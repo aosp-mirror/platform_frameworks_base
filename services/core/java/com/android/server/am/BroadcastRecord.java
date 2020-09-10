@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.content.ComponentName;
@@ -51,6 +52,7 @@ final class BroadcastRecord extends Binder {
     final ComponentName targetComp; // original component name set on the intent
     final ProcessRecord callerApp; // process that sent this
     final String callerPackage; // who sent this
+    final @Nullable String callerFeatureId; // which feature in the package sent this
     final int callingPid;   // the pid of who sent this
     final int callingUid;   // the uid of who sent this
     final boolean callerInstantApp; // caller is an Instant App?
@@ -233,7 +235,8 @@ final class BroadcastRecord extends Binder {
 
     BroadcastRecord(BroadcastQueue _queue,
             Intent _intent, ProcessRecord _callerApp, String _callerPackage,
-            int _callingPid, int _callingUid, boolean _callerInstantApp, String _resolvedType,
+            @Nullable String _callerFeatureId, int _callingPid, int _callingUid,
+            boolean _callerInstantApp, String _resolvedType,
             String[] _requiredPermissions, int _appOp, BroadcastOptions _options, List _receivers,
             IIntentReceiver _resultTo, int _resultCode, String _resultData, Bundle _resultExtras,
             boolean _serialized, boolean _sticky, boolean _initialSticky, int _userId,
@@ -246,6 +249,7 @@ final class BroadcastRecord extends Binder {
         targetComp = _intent.getComponent();
         callerApp = _callerApp;
         callerPackage = _callerPackage;
+        callerFeatureId = _callerFeatureId;
         callingPid = _callingPid;
         callingUid = _callingUid;
         callerInstantApp = _callerInstantApp;
@@ -280,6 +284,7 @@ final class BroadcastRecord extends Binder {
 
         callerApp = from.callerApp;
         callerPackage = from.callerPackage;
+        callerFeatureId = from.callerFeatureId;
         callingPid = from.callingPid;
         callingUid = from.callingUid;
         callerInstantApp = from.callerInstantApp;
@@ -343,8 +348,8 @@ final class BroadcastRecord extends Binder {
         }
 
         // build a new BroadcastRecord around that single-target list
-        BroadcastRecord split = new BroadcastRecord(queue, intent, callerApp,
-                callerPackage, callingPid, callingUid, callerInstantApp, resolvedType,
+        BroadcastRecord split = new BroadcastRecord(queue, intent, callerApp, callerPackage,
+                callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
                 requiredPermissions, appOp, options, splitReceivers, resultTo, resultCode,
                 resultData, resultExtras, ordered, sticky, initialSticky, userId,
                 allowBackgroundActivityStarts, timeoutExempt);
@@ -417,7 +422,7 @@ final class BroadcastRecord extends Binder {
             + " u" + userId + " " + intent.getAction() + "}";
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(BroadcastRecordProto.USER_ID, userId);
         proto.write(BroadcastRecordProto.INTENT_ACTION, intent.getAction());

@@ -170,11 +170,24 @@ public interface IBinder {
     int FLAG_ONEWAY             = 0x00000001;
 
     /**
+     * @hide
+     */
+    int FLAG_COLLECT_NOTED_APP_OPS = 0x00000002;
+
+    /**
      * Limit that should be placed on IPC sizes to keep them safely under the
      * transaction buffer limit.
      * @hide
      */
     public static final int MAX_IPC_SIZE = 64 * 1024;
+
+    /**
+     * Limit that should be placed on IPC sizes, in bytes, to keep them safely under the transaction
+     * buffer limit.
+     */
+    static int getSuggestedMaxIpcSizeBytes() {
+        return MAX_IPC_SIZE;
+    }
 
     /**
      * Get the canonical name of the interface supported by this binder.
@@ -284,6 +297,13 @@ public interface IBinder {
      */
     public interface DeathRecipient {
         public void binderDied();
+
+        /**
+         * @hide
+         */
+        default void binderDied(IBinder who) {
+            binderDied();
+        }
     }
 
     /**

@@ -16,11 +16,14 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.util.ArrayMap;
 import android.util.Property;
 import android.view.View;
 import android.view.animation.Interpolator;
+
+import java.util.function.Consumer;
 
 /**
  * Properties for a View animation
@@ -29,7 +32,7 @@ public class AnimationProperties {
     public long duration;
     public long delay;
     private ArrayMap<Property, Interpolator> mInterpolatorMap;
-    private AnimatorListenerAdapter mAnimatorListenerAdapter;
+    private Consumer<Property> mAnimationEndAction;
 
     /**
      * @return an animation filter for this animation.
@@ -44,14 +47,32 @@ public class AnimationProperties {
     }
 
     /**
-     * @return a listener that should be run whenever any property finished its animation
+     * @return a listener that will be added for a given property during its animation.
      */
-    public AnimatorListenerAdapter getAnimationFinishListener() {
-        return mAnimatorListenerAdapter;
+    public AnimatorListenerAdapter getAnimationFinishListener(Property property) {
+        if (mAnimationEndAction == null) {
+            return null;
+        }
+        Consumer<Property> endAction = mAnimationEndAction;
+        return new AnimatorListenerAdapter() {
+            private boolean mCancelled;
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                 mCancelled = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (!mCancelled) {
+                    endAction.accept(property);
+                }
+            }
+        };
     }
 
-    public AnimationProperties setAnimationFinishListener(AnimatorListenerAdapter listener) {
-        mAnimatorListenerAdapter = listener;
+    public AnimationProperties setAnimationEndAction(Consumer<Property> listener) {
+        mAnimationEndAction = listener;
         return this;
     }
 

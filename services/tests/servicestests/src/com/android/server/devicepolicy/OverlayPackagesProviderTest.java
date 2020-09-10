@@ -79,7 +79,6 @@ public class OverlayPackagesProviderTest extends AndroidTestCase {
                 InstrumentationRegistry.getTargetContext().getCacheDir());
 
         setSystemInputMethods();
-        setIsPerProfileModeEnabled(false);
         setRequiredAppsManagedDevice();
         setVendorRequiredAppsManagedDevice();
         setDisallowedAppsManagedDevice();
@@ -161,15 +160,6 @@ public class OverlayPackagesProviderTest extends AndroidTestCase {
         setSystemInputMethods("app.a");
 
         verifyAppsAreNonRequired(ACTION_PROVISION_MANAGED_PROFILE, "app.a", "app.b");
-    }
-
-    @Test
-    public void testProfileOwnerImesAreRequiredForPerProfileImeMode() {
-        setSystemAppsWithLauncher("app.a", "app.b");
-        setSystemInputMethods("app.a");
-        setIsPerProfileModeEnabled(true);
-
-        verifyAppsAreNonRequired(ACTION_PROVISION_MANAGED_PROFILE, "app.b");
     }
 
     @Test
@@ -342,10 +332,6 @@ public class OverlayPackagesProviderTest extends AndroidTestCase {
             inputMethods.add(inputMethodInfo);
         }
         when(mInjector.getInputMethodListAsUser(eq(TEST_USER_ID))).thenReturn(inputMethods);
-    }
-
-    private void setIsPerProfileModeEnabled(boolean enabled) {
-        when(mInjector.isPerProfileImeEnabled()).thenReturn(enabled);
     }
 
     private void setSystemAppsWithLauncher(String... apps) {

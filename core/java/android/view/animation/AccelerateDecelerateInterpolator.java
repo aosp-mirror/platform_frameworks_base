@@ -17,11 +17,10 @@
 package android.view.animation;
 
 import android.content.Context;
+import android.graphics.animation.HasNativeInterpolator;
+import android.graphics.animation.NativeInterpolator;
+import android.graphics.animation.NativeInterpolatorFactory;
 import android.util.AttributeSet;
-
-import com.android.internal.view.animation.HasNativeInterpolator;
-import com.android.internal.view.animation.NativeInterpolatorFactory;
-import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
 
 /**
  * An interpolator where the rate of change starts and ends slowly but
@@ -29,7 +28,7 @@ import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
  */
 @HasNativeInterpolator
 public class AccelerateDecelerateInterpolator extends BaseInterpolator
-        implements NativeInterpolatorFactory {
+        implements NativeInterpolator {
     public AccelerateDecelerateInterpolator() {
     }
 
@@ -44,6 +43,6 @@ public class AccelerateDecelerateInterpolator extends BaseInterpolator
     /** @hide */
     @Override
     public long createNativeInterpolator() {
-        return NativeInterpolatorFactoryHelper.createAccelerateDecelerateInterpolator();
+        return NativeInterpolatorFactory.createAccelerateDecelerateInterpolator();
     }
 }

@@ -16,27 +16,21 @@
 
 package android.media;
 
-import java.io.File;
-import java.io.FileDescriptor;
-import java.lang.ref.WeakReference;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityThread;
-import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
-import android.media.PlayerBase;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
-import android.os.Process;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
+
+import java.io.File;
+import java.io.FileDescriptor;
+import java.lang.ref.WeakReference;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
@@ -122,13 +116,12 @@ public class SoundPool extends PlayerBase {
     private final static String TAG = "SoundPool";
     private final static boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    private final AtomicReference<EventHandler> mEventHandler = new AtomicReference<>(null);
+
     private long mNativeContext; // accessed by native methods
 
-    private EventHandler mEventHandler;
-    private SoundPool.OnLoadCompleteListener mOnLoadCompleteListener;
     private boolean mHasAppOpsPlayAudio;
 
-    private final Object mLock;
     private final AudioAttributes mAttributes;
 
     /**
@@ -159,7 +152,6 @@ public class SoundPool extends PlayerBase {
         if (native_setup(new WeakReference<SoundPool>(this), maxStreams, attributes) != 0) {
             throw new RuntimeException("Native setup failed");
         }
-        mLock = new Object();
         mAttributes = attributes;
 
         baseRegisterPlayer();
@@ -491,21 +483,18 @@ public class SoundPool extends PlayerBase {
      * Sets the callback hook for the OnLoadCompleteListener.
      */
     public void setOnLoadCompleteListener(OnLoadCompleteListener listener) {
-        synchronized(mLock) {
-            if (listener != null) {
-                // setup message handler
-                Looper looper;
-                if ((looper = Looper.myLooper()) != null) {
-                    mEventHandler = new EventHandler(looper);
-                } else if ((looper = Looper.getMainLooper()) != null) {
-                    mEventHandler = new EventHandler(looper);
-                } else {
-                    mEventHandler = null;
-                }
-            } else {
-                mEventHandler = null;
-            }
-            mOnLoadCompleteListener = listener;
+        if (listener == null) {
+            mEventHandler.set(null);
+            return;
+        }
+
+        Looper looper;
+        if ((looper = Looper.myLooper()) != null) {
+            mEventHandler.set(new EventHandler(looper, listener));
+        } else if ((looper = Looper.getMainLooper()) != null) {
+            mEventHandler.set(new EventHandler(looper, listener));
+        } else {
+            mEventHandler.set(null);
         }
     }
 
@@ -525,35 +514,36 @@ public class SoundPool extends PlayerBase {
     @SuppressWarnings("unchecked")
     private static void postEventFromNative(Object ref, int msg, int arg1, int arg2, Object obj) {
         SoundPool soundPool = ((WeakReference<SoundPool>) ref).get();
-        if (soundPool == null)
+        if (soundPool == null) {
             return;
-
-        if (soundPool.mEventHandler != null) {
-            Message m = soundPool.mEventHandler.obtainMessage(msg, arg1, arg2, obj);
-            soundPool.mEventHandler.sendMessage(m);
         }
+
+        Handler eventHandler = soundPool.mEventHandler.get();
+        if (eventHandler == null) {
+            return;
+        }
+
+        Message message = eventHandler.obtainMessage(msg, arg1, arg2, obj);
+        eventHandler.sendMessage(message);
     }
 
     private final class EventHandler extends Handler {
-        public EventHandler(Looper looper) {
+        private final OnLoadCompleteListener mOnLoadCompleteListener;
+
+        EventHandler(Looper looper, @NonNull OnLoadCompleteListener onLoadCompleteListener) {
             super(looper);
+            mOnLoadCompleteListener = onLoadCompleteListener;
         }
 
         @Override
         public void handleMessage(Message msg) {
-            switch(msg.what) {
-            case SAMPLE_LOADED:
-                if (DEBUG) Log.d(TAG, "Sample " + msg.arg1 + " loaded");
-                synchronized(mLock) {
-                    if (mOnLoadCompleteListener != null) {
-                        mOnLoadCompleteListener.onLoadComplete(SoundPool.this, msg.arg1, msg.arg2);
-                    }
-                }
-                break;
-            default:
+            if (msg.what != SAMPLE_LOADED) {
                 Log.e(TAG, "Unknown message type " + msg.what);
                 return;
             }
+
+            if (DEBUG) Log.d(TAG, "Sample " + msg.arg1 + " loaded");
+            mOnLoadCompleteListener.onLoadComplete(SoundPool.this, msg.arg1, msg.arg2);
         }
     }
 

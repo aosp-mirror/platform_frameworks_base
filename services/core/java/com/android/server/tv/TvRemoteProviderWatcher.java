@@ -27,11 +27,16 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.text.TextUtils.SimpleStringSplitter;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Watches for emote provider services to be installed.
@@ -41,27 +46,41 @@ import java.util.Collections;
  */
 final class TvRemoteProviderWatcher {
 
-    private static final String TAG = "TvRemoteProvWatcher";  // max. 23 chars
+    private static final String TAG = "TvRemoteProviderWatcher";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.VERBOSE);
 
     private final Context mContext;
-    private final ProviderMethods mProvider;
     private final Handler mHandler;
     private final PackageManager mPackageManager;
     private final ArrayList<TvRemoteProviderProxy> mProviderProxies = new ArrayList<>();
     private final int mUserId;
-    private final String mUnbundledServicePackage;
+    private final Object mLock;
+    private final Set<String> mUnbundledServicePackages = new HashSet<>();
 
     private boolean mRunning;
 
-    public TvRemoteProviderWatcher(Context context, ProviderMethods provider, Handler handler) {
+    TvRemoteProviderWatcher(Context context, Object lock, Handler handler) {
         mContext = context;
-        mProvider = provider;
         mHandler = handler;
         mUserId = UserHandle.myUserId();
         mPackageManager = context.getPackageManager();
-        mUnbundledServicePackage = context.getString(
-                com.android.internal.R.string.config_tvRemoteServicePackage);
+        mLock = lock;
+
+        // Unbundled package names supports a comma-separated list
+        SimpleStringSplitter splitter = new SimpleStringSplitter(',');
+        splitter.setString(context.getString(
+                com.android.internal.R.string.config_tvRemoteServicePackage));
+
+        splitter.forEach(packageName -> {
+            packageName = packageName.trim();
+            if (!packageName.isEmpty()) {
+                mUnbundledServicePackages.add(packageName);
+            }
+        });
+    }
+
+    TvRemoteProviderWatcher(Context context, Object lock) {
+        this(context, lock, new Handler(true));
     }
 
     public void start() {
@@ -116,12 +135,11 @@ final class TvRemoteProviderWatcher {
                 int sourceIndex = findProvider(serviceInfo.packageName, serviceInfo.name);
                 if (sourceIndex < 0) {
                     TvRemoteProviderProxy providerProxy =
-                            new TvRemoteProviderProxy(mContext,
+                            new TvRemoteProviderProxy(mContext, mLock,
                                     new ComponentName(serviceInfo.packageName, serviceInfo.name),
                                     mUserId, serviceInfo.applicationInfo.uid);
                     providerProxy.start();
                     mProviderProxies.add(targetIndex++, providerProxy);
-                    mProvider.addProvider(providerProxy);
                 } else if (sourceIndex >= targetIndex) {
                     TvRemoteProviderProxy provider = mProviderProxies.get(sourceIndex);
                     provider.start(); // restart the provider if needed
@@ -135,14 +153,14 @@ final class TvRemoteProviderWatcher {
         if (targetIndex < mProviderProxies.size()) {
             for (int i = mProviderProxies.size() - 1; i >= targetIndex; i--) {
                 TvRemoteProviderProxy providerProxy = mProviderProxies.get(i);
-                mProvider.removeProvider(providerProxy);
                 mProviderProxies.remove(providerProxy);
                 providerProxy.stop();
             }
         }
     }
 
-    private boolean verifyServiceTrusted(ServiceInfo serviceInfo) {
+    @VisibleForTesting
+    boolean verifyServiceTrusted(ServiceInfo serviceInfo) {
         if (serviceInfo.permission == null || !serviceInfo.permission.equals(
                 Manifest.permission.BIND_TV_REMOTE_SERVICE)) {
             // If the service does not require this permission then any app could
@@ -156,7 +174,7 @@ final class TvRemoteProviderWatcher {
         }
 
         // Check if package name is white-listed here.
-        if (!serviceInfo.packageName.equals(mUnbundledServicePackage)) {
+        if (!mUnbundledServicePackages.contains(serviceInfo.packageName)) {
             Slog.w(TAG, "Ignoring atv remote provider service because the package has not "
                     + "been set and/or whitelisted: "
                     + serviceInfo.packageName + "/" + serviceInfo.name);
@@ -212,10 +230,4 @@ final class TvRemoteProviderWatcher {
             scanPackages();
         }
     };
-
-    public interface ProviderMethods {
-        void addProvider(TvRemoteProviderProxy providerProxy);
-
-        void removeProvider(TvRemoteProviderProxy providerProxy);
-    }
 }

@@ -27,7 +27,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -58,13 +57,13 @@ import android.util.SparseArray;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.XmlUtils;
 import com.android.server.UiServiceTestCase;
 
 import com.google.android.collect.Lists;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
@@ -76,7 +75,9 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -96,6 +97,10 @@ public class ManagedServicesTest extends UiServiceTestCase {
 
     UserInfo mZero = new UserInfo(0, "zero", 0);
     UserInfo mTen = new UserInfo(10, "ten", 0);
+    private String mDefaultsString;
+    private String mVersionString;
+    private final Set<ComponentName> mDefaults = new ArraySet();
+    private ManagedServices mService;
 
     private static final String SETTING = "setting";
     private static final String SECONDARY_SETTING = "secondary_setting";
@@ -106,8 +111,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
     private ArrayMap<Integer, String> mExpectedSecondaryComponentNames;
 
     // type : user : list of approved
-    private ArrayMap<Integer, ArrayMap<Integer, String>> mExpectedPrimary = new ArrayMap<>();
-    private ArrayMap<Integer, ArrayMap<Integer, String>> mExpectedSecondary = new ArrayMap<>();
+    private ArrayMap<Integer, ArrayMap<Integer, String>> mExpectedPrimary;
+    private ArrayMap<Integer, ArrayMap<Integer, String>> mExpectedSecondary;
 
     @Before
     public void setUp() throws Exception {
@@ -132,6 +137,9 @@ public class ManagedServicesTest extends UiServiceTestCase {
         profileIds.add(12);
         when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
 
+        mVersionString = "2";
+        mExpectedPrimary = new ArrayMap<>();
+        mExpectedSecondary = new ArrayMap<>();
         mExpectedPrimaryPackages = new ArrayMap<>();
         mExpectedPrimaryPackages.put(0, "this.is.a.package.name:another.package");
         mExpectedPrimaryPackages.put(10, "this.is.another.package");
@@ -155,6 +163,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
                 "this.is.another.package:component:package");
         mExpectedSecondary.put(APPROVAL_BY_PACKAGE, mExpectedSecondaryPackages);
         mExpectedSecondary.put(APPROVAL_BY_COMPONENT, mExpectedSecondaryComponentNames);
+        mService = new TestManagedServices(getContext(), mLock, mUserProfiles,
+                mIpm, APPROVAL_BY_COMPONENT);
     }
 
     @Test
@@ -329,6 +339,147 @@ public class ManagedServicesTest extends UiServiceTestCase {
             assertFalse(service.isPackageOrComponentAllowed(resolvedValue, 0));
             assertTrue(service.isPackageOrComponentAllowed(resolvedValue, 10));
         }
+    }
+
+    /** Test that restore ignores the user id attribute and applies the data to the target user. */
+    @Test
+    public void testWriteReadXml_writeReadDefaults() throws Exception {
+        // setup
+        ManagedServices service1 =
+                new TestManagedServices(
+                        getContext(), mLock, mUserProfiles, mIpm, APPROVAL_BY_COMPONENT);
+        ManagedServices service2 =
+                new TestManagedServices(
+                        getContext(), mLock, mUserProfiles, mIpm, APPROVAL_BY_COMPONENT);
+        XmlSerializer serializer = new FastXmlSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        BufferedOutputStream outStream = new BufferedOutputStream(baos);
+        serializer.setOutput(outStream, "utf-8");
+
+        //data setup
+        service1.addDefaultComponentOrPackage("package/class");
+        serializer.startDocument(null, true);
+        service1.writeXml(serializer, false, 0);
+        serializer.endDocument();
+        outStream.flush();
+
+        final XmlPullParser parser = Xml.newPullParser();
+        BufferedInputStream input = new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray()));
+
+        parser.setInput(input, StandardCharsets.UTF_8.name());
+        XmlUtils.beginDocument(parser, "test");
+        service2.readXml(parser, null, false, 0);
+        ArraySet<ComponentName> defaults = service2.getDefaultComponents();
+
+        assertEquals(1, defaults.size());
+        assertEquals(new ComponentName("package", "class"), defaults.valueAt(0));
+
+    }
+
+    @Test
+    public void resetPackage_enableDefaultsOnly() {
+        // setup
+        ManagedServices service =
+                new TestManagedServices(
+                        getContext(), mLock, mUserProfiles, mIpm, APPROVAL_BY_COMPONENT);
+        service.addApprovedList(
+                "package/not-default:another-package/not-default:package2/default",
+                0, true);
+        service.addDefaultComponentOrPackage("package/default");
+        service.addDefaultComponentOrPackage("package2/default");
+
+        ArrayMap<Boolean, ArrayList<ComponentName>> componentsToActivate =
+                service.resetComponents("package", 0);
+
+        assertEquals(1, componentsToActivate.get(true).size());
+        assertEquals(new ComponentName("package", "default"),
+                componentsToActivate.get(true).get(0));
+    }
+
+
+    @Test
+    public void resetPackage_nonDefaultsRemoved() {
+        // setup
+        ManagedServices service =
+                new TestManagedServices(
+                        getContext(), mLock, mUserProfiles, mIpm, APPROVAL_BY_COMPONENT);
+        service.addApprovedList(
+                "package/not-default:another-package/not-default:package2/default",
+                0, true);
+        service.addDefaultComponentOrPackage("package/default");
+        service.addDefaultComponentOrPackage("package2/default");
+
+        ArrayMap<Boolean, ArrayList<ComponentName>> componentsToActivate =
+                service.resetComponents("package", 0);
+
+        assertEquals(1, componentsToActivate.get(true).size());
+        assertEquals(new ComponentName("package", "not-default"),
+                componentsToActivate.get(false).get(0));
+    }
+
+    @Test
+    public void resetPackage_onlyDefaultsOnly() {
+        // setup
+        ManagedServices service =
+                new TestManagedServices(
+                        getContext(), mLock, mUserProfiles, mIpm, APPROVAL_BY_COMPONENT);
+        service.addApprovedList(
+                "package/not-default:another-package/not-default:package2/default",
+                0, true);
+        service.addDefaultComponentOrPackage("package/default");
+        service.addDefaultComponentOrPackage("package2/default");
+
+        assertEquals(3, service.getAllowedComponents(0).size());
+
+        service.resetComponents("package", 0);
+
+        List<ComponentName> components =  service.getAllowedComponents(0);
+        assertEquals(3, components.size());
+        assertTrue(components.contains(new ComponentName("package", "default")));
+    }
+
+    @Test
+    public void resetPackage_affectCurrentUserOnly() {
+        // setup
+        ManagedServices service =
+                new TestManagedServices(
+                        getContext(), mLock, mUserProfiles, mIpm, APPROVAL_BY_COMPONENT);
+        service.addApprovedList(
+                "package/not-default:another-package/not-default:package2/default",
+                0, true);
+        service.addApprovedList(
+                "package/not-default:another-package/not-default:package2/default",
+                1, true);
+        service.addDefaultComponentOrPackage("package/default");
+        service.addDefaultComponentOrPackage("package2/default");
+
+        service.resetComponents("package", 0);
+
+        List<ComponentName> components =  service.getAllowedComponents(1);
+        assertEquals(3, components.size());
+    }
+
+    @Test
+    public void resetPackage_samePackageMultipleClasses() {
+        // setup
+        ManagedServices service =
+                new TestManagedServices(
+                        getContext(), mLock, mUserProfiles, mIpm, APPROVAL_BY_COMPONENT);
+        service.addApprovedList(
+                "package/not-default:another-package/not-default:package2/default",
+                0, true);
+        service.addApprovedList(
+                "package/class:another-package/class:package2/class",
+                0, true);
+        service.addDefaultComponentOrPackage("package/default");
+        service.addDefaultComponentOrPackage("package2/default");
+
+        service.resetComponents("package", 0);
+
+        List<ComponentName> components =  service.getAllowedComponents(0);
+        assertEquals(5, components.size());
+        assertTrue(components.contains(new ComponentName("package", "default")));
     }
 
     /** Test that backup only writes packages/components that belong to the target user. */
@@ -821,7 +972,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         when(service.asBinder()).thenReturn(mock(IBinder.class));
         ManagedServices services = new TestManagedServices(getContext(), mLock, mUserProfiles,
                 mIpm, APPROVAL_BY_PACKAGE);
-        services.registerService(service, null, 10);
+        services.registerSystemService(service, null, 10);
         ManagedServices.ManagedServiceInfo info = services.checkServiceTokenLocked(service);
         info.isSystem = true;
 
@@ -1037,9 +1188,99 @@ public class ManagedServicesTest extends UiServiceTestCase {
         }
     }
 
+    @Test
+    public void loadDefaults_noVersionNoDefaults() throws Exception {
+        resetComponentsAndPackages();
+        loadXml(mService);
+        assertEquals(mService.getDefaultComponents().size(), 0);
+    }
+
+    @Test
+    public void loadDefaults_noVersionNoDefaultsOneActive() throws Exception {
+        resetComponentsAndPackages();
+        mService.addDefaultComponentOrPackage("package/class");
+        loadXml(mService);
+        assertEquals(1, mService.getDefaultComponents().size());
+        assertTrue(mService.getDefaultComponents()
+                .contains(ComponentName.unflattenFromString("package/class")));
+    }
+
+    @Test
+    public void loadDefaults_noVersionWithDefaults() throws Exception {
+        resetComponentsAndPackages();
+        mDefaults.add(new ComponentName("default", "class"));
+        loadXml(mService);
+        assertEquals(mService.getDefaultComponents(), mDefaults);
+    }
+
+    @Test
+    public void loadDefaults_versionOneWithDefaultsWithActive() throws Exception {
+        resetComponentsAndPackages();
+        mDefaults.add(new ComponentName("default", "class"));
+        mExpectedPrimaryComponentNames.put(0, "package/class");
+        mVersionString = "1";
+        loadXml(mService);
+        assertEquals(mService.getDefaultComponents(),
+                new ArraySet(Arrays.asList(new ComponentName("package", "class"))));
+    }
+
+    @Test
+    public void loadDefaults_versionTwoWithDefaultsWithActive() throws Exception {
+        resetComponentsAndPackages();
+        mDefaults.add(new ComponentName("default", "class"));
+        mDefaultsString = "default/class";
+        mExpectedPrimaryComponentNames.put(0, "package/class");
+        mVersionString = "2";
+        loadXml(mService);
+        assertEquals(1, mService.getDefaultComponents().size());
+        mDefaults.forEach(pkg -> {
+            assertTrue(mService.getDefaultComponents().contains(pkg));
+        });
+    }
+
+    @Test
+    public void loadDefaults_versionOneWithXMLDefaultsWithActive() throws Exception {
+        resetComponentsAndPackages();
+        mDefaults.add(new ComponentName("default", "class"));
+        mDefaultsString = "xml/class";
+        mExpectedPrimaryComponentNames.put(0, "package/class");
+        mVersionString = "1";
+        loadXml(mService);
+        assertEquals(mService.getDefaultComponents(),
+                new ArraySet(Arrays.asList(new ComponentName("xml", "class"))));
+    }
+
+    @Test
+    public void loadDefaults_versionTwoWithXMLDefaultsWithActive() throws Exception {
+        resetComponentsAndPackages();
+        mDefaults.add(new ComponentName("default", "class"));
+        mDefaultsString = "xml/class";
+        mExpectedPrimaryComponentNames.put(0, "package/class");
+        mVersionString = "2";
+        loadXml(mService);
+        assertEquals(mService.getDefaultComponents(),
+                new ArraySet(Arrays.asList(new ComponentName("xml", "class"))));
+    }
+
+    private void resetComponentsAndPackages() {
+        ArrayMap<Integer, ArrayMap<Integer, String>> empty = new ArrayMap(1);
+        ArrayMap<Integer, String> emptyPkgs = new ArrayMap(0);
+        empty.append(mService.mApprovalLevel, emptyPkgs);
+        mExpectedPrimary = empty;
+        mExpectedPrimaryComponentNames = emptyPkgs;
+        mExpectedPrimaryPackages = emptyPkgs;
+        mExpectedSecondary = empty;
+        mExpectedSecondaryComponentNames = emptyPkgs;
+        mExpectedSecondaryPackages = emptyPkgs;
+    }
+
     private void loadXml(ManagedServices service) throws Exception {
         final StringBuffer xml = new StringBuffer();
-        xml.append("<" + service.getConfig().xmlTag + ">\n");
+        String xmlTag = service.getConfig().xmlTag;
+        xml.append("<" + xmlTag
+                + (mDefaultsString != null ? " defaults=\"" + mDefaultsString + "\" " : "")
+                + (mVersionString != null ? " version=\"" + mVersionString + "\" " : "")
+                + ">\n");
         for (int userId : mExpectedPrimary.get(service.mApprovalLevel).keySet()) {
             xml.append(getXmlEntry(
                     mExpectedPrimary.get(service.mApprovalLevel).get(userId), userId, true));
@@ -1056,7 +1297,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
                 + ManagedServices.ATT_USER_ID + "=\"98\" "
                 + ManagedServices.ATT_IS_PRIMARY + "=\"false\" "
                 + ManagedServices.ATT_APPROVED_LIST + "=\"98\" />\n");
-        xml.append("</" + service.getConfig().xmlTag + ">");
+        xml.append("</" + xmlTag + ">");
 
         XmlPullParser parser = Xml.newPullParser();
         parser.setInput(new BufferedInputStream(
@@ -1083,6 +1324,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
 
     private void addExpectedServices(final ManagedServices service, final List<String> packages,
             int userId) {
+        ManagedServices.Config config = service.getConfig();
         when(mPm.queryIntentServicesAsUser(any(), anyInt(), eq(userId))).
                 thenAnswer(new Answer<List<ResolveInfo>>() {
                     @Override
@@ -1092,7 +1334,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
                         Intent invocationIntent = (Intent) args[0];
                         if (invocationIntent != null) {
                             if (invocationIntent.getAction().equals(
-                                    service.getConfig().serviceInterface)
+                                    config.serviceInterface)
                                     && packages.contains(invocationIntent.getPackage())) {
                                 List<ResolveInfo> dummyServices = new ArrayList<>();
                                 for (int i = 1; i <= 3; i ++) {
@@ -1287,6 +1529,11 @@ public class ManagedServicesTest extends UiServiceTestCase {
         @Override
         protected void onServiceAdded(ManagedServiceInfo info) {
 
+        }
+
+        @Override
+        protected void loadDefaultsFromConfig() {
+            mDefaultComponents.addAll(mDefaults);
         }
 
         @Override

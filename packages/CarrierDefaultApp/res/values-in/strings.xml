@@ -5,7 +5,7 @@
     <string name="android_system_label" msgid="2797790869522345065">"Operator Seluler"</string>
     <string name="portal_notification_id" msgid="5155057562457079297">"Data seluler telah habis"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"Data seluler telah dinonaktifkan"</string>
-    <string name="portal_notification_detail" msgid="2295729385924660881">"Tap untuk membuka situs web %s"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Ketuk untuk membuka situs web %s"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Hubungi penyedia layanan %s"</string>
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Tidak ada sambungan data seluler"</string>
     <string name="no_mobile_data_connection" msgid="544980465184147010">"Tambahkan paket data atau roaming melalui %s"</string>

@@ -1,5 +1,5 @@
 set -e
-make TextClassifierPerfTests perf-setup.sh
+build/soong/soong_ui.bash --make-mode TextClassifierPerfTests perf-setup.sh
 adb install ${OUT}/testcases/TextClassifierPerfTests/arm64/TextClassifierPerfTests.apk
 adb shell cmd package compile -m speed -f com.android.perftests.textclassifier
 adb push ${OUT}/obj/EXECUTABLES/perf-setup.sh_intermediates/perf-setup.sh /data/local/tmp/

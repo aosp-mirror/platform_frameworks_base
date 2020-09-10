@@ -1,0 +1,67 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.os.statsd.metadata;
+
+message ConfigKey {
+  optional int64 config_id = 1;
+  optional int32 uid = 2;
+}
+
+message Field {
+  optional int32 tag = 1;
+  optional int32 field = 2;
+}
+
+message FieldValue {
+  optional Field field = 1;
+  oneof value {
+    int32 value_int = 2;
+    int64 value_long = 3;
+    float value_float = 4;
+    double value_double = 5;
+    string value_str = 6;
+    bytes value_storage = 7;
+  }
+}
+
+message MetricDimensionKey {
+  repeated FieldValue dimension_key_in_what = 1;
+  repeated FieldValue state_values_key = 2;
+}
+
+message AlertDimensionKeyedData {
+  // The earliest time the alert can be fired again in wall clock time.
+  optional int32 last_refractory_ends_sec = 1;
+  optional MetricDimensionKey dimension_key = 2;
+}
+
+message AlertMetadata {
+  optional int64 alert_id = 1;
+  repeated AlertDimensionKeyedData alert_dim_keyed_data = 2;
+}
+
+// All metadata for a config in statsd
+message StatsMetadata {
+  optional ConfigKey config_key = 1;
+  repeated AlertMetadata alert_metadata = 2;
+}
+
+message StatsMetadataList {
+  repeated StatsMetadata stats_metadata = 1;
+}

@@ -18,6 +18,8 @@
 <resources>
     <!-- Dashboard foreground image inset (from background edge to foreground edge) -->
     <dimen name="dashboard_tile_foreground_image_inset">6dp</dimen>
+    <!-- Advanced dashboard foreground image inset (from background edge to foreground edge) -->
+    <dimen name="advanced_dashboard_tile_foreground_image_inset">9dp</dimen>
 
     <!-- Stroke size of adaptive outline -->
     <dimen name="adaptive_outline_stroke">1dp</dimen>

@@ -71,9 +71,9 @@ public final class PinResult implements Parcelable {
     /**
      * Returns either success, incorrect or failure.
      *
-     * @see: #PIN_RESULT_TYPE_SUCCESS
-     * @see: #PIN_RESULT_TYPE_INCORRECT
-     * @see: #PIN_RESULT_TYPE_FAILURE
+     * @see #PIN_RESULT_TYPE_SUCCESS
+     * @see #PIN_RESULT_TYPE_INCORRECT
+     * @see #PIN_RESULT_TYPE_FAILURE
      * @return The result type of the pin attempt.
      */
     public @PinResultType int getType() {
@@ -98,9 +98,9 @@ public final class PinResult implements Parcelable {
      * PinResult constructor
      *
      * @param type The type of pin result.
-     * @see: #PIN_RESULT_TYPE_SUCCESS
-     * @see: #PIN_RESULT_TYPE_INCORRECT
-     * @see: #PIN_RESULT_TYPE_FAILURE
+     * @see #PIN_RESULT_TYPE_SUCCESS
+     * @see #PIN_RESULT_TYPE_INCORRECT
+     * @see #PIN_RESULT_TYPE_FAILURE
      * @param attemptsRemaining Number of pin attempts remaining.
      */
     public PinResult(@PinResultType int type, int attemptsRemaining) {

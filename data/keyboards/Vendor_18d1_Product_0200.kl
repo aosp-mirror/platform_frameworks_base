@@ -1,0 +1,71 @@
+# Copyright (C) 2020 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#
+# Keyboard map for the android virtual remote running as a gamepad
+#
+
+key 0x130 BUTTON_A
+key 0x131 BUTTON_B
+key 0x133 BUTTON_X
+key 0x134 BUTTON_Y
+
+key 0x136 BUTTON_L2
+key 0x137 BUTTON_R2
+key 0x138 BUTTON_L1
+key 0x139 BUTTON_R1
+
+key 0x13a BUTTON_SELECT
+key 0x13b BUTTON_START
+key 0x13c BUTTON_MODE
+
+key 0x13d BUTTON_THUMBL
+key 0x13e BUTTON_THUMBR
+
+key 103 DPAD_UP
+key 108 DPAD_DOWN
+key 105 DPAD_LEFT
+key 106 DPAD_RIGHT
+
+# Generic usage buttons
+key 0x2c0 BUTTON_1
+key 0x2c1 BUTTON_2
+key 0x2c2 BUTTON_3
+key 0x2c3 BUTTON_4
+key 0x2c4 BUTTON_5
+key 0x2c5 BUTTON_6
+key 0x2c6 BUTTON_7
+key 0x2c7 BUTTON_8
+key 0x2c8 BUTTON_9
+key 0x2c9 BUTTON_10
+key 0x2ca BUTTON_11
+key 0x2cb BUTTON_12
+key 0x2cc BUTTON_13
+key 0x2cd BUTTON_14
+key 0x2ce BUTTON_15
+key 0x2cf BUTTON_16
+
+# assistant buttons
+key 0x246 VOICE_ASSIST
+key 0x247 ASSIST
+
+axis 0x00 X
+axis 0x01 Y
+axis 0x02 Z
+axis 0x05 RZ
+axis 0x09 RTRIGGER
+axis 0x0a LTRIGGER
+axis 0x10 HAT_X
+axis 0x11 HAT_Y
+

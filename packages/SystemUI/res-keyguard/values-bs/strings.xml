@@ -33,7 +33,7 @@
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Unesite lozinku"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"Pogrešan PIN."</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Nevažeća kartica."</string>
-    <string name="keyguard_charged" msgid="6572033099675649299">"Potpuno napunjen"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"Napunjeno"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bežično punjenje"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Punjenje"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Brzo punjenje"</string>
@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Pritisnite meni da otključate."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Mreža je zaključana"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Nema SIM kartice"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"Nema SIM kartice u tabletu."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"Nema SIM kartice u telefonu."</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Umetnite SIM karticu."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"SIM kartica nije umetnuta ili je uređaj ne može očitati. Umetnite SIM karticu."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"Neupotrebljiva SIM kartica."</string>
@@ -84,25 +82,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Unesite PIN koji sadrži 4 do 8 brojeva."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK kôd treba sadržavati najmanje 8 brojeva."</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"Ponovo unesite ispravan PUK kôd. Ponovljeni pokušaji će trajno onemogućiti SIM karticu."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"PIN-ovi se ne poklapaju"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Previše puta ste pokušali otključati uređaj crtanjem uzorka"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Pogrešno ste unijeli PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Pogrešno ste unijeli lozinku <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Pogrešno ste nacrtali svoj uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"Pokušali ste <xliff:g id="NUMBER_0">%1$d</xliff:g> puta neispravno otključati tablet. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, tablet će se vratiti na fabričke postavke i svi podaci će se izbrisati."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"Pokušali ste <xliff:g id="NUMBER_0">%1$d</xliff:g> puta neispravno otključati telefon. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, telefon će se vratiti na fabričke postavke i svi podaci će se izbrisati."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"Pokušali ste <xliff:g id="NUMBER">%d</xliff:g> puta neispravno otključati tablet. Tablet će se sada vratiti na fabričke postavke i svi podaci će se izbrisati."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"Pokušali ste <xliff:g id="NUMBER">%d</xliff:g> puta neispravno otključati telefon. Telefon će se sada vratiti na fabričke postavke i svi podaci će se izbrisati."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"Pokušali ste <xliff:g id="NUMBER_0">%1$d</xliff:g> puta neispravno otključati tablet. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, ovaj korisnik će se ukloniti i svi podaci korisnika će se izbrisati."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"Pokušali ste <xliff:g id="NUMBER_0">%1$d</xliff:g> puta neispravno otključati telefon. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, ovaj korisnik će se ukloniti i svi podaci korisnika će se izbrisati."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="9046628517316763961">"Pokušali ste <xliff:g id="NUMBER">%d</xliff:g> puta neispravno otključati tablet. Korisnik će se ukloniti i svi podaci korisnika će se izbrisati."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3588779327358321092">"Pokušali ste <xliff:g id="NUMBER">%d</xliff:g> puta neispravno otključati telefon. Korisnik će se ukloniti i svi podaci korisnika će se izbrisati."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="6114158710353725041">"Pokušali ste <xliff:g id="NUMBER_0">%1$d</xliff:g> puta neispravno otključati tablet. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, poslovni profil će se ukloniti i svi podaci s profila će se izbrisati."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="8345451368768804892">"Pokušali ste <xliff:g id="NUMBER_0">%1$d</xliff:g> puta neispravno otključati telefon. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, poslovni profil će se ukloniti i svi podaci s profila će se izbrisati."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"Pokušali ste <xliff:g id="NUMBER">%d</xliff:g> puta neispravno otključati tablet. Poslovni profil će se ukloniti i svi podaci s profila će se izbrisati."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"Pokušali ste <xliff:g id="NUMBER">%d</xliff:g> puta neispravno otključati telefon. Poslovni profil će se ukloniti i svi podaci s profila će se izbrisati."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da tablet otključate koristeći račun e-pošte.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da telefon otključate koristeći račun e-pošte.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"PIN za SIM karticu je netačan. Za otključavanje uređaja sada se morate obratiti svom operateru."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="one">PIN za SIM karticu je netačan. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaj.</item>

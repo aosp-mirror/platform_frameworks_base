@@ -8,11 +8,8 @@ libraries.
 The easiest way to run tests is simply run
 
 ```
-frameworks/base/wifi/tests/runtests.sh
+atest android.net.wifi
 ```
-
-`runtests.sh` will build the test project and all of its dependencies and push the APK to the
-connected device. It will then run the tests on the device.
 
 To pick up changes in framework/base, you will need to:
 1. rebuild the framework library 'make -j32'
@@ -23,22 +20,6 @@ To enable syncing data to the device for first time after clean reflash:
 1. adb disable-verity
 2. adb reboot
 3. adb remount
-
-See below for a few example of options to limit which tests are run.
-See the
-[AndroidJUnitRunner Documentation](https://developer.android.com/reference/android/support/test/runner/AndroidJUnitRunner.html)
-for more details on the supported options.
-
-```
-runtests.sh -e package android.net.wifi
-runtests.sh -e class android.net.wifi.WifiScannerTest
-```
-
-If you manually build and push the test APK to the device you can run tests using
-
-```
-adb shell am instrument -w 'android.net.wifi.test/androidx.test.runner.AndroidJUnitRunner'
-```
 
 ## Adding Tests
 Tests can be added by adding classes to the src directory. JUnit4 style test cases can

@@ -41,6 +41,43 @@ public final class UsageEvents implements Parcelable {
     /** @hide */
     public static final String INSTANT_APP_CLASS_NAME = "android.instant_class";
 
+    /** @hide */
+    public static final String OBFUSCATED_NOTIFICATION_CHANNEL_ID = "unknown_channel_id";
+
+    /**
+     * Flag: indicates to not obfuscate or hide any usage event data when being queried.
+     * @hide
+     */
+    public static final int SHOW_ALL_EVENT_DATA = 0x00000000;
+
+    /**
+     * Flag: indicates to obfuscate package and class names for instant apps when querying usage
+     * events.
+     * @hide
+     */
+    public static final int OBFUSCATE_INSTANT_APPS = 0x00000001;
+
+    /**
+     * Flag: indicates to hide all {@link Event#SHORTCUT_INVOCATION} events when querying usage
+     * events.
+     * @hide
+     */
+    public static final int HIDE_SHORTCUT_EVENTS = 0x00000002;
+
+    /**
+     * Flag: indicates to obfuscate the notification channel id for all notification events,
+     * such as {@link Event#NOTIFICATION_SEEN} and {@link Event#NOTIFICATION_INTERRUPTION} events,
+     * when querying usage events.
+     * @hide
+     */
+    public static final int OBFUSCATE_NOTIFICATION_EVENTS = 0x00000004;
+
+    /**
+     * Flag: indicates to hide all {@link Event#LOCUS_ID_SET} events when querying usage events.
+     * @hide
+     */
+    public static final int HIDE_LOCUS_EVENTS = 0x00000008;
+
     /**
      * An event representing a state change for a component.
      */
@@ -96,6 +133,7 @@ public final class UsageEvents implements Parcelable {
         /**
          * An event type denoting that a component was in the foreground when the stats
          * rolled-over. This is effectively treated as a {@link #ACTIVITY_PAUSED}.
+         * This event has a non-null packageName, and a null className.
          * {@hide}
          */
         public static final int END_OF_DAY = 3;
@@ -276,10 +314,30 @@ public final class UsageEvents implements Parcelable {
         public static final int DEVICE_STARTUP = 27;
 
         /**
+         * An event type denoting that a user has been unlocked for the first time. This event
+         * mainly indicates when the user's credential encrypted storage was first accessible.
+         * @hide
+         */
+        public static final int USER_UNLOCKED = 28;
+
+        /**
+         * An event type denoting that a user has been stopped. This typically happens when the
+         * system is being turned off or when users are being switched.
+         * @hide
+         */
+        public static final int USER_STOPPED = 29;
+
+        /**
+         * An event type denoting that new locusId has been set for a given activity.
+         * @hide
+         */
+        public static final int LOCUS_ID_SET = 30;
+
+        /**
          * Keep in sync with the greatest event type value.
          * @hide
          */
-        public static final int MAX_EVENT_TYPE = 27;
+        public static final int MAX_EVENT_TYPE = 30;
 
         /** @hide */
         public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;
@@ -298,6 +356,11 @@ public final class UsageEvents implements Parcelable {
         public static final int VALID_FLAG_BITS = FLAG_IS_PACKAGE_INSTANT_APP;
 
         /**
+         * @hide
+         */
+        private static final int UNASSIGNED_TOKEN = -1;
+
+        /**
          * {@hide}
          */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -306,8 +369,18 @@ public final class UsageEvents implements Parcelable {
         /**
          * {@hide}
          */
+        public int mPackageToken = UNASSIGNED_TOKEN;
+
+        /**
+         * {@hide}
+         */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public String mClass;
+
+        /**
+         * {@hide}
+         */
+        public int mClassToken = UNASSIGNED_TOKEN;
 
         /**
          * {@hide}
@@ -322,7 +395,17 @@ public final class UsageEvents implements Parcelable {
         /**
          * {@hide}
          */
+        public int mTaskRootPackageToken = UNASSIGNED_TOKEN;
+
+        /**
+         * {@hide}
+         */
         public String mTaskRootClass;
+
+        /**
+         * {@hide}
+         */
+        public int mTaskRootClassToken = UNASSIGNED_TOKEN;
 
         /**
          * {@hide}
@@ -349,6 +432,11 @@ public final class UsageEvents implements Parcelable {
          * {@hide}
          */
         public String mShortcutId;
+
+        /**
+         * {@hide}
+         */
+        public int mShortcutIdToken = UNASSIGNED_TOKEN;
 
         /**
          * Action type passed to ChooserActivity
@@ -387,6 +475,23 @@ public final class UsageEvents implements Parcelable {
          */
         public String mNotificationChannelId;
 
+        /**
+         * {@hide}
+         */
+        public int mNotificationChannelIdToken = UNASSIGNED_TOKEN;
+
+        /**
+         * LocusId.
+         * Currently LocusId only present for {@link #LOCUS_ID_SET} event types.
+         * {@hide}
+         */
+        public String mLocusId;
+
+        /**
+         * {@hide}
+         */
+        public int mLocusIdToken = UNASSIGNED_TOKEN;
+
         /** @hide */
         @EventFlags
         public int mFlags;
@@ -402,21 +507,7 @@ public final class UsageEvents implements Parcelable {
 
         /** @hide */
         public Event(Event orig) {
-            mPackage = orig.mPackage;
-            mClass = orig.mClass;
-            mInstanceId = orig.mInstanceId;
-            mTaskRootPackage = orig.mTaskRootPackage;
-            mTaskRootClass = orig.mTaskRootClass;
-            mTimeStamp = orig.mTimeStamp;
-            mEventType = orig.mEventType;
-            mConfiguration = orig.mConfiguration;
-            mShortcutId = orig.mShortcutId;
-            mAction = orig.mAction;
-            mContentType = orig.mContentType;
-            mContentAnnotations = orig.mContentAnnotations;
-            mFlags = orig.mFlags;
-            mBucketAndReason = orig.mBucketAndReason;
-            mNotificationChannelId = orig.mNotificationChannelId;
+            copyFrom(orig);
         }
 
         /**
@@ -573,6 +664,42 @@ public final class UsageEvents implements Parcelable {
             // which instant apps can't use anyway, so there's no need to hide them.
             return ret;
         }
+
+        /** @hide */
+        public Event getObfuscatedNotificationEvent() {
+            final Event ret = new Event(this);
+            ret.mNotificationChannelId = OBFUSCATED_NOTIFICATION_CHANNEL_ID;
+            return ret;
+        }
+
+        /**
+         * Returns the locusId for this event if the event is of type {@link #LOCUS_ID_SET},
+         * otherwise it returns null.
+         * @hide
+         */
+        @Nullable
+        public String getLocusId() {
+            return mLocusId;
+        }
+
+        private void copyFrom(Event orig) {
+            mPackage = orig.mPackage;
+            mClass = orig.mClass;
+            mInstanceId = orig.mInstanceId;
+            mTaskRootPackage = orig.mTaskRootPackage;
+            mTaskRootClass = orig.mTaskRootClass;
+            mTimeStamp = orig.mTimeStamp;
+            mEventType = orig.mEventType;
+            mConfiguration = orig.mConfiguration;
+            mShortcutId = orig.mShortcutId;
+            mAction = orig.mAction;
+            mContentType = orig.mContentType;
+            mContentAnnotations = orig.mContentAnnotations;
+            mFlags = orig.mFlags;
+            mBucketAndReason = orig.mBucketAndReason;
+            mNotificationChannelId = orig.mNotificationChannelId;
+            mLocusId = orig.mLocusId;
+        }
     }
 
     // Only used when creating the resulting events. Not used for reading/unparceling.
@@ -676,10 +803,14 @@ public final class UsageEvents implements Parcelable {
             return false;
         }
 
-        readEventFromParcel(mParcel, eventOut);
+        if (mParcel != null) {
+            readEventFromParcel(mParcel, eventOut);
+        } else {
+            eventOut.copyFrom(mEventsToWrite.get(mIndex));
+        }
 
         mIndex++;
-        if (mIndex >= mEventCount) {
+        if (mIndex >= mEventCount && mParcel != null) {
             mParcel.recycle();
             mParcel = null;
         }
@@ -766,6 +897,9 @@ public final class UsageEvents implements Parcelable {
             case Event.NOTIFICATION_INTERRUPTION:
                 p.writeString(event.mNotificationChannelId);
                 break;
+            case Event.LOCUS_ID_SET:
+                p.writeString(event.mLocusId);
+                break;
         }
         p.writeInt(event.mFlags);
     }
@@ -814,6 +948,7 @@ public final class UsageEvents implements Parcelable {
         eventOut.mContentType = null;
         eventOut.mContentAnnotations = null;
         eventOut.mNotificationChannelId = null;
+        eventOut.mLocusId = null;
 
         switch (eventOut.mEventType) {
             case Event.CONFIGURATION_CHANGE:
@@ -833,6 +968,9 @@ public final class UsageEvents implements Parcelable {
                 break;
             case Event.NOTIFICATION_INTERRUPTION:
                 eventOut.mNotificationChannelId = p.readString();
+                break;
+            case Event.LOCUS_ID_SET:
+                eventOut.mLocusId = p.readString();
                 break;
         }
         eventOut.mFlags = p.readInt();

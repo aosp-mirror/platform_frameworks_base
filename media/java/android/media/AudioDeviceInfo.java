@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.util.SparseIntArray;
 
 import java.lang.annotation.Retention;
@@ -127,6 +128,23 @@ public final class AudioDeviceInfo {
      * A device type describing a Hearing Aid.
      */
     public static final int TYPE_HEARING_AID   = 23;
+    /**
+     * A device type describing the speaker system (i.e. a mono speaker or stereo speakers) built
+     * in a device, that is specifically tuned for outputting sounds like notifications and alarms
+     * (i.e. sounds the user couldn't necessarily anticipate).
+     * <p>Note that this physical audio device may be the same as {@link #TYPE_BUILTIN_SPEAKER}
+     * but is driven differently to safely accommodate the different use case.</p>
+     */
+    public static final int TYPE_BUILTIN_SPEAKER_SAFE = 24;
+    /**
+     * @hide
+     * A device type for rerouting audio within the Android framework between mixes and
+     * system applications. Typically created when using
+     * {@link android.media.audiopolicy.AudioPolicy} for mixes created with the
+     * {@link android.media.audiopolicy.AudioMix#ROUTE_FLAG_RENDER} flag.
+     */
+    @SystemApi
+    public static final int TYPE_REMOTE_SUBMIX = 25;
 
     /**
      * A device type describing a Bluetooth Low Energy (BLE) audio headset or headphones.
@@ -170,7 +188,9 @@ public final class AudioDeviceInfo {
             TYPE_BLE_SPEAKER}
     )
     @Retention(RetentionPolicy.SOURCE)
-    public @interface AudioDeviceType {}    /** @hide */
+    public @interface AudioDeviceType {}
+
+    /** @hide */
     @IntDef(flag = false, prefix = "TYPE", value = {
             TYPE_BUILTIN_MIC,
             TYPE_BLUETOOTH_SCO,
@@ -244,6 +264,7 @@ public final class AudioDeviceInfo {
             case TYPE_IP:
             case TYPE_BUS:
             case TYPE_HEARING_AID:
+            case TYPE_BUILTIN_SPEAKER_SAFE:
             case TYPE_BLE_HEADSET:
             case TYPE_BLE_SPEAKER:
                 return true;
@@ -271,10 +292,33 @@ public final class AudioDeviceInfo {
             case TYPE_LINE_DIGITAL:
             case TYPE_IP:
             case TYPE_BUS:
+            case TYPE_REMOTE_SUBMIX:
             case TYPE_BLE_HEADSET:
                 return true;
             default:
                 return false;
+        }
+    }
+
+    /**
+     * @hide
+     * Throws IAE on an invalid output device type
+     * @param type
+     */
+    public static void enforceValidAudioDeviceTypeOut(int type) {
+        if (!isValidAudioDeviceTypeOut(type)) {
+            throw new IllegalArgumentException("Illegal output device type " + type);
+        }
+    }
+
+    /**
+     * @hide
+     * Throws IAE on an invalid input device type
+     * @param type
+     */
+    public static void enforceValidAudioDeviceTypeIn(int type) {
+        if (!isValidAudioDeviceTypeIn(type)) {
+            throw new IllegalArgumentException("Illegal input device type " + type);
         }
     }
 
@@ -420,6 +464,37 @@ public final class AudioDeviceInfo {
         return AudioFormat.filterPublicFormats(mPort.formats());
     }
 
+    /**
+     * Returns an array of supported encapsulation modes for the device.
+     *
+     * The array can include any of the {@code AudioTrack} encapsulation modes,
+     * e.g. {@link AudioTrack#ENCAPSULATION_MODE_ELEMENTARY_STREAM}.
+     *
+     * @return An array of supported encapsulation modes for the device.  This
+     *     may be an empty array if no encapsulation modes are supported.
+     */
+    public @NonNull @AudioTrack.EncapsulationMode int[] getEncapsulationModes() {
+        return mPort.encapsulationModes();
+    }
+
+    /**
+     * Returns an array of supported encapsulation metadata types for the device.
+     *
+     * The metadata type returned should be allowed for all encapsulation modes supported
+     * by the device.  Some metadata types may apply only to certain
+     * compressed stream formats, the returned list is the union of subsets.
+     *
+     * The array can include any of
+     * {@link AudioTrack#ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER},
+     * {@link AudioTrack#ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR}.
+     *
+     * @return An array of supported encapsulation metadata types for the device.  This
+     *     may be an empty array if no metadata types are supported.
+     */
+    public @NonNull @AudioTrack.EncapsulationMetadataType int[] getEncapsulationMetadataTypes() {
+        return mPort.encapsulationMetadataTypes();
+    }
+
    /**
      * @return The device type identifier of the audio device (i.e. TYPE_BUILTIN_SPEAKER).
      */
@@ -468,6 +543,9 @@ public final class AudioDeviceInfo {
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_IP, TYPE_IP);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_BUS, TYPE_BUS);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_HEARING_AID, TYPE_HEARING_AID);
+        INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_SPEAKER_SAFE,
+                TYPE_BUILTIN_SPEAKER_SAFE);
+        INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_REMOTE_SUBMIX, TYPE_REMOTE_SUBMIX);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_BLE_HEADSET, TYPE_BLE_HEADSET);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_BLE_SPEAKER, TYPE_BLE_SPEAKER);
 
@@ -489,10 +567,7 @@ public final class AudioDeviceInfo {
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, TYPE_BLUETOOTH_A2DP);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_IP, TYPE_IP);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BUS, TYPE_BUS);
-
-        // not covered here, legacy
-        //AudioSystem.DEVICE_OUT_REMOTE_SUBMIX
-        //AudioSystem.DEVICE_IN_REMOTE_SUBMIX
+        INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_REMOTE_SUBMIX, TYPE_REMOTE_SUBMIX);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BLE_HEADSET, TYPE_BLE_HEADSET);
 
         // privileges mapping to output device
@@ -520,6 +595,9 @@ public final class AudioDeviceInfo {
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_IP, AudioSystem.DEVICE_OUT_IP);
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_BUS, AudioSystem.DEVICE_OUT_BUS);
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_HEARING_AID, AudioSystem.DEVICE_OUT_HEARING_AID);
+        EXT_TO_INT_DEVICE_MAPPING.put(TYPE_BUILTIN_SPEAKER_SAFE,
+                AudioSystem.DEVICE_OUT_SPEAKER_SAFE);
+        EXT_TO_INT_DEVICE_MAPPING.put(TYPE_REMOTE_SUBMIX, AudioSystem.DEVICE_OUT_REMOTE_SUBMIX);
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_BLE_HEADSET, AudioSystem.DEVICE_OUT_BLE_HEADSET);
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_BLE_SPEAKER, AudioSystem.DEVICE_OUT_BLE_SPEAKER);
     }

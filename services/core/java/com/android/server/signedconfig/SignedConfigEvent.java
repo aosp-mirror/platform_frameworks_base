@@ -15,24 +15,24 @@
  */
 package com.android.server.signedconfig;
 
-import android.util.StatsLog;
+import com.android.internal.util.FrameworkStatsLog;
 
 /**
  * Helper class to allow a SignedConfigReported event to be built up in stages.
  */
 public class SignedConfigEvent {
 
-    public int type = StatsLog.SIGNED_CONFIG_REPORTED__TYPE__UNKNOWN_TYPE;
-    public int status = StatsLog.SIGNED_CONFIG_REPORTED__STATUS__UNKNOWN_STATUS;
+    public int type = FrameworkStatsLog.SIGNED_CONFIG_REPORTED__TYPE__UNKNOWN_TYPE;
+    public int status = FrameworkStatsLog.SIGNED_CONFIG_REPORTED__STATUS__UNKNOWN_STATUS;
     public int version = 0;
     public String fromPackage = null;
-    public int verifiedWith = StatsLog.SIGNED_CONFIG_REPORTED__VERIFIED_WITH__NO_KEY;
+    public int verifiedWith = FrameworkStatsLog.SIGNED_CONFIG_REPORTED__VERIFIED_WITH__NO_KEY;
 
     /**
      * Write this event to statslog.
      */
     public void send() {
-        StatsLog.write(StatsLog.SIGNED_CONFIG_REPORTED,
+        FrameworkStatsLog.write(FrameworkStatsLog.SIGNED_CONFIG_REPORTED,
                 type, status, version, fromPackage, verifiedWith);
     }
 

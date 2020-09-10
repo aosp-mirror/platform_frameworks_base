@@ -26,12 +26,12 @@ public interface LogWriter {
     /**
      * Logs a visibility event when view becomes visible.
      */
-    void visible(Context context, int source, int category);
+    void visible(Context context, int source, int category, int latency);
 
     /**
      * Logs a visibility event when view becomes hidden.
      */
-    void hidden(Context context, int category);
+    void hidden(Context context, int category, int visibleTime);
 
     /**
      * Logs an user action.

@@ -21,6 +21,10 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.os.UserHandle;
 
+import com.android.internal.util.function.TriFunction;
+
+import java.util.function.BiFunction;
+
 /**
  * Internal interfaces to be used by other components within the system server.
  *
@@ -44,6 +48,33 @@ public abstract class PermissionManagerInternal {
         @Nullable
         void onRuntimePermissionStateChanged(@NonNull String packageName,
                 @UserIdInt int userId);
+    }
+
+    /** Interface to override permission checks via composition */
+    public interface CheckPermissionDelegate {
+        /**
+         * Checks whether the given package has been granted the specified permission.
+         *
+         * @return If the package has the permission, PERMISSION_GRANTED is
+         * returned.  If it does not have the permission, PERMISSION_DENIED
+         * is returned.
+         *
+         * @see android.content.pm.PackageManager#checkPermission(String, String)
+         */
+        int checkPermission(String permName, String pkgName, int userId,
+                TriFunction<String, String, Integer, Integer> superImpl);
+
+        /**
+        /**
+         * Checks whether the given uid has been granted the specified permission.
+         *
+         * @return If the package has the permission, PERMISSION_GRANTED is
+         * returned.  If it does not have the permission, PERMISSION_DENIED
+         * is returned.
+         *
+         */
+        int checkUidPermission(String permName, int uid,
+                BiFunction<String, Integer, Integer> superImpl);
     }
 
     /**

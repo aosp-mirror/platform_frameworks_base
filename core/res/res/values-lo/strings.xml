@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4562226280528716090">"ພະຍາຍາມລຶບ <xliff:g id="CONTENT_TYPE">%s</xliff:g> ຫຼາຍເກີນໄປ."</string>
     <string name="low_memory" product="tablet" msgid="5557552311566179924">"ພື້ນທີ່ຈັດເກັບຂໍ້ມູນໃນແທັບເລັດເຕັມ. ລຶບບາງໄຟລ໌ອອກເພື່ອເພີ່ມພື້ນທີ່ຫວ່າງ."</string>
     <string name="low_memory" product="watch" msgid="3479447988234030194">"ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ໃນ​ໂມງ​ເຕັມ​ແລ້ວ. ໃຫ້​ລຶບ​ໄຟ​ລ໌​ບາງ​ອັນ​ທີ່ບໍ່​ໄດ້​ໃຊ້​ອອກ​ເພື່ອ​ເພີ່ມ​ເນື້ອ​ທີ່​ຫວ່າງ."</string>
-    <string name="low_memory" product="tv" msgid="8803524975509826759">"ບ່ອນ​ເກັບ​ຂໍ້​ມູນໂທລະພາບເຕັມ. ລຶບ​ບາງ​ໄຟ​ລ໌ ເພື່ອ​ໃຫ້​ມີ​ຊ່ອງ​ຫວ່າງ​."</string>
+    <string name="low_memory" product="tv" msgid="6663680413790323318">"ບ່ອນຈັດເກັບຂໍ້ມູນອຸປະກອນ Android TV ເຕັມແລ້ວ. ລຶບບາງໄຟລ໌ອອກເພື່ອສ້າງບ່ອນຫວ່າງ."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"ພື້ນທີ່ໃນໂທລະສັບເຕັມແລ້ວ. ກະລຸນາລຶບບາງໄຟລ໌ອອກເພື່ອເພີ່ມພື້ນທີ່ຫວ່າງ."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
       <item quantity="other">ຕິດຕັ້ງໃບຮັບຮອງຜູ້ມີອຳນາດແລ້ວ</item>
@@ -188,14 +188,25 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"ບໍ່ມີແອັບຜູ້ເບິ່ງແຍງລະບົບໂປຣໄຟລ໌ບ່ອນເຮັດວຽກ ຫຼື ເສຍຫາຍ. ຜົນກໍຄື, ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກ ແລະ ຂໍ້ມູນທີ່ກ່ຽວຂ້ອງຂອງທ່ານຖືກລຶບອອກແລ້ວ. ໃຫ້ຕິດຕໍ່ຜູ້ເບິ່ງແຍງລະບົບສຳລັບການຊ່ວຍເຫຼືອ."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານບໍ່ສາມາດໃຊ້ໄດ້ໃນອຸປະກອນນີ້ອີກຕໍ່ໄປ"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"ລອງໃສ່ລະຫັດຜ່ານຫຼາຍເທື່ອເກີນໄປ"</string>
+    <string name="device_ownership_relinquished" msgid="4080886992183195724">"ອຸປະກອນທີ່ຍົກເລີກແລ້ວສຳລັບການໃຊ້ສ່ວນບຸກຄົນ"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ອຸປະກອນມີການຈັດການ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ອົງກອນຂອງທ່ານຈັດການອຸປະກອນນີ້ ແລະ ອາດກວດສອບທຣາບຟິກເຄືອຂ່າຍນຳ. ແຕະເພື່ອເບິ່ງລາຍລະອຽດ."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"ແອັບສາມາດເຂົ້າເຖິງສະຖານທີ່ຂອງທ່ານໄດ້"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"ກະລຸນາຕິດຕໍ່ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານເພື່ອສຶກສາເພີ່ມເຕີມ"</string>
+    <string name="country_detector" msgid="7023275114706088854">"ຕົວກວດຫາປະເທດ"</string>
+    <string name="location_service" msgid="2439187616018455546">"​ບໍ​ລິ​ການ​ສະ​ຖານ​ທີ່"</string>
+    <string name="sensor_notification_service" msgid="7474531979178682676">"ບໍລິການການແຈ້ງເຕືອນເຊັນເຊີ"</string>
+    <string name="twilight_service" msgid="8964898045693187224">"ບໍລິການ Twilight"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ຖືກ​ລຶບ"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"ບໍ່ສາມາດໃຊ້ແອັບຜູ້ເບິ່ງແຍງລະບົບໄດ້. ອຸປະກອນຂອງທ່ານຈະຖືກລຶບຂໍ້ມູນໃນຕອນນີ້.\n\nຫາກທ່ານມີຄຳຖາມ, ໃຫ້ຕິດຕໍ່ຜູ້ເບິ່ງແຍງລະບົບອົງກອນຂອງທ່ານ."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ການພິມຖືກປິດໄວ້ໂດຍ <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"ເປີດໃຊ້​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"ແອັບສ່ວນຕົວຂອງທ່ານຈະຖືກບລັອກໄວ້ຈົນກວ່າທ່ານຈະເປີດໃຊ້​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກຂອງທ່ານ"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"ແອັບສ່ວນຕົວຈະຖືກບລັອກໃນວັນທີ <xliff:g id="DATE">%1$s</xliff:g> ເວລາ <xliff:g id="TIME">%2$s</xliff:g>. ຜູ້ເບິ່ງແຍງລະບົບໄອທີຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ປິດໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານເກີນ <xliff:g id="NUMBER">%3$d</xliff:g> ມື້."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ເປີດໃຊ້"</string>
     <string name="me" msgid="6207584824693813140">"ຂ້າພະເຈົ້າ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ໂຕເລືອກແທັບເລັດ"</string>
-    <string name="power_dialog" product="tv" msgid="5941745051236770764">"ທາງ​ເລືອກໂທລະພາບ"</string>
+    <string name="power_dialog" product="tv" msgid="7792839006640933763">"ຕົວເລືອກ Android TV"</string>
     <string name="power_dialog" product="default" msgid="1107775420270203046">"ໂຕເລືອກໂທລະສັບ"</string>
     <string name="silent_mode" msgid="8796112363642579333">"ໂໝດປິດສຽງ"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"ເປີດລະບົບໄຮ້ສາຍ"</string>
@@ -213,7 +224,7 @@
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"ກຳ​ລັງເລີ່ມລະບົບໃໝ່…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"ກຳລັງປິດລະບົບລົງ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"ແທັບເລັດຂອງທ່ານຈະຖືກປິດ."</string>
-    <string name="shutdown_confirm" product="tv" msgid="9187068694573722129">"ໂທລະພາບຂອງ​ທ່ານ​ຈະ​ມອດ."</string>
+    <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"ອຸປະກອນ Android TV ຂອງທ່ານຈະປິດລົງ."</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"ໂມງ​ຂອງ​ທ່ານ​ຈະ​ຖືກ​ປິດ​ໄວ້."</string>
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"ໂທລະສັບຂອງທ່ານຈະຖືກປິດ."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"ທ່ານຕ້ອງການທີ່ຈະປິດບໍ່?"</string>
@@ -222,10 +233,12 @@
     <string name="recent_tasks_title" msgid="8183172372995396653">"ຫຼ້າສຸດ"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"ບໍ່ມີແອັບຯຫຼ້າສຸດ"</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"ໂຕເລືອກແທັບເລັດ"</string>
-    <string name="global_actions" product="tv" msgid="2020669784083287370">"ທາງ​ເລືອກໂທລະພາບ"</string>
+    <string name="global_actions" product="tv" msgid="3871763739487450369">"ຕົວເລືອກ Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ໂຕເລືອກໂທລະສັບ"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"ລັອກໜ້າຈໍ"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"ປິດ"</string>
+    <string name="global_action_power_options" msgid="1185286119330160073">"ປິດເຄື່ອງ"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"ຣີສະຕາດ"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"ສຸກເສີນ"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"ລາຍງານຂໍ້ຜິດພາດ"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"ສິ້ນສຸດເຊດຊັນ"</string>
@@ -240,6 +253,8 @@
       <item quantity="other">ກຳລັງຈະຖ່າຍພາບໜ້າຈໍສຳລັບການລາຍງານຂໍ້ຜິດພາດໃນ <xliff:g id="NUMBER_1">%d</xliff:g> ວິນາທີ.</item>
       <item quantity="one">ກຳລັງຈະຖ່າຍພາບໜ້າຈໍສຳລັບການລາຍງານຂໍ້ຜິດພາດໃນ <xliff:g id="NUMBER_0">%d</xliff:g> ວິນາທີ.</item>
     </plurals>
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"ຖ່າຍຮູບໜ້າຈໍກັບການລາຍງານຂໍ້ຜິດພາດແລ້ວ"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"ຖ່າຍຮູບໜ້າຈໍກັບການລາຍງານຂໍ້ຜິດພາດບໍ່ສຳເລັດ"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"ໂໝດປິດສຽງ"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ປິດສຽງແລ້ວ"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ເປິດສຽງແລ້ວ"</string>
@@ -258,6 +273,7 @@
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"ໂໝດຂັບລົດ"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"ສະ​ຖາ​ນະ​​ບັນ​ຊີ"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"ຂໍ້ຄວາມນັກພັດທະນາ"</string>
+    <string name="notification_channel_developer_important" msgid="7197281908918789589">"ຂໍ້ຄວາມສຳຄັນຈາກຜູ້ພັດທະນາ"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"ອັບເດດ"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"ສະຖານະເຄືອຂ່າຍ"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"ແຈ້ງເຕືອນເຄືອຂ່າຍ"</string>
@@ -279,40 +295,26 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"ສະຫຼັບໄປໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກ"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"ລາຍຊື່ຜູ້ຕິດຕໍ່"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ເຂົ້າ​ຫາ​ລາຍ​ຊື່​ຂອງ​ທ່ານ"</string>
-    <string name="permgrouprequest_contacts" msgid="7755354139254094668">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ເຂົ້າເຖິງລາຍຊື່ຜູ້ຕິດຕໍ່ຂອງທ່ານບໍ?"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ສະ​ຖານ​ທີ່"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ເຂົ້າເຖິງຂໍ້ມູນສະຖານທີ່ຂອງອຸປະກອນນີ້"</string>
-    <string name="permgrouprequest_location" msgid="5261379525646615507">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ເຂົ້າເຖິງສະຖານທີ່ຂອງອຸປະກອນບໍ?"</string>
-    <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"ແອັບຈະມີສິດເຂົ້າເຖິງສະຖານທີ່ໃນເວລາທີ່ທ່ານກຳລັງໃຊ້ແອັບຢູ່ເທົ່ານັ້ນ"</string>
-    <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"ອະນຸຍາດໃຫ້ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ເຂົ້າເຖິງສະຖານທີ່ຂອງອຸປະກອນໄດ້ &lt;b&gt;ຕະຫຼອດເວລາ&lt;/b&gt; ບໍ?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"ຕອນນີ້ແອັບສາມາດເຂົ້າເຖິງສະຖານທີ່ໄດ້ສະເພາະເວລາທີ່ທ່ານໃຊ້ແອັບເທົ່ານັ້ນ"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"ປະຕິທິນ"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ເຂົ້າ​ຫາ​ປະ​ຕິ​ທິນ​ຂອງ​ທ່ານ"</string>
-    <string name="permgrouprequest_calendar" msgid="2680538977344557840">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ເຂົ້າເຖິງປະຕິທິນຂອງທ່ານບໍ?"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ສົ່ງ ແລະ​ເບິ່ງ​ຂໍ້​ຄວາມ SMS"</string>
-    <string name="permgrouprequest_sms" msgid="3985338150822482831">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ສົ່ງ ແລະ ອ່ານຂໍ້ຄວາມ SMS ບໍ?"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"ພື້ນທີ່ຈັດເກັບຂໍ້ມູນ"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"ໄຟລ໌ ແລະ ມີເດຍ"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"ເຂົ້າເຖິງຮູບຖ່າຍ, ສື່ ແລະໄຟລ໌ຢູ່ເທິງອຸປະກອນຂອງທ່ານ"</string>
-    <string name="permgrouprequest_storage" msgid="1594774620878445266">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ເຂົ້າເຖິງຮູບພາບ, ມີເດຍ ແລະ ໄຟລ໌ຢູ່ອຸປະກອນຂອງທ່ານບໍ?"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ໄມໂຄຣໂຟນ"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ບັນທຶກສຽງ"</string>
-    <string name="permgrouprequest_microphone" msgid="4942966684471718126">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ບັນທຶກສຽງບໍ?"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ກິດຈະກຳທາງກາຍະພາບ"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"ເຂົ້າເຖິງກິດຈະກຳທາງກາຍະພາບຂອງທ່ານ"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"ອະນຸຍາດໃຫ້ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ເຂົ້າເຖິງກິດຈະກຳທາງກາຍະພາບຂອງທ່ານບໍ?"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"ກ້ອງ"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ຖ່າຍ​ຮູບ ແລະ​ບັນ​ທຶກວິ​ດີ​ໂອ"</string>
-    <string name="permgrouprequest_camera" msgid="2697305443703328372">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ຖ່າຍຮູບ ແລະ ບັນທຶກວິດີໂອບໍ?"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"ບັນທຶກການໂທ"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ອ່ານ ແລະ ຂຽນບັນທຶກການໂທ"</string>
-    <string name="permgrouprequest_calllog" msgid="7565344038959817408">"ອະນຸຍາດໃຫ້ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ເຂົ້າເຖິງບັນທຶກການໂທທັງໝົດຂອງທ່ານໄດ້ບໍ?"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ໂທລະສັບ"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ໂທ ແລະ​ຈັດ​ການ​ການ​ໂທ​ລະ​ສັບ"</string>
-    <string name="permgrouprequest_phone" msgid="6430085454721364373">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ໂທ ແລະ ຈັດການການໂທບໍ?"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"ເຊັນເຊີຮ່າງກາຍ"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ເຂົ້າ​ຫາ​ຂໍ້​ມູນ​ເຊັນ​ເຊີ​ກ່ຽວ​ກັບ​ສັນ​ຍານ​ຊີບ​ຂອງ​ທ່ານ"</string>
-    <string name="permgrouprequest_sensors" msgid="2431000833343586816">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີກ່ຽວກັບສັນຍານຊີບຂອງທ່ານບໍ?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ດຶງຂໍ້ມູນເນື້ອຫາໃນໜ້າຈໍ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ກວດກາເນື້ອຫາຂອງໜ້າຈໍທີ່ທ່ານກຳລັງມີປະຕິສຳພັນນຳ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"ເປີດໃຊ້ \"ການສຳຫຼວດໂດຍສຳຜັດ\""</string>
@@ -325,6 +327,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"ສາມາດແຕະ, ປັດນີ້ວມື, ຢິບນິ້ວມື ແລະ ດຳເນີນທ່າທາງອື່ນ."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"ທ່າທາງລາຍນິ້ວມື"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ສາມາດບັນທຶກທ່າທາງທີ່ເກີດຂຶ້ນໃນອຸປະກອນເຊັນເຊີລາຍນິ້ວມືໄດ້."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ຖ່າຍຮູບໜ້າຈໍ"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ສາມາດຖ່າຍຮູບໜ້າຈໍໄດ້."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"ປິດການນນຳໃຊ້ ຫຼື ແກ້ໄຂແຖບສະຖານະ"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ອະນຸຍາດໃຫ້ແອັບຯປິດການເຮັດວຽກຂອງແຖບສະຖານະ ຫຼືເພີ່ມ ແລະລຶບໄອຄອນລະບົບອອກໄດ້."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ເປັນ​ແຖບ​ສະ​ຖາ​ນະ"</string>
@@ -353,7 +357,7 @@
     <string name="permdesc_sendSms" msgid="6757089798435130769">"ອະນຸຍາດໃຫ້ແອັບຯສົ່ງຂໍ້ຄວາມ SMS ໄດ້. ນີ້ອາດເຮັດໃຫ້ທ່ານເກີດການຄິດຄ່າບໍລິການທີ່ບໍ່ຄາດຄິດໄດ້. ແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດເຮັດໃຫ້ທ່ານເສຍເງິນຍ້ອນການສົ່ງຂໍ້ຄວາມໂດຍທີ່ທ່ານບໍ່ຮູ້ໂຕໄດ້."</string>
     <string name="permlab_readSms" msgid="5164176626258800297">"ອ່ານຂໍ້ຄວາມຂອງທ່ານ (SMS ຫຼື MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"This app can read all SMS (text) messages stored on your tablet."</string>
-    <string name="permdesc_readSms" product="tv" msgid="8967963387951154530">"This app can read all SMS (text) messages stored on your TV."</string>
+    <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"ແອັບນີ້ສາມາດອ່ານ SMS (ຂໍ້ຄວາມ) ທັງໝົດທີ່ບັນທຶກໃນອຸປະກອນ Android TV ຂອງທ່ານໄດ້."</string>
     <string name="permdesc_readSms" product="default" msgid="774753371111699782">"This app can read all SMS (text) messages stored on your phone."</string>
     <string name="permlab_receiveWapPush" msgid="4223747702856929056">"ຮັບຂໍ້ຄວາມສັ້ນ (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"ອະນຸຍາດໃຫ້ແອັບຯຮັບ ແລະປະມວນຜົນຂໍ້ຄວາມ WAP. ການອະນຸຍາດນີ້ຮວມເຖິງຄວາມສາມາດໃນການກວດເບິ່ງ ແລະລຶບຂໍ້ຄວາມທີ່ສົ່ງແລ້ວ ໂດຍບໍ່ຕ້ອງສະແດງໃຫ້ທ່ານເຫັນ."</string>
@@ -375,7 +379,7 @@
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"ແອັບນີ້ສາມາດໃຊ້ອິນເຕີເນັດໃນພື້ນຫຼັງໄດ້. ນີ້ອາດເຮັດໃຫ້ໃຊ້ອິນເຕີເນັດຫຼາຍຂຶ້ນ."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"ເຮັດໃຫ້ແອັບຯເຮັດວຽກຕະຫຼອດເວລາ"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"ອະນຸຍາດໃຫ້ແອັບຯ ສາມາດເຮັດໃຫ້ບາງພາກສ່ວນຂອງມັນເອັງ ຄົງໂຕໃນໜ່ວຍຄວາມຈຳ. ສິ່ງນີ້ສາມາດຈຳກັດໜ່ວຍຄວາມຈຳທີ່ສາມາດໃຊ້ໄດ້ໂດຍແອັບຯອື່ນ ເຮັດໃຫ້ແທັບເລັດຊ້າລົງ."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="2616944406357387366">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ເຮັດ​ສ່ວນ​ຕ່າງໆ​ຂອງ​ມັນ​ເອງ​ໃຫ້ຕໍ່ເນື່ອງຢູ່​ໃນ​ຄວາມ​ຈຳ. ອັນ​ນີ້​ສາ​ມາດ​ຈຳ​ກັດ​ຄວາມ​ຈຳ​ທີ່​ມີ​ຢູ່​ໃຫ້​ກັບ​ແອັບ​ອື່ນ​ທີ​ເຮັດ​ໃຫ້ໂທລະພາບຊ້າ​ລົງ."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"ອະນຸຍາດໃຫ້ແອັບເຮັດໃຫ້ພາກສ່ວນຂອງຕົວມັນຄົງຢູ່ຖາວອນໃນໜ່ວຍຄວາມຈຳ. ນີ້ສາມາດຈຳກັດໜ່ວຍຄວາມຈຳທີ່ແອັບອື່ນສາມາດໃຊ້ໄດ້ເຊິ່ງຈະເຮັດໃຫ້ອຸປະກອນ Android TV ຂອງທ່ານຊ້າລົງ."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"ອະນຸຍາດໃຫ້ແອັບຯເຮັດໃຫ້ສ່ວນນຶ່ງຂອງຕົນເອງ ຄົງຢູ່ຖາວອນໃນໜ່ວຍຄວາມຈຳ ເຊິ່ງອາດສາມາດ ເຮັດໃຫ້ການນຳໃຊ້ໜ່ວຍຄວາມຈຳຂອງແອັບຯ ອື່ນຖືກຈຳກັດ ສົ່ງຜົນເຮັດໃຫ້ມືຖືຂອງທ່ານເຮັດວຽກຊ້າລົງໄດ້."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"ໃຊ້ບໍລິການພື້ນໜ້າ"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ບໍລິການພື້ນໜ້າ."</string>
@@ -385,47 +389,44 @@
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"ອະນຸຍາດໃຫ້ແອັບຯ ແກ້ໄຂຂໍ້ມູນການຕັ້ງຄ່າລະບົບ. ແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດເຮັດໃຫ້ການຕັ້ງຄ່າຂອງລະບົບເສຍຫາຍໄດ້."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"ເຮັດວຽກໃນຕອນລະບົບເລີ່ມ"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"ອະນຸຍາດໃຫ້ແອັບຯ ເປີດໂຕມັນເອງທັນທີທີ່ເປີດລະບົບຂຶ້ນມາສຳເລັດ. ນີ້ສາມາດເຮັດໃຫ້ການເລີ່ມເປີດຂອງແທັບເລັດໃຊ້ເວລາດົນຂຶ້ນ ແລະເຮັດໃຫ້ການເຮັດວຽກໂດຍຮວມຂອງແທັບເລັດຊ້າລົງ ໂດຍການເຮັດວຽກຕະຫຼອດເວລາ."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="2701244540810970401">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ເປີດ​ຕົວ​ມັນ​ເອງ​ໄດ້​ທັນ​ທີ​ທີ່​ລະ​ບົບ​ສຳ​ເລັດ​ການ​ເປີດ​ໃໝ່. ອັນ​ນີ້​ສາ​ມາດ​ເຮັດ​ໃຫ້​ມັນ​ໃຊ້​ເວ​ລາ​ດົນ​ຂຶ້ນ ເພື່ອ​ເລີ່ມ​ເປີດໂທລະພາບແລະ​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​​ເຮັດ​ໃຫ້​ແທັບ​ເລັດ​ໂດຍ​ລວມ​ຊ້າ​ລົງ ໂດຍ​ການ​ແລ່ນ​ຢູ່​ທຸກ​ຄັ້ງ."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"ອະນຸຍາດໃຫ້ແອັບເປີດຕົວມັນເອງໄດ້ທັນທີທີ່ລະບົບສຳເລັດການເປີດໃໝ່. ອັນນີ້ສາມາດເຮັດໃຫ້ມັນໃຊ້ເວລາດົນຂຶ້ນເພື່ອເລີ່ມເປີດອຸປະກອນ Android TV ຂອງທ່ານ ແລະ ອະນຸຍາດໃຫ້ແອັບເຮັດໃຫ້ອຸປະກອນໂດຍຮວມຊ້າລົງໂດຍການເຮັດວຽກຕະຫຼອດເວລາ."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="7912677044558690092">"ອະນຸຍາດໃຫ້ແອັບຯ ເປີດໂຕມັນເອງທັນທີທີ່ລະບົບສຳເລັດເປີດເຄື່ອງ. ນີ້ສາມາດເຮັດໃຫ້ການເລີ່ມເປີດຂອງໂທລະສັບໃຊ້ເວລາດົນຂຶ້ນ ແລະປ່ອຍໃຫ້ແອັບຯ ເຮັດໃຫ້ໂທລະສັບໂດຍຮວມຊ້າລົງ ດ້ວຍການເຮັດວຽກຢູ່ຕະຫຼອດເວລາ."</string>
     <string name="permlab_broadcastSticky" msgid="4552241916400572230">"ສົ່ງການກະຈາຍສັນຍານແບບຍຶດຕິດ"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="5058486069846384013">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນສົ່ງການກະຈາຍສັນຍານແບບຍຶດຕິດ, ທີ່ຍັງຄົງເຫຼືອຫຼັງຈາກການກະຈາຍສັນຍານສິ້ນສຸດລົງ. ການນຳໃຊ້ແບບມະຫາສານອາດເຮັດໃຫ້ແທັບເລັດຊ້າ ຫຼືບໍ່ສະຖຽນ ໂດຍການໃຊ້ໜ່ວຍຄວາມຈຳຫຼາຍເກີນໄປ."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ສົ່ງ​ການ​ອອກ​ອາ​ກາດຕິດ​ພັນ, ເຊິ່ງ​ຍັງ​ຄົງ​ຢູ່​ຫຼັງ​ຈາກ​ການ​ອອກ​ອາ​ກາດ​ສິ້ນສຸດ. ການ​ໃຊ້​ເກີນ​ອາດ​ຈະ​ເຮັ​ດ​ໃຫ້ໂທລະພາບຊ້າ​ລົງ ຫຼື​ບໍ່​ໝັ້ນຄົງ ເນື່ອງ​ຈາກ​ມັນ​ໃຊ້​ຄວາມ​ຈຳ​ຫຼາຍ​ເກີນ​ໄປ."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"ອະນຸຍາດໃຫ້ແອັບສົ່ງການອອກອາກາດແບບຍຶດຕິດ, ເຊິ່ງຍັງຄົງຢູ່ຫຼັງຈາກການອອກອາກາດສິ້ນສຸດ. ການໃຊ້ເກີນອາດຈະເຮັດໃຫ້ອຸປະກອນ Android TV ຂອງທ່ານຊ້າລົງ ຫຼື ບໍ່ໝັ້ນຄົງເນື່ອງຈາກມັນໃຊ້ໜ່ວຍຄວາມຈຳຫຼາຍເກີນໄປ."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນສົ່ງການກະຈາຍສັນຍານແບບຍຶດຕິດ, ທີ່ຍັງຄົງເຫຼືອຫຼັງຈາກການກະຈາຍສັນຍານສິ້ນສຸດລົງ. ການນຳໃຊ້ແບບມະຫາສານອາດເຮັດໃຫ້ໂທລະສັບຊ້າ ຫຼືບໍ່ສະຖຽນ ໂດຍການໃຊ້ໜ່ວຍຄວາມຈຳຫຼາຍເກີນໄປ."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"ອ່ານລາຍຊື່ຜູ່ຕິດຕໍ່ຂອງທ່ານ"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"ອະນຸຍາດໃຫ້ແອັບອ່ານຂໍ້ມູນກ່ຽວກັບລາຍຊື່ຜູ້ຕິດຕໍ່ທີ່ບັນທຶກໄວ້ຢູ່ແທັບເລັດຂອງທ່ານ. ສິດອະນຸຍາດນີ້ຈະເຮັດໃຫ້ແອັບຕ່າງໆສາມາດບັນທຶກຂໍ້ມູນລາຍຊື່ຜູ້ຕິດຕໍ່ຂອງທ່ານ ແລະ ແອັບທີ່ເປັນອັນຕະລາຍອາດແບ່ງປັນຂໍ້ມູນລາຍຊື່ຜູ້ຕິດຕໍ່ໄດ້ໂດຍທີ່ທ່ານບໍ່ຮູ້ໄດ້."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"ອະນຸຍາດໃຫ້ແອັບອ່ານຂໍ້ມູນກ່ຽວກັບລາຍຊື່ຜູ້ຕິດຕໍ່ທີ່ບັນທຶກໄວ້ຢູ່ໂທລະສັບຂອງທ່ານ. ສິດອະນຸຍາດນີ້ຈະເຮັດໃຫ້ແອັບຕ່າງໆສາມາດບັນທຶກຂໍ້ມູນລາຍຊື່ຜູ້ຕິດຕໍ່ຂອງທ່ານ ແລະ ແອັບທີ່ເປັນອັນຕະລາຍອາດແບ່ງປັນຂໍ້ມູນລາຍຊື່ຜູ້ຕິດຕໍ່ໄດ້ໂດຍທີ່ທ່ານບໍ່ຮູ້ໄດ້."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"ອະນຸຍາດໃຫ້ແອັບອ່ານຂໍ້ມູນກ່ຽວກັບລາຍຊື່ຜູ້ຕິດຕໍ່ທີ່ບັນທຶກໄວ້ຢູ່ໂທລະສັບຂອງທ່ານ. ສິດອະນຸຍາດນີ້ຈະເຮັດໃຫ້ແອັບຕ່າງໆສາມາດບັນທຶກຂໍ້ມູນລາຍຊື່ຜູ້ຕິດຕໍ່ຂອງທ່ານ ແລະ ແອັບທີ່ເປັນອັນຕະລາຍອາດແບ່ງປັນຂໍ້ມູນລາຍຊື່ຜູ້ຕິດຕໍ່ໄດ້ໂດຍທີ່ທ່ານບໍ່ຮູ້ໄດ້."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"ອະນຸຍາດໃຫ້ແອັບອ່ານຂໍ້ມູນກ່ຽວກັບລາຍຊື່ຜູ້ຕິດຕໍ່ທີ່ບັນທຶກໄວ້ຢູ່ແທັບເລັດຂອງທ່ານ. ນອກຈາກນັ້ນ, ແອັບຕ່າງໆຍັງມີສິດເຂົ້າເຖິງບັນຊີຢູ່ແທັບເລັດຂອງທ່ານທີ່ສ້າງລາຍຊື່ຜູ້ຕິດຕໍ່ໄດ້ນຳ. ນີ້ອາດຮວມເຖິງບັນຊີທີ່ສ້າງຂຶ້ນມາໂດຍແອັບທີ່ທ່ານຕິດຕັ້ງໄວ້ນຳ. ສິດອະນຸຍາດນີ້ຈະເຮັດໃຫ້ແອັບຕ່າງໆສາມາດບັນທຶກຂໍ້ມູນລາຍຊື່ຜູ້ຕິດຕໍ່ຂອງທ່ານ ແລະ ແອັບທີ່ເປັນອັນຕະລາຍອາດແບ່ງປັນຂໍ້ມູນລາຍຊື່ຜູ້ຕິດຕໍ່ໄດ້ໂດຍທີ່ທ່ານບໍ່ຮູ້ໄດ້."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"ອະນຸຍາດໃຫ້ແອັບອ່ານຂໍ້ມູນກ່ຽວກັບລາຍຊື່ຜູ້ຕິດຕໍ່ທີ່ຈັດເກັບໄວ້ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານ. ນອກຈາກນັ້ນ, ແອັບຕ່າງໆຍັງມີສິດເຂົ້າເຖິງບັນຊີຢູ່ອຸປະກອນ Android TV ຂອງທ່ານທີ່ສ້າງລາຍຊື່ຜູ້ຕິດຕໍ່ໄດ້ນຳ. ນີ້ອາດຮວມເຖິງບັນຊີທີ່ສ້າງຂຶ້ນມາໂດຍແອັບທີ່ທ່ານຕິດຕັ້ງໄວ້ນຳ. ສິດອະນຸຍາດນີ້ຈະເຮັດໃຫ້ແອັບຕ່າງໆສາມາດບັນທຶກຂໍ້ມູນລາຍຊື່ຜູ້ຕິດຕໍ່ຂອງທ່ານ ແລະ ແອັບທີ່ເປັນອັນຕະລາຍອາດແບ່ງປັນຂໍ້ມູນລາຍຊື່ຜູ້ຕິດຕໍ່ໄດ້ໂດຍທີ່ທ່ານບໍ່ຮູ້ໄດ້."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"ອະນຸຍາດໃຫ້ແອັບອ່ານຂໍ້ມູນກ່ຽວກັບລາຍຊື່ຜູ້ຕິດຕໍ່ທີ່ບັນທຶກໄວ້ຢູ່ໂທລະສັບຂອງທ່ານ. ນອກຈາກນັ້ນ, ແອັບຕ່າງໆຍັງມີສິດເຂົ້າເຖິງບັນຊີຢູ່ໂທລະສັບຂອງທ່ານທີ່ສ້າງລາຍຊື່ຜູ້ຕິດຕໍ່ໄດ້ນຳ. ນີ້ອາດຮວມເຖິງບັນຊີທີ່ສ້າງຂຶ້ນມາໂດຍແອັບທີ່ທ່ານຕິດຕັ້ງໄວ້ນຳ. ສິດອະນຸຍາດນີ້ຈະເຮັດໃຫ້ແອັບຕ່າງໆສາມາດບັນທຶກຂໍ້ມູນລາຍຊື່ຜູ້ຕິດຕໍ່ຂອງທ່ານ ແລະ ແອັບທີ່ເປັນອັນຕະລາຍອາດແບ່ງປັນຂໍ້ມູນລາຍຊື່ຜູ້ຕິດຕໍ່ໄດ້ໂດຍທີ່ທ່ານບໍ່ຮູ້ໄດ້."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"ແກ້ໄຂລາຍຊື່ຜູ່ຕິດຕໍ່ຂອງທ່ານ"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"ອະນຸຍາດໃຫ້ແອັບແກ້ໄຂຂໍ້ມູນກ່ຽວກັບລາຍຊື່ຜູ້ຕິດຕໍ່ທີ່ບັນທຶກໄວ້ຢູ່ແທັບເລັດຂອງທ່ານ. ສິດອະນຸຍາດນີ້ຈະເຮັດໃຫ້ແອັບສາມາດລຶບຂໍ້ມູນລາຍຊື່ຜູ້ຕິດຕໍ່ອອກໄດ້."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"ອະນຸຍາດໃຫ້ແອັບແກ້ໄຂຂໍ້ມູນກ່ຽວກັບລາຍຊື່ຜູ້ຕິດຕໍ່ທີ່ບັນທຶກໄວ້ຢູ່ໂທລະທັດຂອງທ່ານ. ສິດອະນຸຍາດນີ້ຈະເຮັດໃຫ້ແອັບສາມາດລຶບຂໍ້ມູນລາຍຊື່ຜູ້ຕິດຕໍ່ອອກໄດ້."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"ອະນຸຍາດໃຫ້ແອັບແກ້ໄຂຂໍ້ມູນກ່ຽວກັບລາຍຊື່ຕິດຕໍ່ຂອງທ່ານທີ່ບັນທຶກຢູ່ໃນອຸປະກອນ Android TV ທ່ານ. ສິດອະນຸຍາດນີ້ຈະເຮັດໃຫ້ແອັບສາມາດລຶບຂໍ້ມູນລາຍຊື່ຜູ້ຕິດຕໍ່ອອກໄດ້."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"ອະນຸຍາດໃຫ້ແອັບແກ້ໄຂຂໍ້ມູນກ່ຽວກັບລາຍຊື່ຜູ້ຕິດຕໍ່ທີ່ບັນທຶກໄວ້ຢູ່ໂທລະສັບຂອງທ່ານ. ສິດອະນຸຍາດນີ້ຈະເຮັດໃຫ້ແອັບສາມາດລຶບຂໍ້ມູນລາຍຊື່ຜູ້ຕິດຕໍ່ອອກໄດ້."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"ອ່ານບັນທຶກການໂທ"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"This app can read your call history."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"ຂຽນຂໍ້ມູນການໂທ"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"ອະນຸຍາດໃຫ້ແອັບຯແກ້ໄຂບັນທຶກການໂທຂອງແທັບເລັດ ຮວມທັງຂໍ້ມູນກ່ຽວກັບການໂທອອກ ແລະໂທເຂົ້ານຳ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດໃຊ້ຄຸນສົມບັດນີ້ເພື່ອລຶບ ຫຼືແກ້ໄຂບັນທຶກການໂທຂອງທ່ານໄດ້."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="220754624705969171">"ອະນຸຍາດໃຫ້ແອັບແກ້ໄຂບັນທຶກການໂທຂອງໂທລະພາບຂອງ​ທ່ານ ລວມທັງຂໍ້ມູນກ່ຽວກັບການໂທອອກ ແລະໂທເຂົ້ານຳ. ແອັບທີ່ເປັນອັນຕະລາຍອາດໃຊ້ຄຸນສົມບັດນີ້ເພື່ອລຶບ ຫຼືແກ້ໄຂບັນທຶກການໂທຂອງທ່ານໄດ້."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"ອະນຸຍາດໃຫ້ແອັບແກ້ໄຂບັນທຶກການໂທຂອງອຸປະກອນ Android TV ທ່ານ, ຮວມທັງສາຍໂທເຂົ້າ ແລະ ໂທອອກ. ແອັບທີ່ເປັນອັນຕະລາຍສາມາດໃຊ້ຄຸນສົມບັດນີ້ເພື່ອລຶບ ຫຼື ແກ້ໄຂບັນທຶກການໂທຂອງທ່ານໄດ້."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"ອະນຸຍາດໃຫ້ແອັບຯ ແກ້ໄຂລາຍການການໂທໃນໂທລະສັບຂອງທ່ານ, ຮວມທັງຂໍ້ມູນກ່ຽວກັບສາຍໂທເຂົ້າ ແລະການໂທອອກ. ແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດໃຊ້ຄວາມສາມາດນີ້ ເພື່ອລຶບ ຫຼືແກ້ໄຂລາຍການການໂທຂອງທ່ານໄດ້."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"ເຂົ້າ​ຫາເຊັນ​ເຊີ​​ກວດຮ່າງ​ກາຍ (ເຊັ່ນ: ​ຈໍຕິດ​ຕາມ​ອັດ​ຕາ​ການ​ເຕັ້ນ​ຂອງຫົວ​ໃຈ)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ເຂົ້າ​ເຖິງ​ຂໍ້​ມູນ​ຈາກ​ເຊັນ​ເຊີ​ທີ່​ຕິດ​ຕາມ​ສະ​ພາບ​ຮ່າງ​ການ​ຂອງ​ທ່ານ, ເຊັ່ນ: ອັດ​ຕາ​ການ​ເຕັ້ນ​ຂອງ​ຫົວ​ໃຈຂອງ​ທ່ານ."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Read calendar events and details"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"This app can read all calendar events stored on your tablet and share or save your calendar data."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="4359404686228921749">"This app can read all calendar events stored on your TV and share or save your calendar data."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ແອັບນີ້ສາມາດອ່ານນັດໝາຍປະຕິທິນທັງໝົດທີ່ບັນທຶກໄວ້ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານ ແລະ ແບ່ງປັນ ຫຼື ບັນທຶກຂໍ້ມູນປະຕິທິນຂອງທ່ານ."</string>
     <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"This app can read all calendar events stored on your phone and share or save your calendar data."</string>
     <string name="permlab_writeCalendar" msgid="6422137308329578076">"ເພີ່ມ ຫຼືແກ້ໄຂນັດໝາຍໃນປະຕິທິນ ແລະສົ່ງອີເມວຫາຜູ່ເຂົ້າຮ່ວມໂດຍບໍ່ຕ້ອງໃຫ້ເຈົ້າຂອງຮັບຮູ້"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"This app can add, remove, or change calendar events on your tablet. This app can send messages that may appear to come from calendar owners, or change events without notifying their owners."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="6841397610226826926">"This app can add, remove, or change calendar events on your TV. This app can send messages that may appear to come from calendar owners, or change events without notifying their owners."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"ແອັບນີ້ສາມາດເພີ່ມ, ລຶບ ຫຼື ປ່ຽນນັດໝາຍປະຕິທິນຢູ່ອຸປະກອນ Android TV ຂອງທ່ານໄດ້. ແອັບນີ້ສາມາດສົ່ງຂໍ້ຄວາມທີ່ອາດປາກົດວ່າມາຈາກເຈົ້າຂອງປະຕິທິນ ຫຼື ປ່ຽນນັດໝາຍໂດຍບໍ່ມີການແຈ້ງເຕືອນເຈົ້າຂອງໄດ້."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"This app can add, remove, or change calendar events on your phone. This app can send messages that may appear to come from calendar owners, or change events without notifying their owners."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"ເຂົ້າເຖິງຄຳສັ່ງຜູ່ໃຫ້ບໍລິການພິກັດສະຖານທີ່"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"ອະນຸຍາດ​ໃຫ້​ແອັບຯ​ເຂົ້າເຖິງ​ຄຳສັ່ງ​ເພີ່ມເຕີມ​ຂອງ​ຜູ່​ໃຫ້​ບໍລິການ​ສະຖານທີ່. ນີ້​ອາດ​ຈະ​ເປັນ​ການ​ເຮັດ​ໃຫ້​ແອັບຯ ລົບກວນ​ການ​ເຮັດ​ວຽກ​ຂອງ GPS ຫຼື​ແຫລ່ງ​ຂໍ້ມູນ​ສະຖານທີ່​ອື່ນໆ​ໄດ້."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"ເຂົ້າເຖິງສະຖານທີ່ແນ່ນອນໃນພື້ນໜ້າເທົ່ານັ້ນ"</string>
-    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"ແອັບນີ້ສາມາດຮັບເອົາສະຖານທີ່ແນ່ນອນຂອງທ່ານໄດ້ທຸກເວລາທີ່ມັນຢູ່ໃນພື້ນໜ້າ. ການບໍລິການສະຖານທີ່ເຫຼົ່ານີ້ຕ້ອງເປີດຢູ່ ແລະ ສາມາດໃຊ້ໄດ້ໃນໂທລະສັບຂອງທ່ານເພື່ອໃຫ້ແອັບສາມາດໃຊ້ພວກມັນໄດ້. ນີ້ອາດຈະເຮັດໃຫ້ການໃຊ້ແບັດເຕີຣີເພີ່ມຂຶ້ນ."</string>
-    <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"ເຂົ້າເຖິງສະຖານທີ່ໂດຍປະມານ (ອ້າງອີງຈາກເຄືອຂ່າຍ) ສະເພາະໃນພື້ນໜ້າ"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"ແອັບນີ້ສາມາດເບິ່ງສະຖານທີ່ຂອງທ່ານໂດຍອ້າງອີງຈາກແຫລ່ງທີ່ມເຄືອຂ່າຍ ເຊັ່ນ: ເສົາສັນຍານໂທລະສັບ ແລະ ເຄືອຂ່າຍ Wi-Fi ໄດ້, ແຕ່ສະເພາະເມື່ອແອັບເຮັດວຽກໂດຍປາກົດຢູ່ໜ້າເທົ່ານັ້ນ. ບໍລິການສະຖານທີ່ເຫຼົ່ານີ້ຈະຕ້ອງຖືກເປີດໃຊ້ ແລະ ສາມາດໃຊ້ໄດ້ຢູ່ແທັບເລັດຂອງທ່ານ, ແອັບຈຶ່ງຈະສາມາດໃຊ້ພວກມັນໄດ້."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"ແອັບນີ້ສາມາດເບິ່ງສະຖານທີ່ຂອງທ່ານໂດຍອ້າງອີງຈາກແຫລ່ງທີ່ມເຄືອຂ່າຍ ເຊັ່ນ: ເສົາສັນຍານໂທລະສັບ ແລະ ເຄືອຂ່າຍ Wi-Fi ໄດ້, ແຕ່ສະເພາະເມື່ອແອັບເຮັດວຽກໂດຍປາກົດຢູ່ໜ້າເທົ່ານັ້ນ. ບໍລິການສະຖານທີ່ເຫຼົ່ານີ້ຈະຕ້ອງຖືກເປີດໃຊ້ ແລະ ສາມາດໃຊ້ໄດ້ຢູ່ໂທລະທັດຂອງທ່ານ, ແອັບຈຶ່ງຈະສາມາດໃຊ້ພວກມັນໄດ້."</string>
-    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"ແອັບນີ້ສາມາດລະບຸສະຖານທີ່ໂດຍປະມານການຂອງທ່ານໄດ້ສະເພາະເມື່ອມັນຢູ່ໃນພື້ນຫຼັງເທົ່ານັ້ນ. ຈະຕ້ອງເປີດໃຊ້ບໍລິການສະຖານທີ່ເຫຼົ່ານີ້ ແລະ ໃຊ້ໄດ້ຢູ່ລົດຂອງທ່ານເພື່ອໃຫ້ແອັບສາມາດໃຊ້ພວກມັນໄດ້."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"ແອັບນີ້ສາມາດເບິ່ງສະຖານທີ່ຂອງທ່ານໂດຍອ້າງອີງຈາກແຫລ່ງທີ່ມເຄືອຂ່າຍ ເຊັ່ນ: ເສົາສັນຍານໂທລະສັບ ແລະ ເຄືອຂ່າຍ Wi-Fi ໄດ້, ແຕ່ສະເພາະເມື່ອແອັບເຮັດວຽກໂດຍປາກົດຢູ່ໜ້າເທົ່ານັ້ນ. ບໍລິການສະຖານທີ່ເຫຼົ່ານີ້ຈະຕ້ອງຖືກເປີດໃຊ້ ແລະ ສາມາດໃຊ້ໄດ້ຢູ່ໂທລະສັບຂອງທ່ານ, ແອັບຈຶ່ງຈະສາມາດໃຊ້ພວກມັນໄດ້."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"ແອັບນີ້ສາມາດຂໍສະຖານທີ່ແບບລະອຽດຂອງທ່ານຈາກບໍລິການສະຖານທີ່ໄດ້ໃນຂະນະທີ່ກຳລັງໃຊ້ແອັບຢູ່. ທ່ານຕ້ອງເປີດໃຊ້ບໍລິການສະຖານທີ່ສຳລັບອຸປະກອນຂອງທ່ານກ່ອນເພື່ອໃຫ້ແອັບຂໍຂໍ້ມູນສະຖານທີ່. ນີ້ອາດເພີ່ມການນຳໃຊ້ແບັດເຕີຣີ."</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"ເຂົ້າເຖິງສະຖານທີ່ໂດຍປະມານເມື່ອຢູ່ໃນພື້ນໜ້າເທົ່ານັ້ນ"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"ແອັບນີ້ສາມາດຂໍສະຖານທີ່ໂດຍປະມານຂອງທ່ານຈາກບໍລິການສະຖານທີ່ໄດ້ໃນຂະນະທີ່ກຳລັງໃຊ້ແອັບຢູ່. ທ່ານຕ້ອງເປີດໃຊ້ບໍລິການສະຖານທີ່ສຳລັບອຸປະກອນຂອງທ່ານກ່ອນເພື່ອໃຫ້ແອັບຂໍຂໍ້ມູນສະຖານທີ່."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"ເຂົ້າເຖິງສະຖານທີ່ໃນພື້ນຫຼັງ"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"ຖ້າອະນຸຍາດສິ່ງນີ້ນອກຈາກການເຂົ້າເຖິງສະຖານທີ່ໂດຍປະມານ ຫຼື ທີ່ແນ່ນອນ ແອັບສາມາດເຂົ້າເຖິງສະຖານທີ່ໄດ້ໃນຂະນະທີ່ເປີດໃຊ້ໃນພື້ນຫຼັງ."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"ແອັບນີ້ສາມາດເຂົ້າເຖິງສະຖານທີ່ໄດ້ຕະຫຼອດເວລາ, ເຖິງແມ່ນວ່າຈະບໍ່ໄດ້ໃຊ້ແອັບຢູ່ກໍຕາມ."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"ປ່ຽນການຕັ້ງຄ່າສຽງຂອງທ່ານ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"ອະນຸຍາດໃຫ້ແອັບຯແກ້ໄຂການຕັ້ງຄ່າສຽງສ່ວນກາງ ເຊັ່ນ: ລະດັບສຽງ ແລະລຳໂພງໃດທີ່ຖືກໃຊ້ສົ່ງສຽງອອກ."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ບັນທຶກສຽງ"</string>
@@ -436,10 +437,13 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"ແອັບນີ້ສາມາດຈັດລະບຽບການເຄື່ອນໄຫວທາງກາຍຂອງທ່ານໄດ້."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ຖ່າຍຮູບ ແລະວິດີໂອ"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"This app can take pictures and record videos using the camera at any time."</string>
+    <string name="permlab_systemCamera" msgid="3642917457796210580">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນ ຫຼື ບໍລິການເຂົ້າເຖິງກ້ອງຂອງລະບົບໄດ້ເພື່ອຖ່າຍຮູບ ແລະ ວິດີໂອ"</string>
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"ສິດ ຫຼື ແອັບລະບົບນີ້ສາມາດຖ່າຍຮູບ ແລະ ບັນທຶກວິດີໂອໂດຍໃຊ້ກ້ອງຂອງລະບົບຕອນໃດກໍໄດ້. ຕ້ອງໃຊ້ສິດອະນຸຍາດ android.permission.CAMERA ໃຫ້ແອັບຖືນຳ"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນ ຫຼື ບໍລິການຮັບການເອີ້ນກັບກ່ຽວກັບອຸປະກອນກ້ອງຖືກເປີດ ຫຼື ປິດໄດ້."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ແອັບນີ້ສາມາດຮັບການເອີ້ນກັບໄດ້ເມື່ອມີອຸປະກອນກ້ອງໃດຖືກເປີດ (ໂດຍແພັກເກດແອັບພລິເຄຊັນຫຍັງ) ຫຼື ຖືກປິດ."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ຄວບຄຸມການສັ່ນ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ອະນຸຍາດໃຫ້ແອັບຯຄວບຄຸມໂຕສັ່ນ."</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງສະຖານະການສັ່ນໄດ້."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ໂທຫາເບີໂທລະສັບໂດຍກົງ"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"ອະນຸຍາດໃຫ້ແອັບຯໂທຫາເບີໂທລະສັບໄດ້ ໂດຍບໍ່ຕ້ອງຖ້າການດຳເນີນການໃດໆຈາກທ່ານ. ຄຸນສົມບັດນີ້ອາດກໍ່ໃຫ້ເກີດຄ່າໃຊ້ຈ່າຍໃນການໂທທີ່ບໍ່ຄາດຄິດໄດ້. ໝາຍເຫດ: ຄຸນສົມບັດນີ້ບໍ່ໄດ້ເປັນການອະນຸຍາດໃຫ້ແອັບຯ ສາມາດໂທຫາເບີສຸກເສີນ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດເຮັດໃຫ້ທ່ານ ຕ້ອງເສຍຄ່າໂທໂດຍທີ່ບໍ່ໄດ້ຄາດຄິດ."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"ເຂົ້າ​ຫາ​ການ​ບໍ​ລິ​ການ​ໂທ IMS"</string>
@@ -450,21 +454,23 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Allows the app to route its calls through the system in order to improve the calling experience."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ເຫັນ ແລະ ຄວບຄຸມການໂທຜ່ານລະບົບ."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"ອະນຸຍາດໃຫ້ແອັບເຫັນ ແລະ ຄວບຄຸມການໂທທີ່ກຳລັງດຳເນີນຢູ່ອຸປະກອນ. ນີ້ຮວມເຖິງຂໍ້ມູນ ເຊັ່ນ: ເບີໂທສຳລັບການໂທ ແລະ ສະຖານະຂອງການໂທນຳ."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"ຍົກເວັ້ນຈາກການຈຳກັດການບັນທຶກສຽງ"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"ຍົກເວັ້ນແອັບຈາກການຈຳກັດເພື່ອບັນທຶກສຽງ."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"ສືບຕໍ່ການໂທຈາກແອັບອື່ນ"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"ອະນຸຍາດໃຫ້ແອັບສືບຕໍ່ການໂທເຊິ່ງອາດຖືກເລີ່ມຕົ້ນໃນແອັບອື່ນ."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ອ່ານເບີໂທລະສັບ"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງເບີໂທລະສັບຂອງອຸປະກອນໄດ້."</string>
     <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"ເປີດໜ້າຈໍລົດໄວ້ຕະຫຼອດ"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ຂັດຂວາງບໍ່ໃຫ້ປິດໜ້າຈໍແທັບເລັດ"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"ປ້ອງ​ກັນ​ບໍ່​ໃຫ້ໂທລະພາບຫຼັບ​ພັກ"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"ປ້ອງກັນບໍ່ໃຫ້ອຸປະກອນ Android TV ຂອງທ່ານນອນ"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ຂັດຂວາງບໍ່ໃຫ້ໂທລະສັບປິດໜ້າຈໍ"</string>
     <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"ອະນຸຍາດໃຫ້ແອັບເຮັດໃຫ້ໜ້າຈໍລົດເປີດໄວ້ຕະຫຼອດ."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ອະນຸຍາດໃຫ້ແອັບຯ ປ້ອງກັນບໍ່ໃຫ້ປິດໜ້າຈໍແທັບເລັດ."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ປ້ອງ​ກັນ​ບໍ່​ໃຫ້ໂທລະພາບຫຼັບ​ພັກ."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"ອະນຸຍາດໃຫ້ແອັບປ້ອງກັນບໍ່ໃຫ້ອຸປະກອນ Android TV ຂອງທ່ານນອນ."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ອະນຸຍາດໃຫ້ແອັບຯປ້ອງກັນບໍ່ໃຫ້ປິດໜ້າຈໍໂທລະສັບ."</string>
     <string name="permlab_transmitIr" msgid="8077196086358004010">"ສົ່ງອິນຟຣາເຣດ"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5884738958581810253">"ອະນຸຍາດໃຫ້ແອັບຯໃຊ້ການສົ່ງອິນຟຣາເຣດຂອງແທັບເລັດໄດ້."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="4453220932790148184">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບໆ​ໃຊ້​ເຄື່ອງ​ສົ່ງ​ອິນ​ຟ​ຣາ​ເຣດ​ຂອງໂທລະພາບ."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="3278506969529173281">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ຕົວສົ່ງສັນຍານອິນຟຣາເຣດຂອງອຸປະກອນ Android TV ຂອງທ່ານໄດ້."</string>
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"ອະນຸຍາດໃຫ້ແອັບຯໃຊ້ການສົ່ງອິນຟຣາເຣດຂອງໂທລະສັບໄດ້."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"ຕັ້ງພາບພື້ນຫຼັງ"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"ອະນຸຍາດໃຫ້ແອັບຯຕັ້ງຄ່າພາບພື້ນຫຼັງຂອງລະບົບໄດ້."</string>
@@ -472,11 +478,11 @@
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"ອະນຸຍາດໃຫ້ແອັບຯ ຕັ້ງຄ່າຄຳແນະນຳຂະໜາດພາບພື້ນຫຼັງ."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"ຕັ້ງເຂດເວລາ"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1788868809638682503">"ອະນຸຍາດໃຫ້ແອັບຯປ່ຽນເຂດເວລາຂອງແທັບເລັດ."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="1000749751269030813">"ອະນຸຍາດໃຫ້ແອັບປ່ຽນເຂດເວລາຂອງໂທລະພາບ."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="9069045914174455938">"ອະນຸຍາດໃຫ້ແອັບປ່ຽນເຂດເວລາຂອງອຸປະກອນ Android TV ຂອງທ່ານ."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4611828585759488256">"ອະນຸຍາດໃຫ້ແອັບຯ ປ່ຽນເຂດເວລາຂອງໂທລະສັບ."</string>
     <string name="permlab_getAccounts" msgid="5304317160463582791">"ຊອກຫາບັນຊີໃນອຸປະກອນ"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"ອະນຸຍາດໃຫ້ແອັບຯຮັບເອົາລາຍການຂອງບັນຊີທີ່ຮູ້ຈັກໂດຍແທັບເລັດ. ນີ້ອາດຮວມທັງບັນຊີຕ່າງໆ ທີ່ຖືກສ້າງໂດຍແອັບພລິເຄຊັນທີ່ທ່ານໄດ້ຕິດຕັ້ງໄວ້."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="3233589616751852028">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ເອົາ​ລາຍ​ຊື່​ບັນ​ຊີ​ທີ່ໂທລະພາບຮູ້​ຈັກ. ອັນ​ນີ້​ອາດ​ຈະ​ລວມ​ມີ​ບັນ​ຊີ​ໃດ​ໜຶ່ງ​ທີ່​ແອັບ​ພ​ລິ​ເຄ​ຊັນ​ທີ່​ທ່ານ​ຕິດ​ຕັ້ງ​ໃສ່​ນັ້ນ​ສ້າງ​ຂຶ້ນ."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"ອະນຸຍາດໃຫ້ແອັບໂຫຼດລາຍຊື່ບັນຊີທີ່ອຸປະກອນ Android TV ຂອງທ່ານຮູ້ຈັກ. ນີ້ອາດຮວມບັນຊີທີ່ສ້າງຂຶ້ນໂດຍແອັບພລິເຄຊັນທີ່ທ່ານຕິດຕັ້ງໄວ້ນຳ."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນ ດຶງຂໍ້ມູນລາຍຊື່ຂອງບັນຊີທີ່ໂທລະສັບມີ ເຊິ່ງອາດຮວມເຖິງບັນຊີທີ່ໃດໆທີ່ສ້າງຂຶ້ນ ໂດຍແອັບພລິເຄຊັນທີ່ທ່ານຕິດຕັ້ງໄວ້."</string>
     <string name="permlab_accessNetworkState" msgid="2349126720783633918">"ເບິ່ງການເຊື່ອມຕໍ່ເຄືອຂ່າຍ"</string>
     <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"ອະນຸຍາດໃຫ້ແອັບຯ ເບິ່ງຂໍ້ມູນກ່ຽວກັບການເຊື່ອມຕໍ່ເຄືອຂ່າຍ ເຊັ່ນວ່າມີເຄືອຂ່າຍໃດແດ່ ແລະໄດ້ເຊື່ອມຕໍ່ກັບເຄືອຂ່າຍໃດ."</string>
@@ -492,21 +498,21 @@
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"ອະນຸຍາດໃຫ້ແອັບຯເຊື່ອມຕໍ່ ແລະຕັດການເຊື່ອມຕໍ່ຈາກຈຸດເຊື່ອມຕໍ່ Wi-Fi ແລະໃຫ້ສາມາດປ່ຽນແປງຄ່າຂອງອຸປະກອນສຳລັບເຄືອຂ່າຍ Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"ອະນຸຍາດການຮັບ Wi-Fi Multicast"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"ອະນຸຍາດໃຫ້ແອັບຯຮັບຂໍ້ມູນແພັກເກັດ ທີ່ຖືກສົ່ງ ໄປຫາທຸກອຸປະກອນໃນເຄືອຂ່າຍ WiFi ໂດຍການນຳໃຊ້ການກະຈາຍຂໍ້ມູນໃນວົງກວ້າງ, ບໍ່ແມ່ນສະເພາະແທັບເລັດຂອງທ່ານ. ມັນໃຊ້ພະລັງງານຫຼາຍກວ່າໂຫມດກະຈາຍຂໍ້ມູນແບບໂດຍກົງ."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1253281508485111166">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ຮັບ​ແພັກ​ເກັດ​ທີ່​ສົ່ງ​ໄປ​ຫາ​ອຸ​ປະ​ກອນ​ທັງ​ໝົດ​ຢູ່​ໃນ​ເຄືອ​ຂ່າຍ Wi-Fi ດ້ວຍ​ການ​ໃຊ້​ທີ່​ຢູ່​ມັ​ລ​ຕິ​ຄາ​ສ​ທ໌, ບໍ່​ພຽງ​ແຕ່ໂທລະພາບຂອງ​ທ່ານ. ມັນ​ໃຊ້​ໄຟ​ຫຼາຍ​ກວ່າ​ໂໝດ​ທີ່​ບໍ່​ແມ່ນ​ມັ​ລ​ຕິ​ຄາ​ສ​ທ໌."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"ອະນຸຍາດໃຫ້ແອັບຮັບແພັກເກັດທີ່ສົ່ງໄປຫາອຸປະກອນທັງໝົດຢູ່ໃນເຄືອຂ່າຍ Wi-Fi ດ້ວຍການໃຊ້ທີ່ຢູ່ການແຜ່ສັນຍານສະເພາະກຸ່ມ, ບໍ່ພຽງແຕ່ອຸປະກອນ Android TV ຂອງທ່ານ. ມັນໃຊ້ໄຟຫຼາຍກວ່າໂໝດທີ່ບໍ່ແມ່ນການແຜ່ສັນຍານສະເພາະກຸ່ມ."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"ອະນຸຍາດໃຫ້ແອັບຯ ຮັບຂໍ້ມູນແພັກເກດທີ່ສົ່ງໄປໃຫ້ທຸກອຸປະກອນໃນເຄືອຂ່າຍ Wi-Fi ໂດຍໃຊ້ທີ່ຢູ່ multicast ບໍ່ສະເພາະພຽງໂທລະສັບຂອງທ່ານ, ເຊິ່ງຈະໃຊ້ພະລັງງານຫຼາຍກວ່າໃນໂໝດທີ່ບໍ່ແມ່ນ multicast."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"ເຂົ້າເຖິງການຕັ້ງຄ່າ Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"ອະນຸຍາດໃຫ້ແອັບຯຕັ້ງຄ່າແທັບເລັດ Bluetooth ພາຍໃນ ແລະຊອກຫາ ແລະເຊື່ອມຕໍ່ໄວ້ກັບອຸປະກອນພາຍນອກ."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1822785266335294155">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ຕັ້ງ​ຄ່າ Bluetooth ໂທລະພາບກັບ​ທີ່, ແລະ​ເພື່ອ​ຄົ້ນ​ຫາ ແລະ​ຈັບ​ຄູ່​ກັບ​ອຸ​ປະ​ກອນ​ທາງ​ໄກ."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"ອະນຸຍາດໃຫ້ແອັບຕັ້ງຄ່າ Bluetooth ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານ ແລະ ຄົ້ນພົບ ແລະ ຈັບຄູ່ກັບອຸປະກອນຣີໂໝດ."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"ອະນຸຍາດໃຫ້ແອັບຯຕັ້ງຄ່າ Bluetooth ໃນໂທລະສັບ ເພື່ອຊອກຫາ ແລະການເຊື່ອມຕໍ່ກັບອຸປະກອນໄຮ້ສາຍພາຍນອກ."</string>
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"ເຊື່ອມຕໍ່ ແລະຕັດການເຊື່ອມຕໍ່ຈາກ WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"ອະນຸຍາດໃຫ້ແອັບຯກວດເບິ່ງວ່າ WiMAX ຖືກເປີດນຳໃຊ້ຢູ່ບໍ່ ແລະຂໍ້ມູນກ່ຽວກັບເຄືອຂ່າຍ WiMAX ອື່ນໆທີ່ກຳລັງເຊື່ອມຕໍ່ຢູ່."</string>
     <string name="permlab_changeWimaxState" msgid="6223305780806267462">"ປ່ຽນສະຖານະ WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="4011097664859480108">"ອະນຸຍາດໃຫ້ແອັບຯເຊື່ອມຕໍ່ ແລະຕັດການເຊື່ອມຕໍ່ແທັບເລັດຈາກເຄືອຂ່າຍ WiMAX."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6876948244710106021">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ເຊື່ອມ​ຕໍ່​ໂທລະພາບກັບ ແລະ​ຕັດ​ເຊື່ອມ​ຕໍ່ໂທລະພາບຈາກ​ເຄືອ​ຂ່າຍ WiMAX."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"ອະນຸຍາດໃຫ້ແອັບເຊື່ອມຕໍ່ຫາອຸປະກອນ Android TV ຂອງທ່ານຫາ ແລະ ຕັດການເຊື່ອມຕໍ່ອຸປະກອນ Android TV ຂອງທ່ານຈາກເຄືອຂ່າຍ WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"ອະນຸຍາດໃຫ້ແອັບຯເຊື່ອມຕໍ່ ແລະຕັດການເຊື່ອມຕໍ່ຂອງໂທລະສັບຈາກເຄືອຂ່າຍ WiMax ໄດ້."</string>
     <string name="permlab_bluetooth" msgid="586333280736937209">"ຈັບຄູ່ກັບອຸປະກອນ Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"ອະນຸຍາດໃຫ້ແອັບຯເບິ່ງການຕັ້ງຄ່າຂອງ Bluetooth ໃນແທັບເລັດ ຕະຫຼອດຈົນເຊື່ອມຕໍ່ ແລະຍອມຮັບການເຊື່ອມຕໍ່ກັບອຸປະກອນທີ່ຈັບຄູ່ກັນແລ້ວ."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3546625329740068213">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ເບິ່ງ​ການ​ຕັ້ງ​ຄ່າ​ຂອງ Bluetooth ຢູ່​ໃນໂທລະພາບ, ແລະ​ເພື່ອ​ເຮັດ ແລະ​ຮັບ​ການ​ເຊື່ອມ​ຕໍ່​ກັບ​ອຸ​ປະ​ກອນ​ທີ່​ຈັບ​ຄູ່​ແລ້ວ."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"ອະນຸຍາດໃຫ້ແອັບເບິ່ງການຕັ້ງຄ່າ Bluetooth ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານ ແລະ ຕອບຮັບການເຊື່ອມຕໍ່ກັບອຸປະກອນທີ່ຈັບຄູ່ໄວ້."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"ອະນຸຍາດໃຫ້ແອັບຯເບິ່ງການຕັ້ງຄ່າຂອງ Bluetooth ໃນໂທລະສັບ, ຮວມທັງໃຫ້ສ້າງ ແລະຮັບການເຊື່ອມຕໍ່ຈາກອຸປະກອນທີ່ຈັບຄູ່ກັນ."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ຂໍ້ມູນບໍລິການການຈ່າຍເງິນ NFC ທີ່ຕ້ອງການ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ອະນຸຍາດໃຫ້ແອັບຮັບຂໍ້ມູນບໍລິການການຈ່າຍເງິນ NFC ທີ່ຕ້ອງການໄດ້ ເຊັ່ນ: ການຊ່ວຍເຫຼືອແບບລົງທະບຽນ ແລະ ປາຍທາງເສັ້ນທາງ."</string>
@@ -530,7 +536,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"ອະນຸຍາດໃຫ້ແອັບແກ້ໄຂຄໍເລັກຊັນຮູບຂອງທ່ານ."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"ອ່ານສະຖານທີ່ຈາກຄໍເລັກຊັນມີເດຍຂອງທ່ານ"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"ອະນຸຍາດໃຫ້ແອັບອ່ານສະຖານທີ່ຈາກຄໍເລັກຊັນມີເດຍຂອງທ່ານ."</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"ຢັ້ງຢືນວ່າແມ່ນທ່ານ"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"ຢັ້ງຢືນວ່າແມ່ນທ່ານ"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ຮາດແວຊີວະມິຕິບໍ່ສາມາດໃຊ້ໄດ້"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"ຍົກເລີກການຮັບຮອງຄວາມຖືກຕ້ອງແລ້ວ"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"ບໍ່ຮັບຮູ້"</string>
@@ -556,6 +562,7 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"ລອງໃໝ່ອີກຄັ້ງ."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ບໍ່ມີການລົງທະບຽນລາຍນິ້ວມື."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ອຸປະກອນນີ້ບໍ່ມີເຊັນເຊີລາຍນິ້ວມື."</string>
+    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ປິດການເຮັດວຽກຂອງເຊັນເຊີໄວ້ຊົ່ວຄາວແລ້ວ."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ນີ້ວ​ມື <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -599,6 +606,7 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ບໍ່ສາມາດຢັ້ງຢືນໃບໜ້າໄດ້. ກະລຸນາລອງໃໝ່."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"ທ່ານຍັງບໍ່ໄດ້ຕັ້ງການປົດລັອກດ້ວຍໜ້າເທື່ອ."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"ບໍ່ຮອງຮັບການປົດລັອກດ້ວຍໜ້າຢູ່ອຸປະກອນນີ້."</string>
+    <string name="face_error_security_update_required" msgid="5076017208528750161">"ປິດການເຮັດວຽກຂອງເຊັນເຊີໄວ້ຊົ່ວຄາວແລ້ວ."</string>
     <string name="face_name_template" msgid="3877037340223318119">"ໃບໜ້າ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -665,10 +673,10 @@
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"ຄວບຄຸມຄວາມຍາວ ແລະຕົວອັກສອນທີ່ອະ​ນຸ​ຍາດ​ໃຫ້​ຢູ່​ໃນລະ​ຫັດລັອກໜ້າຈໍ ແລະ PIN."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ຕິດຕາມການພະຍາຍາມປົດລັອກໜ້າຈໍ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ຕິດຕາມເບິ່ງຈຳນວນການພິມລະຫັດຜ່ານທີ່ບໍ່ຖືກຕ້ອງ ໃນເວລາປົດລັອກໜ້າຈໍ ແລະລັອກແທັບເລັດ ຫຼືລຶບຂໍ້ມູນທັງໝົດຂອງແທັບເລັດ ຖ້າມີການພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງຫຼາຍເທື່ອເກີນໄປ."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="1880525102716729482">"ຕິດ​ຕາມ​ຈຳ​ນວນ​ຂອງ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ທີ່​ພິມ​ໄປ​ແລ້ວ ເມື່ອ​ປົດ​ລັອກ​ໜ້າ​ຈໍ, ແລະ​ລັອກໂທລະພາບຫຼື​ລຶບ​ທຸກ​ຂໍ້​ມູນ​ຂອງໂທລະພາບຖ້າ​ໄດ້​ພິມ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ເຂົ້າ​ໄປ​ຫຼາຍ​ອັນ​ເກີນ​ໄປ."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"ຕິດຕາມຈຳນວນລະຫັດຜ່ານທີ່ບໍ່ຖືກຕ້ອງທີ່ພິມຕອນກຳລັງປົດລັອກໜ້າຈໍ ແລະ ລັອກອຸປະກອນ Android TV ຂອງທ່ານ ຫຼື ລຶບຂໍ້ມູນຂອງອຸປະກອນ Android TV ຂອງທ່ານຫາກພິມລະຫັດຜ່ານຜິດຫຼາຍເທື່ອເກີນໄປ."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"ຕິດຕາມເບິ່ງຈຳນວນການພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ ໃນເວລາປົດລັອກໜ້າຈໍ ແລະລັອກໂທລະສັບ ຫຼືລຶບຂໍ້ມູນທັງໝົດຂອງໂປລະສັບ ຖ້າມີການພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງຫຼາຍເທື່ອເກີນໄປ."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"ຕິດ​ຕາມ​ຈຳ​ນວນ​ຂອງ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ທີ່​ພິມ​ໄປ​ແລ້ວ ເມື່ອ​ປົດ​ລັອກ​ໜ້າ​ຈໍ, ແລະ​ລັອກແທັບ​ເລັດ ຫຼື​ລຶບ​ທຸກ​ຂໍ້​ມູນຜູ້​ໃຊ້​ນີ້ ຖ້າ​ໄດ້​ພິມ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ເຂົ້າ​ໄປ​ຫຼາຍ​ອັນ​ເກີນ​ໄປ."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="1253625325967736219">"ຕິດ​ຕາມ​ຈຳ​ນວນ​ຂອງ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ທີ່​ພິມ​ໄປ​ແລ້ວ ເມື່ອ​ປົດ​ລັອກ​ໜ້າ​ຈໍ, ແລະ​ລັອກໂທລະພາບ ຫຼື​ລຶບ​ທຸກ​ຂໍ້​ມູນຜູ້​ໃຊ້​ນີ້ ຖ້າ​ໄດ້​ພິມ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ເຂົ້າ​ໄປ​ຫຼາຍ​ອັນ​ເກີນ​ໄປ."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"ຕິດຕາມຈຳນວນຂອງລະຫັດຜ່ານບໍ່ຖືກຕ້ອງທີ່ພິມໄປແລ້ວຕອນກຳລັງປົດລັອກໜ້າຈໍ ແລະ ລັອກອຸປະກອນ Android TV ຂອງທ່ານ ຫຼື ລຶບທຸກຂໍ້ມູນຜູ້ໃຊ້ນີ້ຖ້າພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງເຂົ້າໄປຫຼາຍເທື່ອເກີນໄປ."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"ຕິດ​ຕາມ​ຈຳ​ນວນ​ຂອງ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ທີ່​ພິມ​ໄປ​ແລ້ວ ເມື່ອ​ປົດ​ລັອກ​ໜ້າ​ຈໍ, ແລະ​ລັອກໂທລະສັບ ຫຼື​ລຶບ​ທຸກ​ຂໍ້​ມູນຜູ້​ໃຊ້​ນີ້ ຖ້າ​ໄດ້​ພິມ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ເຂົ້າ​ໄປ​ຫຼາຍ​ອັນ​ເກີນ​ໄປ."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"ປ່ຽນ​ລັອກ​ໜ້າ​ຈໍ"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"ປ່ຽນ​ລັອກ​ໜ້າ​ຈໍ."</string>
@@ -676,11 +684,11 @@
     <string name="policydesc_forceLock" msgid="1008844760853899693">"ຄວບຄຸມວ່າໜ້າຈໍຄວນຈະຖືກລັອກເມື່ອໃດ ແລະ ແນວໃດ."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"ລຶບຂໍ້ມູນທັງໝົດ"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ລຶບຂໍ້ມູນຂອງແທັບເລັດໂດຍບໍ່ມີການເຕືອນ ໂດຍການຣີເຊັດກັບຄືນໃຫ້ເປັນແບບທີ່ມາຈາກໂຮງງານ."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="8755409895408717659">"ລຶບ​ຂໍ້​ມູນ​ຂອງໂທລະພາບໂດຍ​ບໍ່​ມີ​ການ​ເຕືອນ ດ້ວຍ​ການ​ເຮັດ​ການ​ຕັ້ງ​ຄ່າ​ຂໍ້​ມູນ​ໂຮງ​ງານ​ຄືນ​ໃໝ່."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ລຶບຂໍ້ມູນຂອງອຸປະກອນ Android TV ທ່ານໂດຍບໍ່ຕ້ອງແຈ້ງເຕືອນດ້ວຍການຣີເຊັດຂໍ້ມູນເປັນຄ່າເລີ່ມຕົ້ນຈາກໂຮງງານ."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ລຶບຂໍ້ມູນຂອງໂທລະສັບໂດຍບໍ່ມີການເຕືອນ ໂດຍການຣີເຊັດກັບຄືນໃຫ້ເປັນແບບທີ່ມາຈາກໂຮງງານ."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"ລຶບ​ຂໍ້​ມູນ​ຜູ້​ໃຊ້"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"ລຶບ​ຂໍ້​ມູນ​ຂອງ​ຜູ້​ໃຊ້​ນີ້​ຢູ່​ໃນ​ໂທ​ລະ​ທັດ​ນີ້​ໂດຍ​ບໍ່​ມີ​ການ​ເຕືອນ."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="7310266499158746034">"ລຶບ​ອຸ​ປະ​ກອນ​ຜູ້​ໃຊ້​ນີ້​ຢູ່​ໃນ​ໂທ​ລະ​ທັດ​ນີ້​ໂດຍ​ບໍ່​ມີ​ການ​ເຕືອນ."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"ລຶບຂໍ້ມູນຂອງຜູ້ໃຊ້ນີ້ຢູ່ອຸປະກອນ Android TV ນີ້ໂດຍບໍ່ຕ້ອງມີການເຕືອນ."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"ລຶບ​ຂໍ້​ມູນ​ຂອງ​ຜູ້​ໃຊ້​ນີ້​ຢູ່​ໃນ​ໂທ​ລະ​ສັບ​ນີ້​ໂດຍ​ບໍ່​ມີ​ການ​ເຕືອນ."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"ປ່ຽນ proxy ຮວມຂອງອຸປະກອນ"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"ຕັ້ງໃຫ້ພຣັອກຊີສ່ວນກາງຂອງອຸປະກອນ ທີ່ຈະໃຊ້ໃນຂະນະທີ່ເປີດນຳໃຊ້ນະໂຍບາຍ. ພຽງ​ແຕ່​ເຈົ້າ​ຂອງ​ອຸ​ປະ​ກອນ​ເທົ່າ​ນັ້ນ​ສາ​ມາດ​ຕັ້ງ​ພ​ຣັອກ​ຊີ​ທົ່ວ​ໄປ​ໄດ້."</string>
@@ -830,7 +838,7 @@
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"ຄວາມພະຍາຍາມປົດລັອກດ້ວຍໜ້ານັ້ນ ເກີນຈຳນວນທີ່ກຳນົດແລ້ວ"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"ບໍ່ມີ SIM card."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"ບໍ່ມີຊິມກາດໃນແທັບເລັດ."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1165408361036993077">"ບໍ່​ມີ​ແຜ່ນ SIM ຢູ່​ໃນໂທລະພາບ."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"ບໍ່ມີຊິມກາດຢູ່ໃນອຸປະກອນ Android TV ຂອງທ່ານ."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"ບໍ່ມີ SIM card ໃນໂທລະສັບ."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"ໃສ່ຊິມກາດ."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"ບໍ່ມີຊິມກາດ ຫຼືອ່ານຊິມກາດບໍ່ໄດ້. ໃສ່ຊິມກາດ."</string>
@@ -853,13 +861,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"ທ່ານພິມລະຫັດຜ່ານຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. \n\nໃຫ້ລອງໃໝ່ອີກຄັ້ງໃນອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ວິນາທີ."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"ທ່ານພິມລະຫັດ PIN ຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. \n\nລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ວິນາທີ."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຄວາມພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ເທື່ອ ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກແທັບເລັດຂອງທ່ານ ດ້ວຍການເຂົ້າສູ່ລະບົບຂອງ Google.\n\n ລອງໃໝ່ອີກຄັ້ງໃນ <xliff:g id="NUMBER_2">%3$d</xliff:g> ວິນາທີ."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="8418060136796780268">"ທ່ານ​ແຕ້ມ​​ແບບຮູບ​ປົດ​ລັອກຂອງ​ທ່ານ​ບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER_0">%1$d</xliff:g> ຄັ້ງ​ແລ້ວ. ຫຼັງ​ຈາກລອງ​ບໍ່​ສຳ​ເລັດ​ອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ຄັ້ງ, ທ່ານ​ຈະ​ຖືກບອກ​ໃຫ້​ປົດ​ລັອກໂທລະພາບຂອງ​ທ່ານ​ດ້ວຍ​ການ​ໃຊ້​ການ​ລົງ​ຊື່​ເຂົ້າ​ໃຊ້​ Google ຂອງ​ທ່ານ.\n\n ລອງ​ໃໝ່​ອີກ​ໃນ <xliff:g id="NUMBER_2">%3$d</xliff:g> ວິ​ນາ​ທີ."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກພະຍາຍາມບໍ່ສຳເລັດອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ເທື່ອ, ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກອຸປະກອນ Android TV ຂອງທ່ານດ້ວຍການເຂົ້າສູ່ລະບົບຂອງ Google.\n\n ກະລຸນາລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER_2">%3$d</xliff:g> ວິນາທີ."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກແຕ້ມຜິດອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ເທື່ອ, ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກໂທລະສັບຂອງທ່ານ ດ້ວຍການເຂົ້າສູ່ລະບົບ Google.\n\n ລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER_2">%3$d</xliff:g> ວິນາທີ."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"ທ່ານພະຍາຍາມປັດລັອກແທັບເລັດຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຜິດອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ເທື່ອ, ແທັບເລັດຈະຖືກຣີເຊັດໃຫ້ເປັນແບບທີ່ມາຈາກໂຮງງານ ແລະຂໍ້ມູນທັງໝົດຈະຖືກຫາຍໄປ."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2736747741914666082">"ທ່ານ​ພະ​ຍາ​ຍາມ​ປົດ​ລັອກໂທລະພາບບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER_0">%1$d</xliff:g> ຄັ້ງ​ແລ້ວ. ຫຼັງ​ຈາກ​ລອງ​ບໍ່​ສຳ​ເລັດ​ອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ຄັ້ງ, ໂທລະພາບຈະ​ຖືກ​ຕັ້ງ​ຄ່າ​ເປັນ​ຄ່າ​ມາດ​ຕະ​ຖານ​ໂຮງ​ງານ​ຄືນ ແລະ​ຂໍ້​ມູນ​ຜູ້​ໃຊ້​ທັງ​ໝົດ​ຈະ​ເສຍ​ໄປ."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"ທ່ານພະຍາຍາມປົດລັອກອຸປະກອນ Android TV ຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອ. ຫຼັງຈາກພະຍາຍາມບໍ່ສຳເລັດ <xliff:g id="NUMBER_1">%2$d</xliff:g> ເທື່ອ, ອຸປະກອນ Android TV ຂອງທ່ານຈະຖືກຣີເຊັດເປັນຄ່າເລີ່ມຕົ້ນໂຮງງານ ແລະ ຂໍ້ມູນນຜູ້ໃຊ້ທັງໝົດຈະສູນຫາຍໄປ."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"ທ່ານໄດ້ພະຍາຍາມປົດລັອກໂທລະສັບເປັນຈຳນວນ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກການພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ເທື່ອແລ້ວບໍ່ສຳເລັດຜົນ, ໂທລະສັບຈະຖືກຕັ້ງຄ່າໃຫ້ເປັນຄ່າຈາກໂຮງງານ ແລະຂໍ້ມູນທັງໝົດຈະສູນຫາຍໄປ."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"ທ່ານພະຍາຍາມປົດລັອກແທັບເລັດຜິດ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອແລ້ວ. ຕອນນີ້ແທັບເລັດຈະຖືກຣີເຊັດເປັນຄ່າຈາກໂຮງງານ."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2373955520011165432">"ທ່ານ​ພະ​ຍາ​ຍາມ​ປົດ​ລັອກໂທລະພາບບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER">%d</xliff:g> ຄັ້ງແລ້ວ. ດຽວ​ນີ້ໂທລະພາບຈະ​ຖືກ​ຕັ້ງ​ຄ່າ​ໃໝ່​ເປັນ​ຄ່າ​ມາດ​ຕະ​ຖານ​ໂຮງ​ງານ​."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"ທ່ານພະຍາຍາມປົດລັອກອຸປະກອນ Android TV ຂອງທ່ານຜິດ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອ. ຕອນນີ້ອຸປະກອນ Android TV ຂອງທ່ານຈະຖືກຣີເຊັດເປັນຄ່າເລີ່ມຕົ້ນຈາກໂຮງງານ."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"ທ່ານໄດ້ພະຍາຍາມປົດລັອກໂທລະສັບຜິດ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອແລ້ວ. ໂທລະສັບຈະຖືກຣີເຊັດໃຫ້ເປັນຄ່າທີ່ມາຈາກໂຮງງານ."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"ທົດລອງອີກຄັ້ງໃນອີກ <xliff:g id="NUMBER">%d</xliff:g> ວິນາທີ."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"ລືມຮູບແບບປົດລັອກ?"</string>
@@ -946,7 +954,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="2323799501008967852">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານປະຫວັດຂອງ URL ທັງໝົດທີ່ໂປຣແກຣມທ່ອງເວັບເຄີຍເຂົ້າເບິ່ງ ຮວມທັງ ບຸກມາກທັງໝົດຂອງໂປຣແກຣມທ່ອງເວັບນຳ. ໝາຍເຫດ: ການກຳນົດສິດນີ້ ອາດບໍ່ໄດ້ບັງຄັບໃຊ້ໃນໂປຣແກຣມທ່ອງເວັບພາກສ່ວນທີສາມ ຫຼືແອັບພລິເຄຊັນອື່ນທີ່ມີຄວາມສາມາດທ່ອງເວັບ."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="6090259925187986937">"ຂຽນຂໍ້ມູນບຸກມາກ ແລະປະຫວັດເວັບໄຊ"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"ອະນຸຍາດໃຫ້ແອັບຯແກ້ໄຂປະຫວັດໃນການທ່ອງເວັບ ຫຼືບຸກມາກທີ່ບັນທຶກໃນແທັບເລັດຂອງທ່ານ. ນີ້ອາດອະນຸຍາດໃຫ້ແອັບຯລຶບ ຫຼືແກ້ໄຂຂໍ້ມູນໂປຣແກຣມທ່ອງເວັບໄດ້. ໝາຍເຫດ: ການອະນຸຍາດນີ້ອາດເປັນຜົນບັງຄັບໃຊ້ ຈາກໂປຣແກຣມທ່ອງເວັບພາຍນອກ ຫຼືແອັບພລິເຄຊັນອື່ນທີ່ສາມາດເຂົ້າເວັບໄດ້."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="755207379344494691">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ແກ້​ໄຂ​ປະ​ຫວັດ​ຂອງບ​ຣາວ​ເຊີ ຫຼື​ບຸກ​ມາກ​໌ສ​ທີ່​ເກັບ​ໄວ້​ຢູ່​ໃນໂທລະພາບຂອງ​ທ່ານ. ອັນ​ນີ້​ອາດ​ຈະ​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ລຶບ ຫຼື​ແກ້​ໄຂ​ຂໍ້​ມູນ​ໄດ້. ໝາຍ​ເຫດ: ການ​ອະ​ນຸ​ຍາດ​ນີ້​ອາດ​ຈະ​ບໍ່​ຖືກ​ບັງ​ຄົບ​ໂດຍບ​ຣາວ​ເຊີ​ບຸກ​ຄົນ​ທີ​ສາມ ຫຼື​ແອ​ັບ​ພ​ລິ​ເຄ​ຊັນ​ອື່ນ​ກັບ​ຄວາມ​ສາ​ມາດ​ການ​ທ່ອງ​ເວັບ."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"ອະນຸຍາດໃຫ້ແອັບແກ້ໄຂປະຫວັດຂອງໂປຣແກຣມທ່ອງເວບ ຫຼື ບຸກມາກທີ່ບັນທຶກໄວ້ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານ. ຄຸນສົມບັດນີ້ສາມາດອະນຸຍາດໃຫ້ແອັບລຶບ ຫຼື ແກ້ໄຂໂປຣໄຟລ໌ທ່ອງເວັບໄດ້. ໝາຍເຫດ: ສິດອະນຸຍາດນີ້ອາດບໍ່ຖືກບັງຄັບໃຊ້ໂດຍໂປຣແກຣມທ່ອງເວັບພາກສ່ວນທີສາມ ຫຼື ແອັບພລິເຄຊັນອື່ນທີ່ຄວາມສາມາດໃນການເຮັດວຽກຮ່ວມກັບຂອງໂປຣແກຣມທ່ອງເວັບ."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"ອະນຸຍາດໃຫ້ແອັບຯ ແກ້ໄຂປະຫວັດໂປຣແກຣມທ່ອງເວັບ ຫຼືບຸກມາກທີ່ເກັບໄວ້ໃນໂທລະສັບຂອງທ່ານ. ນີ້ອາດອະນຸຍາດໃຫ້ແອັບຯລຶບ ຫຼືແກ້ໄຂຂໍ້ມູນໂປຣແກຣມທ່ອງເວັບ. ໝາຍເຫດ: ການກຳນົດສິດນີ້ ອາດບໍ່ໄດ້ຖືກບັງຄັບໃຊ້ໃນໂປຣແກຣມທ່ອງເວັບພາກສ່ວນທີສາມ ຫຼືແອັບພລິເຄຊັນອື່ນທີ່ມີຄວາມສາມາດທ່ອງເວັບ."</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"ຕັ້ງການແຈ້ງເຕືອນ"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"ອະນຸຍາດໃຫ້ແອັບຯຕັ້ງໂມງປຸກໃນແອັບຯໂມງປຸກທີ່ຕິດຕັ້ງໄວ້. ບາງແອັບຯໂມງປຸກອາດບໍ່ມີຄຸນສົມບັດແບບນີ້ເທື່ອ."</string>
@@ -1099,28 +1107,6 @@
     <string name="deleteText" msgid="4200807474529938112">"ລຶບ"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ຮູບແບບການປ້ອນຂໍ້ມູນ"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"ການເຮັດວຽກຂອງຂໍ້ຄວາມ"</string>
-    <string name="email" msgid="2503484245190492693">"ອີເມວ"</string>
-    <string name="email_desc" msgid="8291893932252173537">"ສົ່ງອີເມວຫາທີ່ຢູ່ທີ່ເລືອກ"</string>
-    <string name="dial" msgid="4954567785798679706">"ໂທ"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"ໂທຫາເບີໂທລະສັບທີ່ເລືອກ"</string>
-    <string name="map" msgid="6865483125449986339">"ແຜນທີ່"</string>
-    <string name="map_desc" msgid="1068169741300922557">"ຊອກຫາທີ່ຢູ່ທີ່ເລືອກ"</string>
-    <string name="browse" msgid="8692753594669717779">"ເປີດ"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"ເປີດ URL ທີ່ເລືອກ"</string>
-    <string name="sms" msgid="3976991545867187342">"ຂໍ້ຄວາມ"</string>
-    <string name="sms_desc" msgid="997349906607675955">"ສົ່ງຂໍ້ຄວາມຫາເບີໂທລະສັບທີ່ເລືອກ"</string>
-    <string name="add_contact" msgid="7404694650594333573">"ເພີ່ມ"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"ເພີ່ມໃສ່ລາຍຊື່ຜູ້ຕິດຕໍ່"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"ເບິ່ງ"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"ເບິ່ງເວລາທີ່ເລືອກໃນປະຕິທິນ"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"ກຳນົດເວລາ"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"ກຳນົດເວລາສຳລັບເວລາທີ່ເລືອກ"</string>
-    <string name="view_flight" msgid="2042802613849690108">"ຕິດຕາມ"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"ຕິດຕາມຖ້ຽວບິນທີ່ເລືອກ"</string>
-    <string name="translate" msgid="1416909787202727524">"ແປພາສາ"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"ແປຂໍ້ຄວາມທີ່ເລືອກ"</string>
-    <string name="define" msgid="5214255850068764195">"ນິຍາມ"</string>
-    <string name="define_desc" msgid="6916651934713282645">"ນິຍາມຂໍ້ຄວາມທີ່ເລືອກໄວ້"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"ພື້ນທີ່ຈັດເກັບຂໍ້ມູນກຳລັງຈະເຕັມ"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"ການເຮັດວຽກບາງຢ່າງຂອງລະບົບບາງອາດຈະໃຊ້ບໍ່ໄດ້"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"​ບໍ່​ມີ​ບ່ອນ​ເກັບ​ຂໍ້​ມູນ​ພຽງ​ພໍ​ສຳ​ລັບ​ລະ​ບົບ. ກວດ​ສອບ​ໃຫ້​ແນ່​ໃຈ​ວ່າ​ທ່ານ​ມີ​ພື້ນ​ທີ່​ຫວ່າງ​ຢ່າງ​ໜ້ອຍ 250MB ​ແລ້ວລອງ​ໃໝ່."</string>
@@ -1134,6 +1120,8 @@
     <string name="loading" msgid="3138021523725055037">"ກຳລັງໂຫລດ..."</string>
     <string name="capital_on" msgid="2770685323900821829">"ເປີດ"</string>
     <string name="capital_off" msgid="7443704171014626777">"ປິດ"</string>
+    <string name="checked" msgid="9179896827054513119">"ໝາຍຖືກແລ້ວ"</string>
+    <string name="not_checked" msgid="7972320087569023342">"ບໍ່ໄດ້ໝາຍຖືກ"</string>
     <string name="whichApplication" msgid="5432266899591255759">"ດຳເນີນການໂດຍໃຊ້"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"ສຳ​ເລັດ​​​ການ​ດຳ​ເນີນ​ການ​ໂດຍ​ໃຊ້ %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"ສຳເລັດຄຳສັ່ງ"</string>
@@ -1248,39 +1236,6 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Alarm sounds"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Notification sounds"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"ບໍ່ຮູ້ຈັກ"</string>
-    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"ບໍ່ສາມາດເຊື່ອມຕໍ່ຫາ <xliff:g id="SSID">%1$s</xliff:g> ໄດ້"</string>
-    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"ແຕະເພື່ອປ່ຽນການຕັ້ງຄ່າຄວາມເປັນສ່ວນຕົວແລ້ວລອງໃໝ່"</string>
-    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"ປ່ຽນການຕັ້ງຄ່າຄວາມເປັນສ່ວນຕົວບໍ?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> ອາດຕ້ອງການເຊື່ອມຕໍ່ໂດຍໃຊ້ທີ່ຢູ່ MAC ອຸປະກອນຂອງທ່ານ, ເຊິ່ງເປັນຕົວລະບຸທີ່ບໍ່ຊ້ຳກັນ. ນີ້ອາດອະນຸຍາດໃຫ້ອຸປະກອນໃກ້ຄຽງສາມາດຕິດຕາມສະຖານທີ່ຂອງອຸປະກອນທ່ານໄດ້. \n\nຫາກທ່ານສືບຕໍ່, <xliff:g id="SSID_1">%1$s</xliff:g> ຈະປ່ຽນການຕັ້ງຄ່າຄວາມເປັນສ່ວນຕົວຂອງທ່ານ ແລະ ລອງເຊື່ອມຕໍ່ອີກເທື່ອໜຶ່ງ."</string>
-    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"ປ່ຽນການຕັ້ງຄ່າ"</string>
-    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"ອັບເດດການຕັ້ງຄ່າແລ້ວ ລອງເຊື່ອມຕໍ່ໃໝ່."</string>
-    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"ບໍ່ສາມາດປ່ຽນການຕັ້ງຄ່າຄວາມເປັນສ່ວນຕົວໄດ້"</string>
-    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"ບໍ່ພົບເຄືອຂ່າຍ"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
-      <item quantity="other">ເຄືອຂ່າຍ Wi-Fi ທີ່ມີໃຫ້</item>
-      <item quantity="one">ເຄືອຂ່າຍ Wi-Fi ທີ່ມີໃຫ້</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1104430011355500386">
-      <item quantity="other">ເປີດເຄືອຂ່າຍ Wi-Fi  ທີ່ມີໃຫ້</item>
-      <item quantity="one">ເປີດເຄືອຂ່າຍ Wi-Fi  ທີ່ມີໃຫ້</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="722493260955778406">"ເຊື່ອມຕໍ່ຫາເຄືອຂ່າຍ Wi‑Fi ແບບເປີດ"</string>
-    <string name="wifi_available_carrier_network_title" msgid="7740328884692643968">"ເຊື່ອມຕໍ່ຫາເຄືອຂ່າຍ Wi‑Fi ຜູ້ໃຫ້ບໍລິການ"</string>
-    <string name="wifi_available_title_connecting" msgid="5249247039230566878">"ກຳລັງເຊື່ອມຕໍ່ຫາເຄືອຂ່າຍ Wi‑Fi"</string>
-    <string name="wifi_available_title_connected" msgid="5892203664604121475">"ເຊື່ອມຕໍ່ຫາເຄືອຂ່າຍ Wi‑Fi ແລ້ວ"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="5133141923288104331">"ບໍ່ສາມາດເຊື່ອມຕໍ່ຫາເຄືອຂ່າຍ Wi‑Fi ໄດ້"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3555247614042954032">"ແຕະເພື່ອເບິ່ງເຄືອຂ່າຍທັງໝົດ"</string>
-    <string name="wifi_available_action_connect" msgid="924369499736631716">"ເຊື່ອມ​ຕໍ່"</string>
-    <string name="wifi_available_action_all_networks" msgid="7759049005868147147">"ເຄືອຂ່າຍທັງໝົດ"</string>
-    <string name="wifi_suggestion_title" msgid="5041459385180298879">"ອະນຸຍາດເຄືອຂ່າຍ Wi‑Fi ທີ່ແນະນຳບໍ?"</string>
-    <string name="wifi_suggestion_content" msgid="477311057093517127">"ເຄືອຂ່າຍ <xliff:g id="NAME">%s</xliff:g> ທີ່ແນະນຳ. ອຸປະກອນອາດເຊື່ອມຕໍ່ເອງໂດຍອັດຕະໂນມັດ."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="6292456946562368121">"ອະນຸຍາດ"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="5544497236277666556">"ບໍ່, ຂອບໃຈ"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="2609831579583316922">"ຈະມີການເປີດໃຊ້ Wi‑Fi ອັດຕະໂນມັດ"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="6802089127390267217">"ເມື່ອທ່ານຢູ່ໃກ້ເຄືອຂ່າຍຄຸນນະພາບສູງທີ່ບັນທຶກໄວ້"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="9093154721154555101">"ບໍ່ຕ້ອງເປີດໃຊ້ຄືນໃໝ່"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="7983113075476310532">"ເປີດໃຊ້ Wi‑Fi ອັດຕະໂນມັດແລ້ວ"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="5672823591753088037">"ທ່ານຢູ່ໃກ້ເຄືອຂ່າຍທີ່ບັນທຶກໄວ້: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="381054692557675237">"ເຂົ້າສູ່ລະບົບເຄືອຂ່າຍ Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1520342291829283114">"ລົງຊື່ເຂົ້າເຄືອຂ່າຍ"</string>
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
@@ -1292,9 +1247,6 @@
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"ບໍ່ສາມາດເຂົ້າເຖິງເຊີບເວີ DNS ສ່ວນຕົວໄດ້"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ມີການເຊື່ອມຕໍ່ທີ່ຈຳກັດ"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"ແຕະເພື່ອຢືນຢັນການເຊື່ອມຕໍ່"</string>
-    <string name="wifi_softap_config_change" msgid="9101613252632264297">"ການປ່ຽນແປງການຕັ້ງຄ່າຮັອດສະປອດຂອງທ່ານ"</string>
-    <string name="wifi_softap_config_change_summary" msgid="3818290044234944123">"ຄື້ນຄວາມຖີ່ຮັອດສະປອດຂອງທ່ານປ່ຽນແປງແລ້ວ."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="2531736378103873579">"ອຸປະກອນນີ້ບໍ່ຮອງຮັບການຕັ້ງຄ່າຂອງທ່ານສຳລັບ 5GHz ເທົ່ານັ້ນ. ແຕ່ວ່າອຸປະກອນນີ້ຈະໃຊ້ຄື້ນຄວາມຖີ່ 5GHz ເມື່ອສາມາດໃຊ້ໄດ້."</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"ສະຫຼັບໄປໃຊ້ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ແລ້ວ"</string>
     <string name="network_switch_metered_detail" msgid="1358296010128405906">"ອຸປະກອນຈະໃຊ້ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ເມື່ອ <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ບໍ່ມີການເຊື່ອມຕໍ່ອິນເຕີເນັດ. ອາດມີການຮຽກເກັບຄ່າບໍລິການ."</string>
     <string name="network_switch_metered_toast" msgid="501662047275723743">"ສະຫຼັບຈາກ <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ໄປໃຊ້ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> ແລ້ວ"</string>
@@ -1306,27 +1258,8 @@
     <item msgid="9177085807664964627">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"ບໍ່ຮູ້ຈັກປະເພດເຄືອຂ່າຍ"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="588755196559781297">"ບໍ່ສາມາດເຊື່ອມຕໍ່ Wi-Fi ໄດ້"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5469207538636315968">" ມີການເຊື່ອມຕໍ່ອິນເຕີເນັດທີ່ຊ້າ."</string>
-    <string name="wifi_connect_alert_title" msgid="2377999802455909057">"​ອະ​ນຸ​ຍາດ​ການ​ເຊື່ອມ​ຕໍ່ຫຼື​ບໍ່?"</string>
-    <string name="wifi_connect_alert_message" msgid="169228218944976720">"ແອັບ​ພ​ລິ​ເຄ​ຊັນ %1$s ຢາກ​ຈະ​ເຊື່ອມ​ຕໍ່​ກັບ​ເຄືອ​ຂ່າຍ Wifi %2$s"</string>
-    <string name="wifi_connect_default_application" msgid="7577787709633050605">"​ແອັບ​ພລິ​ເຄ​ຊັນ"</string>
-    <string name="wifi_p2p_dialog_title" msgid="6334579064086920198">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="804818801818052402">"ເລີ່ມ Wi-Fi Direct. ນີ້ຈະເປັນການປິດ Wi-Fi client/hotspot."</string>
-    <string name="wifi_p2p_failed_message" msgid="6296397512378755690">"ບໍ່ສາມາດເລີ່ມ Wi-Fi Direct ໄດ້."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="9128862563403191596">"ເປີດໃຊ້ Wi-Fi Direct ແລ້ວ"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="5571179544720861510">"ແຕະເພື່ອເບິ່ງການຕັ້ງຄ່າ"</string>
     <string name="accept" msgid="5447154347815825107">"ຍອມຮັບ"</string>
     <string name="decline" msgid="6490507610282145874">"ປະຕິເສດ"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="355410493918793111">"ການ​ເຊື້ອ​ເຊີນ​ຖືກສົ່ງໄປແລ້ວ"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="8082524320754820762">"ການເຊີນຊວນເພື່ອເຊື່ອມຕໍ່"</string>
-    <string name="wifi_p2p_from_message" msgid="8288949679353111893">"ຈາກ:"</string>
-    <string name="wifi_p2p_to_message" msgid="2841587668240064488">"ຈາກ:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="1020819021188731574">"ພິມລະຫັດ PIN:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="3598694912050152976">"PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="6006673840559201871">"ແທັບເລັດຈະຖືກຕັດການເຊື່ອມຕໍ່ຈາກ Wi-Fi ເປັນການຊົ່ວຄາວ ໃນຂະນະທີ່ມັນເຊື່ອມຕໍ່ກັບ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ຢູ່."</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="1081550817886390524">"ໂທລະພາບຈະ​ຕັດ​ເຊື່ອມ​ຕໍ່​ຈາກ Wi-Fi ຊົ່ວ​ຄາວ ໃນ​ຂະ​ນະ​ທີ່​ມັນ​ເຊື່ອມ​ຕໍ່​ກັບ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ແລ້ວ"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="5357599796604438547">"ໂທລະສັບຈະຖືກຢຸດການເຊື່ອມຕໍ່ຊົ່ວຄາວຈາກ Wi-Fi ໃນຂະນະທີ່ມັນເຊື່ອມຕໍ່ກັບ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3352797107930786979">"ໃສ່ໂຕອັກສອນ"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"ກຳລັງສົ່ງຂໍ້ຄວາມ SMS"</string>
     <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ກຳລັງສົ່ງຂໍ້ຄວາມ SMS ຈຳນວນຫຼາຍ. ທ່ານຕ້ອງການອະນຸຍາດໃຫ້ແອັບຯສືບຕໍ່ການສົ່ງຂໍ້ຄວາມບໍ່?"</string>
@@ -1381,6 +1314,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ເລືອກເພື່ອປິດການນຳໃຊ້ການດີບັກໄຮ້ສາຍ."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"ເປີດໃຊ້ໂໝດ Test Harness ແລ້ວ"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"ດຳເນີນການຣີເຊັດເປັນຄ່າຈາກໂຮງງານເພື່ອປິດການນຳໃຊ້ໂໝດ Test Harness."</string>
+    <string name="console_running_notification_title" msgid="6087888939261635904">"ເປີດນຳໃຊ້ຊີຣຽວຄອນໂຊແລ້ວ"</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"ມີຜົນກະທົບກັບປະສິດທິພາບ. ເພື່ອປິດການນຳໃຊ້, ໃຫ້ກວດສອບ bootloader ເບິ່ງ."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"ມີຂອງແຫລວ ຫຼື ເສດດິນໃນຜອດ USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"ປິດຜອດ USB ໂດຍອັດຕະໂນມັດແລ້ວ. ແຕະເພື່ອສຶກສາເພີ່ມເຕີມ."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"ສາມາດໃຊ້ຜອດ USB ໄດ້"</string>
@@ -1406,14 +1341,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"ກຳລັງກວດສອບ <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"ກຳລັງຕໍ່ອາຍຸເນື້ອຫາປັດຈຸບັນ"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> ໃໝ່"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> ບໍ່ເຮັດວຽກ"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"ແຕະເພື່ອຕັ້ງຄ່າ"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"ທ່ານຈະຕ້ອງຟໍແມັດອຸປະກອນຄືນໃໝ່. ແຕະເພື່ອຖອດອອກ."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ສຳ​ລັບ​ການ​ໂອນ​ຮູບຖ່າຍ ແລະ​ມີ​ເດຍ"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"ເກີດບັນຫາກັບ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> ບໍ່ເຮັດວຽກ"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ແຕະເພື່ອແກ້ໄຂ"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> ເສຍຫາຍ. ແຕະເພື່ອສ້ອມແປງ."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"ທ່ານຈະຕ້ອງຟໍແມັດອຸປະກອນຄືນໃໝ່. ແຕະເພື່ອຖອດອອກ."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"ບໍ່​ຮອງ​ຮັບ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> ບໍ່ເຮັດວຽກ"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ອຸປະກອນນີ້ບໍ່ຮອງຮັບ <xliff:g id="NAME">%s</xliff:g> ນີ້. ແຕະເພື່ອຕັ້ງຄ່າໃນຮູບແບບທີ່ຮອງຮັບ."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"ອຸປະກອນນີ້ບໍ່ຮອງຮັບ <xliff:g id="NAME">%s</xliff:g> ນີ້. ແຕະເພື່ອຕັ້ງຄ່າໃນຮູບແບບທີ່ຮອງຮັບ."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"ທ່ານຈະຕ້ອງຟໍແມັດອຸປະກອນຄືນໃໝ່"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> ຖືກ​ຖອດ​ອອກ​ໄປ​ແບບ​ບໍ່​ຄາດ​ຄິດ"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"ກະລຸນາດີດມີເດຍອອກກ່ອນການຖອດເພື່ອຫຼີກເວັ້ນການສູນເສຍຂໍ້ມູນ"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"ຖອດ <xliff:g id="NAME">%s</xliff:g> ອອກແລ້ວ"</string>
@@ -1519,6 +1460,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"ຮ້ອງຂໍໂດຍ <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"ຕົກລົງ"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"ບໍ່"</string>
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"ມີການເຂົ້າເຖິງສະຖານທີ່ສຸກເສີນ"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"ຜູ້ຜະລິດອຸປະກອນຂອງທ່ານເຂົ້າເຖິງສະຖານທີ່ທ່ານໃນລະຫວ່າງຊ່ວງເວລາສຸກເສີນຫຼ້າສຸດຂອງທ່ານ"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"ຜູ້ໃຫ້ບໍລິການຂອງທ່ານເຂົ້າເຖິງສະຖານທີ່ທ່ານໃນລະຫວ່າງຊ່ວງເວລາສຸກເສີນຫຼ້າສຸດຂອງທ່ານ"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"ກາຍເຂດກຳນົດການລຶບ"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"ມີ <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> ລາຍການທີ່ຖືກລຶບສຳລັບ <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, ບັນຊີ <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. ທ່ານຕ້ອງການຈະເຮັດແນວໃດ?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"ລຶບລາຍການ"</string>
@@ -1604,9 +1548,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"ເປີດໂປຣແກຣມທ່ອງເວັບ?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"ຮັບການໂທບໍ່?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"ທຸກຄັ້ງ"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"ຕັ້ງໃຫ້ເປັນເປີດທຸກເທື່ອ"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"ຄັ້ງດຽວ"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"ການຕັ້ງຄ່າ"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s ບໍ່​ຮອງ​ຮັບ​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ​ຂອງ​ທ່ານ"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"ແທັບເລັດ"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"ໂທລະພາບ"</string>
@@ -1667,32 +1609,56 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"ທ່ານພິມລະຫັດຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. \n\nລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ວິນາທີ."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. \n\nກະລຸນາລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ວິນາທີ."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"ທ່ານໄດ້ພະຍາຍາມປົດລັອກແທັບເລັດບໍ່ສຳເລັດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຄວາມພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ເທື່ອ ແທັບເລັດຂອງທ່ານຈະຖືກຕັ້ງ ໃຫ້ກັບໄປໃຊ້ຄ່າເລີ່ມຕົ້ນຈາກໂຮງງານຄືນໃໝ່ ແລະຂໍ້ມູນຜູ່ໃຊ້ທັງໝົດຈະສູນຫາຍໄປ."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7525614240870652051">"ທ່ານ​ພະ​ຍາ​ຍາມ​ປົດ​ລັອກໂທລະພາບບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER_0">%1$d</xliff:g> ຄັ້ງແລ້ວ. ຫຼັງ​ຈາກ​ລອງ​ບໍ່​ສຳ​ເລັດ​ອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ຄັ້ງ, ໂທລະພາບຈະ​ຖືກ​ຕັ້ງ​ຄ່າ​ເປັນ​ຄ່າ​ມາດ​ຕະ​ຖານ​ໂຮງ​ງານ​ຄືນ ແລະ​ຂໍ້​ມູນ​ຜູ້​ໃຊ້​ທັງ​ໝົດ​ຈະ​ເສຍ​ໄປ."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"ທ່ານພະຍາຍາມປົດລັອກອຸປະກອນ Android TV ຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອ. ຫຼັງຈາກພະຍາຍາມບໍ່ສຳເລັດ <xliff:g id="NUMBER_1">%2$d</xliff:g> ເທື່ອ, ອຸປະກອນ Android TV ຂອງທ່ານຈະຖືກຣີເຊັດເປັນຄ່າເລີ່ມຕົ້ນໂຮງງານ ແລະ ຂໍ້ມູນນຜູ້ໃຊ້ທັງໝົດຈະສູນຫາຍໄປ."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"ທ່ານໄດ້ພະຍາຍາມປົດລັອກໂທລະສັບບໍ່ສຳເລັດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຄວາມພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ເທື່ອ ໂທລະສັບຂອງທ່ານຈະຖືກຕັ້ງ ໃຫ້ກັບໄປໃຊ້ຄ່າເລີ່ມຕົ້ນຈາກໂຮງງານຄືນໃໝ່ ແລະຂໍ້ມູນຜູ່ໃຊ້ທັງໝົດຈະສູນຫາຍໄປ."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"ທ່ານໄດ້ພະຍາຍາມປົດລັອກແທັບເລັດບໍ່ສຳເລັດ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອແລ້ວ. ຕອນນີ້ແທັບເລັດຈະຖືກຕັ້ງໃຫ້ກັບໄປໃຊ້ຄ່າເລີ່ມຕົ້ນຈາກໂຮງງານ."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5213981402777341134">"ທ່ານ​ພະ​ຍາ​ຍາມ​ປົດ​ລັອກໂທລະພາບບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER">%d</xliff:g> ຄັ້ງ​ແລ້ວ. ດຽວ​ນີ້ໂທລະພາບຈະ​ຖືກ​ຕັ້ງ​ຄ່າ​ໃໝ່​ເປັນ​ຄ່າ​ມາດ​ຕະ​ຖານ​ໂຮງ​ງານ​."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"ທ່ານພະຍາຍາມປົດລັອກອຸປະກອນ Android TV ຂອງທ່ານຜິດ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອ. ຕອນນີ້ອຸປະກອນ Android TV ຂອງທ່ານຈະຖືກຣີເຊັດເປັນຄ່າເລີ່ມຕົ້ນຈາກໂຮງງານ."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"ທ່ານໄດ້ພະຍາຍາມປົດລັອກໂທລະສັບບໍ່ຖືກ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອແລ້ວ. ຕອນນີ້ໂທລະສັບຈະຖືກຣີເຊັດເປັນຄ່າຈາກໂຮງງານ."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກແຕ້ມຜິດອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ເທື່ອ, ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກແທັບເລັດຂອງທ່ານ ດ້ວຍການເຂົ້າສູ່ລະບົບໂດຍໃຊ້ອີເມວຂອງທ່ານ.\n\n ກະລຸນາລອງໃໝ່ອີກຄັ້ງໃນອີກ <xliff:g id="NUMBER_2">%3$d</xliff:g> ວິນາທີ."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="8057874855853116724">"ທ່ານ​ແຕ້ມ​​ແບບຮູບ​ປົດ​ລັອກຂອງ​ທ່ານ​ບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER_0">%1$d</xliff:g> ຄັ້ງ​ແລ້ວ. ຫຼັງ​ຈາກລອງ​ບໍ່​ສຳ​ເລັດ​ອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ຄັ້ງ, ທ່ານ​ຈະ​ຖືກບອກ​ໃຫ້​ປົດ​ລັອກໂທລະພາບຂອງ​ທ່ານ​ດ້ວຍ​ການ​ໃຊ້​ບັນ​ຊີ​ອີ​ເມ​ວ.\n\n ລອງ​ອີກ​ໃນ <xliff:g id="NUMBER_2">%3$d</xliff:g> ວິ​ນາ​ທີ."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກແຕ້ມຜິດອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ເທື່ອ, ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກອຸປະກອນ Android TV ຂອງທ່ານດ້ວຍການເຂົ້າສູ່ລະບົບໂດຍໃຊ້ອີເມວຂອງທ່ານ.\n\n ກະລຸນາລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER_2">%3$d</xliff:g> ວິນາທີ."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຄວາມພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ເທື່ອ ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກໂທລະສັບຂອງທ່ານດ້ວຍບັນຊີອີເມວ.\n\n ລອງໃໝ່ອີກຄັ້ງໃນ <xliff:g id="NUMBER_2">%3$d</xliff:g> ວິນາທີ."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ລຶບອອກ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ເພີ່ມ​ລະ​ດັບ​ສຽງ​ໃຫ້​ເກີນກວ່າ​ລະ​ດັບ​ທີ່​ແນະ​ນຳ​ບໍ?\n\n​ການ​ຮັບ​ຟັງ​ສຽງ​ໃນ​ລະ​ດັບ​ທີ່​ສູງ​ເປັນ​ໄລ​ຍະ​ເວ​ລາ​ດົນ​​ອາດ​ເຮັດ​ໃຫ້​ການ​ຟັງ​ຂອງ​ທ່ານ​ມີ​ບັນ​ຫາ​ໄດ້."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ໃຊ້ປຸ່ມລັດການຊ່ວຍເຂົ້າເຖິງບໍ?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"ເມື່ອເປີດໃຊ້ປຸ່ມລັດແລ້ວ, ໃຫ້ກົດປຸ່ມສຽງທັງສອງຄ້າງໄວ້ 3 ວິນາທີເພື່ອເລີ່ມຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ.\n\n ຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງປັດຈຸບັນ:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ທ່ານສາມາດປ່ຽນຄຸນສົມບັດໄດ້ໃນການຕັ້ງຄ່າ &gt; ການຊ່ວຍເຂົ້າເຖິງ."</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ເມື່ອເປີດໃຊ້ທາງລັດແລ້ວ, ການກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ 3 ວິນາທີຈະເປັນການເລີ່ມຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ."</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"ເປີດໃຊ້ຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງບໍ?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"ກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ສອງສາມວິນາທີເພື່ອເປີດໃຊ້ຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ. ນີ້ອາດປ່ຽນວິທີການເຮັດວຽກຂອງອຸປະກອນທ່ານ.\n\nຄຸນສົມບັດປັດຈຸບັນ:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nທ່ານສາມາດປ່ຽນຄຸນສົມບັດທີ່ເລືອກໄດ້ໃນການຕັ້ງຄ່າ &gt; ການຊ່ວຍເຂົ້າເຖິງ."</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"ເປີດໃຊ້ <xliff:g id="SERVICE">%1$s</xliff:g> ບໍ?"</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"ກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ສອງສາມວິນາທີເພື່ອເປີດໃຊ້ <xliff:g id="SERVICE">%1$s</xliff:g>, ຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ. ນີ້ອາດປ່ຽນວິທີການເຮັດວຽກຂອງອຸປະກອນທ່ານ.\n\nທ່ານສາມາດປ່ຽນທາງລັດນີ້ເປັນຄຸນສົມບັດອື່ນໄດ້ໃນການຕັ້ງຄ່າ &gt; ການຊ່ວຍເຂົ້າເຖິງ."</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ເປີດໃຊ້"</string>
+    <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ບໍ່ເປີດ"</string>
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ເປີດ"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ປິດ"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"ອະນຸຍາດໃຫ້ <xliff:g id="SERVICE">%1$s</xliff:g> ຄວບຄຸມອຸປະກອນທ່ານໄດ້ເຕັມຮູບແບບບໍ?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"ຫາກ​ທ່ານ​ເປີດ​ໃຊ້ <xliff:g id="SERVICE">%1$s</xliff:g>, ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ບໍ່​ໃຊ້​ການ​ລັອກ​ໜ້າ​ຈໍ​ຂອງ​ທ່ານ​ເພື່ອ​ເພີ່ມ​ການ​ເຂົ້າ​ລະ​ຫັດ​ຂໍ້​ມູນ."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"ການຄວບຄຸມແບບເຕັມຮູບແບບແມ່ນເໝາະສົມສຳລັບແອັບທີ່ຊ່ວຍທ່ານໃນດ້ານການຊ່ວຍເຂົ້າເຖິງ, ແຕ່ບໍ່ເໝາະສຳລັບທຸກແອັບ."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ເບິ່ງ ແລະ ຄວບຄຸມໜ້າຈໍ"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ມັນສາມາດອ່ານເນື້ອຫາທັງໝົດຢູ່ໜ້າຈໍ ແລະ ສະແດງເນື້ອຫາບັງແອັບອື່ນໄດ້."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ເບິ່ງ ແລະ ດຳເນີນການ"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ມັນສາມາດຕິດຕາມການໂຕ້ຕອບຂອງທ່ານກັບແອັບ ຫຼື ເຊັນເຊີຮາດແວໃດໜຶ່ງ ແລະ ໂຕ້ຕອບກັບແອັບໃນນາມຂອງທ່ານໄດ້."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ອະນຸຍາດ"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ປະຕິເສດ"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ແຕະໃສ່ຄຸນສົມບັດໃດໜຶ່ງເພື່ອເລີ່ມການນຳໃຊ້ມັນ:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ເລືອກຄຸນສົມບັດເພື່ອໃຊ້ກັບປຸ່ມການຊ່ວຍເຂົ້າເຖິງ"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"ເລືອກຄຸນສົມບັດເພື່ອໃຊ້ກັບທາງລັດປຸ່ມລະດັບສຽງ"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"ປິດ <xliff:g id="SERVICE_NAME">%s</xliff:g> ໄວ້ແລ້ວ"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ແກ້ໄຂທາງລັດ"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ແລ້ວໆ"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ປິດປຸ່ມລັດ"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ໃຊ້ປຸ່ມລັດ"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ການປີ້ນສີ"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"ການແກ້ໄຂຄ່າສີ"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"Accessibility Shortcut turned <xliff:g id="SERVICE_NAME">%1$s</xliff:g> on"</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"Accessibility Shortcut turned <xliff:g id="SERVICE_NAME">%1$s</xliff:g> off"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ກົດປຸ່ມລະດັບສຽງຄ້າງໄວ້. ເປີດໃຊ້ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ແລ້ວ."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ກົດປຸ່ມລະດັບສຽງຄ້າງໄວ້. ປິດ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ໄວ້ແລ້ວ."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"ກົດປຸ່ມສຽງທັງສອງພ້ອມກັນຄ້າງໄວ້ສາມວິນາທີເພື່ອໃຊ້ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"ເລືອກບໍລິການເພື່ອໃຊ້ເມື່ອທ່ານແຕະໃສ່ປຸ່ມການຊ່ວຍເຂົ້າເຖິງ:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"ເລືອກບໍລິການເພື່ອໃຊ້ກັບທ່າທາງການຊ່ວຍເຂົ້າເຖິງ (ປັດຂຶ້ນຈາກລຸ່ມສຸດຂອງໜ້າຈໍດ້ວຍສອງນິ້ວ):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"ເລືອກບໍລິການເພື່ອໃຊ້ກັບທ່າທາງການຊ່ວຍເຂົ້າເຖິງ (ປັດຂຶ້ນຈາກລຸ່ມສຸດຂອງໜ້າຈໍດ້ວຍສາມນິ້ວ):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"ເພື່ອສະຫຼັບລະຫວ່າງບໍລິການຕ່າງໆ, ໃຫ້ແຕະໃສ່ປຸ່ມການຊ່ວຍເຂົ້າເຖິງຄ້າງໄວ້."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"ເພື່ອສະຫຼັບລະຫວ່າງບໍລິການຕ່າງໆ, ໃຫ້ປັດຂຶ້ນດ້ວຍສອງນິ້ວຄ້າງໄວ້."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"ເພື່ອສະຫຼັບລະຫວ່າງບໍລິການຕ່າງໆ, ໃຫ້ປັດຂຶ້ນດ້ວຍສາມນິ້ວຄ້າງໄວ້."</string>
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ເລືອກຄຸນສົມບັດທີ່ຈະໃຊ້ເມື່ອທ່ານແຕະປຸ່ມການຊ່ວຍເຂົ້າເຖິງ:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ເລືອກຄຸນສົມບັດເພື່ອໃຊ້ກັບທ່າທາງການຊ່ວຍເຂົ້າເຖິງ (ປັດຂຶ້ນຈາກລຸ່ມສຸດຂອງໜ້າຈໍດ້ວຍສອງນິ້ວ):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ເລືອກຄຸນສົມບັດເພື່ອໃຊ້ກັບທ່າທາງການຊ່ວຍເຂົ້າເຖິງ (ປັດຂຶ້ນຈາກລຸ່ມສຸດຂອງໜ້າຈໍດ້ວຍສາມນິ້ວ):"</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"ເພື່ອສະຫຼັບລະຫວ່າງຄຸນສົມບັດຕ່າງໆ, ໃຫ້ແຕະໃສ່ປຸ່ມການຊ່ວຍເຂົ້າເຖິງຄ້າງໄວ້."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"ເພື່ອສະຫຼັບລະຫວ່າງບໍລິຄຸນສົມບັດຕ່າງໆ, ໃຫ້ປັດຂຶ້ນດ້ວຍສອງນິ້ວຄ້າງໄວ້."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ເພື່ອສະຫຼັບລະຫວ່າງຄຸນສົມບັດຕ່າງໆ, ໃຫ້ປັດຂຶ້ນດ້ວຍສາມນິ້ວຄ້າງໄວ້."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ການຂະຫຍາຍ"</string>
     <string name="user_switched" msgid="7249833311585228097">"ຜູ່ໃຊ້ປັດຈຸບັນ <xliff:g id="NAME">%1$s</xliff:g> ."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"ກຳ​ລັງ​ສະ​ລັບ​​ໄປ​ຫາ <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1826,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ຖືກອັບໂຫລດໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ຖືກລຶບອອກໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ຕົກລົງ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ເພື່ອຍືດອາຍຸແບັດເຕີຣີ, ຕົວປະຢັດແບັດເຕີຣີຈະ:\n·ເປີດໃຊ້ຮູບແບບສີສັນມືດ\n·ປິດ ຫຼື ຈຳກັດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກດ້ານພາບບາງຢ່າງ ແລະ ຄຸນສົມບັດອື່ນໆ ເຊັ່ນ: “Hey Google”\n\n"<annotation id="url">"ສຶກສາເພີ່ມເຕີມ"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"ເພື່ອຍືດອາຍຸແບັດເຕີຣີ, ຕົວປະຢັດແບັດເຕີຣີຈະ:\n·ເປີດໃຊ້ຮູບແບບສີສັນມືດ\n·ປິດ ຫຼື ຈຳກັດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກດ້ານພາບບາງຢ່າງ ແລະ ຄຸນສົມບັດອື່ນໆ ເຊັ່ນ: “Hey Google”"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"ເພື່ອຍືດອາຍຸແບັດເຕີຣີ, ຕົວປະຢັດແບັດເຕີຣີຈະ:\n\n•ເປີດໃຊ້ຮູບແບບສີສັນມືດ\n•ປິດ ຫຼື ຈຳກັດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກດ້ານພາບບາງຢ່າງ ແລະ ຄຸນສົມບັດອື່ນໆ ເຊັ່ນ: “Ok Google”\n\n"<annotation id="url">"ສຶກສາເພີ່ມເຕີມ"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"ເພື່ອຍືດອາຍຸແບັດເຕີຣີ, ຕົວປະຢັດແບັດເຕີຣີຈະ:\n\n•ເປີດໃຊ້ຮູບແບບສີສັນມືດ\n•ປິດ ຫຼື ຈຳກັດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກດ້ານພາບບາງຢ່າງ ແລະ ຄຸນສົມບັດອື່ນໆ ເຊັ່ນ: “Ok Google”"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ເພື່ອຊ່ວຍຫຼຸດຜ່ອນການນຳໃຊ້ຂໍ້ມູນ, ຕົວປະຢັດອິນເຕີເນັດຈະປ້ອງກັນບໍ່ໃຫ້ບາງແອັບສົ່ງ ຫຼື ຮັບຂໍ້ມູນໃນພື້ນຫຼັງ. ແອັບໃດໜຶ່ງທີ່ທ່ານກຳລັງໃຊ້ຢູ່ຈະສາມາດເຂົ້າເຖິງຂໍ້ມູນໄດ້ ແຕ່ອາດເຂົ້າເຖິງໄດ້ຖີ່ໜ້ອຍລົງ. ນີ້ອາດໝາຍຄວາມວ່າ ຮູບພາບຕ່າງໆອາດບໍ່ສະແດງຈົນກວ່າທ່ານຈະແຕະໃສ່ກ່ອນ."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ເປີດຕົວປະຢັດອິນເຕີເນັດບໍ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ເປີດໃຊ້"</string>
@@ -1906,6 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"ບໍ່​ມີ​ໝວດ​ໝູ່"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ທ່ານຕັ້ງຄວາມສຳຄັນຂອງການແຈ້ງເຕືອນເຫຼົ່ານີ້."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ຂໍ້ຄວາມນີ້ສຳຄັນເນື່ອງຈາກບຸກຄົນທີ່ກ່ຽວຂ້ອງ."</string>
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"ການແຈ້ງເຕືອນແອັບແບບກຳນົດເອງ"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"ອະນຸຍາດໃຫ້ <xliff:g id="APP">%1$s</xliff:g> ສ້າງຜູ້ໃຊ້ໃໝ່ກັບ <xliff:g id="ACCOUNT">%2$s</xliff:g> ໄດ້ບໍ່ (ມີຜູ້ໃຊ້ທີ່ໃຊ້ບັນຊີນີ້ຢູ່ກ່ອນແລ້ວ) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"ອະນຸຍາດໃຫ້ <xliff:g id="APP">%1$s</xliff:g> ສ້າງຜູ້ໃຊ້ໃໝ່ກັບ <xliff:g id="ACCOUNT">%2$s</xliff:g> ໄດ້ບໍ?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ເພີ່ມພາສາ"</string>
@@ -1918,9 +1885,12 @@
     <string name="app_suspended_title" msgid="888873445010322650">"ບໍ່ສາມາດໃຊ້ແອັບໄດ້"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ບໍ່ສາມາດໃຊ້ໄດ້ໃນຕອນນີ້. ມັນຖືກຈັດການໂດຍ <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ສຶກສາເພີ່ມເຕີມ"</string>
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ຍົກເລີກການຢຸດແອັບຊົ່ວຄາວ"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"ເປີດໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກບໍ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"ແອັບວຽກຂອງທ່ານ, ການແຈ້ງເຕືອນ, ຂໍ້ມູນ ແລະ ຄຸນສົມບັດໂປຣໄຟລ໌ວຽກຈະຖືກເປີດໃຊ້"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ເປີດ​"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"ແອັບບໍ່ສາມາດໃຊ້ໄດ້"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ່ສາມາດໃຊ້ໄດ້ໃນຕອນນີ້."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ແອັບນີ້ຖືກສ້າງຂຶ້ນສຳລັບ Android ເວີຊັນທີ່ເກົ່າກວ່າ ແລະ ອາດເຮັດວຽກໄດ້ບໍ່ປົກກະຕິ. ໃຫ້ລອງກວດສອບເບິ່ງອັບເດດ ຫຼື ຕິດຕໍ່ຜູ້ພັດທະນາ."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ກວດເບິ່ງອັບເດດ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ທ່ານມີຂໍ້ຄວາມໃໝ່"</string>
@@ -1931,7 +1901,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"ເຊື່ອມຕໍ່ກັບ <xliff:g id="PRODUCT_NAME">%1$s</xliff:g> ແລ້ວ"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"ແຕະເພື່ອເບິ່ງໄຟລ໌"</string>
     <string name="pin_target" msgid="8036028973110156895">"ປັກໝຸດ"</string>
+    <string name="pin_specific_target" msgid="7824671240625957415">"ປັກໝຸດ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"ຖອນປັກໝຸດ"</string>
+    <string name="unpin_specific_target" msgid="3859828252160908146">"ຖອດປັກມຸດ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"ຂໍ້ມູນແອັບ"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"ກຳລັງເລີ່ມເດໂມ…"</string>
@@ -1974,10 +1946,16 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"ອັບເດດລາຍການເຫຼົ່ານີ້ໃນ "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ແລະ <xliff:g id="TYPE_2">%3$s</xliff:g> ບໍ?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"ບັນທຶກ"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"ບໍ່, ຂອບໃຈ"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"ບໍ່ຟ້າວເທື່ອ"</string>
+    <string name="autofill_save_never" msgid="6821841919831402526">"ຢ່າບັນທຶກ"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"ອັບເດດ"</string>
+    <string name="autofill_continue_yes" msgid="7914985605534510385">"ສືບຕໍ່"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"​ລະ​ຫັດ​ຜ່ານ"</string>
     <string name="autofill_save_type_address" msgid="3111006395818252885">"ທີ່ຢູ່"</string>
     <string name="autofill_save_type_credit_card" msgid="3583795235862046693">"ບັດເຄຣດິດ"</string>
+    <string name="autofill_save_type_debit_card" msgid="3169397504133097468">"ບັດເດບິດ"</string>
+    <string name="autofill_save_type_payment_card" msgid="6555012156728690856">"ບັດຈ່າຍເງິນ"</string>
+    <string name="autofill_save_type_generic_card" msgid="1019367283921448608">"ບັດ"</string>
     <string name="autofill_save_type_username" msgid="1018816929884640882">"ຊື່ຜູ້ໃຊ້"</string>
     <string name="autofill_save_type_email_address" msgid="1303262336895591924">"ທີ່ຢູ່ອີເມລ"</string>
     <string name="etws_primary_default_message_earthquake" msgid="8401079517718280669">"ໃຈເຢັນໆ ແລະ ຊອກຫາບ່ອນພັກຢູ່ໃກ້ໆ."</string>
@@ -2023,13 +2001,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ແບັດເຕີຣີອາດໝົດກ່ອນການສາກຕາມປົກກະຕິ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ເປີດຕົວປະຢັດແບັດເຕີຣີເພື່ອຂະຫຍາຍອາຍຸແບັດເຕີຣີ"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ຕົວປະຢັດແບັດເຕີຣີ"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"ຈະບໍ່ມີການເປີດໃຊ້ຕົວປະຢັດແບັດເຕີຣີຄືນໃໝ່ຈົນກວ່າແບັດເຕີຣີຈະເຫຼືອໜ້ອຍອີກເທື່ອໜຶ່ງ"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"ສາກແບັດເຕີຣີຮອດລະດັບທີ່ພຽງພໍແລ້ວ. ຕົວປະຢັດແບັດເຕີຣີຈະບໍ່ເປີດໃຊ້ຄືນໃໝ່ຈົນກວ່າແບັດເຕີຣີຈະເຫຼືອໜ້ອຍກີເທື່ອໜຶ່ງ."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"ສາກໂທລະສັບແລ້ວ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"ສາກແທັບເລັດແລ້ວ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"ສາກອຸປະກອນແລ້ວ <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"ຕົວປະຢັດແບັດເຕີຣີປິດຢູ່. ບໍ່ມີການຈຳກັດຄຸນສົມບັດອີກຕໍ່ໄປແລ້ວ."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"ປິດຕົວປະຢັດແບັດເຕີຣີແລ້ວ. ບໍ່ມີການຈຳກັດຄຸນສົມບັດອີກຕໍ່ໄປແລ້ວ."</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ປິດຕົວປະຢັດແບັດເຕີຣີແລ້ວ"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ໂທລະສັບມີໄຟພຽງພໍແລ້ວ. ບໍ່ມີການຈຳກັດຄຸນສົມບັດອີກຕໍ່ໄປແລ້ວ."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"ແທັບເລັດມີໄຟພຽງພໍແລ້ວ. ບໍ່ມີການຈຳກັດຄຸນສົມບັດອີກຕໍ່ໄປແລ້ວ."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"ອຸປະກອນມີໄຟພຽງພໍແລ້ວ. ບໍ່ມີການຈຳກັດຄຸນສົມບັດອີກຕໍ່ໄປແລ້ວ."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"ໂຟນເດີ"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"ແອັບພລິເຄຊັນ Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ໄຟລ໌"</string>
@@ -2054,8 +2029,45 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ໄຟລ໌</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ໄຟລ໌</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="492542066060841139">"ບໍ່ສາມາດແບ່ງປັນໂດຍກົງໄດ້"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ບໍ່ມີຄົນທີ່ແນະນຳໃຫ້ແບ່ງປັນນຳ"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"ລາຍຊື່ແອັບ"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"ແອັບນີ້ບໍ່ໄດ້ຮັບສິດອະນຸຍາດໃນການບັນທຶກ ແຕ່ສາມາດບັນທຶກສຽງໄດ້ຜ່ານອຸປະກອນ USB ນີ້."</string>
+    <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"ເຮືອນ"</string>
+    <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"ກັບຄືນ"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"ແອັບຫຼ້າສຸດ"</string>
+    <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"ການແຈ້ງເຕືອນ"</string>
+    <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"ການຕັ້ງຄ່າດ່ວນ"</string>
+    <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"ກ່ອງໂຕ້ຕອບການເປີດປິດ"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ໜ້າຈໍລັອກ"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ຮູບໜ້າຈໍ"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"ທາງລັດການຊ່ວຍເຂົ້າເຖິງຢູ່ໜ້າຈໍ"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"ຕົວເລືອກທາງລັດການຊ່ວຍເຂົ້າເຖິງຢູ່ໜ້າຈໍ"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ທາງລັດການຊ່ວຍເຂົ້າເຖິງ"</string>
+    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"ແຖບຄຳບັນຍາຍຂອງ <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ຖືກວາງໄວ້ໃນກະຕ່າ \"ຈຳກັດ\" ແລ້ວ"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"ສົ່ງຮູບແລ້ວ"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"ການສົນທະນາ"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"ການສົນທະນາກຸ່ມ"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"ສ່ວນຕົວ"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"ວຽກ"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ມຸມມອງສ່ວນຕົວ"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ມຸມມອງວຽກ"</string>
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"ບໍ່ສາມາດແບ່ງປັນກັບແອັບວຽກໄດ້"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ທ່ານແບ່ງປັນເນື້ອຫານີ້ດ້ວຍແອັບໃນໂປຣໄຟລ໌ວຽກຂອງທ່ານ"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"ບໍ່ສາມາດເປີດດ້ວຍແອັບວຽກໄດ້"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ທ່ານເປີດເນື້ອຫານີ້ດ້ວຍແອັບໃນໂປຣໄຟລ໌ວຽກຂອງທ່ານ"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"ບໍ່ສາມາດແບ່ງປັນກັບແອັບສ່ວນຕົວໄດ້"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ທ່ານແບ່ງປັນເນື້ອຫານີ້ກັບແອັບໃນໂປຣໄຟລ໌ສ່ວນຕົວຂອງທ່ານ"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"ບໍ່ສາມາດເປີດດ້ວຍແອັບສ່ວນຕົວໄດ້"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ທ່ານເປີດເນື້ອຫານີ້ກັບແອັບໃນໂປຣໄຟລ໌ສ່ວນຕົວຂອງທ່ານ"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"ຢຸດໂປຣໄຟລ໌ວຽກໄວ້ຊົ່ວຄາວແລ້ວ"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"ເປີດໃຊ້"</string>
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"ບໍ່ມີແອັບວຽກທີ່ຮອງຮັບເນື້ອຫານີ້"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"ບໍ່ມີແອັບວຽກທີ່ສາມາດເປີດເນື້ອຫານີ້ໄດ້"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"ບໍ່ມີແອັບສ່ວນຕົວທີ່ຮອງຮັບເນື້ອຫານີ້"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"ບໍ່ມີແອັບສ່ວນຕົວທີ່ສາມາດເປີດເນື້ອຫານີ້ໄດ້"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ປົດລັອກເຄືອຂ່າຍຊິມ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN ການປົດລັອກຊຸດຍ່ອຍເຄືອຂ່າຍຊິມ"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN ປົດລັອກ SIM ອົງການ"</string>

@@ -46,6 +46,7 @@ public class SystemAudioInitiationActionFromAvr extends HdmiCecFeatureAction {
             addTimer(mState, HdmiConfig.TIMEOUT_MS);
             sendRequestActiveSource();
         } else {
+            mState = STATE_WAITING_FOR_TV_SUPPORT;
             queryTvSystemAudioModeSupport();
         }
         return true;

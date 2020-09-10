@@ -47,6 +47,7 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -57,7 +58,6 @@ import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.KeyValueBackupJob;
-import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
 import com.android.server.backup.internal.OnTaskFinishedListener;
@@ -66,7 +66,10 @@ import com.android.server.backup.remote.RemoteCall;
 import com.android.server.backup.remote.RemoteCallable;
 import com.android.server.backup.remote.RemoteResult;
 import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.utils.AppBackupUtils;
+
+import libcore.io.IoUtils;
 
 import java.io.Closeable;
 import java.io.DataInputStream;
@@ -74,6 +77,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -81,8 +85,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -170,10 +176,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 // TODO: Consider having the caller responsible for some clean-up (like resetting state)
 // TODO: Distinguish between cancel and time-out where possible for logging/monitoring/observing
 public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
+    private static final String TAG = "KVBT";
+
     private static final int THREAD_PRIORITY = Process.THREAD_PRIORITY_BACKGROUND;
     private static final AtomicInteger THREAD_COUNT = new AtomicInteger();
     private static final String BLANK_STATE_FILE_NAME = "blank_state";
     private static final String PM_PACKAGE = UserBackupManagerService.PACKAGE_MANAGER_SENTINEL;
+    private static final String SUCCESS_STATE_SUBDIR = "backing-up";
+    @VisibleForTesting static final String NO_DATA_END_SENTINEL = "@end@";
     @VisibleForTesting public static final String STAGING_FILE_SUFFIX = ".data";
     @VisibleForTesting public static final String NEW_STATE_FILE_SUFFIX = ".new";
 
@@ -233,13 +243,11 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
 
     private final UserBackupManagerService mBackupManagerService;
     private final PackageManager mPackageManager;
-    private final TransportManager mTransportManager;
     private final TransportClient mTransportClient;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     private final KeyValueBackupReporter mReporter;
     private final OnTaskFinishedListener mTaskFinishedListener;
     private final boolean mUserInitiated;
-    private final boolean mNonIncremental;
     private final int mCurrentOpToken;
     private final int mUserId;
     private final File mStateDirectory;
@@ -264,6 +272,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     // and at least one of the packages had data. Used to avoid updating current token for
     // empty backups.
     private boolean mHasDataToBackup;
+    private boolean mNonIncremental;
 
     /**
      * This {@link ConditionVariable} is used to signal that the cancel operation has been
@@ -300,7 +309,6 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             boolean userInitiated,
             boolean nonIncremental) {
         mBackupManagerService = backupManagerService;
-        mTransportManager = backupManagerService.getTransportManager();
         mPackageManager = backupManagerService.getPackageManager();
         mTransportClient = transportClient;
         mOriginalQueue = queue;
@@ -313,7 +321,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         mUserInitiated = userInitiated;
         mNonIncremental = nonIncremental;
         mAgentTimeoutParameters =
-                Preconditions.checkNotNull(
+                Objects.requireNonNull(
                         backupManagerService.getAgentTimeoutParameters(),
                         "Timeout parameters cannot be null");
         mStateDirectory = new File(backupManagerService.getBaseStateDir(), transportDirName);
@@ -339,6 +347,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
 
         mHasDataToBackup = false;
 
+        Set<String> backedUpApps = new HashSet<>();
         int status = BackupTransport.TRANSPORT_OK;
         try {
             startTask();
@@ -350,13 +359,18 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
                     } else {
                         backupPackage(packageName);
                     }
+                    setSuccessState(packageName, true);
+                    backedUpApps.add(packageName);
                 } catch (AgentException e) {
+                    setSuccessState(packageName, false);
                     if (e.isTransitory()) {
                         // We try again this package in the next backup pass.
                         mBackupManagerService.dataChangedImpl(packageName);
                     }
                 }
             }
+
+            informTransportOfUnchangedApps(backedUpApps);
         } catch (TaskException e) {
             if (e.isStateCompromised()) {
                 mBackupManagerService.resetBackupState(mStateDirectory);
@@ -365,6 +379,185 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             status = e.getStatus();
         }
         finishTask(status);
+    }
+
+    /**
+     * Tell the transport about all of the packages which have successfully backed up but
+     * have not informed the framework that they have new data. This allows transports to
+     * differentiate between packages which are not backing data up due to an error and
+     * packages which are not backing up data because nothing has changed.
+     *
+     * The current implementation involves creating a state file when a backup succeeds,
+     * on subsequent runs the existence of the file indicates the backup ran successfully
+     * but there was no data. If a backup fails with an error, or if the package is not
+     * eligible for backup by the transport any more, the status file is removed and the
+     * "no data" message will not be sent to the transport until another successful data
+     * changed backup has succeeded.
+     *
+     * @param appsBackedUp The Set of apps backed up during this run so we can exclude them
+     *                     from the list of successfully backed up apps that we signal to
+     *                     the transport have no data.
+     */
+    private void informTransportOfUnchangedApps(Set<String> appsBackedUp) {
+        String[] succeedingPackages = getSucceedingPackages();
+        if (succeedingPackages == null) {
+            // Nothing is succeeding, so end early.
+            return;
+        }
+
+        int flags = BackupTransport.FLAG_DATA_NOT_CHANGED;
+        if (mUserInitiated) {
+            flags |= BackupTransport.FLAG_USER_INITIATED;
+        }
+
+        boolean noDataPackageEncountered = false;
+        try {
+            IBackupTransport transport =
+                    mTransportClient.connectOrThrow("KVBT.informTransportOfEmptyBackups()");
+
+            for (String packageName : succeedingPackages) {
+                if (appsBackedUp.contains(packageName)) {
+                    Log.v(TAG, "Skipping package which was backed up this time :" + packageName);
+                    // Skip packages we backed up in this run.
+                    continue;
+                }
+
+                PackageInfo packageInfo;
+                try {
+                    packageInfo = mPackageManager.getPackageInfo(packageName, /* flags */ 0);
+                    if (!isEligibleForNoDataCall(packageInfo)) {
+                        // If the package isn't eligible any more we can forget about it and move
+                        // on.
+                        clearStatus(packageName);
+                        continue;
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                    // If the package has been uninstalled we can forget about it and move on.
+                    clearStatus(packageName);
+                    continue;
+                }
+
+                sendNoDataChangedTo(transport, packageInfo, flags);
+                noDataPackageEncountered = true;
+            }
+
+            if (noDataPackageEncountered) {
+                // If we've notified the transport of an unchanged package we need to
+                // tell it that it's seen all of the unchanged packages. We do this by
+                // reporting the end sentinel package as unchanged.
+                PackageInfo endSentinal = new PackageInfo();
+                endSentinal.packageName = NO_DATA_END_SENTINEL;
+                sendNoDataChangedTo(transport, endSentinal, flags);
+            }
+        } catch (TransportNotAvailableException | RemoteException e) {
+            Log.e(TAG, "Could not inform transport of all unchanged apps", e);
+        }
+    }
+
+    /** Determine if a package is eligible to be backed up to the transport */
+    private boolean isEligibleForNoDataCall(PackageInfo packageInfo) {
+        return AppBackupUtils.appIsKeyValueOnly(packageInfo)
+                && AppBackupUtils.appIsRunningAndEligibleForBackupWithTransport(mTransportClient,
+                packageInfo.packageName, mPackageManager, mUserId);
+    }
+
+    /** Send the "no data changed" message to a transport for a specific package */
+    private void sendNoDataChangedTo(IBackupTransport transport, PackageInfo packageInfo, int flags)
+            throws RemoteException {
+        ParcelFileDescriptor pfd;
+        try {
+            pfd = ParcelFileDescriptor.open(mBlankStateFile, MODE_READ_ONLY | MODE_CREATE);
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "Unable to find blank state file, aborting unchanged apps signal.");
+            return;
+        }
+        try {
+            int result = transport.performBackup(packageInfo, pfd, flags);
+            if (result == BackupTransport.TRANSPORT_ERROR
+                    || result == BackupTransport.TRANSPORT_NOT_INITIALIZED) {
+                Log.w(
+                        TAG,
+                        "Aborting informing transport of unchanged apps, transport" + " errored");
+                return;
+            }
+
+            transport.finishBackup();
+        } finally {
+            IoUtils.closeQuietly(pfd);
+        }
+    }
+
+    /** Get the list of package names which are marked as having previously succeeded */
+    private String[] getSucceedingPackages() {
+        File stateDirectory = getTopLevelSuccessStateDirectory(/* createIfMissing */ false);
+        if (stateDirectory == null) {
+            // getSuccessStateFileFor logs when we can't use the state area
+            return null;
+        }
+
+        return stateDirectory.list();
+    }
+
+    /** Sets the indicator that a package backup is succeeding */
+    private void setSuccessState(String packageName, boolean success) {
+        File successStateFile = getSuccessStateFileFor(packageName);
+        if (successStateFile == null) {
+            // The error will have been logged by getSuccessStateFileFor().
+            return;
+        }
+
+        if (successStateFile.exists() != success) {
+            // If there's been a change of state
+            if (!success) {
+                // Clear the status if we're now failing
+                clearStatus(packageName, successStateFile);
+                return;
+            }
+
+            // For succeeding packages we want the file
+            try {
+                if (!successStateFile.createNewFile()) {
+                    Log.w(TAG, "Unable to permanently record success for " + packageName);
+                }
+            } catch (IOException e) {
+                Log.w(TAG, "Unable to permanently record success for " + packageName, e);
+            }
+        }
+    }
+
+    /** Clear the status file for a specific package */
+    private void clearStatus(String packageName) {
+        File successStateFile = getSuccessStateFileFor(packageName);
+        if (successStateFile == null) {
+            // The error will have been logged by getSuccessStateFileFor().
+            return;
+        }
+        clearStatus(packageName, successStateFile);
+    }
+
+    /** Clear the status file for a package once we have the File representation */
+    private void clearStatus(String packageName, File successStateFile) {
+        if (successStateFile.exists()) {
+            if (!successStateFile.delete()) {
+                Log.w(TAG, "Unable to remove status file for " + packageName);
+            }
+        }
+    }
+
+    /** Get the backup state file for a package **/
+    private File getSuccessStateFileFor(String packageName) {
+        File stateDirectory = getTopLevelSuccessStateDirectory(/* createIfMissing */ true);
+        return stateDirectory == null ? null : new File(stateDirectory, packageName);
+    }
+
+    /** The top level directory for success state files */
+    private File getTopLevelSuccessStateDirectory(boolean createIfMissing) {
+        File directory = new File(mStateDirectory, SUCCESS_STATE_SUBDIR);
+        if (!directory.exists() && createIfMissing && !directory.mkdirs()) {
+            Log.e(TAG, "Unable to create backing-up state directory");
+            return null;
+        }
+        return directory;
     }
 
     /** Returns transport status. */
@@ -412,6 +605,11 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         try {
             IBackupTransport transport = mTransportClient.connectOrThrow("KVBT.startTask()");
             String transportName = transport.name();
+            if (transportName.contains("EncryptedLocalTransport")) {
+                // Temporary code for EiTF POC. Only supports non-incremental backups.
+                mNonIncremental = true;
+            }
+
             mReporter.onTransportReady(transportName);
 
             // If we haven't stored PM metadata yet, we must initialize the transport.
@@ -535,6 +733,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         }
 
         String callerLogString = "KVBT.finishTask()";
+        String transportName = null;
 
         // If the backup data was not empty, we succeeded and this is the first time
         // we've done a backup, we can record the current backup dataset token.
@@ -542,6 +741,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         if (mHasDataToBackup && (status == BackupTransport.TRANSPORT_OK) && (currentToken == 0)) {
             try {
                 IBackupTransport transport = mTransportClient.connectOrThrow(callerLogString);
+                transportName = transport.name();
                 mBackupManagerService.setCurrentToken(transport.getCurrentRestoreSet());
                 mBackupManagerService.writeRestoreTokens();
             } catch (Exception e) {
@@ -553,7 +753,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         synchronized (mQueueLock) {
             mBackupManagerService.setBackupRunning(false);
             if (status == BackupTransport.TRANSPORT_NOT_INITIALIZED) {
-                mReporter.onTransportNotInitialized();
+                mReporter.onTransportNotInitialized(transportName);
                 try {
                     triggerTransportInitializationLocked();
                 } catch (Exception e) {
@@ -861,6 +1061,8 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             status = transport.performBackup(packageInfo, backupData, flags);
             if (status == BackupTransport.TRANSPORT_OK) {
                 status = transport.finishBackup();
+            } else if (status == BackupTransport.TRANSPORT_NOT_INITIALIZED) {
+                mReporter.onTransportNotInitialized(transport.name());
             }
         } catch (Exception e) {
             mReporter.onPackageBackupTransportError(packageName, e);

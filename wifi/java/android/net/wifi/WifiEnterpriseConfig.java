@@ -15,14 +15,18 @@
  */
 package android.net.wifi;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.security.Credentials;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
@@ -36,6 +40,36 @@ import java.util.Map;
  * and any associated credentials.
  */
 public class WifiEnterpriseConfig implements Parcelable {
+
+    /** Key prefix for WAPI AS certificates. */
+    public static final String WAPI_AS_CERTIFICATE = "WAPIAS_";
+
+    /** Key prefix for WAPI user certificates. */
+    public static final String WAPI_USER_CERTIFICATE = "WAPIUSR_";
+
+    /**
+     * Intent extra: name for WAPI AS certificates
+     */
+    public static final String EXTRA_WAPI_AS_CERTIFICATE_NAME =
+            "android.net.wifi.extra.WAPI_AS_CERTIFICATE_NAME";
+
+    /**
+     * Intent extra: data for WAPI AS certificates
+     */
+    public static final String EXTRA_WAPI_AS_CERTIFICATE_DATA =
+            "android.net.wifi.extra.WAPI_AS_CERTIFICATE_DATA";
+
+    /**
+     * Intent extra: name for WAPI USER certificates
+     */
+    public static final String EXTRA_WAPI_USER_CERTIFICATE_NAME =
+            "android.net.wifi.extra.WAPI_USER_CERTIFICATE_NAME";
+
+    /**
+     * Intent extra: data for WAPI USER certificates
+     */
+    public static final String EXTRA_WAPI_USER_CERTIFICATE_DATA =
+            "android.net.wifi.extra.WAPI_USER_CERTIFICATE_DATA";
 
     /** @hide */
     public static final String EMPTY_VALUE         = "NULL";
@@ -57,6 +91,11 @@ public class WifiEnterpriseConfig implements Parcelable {
     public static final String DOM_SUFFIX_MATCH_KEY = "domain_suffix_match";
     /** @hide */
     public static final String OPP_KEY_CACHING     = "proactive_key_caching";
+    /** @hide */
+    public static final String EAP_ERP             = "eap_erp";
+    /** @hide */
+    public static final String OCSP                = "ocsp";
+
     /**
      * String representing the keystore OpenSSL ENGINE's ID.
      * @hide
@@ -88,10 +127,26 @@ public class WifiEnterpriseConfig implements Parcelable {
      */
     public static final String ENGINE_DISABLE = "0";
 
+    /**
+     * Key prefix for CA certificates.
+     * Note: copied from {@link android.security.Credentials#CA_CERTIFICATE} since it is @hide.
+     */
+    private static final String CA_CERTIFICATE = "CACERT_";
+    /**
+     * Key prefix for user certificates.
+     * Note: copied from {@link android.security.Credentials#USER_CERTIFICATE} since it is @hide.
+     */
+    private static final String USER_CERTIFICATE = "USRCERT_";
+    /**
+     * Key prefix for user private and secret keys.
+     * Note: copied from {@link android.security.Credentials#USER_PRIVATE_KEY} since it is @hide.
+     */
+    private static final String USER_PRIVATE_KEY = "USRPKEY_";
+
     /** @hide */
-    public static final String CA_CERT_PREFIX = KEYSTORE_URI + Credentials.CA_CERTIFICATE;
+    public static final String CA_CERT_PREFIX = KEYSTORE_URI + CA_CERTIFICATE;
     /** @hide */
-    public static final String CLIENT_CERT_PREFIX = KEYSTORE_URI + Credentials.USER_CERTIFICATE;
+    public static final String CLIENT_CERT_PREFIX = KEYSTORE_URI + USER_CERTIFICATE;
     /** @hide */
     public static final String CLIENT_CERT_KEY     = "client_cert";
     /** @hide */
@@ -110,6 +165,53 @@ public class WifiEnterpriseConfig implements Parcelable {
     public static final String PLMN_KEY            = "plmn";
     /** @hide */
     public static final String CA_CERT_ALIAS_DELIMITER = " ";
+    /** @hide */
+    public static final String WAPI_CERT_SUITE_KEY = "wapi_cert_suite";
+
+    /**
+     * Do not use OCSP stapling (TLS certificate status extension)
+     * @hide
+     */
+    @SystemApi
+    public static final int OCSP_NONE = 0;
+
+    /**
+     * Try to use OCSP stapling, but not require response
+     * @hide
+     */
+    @SystemApi
+    public static final int OCSP_REQUEST_CERT_STATUS = 1;
+
+    /**
+     * Require valid OCSP stapling response
+     * @hide
+     */
+    @SystemApi
+    public static final int OCSP_REQUIRE_CERT_STATUS = 2;
+
+    /**
+     * Require valid OCSP stapling response for all not-trusted certificates in the server
+     * certificate chain
+     * @hide
+     */
+    @SystemApi
+    public static final int OCSP_REQUIRE_ALL_NON_TRUSTED_CERTS_STATUS = 3;
+
+    /** @hide */
+    @IntDef(prefix = {"OCSP_"}, value = {
+            OCSP_NONE,
+            OCSP_REQUEST_CERT_STATUS,
+            OCSP_REQUIRE_CERT_STATUS,
+            OCSP_REQUIRE_ALL_NON_TRUSTED_CERTS_STATUS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Ocsp {}
+
+    /**
+     * Whether to use/require OCSP (Online Certificate Status Protocol) to check server certificate.
+     * @hide
+     */
+    private @Ocsp int mOcsp = OCSP_NONE;
 
     // Fields to copy verbatim from wpa_supplicant.
     private static final String[] SUPPLICANT_CONFIG_KEYS = new String[] {
@@ -130,7 +232,8 @@ public class WifiEnterpriseConfig implements Parcelable {
     /**
      * Fields that have unquoted values in {@link #mFields}.
      */
-    private static final List<String> UNQUOTED_KEYS = Arrays.asList(ENGINE_KEY, OPP_KEY_CACHING);
+    private static final List<String> UNQUOTED_KEYS = Arrays.asList(ENGINE_KEY, OPP_KEY_CACHING,
+                                                                    EAP_ERP);
 
     @UnsupportedAppUsage
     private HashMap<String, String> mFields = new HashMap<String, String>();
@@ -185,6 +288,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         mPhase2Method = source.mPhase2Method;
         mIsAppInstalledDeviceKeyAndCert = source.mIsAppInstalledDeviceKeyAndCert;
         mIsAppInstalledCaCert = source.mIsAppInstalledCaCert;
+        mOcsp = source.mOcsp;
     }
 
     /**
@@ -230,6 +334,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         ParcelUtil.writeCertificates(dest, mClientCertificateChain);
         dest.writeBoolean(mIsAppInstalledDeviceKeyAndCert);
         dest.writeBoolean(mIsAppInstalledCaCert);
+        dest.writeInt(mOcsp);
     }
 
     public static final @android.annotation.NonNull Creator<WifiEnterpriseConfig> CREATOR =
@@ -251,6 +356,7 @@ public class WifiEnterpriseConfig implements Parcelable {
                     enterpriseConfig.mClientCertificateChain = ParcelUtil.readCertificates(in);
                     enterpriseConfig.mIsAppInstalledDeviceKeyAndCert = in.readBoolean();
                     enterpriseConfig.mIsAppInstalledCaCert = in.readBoolean();
+                    enterpriseConfig.mOcsp = in.readInt();
                     return enterpriseConfig;
                 }
 
@@ -280,9 +386,12 @@ public class WifiEnterpriseConfig implements Parcelable {
         public static final int AKA_PRIME = 6;
         /** Hotspot 2.0 r2 OSEN */
         public static final int UNAUTH_TLS = 7;
+        /** WAPI Certificate */
+        public static final int WAPI_CERT = 8;
         /** @hide */
         public static final String[] strings =
-                { "PEAP", "TLS", "TTLS", "PWD", "SIM", "AKA", "AKA'", "WFA-UNAUTH-TLS" };
+                { "PEAP", "TLS", "TTLS", "PWD", "SIM", "AKA", "AKA'", "WFA-UNAUTH-TLS",
+                        "WAPI_CERT" };
 
         /** Prevent initialization */
         private Eap() {}
@@ -375,7 +484,7 @@ public class WifiEnterpriseConfig implements Parcelable {
             return false;
         }
 
-        if (mEapMethod != Eap.TLS && mPhase2Method != Phase2.NONE) {
+        if (mEapMethod != Eap.TLS && mEapMethod != Eap.UNAUTH_TLS && mPhase2Method != Phase2.NONE) {
             boolean is_autheap = mEapMethod == Eap.TTLS && mPhase2Method == Phase2.GTC;
             String prefix = is_autheap ? Phase2.AUTHEAP_PREFIX : Phase2.AUTH_PREFIX;
             String value = convertToQuotedString(prefix + Phase2.strings[mPhase2Method]);
@@ -426,6 +535,10 @@ public class WifiEnterpriseConfig implements Parcelable {
     public void setEapMethod(int eapMethod) {
         switch (eapMethod) {
             /** Valid methods */
+            case Eap.WAPI_CERT:
+                mEapMethod = eapMethod;
+                setPhase2Method(Phase2.NONE);
+                break;
             case Eap.TLS:
             case Eap.UNAUTH_TLS:
                 setPhase2Method(Phase2.NONE);
@@ -588,9 +701,11 @@ public class WifiEnterpriseConfig implements Parcelable {
      * <p> See the {@link android.security.KeyChain} for details on installing or choosing
      * a certificate.
      * </p>
-     * @param aliases identifies the certificate
+     * @param aliases identifies the certificate. Can be null to indicate the absence of a
+     *                certificate.
      * @hide
      */
+    @SystemApi
     public void setCaCertificateAliases(@Nullable String[] aliases) {
         if (aliases == null) {
             setFieldValue(CA_CERT_KEY, null, CA_CERT_PREFIX);
@@ -604,7 +719,7 @@ public class WifiEnterpriseConfig implements Parcelable {
                 if (i > 0) {
                     sb.append(CA_CERT_ALIAS_DELIMITER);
                 }
-                sb.append(encodeCaCertificateAlias(Credentials.CA_CERTIFICATE + aliases[i]));
+                sb.append(encodeCaCertificateAlias(CA_CERTIFICATE + aliases[i]));
             }
             setFieldValue(CA_CERT_KEY, sb.toString(), KEYSTORES_URI);
         }
@@ -621,11 +736,13 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Get CA certificate aliases
-     * @return alias to the CA certificate
+     * Get CA certificate aliases.
+     * @return alias to the CA certificate, or null if unset.
      * @hide
      */
-    @Nullable public String[] getCaCertificateAliases() {
+    @Nullable
+    @SystemApi
+    public String[] getCaCertificateAliases() {
         String value = getFieldValue(CA_CERT_KEY);
         if (value.startsWith(CA_CERT_PREFIX)) {
             // Backwards compatibility: parse the original alias prefix.
@@ -636,8 +753,8 @@ public class WifiEnterpriseConfig implements Parcelable {
             String[] aliases = TextUtils.split(values, CA_CERT_ALIAS_DELIMITER);
             for (int i = 0; i < aliases.length; i++) {
                 aliases[i] = decodeCaCertificateAlias(aliases[i]);
-                if (aliases[i].startsWith(Credentials.CA_CERTIFICATE)) {
-                    aliases[i] = aliases[i].substring(Credentials.CA_CERTIFICATE.length());
+                if (aliases[i].startsWith(CA_CERTIFICATE)) {
+                    aliases[i] = aliases[i].substring(CA_CERTIFICATE.length());
                 }
             }
             return aliases.length != 0 ? aliases : null;
@@ -653,6 +770,10 @@ public class WifiEnterpriseConfig implements Parcelable {
      * with this configuration. The framework takes care of installing the
      * certificate when the config is saved and removing the certificate when
      * the config is removed.
+     *
+     * Note: If no certificate is set for an Enterprise configuration, either by not calling this
+     * API (or the {@link #setCaCertificates(X509Certificate[])}, or by calling it with null, then
+     * the server certificate validation is skipped - which means that the connection is not secure.
      *
      * @param cert X.509 CA certificate
      * @throws IllegalArgumentException if not a CA certificate
@@ -692,6 +813,11 @@ public class WifiEnterpriseConfig implements Parcelable {
      * with this configuration. The framework takes care of installing the
      * certificates when the config is saved and removing the certificates when
      * the config is removed.
+     *
+     * Note: If no certificates are set for an Enterprise configuration, either by not calling this
+     * API (or the {@link #setCaCertificate(X509Certificate)}, or by calling it with null, then the
+     * server certificate validation is skipped - which means that the
+     * connection is not secure.
      *
      * @param certs X.509 CA certificates
      * @throws IllegalArgumentException if any of the provided certificates is
@@ -744,34 +870,45 @@ public class WifiEnterpriseConfig implements Parcelable {
      * like /etc/ssl/certs. If configured, these certificates are added to the
      * list of trusted CAs. ca_cert may also be included in that case, but it is
      * not required.
-     * @param domain The path for CA certificate files
+     *
+     * Note: If no certificate path is set for an Enterprise configuration, either by not calling
+     * this API, or by calling it with null, and no certificate is set by
+     * {@link #setCaCertificate(X509Certificate)} or {@link #setCaCertificates(X509Certificate[])},
+     * then the server certificate validation is skipped - which means that the connection is not
+     * secure.
+     *
+     * @param path The path for CA certificate files, or empty string to clear.
      * @hide
      */
-    public void setCaPath(String path) {
+    @SystemApi
+    public void setCaPath(@NonNull String path) {
         setFieldValue(CA_PATH_KEY, path);
     }
 
     /**
-     * Get the domain_suffix_match value. See setDomSuffixMatch.
-     * @return The path for CA certificate files.
+     * Get the ca_path directive from wpa_supplicant.
+     * @return The path for CA certificate files, or an empty string if unset.
      * @hide
      */
+    @NonNull
+    @SystemApi
     public String getCaPath() {
         return getFieldValue(CA_PATH_KEY);
     }
 
-    /** Set Client certificate alias.
+    /**
+     * Set Client certificate alias.
      *
      * <p> See the {@link android.security.KeyChain} for details on installing or choosing
      * a certificate
      * </p>
-     * @param alias identifies the certificate
+     * @param alias identifies the certificate, or empty string to clear.
      * @hide
      */
-    @UnsupportedAppUsage
-    public void setClientCertificateAlias(String alias) {
+    @SystemApi
+    public void setClientCertificateAlias(@NonNull String alias) {
         setFieldValue(CLIENT_CERT_KEY, alias, CLIENT_CERT_PREFIX);
-        setFieldValue(PRIVATE_KEY_ID_KEY, alias, Credentials.USER_PRIVATE_KEY);
+        setFieldValue(PRIVATE_KEY_ID_KEY, alias, USER_PRIVATE_KEY);
         // Also, set engine parameters
         if (TextUtils.isEmpty(alias)) {
             setFieldValue(ENGINE_KEY, ENGINE_DISABLE);
@@ -783,11 +920,12 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Get client certificate alias
-     * @return alias to the client certificate
+     * Get client certificate alias.
+     * @return alias to the client certificate, or an empty string if unset.
      * @hide
      */
-    @UnsupportedAppUsage
+    @NonNull
+    @SystemApi
     public String getClientCertificateAlias() {
         return getFieldValue(CLIENT_CERT_KEY, CLIENT_CERT_PREFIX);
     }
@@ -911,8 +1049,10 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * @hide
+     * Get the client private key as supplied in {@link #setClientKeyEntryWithCertificateChain}, or
+     * null if unset.
      */
+    @Nullable
     public PrivateKey getClientPrivateKey() {
         return mClientPrivateKey;
     }
@@ -939,6 +1079,12 @@ public class WifiEnterpriseConfig implements Parcelable {
     /**
      * Set alternate subject match. This is the substring to be matched against the
      * alternate subject of the authentication server certificate.
+     *
+     * Note: If no alternate subject is set for an Enterprise configuration, either by not calling
+     * this API, or by calling it with null, or not setting domain suffix match using the
+     * {@link #setDomainSuffixMatch(String)}, then the server certificate validation is incomplete -
+     * which means that the connection is not secure.
+     *
      * @param altSubjectMatch substring to be matched, for example
      *                     DNS:server.example.com;EMAIL:server@example.com
      */
@@ -973,6 +1119,12 @@ public class WifiEnterpriseConfig implements Parcelable {
      * ORed ogether.
      * <p>For example, domain_suffix_match=example.com would match test.example.com but would not
      * match test-example.com.
+     *
+     * Note: If no domain suffix is set for an Enterprise configuration, either by not calling this
+     * API, or by calling it with null, or not setting alternate subject match using the
+     * {@link #setAltSubjectMatch(String)}, then the server certificate
+     * validation is incomplete - which means that the connection is not secure.
+     *
      * @param domain The domain value
      */
     public void setDomainSuffixMatch(String domain) {
@@ -1141,6 +1293,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         if (mPhase2Method > 0 && mPhase2Method < Phase2.strings.length) {
             sb.append("phase2_method: ").append(Phase2.strings[mPhase2Method]).append("\n");
         }
+        sb.append(" ocsp: ").append(mOcsp).append("\n");
         return sb.toString();
     }
 
@@ -1189,5 +1342,104 @@ public class WifiEnterpriseConfig implements Parcelable {
      */
     public boolean isAppInstalledCaCert() {
         return mIsAppInstalledCaCert;
+    }
+
+    /**
+     * Set the OCSP type.
+     * @param ocsp is one of {@link ##OCSP_NONE}, {@link #OCSP_REQUEST_CERT_STATUS},
+     *                   {@link #OCSP_REQUIRE_CERT_STATUS} or
+     *                   {@link #OCSP_REQUIRE_ALL_NON_TRUSTED_CERTS_STATUS}
+     * @throws IllegalArgumentException if the OCSP type is invalid
+     * @hide
+     */
+    @SystemApi
+    public void setOcsp(@Ocsp int ocsp) {
+        if (ocsp >= OCSP_NONE && ocsp <= OCSP_REQUIRE_ALL_NON_TRUSTED_CERTS_STATUS) {
+            mOcsp = ocsp;
+        } else {
+            throw new IllegalArgumentException("Invalid OCSP type.");
+        }
+    }
+
+    /**
+     * Get the OCSP type.
+     * @hide
+     */
+    @SystemApi
+    public @Ocsp int getOcsp() {
+        return mOcsp;
+    }
+
+    /**
+     * Utility method to determine whether the configuration's authentication method is SIM-based.
+     *
+     * @return true if the credential information requires SIM card for current authentication
+     * method, otherwise it returns false.
+     */
+    public boolean isAuthenticationSimBased() {
+        if (mEapMethod == Eap.SIM || mEapMethod == Eap.AKA || mEapMethod == Eap.AKA_PRIME) {
+            return true;
+        }
+        if (mEapMethod == Eap.PEAP) {
+            return mPhase2Method == Phase2.SIM || mPhase2Method == Phase2.AKA
+                    || mPhase2Method == Phase2.AKA_PRIME;
+        }
+        return false;
+    }
+
+    /**
+     * Set the WAPI certificate suite name on wpa_supplicant.
+     *
+     * If this field is not specified, WAPI-CERT uses ASU ID from WAI packet
+     * as the certificate suite name automatically.
+     *
+     * @param wapiCertSuite The name for WAPI certificate suite, or empty string to clear.
+     * @hide
+     */
+    @SystemApi
+    public void setWapiCertSuite(@NonNull String wapiCertSuite) {
+        setFieldValue(WAPI_CERT_SUITE_KEY, wapiCertSuite);
+    }
+
+    /**
+     * Get the WAPI certificate suite name
+     * @return the certificate suite name
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    public String getWapiCertSuite() {
+        return getFieldValue(WAPI_CERT_SUITE_KEY);
+    }
+
+    /**
+     * Method determines whether the Enterprise configuration is insecure. An insecure
+     * configuration is one where EAP method requires a CA certification, i.e. PEAP, TLS, or
+     * TTLS, and any of the following conditions are met:
+     * - Both certificate and CA path are not configured.
+     * - Both alternative subject match and domain suffix match are not set.
+     *
+     * Note: this method does not exhaustively check security of the configuration - i.e. a return
+     * value of {@code false} is not a guarantee that the configuration is secure.
+     * @hide
+     */
+    public boolean isInsecure() {
+        if (mEapMethod != Eap.PEAP && mEapMethod != Eap.TLS && mEapMethod != Eap.TTLS) {
+            return false;
+        }
+        if (TextUtils.isEmpty(getAltSubjectMatch())
+                && TextUtils.isEmpty(getDomainSuffixMatch())) {
+            // Both subject and domain match are not set, it's insecure.
+            return true;
+        }
+        if (mIsAppInstalledCaCert) {
+            // CA certificate is installed by App, it's secure.
+            return false;
+        }
+        if (getCaCertificateAliases() != null) {
+            // CA certificate alias from keyStore is set, it's secure.
+            return false;
+        }
+        return TextUtils.isEmpty(getCaPath());
     }
 }

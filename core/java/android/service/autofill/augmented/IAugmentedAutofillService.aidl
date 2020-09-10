@@ -22,6 +22,7 @@ import android.os.IBinder;
 import android.service.autofill.augmented.IFillCallback;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
+import android.view.inputmethod.InlineSuggestionsRequest;
 
 import java.util.List;
 
@@ -35,7 +36,9 @@ oneway interface IAugmentedAutofillService {
     void onDisconnected();
     void onFillRequest(int sessionId, in IBinder autofillManagerClient, int taskId,
                        in ComponentName activityComponent, in AutofillId focusedId,
-                       in AutofillValue focusedValue, long requestTime, in IFillCallback callback);
+                       in AutofillValue focusedValue, long requestTime,
+                       in InlineSuggestionsRequest inlineSuggestionsRequest,
+                       in IFillCallback callback);
 
     void onDestroyAllFillWindowsRequest();
 }

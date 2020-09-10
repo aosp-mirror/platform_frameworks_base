@@ -56,6 +56,12 @@ public class AccessoryFilter {
         mVersion = accessory.getVersion();
     }
 
+    public AccessoryFilter(@NonNull AccessoryFilter filter) {
+        mManufacturer = filter.mManufacturer;
+        mModel = filter.mModel;
+        mVersion = filter.mVersion;
+    }
+
     public static AccessoryFilter read(XmlPullParser parser)
             throws XmlPullParserException, IOException {
         String manufacturer = null;

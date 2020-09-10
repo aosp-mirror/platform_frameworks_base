@@ -40,9 +40,11 @@ import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
 import android.annotation.XmlRes;
+import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
+import android.content.res.loader.ResourcesLoader;
 import android.graphics.Movie;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -50,18 +52,24 @@ import android.graphics.drawable.Drawable.ConstantState;
 import android.graphics.drawable.DrawableInflater;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pools.SynchronizedPool;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.DisplayAdjustments;
 import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
+import android.view.WindowManager;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -71,6 +79,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Class for accessing an application's resources.  This sits on top of the
@@ -94,6 +105,12 @@ import java.util.ArrayList;
  * (such as for different languages and screen sizes). This is an important aspect of developing
  * Android applications that are compatible on different types of devices.</p>
  *
+ * <p>After {@link Build.VERSION_CODES#R}, {@link Resources} must be obtained by
+ * {@link android.app.Activity} or {@link android.content.Context} created with
+ * {@link android.content.Context#createWindowContext(int, Bundle)}.
+ * {@link Application#getResources()} may report wrong values in multi-window or on secondary
+ * displays.
+ *
  * <p>For more information about using resources, see the documentation about <a
  * href="{@docRoot}guide/topics/resources/index.html">Application Resources</a>.</p>
  */
@@ -107,6 +124,7 @@ public class Resources {
     static final String TAG = "Resources";
 
     private static final Object sSync = new Object();
+    private final Object mUpdateLock = new Object();
 
     // Used by BridgeResources in layoutlib
     @UnsupportedAppUsage
@@ -123,6 +141,9 @@ public class Resources {
     @UnsupportedAppUsage
     private DrawableInflater mDrawableInflater;
 
+    /** Used to override the returned adjustments of {@link #getDisplayAdjustments}. */
+    private DisplayAdjustments mOverrideDisplayAdjustments;
+
     /** Lock object used to protect access to {@link #mTmpValue}. */
     private final Object mTmpValueLock = new Object();
 
@@ -132,6 +153,9 @@ public class Resources {
 
     @UnsupportedAppUsage
     final ClassLoader mClassLoader;
+
+    @GuardedBy("mUpdateLock")
+    private UpdateCallbacks mCallbacks = null;
 
     /**
      * WeakReferences to Themes that were constructed from this Resources object.
@@ -147,6 +171,8 @@ public class Resources {
      */
     private static final int MIN_THEME_REFS_FLUSH_SIZE = 32;
     private int mThemeRefsNextFlushSize = MIN_THEME_REFS_FLUSH_SIZE;
+
+    private int mBaseApkAssetsSize;
 
     /**
      * Returns the most appropriate default theme for the specified target SDK version.
@@ -223,6 +249,47 @@ public class Resources {
         }
     }
 
+    /** @hide */
+    public interface UpdateCallbacks extends ResourcesLoader.UpdateCallbacks {
+        /**
+         * Invoked when a {@link Resources} instance has a {@link ResourcesLoader} added, removed,
+         * or reordered.
+         *
+         * @param resources the instance being updated
+         * @param newLoaders the new set of loaders for the instance
+         */
+        void onLoadersChanged(@NonNull Resources resources,
+                @NonNull List<ResourcesLoader> newLoaders);
+    }
+
+    /**
+     * Handler that propagates updates of the {@link Resources} instance to the underlying
+     * {@link AssetManager} when the Resources is not registered with a
+     * {@link android.app.ResourcesManager}.
+     * @hide
+     */
+    public class AssetManagerUpdateHandler implements UpdateCallbacks{
+
+        @Override
+        public void onLoadersChanged(@NonNull Resources resources,
+                @NonNull List<ResourcesLoader> newLoaders) {
+            Preconditions.checkArgument(Resources.this == resources);
+            final ResourcesImpl impl = mResourcesImpl;
+            impl.clearAllCaches();
+            impl.getAssets().setLoaders(newLoaders);
+        }
+
+        @Override
+        public void onLoaderUpdated(@NonNull ResourcesLoader loader) {
+            final ResourcesImpl impl = mResourcesImpl;
+            final AssetManager assets = impl.getAssets();
+            if (assets.getLoaders().contains(loader)) {
+                impl.clearAllCaches();
+                assets.setLoaders(assets.getLoaders());
+            }
+        }
+    }
+
     /**
      * Create a new Resources object on top of an existing set of assets in an
      * AssetManager.
@@ -283,6 +350,7 @@ public class Resources {
             return;
         }
 
+        mBaseApkAssetsSize = ArrayUtils.size(impl.getAssets().getApkAssets());
         mResourcesImpl = impl;
 
         // Create new ThemeImpls that are identical to the ones we have.
@@ -296,6 +364,15 @@ public class Resources {
                 }
             }
         }
+    }
+
+    /** @hide */
+    public void setCallbacks(UpdateCallbacks callbacks) {
+        if (mCallbacks != null) {
+            throw new IllegalStateException("callback already registered");
+        }
+
+        mCallbacks = callbacks;
     }
 
     /**
@@ -903,7 +980,7 @@ public class Resources {
         try {
             final ResourcesImpl impl = mResourcesImpl;
             impl.getValueForDensity(id, density, value, true);
-            return impl.loadDrawable(this, value, id, density, theme);
+            return loadDrawable(value, id, density, theme);
         } finally {
             releaseTempTypedValue(value);
         }
@@ -1827,6 +1904,7 @@ public class Resources {
             mResId = other.mResId == null ? null : other.mResId.clone();
             mForce = other.mForce == null ? null : other.mForce.clone();
             mCount = other.mCount;
+            mHashCode = other.mHashCode;
         }
 
         @Override
@@ -1959,10 +2037,20 @@ public class Resources {
     }
 
     /**
-     * Return the current display metrics that are in effect for this resource 
-     * object.  The returned object should be treated as read-only.
-     * 
-     * @return The resource's current display metrics. 
+     * Return the current display metrics that are in effect for this resource
+     * object. The returned object should be treated as read-only.
+     *
+     * <p>Note that the reported value may be different than the window this application is
+     * interested in.</p>
+     *
+     * <p>Best practices are to obtain metrics from {@link WindowManager#getCurrentWindowMetrics()}
+     * for window bounds, {@link Display#getRealMetrics(DisplayMetrics)} for display bounds and
+     * obtain density from {@link Configuration#densityDpi}. The value obtained from this API may be
+     * wrong if the {@link Resources} is from the context which is different than the window is
+     * attached such as {@link Application#getResources()}.
+     * <p/>
+     *
+     * @return The resource's current display metrics.
      */
     public DisplayMetrics getDisplayMetrics() {
         return mResourcesImpl.getDisplayMetrics();
@@ -1971,7 +2059,38 @@ public class Resources {
     /** @hide */
     @UnsupportedAppUsage
     public DisplayAdjustments getDisplayAdjustments() {
+        final DisplayAdjustments overrideDisplayAdjustments = mOverrideDisplayAdjustments;
+        if (overrideDisplayAdjustments != null) {
+            return overrideDisplayAdjustments;
+        }
         return mResourcesImpl.getDisplayAdjustments();
+    }
+
+    /**
+     * Customize the display adjustments based on the current one in {@link #mResourcesImpl}, in
+     * order to isolate the effect with other instances of {@link Resource} that may share the same
+     * instance of {@link ResourcesImpl}.
+     *
+     * @param override The operation to override the existing display adjustments. If it is null,
+     *                 the override adjustments will be cleared.
+     * @hide
+     */
+    public void overrideDisplayAdjustments(@Nullable Consumer<DisplayAdjustments> override) {
+        if (override != null) {
+            mOverrideDisplayAdjustments = new DisplayAdjustments(
+                    mResourcesImpl.getDisplayAdjustments());
+            override.accept(mOverrideDisplayAdjustments);
+        } else {
+            mOverrideDisplayAdjustments = null;
+        }
+    }
+
+    /**
+     * Return {@code true} if the override display adjustments have been set.
+     * @hide
+     */
+    public boolean hasOverrideDisplayAdjustments() {
+        return mOverrideDisplayAdjustments != null;
     }
 
     /**
@@ -2280,7 +2399,7 @@ public class Resources {
             final ResourcesImpl impl = mResourcesImpl;
             impl.getValue(id, value, true);
             if (value.type == TypedValue.TYPE_STRING) {
-                return impl.loadXmlResourceParser(value.string.toString(), id,
+                return loadXmlResourceParser(value.string.toString(), id,
                         value.assetCookie, type);
             }
             throw new NotFoundException("Resource ID #0x" + Integer.toHexString(id)
@@ -2328,5 +2447,113 @@ public class Resources {
             return res.obtainAttributes(set, attrs);
         }
         return theme.obtainStyledAttributes(set, attrs, 0, 0);
+    }
+
+    private void checkCallbacksRegistered() {
+        if (mCallbacks == null) {
+            // Fallback to updating the underlying AssetManager if the Resources is not associated
+            // with a ResourcesManager.
+            mCallbacks = new AssetManagerUpdateHandler();
+        }
+    }
+
+    /**
+     * Retrieves the list of loaders.
+     *
+     * <p>Loaders are listed in increasing precedence order. A loader will override the resources
+     * and assets of loaders listed before itself.
+     * @hide
+     */
+    @NonNull
+    public List<ResourcesLoader> getLoaders() {
+        return mResourcesImpl.getAssets().getLoaders();
+    }
+
+    /**
+     * Adds a loader to the list of loaders. If the loader is already present in the list, the list
+     * will not be modified.
+     *
+     * <p>This should only be called from the UI thread to avoid lock contention when propagating
+     * loader changes.
+     *
+     * @param loaders the loaders to add
+     */
+    public void addLoaders(@NonNull ResourcesLoader... loaders) {
+        synchronized (mUpdateLock) {
+            checkCallbacksRegistered();
+            final List<ResourcesLoader> newLoaders =
+                    new ArrayList<>(mResourcesImpl.getAssets().getLoaders());
+            final ArraySet<ResourcesLoader> loaderSet = new ArraySet<>(newLoaders);
+
+            for (int i = 0; i < loaders.length; i++) {
+                final ResourcesLoader loader = loaders[i];
+                if (!loaderSet.contains(loader)) {
+                    newLoaders.add(loader);
+                }
+            }
+
+            if (loaderSet.size() == newLoaders.size()) {
+                return;
+            }
+
+            mCallbacks.onLoadersChanged(this, newLoaders);
+            for (int i = loaderSet.size(), n = newLoaders.size(); i < n; i++) {
+                newLoaders.get(i).registerOnProvidersChangedCallback(this, mCallbacks);
+            }
+        }
+    }
+
+    /**
+     * Removes loaders from the list of loaders. If the loader is not present in the list, the list
+     * will not be modified.
+     *
+     * <p>This should only be called from the UI thread to avoid lock contention when propagating
+     * loader changes.
+     *
+     * @param loaders the loaders to remove
+     */
+    public void removeLoaders(@NonNull ResourcesLoader... loaders) {
+        synchronized (mUpdateLock) {
+            checkCallbacksRegistered();
+            final ArraySet<ResourcesLoader> removedLoaders = new ArraySet<>(loaders);
+            final List<ResourcesLoader> newLoaders = new ArrayList<>();
+            final List<ResourcesLoader> oldLoaders = mResourcesImpl.getAssets().getLoaders();
+
+            for (int i = 0, n = oldLoaders.size(); i < n; i++) {
+                final ResourcesLoader loader = oldLoaders.get(i);
+                if (!removedLoaders.contains(loader)) {
+                    newLoaders.add(loader);
+                }
+            }
+
+            if (oldLoaders.size() == newLoaders.size()) {
+                return;
+            }
+
+            mCallbacks.onLoadersChanged(this, newLoaders);
+            for (int i = 0; i < loaders.length; i++) {
+                loaders[i].unregisterOnProvidersChangedCallback(this);
+            }
+        }
+    }
+
+    /**
+     * Removes all {@link ResourcesLoader ResourcesLoader(s)}.
+     *
+     * <p>This should only be called from the UI thread to avoid lock contention when propagating
+     * loader changes.
+     * @hide
+     */
+    @VisibleForTesting
+    public void clearLoaders() {
+        synchronized (mUpdateLock) {
+            checkCallbacksRegistered();
+            final List<ResourcesLoader> newLoaders = Collections.emptyList();
+            final List<ResourcesLoader> oldLoaders = mResourcesImpl.getAssets().getLoaders();
+            mCallbacks.onLoadersChanged(this, newLoaders);
+            for (ResourcesLoader loader : oldLoaders) {
+                loader.unregisterOnProvidersChangedCallback(this);
+            }
+        }
     }
 }

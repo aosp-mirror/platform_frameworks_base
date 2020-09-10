@@ -19,9 +19,10 @@ package android.graphics;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
+import android.graphics.fonts.Font;
 import android.graphics.fonts.FontVariationAxis;
+import android.os.Build;
 import android.text.TextUtils;
-import android.util.Log;
 
 import dalvik.annotation.optimization.CriticalNative;
 
@@ -59,7 +60,8 @@ public class FontFamily {
      *
      * This cannot be deleted because it's in use by AndroidX.
      */
-    @UnsupportedAppUsage(trackingBug = 123768928)
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@link android.graphics.fonts.FontFamily} instead.")
     public long mNativePtr;
 
     // Points native font family builder. Must be zero after freezing this family.
@@ -68,7 +70,8 @@ public class FontFamily {
     /**
      * This cannot be deleted because it's in use by AndroidX.
      */
-    @UnsupportedAppUsage(trackingBug = 123768928)
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@link android.graphics.fonts.FontFamily} instead.")
     public FontFamily() {
         mBuilderPtr = nInitBuilder(null, 0);
         mNativeBuilderCleaner = sBuilderRegistry.registerNativeAllocation(this, mBuilderPtr);
@@ -77,7 +80,8 @@ public class FontFamily {
     /**
      * This cannot be deleted because it's in use by AndroidX.
      */
-    @UnsupportedAppUsage(trackingBug = 123768928)
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@link android.graphics.fonts.FontFamily} instead.")
     public FontFamily(@Nullable String[] langs, int variant) {
         final String langsString;
         if (langs == null || langs.length == 0) {
@@ -99,7 +103,8 @@ public class FontFamily {
      *
      * This cannot be deleted because it's in use by AndroidX.
      */
-    @UnsupportedAppUsage(trackingBug = 123768928)
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@link android.graphics.fonts.FontFamily} instead.")
     public boolean freeze() {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("This FontFamily is already frozen");
@@ -116,7 +121,8 @@ public class FontFamily {
     /**
      * This cannot be deleted because it's in use by AndroidX.
      */
-    @UnsupportedAppUsage(trackingBug = 123768928)
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@link android.graphics.fonts.FontFamily} instead.")
     public void abortCreation() {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("This FontFamily is already frozen or abandoned");
@@ -128,7 +134,8 @@ public class FontFamily {
     /**
      * This cannot be deleted because it's in use by AndroidX.
      */
-    @UnsupportedAppUsage(trackingBug = 123768928)
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@link android.graphics.fonts.FontFamily} instead.")
     public boolean addFont(String path, int ttcIndex, FontVariationAxis[] axes, int weight,
             int italic) {
         if (mBuilderPtr == 0) {
@@ -145,7 +152,6 @@ public class FontFamily {
             }
             return nAddFont(mBuilderPtr, fontBuffer, ttcIndex, weight, italic);
         } catch (IOException e) {
-            Log.e(TAG, "Error mapping font file " + path);
             return false;
         }
     }
@@ -153,7 +159,8 @@ public class FontFamily {
     /**
      * This cannot be deleted because it's in use by AndroidX.
      */
-    @UnsupportedAppUsage(trackingBug = 123768928)
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@link android.graphics.fonts.FontFamily} instead.")
     public boolean addFontFromBuffer(ByteBuffer font, int ttcIndex, FontVariationAxis[] axes,
             int weight, int italic) {
         if (mBuilderPtr == 0) {
@@ -181,25 +188,21 @@ public class FontFamily {
      *
      * This cannot be deleted because it's in use by AndroidX.
      */
-    @UnsupportedAppUsage(trackingBug = 123768928)
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@link android.graphics.fonts.FontFamily} instead.")
     public boolean addFontFromAssetManager(AssetManager mgr, String path, int cookie,
             boolean isAsset, int ttcIndex, int weight, int isItalic,
             FontVariationAxis[] axes) {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("Unable to call addFontFromAsset after freezing.");
         }
-        if (axes != null) {
-            for (FontVariationAxis axis : axes) {
-                nAddAxisValue(mBuilderPtr, axis.getOpenTypeTagValue(), axis.getStyleValue());
-            }
-        }
-        return nAddFontFromAssetManager(mBuilderPtr, mgr, path, cookie, isAsset, ttcIndex, weight,
-                isItalic);
-    }
 
-    // TODO: Remove once internal user stop using private API.
-    private static boolean nAddFont(long builderPtr, ByteBuffer font, int ttcIndex) {
-        return nAddFont(builderPtr, font, ttcIndex, -1, -1);
+        try {
+            ByteBuffer buffer =  Font.Builder.createBuffer(mgr, path, isAsset, cookie);
+            return addFontFromBuffer(buffer, ttcIndex, axes, weight, isItalic);
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     private static native long nInitBuilder(String langs, int variant);
@@ -218,8 +221,6 @@ public class FontFamily {
             int weight, int isItalic);
     private static native boolean nAddFontWeightStyle(long builderPtr, ByteBuffer font,
             int ttcIndex, int weight, int isItalic);
-    private static native boolean nAddFontFromAssetManager(long builderPtr, AssetManager mgr,
-            String path, int cookie, boolean isAsset, int ttcIndex, int weight, int isItalic);
 
     // The added axis values are only valid for the next nAddFont* method call.
     @CriticalNative

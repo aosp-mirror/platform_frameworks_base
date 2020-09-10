@@ -17,6 +17,19 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$DIR/lib/common"
 
+launch_application_usage() {
+    cat <<EOF
+Usage: $(basename $0) <package> <activity>
+
+  Positional Arguments:
+    <package>                   package of the app to test
+    <activity>                  activity to use
+
+  Named Arguments:
+    -h, --help                  usage information (this)
+EOF
+}
+
 launch_application() {
   local package="$1"
   local activity="$2"
@@ -26,22 +39,14 @@ launch_application() {
   # if the $ is not escaped, adb shell will try to evaluate $HomeActivity to a variable.
   activity=${activity//\$/\\$}
 
-  local am_output="$(adb shell am start -S -W "$package"/"$activity")"
-  verbose_print adb shell am start -S -W "$package"/"$activity"
-  if [[ $? -ne 0 ]]; then
-    echo "am start failed" >&2
+  adb shell am start -S -W "$package"/"$activity"
 
-    return 1
-  fi
-
-  # for everything else use the am start "TotalTime" output.
-  verbose_print "$am_output"
-  local total_time="$(echo "$am_output" | grep 'TotalTime:' | sed 's/TotalTime: //g')"
-  verbose_print "total time: $total_time"
-
-  # TODO: Extract alternative metrics such as the #reportFullyDrawn.
-
-  echo "$total_time"
+  # pipe this into 'parse_metrics' to parse the output.
 }
+
+if [[ $# -lt 2 ]]; then
+  launch_application_usage
+  exit 1
+fi
 
 launch_application "$@"

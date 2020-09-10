@@ -55,6 +55,8 @@ class TaskPositioningController {
         return mTaskPositioner != null;
     }
 
+    final SurfaceControl.Transaction mTransaction;
+
     InputWindowHandle getDragWindowHandleLocked() {
         return mTaskPositioner != null ? mTaskPositioner.mDragWindowHandle : null;
     }
@@ -65,16 +67,18 @@ class TaskPositioningController {
         mInputManager = inputManager;
         mActivityManager = activityManager;
         mHandler = new Handler(looper);
+        mTransaction = service.mTransactionFactory.get();
     }
 
-    void hideInputSurface(SurfaceControl.Transaction t, int displayId) {
+    void hideInputSurface(int displayId) {
         if (mPositioningDisplay != null && mPositioningDisplay.getDisplayId() == displayId
                 && mInputSurface != null) {
-            t.hide(mInputSurface);
+            mTransaction.hide(mInputSurface);
+            mTransaction.syncInputWindows().apply();
         }
     }
 
-    void showInputSurface(SurfaceControl.Transaction t, int displayId) {
+    void showInputSurface(int displayId) {
         if (mPositioningDisplay == null || mPositioningDisplay.getDisplayId() != displayId) {
             return;
         }
@@ -82,7 +86,9 @@ class TaskPositioningController {
         if (mInputSurface == null) {
             mInputSurface = mService.makeSurfaceBuilder(dc.getSession())
                     .setContainerLayer()
-                    .setName("Drag and Drop Input Consumer").build();
+                    .setName("Drag and Drop Input Consumer")
+                    .setCallsite("TaskPositioningController.showInputSurface")
+                    .build();
         }
 
         final InputWindowHandle h = getDragWindowHandleLocked();
@@ -92,16 +98,17 @@ class TaskPositioningController {
             return;
         }
 
-        t.show(mInputSurface);
-        t.setInputWindowInfo(mInputSurface, h);
-        t.setLayer(mInputSurface, Integer.MAX_VALUE);
+        mTransaction.show(mInputSurface);
+        mTransaction.setInputWindowInfo(mInputSurface, h);
+        mTransaction.setLayer(mInputSurface, Integer.MAX_VALUE);
 
         final Display display = dc.getDisplay();
         final Point p = new Point();
         display.getRealSize(p);
 
         mTmpClipRect.set(0, 0, p.x, p.y);
-        t.setWindowCrop(mInputSurface, mTmpClipRect);
+        mTransaction.setWindowCrop(mInputSurface, mTmpClipRect);
+        mTransaction.syncInputWindows().apply();
     }
 
     boolean startMovingTask(IWindow window, float startX, float startY) {
@@ -126,6 +133,11 @@ class TaskPositioningController {
             synchronized (mService.mGlobalLock) {
                 final Task task = displayContent.findTaskForResizePoint(x, y);
                 if (task != null) {
+                    if (!task.isResizeable()) {
+                        // The task is not resizable, so don't do anything when the user drags the
+                        // the resize handles.
+                        return;
+                    }
                     if (!startPositioningLocked(task.getTopVisibleAppMainWindow(), true /*resize*/,
                             task.preserveOrientationOnResize(), x, y)) {
                         return;
@@ -164,7 +176,7 @@ class TaskPositioningController {
         mPositioningDisplay = displayContent;
 
         mTaskPositioner = TaskPositioner.create(mService);
-        mTaskPositioner.register(displayContent);
+        mTaskPositioner.register(displayContent, win);
 
         // We need to grab the touch focus so that the touch events during the
         // resizing/scrolling are not sent to the app. 'win' is the main window
@@ -172,7 +184,7 @@ class TaskPositioningController {
         // on top (eg. a dialog window).
         WindowState transferFocusFromWin = win;
         if (displayContent.mCurrentFocus != null && displayContent.mCurrentFocus != win
-                && displayContent.mCurrentFocus.mAppToken == win.mAppToken) {
+                && displayContent.mCurrentFocus.mActivityRecord == win.mActivityRecord) {
             transferFocusFromWin = displayContent.mCurrentFocus;
         }
         if (!mInputManager.transferTouchFocus(
@@ -182,7 +194,7 @@ class TaskPositioningController {
             return false;
         }
 
-        mTaskPositioner.startDrag(win, resize, preserveOrientation, startX, startY);
+        mTaskPositioner.startDrag(resize, preserveOrientation, startX, startY);
         return true;
     }
 
@@ -193,7 +205,9 @@ class TaskPositioningController {
     }
 
     void finishTaskPositioning() {
-        mHandler.post(() -> {
+        // TaskPositioner attaches the InputEventReceiver to the animation thread. We need to
+        // dispose the receiver on the same thread to avoid race conditions.
+        mService.mAnimationHandler.post(() -> {
             if (DEBUG_TASK_POSITIONING) Slog.d(TAG_WM, "finishPositioning");
 
             synchronized (mService.mGlobalLock) {

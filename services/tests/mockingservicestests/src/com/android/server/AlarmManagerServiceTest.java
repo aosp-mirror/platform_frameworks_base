@@ -22,6 +22,7 @@ import static android.app.AlarmManager.RTC_WAKEUP;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RESTRICTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
@@ -35,12 +36,11 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.AlarmManagerService.ACTIVE_INDEX;
 import static com.android.server.AlarmManagerService.AlarmHandler.APP_STANDBY_BUCKET_CHANGED;
-import static com.android.server.AlarmManagerService.AlarmHandler.APP_STANDBY_PAROLE_CHANGED;
+import static com.android.server.AlarmManagerService.AlarmHandler.CHARGING_STATUS_CHANGED;
 import static com.android.server.AlarmManagerService.AlarmHandler.REMOVE_FOR_CANCELED;
 import static com.android.server.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_LONG_TIME;
 import static com.android.server.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_SHORT_TIME;
 import static com.android.server.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION;
-import static com.android.server.AlarmManagerService.Constants.KEY_APP_STANDBY_QUOTAS_ENABLED;
 import static com.android.server.AlarmManagerService.Constants.KEY_LISTENER_TIMEOUT;
 import static com.android.server.AlarmManagerService.Constants.KEY_MAX_INTERVAL;
 import static com.android.server.AlarmManagerService.Constants.KEY_MIN_FUTURITY;
@@ -55,6 +55,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
@@ -70,6 +71,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -85,6 +87,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.dx.mockito.inline.extended.MockedVoidMethod;
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.usage.AppStandbyInternal;
 
 import org.junit.After;
 import org.junit.Before;
@@ -103,12 +106,14 @@ import java.util.ArrayList;
 public class AlarmManagerServiceTest {
     private static final String TAG = AlarmManagerServiceTest.class.getSimpleName();
     private static final String TEST_CALLING_PACKAGE = "com.android.framework.test-package";
-    private static final int SYSTEM_UI_UID = 123456789;
-    private static final int TEST_CALLING_UID = 12345;
+    private static final int SYSTEM_UI_UID = 12345;
+    private static final int TEST_CALLING_UID = 67890;
+    private static final int TEST_CALLING_USER = UserHandle.getUserId(TEST_CALLING_UID);
 
     private long mAppStandbyWindow;
     private AlarmManagerService mService;
-    private UsageStatsManagerInternal.AppIdleStateChangeListener mAppStandbyListener;
+    private AppStandbyInternal.AppIdleStateChangeListener mAppStandbyListener;
+    private AlarmManagerService.ChargingReceiver mChargingReceiver;
     @Mock
     private ContentResolver mMockResolver;
     @Mock
@@ -117,6 +122,8 @@ public class AlarmManagerServiceTest {
     private IActivityManager mIActivityManager;
     @Mock
     private UsageStatsManagerInternal mUsageStatsManagerInternal;
+    @Mock
+    private AppStandbyInternal mAppStandbyInternal;
     @Mock
     private AppStateTracker mAppStateTracker;
     @Mock
@@ -249,20 +256,21 @@ public class AlarmManagerServiceTest {
                 .mockStatic(LocalServices.class)
                 .spyStatic(Looper.class)
                 .spyStatic(Settings.Global.class)
+                .spyStatic(UserHandle.class)
                 .strictness(Strictness.WARN)
                 .startMocking();
         doReturn(mIActivityManager).when(ActivityManager::getService);
         doReturn(mAppStateTracker).when(() -> LocalServices.getService(AppStateTracker.class));
-        doReturn(null)
-                .when(() -> LocalServices.getService(DeviceIdleController.LocalService.class));
+        doReturn(mAppStandbyInternal).when(
+                () -> LocalServices.getService(AppStandbyInternal.class));
         doReturn(mUsageStatsManagerInternal).when(
                 () -> LocalServices.getService(UsageStatsManagerInternal.class));
         doCallRealMethod().when((MockedVoidMethod) () ->
                 LocalServices.addService(eq(AlarmManagerInternal.class), any()));
         doCallRealMethod().when(() -> LocalServices.getService(AlarmManagerInternal.class));
+        doReturn(false).when(() -> UserHandle.isCore(TEST_CALLING_UID));
         when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE),
-                eq(UserHandle.getUserId(TEST_CALLING_UID)), anyLong()))
-                .thenReturn(STANDBY_BUCKET_ACTIVE);
+                eq(TEST_CALLING_USER), anyLong())).thenReturn(STANDBY_BUCKET_ACTIVE);
         doReturn(Looper.getMainLooper()).when(Looper::myLooper);
 
         when(mMockContext.getContentResolver()).thenReturn(mMockResolver);
@@ -290,10 +298,19 @@ public class AlarmManagerServiceTest {
         assertEquals(0, mService.mConstants.MIN_FUTURITY);
         assertEquals(0, mService.mConstants.MIN_INTERVAL);
         mAppStandbyWindow = mService.mConstants.APP_STANDBY_WINDOW;
-        ArgumentCaptor<UsageStatsManagerInternal.AppIdleStateChangeListener> captor =
-                ArgumentCaptor.forClass(UsageStatsManagerInternal.AppIdleStateChangeListener.class);
-        verify(mUsageStatsManagerInternal).addAppIdleStateChangeListener(captor.capture());
+        ArgumentCaptor<AppStandbyInternal.AppIdleStateChangeListener> captor =
+                ArgumentCaptor.forClass(AppStandbyInternal.AppIdleStateChangeListener.class);
+        verify(mAppStandbyInternal).addListener(captor.capture());
         mAppStandbyListener = captor.getValue();
+
+        ArgumentCaptor<AlarmManagerService.ChargingReceiver> chargingReceiverCaptor =
+                ArgumentCaptor.forClass(AlarmManagerService.ChargingReceiver.class);
+        verify(mMockContext).registerReceiver(chargingReceiverCaptor.capture(),
+                argThat((filter) -> filter.hasAction(BatteryManager.ACTION_CHARGING)
+                        && filter.hasAction(BatteryManager.ACTION_DISCHARGING)));
+        mChargingReceiver = chargingReceiverCaptor.getValue();
+
+        setTestableQuotas();
     }
 
     private void setTestAlarm(int type, long triggerTime, PendingIntent operation) {
@@ -331,9 +348,10 @@ public class AlarmManagerServiceTest {
     }
 
     /**
-     * Careful while calling as this will replace any existing settings for the calling test.
+     * Lowers quotas to make testing feasible. Careful while calling as this will replace any
+     * existing settings for the calling test.
      */
-    private void setQuotasEnabled(boolean enabled) {
+    private void setTestableQuotas() {
         final StringBuilder constantsBuilder = new StringBuilder();
         constantsBuilder.append(KEY_MIN_FUTURITY);
         constantsBuilder.append("=0,");
@@ -342,14 +360,9 @@ public class AlarmManagerServiceTest {
         constantsBuilder.append("=8,");
         constantsBuilder.append(mService.mConstants.KEYS_APP_STANDBY_QUOTAS[WORKING_INDEX]);
         constantsBuilder.append("=5,");
-        if (!enabled) {
-            constantsBuilder.append(KEY_APP_STANDBY_QUOTAS_ENABLED);
-            constantsBuilder.append("=false,");
-        }
         doReturn(constantsBuilder.toString()).when(() -> Settings.Global.getString(mMockResolver,
                 Settings.Global.ALARM_MANAGER_CONSTANTS));
         mService.mConstants.onChange(false, null);
-        assertEquals(mService.mConstants.APP_STANDBY_QUOTAS_ENABLED, enabled);
     }
 
     @Test
@@ -448,6 +461,19 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
+    public void testMinFuturityCoreUid() {
+        doReturn("min_futurity=10").when(() ->
+                Settings.Global.getString(mMockResolver, Settings.Global.ALARM_MANAGER_CONSTANTS));
+        mService.mConstants.onChange(false, null);
+        assertEquals(10, mService.mConstants.MIN_FUTURITY);
+        final long triggerTime = mNowElapsedTest + 1;
+        doReturn(true).when(() -> UserHandle.isCore(TEST_CALLING_UID));
+        final long expectedTriggerTime = triggerTime;
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, triggerTime, getNewMockPendingIntent());
+        assertEquals(expectedTriggerTime, mTestTimer.getElapsed());
+    }
+
+    @Test
     public void testEarliestAlarmSet() {
         final PendingIntent pi6 = getNewMockPendingIntent();
         final PendingIntent pi8 = getNewMockPendingIntent();
@@ -469,82 +495,21 @@ public class AlarmManagerServiceTest {
         assertEquals(mNowElapsedTest + 9, mTestTimer.getElapsed());
     }
 
-    @Test
-    public void testStandbyBucketDelay_workingSet() throws Exception {
-        setQuotasEnabled(false);
-        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 5, getNewMockPendingIntent());
-        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 6, getNewMockPendingIntent());
-        assertEquals(mNowElapsedTest + 5, mTestTimer.getElapsed());
-
-        when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE), anyInt(),
-                anyLong())).thenReturn(STANDBY_BUCKET_WORKING_SET);
-
-        mNowElapsedTest = mTestTimer.getElapsed();
-        mTestTimer.expire();
-
-        verify(mUsageStatsManagerInternal, atLeastOnce())
-                .getAppStandbyBucket(eq(TEST_CALLING_PACKAGE),
-                        eq(UserHandle.getUserId(TEST_CALLING_UID)), anyLong());
-        final long expectedNextTrigger = mNowElapsedTest
-                + mService.getMinDelayForBucketLocked(STANDBY_BUCKET_WORKING_SET);
-        assertEquals("Incorrect next alarm trigger", expectedNextTrigger, mTestTimer.getElapsed());
-    }
-
-    @Test
-    public void testStandbyBucketDelay_frequent() throws Exception {
-        setQuotasEnabled(false);
-        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 5, getNewMockPendingIntent());
-        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 6, getNewMockPendingIntent());
-        assertEquals(mNowElapsedTest + 5, mTestTimer.getElapsed());
-
-        when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE), anyInt(),
-                anyLong())).thenReturn(STANDBY_BUCKET_FREQUENT);
-        mNowElapsedTest = mTestTimer.getElapsed();
-        mTestTimer.expire();
-
-        verify(mUsageStatsManagerInternal, atLeastOnce())
-                .getAppStandbyBucket(eq(TEST_CALLING_PACKAGE),
-                        eq(UserHandle.getUserId(TEST_CALLING_UID)), anyLong());
-        final long expectedNextTrigger = mNowElapsedTest
-                + mService.getMinDelayForBucketLocked(STANDBY_BUCKET_FREQUENT);
-        assertEquals("Incorrect next alarm trigger.", expectedNextTrigger, mTestTimer.getElapsed());
-    }
-
-    @Test
-    public void testStandbyBucketDelay_rare() throws Exception {
-        setQuotasEnabled(false);
-        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 5, getNewMockPendingIntent());
-        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 6, getNewMockPendingIntent());
-        assertEquals(mNowElapsedTest + 5, mTestTimer.getElapsed());
-
-        when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE), anyInt(),
-                anyLong())).thenReturn(STANDBY_BUCKET_RARE);
-        mNowElapsedTest = mTestTimer.getElapsed();
-        mTestTimer.expire();
-
-        verify(mUsageStatsManagerInternal, atLeastOnce())
-                .getAppStandbyBucket(eq(TEST_CALLING_PACKAGE),
-                        eq(UserHandle.getUserId(TEST_CALLING_UID)), anyLong());
-        final long expectedNextTrigger = mNowElapsedTest
-                + mService.getMinDelayForBucketLocked(STANDBY_BUCKET_RARE);
-        assertEquals("Incorrect next alarm trigger.", expectedNextTrigger, mTestTimer.getElapsed());
-    }
-
     private void testQuotasDeferralOnSet(int standbyBucket) throws Exception {
         final int quota = mService.getQuotaForBucketLocked(standbyBucket);
         when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE), anyInt(),
                 anyLong())).thenReturn(standbyBucket);
         final long firstTrigger = mNowElapsedTest + 10;
         for (int i = 0; i < quota; i++) {
-            setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 10 + i,
+            setTestAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + i,
                     getNewMockPendingIntent());
             mNowElapsedTest = mTestTimer.getElapsed();
             mTestTimer.expire();
         }
         // This one should get deferred on set
-        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + quota + 10,
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + quota,
                 getNewMockPendingIntent());
-        final long expectedNextTrigger = firstTrigger + 1 + mAppStandbyWindow;
+        final long expectedNextTrigger = firstTrigger + mAppStandbyWindow;
         assertEquals("Incorrect next alarm trigger", expectedNextTrigger, mTestTimer.getElapsed());
     }
 
@@ -554,17 +519,17 @@ public class AlarmManagerServiceTest {
                 anyLong())).thenReturn(standbyBucket);
         final long firstTrigger = mNowElapsedTest + 10;
         for (int i = 0; i < quota; i++) {
-            setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 10 + i,
+            setTestAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + i,
                     getNewMockPendingIntent());
         }
         // This one should get deferred after the latest alarm expires
-        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + quota + 10,
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + quota,
                 getNewMockPendingIntent());
         for (int i = 0; i < quota; i++) {
             mNowElapsedTest = mTestTimer.getElapsed();
             mTestTimer.expire();
         }
-        final long expectedNextTrigger = firstTrigger + 1 + mAppStandbyWindow;
+        final long expectedNextTrigger = firstTrigger + mAppStandbyWindow;
         assertEquals("Incorrect next alarm trigger", expectedNextTrigger, mTestTimer.getElapsed());
     }
 
@@ -589,74 +554,99 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void testActiveQuota_deferredOnSet() throws Exception {
-        setQuotasEnabled(true);
         testQuotasDeferralOnSet(STANDBY_BUCKET_ACTIVE);
     }
 
     @Test
     public void testActiveQuota_deferredOnExpiration() throws Exception {
-        setQuotasEnabled(true);
         testQuotasDeferralOnExpiration(STANDBY_BUCKET_ACTIVE);
     }
 
     @Test
     public void testActiveQuota_notDeferred() throws Exception {
-        setQuotasEnabled(true);
         testQuotasNoDeferral(STANDBY_BUCKET_ACTIVE);
     }
 
     @Test
     public void testWorkingQuota_deferredOnSet() throws Exception {
-        setQuotasEnabled(true);
         testQuotasDeferralOnSet(STANDBY_BUCKET_WORKING_SET);
     }
 
     @Test
     public void testWorkingQuota_deferredOnExpiration() throws Exception {
-        setQuotasEnabled(true);
         testQuotasDeferralOnExpiration(STANDBY_BUCKET_WORKING_SET);
     }
 
     @Test
     public void testWorkingQuota_notDeferred() throws Exception {
-        setQuotasEnabled(true);
         testQuotasNoDeferral(STANDBY_BUCKET_WORKING_SET);
     }
 
     @Test
     public void testFrequentQuota_deferredOnSet() throws Exception {
-        setQuotasEnabled(true);
         testQuotasDeferralOnSet(STANDBY_BUCKET_FREQUENT);
     }
 
     @Test
     public void testFrequentQuota_deferredOnExpiration() throws Exception {
-        setQuotasEnabled(true);
         testQuotasDeferralOnExpiration(STANDBY_BUCKET_FREQUENT);
     }
 
     @Test
     public void testFrequentQuota_notDeferred() throws Exception {
-        setQuotasEnabled(true);
         testQuotasNoDeferral(STANDBY_BUCKET_FREQUENT);
     }
 
     @Test
     public void testRareQuota_deferredOnSet() throws Exception {
-        setQuotasEnabled(true);
         testQuotasDeferralOnSet(STANDBY_BUCKET_RARE);
     }
 
     @Test
     public void testRareQuota_deferredOnExpiration() throws Exception {
-        setQuotasEnabled(true);
         testQuotasDeferralOnExpiration(STANDBY_BUCKET_RARE);
     }
 
     @Test
     public void testRareQuota_notDeferred() throws Exception {
-        setQuotasEnabled(true);
         testQuotasNoDeferral(STANDBY_BUCKET_RARE);
+    }
+
+    @Test
+    public void testRestrictedBucketAlarmsDeferredOnSet() throws Exception {
+        when(mUsageStatsManagerInternal
+                .getAppStandbyBucket(eq(TEST_CALLING_PACKAGE), anyInt(), anyLong()))
+                .thenReturn(STANDBY_BUCKET_RESTRICTED);
+        // This one should go off
+        final long firstTrigger = mNowElapsedTest + 10;
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger, getNewMockPendingIntent());
+        mNowElapsedTest = mTestTimer.getElapsed();
+        mTestTimer.expire();
+
+        // This one should get deferred on set
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + 1, getNewMockPendingIntent());
+        final long expectedNextTrigger =
+                firstTrigger + mService.mConstants.APP_STANDBY_RESTRICTED_WINDOW;
+        assertEquals("Incorrect next alarm trigger", expectedNextTrigger, mTestTimer.getElapsed());
+    }
+
+    @Test
+    public void testRestrictedBucketAlarmsDeferredOnExpiration() throws Exception {
+        when(mUsageStatsManagerInternal
+                .getAppStandbyBucket(eq(TEST_CALLING_PACKAGE), anyInt(), anyLong()))
+                .thenReturn(STANDBY_BUCKET_RESTRICTED);
+        // This one should go off
+        final long firstTrigger = mNowElapsedTest + 10;
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger, getNewMockPendingIntent());
+
+        // This one should get deferred after the latest alarm expires
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + 1, getNewMockPendingIntent());
+
+        mNowElapsedTest = mTestTimer.getElapsed();
+        mTestTimer.expire();
+        final long expectedNextTrigger =
+                firstTrigger + mService.mConstants.APP_STANDBY_RESTRICTED_WINDOW;
+        assertEquals("Incorrect next alarm trigger", expectedNextTrigger, mTestTimer.getElapsed());
     }
 
     private void assertAndHandleBucketChanged(int bucket) {
@@ -678,7 +668,6 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void testQuotaDowngrade() throws Exception {
-        setQuotasEnabled(true);
         final int workingQuota = mService.getQuotaForBucketLocked(STANDBY_BUCKET_WORKING_SET);
         when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE), anyInt(),
                 anyLong())).thenReturn(STANDBY_BUCKET_WORKING_SET);
@@ -700,13 +689,12 @@ public class AlarmManagerServiceTest {
         final int rareQuota = mService.getQuotaForBucketLocked(STANDBY_BUCKET_RARE);
         // The last alarm should now be deferred.
         final long expectedNextTrigger = (firstTrigger + workingQuota - 1 - rareQuota)
-                + mAppStandbyWindow + 1;
+                + mAppStandbyWindow;
         assertEquals("Incorrect next alarm trigger", expectedNextTrigger, mTestTimer.getElapsed());
     }
 
     @Test
     public void testQuotaUpgrade() throws Exception {
-        setQuotasEnabled(true);
         final int frequentQuota = mService.getQuotaForBucketLocked(STANDBY_BUCKET_FREQUENT);
         when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE), anyInt(),
                 anyLong())).thenReturn(STANDBY_BUCKET_FREQUENT);
@@ -720,7 +708,7 @@ public class AlarmManagerServiceTest {
             }
         }
         // The last alarm should be deferred due to exceeding the quota
-        final long deferredTrigger = firstTrigger + 1 + mAppStandbyWindow;
+        final long deferredTrigger = firstTrigger + mAppStandbyWindow;
         assertEquals(deferredTrigger, mTestTimer.getElapsed());
 
         // Upgrading the bucket now
@@ -731,13 +719,14 @@ public class AlarmManagerServiceTest {
     }
 
     private void assertAndHandleParoleChanged(boolean parole) {
-        mAppStandbyListener.onParoleStateChanged(parole);
-        assertAndHandleMessageSync(APP_STANDBY_PAROLE_CHANGED);
+        mChargingReceiver.onReceive(mMockContext,
+                new Intent(parole ? BatteryManager.ACTION_CHARGING
+                        : BatteryManager.ACTION_DISCHARGING));
+        assertAndHandleMessageSync(CHARGING_STATUS_CHANGED);
     }
 
     @Test
-    public void testParole() throws Exception {
-        setQuotasEnabled(true);
+    public void testCharging() throws Exception {
         final int workingQuota = mService.getQuotaForBucketLocked(STANDBY_BUCKET_WORKING_SET);
         when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE), anyInt(),
                 anyLong())).thenReturn(STANDBY_BUCKET_WORKING_SET);
@@ -754,7 +743,7 @@ public class AlarmManagerServiceTest {
             mTestTimer.expire();
         }
         // Any subsequent alarms in queue should all be deferred
-        assertEquals(firstTrigger + mAppStandbyWindow + 1, mTestTimer.getElapsed());
+        assertEquals(firstTrigger + mAppStandbyWindow, mTestTimer.getElapsed());
         // Paroling now
         assertAndHandleParoleChanged(true);
 
@@ -768,7 +757,7 @@ public class AlarmManagerServiceTest {
         assertAndHandleParoleChanged(false);
 
         // Subsequent alarms should again get deferred
-        final long expectedNextTrigger = (firstTrigger + 5) + 1 + mAppStandbyWindow;
+        final long expectedNextTrigger = (firstTrigger + 5) + mAppStandbyWindow;
         assertEquals("Incorrect next alarm trigger", expectedNextTrigger, mTestTimer.getElapsed());
     }
 
@@ -1043,6 +1032,25 @@ public class AlarmManagerServiceTest {
         ami.remove(pi);
         assertAndHandleMessageSync(REMOVE_FOR_CANCELED);
         assertEquals(0, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
+    }
+
+    @Test
+    public void alarmCountOnListenerBinderDied() {
+        final int numAlarms = 10;
+        final IAlarmListener[] listeners = new IAlarmListener[numAlarms];
+        for (int i = 0; i < numAlarms; i++) {
+            listeners[i] = new IAlarmListener.Stub() {
+                @Override
+                public void doAlarm(IAlarmCompleteListener callback) throws RemoteException {
+                }
+            };
+            setTestAlarmWithListener(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + i, listeners[i]);
+        }
+        assertEquals(numAlarms, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
+        for (int i = 0; i < numAlarms; i++) {
+            mService.mListenerDeathRecipient.binderDied(listeners[i].asBinder());
+            assertEquals(numAlarms - i - 1, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
+        }
     }
 
     @After

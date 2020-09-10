@@ -1,0 +1,6 @@
+java_library_static {
+    name: "services.people",
+    defaults: ["services_defaults"],
+    srcs: ["java/**/*.java"],
+    libs: ["services.core"],
+}

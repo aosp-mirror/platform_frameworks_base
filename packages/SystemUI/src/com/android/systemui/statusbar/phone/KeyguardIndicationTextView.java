@@ -27,6 +27,8 @@ import android.widget.TextView;
  */
 public class KeyguardIndicationTextView extends TextView {
 
+    private CharSequence mText = "";
+
     public KeyguardIndicationTextView(Context context) {
         super(context);
     }
@@ -53,10 +55,12 @@ public class KeyguardIndicationTextView extends TextView {
 
         // TODO: Animation, make sure that we will show one indication long enough.
         if (TextUtils.isEmpty(text)) {
+            mText = "";
             setVisibility(View.INVISIBLE);
-        } else {
+        } else if (!TextUtils.equals(text, mText)) {
+            mText = text;
             setVisibility(View.VISIBLE);
-            setText(text);
+            setText(mText);
         }
     }
 

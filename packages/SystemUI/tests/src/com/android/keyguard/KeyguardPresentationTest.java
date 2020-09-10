@@ -16,32 +16,88 @@
 
 package com.android.keyguard;
 
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardDisplayManager.KeyguardPresentation;
+import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.InjectionInflationController;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class KeyguardPresentationTest extends SysuiTestCase {
-    @Test
-    public void testInflation_doesntCrash() {
-        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
+
+    @Mock
+    KeyguardClockSwitch mMockKeyguardClockSwitch;
+    @Mock
+    KeyguardSliceView mMockKeyguardSliceView;
+    @Mock
+    KeyguardStatusView mMockKeyguardStatusView;
+
+    LayoutInflater mLayoutInflater;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
+        when(mMockKeyguardClockSwitch.getContext()).thenReturn(mContext);
+        when(mMockKeyguardSliceView.getContext()).thenReturn(mContext);
+        when(mMockKeyguardStatusView.getContext()).thenReturn(mContext);
+        when(mMockKeyguardStatusView.findViewById(R.id.clock)).thenReturn(mMockKeyguardStatusView);
+        allowTestableLooperAsMainThread();
+
         InjectionInflationController inflationController = new InjectionInflationController(
                 SystemUIFactory.getInstance().getRootComponent());
-        Context context = getContext();
-        KeyguardPresentation keyguardPresentation =
-                new KeyguardPresentation(context, context.getDisplay(), inflationController);
+        mLayoutInflater = inflationController.injectable(LayoutInflater.from(mContext));
+        mLayoutInflater.setPrivateFactory(new LayoutInflater.Factory2() {
+
+            @Override
+            public View onCreateView(View parent, String name, Context context,
+                    AttributeSet attrs) {
+                return onCreateView(name, context, attrs);
+            }
+
+            @Override
+            public View onCreateView(String name, Context context, AttributeSet attrs) {
+                if ("com.android.keyguard.KeyguardStatusView".equals(name)) {
+                    return mMockKeyguardStatusView;
+                } else if ("com.android.keyguard.KeyguardClockSwitch".equals(name)) {
+                    return mMockKeyguardClockSwitch;
+                } else if ("com.android.keyguard.KeyguardSliceView".equals(name)) {
+                    return mMockKeyguardStatusView;
+                }
+                return null;
+            }
+        });
+    }
+
+    @After
+    public void tearDown() {
+        disallowTestableLooperAsMainThread();
+    }
+
+    @Test
+    public void testInflation_doesntCrash() {
+        KeyguardPresentation keyguardPresentation = new KeyguardPresentation(mContext,
+                mContext.getDisplayNoVerify(), mLayoutInflater);
         keyguardPresentation.onCreate(null /*savedInstanceState */);
     }
 }

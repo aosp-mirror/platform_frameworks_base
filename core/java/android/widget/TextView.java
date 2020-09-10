@@ -17,12 +17,14 @@
 package android.widget;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_RENDERING_INFO_KEY;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
 import static android.view.inputmethod.CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
 
 import android.R;
+import android.annotation.CallSuper;
 import android.annotation.CheckResult;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
@@ -344,6 +346,8 @@ import java.util.function.Supplier;
 public class TextView extends View implements ViewTreeObserver.OnPreDrawListener {
     static final String LOG_TAG = "TextView";
     static final boolean DEBUG_EXTRACT = false;
+    static final boolean DEBUG_CURSOR = false;
+
     private static final float[] TEMP_POSITION = new float[2];
 
     // Enum for the "typeface" XML parameter.
@@ -724,6 +728,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @UnsupportedAppUsage
     private Layout mLayout;
     private boolean mLocalesChanged = false;
+    private int mTextSizeUnit = -1;
 
     // True if setKeyListener() has been explicitly called
     private boolean mListenerChanged = false;
@@ -850,6 +855,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     int mTextEditSuggestionContainerLayout;
     int mTextEditSuggestionHighlightStyle;
 
+    private static final int NO_POINTER_ID = -1;
+    /**
+     * The prime (the 1st finger) pointer id which is used as a lock to prevent multi touch among
+     * TextView and the handle views which are rendered on popup windows.
+     */
+    private int mPrimePointerId = NO_POINTER_ID;
+
+    /**
+     * Whether the prime pointer is from the event delivered to selection handle or insertion
+     * handle.
+     */
+    private boolean mIsPrimePointerFromHandleView;
+
     /**
      * {@link EditText} specific data, created on demand when one of the Editor fields is used.
      * See {@link #createEditorIfNeeded()}.
@@ -918,6 +936,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mTextSetFromXmlOrResourceId = false;
     // Resource id used to set the text.
     private @StringRes int mTextId = Resources.ID_NULL;
+    // Resource id used to set the hint.
+    private @StringRes int mHintId = Resources.ID_NULL;
     //
     // End of autofill-related attributes
 
@@ -1210,6 +1230,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     break;
 
                 case com.android.internal.R.styleable.TextView_hint:
+                    mHintId = a.getResourceId(attr, Resources.ID_NULL);
                     hint = a.getText(attr);
                     break;
 
@@ -3264,7 +3285,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Applies a tint to the compound drawables. Does not modify the
-     * current tint mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+     * current tint mode, which is {@link BlendMode#SRC_IN} by default.
      * <p>
      * Subsequent calls to
      * {@link #setCompoundDrawables(Drawable, Drawable, Drawable, Drawable)}
@@ -3836,6 +3857,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         ColorStateList mTextColorHint = null;
         ColorStateList mTextColorLink = null;
         int mTextSize = -1;
+        int mTextSizeUnit = -1;
         LocaleList mTextLocales = null;
         String mFontFamily = null;
         Typeface mFontTypeface = null;
@@ -3863,6 +3885,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     + "    mTextColorHint:" + mTextColorHint + "\n"
                     + "    mTextColorLink:" + mTextColorLink + "\n"
                     + "    mTextSize:" + mTextSize + "\n"
+                    + "    mTextSizeUnit:" + mTextSizeUnit + "\n"
                     + "    mTextLocales:" + mTextLocales + "\n"
                     + "    mFontFamily:" + mFontFamily + "\n"
                     + "    mFontTypeface:" + mFontTypeface + "\n"
@@ -3974,6 +3997,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 case com.android.internal.R.styleable.TextAppearance_textSize:
                     attributes.mTextSize =
                             appearance.getDimensionPixelSize(attr, attributes.mTextSize);
+                    attributes.mTextSizeUnit = appearance.peekValue(attr).getComplexUnit();
                     break;
                 case com.android.internal.R.styleable.TextAppearance_textLocale:
                     final String localeString = appearance.getString(attr);
@@ -4067,6 +4091,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (attributes.mTextSize != -1) {
+            mTextSizeUnit = attributes.mTextSizeUnit;
             setRawTextSize(attributes.mTextSize, true /* shouldRequestLayout */);
         }
 
@@ -4289,6 +4314,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             r = c.getResources();
         }
 
+        mTextSizeUnit = unit;
         setRawTextSize(TypedValue.applyDimension(unit, size, r.getDisplayMetrics()),
                 shouldRequestLayout);
     }
@@ -4306,6 +4332,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 invalidate();
             }
         }
+    }
+
+    /**
+     * Gets the text size unit defined by the developer. It may be specified in resources or be
+     * passed as the unit argument of {@link #setTextSize(int, float)} at runtime.
+     *
+     * @return the dimension type of the text size unit originally defined.
+     * @see TypedValue#TYPE_DIMENSION
+     */
+    public int getTextSizeUnit() {
+        return mTextSizeUnit;
     }
 
     /**
@@ -6446,6 +6483,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @android.view.RemotableViewMethod
     public final void setHint(@StringRes int resid) {
+        mHintId = resid;
         setHint(getContext().getResources().getText(resid));
     }
 
@@ -8277,23 +8315,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return false;
     }
 
-    /**
-     * Returns true if pressing TAB in this field advances focus instead
-     * of inserting the character.  Insert tabs only in multi-line editors.
-     */
-    private boolean shouldAdvanceFocusOnTab() {
-        if (getKeyListener() != null && !mSingleLine && mEditor != null
-                && (mEditor.mInputType & EditorInfo.TYPE_MASK_CLASS)
-                        == EditorInfo.TYPE_CLASS_TEXT) {
-            int variation = mEditor.mInputType & EditorInfo.TYPE_MASK_VARIATION;
-            if (variation == EditorInfo.TYPE_TEXT_FLAG_IME_MULTI_LINE
-                    || variation == EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     private boolean isDirectionalNavigationKey(int keyCode) {
         switch(keyCode) {
             case KeyEvent.KEYCODE_DPAD_UP:
@@ -8321,6 +8342,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENTER:
+            case KeyEvent.KEYCODE_NUMPAD_ENTER:
                 if (event.hasNoModifiers()) {
                     // When mInputContentType is set, we know that we are
                     // running in a "modern" cupcake environment, so don't need
@@ -8361,9 +8383,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case KeyEvent.KEYCODE_TAB:
                 if (event.hasNoModifiers() || event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
-                    if (shouldAdvanceFocusOnTab()) {
-                        return KEY_EVENT_NOT_HANDLED;
-                    }
+                    // Tab is used to move focus.
+                    return KEY_EVENT_NOT_HANDLED;
                 }
                 break;
 
@@ -8548,6 +8569,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return super.onKeyUp(keyCode, event);
 
             case KeyEvent.KEYCODE_ENTER:
+            case KeyEvent.KEYCODE_NUMPAD_ENTER:
                 if (event.hasNoModifiers()) {
                     if (mEditor != null && mEditor.mInputContentType != null
                             && mEditor.mInputContentType.onEditorActionListener != null
@@ -8671,6 +8693,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 outAttrs.initialSelStart = getSelectionStart();
                 outAttrs.initialSelEnd = getSelectionEnd();
                 outAttrs.initialCapsMode = ic.getCursorCapsMode(getInputType());
+                outAttrs.setInitialSurroundingText(mText);
                 return ic;
             }
         }
@@ -10452,10 +10475,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * This method is called when the selection has changed, in case any
      * subclasses would like to know.
+     * </p>
+     * <p class="note"><strong>Note:</strong> Always call the super implementation, which informs
+     * the accessibility subsystem about the selection change.
+     * </p>
      *
      * @param selStart The new selection start location.
      * @param selEnd The new selection end location.
      */
+    @CallSuper
     protected void onSelectionChanged(int selStart, int selEnd) {
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED);
     }
@@ -10855,12 +10883,57 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    /**
+     * Called from onTouchEvent() to prevent the touches by secondary fingers.
+     * Dragging on handles can revise cursor/selection, so can dragging on the text view.
+     * This method is a lock to avoid processing multiple fingers on both text view and handles.
+     * Note: multiple fingers on handles (e.g. 2 fingers on the 2 selection handles) should work.
+     *
+     * @param event The motion event that is being handled and carries the pointer info.
+     * @param fromHandleView true if the event is delivered to selection handle or insertion
+     * handle; false if this event is delivered to TextView.
+     * @return Returns true to indicate that onTouchEvent() can continue processing the motion
+     * event, otherwise false.
+     *  - Always returns true for the first finger.
+     *  - For secondary fingers, if the first or current finger is from TextView, returns false.
+     *    This is to make touch mutually exclusive between the TextView and the handles, but
+     *    not among the handles.
+     */
+    boolean isFromPrimePointer(MotionEvent event, boolean fromHandleView) {
+        boolean res = true;
+        if (mPrimePointerId == NO_POINTER_ID)  {
+            mPrimePointerId = event.getPointerId(0);
+            mIsPrimePointerFromHandleView = fromHandleView;
+        } else if (mPrimePointerId != event.getPointerId(0)) {
+            res = mIsPrimePointerFromHandleView && fromHandleView;
+        }
+        if (event.getActionMasked() == MotionEvent.ACTION_UP
+            || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+            mPrimePointerId = -1;
+        }
+        return res;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (DEBUG_CURSOR) {
+            logCursor("onTouchEvent", "%d: %s (%f,%f)",
+                    event.getSequenceNumber(),
+                    MotionEvent.actionToString(event.getActionMasked()),
+                    event.getX(), event.getY());
+        }
+        if (!isFromPrimePointer(event, false)) {
+            return true;
+        }
+
         final int action = event.getActionMasked();
         if (mEditor != null) {
             mEditor.onTouchEvent(event);
 
+            if (mEditor.mInsertionPointCursorController != null
+                    && mEditor.mInsertionPointCursorController.isCursorBeingModified()) {
+                return true;
+            }
             if (mEditor.mSelectionModifierCursorController != null
                     && mEditor.mSelectionModifierCursorController.isDragAcceleratorActive()) {
                 return true;
@@ -10868,6 +10941,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         final boolean superResult = super.onTouchEvent(event);
+        if (DEBUG_CURSOR) {
+            logCursor("onTouchEvent", "superResult=%s", superResult);
+        }
 
         /*
          * Don't handle the release after a long press, because it will move the selection away from
@@ -10876,7 +10952,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
          */
         if (mEditor != null && mEditor.mDiscardNextActionUp && action == MotionEvent.ACTION_UP) {
             mEditor.mDiscardNextActionUp = false;
-
+            if (DEBUG_CURSOR) {
+                logCursor("onTouchEvent", "release after long press detected");
+            }
             if (mEditor.mIsInsertionActionModeStartPending) {
                 mEditor.startInsertionActionMode();
                 mEditor.mIsInsertionActionModeStartPending = false;
@@ -11608,6 +11686,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 structure.setMaxTextLength(maxLength);
             }
         }
+        if (mHintId != Resources.ID_NULL) {
+            try {
+                structure.setHintIdEntry(getResources().getResourceEntryName(mHintId));
+            } catch (Resources.NotFoundException e) {
+                if (android.view.autofill.Helper.sVerbose) {
+                    Log.v(LOG_TAG, "onProvideAutofillStructure(): cannot set name for hint id "
+                            + mHintId + ": " + e.getMessage());
+                }
+            }
+        }
         structure.setHint(getHint());
         structure.setInputType(getInputType());
     }
@@ -11712,6 +11800,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 info.setContentInvalid(true);
                 info.setError(mEditor.mError);
             }
+            // TextView will expose this action if it is editable and has focus.
+            if (isTextEditable() && isFocused()) {
+                CharSequence imeActionLabel = mContext.getResources().getString(
+                        com.android.internal.R.string.keyboardview_keycode_enter);
+                if (getImeActionLabel() != null) {
+                    imeActionLabel = getImeActionLabel();
+                }
+                AccessibilityNodeInfo.AccessibilityAction action =
+                        new AccessibilityNodeInfo.AccessibilityAction(
+                                R.id.accessibilityActionImeEnter, imeActionLabel);
+                info.addAction(action);
+            }
         }
 
         if (!TextUtils.isEmpty(mText)) {
@@ -11723,8 +11823,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PARAGRAPH
                     | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PAGE);
             info.addAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
-            info.setAvailableExtraData(
-                    Arrays.asList(EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY));
+            info.setAvailableExtraData(Arrays.asList(
+                    EXTRA_DATA_RENDERING_INFO_KEY,
+                    EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
+            ));
+        } else {
+            info.setAvailableExtraData(Arrays.asList(
+                    EXTRA_DATA_RENDERING_INFO_KEY
+            ));
         }
 
         if (isFocused()) {
@@ -11759,16 +11865,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (!isSingleLine()) {
             info.setMultiLine(true);
         }
+
+        // A view should not be exposed as clickable/long-clickable to a service because of a
+        // LinkMovementMethod.
+        if ((info.isClickable() || info.isLongClickable())
+                && mMovement instanceof LinkMovementMethod) {
+            if (!hasOnClickListeners()) {
+                info.setClickable(false);
+                info.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK);
+            }
+            if (!hasOnLongClickListeners()) {
+                info.setLongClickable(false);
+                info.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK);
+            }
+        }
     }
 
     @Override
     public void addExtraDataToAccessibilityNodeInfo(
             AccessibilityNodeInfo info, String extraDataKey, Bundle arguments) {
-        // The only extra data we support requires arguments.
-        if (arguments == null) {
-            return;
-        }
-        if (extraDataKey.equals(EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY)) {
+        if (arguments != null && extraDataKey.equals(EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY)) {
             int positionInfoStartIndex = arguments.getInt(
                     EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX, -1);
             int positionInfoLength = arguments.getInt(
@@ -11796,6 +11912,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
             info.getExtras().putParcelableArray(extraDataKey, boundingRects);
+            return;
+        }
+        if (extraDataKey.equals(AccessibilityNodeInfo.EXTRA_DATA_RENDERING_INFO_KEY)) {
+            final AccessibilityNodeInfo.ExtraRenderingInfo extraRenderingInfo =
+                    AccessibilityNodeInfo.ExtraRenderingInfo.obtain();
+            extraRenderingInfo.setLayoutSize(getLayoutParams().width, getLayoutParams().height);
+            extraRenderingInfo.setTextSizeInPx(getTextSize());
+            extraRenderingInfo.setTextSizeUnit(getTextSizeUnit());
+            info.setExtraRenderingInfo(extraRenderingInfo);
         }
     }
 
@@ -12009,6 +12134,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                 }
             } return true;
+            case R.id.accessibilityActionImeEnter: {
+                if (isFocused() && isTextEditable()) {
+                    onEditorAction(getImeActionId());
+                }
+            } return true;
+            case AccessibilityNodeInfo.ACTION_LONG_CLICK: {
+                if (isLongClickable()) {
+                    boolean handled;
+                    if (isEnabled() && (mBufferType == BufferType.EDITABLE)) {
+                        mEditor.mIsBeingLongClickedByAccessibility = true;
+                        try {
+                            handled = performLongClick();
+                        } finally {
+                            mEditor.mIsBeingLongClickedByAccessibility = false;
+                        }
+                    } else {
+                        handled = performLongClick();
+                    }
+                    return handled;
+                }
+            }
+            return false;
             default: {
                 return super.performAccessibilityActionInternal(action, arguments);
             }
@@ -12230,6 +12377,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public boolean performLongClick() {
+        if (DEBUG_CURSOR) {
+            logCursor("performLongClick", null);
+        }
+
         boolean handled = false;
         boolean performedHapticFeedback = false;
 
@@ -12458,7 +12609,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return getTextClassifier() == TextClassifier.NO_OP;
     }
 
-
     /**
      * Starts an ActionMode for the specified TextLinkSpan.
      *
@@ -12502,7 +12652,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         .setDefaultLocales(getTextLocales())
                         .build();
                 final Supplier<TextClassification> supplier = () ->
-                        getTextClassifier().classifyText(request);
+                        getTextClassificationSession().classifyText(request);
                 final Consumer<TextClassification> consumer = classification -> {
                     if (classification != null) {
                         if (!classification.getActions().isEmpty()) {
@@ -13070,7 +13220,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         stream.addProperty("text:selectionStart", getSelectionStart());
         stream.addProperty("text:selectionEnd", getSelectionEnd());
         stream.addProperty("text:curTextColor", mCurTextColor);
-        stream.addProperty("text:text", mText == null ? null : mText.toString());
+        stream.addUserProperty("text:text", mText == null ? null : mText.toString());
         stream.addProperty("text:gravity", mGravity);
     }
 
@@ -13455,6 +13605,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 Log.v(LOG_TAG, "onSpanRemoved s=" + s + " e=" + e + " what=" + what + ": " + buf);
             }
             TextView.this.spanChange(buf, what, s, -1, e, -1);
+        }
+    }
+
+    private static void logCursor(String location, @Nullable String msgFormat, Object ... msgArgs) {
+        if (msgFormat == null) {
+            Log.d(LOG_TAG, location);
+        } else {
+            Log.d(LOG_TAG, location + ": " + String.format(msgFormat, msgArgs));
         }
     }
 }

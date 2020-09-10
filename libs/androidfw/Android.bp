@@ -67,7 +67,6 @@ cc_library {
                 "BackupData.cpp",
                 "BackupHelpers.cpp",
                 "CursorWindow.cpp",
-                "DisplayEventDispatcher.cpp",
             ],
             shared_libs: [
                 "libziparchive",
@@ -75,7 +74,6 @@ cc_library {
                 "libbinder",
                 "liblog",
                 "libcutils",
-                "libgui",
                 "libutils",
                 "libz",
             ],
@@ -166,7 +164,11 @@ cc_test {
             static_libs: common_test_libs + ["liblog", "libz"],
         },
     },
-    data: ["tests/data/**/*.apk"],
+    data: [
+        "tests/data/**/*.apk",
+        "tests/data/**/*.arsc",
+        "tests/data/**/*.idmap",
+    ],
     test_suites: ["device-tests"],
 }
 
@@ -188,4 +190,3 @@ cc_benchmark {
     shared_libs: common_test_libs,
     data: ["tests/data/**/*.apk"],
 }
-

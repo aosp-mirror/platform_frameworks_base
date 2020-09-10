@@ -16,6 +16,8 @@
 
 package com.android.internal.inputmethod;
 
+import android.annotation.AnyThread;
+import android.annotation.NonNull;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
@@ -25,6 +27,7 @@ import java.util.StringJoiner;
  * Provides useful methods for debugging.
  */
 public final class InputMethodDebug {
+
     /**
      * Not intended to be instantiated.
      */
@@ -43,8 +46,10 @@ public final class InputMethodDebug {
                 return "UNSPECIFIED";
             case StartInputReason.WINDOW_FOCUS_GAIN:
                 return "WINDOW_FOCUS_GAIN";
-            case StartInputReason.WINDOW_FOCUS_GAIN_REPORT_ONLY:
-                return "WINDOW_FOCUS_GAIN_REPORT_ONLY";
+            case StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION:
+                return "WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION";
+            case StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION:
+                return "WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION";
             case StartInputReason.APP_CALLED_RESTART_INPUT_API:
                 return "APP_CALLED_RESTART_INPUT_API";
             case StartInputReason.CHECK_FOCUS:
@@ -168,13 +173,77 @@ public final class InputMethodDebug {
         if ((startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0) {
             joiner.add("IS_TEXT_EDITOR");
         }
-        if ((startInputFlags & StartInputFlags.FIRST_WINDOW_FOCUS_GAIN) != 0) {
-            joiner.add("FIRST_WINDOW_FOCUS_GAIN");
-        }
         if ((startInputFlags & StartInputFlags.INITIAL_CONNECTION) != 0) {
             joiner.add("INITIAL_CONNECTION");
         }
 
         return joiner.setEmptyValue("(none)").toString();
+    }
+
+
+    /**
+     * Converts {@link SoftInputShowHideReason} to {@link String} for history dump.
+     */
+    public static String softInputDisplayReasonToString(@SoftInputShowHideReason int reason) {
+        switch (reason) {
+            case SoftInputShowHideReason.SHOW_SOFT_INPUT:
+                return "SHOW_SOFT_INPUT";
+            case SoftInputShowHideReason.ATTACH_NEW_INPUT:
+                return "ATTACH_NEW_INPUT";
+            case SoftInputShowHideReason.SHOW_MY_SOFT_INPUT:
+                return "SHOW_MY_SOFT_INPUT";
+            case SoftInputShowHideReason.HIDE_SOFT_INPUT:
+                return "HIDE_SOFT_INPUT";
+            case SoftInputShowHideReason.HIDE_MY_SOFT_INPUT:
+                return "HIDE_MY_SOFT_INPUT";
+            case SoftInputShowHideReason.SHOW_AUTO_EDITOR_FORWARD_NAV:
+                return "SHOW_AUTO_EDITOR_FORWARD_NAV";
+            case SoftInputShowHideReason.SHOW_STATE_VISIBLE_FORWARD_NAV:
+                return "SHOW_STATE_VISIBLE_FORWARD_NAV";
+            case SoftInputShowHideReason.SHOW_STATE_ALWAYS_VISIBLE:
+                return "SHOW_STATE_ALWAYS_VISIBLE";
+            case SoftInputShowHideReason.SHOW_SETTINGS_ON_CHANGE:
+                return "SHOW_SETTINGS_ON_CHANGE";
+            case SoftInputShowHideReason.HIDE_SWITCH_USER:
+                return "HIDE_SWITCH_USER";
+            case SoftInputShowHideReason.HIDE_INVALID_USER:
+                return "HIDE_INVALID_USER";
+            case SoftInputShowHideReason.HIDE_UNSPECIFIED_WINDOW:
+                return "HIDE_UNSPECIFIED_WINDOW";
+            case SoftInputShowHideReason.HIDE_STATE_HIDDEN_FORWARD_NAV:
+                return "HIDE_STATE_HIDDEN_FORWARD_NAV";
+            case SoftInputShowHideReason.HIDE_ALWAYS_HIDDEN_STATE:
+                return "HIDE_ALWAYS_HIDDEN_STATE";
+            case SoftInputShowHideReason.HIDE_RESET_SHELL_COMMAND:
+                return "HIDE_RESET_SHELL_COMMAND";
+            case SoftInputShowHideReason.HIDE_SETTINGS_ON_CHANGE:
+                return "HIDE_SETTINGS_ON_CHANGE";
+            case SoftInputShowHideReason.HIDE_POWER_BUTTON_GO_HOME:
+                return "HIDE_POWER_BUTTON_GO_HOME";
+            case SoftInputShowHideReason.HIDE_DOCKED_STACK_ATTACHED:
+                return "HIDE_DOCKED_STACK_ATTACHED";
+            case SoftInputShowHideReason.HIDE_RECENTS_ANIMATION:
+                return "HIDE_RECENTS_ANIMATION";
+            default:
+                return "Unknown=" + reason;
+        }
+    }
+
+    /**
+     * Return a fixed size string of the object.
+     * TODO(b/151575861): Take & return with StringBuilder to make more memory efficient.
+     */
+    @NonNull
+    @AnyThread
+    public static String objToString(Object obj) {
+        if (obj == null) {
+            return "null";
+        }
+        StringBuilder sb = new StringBuilder(64);
+        sb.setLength(0);
+        sb.append(obj.getClass().getName());
+        sb.append("@");
+        sb.append(Integer.toHexString(obj.hashCode()));
+        return sb.toString();
     }
 }

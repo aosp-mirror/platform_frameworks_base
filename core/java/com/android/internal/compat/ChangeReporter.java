@@ -19,10 +19,10 @@ package com.android.internal.compat;
 import android.annotation.IntDef;
 import android.util.Log;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -88,8 +88,8 @@ public final class ChangeReporter {
      */
     public void reportChange(int uid, long changeId, int state) {
         if (shouldWriteToStatsLog(uid, changeId, state)) {
-            StatsLog.write(StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED, uid, changeId,
-                    state, mSource);
+            FrameworkStatsLog.write(FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED, uid,
+                    changeId, state, mSource);
         }
         if (shouldWriteToDebug(uid, changeId, state)) {
             debugLog(uid, changeId, state);
@@ -113,7 +113,7 @@ public final class ChangeReporter {
 
 
     /**
-     * Returns whether the next report should be logged to statsLog.
+     * Returns whether the next report should be logged to FrameworkStatsLog.
      *
      * @param uid      affected by the change
      * @param changeId the reported change id
@@ -206,19 +206,19 @@ public final class ChangeReporter {
 
     /** These values should be kept in sync with those in atoms.proto */
     public static final int STATE_UNKNOWN_STATE =
-                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__UNKNOWN_STATE;
+                    FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__UNKNOWN_STATE;
     public static final int STATE_ENABLED =
-                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__ENABLED;
+                    FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__ENABLED;
     public static final int STATE_DISABLED =
-                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__DISABLED;
+                    FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__DISABLED;
     public static final int STATE_LOGGED =
-                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__LOGGED;
+                    FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__LOGGED;
     public static final int SOURCE_UNKNOWN_SOURCE =
-                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__UNKNOWN_SOURCE;
+                    FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__UNKNOWN_SOURCE;
     public static final int SOURCE_APP_PROCESS =
-                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__APP_PROCESS;
+                    FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__APP_PROCESS;
     public static final int SOURCE_SYSTEM_SERVER =
-                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER;
+                    FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "STATE_" }, value = {

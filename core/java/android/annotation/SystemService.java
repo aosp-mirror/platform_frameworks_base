@@ -19,14 +19,12 @@ package android.annotation;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import android.content.Context;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
  * Description of a system service available through
- * {@link Context#getSystemService(Class)}. This is used to auto-generate
+ * {@link android.content.Context#getSystemService(Class)}. This is used to auto-generate
  * documentation explaining how to obtain a reference to the service.
  *
  * @hide
@@ -36,9 +34,9 @@ import java.lang.annotation.Target;
 public @interface SystemService {
     /**
      * The string name of the system service that can be passed to
-     * {@link Context#getSystemService(String)}.
+     * {@link android.content.Context#getSystemService(String)}.
      *
-     * @see Context#getSystemServiceName(Class)
+     * @see android.content.Context#getSystemServiceName(Class)
      */
     String value();
 }

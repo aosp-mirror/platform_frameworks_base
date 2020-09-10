@@ -24,7 +24,6 @@ import android.app.IActivityManager;
 import android.app.IUidObserver;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
-import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -54,9 +53,12 @@ import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.StatLogger;
-import com.android.server.ForceAppStandbyTrackerProto.ExemptedPackage;
-import com.android.server.ForceAppStandbyTrackerProto.RunAnyInBackgroundRestrictedPackages;
+import com.android.server.AppStateTrackerProto.ExemptedPackage;
+import com.android.server.AppStateTrackerProto.RunAnyInBackgroundRestrictedPackages;
+import com.android.server.usage.AppStandbyInternal;
+import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -71,8 +73,7 @@ import java.util.Objects;
  * - Temporary power save whitelist
  * - Global "force all apps standby" mode enforced by battery saver.
  *
- * Test:
-  atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/AppStateTrackerTest.java
+ * Test: atest com.android.server.AppStateTrackerTest
  */
 public class AppStateTracker {
     private static final String TAG = "AppStateTracker";
@@ -90,7 +91,7 @@ public class AppStateTracker {
     IAppOpsService mAppOpsService;
     PowerManagerInternal mPowerManagerInternal;
     StandbyTracker mStandbyTracker;
-    UsageStatsManagerInternal mUsageStatsManagerInternal;
+    AppStandbyInternal mAppStandbyInternal;
 
     private final MyHandler mHandler;
 
@@ -421,8 +422,7 @@ public class AppStateTracker {
             mAppOpsManager = Objects.requireNonNull(injectAppOpsManager());
             mAppOpsService = Objects.requireNonNull(injectIAppOpsService());
             mPowerManagerInternal = Objects.requireNonNull(injectPowerManagerInternal());
-            mUsageStatsManagerInternal = Objects.requireNonNull(
-                    injectUsageStatsManagerInternal());
+            mAppStandbyInternal = Objects.requireNonNull(injectAppStandbyInternal());
 
             mFlagsObserver = new FeatureFlagsObserver();
             mFlagsObserver.register();
@@ -430,7 +430,7 @@ public class AppStateTracker {
             mForceAllAppStandbyForSmallBattery =
                     mFlagsObserver.isForcedAppStandbyForSmallBatteryEnabled();
             mStandbyTracker = new StandbyTracker();
-            mUsageStatsManagerInternal.addAppIdleStateChangeListener(mStandbyTracker);
+            mAppStandbyInternal.addListener(mStandbyTracker);
 
             try {
                 mIActivityManager.registerUidObserver(new UidObserver(),
@@ -448,6 +448,7 @@ public class AppStateTracker {
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_USER_REMOVED);
             filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+            filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
             mContext.registerReceiver(new MyReceiver(), filter);
 
             refreshForcedAppStandbyUidPackagesLocked();
@@ -495,8 +496,8 @@ public class AppStateTracker {
     }
 
     @VisibleForTesting
-    UsageStatsManagerInternal injectUsageStatsManagerInternal() {
-        return LocalServices.getService(UsageStatsManagerInternal.class);
+    AppStandbyInternal injectAppStandbyInternal() {
+        return LocalServices.getService(AppStandbyInternal.class);
     }
 
     @VisibleForTesting
@@ -633,7 +634,7 @@ public class AppStateTracker {
 
     private final class UidObserver extends IUidObserver.Stub {
         @Override
-        public void onUidStateChanged(int uid, int procState, long procStateSeq) {
+        public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             mHandler.onUidStateChanged(uid, procState);
         }
 
@@ -688,6 +689,13 @@ public class AppStateTracker {
                     mIsPluggedIn = (intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0);
                 }
                 updateForceAllAppStandbyState();
+            } else if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())
+                    && !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                final String pkgName = intent.getData().getSchemeSpecificPart();
+                if (mExemptedPackages.remove(userId, pkgName)) {
+                    mHandler.notifyExemptChanged();
+                }
             }
         }
     }
@@ -711,10 +719,6 @@ public class AppStateTracker {
                     mHandler.notifyExemptChanged();
                 }
             }
-        }
-
-        @Override
-        public void onParoleStateChanged(boolean isParoleOn) {
         }
     }
 
@@ -1116,7 +1120,8 @@ public class AppStateTracker {
                 return false;
             }
             final int userId = UserHandle.getUserId(uid);
-            if (mExemptedPackages.contains(userId, packageName)) {
+            if (mAppStandbyInternal.isAppIdleEnabled() && !mAppStandbyInternal.isInParole()
+                    && mExemptedPackages.contains(userId, packageName)) {
                 return false;
             }
             return mForceAllAppsStandby;
@@ -1310,43 +1315,42 @@ public class AppStateTracker {
         synchronized (mLock) {
             final long token = proto.start(fieldId);
 
-            proto.write(ForceAppStandbyTrackerProto.FORCE_ALL_APPS_STANDBY, mForceAllAppsStandby);
-            proto.write(ForceAppStandbyTrackerProto.IS_SMALL_BATTERY_DEVICE,
-                    isSmallBatteryDevice());
-            proto.write(ForceAppStandbyTrackerProto.FORCE_ALL_APPS_STANDBY_FOR_SMALL_BATTERY,
+            proto.write(AppStateTrackerProto.FORCED_APP_STANDBY_FEATURE_ENABLED,
+                    mForcedAppStandbyEnabled);
+            proto.write(AppStateTrackerProto.FORCE_ALL_APPS_STANDBY,
+                    isForceAllAppsStandbyEnabled());
+            proto.write(AppStateTrackerProto.IS_SMALL_BATTERY_DEVICE, isSmallBatteryDevice());
+            proto.write(AppStateTrackerProto.FORCE_ALL_APPS_STANDBY_FOR_SMALL_BATTERY,
                     mForceAllAppStandbyForSmallBattery);
-            proto.write(ForceAppStandbyTrackerProto.IS_PLUGGED_IN, mIsPluggedIn);
+            proto.write(AppStateTrackerProto.IS_PLUGGED_IN, mIsPluggedIn);
 
             for (int i = 0; i < mActiveUids.size(); i++) {
                 if (mActiveUids.valueAt(i)) {
-                    proto.write(ForceAppStandbyTrackerProto.ACTIVE_UIDS,
-                            mActiveUids.keyAt(i));
+                    proto.write(AppStateTrackerProto.ACTIVE_UIDS, mActiveUids.keyAt(i));
                 }
             }
 
             for (int i = 0; i < mForegroundUids.size(); i++) {
                 if (mForegroundUids.valueAt(i)) {
-                    proto.write(ForceAppStandbyTrackerProto.FOREGROUND_UIDS,
-                            mForegroundUids.keyAt(i));
+                    proto.write(AppStateTrackerProto.FOREGROUND_UIDS, mForegroundUids.keyAt(i));
                 }
             }
 
             for (int appId : mPowerWhitelistedAllAppIds) {
-                proto.write(ForceAppStandbyTrackerProto.POWER_SAVE_WHITELIST_APP_IDS, appId);
+                proto.write(AppStateTrackerProto.POWER_SAVE_WHITELIST_APP_IDS, appId);
             }
 
             for (int appId : mPowerWhitelistedUserAppIds) {
-                proto.write(ForceAppStandbyTrackerProto.POWER_SAVE_USER_WHITELIST_APP_IDS, appId);
+                proto.write(AppStateTrackerProto.POWER_SAVE_USER_WHITELIST_APP_IDS, appId);
             }
 
             for (int appId : mTempWhitelistedAppIds) {
-                proto.write(ForceAppStandbyTrackerProto.TEMP_POWER_SAVE_WHITELIST_APP_IDS, appId);
+                proto.write(AppStateTrackerProto.TEMP_POWER_SAVE_WHITELIST_APP_IDS, appId);
             }
 
             for (int i = 0; i < mExemptedPackages.size(); i++) {
                 for (int j = 0; j < mExemptedPackages.sizeAt(i); j++) {
-                    final long token2 = proto.start(
-                            ForceAppStandbyTrackerProto.EXEMPTED_PACKAGES);
+                    final long token2 = proto.start(AppStateTrackerProto.EXEMPTED_PACKAGES);
 
                     proto.write(ExemptedPackage.USER_ID, mExemptedPackages.keyAt(i));
                     proto.write(ExemptedPackage.PACKAGE_NAME, mExemptedPackages.valueAt(i, j));
@@ -1357,14 +1361,14 @@ public class AppStateTracker {
 
             for (Pair<Integer, String> uidAndPackage : mRunAnyRestrictedPackages) {
                 final long token2 = proto.start(
-                        ForceAppStandbyTrackerProto.RUN_ANY_IN_BACKGROUND_RESTRICTED_PACKAGES);
+                        AppStateTrackerProto.RUN_ANY_IN_BACKGROUND_RESTRICTED_PACKAGES);
                 proto.write(RunAnyInBackgroundRestrictedPackages.UID, uidAndPackage.first);
                 proto.write(RunAnyInBackgroundRestrictedPackages.PACKAGE_NAME,
                         uidAndPackage.second);
                 proto.end(token2);
             }
 
-            mStatLogger.dumpProto(proto, ForceAppStandbyTrackerProto.STATS);
+            mStatLogger.dumpProto(proto, AppStateTrackerProto.STATS);
 
             proto.end(token);
         }

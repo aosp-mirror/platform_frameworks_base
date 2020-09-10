@@ -20,6 +20,7 @@ import static android.os.storage.StorageManager.convert;
 
 import android.annotation.BytesLong;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.WorkerThread;
@@ -27,15 +28,19 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.storage.CrateInfo;
 import android.os.storage.StorageManager;
 
 import com.android.internal.util.Preconditions;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -58,8 +63,8 @@ public class StorageStatsManager {
 
     /** {@hide} */
     public StorageStatsManager(Context context, IStorageStatsManager service) {
-        mContext = Preconditions.checkNotNull(context);
-        mService = Preconditions.checkNotNull(service);
+        mContext = Objects.requireNonNull(context);
+        mService = Objects.requireNonNull(service);
     }
 
     /** {@hide} */
@@ -343,6 +348,102 @@ public class StorageStatsManager {
     public long getCacheQuotaBytes(String volumeUuid, int uid) {
         try {
             return mService.getCacheQuotaBytes(volumeUuid, uid, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return all of crate information for the specified storageUuid, packageName, and
+     * userHandle.
+     *
+     * @param storageUuid the UUID of the storage volume you're interested in,
+     *            such as {@link StorageManager#UUID_DEFAULT}.
+     * @param uid the uid you're interested in.
+     * @return the collection of crate information.
+     * @throws PackageManager.NameNotFoundException when the package name is not found.
+     * @throws IOException cause by IO, not support, or the other reasons.
+     * @hide
+     */
+    @TestApi
+    @WorkerThread
+    @NonNull
+    public Collection<CrateInfo> queryCratesForUid(@NonNull UUID storageUuid,
+            int uid) throws IOException, PackageManager.NameNotFoundException {
+        try {
+            ParceledListSlice<CrateInfo> crateInfoList =
+                    mService.queryCratesForUid(convert(storageUuid), uid,
+                            mContext.getOpPackageName());
+            return Objects.requireNonNull(crateInfoList).getList();
+        } catch (ParcelableException e) {
+            e.maybeRethrow(PackageManager.NameNotFoundException.class);
+            e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return all of crates information for the specified storageUuid, packageName, and
+     * userHandle.
+     *
+     * @param storageUuid the UUID of the storage volume you're interested in,
+     *            such as {@link StorageManager#UUID_DEFAULT}.
+     * @param packageName the package name you're interested in.
+     * @param user the user you're interested in.
+     * @return the collection of crate information.
+     * @throws PackageManager.NameNotFoundException when the package name is not found.
+     * @throws IOException cause by IO, not support, or the other reasons.
+     * @hide
+     */
+    @WorkerThread
+    @TestApi
+    @NonNull
+    public Collection<CrateInfo> queryCratesForPackage(@NonNull UUID storageUuid,
+            @NonNull String packageName, @NonNull UserHandle user)
+            throws PackageManager.NameNotFoundException, IOException {
+        try {
+            ParceledListSlice<CrateInfo> crateInfoList =
+                    mService.queryCratesForPackage(convert(storageUuid), packageName,
+                            user.getIdentifier(), mContext.getOpPackageName());
+            return Objects.requireNonNull(crateInfoList).getList();
+        } catch (ParcelableException e) {
+            e.maybeRethrow(PackageManager.NameNotFoundException.class);
+            e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return all of crate information for the specified storageUuid, packageName, and
+     * userHandle.
+     *
+     * @param storageUuid the UUID of the storage volume you're interested in,
+     *            such as {@link StorageManager#UUID_DEFAULT}.
+     * @param user the user you're interested in.
+     * @return the collection of crate information.
+     * @throws PackageManager.NameNotFoundException when the package name is not found.
+     * @throws IOException cause by IO, not support, or the other reasons.
+     * @hide
+     */
+    @WorkerThread
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_CRATES)
+    @NonNull
+    public Collection<CrateInfo> queryCratesForUser(@NonNull UUID storageUuid,
+            @NonNull UserHandle user) throws PackageManager.NameNotFoundException, IOException {
+        try {
+            ParceledListSlice<CrateInfo> crateInfoList =
+                    mService.queryCratesForUser(convert(storageUuid), user.getIdentifier(),
+                            mContext.getOpPackageName());
+            return Objects.requireNonNull(crateInfoList).getList();
+        } catch (ParcelableException e) {
+            e.maybeRethrow(PackageManager.NameNotFoundException.class);
+            e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

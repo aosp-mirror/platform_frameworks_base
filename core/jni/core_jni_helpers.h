@@ -47,28 +47,32 @@ static inline jclass FindClassOrDie(JNIEnv* env, const char* class_name) {
 static inline jfieldID GetFieldIDOrDie(JNIEnv* env, jclass clazz, const char* field_name,
                                        const char* field_signature) {
     jfieldID res = env->GetFieldID(clazz, field_name, field_signature);
-    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to find static field %s", field_name);
+    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to find static field %s with signature %s", field_name,
+                        field_signature);
     return res;
 }
 
 static inline jmethodID GetMethodIDOrDie(JNIEnv* env, jclass clazz, const char* method_name,
                                          const char* method_signature) {
     jmethodID res = env->GetMethodID(clazz, method_name, method_signature);
-    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to find method %s", method_name);
+    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to find method %s with signature %s", method_name,
+                        method_signature);
     return res;
 }
 
 static inline jfieldID GetStaticFieldIDOrDie(JNIEnv* env, jclass clazz, const char* field_name,
                                              const char* field_signature) {
     jfieldID res = env->GetStaticFieldID(clazz, field_name, field_signature);
-    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to find static field %s", field_name);
+    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to find static field %s with signature %s", field_name,
+                        field_signature);
     return res;
 }
 
 static inline jmethodID GetStaticMethodIDOrDie(JNIEnv* env, jclass clazz, const char* method_name,
                                                const char* method_signature) {
     jmethodID res = env->GetStaticMethodID(clazz, method_name, method_signature);
-    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to find static method %s", method_name);
+    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to find static method %s with signature %s",
+                        method_name, method_signature);
     return res;
 }
 

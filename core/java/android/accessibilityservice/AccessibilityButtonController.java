@@ -23,7 +23,7 @@ import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Slog;
 
-import com.android.internal.util.Preconditions;
+import java.util.Objects;
 
 /**
  * Controller for the accessibility button within the system's navigation area
@@ -108,8 +108,8 @@ public final class AccessibilityButtonController {
      */
     public void registerAccessibilityButtonCallback(@NonNull AccessibilityButtonCallback callback,
             @NonNull Handler handler) {
-        Preconditions.checkNotNull(callback);
-        Preconditions.checkNotNull(handler);
+        Objects.requireNonNull(callback);
+        Objects.requireNonNull(handler);
         synchronized (mLock) {
             if (mCallbacks == null) {
                 mCallbacks = new ArrayMap<>();
@@ -127,7 +127,7 @@ public final class AccessibilityButtonController {
      */
     public void unregisterAccessibilityButtonCallback(
             @NonNull AccessibilityButtonCallback callback) {
-        Preconditions.checkNotNull(callback);
+        Objects.requireNonNull(callback);
         synchronized (mLock) {
             if (mCallbacks == null) {
                 return;

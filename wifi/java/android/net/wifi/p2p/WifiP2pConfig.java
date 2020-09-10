@@ -17,6 +17,7 @@
 package android.net.wifi.p2p;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -48,29 +49,39 @@ public class WifiP2pConfig implements Parcelable {
      */
     public WpsInfo wps;
 
-    /**
-     * The network name of a group, should be configured by helper method
-     */
+    /** Get the network name of this P2P configuration, or null if unset. */
+    @Nullable
+    public String getNetworkName() {
+        return networkName;
+    }
+
     /** @hide */
     public String networkName = "";
 
-    /**
-     * The passphrase of a group, should be configured by helper method
-     */
+    /** Get the passphrase of this P2P configuration, or null if unset. */
+    @Nullable
+    public String getPassphrase() {
+        return passphrase;
+    }
+
     /** @hide */
     public String passphrase = "";
 
     /**
-     * The required band for Group Owner
+     * Get the required band for the group owner.
+     * The result will be one of the following:
+     * {@link #GROUP_OWNER_BAND_AUTO},
+     * {@link #GROUP_OWNER_BAND_2GHZ},
+     * {@link #GROUP_OWNER_BAND_5GHZ}
      */
-    /** @hide */
-    public int groupOwnerBand = GROUP_OWNER_BAND_AUTO;
+    @GroupOperatingBandType
+    public int getGroupOwnerBand() {
+        return groupOwnerBand;
+    }
 
     /** @hide */
-    public static final int MAX_GROUP_OWNER_INTENT   =   15;
-    /** @hide */
-    @UnsupportedAppUsage
-    public static final int MIN_GROUP_OWNER_INTENT   =   0;
+    @GroupOperatingBandType
+    public int groupOwnerBand = GROUP_OWNER_BAND_AUTO;
 
     /** @hide */
     @IntDef(flag = false, prefix = { "GROUP_OWNER_BAND_" }, value = {
@@ -95,17 +106,49 @@ public class WifiP2pConfig implements Parcelable {
     public static final int GROUP_OWNER_BAND_5GHZ = 2;
 
     /**
-     * This is an integer value between 0 and 15 where 0 indicates the least
-     * inclination to be a group owner and 15 indicates the highest inclination
-     * to be a group owner.
-     *
-     * A value of -1 indicates the system can choose an appropriate value.
+     * The least inclination to be a group owner, to be filled in the field
+     * {@link #groupOwnerIntent}.
      */
-    public int groupOwnerIntent = -1;
+    public static final int GROUP_OWNER_INTENT_MIN = 0;
+
+    /**
+     * The most inclination to be a group owner, to be filled in the field
+     * {@link #groupOwnerIntent}.
+     */
+    public static final int GROUP_OWNER_INTENT_MAX = 15;
+
+    /**
+     * The system can choose an appropriate owner intent value, to be filled in the field
+     * {@link #groupOwnerIntent}.
+     */
+    public static final int GROUP_OWNER_INTENT_AUTO = -1;
+
+    /**
+     * This is an integer value between {@link #GROUP_OWNER_INTENT_MIN} and
+     * {@link #GROUP_OWNER_INTENT_MAX} where
+     * {@link #GROUP_OWNER_INTENT_MIN} indicates the least inclination to be a group owner and
+     * {@link #GROUP_OWNER_INTENT_MAX} indicates the highest inclination to be a group owner.
+     *
+     * A value of {@link #GROUP_OWNER_INTENT_AUTO} indicates the system can choose an appropriate
+     * value.
+     *
+     * By default this field is set to {@link #GROUP_OWNER_INTENT_AUTO}.
+     */
+    @IntRange(from = 0, to = 15)
+    public int groupOwnerIntent = GROUP_OWNER_INTENT_AUTO;
 
     /** @hide */
     @UnsupportedAppUsage
-    public int netId = WifiP2pGroup.PERSISTENT_NET_ID;
+    public int netId = WifiP2pGroup.NETWORK_ID_PERSISTENT;
+
+    /**
+     * Get the network ID of this P2P configuration.
+     * @return either a non-negative network ID, or one of
+     * {@link WifiP2pGroup#NETWORK_ID_PERSISTENT} or {@link WifiP2pGroup#NETWORK_ID_TEMPORARY}.
+     */
+    public int getNetworkId() {
+        return netId;
+    }
 
     public WifiP2pConfig() {
         //set defaults
@@ -239,7 +282,7 @@ public class WifiP2pConfig implements Parcelable {
         private String mPassphrase = "";
         private int mGroupOperatingBand = GROUP_OWNER_BAND_AUTO;
         private int mGroupOperatingFrequency = GROUP_OWNER_BAND_AUTO;
-        private int mNetId = WifiP2pGroup.TEMPORARY_NET_ID;
+        private int mNetId = WifiP2pGroup.NETWORK_ID_TEMPORARY;
 
         /**
          * Specify the peer's MAC address. If not set, the device will
@@ -419,9 +462,9 @@ public class WifiP2pConfig implements Parcelable {
          */
         public @NonNull Builder enablePersistentMode(boolean persistent) {
             if (persistent) {
-                mNetId = WifiP2pGroup.PERSISTENT_NET_ID;
+                mNetId = WifiP2pGroup.NETWORK_ID_PERSISTENT;
             } else {
-                mNetId = WifiP2pGroup.TEMPORARY_NET_ID;
+                mNetId = WifiP2pGroup.NETWORK_ID_TEMPORARY;
             }
             return this;
         }

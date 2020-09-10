@@ -25,7 +25,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 
-import com.android.internal.util.Preconditions;
+import java.util.Objects;
 
 /**
  * A representation of a launchable target.
@@ -55,9 +55,9 @@ public final class AppTarget implements Parcelable {
         mId = id;
         mShortcutInfo = null;
 
-        mPackageName = Preconditions.checkNotNull(packageName);
+        mPackageName = Objects.requireNonNull(packageName);
         mClassName = className;
-        mUser = Preconditions.checkNotNull(user);
+        mUser = Objects.requireNonNull(user);
         mRank = 0;
     }
 
@@ -69,7 +69,7 @@ public final class AppTarget implements Parcelable {
     public AppTarget(@NonNull AppTargetId id, @NonNull ShortcutInfo shortcutInfo,
             @Nullable String className) {
         mId = id;
-        mShortcutInfo = Preconditions.checkNotNull(shortcutInfo);
+        mShortcutInfo = Objects.requireNonNull(shortcutInfo);
 
         mPackageName = mShortcutInfo.getPackage();
         mUser = mShortcutInfo.getUserHandle();
@@ -224,9 +224,9 @@ public final class AppTarget implements Parcelable {
         @TestApi
         public Builder(@NonNull AppTargetId id, @NonNull String packageName,
                 @NonNull UserHandle user) {
-            mId = Preconditions.checkNotNull(id);
-            mPackageName = Preconditions.checkNotNull(packageName);
-            mUser = Preconditions.checkNotNull(user);
+            mId = Objects.requireNonNull(id);
+            mPackageName = Objects.requireNonNull(packageName);
+            mUser = Objects.requireNonNull(user);
         }
 
         /**
@@ -237,8 +237,8 @@ public final class AppTarget implements Parcelable {
         @SystemApi
         @TestApi
         public Builder(@NonNull AppTargetId id, @NonNull ShortcutInfo info) {
-            mId = Preconditions.checkNotNull(id);
-            mShortcutInfo = Preconditions.checkNotNull(info);
+            mId = Objects.requireNonNull(id);
+            mShortcutInfo = Objects.requireNonNull(info);
             mPackageName = info.getPackage();
             mUser = info.getUserHandle();
         }
@@ -253,8 +253,8 @@ public final class AppTarget implements Parcelable {
             if (mPackageName != null) {
                 throw new IllegalArgumentException("Target is already set");
             }
-            mPackageName = Preconditions.checkNotNull(packageName);
-            mUser = Preconditions.checkNotNull(user);
+            mPackageName = Objects.requireNonNull(packageName);
+            mUser = Objects.requireNonNull(user);
             return this;
         }
 
@@ -266,7 +266,7 @@ public final class AppTarget implements Parcelable {
         @Deprecated
         public Builder setTarget(@NonNull ShortcutInfo info) {
             setTarget(info.getPackage(), info.getUserHandle());
-            mShortcutInfo = Preconditions.checkNotNull(info);
+            mShortcutInfo = Objects.requireNonNull(info);
             return this;
         }
 
@@ -275,7 +275,7 @@ public final class AppTarget implements Parcelable {
          */
         @NonNull
         public Builder setClassName(@NonNull String className) {
-            mClassName = Preconditions.checkNotNull(className);
+            mClassName = Objects.requireNonNull(className);
             return this;
         }
 

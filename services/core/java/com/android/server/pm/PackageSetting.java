@@ -16,24 +16,36 @@
 
 package com.android.server.pm;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.UserInfo;
 import android.service.pm.PackageProto;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionsState;
+import com.android.server.pm.pkg.PackageStateUnserialized;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Settings data for a particular package we know about.
  */
-public final class PackageSetting extends PackageSettingBase {
+public class PackageSetting extends PackageSettingBase {
     int appId;
-    PackageParser.Package pkg;
+
+    @Nullable
+    public AndroidPackage pkg;
     /**
      * WARNING. The object reference is important. We perform integer equality and NOT
      * object equality to check whether shared user settings are the same.
@@ -47,17 +59,30 @@ public final class PackageSetting extends PackageSettingBase {
      */
     private int sharedUserId;
 
-    PackageSetting(String name, String realName, File codePath, File resourcePath,
+    /**
+     *  Maps mime group name to the set of Mime types in a group. Mime groups declared
+     *  by app are populated with empty sets at construction.
+     *  Mime groups can not be created/removed at runtime, thus keys in this map should not change
+     */
+    @Nullable
+    Map<String, ArraySet<String>> mimeGroups;
+
+    @NonNull
+    private PackageStateUnserialized pkgState = new PackageStateUnserialized();
+
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public PackageSetting(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
-            long pVersionCode, int pkgFlags, int privateFlags, String parentPackageName,
-            List<String> childPackageNames, int sharedUserId, String[] usesStaticLibraries,
-            long[] usesStaticLibrariesVersions) {
+            long pVersionCode, int pkgFlags, int privateFlags,
+            int sharedUserId, String[] usesStaticLibraries,
+            long[] usesStaticLibrariesVersions, Map<String, ArraySet<String>> mimeGroups) {
         super(name, realName, codePath, resourcePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
-                pVersionCode, pkgFlags, privateFlags, parentPackageName, childPackageNames,
+                pVersionCode, pkgFlags, privateFlags,
                 usesStaticLibraries, usesStaticLibrariesVersions);
         this.sharedUserId = sharedUserId;
+        copyMimeGroups(mimeGroups);
     }
 
     /**
@@ -107,6 +132,53 @@ public final class PackageSetting extends PackageSettingBase {
         pkg = orig.pkg;
         sharedUser = orig.sharedUser;
         sharedUserId = orig.sharedUserId;
+        copyMimeGroups(orig.mimeGroups);
+    }
+
+    private void copyMimeGroups(@Nullable Map<String, ArraySet<String>> newMimeGroups) {
+        if (newMimeGroups == null) {
+            mimeGroups = null;
+            return;
+        }
+
+        mimeGroups = new ArrayMap<>(newMimeGroups.size());
+        for (String mimeGroup : newMimeGroups.keySet()) {
+            ArraySet<String> mimeTypes = newMimeGroups.get(mimeGroup);
+
+            if (mimeTypes != null) {
+                mimeGroups.put(mimeGroup, new ArraySet<>(mimeTypes));
+            } else {
+                mimeGroups.put(mimeGroup, new ArraySet<>());
+            }
+        }
+    }
+
+    /**
+     * Updates declared MIME groups, removing no longer declared groups
+     * and keeping previous state of MIME groups
+     */
+    void updateMimeGroups(@Nullable Set<String> newMimeGroupNames) {
+        if (newMimeGroupNames == null) {
+            mimeGroups = null;
+            return;
+        }
+
+        if (mimeGroups == null) {
+            // set mimeGroups to empty map to avoid repeated null-checks in the next loop
+            mimeGroups = Collections.emptyMap();
+        }
+
+        ArrayMap<String, ArraySet<String>> updatedMimeGroups =
+                new ArrayMap<>(newMimeGroupNames.size());
+
+        for (String mimeGroup : newMimeGroupNames) {
+            if (mimeGroups.containsKey(mimeGroup)) {
+                updatedMimeGroups.put(mimeGroup, mimeGroups.get(mimeGroup));
+            } else {
+                updatedMimeGroups.put(mimeGroup, new ArraySet<>());
+            }
+        }
+        mimeGroups = updatedMimeGroups;
     }
 
     @Override
@@ -114,10 +186,6 @@ public final class PackageSetting extends PackageSettingBase {
         return (sharedUser != null)
                 ? sharedUser.getPermissionsState()
                 : super.getPermissionsState();
-    }
-
-    public PackageParser.Package getPackage() {
-        return pkg;
     }
 
     public int getAppId() {
@@ -132,6 +200,7 @@ public final class PackageSetting extends PackageSettingBase {
         return installPermissionsFixed;
     }
 
+    // TODO(b/135203078): Remove these in favor of reading from the package directly
     public boolean isPrivileged() {
         return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
     }
@@ -160,10 +229,6 @@ public final class PackageSetting extends PackageSettingBase {
         return (pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
-    public boolean isUpdatedSystem() {
-        return (pkgFlags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
-    }
-
     @Override
     public boolean isSharedUser() {
         return sharedUser != null;
@@ -176,35 +241,65 @@ public final class PackageSetting extends PackageSettingBase {
         return true;
     }
 
-    public boolean hasChildPackages() {
-        return childPackageNames != null && !childPackageNames.isEmpty();
+    public boolean setMimeGroup(String mimeGroup, List<String> mimeTypes) {
+        ArraySet<String> oldMimeTypes = getMimeGroupInternal(mimeGroup);
+        if (oldMimeTypes == null) {
+            throw new IllegalArgumentException("Unknown MIME group " + mimeGroup
+                    + " for package " + name);
+        }
+
+        ArraySet<String> newMimeTypes = new ArraySet<>(mimeTypes);
+        boolean hasChanges = !newMimeTypes.equals(oldMimeTypes);
+        mimeGroups.put(mimeGroup, newMimeTypes);
+        return hasChanges;
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId, List<UserInfo> users) {
+    public List<String> getMimeGroup(String mimeGroup) {
+        ArraySet<String> mimeTypes = getMimeGroupInternal(mimeGroup);
+        if (mimeTypes == null) {
+            throw new IllegalArgumentException("Unknown MIME group " + mimeGroup
+                    + " for package " + name);
+        }
+        return new ArrayList<>(mimeTypes);
+    }
+
+    private ArraySet<String> getMimeGroupInternal(String mimeGroup) {
+        return mimeGroups != null ? mimeGroups.get(mimeGroup) : null;
+    }
+
+    public void dumpDebug(ProtoOutputStream proto, long fieldId, List<UserInfo> users) {
         final long packageToken = proto.start(fieldId);
         proto.write(PackageProto.NAME, (realName != null ? realName : name));
         proto.write(PackageProto.UID, appId);
         proto.write(PackageProto.VERSION_CODE, versionCode);
         proto.write(PackageProto.INSTALL_TIME_MS, firstInstallTime);
         proto.write(PackageProto.UPDATE_TIME_MS, lastUpdateTime);
-        proto.write(PackageProto.INSTALLER_NAME, installerPackageName);
+        proto.write(PackageProto.INSTALLER_NAME, installSource.installerPackageName);
 
         if (pkg != null) {
-            proto.write(PackageProto.VERSION_STRING, pkg.mVersionName);
+            proto.write(PackageProto.VERSION_STRING, pkg.getVersionName());
 
             long splitToken = proto.start(PackageProto.SPLITS);
             proto.write(PackageProto.SplitProto.NAME, "base");
-            proto.write(PackageProto.SplitProto.REVISION_CODE, pkg.baseRevisionCode);
+            proto.write(PackageProto.SplitProto.REVISION_CODE, pkg.getBaseRevisionCode());
             proto.end(splitToken);
 
-            if (pkg.splitNames != null) {
-                for (int i = 0; i < pkg.splitNames.length; i++) {
+            if (pkg.getSplitNames() != null) {
+                for (int i = 0; i < pkg.getSplitNames().length; i++) {
                     splitToken = proto.start(PackageProto.SPLITS);
-                    proto.write(PackageProto.SplitProto.NAME, pkg.splitNames[i]);
-                    proto.write(PackageProto.SplitProto.REVISION_CODE, pkg.splitRevisionCodes[i]);
+                    proto.write(PackageProto.SplitProto.NAME, pkg.getSplitNames()[i]);
+                    proto.write(PackageProto.SplitProto.REVISION_CODE,
+                            pkg.getSplitRevisionCodes()[i]);
                     proto.end(splitToken);
                 }
             }
+
+            long sourceToken = proto.start(PackageProto.INSTALL_SOURCE);
+            proto.write(PackageProto.InstallSourceProto.INITIATING_PACKAGE_NAME,
+                    installSource.initiatingPackageName);
+            proto.write(PackageProto.InstallSourceProto.ORIGINATING_PACKAGE_NAME,
+                    installSource.originatingPackageName);
+            proto.end(sourceToken);
         }
         writeUsersInfoToProto(proto, PackageProto.USERS);
         proto.end(packageToken);
@@ -217,5 +312,15 @@ public final class PackageSetting extends PackageSettingBase {
         pkg = other.pkg;
         sharedUserId = other.sharedUserId;
         sharedUser = other.sharedUser;
+
+        Set<String> mimeGroupNames = other.mimeGroups != null ? other.mimeGroups.keySet() : null;
+        updateMimeGroups(mimeGroupNames);
+
+        getPkgState().updateFrom(other.getPkgState());
+    }
+
+    @NonNull
+    public PackageStateUnserialized getPkgState() {
+        return pkgState;
     }
 }

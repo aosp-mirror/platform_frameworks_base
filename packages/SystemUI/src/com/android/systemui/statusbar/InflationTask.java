@@ -22,11 +22,4 @@ package com.android.systemui.statusbar;
  */
 public interface InflationTask {
     void abort();
-
-    /**
-     * Supersedes an existing task. i.e another task was superceeded by this.
-     *
-     * @param task the task that was previously running
-     */
-    default void supersedeTask(InflationTask task) {}
 }

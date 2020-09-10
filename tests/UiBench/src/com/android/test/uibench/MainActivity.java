@@ -19,12 +19,14 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.ListFragment;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+
+import androidx.fragment.app.ListFragment;
+
+import com.android.test.uibench.listview.CompatListActivity;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -34,9 +36,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends CompatListActivity {
     private static final String EXTRA_PATH = "activity_path";
     private static final String CATEGORY_HWUI_TEST = "com.android.test.uibench.TEST";
+
+    private String mActivityPath = "";
 
     public static class TestListFragment extends ListFragment {
         @Override
@@ -56,9 +60,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
+    protected void initializeActivity() {
         Intent intent = getIntent();
         String path = intent.getStringExtra(EXTRA_PATH);
 
@@ -68,15 +70,19 @@ public class MainActivity extends AppCompatActivity {
             // not root level, display where we are in the hierarchy
             setTitle(path);
         }
+        mActivityPath = path;
+    }
 
-        FragmentManager fm = getSupportFragmentManager();
-        if (fm.findFragmentById(android.R.id.content) == null) {
-            ListFragment listFragment = new TestListFragment();
-            listFragment.setListAdapter(new SimpleAdapter(this, getData(path),
-                    android.R.layout.simple_list_item_1, new String[] { "title" },
-                    new int[] { android.R.id.text1 }));
-            fm.beginTransaction().add(android.R.id.content, listFragment).commit();
-        }
+    @Override
+    protected ListAdapter createListAdapter() {
+        return new SimpleAdapter(this, getData(mActivityPath),
+                android.R.layout.simple_list_item_1, new String[] { "title" },
+                new int[] { android.R.id.text1 });
+    }
+
+    @Override
+    protected ListFragment createListFragment() {
+        return new TestListFragment();
     }
 
     protected List<Map<String, Object>> getData(String prefix) {

@@ -657,6 +657,7 @@ public abstract class AbstractMessageParser {
     @UnsupportedAppUsage(implicitMember =
             "values()[Lcom/google/android/util/AbstractMessageParser$Token$Type;")
     public enum Type {
+
       @UnsupportedAppUsage
       HTML ("html"),
       @UnsupportedAppUsage

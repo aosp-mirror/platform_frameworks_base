@@ -234,4 +234,18 @@ abstract class ThemedResourceCache<T> {
         return entry == null || (configChanges != 0
                 && shouldInvalidateEntry(entry, configChanges));
     }
+
+    public synchronized void clear() {
+        if (mThemedEntries != null) {
+            mThemedEntries.clear();
+        }
+
+        if (mUnthemedEntries != null) {
+            mUnthemedEntries.clear();
+        }
+
+        if (mNullThemedEntries != null) {
+            mNullThemedEntries.clear();
+        }
+    }
 }

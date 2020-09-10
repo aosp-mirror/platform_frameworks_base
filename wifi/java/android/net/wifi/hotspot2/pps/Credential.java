@@ -738,7 +738,16 @@ public final class Credential implements Parcelable {
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append("IMSI: ").append(mImsi).append("\n");
+            String imsi;
+            if (mImsi != null) {
+                if (mImsi.length() > 6 && mImsi.charAt(6) != '*') {
+                    // Truncate the full IMSI from the log
+                    imsi = mImsi.substring(0, 6) + "****";
+                } else {
+                    imsi = mImsi;
+                }
+                builder.append("IMSI: ").append(imsi).append("\n");
+            }
             builder.append("EAPType: ").append(mEapType).append("\n");
             return builder.toString();
         }
@@ -1020,6 +1029,17 @@ public final class Credential implements Parcelable {
                 Arrays.hashCode(mClientCertificateChain));
     }
 
+    /**
+     * Get a unique identifier for Credential. This identifier depends only on items that remain
+     * constant throughout the lifetime of a subscription's credentials.
+     *
+     * @hide
+     * @return a Unique identifier for a Credential object
+     */
+    public int getUniqueId() {
+        return Objects.hash(mUserCredential, mCertCredential, mSimCredential, mRealm);
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -1050,11 +1070,10 @@ public final class Credential implements Parcelable {
     /**
      * Validate the configuration data.
      *
-     * @param isR1 {@code true} if the configuration is for R1
      * @return true on success or false on failure
      * @hide
      */
-    public boolean validate(boolean isR1) {
+    public boolean validate() {
         if (TextUtils.isEmpty(mRealm)) {
             Log.d(TAG, "Missing realm");
             return false;
@@ -1067,11 +1086,11 @@ public final class Credential implements Parcelable {
 
         // Verify the credential.
         if (mUserCredential != null) {
-            if (!verifyUserCredential(isR1)) {
+            if (!verifyUserCredential()) {
                 return false;
             }
         } else if (mCertCredential != null) {
-            if (!verifyCertCredential(isR1)) {
+            if (!verifyCertCredential()) {
                 return false;
             }
         } else if (mSimCredential != null) {
@@ -1112,11 +1131,11 @@ public final class Credential implements Parcelable {
 
     /**
      * Verify user credential.
+     * If no CA certificate is provided, then the system uses the CAs in the trust store.
      *
-     * @param isR1 {@code true} if credential is for R1
      * @return true if user credential is valid, false otherwise.
      */
-    private boolean verifyUserCredential(boolean isR1) {
+    private boolean verifyUserCredential() {
         if (mUserCredential == null) {
             Log.d(TAG, "Missing user credential");
             return false;
@@ -1129,23 +1148,17 @@ public final class Credential implements Parcelable {
             return false;
         }
 
-        // CA certificate is required for R1 Passpoint profile.
-        // For R2, it is downloaded using cert URL provided in PPS MO after validation completes.
-        if (isR1 && mCaCertificates == null) {
-            Log.d(TAG, "Missing CA Certificate for user credential");
-            return false;
-        }
         return true;
     }
 
     /**
      * Verify certificate credential, which is used for EAP-TLS.  This will verify
      * that the necessary client key and certificates are provided.
+     * If no CA certificate is provided, then the system uses the CAs in the trust store.
      *
-     * @param isR1 {@code true} if credential is for R1
      * @return true if certificate credential is valid, false otherwise.
      */
-    private boolean verifyCertCredential(boolean isR1) {
+    private boolean verifyCertCredential() {
         if (mCertCredential == null) {
             Log.d(TAG, "Missing certificate credential");
             return false;
@@ -1159,13 +1172,6 @@ public final class Credential implements Parcelable {
             return false;
         }
 
-        // Verify required key and certificates for certificate credential.
-        // CA certificate is required for R1 Passpoint profile.
-        // For R2, it is downloaded using cert URL provided in PPS MO after validation completes.
-        if (isR1 && mCaCertificates == null) {
-            Log.d(TAG, "Missing CA Certificate for certificate credential");
-            return false;
-        }
         if (mClientPrivateKey == null) {
             Log.d(TAG, "Missing client private key for certificate credential");
             return false;

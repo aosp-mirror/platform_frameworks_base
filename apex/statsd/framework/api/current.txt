@@ -1,0 +1,12 @@
+// Signature format: 2.0
+package android.util {
+
+  public final class StatsLog {
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public static boolean logBinaryPushStateChanged(@NonNull String, long, int, int, @NonNull long[]);
+    method public static boolean logEvent(int);
+    method public static boolean logStart(int);
+    method public static boolean logStop(int);
+  }
+
+}
+

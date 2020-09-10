@@ -20,9 +20,9 @@ import static org.junit.Assert.assertTrue;
 
 import android.os.Looper;
 import android.perftests.utils.PerfStatusReporter;
+import android.perftests.utils.PerfTestActivity;
 import android.perftests.utils.SettingsHelper;
 import android.perftests.utils.SettingsStateKeeperRule;
-import android.perftests.utils.StubActivity;
 import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
@@ -46,8 +46,8 @@ public abstract class AbstractAutofillPerfTestCase {
                     Settings.Secure.AUTOFILL_SERVICE);
 
     @Rule
-    public ActivityTestRule<StubActivity> mActivityRule =
-            new ActivityTestRule<StubActivity>(StubActivity.class);
+    public ActivityTestRule<PerfTestActivity> mActivityRule =
+            new ActivityTestRule<>(PerfTestActivity.class);
 
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
@@ -68,7 +68,7 @@ public abstract class AbstractAutofillPerfTestCase {
                     Looper.getMainLooper().getThread() == Thread.currentThread());
             assertTrue("We should be running on the main thread",
                     Looper.myLooper() == Looper.getMainLooper());
-            StubActivity activity = mActivityRule.getActivity();
+            PerfTestActivity activity = mActivityRule.getActivity();
             activity.setContentView(mLayoutId);
             onCreate(activity);
         });
@@ -89,9 +89,9 @@ public abstract class AbstractAutofillPerfTestCase {
     }
 
     /**
-     * Initializes the {@link StubActivity} after it was launched.
+     * Initializes the {@link PerfTestActivity} after it was launched.
      */
-    protected abstract void onCreate(StubActivity activity);
+    protected abstract void onCreate(PerfTestActivity activity);
 
     /**
      * Uses the {@code settings} binary to set the autofill service.

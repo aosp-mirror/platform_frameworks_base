@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.accessibilityservice.AccessibilityGestureEvent;
 import android.accessibilityservice.AccessibilityService.Callbacks;
 import android.accessibilityservice.AccessibilityService.IAccessibilityServiceClientWrapper;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -41,6 +42,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.InputEvent;
 import android.view.KeyEvent;
@@ -241,7 +243,7 @@ public final class UiAutomation {
             mUiAutomationConnection.connect(mClient, flags);
             mFlags = flags;
         } catch (RemoteException re) {
-            throw new RuntimeException("Error while connecting UiAutomation", re);
+            throw new RuntimeException("Error while connecting " + this, re);
         }
 
         synchronized (mLock) {
@@ -254,7 +256,7 @@ public final class UiAutomation {
                     final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
                     final long remainingTimeMillis = CONNECT_TIMEOUT_MILLIS - elapsedTimeMillis;
                     if (remainingTimeMillis <= 0) {
-                        throw new RuntimeException("Error while connecting UiAutomation");
+                        throw new RuntimeException("Error while connecting " + this);
                     }
                     try {
                         mLock.wait(remainingTimeMillis);
@@ -289,7 +291,7 @@ public final class UiAutomation {
         synchronized (mLock) {
             if (mIsConnecting) {
                 throw new IllegalStateException(
-                        "Cannot call disconnect() while connecting!");
+                        "Cannot call disconnect() while connecting " + this);
             }
             throwIfNotConnectedLocked();
             mConnectionId = CONNECTION_ID_UNDEFINED;
@@ -298,7 +300,7 @@ public final class UiAutomation {
             // Calling out without a lock held.
             mUiAutomationConnection.disconnect();
         } catch (RemoteException re) {
-            throw new RuntimeException("Error while disconnecting UiAutomation", re);
+            throw new RuntimeException("Error while disconnecting " + this, re);
         } finally {
             mRemoteCallbackThread.quit();
             mRemoteCallbackThread = null;
@@ -534,7 +536,7 @@ public final class UiAutomation {
     }
 
     /**
-     * Gets the windows on the screen. This method returns only the windows
+     * Gets the windows on the screen of the default display. This method returns only the windows
      * that a sighted user can interact with, as opposed to all windows.
      * For example, if there is a modal dialog shown and the user cannot touch
      * anything behind it, then only the modal window will be reported
@@ -558,6 +560,35 @@ public final class UiAutomation {
         // Calling out without a lock held.
         return AccessibilityInteractionClient.getInstance()
                 .getWindows(connectionId);
+    }
+
+    /**
+     * Gets the windows on the screen of all displays. This method returns only the windows
+     * that a sighted user can interact with, as opposed to all windows.
+     * For example, if there is a modal dialog shown and the user cannot touch
+     * anything behind it, then only the modal window will be reported
+     * (assuming it is the top one). For convenience the returned windows
+     * are ordered in a descending layer order, which is the windows that
+     * are higher in the Z-order are reported first.
+     * <p>
+     * <strong>Note:</strong> In order to access the windows you have to opt-in
+     * to retrieve the interactive windows by setting the
+     * {@link AccessibilityServiceInfo#FLAG_RETRIEVE_INTERACTIVE_WINDOWS} flag.
+     * </p>
+     *
+     * @return The windows of all displays if there are windows and the service is can retrieve
+     *         them, otherwise an empty list. The key of SparseArray is display ID.
+     */
+    @NonNull
+    public SparseArray<List<AccessibilityWindowInfo>> getWindowsOnAllDisplays() {
+        final int connectionId;
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+            connectionId = mConnectionId;
+        }
+        // Calling out without a lock held.
+        return AccessibilityInteractionClient.getInstance()
+                .getWindowsOnAllDisplays(connectionId);
     }
 
     /**
@@ -1183,19 +1214,29 @@ public final class UiAutomation {
         return result;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("UiAutomation@").append(Integer.toHexString(hashCode()));
+        stringBuilder.append("[id=").append(mConnectionId);
+        stringBuilder.append(", flags=").append(mFlags);
+        stringBuilder.append("]");
+        return stringBuilder.toString();
+    }
+
     private boolean isConnectedLocked() {
         return mConnectionId != CONNECTION_ID_UNDEFINED;
     }
 
     private void throwIfConnectedLocked() {
         if (mConnectionId != CONNECTION_ID_UNDEFINED) {
-            throw new IllegalStateException("UiAutomation not connected!");
+            throw new IllegalStateException("UiAutomation not connected, " + this);
         }
     }
 
     private void throwIfNotConnectedLocked() {
         if (!isConnectedLocked()) {
-            throw new IllegalStateException("UiAutomation not connected!");
+            throw new IllegalStateException("UiAutomation not connected, " + this);
         }
     }
 
@@ -1219,6 +1260,9 @@ public final class UiAutomation {
                         mConnectionId = connectionId;
                         mLock.notifyAll();
                     }
+                    if (Build.IS_DEBUGGABLE) {
+                        Log.v(LOG_TAG, "Init " + UiAutomation.this);
+                    }
                 }
 
                 @Override
@@ -1232,7 +1276,12 @@ public final class UiAutomation {
                 }
 
                 @Override
-                public boolean onGesture(int gestureId) {
+                public void onSystemActionsChanged() {
+                    /* do nothing */
+                }
+
+                @Override
+                public boolean onGesture(AccessibilityGestureEvent gestureEvent) {
                     /* do nothing */
                     return false;
                 }
@@ -1288,7 +1337,7 @@ public final class UiAutomation {
                 }
 
                 @Override
-                public void onAccessibilityButtonClicked() {
+                public void onAccessibilityButtonClicked(int displayId) {
                     /* do nothing */
                 }
 

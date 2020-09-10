@@ -110,4 +110,4 @@ static Key KEYS[] = {
 
 } // namespace android
 
-#endif // SERVICE_JNI_KEYS_H_
+#endif // ANDROIDTVREMOTE_SERVICE_JNI_KEYS_H_

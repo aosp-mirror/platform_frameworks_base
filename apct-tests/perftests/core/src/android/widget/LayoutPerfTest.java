@@ -28,7 +28,7 @@ import android.app.Activity;
 import android.os.Looper;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.perftests.utils.StubActivity;
+import android.perftests.utils.PerfTestActivity;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -72,8 +72,8 @@ public class LayoutPerfTest {
     }
 
     @Rule
-    public ActivityTestRule<StubActivity> mActivityRule =
-            new ActivityTestRule(StubActivity.class);
+    public ActivityTestRule<PerfTestActivity> mActivityRule =
+            new ActivityTestRule(PerfTestActivity.class);
 
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();

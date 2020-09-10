@@ -39,6 +39,8 @@ import java.util.Comparator;
  */
 public class ResolveInfo implements Parcelable {
     private static final String TAG = "ResolveInfo";
+    private static final String INTENT_FORWARDER_ACTIVITY =
+            "com.android.internal.app.IntentForwarderActivity";
 
     /**
      * The activity or broadcast receiver that corresponds to this resolution
@@ -74,10 +76,6 @@ public class ResolveInfo implements Parcelable {
      * Whether or not an instant app is available for the resolved intent.
      */
     public boolean isInstantAppAvailable;
-
-    /** @removed */
-    @Deprecated
-    public boolean instantAppAvailable;
 
     /**
      * The IntentFilter that was matched for this ResolveInfo.
@@ -355,6 +353,16 @@ public class ResolveInfo implements Parcelable {
         }
     }
 
+    /**
+     * Returns whether this resolution represents the intent forwarder activity.
+     *
+     * @return whether this resolution represents the intent forwarder activity
+     */
+    public boolean isCrossProfileIntentForwarderActivity() {
+        return activityInfo != null
+                && INTENT_FORWARDER_ACTIVITY.equals(activityInfo.targetActivity);
+    }
+
     public ResolveInfo() {
         targetUserId = UserHandle.USER_CURRENT;
     }
@@ -378,7 +386,6 @@ public class ResolveInfo implements Parcelable {
         targetUserId = orig.targetUserId;
         handleAllWebDataURI = orig.handleAllWebDataURI;
         isInstantAppAvailable = orig.isInstantAppAvailable;
-        instantAppAvailable = isInstantAppAvailable;
     }
 
     public String toString() {
@@ -436,7 +443,7 @@ public class ResolveInfo implements Parcelable {
         dest.writeInt(labelRes);
         TextUtils.writeToParcel(nonLocalizedLabel, dest, parcelableFlags);
         dest.writeInt(icon);
-        dest.writeString(resolvePackageName);
+        dest.writeString8(resolvePackageName);
         dest.writeInt(targetUserId);
         dest.writeInt(system ? 1 : 0);
         dest.writeInt(noResourceId ? 1 : 0);
@@ -484,13 +491,13 @@ public class ResolveInfo implements Parcelable {
         nonLocalizedLabel
                 = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         icon = source.readInt();
-        resolvePackageName = source.readString();
+        resolvePackageName = source.readString8();
         targetUserId = source.readInt();
         system = source.readInt() != 0;
         noResourceId = source.readInt() != 0;
         iconResourceId = source.readInt();
         handleAllWebDataURI = source.readInt() != 0;
-        instantAppAvailable = isInstantAppAvailable = source.readInt() != 0;
+        isInstantAppAvailable = source.readInt() != 0;
     }
 
     public static class DisplayNameComparator

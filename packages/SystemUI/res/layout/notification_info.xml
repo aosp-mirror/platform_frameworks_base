@@ -20,59 +20,75 @@
     android:id="@+id/notification_guts"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clickable="true"
+    android:focusable="true"
     android:clipChildren="false"
     android:clipToPadding="true"
     android:orientation="vertical"
-    android:paddingStart="@*android:dimen/notification_content_margin_start"
-    android:background="@color/notification_guts_bg_color">
+    android:paddingStart="@*android:dimen/notification_content_margin_start">
 
     <!-- Package Info -->
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/notification_guts_conversation_header_height"
+        android:gravity="center_vertical"
         android:clipChildren="false"
         android:clipToPadding="false">
         <ImageView
-            android:id="@+id/pkgicon"
-            android:layout_width="@dimen/notification_guts_header_height"
-            android:layout_height="@dimen/notification_guts_header_height"
+            android:id="@+id/pkg_icon"
+            android:layout_width="@dimen/notification_guts_conversation_icon_size"
+            android:layout_height="@dimen/notification_guts_conversation_icon_size"
             android:layout_centerVertical="true"
             android:layout_alignParentStart="true"
-            android:layout_marginEnd="3dp" />
-        <TextView
-            android:id="@+id/pkgname"
-            android:layout_width="wrap_content"
+            android:layout_marginEnd="15dp" />
+        <LinearLayout
+            android:id="@+id/names"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:orientation="vertical"
             android:layout_height="wrap_content"
+            android:minHeight="@dimen/notification_guts_conversation_icon_size"
             android:layout_centerVertical="true"
-            style="@style/TextAppearance.NotificationImportanceHeader"
-            android:layout_marginStart="3dp"
-            android:layout_marginEnd="2dp"
-            android:layout_toEndOf="@id/pkgicon"
-            android:singleLine="true" />
-        <TextView
-            android:id="@+id/pkg_divider"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            style="@style/TextAppearance.NotificationImportanceHeader"
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="2dp"
-            android:layout_toEndOf="@id/pkgname"
-            android:text="@*android:string/notification_header_divider_symbol" />
-        <TextView
-            android:id="@+id/delegate_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            style="@style/TextAppearance.NotificationImportanceHeader"
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="2dp"
-            android:ellipsize="end"
-            android:text="@string/notification_delegate_header"
-            android:layout_toEndOf="@id/pkg_divider"
-            android:maxLines="1" />
+            android:gravity="center_vertical"
+            android:layout_alignEnd="@id/pkg_icon"
+            android:layout_toEndOf="@id/pkg_icon">
+            <TextView
+                android:id="@+id/channel_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textDirection="locale"
+                style="@style/TextAppearance.NotificationImportanceChannel"/>
+            <TextView
+                android:id="@+id/group_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textDirection="locale"
+                android:ellipsize="end"
+                style="@style/TextAppearance.NotificationImportanceChannelGroup"/>
+            <TextView
+                android:id="@+id/pkg_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.NotificationImportanceApp"
+                android:ellipsize="end"
+                android:textDirection="locale"
+                android:maxLines="1"/>
+            <TextView
+                android:id="@+id/delegate_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                style="@style/TextAppearance.NotificationImportanceHeader"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:ellipsize="end"
+                android:textDirection="locale"
+                android:text="@string/notification_delegate_header"
+                android:maxLines="1" />
+
+        </LinearLayout>
+
+        <!-- end aligned fields -->
         <!-- Optional link to app. Only appears if the channel is not disabled and the app
 asked for it -->
         <ImageButton
@@ -96,91 +112,6 @@ asked for it -->
             android:src="@drawable/ic_settings"
             android:layout_alignParentEnd="true"
             android:tint="@color/notification_guts_link_icon_tint"/>
-    </RelativeLayout>
-
-    <!-- Channel Info Block -->
-    <LinearLayout
-        android:id="@+id/channel_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingEnd="@*android:dimen/notification_content_margin_end"
-        android:gravity="center"
-        android:orientation="vertical">
-        <!-- Channel Name -->
-        <TextView
-            android:id="@+id/channel_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            style="@style/TextAppearance.NotificationImportanceChannel"/>
-        <TextView
-            android:id="@+id/group_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/TextAppearance.NotificationImportanceChannelGroup"
-            android:ellipsize="end"
-            android:maxLines="1"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/blocking_helper"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/notification_guts_button_spacing"
-        android:layout_marginBottom="@dimen/notification_guts_button_spacing"
-        android:paddingEnd="@*android:dimen/notification_content_margin_end"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:orientation="vertical">
-        <!-- blocking helper text. no need for non-configurable check b/c controls won't be
-        activated in that case -->
-        <TextView
-            android:id="@+id/blocking_helper_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="@string/inline_blocking_helper"
-            style="@*android:style/TextAppearance.DeviceDefault.Notification" />
-        <RelativeLayout
-            android:id="@+id/block_buttons"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/notification_guts_button_spacing">
-            <TextView
-                android:id="@+id/blocking_helper_turn_off_notifications"
-                android:text="@string/inline_turn_off_notifications"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_alignParentStart="true"
-                android:width="110dp"
-                android:paddingEnd="15dp"
-                android:breakStrategy="simple"
-                style="@style/TextAppearance.NotificationInfo.Button"/>
-            <TextView
-                android:id="@+id/deliver_silently"
-                android:text="@string/inline_deliver_silently_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="@dimen/notification_guts_button_horizontal_spacing"
-                android:paddingEnd="15dp"
-                android:width="110dp"
-                android:breakStrategy="simple"
-                android:layout_toStartOf="@+id/keep_showing"
-                style="@style/TextAppearance.NotificationInfo.Button"/>
-            <TextView
-                android:id="@+id/keep_showing"
-                android:text="@string/inline_keep_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="@dimen/notification_guts_button_horizontal_spacing"
-                android:width="110dp"
-                android:breakStrategy="simple"
-                android:layout_alignParentEnd="true"
-                style="@style/TextAppearance.NotificationInfo.Button"/>
-        </RelativeLayout>
 
     </LinearLayout>
 
@@ -358,34 +289,4 @@ asked for it -->
         </RelativeLayout>
 
     </LinearLayout>
-
-    <com.android.systemui.statusbar.notification.row.NotificationUndoLayout
-        android:id="@+id/confirmation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:orientation="horizontal" >
-        <TextView
-            android:id="@+id/confirmation_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start|center_vertical"
-            android:layout_marginStart="@*android:dimen/notification_content_margin_start"
-            android:layout_marginEnd="@*android:dimen/notification_content_margin_start"
-            android:text="@string/notification_channel_disabled"
-            style="@style/TextAppearance.NotificationInfo.Confirmation"/>
-        <TextView
-            android:id="@+id/undo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/notification_importance_toggle_size"
-            android:minHeight="@dimen/notification_importance_toggle_size"
-            android:layout_marginTop="@dimen/notification_guts_button_spacing"
-            android:layout_marginBottom="@dimen/notification_guts_button_spacing"
-            android:layout_marginStart="@dimen/notification_guts_button_side_margin"
-            android:layout_marginEnd="@dimen/notification_guts_button_side_margin"
-            android:layout_gravity="end|center_vertical"
-            android:text="@string/inline_undo"
-            style="@style/TextAppearance.NotificationInfo.Button"/>
-    </com.android.systemui.statusbar.notification.row.NotificationUndoLayout>
 </com.android.systemui.statusbar.notification.row.NotificationInfo>

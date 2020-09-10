@@ -17,6 +17,7 @@ package com.android.server.notification;
 
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 
+import android.app.Notification;
 import android.content.Context;
 import android.util.Slog;
 
@@ -43,9 +44,9 @@ public class BadgeExtractor implements NotificationSignalExtractor {
             if (DBG) Slog.d(TAG, "missing config");
             return null;
         }
-        boolean userWantsBadges = mConfig.badgingEnabled(record.sbn.getUser());
+        boolean userWantsBadges = mConfig.badgingEnabled(record.getSbn().getUser());
         boolean appCanShowBadge =
-                mConfig.canShowBadge(record.sbn.getPackageName(), record.sbn.getUid());
+                mConfig.canShowBadge(record.getSbn().getPackageName(), record.getSbn().getUid());
         if (!userWantsBadges || !appCanShowBadge) {
             record.setShowBadge(false);
         } else {
@@ -61,6 +62,21 @@ public class BadgeExtractor implements NotificationSignalExtractor {
             record.setShowBadge(false);
         }
 
+        Notification.BubbleMetadata metadata = record.getNotification().getBubbleMetadata();
+        if (metadata != null && metadata.isNotificationSuppressed()) {
+            record.setShowBadge(false);
+        }
+
+        if (mConfig.isMediaNotificationFilteringEnabled()) {
+            final Notification notif = record.getNotification();
+            if (notif.hasMediaSession()) {
+                Class<? extends Notification.Style> notifStyle = notif.getNotificationStyle();
+                if (Notification.DecoratedMediaCustomViewStyle.class.equals(notifStyle)
+                        || Notification.MediaStyle.class.equals(notifStyle)) {
+                    record.setShowBadge(false);
+                }
+            }
+        }
         return null;
     }
 

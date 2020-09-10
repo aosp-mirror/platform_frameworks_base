@@ -15,14 +15,16 @@
  */
 package com.android.server.wm;
 
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RECENTS_ANIMATIONS;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 
 import android.graphics.GraphicBuffer;
-import android.graphics.Rect;
-import android.util.Slog;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+
+import com.android.server.protolog.common.ProtoLog;
+
+import java.util.function.Function;
 
 /**
  * Class used by {@link RecentsAnimationController} to create a surface control with taking
@@ -37,40 +39,28 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
     private int mWidth;
     private int mHeight;
 
-    public static TaskScreenshotAnimatable create(Task task) {
-        return new TaskScreenshotAnimatable(task, getBufferFromTask(task));
-    }
-
-    private static SurfaceControl.ScreenshotGraphicBuffer getBufferFromTask(Task task) {
-        if (task == null) {
-            return null;
-        }
-        final Rect tmpRect = task.getBounds();
-        tmpRect.offset(0, 0);
-        return SurfaceControl.captureLayers(
-                task.getSurfaceControl().getHandle(), tmpRect, 1f);
-    }
-
-    private TaskScreenshotAnimatable(Task task,
-            SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer) {
+    TaskScreenshotAnimatable(Function<SurfaceSession, SurfaceControl.Builder> surfaceControlFactory,
+            Task task, SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer) {
         GraphicBuffer buffer = screenshotBuffer == null
                 ? null : screenshotBuffer.getGraphicBuffer();
         mTask = task;
         mWidth = (buffer != null) ? buffer.getWidth() : 1;
         mHeight = (buffer != null) ? buffer.getHeight() : 1;
-        if (DEBUG_RECENTS_ANIMATIONS) {
-            Slog.d(TAG, "Creating TaskScreenshotAnimatable: task: " + task
-                    + "width: " + mWidth + "height: " + mHeight);
-        }
-        mSurfaceControl = new SurfaceControl.Builder(new SurfaceSession())
+        ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
+                "Creating TaskScreenshotAnimatable: task: %s width: %d height: %d",
+                        task, mWidth, mHeight);
+        mSurfaceControl = surfaceControlFactory.apply(new SurfaceSession())
                 .setName("RecentTaskScreenshotSurface")
                 .setBufferSize(mWidth, mHeight)
+                .setCallsite("TaskScreenshotAnimatable")
                 .build();
         if (buffer != null) {
             final Surface surface = new Surface();
             surface.copyFrom(mSurfaceControl);
             surface.attachAndQueueBufferWithColorSpace(buffer, screenshotBuffer.getColorSpace());
             surface.release();
+            final float scale = 1.0f * mTask.getBounds().width() / mWidth;
+            mSurfaceControl.setMatrix(scale, 0, 0, scale);
         }
         getPendingTransaction().show(mSurfaceControl);
     }

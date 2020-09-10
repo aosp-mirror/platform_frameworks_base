@@ -32,6 +32,8 @@ import android.os.AsyncTask;
 import android.os.UserHandle;
 import android.util.Log;
 
+import com.android.settingslib.Utils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -116,7 +118,7 @@ final public class AuthenticatorHelper extends BroadcastReceiver {
         if (icon == null) {
             icon = context.getPackageManager().getDefaultActivityIcon();
         }
-        return icon;
+        return Utils.getBadgedIcon(mContext, icon, mUserHandle);
     }
 
     /**

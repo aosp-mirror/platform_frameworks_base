@@ -26,8 +26,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
 import android.util.MathUtils;
-import android.util.Slog;
-import android.util.StatsLog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,14 +35,18 @@ import android.view.WindowInsets;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardHostView;
+import com.android.keyguard.KeyguardSecurityModel;
 import com.android.keyguard.KeyguardSecurityView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DejankUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.PrintWriter;
 
@@ -68,7 +70,7 @@ public class KeyguardBouncer {
     private final Handler mHandler;
     private final BouncerExpansionCallback mExpansionCallback;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private final UnlockMethodCache mUnlockMethodCache;
+    private final KeyguardStateController mKeyguardStateController;
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
@@ -92,12 +94,12 @@ public class KeyguardBouncer {
     private int mBouncerPromptReason;
     private boolean mIsAnimatingAway;
     private boolean mIsScrimmed;
-    private ViewGroup mLockIconContainer;
 
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils, ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry, FalsingManager falsingManager,
-            BouncerExpansionCallback expansionCallback, UnlockMethodCache unlockMethodCache,
+            BouncerExpansionCallback expansionCallback,
+            KeyguardStateController keyguardStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             KeyguardBypassController keyguardBypassController, Handler handler) {
         mContext = context;
@@ -109,7 +111,7 @@ public class KeyguardBouncer {
         mDismissCallbackRegistry = dismissCallbackRegistry;
         mExpansionCallback = expansionCallback;
         mHandler = handler;
-        mUnlockMethodCache = unlockMethodCache;
+        mKeyguardStateController = keyguardStateController;
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
         mKeyguardBypassController = keyguardBypassController;
     }
@@ -166,14 +168,14 @@ public class KeyguardBouncer {
 
         // This condition may indicate an error on Android, so log it.
         if (!allowDismissKeyguard) {
-            Slog.w(TAG, "User can't dismiss keyguard: " + activeUserId + " != " + keyguardUserId);
+            Log.w(TAG, "User can't dismiss keyguard: " + activeUserId + " != " + keyguardUserId);
         }
 
         mShowingSoon = true;
 
         // Split up the work over multiple frames.
         DejankUtils.removeCallbacks(mResetRunnable);
-        if (mUnlockMethodCache.isFaceAuthEnabled() && !needsFullscreenBouncer()
+        if (mKeyguardStateController.isFaceAuthEnabled() && !needsFullscreenBouncer()
                 && !mKeyguardUpdateMonitor.userNeedsStrongAuth()
                 && !mKeyguardBypassController.getBypassEnabled()) {
             mHandler.postDelayed(mShowRunnable, BOUNCER_FACE_DELAY);
@@ -189,10 +191,6 @@ public class KeyguardBouncer {
         return mIsScrimmed;
     }
 
-    public ViewGroup getLockIconContainer() {
-        return mRoot == null || mRoot.getVisibility() != View.VISIBLE ? null : mLockIconContainer;
-    }
-
     /**
      * This method must be called at the end of the bouncer animation when
      * the translation is performed manually by the user, otherwise FalsingManager
@@ -204,6 +202,9 @@ public class KeyguardBouncer {
             Log.wtf(TAG, "onFullyShown when view was null");
         } else {
             mKeyguardView.onResume();
+            if (mRoot != null) {
+                mRoot.announceForAccessibility(mKeyguardView.getAccessibilityTitleForCurrentMode());
+            }
         }
     }
 
@@ -248,9 +249,10 @@ public class KeyguardBouncer {
             if (mExpansion == EXPANSION_VISIBLE) {
                 mKeyguardView.onResume();
                 mKeyguardView.resetSecurityContainer();
+                showPromptReason(mBouncerPromptReason);
             }
-            StatsLog.write(StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
-                StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN);
+            SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
+                    SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN);
         }
     };
 
@@ -291,8 +293,8 @@ public class KeyguardBouncer {
 
     public void hide(boolean destroyView) {
         if (isShowing()) {
-            StatsLog.write(StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
-                StatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__HIDDEN);
+            SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
+                    SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__HIDDEN);
             mDismissCallbackRegistry.notifyDismissCancelled();
         }
         mIsScrimmed = false;
@@ -373,11 +375,6 @@ public class KeyguardBouncer {
 
     private void showPrimarySecurityScreen() {
         mKeyguardView.showPrimarySecurityScreen();
-        KeyguardSecurityView keyguardSecurityView = mKeyguardView.getCurrentSecurityView();
-        if (keyguardSecurityView != null) {
-            mLockIconContainer = ((ViewGroup) keyguardSecurityView)
-                    .findViewById(R.id.lock_icon_container);
-        }
     }
 
     /**
@@ -402,6 +399,9 @@ public class KeyguardBouncer {
             mExpansionCallback.onFullyHidden();
         } else if (fraction != EXPANSION_VISIBLE && oldExpansion == EXPANSION_VISIBLE) {
             mExpansionCallback.onStartingToHide();
+            if (mKeyguardView != null) {
+                mKeyguardView.onStartingToHide();
+            }
         }
     }
 
@@ -444,7 +444,6 @@ public class KeyguardBouncer {
         mStatusBarHeight = mRoot.getResources().getDimensionPixelOffset(
                 com.android.systemui.R.dimen.status_bar_height);
         mRoot.setVisibility(View.INVISIBLE);
-        mRoot.setAccessibilityPaneTitle(mKeyguardView.getAccessibilityTitleForCurrentMode());
 
         final WindowInsets rootInsets = mRoot.getRootWindowInsets();
         if (rootInsets != null) {
@@ -468,12 +467,9 @@ public class KeyguardBouncer {
      * notifications on Keyguard, like SIM PIN/PUK.
      */
     public boolean needsFullscreenBouncer() {
-        ensureView();
-        if (mKeyguardView != null) {
-            SecurityMode mode = mKeyguardView.getSecurityMode();
-            return mode == SecurityMode.SimPin || mode == SecurityMode.SimPuk;
-        }
-        return false;
+        SecurityMode mode = Dependency.get(KeyguardSecurityModel.class).getSecurityMode(
+                KeyguardUpdateMonitor.getCurrentUser());
+        return mode == SecurityMode.SimPin || mode == SecurityMode.SimPuk;
     }
 
     /**

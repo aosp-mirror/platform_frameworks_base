@@ -33,7 +33,7 @@
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Увядзіце пароль"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"Няправільны PIN-код."</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Несапраўдная картка."</string>
-    <string name="keyguard_charged" msgid="6572033099675649299">"Акумулятар поўнасцю зараджаны"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"Зараджаны"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ідзе бесправадная зарадка"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ідзе зарадка"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ідзе хуткая зарадка"</string>
@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Націсніце кнопку \"Меню\", каб разблакіраваць."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Сетка заблакіравана"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Няма SIM-карты"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"У планшэце няма SIM-карты."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"У тэлефоне няма SIM-карты."</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Устаўце SIM-карту."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"SIM-карта адсутнічае ці не чытаецца. Устаўце SIM-карту."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"SIM-карту немагчыма выкарыстоўваць."</string>
@@ -85,25 +83,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Увядзіце PIN-код, які змяшчае ад 4 да 8 лічбаў."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK-код павінен утрымліваць 8 лічбаў ці больш."</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"Паўторна ўвядзіце правільны PUK-код. Паўторныя спробы прывядуць да адключэння SIM-карты назаўсёды."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"PIN-коды не супадаюць"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Занадта шмат спроб уводу ўзору"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Вы няправільна ўвялі PIN-код столькі разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\nПаўтарыце спробу праз <xliff:g id="NUMBER_1">%2$d</xliff:g> с."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Вы няправільна ўвялі пароль столькі разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\nПаўтарыце спробу праз <xliff:g id="NUMBER_1">%2$d</xliff:g> с."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Вы няправільна ўвялі ўзор разблакіроўкі столькі разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\nПаўтарыце спробу праз <xliff:g id="NUMBER_1">%2$d</xliff:g> с."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"Вы не змаглі разблакіраваць планшэт столькі разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькіх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) ён будзе скінуты да заводскіх налад, гэта прывядзе да выдалення ўсіх даных."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"Вы не змаглі разблакіраваць тэлефон столькі разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькіх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) ён будзе скінуты да заводскіх налад, гэта прывядзе да выдалення ўсіх даных."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"Вы не змаглі разблакіраваць планшэт столькі разоў: <xliff:g id="NUMBER">%d</xliff:g>. Цяпер ён будзе скінуты да заводскіх налад, гэта прывядзе да выдалення ўсіх даных."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"Вы не змаглі разблакіраваць тэлефон столькі разоў: <xliff:g id="NUMBER">%d</xliff:g>. Цяпер ён будзе скінуты да заводскіх налад, гэта прывядзе да выдалення ўсіх даных."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"Вы не змаглі разблакіраваць планшэт столькі разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькіх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) гэты карыстальнік будзе выдалены, гэта прывядзе да выдалення ўсіх карыстальніцкіх даных."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"Вы не змаглі разблакіраваць тэлефон столькі разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькіх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) гэты карыстальнік будзе выдалены, гэта прывядзе да выдалення ўсіх карыстальніцкіх даных."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="9046628517316763961">"Вы не змаглі разблакіраваць планшэт столькі разоў: <xliff:g id="NUMBER">%d</xliff:g>. Гэты карыстальнік будзе выдалены, гэта прывядзе да выдалення ўсіх карыстальніцкіх даных."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3588779327358321092">"Вы не змаглі разблакіраваць тэлефон столькі разоў: <xliff:g id="NUMBER">%d</xliff:g>. Гэты карыстальнік будзе выдалены, гэта прывядзе да выдалення ўсіх карыстальніцкіх даных."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="6114158710353725041">"Вы не змаглі разблакіраваць планшэт столькі разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькіх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) працоўны профіль будзе выдалены, гэта прывядзе да выдалення ўсіх даных у профілі."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="8345451368768804892">"Вы не змаглі разблакіраваць тэлефон столькі разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькіх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) працоўны профіль будзе выдалены, гэта прывядзе да выдалення ўсіх даных у профілі."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"Вы не змаглі разблакіраваць планшэт столькі разоў: <xliff:g id="NUMBER">%d</xliff:g>. Працоўны профіль будзе выдалены, гэта прывядзе да выдалення ўсіх даных у профілі."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"Вы не змаглі разблакіраваць тэлефон столькі разоў: <xliff:g id="NUMBER">%d</xliff:g>. Працоўны профіль будзе выдалены, гэта прывядзе да выдалення ўсіх даных у профілі."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"Вы няправільна ўвялі ўзор разблакіроўкі столькі разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькіх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) вам будзе прапанавана разблакіраваць планшэт, увайшоўшы ва ўліковы запіс электроннай пошты.\n\n Паўтарыце спробу праз <xliff:g id="NUMBER_2">%3$d</xliff:g> с."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"Вы няправільна ўвялі ўзор разблакіроўкі столькі разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькіх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) вам будзе прапанавана разблакіраваць тэлефон, увайшоўшы ва ўліковы запіс электроннай пошты.\n\n Паўтарыце спробу праз <xliff:g id="NUMBER_2">%3$d</xliff:g> с."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Няправільны PIN-код SIM-карты, цяпер вы павінны звязацца з аператарам для разблакіроўкі прылады."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="one">Няправільны PIN-код SIM-карты, у вас засталася <xliff:g id="NUMBER_1">%d</xliff:g> спроба.</item>

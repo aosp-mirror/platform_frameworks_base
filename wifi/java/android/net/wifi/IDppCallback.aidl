@@ -38,7 +38,7 @@ oneway interface IDppCallback
     /**
      * Called when DPP Failure events take place.
      */
-    void onFailure(int status);
+    void onFailure(int status, String ssid, String channelList, in int[] bandArray);
 
     /**
      * Called when DPP events that indicate progress take place. Can be used by UI elements

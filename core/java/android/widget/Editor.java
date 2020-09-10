@@ -21,6 +21,7 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppGlobals;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.app.RemoteAction;
@@ -82,6 +83,7 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ActionMode.Callback;
 import android.view.ContextMenu;
@@ -139,6 +141,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Helper class used by TextView to handle editable text views.
@@ -148,9 +151,12 @@ import java.util.Map;
 public class Editor {
     private static final String TAG = "Editor";
     private static final boolean DEBUG_UNDO = false;
-    // Specifies whether to use or not the magnifier when pressing the insertion or selection
-    // handles.
+
+    // Specifies whether to use the magnifier when pressing the insertion or selection handles.
     private static final boolean FLAG_USE_MAGNIFIER = true;
+
+    private static final int DELAY_BEFORE_HANDLE_FADES_OUT = 4000;
+    private static final int RECENT_CUT_COPY_DURATION_MS = 15 * 1000; // 15 seconds in millis
 
     static final int BLINK = 500;
     private static final int DRAG_SHADOW_MAX_TEXT_LENGTH = 20;
@@ -201,7 +207,7 @@ public class Editor {
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
     // Cursor Controllers.
-    private InsertionPointCursorController mInsertionPointCursorController;
+    InsertionPointCursorController mInsertionPointCursorController;
     SelectionModifierCursorController mSelectionModifierCursorController;
     // Action mode used when text is selected or when actions on an insertion cursor are triggered.
     private ActionMode mTextActionMode;
@@ -212,7 +218,9 @@ public class Editor {
 
     private final boolean mHapticTextHandleEnabled;
 
-    private final MagnifierMotionAnimator mMagnifierAnimator;
+    @Nullable
+    private MagnifierMotionAnimator mMagnifierAnimator;
+
     private final Runnable mUpdateMagnifierRunnable = new Runnable() {
         @Override
         public void run() {
@@ -309,6 +317,7 @@ public class Editor {
     private SelectionActionModeHelper mSelectionActionModeHelper;
 
     boolean mIsBeingLongClicked;
+    boolean mIsBeingLongClickedByAccessibility;
 
     private SuggestionsPopupWindow mSuggestionsPopupWindow;
     SuggestionRangeSpan mSuggestionRangeSpan;
@@ -326,8 +335,6 @@ public class Editor {
     // Global listener that detects changes in the global position of the TextView
     private PositionListener mPositionListener;
 
-    private float mLastDownPositionX, mLastDownPositionY;
-    private float mLastUpPositionX, mLastUpPositionY;
     private float mContextMenuAnchorX, mContextMenuAnchorY;
     Callback mCustomSelectionActionModeCallback;
     Callback mCustomInsertionActionModeCallback;
@@ -336,17 +343,10 @@ public class Editor {
     @UnsupportedAppUsage
     boolean mCreatedWithASelection;
 
-    // Indicates the current tap state (first tap, double tap, or triple click).
-    private int mTapState = TAP_STATE_INITIAL;
-    private long mLastTouchUpTime = 0;
-    private static final int TAP_STATE_INITIAL = 0;
-    private static final int TAP_STATE_FIRST_TAP = 1;
-    private static final int TAP_STATE_DOUBLE_TAP = 2;
-    // Only for mouse input.
-    private static final int TAP_STATE_TRIPLE_CLICK = 3;
-
     // The button state as of the last time #onTouchEvent is called.
     private int mLastButtonState;
+
+    private final EditorTouchState mTouchState = new EditorTouchState();
 
     private Runnable mInsertionActionModeRunnable;
 
@@ -386,6 +386,32 @@ public class Editor {
 
     private final SuggestionHelper mSuggestionHelper = new SuggestionHelper();
 
+    private boolean mFlagCursorDragFromAnywhereEnabled;
+    private boolean mFlagInsertionHandleGesturesEnabled;
+
+    // Specifies whether the new magnifier (with fish-eye effect) is enabled.
+    private final boolean mNewMagnifierEnabled;
+
+    // Line height range in DP for the new magnifier.
+    static private final int MIN_LINE_HEIGHT_FOR_MAGNIFIER = 20;
+    static private final int MAX_LINE_HEIGHT_FOR_MAGNIFIER = 32;
+    // Line height range in pixels for the new magnifier.
+    //  - If the line height is bigger than the max, magnifier should be dismissed.
+    //  - If the line height is smaller than the min, magnifier should apply a bigger zoom factor
+    //    to make sure the text can be seen clearly.
+    private int mMinLineHeightForMagnifier;
+    private int mMaxLineHeightForMagnifier;
+    // The zoom factor initially configured.
+    // The actual zoom value may changes based on this initial zoom value.
+    private float mInitialZoom = 1f;
+
+    // For calculating the line change slops while moving cursor/selection.
+    // The slop max/min value include line height and the slop on the upper/lower line.
+    private static final int LINE_CHANGE_SLOP_MAX_DP = 45;
+    private static final int LINE_CHANGE_SLOP_MIN_DP = 12;
+    private int mLineChangeSlopMax;
+    private int mLineChangeSlopMin;
+
     Editor(TextView textView) {
         mTextView = textView;
         // Synchronize the filter list, which places the undo input filter at the end.
@@ -394,11 +420,121 @@ public class Editor {
         mHapticTextHandleEnabled = mTextView.getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_enableHapticTextHandle);
 
-        if (FLAG_USE_MAGNIFIER) {
-            final Magnifier magnifier =
-                    Magnifier.createBuilderWithOldMagnifierDefaults(mTextView).build();
-            mMagnifierAnimator = new MagnifierMotionAnimator(magnifier);
+        mFlagCursorDragFromAnywhereEnabled = AppGlobals.getIntCoreSetting(
+                WidgetFlags.KEY_ENABLE_CURSOR_DRAG_FROM_ANYWHERE,
+                WidgetFlags.ENABLE_CURSOR_DRAG_FROM_ANYWHERE_DEFAULT ? 1 : 0) != 0;
+        mFlagInsertionHandleGesturesEnabled = AppGlobals.getIntCoreSetting(
+                WidgetFlags.KEY_ENABLE_INSERTION_HANDLE_GESTURES,
+                WidgetFlags.ENABLE_INSERTION_HANDLE_GESTURES_DEFAULT ? 1 : 0) != 0;
+        mNewMagnifierEnabled = AppGlobals.getIntCoreSetting(
+                WidgetFlags.KEY_ENABLE_NEW_MAGNIFIER,
+                WidgetFlags.ENABLE_NEW_MAGNIFIER_DEFAULT ? 1 : 0) != 0;
+        if (TextView.DEBUG_CURSOR) {
+            logCursor("Editor", "Cursor drag from anywhere is %s.",
+                    mFlagCursorDragFromAnywhereEnabled ? "enabled" : "disabled");
+            logCursor("Editor", "Insertion handle gestures is %s.",
+                    mFlagInsertionHandleGesturesEnabled ? "enabled" : "disabled");
+            logCursor("Editor", "New magnifier is %s.",
+                    mNewMagnifierEnabled ? "enabled" : "disabled");
         }
+
+        mLineChangeSlopMax = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, LINE_CHANGE_SLOP_MAX_DP,
+                mTextView.getContext().getResources().getDisplayMetrics());
+        mLineChangeSlopMin = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, LINE_CHANGE_SLOP_MIN_DP,
+                mTextView.getContext().getResources().getDisplayMetrics());
+
+    }
+
+    @VisibleForTesting
+    public boolean getFlagCursorDragFromAnywhereEnabled() {
+        return mFlagCursorDragFromAnywhereEnabled;
+    }
+
+    @VisibleForTesting
+    public void setFlagCursorDragFromAnywhereEnabled(boolean enabled) {
+        mFlagCursorDragFromAnywhereEnabled = enabled;
+    }
+
+    @VisibleForTesting
+    public boolean getFlagInsertionHandleGesturesEnabled() {
+        return mFlagInsertionHandleGesturesEnabled;
+    }
+
+    @VisibleForTesting
+    public void setFlagInsertionHandleGesturesEnabled(boolean enabled) {
+        mFlagInsertionHandleGesturesEnabled = enabled;
+    }
+
+    // Lazy creates the magnifier animator.
+    private MagnifierMotionAnimator getMagnifierAnimator() {
+        if (FLAG_USE_MAGNIFIER && mMagnifierAnimator == null) {
+            // Lazy creates the magnifier instance because it requires the text height which cannot
+            // be measured at the time of Editor instance being created.
+            final Magnifier.Builder builder = mNewMagnifierEnabled
+                    ? createBuilderWithInlineMagnifierDefaults()
+                    : Magnifier.createBuilderWithOldMagnifierDefaults(mTextView);
+            mMagnifierAnimator = new MagnifierMotionAnimator(builder.build());
+        }
+        return mMagnifierAnimator;
+    }
+
+    private Magnifier.Builder createBuilderWithInlineMagnifierDefaults() {
+        final Magnifier.Builder params = new Magnifier.Builder(mTextView);
+
+        float zoom = AppGlobals.getFloatCoreSetting(
+                WidgetFlags.KEY_MAGNIFIER_ZOOM_FACTOR,
+                WidgetFlags.MAGNIFIER_ZOOM_FACTOR_DEFAULT);
+        float aspectRatio = AppGlobals.getFloatCoreSetting(
+                WidgetFlags.KEY_MAGNIFIER_ASPECT_RATIO,
+                WidgetFlags.MAGNIFIER_ASPECT_RATIO_DEFAULT);
+        // Avoid invalid/unsupported values.
+        if (zoom < 1.2f || zoom > 1.8f) {
+            zoom = 1.5f;
+        }
+        if (aspectRatio < 3 || aspectRatio > 8) {
+            aspectRatio = 5.5f;
+        }
+
+        mInitialZoom = zoom;
+        mMinLineHeightForMagnifier = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, MIN_LINE_HEIGHT_FOR_MAGNIFIER,
+                mTextView.getContext().getResources().getDisplayMetrics());
+        mMaxLineHeightForMagnifier = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, MAX_LINE_HEIGHT_FOR_MAGNIFIER,
+                mTextView.getContext().getResources().getDisplayMetrics());
+
+        final Layout layout = mTextView.getLayout();
+        final int line = layout.getLineForOffset(mTextView.getSelectionStart());
+        final int sourceHeight =
+            layout.getLineBottomWithoutSpacing(line) - layout.getLineTop(line);
+        final int height = (int)(sourceHeight * zoom);
+        final int width = (int)(aspectRatio * Math.max(sourceHeight, mMinLineHeightForMagnifier));
+
+        params.setFishEyeStyle()
+                .setSize(width, height)
+                .setSourceSize(width, sourceHeight)
+                .setElevation(0)
+                .setInitialZoom(zoom)
+                .setClippingEnabled(false);
+
+        final Context context = mTextView.getContext();
+        final TypedArray a = context.obtainStyledAttributes(
+                null, com.android.internal.R.styleable.Magnifier,
+                com.android.internal.R.attr.magnifierStyle, 0);
+        params.setDefaultSourceToMagnifierOffset(
+                a.getDimensionPixelSize(
+                        com.android.internal.R.styleable.Magnifier_magnifierHorizontalOffset, 0),
+                a.getDimensionPixelSize(
+                        com.android.internal.R.styleable.Magnifier_magnifierVerticalOffset, 0));
+        a.recycle();
+
+        return params.setSourceBounds(
+                Magnifier.SOURCE_BOUND_MAX_VISIBLE,
+                Magnifier.SOURCE_BOUND_MAX_IN_SURFACE,
+                Magnifier.SOURCE_BOUND_MAX_VISIBLE,
+                Magnifier.SOURCE_BOUND_MAX_IN_SURFACE);
     }
 
     ParcelableParcel saveInstanceState() {
@@ -1189,11 +1325,20 @@ public class Editor {
     }
 
     public boolean performLongClick(boolean handled) {
+        if (TextView.DEBUG_CURSOR) {
+            logCursor("performLongClick", "handled=%s", handled);
+        }
+        if (mIsBeingLongClickedByAccessibility) {
+            if (!handled) {
+                toggleInsertionActionMode();
+            }
+            return true;
+        }
         // Long press in empty space moves cursor and starts the insertion action mode.
-        if (!handled && !isPositionOnText(mLastDownPositionX, mLastDownPositionY)
-                && mInsertionControllerEnabled) {
-            final int offset = mTextView.getOffsetForPosition(mLastDownPositionX,
-                    mLastDownPositionY);
+        if (!handled && !isPositionOnText(mTouchState.getLastDownX(), mTouchState.getLastDownY())
+                && !mTouchState.isOnHandle() && mInsertionControllerEnabled) {
+            final int offset = mTextView.getOffsetForPosition(mTouchState.getLastDownX(),
+                    mTouchState.getLastDownY());
             Selection.setSelection((Spannable) mTextView.getText(), offset);
             getInsertionController().show();
             mIsInsertionActionModeStartPending = true;
@@ -1236,12 +1381,20 @@ public class Editor {
         return handled;
     }
 
+    private void toggleInsertionActionMode() {
+        if (mTextActionMode != null) {
+            stopTextActionMode();
+        } else {
+            startInsertionActionMode();
+        }
+    }
+
     float getLastUpPositionX() {
-        return mLastUpPositionX;
+        return mTouchState.getLastUpX();
     }
 
     float getLastUpPositionY() {
-        return mLastUpPositionY;
+        return mTouchState.getLastUpY();
     }
 
     private long getLastTouchOffsets() {
@@ -1252,6 +1405,10 @@ public class Editor {
     }
 
     void onFocusChanged(boolean focused, int direction) {
+        if (TextView.DEBUG_CURSOR) {
+            logCursor("onFocusChanged", "focused=%s", focused);
+        }
+
         mShowCursor = SystemClock.uptimeMillis();
         ensureEndedBatchEdit();
 
@@ -1272,6 +1429,9 @@ public class Editor {
                 // Has to be done before onTakeFocus, which can be overloaded.
                 final int lastTapPosition = getLastTapPosition();
                 if (lastTapPosition >= 0) {
+                    if (TextView.DEBUG_CURSOR) {
+                        logCursor("onFocusChanged", "setting cursor position: %d", lastTapPosition);
+                    }
                     Selection.setSelection((Spannable) mTextView.getText(), lastTapPosition);
                 }
 
@@ -1436,29 +1596,6 @@ public class Editor {
         }
     }
 
-    private void updateTapState(MotionEvent event) {
-        final int action = event.getActionMasked();
-        if (action == MotionEvent.ACTION_DOWN) {
-            final boolean isMouse = event.isFromSource(InputDevice.SOURCE_MOUSE);
-            // Detect double tap and triple click.
-            if (((mTapState == TAP_STATE_FIRST_TAP)
-                    || ((mTapState == TAP_STATE_DOUBLE_TAP) && isMouse))
-                            && (SystemClock.uptimeMillis() - mLastTouchUpTime)
-                                    <= ViewConfiguration.getDoubleTapTimeout()) {
-                if (mTapState == TAP_STATE_FIRST_TAP) {
-                    mTapState = TAP_STATE_DOUBLE_TAP;
-                } else {
-                    mTapState = TAP_STATE_TRIPLE_CLICK;
-                }
-            } else {
-                mTapState = TAP_STATE_FIRST_TAP;
-            }
-        }
-        if (action == MotionEvent.ACTION_UP) {
-            mLastTouchUpTime = SystemClock.uptimeMillis();
-        }
-    }
-
     private boolean shouldFilterOutTouchEvent(MotionEvent event) {
         if (!event.isFromSource(InputDevice.SOURCE_MOUSE)) {
             return false;
@@ -1477,7 +1614,11 @@ public class Editor {
         return false;
     }
 
-    void onTouchEvent(MotionEvent event) {
+    /**
+     * Handles touch events on an editable text view, implementing cursor movement, selection, etc.
+     */
+    @VisibleForTesting
+    public void onTouchEvent(MotionEvent event) {
         final boolean filterOutEvent = shouldFilterOutTouchEvent(event);
         mLastButtonState = event.getButtonState();
         if (filterOutEvent) {
@@ -1486,9 +1627,13 @@ public class Editor {
             }
             return;
         }
-        updateTapState(event);
+        ViewConfiguration viewConfiguration = ViewConfiguration.get(mTextView.getContext());
+        mTouchState.update(event, viewConfiguration);
         updateFloatingToolbarVisibility(event);
 
+        if (hasInsertionController()) {
+            getInsertionController().onTouchEvent(event);
+        }
         if (hasSelectionController()) {
             getSelectionController().onTouchEvent(event);
         }
@@ -1498,15 +1643,7 @@ public class Editor {
             mShowSuggestionRunnable = null;
         }
 
-        if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-            mLastUpPositionX = event.getX();
-            mLastUpPositionY = event.getY();
-        }
-
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            mLastDownPositionX = event.getX();
-            mLastDownPositionY = event.getY();
-
             // Reset this state; it will be re-set if super.onTouchEvent
             // causes focus to move to the view.
             mTouchFocusSelected = false;
@@ -2354,6 +2491,9 @@ public class Editor {
     }
 
     void onTouchUpEvent(MotionEvent event) {
+        if (TextView.DEBUG_CURSOR) {
+            logCursor("onTouchUpEvent", null);
+        }
         if (getSelectionActionModeHelper().resetSelection(
                 getTextView().getOffsetForPosition(event.getX(), event.getY()))) {
             return;
@@ -2440,7 +2580,9 @@ public class Editor {
         return mSelectionControllerEnabled;
     }
 
-    private InsertionPointCursorController getInsertionController() {
+    /** Returns the controller for the insertion cursor. */
+    @VisibleForTesting
+    public @Nullable InsertionPointCursorController getInsertionController() {
         if (!mInsertionControllerEnabled) {
             return null;
         }
@@ -2455,8 +2597,9 @@ public class Editor {
         return mInsertionPointCursorController;
     }
 
-    @Nullable
-    SelectionModifierCursorController getSelectionController() {
+    /** Returns the controller for selection. */
+    @VisibleForTesting
+    public @Nullable SelectionModifierCursorController getSelectionController() {
         if (!mSelectionControllerEnabled) {
             return null;
         }
@@ -2481,6 +2624,9 @@ public class Editor {
         loadCursorDrawable();
         final int left = clampHorizontalPosition(mDrawableForCursor, horizontal);
         final int width = mDrawableForCursor.getIntrinsicWidth();
+        if (TextView.DEBUG_CURSOR) {
+            logCursor("updateCursorPosition", "left=%s, top=%s", left, (top - mTempRect.top));
+        }
         mDrawableForCursor.setBounds(left, top - mTempRect.top, left + width,
                 bottom + mTempRect.bottom);
     }
@@ -4471,8 +4617,9 @@ public class Editor {
         protected int mHorizontalGravity;
         // Offsets the hotspot point up, so that cursor is not hidden by the finger when moving up
         private float mTouchOffsetY;
-        // Where the touch position should be on the handle to ensure a maximum cursor visibility
-        private float mIdealVerticalOffset;
+        // Where the touch position should be on the handle to ensure a maximum cursor visibility.
+        // This is the distance in pixels from the top of the handle view.
+        private final float mIdealVerticalOffset;
         // Parent's (TextView) previous position in window
         private int mLastParentX, mLastParentY;
         // Parent's (TextView) previous position on screen
@@ -4496,6 +4643,11 @@ public class Editor {
         // when magnifier is used.
         private float mTextViewScaleX;
         private float mTextViewScaleY;
+        /**
+         * The vertical distance in pixels from finger to the cursor Y while dragging.
+         * See {@link Editor.InsertionPointCursorController#getLineDuringDrag}.
+         */
+        private final int mIdealFingerToCursorOffset;
 
         private HandleView(Drawable drawableLtr, Drawable drawableRtl, final int id) {
             super(mTextView.getContext());
@@ -4516,11 +4668,26 @@ public class Editor {
 
             final int handleHeight = getPreferredHeight();
             mTouchOffsetY = -0.3f * handleHeight;
-            mIdealVerticalOffset = 0.7f * handleHeight;
+            final int distance = AppGlobals.getIntCoreSetting(
+                    WidgetFlags.KEY_FINGER_TO_CURSOR_DISTANCE,
+                    WidgetFlags.FINGER_TO_CURSOR_DISTANCE_DEFAULT);
+            if (distance < 0 || distance > 100) {
+                mIdealVerticalOffset = 0.7f * handleHeight;
+                mIdealFingerToCursorOffset = (int)(mIdealVerticalOffset - mTouchOffsetY);
+            } else {
+                mIdealFingerToCursorOffset = (int) TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, distance,
+                        mTextView.getContext().getResources().getDisplayMetrics());
+                mIdealVerticalOffset = mIdealFingerToCursorOffset + mTouchOffsetY;
+            }
         }
 
         public float getIdealVerticalOffset() {
             return mIdealVerticalOffset;
+        }
+
+        final int getIdealFingerToCursorOffset() {
+            return mIdealFingerToCursorOffset;
         }
 
         void setDrawables(final Drawable drawableLtr, final Drawable drawableRtl) {
@@ -4611,15 +4778,20 @@ public class Editor {
             }
         };
 
-        private int getPreferredWidth() {
+        protected final int getPreferredWidth() {
             return Math.max(mDrawable.getIntrinsicWidth(), mMinSize);
         }
 
-        private int getPreferredHeight() {
+        protected final int getPreferredHeight() {
             return Math.max(mDrawable.getIntrinsicHeight(), mMinSize);
         }
 
         public void show() {
+            if (TextView.DEBUG_CURSOR) {
+                logCursor(getClass().getSimpleName() + ": HandleView: show()", "offset=%s",
+                        getCurrentCursorOffset());
+            }
+
             if (isShowing()) return;
 
             getPositionListener().addSubscriber(this, true /* local position may change */);
@@ -4636,6 +4808,11 @@ public class Editor {
         }
 
         public void hide() {
+            if (TextView.DEBUG_CURSOR) {
+                logCursor(getClass().getSimpleName() + ": HandleView: hide()", "offset=%s",
+                        getCurrentCursorOffset());
+            }
+
             dismiss();
 
             getPositionListener().removeSubscriber(this);
@@ -4810,6 +4987,12 @@ public class Editor {
         }
 
         private boolean tooLargeTextForMagnifier() {
+            if (mNewMagnifierEnabled) {
+                Layout layout = mTextView.getLayout();
+                final int line = layout.getLineForOffset(getCurrentCursorOffset());
+                return layout.getLineBottomWithoutSpacing(line) - layout.getLineTop(line)
+                        >= mMaxLineHeightForMagnifier;
+            }
             final float magnifierContentHeight = Math.round(
                     mMagnifierAnimator.mMagnifier.getHeight()
                             / mMagnifierAnimator.mMagnifier.getZoom());
@@ -4951,7 +5134,7 @@ public class Editor {
 
             // Vertically snap to middle of current line.
             showPosInView.y = ((mTextView.getLayout().getLineTop(lineNumber)
-                    + mTextView.getLayout().getLineBottom(lineNumber)) / 2.0f
+                    + mTextView.getLayout().getLineBottomWithoutSpacing(lineNumber)) / 2.0f
                     + mTextView.getTotalPaddingTop() - mTextView.getScrollY()) * mTextViewScaleY;
             return true;
         }
@@ -4996,7 +5179,7 @@ public class Editor {
         }
 
         protected final void updateMagnifier(@NonNull final MotionEvent event) {
-            if (mMagnifierAnimator == null) {
+            if (getMagnifierAnimator() == null) {
                 return;
             }
 
@@ -5010,7 +5193,26 @@ public class Editor {
                 mTextView.invalidateCursorPath();
                 suspendBlink();
 
-                mMagnifierAnimator.show(showPosInView.x, showPosInView.y);
+                if (mNewMagnifierEnabled) {
+                    // Calculates the line bounds as the content source bounds to the magnifier.
+                    Layout layout = mTextView.getLayout();
+                    int line = layout.getLineForOffset(getCurrentCursorOffset());
+                    int lineLeft = (int) layout.getLineLeft(line);
+                    lineLeft += mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
+                    int lineRight = (int) layout.getLineRight(line);
+                    lineRight += mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
+                    mMagnifierAnimator.mMagnifier.setSourceHorizontalBounds(lineLeft, lineRight);
+                    final int lineHeight =
+                            layout.getLineBottomWithoutSpacing(line) - layout.getLineTop(line);
+                    float zoom = mInitialZoom;
+                    if (lineHeight < mMinLineHeightForMagnifier) {
+                        zoom = zoom * mMinLineHeightForMagnifier / lineHeight;
+                    }
+                    mMagnifierAnimator.mMagnifier.updateSourceFactors(lineHeight, zoom);
+                    mMagnifierAnimator.mMagnifier.show(showPosInView.x, showPosInView.y);
+                } else {
+                    mMagnifierAnimator.show(showPosInView.x, showPosInView.y);
+                }
                 updateHandlesVisibility();
             } else {
                 dismissMagnifier();
@@ -5032,6 +5234,14 @@ public class Editor {
 
         @Override
         public boolean onTouchEvent(MotionEvent ev) {
+            if (TextView.DEBUG_CURSOR) {
+                logCursor(this.getClass().getSimpleName() + ": HandleView: onTouchEvent",
+                        "%d: %s (%f,%f)",
+                        ev.getSequenceNumber(),
+                        MotionEvent.actionToString(ev.getActionMasked()),
+                        ev.getX(), ev.getY());
+            }
+
             updateFloatingToolbarVisibility(ev);
 
             switch (ev.getActionMasked()) {
@@ -5107,54 +5317,65 @@ public class Editor {
     }
 
     private class InsertionHandleView extends HandleView {
-        private static final int DELAY_BEFORE_HANDLE_FADES_OUT = 4000;
-        private static final int RECENT_CUT_COPY_DURATION = 15 * 1000; // seconds
-
         // Used to detect taps on the insertion handle, which will affect the insertion action mode
-        private float mDownPositionX, mDownPositionY;
+        private float mLastDownRawX, mLastDownRawY;
         private Runnable mHider;
 
-        public InsertionHandleView(Drawable drawable) {
+        // Members for fake-dismiss effect in touch through mode.
+        // It is to make InsertionHandleView can receive the MOVE/UP events after calling dismiss(),
+        // which could happen in case of long-press (making selection will dismiss the insertion
+        // handle).
+
+        // Whether the finger is down and hasn't been up yet.
+        private boolean mIsTouchDown = false;
+        // Whether the popup window is in the invisible state and will be dismissed when finger up.
+        private boolean mPendingDismissOnUp = false;
+        // The alpha value of the drawable.
+        private final int mDrawableOpacity;
+
+        // Members for toggling the insertion menu in touch through mode.
+
+        // The coordinate for the touch down event, which is used for transforming the coordinates
+        // of the events to the text view.
+        private float mTouchDownX;
+        private float mTouchDownY;
+        // The cursor offset when touch down. This is to detect whether the cursor is moved when
+        // finger move/up.
+        private int mOffsetDown;
+        // Whether the cursor offset has been changed on the move/up events.
+        private boolean mOffsetChanged;
+        // Whether it is in insertion action mode when finger down.
+        private boolean mIsInActionMode;
+        // The timestamp for the last up event, which is used for double tap detection.
+        private long mLastUpTime;
+
+        // The delta height applied to the insertion handle view.
+        private final int mDeltaHeight;
+
+        InsertionHandleView(Drawable drawable) {
             super(drawable, drawable, com.android.internal.R.id.insertion_handle);
-        }
 
-        @Override
-        public void show() {
-            super.show();
-
-            final long durationSinceCutOrCopy =
-                    SystemClock.uptimeMillis() - TextView.sLastCutCopyOrTextChangedTime;
-
-            // Cancel the single tap delayed runnable.
-            if (mInsertionActionModeRunnable != null
-                    && ((mTapState == TAP_STATE_DOUBLE_TAP)
-                            || (mTapState == TAP_STATE_TRIPLE_CLICK)
-                            || isCursorInsideEasyCorrectionSpan())) {
-                mTextView.removeCallbacks(mInsertionActionModeRunnable);
-            }
-
-            // Prepare and schedule the single tap runnable to run exactly after the double tap
-            // timeout has passed.
-            if ((mTapState != TAP_STATE_DOUBLE_TAP) && (mTapState != TAP_STATE_TRIPLE_CLICK)
-                    && !isCursorInsideEasyCorrectionSpan()
-                    && (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION)) {
-                if (mTextActionMode == null) {
-                    if (mInsertionActionModeRunnable == null) {
-                        mInsertionActionModeRunnable = new Runnable() {
-                            @Override
-                            public void run() {
-                                startInsertionActionMode();
-                            }
-                        };
-                    }
-                    mTextView.postDelayed(
-                            mInsertionActionModeRunnable,
-                            ViewConfiguration.getDoubleTapTimeout() + 1);
+            int deltaHeight = 0;
+            int opacity = 255;
+            if (mFlagInsertionHandleGesturesEnabled) {
+                deltaHeight = AppGlobals.getIntCoreSetting(
+                        WidgetFlags.KEY_INSERTION_HANDLE_DELTA_HEIGHT,
+                        WidgetFlags.INSERTION_HANDLE_DELTA_HEIGHT_DEFAULT);
+                opacity = AppGlobals.getIntCoreSetting(
+                        WidgetFlags.KEY_INSERTION_HANDLE_OPACITY,
+                        WidgetFlags.INSERTION_HANDLE_OPACITY_DEFAULT);
+                // Avoid invalid/unsupported values.
+                if (deltaHeight < -25 || deltaHeight > 50) {
+                    deltaHeight = 25;
                 }
-
+                if (opacity < 10 || opacity > 100) {
+                    opacity = 50;
+                }
+                // Converts the opacity value from range {0..100} to {0..255}.
+                opacity = opacity * 255 / 100;
             }
-
-            hideAfterDelay();
+            mDeltaHeight = deltaHeight;
+            mDrawableOpacity = opacity;
         }
 
         private void hideAfterDelay() {
@@ -5207,13 +5428,32 @@ public class Editor {
         }
 
         @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            if (mFlagInsertionHandleGesturesEnabled) {
+                final int height = Math.max(
+                        getPreferredHeight() + mDeltaHeight, mDrawable.getIntrinsicHeight());
+                setMeasuredDimension(getPreferredWidth(), height);
+                return;
+            }
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        }
+
+        @Override
         public boolean onTouchEvent(MotionEvent ev) {
+            if (!mTextView.isFromPrimePointer(ev, true)) {
+                return true;
+            }
+            if (mFlagInsertionHandleGesturesEnabled && mFlagCursorDragFromAnywhereEnabled) {
+                // Should only enable touch through when cursor drag is enabled.
+                // Otherwise the insertion handle view cannot be moved.
+                return touchThrough(ev);
+            }
             final boolean result = super.onTouchEvent(ev);
 
             switch (ev.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
-                    mDownPositionX = ev.getRawX();
-                    mDownPositionY = ev.getRawY();
+                    mLastDownRawX = ev.getRawX();
+                    mLastDownRawY = ev.getRawY();
                     updateMagnifier(ev);
                     break;
 
@@ -5223,21 +5463,13 @@ public class Editor {
 
                 case MotionEvent.ACTION_UP:
                     if (!offsetHasBeenChanged()) {
-                        final float deltaX = mDownPositionX - ev.getRawX();
-                        final float deltaY = mDownPositionY - ev.getRawY();
-                        final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
-
-                        final ViewConfiguration viewConfiguration = ViewConfiguration.get(
-                                mTextView.getContext());
-                        final int touchSlop = viewConfiguration.getScaledTouchSlop();
-
-                        if (distanceSquared < touchSlop * touchSlop) {
+                        ViewConfiguration config = ViewConfiguration.get(mTextView.getContext());
+                        boolean isWithinTouchSlop = EditorTouchState.isDistanceWithin(
+                                mLastDownRawX, mLastDownRawY, ev.getRawX(), ev.getRawY(),
+                                config.getScaledTouchSlop());
+                        if (isWithinTouchSlop) {
                             // Tapping on the handle toggles the insertion action mode.
-                            if (mTextActionMode != null) {
-                                stopTextActionMode();
-                            } else {
-                                startInsertionActionMode();
-                            }
+                            toggleInsertionActionMode();
                         }
                     } else {
                         if (mTextActionMode != null) {
@@ -5255,6 +5487,117 @@ public class Editor {
             }
 
             return result;
+        }
+
+        // Handles the touch events in touch through mode.
+        private boolean touchThrough(MotionEvent ev) {
+            final int actionType = ev.getActionMasked();
+            switch (actionType) {
+                case MotionEvent.ACTION_DOWN:
+                    mIsTouchDown = true;
+                    mOffsetChanged = false;
+                    mOffsetDown = mTextView.getSelectionStart();
+                    mTouchDownX = ev.getX();
+                    mTouchDownY = ev.getY();
+                    mIsInActionMode = mTextActionMode != null;
+                    if (ev.getEventTime() - mLastUpTime < ViewConfiguration.getDoubleTapTimeout()) {
+                        stopTextActionMode();  // Avoid crash when double tap and drag backwards.
+                    }
+                    mTouchState.setIsOnHandle(true);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    mLastUpTime = ev.getEventTime();
+                    break;
+            }
+            // Performs the touch through by forward the events to the text view.
+            boolean ret = mTextView.onTouchEvent(transformEventForTouchThrough(ev));
+
+            if (actionType == MotionEvent.ACTION_UP || actionType == MotionEvent.ACTION_CANCEL) {
+                mIsTouchDown = false;
+                if (mPendingDismissOnUp) {
+                    dismiss();
+                }
+                mTouchState.setIsOnHandle(false);
+            }
+
+            // Checks for cursor offset change.
+            if (!mOffsetChanged) {
+                int start = mTextView.getSelectionStart();
+                int end = mTextView.getSelectionEnd();
+                if (start != end || mOffsetDown != start) {
+                    mOffsetChanged = true;
+                }
+            }
+
+            // Toggling the insertion action mode on finger up.
+            if (!mOffsetChanged && actionType == MotionEvent.ACTION_UP) {
+                if (mIsInActionMode) {
+                    stopTextActionMode();
+                } else {
+                    startInsertionActionMode();
+                }
+            }
+            return ret;
+        }
+
+        private MotionEvent transformEventForTouchThrough(MotionEvent ev) {
+            final Layout layout = mTextView.getLayout();
+            final int line = layout.getLineForOffset(getCurrentCursorOffset());
+            final int textHeight =
+                    layout.getLineBottomWithoutSpacing(line) - layout.getLineTop(line);
+            // Transforms the touch events to screen coordinates.
+            // And also shift up to make the hit point is on the text.
+            // Note:
+            //  - The revised X should reflect the distance to the horizontal center of touch down.
+            //  - The revised Y should be at the top of the text.
+            Matrix m = new Matrix();
+            m.setTranslate(ev.getRawX() - ev.getX() + (getMeasuredWidth() >> 1) - mTouchDownX,
+                    ev.getRawY() - ev.getY() - (textHeight >> 1) - mTouchDownY);
+            ev.transform(m);
+            // Transforms the touch events to text view coordinates.
+            mTextView.toLocalMotionEvent(ev);
+            if (TextView.DEBUG_CURSOR) {
+                logCursor("InsertionHandleView#transformEventForTouchThrough",
+                        "Touch through: %d, (%f, %f)",
+                        ev.getAction(), ev.getX(), ev.getY());
+            }
+            return ev;
+        }
+
+        @Override
+        public boolean isShowing() {
+            if (mPendingDismissOnUp) {
+                return false;
+            }
+            return super.isShowing();
+        }
+
+        @Override
+        public void show() {
+            super.show();
+            mPendingDismissOnUp = false;
+            mDrawable.setAlpha(mDrawableOpacity);
+        }
+
+        @Override
+        public void dismiss() {
+            if (mIsTouchDown) {
+                if (TextView.DEBUG_CURSOR) {
+                    logCursor("InsertionHandleView#dismiss",
+                            "Suppressed the real dismiss, only become invisible");
+                }
+                mPendingDismissOnUp = true;
+                mDrawable.setAlpha(0);
+            } else {
+                super.dismiss();
+                mPendingDismissOnUp = false;
+            }
+        }
+
+        @Override
+        protected void updateDrawable(final boolean updateDrawableWhenDragging) {
+            super.updateDrawable(updateDrawableWhenDragging);
+            mDrawable.setAlpha(mDrawableOpacity);
         }
 
         @Override
@@ -5280,6 +5623,10 @@ public class Editor {
                 mPreviousLineTouched = currLine;
             } else {
                 offset = -1;
+            }
+            if (TextView.DEBUG_CURSOR) {
+                logCursor("InsertionHandleView: updatePosition", "x=%f, y=%f, offset=%d, line=%d",
+                        x, y, offset, mPreviousLineTouched);
             }
             positionAtCursorOffset(offset, false, fromTouchScreen);
             if (mTextActionMode != null) {
@@ -5564,6 +5911,9 @@ public class Editor {
 
         @Override
         public boolean onTouchEvent(MotionEvent event) {
+            if (!mTextView.isFromPrimePointer(event, true)) {
+                return true;
+            }
             boolean superResult = super.onTouchEvent(event);
 
             switch (event.getActionMasked()) {
@@ -5689,7 +6039,14 @@ public class Editor {
         }
     }
 
-    private int getCurrentLineAdjustedForSlop(Layout layout, int prevLine, float y) {
+    @VisibleForTesting
+    public void setLineChangeSlopMinMaxForTesting(final int min, final int max) {
+        mLineChangeSlopMin = min;
+        mLineChangeSlopMax = max;
+    }
+
+    @VisibleForTesting
+    public int getCurrentLineAdjustedForSlop(Layout layout, int prevLine, float y) {
         final int trueLine = mTextView.getLineAtCoordinate(y);
         if (layout == null || prevLine > layout.getLineCount()
                 || layout.getLineCount() <= 0 || prevLine < 0) {
@@ -5702,28 +6059,21 @@ public class Editor {
             return trueLine;
         }
 
+        final int lineHeight = layout.getLineBottom(prevLine) - layout.getLineTop(prevLine);
+        int slop = (int)(LINE_SLOP_MULTIPLIER_FOR_HANDLEVIEWS
+                * (layout.getLineBottom(trueLine) - layout.getLineTop(trueLine)));
+        slop = Math.max(mLineChangeSlopMin,
+                Math.min(mLineChangeSlopMax, lineHeight + slop)) - lineHeight;
+        slop = Math.max(0, slop);
+
         final float verticalOffset = mTextView.viewportToContentVerticalOffset();
-        final int lineCount = layout.getLineCount();
-        final float slop = mTextView.getLineHeight() * LINE_SLOP_MULTIPLIER_FOR_HANDLEVIEWS;
-
-        final float firstLineTop = layout.getLineTop(0) + verticalOffset;
-        final float prevLineTop = layout.getLineTop(prevLine) + verticalOffset;
-        final float yTopBound = Math.max(prevLineTop - slop, firstLineTop + slop);
-
-        final float lastLineBottom = layout.getLineBottom(lineCount - 1) + verticalOffset;
-        final float prevLineBottom = layout.getLineBottom(prevLine) + verticalOffset;
-        final float yBottomBound = Math.min(prevLineBottom + slop, lastLineBottom - slop);
-
-        // Determine if we've moved lines based on y position and previous line.
-        int currLine;
-        if (y <= yTopBound) {
-            currLine = Math.max(prevLine - 1, 0);
-        } else if (y >= yBottomBound) {
-            currLine = Math.min(prevLine + 1, lineCount - 1);
-        } else {
-            currLine = prevLine;
+        if (trueLine > prevLine && y >= layout.getLineBottom(prevLine) + slop + verticalOffset) {
+            return trueLine;
         }
-        return currLine;
+        if (trueLine < prevLine && y <= layout.getLineTop(prevLine) - slop + verticalOffset) {
+            return trueLine;
+        }
+        return prevLine;
     }
 
     /**
@@ -5760,11 +6110,181 @@ public class Editor {
         }
     }
 
-    private class InsertionPointCursorController implements CursorController {
+    /** Controller for the insertion cursor. */
+    @VisibleForTesting
+    public class InsertionPointCursorController implements CursorController {
         private InsertionHandleView mHandle;
+        // Tracks whether the cursor is currently being dragged.
+        private boolean mIsDraggingCursor;
+        // During a drag, tracks whether the user's finger has adjusted to be over the handle rather
+        // than the cursor bar.
+        private boolean mIsTouchSnappedToHandleDuringDrag;
+        // During a drag, tracks the line of text where the cursor was last positioned.
+        private int mPrevLineDuringDrag;
+
+        public void onTouchEvent(MotionEvent event) {
+            if (hasSelectionController() && getSelectionController().isCursorBeingModified()) {
+                return;
+            }
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_MOVE:
+                    if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+                        break;
+                    }
+                    if (mIsDraggingCursor) {
+                        performCursorDrag(event);
+                    } else if (mFlagCursorDragFromAnywhereEnabled
+                                && mTextView.getLayout() != null
+                                && mTextView.isFocused()
+                                && mTouchState.isMovedEnoughForDrag()
+                                && !mTouchState.isDragCloseToVertical()) {
+                        startCursorDrag(event);
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    if (mIsDraggingCursor) {
+                        endCursorDrag(event);
+                    }
+                    break;
+            }
+        }
+
+        private void positionCursorDuringDrag(MotionEvent event) {
+            mPrevLineDuringDrag = getLineDuringDrag(event);
+            int offset = mTextView.getOffsetAtCoordinate(mPrevLineDuringDrag, event.getX());
+            int oldSelectionStart = mTextView.getSelectionStart();
+            int oldSelectionEnd = mTextView.getSelectionEnd();
+            if (offset == oldSelectionStart && offset == oldSelectionEnd) {
+                return;
+            }
+            Selection.setSelection((Spannable) mTextView.getText(), offset);
+            updateCursorPosition();
+            if (mHapticTextHandleEnabled) {
+                mTextView.performHapticFeedback(HapticFeedbackConstants.TEXT_HANDLE_MOVE);
+            }
+        }
+
+        /**
+         * Returns the line where the cursor should be positioned during a cursor drag. Rather than
+         * simply returning the line directly at the touch position, this function has the following
+         * additional logic:
+         * 1) Apply some slop to avoid switching lines if the touch moves just slightly off the
+         * current line.
+         * 2) Allow the user's finger to slide down and "snap" to the handle to provide better
+         * visibility of the cursor and text.
+         */
+        private int getLineDuringDrag(MotionEvent event) {
+            final Layout layout = mTextView.getLayout();
+            if (mPrevLineDuringDrag == UNSET_LINE) {
+                return getCurrentLineAdjustedForSlop(layout, mPrevLineDuringDrag, event.getY());
+            }
+            // In case of touch through on handle (when isOnHandle() returns true), event.getY()
+            // returns the midpoint of the cursor vertical bar, while event.getRawY() returns the
+            // finger location on the screen. See {@link InsertionHandleView#touchThrough}.
+            final float fingerY = mTouchState.isOnHandle()
+                    ? event.getRawY() - mTextView.getLocationOnScreen()[1]
+                    : event.getY();
+            final float cursorY = fingerY - getHandle().getIdealFingerToCursorOffset();
+            int line = getCurrentLineAdjustedForSlop(layout, mPrevLineDuringDrag, cursorY);
+            if (mIsTouchSnappedToHandleDuringDrag) {
+                // Just returns the line hit by cursor Y when already snapped.
+                return line;
+            }
+            if (line < mPrevLineDuringDrag) {
+                // The cursor Y aims too high & not yet snapped, check the finger Y.
+                // If finger Y is moving downwards, don't jump to lower line (until snap).
+                // If finger Y is moving upwards, can jump to upper line.
+                return Math.min(mPrevLineDuringDrag,
+                        getCurrentLineAdjustedForSlop(layout, mPrevLineDuringDrag, fingerY));
+            }
+            // The cursor Y aims not too high, so snap!
+            mIsTouchSnappedToHandleDuringDrag = true;
+            if (TextView.DEBUG_CURSOR) {
+                logCursor("InsertionPointCursorController",
+                        "snapped touch to handle: fingerY=%d, cursorY=%d, mLastLine=%d, line=%d",
+                        (int) fingerY, (int) cursorY, mPrevLineDuringDrag, line);
+            }
+            return line;
+        }
+
+        private void startCursorDrag(MotionEvent event) {
+            if (TextView.DEBUG_CURSOR) {
+                logCursor("InsertionPointCursorController", "start cursor drag");
+            }
+            mIsDraggingCursor = true;
+            mIsTouchSnappedToHandleDuringDrag = false;
+            mPrevLineDuringDrag = UNSET_LINE;
+            // We don't want the parent scroll/long-press handlers to take over while dragging.
+            mTextView.getParent().requestDisallowInterceptTouchEvent(true);
+            mTextView.cancelLongPress();
+            // Update the cursor position.
+            positionCursorDuringDrag(event);
+            // Show the cursor handle and magnifier.
+            show();
+            getHandle().removeHiderCallback();
+            getHandle().updateMagnifier(event);
+            // TODO(b/146555651): Figure out if suspendBlink() should be called here.
+        }
+
+        private void performCursorDrag(MotionEvent event) {
+            positionCursorDuringDrag(event);
+            getHandle().updateMagnifier(event);
+        }
+
+        private void endCursorDrag(MotionEvent event) {
+            if (TextView.DEBUG_CURSOR) {
+                logCursor("InsertionPointCursorController", "end cursor drag");
+            }
+            mIsDraggingCursor = false;
+            mIsTouchSnappedToHandleDuringDrag = false;
+            mPrevLineDuringDrag = UNSET_LINE;
+            // Hide the magnifier and set the handle to be hidden after a delay.
+            getHandle().dismissMagnifier();
+            getHandle().hideAfterDelay();
+            // We're no longer dragging, so let the parent receive events.
+            mTextView.getParent().requestDisallowInterceptTouchEvent(false);
+        }
 
         public void show() {
             getHandle().show();
+
+            final long durationSinceCutOrCopy =
+                    SystemClock.uptimeMillis() - TextView.sLastCutCopyOrTextChangedTime;
+
+            if (mInsertionActionModeRunnable != null) {
+                if (mIsDraggingCursor
+                        || mTouchState.isMultiTap()
+                        || isCursorInsideEasyCorrectionSpan()) {
+                    // Cancel the runnable for showing the floating toolbar.
+                    mTextView.removeCallbacks(mInsertionActionModeRunnable);
+                }
+            }
+
+            // If the user recently performed a Cut or Copy action, we want to show the floating
+            // toolbar even for a single tap.
+            if (!mIsDraggingCursor
+                    && !mTouchState.isMultiTap()
+                    && !isCursorInsideEasyCorrectionSpan()
+                    && (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION_MS)) {
+                if (mTextActionMode == null) {
+                    if (mInsertionActionModeRunnable == null) {
+                        mInsertionActionModeRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                startInsertionActionMode();
+                            }
+                        };
+                    }
+                    mTextView.postDelayed(
+                            mInsertionActionModeRunnable,
+                            ViewConfiguration.getDoubleTapTimeout() + 1);
+                }
+            }
+
+            if (!mIsDraggingCursor) {
+                getHandle().hideAfterDelay();
+            }
 
             if (mSelectionModifierCursorController != null) {
                 mSelectionModifierCursorController.hide();
@@ -5783,7 +6303,7 @@ public class Editor {
             }
         }
 
-        private InsertionHandleView getHandle() {
+        public InsertionHandleView getHandle() {
             if (mHandle == null) {
                 loadHandleDrawables(false /* overwrite */);
                 mHandle = new InsertionHandleView(mSelectHandleCenter);
@@ -5810,7 +6330,7 @@ public class Editor {
 
         @Override
         public boolean isCursorBeingModified() {
-            return mHandle != null && mHandle.isDragging();
+            return mIsDraggingCursor || (mHandle != null && mHandle.isDragging());
         }
 
         @Override
@@ -5825,14 +6345,15 @@ public class Editor {
         }
     }
 
-    class SelectionModifierCursorController implements CursorController {
+    /** Controller for selection. */
+    @VisibleForTesting
+    public class SelectionModifierCursorController implements CursorController {
         // The cursor controller handles, lazily created when shown.
         private SelectionHandleView mStartHandle;
         private SelectionHandleView mEndHandle;
         // The offsets of that last touch down event. Remembered to start selection there.
         private int mMinTouchOffset, mMaxTouchOffset;
 
-        private float mDownPositionX, mDownPositionY;
         private boolean mGestureStayedInTapRegion;
 
         // Where the user first starts the drag motion.
@@ -5902,13 +6423,18 @@ public class Editor {
         }
 
         public void enterDrag(int dragAcceleratorMode) {
+            if (TextView.DEBUG_CURSOR) {
+                logCursor("SelectionModifierCursorController: enterDrag",
+                        "starting selection drag: mode=%s", dragAcceleratorMode);
+            }
+
             // Just need to init the handles / hide insertion cursor.
             show();
             mDragAcceleratorMode = dragAcceleratorMode;
             // Start location of selection.
-            mStartOffset = mTextView.getOffsetForPosition(mLastDownPositionX,
-                    mLastDownPositionY);
-            mLineSelectionIsOn = mTextView.getLineAtCoordinate(mLastDownPositionY);
+            mStartOffset = mTextView.getOffsetForPosition(mTouchState.getLastDownX(),
+                    mTouchState.getLastDownY());
+            mLineSelectionIsOn = mTextView.getLineAtCoordinate(mTouchState.getLastDownY());
             // Don't show the handles until user has lifted finger.
             hide();
 
@@ -5936,32 +6462,21 @@ public class Editor {
                                 eventX, eventY);
 
                         // Double tap detection
-                        if (mGestureStayedInTapRegion) {
-                            if (mTapState == TAP_STATE_DOUBLE_TAP
-                                    || mTapState == TAP_STATE_TRIPLE_CLICK) {
-                                final float deltaX = eventX - mDownPositionX;
-                                final float deltaY = eventY - mDownPositionY;
-                                final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
-
-                                ViewConfiguration viewConfiguration = ViewConfiguration.get(
-                                        mTextView.getContext());
-                                int doubleTapSlop = viewConfiguration.getScaledDoubleTapSlop();
-                                boolean stayedInArea =
-                                        distanceSquared < doubleTapSlop * doubleTapSlop;
-
-                                if (stayedInArea && (isMouse || isPositionOnText(eventX, eventY))) {
-                                    if (mTapState == TAP_STATE_DOUBLE_TAP) {
-                                        selectCurrentWordAndStartDrag();
-                                    } else if (mTapState == TAP_STATE_TRIPLE_CLICK) {
-                                        selectCurrentParagraphAndStartDrag();
-                                    }
-                                    mDiscardNextActionUp = true;
-                                }
+                        if (mGestureStayedInTapRegion
+                                && mTouchState.isMultiTapInSameArea()
+                                && (isMouse || isPositionOnText(eventX, eventY)
+                                || mTouchState.isOnHandle())) {
+                            if (TextView.DEBUG_CURSOR) {
+                                logCursor("SelectionModifierCursorController: onTouchEvent",
+                                        "ACTION_DOWN: select and start drag");
                             }
+                            if (mTouchState.isDoubleTap()) {
+                                selectCurrentWordAndStartDrag();
+                            } else if (mTouchState.isTripleClick()) {
+                                selectCurrentParagraphAndStartDrag();
+                            }
+                            mDiscardNextActionUp = true;
                         }
-
-                        mDownPositionX = eventX;
-                        mDownPositionY = eventY;
                         mGestureStayedInTapRegion = true;
                         mHaventMovedEnoughToStartDrag = true;
                     }
@@ -5978,25 +6493,16 @@ public class Editor {
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    final ViewConfiguration viewConfig = ViewConfiguration.get(
-                            mTextView.getContext());
-                    final int touchSlop = viewConfig.getScaledTouchSlop();
+                    if (mGestureStayedInTapRegion) {
+                        final ViewConfiguration viewConfig = ViewConfiguration.get(
+                                mTextView.getContext());
+                        mGestureStayedInTapRegion = EditorTouchState.isDistanceWithin(
+                                mTouchState.getLastDownX(), mTouchState.getLastDownY(),
+                                eventX, eventY, viewConfig.getScaledDoubleTapTouchSlop());
+                    }
 
-                    if (mGestureStayedInTapRegion || mHaventMovedEnoughToStartDrag) {
-                        final float deltaX = eventX - mDownPositionX;
-                        final float deltaY = eventY - mDownPositionY;
-                        final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
-
-                        if (mGestureStayedInTapRegion) {
-                            int doubleTapTouchSlop = viewConfig.getScaledDoubleTapTouchSlop();
-                            mGestureStayedInTapRegion =
-                                    distanceSquared <= doubleTapTouchSlop * doubleTapTouchSlop;
-                        }
-                        if (mHaventMovedEnoughToStartDrag) {
-                            // We don't start dragging until the user has moved enough.
-                            mHaventMovedEnoughToStartDrag =
-                                    distanceSquared <= touchSlop * touchSlop;
-                        }
+                    if (mHaventMovedEnoughToStartDrag) {
+                        mHaventMovedEnoughToStartDrag = !mTouchState.isMovedEnoughForDrag();
                     }
 
                     if (isMouse && !isDragAcceleratorActive()) {
@@ -6027,6 +6533,9 @@ public class Editor {
                     break;
 
                 case MotionEvent.ACTION_UP:
+                    if (TextView.DEBUG_CURSOR) {
+                        logCursor("SelectionModifierCursorController: onTouchEvent", "ACTION_UP");
+                    }
                     if (!isDragAcceleratorActive()) {
                         break;
                     }
@@ -6994,11 +7503,11 @@ public class Editor {
         private final List<ResolveInfo> mSupportedActivities = new ArrayList<>();
 
         private ProcessTextIntentActionsHandler(Editor editor) {
-            mEditor = Preconditions.checkNotNull(editor);
-            mTextView = Preconditions.checkNotNull(mEditor.mTextView);
-            mContext = Preconditions.checkNotNull(mTextView.getContext());
-            mPackageManager = Preconditions.checkNotNull(mContext.getPackageManager());
-            mPackageName = Preconditions.checkNotNull(mContext.getPackageName());
+            mEditor = Objects.requireNonNull(editor);
+            mTextView = Objects.requireNonNull(mEditor.mTextView);
+            mContext = Objects.requireNonNull(mTextView.getContext());
+            mPackageManager = Objects.requireNonNull(mContext.getPackageManager());
+            mPackageName = Objects.requireNonNull(mContext.getPackageName());
         }
 
         /**
@@ -7116,6 +7625,14 @@ public class Editor {
 
         private CharSequence getLabel(ResolveInfo resolveInfo) {
             return resolveInfo.loadLabel(mPackageManager);
+        }
+    }
+
+    static void logCursor(String location, @Nullable String msgFormat, Object ... msgArgs) {
+        if (msgFormat == null) {
+            Log.d(TAG, location);
+        } else {
+            Log.d(TAG, location + ": " + String.format(msgFormat, msgArgs));
         }
     }
 }

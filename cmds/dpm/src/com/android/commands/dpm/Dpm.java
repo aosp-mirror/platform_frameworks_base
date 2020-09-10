@@ -48,8 +48,8 @@ public final class Dpm extends BaseCommand {
     private static final String COMMAND_CLEAR_FREEZE_PERIOD_RECORD = "clear-freeze-period-record";
     private static final String COMMAND_FORCE_NETWORK_LOGS = "force-network-logs";
     private static final String COMMAND_FORCE_SECURITY_LOGS = "force-security-logs";
-    private static final String COMMAND_GRANT_PO_DEVICE_ID_ACCESS =
-            "grant-profile-owner-device-ids-access";
+    private static final String COMMAND_MARK_PO_ON_ORG_OWNED_DEVICE =
+            "mark-profile-owner-on-organization-owned-device";
 
     private IDevicePolicyManager mDevicePolicyManager;
     private int mUserId = UserHandle.USER_SYSTEM;
@@ -93,7 +93,7 @@ public final class Dpm extends BaseCommand {
                 "dpm " + COMMAND_FORCE_SECURITY_LOGS + ": makes all security logs available to " +
                 "the DPC and triggers DeviceAdminReceiver.onSecurityLogsAvailable() if needed."
                 + "\n"
-                + "usage: dpm " + COMMAND_GRANT_PO_DEVICE_ID_ACCESS + ": "
+                + "usage: dpm " + COMMAND_MARK_PO_ON_ORG_OWNED_DEVICE + ": "
                 + "[ --user <USER_ID> | current ] <COMPONENT>\n");
     }
 
@@ -129,8 +129,8 @@ public final class Dpm extends BaseCommand {
             case COMMAND_FORCE_SECURITY_LOGS:
                 runForceSecurityLogs();
                 break;
-            case COMMAND_GRANT_PO_DEVICE_ID_ACCESS:
-                runGrantProfileOwnerDeviceIdsAccess();
+            case COMMAND_MARK_PO_ON_ORG_OWNED_DEVICE:
+                runMarkProfileOwnerOnOrganizationOwnedDevice();
                 break;
             default:
                 throw new IllegalArgumentException ("unknown command '" + command + "'");
@@ -251,9 +251,9 @@ public final class Dpm extends BaseCommand {
     }
 
 
-    private void runGrantProfileOwnerDeviceIdsAccess() throws RemoteException {
+    private void runMarkProfileOwnerOnOrganizationOwnedDevice() throws RemoteException {
         parseArgs(/*canHaveName=*/ false);
-        mDevicePolicyManager.grantDeviceIdsAccessToProfileOwner(mComponent, mUserId);
+        mDevicePolicyManager.markProfileOwnerOnOrganizationOwnedDevice(mComponent, mUserId);
         System.out.println("Success");
     }
 

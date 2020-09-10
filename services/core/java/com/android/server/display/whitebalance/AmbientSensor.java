@@ -29,6 +29,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.display.utils.History;
 
 import java.io.PrintWriter;
+import java.util.Objects;
 
 /**
  * The DisplayWhiteBalanceController uses the AmbientSensor to detect changes in the ambient
@@ -139,8 +140,8 @@ abstract class AmbientSensor {
 
 
     private static void validateArguments(Handler handler, SensorManager sensorManager, int rate) {
-        Preconditions.checkNotNull(handler, "handler cannot be null");
-        Preconditions.checkNotNull(sensorManager, "sensorManager cannot be null");
+        Objects.requireNonNull(handler, "handler cannot be null");
+        Objects.requireNonNull(sensorManager, "sensorManager cannot be null");
         if (rate <= 0) {
             throw new IllegalArgumentException("rate must be positive");
         }

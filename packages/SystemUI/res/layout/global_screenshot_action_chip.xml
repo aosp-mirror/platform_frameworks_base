@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<com.android.systemui.screenshot.ScreenshotActionChip
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/global_screenshot_action_chip"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="@dimen/screenshot_action_chip_margin_right"
+    android:paddingVertical="@dimen/screenshot_action_chip_margin_vertical"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:alpha="0.0">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingVertical="@dimen/screenshot_action_chip_padding_vertical"
+        android:background="@drawable/action_chip_background"
+        android:gravity="center">
+        <ImageView
+            android:id="@+id/screenshot_action_chip_icon"
+            android:layout_width="@dimen/screenshot_action_chip_icon_size"
+            android:layout_height="@dimen/screenshot_action_chip_icon_size"
+            android:layout_marginStart="@dimen/screenshot_action_chip_padding_start"
+            android:layout_marginEnd="@dimen/screenshot_action_chip_padding_middle"/>
+        <TextView
+            android:id="@+id/screenshot_action_chip_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/screenshot_action_chip_padding_end"
+            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+            android:textSize="@dimen/screenshot_action_chip_text_size"
+            android:textColor="@color/global_screenshot_button_text"/>
+    </LinearLayout>
+</com.android.systemui.screenshot.ScreenshotActionChip>

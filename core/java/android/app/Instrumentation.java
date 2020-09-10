@@ -493,6 +493,7 @@ public class Instrumentation {
     public Activity startActivitySync(@NonNull Intent intent, @Nullable Bundle options) {
         validateNotAppThread();
 
+        final Activity activity;
         synchronized (mSync) {
             intent = new Intent(intent);
 
@@ -527,16 +528,18 @@ public class Instrumentation {
                 } catch (InterruptedException e) {
                 }
             } while (mWaitingActivities.contains(aw));
-
-            waitForEnterAnimationComplete(aw.activity);
-
-            // Apply an empty transaction to ensure SF has a chance to update before
-            // the Activity is ready (b/138263890).
-            try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
-                t.apply(true);
-            }
-            return aw.activity;
+            activity = aw.activity;
         }
+
+        // Do not call this method within mSync, lest it could block the main thread.
+        waitForEnterAnimationComplete(activity);
+
+        // Apply an empty transaction to ensure SF has a chance to update before
+        // the Activity is ready (b/138263890).
+        try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
+            t.apply(true);
+        }
+        return activity;
     }
 
     /**
@@ -1516,6 +1519,16 @@ public class Instrumentation {
     public void callActivityOnUserLeaving(Activity activity) {
         activity.performUserLeaving();
     }
+
+    /**
+     * Perform calling of an activity's {@link Activity#onPictureInPictureRequested} method.
+     * The default implementation simply calls through to that method.
+     *
+     * @param activity The activity being notified that picture-in-picture is being requested.
+     */
+    public void callActivityOnPictureInPictureRequested(@NonNull Activity activity) {
+        activity.onPictureInPictureRequested();
+    }
     
     /*
      * Starts allocation counting. This triggers a gc and resets the counts.
@@ -1670,7 +1683,6 @@ public class Instrumentation {
      *
      * @see Activity#startActivity(Intent)
      * @see Activity#startActivityForResult(Intent, int)
-     * @see Activity#startActivityFromChild
      *
      * {@hide}
      */
@@ -1706,13 +1718,12 @@ public class Instrumentation {
             }
         }
         try {
-            intent.migrateExtraStreamToClipData();
+            intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
-            int result = ActivityTaskManager.getService()
-                .startActivity(whoThread, who.getBasePackageName(), intent,
-                        intent.resolveTypeIfNeeded(who.getContentResolver()),
-                        token, target != null ? target.mEmbeddedID : null,
-                        requestCode, 0, null, options);
+            int result = ActivityTaskManager.getService().startActivity(whoThread,
+                    who.getBasePackageName(), who.getAttributionTag(), intent,
+                    intent.resolveTypeIfNeeded(who.getContentResolver()), token,
+                    target != null ? target.mEmbeddedID : null, requestCode, 0, null, options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -1777,13 +1788,13 @@ public class Instrumentation {
         try {
             String[] resolvedTypes = new String[intents.length];
             for (int i=0; i<intents.length; i++) {
-                intents[i].migrateExtraStreamToClipData();
+                intents[i].migrateExtraStreamToClipData(who);
                 intents[i].prepareToLeaveProcess(who);
                 resolvedTypes[i] = intents[i].resolveTypeIfNeeded(who.getContentResolver());
             }
-            int result = ActivityTaskManager.getService()
-                .startActivities(whoThread, who.getBasePackageName(), intents, resolvedTypes,
-                        token, options, userId);
+            int result = ActivityTaskManager.getService().startActivities(whoThread,
+                    who.getBasePackageName(), who.getAttributionTag(), intents, resolvedTypes,
+                    token, options, userId);
             checkStartActivityResult(result, intents[0]);
             return result;
         } catch (RemoteException e) {
@@ -1815,7 +1826,6 @@ public class Instrumentation {
      * 
      * @see Activity#startActivity(Intent)
      * @see Activity#startActivityForResult(Intent, int)
-     * @see Activity#startActivityFromChild
      * 
      * {@hide}
      */
@@ -1847,12 +1857,12 @@ public class Instrumentation {
             }
         }
         try {
-            intent.migrateExtraStreamToClipData();
+            intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
-            int result = ActivityTaskManager.getService()
-                .startActivity(whoThread, who.getBasePackageName(), intent,
-                        intent.resolveTypeIfNeeded(who.getContentResolver()),
-                        token, target, requestCode, 0, null, options);
+            int result = ActivityTaskManager.getService().startActivity(whoThread,
+                    who.getBasePackageName(), who.getAttributionTag(), intent,
+                    intent.resolveTypeIfNeeded(who.getContentResolver()), token, target,
+                    requestCode, 0, null, options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -1883,7 +1893,6 @@ public class Instrumentation {
      *
      * @see Activity#startActivity(Intent)
      * @see Activity#startActivityForResult(Intent, int)
-     * @see Activity#startActivityFromChild
      *
      * {@hide}
      */
@@ -1915,13 +1924,12 @@ public class Instrumentation {
             }
         }
         try {
-            intent.migrateExtraStreamToClipData();
+            intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
-            int result = ActivityTaskManager.getService()
-                .startActivityAsUser(whoThread, who.getBasePackageName(), intent,
-                        intent.resolveTypeIfNeeded(who.getContentResolver()),
-                        token, resultWho,
-                        requestCode, 0, null, options, user.getIdentifier());
+            int result = ActivityTaskManager.getService().startActivityAsUser(whoThread,
+                    who.getBasePackageName(), who.getAttributionTag(), intent,
+                    intent.resolveTypeIfNeeded(who.getContentResolver()), token, resultWho,
+                    requestCode, 0, null, options, user.getIdentifier());
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -1962,7 +1970,7 @@ public class Instrumentation {
             }
         }
         try {
-            intent.migrateExtraStreamToClipData();
+            intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
             int result = ActivityTaskManager.getService()
                 .startActivityAsCaller(whoThread, who.getBasePackageName(), intent,
@@ -2009,10 +2017,11 @@ public class Instrumentation {
             }
         }
         try {
-            intent.migrateExtraStreamToClipData();
+            intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
             int result = appTask.startActivity(whoThread.asBinder(), who.getBasePackageName(),
-                    intent, intent.resolveTypeIfNeeded(who.getContentResolver()), options);
+                    who.getAttributionTag(), intent,
+                    intent.resolveTypeIfNeeded(who.getContentResolver()), options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);

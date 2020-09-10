@@ -33,7 +33,7 @@
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Մուտքագրեք գաղտնաբառը"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"PIN կոդը սխալ է։"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Սխալ քարտ"</string>
-    <string name="keyguard_charged" msgid="6572033099675649299">"Ամբողջությամբ լիցքավորված է"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"Լիցքավորված է"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Անլար լիցքավորում"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Լիցքավորում"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Արագ լիցքավորում"</string>
@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Ապակողպելու համար սեղմեք Ընտրացանկը:"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Ցանցը կողպված է"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"SIM քարտ չկա"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"Պլանշետում SIM քարտ չկա:"</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"Հեռախոսում SIM քարտ չկա:"</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Տեղադրեք SIM քարտ:"</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"SIM քարտը բացակայում է կամ ընթեռնելի չէ: Տեղադրեք SIM քարտ:"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"Անպիտան SIM քարտ:"</string>
@@ -83,25 +81,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Մուտքագրեք 4-8 թվանշան պարունակող PIN կոդ։"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK կոդը պետք է առնվազն 8 թվանշան պարունակի։"</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"Վերամուտքագրեք ճիշտ PUK կոդը: Կրկնվող փորձերը ընդմիշտ կարգելափակեն SIM քարտը:"</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"PIN կոդերը չեն համընկնում"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Նախշը մուտքագրելու չափազանց շատ փորձեր են կատարվել"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Դուք սխալ եք մուտքագրել ձեր PIN կոդը <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ: \n\nՓորձեք կրկին <xliff:g id="NUMBER_1">%2$d</xliff:g> վայրկյանից։"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Դուք սխալ եք մուտքագրել ձեր գաղտնաբառը <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ: \n\nՓորձեք կրկին <xliff:g id="NUMBER_1">%2$d</xliff:g> վայրկյանից:"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Դուք սխալ եք մուտքագրել ձեր ապակողպման նախշը <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ: \n\nՓորձեք կրկին <xliff:g id="NUMBER_1">%2$d</xliff:g> վայրկյանից։"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"Դուք կատարել եք պլանշետն ապակողպելու <xliff:g id="NUMBER_0">%1$d</xliff:g> անհաջող փորձ: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո այս պլանշետը կվերակայվի և բոլոր տվյալները կջնջվեն:"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"Դուք կատարել եք հեռախոսն ապակողպելու <xliff:g id="NUMBER_0">%1$d</xliff:g> անհաջող փորձ: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո այս հեռախոսը կվերակայվի և բոլոր տվյալները կջնջվեն:"</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"Դուք կատարել եք պլանշետն ապակողպելու <xliff:g id="NUMBER">%d</xliff:g> անհաջող փորձ: Այս պլանշետը կվերակայվի և բոլոր տվյալները կջնջվեն:"</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"Դուք կատարել եք հեռախոսն ապակողպելու <xliff:g id="NUMBER">%d</xliff:g> անհաջող փորձ: Այս հեռախոսը կվերակայվի և բոլոր տվյալները կջնջվեն:"</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"Դուք կատարել եք պլանշետն ապակողպելու <xliff:g id="NUMBER_0">%1$d</xliff:g> անհաջող փորձ: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո այս օգտվողը կհեռացվի և օգտվողի բոլոր տվյալները կջնջվեն:"</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"Դուք կատարել եք հեռախոսն ապակողպելու <xliff:g id="NUMBER_0">%1$d</xliff:g> անհաջող փորձ: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո այս օգտվողը կհեռացվի և օգտվողի բոլոր տվյալները կջնջվեն:"</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="9046628517316763961">"Դուք կատարել եք պլանշետն ապակողպելու <xliff:g id="NUMBER">%d</xliff:g> անհաջող փորձ: Օգտվողը կհեռացվի և օգտվողի բոլոր տվյալները կջնջվեն:"</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3588779327358321092">"Դուք կատարել եք հեռախոսն ապակողպելու <xliff:g id="NUMBER">%d</xliff:g> անհաջող փորձ: Օգտվողը կհեռացվի և օգտվողի բոլոր տվյալները կջնջվեն:"</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="6114158710353725041">"Դուք կատարել եք պլանշետն ապակողպելու <xliff:g id="NUMBER_0">%1$d</xliff:g> անհաջող փորձ: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո աշխատանքային պրոֆիլը կհեռացվի և պրոֆիլի բոլոր տվյալները կջնջվեն:"</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="8345451368768804892">"Դուք կատարել եք հեռախոսն ապակողպելու <xliff:g id="NUMBER_0">%1$d</xliff:g> անհաջող փորձ: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո աշխատանքային պրոֆիլը կհեռացվի և պրոֆիլի բոլոր տվյալները կջնջվեն:"</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"Դուք կատարել եք պլանշետն ապակողպելու <xliff:g id="NUMBER">%d</xliff:g> անհաջող փորձ: Աշխատանքային պրոֆիլը կհեռացվի և պրոֆիլի բոլոր տվյալները կջնջվեն:"</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"Դուք կատարել եք հեռախոսն ապակողպելու <xliff:g id="NUMBER">%d</xliff:g> անհաջող փորձ: Աշխատանքային պրոֆիլը կհեռացվի և պրոֆիլի բոլոր տվյալները կջնջվեն:"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"Դուք կատարել եք ապակողպման նախշը մուտքագրելու <xliff:g id="NUMBER_0">%1$d</xliff:g> անհաջող փորձ: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո ձեզանից կպահանջվի ապակողպել պլանշետը էլփոստի հաշվի միջոցով։\n\n Խնդրում ենք փորձել կրկին <xliff:g id="NUMBER_2">%3$d</xliff:g> վայրկյանից:"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"Դուք կատարել եք ապակողպման նախշը մուտքագրելու <xliff:g id="NUMBER_0">%1$d</xliff:g> անհաջող փորձ: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո ձեզանից կպահանջվի ապակողպել հեռախոսը էլփոստի հաշվի միջոցով։\n\n Խնդրում ենք փորձել կրկին <xliff:g id="NUMBER_2">%3$d</xliff:g> վայրկյանից:"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"SIM PIN կոդը սխալ է։ Այժմ պետք է դիմեք ձեր օպերատորին՝ սարքն արգելահանելու համար:"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="one">Incorrect SIM PIN code, you have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts.</item>

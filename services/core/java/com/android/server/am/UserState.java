@@ -139,7 +139,7 @@ public final class UserState {
         pw.println();
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(UserStateProto.STATE, stateToProtoEnum(state));
         proto.write(UserStateProto.SWITCHING, switching);

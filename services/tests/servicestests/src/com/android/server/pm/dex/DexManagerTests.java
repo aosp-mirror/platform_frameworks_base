@@ -85,6 +85,9 @@ public class DexManagerTests {
     private TestData mBarUser0UnsupportedClassLoader;
     private TestData mBarUser0DelegateLastClassLoader;
 
+    private TestData mSystemServerJar;
+    private TestData mSystemServerJarInvalid;
+
     private int mUser0;
     private int mUser1;
 
@@ -107,6 +110,9 @@ public class DexManagerTests {
                 UNSUPPORTED_CLASS_LOADER_NAME);
         mBarUser0DelegateLastClassLoader = new TestData(bar, isa, mUser0,
                 DELEGATE_LAST_CLASS_LOADER_NAME);
+
+        mSystemServerJar = new TestData("android", isa, mUser0, PATH_CLASS_LOADER_NAME);
+        mSystemServerJarInvalid = new TestData("android", isa, mUser0, PATH_CLASS_LOADER_NAME);
 
         mDexManager = new DexManager(/*Context*/ null, mPM, /*PackageDexOptimizer*/ null,
                 mInstaller, mInstallLock);
@@ -587,6 +593,25 @@ public class DexManagerTests {
         assertHasDclInfo(mFooUser0, mFooUser0, fooSecondaries);
     }
 
+
+    @Test
+    public void testNotifySystemServerUse() {
+        List<String> dexFiles = new ArrayList<String>();
+        dexFiles.add("/system/framework/foo");
+        notifyDexLoad(mSystemServerJar, dexFiles, mUser0);
+        PackageUseInfo pui = getPackageUseInfo(mSystemServerJar);
+        assertIsUsedByOtherApps(mSystemServerJar, pui, false);
+    }
+
+    @Test
+    public void testNotifySystemServerInvalidUse() {
+        List<String> dexFiles = new ArrayList<String>();
+        dexFiles.add("/data/foo");
+        notifyDexLoad(mSystemServerJarInvalid, dexFiles, mUser0);
+        assertNoUseInfo(mSystemServerJarInvalid);
+        assertNoDclInfo(mSystemServerJarInvalid);
+    }
+
     private void assertSecondaryUse(TestData testData, PackageUseInfo pui,
             List<String> secondaries, boolean isUsedByOtherApps, int ownerUserId,
             String[] expectedContexts) {
@@ -797,35 +822,16 @@ public class DexManagerTests {
         }
     }
 
-    private boolean shouldPackageRunOob(
-            boolean isDefaultEnabled, String defaultWhitelist, String overrideEnabled,
-            String overrideWhitelist, Collection<String> packageNamesInSameProcess) {
+    private boolean shouldPackageRunOob(boolean isDefaultEnabled, String whitelist,
+            Collection<String> packageNamesInSameProcess) {
         return DexManager.isPackageSelectedToRunOobInternal(
-                isDefaultEnabled, defaultWhitelist, overrideEnabled, overrideWhitelist,
-                packageNamesInSameProcess);
+                isDefaultEnabled, whitelist, packageNamesInSameProcess);
     }
 
     @Test
-    public void testOobPackageSelectionSwitch() {
+    public void testOobPackageSelectionDefault() {
         // Feature is off by default, not overriden
-        assertFalse(shouldPackageRunOob(false, "ALL", null, null, null));
-
-        // Feature is off by default, overriden
-        assertTrue(shouldPackageRunOob(false, "ALL", "true", "ALL", null));
-        assertFalse(shouldPackageRunOob(false, "ALL", "false", null, null));
-        assertFalse(shouldPackageRunOob(false, "ALL", "false", "ALL", null));
-        assertFalse(shouldPackageRunOob(false, "ALL", "false", null, null));
-
-        // Feature is on by default, not overriden
-        assertTrue(shouldPackageRunOob(true, "ALL", null, null, null));
-        assertTrue(shouldPackageRunOob(true, "ALL", null, null, null));
-        assertTrue(shouldPackageRunOob(true, "ALL", null, "ALL", null));
-
-        // Feature is on by default, overriden
-        assertTrue(shouldPackageRunOob(true, "ALL", "true", null, null));
-        assertTrue(shouldPackageRunOob(true, "ALL", "true", "ALL", null));
-        assertFalse(shouldPackageRunOob(true, "ALL", "false", null, null));
-        assertFalse(shouldPackageRunOob(true, "ALL", "false", "ALL", null));
+        assertFalse(shouldPackageRunOob(false, "ALL", null));
     }
 
     @Test
@@ -840,24 +846,19 @@ public class DexManagerTests {
         final Collection<String> runningPackages = Arrays.asList("com.priv.app1", "com.priv.app2");
 
         // Feature is off, whitelist does not matter
-        assertFalse(shouldPackageRunOob(false, kWhitelistApp0, null, null, runningPackages));
-        assertFalse(shouldPackageRunOob(false, kWhitelistApp1, null, null, runningPackages));
-        assertFalse(shouldPackageRunOob(false, "", null, kWhitelistApp1, runningPackages));
-        assertFalse(shouldPackageRunOob(false, "", null, "ALL", runningPackages));
-        assertFalse(shouldPackageRunOob(false, "ALL", null, "ALL", runningPackages));
-        assertFalse(shouldPackageRunOob(false, "ALL", null, "", runningPackages));
+        assertFalse(shouldPackageRunOob(false, kWhitelistApp0, runningPackages));
+        assertFalse(shouldPackageRunOob(false, kWhitelistApp1, runningPackages));
+        assertFalse(shouldPackageRunOob(false, "", runningPackages));
+        assertFalse(shouldPackageRunOob(false, "ALL", runningPackages));
 
-        // Feature is on, app not in default or overridden whitelist
-        assertFalse(shouldPackageRunOob(true, kWhitelistApp0, null, null, runningPackages));
-        assertFalse(shouldPackageRunOob(true, "", null, kWhitelistApp0, runningPackages));
-        assertFalse(shouldPackageRunOob(true, "ALL", null, kWhitelistApp0, runningPackages));
+        // Feature is on, app not in whitelist
+        assertFalse(shouldPackageRunOob(true, kWhitelistApp0, runningPackages));
+        assertFalse(shouldPackageRunOob(true, "", runningPackages));
 
-        // Feature is on, app in default or overridden whitelist
-        assertTrue(shouldPackageRunOob(true, kWhitelistApp1, null, null, runningPackages));
-        assertTrue(shouldPackageRunOob(true, kWhitelistApp2, null, null, runningPackages));
-        assertTrue(shouldPackageRunOob(true, kWhitelistApp1AndApp2, null, null, runningPackages));
-        assertTrue(shouldPackageRunOob(true, kWhitelistApp1, null, "ALL", runningPackages));
-        assertTrue(shouldPackageRunOob(true, "", null, kWhitelistApp1, runningPackages));
-        assertTrue(shouldPackageRunOob(true, "ALL", null, kWhitelistApp1, runningPackages));
+        // Feature is on, app in whitelist
+        assertTrue(shouldPackageRunOob(true, kWhitelistApp1, runningPackages));
+        assertTrue(shouldPackageRunOob(true, kWhitelistApp2, runningPackages));
+        assertTrue(shouldPackageRunOob(true, kWhitelistApp1AndApp2, runningPackages));
+        assertTrue(shouldPackageRunOob(true, "ALL", runningPackages));
     }
 }

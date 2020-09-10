@@ -16,12 +16,12 @@
 
 package com.android.server.wm;
 
-import android.annotation.ColorInt;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.animation.Animation;
 
+import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import java.io.PrintWriter;
@@ -41,11 +41,6 @@ interface AnimationAdapter {
     boolean getShowWallpaper();
 
     /**
-     * @return The background color behind the animation.
-     */
-    @ColorInt int getBackgroundColor();
-
-    /**
      * Requests to start the animation.
      *
      * @param animationLeash The surface to run the animation on. See {@link SurfaceAnimator} for an
@@ -53,9 +48,10 @@ interface AnimationAdapter {
      *                       component running the animation after {@code finishCallback} has been
      *                       invoked, or after the animation was cancelled.
      * @param t The Transaction to apply the initial frame of the animation.
+     * @param type The type of the animation.
      * @param finishCallback The callback to be invoked when the animation has finished.
      */
-    void startAnimation(SurfaceControl animationLeash, Transaction t,
+    void startAnimation(SurfaceControl animationLeash, Transaction t, @AnimationType int type,
             OnAnimationFinishedCallback finishCallback);
 
     /**
@@ -82,11 +78,32 @@ interface AnimationAdapter {
 
     void dump(PrintWriter pw, String prefix);
 
-    default void writeToProto(ProtoOutputStream proto, long fieldId) {
+    default void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        writeToProto(proto);
+        dumpDebug(proto);
         proto.end(token);
     }
 
-    void writeToProto(ProtoOutputStream proto);
+    void dumpDebug(ProtoOutputStream proto);
+
+    /**
+     * Gets called when the animation is about to finish and gives the client the opportunity to
+     * defer finishing the animation, i.e. it keeps the leash around until the client calls
+     * endDeferFinishCallback.
+     * <p>
+     * This has the same effect as
+     * {@link com.android.server.wm.SurfaceAnimator.Animatable#shouldDeferAnimationFinish(Runnable)}
+     * . The later will be evaluated first and has precedence over this method if it returns true,
+     * which means that if the {@link com.android.server.wm.SurfaceAnimator.Animatable} requests to
+     * defer its finish, this method won't be called so this adapter will never have access to the
+     * finish callback. On the other hand, if the
+     * {@link com.android.server.wm.SurfaceAnimator.Animatable}, doesn't request to defer, this
+     * {@link AnimationAdapter} is responsible for ending the animation.
+     *
+     * @param endDeferFinishCallback The callback to call when defer finishing should be ended.
+     * @return Whether the client would like to defer the animation finish.
+     */
+    default boolean shouldDeferAnimationFinish(Runnable endDeferFinishCallback) {
+        return false;
+    }
 }

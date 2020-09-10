@@ -395,7 +395,8 @@ public class KeyValueBackupReporter {
         Slog.e(TAG, "Transport threw reporting restore set: " + e);
     }
 
-    void onTransportNotInitialized() {
+    void onTransportNotInitialized(@Nullable String transportName) {
+        EventLog.writeEvent(EventLogTags.BACKUP_RESET, transportName);
         if (MORE_DEBUG) {
             Slog.d(TAG, "Transport requires initialization, rerunning");
         }

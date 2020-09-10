@@ -20,6 +20,7 @@
 #include <GrBackendDrawableInfo.h>
 #include <SkAndroidFrameworkUtils.h>
 #include <SkImage.h>
+#include "include/private/SkM44.h"
 #include <utils/Color.h>
 #include <utils/Trace.h>
 #include <utils/TraceUtils.h>
@@ -62,7 +63,7 @@ void VkFunctorDrawHandler::draw(const GrBackendDrawableInfo& info) {
             renderthread::RenderThread::getInstance().vulkanManager();
     mFunctorHandle->initVk(vk_manager.getVkFunctorInitParams());
 
-    SkMatrix44 mat4(mMatrix);
+    SkM44 mat4(mMatrix);
     VkFunctorDrawParams params{
             .width = mImageInfo.width(),
             .height = mImageInfo.height(),
@@ -72,7 +73,7 @@ void VkFunctorDrawHandler::draw(const GrBackendDrawableInfo& info) {
             .clip_right = mClip.fRight,
             .clip_bottom = mClip.fBottom,
     };
-    mat4.asColMajorf(&params.transform[0]);
+    mat4.getColMajor(&params.transform[0]);
     params.secondary_command_buffer = vulkan_info.fSecondaryCommandBuffer;
     params.color_attachment_index = vulkan_info.fColorAttachmentIndex;
     params.compatible_render_pass = vulkan_info.fCompatibleRenderPass;

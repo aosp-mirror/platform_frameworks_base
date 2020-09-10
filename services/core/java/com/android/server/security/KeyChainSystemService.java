@@ -27,7 +27,7 @@ import android.os.UserHandle;
 import android.security.IKeyChainService;
 import android.util.Slog;
 
-import com.android.server.DeviceIdleController;
+import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
@@ -99,8 +99,8 @@ public class KeyChainSystemService extends SystemService {
         }
 
         final String packageName = intent.getComponent().getPackageName();
-        final DeviceIdleController.LocalService idleController =
-                LocalServices.getService(DeviceIdleController.LocalService.class);
+        final DeviceIdleInternal idleController =
+                LocalServices.getService(DeviceIdleInternal.class);
         idleController.addPowerSaveTempWhitelistApp(Process.myUid(), packageName,
                 KEYCHAIN_IDLE_WHITELIST_DURATION_MS, user.getIdentifier(), false, "keychain");
 

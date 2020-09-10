@@ -25,10 +25,12 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
@@ -36,6 +38,7 @@ import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.IActivityTaskManager;
+import android.app.LoadedApk;
 import android.app.servertransaction.PendingTransactionActions;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -46,6 +49,7 @@ import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.platform.test.annotations.Presubmit;
 import android.view.WindowManagerGlobal;
 
 import androidx.test.annotation.UiThreadTest;
@@ -70,139 +74,8 @@ import org.mockito.quality.Strictness;
  */
 @RunWith(AndroidJUnit4.class)
 @MediumTest
+@Presubmit
 public class ActivityThreadClientTest {
-
-    @Test
-    @UiThreadTest
-    public void testWindowVisibilityChange_OnCreate() throws Exception {
-        try (ClientMockSession clientSession = new ClientMockSession()) {
-            ActivityClientRecord r = clientSession.stubActivityRecord();
-
-            clientSession.launchActivity(r);
-            assertEquals(ON_CREATE, r.getLifecycleState());
-
-            clientSession.changeVisibility(r, true);
-            assertEquals(ON_CREATE, r.getLifecycleState());
-
-            clientSession.changeVisibility(r, false);
-            assertEquals(ON_CREATE, r.getLifecycleState());
-        }
-    }
-
-    @Test
-    @UiThreadTest
-    public void testWindowVisibilityChange_OnCreate_Finished() throws Exception {
-        try (ClientMockSession clientSession = new ClientMockSession()) {
-            ActivityClientRecord r = clientSession.stubActivityRecord();
-
-            Activity activity = clientSession.launchActivity(r);
-            activity.finish();
-            assertEquals(ON_CREATE, r.getLifecycleState());
-
-            clientSession.changeVisibility(r, true);
-            assertEquals(ON_CREATE, r.getLifecycleState());
-
-            clientSession.changeVisibility(r, false);
-            assertEquals(ON_CREATE, r.getLifecycleState());
-        }
-    }
-
-    @Test
-    @UiThreadTest
-    public void testWindowVisibilityChange_OnStart() throws Exception {
-        try (ClientMockSession clientSession = new ClientMockSession()) {
-            ActivityClientRecord r = clientSession.stubActivityRecord();
-
-            clientSession.launchActivity(r);
-            clientSession.startActivity(r);
-            assertEquals(ON_START, r.getLifecycleState());
-
-            clientSession.changeVisibility(r, false);
-            assertEquals(ON_STOP, r.getLifecycleState());
-
-            clientSession.changeVisibility(r, true);
-            assertEquals(ON_START, r.getLifecycleState());
-        }
-    }
-
-    @Test
-    @UiThreadTest
-    public void testWindowVisibilityChange_OnStart_Finished() throws Exception {
-        try (ClientMockSession clientSession = new ClientMockSession()) {
-            ActivityClientRecord r = clientSession.stubActivityRecord();
-
-            Activity activity = clientSession.launchActivity(r);
-            clientSession.startActivity(r);
-            activity.finish();
-            assertEquals(ON_START, r.getLifecycleState());
-
-            clientSession.changeVisibility(r, false);
-            assertEquals(ON_STOP, r.getLifecycleState());
-
-            clientSession.changeVisibility(r, true);
-            assertEquals(ON_START, r.getLifecycleState());
-        }
-    }
-
-    @Test
-    @UiThreadTest
-    public void testWindowVisibilityChange_OnResume() throws Exception {
-        try (ClientMockSession clientSession = new ClientMockSession()) {
-            ActivityClientRecord r = clientSession.stubActivityRecord();
-
-            clientSession.launchActivity(r);
-            clientSession.startActivity(r);
-            clientSession.resumeActivity(r);
-            assertEquals(ON_RESUME, r.getLifecycleState());
-
-            clientSession.changeVisibility(r, false);
-            assertEquals(ON_STOP, r.getLifecycleState());
-
-            clientSession.changeVisibility(r, true);
-            assertEquals(ON_START, r.getLifecycleState());
-        }
-    }
-
-    @Test
-    @UiThreadTest
-    public void testWindowVisibilityChange_OnPause() throws Exception {
-        try (ClientMockSession clientSession = new ClientMockSession()) {
-            ActivityClientRecord r = clientSession.stubActivityRecord();
-
-            clientSession.launchActivity(r);
-            clientSession.startActivity(r);
-            clientSession.resumeActivity(r);
-            clientSession.pauseActivity(r);
-            assertEquals(ON_PAUSE, r.getLifecycleState());
-
-            clientSession.changeVisibility(r, false);
-            assertEquals(ON_STOP, r.getLifecycleState());
-
-            clientSession.changeVisibility(r, true);
-            assertEquals(ON_START, r.getLifecycleState());
-        }
-    }
-
-    @Test
-    @UiThreadTest
-    public void testWindowVisibilityChange_OnStop() throws Exception {
-        try (ClientMockSession clientSession = new ClientMockSession()) {
-            ActivityClientRecord r = clientSession.stubActivityRecord();
-
-            clientSession.launchActivity(r);
-            clientSession.startActivity(r);
-            clientSession.resumeActivity(r);
-            clientSession.pauseActivity(r);
-            clientSession.stopActivity(r);
-            assertEquals(ON_STOP, r.getLifecycleState());
-
-            clientSession.changeVisibility(r, true);
-            assertEquals(ON_START, r.getLifecycleState());
-
-            clientSession.changeVisibility(r, false);
-            assertEquals(ON_STOP, r.getLifecycleState());
-        }
-    }
 
     @Test
     @UiThreadTest
@@ -303,7 +176,7 @@ public class ActivityThreadClientTest {
         }
 
         private void startActivity(ActivityClientRecord r) {
-            mThread.handleStartActivity(r, null /* pendingActions */);
+            mThread.handleStartActivity(r.token, null /* pendingActions */);
         }
 
         private void resumeActivity(ActivityClientRecord r) {
@@ -318,17 +191,13 @@ public class ActivityThreadClientTest {
         }
 
         private void stopActivity(ActivityClientRecord r) {
-            mThread.handleStopActivity(r.token, false /* show */, 0 /* configChanges */,
+            mThread.handleStopActivity(r.token, 0 /* configChanges */,
                     new PendingTransactionActions(), false /* finalStateRequest */, "test");
         }
 
         private void destroyActivity(ActivityClientRecord r) {
             mThread.handleDestroyActivity(r.token, true /* finishing */, 0 /* configChanges */,
                     false /* getNonConfigInstance */, "test");
-        }
-
-        private void changeVisibility(ActivityClientRecord r, boolean show) {
-            mThread.handleWindowVisibility(r.token, show);
         }
 
         private ActivityClientRecord stubActivityRecord() {
@@ -341,13 +210,23 @@ public class ActivityThreadClientTest {
             info.applicationInfo = new ApplicationInfo();
             info.applicationInfo.packageName = info.packageName;
             info.applicationInfo.uid = UserHandle.myUserId();
+            info.applicationInfo.sourceDir = "/test/sourceDir";
+
+            // mock the function for preventing NPE in emulator environment. The purpose of the
+            // test is for activity client state changes, we don't focus on the updating for the
+            // ApplicationInfo.
+            LoadedApk packageInfo = mThread.peekPackageInfo(info.packageName,
+                    true /* includeCode */);
+            spyOn(packageInfo);
+            doNothing().when(packageInfo).updateApplicationInfo(any(), any());
 
             return new ActivityClientRecord(new Binder(), Intent.makeMainActivity(component),
                     0 /* ident */, info, new Configuration(),
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null /* referrer */,
                     null /* voiceInteractor */, null /* state */, null /* persistentState */,
                     null /* pendingResults */, null /* pendingNewIntents */, true /* isForward */,
-                    null /* profilerInfo */,  mThread /* client */, null /* asssitToken */);
+                    null /* profilerInfo */,  mThread /* client */, null /* asssitToken */,
+                    null /* fixedRotationAdjustments */);
         }
 
         @Override

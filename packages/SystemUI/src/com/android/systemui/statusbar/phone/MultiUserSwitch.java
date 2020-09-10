@@ -16,10 +16,10 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.admin.DevicePolicyManager;
+import static com.android.systemui.DejankUtils.whitelistIpcs;
+
 import android.content.Context;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -95,28 +95,9 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
     }
 
     public boolean isMultiUserEnabled() {
-        // Short-circuiting from UserManager. Needs to be extracted because of SystemUI boolean flag
-        // qs_show_user_switcher_for_single_user
-
-        // The default in UserManager is to show the switcher. We want to not show it unless the
-        // user explicitly requests it in Settings
-        final boolean userSwitcherEnabled = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.USER_SWITCHER_ENABLED, 0) != 0;
-
         // TODO(b/138661450) Move IPC calls to background
-        if (!userSwitcherEnabled
-                || !UserManager.supportsMultipleUsers()
-                || UserManager.isDeviceInDemoMode(mContext)
-                || mUserManager.hasUserRestriction(UserManager.DISALLOW_USER_SWITCH)) {
-            return false;
-        }
-
-        final boolean guestEnabled = !mContext.getSystemService(DevicePolicyManager.class)
-                .getGuestUserDisabled(null);
-        return mUserSwitcherController.getSwitchableUserCount() > 1
-                // If we cannot add guests even if they are enabled, do not show
-                || (guestEnabled && !mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_USER))
-                || mContext.getResources().getBoolean(R.bool.qs_show_user_switcher_for_single_user);
+        return whitelistIpcs(() -> mUserManager.isUserSwitcherEnabled(
+                mContext.getResources().getBoolean(R.bool.qs_show_user_switcher_for_single_user)));
     }
 
     private void registerListener() {
@@ -167,7 +148,8 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
 
     private void refreshContentDescription() {
         String currentUser = null;
-        if (mUserManager.isUserSwitcherEnabled()
+        // TODO(b/138661450)
+        if (whitelistIpcs(() -> mUserManager.isUserSwitcherEnabled())
                 && mUserSwitcherController != null) {
             currentUser = mUserSwitcherController.getCurrentUserName(mContext);
         }

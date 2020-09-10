@@ -21,6 +21,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.location.Address;
 import android.location.Location;
@@ -1367,7 +1368,8 @@ public final class ResponderLocation implements Parcelable {
      *
      */
     @Nullable
-    public SparseArray toCivicLocationSparseArray() {
+    @SuppressLint("ChangedType")
+    public SparseArray<String> toCivicLocationSparseArray() {
         if (mCivicLocation != null && mCivicLocation.isValid()) {
             return mCivicLocation.toSparseArray();
         } else {

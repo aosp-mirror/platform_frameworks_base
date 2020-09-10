@@ -100,6 +100,7 @@ public class DoubleTapHelper {
                                     event.getY() - mActivationY);
                         }
                         if (withinDoubleTapSlop) {
+                            makeInactive();
                             if (!mDoubleTapListener.onDoubleTap()) {
                                 return false;
                             }
@@ -134,6 +135,7 @@ public class DoubleTapHelper {
         if (mActivated) {
             mActivated = false;
             mActivationListener.onActiveChanged(false);
+            mView.removeCallbacks(mTapTimeoutRunnable);
         }
     }
 

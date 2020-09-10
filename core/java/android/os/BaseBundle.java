@@ -570,6 +570,35 @@ public class BaseBundle {
         return mMap.keySet();
     }
 
+    /** {@hide} */
+    public void putObject(@Nullable String key, @Nullable Object value) {
+        if (value == null) {
+            putString(key, null);
+        } else if (value instanceof Boolean) {
+            putBoolean(key, (Boolean) value);
+        } else if (value instanceof Integer) {
+            putInt(key, (Integer) value);
+        } else if (value instanceof Long) {
+            putLong(key, (Long) value);
+        } else if (value instanceof Double) {
+            putDouble(key, (Double) value);
+        } else if (value instanceof String) {
+            putString(key, (String) value);
+        } else if (value instanceof boolean[]) {
+            putBooleanArray(key, (boolean[]) value);
+        } else if (value instanceof int[]) {
+            putIntArray(key, (int[]) value);
+        } else if (value instanceof long[]) {
+            putLongArray(key, (long[]) value);
+        } else if (value instanceof double[]) {
+            putDoubleArray(key, (double[]) value);
+        } else if (value instanceof String[]) {
+            putStringArray(key, (String[]) value);
+        } else {
+            throw new IllegalArgumentException("Unsupported type " + value.getClass());
+        }
+    }
+
     /**
      * Inserts a Boolean value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.

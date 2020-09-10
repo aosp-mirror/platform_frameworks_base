@@ -21,29 +21,23 @@ import static com.android.server.om.OverlayManagerService.TAG;
 
 import android.annotation.NonNull;
 import android.content.om.OverlayInfo;
+import android.content.om.OverlayableInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.os.Build.VERSION_CODES;
-import android.os.IIdmap2;
+import android.os.OverlayablePolicy;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.util.Slog;
 
-import com.android.server.om.OverlayManagerServiceImpl.PackageManagerHelper;
-import com.android.server.pm.Installer;
-
-import java.io.File;
+import java.io.IOException;
 
 /**
  * Handle the creation and deletion of idmap files.
  *
- * The actual work is performed by the idmap binary, launched through Installer
- * and installd (or idmap2).
- *
- * Note: this class is subclassed in the OMS unit tests, and hence not marked as final.
+ * The actual work is performed by idmap2d.
+ * @see IdmapDaemon
  */
-class IdmapManager {
-    private static final boolean FEATURE_FLAG_IDMAP2 = true;
+final class IdmapManager {
     private static final boolean VENDOR_IS_Q_OR_LATER;
     static {
         final String value = SystemProperties.get("ro.vndk.version", "29");
@@ -58,38 +52,34 @@ class IdmapManager {
         VENDOR_IS_Q_OR_LATER = isQOrLater;
     }
 
-    private final Installer mInstaller;
-    private final PackageManagerHelper mPackageManager;
     private final IdmapDaemon mIdmapDaemon;
+    private final OverlayableInfoCallback mOverlayableCallback;
 
-    IdmapManager(final Installer installer, final PackageManagerHelper packageManager) {
-        mInstaller = installer;
-        mPackageManager = packageManager;
-        mIdmapDaemon = IdmapDaemon.getInstance();
+    IdmapManager(final IdmapDaemon idmapDaemon, final OverlayableInfoCallback verifyCallback) {
+        mOverlayableCallback = verifyCallback;
+        mIdmapDaemon = idmapDaemon;
     }
 
+    /**
+     * Creates the idmap for the target/overlay combination and returns whether the idmap file was
+     * modified.
+     */
     boolean createIdmap(@NonNull final PackageInfo targetPackage,
             @NonNull final PackageInfo overlayPackage, int userId) {
         if (DEBUG) {
             Slog.d(TAG, "create idmap for " + targetPackage.packageName + " and "
                     + overlayPackage.packageName);
         }
-        final int sharedGid = UserHandle.getSharedAppGid(targetPackage.applicationInfo.uid);
         final String targetPath = targetPackage.applicationInfo.getBaseCodePath();
         final String overlayPath = overlayPackage.applicationInfo.getBaseCodePath();
         try {
-            if (FEATURE_FLAG_IDMAP2) {
-                int policies = calculateFulfilledPolicies(targetPackage, overlayPackage, userId);
-                boolean enforce = enforceOverlayable(overlayPackage);
-                if (mIdmapDaemon.verifyIdmap(overlayPath, policies, enforce, userId)) {
-                    return true;
-                }
-                return mIdmapDaemon.createIdmap(targetPath, overlayPath, policies,
-                        enforce, userId) != null;
-            } else {
-                mInstaller.idmap(targetPath, overlayPath, sharedGid);
-                return true;
+            int policies = calculateFulfilledPolicies(targetPackage, overlayPackage, userId);
+            boolean enforce = enforceOverlayable(overlayPackage);
+            if (mIdmapDaemon.verifyIdmap(targetPath, overlayPath, policies, enforce, userId)) {
+                return false;
             }
+            return mIdmapDaemon.createIdmap(targetPath, overlayPath, policies,
+                    enforce, userId) != null;
         } catch (Exception e) {
             Slog.w(TAG, "failed to generate idmap for " + targetPath + " and "
                     + overlayPath + ": " + e.getMessage());
@@ -102,12 +92,7 @@ class IdmapManager {
             Slog.d(TAG, "remove idmap for " + oi.baseCodePath);
         }
         try {
-            if (FEATURE_FLAG_IDMAP2) {
-                return mIdmapDaemon.removeIdmap(oi.baseCodePath, userId);
-            } else {
-                mInstaller.removeIdmap(oi.baseCodePath);
-                return true;
-            }
+            return mIdmapDaemon.removeIdmap(oi.baseCodePath, userId);
         } catch (Exception e) {
             Slog.w(TAG, "failed to remove idmap for " + oi.baseCodePath + ": " + e.getMessage());
             return false;
@@ -115,30 +100,11 @@ class IdmapManager {
     }
 
     boolean idmapExists(@NonNull final OverlayInfo oi) {
-        return new File(getIdmapPath(oi.baseCodePath, oi.userId)).isFile();
+        return mIdmapDaemon.idmapExists(oi.baseCodePath, oi.userId);
     }
 
     boolean idmapExists(@NonNull final PackageInfo overlayPackage, final int userId) {
-        return new File(getIdmapPath(overlayPackage.applicationInfo.getBaseCodePath(), userId))
-            .isFile();
-    }
-
-    private @NonNull String getIdmapPath(@NonNull final String overlayPackagePath,
-            final int userId) {
-        if (FEATURE_FLAG_IDMAP2) {
-            try {
-                return mIdmapDaemon.getIdmapPath(overlayPackagePath, userId);
-            } catch (Exception e) {
-                Slog.w(TAG, "failed to get idmap path for " + overlayPackagePath + ": "
-                        + e.getMessage());
-                return "";
-            }
-        } else {
-            final StringBuilder sb = new StringBuilder("/data/resource-cache/");
-            sb.append(overlayPackagePath.substring(1).replace('/', '@'));
-            sb.append("@idmap");
-            return sb.toString();
-        }
+        return mIdmapDaemon.idmapExists(overlayPackage.applicationInfo.getBaseCodePath(), userId);
     }
 
     /**
@@ -170,40 +136,67 @@ class IdmapManager {
     private int calculateFulfilledPolicies(@NonNull final PackageInfo targetPackage,
             @NonNull final PackageInfo overlayPackage, int userId)  {
         final ApplicationInfo ai = overlayPackage.applicationInfo;
-        int fulfilledPolicies = IIdmap2.POLICY_PUBLIC;
+        int fulfilledPolicies = OverlayablePolicy.PUBLIC;
 
         // Overlay matches target signature
-        if (mPackageManager.signaturesMatching(targetPackage.packageName,
+        if (mOverlayableCallback.signaturesMatching(targetPackage.packageName,
                 overlayPackage.packageName, userId)) {
-            fulfilledPolicies |= IIdmap2.POLICY_SIGNATURE;
+            fulfilledPolicies |= OverlayablePolicy.SIGNATURE;
+        }
+
+        // Overlay matches actor signature
+        if (matchesActorSignature(targetPackage, overlayPackage, userId)) {
+            fulfilledPolicies |= OverlayablePolicy.ACTOR_SIGNATURE;
         }
 
         // Vendor partition (/vendor)
         if (ai.isVendor()) {
-            return fulfilledPolicies | IIdmap2.POLICY_VENDOR_PARTITION;
+            return fulfilledPolicies | OverlayablePolicy.VENDOR_PARTITION;
         }
 
         // Product partition (/product)
         if (ai.isProduct()) {
-            return fulfilledPolicies | IIdmap2.POLICY_PRODUCT_PARTITION;
+            return fulfilledPolicies | OverlayablePolicy.PRODUCT_PARTITION;
         }
 
         // Odm partition (/odm)
         if (ai.isOdm()) {
-            return fulfilledPolicies | IIdmap2.POLICY_ODM_PARTITION;
+            return fulfilledPolicies | OverlayablePolicy.ODM_PARTITION;
         }
 
         // Oem partition (/oem)
         if (ai.isOem()) {
-            return fulfilledPolicies | IIdmap2.POLICY_OEM_PARTITION;
+            return fulfilledPolicies | OverlayablePolicy.OEM_PARTITION;
         }
 
         // System_ext partition (/system_ext) is considered as system
         // Check this last since every partition except for data is scanned as system in the PMS.
         if (ai.isSystemApp() || ai.isSystemExt()) {
-            return fulfilledPolicies | IIdmap2.POLICY_SYSTEM_PARTITION;
+            return fulfilledPolicies | OverlayablePolicy.SYSTEM_PARTITION;
         }
 
         return fulfilledPolicies;
+    }
+
+    private boolean matchesActorSignature(@NonNull PackageInfo targetPackage,
+            @NonNull PackageInfo overlayPackage, int userId) {
+        String targetOverlayableName = overlayPackage.targetOverlayableName;
+        if (targetOverlayableName != null) {
+            try {
+                OverlayableInfo overlayableInfo = mOverlayableCallback.getOverlayableForTarget(
+                        targetPackage.packageName, targetOverlayableName, userId);
+                if (overlayableInfo != null && overlayableInfo.actor != null) {
+                    String actorPackageName = OverlayActorEnforcer.getPackageNameForActor(
+                            overlayableInfo.actor, mOverlayableCallback.getNamedActors()).first;
+                    if (mOverlayableCallback.signaturesMatching(actorPackageName,
+                            overlayPackage.packageName, userId)) {
+                        return true;
+                    }
+                }
+            } catch (IOException ignored) {
+            }
+        }
+
+        return false;
     }
 }

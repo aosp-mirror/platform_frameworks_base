@@ -49,6 +49,12 @@ public interface NotificationLockscreenUserManager {
     /** Adds a listener to be notified when the current user changes. */
     void addUserChangedListener(UserChangedListener listener);
 
+    /**
+     * Removes a listener previously registered with
+     * {@link #addUserChangedListener(UserChangedListener)}
+     */
+    void removeUserChangedListener(UserChangedListener listener);
+
     SparseArray<UserInfo> getCurrentProfiles();
 
     void setLockscreenPublicMode(boolean isProfilePublic, int userId);
@@ -65,10 +71,21 @@ public interface NotificationLockscreenUserManager {
 
     boolean needsRedaction(NotificationEntry entry);
 
+    /**
+     * Has the given user chosen to allow their private (full) notifications to be shown even
+     * when the lockscreen is in "public" (secure & locked) mode?
+     */
     boolean userAllowsPrivateNotificationsInPublic(int currentUserId);
+
+    /**
+     * Has the given user chosen to allow notifications to be shown even when the lockscreen is in
+     * "public" (secure & locked) mode?
+     */
+    boolean userAllowsNotificationsInPublic(int userId);
 
     /** Notified when the current user changes. */
     interface UserChangedListener {
-        void onUserChanged(int userId);
+        default void onUserChanged(int userId) {}
+        default void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles) {}
     }
 }

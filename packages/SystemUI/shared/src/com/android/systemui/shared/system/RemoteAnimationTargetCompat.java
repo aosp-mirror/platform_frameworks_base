@@ -44,7 +44,9 @@ public class RemoteAnimationTargetCompat {
     public final Rect clipRect;
     public final int prefixOrderIndex;
     public final Point position;
+    public final Rect localBounds;
     public final Rect sourceContainerBounds;
+    public final Rect screenSpaceBounds;
     public final boolean isNotInRecents;
     public final Rect contentInsets;
 
@@ -57,7 +59,9 @@ public class RemoteAnimationTargetCompat {
         isTranslucent = app.isTranslucent;
         clipRect = app.clipRect;
         position = app.position;
+        localBounds = app.localBounds;
         sourceContainerBounds = app.sourceContainerBounds;
+        screenSpaceBounds = app.screenSpaceBounds;
         prefixOrderIndex = app.prefixOrderIndex;
         isNotInRecents = app.isNotInRecents;
         contentInsets = app.contentInsets;
@@ -68,7 +72,7 @@ public class RemoteAnimationTargetCompat {
 
     public static RemoteAnimationTargetCompat[] wrap(RemoteAnimationTarget[] apps) {
         final RemoteAnimationTargetCompat[] appsCompat =
-                new RemoteAnimationTargetCompat[apps.length];
+                new RemoteAnimationTargetCompat[apps != null ? apps.length : 0];
         for (int i = 0; i < apps.length; i++) {
             appsCompat[i] = new RemoteAnimationTargetCompat(apps[i]);
         }

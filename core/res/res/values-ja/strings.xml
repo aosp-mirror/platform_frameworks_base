@@ -175,7 +175,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4562226280528716090">"削除する <xliff:g id="CONTENT_TYPE">%s</xliff:g> が多すぎます。"</string>
     <string name="low_memory" product="tablet" msgid="5557552311566179924">"タブレットのストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
     <string name="low_memory" product="watch" msgid="3479447988234030194">"ウォッチのストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
-    <string name="low_memory" product="tv" msgid="8803524975509826759">"テレビのストレージに空き容量がありません。ファイルを削除して空き領域を確保してください。"</string>
+    <string name="low_memory" product="tv" msgid="6663680413790323318">"Android TV デバイスのストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"デバイスのストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
       <item quantity="other">認証局がインストールされました</item>
@@ -188,14 +188,25 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"仕事用プロファイルの管理アプリがないか、破損しています。そのため仕事用プロファイルと関連データが削除されました。管理者にサポートをご依頼ください。"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"お使いの仕事用プロファイルはこのデバイスで使用できなくなりました"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"パスワード入力回数が上限を超えました"</string>
+    <string name="device_ownership_relinquished" msgid="4080886992183195724">"管理者により、デバイスの個人使用が許可されました"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"管理対象のデバイス"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"このデバイスは組織によって管理され、ネットワーク トラフィックが監視される場合があります。詳しくはタップしてください。"</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"アプリに位置情報へのアクセスを許可しました"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"詳しくは IT 管理者にお問い合わせください"</string>
+    <string name="country_detector" msgid="7023275114706088854">"国の検出"</string>
+    <string name="location_service" msgid="2439187616018455546">"位置情報サービス"</string>
+    <string name="sensor_notification_service" msgid="7474531979178682676">"センサー通知サービス"</string>
+    <string name="twilight_service" msgid="8964898045693187224">"トワイライト サービス"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"デバイスのデータが消去されます"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"管理アプリを使用できません。デバイスのデータはこれから消去されます。\n\nご不明な点がある場合は、組織の管理者にお問い合わせください。"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"「<xliff:g id="OWNER_APP">%s</xliff:g>」により印刷は無効にされています。"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"仕事用プロファイルを ON にする"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"個人用アプリは、仕事用プロファイルを ON にしない限りブロックされます"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"個人用アプリは、<xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g> にブロックされます。仕事用プロファイルを <xliff:g id="NUMBER">%3$d</xliff:g> 日を超えて OFF にすることは、IT 管理者から許可されていません。"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ON にする"</string>
     <string name="me" msgid="6207584824693813140">"自分"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"タブレットオプション"</string>
-    <string name="power_dialog" product="tv" msgid="5941745051236770764">"テレビのオプション"</string>
+    <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV のオプション"</string>
     <string name="power_dialog" product="default" msgid="1107775420270203046">"携帯電話オプション"</string>
     <string name="silent_mode" msgid="8796112363642579333">"マナーモード"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"ワイヤレス接続をONにする"</string>
@@ -213,7 +224,7 @@
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"再起動しています…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"シャットダウン中..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"タブレットの電源をOFFにします。"</string>
-    <string name="shutdown_confirm" product="tv" msgid="9187068694573722129">"テレビの電源をOFFにします。"</string>
+    <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"Android TV デバイスをシャットダウンします。"</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"ウォッチの電源をOFFにします。"</string>
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"携帯電話の電源を切ります。"</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"シャットダウンしますか？"</string>
@@ -222,10 +233,12 @@
     <string name="recent_tasks_title" msgid="8183172372995396653">"新着"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"最近使ったアプリはありません。"</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"タブレットオプション"</string>
-    <string name="global_actions" product="tv" msgid="2020669784083287370">"テレビのオプション"</string>
+    <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV のオプション"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"携帯電話オプション"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"画面ロック"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"電源を切る"</string>
+    <string name="global_action_power_options" msgid="1185286119330160073">"電源"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"再起動"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"緊急通報"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"バグレポート"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"セッションを終了"</string>
@@ -240,6 +253,8 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> 秒後にバグレポートのスクリーンショットが作成されます。</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> 秒後にバグレポートのスクリーンショットが作成されます。</item>
     </plurals>
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"バグレポートのスクリーンショットを取得しました"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"バグレポートのスクリーンショットを取得できませんでした"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"マナーモード"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"サウンドOFF"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"サウンドON"</string>
@@ -258,6 +273,7 @@
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"運転モード"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"アカウントのステータス"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"デベロッパー メッセージ"</string>
+    <string name="notification_channel_developer_important" msgid="7197281908918789589">"デベロッパーからの重要なメッセージ"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"アップデート"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"ネットワークのステータス"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"ネットワーク通知"</string>
@@ -279,40 +295,26 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"仕事用プロファイルに切り替える"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"連絡先"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"連絡先へのアクセス"</string>
-    <string name="permgrouprequest_contacts" msgid="7755354139254094668">"連絡先へのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"位置情報"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"このデバイスの位置情報へのアクセス"</string>
-    <string name="permgrouprequest_location" msgid="5261379525646615507">"このデバイスの位置情報へのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
-    <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"このアプリは、ユーザーがアプリを使用している間のみ位置情報にアクセスできます"</string>
-    <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"このデバイスの位置情報に&lt;b&gt;常に&lt;/b&gt;アクセスすることを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"現在、アプリは、ユーザーがアプリを使用している場合のみ位置情報にアクセスできます"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"カレンダー"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"カレンダーへのアクセス"</string>
-    <string name="permgrouprequest_calendar" msgid="2680538977344557840">"カレンダーへのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMSメッセージの送信と表示"</string>
-    <string name="permgrouprequest_sms" msgid="3985338150822482831">"SMS メッセージの送信と表示を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"ストレージ"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"ファイルとメディア"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"デバイス内の写真、メディア、ファイルへのアクセス"</string>
-    <string name="permgrouprequest_storage" msgid="1594774620878445266">"デバイス内の写真、メディア、ファイルへのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"マイク"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"音声の録音"</string>
-    <string name="permgrouprequest_microphone" msgid="4942966684471718126">"音声の録音を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"身体活動"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"身体活動にアクセス"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"身体活動データへのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"カメラ"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"写真と動画の撮影"</string>
-    <string name="permgrouprequest_camera" msgid="2697305443703328372">"写真と動画の撮影を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"通話履歴"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"通話履歴の読み取りと書き込み"</string>
-    <string name="permgrouprequest_calllog" msgid="7565344038959817408">"通話履歴へのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"電話"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"電話の発信と管理"</string>
-    <string name="permgrouprequest_phone" msgid="6430085454721364373">"電話の発信と管理を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"ボディセンサー"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"バイタルサインに関するセンサーデータへのアクセス"</string>
-    <string name="permgrouprequest_sensors" msgid="2431000833343586816">"バイタルサインに関するセンサーデータへのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ウィンドウコンテンツの取得"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ユーザーがアクセスしているウィンドウのコンテンツを検査します。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"タッチガイドの有効化"</string>
@@ -325,6 +327,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"タップ、スワイプ、ピンチ、その他の操作を行えます。"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"指紋認証センサーでの操作"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"デバイスの指紋認証センサーで行われた操作をキャプチャできます。"</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"スクリーンショットの撮影"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ディスプレイのスクリーンショットを撮影できます。"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"ステータスバーの無効化や変更"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ステータスバーの無効化、システムアイコンの追加や削除をアプリに許可します。"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ステータスバーへの表示"</string>
@@ -353,7 +357,7 @@
     <string name="permdesc_sendSms" msgid="6757089798435130769">"SMSメッセージの送信をアプリに許可します。これにより、予期せぬ料金が発生する可能性があります。悪意のあるアプリが確認なしでメッセージを送信し、料金が発生する恐れがあります。"</string>
     <string name="permlab_readSms" msgid="5164176626258800297">"テキストメッセージ（SMSまたはMMS）の読み取り"</string>
     <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"このアプリは、お使いのタブレットに保存された SMS（テキスト）メッセージをすべて読み取ることができます。"</string>
-    <string name="permdesc_readSms" product="tv" msgid="8967963387951154530">"このアプリは、お使いのテレビに保存された SMS（テキスト）メッセージをすべて読み取ることができます。"</string>
+    <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"このアプリは、Android TV デバイスに保存された SMS（テキスト）メッセージをすべて読み取ることができます。"</string>
     <string name="permdesc_readSms" product="default" msgid="774753371111699782">"このアプリは、お使いのスマートフォンに保存された SMS（テキスト）メッセージをすべて読み取ることができます。"</string>
     <string name="permlab_receiveWapPush" msgid="4223747702856929056">"テキストメッセージ（WAP）の受信"</string>
     <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"WAPメッセージの受信と処理をアプリに許可します。これにより、アプリがデバイスに届いたメッセージを表示することなく監視または削除できるようになります。"</string>
@@ -375,7 +379,7 @@
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"このアプリにバックグラウンドでのデータ使用を許可します。許可するとデータ使用量が増える場合があります。"</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"アプリの常時実行"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"アプリにその一部をメモリに常駐させることを許可します。これにより他のアプリが使用できるメモリが制限されるため、タブレットの動作が遅くなることがあります。"</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="2616944406357387366">"アプリにその一部をメモリに常駐させることを許可します。これにより他のアプリが使用できるメモリが制限されるため、テレビの動作が遅くなることがあります。"</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"アプリにその一部をメモリに常駐させることを許可します。これにより他のアプリが使用できるメモリが制限されるため、Android TV デバイスの動作が遅くなることがあります。"</string>
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"アプリにその一部をメモリに常駐させることを許可します。これにより他のアプリが使用できるメモリが制限されるため、モバイル デバイスの動作が遅くなることがあります。"</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"フォアグラウンド サービスの実行"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"フォアグラウンド サービスの使用をアプリに許可します。"</string>
@@ -385,47 +389,44 @@
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"システムの設定データの変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、システムの設定が破損する恐れがあります。"</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"起動時の実行"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"システムの起動後に自動的に起動することをアプリに許可します。許可すると、タブレットの起動時間が長くなったり、アプリが常に実行されるためにタブレット全体の動作が遅くなったりする可能性があります。"</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="2701244540810970401">"システムの起動後に自動的に起動することをアプリに許可します。許可すると、テレビの起動時間が長くなったり、アプリが常に実行されるためにテレビ全体の動作が遅くなったりする可能性があります。"</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"システムの起動の直後に自動的に起動することをアプリに許可します。これにより、Android TV デバイスの起動時間が長くなったり、アプリが常に実行されるためにデバイス全体の動作が遅くなったりすることがあります。"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="7912677044558690092">"システムの起動後に自動的に起動することをアプリに許可します。許可すると、モバイル デバイスの起動時間が長くなったり、アプリが常に実行されるためにモバイル デバイス全体の動作が遅くなったりする可能性があります。"</string>
     <string name="permlab_broadcastSticky" msgid="4552241916400572230">"stickyブロードキャストの配信"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="5058486069846384013">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリに許可します。この許可を使用し過ぎると、メモリの使用量が増えてタブレットの動作が遅くなったり不安定になったりする恐れがあります。"</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリに許可します。この許可を使用し過ぎると、メモリの使用量が増えてテレビの動作が遅くなったり不安定になったりする恐れがあります。"</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"配信が終了してもメモリに残る sticky ブロードキャストの配信をアプリに許可します。この許可を使用しすぎると、メモリの使用量が増えて Android TV デバイスの動作が遅くなったり不安定になったりすることがあります。"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリに許可します。この許可を使用し過ぎると、メモリの使用量が増えてモバイル デバイスの動作が遅くなったり不安定になったりする恐れがあります。"</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"連絡先の読み取り"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"タブレットに保存されている連絡先に関するデータの読み取りをアプリに許可します。これにより、連絡先データの保存をアプリに許可することになり、知らないうちに悪意のあるアプリによって連絡先データが共有される恐れがあります。"</string>
-    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"テレビに保存されている連絡先に関するデータの読み取りをアプリに許可します。これにより、連絡先データの保存をアプリに許可することになり、知らないうちに悪意のあるアプリによって連絡先データが共有される恐れがあります。"</string>
-    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"スマートフォンに保存されている連絡先に関するデータの読み取りをアプリに許可します。これにより、連絡先データの保存をアプリに許可することになり、知らないうちに悪意のあるアプリによって連絡先データが共有される恐れがあります。"</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"タブレットに保存されている連絡先に関するデータの読み取りをアプリに許可します。また、この読み取りを許可したアプリは、連絡先を作成したタブレット上のアカウントにもアクセスできます。これには、インストールしたアプリによって作成されたアカウントも含まれます。これにより、連絡先データの保存をアプリに許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Android TV デバイスに保存されている連絡先に関するデータの読み取りをアプリに許可します。また、この読み取りを許可したアプリは、連絡先を作成した Android TV デバイス上のアカウントにもアクセスできます。これには、インストールしたアプリによって作成されたアカウントも含まれます。これにより、連絡先データの保存をアプリに許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"スマートフォンに保存されている連絡先に関するデータの読み取りをアプリに許可します。また、この読み取りを許可したアプリは、連絡先を作成したスマートフォン上のアカウントにもアクセスできます。これには、インストールしたアプリによって作成されたアカウントも含まれます。これにより、連絡先データの保存をアプリに許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"連絡先の変更"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"タブレットに保存されている連絡先に関するデータの変更をアプリに許可します。これにより、連絡先データの削除をアプリに許可することになります。"</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"テレビに保存されている連絡先に関するデータの変更をアプリに許可します。これにより、連絡先データの削除をアプリに許可することになります。"</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Android TV デバイスに保存されている連絡先に関するデータの変更をアプリに許可します。これにより、連絡先データの削除をアプリに許可することになります。"</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"スマートフォンに保存されている連絡先に関するデータの変更をアプリに許可します。これにより、連絡先データの削除をアプリに許可することになります。"</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"通話履歴の読み取り"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"このアプリは通話履歴を読み取ることができます。"</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"通話履歴の書き込み"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"タブレットの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="220754624705969171">"テレビの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Android TV デバイスの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"モバイル デバイスの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"ボディーセンサー（心拍数モニターなど）へのアクセス"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"心拍数など、身体状態を監視するセンサーからのデータにアクセスすることをアプリに許可します。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"カレンダーの予定と詳細を読み取り"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"このアプリは、お使いのタブレットに保存されたカレンダーの予定をすべて読み取り、カレンダーのデータを共有したり、保存したりできます。"</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="4359404686228921749">"このアプリは、お使いのテレビに保存されたカレンダーの予定をすべて読み取り、カレンダーのデータを共有したり、保存したりできます。"</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"このアプリは、Android TV デバイスに保存されているカレンダーの予定をすべて読み取り、カレンダーのデータを共有したり、保存したりできます。"</string>
     <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"このアプリは、お使いのスマートフォンに保存されたカレンダーの予定をすべて読み取り、カレンダーのデータを共有したり、保存したりできます。"</string>
     <string name="permlab_writeCalendar" msgid="6422137308329578076">"カレンダーの予定の変更や追加を行う、所有者に通知せずにゲストにメールを送信する場合がある"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"このアプリは、お使いのタブレットでカレンダーの予定を追加、削除、変更できます。また、カレンダーの所有者から発信されたかのように表示されるメッセージを送信したり、所有者に通知することなく予定を変更したりできます。"</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="6841397610226826926">"このアプリは、お使いのテレビでカレンダーの予定を追加、削除、変更できます。また、カレンダーの所有者から発信されたかのように表示されるメッセージを送信したり、所有者に通知することなく予定を変更したりできます。"</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"このアプリは、Android TV デバイスでカレンダーの予定を追加、削除、変更できます。また、カレンダーの所有者から発信されたかのように表示されるメッセージを送信したり、所有者に通知することなく予定を変更したりできます。"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"このアプリは、お使いのスマートフォンでカレンダーの予定を追加、削除、変更できます。また、カレンダーの所有者から発信されたかのように表示されるメッセージを送信したり、所有者に通知することなく予定を変更したりできます。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"位置情報提供者の追加コマンドアクセス"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"位置情報提供元の追加のコマンドにアクセスすることをアプリに許可します。許可すると、アプリがGPSなどの位置情報源の動作を妨害する恐れがあります。"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"フォアグラウンドでのみ正確な位置情報にアクセス"</string>
-    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"このアプリは、フォアグラウンド状態でのみユーザーの正確な位置情報を取得できます。この位置情報サービスは ON の状態にして、スマートフォンでアプリがサービスを利用できるようにする必要があります。これにより、電池の消費量が増える可能性があります。"</string>
-    <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"フォアグラウンドでのみ（ネットワークに基づく）おおよその位置情報にアクセス"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、タブレットでアプリがサービスを利用できるようにする必要があります。"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、テレビでアプリがサービスを利用できるようにする必要があります。"</string>
-    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"このアプリは、フォアグラウンドでのみユーザーのおおよその位置情報を取得できます。これらの位置情報サービスを ON にして、車でアプリがサービスを利用できるようにする必要があります。"</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、スマートフォンでアプリがサービスを利用できるようにする必要があります。"</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"このアプリは、使用中に、位置情報サービスからデバイスの正確な位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスがオンになっている必要があります。この場合、電池使用量が増えることがあります。"</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"フォアグラウンドでのみおおよその位置情報にアクセス"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"このアプリは、使用中に、位置情報サービスからデバイスのおおよその位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスがオンになっている必要があります。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"バックグラウンドでの位置情報へのアクセス"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"これが、おおよその位置情報または正確な位置情報へのアクセスの追加権限の場合、アプリはバックグラウンドでの実行中も位置情報にアクセスできます。"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"このアプリは、使用中でない場合でも、常に位置情報にアクセスできます。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"音声設定の変更"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"音声全般の設定（音量、出力に使用するスピーカーなど）の変更をアプリに許可します。"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"録音"</string>
@@ -436,10 +437,13 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"このアプリで身体活動が認識されるようにします。"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"写真と動画の撮影"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"このアプリは、いつでもカメラを使用して写真や動画を撮影できます。"</string>
+    <string name="permlab_systemCamera" msgid="3642917457796210580">"写真と動画を撮影するには、システムカメラへのアクセスをアプリまたはサービスに許可してください"</string>
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"権限を付与されたこのアプリまたはシステムアプリは、いつでもシステムカメラを使用して写真と動画を撮影できます。アプリには android.permission.CAMERA 権限も必要です"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"カメラデバイスが起動または終了したときにコールバックを受け取ることを、アプリまたはサービスに許可してください。"</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"このアプリは、カメラデバイスが（なんらかのアプリによって）起動するとき、または終了するときにコールバックを受け取ることができます。"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"バイブレーションの制御"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"バイブレーションの制御をアプリに許可します。"</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"バイブレーションのオン / オフ状態の把握をアプリに許可します。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"電話番号発信"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"電話番号への自動発信をアプリに許可します。これにより、予期せぬ発信や料金が発生する可能性があります。なお、緊急通報番号への発信は許可されません。悪意のあるアプリが確認なしで発信し、料金が発生する恐れがあります。"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS通話サービスへのアクセス"</string>
@@ -450,21 +454,23 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"通話環境の改善のために、システム経由での通話転送をアプリに許可します。"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"システム経由の通話の表示と操作。"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"デバイスで進行中の通話の表示と操作をアプリに許可します。通話の電話番号や状態などの情報も含まれます。"</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"録音制限からの除外"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"このアプリを録音制限から除外します。"</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"別のアプリでの通話の続行"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"別のアプリで通話を続行することをこのアプリに許可します。"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"電話番号の読み取り"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"デバイスの電話番号へのアクセスをアプリに許可します。"</string>
     <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"車の画面を常にオンにする"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"タブレットのスリープを無効化"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"テレビのスリープを無効化"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"Android TV デバイスのスリープの無効化"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"デバイスのスリープを無効にする"</string>
     <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"車の画面を常にオンにすることをアプリに許可します。"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"タブレットのスリープを無効にすることをアプリに許可します。"</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"テレビのスリープを無効にすることをアプリに許可します。"</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Android TV デバイスのスリープを無効にすることをアプリに許可します。"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"モバイル デバイスのスリープを無効にすることをアプリに許可します。"</string>
     <string name="permlab_transmitIr" msgid="8077196086358004010">"赤外線の送信"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5884738958581810253">"タブレットの赤外線送信機能の使用をアプリに許可します。"</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="4453220932790148184">"テレビの赤外線送信機能の使用をアプリに許可します。"</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="3278506969529173281">"Android TV デバイスの赤外線送信機能の使用をアプリに許可します。"</string>
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"携帯電話の赤外線送信機能の使用をアプリに許可します。"</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"壁紙の設定"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"システムの壁紙を設定することをアプリに許可します。"</string>
@@ -472,11 +478,11 @@
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"システムの壁紙サイズのヒントを設定することをアプリに許可します。"</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"タイムゾーンの設定"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1788868809638682503">"タブレットのタイムゾーンの変更をアプリに許可します。"</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="1000749751269030813">"テレビのタイムゾーンの変更をアプリに許可します。"</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="9069045914174455938">"Android TV デバイスのタイムゾーンの変更をアプリに許可します。"</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4611828585759488256">"モバイル デバイスのタイムゾーンの変更をアプリに許可します。"</string>
     <string name="permlab_getAccounts" msgid="5304317160463582791">"このデバイス上のアカウントの検索"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"タブレットで認識されているアカウントのリストの取得をアプリに許可します。これには、インストールしたアプリによって作成されたアカウントも含まれます。"</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="3233589616751852028">"テレビで認識されているアカウントのリストの取得をアプリに許可します。これには、インストールしたアプリによって作成されたアカウントも含まれます。"</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"Android TV デバイスの認識済みアカウントのリストを取得することをアプリに許可します。これには、インストールしたアプリによって作成されたアカウントも含まれます。"</string>
     <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"モバイル デバイスで認識されているアカウントのリストの取得をアプリに許可します。これには、インストールしたアプリによって作成されたアカウントも含まれます。"</string>
     <string name="permlab_accessNetworkState" msgid="2349126720783633918">"ネットワーク接続の表示"</string>
     <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"存在するネットワークや接続しているネットワークなど、ネットワーク接続に関する情報を表示することをアプリに許可します。"</string>
@@ -492,21 +498,21 @@
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Wi-Fiアクセスポイントへの接続/切断、Wi-Fiネットワークのデバイス設定の変更をアプリに許可します。"</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"Wi-Fiマルチキャストの受信を許可する"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"マルチキャストアドレスを使用して、このタブレットだけでなくWi-Fiネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電池の消費量が大きくなります。"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1253281508485111166">"マルチキャストアドレスを使用して、このテレビだけでなくWi-Fiネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電池の消費量が大きくなります。"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"マルチキャスト アドレスを使用して、この Android TV デバイスだけでなく Wi-Fi ネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電池の消費量が大きくなります。"</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"マルチキャストアドレスを使用して、このモバイル デバイスだけでなくWi-Fiネットワーク上のすべてのデバイスに送信されたパケットを受信することをアプリに許可します。マルチキャスト以外のモードよりも電池の消費量が大きくなります。"</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"Bluetoothの設定へのアクセス"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"ローカルのBluetoothタブレットを設定することと、リモートデバイスを検出してペアに設定することをアプリに許可します。"</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1822785266335294155">"ローカルのBluetoothテレビを設定することと、リモートデバイスを検出してペア設定することをアプリに許可します。"</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Android TV デバイスで Bluetooth を設定することと、リモート デバイスを検出してペアに設定することをアプリに許可します。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"ローカルのBluetoothモバイル デバイスを設定することと、リモートデバイスを検出してペアに設定することをアプリに許可します。"</string>
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"WiMAXへの接続と切断"</string>
     <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"WiMAXがONになっているかどうかを識別し、接続されているWiMAXネットワークの情報を表示することをアプリに許可します。"</string>
     <string name="permlab_changeWimaxState" msgid="6223305780806267462">"WiMAX状態の変更"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="4011097664859480108">"タブレットのWiMAXネットワークへの接続と切断をアプリに許可します。"</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6876948244710106021">"テレビのWiMAXネットワークへの接続と切断をアプリに許可します。"</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"Android TV デバイスの WiMAX ネットワークへの接続と切断をアプリに許可します。"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"モバイル デバイスのWiMAXネットワークへの接続と切断をアプリに許可します。"</string>
     <string name="permlab_bluetooth" msgid="586333280736937209">"Bluetoothデバイスのペアの設定"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"タブレットのBluetooth設定を表示すること、ペアのデバイスに接続すること/ペアのデバイスからの接続を受け入れることをアプリに許可します。"</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3546625329740068213">"テレビのBluetooth設定を表示すること、ペア設定したデバイスに接続すること、ペア設定したデバイスからの接続を受け入れることをアプリに許可します。"</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Android TV デバイスの Bluetooth 設定の表示と、ペア設定されたデバイスへの接続の確立、またはペア設定されたデバイスからの接続の受け入れをアプリに許可します。"</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"モバイルデバイスのBluetooth設定を表示すること、ペアのデバイスに接続すること/ペアのデバイスからの接続を受け入れることをアプリに許可します。"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"優先される NFC お支払いサービスの情報"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"登録されている支援やルートの目的地など、優先される NFC お支払いサービスの情報を取得することをアプリに許可します。"</string>
@@ -530,7 +536,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"写真コレクションの変更をアプリに許可します。"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"メディア コレクションの位置情報の読み取り"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"メディア コレクションの位置情報の読み取りをアプリに許可します。"</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"本人確認"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"本人確認"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"生体認証ハードウェアが利用できません"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"認証をキャンセルしました"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"認識されませんでした"</string>
@@ -556,6 +562,7 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"もう一度お試しください。"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"指紋が登録されていません。"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"このデバイスには指紋認証センサーがありません。"</string>
+    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"センサーが一時的に無効になっています。"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"指紋 <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -599,6 +606,7 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"顔を確認できません。もう一度お試しください。"</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"顔認証を設定していません。"</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"このデバイスでは、顔認証はご利用いただけません。"</string>
+    <string name="face_error_security_update_required" msgid="5076017208528750161">"センサーが一時的に無効になっています。"</string>
     <string name="face_name_template" msgid="3877037340223318119">"顔 <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -665,10 +673,10 @@
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"画面ロックのパスワードとPINの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"画面ロック解除試行の監視"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合はタブレットをロックするかタブレットのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="1880525102716729482">"画面のロック解除に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はテレビをロックするかテレビのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合は Android TV デバイスをロックするか Android TV デバイスのデータをすべて消去します。"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合はモバイルデバイスをロックするかモバイルデバイスのデータをすべて消去します。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はタブレットをロックするかこのユーザーのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="1253625325967736219">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はテレビをロックするかこのユーザーのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合は Android TV デバイスをロックするかこのユーザーのデータをすべて消去します。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はスマートフォンをロックするかこのユーザーのデータをすべて消去します。"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"画面ロックの変更"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"画面ロックを変更します。"</string>
@@ -676,11 +684,11 @@
     <string name="policydesc_forceLock" msgid="1008844760853899693">"画面をロックする方法とタイミングを制御します。"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"すべてのデータを消去"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"警告せずにデータの初期化を実行してタブレット内のデータを消去します。"</string>
-    <string name="policydesc_wipeData" product="tv" msgid="8755409895408717659">"警告せずにデータの初期化を実行してテレビ内のデータを消去します。"</string>
+    <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"警告せずに出荷時設定へのリセットを実行して Android TV デバイスのデータを消去します。"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"警告せずにデータの初期化を実行してデバイス内のデータを消去します。"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"ユーザーデータの消去"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"このタブレットのこのユーザーのデータを警告なく消去します。"</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="7310266499158746034">"このテレビのこのユーザーのデータを警告なく消去します。"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"この Android TV デバイスでこのユーザーのデータを警告なく消去します。"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"このスマートフォンのこのユーザーのデータを警告なく消去します。"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"デバイスのグローバルプロキシを設定"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"ポリシーが有効になっている場合はデバイスのグローバルプロキシが使用されるように設定します。グローバルプロキシを設定できるのはデバイスの所有者だけです。"</string>
@@ -830,7 +838,7 @@
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"顔認証の最大試行回数を超えました"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIMカードが挿入されていません"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"タブレット内にSIMカードがありません。"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1165408361036993077">"テレビにSIMカードが挿入されていません。"</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Android TV デバイスに SIM カードがありません。"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"SIMカードが挿入されていません"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"SIMカードを挿入してください。"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIMカードが見つからないか読み取れません。SIMカードを挿入してください。"</string>
@@ -853,13 +861,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"正しくないパスワードを<xliff:g id="NUMBER_0">%1$d</xliff:g>回入力しました。\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"正しくないPINを<xliff:g id="NUMBER_0">%1$d</xliff:g>回入力しました。\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、タブレットのロック解除にGoogleへのログインが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒後にもう一度お試しください。"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="8418060136796780268">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、テレビのロック解除にGoogleへのログインが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒以内にもう一度お試しください。"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"ロック解除パターンの入力を <xliff:g id="NUMBER_0">%1$d</xliff:g> 回間違えました。あと <xliff:g id="NUMBER_1">%2$d</xliff:g> 回間違えると、Android TV デバイスのロック解除に Google へのログインが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後にもう一度お試しください。"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、モバイルデバイスのロック解除にGoogleへのログインが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"タブレットのロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、タブレットは工場出荷状態にリセットされ、ユーザーのデータはすべて失われます。"</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2736747741914666082">"テレビのロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、テレビは出荷時設定にリセットされ、ユーザーのデータはすべて失われます。"</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"Android TV デバイスのロック解除に <xliff:g id="NUMBER_0">%1$d</xliff:g> 回失敗しました。あと <xliff:g id="NUMBER_1">%2$d</xliff:g> 回失敗すると、Android TV デバイスは出荷時設定にリセットされ、ユーザーデータはすべて失われます。"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"デバイスのロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、デバイスは工場出荷状態にリセットされ、ユーザーのデータはすべて失われます。"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"タブレットのロック解除を<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。タブレットを工場出荷状態にリセットします。"</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2373955520011165432">"テレビのロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。テレビは出荷時設定にリセットされます。"</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"Android TV デバイスのロック解除に <xliff:g id="NUMBER">%d</xliff:g> 回失敗しました。Android TV デバイスは出荷時設定にリセットされます。"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"デバイスのロック解除を<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。デバイスを工場出荷状態にリセットします。"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"<xliff:g id="NUMBER">%d</xliff:g>秒後にやり直してください。"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"パターンを忘れた場合"</string>
@@ -946,7 +954,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="2323799501008967852">"ブラウザからアクセスしたすべてのURLの履歴とブラウザのすべてのブックマークの読み取りをアプリに許可します。注: この許可は、サードパーティブラウザまたはウェブブラウジング機能を備えたその他のアプリでは適用されない場合があります。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="6090259925187986937">"ウェブのブックマークと履歴の書き込み"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"タブレットに保存されているブラウザの履歴やブックマークの変更をアプリに許可します。これにより、アプリがブラウザデータを消去または変更できるようになる可能性があります。注: この許可は、サードパーティブラウザまたはウェブブラウジング機能を備えたその他のアプリでは適用されない場合があります。"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="755207379344494691">"テレビに保存されているブラウザの履歴やブックマークの変更をアプリに許可します。これにより、アプリがブラウザデータを消去または変更できるようになる可能性があります。注: この許可は、サードパーティブラウザまたはウェブブラウジング機能を備えたその他のアプリでは適用されない場合があります。"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"Android TV デバイスに保存されているブラウザの履歴やブックマークの変更をアプリに許可します。これにより、アプリがブラウザデータを消去または変更できるようになる可能性があります。注: この許可は、サードパーティ ブラウザまたはウェブ ブラウジング機能を備えたその他のアプリでは適用されない場合があります。"</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"モバイル デバイスに保存されているブラウザの履歴やブックマークの変更をアプリに許可します。これにより、アプリがブラウザデータを消去または変更できるようになる可能性があります。注: この許可は、サードパーティブラウザまたはウェブブラウジング機能を備えたその他のアプリでは適用されない場合があります。"</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"アラームの設定"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"インストール済みアラームアプリのアラームを設定することをアプリに許可します。この機能が実装されていないアラームアプリもあります。"</string>
@@ -1099,28 +1107,6 @@
     <string name="deleteText" msgid="4200807474529938112">"削除"</string>
     <string name="inputMethod" msgid="1784759500516314751">"入力方法"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"テキスト操作"</string>
-    <string name="email" msgid="2503484245190492693">"メール"</string>
-    <string name="email_desc" msgid="8291893932252173537">"選択したメールアドレスにメールを送信します"</string>
-    <string name="dial" msgid="4954567785798679706">"電話"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"選択した電話番号に電話をかけます"</string>
-    <string name="map" msgid="6865483125449986339">"地図"</string>
-    <string name="map_desc" msgid="1068169741300922557">"選択した住所を探します"</string>
-    <string name="browse" msgid="8692753594669717779">"開く"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"選択した URL を開きます"</string>
-    <string name="sms" msgid="3976991545867187342">"メッセージ"</string>
-    <string name="sms_desc" msgid="997349906607675955">"選択した電話番号に SMS を送信します"</string>
-    <string name="add_contact" msgid="7404694650594333573">"追加"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"連絡先に追加します"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"表示"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"カレンダーで選択した日時を表示します"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"予定を作成"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"選択した日時に予定を設定します"</string>
-    <string name="view_flight" msgid="2042802613849690108">"フライト"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"選択したフライトをチェックします"</string>
-    <string name="translate" msgid="1416909787202727524">"翻訳"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"選択したテキストを翻訳します"</string>
-    <string name="define" msgid="5214255850068764195">"辞書で調べる"</string>
-    <string name="define_desc" msgid="6916651934713282645">"選択したテキストを辞書で調べます"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"空き容量わずか"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"一部のシステム機能が動作しない可能性があります"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"システムに十分な容量がありません。250MBの空き容量を確保して再起動してください。"</string>
@@ -1134,6 +1120,8 @@
     <string name="loading" msgid="3138021523725055037">"読み込んでいます..."</string>
     <string name="capital_on" msgid="2770685323900821829">"ON"</string>
     <string name="capital_off" msgid="7443704171014626777">"OFF"</string>
+    <string name="checked" msgid="9179896827054513119">"ON"</string>
+    <string name="not_checked" msgid="7972320087569023342">"OFF"</string>
     <string name="whichApplication" msgid="5432266899591255759">"アプリケーションを選択"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$sを使用してアクションを完了"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"アクションを実行"</string>
@@ -1248,39 +1236,6 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"アラーム音"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"通知音"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"不明"</string>
-    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g> に接続できません"</string>
-    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"タップしてプライバシー設定を変更し、もう一度お試しください"</string>
-    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"プライバシー設定を変更しますか？"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> があなたのデバイスの MAC アドレス（固有の識別番号）を使用して接続できるようになります。これにより、付近のデバイスがあなたのデバイスの位置情報を追跡できるようになる可能性があります。\n\n続行すると、<xliff:g id="SSID_1">%1$s</xliff:g> があなたのプライバシー設定を変更し、もう一度接続を試みます。"</string>
-    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"設定を変更"</string>
-    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"設定を更新しました。もう一度接続してみてください。"</string>
-    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"プライバシー設定を変更できません"</string>
-    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"ネットワークが見つかりません"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
-      <item quantity="other">複数のWi-Fiネットワークが利用できます</item>
-      <item quantity="one">Wi-Fiネットワークが利用できます</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1104430011355500386">
-      <item quantity="other">複数のWi-Fiオープンネットワークが利用できます</item>
-      <item quantity="one">Wi-Fiオープンネットワークが利用できます</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="722493260955778406">"Wi-Fi オープン ネットワークに接続"</string>
-    <string name="wifi_available_carrier_network_title" msgid="7740328884692643968">"携帯通信会社の Wi‑Fi ネットワークに接続"</string>
-    <string name="wifi_available_title_connecting" msgid="5249247039230566878">"Wi-Fi ネットワークに接続中"</string>
-    <string name="wifi_available_title_connected" msgid="5892203664604121475">"Wi-Fi ネットワークに接続しました"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="5133141923288104331">"Wi‑Fi ネットワークに接続できませんでした"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3555247614042954032">"すべてのネットワークを表示するにはタップします"</string>
-    <string name="wifi_available_action_connect" msgid="924369499736631716">"接続"</string>
-    <string name="wifi_available_action_all_networks" msgid="7759049005868147147">"すべてのネットワーク"</string>
-    <string name="wifi_suggestion_title" msgid="5041459385180298879">"Wi‑Fi ネットワーク候補を許可しますか？"</string>
-    <string name="wifi_suggestion_content" msgid="477311057093517127">"<xliff:g id="NAME">%s</xliff:g> からのネットワーク候補に、デバイスが自動的に接続される可能性があります。"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="6292456946562368121">"許可"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="5544497236277666556">"許可しない"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="2609831579583316922">"Wi-Fi は自動的にオンになります"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="6802089127390267217">"高品質の保存済みネットワークの検出時"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="9093154721154555101">"再度オンにしない"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="7983113075476310532">"Wi‑Fi が自動的に ON になりました"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="5672823591753088037">"保存済みネットワーク「<xliff:g id="NETWORK_SSID">%1$s</xliff:g>」の近くにいます"</string>
     <string name="wifi_available_sign_in" msgid="381054692557675237">"Wi-Fiネットワークにログイン"</string>
     <string name="network_available_sign_in" msgid="1520342291829283114">"ネットワークにログインしてください"</string>
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
@@ -1292,9 +1247,6 @@
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"プライベート DNS サーバーにアクセスできません"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> の接続が制限されています"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"接続するにはタップしてください"</string>
-    <string name="wifi_softap_config_change" msgid="9101613252632264297">"アクセス ポイントの設定の変更"</string>
-    <string name="wifi_softap_config_change_summary" msgid="3818290044234944123">"アクセス ポイントの帯域幅が変更されました。"</string>
-    <string name="wifi_softap_config_change_detailed" msgid="2531736378103873579">"このデバイスは 5 GHz のみという設定に対応していません。ただし、5 GHz 周波数帯が利用できるときには利用します。"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"「<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>」に切り替えました"</string>
     <string name="network_switch_metered_detail" msgid="1358296010128405906">"デバイスで「<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>」によるインターネット接続ができない場合に「<xliff:g id="NEW_NETWORK">%1$s</xliff:g>」を使用します。通信料が発生することがあります。"</string>
     <string name="network_switch_metered_toast" msgid="501662047275723743">"「<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>」から「<xliff:g id="NEW_NETWORK">%2$s</xliff:g>」に切り替えました"</string>
@@ -1306,27 +1258,8 @@
     <item msgid="9177085807664964627">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"不明なネットワーク タイプ"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="588755196559781297">"Wi-Fiに接続できませんでした"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5469207538636315968">" はインターネット接続に問題があります。"</string>
-    <string name="wifi_connect_alert_title" msgid="2377999802455909057">"接続を許可しますか？"</string>
-    <string name="wifi_connect_alert_message" msgid="169228218944976720">"アプリ%1$sがWi-Fiネットワーク%2$sへの接続を希望しています"</string>
-    <string name="wifi_connect_default_application" msgid="7577787709633050605">"アプリ"</string>
-    <string name="wifi_p2p_dialog_title" msgid="6334579064086920198">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="804818801818052402">"Wi-Fi Directを開始します。これによりWi-Fiクライアント/アクセスポイントがOFFになります。"</string>
-    <string name="wifi_p2p_failed_message" msgid="6296397512378755690">"Wi-Fi Directを開始できませんでした。"</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="9128862563403191596">"Wi-Fi DirectはONです"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="5571179544720861510">"タップして設定を表示"</string>
     <string name="accept" msgid="5447154347815825107">"同意する"</string>
     <string name="decline" msgid="6490507610282145874">"同意しない"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="355410493918793111">"招待状を送信しました"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="8082524320754820762">"接続への招待"</string>
-    <string name="wifi_p2p_from_message" msgid="8288949679353111893">"From:"</string>
-    <string name="wifi_p2p_to_message" msgid="2841587668240064488">"To:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="1020819021188731574">"必要なPINを入力してください:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="3598694912050152976">"PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="6006673840559201871">"タブレットが<xliff:g id="DEVICE_NAME">%1$s</xliff:g>に接続されている間は一時的にWi-Fi接続が切断されます"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="1081550817886390524">"テレビが<xliff:g id="DEVICE_NAME">%1$s</xliff:g>に接続されている間は一時的にWi-Fi接続が切断されます"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="5357599796604438547">"モバイル デバイスが<xliff:g id="DEVICE_NAME">%1$s</xliff:g>に接続されている間は一時的にWi-Fi接続が解除されます。"</string>
     <string name="select_character" msgid="3352797107930786979">"文字を挿入"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"SMSメッセージの送信中"</string>
     <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;が大量のSMSメッセージを送信しています。このアプリにこのままメッセージの送信を許可しますか？"</string>
@@ -1381,6 +1314,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ワイヤレス デバッグを無効にするには選択します。"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"テストハーネス モード有効"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"出荷時設定にリセットしてテストハーネス モードを無効にしてください。"</string>
+    <string name="console_running_notification_title" msgid="6087888939261635904">"シリアル コンソールは有効です"</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"シリアル コンソールを有効にすると、パフォーマンスに影響します。無効にするには、ブートローダーをチェックしてください。"</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB ポート内の液体やゴミ"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB ポートが自動的に無効になりました。タップして詳細をご確認ください。"</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB ポートを安全に使用できます"</string>
@@ -1406,14 +1341,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g>を確認しています…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"現在のコンテンツを確認しています"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"新しい <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g>は動作していません"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"タップして設定してください"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"デバイスの再フォーマットが必要になる場合があります。取り出すにはタップしてください。"</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"写真などのメディア転送用"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>に関する問題"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g>は動作していません"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"タップして修正してください"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g>が破損しています。修正するには選択してください。"</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"デバイスの再フォーマットが必要になる場合があります。取り出すにはタップしてください。"</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"対応していない<xliff:g id="NAME">%s</xliff:g>です"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g>は動作していません"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"このデバイスはこの <xliff:g id="NAME">%s</xliff:g>に対応していません。タップして、対応している形式でセットアップしてください。"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"このデバイスはこの <xliff:g id="NAME">%s</xliff:g>に対応していません。サポートされるフォーマットで設定するには選択してください。"</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"デバイスの再フォーマットが必要になる場合があります"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>が不適切に取り外されました"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"コンテンツの喪失を防ぐため、メディアを取り出してから取り外してください"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g>の取り外し"</string>
@@ -1519,6 +1460,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g>さん（<xliff:g id="SERVICE">%2$s</xliff:g>）からのリクエスト"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"はい"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"いいえ"</string>
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"緊急対応時に位置情報にアクセスされました"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"最近の緊急対応時にデバイス メーカーが位置情報にアクセスしました"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"最近の緊急対応時に携帯通信会社が位置情報にアクセスしました"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"削除の制限を超えました"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>アカウントの<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>で<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>件の削除があります。操作を選択してください。"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"アイテムを削除する"</string>
@@ -1604,9 +1548,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"ブラウザを起動しますか？"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"通話を受けますか？"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"常時"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"[常に開く] に設定"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"1 回のみ"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"設定"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$sは仕事用プロファイルをサポートしていません"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"タブレット"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"テレビ"</string>
@@ -1667,32 +1609,56 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"パスワードの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"タブレットのロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、タブレットは出荷時設定にリセットされ、ユーザーのデータはすべて失われます。"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7525614240870652051">"テレビのロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、テレビは出荷時設定にリセットされ、ユーザーのデータはすべて失われます。"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"Android TV デバイスのロック解除に <xliff:g id="NUMBER_0">%1$d</xliff:g> 回失敗しました。あと <xliff:g id="NUMBER_1">%2$d</xliff:g> 回失敗すると、Android TV デバイスは出荷時設定にリセットされ、ユーザーデータはすべて失われます。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"モバイル デバイスのロック解除に<xliff:g id="NUMBER_0">%1$d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回失敗すると、デバイスは出荷時設定にリセットされ、ユーザーのデータはすべて失われます。"</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"タブレットのロック解除を<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。タブレットは出荷時設定にリセットされます。"</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5213981402777341134">"テレビのロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。テレビは出荷時設定にリセットされます。"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"Android TV デバイスのロック解除に <xliff:g id="NUMBER">%d</xliff:g> 回失敗しました。Android TV デバイスは出荷時設定にリセットされます。"</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"モバイル デバイスのロック解除を<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。デバイスは出荷時設定にリセットされます。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、タブレットのロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒後にもう一度お試しください。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="8057874855853116724">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、テレビのロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒以内にもう一度お試しください。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"ロック解除パターンの入力を <xliff:g id="NUMBER_0">%1$d</xliff:g> 回間違えました。あと <xliff:g id="NUMBER_1">%2$d</xliff:g> 回間違えると、Android TV デバイスのロック解除にメール アカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後にもう一度お試しください。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、モバイルデバイスのロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"削除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"推奨レベルを超えるまで音量を上げますか？\n\n大音量で長時間聞き続けると、聴力を損なう恐れがあります。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ユーザー補助機能のショートカットの使用"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"ショートカットが ON の場合、両方の音量ボタンを 3 秒間押し続けるとユーザー補助機能が起動します。\n\n現在のユーザー補助機能:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\nユーザー補助機能は [設定] &gt; [ユーザー補助] で変更できます。"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ショートカットが ON の場合、両方の音量ボタンを 3 秒ほど長押しするとユーザー補助機能が起動します。"</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"ユーザー補助機能を ON にしますか？"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"音量大と音量小の両方のボタンを数秒ほど長押しすると、ユーザー補助機能が ON になります。この機能が ON になると、デバイスの動作が変わることがあります。\n\n現在の機能:\n<xliff:g id="SERVICE">%1$s</xliff:g>\n選択した機能は [設定] &gt; [ユーザー補助] で変更できます。"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> を ON にしますか？"</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"音量大と音量小の両方のボタンを数秒ほど長押しすると、ユーザー補助機能の <xliff:g id="SERVICE">%1$s</xliff:g> が ON になります。この機能が ON になると、デバイスの動作が変わることがあります。\n\nこのショートカットは [設定] &gt; [ユーザー補助] で別の機能に変更できます。"</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ON にする"</string>
+    <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ON にしない"</string>
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ON"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"OFF"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> にデバイスのフル コントロールを許可しますか？"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> をオンにすると、デバイスデータの暗号化の強化に画面ロックは使用されなくなります。"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"フル コントロールは、ユーザー補助機能を必要とするユーザーをサポートするアプリには適していますが、ほとんどのアプリには適していません。"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"画面の表示と操作"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"画面上のすべてのコンテンツを読み取り、他のアプリでコンテンツを表示することができます。"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"操作の表示と実行"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"アプリやハードウェア センサーの操作を記録したり、自動的にアプリを操作したりできます。"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"許可"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"許可しない"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"使用を開始する機能をタップ:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ユーザー補助機能ボタンで使用する機能の選択"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"音量ボタンのショートカットで使用する機能の選択"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> はオフになっています"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ショートカットの編集"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完了"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ショートカットを OFF にする"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ショートカットを使用"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"色反転"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"色補正"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"ユーザー補助機能のショートカットにより <xliff:g id="SERVICE_NAME">%1$s</xliff:g> は ON になっています"</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"ユーザー補助機能のショートカットにより <xliff:g id="SERVICE_NAME">%1$s</xliff:g> は OFF になっています"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が ON になりました。"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が OFF になりました。"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> を使用するには、音量大と音量小の両方のボタンを 3 秒間長押ししてください"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"ユーザー補助機能ボタンをタップした場合に使用するサービスを選択してください。"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"ユーザー補助操作（2 本の指で画面の下から上にスワイプ）で使用するサービスを選択してください。"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"ユーザー補助操作（3 本の指で画面の下から上にスワイプ）で使用するサービスを選択してください。"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"サービスを切り替えるには、ユーザー補助機能ボタンを長押しします。"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"サービスを切り替えるには、2 本の指で上にスワイプしたまま長押しします。"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"サービスを切り替えるには、3 本の指で上にスワイプしたまま長押しします。"</string>
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ユーザー補助機能ボタンをタップした場合に使用する機能を選択してください。"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ユーザー補助操作（2 本の指で画面の下から上にスワイプ）で使用する機能を選択してください。"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ユーザー補助操作（3 本の指で画面の下から上にスワイプ）で使用する機能を選択してください。"</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"機能を切り替えるには、ユーザー補助機能ボタンを長押しします。"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"機能を切り替えるには、2 本の指で上にスワイプしたまま長押しします。"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"機能を切り替えるには、3 本の指で上にスワイプしたまま長押しします。"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"拡大"</string>
     <string name="user_switched" msgid="7249833311585228097">"現在のユーザーは<xliff:g id="NAME">%1$s</xliff:g>です。"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>に切り替えています…"</string>
@@ -1826,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"管理者により更新されています"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"管理者により削除されています"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマを ON にする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する\n\n"<annotation id="url">"詳細"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマを ON にする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n\n•ダークテーマをオンにする\n•バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能をオフにする、または制限する\n\n"<annotation id="url">"詳細"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n\n•ダークテーマをオンにする\n•バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能をオフにする、または制限する"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータを送受信することはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"データセーバーを ON にしますか？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ON にする"</string>
@@ -1906,6 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"カテゴリなし"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"このような通知の重要度を設定します。"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"関係するユーザーのため、この設定は重要です。"</string>
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"カスタムアプリ通知"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> が <xliff:g id="ACCOUNT">%2$s</xliff:g> で新しいユーザーを作成できるようにしますか？（このアカウントのユーザーはすでに存在します）"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g> が <xliff:g id="ACCOUNT">%2$s</xliff:g> で新しいユーザーを作成できるようにしますか？"</string>
     <string name="language_selection_title" msgid="52674936078683285">"言語を追加"</string>
@@ -1918,9 +1885,12 @@
     <string name="app_suspended_title" msgid="888873445010322650">"このアプリは使用できません"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"現在、<xliff:g id="APP_NAME_0">%1$s</xliff:g> は使用できません。このアプリの使用は [<xliff:g id="APP_NAME_1">%2$s</xliff:g>] で管理されています。"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"詳細"</string>
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"アプリの一時停止を解除"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"仕事用プロファイルを ON にしますか？"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"仕事用のアプリ、通知、データなど、仕事用プロファイルの機能が ON になります"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ON にする"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"アプリの利用不可"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"現在 <xliff:g id="APP_NAME">%1$s</xliff:g> はご利用になれません。"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"このアプリは以前のバージョンの Android 用に作成されており、正常に動作しない可能性があります。アップデートを確認するか、デベロッパーにお問い合わせください。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"アップデートを確認"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"新着メッセージがあります"</string>
@@ -1931,7 +1901,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> に接続しました"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"タップしてファイルを表示"</string>
     <string name="pin_target" msgid="8036028973110156895">"固定"</string>
+    <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g> を固定"</string>
     <string name="unpin_target" msgid="3963318576590204447">"固定を解除"</string>
+    <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g> の固定を解除"</string>
     <string name="app_info" msgid="6113278084877079851">"アプリ情報"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"デモを開始しています…"</string>
@@ -1974,10 +1946,16 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>、<xliff:g id="TYPE_2">%3$s</xliff:g>を "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" で更新しますか？"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"はい"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"いいえ"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"後で"</string>
+    <string name="autofill_save_never" msgid="6821841919831402526">"なし"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"更新"</string>
+    <string name="autofill_continue_yes" msgid="7914985605534510385">"続行"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"パスワード"</string>
     <string name="autofill_save_type_address" msgid="3111006395818252885">"住所"</string>
     <string name="autofill_save_type_credit_card" msgid="3583795235862046693">"クレジット カード"</string>
+    <string name="autofill_save_type_debit_card" msgid="3169397504133097468">"デビットカード"</string>
+    <string name="autofill_save_type_payment_card" msgid="6555012156728690856">"支払いカード"</string>
+    <string name="autofill_save_type_generic_card" msgid="1019367283921448608">"カード"</string>
     <string name="autofill_save_type_username" msgid="1018816929884640882">"ユーザー名"</string>
     <string name="autofill_save_type_email_address" msgid="1303262336895591924">"メールアドレス"</string>
     <string name="etws_primary_default_message_earthquake" msgid="8401079517718280669">"強い揺れに備えてください"</string>
@@ -2023,13 +2001,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"通常の充電を行う前に電池が切れる可能性があります"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"電池を長持ちさせるため、バッテリー セーバーが有効になりました"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"バッテリー セーバー"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"バッテリー セーバーは、電池残量が再び低下するまで有効に戻りません。"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"電池が十分なレベルまで充電されました。バッテリー セーバーは、電池残量が再び低下するまで有効に戻りません。"</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"スマートフォンの電池残量 <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"タブレットの電池残量 <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"デバイスの電池残量 <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"バッテリー セーバーが無効になりました。機能は制限されなくなりました。"</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"バッテリー セーバーが無効になりました。機能は制限されなくなりました。"</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"バッテリー セーバーが OFF になりました"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"スマートフォンが十分に充電されました。機能は制限されなくなりました。"</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"タブレットが十分に充電されました。機能は制限されなくなりました。"</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"デバイスが十分に充電されました。機能は制限されなくなりました。"</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"フォルダ"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android アプリ"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ファイル"</string>
@@ -2054,8 +2029,45 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g>、他 <xliff:g id="COUNT_3">%d</xliff:g> ファイル</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g>、他 <xliff:g id="COUNT_1">%d</xliff:g> ファイル</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="492542066060841139">"ダイレクト シェアは利用できません"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"おすすめの共有相手はいません"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"アプリのリスト"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"このアプリに録音権限は付与されていませんが、この USB デバイスから音声を収集できるようになります。"</string>
+    <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"ホーム"</string>
+    <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"戻る"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"最近使ったアプリ"</string>
+    <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"通知"</string>
+    <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"クイック設定"</string>
+    <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"電源ダイアログ"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ロック画面"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"スクリーンショット"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"画面上のユーザー補助のショートカット"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"画面上のユーザー補助のショートカットの選択メニュー"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ユーザー補助のショートカット"</string>
+    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> のキャプション バーです。"</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> は RESTRICTED バケットに移動しました。"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"画像を送信しました"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"会話"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"グループの会話"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"個人用"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"仕事用"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"個人用ビュー"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"仕事用ビュー"</string>
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"仕事用アプリでこのコンテンツを共有することはできません"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"IT 管理者は、仕事用プロファイルのアプリでこのコンテンツを共有することを許可していません"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"仕事用アプリでこのコンテンツを開くことはできません"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"IT 管理者は、仕事用プロファイルのアプリでこのコンテンツを開くことを許可していません"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"個人用アプリでこのコンテンツを共有することはできません"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"IT 管理者は、個人用プロファイルのアプリでこのコンテンツを共有することを許可していません"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"個人用アプリでこのコンテンツを開くことはできません"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"IT 管理者は、個人用プロファイルのアプリでこのコンテンツを開くことを許可していません"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"仕事用プロファイルが一時停止しています"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"ON にする"</string>
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"このコンテンツに対応する仕事用アプリはありません"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"このコンテンツを開くことができる仕事用アプリはありません"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"このコンテンツに対応する個人用アプリはありません"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"このコンテンツを開くことができる個人用アプリはありません"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM のネットワーク ロック解除 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM のネットワーク サブネットのロック解除 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM の企業ロック解除 PIN"</string>

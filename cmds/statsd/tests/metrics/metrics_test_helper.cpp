@@ -26,8 +26,21 @@ HashableDimensionKey getMockedDimensionKey(int tagId, int key, string value) {
     return dimension;
 }
 
+HashableDimensionKey getMockedDimensionKeyLongValue(int tagId, int key, int64_t value) {
+    HashableDimensionKey dimension;
+    int pos[] = {key, 0, 0};
+    dimension.addValue(FieldValue(Field(tagId, pos, 0), Value(value)));
+
+    return dimension;
+}
+
 MetricDimensionKey getMockedMetricDimensionKey(int tagId, int key, string value) {
     return MetricDimensionKey(getMockedDimensionKey(tagId, key, value), DEFAULT_DIMENSION_KEY);
+}
+
+MetricDimensionKey getMockedStateDimensionKey(int tagId, int key, int64_t value) {
+    return MetricDimensionKey(DEFAULT_DIMENSION_KEY,
+                              getMockedDimensionKeyLongValue(tagId, key, value));
 }
 
 void buildSimpleAtomFieldMatcher(const int tagId, FieldMatcher* matcher) {

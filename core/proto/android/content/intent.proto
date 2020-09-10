@@ -65,7 +65,7 @@ message IntentProto {
     optional string identifier = 13 [ (.android.privacy).dest = DEST_EXPLICIT ];
 }
 
-// Next Tag: 11
+// Next Tag: 12
 message IntentFilterProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -86,6 +86,7 @@ message IntentFilterProto {
     optional int32 priority = 8;
     optional bool has_partial_types = 9;
     optional bool get_auto_verify = 10;
+    repeated string mime_groups = 11;
 }
 
 message AuthorityEntryProto {

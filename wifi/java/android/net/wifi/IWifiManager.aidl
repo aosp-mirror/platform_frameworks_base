@@ -24,14 +24,19 @@ import android.net.wifi.hotspot2.IProvisioningCallback;
 
 import android.net.DhcpInfo;
 import android.net.Network;
+import android.net.wifi.IActionListener;
 import android.net.wifi.IDppCallback;
+import android.net.wifi.ILocalOnlyHotspotCallback;
 import android.net.wifi.INetworkRequestMatchCallback;
-import android.net.wifi.ISoftApCallback;
-import android.net.wifi.ITrafficStateCallback;
+import android.net.wifi.IOnWifiActivityEnergyInfoListener;
 import android.net.wifi.IOnWifiUsabilityStatsListener;
-import android.net.wifi.PasspointManagementObjectDefinition;
+import android.net.wifi.IScanResultsCallback;
+import android.net.wifi.ISoftApCallback;
+import android.net.wifi.ISuggestionConnectionStatusListener;
+import android.net.wifi.ITrafficStateCallback;
+import android.net.wifi.IWifiConnectedNetworkScorer;
 import android.net.wifi.ScanResult;
-import android.net.wifi.WifiActivityEnergyInfo;
+import android.net.wifi.SoftApConfiguration;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiNetworkSuggestion;
@@ -49,19 +54,11 @@ interface IWifiManager
 {
     long getSupportedFeatures();
 
-    WifiActivityEnergyInfo reportActivityInfo();
+    oneway void getWifiActivityEnergyInfoAsync(in IOnWifiActivityEnergyInfoListener listener);
 
-    /**
-     * Requests the controller activity info asynchronously.
-     * The implementor is expected to reply with the
-     * {@link android.net.wifi.WifiActivityEnergyInfo} object placed into the Bundle with the key
-     * {@link android.os.BatteryStats#RESULT_RECEIVER_CONTROLLER_KEY}. The result code is ignored.
-     */
-    oneway void requestActivityInfo(in ResultReceiver result);
+    ParceledListSlice getConfiguredNetworks(String packageName, String featureId);
 
-    ParceledListSlice getConfiguredNetworks(String packageName);
-
-    ParceledListSlice getPrivilegedConfiguredNetworks(String packageName);
+    ParceledListSlice getPrivilegedConfiguredNetworks(String packageName, String featureId);
 
     Map getAllMatchingFqdnsForScanResults(in List<ScanResult> scanResult);
 
@@ -91,9 +88,19 @@ interface IWifiManager
 
     boolean disableNetwork(int netId, String packageName);
 
-    boolean startScan(String packageName);
+    void allowAutojoinGlobal(boolean choice);
 
-    List<ScanResult> getScanResults(String callingPackage);
+    void allowAutojoin(int netId, boolean choice);
+
+    void allowAutojoinPasspoint(String fqdn, boolean enableAutoJoin);
+
+    void setMacRandomizationSettingPasspointEnabled(String fqdn, boolean enable);
+
+    void setPasspointMeteredOverride(String fqdn, int meteredOverride);
+
+    boolean startScan(String packageName, String featureId);
+
+    List<ScanResult> getScanResults(String callingPackage, String callingFeatureId);
 
     boolean disconnect(String packageName);
 
@@ -101,21 +108,23 @@ interface IWifiManager
 
     boolean reassociate(String packageName);
 
-    WifiInfo getConnectionInfo(String callingPackage);
+    WifiInfo getConnectionInfo(String callingPackage, String callingFeatureId);
 
     boolean setWifiEnabled(String packageName, boolean enable);
 
     int getWifiEnabledState();
 
-    void setCountryCode(String country);
-
     String getCountryCode();
 
-    boolean isDualBandSupported();
+    boolean is5GHzBandSupported();
 
-    boolean needs5GHzToAnyApBandConversion();
+    boolean is6GHzBandSupported();
+
+    boolean isWifiStandardSupported(int standard);
 
     DhcpInfo getDhcpInfo();
+
+    void setScanAlwaysAvailable(boolean isAvailable);
 
     boolean isScanAlwaysAvailable();
 
@@ -137,13 +146,16 @@ interface IWifiManager
 
     boolean startSoftAp(in WifiConfiguration wifiConfig);
 
+    boolean startTetheredHotspot(in SoftApConfiguration softApConfig);
+
     boolean stopSoftAp();
 
-    int startLocalOnlyHotspot(in Messenger messenger, in IBinder binder, String packageName);
+    int startLocalOnlyHotspot(in ILocalOnlyHotspotCallback callback, String packageName,
+                              String featureId, in SoftApConfiguration customConfig);
 
     void stopLocalOnlyHotspot();
 
-    void startWatchLocalOnlyHotspot(in Messenger messenger, in IBinder binder);
+    void startWatchLocalOnlyHotspot(in ILocalOnlyHotspotCallback callback);
 
     void stopWatchLocalOnlyHotspot();
 
@@ -153,11 +165,13 @@ interface IWifiManager
     @UnsupportedAppUsage
     WifiConfiguration getWifiApConfiguration();
 
+    SoftApConfiguration getSoftApConfiguration();
+
     boolean setWifiApConfiguration(in WifiConfiguration wifiConfig, String packageName);
 
-    void notifyUserOfApBandConversion(String packageName);
+    boolean setSoftApConfiguration(in SoftApConfiguration softApConfig, String packageName);
 
-    Messenger getWifiServiceMessenger(String packageName);
+    void notifyUserOfApBandConversion(String packageName);
 
     void enableTdls(String remoteIPAddress, boolean enable);
 
@@ -169,8 +183,6 @@ interface IWifiManager
 
     int getVerboseLoggingLevel();
 
-    void enableWifiConnectivityManager(boolean enabled);
-
     void disableEphemeralNetwork(String SSID, String packageName);
 
     void factoryReset(String packageName);
@@ -181,6 +193,10 @@ interface IWifiManager
     byte[] retrieveBackupData();
 
     void restoreBackupData(in byte[] data);
+
+    byte[] retrieveSoftApBackupData();
+
+    SoftApConfiguration restoreSoftApBackupData(in byte[] data);
 
     void restoreSupplicantBackupData(in byte[] supplicantData, in byte[] ipConfigData);
 
@@ -202,9 +218,12 @@ interface IWifiManager
 
     void unregisterNetworkRequestMatchCallback(int callbackIdentifier);
 
-    int addNetworkSuggestions(in List<WifiNetworkSuggestion> networkSuggestions, in String packageName);
+    int addNetworkSuggestions(in List<WifiNetworkSuggestion> networkSuggestions, in String packageName,
+        in String featureId);
 
     int removeNetworkSuggestions(in List<WifiNetworkSuggestion> networkSuggestions, in String packageName);
+
+    List<WifiNetworkSuggestion> getNetworkSuggestions(in String packageName);
 
     String[] getFactoryMacAddresses();
 
@@ -219,4 +238,41 @@ interface IWifiManager
     void stopDppSession();
 
     void updateWifiUsabilityScore(int seqNum, int score, int predictionHorizonSec);
+
+    oneway void connect(in WifiConfiguration config, int netId, in IBinder binder, in IActionListener listener, int callbackIdentifier);
+
+    oneway void save(in WifiConfiguration config, in IBinder binder, in IActionListener listener, int callbackIdentifier);
+
+    oneway void forget(int netId, in IBinder binder, in IActionListener listener, int callbackIdentifier);
+
+    void registerScanResultsCallback(in IScanResultsCallback callback);
+
+    void unregisterScanResultsCallback(in IScanResultsCallback callback);
+
+    void registerSuggestionConnectionStatusListener(in IBinder binder, in ISuggestionConnectionStatusListener listener, int listenerIdentifier, String packageName, String featureId);
+
+    void unregisterSuggestionConnectionStatusListener(int listenerIdentifier, String packageName);
+
+    int calculateSignalLevel(int rssi);
+
+    List<WifiConfiguration> getWifiConfigForMatchedNetworkSuggestionsSharedWithUser(in List<ScanResult> scanResults);
+
+    boolean setWifiConnectedNetworkScorer(in IBinder binder, in IWifiConnectedNetworkScorer scorer);
+
+    void clearWifiConnectedNetworkScorer();
+
+    /**
+     * Return the Map of {@link WifiNetworkSuggestion} and the list of <ScanResult>
+     */
+    Map getMatchingScanResults(in List<WifiNetworkSuggestion> networkSuggestions, in List<ScanResult> scanResults, String callingPackage, String callingFeatureId);
+
+    void setScanThrottleEnabled(boolean enable);
+
+    boolean isScanThrottleEnabled();
+
+    Map getAllMatchingPasspointProfilesForScanResults(in List<ScanResult> scanResult);
+
+    void setAutoWakeupEnabled(boolean enable);
+
+    boolean isAutoWakeupEnabled();
 }

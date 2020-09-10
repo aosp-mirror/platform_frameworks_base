@@ -176,7 +176,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4562226280528716090">"Ați încercat să ștergeți prea multe <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="5557552311566179924">"Stocarea pe tabletă este plină. Ștergeți câteva fișiere pentru a elibera spațiu."</string>
     <string name="low_memory" product="watch" msgid="3479447988234030194">"Spațiul de stocare de pe ceas este plin! Ștergeți câteva fișiere pentru a elibera spațiu."</string>
-    <string name="low_memory" product="tv" msgid="8803524975509826759">"Spațiul de stocare al televizorului este plin. Ștergeți câteva fișiere pentru a elibera spațiu."</string>
+    <string name="low_memory" product="tv" msgid="6663680413790323318">"Spațiul de stocare de pe dispozitivul Android TV este plin. Ștergeți câteva fișiere pentru a elibera spațiu."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Stocarea pe telefon este plină. Ștergeți câteva fișiere pentru a elibera spațiu."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
       <item quantity="few">S-au instalat autorități de certificare</item>
@@ -190,14 +190,25 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Aplicația de administrare a profilului de serviciu lipsește sau este deteriorată. Prin urmare, profilul de serviciu și datele asociate au fost șterse. Pentru asistență, contactați administratorul."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Profilul de serviciu nu mai este disponibil pe acest dispozitiv"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Prea multe încercări de introducere a parolei"</string>
+    <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administratorul a retras dispozitivul pentru uz personal"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Dispozitivul este gestionat"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organizația dvs. gestionează acest dispozitiv și poate monitoriza traficul în rețea. Atingeți pentru mai multe detalii."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplicațiile vă pot accesa locația"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Contactați administratorul IT pentru a afla mai multe"</string>
+    <string name="country_detector" msgid="7023275114706088854">"Detector de țară"</string>
+    <string name="location_service" msgid="2439187616018455546">"Servicii de localizare"</string>
+    <string name="sensor_notification_service" msgid="7474531979178682676">"Serviciu pentru notificări de la senzori"</string>
+    <string name="twilight_service" msgid="8964898045693187224">"Serviciul Twilight"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Datele de pe dispozitiv vor fi șterse"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Aplicația de administrare nu poate fi utilizată. Dispozitivul va fi șters.\n\nDacă aveți întrebări, contactați administratorul organizației dvs."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Printare dezactivată de <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Activați profilul de serviciu"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Aplicațiile personale sunt blocate până când activați profilul de serviciu"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Aplicațiile personale vor fi blocate pe <xliff:g id="DATE">%1$s</xliff:g>, la <xliff:g id="TIME">%2$s</xliff:g>. Administratorul IT nu permite ca profilul de serviciu să fie dezactivat mai mult de <xliff:g id="NUMBER">%3$d</xliff:g> zile."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Activați"</string>
     <string name="me" msgid="6207584824693813140">"Eu"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opțiuni tablet PC"</string>
-    <string name="power_dialog" product="tv" msgid="5941745051236770764">"Opțiuni TV"</string>
+    <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opțiuni pentru Android TV"</string>
     <string name="power_dialog" product="default" msgid="1107775420270203046">"Opțiuni telefon"</string>
     <string name="silent_mode" msgid="8796112363642579333">"Mod Silențios"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"Activați funcția wireless"</string>
@@ -215,7 +226,7 @@
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"Se repornește…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"Se închide..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Computerul dvs. tablet PC se va închide."</string>
-    <string name="shutdown_confirm" product="tv" msgid="9187068694573722129">"Televizorul se va închide."</string>
+    <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"Dispozitivul Android TV se va închide."</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"Ceasul dvs. se va închide."</string>
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"Telefonul dvs. se va închide."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"Doriți să închideți?"</string>
@@ -224,10 +235,12 @@
     <string name="recent_tasks_title" msgid="8183172372995396653">"Recente"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"Nu există aplicații recente."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Opțiuni tablet PC"</string>
-    <string name="global_actions" product="tv" msgid="2020669784083287370">"Opțiuni TV"</string>
+    <string name="global_actions" product="tv" msgid="3871763739487450369">"Opțiuni pentru Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Opțiuni telefon"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Blocați ecranul"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Opriți"</string>
+    <string name="global_action_power_options" msgid="1185286119330160073">"Alimentare"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Reporniți"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Urgență"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Raport despre erori"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Încheiați sesiunea"</string>
@@ -243,6 +256,8 @@
       <item quantity="other">Peste <xliff:g id="NUMBER_1">%d</xliff:g> de secunde se va realiza o captură de ecran pentru raportul de eroare.</item>
       <item quantity="one">Peste <xliff:g id="NUMBER_0">%d</xliff:g> secundă se va realiza o captură de ecran pentru raportul de eroare.</item>
     </plurals>
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"S-a realizat captura de ecran a raportului de eroare"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Nu s-a realizat captura de ecran a raportului de eroare"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Mod Silențios"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Sunetul este DEZACTIVAT"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Sunetul este ACTIVAT"</string>
@@ -261,6 +276,7 @@
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"Mod Mașină"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"Starea contului"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"Mesaje pentru dezvoltatori"</string>
+    <string name="notification_channel_developer_important" msgid="7197281908918789589">"Mesaje importante pentru dezvoltatori"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"Actualizări"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"Starea rețelei"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"Alerte privind rețeaua"</string>
@@ -282,40 +298,26 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Comutați la profilul de serviciu"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Agendă"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"acceseze persoanele de contact"</string>
-    <string name="permgrouprequest_contacts" msgid="7755354139254094668">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să vă acceseze agenda?"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Locație"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"acceseze locația acestui dispozitiv"</string>
-    <string name="permgrouprequest_location" msgid="5261379525646615507">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să acceseze locația acestui dispozitiv?"</string>
-    <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"Aplicația va avea acces la locație doar atunci când o folosiți"</string>
-    <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"Permiteți aplicației &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să acceseze locația dispozitivului &lt;b&gt;tot timpul&lt;/b&gt;?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"Aplicația poate accesa locația numai când folosiți aplicația"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acceseze calendarul"</string>
-    <string name="permgrouprequest_calendar" msgid="2680538977344557840">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să vă acceseze calendarul?"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"trimită și să vadă mesajele SMS"</string>
-    <string name="permgrouprequest_sms" msgid="3985338150822482831">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să trimită și să vadă mesajele SMS?"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Stocare"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Fișiere și media"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"acceseze fotografiile, conținutul media și fișierele de pe dispozitiv"</string>
-    <string name="permgrouprequest_storage" msgid="1594774620878445266">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să acceseze fotografiile, conținutul media și fișierele de pe dispozitiv?"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microfon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"înregistreze sunet"</string>
-    <string name="permgrouprequest_microphone" msgid="4942966684471718126">"Pemiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să înregistreze audio?"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activitate fizică"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"accesați activitatea fizică"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"Permiteți aplicației &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să vă acceseze activitatea fizică?"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Camera foto"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"fotografieze și să înregistreze videoclipuri"</string>
-    <string name="permgrouprequest_camera" msgid="2697305443703328372">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să fotografieze și să înregistreze video?"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Jurnale de apeluri"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"să citească și să scrie jurnalul de apeluri telefonice"</string>
-    <string name="permgrouprequest_calllog" msgid="7565344038959817408">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să vă acceseze jurnalele de apeluri?"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"inițieze și să gestioneze apeluri telefonice"</string>
-    <string name="permgrouprequest_phone" msgid="6430085454721364373">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să inițieze și să gestioneze apeluri telefonice?"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Senzori corporali"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"acceseze datele de la senzori despre semnele vitale"</string>
-    <string name="permgrouprequest_sensors" msgid="2431000833343586816">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să acceseze datele de la senzori despre semnele dvs. vitale?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Analizează conținutul ferestrei"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspectează conținutul unei ferestre cu care interacționați."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Activează funcția Explorați prin atingere"</string>
@@ -328,6 +330,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Poate atinge, glisa, ciupi sau folosi alte gesturi."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gesturi ce implică amprente"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Poate reda gesturile făcute pe senzorul de amprentă al dispozitivului."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Faceți o captură de ecran"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Poate face o captură de ecran."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"dezactivare sau modificare bare de stare"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite aplicației să dezactiveze bara de stare sau să adauge și să elimine pictograme de sistem."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"să fie bara de stare"</string>
@@ -356,7 +360,7 @@
     <string name="permdesc_sendSms" msgid="6757089798435130769">"Permite aplicației să trimită mesaje SMS, ceea ce ar putea determina apariția unor taxe neașteptate. Aplicațiile rău intenționate pot acumula costuri prin trimiterea mesajelor fără confirmarea dvs."</string>
     <string name="permlab_readSms" msgid="5164176626258800297">"citește mesajele text (SMS sau MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"Această aplicație poate citi toate mesajele SMS stocate pe tabletă."</string>
-    <string name="permdesc_readSms" product="tv" msgid="8967963387951154530">"Această aplicație poate citi toate mesajele SMS stocate pe televizor."</string>
+    <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"Această aplicație poate să citească toate mesajele SMS (texT) stocate pe dispozitivul Android TV."</string>
     <string name="permdesc_readSms" product="default" msgid="774753371111699782">"Această aplicație poate citi toate mesajele SMS stocate pe telefon."</string>
     <string name="permlab_receiveWapPush" msgid="4223747702856929056">"primește mesaje text (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"Permite aplicației să primească și să proceseze mesaje WAP. Această permisiune include capacitatea de a monitoriza sau șterge mesajele care v-au fost trimise fără a vi le arăta."</string>
@@ -378,7 +382,7 @@
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Această aplicație poate utiliza date în fundal. Astfel, gradul de utilizare a datelor poate crește."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"rulare continuă a aplicației"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Permite aplicației să declare persistente în memorie anumite părți ale sale. Acest lucru poate limita memoria disponibilă pentru alte aplicații și poate încetini funcționarea tabletei."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="2616944406357387366">"Permite aplicației să declare persistente în memorie anumite părți ale sale. Acest lucru poate limita memoria disponibilă pentru alte aplicații și poate încetini funcționarea televizorului."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Permite aplicației să declare persistente în memorie anumite părți ale sale. Acest lucru poate limita memoria disponibilă pentru alte aplicații și poate încetini funcționarea dispozitivului Android TV."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Permite aplicației să declare persistente în memorie anumite părți ale sale. Acest lucru poate limita memoria disponibilă pentru alte aplicații și poate încetini funcționarea telefonului."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"să ruleze serviciul în prim plan"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Permite aplicației să utilizeze serviciile din prim-plan."</string>
@@ -388,47 +392,44 @@
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"Permite aplicației să modifice datele din setările sistemului. Aplicațiile rău intenționate pot corupe configurația sistemului dvs."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"rulează la pornire"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"Permite aplicației să pornească imediat ce s-a terminat încărcarea sistemului. Din acest motiv, pornirea tabletei poate dura mai mult timp, iar rularea continuă a aplicației poate încetini dispozitivul."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="2701244540810970401">"Permite aplicației să pornească imediat ce s-a terminat încărcarea sistemului. Din acest motiv, pornirea televizorului poate dura mai mult timp, iar funcționarea continuă a aplicației poate încetini televizorul."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"Permite aplicației să pornească imediat ce s-a terminat încărcarea sistemului. Din acest motiv, pornirea dispozitivului Android TV poate dura mai mult timp, iar rularea continuă a aplicației poate încetini dispozitivul."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="7912677044558690092">"Permite aplicației să pornească imediat ce s-a terminat încărcarea sistemului. Din acest motiv, pornirea telefonului poate dura mai mult timp, iar rularea continuă a aplicației poate încetini dispozitivul."</string>
     <string name="permlab_broadcastSticky" msgid="4552241916400572230">"trimitere mesaj difuzat persistent"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="5058486069846384013">"Permite aplicației să trimită mesaje difuzate persistente, care se păstrează după terminarea difuzării mesajului. Utilizarea excesivă a acestei funcții poate să încetinească sau să destabilizeze tableta, determinând-o să utilizeze prea multă memorie."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Permite aplicației să trimită mesaje difuzate persistente, care se păstrează după terminarea difuzării mesajului. Utilizarea excesivă a acestei funcții poate să încetinească sau să destabilizeze televizorul, determinându-l să utilizeze prea multă memorie."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"Permite aplicației să trimită mesaje difuzate persistente, care se păstrează după terminarea difuzării mesajului. Utilizarea excesivă a acestei funcții poate să încetinească sau să destabilizeze dispozitivul Android TV, determinându-l să utilizeze prea multă memorie."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Permite aplicației să trimită mesaje difuzate persistente, care se păstrează după terminarea difuzării mesajului. Utilizarea excesivă a acestei funcții poate să încetinească sau să destabilizeze telefonul, determinându-l să utilizeze prea multă memorie."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"citește agenda"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Permite aplicației să citească datele despre persoanele de contact salvate pe tabletă. Cu această permisiune, aplicațiile pot salva datele de contact, iar aplicațiile rău-intenționate pot permite accesul la datele de contact fără cunoștința dvs."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Permite aplicației să citească datele despre persoanele de contact salvate pe televizor. Cu această permisiune, aplicațiile pot salva datele de contact, iar aplicațiile rău-intenționate pot permite accesul la datele de contact fără cunoștința dvs."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Permite aplicației să citească datele despre persoanele de contact salvate pe telefon. Cu această permisiune, aplicațiile pot salva datele de contact, iar aplicațiile rău-intenționate pot permite accesul la datele de contact fără cunoștința dvs."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"Permite aplicației să citească datele despre persoanele din agenda stocată pe tabletă. Aplicațiile vor avea și acces la conturile de pe tabletă care au creat agenda. Aici pot fi incluse conturile create de aplicațiile pe care le-ați instalat. Cu această permisiune, aplicațiile pot salva datele de contact, iar aplicațiile rău-intenționate pot permite accesul la datele de contact fără cunoștința dvs."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Permite aplicației să citească datele despre persoanele de contact din agenda stocată pe dispozitivul Android TV. Aplicațiile vor avea și acces la conturile de pe dispozitivul Android TV care au creat agenda. Aici pot fi incluse conturile create de aplicațiile pe care le-ați instalat. Cu această permisiune, aplicațiile pot salva datele de contact, iar aplicațiile rău-intenționate pot permite accesul la datele de contact fără cunoștința dvs."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"Permite aplicației să citească datele despre persoanele de contact salvate pe telefon. Aplicațiile vor avea și acces la conturile de pe telefon care au creat agenda. Aici pot fi incluse conturile create de aplicațiile pe care le-ați instalat. Cu această permisiune, aplicațiile pot salva datele de contact, iar aplicațiile rău-intenționate pot permite accesul la datele de contact fără cunoștința dvs."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"modifică agenda"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Permite aplicației să modifice datele despre persoanele din agenda stocată pe tabletă. Cu această permisiune, aplicația poate șterge datele de contact."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Permite aplicației să modifice datele despre persoanele de contact salvate pe telefon. Cu această permisiune, aplicația poate șterge datele de contact."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Permite aplicației să modifice datele despre persoanele din agenda stocată pe dispozitivul Android TV. Cu această permisiune, aplicația poate șterge datele de contact."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Permite aplicației să modifice datele despre persoanele din agenda stocată pe telefon. Cu această permisiune, aplicația poate șterge datele de contact."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"citește jurnalul de apeluri"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Această aplicație poate citi istoricul apelurilor."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"scrie jurnalul de apeluri"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Permite aplicației să modifice jurnalul de apeluri al tabletei dvs., inclusiv datele despre apelurile primite sau efectuate. Aplicațiile rău intenționate pot utiliza această permisiune pentru a șterge sau pentru a modifica jurnalul dvs. de apeluri."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="220754624705969171">"Permite aplicației să modifice jurnalul de apeluri al televizorului, inclusiv datele despre apelurile primite sau efectuate. Aplicațiile rău-intenționate pot utiliza această permisiune pentru a șterge sau pentru a modifica jurnalul de apeluri."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Permite aplicației să modifice jurnalul de apeluri al dispozitivului Android TV, inclusiv datele despre apelurile primite sau efectuate. Aplicațiile rău intenționate pot utiliza această permisiune pentru a șterge sau pentru a modifica jurnalul de apeluri."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Permite aplicației să modifice jurnalul de apeluri al telefonului dvs., inclusiv datele despre apelurile primite sau efectuate. Aplicațiile rău intenționate pot utiliza această permisiune pentru a șterge sau pentru a modifica jurnalul dvs. de apeluri."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"să acceseze senzorii corporali (cum ar fi monitoarele cardiace)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Permite aplicației să acceseze date de la senzorii care vă monitorizează starea fizică, cum ar fi ritmul cardiac."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"să citească evenimentele din calendar și detaliile"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Această aplicație poate să citească toate evenimentele din calendar stocate pe tabletă și să trimită sau să salveze datele din calendar."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="4359404686228921749">"Această aplicație poate să citească toate evenimentele din calendar stocate pe televizor și să trimită sau să salveze datele din calendar."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Această aplicație poate să citească toate evenimentele din calendar stocate pe dispozitivul Android TV și să trimită sau să salveze datele din calendar."</string>
     <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"Această aplicație poate să citească toate evenimentele din calendar stocate pe telefon și să trimită sau să salveze datele din calendar."</string>
     <string name="permlab_writeCalendar" msgid="6422137308329578076">"adăugarea sau modificarea evenimentelor din calendar și trimiterea de e-mailuri invitaților fără știrea proprietarului"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"Această aplicație poate să adauge, să elimine sau să modifice evenimente din calendarul de pe tabletă. Această aplicație poate să trimită mesaje care par trimise de proprietarii calendarului sau să modifice evenimentele fără notificarea acestora."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="6841397610226826926">"Această aplicație poate să adauge, să elimine sau să modifice evenimente din calendarul de pe televizor. Această aplicație poate să trimită mesaje care par trimise de proprietarii calendarului sau să modifice evenimentele fără notificarea acestora."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"Această aplicație poate să adauge, să elimine sau să modifice evenimente din calendarul de pe dispozitivul Android TV. Această aplicație poate să trimită mesaje care par trimise de proprietarii calendarului sau să modifice evenimentele fără notificarea acestora."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Această aplicație poate să adauge, să elimine sau să modifice evenimente din calendarul de pe telefon. Această aplicație poate să trimită mesaje care par trimise de proprietarii calendarului sau să modifice evenimentele fără notificarea acestora."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"accesare comenzi suplimentare ale furnizorului locației"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Permite aplicației să acceseze comenzi suplimentare pentru furnizorul locației. Aplicația ar putea să utilizeze această permisiune pentru a influența operațiile GPS sau ale altor surse de locații."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"să acceseze locația exactă în prim-plan"</string>
-    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"Aplicația vă poate obține locația exactă numai când rulează în prim-plan. Serviciile de localizare trebuie să fie activate și disponibile pe telefon pentru ca aplicația să le poată folosi. Acest lucru poate accelera descărcarea bateriei."</string>
-    <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"să acceseze locația aproximativă (bazată pe rețea) doar în prim-plan"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Aplicația vă poate determina locația folosind sursele din rețea, cum ar fi turnurile de telefonie mobilă și rețelele Wi-Fi, însă numai când rulează în prim-plan. Aceste servicii de localizare trebuie să fie activate și disponibile pe tabletă pentru ca aplicația să le poată folosi."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Aplicația vă poate determina locația folosind sursele din rețea, cum ar fi turnurile de telefonie mobilă și rețelele Wi-Fi, însă numai când rulează în prim-plan. Aceste servicii de localizare trebuie să fie activate și disponibile pe televizor pentru ca aplicația să le poată folosi."</string>
-    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Aplicația vă poate determina locația aproximativă numai când rulează în prim-plan. Aceste servicii de localizare trebuie să fie activate și disponibile pe mașină pentru ca aplicația să le poată folosi."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Aplicația vă poate determina locația folosind sursele din rețea, cum ar fi turnurile de telefonie mobilă și rețelele Wi-Fi, însă numai când rulează în prim-plan. Aceste servicii de localizare trebuie să fie activate și disponibile pe telefon pentru ca aplicația să le poată folosi."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Aplicația vă poate determina locația exactă cu ajutorul serviciilor de localizare atunci când este folosită. Pentru ca aplicația să poată determina locația, trebuie să activați serviciile de localizare pentru dispozitiv. Aceasta poate mări utilizarea bateriei."</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"să acceseze locația aproximativă numai în prim-plan."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Aplicația vă poate determina locația aproximativă cu ajutorul serviciilor de localizare atunci când este folosită. Pentru ca aplicația să poată determina locația, trebuie să activați serviciile de localizare pentru dispozitiv."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"accesați locația în fundal"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Dacă se acordă în plus față de accesul la locație aproximativă sau exactă, aplicația poate accesa locația în timp ce rulează în fundal."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Aplicația poate accesa locația oricând, chiar dacă nu este folosită."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"modificare setări audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Permite aplicației să modifice setările audio globale, cum ar fi volumul și difuzorul care este utilizat pentru ieșire."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"înregistreze sunet"</string>
@@ -439,10 +440,13 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Această aplicație vă poate recunoaște activitatea fizică."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"realizarea de fotografii și videoclipuri"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Această aplicație poate să facă fotografii și să înregistreze videoclipuri folosind camera foto în orice moment."</string>
+    <string name="permlab_systemCamera" msgid="3642917457796210580">"Permiteți unei aplicații sau unui serviciu accesul la camerele de sistem, ca să fotografieze și să înregistreze videoclipuri"</string>
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Această aplicație de sistem privilegiată poate să fotografieze și să înregistreze videoclipuri folosind o cameră de sistem în orice moment. Necesită și permisiunea android.permission.CAMERA pentru aplicație"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permiteți unei aplicații sau unui serviciu să primească apeluri inverse atunci când sunt deschise sau închise dispozitive cu cameră."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Această aplicație poate primi apeluri inverse atunci când este deschis (de aplicație) sau închis orice dispozitiv cu cameră."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlează vibrarea"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite aplicației să controleze mecanismul de vibrare."</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permite aplicației să acceseze modul de vibrații."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"apelare directă numere de telefon"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"Permite aplicației să apeleze numere de telefon fără intervenția dvs. Acest lucru poate determina apariția unor taxe sau a unor apeluri neașteptate. Cu această permisiune aplicația nu poate apela numerele de urgență. Aplicațiile rău intenționate pot acumula costuri prin efectuarea unor apeluri fără confirmare."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"accesează serviciul de apelare IMS"</string>
@@ -453,21 +457,23 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Permiteți aplicației să direcționeze apelurile prin intermediul sistemului pentru a îmbunătăți calitatea apelurilor."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"Vedeți și controlați apelurile prin intermediul sistemului."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Permite aplicației să vadă și să controleze apelurile în desfășurare pe dispozitiv. Aceasta include informații ca numerele pentru apeluri și starea apelurilor."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"scutită de restricțiile pentru înregistrarea conținutului audio"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Scutiți aplicația de restricțiile pentru înregistrarea conținutului audio."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"să continue un apel dintr-o altă aplicație"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Permite aplicației să continue un apel care a fost inițiat dintr-o altă aplicație."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"să citească numerele de telefon"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Permite aplicației să acceseze numerele de telefon ale dispozitivului."</string>
     <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"menține ecranul mașinii activat"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"împiedicarea computerului tablet PC să intre în repaus"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"împiedică intrarea televizorului în stare de inactivitate"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"împiedică dispozitivul Android TV să intre în repaus"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"împiedicare intrare telefon în repaus"</string>
     <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Permite aplicației să mențină ecranul mașinii activat."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Permite aplicației să împiedice intrarea tabletei în stare de repaus."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Permite aplicației să împiedice intrarea televizorului în stare de inactivitate."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Permite aplicației să împiedice intrarea dispozitivului Android TV în stare de inactivitate."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Permite aplicației să împiedice intrarea telefonului în stare de repaus."</string>
     <string name="permlab_transmitIr" msgid="8077196086358004010">"transmisie prin infraroșii"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5884738958581810253">"Permite aplicației să utilizeze transmițătorul prin infraroșii al tabletei."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="4453220932790148184">"Permite aplicației să utilizeze transmițătorul prin infraroșii al televizorului."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="3278506969529173281">"Permite aplicației să folosească transmițătorul prin infraroșii al dispozitivului Android TV."</string>
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Permite aplicației să utilizeze transmițătorul prin infraroșii al telefonului."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"setare imagine de fundal"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Permite aplicației să seteze imaginea de fundal a sistemului."</string>
@@ -475,11 +481,11 @@
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Permite aplicației să seteze sugestiile privind dimensiunile imaginii de fundal a sistemului."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"setare fus orar"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1788868809638682503">"Permite aplicației să schimbe fusul orar al tabletei."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="1000749751269030813">"Permite aplicației să modifice fusul orar al televizorului."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="9069045914174455938">"Permite aplicației să schimbe fusul orar al dispozitivului Android TV."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4611828585759488256">"Permite aplicației să schimbe fusul orar al telefonului."</string>
     <string name="permlab_getAccounts" msgid="5304317160463582791">"găsește conturi pe dispozitiv"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"Permite aplicației să obțină lista de conturi cunoscute de tabletă. Aceasta poate include conturile create de aplicațiile pe care le-ați instalat."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="3233589616751852028">"Permite aplicației să obțină lista de conturi cunoscute de televizor. Aceasta poate include conturile create de aplicațiile pe care le-ați instalat."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"Permite aplicației să obțină lista conturilor cunoscute de dispozitivul Android TV. Aceasta poate include conturile create de aplicațiile pe care le-ați instalat."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"Permite aplicației să obțină lista de conturi cunoscute de telefon. Aceasta poate include conturile create de aplicațiile pe care le-ați instalat."</string>
     <string name="permlab_accessNetworkState" msgid="2349126720783633918">"vizualizează conexiunile la rețea"</string>
     <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"Permite aplicației să vadă informațiile despre conexiunile la rețea, cum ar fi rețelele existente și cele care sunt conectate."</string>
@@ -495,21 +501,21 @@
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Permite aplicației să se conecteze și să se deconecteze de la punctele de acces Wi-Fi, precum și să efectueze modificări în configurația dispozitivului pentru rețelele Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"permitere recepționare difuzare multiplă Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Permite aplicației să primească pachetele trimise către toate dispozitivele dintr-o rețea Wi-Fi, utilizând adrese cu difuzare multiplă, nu doar tableta dvs. Această funcție utilizează mai multă energie decât modul fără difuzare multiplă."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1253281508485111166">"Permite aplicației să primească pachetele trimise către toate dispozitivele dintr-o rețea Wi-Fi, utilizând adrese cu difuzare multiplă, nu doar televizorul dvs. Această funcție utilizează mai multă energie decât modul fără difuzare multiplă."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Permite aplicației să primească pachetele trimise către toate dispozitivele dintr-o rețea Wi-Fi, utilizând adrese cu difuzare multiplă, nu doar dispozitivul Android TV. Această funcție utilizează mai multă energie decât modul fără difuzare multiplă."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Permite aplicației să primească pachetele trimise către toate dispozitivele dintr-o rețea Wi-Fi, utilizând adrese cu difuzare multiplă, nu doar telefonul dvs. Această funcție utilizează mai multă energie decât modul fără difuzare multiplă."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"accesează setările Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Permite aplicației să configureze tableta Bluetooth locală, să descopere și să se împerecheze cu dispozitive la distanță."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1822785266335294155">"Permite aplicației să configureze televizorul Bluetooth local, precum și să descopere și să se asocieze cu dispozitive la distanță."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Permite aplicației să configureze conexiunea Bluetooth pe dispozitivul Android TV, să descopere și să se împerecheze cu dispozitive la distanță."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Permite aplicației să configureze telefonul Bluetooth local, să descopere și să se împerecheze cu dispozitive la distanță."</string>
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"se conectează și se deconectează de la WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"Permite aplicației să stabilească dacă o rețea WiMAX este activată și să vadă informațiile cu privire la toate rețelele WiMAX conectate."</string>
     <string name="permlab_changeWimaxState" msgid="6223305780806267462">"schimbați starea WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="4011097664859480108">"Permite aplicației să conecteze și să deconecteze tableta la și de la rețelele WiMAX."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6876948244710106021">"Permite aplicației să conecteze și să deconecteze televizorul la și de la rețelele WiMAX."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"Permite aplicației să conecteze și să deconecteze dispozitivul Android TV de la rețelele WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"Permite aplicației să conecteze și să deconecteze telefonul la și de la rețelele WiMAX."</string>
     <string name="permlab_bluetooth" msgid="586333280736937209">"conectează dispozitive Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Permite aplicației să vadă configurația tabletei Bluetooth, să efectueze și să accepte conexiuni cu dispozitive împerecheate."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3546625329740068213">"Permite aplicației să vadă configurația funcției Bluetooth a televizorului, precum și să efectueze și să accepte conexiuni cu dispozitive asociate."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Permite aplicației să vadă configurația conexiunii prin Bluetooth a dispozitivului Android TV, să efectueze și să accepte conexiuni cu dispozitive împerecheate."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Permite aplicației să vadă configurația telefonului Bluetooth, să efectueze și să accepte conexiuni cu dispozitive împerecheate."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informații despre serviciul de plăți NFC preferat"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite aplicației să obțină informații despre serviciul de plăți NFC preferat, de exemplu, identificatorii de aplicație înregistrați și destinația traseului."</string>
@@ -533,7 +539,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Permite aplicației să vă modifice colecția de fotografii."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"citiți locațiile din colecția media"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Permite aplicației să citească locațiile din colecția dvs. media."</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Confirmați că sunteți dvs."</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Confirmați-vă identitatea"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Hardware biometric indisponibil"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentificarea a fost anulată"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nu este recunoscut"</string>
@@ -559,6 +565,7 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Încercați din nou."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nu au fost înregistrate amprente."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Dispozitivul nu are senzor de amprentă."</string>
+    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Senzorul este dezactivat temporar."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Degetul <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -602,6 +609,7 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Nu se poate confirma fața. Încercați din nou."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"Nu ați configurat deblocarea facială."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Deblocarea facială nu este acceptată pe dispozitiv."</string>
+    <string name="face_error_security_update_required" msgid="5076017208528750161">"Senzorul este dezactivat temporar."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Chip <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -668,10 +676,10 @@
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Stabiliți lungimea și tipul de caractere permise pentru parolele și codurile PIN de blocare a ecranului."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Să monitorizeze încercările de deblocare a ecranului"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați tableta sau ștergeți datele acesteia dacă sunt introduse prea multe parole incorecte."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="1880525102716729482">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați televizorul sau ștergeți toate datele acestuia dacă sunt introduse prea multe parole incorecte."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați dispozitivul Android TV sau ștergeți toate datele de pe acesta dacă se introduc prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați telefonul sau ștergeți toate datele acestuia dacă sunt introduse prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați tableta sau ștergeți toate datele acestui utilizator dacă se introduc prea multe parole incorecte."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="1253625325967736219">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați televizorul sau ștergeți toate datele acestui utilizator dacă se introduc prea multe parole incorecte."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați dispozitivul Android TV sau ștergeți toate datele acestui utilizator dacă se introduc prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați telefonul sau ștergeți toate datele acestui utilizator dacă se introduc prea multe parole incorecte."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Să schimbe blocarea ecranului"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Modificați blocarea ecranului."</string>
@@ -679,11 +687,11 @@
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Stabiliți modul și timpul în care se blochează ecranul."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Să șteargă toate datele"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Ștergeți datele de pe tabletă fără avertisment, efectuând resetarea configurării din fabrică."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="8755409895408717659">"Ștergeți datele de pe televizor fără avertisment, prin revenirea la setările din fabrică."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Ștergeți datele de pe dispozitivul Android TV fără avertisment, efectuând o revenire la setările din fabrică."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Ștergeți datele din telefon fără avertisment, efectuând resetarea configurării din fabrică."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Ștergeți datele utilizatorului"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Ștergeți datele acestui utilizator de pe această tabletă fără avertisment."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="7310266499158746034">"Ștergeți datele acestui utilizator de pe acest televizor fără avertisment."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Ștergeți datele acestui utilizator de pe acest dispozitiv Android TV fără avertisment"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Ștergeți datele acestui utilizator de pe acest telefon fără avertisment."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Setați serverul proxy global pentru dispozitiv"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Setați serverul proxy global pentru dispozitiv, care să fie utilizat cât timp politica este activă. Numai proprietarul dispozitivului poate seta serverul proxy global."</string>
@@ -833,7 +841,7 @@
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"S-a depășit numărul maxim de încercări pentru Deblocare facială"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Fără SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Nu există card SIM în computerul tablet PC."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1165408361036993077">"Niciun card SIM în televizor."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Nu există un card SIM în dispozitivul Android TV."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Telefonul nu are card SIM."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Introduceți un card SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"Cardul SIM lipsește sau nu poate fi citit. Introduceți un card SIM."</string>
@@ -856,13 +864,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Ați introdus incorect parola de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. \n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%2$d</xliff:g>   secunde."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Ați introdus incorect codul PIN de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori.\n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%2$d</xliff:g>   secunde."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, vi se va solicita să deblocați tableta cu ajutorul datelor de conectare la Google.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%3$d</xliff:g>   secunde."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="8418060136796780268">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, vi se va solicita să deblocați televizorul cu ajutorul datelor de conectare la Google.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%3$d</xliff:g>   secunde."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, vi se va solicita să deblocați dispozitivul Android TV prin conectarea la Google.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%3$d</xliff:g> secunde."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, vi se va solicita să deblocați telefonul cu ajutorul datelor de conectare la Google.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%3$d</xliff:g>   secunde."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"Ați efectuat <xliff:g id="NUMBER_0">%1$d</xliff:g> încercări incorecte de deblocare a tabletei. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, aceasta va fi resetată la setările prestabilite din fabrică, iar toate datele de utilizator vor fi pierdute."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2736747741914666082">"Ați efectuat <xliff:g id="NUMBER_0">%1$d</xliff:g> încercări incorecte de deblocare a televizorului. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, televizorul va reveni la setările prestabilite din fabrică, iar toate datele de utilizator se vor pierde."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"Ați efectuat <xliff:g id="NUMBER_0">%1$d</xliff:g> încercări incorecte de deblocare a dispozitivului Android TV. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, acesta va reveni la setările din fabrică, iar toate datele de utilizator se vor pierde."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"Ați efectuat <xliff:g id="NUMBER_0">%1$d</xliff:g> încercări incorecte de deblocare a telefonului. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, acesta va fi resetat la setările prestabilite din fabrică, iar toate datele de utilizator vor fi pierdute."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"Ați efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a tabletei. Tableta va fi acum resetată la setările prestabilite din fabrică."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2373955520011165432">"Ați efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a televizorului. Televizorul va reveni acum la setările prestabilite din fabrică."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"Ați efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a dispozitivului Android TV. Acesta va reveni la setările din fabrică."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"Ați efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a telefonului. Acesta va fi acum resetat la setările prestabilite din fabrică."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"Încercați din nou peste <xliff:g id="NUMBER">%d</xliff:g>   secunde."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Ați uitat modelul?"</string>
@@ -949,7 +957,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="2323799501008967852">"Permite aplicației să citească istoricul tuturor adreselor URL accesate de Browser și toate marcajele din Browser. Notă: această permisiune nu poate fi aplicată de browsere terță parte sau de alte aplicații cu capacități de navigare pe web."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="6090259925187986937">"scrie în marcajele și în istoricul web"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"Permite aplicației să modifice istoricul Browserului sau marcajele stocate pe tabletă. În acest fel, aplicația poate șterge sau modifica datele din Browser. Notă: această permisiune nu poate fi aplicată de browsere terță parte sau de alte aplicații cu capacități de navigare pe web."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="755207379344494691">"Permite aplicației să modifice istoricul sau marcajele browserului stocate pe televizor. Cu această permisiune, aplicația poate șterge sau modifica datele din browser. Notă: această permisiune nu poate fi aplicată de browsere terță parte sau de alte aplicații cu capacități de navigare pe web."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"Permite aplicației să modifice istoricul sau marcajele din browser stocate pe dispozitivul Android TV. Cu această permisiune, aplicația poate șterge sau modifica datele din browser. Notă: această permisiune nu poate fi aplicată de browsere terță parte sau de alte aplicații cu capacități de navigare pe web."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"Permite aplicației să modifice istoricul Browserului sau marcajele stocate pe telefon. În acest fel, aplicația poate șterge sau modifica datele din Browser. Notă: această permisiune nu poate fi aplicată de browsere terță parte sau de alte aplicații cu capacități de navigare pe web."</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"setează o alarmă"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"Permite aplicației să seteze o alarmă într-o aplicație de ceas cu alarmă instalată. Este posibil ca unele aplicații de ceas cu alarmă să nu implementeze această funcție."</string>
@@ -1119,28 +1127,6 @@
     <string name="deleteText" msgid="4200807474529938112">"Ștergeți"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Metodă de intrare"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Acțiuni pentru text"</string>
-    <string name="email" msgid="2503484245190492693">"E-mail"</string>
-    <string name="email_desc" msgid="8291893932252173537">"Trimiteți un e-mail la adresa selectată"</string>
-    <string name="dial" msgid="4954567785798679706">"Sunați"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"Sunați la numărul de telefon selectat"</string>
-    <string name="map" msgid="6865483125449986339">"Hartă"</string>
-    <string name="map_desc" msgid="1068169741300922557">"Localizați adresa selectată"</string>
-    <string name="browse" msgid="8692753594669717779">"Deschideți"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"Deschideți adresa URL selectată"</string>
-    <string name="sms" msgid="3976991545867187342">"Trimiteți mesaj"</string>
-    <string name="sms_desc" msgid="997349906607675955">"Trimiteți un mesaj la numărul de telefon selectat"</string>
-    <string name="add_contact" msgid="7404694650594333573">"Adăugați"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"Adăugați în agendă"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"Afișați"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"Afișați data selectată în calendar"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"Programați"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"Programați evenimentul pentru data selectată"</string>
-    <string name="view_flight" msgid="2042802613849690108">"Urmăriți"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"Urmăriți zborul selectat"</string>
-    <string name="translate" msgid="1416909787202727524">"Traduceți"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"Traduceți textul selectat"</string>
-    <string name="define" msgid="5214255850068764195">"Definiți"</string>
-    <string name="define_desc" msgid="6916651934713282645">"Definiți textul selectat"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Spațiul de stocare aproape ocupat"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Este posibil ca unele funcții de sistem să nu funcționeze"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Spațiu de stocare insuficient pentru sistem. Asigurați-vă că aveți 250 MB de spațiu liber și reporniți."</string>
@@ -1154,6 +1140,8 @@
     <string name="loading" msgid="3138021523725055037">"Se încarcă…"</string>
     <string name="capital_on" msgid="2770685323900821829">"DA"</string>
     <string name="capital_off" msgid="7443704171014626777">"NU"</string>
+    <string name="checked" msgid="9179896827054513119">"bifat"</string>
+    <string name="not_checked" msgid="7972320087569023342">"nebifat"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Finalizare acțiune utilizând"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Finalizați acțiunea utilizând %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Finalizați acțiunea"</string>
@@ -1268,41 +1256,6 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Sunete de alarmă"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Sunete pentru notificare"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Necunoscut"</string>
-    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Nu se poate conecta la <xliff:g id="SSID">%1$s</xliff:g>"</string>
-    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Atingeți pentru a modifica setările de confidențialitate și a încerca din nou"</string>
-    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Modificați setările de confidențialitate?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> poate dori să se conecteze folosind adresa MAC a dispozitivului, un identificator unic. Astfel, locația dispozitivului poate fi urmărită de dispozitivele din apropiere. \n\nDacă alegeți să continuați, <xliff:g id="SSID_1">%1$s</xliff:g> vă va modifica setarea de confidențialitate și va încerca din nou să se conecteze."</string>
-    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Modificați setarea"</string>
-    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Setarea a fost actualizată. Încercați să vă conectați din nou."</string>
-    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Nu puteți modifica setarea de confidențialitate"</string>
-    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Rețeaua nu a fost găsită"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
-      <item quantity="few">Rețele Wi-Fi disponibile</item>
-      <item quantity="other">Rețele Wi-Fi disponibile</item>
-      <item quantity="one">Rețea Wi-Fi disponibilă</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1104430011355500386">
-      <item quantity="few">Rețele Wi-Fi deschise disponibile</item>
-      <item quantity="other">Rețele Wi-Fi deschise disponibile</item>
-      <item quantity="one">Rețea Wi-Fi deschisă disponibilă</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="722493260955778406">"Conectați-vă la o rețea Wi‑Fi deschisă"</string>
-    <string name="wifi_available_carrier_network_title" msgid="7740328884692643968">"Conectați-vă la rețeaua Wi-Fi a operatorului"</string>
-    <string name="wifi_available_title_connecting" msgid="5249247039230566878">"Se conectează la rețeaua Wi-Fi"</string>
-    <string name="wifi_available_title_connected" msgid="5892203664604121475">"S-a realizat conexiunea la rețeaua Wi-Fi"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="5133141923288104331">"Nu s-a putut stabili conexiunea la rețeaua Wi-Fi"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3555247614042954032">"Atingeți pentru a vedea toate rețelele"</string>
-    <string name="wifi_available_action_connect" msgid="924369499736631716">"Conectați-vă"</string>
-    <string name="wifi_available_action_all_networks" msgid="7759049005868147147">"Toate rețelele"</string>
-    <string name="wifi_suggestion_title" msgid="5041459385180298879">"Permiteți rețelele Wi-Fi sugerate?"</string>
-    <string name="wifi_suggestion_content" msgid="477311057093517127">"<xliff:g id="NAME">%s</xliff:g> a sugerat rețele. Dispozitivul se poate conecta automat."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="6292456946562368121">"Permiteți"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="5544497236277666556">"Nu, mulțumesc"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="2609831579583316922">"Wi‑Fi se va activa automat"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="6802089127390267217">"Când vă aflați lângă o rețea salvată, de înaltă calitate"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="9093154721154555101">"Nu reactivați"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="7983113075476310532">"Wi-Fi s-a activat automat"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="5672823591753088037">"Vă aflați lângă o rețea salvată: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="381054692557675237">"Conectați-vă la rețeaua Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1520342291829283114">"Conectați-vă la rețea"</string>
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
@@ -1314,9 +1267,6 @@
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Serverul DNS privat nu poate fi accesat"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> are conectivitate limitată"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Atingeți pentru a vă conecta oricum"</string>
-    <string name="wifi_softap_config_change" msgid="9101613252632264297">"Modificări aduse setărilor pentru hotspot"</string>
-    <string name="wifi_softap_config_change_summary" msgid="3818290044234944123">"S-a schimbat banda de frecvență a hotspotului."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="2531736378103873579">"Dispozitivul nu acceptă doar preferința pentru 5 GHz. Dispozitivul va folosi banda de 5 GHz când este disponibilă."</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"S-a comutat la <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="1358296010128405906">"Dispozitivul folosește <xliff:g id="NEW_NETWORK">%1$s</xliff:g> când <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nu are acces la internet. Se pot aplica taxe."</string>
     <string name="network_switch_metered_toast" msgid="501662047275723743">"S-a comutat de la <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> la <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1328,27 +1278,8 @@
     <item msgid="9177085807664964627">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"un tip de rețea necunoscut"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="588755196559781297">"Nu se poate conecta la Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5469207538636315968">" are o conexiune la internet slabă."</string>
-    <string name="wifi_connect_alert_title" msgid="2377999802455909057">"Permiteți conectarea?"</string>
-    <string name="wifi_connect_alert_message" msgid="169228218944976720">"Aplicația %1$s dorește să se conecteze la rețeaua Wi-Fi %2$s"</string>
-    <string name="wifi_connect_default_application" msgid="7577787709633050605">"O aplicație"</string>
-    <string name="wifi_p2p_dialog_title" msgid="6334579064086920198">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="804818801818052402">"Porniți Wi-Fi Direct. Acest lucru va dezactiva clientul/hotspotul Wi-Fi."</string>
-    <string name="wifi_p2p_failed_message" msgid="6296397512378755690">"Wi-Fi Direct nu a putut porni."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="9128862563403191596">"Wi-Fi Direct este activat"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="5571179544720861510">"Atingeți pentru setări"</string>
     <string name="accept" msgid="5447154347815825107">"Acceptați"</string>
     <string name="decline" msgid="6490507610282145874">"Refuzați"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="355410493918793111">"Invitația a fost trimisă."</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="8082524320754820762">"Invitație pentru conectare"</string>
-    <string name="wifi_p2p_from_message" msgid="8288949679353111893">"De la:"</string>
-    <string name="wifi_p2p_to_message" msgid="2841587668240064488">"Către:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="1020819021188731574">"Introduceți codul PIN necesar:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="3598694912050152976">"Cod PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="6006673840559201871">"Tableta se va deconecta temporar de la rețeaua Wi-Fi cât timp este conectată la <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="1081550817886390524">"Televizorul se va deconecta temporar de la rețeaua Wi-Fi cât timp este conectat la <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="5357599796604438547">"Telefonul se va deconecta temporar de la rețeaua Wi-Fi cât timp este conectat la <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3352797107930786979">"Introduceți caracterul"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"Se trimit mesaje SMS"</string>
     <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; trimite un număr mare de mesaje SMS. Permiteți acestei aplicații să trimită în continuare mesaje?"</string>
@@ -1403,6 +1334,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Selectați pentru a dezactiva remedierea erorilor wireless."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Modul Set de testare este activat"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Reveniți la setările din fabrică pentru a dezactiva modul Set de testare."</string>
+    <string name="console_running_notification_title" msgid="6087888939261635904">"Consola din serie este activată"</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Performanța este afectată. Pentru a dezactiva, verificați programul bootloader."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Lichide sau reziduuri în portul USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"Portul USB este dezactivat automat. Atingeți ca să aflați mai multe."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Portul USB poate fi folosit"</string>
@@ -1428,14 +1361,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Se verifică <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Se examinează conținutul curent"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> nou"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> nu funcționează"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Atingeți pentru a configura"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Poate fi nevoie să reformatați dispozitivul. Atingeți pentru a-l scoate."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Pentru a transfera fotografii și fișiere media"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problemă cu <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> nu funcționează"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Atingeți pentru a remedia"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> este corupt. Selectați pentru a remedia."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Poate fi nevoie să reformatați dispozitivul. Atingeți pentru a-l scoate."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> necompatibil"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> nu funcționează"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Dispozitivul nu este compatibil cu acest <xliff:g id="NAME">%s</xliff:g>. Atingeți pentru configurare într-un format compatibil."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Dispozitivul nu este compatibil cu acest <xliff:g id="NAME">%s</xliff:g>. Selectați pentru configurare într-un format compatibil."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Poate fi nevoie să reformatați dispozitivul"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> scos pe neașteptate"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Deconectați din setări dispozitivele media înainte de a le îndepărta, pentru a evita pierderea conținutului"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"S-a eliminat <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1542,6 +1481,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Solicitat de <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Da"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Nu"</string>
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"A fost accesată locația de urgență"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"Producătorul dispozitivului v-a accesat locația în timpul unei sesiuni de urgență recente"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"Operatorul v-a accesat locația în timpul unei sesiuni de urgență recente"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Limita pentru ștergere a fost depășită"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Există <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>   elemente șterse pentru <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, contul <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Ce doriți să faceți?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Ștergeți elementele"</string>
@@ -1627,9 +1569,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Lansați browserul?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Acceptați apelul?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Întotdeauna"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Schimbați la „Deschideți întotdeauna”"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Numai o dată"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"Setări"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s nu acceptă profilul de serviciu"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tabletă"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
@@ -1691,32 +1631,56 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"Ați introdus incorect parola de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. \n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%2$d</xliff:g>   secunde."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. \n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%2$d</xliff:g>   secunde."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"Ați efectuat <xliff:g id="NUMBER_0">%1$d</xliff:g> încercări incorecte de deblocare a tabletei. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, aceasta va fi resetată la setările prestabilite din fabrică, iar toate datele de utilizator se vor pierde."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7525614240870652051">"Ați efectuat <xliff:g id="NUMBER_0">%1$d</xliff:g> încercări incorecte de deblocare a televizorului. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, televizorul va reveni la setările prestabilite din fabrică, iar toate datele de utilizator se vor pierde."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"Ați efectuat <xliff:g id="NUMBER_0">%1$d</xliff:g> încercări incorecte de deblocare a dispozitivului Android TV. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, acesta va reveni la setările din fabrică, iar toate datele de utilizator se vor pierde."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"Ați efectuat <xliff:g id="NUMBER_0">%1$d</xliff:g> încercări incorecte de deblocare a telefonului. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, acesta va fi resetat la setările prestabilite din fabrică, iar toate datele de utilizator se vor pierde."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"Ați efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a tabletei. Tableta va fi acum resetată la setările prestabilite din fabrică."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5213981402777341134">"Ați efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a televizorului. Televizorul va reveni acum la setările prestabilite din fabrică."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"Ați efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a dispozitivului Android TV. Acesta va reveni la setările din fabrică."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"Ați efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a telefonului. Telefonul va fi acum resetat la setările prestabilite din fabrică."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, vi se va solicita să deblocați tableta cu ajutorul unui cont de e-mail.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%3$d</xliff:g>   secunde."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="8057874855853116724">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, vi se va solicita să deblocați televizorul cu ajutorul unui cont de e-mail.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%3$d</xliff:g>   secunde."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, vi se va solicita să deblocați dispozitivul Android TV cu ajutorul unui cont de e-mail.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%3$d</xliff:g> secunde."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, vi se va solicita să deblocați telefonul cu ajutorul unui cont de e-mail.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%3$d</xliff:g>   secunde."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Eliminați"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ridicați volumul mai sus de nivelul recomandat?\n\nAscultarea la volum ridicat pe perioade lungi de timp vă poate afecta auzul."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Utilizați comanda rapidă pentru accesibilitate?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Când comanda rapidă este activată, dacă apăsați ambele butoane de volum timp de 3 secunde, veți lansa o funcție de accesibilitate.\n\n Funcția actuală de accesibilitate:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Puteți schimba funcția în Setări &gt; Accesibilitate."</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Atunci când comanda rapidă este activată, dacă apăsați ambele butoane de volum timp de trei secunde, veți lansa o funcție de accesibilitate."</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Activați funcțiile de accesibilitate?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Dacă apăsați ambele taste de volum câteva secunde, activați funcțiile de accesibilitate. Acest lucru poate schimba funcționarea dispozitivului.\n\nFuncțiile actuale:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuteți schimba funcțiile selectate din Setări &gt; Accesibilitate."</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Activați <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Dacă apăsați ambele taste de volum câteva secunde, activați funcția de accesibilitate <xliff:g id="SERVICE">%1$s</xliff:g>. Acest lucru poate schimba funcționarea dispozitivului.\n\nPuteți alege altă funcție pentru această comandă în Setări &gt; Accesibilitate."</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Activați"</string>
+    <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Nu activați"</string>
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ACTIVAT"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"DEZACTIVAT"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Permiteți serviciului <xliff:g id="SERVICE">%1$s</xliff:g> să aibă control total asupra dispozitivului dvs.?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Dacă activați <xliff:g id="SERVICE">%1$s</xliff:g>, dispozitivul nu va folosi blocarea ecranului pentru a îmbunătăți criptarea datelor."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Controlul total este adecvat pentru aplicații care vă ajută cu accesibilitatea, însă nu pentru majoritatea aplicaților."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Vă vede și vă controlează ecranul"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Poate citi tot conținutul de pe ecran și poate afișa conținut peste alte aplicații."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Vă vede interacțiunile și le realizează"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Poate urmări interacțiunile dvs. cu o aplicație sau cu un senzor hardware și poate interacționa cu aplicații în numele dvs."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permiteți"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Refuzați"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Atingeți o funcție ca să începeți să o folosiți:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Alegeți funcțiile pe care să le folosiți cu butonul de accesibilitate"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Alegeți funcțiile pentru comanda rapidă a butonului de volum"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> a fost dezactivat"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editați comenzile rapide"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Gata"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Dezactivați comanda rapidă"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizați comanda rapidă"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversarea culorilor"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Corecția culorii"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"Comanda rapidă de accesibilitate a activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"Comanda rapidă de accesibilitate a dezactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"S-au apăsat lung tastele de volum. S-a activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"S-au apăsat lung tastele de volum. S-a dezactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Apăsați ambele butoane de volum timp de trei secunde pentru a folosi <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"Alegeți un serviciu pe care să îl folosiți când atingeți butonul de accesibilitate:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"Alegeți un serviciu pe care să îl folosiți cu gestul de accesibilitate (glisați în sus cu două degete din partea de jos a ecranului):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"Alegeți un serviciu pe care să îl folosiți cu gestul de accesibilitate (glisați în sus cu trei degete din partea de jos a ecranului):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"Pentru a comuta între servicii, atingeți lung butonul de accesibilitate."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"Pentru a schimba între servicii, glisați în sus cu două degete și țineți lung."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"Pentru a schimba între servicii, glisați în sus cu trei degete și țineți lung."</string>
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Alegeți o funcție pe care să o folosiți când atingeți butonul de accesibilitate:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Alegeți o funcție pe care să o folosiți cu gestul de accesibilitate (glisați în sus cu două degete din partea de jos a ecranului):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Alegeți o funcție pe care să o folosiți cu gestul de accesibilitate (glisați în sus cu trei degete din partea de jos a ecranului):"</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Pentru a comuta între funcții, atingeți lung butonul de accesibilitate."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Pentru a comuta între funcții, glisați în sus cu două degete și mențineți apăsat."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Pentru a comuta între funcții, glisați în sus cu trei degete și mențineți apăsat."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Mărire"</string>
     <string name="user_switched" msgid="7249833311585228097">"Utilizator curent: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Se comută la <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1851,8 +1815,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualizat de administratorul dvs."</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Șters de administratorul dvs."</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Pentru a prelungi autonomia bateriei, Economisirea bateriei:\n·activează tema întunecată;\n·activează sau restricționează activitatea în fundal, unele efecte vizuale și alte funcții, cum ar fi „Ok Google”.\n\n"<annotation id="url">"Aflați mai multe"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Pentru a prelungi autonomia bateriei, Economisirea bateriei:\n·activează tema întunecată;\n·activează sau restricționează activitatea în fundal, unele efecte vizuale și alte funcții, cum ar fi „Ok Google”."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Pentru a mări autonomia bateriei, Economisirea bateriei:\n\n•·activează tema întunecată;\n•·dezactivează sau restricționează activitatea în fundal, unele efecte vizuale și alte funcții, cum ar fi „Ok Google”.\n\n"<annotation id="url">"Aflați mai multe"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"Pentru a mări autonomia bateriei, Economisirea bateriei:\n\n• activează tema întunecată;\n• dezactivează sau restricționează activitatea în fundal, unele efecte vizuale și alte funcții, cum ar fi „Ok Google”."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Pentru a contribui la reducerea utilizării de date, Economizorul de date împiedică unele aplicații să trimită sau să primească date în fundal. O aplicație pe care o folosiți poate accesa datele, însă mai rar. Aceasta poate însemna, de exemplu, că imaginile se afișează numai după ce le atingeți."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activați Economizorul de date?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activați"</string>
@@ -1940,6 +1904,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Neclasificate"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Dvs. setați importanța acestor notificări."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Notificarea este importantă având în vedere persoanele implicate."</string>
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Notificare de aplicație personalizată"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Permiteți ca <xliff:g id="APP">%1$s</xliff:g> să creeze un nou utilizator folosind <xliff:g id="ACCOUNT">%2$s</xliff:g>? (există deja un utilizator cu acest cont)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Permiteți ca <xliff:g id="APP">%1$s</xliff:g> să creeze un nou utilizator folosind <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Adăugați o limbă"</string>
@@ -1952,9 +1917,12 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Aplicația nu este disponibilă"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Momentan, aplicația <xliff:g id="APP_NAME_0">%1$s</xliff:g> nu este disponibilă. Aceasta este gestionată de <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Aflați mai multe"</string>
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Anulați întreruperea aplicației"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Activați profilul de serviciu?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Se vor activa aplicațiile dvs. de serviciu, notificările, datele și alte funcții ale profilului de serviciu"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Activați"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Aplicația nu este disponibilă"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> nu este disponibilă momentan."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Această aplicație a fost creată pentru o versiune Android mai veche și este posibil să nu funcționeze corect. Încercați să căutați actualizări sau contactați dezvoltatorul."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Căutați actualizări"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Aveți mesaje noi"</string>
@@ -1965,7 +1933,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Conectat la <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Atingeți pentru a vedea fișierele"</string>
     <string name="pin_target" msgid="8036028973110156895">"Fixați"</string>
+    <string name="pin_specific_target" msgid="7824671240625957415">"Fixați <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Anulați fixarea"</string>
+    <string name="unpin_specific_target" msgid="3859828252160908146">"Anulați fixarea pentru <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Informații despre aplicație"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Se pornește demonstrația…"</string>
@@ -2009,10 +1979,16 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Actualizați aceste articole în "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> și <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Salvați"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Nu, mulțumesc"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"Nu acum"</string>
+    <string name="autofill_save_never" msgid="6821841919831402526">"Niciodată"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Actualizați"</string>
+    <string name="autofill_continue_yes" msgid="7914985605534510385">"Continuați"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"parolă"</string>
     <string name="autofill_save_type_address" msgid="3111006395818252885">"adresă"</string>
     <string name="autofill_save_type_credit_card" msgid="3583795235862046693">"card de credit"</string>
+    <string name="autofill_save_type_debit_card" msgid="3169397504133097468">"card de debit"</string>
+    <string name="autofill_save_type_payment_card" msgid="6555012156728690856">"card de plată"</string>
+    <string name="autofill_save_type_generic_card" msgid="1019367283921448608">"card"</string>
     <string name="autofill_save_type_username" msgid="1018816929884640882">"nume de utilizator"</string>
     <string name="autofill_save_type_email_address" msgid="1303262336895591924">"adresă de e-mail"</string>
     <string name="etws_primary_default_message_earthquake" msgid="8401079517718280669">"Păstrați-vă calmul și căutați un adăpost în apropiere."</string>
@@ -2058,13 +2034,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria se poate descărca înainte de încărcarea obișnuită"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Economisirea bateriei este activată pentru a prelungi durata de funcționare a bateriei"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Economisirea bateriei"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Economisirea bateriei se va reactiva când bateria va fi descărcată din nou"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Bateria s-a încărcat la un nivel suficient. Economisirea bateriei se va reactiva când bateria va fi descărcată din nou."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Telefonul este încărcat <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Tableta este încărcată <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Dispozitivul este încărcat <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Economisirea bateriei este dezactivată. Funcțiile nu mai sunt limitate."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Economisirea bateriei a fost dezactivată. Funcțiile nu mai sunt limitate."</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Economisirea bateriei a fost dezactivată"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Telefonul este încărcat suficient. Funcțiile nu mai sunt limitate."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Tableta este încărcată suficient. Funcțiile nu mai sunt limitate."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Dispozitivul este încărcat suficient. Funcțiile nu mai sunt limitate."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Dosar"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Aplicație Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Fișier"</string>
@@ -2090,8 +2063,45 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> de fișiere</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> fișier</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="492542066060841139">"Trimiterea directă nu este disponibilă"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nu există persoane recomandate pentru permiterea accesului"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista de aplicații"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Permisiunea de înregistrare nu a fost acordată aplicației, dar aceasta poate să înregistreze conținut audio prin intermediul acestui dispozitiv USB."</string>
+    <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Pornire"</string>
+    <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Înapoi"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Aplicații recente"</string>
+    <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Notificări"</string>
+    <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Setări rapide"</string>
+    <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Power Dialog"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Ecran de blocare"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Captură de ecran"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Comandă rapidă de accesibilitate de pe ecran"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Selector de comenzi rapide de accesibilitate de pe ecran"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Comandă rapidă de accesibilitate"</string>
+    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Bară cu legenda pentru <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> a fost adăugat la grupul RESTRICȚIONATE"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"a trimis o imagine"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Conversație"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Conversație de grup"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Personal"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"Serviciu"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Afișarea conținutului personal"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Afișarea conținutului de lucru"</string>
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Nu se poate trimite către aplicații pentru lucru"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Administratorul IT nu vă permite să trimiteți acest conținut către aplicațiile din profilul de serviciu"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Nu se poate deschide cu aplicații pentru lucru"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Administratorul IT nu vă permite să deschideți acest conținut cu aplicațiile din profilul de serviciu"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Nu se poate trimite către aplicații personale"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Administratorul IT nu vă permite să trimiteți acest conținut cu aplicațiile din profilul personal"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Nu se poate deschide cu aplicații personale"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Administratorul IT nu vă permite să deschideți acest conținut cu aplicațiile din profilul personal"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Profilul de serviciu este întrerupt"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Activați"</string>
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Aplicațiile pentru lucru nu acceptă acest conținut"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Aplicațiile pentru lucru nu pot deschide acest conținut"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Aplicațiile personale nu acceptă acest conținut"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Aplicațiile personale nu pot deschide acest conținut"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Codul PIN de deblocare SIM privind rețeaua"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Codul PIN de deblocare SIM privind subsetul de rețea"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Codul PIN de deblocare SIM corporativă"</string>

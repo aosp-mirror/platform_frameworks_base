@@ -22,6 +22,7 @@ import static android.app.Notification.CATEGORY_EVENT;
 import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.Notification.CATEGORY_REMINDER;
 import static android.app.Notification.FLAG_BUBBLE;
+import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
@@ -29,38 +30,49 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICAT
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 
-import android.annotation.NonNull;
+import static com.android.systemui.statusbar.notification.collection.NotifCollection.REASON_NOT_CANCELED;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_ALERTING;
+
+import static java.util.Objects.requireNonNull;
+
+import android.annotation.CurrentTimeMillisLong;
 import android.app.Notification;
+import android.app.Notification.MessagingStyle.Message;
 import android.app.NotificationChannel;
 import android.app.NotificationManager.Policy;
 import android.app.Person;
+import android.app.RemoteInput;
+import android.app.RemoteInputHistoryItem;
 import android.content.Context;
-import android.graphics.drawable.Icon;
+import android.content.pm.ShortcutInfo;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.os.SystemClock;
-import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
-import android.view.View;
-import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.statusbar.InflationTask;
-import com.android.systemui.statusbar.StatusBarIconView;
-import com.android.systemui.statusbar.notification.InflationException;
+import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
+import com.android.systemui.statusbar.notification.icon.IconPack;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
+import com.android.systemui.statusbar.notification.stack.PriorityBucket;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -79,50 +91,57 @@ import java.util.Objects;
  * At the moment, there are many things here that shouldn't be and vice-versa. Hopefully we can
  * clean this up in the future.
  */
-public final class NotificationEntry {
-    private static final long LAUNCH_COOLDOWN = 2000;
-    private static final long REMOTE_INPUT_COOLDOWN = 500;
-    private static final long INITIALIZATION_DELAY = 400;
-    private static final long NOT_LAUNCHED_YET = -LAUNCH_COOLDOWN;
-    private static final int COLOR_INVALID = 1;
-    public final String key;
-    public StatusBarNotification notification;
-    public NotificationChannel channel;
-    public long lastAudiblyAlertedMs;
-    public boolean noisy;
-    public boolean ambient;
-    public int importance;
-    public StatusBarIconView icon;
-    public StatusBarIconView expandedIcon;
-    public StatusBarIconView centeredIcon;
-    public StatusBarIconView aodIcon;
+public final class NotificationEntry extends ListEntry {
+
+    private final String mKey;
+    private StatusBarNotification mSbn;
+    private Ranking mRanking;
+    private long mCreationTime;
+
+    /*
+     * Bookkeeping members
+     */
+
+    /** List of lifetime extenders that are extending the lifetime of this notification. */
+    final List<NotifLifetimeExtender> mLifetimeExtenders = new ArrayList<>();
+
+    /** List of dismiss interceptors that are intercepting the dismissal of this notification. */
+    final List<NotifDismissInterceptor> mDismissInterceptors = new ArrayList<>();
+
+    /**
+     * If this notification was cancelled by system server, then the reason that was supplied.
+     * Uncancelled notifications always have REASON_NOT_CANCELED. Note that lifetime-extended
+     * notifications will have this set even though they are still in the active notification set.
+     */
+    @CancellationReason int mCancellationReason = REASON_NOT_CANCELED;
+
+    /** @see #getDismissState() */
+    @NonNull private DismissState mDismissState = DismissState.NOT_DISMISSED;
+
+    /*
+    * Old members
+    * TODO: Remove every member beneath this line if possible
+    */
+
+    private IconPack mIcons = IconPack.buildEmptyPack(null);
     private boolean interruption;
-    public boolean autoRedacted; // whether the redacted notification was generated by us
     public int targetSdk;
     private long lastFullScreenIntentLaunchTime = NOT_LAUNCHED_YET;
     public CharSequence remoteInputText;
-    public List<SnoozeCriterion> snoozeCriteria;
-    public int userSentiment = NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
-    /** Smart Actions provided by the NotificationAssistantService. */
-    @NonNull
-    public List<Notification.Action> systemGeneratedSmartActions = Collections.emptyList();
-    /** Smart replies provided by the NotificationAssistantService. */
-    @NonNull
-    public CharSequence[] systemGeneratedSmartReplies = new CharSequence[0];
+    public String remoteInputMimeType;
+    public Uri remoteInputUri;
+    private Notification.BubbleMetadata mBubbleMetadata;
+    private ShortcutInfo mShortcutInfo;
 
     /**
-     * If {@link android.app.RemoteInput#getEditChoicesBeforeSending} is enabled, and the user is
+     * If {@link RemoteInput#getEditChoicesBeforeSending} is enabled, and the user is
      * currently editing a choice (smart reply), then this field contains the information about the
      * suggestion being edited. Otherwise <code>null</code>.
      */
     public EditedSuggestionInfo editedSuggestionInfo;
 
-    @VisibleForTesting
-    public int suppressedVisualEffects;
-    public boolean suspended;
-
-    private NotificationEntry parent; // our parent (if we're in a group)
     private ExpandableNotificationRow row; // the outer expanded view
+    private ExpandableNotificationRowController mRowController;
 
     private int mCachedContrastColor = COLOR_INVALID;
     private int mCachedContrastColorIsFor = COLOR_INVALID;
@@ -130,10 +149,12 @@ public final class NotificationEntry {
     private Throwable mDebugThrowable;
     public CharSequence remoteInputTextWhenReset;
     public long lastRemoteInputSent = NOT_LAUNCHED_YET;
-    public ArraySet<Integer> mActiveAppOps = new ArraySet<>(3);
+    public final ArraySet<Integer> mActiveAppOps = new ArraySet<>(3);
     public CharSequence headsUpStatusBarText;
     public CharSequence headsUpStatusBarTextPublic;
 
+    // indicates when this entry's view was first attached to a window
+    // this value will reset when the view is completely removed from the shade (ie: filtered out)
     private long initializationTime = -1;
 
     /**
@@ -148,61 +169,205 @@ public final class NotificationEntry {
      */
     private boolean hasSentReply;
 
-    /**
-     * Whether this notification has been approved globally, at the app level, and at the channel
-     * level for bubbling.
-     */
-    public boolean canBubble;
-
-    /**
-     * Whether this notification has changed in visual appearance since the previous post.
-     * New notifications are  interruptive by default.
-     */
-    public boolean isVisuallyInterruptive;
-
-    /**
-     * Whether this notification is shown to the user as a high priority notification: visible on
-     * the lock screen/status bar and in the top section in the shade.
-     */
-    private boolean mHighPriority;
-
-    private boolean mIsTopBucket;
-
     private boolean mSensitive = true;
-    private Runnable mOnSensitiveChangedListener;
+    private List<OnSensitivityChangedListener> mOnSensitivityChangedListeners = new ArrayList<>();
+
     private boolean mAutoHeadsUp;
     private boolean mPulseSupressed;
+    private boolean mAllowFgsDismissal;
+    private int mBucket = BUCKET_ALERTING;
+    @Nullable private Long mPendingAnimationDuration;
+    private boolean mIsMarkedForUserTriggeredMovement;
+    private boolean mShelfIconVisible;
 
-    public NotificationEntry(StatusBarNotification n) {
-        this(n, null);
+    /**
+     * @param sbn the StatusBarNotification from system server
+     * @param ranking also from system server
+     * @param creationTime SystemClock.uptimeMillis of when we were created
+     */
+    public NotificationEntry(
+            @NonNull StatusBarNotification sbn,
+            @NonNull Ranking ranking,
+            long creationTime) {
+        this(sbn, ranking, false, creationTime);
     }
 
     public NotificationEntry(
-            StatusBarNotification n,
-            @Nullable NotificationListenerService.Ranking ranking) {
-        this.key = n.getKey();
-        this.notification = n;
-        if (ranking != null) {
-            populateFromRanking(ranking);
-        }
+            @NonNull StatusBarNotification sbn,
+            @NonNull Ranking ranking,
+            boolean allowFgsDismissal,
+            long creationTime
+    ) {
+        super(requireNonNull(requireNonNull(sbn).getKey()));
+
+        requireNonNull(ranking);
+
+        mCreationTime = creationTime;
+        mKey = sbn.getKey();
+        setSbn(sbn);
+        setRanking(ranking);
+
+        mAllowFgsDismissal = allowFgsDismissal;
     }
 
-    public void populateFromRanking(@NonNull NotificationListenerService.Ranking ranking) {
-        channel = ranking.getChannel();
-        lastAudiblyAlertedMs = ranking.getLastAudiblyAlertedMillis();
-        importance = ranking.getImportance();
-        ambient = ranking.isAmbient();
-        snoozeCriteria = ranking.getSnoozeCriteria();
-        userSentiment = ranking.getUserSentiment();
-        systemGeneratedSmartActions = ranking.getSmartActions() == null
-                ? Collections.emptyList() : ranking.getSmartActions();
-        systemGeneratedSmartReplies = ranking.getSmartReplies() == null
-                ? new CharSequence[0]
-                : ranking.getSmartReplies().toArray(new CharSequence[0]);
-        suppressedVisualEffects = ranking.getSuppressedVisualEffects();
-        suspended = ranking.isSuspended();
-        canBubble = ranking.canBubble();
-        isVisuallyInterruptive = ranking.visuallyInterruptive();
+    @Override
+    public NotificationEntry getRepresentativeEntry() {
+        return this;
+    }
+
+    /** The key for this notification. Guaranteed to be immutable and unique */
+    @NonNull public String getKey() {
+        return mKey;
+    }
+
+    /**
+     * The StatusBarNotification that represents one half of a NotificationEntry (the other half
+     * being the Ranking). This object is swapped out whenever a notification is updated.
+     */
+    @NonNull public StatusBarNotification getSbn() {
+        return mSbn;
+    }
+
+    /**
+     * Should only be called by NotificationEntryManager and friends.
+     * TODO: Make this package-private
+     */
+    public void setSbn(@NonNull StatusBarNotification sbn) {
+        requireNonNull(sbn);
+        requireNonNull(sbn.getKey());
+
+        if (!sbn.getKey().equals(mKey)) {
+            throw new IllegalArgumentException("New key " + sbn.getKey()
+                    + " doesn't match existing key " + mKey);
+        }
+
+        mSbn = sbn;
+        mBubbleMetadata = mSbn.getNotification().getBubbleMetadata();
+    }
+
+    /**
+     * The Ranking that represents one half of a NotificationEntry (the other half being the
+     * StatusBarNotification). This object is swapped out whenever a the ranking is updated (which
+     * generally occurs whenever anything changes in the notification list).
+     */
+    public Ranking getRanking() {
+        return mRanking;
+    }
+
+    /**
+     * A timestamp of SystemClock.uptimeMillis() of when this entry was first created, regardless
+     * of any changes to the data presented. It is set once on creation and will never change, and
+     * allows us to know exactly how long this notification has been alive for in our listener
+     * service. It is entirely unrelated to the information inside of the notification.
+     *
+     * This is different to Notification#when because it persists throughout updates, whereas
+     * system server treats every single call to notify() as a new notification and we handle
+     * updates to NotificationEntry locally.
+     */
+    @CurrentTimeMillisLong
+    public long getCreationTime() {
+        return mCreationTime;
+    }
+
+    /**
+     * Should only be called by NotificationEntryManager and friends.
+     * TODO: Make this package-private
+     */
+    public void setRanking(@NonNull Ranking ranking) {
+        requireNonNull(ranking);
+        requireNonNull(ranking.getKey());
+
+        if (!ranking.getKey().equals(mKey)) {
+            throw new IllegalArgumentException("New key " + ranking.getKey()
+                    + " doesn't match existing key " + mKey);
+        }
+
+        mRanking = ranking;
+    }
+
+    /*
+     * Bookkeeping getters and setters
+     */
+
+    /**
+     * Set if the user has dismissed this notif but we haven't yet heard back from system server to
+     * confirm the dismissal.
+     */
+    @NonNull public DismissState getDismissState() {
+        return mDismissState;
+    }
+
+    void setDismissState(@NonNull DismissState dismissState) {
+        mDismissState = requireNonNull(dismissState);
+    }
+
+    @Nullable public NotifFilter getExcludingFilter() {
+        return getAttachState().getExcludingFilter();
+    }
+
+    @Nullable public NotifPromoter getNotifPromoter() {
+        return getAttachState().getPromoter();
+    }
+
+    /*
+     * Convenience getters for SBN and Ranking members
+     */
+
+    public NotificationChannel getChannel() {
+        return mRanking.getChannel();
+    }
+
+    public long getLastAudiblyAlertedMs() {
+        return mRanking.getLastAudiblyAlertedMillis();
+    }
+
+    public boolean isAmbient() {
+        return mRanking.isAmbient();
+    }
+
+    public int getImportance() {
+        return mRanking.getImportance();
+    }
+
+    public List<SnoozeCriterion> getSnoozeCriteria() {
+        return mRanking.getSnoozeCriteria();
+    }
+
+    public int getUserSentiment() {
+        return mRanking.getUserSentiment();
+    }
+
+    public int getSuppressedVisualEffects() {
+        return mRanking.getSuppressedVisualEffects();
+    }
+
+    /** @see Ranking#canBubble() */
+    public boolean canBubble() {
+        return mRanking.canBubble();
+    }
+
+    public @NonNull List<Notification.Action> getSmartActions() {
+        return mRanking.getSmartActions();
+    }
+
+    public @NonNull List<CharSequence> getSmartReplies() {
+        return mRanking.getSmartReplies();
+    }
+
+
+    /*
+     * Old methods
+     *
+     * TODO: Remove as many of these as possible
+     */
+
+    @NonNull
+    public IconPack getIcons() {
+        return mIcons;
+    }
+
+    public void setIcons(@NonNull IconPack icons) {
+        mIcons = icons;
     }
 
     public void setInterruption() {
@@ -213,44 +378,51 @@ public final class NotificationEntry {
         return interruption;
     }
 
-    public boolean isHighPriority() {
-        return mHighPriority;
-    }
-
-    public void setIsHighPriority(boolean highPriority) {
-        this.mHighPriority = highPriority;
-    }
-
-    /**
-     * @return True if the notif should appear in the "top" or "important" section of notifications
-     * (as opposed to the "bottom" or "silent" section). This is usually the same as
-     * {@link #isHighPriority()}, but there are certain exceptions, such as media notifs.
-     */
-    public boolean isTopBucket() {
-        return mIsTopBucket;
-    }
-    public void setIsTopBucket(boolean isTopBucket) {
-        mIsTopBucket = isTopBucket;
-    }
-
     public boolean isBubble() {
-        return (notification.getNotification().flags & FLAG_BUBBLE) != 0;
+        return (mSbn.getNotification().flags & FLAG_BUBBLE) != 0;
     }
 
     /**
      * Returns the data needed for a bubble for this notification, if it exists.
      */
+    @Nullable
     public Notification.BubbleMetadata getBubbleMetadata() {
-        return notification.getNotification().getBubbleMetadata();
+        return mBubbleMetadata;
     }
 
     /**
-     * Resets the notification entry to be re-used.
+     * Sets bubble metadata for this notification.
      */
-    public void reset() {
-        if (row != null) {
-            row.reset();
+    public void setBubbleMetadata(@Nullable Notification.BubbleMetadata metadata) {
+        mBubbleMetadata = metadata;
+    }
+
+    /**
+     * Updates the {@link Notification#FLAG_BUBBLE} flag on this notification to indicate
+     * whether it is a bubble or not. If this entry is set to not bubble, or does not have
+     * the required info to bubble, the flag cannot be set to true.
+     *
+     * @param shouldBubble whether this notification should be flagged as a bubble.
+     * @return true if the value changed.
+     */
+    public boolean setFlagBubble(boolean shouldBubble) {
+        boolean wasBubble = isBubble();
+        if (!shouldBubble) {
+            mSbn.getNotification().flags &= ~FLAG_BUBBLE;
+        } else if (mBubbleMetadata != null && canBubble()) {
+            // wants to be bubble & can bubble, set flag
+            mSbn.getNotification().flags |= FLAG_BUBBLE;
         }
+        return wasBubble != isBubble();
+    }
+
+    @PriorityBucket
+    public int getBucket() {
+        return mBucket;
+    }
+
+    public void setBucket(@PriorityBucket int bucket) {
+        mBucket = bucket;
     }
 
     public ExpandableNotificationRow getRow() {
@@ -260,15 +432,29 @@ public final class NotificationEntry {
     //TODO: This will go away when we have a way to bind an entry to a row
     public void setRow(ExpandableNotificationRow row) {
         this.row = row;
+        updateShelfIconVisibility();
     }
 
-    @Nullable
-    public List<NotificationEntry> getChildren() {
+    public ExpandableNotificationRowController getRowController() {
+        return mRowController;
+    }
+
+    public void setRowController(ExpandableNotificationRowController controller) {
+        mRowController = controller;
+    }
+
+    /**
+     * Get the children that are actually attached to this notification's row.
+     *
+     * TODO: Seems like most callers here should probably be using
+     * {@link NotificationGroupManager#getChildren}
+     */
+    public @Nullable List<NotificationEntry> getAttachedNotifChildren() {
         if (row == null) {
             return null;
         }
 
-        List<ExpandableNotificationRow> rowChildren = row.getNotificationChildren();
+        List<ExpandableNotificationRow> rowChildren = row.getAttachedChildren();
         if (rowChildren == null) {
             return null;
         }
@@ -295,131 +481,14 @@ public final class NotificationEntry {
     }
 
     public boolean hasFinishedInitialization() {
-        return initializationTime == -1
-                || SystemClock.elapsedRealtime() > initializationTime + INITIALIZATION_DELAY;
-    }
-
-    /**
-     * Create the icons for a notification
-     * @param context the context to create the icons with
-     * @param sbn the notification
-     * @throws InflationException Exception if required icons are not valid or specified
-     */
-    public void createIcons(Context context, StatusBarNotification sbn)
-            throws InflationException {
-        Notification n = sbn.getNotification();
-        final Icon smallIcon = n.getSmallIcon();
-        if (smallIcon == null) {
-            throw new InflationException("No small icon in notification from "
-                    + sbn.getPackageName());
-        }
-
-        // Construct the icon.
-        icon = new StatusBarIconView(context,
-                sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId()), sbn);
-        icon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-
-        // Construct the expanded icon.
-        expandedIcon = new StatusBarIconView(context,
-                sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId()), sbn);
-        expandedIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-
-        // Construct the expanded icon.
-        aodIcon = new StatusBarIconView(context,
-                sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId()), sbn);
-        aodIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        aodIcon.setIncreasedSize(true);
-
-        final StatusBarIcon ic = new StatusBarIcon(
-                sbn.getUser(),
-                sbn.getPackageName(),
-                smallIcon,
-                n.iconLevel,
-                n.number,
-                StatusBarIconView.contentDescForNotification(context, n));
-
-        if (!icon.set(ic) || !expandedIcon.set(ic) || !aodIcon.set(ic)) {
-            icon = null;
-            expandedIcon = null;
-            centeredIcon = null;
-            aodIcon = null;
-            throw new InflationException("Couldn't create icon: " + ic);
-        }
-        expandedIcon.setVisibility(View.INVISIBLE);
-        expandedIcon.setOnVisibilityChangedListener(
-                newVisibility -> {
-                    if (row != null) {
-                        row.setIconsVisible(newVisibility != View.VISIBLE);
-                    }
-                });
-
-        // Construct the centered icon
-        if (notification.getNotification().isMediaNotification()) {
-            centeredIcon = new StatusBarIconView(context,
-                    sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId()), sbn);
-            centeredIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-
-            if (!centeredIcon.set(ic)) {
-                centeredIcon = null;
-                throw new InflationException("Couldn't update centered icon: " + ic);
-            }
-        }
-    }
-
-    public void setIconTag(int key, Object tag) {
-        if (icon != null) {
-            icon.setTag(key, tag);
-            expandedIcon.setTag(key, tag);
-        }
-
-        if (centeredIcon != null) {
-            centeredIcon.setTag(key, tag);
-        }
-
-        if (aodIcon != null) {
-            aodIcon.setTag(key, tag);
-        }
-    }
-
-    /**
-     * Update the notification icons.
-     *
-     * @param context the context to create the icons with.
-     * @param sbn the notification to read the icon from.
-     * @throws InflationException Exception if required icons are not valid or specified
-     */
-    public void updateIcons(Context context, StatusBarNotification sbn)
-            throws InflationException {
-        if (icon != null) {
-            // Update the icon
-            Notification n = sbn.getNotification();
-            final StatusBarIcon ic = new StatusBarIcon(
-                    notification.getUser(),
-                    notification.getPackageName(),
-                    n.getSmallIcon(),
-                    n.iconLevel,
-                    n.number,
-                    StatusBarIconView.contentDescForNotification(context, n));
-            icon.setNotification(sbn);
-            expandedIcon.setNotification(sbn);
-            aodIcon.setNotification(sbn);
-            if (!icon.set(ic) || !expandedIcon.set(ic) || !aodIcon.set(ic)) {
-                throw new InflationException("Couldn't update icon: " + ic);
-            }
-
-            if (centeredIcon != null) {
-                centeredIcon.setNotification(sbn);
-                if (!centeredIcon.set(ic)) {
-                    throw new InflationException("Couldn't update centered icon: " + ic);
-                }
-            }
-        }
+        return initializationTime != -1
+                && SystemClock.elapsedRealtime() > initializationTime + INITIALIZATION_DELAY;
     }
 
     public int getContrastedColor(Context context, boolean isLowPriority,
             int backgroundColor) {
         int rawColor = isLowPriority ? Notification.COLOR_DEFAULT :
-                notification.getNotification().color;
+                mSbn.getNotification().color;
         if (mCachedContrastColorIsFor == rawColor && mCachedContrastColor != COLOR_INVALID) {
             return mCachedContrastColor;
         }
@@ -442,12 +511,8 @@ public final class NotificationEntry {
 
     public void setInflationTask(InflationTask abortableTask) {
         // abort any existing inflation
-        InflationTask existing = mRunningTask;
         abortTask();
         mRunningTask = abortableTask;
-        if (existing != null && mRunningTask != null) {
-            mRunningTask.supersedeTask(existing);
-        }
     }
 
     public void onInflationTaskFinished() {
@@ -485,30 +550,31 @@ public final class NotificationEntry {
         if (!hasSentReply) {
             return false;
         }
-        Bundle extras = notification.getNotification().extras;
-        CharSequence[] replyTexts = extras.getCharSequenceArray(
-                Notification.EXTRA_REMOTE_INPUT_HISTORY);
+        Bundle extras = mSbn.getNotification().extras;
+        RemoteInputHistoryItem[] replyTexts = (RemoteInputHistoryItem[]) extras.getParcelableArray(
+                Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
         if (!ArrayUtils.isEmpty(replyTexts)) {
             return true;
         }
-        Parcelable[] messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES);
-        if (messages != null && messages.length > 0) {
-            Parcelable message = messages[messages.length - 1];
-            if (message instanceof Bundle) {
-                Notification.MessagingStyle.Message lastMessage =
-                        Notification.MessagingStyle.Message.getMessageFromBundle(
-                                (Bundle) message);
-                if (lastMessage != null) {
-                    Person senderPerson = lastMessage.getSenderPerson();
-                    if (senderPerson == null) {
-                        return true;
-                    }
-                    Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON);
-                    return Objects.equals(user, senderPerson);
+        List<Message> messages = Message.getMessagesFromBundleArray(
+                extras.getParcelableArray(Notification.EXTRA_MESSAGES));
+        if (messages != null && !messages.isEmpty()) {
+            Message lastMessage = messages.get(messages.size() -1);
+
+            if (lastMessage != null) {
+                Person senderPerson = lastMessage.getSenderPerson();
+                if (senderPerson == null) {
+                    return true;
                 }
+                Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON);
+                return Objects.equals(user, senderPerson);
             }
         }
         return false;
+    }
+
+    public void resetInitializationTime() {
+        initializationTime = -1;
     }
 
     public void setInitializationTime(long time) {
@@ -545,10 +611,6 @@ public final class NotificationEntry {
         if (row != null) row.resetUserExpansion();
     }
 
-    public void freeContentViewWhenSafe(@InflationFlag int inflationFlag) {
-        if (row != null) row.freeContentViewWhenSafe(inflationFlag);
-    }
-
     public boolean rowExists() {
         return row != null;
     }
@@ -571,6 +633,13 @@ public final class NotificationEntry {
 
     public boolean isRowPinned() {
         return row != null && row.isPinned();
+    }
+
+    /**
+     * Is this entry pinned and was expanded while doing so
+     */
+    public boolean isPinnedAndExpanded() {
+        return row != null && row.isPinnedAndExpanded();
     }
 
     public void setRowPinned(boolean pinned) {
@@ -681,7 +750,7 @@ public final class NotificationEntry {
     }
 
     public boolean isChildInGroup() {
-        return parent == null;
+        return row != null && row.isChildInGroup();
     }
 
     /**
@@ -689,21 +758,49 @@ public final class NotificationEntry {
      *         notification can be dismissed in case notifications are sensitive on the lockscreen.
      * @see #canViewBeDismissed()
      */
+    // TOOD: This logic doesn't belong on NotificationEntry. It should be moved to the
+    // ForegroundsServiceDismissalFeatureController or some other controller that can be added
+    // as a dependency to any class that needs to answer this question.
     public boolean isClearable() {
-        if (notification == null || !notification.isClearable()) {
+        if (!isDismissable()) {
             return false;
         }
 
-        List<NotificationEntry> children = getChildren();
+        List<NotificationEntry> children = getAttachedNotifChildren();
         if (children != null && children.size() > 0) {
             for (int i = 0; i < children.size(); i++) {
                 NotificationEntry child =  children.get(i);
-                if (!child.isClearable()) {
+                if (!child.isDismissable()) {
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    /**
+     * Notifications might have any combination of flags:
+     * - FLAG_ONGOING_EVENT
+     * - FLAG_NO_CLEAR
+     * - FLAG_FOREGROUND_SERVICE
+     *
+     * We want to allow dismissal of notifications that represent foreground services, which may
+     * have all 3 flags set. If we only find NO_CLEAR though, we don't want to allow dismissal
+     */
+    private boolean isDismissable() {
+        boolean ongoing = ((mSbn.getNotification().flags & Notification.FLAG_ONGOING_EVENT) != 0);
+        boolean noclear = ((mSbn.getNotification().flags & Notification.FLAG_NO_CLEAR) != 0);
+        boolean fgs = ((mSbn.getNotification().flags & FLAG_FOREGROUND_SERVICE) != 0);
+
+        if (mAllowFgsDismissal) {
+            if (noclear && !ongoing && !fgs) {
+                return false;
+            }
+            return true;
+        } else {
+            return mSbn.isClearable();
+        }
+
     }
 
     public boolean canViewBeDismissed() {
@@ -713,15 +810,15 @@ public final class NotificationEntry {
 
     @VisibleForTesting
     boolean isExemptFromDndVisualSuppression() {
-        if (isNotificationBlockedByPolicy(notification.getNotification())) {
+        if (isNotificationBlockedByPolicy(mSbn.getNotification())) {
             return false;
         }
 
-        if ((notification.getNotification().flags
-                & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
+        if ((mSbn.getNotification().flags
+                & FLAG_FOREGROUND_SERVICE) != 0) {
             return true;
         }
-        if (notification.getNotification().isMediaNotification()) {
+        if (mSbn.getNotification().isMediaNotification()) {
             return true;
         }
         if (mIsSystemNotification != null && mIsSystemNotification) {
@@ -734,7 +831,7 @@ public final class NotificationEntry {
         if (isExemptFromDndVisualSuppression()) {
             return false;
         }
-        return (suppressedVisualEffects & effect) != 0;
+        return (getSuppressedVisualEffects() & effect) != 0;
     }
 
     /**
@@ -805,6 +902,15 @@ public final class NotificationEntry {
     }
 
     /**
+     * Whether or not this row represents a system notification. Note that if this is
+     * {@code null}, that means we were either unable to retrieve the info or have yet to
+     * retrieve the info.
+     */
+    public Boolean isSystemNotification() {
+        return mIsSystemNotification;
+    }
+
+    /**
      * Set this notification to be sensitive.
      *
      * @param sensitive true if the content of this notification is sensitive right now
@@ -814,8 +920,8 @@ public final class NotificationEntry {
         getRow().setSensitive(sensitive, deviceSensitive);
         if (sensitive != mSensitive) {
             mSensitive = sensitive;
-            if (mOnSensitiveChangedListener != null) {
-                mOnSensitiveChangedListener.run();
+            for (int i = 0; i < mOnSensitivityChangedListeners.size(); i++) {
+                mOnSensitivityChangedListeners.get(i).onSensitivityChanged(this);
             }
         }
     }
@@ -824,8 +930,14 @@ public final class NotificationEntry {
         return mSensitive;
     }
 
-    public void setOnSensitiveChangedListener(Runnable listener) {
-        mOnSensitiveChangedListener = listener;
+    /** Add a listener to be notified when the entry's sensitivity changes. */
+    public void addOnSensitivityChangedListener(OnSensitivityChangedListener listener) {
+        mOnSensitivityChangedListeners.add(listener);
+    }
+
+    /** Remove a listener that was registered above. */
+    public void removeOnSensitivityChangedListener(OnSensitivityChangedListener listener) {
+        mOnSensitivityChangedListeners.remove(listener);
     }
 
     public boolean isPulseSuppressed() {
@@ -834,6 +946,31 @@ public final class NotificationEntry {
 
     public void setPulseSuppressed(boolean suppressed) {
         mPulseSupressed = suppressed;
+    }
+
+    /** Whether or not this entry has been marked for a user-triggered movement. */
+    public boolean isMarkedForUserTriggeredMovement() {
+        return mIsMarkedForUserTriggeredMovement;
+    }
+
+    /** Whether or not the icon for this notification is visible in the shelf. */
+    public void setShelfIconVisible(boolean shelfIconVisible) {
+        mShelfIconVisible = shelfIconVisible;
+        updateShelfIconVisibility();
+    }
+
+    private void updateShelfIconVisibility() {
+        if (row != null) {
+            row.setShelfIconVisible(mShelfIconVisible);
+        }
+    }
+
+    /**
+     * Mark this entry for movement triggered by a user action (ex: changing the priorirty of a
+     * conversation). This can then be used for custom animations.
+     */
+    public void markForUserTriggeredMovement(boolean marked) {
+        mIsMarkedForUserTriggeredMovement = marked;
     }
 
     /** Information about a suggestion that is being edited. */
@@ -854,4 +991,26 @@ public final class NotificationEntry {
             this.index = index;
         }
     }
+
+    /** Listener interface for {@link #addOnSensitivityChangedListener} */
+    public interface OnSensitivityChangedListener {
+        /** Called when the sensitivity changes */
+        void onSensitivityChanged(@NonNull NotificationEntry entry);
+    }
+
+    /** @see #getDismissState() */
+    public enum DismissState {
+        /** User has not dismissed this notif or its parent */
+        NOT_DISMISSED,
+        /** User has dismissed this notif specifically */
+        DISMISSED,
+        /** User has dismissed this notif's parent (which implicitly dismisses this one as well) */
+        PARENT_DISMISSED,
+    }
+
+    private static final long LAUNCH_COOLDOWN = 2000;
+    private static final long REMOTE_INPUT_COOLDOWN = 500;
+    private static final long INITIALIZATION_DELAY = 400;
+    private static final long NOT_LAUNCHED_YET = -LAUNCH_COOLDOWN;
+    private static final int COLOR_INVALID = 1;
 }

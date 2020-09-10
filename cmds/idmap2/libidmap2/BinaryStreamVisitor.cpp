@@ -24,6 +24,14 @@
 
 namespace android::idmap2 {
 
+void BinaryStreamVisitor::Write(const void* value, size_t length) {
+  stream_.write(reinterpret_cast<const char*>(value), length);
+}
+
+void BinaryStreamVisitor::Write8(uint8_t value) {
+  stream_.write(reinterpret_cast<char*>(&value), sizeof(uint8_t));
+}
+
 void BinaryStreamVisitor::Write16(uint16_t value) {
   uint16_t x = htodl(value);
   stream_.write(reinterpret_cast<char*>(&x), sizeof(uint16_t));
@@ -34,11 +42,19 @@ void BinaryStreamVisitor::Write32(uint32_t value) {
   stream_.write(reinterpret_cast<char*>(&x), sizeof(uint32_t));
 }
 
-void BinaryStreamVisitor::WriteString(const StringPiece& value) {
+void BinaryStreamVisitor::WriteString256(const StringPiece& value) {
   char buf[kIdmapStringLength];
   memset(buf, 0, sizeof(buf));
   memcpy(buf, value.data(), std::min(value.size(), sizeof(buf)));
   stream_.write(buf, sizeof(buf));
+}
+
+void BinaryStreamVisitor::WriteString(const std::string& value) {
+  // pad with null to nearest word boundary; include at least one terminating null
+  size_t padding_size = 4 - (value.size() % 4);
+  Write32(value.size() + padding_size);
+  stream_.write(value.c_str(), value.size());
+  stream_.write("\0\0\0\0", padding_size);
 }
 
 void BinaryStreamVisitor::visit(const Idmap& idmap ATTRIBUTE_UNUSED) {
@@ -50,30 +66,35 @@ void BinaryStreamVisitor::visit(const IdmapHeader& header) {
   Write32(header.GetVersion());
   Write32(header.GetTargetCrc());
   Write32(header.GetOverlayCrc());
-  WriteString(header.GetTargetPath());
-  WriteString(header.GetOverlayPath());
+  Write32(header.GetFulfilledPolicies());
+  Write8(static_cast<uint8_t>(header.GetEnforceOverlayable()));
+  WriteString256(header.GetTargetPath());
+  WriteString256(header.GetOverlayPath());
+  WriteString(header.GetDebugInfo());
 }
 
-void BinaryStreamVisitor::visit(const IdmapData& data ATTRIBUTE_UNUSED) {
-  // nothing to do
+void BinaryStreamVisitor::visit(const IdmapData& data) {
+  for (const auto& target_entry : data.GetTargetEntries()) {
+    Write32(target_entry.target_id);
+    Write8(target_entry.data_type);
+    Write32(target_entry.data_value);
+  }
+
+  for (const auto& overlay_entry : data.GetOverlayEntries()) {
+    Write32(overlay_entry.overlay_id);
+    Write32(overlay_entry.target_id);
+  }
+
+  Write(data.GetStringPoolData(), data.GetHeader()->GetStringPoolLength());
 }
 
 void BinaryStreamVisitor::visit(const IdmapData::Header& header) {
-  Write16(header.GetTargetPackageId());
-  Write16(header.GetTypeCount());
-}
-
-void BinaryStreamVisitor::visit(const IdmapData::TypeEntry& type_entry) {
-  const uint16_t entryCount = type_entry.GetEntryCount();
-
-  Write16(type_entry.GetTargetTypeId());
-  Write16(type_entry.GetOverlayTypeId());
-  Write16(entryCount);
-  Write16(type_entry.GetEntryOffset());
-  for (uint16_t i = 0; i < entryCount; i++) {
-    EntryId entry_id = type_entry.GetEntry(i);
-    Write32(entry_id != kNoEntry ? static_cast<uint32_t>(entry_id) : kPadding);
-  }
+  Write8(header.GetTargetPackageId());
+  Write8(header.GetOverlayPackageId());
+  Write32(header.GetTargetEntryCount());
+  Write32(header.GetOverlayEntryCount());
+  Write32(header.GetStringPoolIndexOffset());
+  Write32(header.GetStringPoolLength());
 }
 
 }  // namespace android::idmap2

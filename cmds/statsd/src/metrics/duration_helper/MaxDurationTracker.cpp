@@ -26,37 +26,14 @@ namespace statsd {
 
 MaxDurationTracker::MaxDurationTracker(const ConfigKey& key, const int64_t& id,
                                        const MetricDimensionKey& eventKey,
-                                       sp<ConditionWizard> wizard, int conditionIndex,
-                                       const vector<Matcher>& dimensionInCondition, bool nesting,
+                                       sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
                                        int64_t currentBucketStartNs, int64_t currentBucketNum,
                                        int64_t startTimeNs, int64_t bucketSizeNs,
                                        bool conditionSliced, bool fullLink,
                                        const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
-    : DurationTracker(key, id, eventKey, wizard, conditionIndex, dimensionInCondition, nesting,
-                      currentBucketStartNs, currentBucketNum, startTimeNs, bucketSizeNs,
-                      conditionSliced, fullLink, anomalyTrackers) {
-    if (mWizard != nullptr) {
-        mSameConditionDimensionsInTracker =
-            mWizard->equalOutputDimensions(conditionIndex, mDimensionInCondition);
-    }
-}
-
-unique_ptr<DurationTracker> MaxDurationTracker::clone(const int64_t eventTime) {
-    auto clonedTracker = make_unique<MaxDurationTracker>(*this);
-    for (auto it = clonedTracker->mInfos.begin(); it != clonedTracker->mInfos.end();) {
-        if (it->second.state  != kStopped) {
-            it->second.lastStartTime = eventTime;
-            it->second.lastDuration = 0;
-            it++;
-        } else {
-            it = clonedTracker->mInfos.erase(it);
-        }
-    }
-    if (clonedTracker->mInfos.empty()) {
-        return nullptr;
-    } else {
-        return clonedTracker;
-    }
+    : DurationTracker(key, id, eventKey, wizard, conditionIndex, nesting, currentBucketStartNs,
+                      currentBucketNum, startTimeNs, bucketSizeNs, conditionSliced, fullLink,
+                      anomalyTrackers) {
 }
 
 bool MaxDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
@@ -112,7 +89,6 @@ void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool conditi
             break;
     }
 }
-
 
 void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const int64_t eventTime,
                                   bool forceStop) {
@@ -252,20 +228,19 @@ void MaxDurationTracker::onSlicedConditionMayChange(bool overallCondition,
         if (pair.second.state == kStopped) {
             continue;
         }
-        std::unordered_set<HashableDimensionKey> conditionDimensionKeySet;
         ConditionState conditionState = mWizard->query(
-            mConditionTrackerIndex, pair.second.conditionKeys, mDimensionInCondition,
-            !mSameConditionDimensionsInTracker,
-            !mHasLinksToAllConditionDimensionsInTracker,
-            &conditionDimensionKeySet);
-        bool conditionMet =
-                (conditionState == ConditionState::kTrue) &&
-                (mDimensionInCondition.size() == 0 ||
-                 conditionDimensionKeySet.find(mEventKey.getDimensionKeyInCondition()) !=
-                         conditionDimensionKeySet.end());
+            mConditionTrackerIndex, pair.second.conditionKeys,
+            !mHasLinksToAllConditionDimensionsInTracker);
+        bool conditionMet = (conditionState == ConditionState::kTrue);
+
         VLOG("key: %s, condition: %d", pair.first.toString().c_str(), conditionMet);
         noteConditionChanged(pair.first, conditionMet, timestamp);
     }
+}
+
+void MaxDurationTracker::onStateChanged(const int64_t timestamp, const int32_t atomId,
+                                        const FieldValue& newState) {
+    ALOGE("MaxDurationTracker does not handle sliced state changes.");
 }
 
 void MaxDurationTracker::onConditionChanged(bool condition, const int64_t timestamp) {
@@ -335,6 +310,20 @@ int64_t MaxDurationTracker::predictAnomalyTimestampNs(const DurationAnomalyTrack
 void MaxDurationTracker::dumpStates(FILE* out, bool verbose) const {
     fprintf(out, "\t\t sub-durations %lu\n", (unsigned long)mInfos.size());
     fprintf(out, "\t\t current duration %lld\n", (long long)mDuration);
+}
+
+int64_t MaxDurationTracker::getCurrentStateKeyDuration() const {
+    ALOGE("MaxDurationTracker does not handle sliced state changes.");
+    return -1;
+}
+
+int64_t MaxDurationTracker::getCurrentStateKeyFullBucketDuration() const {
+    ALOGE("MaxDurationTracker does not handle sliced state changes.");
+    return -1;
+}
+
+void MaxDurationTracker::updateCurrentStateKey(const int32_t atomId, const FieldValue& newState) {
+    ALOGE("MaxDurationTracker does not handle sliced state changes.");
 }
 
 }  // namespace statsd

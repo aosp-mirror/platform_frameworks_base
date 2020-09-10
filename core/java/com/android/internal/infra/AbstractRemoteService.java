@@ -321,6 +321,20 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
                 obtainMessage(AbstractRemoteService::handlePendingRequest, this, asyncRequest));
     }
 
+    /**
+     * Executes an async request immediately instead of sending it to Handler queue as what
+     * {@link scheduleAsyncRequest} does.
+     *
+     * <p>This request is not expecting a callback from the service, hence it's represented by
+     * a simple {@link Runnable}.
+     */
+    protected void executeAsyncRequest(@NonNull AsyncRequest<I> request) {
+        // TODO(b/117779333): fix generics below
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        final MyAsyncPendingRequest<S, I> asyncRequest = new MyAsyncPendingRequest(this, request);
+        handlePendingRequest(asyncRequest);
+    }
+
     private void cancelScheduledUnbind() {
         mHandler.removeMessages(MSG_UNBIND);
     }

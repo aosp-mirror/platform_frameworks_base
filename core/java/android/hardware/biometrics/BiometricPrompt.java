@@ -18,14 +18,17 @@ package android.hardware.biometrics;
 
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
+import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.hardware.face.FaceManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -33,11 +36,15 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.security.identity.IdentityCredential;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.R;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.security.Signature;
 import java.util.concurrent.Executor;
 
@@ -58,6 +65,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     /**
      * @hide
      */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     public static final String KEY_USE_DEFAULT_TITLE = "use_default_title";
     /**
      * @hide
@@ -70,7 +78,18 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     /**
      * @hide
      */
-    public static final String KEY_POSITIVE_TEXT = "positive_text";
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public static final String KEY_DEVICE_CREDENTIAL_TITLE = "device_credential_title";
+    /**
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public static final String KEY_DEVICE_CREDENTIAL_SUBTITLE = "device_credential_subtitle";
+    /**
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public static final String KEY_DEVICE_CREDENTIAL_DESCRIPTION = "device_credential_description";
     /**
      * @hide
      */
@@ -80,14 +99,28 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      */
     public static final String KEY_REQUIRE_CONFIRMATION = "require_confirmation";
     /**
+     * This is deprecated. Internally we should use {@link #KEY_AUTHENTICATORS_ALLOWED}
      * @hide
      */
     public static final String KEY_ALLOW_DEVICE_CREDENTIAL = "allow_device_credential";
     /**
+     * If this key is set, we will ignore {@link #KEY_ALLOW_DEVICE_CREDENTIAL}
      * @hide
      */
-    public static final String KEY_FROM_CONFIRM_DEVICE_CREDENTIAL
-            = "from_confirm_device_credential";
+    public static final String KEY_AUTHENTICATORS_ALLOWED = "authenticators_allowed";
+    /**
+     * If this is set, check the Device Policy Manager for allowed biometrics.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public static final String EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS = "check_dpm";
+    /**
+     * Request to receive system events, such as back gesture/button. See
+     * {@link AuthenticationCallback#onSystemEvent(int)}
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public static final String KEY_RECEIVE_SYSTEM_EVENTS = "receive_system_events";
 
     /**
      * Error/help message will show for this amount of time.
@@ -101,9 +134,12 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     /**
      * @hide
      */
-    public static final int DISMISSED_REASON_POSITIVE = 1;
+    public static final int DISMISSED_REASON_BIOMETRIC_CONFIRMED = 1;
 
     /**
+     * Dialog is done animating away after user clicked on the button set via
+     * {@link BiometricPrompt.Builder#setNegativeButton(CharSequence, Executor,
+     * DialogInterface.OnClickListener)}.
      * @hide
      */
     public static final int DISMISSED_REASON_NEGATIVE = 2;
@@ -112,6 +148,30 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * @hide
      */
     public static final int DISMISSED_REASON_USER_CANCEL = 3;
+
+    /**
+     * Authenticated, confirmation not required. Dialog animated away.
+     * @hide
+     */
+    public static final int DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED = 4;
+
+    /**
+     * Error message shown on SystemUI. When BiometricService receives this, the UI is already
+     * gone.
+     * @hide
+     */
+    public static final int DISMISSED_REASON_ERROR = 5;
+
+    /**
+     * Dialog dismissal requested by BiometricService.
+     * @hide
+     */
+    public static final int DISMISSED_REASON_SERVER_REQUESTED = 6;
+
+    /**
+     * @hide
+     */
+    public static final int DISMISSED_REASON_CREDENTIAL_CONFIRMED = 7;
 
     private static class ButtonInfo {
         Executor executor;
@@ -124,7 +184,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
 
     /**
      * A builder that collects arguments to be shown on the system-provided biometric dialog.
-     **/
+     */
     public static class Builder {
         private final Bundle mBundle;
         private ButtonInfo mPositiveButtonInfo;
@@ -132,8 +192,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         private Context mContext;
 
         /**
-         * Creates a builder for a biometric dialog.
-         * @param context
+         * Creates a builder for a {@link BiometricPrompt} dialog.
+         * @param context The {@link Context} that will be used to build the prompt.
          */
         public Builder(Context context) {
             mBundle = new Bundle();
@@ -141,82 +201,91 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
-         * Required: Set the title to display.
-         * @param title
-         * @return
+         * Required: Sets the title that will be shown on the prompt.
+         * @param title The title to display.
+         * @return This builder.
          */
-        @NonNull public Builder setTitle(@NonNull CharSequence title) {
+        @NonNull
+        public Builder setTitle(@NonNull CharSequence title) {
             mBundle.putCharSequence(KEY_TITLE, title);
             return this;
         }
 
         /**
-         * For internal use currently. Only takes effect if title is null/empty. Shows a default
-         * modality-specific title.
+         * Shows a default, modality-specific title for the prompt if the title would otherwise be
+         * null or empty. Currently for internal use only.
+         * @return This builder.
          * @hide
          */
         @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-        @NonNull public Builder setUseDefaultTitle() {
+        @NonNull
+        public Builder setUseDefaultTitle() {
             mBundle.putBoolean(KEY_USE_DEFAULT_TITLE, true);
             return this;
         }
 
         /**
-         * Optional: Set the subtitle to display.
-         * @param subtitle
-         * @return
+         * Optional: Sets a subtitle that will be shown on the prompt.
+         * @param subtitle The subtitle to display.
+         * @return This builder.
          */
-        @NonNull public Builder setSubtitle(@NonNull CharSequence subtitle) {
+        @NonNull
+        public Builder setSubtitle(@NonNull CharSequence subtitle) {
             mBundle.putCharSequence(KEY_SUBTITLE, subtitle);
             return this;
         }
 
         /**
-         * Optional: Set the description to display.
-         * @param description
-         * @return
+         * Optional: Sets a description that will be shown on the prompt.
+         * @param description The description to display.
+         * @return This builder.
          */
-        @NonNull public Builder setDescription(@NonNull CharSequence description) {
+        @NonNull
+        public Builder setDescription(@NonNull CharSequence description) {
             mBundle.putCharSequence(KEY_DESCRIPTION, description);
             return this;
         }
 
         /**
-         * Optional: Set the text for the positive button. If not set, the positive button
-         * will not show.
-         * @param text
-         * @return
+         * Sets an optional title, subtitle, and/or description that will override other text when
+         * the user is authenticating with PIN/pattern/password. Currently for internal use only.
+         * @return This builder.
          * @hide
          */
-        @NonNull public Builder setPositiveButton(@NonNull CharSequence text,
-                @NonNull @CallbackExecutor Executor executor,
-                @NonNull DialogInterface.OnClickListener listener) {
-            if (TextUtils.isEmpty(text)) {
-                throw new IllegalArgumentException("Text must be set and non-empty");
+        @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+        @NonNull
+        public Builder setTextForDeviceCredential(
+                @Nullable CharSequence title,
+                @Nullable CharSequence subtitle,
+                @Nullable CharSequence description) {
+            if (title != null) {
+                mBundle.putCharSequence(KEY_DEVICE_CREDENTIAL_TITLE, title);
             }
-            if (executor == null) {
-                throw new IllegalArgumentException("Executor must not be null");
+            if (subtitle != null) {
+                mBundle.putCharSequence(KEY_DEVICE_CREDENTIAL_SUBTITLE, subtitle);
             }
-            if (listener == null) {
-                throw new IllegalArgumentException("Listener must not be null");
+            if (description != null) {
+                mBundle.putCharSequence(KEY_DEVICE_CREDENTIAL_DESCRIPTION, description);
             }
-            mBundle.putCharSequence(KEY_POSITIVE_TEXT, text);
-            mPositiveButtonInfo = new ButtonInfo(executor, listener);
             return this;
         }
 
         /**
-         * Required: Set the text for the negative button. This would typically be used as a
-         * "Cancel" button, but may be also used to show an alternative method for authentication,
-         * such as screen that asks for a backup password.
+         * Required: Sets the text, executor, and click listener for the negative button on the
+         * prompt. This is typically a cancel button, but may be also used to show an alternative
+         * method for authentication, such as a screen that asks for a backup password.
          *
-         * Note that this should not be set if {@link #setDeviceCredentialAllowed(boolean)}(boolean)
-         * is set to true.
+         * <p>Note that this setting is not required, and in fact is explicitly disallowed, if
+         * device credential authentication is enabled via {@link #setAllowedAuthenticators(int)} or
+         * {@link #setDeviceCredentialAllowed(boolean)}.
          *
-         * @param text
-         * @return
+         * @param text Text to be shown on the negative button for the prompt.
+         * @param executor Executor that will be used to run the on click callback.
+         * @param listener Listener containing a callback to be run when the button is pressed.
+         * @return This builder.
          */
-        @NonNull public Builder setNegativeButton(@NonNull CharSequence text,
+        @NonNull
+        public Builder setNegativeButton(@NonNull CharSequence text,
                 @NonNull @CallbackExecutor Executor executor,
                 @NonNull DialogInterface.OnClickListener listener) {
             if (TextUtils.isEmpty(text)) {
@@ -234,75 +303,144 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
-         * Optional: A hint to the system to require user confirmation after a biometric has been
-         * authenticated. For example, implicit modalities like Face and Iris authentication are
-         * passive, meaning they don't require an explicit user action to complete. When set to
-         * 'false', the user action (e.g. pressing a button) will not be required. BiometricPrompt
-         * will require confirmation by default.
+         * Optional: Sets a hint to the system for whether to require user confirmation after
+         * authentication. For example, implicit modalities like face and iris are passive, meaning
+         * they don't require an explicit user action to complete authentication. If set to true,
+         * these modalities should require the user to take some action (e.g. press a button)
+         * before {@link AuthenticationCallback#onAuthenticationSucceeded(AuthenticationResult)} is
+         * called. Defaults to true.
          *
-         * A typical use case for not requiring confirmation would be for low-risk transactions,
+         * <p>A typical use case for not requiring confirmation would be for low-risk transactions,
          * such as re-authenticating a recently authenticated application. A typical use case for
          * requiring confirmation would be for authorizing a purchase.
          *
-         * Note that this is a hint to the system. The system may choose to ignore the flag. For
-         * example, if the user disables implicit authentication in Settings, or if it does not
-         * apply to a modality (e.g. Fingerprint). When ignored, the system will default to
-         * requiring confirmation.
+         * <p>Note that this just passes a hint to the system, which the system may then ignore. For
+         * example, a value of false may be ignored if the user has disabled implicit authentication
+         * in Settings, or if it does not apply to a particular modality (e.g. fingerprint).
          *
-         * @param requireConfirmation
+         * @param requireConfirmation true if explicit user confirmation should be required, or
+         *                            false otherwise.
+         * @return This builder.
          */
-        @NonNull public Builder setConfirmationRequired(boolean requireConfirmation) {
+        @NonNull
+        public Builder setConfirmationRequired(boolean requireConfirmation) {
             mBundle.putBoolean(KEY_REQUIRE_CONFIRMATION, requireConfirmation);
             return this;
         }
 
         /**
-         * The user will first be prompted to authenticate with biometrics, but also given the
-         * option to authenticate with their device PIN, pattern, or password. Developers should
-         * first check {@link KeyguardManager#isDeviceSecure()} before enabling this. If the device
-         * is not secure, {@link BiometricPrompt#BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL} will be
-         * returned in {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)}}.
-         * Defaults to false.
+         * Optional: If enabled, the user will be given the option to authenticate with their device
+         * PIN, pattern, or password. Developers should first check {@link
+         * BiometricManager#canAuthenticate(int)} for {@link Authenticators#DEVICE_CREDENTIAL}
+         * before enabling. If the device is not secured with a credential,
+         * {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)} will be invoked
+         * with {@link BiometricPrompt#BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL}. Defaults to false.
          *
-         * Note that {@link #setNegativeButton(CharSequence, Executor,
-         * DialogInterface.OnClickListener)} should not be set if this is set to true.
+         * <p>Note that enabling this option replaces the negative button on the prompt with one
+         * that allows the user to authenticate with their device credential, making it an error to
+         * call {@link #setNegativeButton(CharSequence, Executor, DialogInterface.OnClickListener)}.
          *
-         * @param allowed When true, the prompt will fall back to ask for the user's device
-         *               credentials (PIN, pattern, or password).
-         * @return
+         * @param allowed true if the prompt should fall back to asking for the user's device
+         *                credential (PIN/pattern/password), or false otherwise.
+         * @return This builder.
+         *
+         * @deprecated Replaced by {@link #setAllowedAuthenticators(int)}.
          */
-        @NonNull public Builder setDeviceCredentialAllowed(boolean allowed) {
+        @Deprecated
+        @NonNull
+        public Builder setDeviceCredentialAllowed(boolean allowed) {
             mBundle.putBoolean(KEY_ALLOW_DEVICE_CREDENTIAL, allowed);
             return this;
         }
 
         /**
-         * TODO(123378871): Remove when moved.
-         * @return
+         * Optional: Specifies the type(s) of authenticators that may be invoked by
+         * {@link BiometricPrompt} to authenticate the user. Available authenticator types are
+         * defined in {@link Authenticators} and can be combined via bitwise OR. Defaults to:
+         * <ul>
+         *     <li>{@link Authenticators#BIOMETRIC_WEAK} for non-crypto authentication, or</li>
+         *     <li>{@link Authenticators#BIOMETRIC_STRONG} for crypto-based authentication.</li>
+         * </ul>
+         *
+         * <p>If this method is used and no authenticator of any of the specified types is available
+         * at the time <code>BiometricPrompt#authenticate(...)</code> is called, authentication will
+         * be canceled and {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)}
+         * will be invoked with an appropriate error code.
+         *
+         * <p>This method should be preferred over {@link #setDeviceCredentialAllowed(boolean)} and
+         * overrides the latter if both are used. Using this method to enable device credential
+         * authentication (with {@link Authenticators#DEVICE_CREDENTIAL}) will replace the negative
+         * button on the prompt, making it an error to also call
+         * {@link #setNegativeButton(CharSequence, Executor, DialogInterface.OnClickListener)}.
+         *
+         * <p>If unlocking cryptographic operation(s), it is the application's responsibility to
+         * request authentication with the proper set of authenticators (e.g. match the
+         * authenticators specified during key generation).
+         *
+         * @see KeyGenParameterSpec.Builder#setUserAuthenticationParameters(int, int)
+         * @see KeyProperties#AUTH_BIOMETRIC_STRONG
+         * @see KeyProperties#AUTH_DEVICE_CREDENTIAL
+         *
+         * @param authenticators A bit field representing all valid authenticator types that may be
+         *                       invoked by the prompt.
+         * @return This builder.
+         */
+        @NonNull
+        public Builder setAllowedAuthenticators(@Authenticators.Types int authenticators) {
+            mBundle.putInt(KEY_AUTHENTICATORS_ALLOWED, authenticators);
+            return this;
+        }
+
+        /**
+         * If set check the Device Policy Manager for disabled biometrics.
+         *
+         * @param checkDevicePolicyManager
+         * @return This builder.
          * @hide
          */
-        @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-        @NonNull public Builder setFromConfirmDeviceCredential() {
-            mBundle.putBoolean(KEY_FROM_CONFIRM_DEVICE_CREDENTIAL, true);
+        @NonNull
+        public Builder setDisallowBiometricsIfPolicyExists(boolean checkDevicePolicyManager) {
+            mBundle.putBoolean(EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS,
+                    checkDevicePolicyManager);
+            return this;
+        }
+
+        /**
+         * If set, receive internal events via {@link AuthenticationCallback#onSystemEvent(int)}
+         * @param set
+         * @return This builder.
+         * @hide
+         */
+        @NonNull
+        public Builder setReceiveSystemEvents(boolean set) {
+            mBundle.putBoolean(KEY_RECEIVE_SYSTEM_EVENTS, set);
             return this;
         }
 
         /**
          * Creates a {@link BiometricPrompt}.
-         * @return a {@link BiometricPrompt}
-         * @throws IllegalArgumentException if any of the required fields are not set.
+         *
+         * @return An instance of {@link BiometricPrompt}.
+         *
+         * @throws IllegalArgumentException If any required fields are unset, or if given any
+         * invalid combination of field values.
          */
-        @NonNull public BiometricPrompt build() {
+        @NonNull
+        public BiometricPrompt build() {
             final CharSequence title = mBundle.getCharSequence(KEY_TITLE);
             final CharSequence negative = mBundle.getCharSequence(KEY_NEGATIVE_TEXT);
-            final boolean useDefaultTitle = mBundle.getBoolean(KEY_USE_DEFAULT_TITLE);
-            final boolean enableFallback = mBundle.getBoolean(KEY_ALLOW_DEVICE_CREDENTIAL);
+            final boolean useDefaultTitle = mBundle.getBoolean(KEY_USE_DEFAULT_TITLE, false);
+            final boolean deviceCredentialAllowed = mBundle.getBoolean(KEY_ALLOW_DEVICE_CREDENTIAL);
+            final @Authenticators.Types int authenticators =
+                    mBundle.getInt(KEY_AUTHENTICATORS_ALLOWED, 0);
+            final boolean willShowDeviceCredentialButton = deviceCredentialAllowed
+                    || (authenticators & Authenticators.DEVICE_CREDENTIAL) != 0;
 
             if (TextUtils.isEmpty(title) && !useDefaultTitle) {
                 throw new IllegalArgumentException("Title must be set and non-empty");
-            } else if (TextUtils.isEmpty(negative) && !enableFallback) {
+            } else if (TextUtils.isEmpty(negative) && !willShowDeviceCredentialButton) {
                 throw new IllegalArgumentException("Negative text must be set and non-empty");
-            } else if (!TextUtils.isEmpty(negative) && enableFallback) {
+            } else if (!TextUtils.isEmpty(negative) && willShowDeviceCredentialButton) {
                 throw new IllegalArgumentException("Can't have both negative button behavior"
                         + " and device credential enabled");
             }
@@ -319,7 +457,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
 
     private final IBinder mToken = new Binder();
     private final Context mContext;
-    private final IBiometricService mService;
+    private final IAuthService mService;
     private final Bundle mBundle;
     private final ButtonInfo mPositiveButtonInfo;
     private final ButtonInfo mNegativeButtonInfo;
@@ -332,9 +470,11 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             new IBiometricServiceReceiver.Stub() {
 
         @Override
-        public void onAuthenticationSucceeded() throws RemoteException {
+        public void onAuthenticationSucceeded(@AuthenticationResultType int authenticationType)
+                throws RemoteException {
             mExecutor.execute(() -> {
-                final AuthenticationResult result = new AuthenticationResult(mCryptoObject);
+                final AuthenticationResult result =
+                        new AuthenticationResult(mCryptoObject, authenticationType);
                 mAuthenticationCallback.onAuthenticationSucceeded(result);
             });
         }
@@ -347,9 +487,23 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         @Override
-        public void onError(int error, String message) throws RemoteException {
+        public void onError(int modality, int error, int vendorCode) throws RemoteException {
             mExecutor.execute(() -> {
-                mAuthenticationCallback.onAuthenticationError(error, message);
+                String errorMessage;
+                switch (modality) {
+                    case TYPE_FACE:
+                        errorMessage = FaceManager.getErrorString(mContext, error, vendorCode);
+                        break;
+
+                    case TYPE_FINGERPRINT:
+                        errorMessage = FingerprintManager.getErrorString(mContext, error,
+                                vendorCode);
+                        break;
+
+                    default:
+                        errorMessage = "";
+                }
+                mAuthenticationCallback.onAuthenticationError(error, errorMessage);
             });
         }
 
@@ -363,7 +517,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         @Override
         public void onDialogDismissed(int reason) throws RemoteException {
             // Check the reason and invoke OnClickListener(s) if necessary
-            if (reason == DISMISSED_REASON_POSITIVE) {
+            if (reason == DISMISSED_REASON_BIOMETRIC_CONFIRMED) {
                 mPositiveButtonInfo.executor.execute(() -> {
                     mPositiveButtonInfo.listener.onClick(null, DialogInterface.BUTTON_POSITIVE);
                 });
@@ -373,6 +527,13 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
                 });
             }
         }
+
+        @Override
+        public void onSystemEvent(int event) throws RemoteException {
+            mExecutor.execute(() -> {
+                mAuthenticationCallback.onSystemEvent(event);
+            });
+        }
     };
 
     private BiometricPrompt(Context context, Bundle bundle,
@@ -381,13 +542,98 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         mBundle = bundle;
         mPositiveButtonInfo = positiveButtonInfo;
         mNegativeButtonInfo = negativeButtonInfo;
-        mService = IBiometricService.Stub.asInterface(
-                ServiceManager.getService(Context.BIOMETRIC_SERVICE));
+        mService = IAuthService.Stub.asInterface(
+                ServiceManager.getService(Context.AUTH_SERVICE));
     }
 
     /**
-     * A wrapper class for the crypto objects supported by BiometricPrompt. Currently the framework
-     * supports {@link Signature}, {@link Cipher} and {@link Mac} objects.
+     * Gets the title for the prompt, as set by {@link Builder#setTitle(CharSequence)}.
+     * @return The title of the prompt, which is guaranteed to be non-null.
+     */
+    @NonNull
+    public CharSequence getTitle() {
+        return mBundle.getCharSequence(KEY_TITLE, "");
+    }
+
+    /**
+     * Whether to use a default modality-specific title. For internal use only.
+     * @return See {@link Builder#setUseDefaultTitle()}.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public boolean shouldUseDefaultTitle() {
+        return mBundle.getBoolean(KEY_USE_DEFAULT_TITLE, false);
+    }
+
+    /**
+     * Gets the subtitle for the prompt, as set by {@link Builder#setSubtitle(CharSequence)}.
+     * @return The subtitle for the prompt, or null if the prompt has no subtitle.
+     */
+    @Nullable
+    public CharSequence getSubtitle() {
+        return mBundle.getCharSequence(KEY_SUBTITLE);
+    }
+
+    /**
+     * Gets the description for the prompt, as set by {@link Builder#setDescription(CharSequence)}.
+     * @return The description for the prompt, or null if the prompt has no description.
+     */
+    @Nullable
+    public CharSequence getDescription() {
+        return mBundle.getCharSequence(KEY_DESCRIPTION);
+    }
+
+    /**
+     * Gets the negative button text for the prompt, as set by
+     * {@link Builder#setNegativeButton(CharSequence, Executor, DialogInterface.OnClickListener)}.
+     * @return The negative button text for the prompt, or null if no negative button text was set.
+     */
+    @Nullable
+    public CharSequence getNegativeButtonText() {
+        return mBundle.getCharSequence(KEY_NEGATIVE_TEXT);
+    }
+
+    /**
+     * Determines if explicit user confirmation is required by the prompt, as set by
+     * {@link Builder#setConfirmationRequired(boolean)}.
+     *
+     * @return true if explicit user confirmation is required, or false otherwise.
+     */
+    public boolean isConfirmationRequired() {
+        return mBundle.getBoolean(KEY_REQUIRE_CONFIRMATION, true);
+    }
+
+    /**
+     * Gets the type(s) of authenticators that may be invoked by the prompt to authenticate the
+     * user, as set by {@link Builder#setAllowedAuthenticators(int)}.
+     *
+     * @return A bit field representing the type(s) of authenticators that may be invoked by the
+     * prompt (as defined by {@link Authenticators}), or 0 if this field was not set.
+     */
+    @Nullable
+    public int getAllowedAuthenticators() {
+        return mBundle.getInt(KEY_AUTHENTICATORS_ALLOWED, 0);
+    }
+
+    /**
+     * A wrapper class for the cryptographic operations supported by BiometricPrompt.
+     *
+     * <p>Currently the framework supports {@link Signature}, {@link Cipher}, {@link Mac}, and
+     * {@link IdentityCredential}.
+     *
+     * <p>Cryptographic operations in Android can be split into two categories: auth-per-use and
+     * time-based. This is specified during key creation via the timeout parameter of the
+     * {@link KeyGenParameterSpec.Builder#setUserAuthenticationParameters(int, int)} API.
+     *
+     * <p>CryptoObjects are used to unlock auth-per-use keys via
+     * {@link BiometricPrompt#authenticate(CryptoObject, CancellationSignal, Executor,
+     * AuthenticationCallback)}, whereas time-based keys are unlocked for their specified duration
+     * any time the user authenticates with the specified authenticators (e.g. unlocking keyguard).
+     * If a time-based key is not available for use (i.e. none of the allowed authenticators have
+     * been unlocked recently), applications can prompt the user to authenticate via
+     * {@link BiometricPrompt#authenticate(CancellationSignal, Executor, AuthenticationCallback)}
+     *
+     * @see Builder#setAllowedAuthenticators(int)
      */
     public static final class CryptoObject extends android.hardware.biometrics.CryptoObject {
         public CryptoObject(@NonNull Signature signature) {
@@ -440,27 +686,61 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     }
 
     /**
-     * Container for callback data from {@link #authenticate( CancellationSignal, Executor,
+     * Authentication type reported by {@link AuthenticationResult} when the user authenticated by
+     * entering their device PIN, pattern, or password.
+     */
+    public static final int AUTHENTICATION_RESULT_TYPE_DEVICE_CREDENTIAL = 1;
+
+    /**
+     * Authentication type reported by {@link AuthenticationResult} when the user authenticated by
+     * presenting some form of biometric (e.g. fingerprint or face).
+     */
+    public static final int AUTHENTICATION_RESULT_TYPE_BIOMETRIC = 2;
+
+    /**
+     * An {@link IntDef} representing the type of auth, as reported by {@link AuthenticationResult}.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({AUTHENTICATION_RESULT_TYPE_DEVICE_CREDENTIAL, AUTHENTICATION_RESULT_TYPE_BIOMETRIC})
+    public @interface AuthenticationResultType {
+    }
+
+    /**
+     * Container for callback data from {@link #authenticate(CancellationSignal, Executor,
      * AuthenticationCallback)} and {@link #authenticate(CryptoObject, CancellationSignal, Executor,
-     * AuthenticationCallback)}
+     * AuthenticationCallback)}.
      */
     public static class AuthenticationResult extends BiometricAuthenticator.AuthenticationResult {
         /**
          * Authentication result
          * @param crypto
+         * @param authenticationType
          * @hide
          */
-        public AuthenticationResult(CryptoObject crypto) {
+        public AuthenticationResult(CryptoObject crypto,
+                @AuthenticationResultType int authenticationType) {
             // Identifier and userId is not used for BiometricPrompt.
-            super(crypto, null /* identifier */, 0 /* userId */);
+            super(crypto, authenticationType, null /* identifier */, 0 /* userId */);
         }
+
         /**
-         * Obtain the crypto object associated with this transaction
-         * @return crypto object provided to {@link #authenticate( CryptoObject, CancellationSignal,
-         * Executor, AuthenticationCallback)}
+         * Provides the crypto object associated with this transaction.
+         * @return The crypto object provided to {@link #authenticate(CryptoObject,
+         * CancellationSignal, Executor, AuthenticationCallback)}
          */
         public CryptoObject getCryptoObject() {
             return (CryptoObject) super.getCryptoObject();
+        }
+
+        /**
+         * Provides the type of authentication (e.g. device credential or biometric) that was
+         * requested from and successfully provided by the user.
+         *
+         * @return An integer value representing the authentication method used.
+         */
+        public @AuthenticationResultType int getAuthenticationType() {
+            return super.getAuthenticationType();
         }
     }
 
@@ -509,22 +789,29 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          */
         @Override
         public void onAuthenticationAcquired(int acquireInfo) {}
+
+        /**
+         * Receiver for internal system events. See {@link Builder#setReceiveSystemEvents(boolean)}
+         * @hide
+         */
+        public void onSystemEvent(int event) {}
     }
 
     /**
      * Authenticates for the given user.
+     *
      * @param cancel An object that can be used to cancel authentication
      * @param executor An executor to handle callback events
      * @param callback An object to receive authentication events
      * @param userId The user to authenticate
+     *
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     public void authenticateUser(@NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AuthenticationCallback callback,
-            int userId,
-            IBiometricConfirmDeviceCredentialCallback confirmDeviceCredentialCallback) {
+            int userId) {
         if (cancel == null) {
             throw new IllegalArgumentException("Must supply a cancellation signal");
         }
@@ -534,8 +821,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         if (callback == null) {
             throw new IllegalArgumentException("Must supply a callback");
         }
-        authenticateInternal(null /* crypto */, cancel, executor, callback, userId,
-                confirmDeviceCredentialCallback);
+        authenticateInternal(null /* crypto */, cancel, executor, callback, userId);
     }
 
     /**
@@ -548,23 +834,33 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * authentication errors through {@link AuthenticationCallback}, and button events through the
      * corresponding callback set in {@link Builder#setNegativeButton(CharSequence, Executor,
      * DialogInterface.OnClickListener)}. It is safe to reuse the {@link BiometricPrompt} object,
-     * and calling {@link BiometricPrompt#authenticate( CancellationSignal, Executor,
+     * and calling {@link BiometricPrompt#authenticate(CancellationSignal, Executor,
      * AuthenticationCallback)} while an existing authentication attempt is occurring will stop the
      * previous client and start a new authentication. The interrupted client will receive a
      * cancelled notification through {@link AuthenticationCallback#onAuthenticationError(int,
      * CharSequence)}.
      *
-     * Note: Applications generally should not cancel and start authentication in quick succession.
-     * For example, to properly handle authentication across configuration changes, it's recommended
-     * to use BiometricPrompt in a fragment with setRetainInstance(true). By doing so, the
-     * application will not need to cancel/restart authentication during the configuration change.
+     * <p>Note: Applications generally should not cancel and start authentication in quick
+     * succession. For example, to properly handle authentication across configuration changes, it's
+     * recommended to use BiometricPrompt in a fragment with setRetainInstance(true). By doing so,
+     * the application will not need to cancel/restart authentication during the configuration
+     * change.
      *
-     * @throws IllegalArgumentException If any of the arguments are null
+     * <p>Per the Android CDD, only biometric authenticators that meet or exceed the requirements
+     * for <strong>Strong</strong> are permitted to integrate with Keystore to perform related
+     * cryptographic operations. Therefore, it is an error to call this method after explicitly
+     * calling {@link Builder#setAllowedAuthenticators(int)} with any biometric strength other than
+     * {@link Authenticators#BIOMETRIC_STRONG}.
      *
-     * @param crypto Object associated with the call
-     * @param cancel An object that can be used to cancel authentication
-     * @param executor An executor to handle callback events
-     * @param callback An object to receive authentication events
+     * @throws IllegalArgumentException If any argument is null, or if the allowed biometric
+     * authenticator strength is explicitly set to {@link Authenticators#BIOMETRIC_WEAK}. Prior to
+     * {@link android.os.Build.VERSION_CODES#R}, this exception is also thrown if
+     * {@link Builder#setDeviceCredentialAllowed(boolean)} was explicitly set to true.
+     *
+     * @param crypto A cryptographic operation to be unlocked after successful authentication.
+     * @param cancel An object that can be used to cancel authentication.
+     * @param executor An executor to handle callback events.
+     * @param callback An object to receive authentication events.
      */
     @RequiresPermission(USE_BIOMETRIC)
     public void authenticate(@NonNull CryptoObject crypto,
@@ -583,11 +879,16 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         if (callback == null) {
             throw new IllegalArgumentException("Must supply a callback");
         }
-        if (mBundle.getBoolean(KEY_ALLOW_DEVICE_CREDENTIAL)) {
-            throw new IllegalArgumentException("Device credential not supported with crypto");
+
+        // Disallow explicitly setting any non-Strong biometric authenticator types.
+        final @Authenticators.Types int authenticators = mBundle.getInt(
+                KEY_AUTHENTICATORS_ALLOWED, Authenticators.BIOMETRIC_STRONG);
+        final int biometricStrength = authenticators & Authenticators.BIOMETRIC_WEAK;
+        if ((biometricStrength & ~Authenticators.BIOMETRIC_STRONG) != 0) {
+            throw new IllegalArgumentException("Only Strong biometrics supported with crypto");
         }
-        authenticateInternal(crypto, cancel, executor, callback, mContext.getUserId(),
-                null /* confirmDeviceCredentialCallback */);
+
+        authenticateInternal(crypto, cancel, executor, callback, mContext.getUserId());
     }
 
     /**
@@ -605,16 +906,17 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * authentication. The interrupted client will receive a cancelled notification through {@link
      * AuthenticationCallback#onAuthenticationError(int, CharSequence)}.
      *
-     * Note: Applications generally should not cancel and start authentication in quick succession.
-     * For example, to properly handle authentication across configuration changes, it's recommended
-     * to use BiometricPrompt in a fragment with setRetainInstance(true). By doing so, the
-     * application will not need to cancel/restart authentication during the configuration change.
+     * <p>Note: Applications generally should not cancel and start authentication in quick
+     * succession. For example, to properly handle authentication across configuration changes, it's
+     * recommended to use BiometricPrompt in a fragment with setRetainInstance(true). By doing so,
+     * the application will not need to cancel/restart authentication during the configuration
+     * change.
      *
-     * @throws IllegalArgumentException If any of the arguments are null
+     * @throws IllegalArgumentException If any of the arguments are null.
      *
-     * @param cancel An object that can be used to cancel authentication
-     * @param executor An executor to handle callback events
-     * @param callback An object to receive authentication events
+     * @param cancel An object that can be used to cancel authentication.
+     * @param executor An executor to handle callback events.
+     * @param callback An object to receive authentication events.
      */
     @RequiresPermission(USE_BIOMETRIC)
     public void authenticate(@NonNull CancellationSignal cancel,
@@ -629,8 +931,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         if (callback == null) {
             throw new IllegalArgumentException("Must supply a callback");
         }
-        authenticateInternal(null /* crypto */, cancel, executor, callback, mContext.getUserId(),
-                null /* confirmDeviceCredentialCallback */);
+        authenticateInternal(null /* crypto */, cancel, executor, callback, mContext.getUserId());
     }
 
     private void cancelAuthentication() {
@@ -647,8 +948,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             @NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AuthenticationCallback callback,
-            int userId,
-            IBiometricConfirmDeviceCredentialCallback confirmDeviceCredentialCallback) {
+            int userId) {
         try {
             if (cancel.isCanceled()) {
                 Log.w(TAG, "Authentication already canceled");
@@ -661,15 +961,24 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             mExecutor = executor;
             mAuthenticationCallback = callback;
             final long sessionId = crypto != null ? crypto.getOpId() : 0;
-            if (BiometricManager.hasBiometrics(mContext)) {
-                mService.authenticate(mToken, sessionId, userId, mBiometricServiceReceiver,
-                        mContext.getOpPackageName(), mBundle, confirmDeviceCredentialCallback);
+
+            final Bundle bundle;
+            if (crypto != null) {
+                // Allowed authenticators should default to BIOMETRIC_STRONG for crypto auth.
+                // Note that we use a new bundle here so as to not overwrite the application's
+                // preference, since it is possible that the same prompt configuration be used
+                // without a crypto object later.
+                bundle = new Bundle(mBundle);
+                bundle.putInt(KEY_AUTHENTICATORS_ALLOWED,
+                        mBundle.getInt(KEY_AUTHENTICATORS_ALLOWED,
+                                Authenticators.BIOMETRIC_STRONG));
             } else {
-                mExecutor.execute(() -> {
-                    callback.onAuthenticationError(BiometricPrompt.BIOMETRIC_ERROR_HW_NOT_PRESENT,
-                            mContext.getString(R.string.biometric_error_hw_unavailable));
-                });
+                bundle = mBundle;
             }
+
+            mService.authenticate(mToken, sessionId, userId, mBiometricServiceReceiver,
+                    mContext.getOpPackageName(), bundle);
+
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception while authenticating", e);
             mExecutor.execute(() -> {

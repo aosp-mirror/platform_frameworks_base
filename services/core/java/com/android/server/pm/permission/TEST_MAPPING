@@ -53,6 +53,19 @@
                     "include-filter": "android.appsecurity.cts.AppSecurityTests#testPermissionDiffCert"
                 }
             ]
+        },
+        {
+            "name": "CtsPermissionTestCases",
+            "options": [
+                {
+                    "include-filter": "android.permission.cts.PermissionUpdateListenerTest"
+                }
+            ]
+        }
+    ],
+    "imports": [
+        {
+            "path": "vendor/xts/gts-tests/tests/permission"
         }
     ]
 }

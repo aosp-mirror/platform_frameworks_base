@@ -33,7 +33,7 @@
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Voer jou wagwoord in"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"Verkeerde PIN-kode."</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ongeldige kaart."</string>
-    <string name="keyguard_charged" msgid="6572033099675649299">"Volgelaai"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"Gelaai"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laai tans draadloos"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laai tans"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laai tans vinnig"</string>
@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Druk Kieslys om te ontsluit."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Netwerk is gesluit"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Geen SIM-kaart nie"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"Geen SIM-kaart in tablet nie."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"Geen SIM-kaart in foon nie."</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Steek \'n SIM-kaart in."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"Die SIM-kaart is weg of nie leesbaar nie. Steek \'n SIM-kaart in."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"Onbruikbare SIM-kaart."</string>
@@ -83,25 +81,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Tik \'n PIN wat 4 to 8 syfers lank is, in."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK-kode moet 8 of meer syfers wees."</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"Voer die korrekte PUK-kode weer in. Herhaalde pogings sal die SIM permanent deaktiveer."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"PIN-kodes stem nie ooreen nie"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Te veel patroonpogings"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Jy het jou PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> keer verkeerd ingetik. \n\nProbeer weer oor <xliff:g id="NUMBER_1">%2$d</xliff:g> sekondes."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Jy het jou wagwoord <xliff:g id="NUMBER_0">%1$d</xliff:g> keer verkeerd ingetik. \n\nProbeer weer oor <xliff:g id="NUMBER_1">%2$d</xliff:g> sekondes."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer verkeerd geteken. \n\nProbeer weer oor <xliff:g id="NUMBER_1">%2$d</xliff:g> sekondes."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"Jy het die tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> keer verkeerd probeer ontsluit. Na nóg <xliff:g id="NUMBER_1">%2$d</xliff:g> onsuksesvolle pogings sal hierdie tablet teruggestel word, wat al sy data sal uitvee."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"Jy het die foon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer verkeerd probeer ontsluit. Na nóg <xliff:g id="NUMBER_1">%2$d</xliff:g> onsuksesvolle pogings sal hierdie foon teruggestel word, wat al sy data sal uitvee."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"Jy het die tablet <xliff:g id="NUMBER">%d</xliff:g> keer verkeerd probeer ontsluit. Hierdie tablet sal teruggestel word, wat al sy data sal uitvee."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"Jy het die foon <xliff:g id="NUMBER">%d</xliff:g> keer verkeerd probeer ontsluit. Hierdie foon sal teruggestel word, wat al sy data sal uitvee."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"Jy het die tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> keer verkeerd probeer ontsluit. Na nóg <xliff:g id="NUMBER_1">%2$d</xliff:g> onsuksesvolle pogings sal hierdie gebruiker verwyder word, wat alle gebruikerdata sal uitvee."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"Jy het die foon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer verkeerd probeer ontsluit. Na nóg <xliff:g id="NUMBER_1">%2$d</xliff:g> onsuksesvolle pogings sal hierdie gebruiker verwyder word, wat alle gebruikerdata sal uitvee."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="9046628517316763961">"Jy het die tablet <xliff:g id="NUMBER">%d</xliff:g> keer verkeerd probeer ontsluit. Hierdie gebruiker sal verwyder word, wat alle gebruikerdata sal uitvee."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3588779327358321092">"Jy het die foon <xliff:g id="NUMBER">%d</xliff:g> keer verkeerd probeer ontsluit. Hierdie gebruiker sal verwyder word, wat alle gebruikerdata sal uitvee."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="6114158710353725041">"Jy het die tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> keer verkeerd probeer ontsluit. Na nog <xliff:g id="NUMBER_1">%2$d</xliff:g> onsuksesvolle pogings sal die werkprofiel verwyder word, wat alle profieldata sal uitvee."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="8345451368768804892">"Jy het die foon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer verkeerd probeer ontsluit. Na nog <xliff:g id="NUMBER_1">%2$d</xliff:g> onsuksesvolle pogings sal die werkprofiel verwyder word, wat alle profieldata sal uitvee."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"Jy het die tablet <xliff:g id="NUMBER">%d</xliff:g> keer verkeerd probeer ontsluit. Die werkprofiel sal verwyder word, wat alle profieldata sal uitvee."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"Jy het die foon <xliff:g id="NUMBER">%d</xliff:g> keer verkeerd probeer ontsluit. Die werkprofiel sal verwyder word, wat alle profieldata sal uitvee."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer verkeerd geteken. Na nóg <xliff:g id="NUMBER_1">%2$d</xliff:g> onsuksesvolle pogings sal jy gevra word om jou e-posrekening te gebruik om jou tablet te ontsluit.\n\n Probeer weer oor <xliff:g id="NUMBER_2">%3$d</xliff:g> sekondes."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer verkeerd geteken. Na nóg <xliff:g id="NUMBER_1">%2$d</xliff:g> onsuksesvolle pogings sal jy gevra word om jou e-posrekening te gebruik om jou foon te ontsluit.\n\n Probeer weer oor <xliff:g id="NUMBER_2">%3$d</xliff:g> sekondes."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Verkeerde SIM-PIN-kode. Jy sal nou jou diensverskaffer moet kontak om jou toestel te ontsluit."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="other">Verkeerde SIM-PIN-kode. Jy het <xliff:g id="NUMBER_1">%d</xliff:g> pogings oor.</item>

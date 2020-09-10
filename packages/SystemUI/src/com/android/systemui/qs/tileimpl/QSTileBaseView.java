@@ -18,8 +18,10 @@ import static com.android.systemui.qs.tileimpl.QSIconViewImpl.QS_ANIM_LENGTH;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Drawable;
@@ -61,8 +63,9 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     private String mAccessibilityClass;
     private boolean mTileState;
     private boolean mCollapsedView;
-    private boolean mClicked;
     private boolean mShowRippleEffect = true;
+    private float mStrokeWidthActive;
+    private float mStrokeWidthInactive;
 
     private final ImageView mBg;
     private final int mColorActive;
@@ -70,6 +73,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     private final int mColorDisabled;
     private int mCircleColor;
     private int mBgSize;
+
 
     public QSTileBaseView(Context context, QSIconView icon) {
         this(context, icon, false);
@@ -80,6 +84,10 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         // Default to Quick Tile padding, and QSTileView will specify its own padding.
         int padding = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_padding);
         mIconFrame = new FrameLayout(context);
+        mStrokeWidthActive = context.getResources()
+                .getDimension(com.android.internal.R.dimen.config_qsTileStrokeWidthActive);
+        mStrokeWidthInactive = context.getResources()
+                .getDimension(com.android.internal.R.dimen.config_qsTileStrokeWidthInactive);
         int size = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
         addView(mIconFrame, new LayoutParams(size, size));
         mBg = new ImageView(getContext());
@@ -193,7 +201,31 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         mHandler.obtainMessage(H.STATE_CHANGED, state).sendToTarget();
     }
 
+    private void updateStrokeShapeWidth(QSTile.State state) {
+        Resources resources = getContext().getResources();
+        if (!(mBg.getDrawable() instanceof ShapeDrawable)) {
+            return;
+        }
+        ShapeDrawable d = (ShapeDrawable) mBg.getDrawable();
+        d.getPaint().setStyle(Paint.Style.FILL);
+        switch (state.state) {
+            case Tile.STATE_INACTIVE:
+                if (mStrokeWidthInactive >= 0) {
+                    d.getPaint().setStyle(Paint.Style.STROKE);
+                    d.getPaint().setStrokeWidth(mStrokeWidthInactive);
+                }
+                break;
+            case Tile.STATE_ACTIVE:
+                if (mStrokeWidthActive >= 0) {
+                    d.getPaint().setStyle(Paint.Style.STROKE);
+                    d.getPaint().setStrokeWidth(mStrokeWidthActive);
+                }
+                break;
+        }
+    }
+
     protected void handleStateChanged(QSTile.State state) {
+        updateStrokeShapeWidth(state);
         int circleColor = getCircleColor(state.state);
         boolean allowAnimations = animationsEnabled();
         if (circleColor != mCircleColor) {
@@ -214,13 +246,35 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         setLongClickable(state.handlesLongClick);
         mIcon.setIcon(state, allowAnimations);
         setContentDescription(state.contentDescription);
+        final StringBuilder stateDescription = new StringBuilder();
+        switch (state.state) {
+            case Tile.STATE_UNAVAILABLE:
+                stateDescription.append(mContext.getString(R.string.tile_unavailable));
+                break;
+            case Tile.STATE_INACTIVE:
+                if (state instanceof QSTile.BooleanState) {
+                    stateDescription.append(mContext.getString(R.string.switch_bar_off));
+                }
+                break;
+            case Tile.STATE_ACTIVE:
+                if (state instanceof QSTile.BooleanState) {
+                    stateDescription.append(mContext.getString(R.string.switch_bar_on));
+                }
+                break;
+            default:
+                break;
+        }
+        if (!TextUtils.isEmpty(state.stateDescription)) {
+            stateDescription.append(", ");
+            stateDescription.append(state.stateDescription);
+        }
+        setStateDescription(stateDescription.toString());
 
         mAccessibilityClass =
                 state.state == Tile.STATE_UNAVAILABLE ? null : state.expandedAccessibilityClassName;
         if (state instanceof QSTile.BooleanState) {
             boolean newState = ((BooleanState) state).value;
             if (mTileState != newState) {
-                mClicked = false;
                 mTileState = newState;
             }
         }
@@ -272,23 +326,10 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     }
 
     @Override
-    public boolean performClick() {
-        mClicked = true;
-        return super.performClick();
-    }
-
-    @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
         if (!TextUtils.isEmpty(mAccessibilityClass)) {
             event.setClassName(mAccessibilityClass);
-            if (Switch.class.getName().equals(mAccessibilityClass)) {
-                boolean b = mClicked ? !mTileState : mTileState;
-                String label = getResources()
-                        .getString(b ? R.string.switch_bar_on : R.string.switch_bar_off);
-                event.setContentDescription(label);
-                event.setChecked(b);
-            }
         }
     }
 
@@ -300,11 +341,13 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         if (!TextUtils.isEmpty(mAccessibilityClass)) {
             info.setClassName(mAccessibilityClass);
             if (Switch.class.getName().equals(mAccessibilityClass)) {
-                boolean b = mClicked ? !mTileState : mTileState;
-                String label = getResources()
-                        .getString(b ? R.string.switch_bar_on : R.string.switch_bar_off);
+                String label = getResources().getString(
+                        mTileState ? R.string.switch_bar_on : R.string.switch_bar_off);
+                // Set the text here for tests in
+                // android.platform.test.scenario.sysui.quicksettings. Can be removed when
+                // UiObject2 has a new getStateDescription() API and tests are updated.
                 info.setText(label);
-                info.setChecked(b);
+                info.setChecked(mTileState);
                 info.setCheckable(true);
                 if (isLongClickable()) {
                     info.addAction(

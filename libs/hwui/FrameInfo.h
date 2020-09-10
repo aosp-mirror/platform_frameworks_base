@@ -51,6 +51,8 @@ enum class FrameInfoIndex {
     DequeueBufferDuration,
     QueueBufferDuration,
 
+    GpuCompleted,
+
     // Must be the last value!
     // Also must be kept in sync with FrameMetrics.java#FRAME_STATS_COUNT
     NumIndexes
@@ -100,15 +102,15 @@ class FrameInfo {
 public:
     void importUiThreadInfo(int64_t* info);
 
-    void markSyncStart() { set(FrameInfoIndex::SyncStart) = systemTime(CLOCK_MONOTONIC); }
+    void markSyncStart() { set(FrameInfoIndex::SyncStart) = systemTime(SYSTEM_TIME_MONOTONIC); }
 
     void markIssueDrawCommandsStart() {
-        set(FrameInfoIndex::IssueDrawCommandsStart) = systemTime(CLOCK_MONOTONIC);
+        set(FrameInfoIndex::IssueDrawCommandsStart) = systemTime(SYSTEM_TIME_MONOTONIC);
     }
 
-    void markSwapBuffers() { set(FrameInfoIndex::SwapBuffers) = systemTime(CLOCK_MONOTONIC); }
+    void markSwapBuffers() { set(FrameInfoIndex::SwapBuffers) = systemTime(SYSTEM_TIME_MONOTONIC); }
 
-    void markFrameCompleted() { set(FrameInfoIndex::FrameCompleted) = systemTime(CLOCK_MONOTONIC); }
+    void markFrameCompleted() { set(FrameInfoIndex::FrameCompleted) = systemTime(SYSTEM_TIME_MONOTONIC); }
 
     void addFlag(int frameInfoFlag) {
         set(FrameInfoIndex::Flags) |= static_cast<uint64_t>(frameInfoFlag);
@@ -141,6 +143,13 @@ public:
 
     inline int64_t totalDuration() const {
         return duration(FrameInfoIndex::IntendedVsync, FrameInfoIndex::FrameCompleted);
+    }
+
+    inline int64_t gpuDrawTime() const {
+        // GPU start time is approximated to the moment before swapBuffer is invoked.
+        // We could add an EGLSyncKHR fence at the beginning of the frame, but that is an overhead.
+        int64_t endTime = get(FrameInfoIndex::GpuCompleted);
+        return endTime > 0 ? endTime - get(FrameInfoIndex::SwapBuffers) : -1;
     }
 
     inline int64_t& set(FrameInfoIndex index) { return mFrameInfo[static_cast<int>(index)]; }

@@ -13,13 +13,11 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
 <resources>
-    <string name="test2">test2-overlay</string>
-    <integer-array name="integerArray1">
-        <item>10</item>
-        <item>11</item>
-    </integer-array>
-    <public type="animator" name="unoverlaid" id="0x7fff0000" />
-    <item type="animator" name="unoverlaid">@null</item>
+    <string name="overlay1">Overlay One</string>
+    <string name="overlay2">Overlay Two</string>
+    <string name="overlay3">@string/internal</string>
+    <string name="overlay4">@string/overlay2</string>
+    <string name="internal">Internal</string>
+    <attr name="max_lines" format="integer" />
 </resources>

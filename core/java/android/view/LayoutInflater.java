@@ -59,19 +59,20 @@ import java.util.Objects;
  * {@link Context#getSystemService} to retrieve a standard LayoutInflater instance
  * that is already hooked up to the current context and correctly configured
  * for the device you are running on.
- *
  * <p>
  * To create a new LayoutInflater with an additional {@link Factory} for your
  * own views, you can use {@link #cloneInContext} to clone an existing
  * ViewFactory, and then call {@link #setFactory} on it to include your
  * Factory.
- *
  * <p>
  * For performance reasons, view inflation relies heavily on pre-processing of
  * XML files that is done at build time. Therefore, it is not currently possible
  * to use LayoutInflater with an XmlPullParser over a plain XML file at runtime;
  * it only works with an XmlPullParser returned from a compiled resource
  * (R.<em>something</em> file.)
+ * <p>
+ * <strong>Note:</strong> This class is <strong>not</strong> thread-safe and a given
+ * instance should only be accessed by a single thread.
  */
 @SystemService(Context.LAYOUT_INFLATER_SERVICE)
 public abstract class LayoutInflater {

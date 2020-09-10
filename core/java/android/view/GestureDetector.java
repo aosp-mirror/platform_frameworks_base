@@ -16,20 +16,26 @@
 
 package android.view;
 
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DEEP_PRESS;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DOUBLE_TAP;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SCROLL;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SINGLE_TAP;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION;
+import static android.os.StrictMode.vmIncorrectContextUseEnabled;
+
+import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DEEP_PRESS;
+import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DOUBLE_TAP;
+import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS;
+import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SCROLL;
+import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SINGLE_TAP;
+import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.StrictMode;
 import android.os.SystemClock;
-import android.util.StatsLog;
+import android.util.Log;
+
+import com.android.internal.util.FrameworkStatsLog;
 
 /**
  * Detects various gestures and events using the supplied {@link MotionEvent}s.
@@ -145,7 +151,7 @@ public class GestureDetector {
         boolean onSingleTapConfirmed(MotionEvent e);
  
         /**
-         * Notified when a double-tap occurs.
+         * Notified when a double-tap occurs. Triggered on the down event of second tap.
          *
          * @param e The down motion event of the first tap of the double-tap.
          * @return true if the event is consumed, else false
@@ -227,10 +233,12 @@ public class GestureDetector {
         }
     }
 
+    private static final String TAG = GestureDetector.class.getSimpleName();
     @UnsupportedAppUsage
     private int mTouchSlopSquare;
     private int mDoubleTapTouchSlopSquare;
     private int mDoubleTapSlopSquare;
+    private float mAmbiguousGestureMultiplier;
     @UnsupportedAppUsage
     private int mMinimumFlingVelocity;
     private int mMaximumFlingVelocity;
@@ -376,9 +384,12 @@ public class GestureDetector {
      * You may only use this constructor from a {@link android.os.Looper} thread.
      * @see android.os.Handler#Handler()
      *
-     * @param context the application's context
+     * @param context An {@link android.app.Activity} or a {@link Context} created from
+     * {@link Context#createWindowContext(int, Bundle)}
      * @param listener the listener invoked for all the callbacks, this must
-     * not be null.
+     * not be null. If the listener implements the {@link OnDoubleTapListener} or
+     * {@link OnContextClickListener} then it will also be set as the listener for
+     * these callbacks (for example when using the {@link SimpleOnGestureListener}).
      *
      * @throws NullPointerException if {@code listener} is null.
      */
@@ -391,9 +402,12 @@ public class GestureDetector {
      * thread associated with the supplied {@link android.os.Handler}.
      * @see android.os.Handler#Handler()
      *
-     * @param context the application's context
+     * @param context An {@link android.app.Activity} or a {@link Context} created from
+     * {@link Context#createWindowContext(int, Bundle)}
      * @param listener the listener invoked for all the callbacks, this must
-     * not be null.
+     * not be null. If the listener implements the {@link OnDoubleTapListener} or
+     * {@link OnContextClickListener} then it will also be set as the listener for
+     * these callbacks (for example when using the {@link SimpleOnGestureListener}).
      * @param handler the handler to use for running deferred listener events.
      *
      * @throws NullPointerException if {@code listener} is null.
@@ -419,7 +433,8 @@ public class GestureDetector {
      * thread associated with the supplied {@link android.os.Handler}.
      * @see android.os.Handler#Handler()
      *
-     * @param context the application's context
+     * @param context An {@link android.app.Activity} or a {@link Context} created from
+     * {@link Context#createWindowContext(int, Bundle)}
      * @param listener the listener invoked for all the callbacks, this must
      * not be null.
      * @param handler the handler to use for running deferred listener events.
@@ -448,13 +463,26 @@ public class GestureDetector {
             //noinspection deprecation
             mMinimumFlingVelocity = ViewConfiguration.getMinimumFlingVelocity();
             mMaximumFlingVelocity = ViewConfiguration.getMaximumFlingVelocity();
+            mAmbiguousGestureMultiplier = ViewConfiguration.getAmbiguousGestureMultiplier();
         } else {
+            if (!context.isUiContext() && vmIncorrectContextUseEnabled()) {
+                final String errorMessage =
+                        "Tried to access UI constants from a non-visual Context.";
+                final String message = "GestureDetector must be accessed from Activity or other "
+                        + "visual Context. Use an Activity or a Context created with "
+                        + "Context#createWindowContext(int, Bundle), which are adjusted to the "
+                        + "configuration and visual bounds of an area on screen.";
+                final Exception exception = new IllegalArgumentException(errorMessage);
+                StrictMode.onIncorrectContextUsed(message, exception);
+                Log.e(TAG, errorMessage + message, exception);
+            }
             final ViewConfiguration configuration = ViewConfiguration.get(context);
             touchSlop = configuration.getScaledTouchSlop();
             doubleTapTouchSlop = configuration.getScaledDoubleTapTouchSlop();
             doubleTapSlop = configuration.getScaledDoubleTapSlop();
             mMinimumFlingVelocity = configuration.getScaledMinimumFlingVelocity();
             mMaximumFlingVelocity = configuration.getScaledMaximumFlingVelocity();
+            mAmbiguousGestureMultiplier = configuration.getScaledAmbiguousGestureMultiplier();
         }
         mTouchSlopSquare = touchSlop * touchSlop;
         mDoubleTapTouchSlopSquare = doubleTapTouchSlop * doubleTapTouchSlop;
@@ -657,7 +685,6 @@ public class GestureDetector {
                             hasPendingLongPress && ambiguousGesture;
                     if (shouldInhibitDefaultAction) {
                         // Inhibit default long press
-                        final float multiplier = ViewConfiguration.getAmbiguousGestureMultiplier();
                         if (distance > slopSquare) {
                             // The default action here is to remove long press. But if the touch
                             // slop below gets increased, and we never exceed the modified touch
@@ -671,13 +698,14 @@ public class GestureDetector {
                                             LONG_PRESS,
                                             TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS,
                                             0 /* arg2 */),
-                                    ev.getDownTime() + (long) (longPressTimeout * multiplier));
+                                    ev.getDownTime()
+                                        + (long) (longPressTimeout * mAmbiguousGestureMultiplier));
                         }
                         // Inhibit default scroll. If a gesture is ambiguous, we prevent scroll
                         // until the gesture is resolved.
                         // However, for safety, simply increase the touch slop in case the
                         // classification is erroneous. Since the value is squared, multiply twice.
-                        slopSquare *= multiplier * multiplier;
+                        slopSquare *= mAmbiguousGestureMultiplier * mAmbiguousGestureMultiplier;
                     }
 
                     if (distance > slopSquare) {
@@ -880,8 +908,8 @@ public class GestureDetector {
             mHasRecordedClassification = true;
             return;
         }
-        StatsLog.write(
-                StatsLog.TOUCH_GESTURE_CLASSIFIED,
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED,
                 getClass().getName(),
                 classification,
                 (int) (SystemClock.uptimeMillis() - mCurrentMotionEvent.getDownTime()),

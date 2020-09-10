@@ -18,6 +18,7 @@ package android.view;
 
 import static android.view.DisplayInfoProto.APP_HEIGHT;
 import static android.view.DisplayInfoProto.APP_WIDTH;
+import static android.view.DisplayInfoProto.FLAGS;
 import static android.view.DisplayInfoProto.LOGICAL_HEIGHT;
 import static android.view.DisplayInfoProto.LOGICAL_WIDTH;
 import static android.view.DisplayInfoProto.NAME;
@@ -27,9 +28,11 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.display.DeviceProductInfo;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.proto.ProtoOutputStream;
@@ -67,6 +70,13 @@ public final class DisplayInfo implements Parcelable {
      * Interpretation varies by display type.
      */
     public DisplayAddress address;
+
+    /**
+     * Product-specific information about the display or the directly connected device on the
+     * display chain. For example, if the display is transitively connected, this field may contain
+     * product information about the intermediate device.
+     */
+    public DeviceProductInfo deviceProductInfo;
 
     /**
      * The human-readable name of the display.
@@ -135,30 +145,6 @@ public final class DisplayInfo implements Parcelable {
     public int logicalHeight;
 
     /**
-     * @hide
-     * Number of overscan pixels on the left side of the display.
-     */
-    public int overscanLeft;
-
-    /**
-     * @hide
-     * Number of overscan pixels on the top side of the display.
-     */
-    public int overscanTop;
-
-    /**
-     * @hide
-     * Number of overscan pixels on the right side of the display.
-     */
-    public int overscanRight;
-
-    /**
-     * @hide
-     * Number of overscan pixels on the bottom side of the display.
-     */
-    public int overscanBottom;
-
-    /**
      * The {@link DisplayCutout} if present, otherwise {@code null}.
      *
      * @hide
@@ -205,6 +191,14 @@ public final class DisplayInfo implements Parcelable {
 
     /** The display's HDR capabilities */
     public Display.HdrCapabilities hdrCapabilities;
+
+    /**
+     * Indicates whether the display can be switched into a mode with minimal post
+     * processing.
+     *
+     * @see android.view.Display#isMinimalPostProcessingSupported
+     */
+    public boolean minimalPostProcessingSupported;
 
     /**
      * The logical display density which is the basis for density-independent
@@ -312,6 +306,7 @@ public final class DisplayInfo implements Parcelable {
                 && type == other.type
                 && displayId == other.displayId
                 && Objects.equals(address, other.address)
+                && Objects.equals(deviceProductInfo, other.deviceProductInfo)
                 && Objects.equals(uniqueId, other.uniqueId)
                 && appWidth == other.appWidth
                 && appHeight == other.appHeight
@@ -321,10 +316,6 @@ public final class DisplayInfo implements Parcelable {
                 && largestNominalAppHeight == other.largestNominalAppHeight
                 && logicalWidth == other.logicalWidth
                 && logicalHeight == other.logicalHeight
-                && overscanLeft == other.overscanLeft
-                && overscanTop == other.overscanTop
-                && overscanRight == other.overscanRight
-                && overscanBottom == other.overscanBottom
                 && Objects.equals(displayCutout, other.displayCutout)
                 && rotation == other.rotation
                 && modeId == other.modeId
@@ -332,6 +323,7 @@ public final class DisplayInfo implements Parcelable {
                 && colorMode == other.colorMode
                 && Arrays.equals(supportedColorModes, other.supportedColorModes)
                 && Objects.equals(hdrCapabilities, other.hdrCapabilities)
+                && minimalPostProcessingSupported == other.minimalPostProcessingSupported
                 && logicalDensityDpi == other.logicalDensityDpi
                 && physicalXDpi == other.physicalXDpi
                 && physicalYDpi == other.physicalYDpi
@@ -354,6 +346,7 @@ public final class DisplayInfo implements Parcelable {
         type = other.type;
         displayId = other.displayId;
         address = other.address;
+        deviceProductInfo = other.deviceProductInfo;
         name = other.name;
         uniqueId = other.uniqueId;
         appWidth = other.appWidth;
@@ -364,10 +357,6 @@ public final class DisplayInfo implements Parcelable {
         largestNominalAppHeight = other.largestNominalAppHeight;
         logicalWidth = other.logicalWidth;
         logicalHeight = other.logicalHeight;
-        overscanLeft = other.overscanLeft;
-        overscanTop = other.overscanTop;
-        overscanRight = other.overscanRight;
-        overscanBottom = other.overscanBottom;
         displayCutout = other.displayCutout;
         rotation = other.rotation;
         modeId = other.modeId;
@@ -377,6 +366,7 @@ public final class DisplayInfo implements Parcelable {
         supportedColorModes = Arrays.copyOf(
                 other.supportedColorModes, other.supportedColorModes.length);
         hdrCapabilities = other.hdrCapabilities;
+        minimalPostProcessingSupported = other.minimalPostProcessingSupported;
         logicalDensityDpi = other.logicalDensityDpi;
         physicalXDpi = other.physicalXDpi;
         physicalYDpi = other.physicalYDpi;
@@ -394,7 +384,8 @@ public final class DisplayInfo implements Parcelable {
         type = source.readInt();
         displayId = source.readInt();
         address = source.readParcelable(null);
-        name = source.readString();
+        deviceProductInfo = source.readParcelable(null);
+        name = source.readString8();
         appWidth = source.readInt();
         appHeight = source.readInt();
         smallestNominalAppWidth = source.readInt();
@@ -403,10 +394,6 @@ public final class DisplayInfo implements Parcelable {
         largestNominalAppHeight = source.readInt();
         logicalWidth = source.readInt();
         logicalHeight = source.readInt();
-        overscanLeft = source.readInt();
-        overscanTop = source.readInt();
-        overscanRight = source.readInt();
-        overscanBottom = source.readInt();
         displayCutout = DisplayCutout.ParcelableWrapper.readCutoutFromParcel(source);
         rotation = source.readInt();
         modeId = source.readInt();
@@ -423,6 +410,7 @@ public final class DisplayInfo implements Parcelable {
             supportedColorModes[i] = source.readInt();
         }
         hdrCapabilities = source.readParcelable(null);
+        minimalPostProcessingSupported = source.readBoolean();
         logicalDensityDpi = source.readInt();
         physicalXDpi = source.readFloat();
         physicalYDpi = source.readFloat();
@@ -430,8 +418,8 @@ public final class DisplayInfo implements Parcelable {
         presentationDeadlineNanos = source.readLong();
         state = source.readInt();
         ownerUid = source.readInt();
-        ownerPackageName = source.readString();
-        uniqueId = source.readString();
+        ownerPackageName = source.readString8();
+        uniqueId = source.readString8();
         removeMode = source.readInt();
     }
 
@@ -442,7 +430,8 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(type);
         dest.writeInt(displayId);
         dest.writeParcelable(address, flags);
-        dest.writeString(name);
+        dest.writeParcelable(deviceProductInfo, flags);
+        dest.writeString8(name);
         dest.writeInt(appWidth);
         dest.writeInt(appHeight);
         dest.writeInt(smallestNominalAppWidth);
@@ -451,10 +440,6 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(largestNominalAppHeight);
         dest.writeInt(logicalWidth);
         dest.writeInt(logicalHeight);
-        dest.writeInt(overscanLeft);
-        dest.writeInt(overscanTop);
-        dest.writeInt(overscanRight);
-        dest.writeInt(overscanBottom);
         DisplayCutout.ParcelableWrapper.writeCutoutToParcel(displayCutout, dest, flags);
         dest.writeInt(rotation);
         dest.writeInt(modeId);
@@ -469,6 +454,7 @@ public final class DisplayInfo implements Parcelable {
             dest.writeInt(supportedColorModes[i]);
         }
         dest.writeParcelable(hdrCapabilities, flags);
+        dest.writeBoolean(minimalPostProcessingSupported);
         dest.writeInt(logicalDensityDpi);
         dest.writeFloat(physicalXDpi);
         dest.writeFloat(physicalYDpi);
@@ -476,8 +462,8 @@ public final class DisplayInfo implements Parcelable {
         dest.writeLong(presentationDeadlineNanos);
         dest.writeInt(state);
         dest.writeInt(ownerUid);
-        dest.writeString(ownerPackageName);
-        dest.writeString(uniqueId);
+        dest.writeString8(ownerPackageName);
+        dest.writeString8(uniqueId);
         dest.writeInt(removeMode);
     }
 
@@ -619,29 +605,13 @@ public final class DisplayInfo implements Parcelable {
         StringBuilder sb = new StringBuilder();
         sb.append("DisplayInfo{\"");
         sb.append(name);
-        sb.append(", displayId ");
+        sb.append("\", displayId ");
         sb.append(displayId);
-        sb.append("\", uniqueId \"");
-        sb.append(uniqueId);
-        sb.append("\", app ");
-        sb.append(appWidth);
-        sb.append(" x ");
-        sb.append(appHeight);
+        sb.append(flagsToString(flags));
         sb.append(", real ");
         sb.append(logicalWidth);
         sb.append(" x ");
         sb.append(logicalHeight);
-        if (overscanLeft != 0 || overscanTop != 0 || overscanRight != 0 || overscanBottom != 0) {
-            sb.append(", overscan (");
-            sb.append(overscanLeft);
-            sb.append(",");
-            sb.append(overscanTop);
-            sb.append(",");
-            sb.append(overscanRight);
-            sb.append(",");
-            sb.append(overscanBottom);
-            sb.append(")");
-        }
         sb.append(", largest app ");
         sb.append(largestNominalAppWidth);
         sb.append(" x ");
@@ -650,20 +620,38 @@ public final class DisplayInfo implements Parcelable {
         sb.append(smallestNominalAppWidth);
         sb.append(" x ");
         sb.append(smallestNominalAppHeight);
+        sb.append(", appVsyncOff ");
+        sb.append(appVsyncOffsetNanos);
+        sb.append(", presDeadline ");
+        sb.append(presentationDeadlineNanos);
         sb.append(", mode ");
         sb.append(modeId);
         sb.append(", defaultMode ");
         sb.append(defaultModeId);
         sb.append(", modes ");
         sb.append(Arrays.toString(supportedModes));
-        sb.append(", colorMode ");
-        sb.append(colorMode);
-        sb.append(", supportedColorModes ");
-        sb.append(Arrays.toString(supportedColorModes));
         sb.append(", hdrCapabilities ");
         sb.append(hdrCapabilities);
+        sb.append(", minimalPostProcessingSupported ");
+        sb.append(minimalPostProcessingSupported);
         sb.append(", rotation ");
         sb.append(rotation);
+        sb.append(", state ");
+        sb.append(Display.stateToString(state));
+
+        if (Process.myUid() != Process.SYSTEM_UID) {
+            sb.append("}");
+            return sb.toString();
+        }
+
+        sb.append(", type ");
+        sb.append(Display.typeToString(type));
+        sb.append(", uniqueId \"");
+        sb.append(uniqueId);
+        sb.append("\", app ");
+        sb.append(appWidth);
+        sb.append(" x ");
+        sb.append(appHeight);
         sb.append(", density ");
         sb.append(logicalDensityDpi);
         sb.append(" (");
@@ -672,22 +660,19 @@ public final class DisplayInfo implements Parcelable {
         sb.append(physicalYDpi);
         sb.append(") dpi, layerStack ");
         sb.append(layerStack);
-        sb.append(", appVsyncOff ");
-        sb.append(appVsyncOffsetNanos);
-        sb.append(", presDeadline ");
-        sb.append(presentationDeadlineNanos);
-        sb.append(", type ");
-        sb.append(Display.typeToString(type));
+        sb.append(", colorMode ");
+        sb.append(colorMode);
+        sb.append(", supportedColorModes ");
+        sb.append(Arrays.toString(supportedColorModes));
         if (address != null) {
             sb.append(", address ").append(address);
         }
-        sb.append(", state ");
-        sb.append(Display.stateToString(state));
+        sb.append(", deviceProductInfo ");
+        sb.append(deviceProductInfo);
         if (ownerUid != 0 || ownerPackageName != null) {
             sb.append(", owner ").append(ownerPackageName);
             sb.append(" (uid ").append(ownerUid).append(")");
         }
-        sb.append(flagsToString(flags));
         sb.append(", removeMode ");
         sb.append(removeMode);
         sb.append("}");
@@ -701,13 +686,14 @@ public final class DisplayInfo implements Parcelable {
      * @param protoOutputStream Stream to write the Rect object to.
      * @param fieldId           Field Id of the DisplayInfoProto as defined in the parent message
      */
-    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
+    public void dumpDebug(ProtoOutputStream protoOutputStream, long fieldId) {
         final long token = protoOutputStream.start(fieldId);
         protoOutputStream.write(LOGICAL_WIDTH, logicalWidth);
         protoOutputStream.write(LOGICAL_HEIGHT, logicalHeight);
         protoOutputStream.write(APP_WIDTH, appWidth);
         protoOutputStream.write(APP_HEIGHT, appHeight);
         protoOutputStream.write(NAME, name);
+        protoOutputStream.write(FLAGS, flags);
         protoOutputStream.end(token);
     }
 
@@ -730,6 +716,15 @@ public final class DisplayInfo implements Parcelable {
         }
         if ((flags & Display.FLAG_ROUND) != 0) {
             result.append(", FLAG_ROUND");
+        }
+        if ((flags & Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0) {
+            result.append(", FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD");
+        }
+        if ((flags & Display.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0) {
+            result.append(", FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS");
+        }
+        if ((flags & Display.FLAG_TRUSTED) != 0) {
+            result.append(", FLAG_TRUSTED");
         }
         return result.toString();
     }

@@ -16,17 +16,17 @@
 
 package com.android.internal.app.procstats;
 
+import static com.android.internal.app.procstats.ProcessStats.PSS_AVERAGE;
+import static com.android.internal.app.procstats.ProcessStats.PSS_COUNT;
+import static com.android.internal.app.procstats.ProcessStats.PSS_MAXIMUM;
+import static com.android.internal.app.procstats.ProcessStats.PSS_MINIMUM;
 import static com.android.internal.app.procstats.ProcessStats.PSS_RSS_AVERAGE;
 import static com.android.internal.app.procstats.ProcessStats.PSS_RSS_MAXIMUM;
 import static com.android.internal.app.procstats.ProcessStats.PSS_RSS_MINIMUM;
 import static com.android.internal.app.procstats.ProcessStats.PSS_SAMPLE_COUNT;
-import static com.android.internal.app.procstats.ProcessStats.PSS_MINIMUM;
-import static com.android.internal.app.procstats.ProcessStats.PSS_AVERAGE;
-import static com.android.internal.app.procstats.ProcessStats.PSS_MAXIMUM;
-import static com.android.internal.app.procstats.ProcessStats.PSS_USS_MINIMUM;
 import static com.android.internal.app.procstats.ProcessStats.PSS_USS_AVERAGE;
 import static com.android.internal.app.procstats.ProcessStats.PSS_USS_MAXIMUM;
-import static com.android.internal.app.procstats.ProcessStats.PSS_COUNT;
+import static com.android.internal.app.procstats.ProcessStats.PSS_USS_MINIMUM;
 
 import android.service.procstats.ProcessStatsStateProto;
 import android.util.proto.ProtoOutputStream;
@@ -133,7 +133,6 @@ public class PssTable extends SparseMappingTable.Table {
             }
 
             if (stats[statsIndex + PSS_RSS_MINIMUM] > minRss) {
-                stats[statsIndex + PSS_RSS_MINIMUM] = minRss;
             }
 
             stats[statsIndex + PSS_RSS_AVERAGE] = (long)(((stats[statsIndex + PSS_RSS_AVERAGE]
@@ -166,5 +165,11 @@ public class PssTable extends SparseMappingTable.Table {
                 stats[statsIndex + PSS_RSS_MINIMUM],
                 stats[statsIndex + PSS_RSS_AVERAGE],
                 stats[statsIndex + PSS_RSS_MAXIMUM]);
+    }
+
+    long[] getRssMeanAndMax(int key) {
+        final long[] stats = getArrayForKey(key);
+        final int statsIndex = SparseMappingTable.getIndexFromKey(key);
+        return new long[]{stats[statsIndex + PSS_RSS_AVERAGE], stats[statsIndex + PSS_RSS_MAXIMUM]};
     }
 }

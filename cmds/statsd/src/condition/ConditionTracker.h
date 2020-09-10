@@ -36,7 +36,7 @@ public:
           mIndex(index),
           mInitialized(false),
           mTrackerIndex(),
-          mNonSlicedConditionState(ConditionState::kUnknown),
+          mUnSlicedPartCondition(ConditionState::kUnknown),
           mSliced(false){};
 
     virtual ~ConditionTracker(){};
@@ -51,10 +51,12 @@ public:
     //                       need to call init() on children conditions)
     // conditionIdIndexMap: the mapping from condition id to its index.
     // stack: a bit map to keep track which nodes have been visited on the stack in the recursion.
+    // initialConditionCache: tracks initial conditions of all ConditionTrackers.
     virtual bool init(const std::vector<Predicate>& allConditionConfig,
                       const std::vector<sp<ConditionTracker>>& allConditionTrackers,
                       const std::unordered_map<int64_t, int>& conditionIdIndexMap,
-                      std::vector<bool>& stack) = 0;
+                      std::vector<bool>& stack,
+                      std::vector<ConditionState>& initialConditionCache) = 0;
 
     // evaluate current condition given the new event.
     // event: the new log event
@@ -72,39 +74,19 @@ public:
                                    std::vector<ConditionState>& conditionCache,
                                    std::vector<bool>& conditionChanged) = 0;
 
-    // Return the current condition state.
-    virtual ConditionState isConditionMet() const {
-        return mNonSlicedConditionState;
-    };
-
     // Query the condition with parameters.
     // [conditionParameters]: a map from condition name to the HashableDimensionKey to query the
     //                       condition.
     // [allConditions]: all condition trackers. This is needed because the condition evaluation is
     //                  done recursively
-    // [dimensionFields]: the needed dimension fields which should be all or subset of the condition
-    //                    tracker output dimension.
-    // [isSubOutputDimensionFields]: true if the needed dimension fields which is strictly subset of
-    //                               the condition tracker output dimension.
     // [isPartialLink]: true if the link specified by 'conditionParameters' contains all the fields
     //                  in the condition tracker output dimension.
     // [conditionCache]: the cache holding the condition evaluation values.
-    // [dimensionsKeySet]: the dimensions where the sliced condition is true. For combination
-    //                    condition, it assumes that only one child predicate is sliced.
     virtual void isConditionMet(
             const ConditionKey& conditionParameters,
             const std::vector<sp<ConditionTracker>>& allConditions,
-            const vector<Matcher>& dimensionFields,
-            const bool isSubOutputDimensionFields,
             const bool isPartialLink,
-            std::vector<ConditionState>& conditionCache,
-            std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const = 0;
-
-    virtual ConditionState getMetConditionDimension(
-            const std::vector<sp<ConditionTracker>>& allConditions,
-            const vector<Matcher>& dimensionFields,
-            const bool isSubOutputDimensionFields,
-            std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const = 0;
+            std::vector<ConditionState>& conditionCache) const = 0;
 
     // return the list of LogMatchingTracker index that this ConditionTracker uses.
     virtual const std::set<int>& getLogTrackerIndex() const {
@@ -140,8 +122,9 @@ public:
         const std::vector<sp<ConditionTracker>>& allConditions,
         const vector<Matcher>& dimensions) const = 0;
 
+    // Return the current condition state of the unsliced part of the condition.
     inline ConditionState getUnSlicedPartConditionState() const  {
-        return mUnSlicedPart;
+        return mUnSlicedPartCondition;
     }
 
 protected:
@@ -156,10 +139,16 @@ protected:
     // the list of LogMatchingTracker index that this ConditionTracker uses.
     std::set<int> mTrackerIndex;
 
-    ConditionState mNonSlicedConditionState;
+    // This variable is only used for CombinationConditionTrackers.
+    // SimpleConditionTrackers technically don't have an unsliced part because
+    // they are either sliced or unsliced.
+    //
+    // CombinationConditionTrackers have multiple children ConditionTrackers
+    // that can be a mixture of sliced or unsliced. This tracks the
+    // condition of the unsliced part of the combination condition.
+    ConditionState mUnSlicedPartCondition;
 
     bool mSliced;
-    ConditionState mUnSlicedPart;
 };
 
 }  // namespace statsd

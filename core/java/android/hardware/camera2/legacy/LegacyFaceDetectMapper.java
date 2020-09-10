@@ -233,8 +233,10 @@ public class LegacyFaceDetectMapper {
         Camera.Parameters params = legacyRequest.parameters;
 
         Rect activeArray = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
-        ZoomData zoomData = ParameterUtils.convertScalerCropRegion(activeArray,
-                request.get(CaptureRequest.SCALER_CROP_REGION), previewSize, params);
+        ZoomData zoomData = ParameterUtils.convertToLegacyZoom(activeArray,
+                request.get(CaptureRequest.SCALER_CROP_REGION),
+                request.get(CaptureRequest.CONTROL_ZOOM_RATIO),
+                previewSize, params);
 
         List<Face> convertedFaces = new ArrayList<>();
         if (faces != null) {

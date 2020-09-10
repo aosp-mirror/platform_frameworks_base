@@ -19,6 +19,30 @@
           <NodeName>VendorSpecific</NodeName>
           <Value>Test</Value>
         </Node>
+        <Node>
+          <NodeName>VendorExtension</NodeName>
+          <Node>
+            <NodeName>VendorAttribute</NodeName>
+            <Value>VendorValue</Value>
+          </Node>
+        </Node>
+        <Node>
+          <NodeName>Android</NodeName>
+          <Node>
+            <NodeName>AAAServerTrustedNames</NodeName>
+            <Node>
+              <NodeName>FQDN</NodeName>
+              <Value>trusted.fqdn.com;another-trusted.fqdn.com</Value>
+            </Node>
+          </Node>
+          <Node>
+            <NodeName>NewSubTree</NodeName>
+            <Node>
+              <NodeName>NewAttribute</NodeName>
+              <Value>NewValue</Value>
+            </Node>
+          </Node>
+        </Node>
       </Node>
       <Node>
         <NodeName>HomeSP</NodeName>

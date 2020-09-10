@@ -19,12 +19,15 @@ package android.util;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.DeadSystemException;
 
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.LineBreakBufferedWriter;
+
+import dalvik.annotation.optimization.FastNative;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -227,6 +230,7 @@ public final class Log {
      *         for Nougat (7.0) releases (API <= 23) and prior, there is no
      *         tag limit of concern after this API level.
      */
+    @FastNative
     public static native boolean isLoggable(@Nullable String tag, @Level int level);
 
     /**
@@ -400,6 +404,7 @@ public final class Log {
      * @param message The message you would like logged.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static int logToRadioBuffer(@Level int priority, @Nullable String tag,
             @Nullable String message) {
         return println_native(LOG_ID_RADIO, priority, tag, message);

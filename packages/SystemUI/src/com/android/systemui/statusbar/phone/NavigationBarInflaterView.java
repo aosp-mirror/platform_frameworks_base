@@ -40,6 +40,7 @@ import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.ReverseLinearLayout.ReverseRelativeLayout;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 
+import java.io.PrintWriter;
 import java.util.Objects;
 
 public class NavigationBarInflaterView extends FrameLayout
@@ -93,7 +94,6 @@ public class NavigationBarInflaterView extends FrameLayout
 
     private boolean mIsVertical;
     private boolean mAlternativeOrder;
-    private boolean mUsingCustomLayout;
 
     private OverviewProxyService mOverviewProxyService;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
@@ -145,7 +145,6 @@ public class NavigationBarInflaterView extends FrameLayout
     @Override
     public void onNavigationModeChanged(int mode) {
         mNavBarMode = mode;
-        onLikelyDefaultLayoutChange();
     }
 
     @Override
@@ -154,17 +153,7 @@ public class NavigationBarInflaterView extends FrameLayout
         super.onDetachedFromWindow();
     }
 
-    public void setNavigationBarLayout(String layoutValue) {
-        if (!Objects.equals(mCurrentLayout, layoutValue)) {
-            mUsingCustomLayout = layoutValue != null;
-            clearViews();
-            inflateLayout(layoutValue);
-        }
-    }
-
     public void onLikelyDefaultLayoutChange() {
-        // Don't override custom layouts
-        if (mUsingCustomLayout) return;
 
         // Reevaluate new layout
         final String newValue = getDefaultLayout();
@@ -480,5 +469,11 @@ public class NavigationBarInflaterView extends FrameLayout
 
     private static float convertDpToPx(Context context, float dp) {
         return dp * context.getResources().getDisplayMetrics().density;
+    }
+
+    public void dump(PrintWriter pw) {
+        pw.println("NavigationBarInflaterView {");
+        pw.println("      mCurrentLayout: " + mCurrentLayout);
+        pw.println("    }");
     }
 }

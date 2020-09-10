@@ -21,6 +21,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
+
 import java.util.List;
 
 public class FakeStatusBarIconController extends BaseLeakChecker<IconManager>
@@ -73,6 +74,10 @@ public class FakeStatusBarIconController extends BaseLeakChecker<IconManager>
 
     @Override
     public void removeAllIconsForSlot(String slot) {
+    }
+
+    @Override
+    public void setIconAccessibilityLiveRegion(String slot, int mode) {
     }
 
 }

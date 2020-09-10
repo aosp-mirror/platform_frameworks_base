@@ -58,7 +58,7 @@ class TestDirectoryFixture : public ::testing::Test {
 
   // Creates a file with the specified contents, creates any intermediate directories in the
   // process. The file path must be an absolute path within the test directory.
-  bool WriteFile(const std::string& path, const std::string& contents);
+  void WriteFile(const std::string& path, const std::string& contents);
 
  private:
   std::string temp_dir_;
@@ -74,6 +74,9 @@ class CommandTestFixture : public TestDirectoryFixture {
   // file is written to the out directory.
   bool CompileFile(const std::string& path, const std::string& contents,
                    const android::StringPiece& flat_out_dir, IDiagnostics* diag);
+
+  // Executes the link command with the specified arguments.
+  bool Link(const std::vector<std::string>& args, IDiagnostics* diag);
 
   // Executes the link command with the specified arguments. The flattened files residing in the
   // flat directory will be added to the link command as file arguments.

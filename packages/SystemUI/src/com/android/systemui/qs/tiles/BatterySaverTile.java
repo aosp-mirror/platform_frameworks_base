@@ -20,6 +20,7 @@ import android.provider.Settings.Secure;
 import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
@@ -34,7 +35,8 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
         BatteryController.BatteryStateChangeCallback {
 
     private final BatteryController mBatteryController;
-    private final SecureSetting mSetting;
+    @VisibleForTesting
+    protected final SecureSetting mSetting;
 
     private int mLevel;
     private boolean mPowerSave;
@@ -48,7 +50,9 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
         super(host);
         mBatteryController = batteryController;
         mBatteryController.observe(getLifecycle(), this);
-        mSetting = new SecureSetting(mContext, mHandler, Secure.LOW_POWER_WARNING_ACKNOWLEDGED) {
+        int currentUser = host.getUserContext().getUserId();
+        mSetting = new SecureSetting(mContext, mHandler, Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
+                currentUser) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
                 handleRefreshState(null);
@@ -68,12 +72,18 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
+    protected void handleUserSwitch(int newUserId) {
+        mSetting.setUserId(newUserId);
+    }
+
+    @Override
     public int getMetricsCategory() {
         return MetricsEvent.QS_BATTERY_TILE;
     }
 
     @Override
     public void handleSetListening(boolean listening) {
+        super.handleSetListening(listening);
         mSetting.setListening(listening);
     }
 

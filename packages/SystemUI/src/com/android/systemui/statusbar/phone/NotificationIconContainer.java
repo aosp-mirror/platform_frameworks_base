@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.phone;
 import static com.android.systemui.statusbar.phone.HeadsUpAppearanceController.CONTENT_FADE_DELAY;
 import static com.android.systemui.statusbar.phone.HeadsUpAppearanceController.CONTENT_FADE_DURATION;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
@@ -27,7 +29,9 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.util.AttributeSet;
+import android.util.Property;
 import android.view.View;
+import android.view.animation.Interpolator;
 
 import androidx.collection.ArrayMap;
 
@@ -42,6 +46,7 @@ import com.android.systemui.statusbar.notification.stack.ViewState;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 /**
  * A container for notification icons. It handles overflowing icons properly and positions them
@@ -69,7 +74,10 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     }.setDuration(200);
 
     private static final AnimationProperties ICON_ANIMATION_PROPERTIES = new AnimationProperties() {
-        private AnimationFilter mAnimationFilter = new AnimationFilter().animateY().animateAlpha()
+        private AnimationFilter mAnimationFilter = new AnimationFilter()
+                .animateX()
+                .animateY()
+                .animateAlpha()
                 .animateScale();
 
         @Override
@@ -77,8 +85,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             return mAnimationFilter;
         }
 
-    }.setDuration(CANNED_ANIMATION_DURATION)
-            .setCustomInterpolator(View.TRANSLATION_Y, Interpolators.ICON_OVERSHOT);
+    }.setDuration(CANNED_ANIMATION_DURATION);
 
     /**
      * Temporary AnimationProperties to avoid unnecessary allocations.
@@ -272,7 +279,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         super.onViewAdded(child);
         boolean isReplacingIcon = isReplacingIcon(child);
         if (!mChangingViewPositions) {
-            IconState v = new IconState();
+            IconState v = new IconState(child);
             if (isReplacingIcon) {
                 v.justAdded = false;
                 v.justReplaced = true;
@@ -388,7 +395,12 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         for (int i = 0; i < childCount; i++) {
             View view = getChildAt(i);
             IconState iconState = mIconStates.get(view);
-            iconState.xTranslation = translationX;
+            if (iconState.iconAppearAmount == 1.0f) {
+                // We only modify the xTranslation if it's fully inside of the container
+                // since during the transition to the shelf, the translations are controlled
+                // from the outside
+                iconState.xTranslation = translationX;
+            }
             if (mFirstVisibleIconState == null) {
                 mFirstVisibleIconState = iconState;
             }
@@ -499,7 +511,10 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         return mActualPaddingEnd;
     }
 
-    private float getActualPaddingStart() {
+    /**
+     * @return the actual startPadding of this view
+     */
+    public float getActualPaddingStart() {
         if (mActualPaddingStart == NO_VALUE) {
             return getPaddingStart();
         }
@@ -692,6 +707,20 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         public boolean noAnimations;
         public boolean isLastExpandIcon;
         public int customTransformHeight = NO_VALUE;
+        private final View mView;
+
+        private final Consumer<Property> mCannedAnimationEndListener;
+
+        public IconState(View child) {
+            mView = child;
+            mCannedAnimationEndListener = (property) -> {
+                // If we finished animating out of the shelf
+                if (property == View.TRANSLATION_Y && iconAppearAmount == 0.0f
+                        && mView.getVisibility() == VISIBLE) {
+                    mView.setVisibility(INVISIBLE);
+                }
+            };
+        }
 
         @Override
         public void applyToView(View view) {
@@ -729,6 +758,14 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                                 ICON_ANIMATION_PROPERTIES.getAnimationFilter());
                         sTempProperties.resetCustomInterpolators();
                         sTempProperties.combineCustomInterpolators(ICON_ANIMATION_PROPERTIES);
+                        Interpolator interpolator;
+                        if (icon.showsConversation()) {
+                            interpolator = Interpolators.ICON_OVERSHOT_LESS;
+                        } else {
+                            interpolator = Interpolators.ICON_OVERSHOT;
+                        }
+                        sTempProperties.setCustomInterpolator(View.TRANSLATION_Y, interpolator);
+                        sTempProperties.setAnimationEndAction(mCannedAnimationEndListener);
                         if (animationProperties != null) {
                             animationFilter.combineFilter(animationProperties.getAnimationFilter());
                             sTempProperties.combineCustomInterpolators(animationProperties);

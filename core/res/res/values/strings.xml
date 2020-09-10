@@ -370,7 +370,7 @@
     <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. [CHAR LIMIT=TOAST] -->
     <string name="low_memory" product="watch">Watch storage is full. Delete some files to free space.</string>
     <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. [CHAR LIMIT=TOAST] -->
-    <string name="low_memory" product="tv">TV storage is full. Delete some files to free space.</string>
+    <string name="low_memory" product="tv">Android TV device storage is full. Delete some files to free space.</string>
     <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. [CHAR LIMIT=TOAST] -->
     <string name="low_memory" product="default">Phone storage is full. Delete some files to free space.</string>
 
@@ -404,6 +404,8 @@
     <!-- Content text for a notification. The Title of the notification is "Work profile deleted",
         This indicates that a work profile has been deleted because the maximum failed password attempts as been reached. [CHAR LIMIT=NONE]-->
     <string name="work_profile_deleted_reason_maximum_password_failure">Too many password attempts</string>
+    <!-- Shows up as the reason for the work profile deletion when the admin of an organization-owend device relinquishes it. [CHAR LIMIT=NONE] -->
+    <string name="device_ownership_relinquished">Admin relinquished device for personal use</string>
 
     <!-- Content title for a notification. This notification indicates that the device is managed
          and network logging was activated by a device owner. [CHAR LIMIT=NONE]-->
@@ -411,6 +413,22 @@
     <!-- Content text for a notification. Tapping opens a dialog with more information on device management and network
          logging. [CHAR LIMIT=NONE]-->
     <string name="network_logging_notification_text">Your organization manages this device and may monitor network traffic. Tap for details.</string>
+
+    <!-- Content title for a notification. This notification indicates that the device owner has
+         changed the location settings. [CHAR LIMIT=NONE] -->
+    <string name="location_changed_notification_title">Apps can access your location</string>
+    <!-- Content text for a notification. Tapping opens device location settings.
+         [CHAR LIMIT=NONE] -->
+    <string name="location_changed_notification_text">Contact your IT admin to learn more</string>
+
+    <!-- Feature Id for Country Detector. [CHAR LIMIT=NONE]-->
+    <string name="country_detector">Country Detector</string>
+    <!-- Feature Id for Location service. [CHAR LIMIT=NONE]-->
+    <string name="location_service">Location Service</string>
+    <!-- Feature Id for Sensor Notification service. [CHAR LIMIT=NONE]-->
+    <string name="sensor_notification_service">Sensor Notification Service</string>
+    <!-- Feature Id for Twilight service. [CHAR LIMIT=NONE]-->
+    <string name="twilight_service">Twilight Service</string>
 
     <!-- Factory reset warning dialog strings--> <skip />
     <!-- Shows up in the dialog's title to warn about an impeding factory reset. [CHAR LIMIT=NONE] -->
@@ -423,6 +441,28 @@
     <!-- A toast message displayed when printing is attempted but disabled by policy. -->
     <string name="printing_disabled_by">Printing disabled by <xliff:g id="owner_app">%s</xliff:g>.</string>
 
+    <!-- Notification title. This notification lets a user know that their personal apps are
+        either blocked or will be blocked soon due to a work policy from their IT admin, and that
+        they need to turn on their work profile to unblock their apps.[CHAR LIMIT=29] -->
+    <string name="personal_apps_suspension_title">Turn on your work profile</string>
+    <!-- Notification text. This notification lets a user know that their personal apps are
+        blocked due to a work policy from their IT admin, and that they need to turn on their work
+        profile to unblock their apps.[CHAR LIMIT=NONE] -->
+    <string name="personal_apps_suspension_text">
+        Your personal apps are blocked until you turn on your work profile</string>
+    <!-- Notification text. This notification lets a user know that their apps will be blocked
+        at a particular time due to a work policy from their IT admin, and that they need to turn on
+        their work profile to prevent the apps from being blocked. It also explains for how many
+        days the profile is allowed to be off and this number is at least 3. [CHAR LIMIT=NONE] -->
+    <string name="personal_apps_suspension_soon_text">
+        Personal apps will be blocked on <xliff:g id="date" example="May 29">%1$s</xliff:g> at
+        <xliff:g id="time" example="5:20 PM">%2$s</xliff:g>. Your IT admin doesn\u2019t allow your
+        work profile to stay off for more than <xliff:g id="number" example="3">%3$d</xliff:g> days.
+    </string>
+    <!-- Title for the button that turns work profile on. To be used in a notification
+        [CHAR LIMIT=NONE] -->
+    <string name="personal_apps_suspended_turn_profile_on">Turn on</string>
+
     <!-- Display name for any time a piece of data refers to the owner of the phone. For example, this could be used in place of the phone's phone number. -->
     <string name="me">Me</string>
 
@@ -430,7 +470,7 @@
     <!-- Title for the Phone Options dialog to lock the screen, turn off the phone etc. -->
     <string name="power_dialog" product="tablet">Tablet options</string>
     <!-- Title for the Phone Options dialog to lock the screen, turn off the phone etc. -->
-    <string name="power_dialog" product="tv">TV options</string>
+    <string name="power_dialog" product="tv">Android TV options</string>
     <!-- Title for the Phone Options dialog to lock the screen, turn off the phone etc. -->
     <string name="power_dialog" product="default">Phone options</string>
     <!-- Button to turn on silent mode, within the Phone Options dialog -->
@@ -468,7 +508,7 @@
     <string name="shutdown_confirm" product="tablet">Your tablet will shut down.</string>
     <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the TV, there will
          be a confirmation dialog.  This is the message. -->
-    <string name="shutdown_confirm" product="tv">Your TV will shut down.</string>
+    <string name="shutdown_confirm" product="tv">Your Android TV device will shut down.</string>
     <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the watch, there will
          be a confirmation dialog.  This is the message. -->
     <string name="shutdown_confirm" product="watch">Your watch will shut down.</string>
@@ -505,30 +545,32 @@
     <!-- Title of the Global Actions Dialog -->
     <string name="global_actions" product="tablet">Tablet options</string>
     <!-- Title of the Global Actions Dialog -->
-    <string name="global_actions" product="tv">TV options</string>
+    <string name="global_actions" product="tv">Android TV options</string>
     <!-- Title of the Global Actions Dialog -->
     <string name="global_actions" product="default">Phone options</string>
 
-    <!-- label for item that locks the phone in the phone options dialog -->
+    <!-- label for item that locks the phone in the phone options dialog [CHAR LIMIT=24]-->
     <string name="global_action_lock">Screen lock</string>
 
-    <!-- label for item that turns off power in phone options dialog -->
+    <!-- label for item that turns off power in phone options dialog [CHAR LIMIT=24] -->
     <string name="global_action_power_off">Power off</string>
 
-    <!-- label for item that restarts phone in phone options dialog -->
-    <!-- TODO: promote to separate string-->
-    <string name="global_action_restart" translatable="false">@string/sim_restart_button</string>
+    <!-- label for item that shows options to power off and restart the phone [CHAR LIMIT=24]-->
+    <string name="global_action_power_options">Power</string>
 
-    <!-- label for item that starts emergency call -->
+    <!-- label for item that restarts phone in phone options dialog [CHAR LIMIT=24]-->
+    <string name="global_action_restart">Restart</string>
+
+    <!-- label for item that opens emergency features in the phone options dialog [CHAR LIMIT=24]-->
     <string name="global_action_emergency">Emergency</string>
 
-    <!-- label for item that generates a bug report in the phone options dialog -->
+    <!-- label for item that generates a bug report in the phone options dialog [CHAR LIMIT=24] -->
     <string name="global_action_bug_report">Bug report</string>
 
-    <!-- label for item that logouts the current user -->
+    <!-- label for item that logouts the current user [CHAR LIMIT=24]-->
     <string name="global_action_logout">End session</string>
 
-    <!-- label for screenshot item in power menu -->
+    <!-- label for screenshot item in power menu [CHAR LIMIT=24]-->
     <string name="global_action_screenshot">Screenshot</string>
 
     <!-- Take bug report menu title [CHAR LIMIT=30] -->
@@ -560,6 +602,12 @@
     <!-- Format for build summary info [CHAR LIMIT=NONE] -->
     <string name="bugreport_status" translatable="false">%s (%s)</string>
 
+    <!-- Toast for taking screenshot with bugreport successfully. [CHAR_LIMIT=100] -->
+    <string name="bugreport_screenshot_success_toast">Screenshot taken with bug report</string>
+
+    <!-- Toast for failed to take screenshot with bugreport. [CHAR_LIMIT=100] -->
+    <string name="bugreport_screenshot_failure_toast">Failed to take screenshot with bug report</string>
+
     <!-- label for item that enables silent mode in phone options dialog -->
     <string name="global_action_toggle_silent_mode">Silent mode</string>
 
@@ -587,7 +635,7 @@
     <!-- label for item that launches voice assist in phone options dialog [CHAR LIMIT=15]-->
     <string name="global_action_voice_assist">Voice Assist</string>
 
-    <!-- label for item that locks the phone and enforces that it can't be unlocked without strong authentication. [CHAR LIMIT=15] -->
+    <!-- label for item that locks the phone and enforces that it can't be unlocked without strong authentication. [CHAR LIMIT=24] -->
     <string name="global_action_lockdown">Lockdown</string>
 
     <!-- Text to use when the number in a notification info is too large
@@ -623,6 +671,9 @@
 
     <!-- Text shown when viewing channel settings for notifications related to developers -->
     <string name="notification_channel_developer">Developer messages</string>
+
+    <!-- Text shown when viewing channel settings for high importance notifications related to developers [CHAR LIMIT=60]-->
+    <string name="notification_channel_developer_important">Important developer messages</string>
 
     <!-- Text shown when viewing channel settings for notifications related to system updates -->
     <string name="notification_channel_updates">Updates</string>
@@ -701,96 +752,57 @@
     <string name="permgrouplab_contacts">Contacts</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_contacts">access your contacts</string>
-    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
-    <string name="permgrouprequest_contacts">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your contacts?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_location">Location</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_location">access this device\'s location</string>
-    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
-    <string name="permgrouprequest_location">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access this device\'s location?</string>
-    <!-- Subtitle of the message shown to the user when the apps requests permission to use the location only while app is in foreground [CHAR LIMIT=150]-->
-    <string name="permgrouprequestdetail_location">The app will only have access to the location while you\u2019re using the app</string>
-    <!-- Message shown to the user when the apps requests permission to use the location while app is in foreground and background. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
-    <string name="permgroupbackgroundrequest_location">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access this device\u2019s location &lt;b>all the time&lt;/b>?</string>
-    <!-- Subtitle of the message shown to the user when the apps requests permission to use the location while app is in foreground and background [CHAR LIMIT=150] -->
-    <string name="permgroupbackgroundrequestdetail_location">App currently can access location only while you\u2019re using the app</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_calendar">Calendar</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_calendar">access your calendar</string>
-    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
-    <string name="permgrouprequest_calendar">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your calendar?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_sms">SMS</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_sms">send and view SMS messages</string>
-    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
-    <string name="permgrouprequest_sms">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to send and view SMS messages?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_storage">Storage</string>
+    <string name="permgrouplab_storage">Files and media</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_storage">access photos, media, and files on your device</string>
-    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
-    <string name="permgrouprequest_storage">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access photos, media, and files on your device?</string>
 
-    <!-- Title of a category of application permissioncds, listed so the user can choose whether they want to allow the application to do this. -->
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_microphone">Microphone</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_microphone">record audio</string>
-    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
-    <string name="permgrouprequest_microphone">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to record audio?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
     <string name="permgrouplab_activityRecognition">Physical activity</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
     <string name="permgroupdesc_activityRecognition">access your physical activity</string>
-    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
-    <string name="permgrouprequest_activityRecognition">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your physical activity?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_camera">Camera</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_camera">take pictures and record video</string>
-    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
-    <string name="permgrouprequest_camera">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to take pictures and record video?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_calllog">Call logs</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_calllog">read and write phone call log</string>
-    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
-    <string name="permgrouprequest_calllog">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your phone call logs?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_phone">Phone</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_phone">make and manage phone calls</string>
     <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
-    <string name="permgrouprequest_phone">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to make and manage phone calls?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_sensors">Body sensors</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_sensors">access sensor data about your vital signs</string>
-    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
-    <string name="permgrouprequest_sensors">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access sensor data about your vital signs?</string>
 
     <!-- Title for the capability of an accessibility service to retrieve window content. -->
     <string name="capability_title_canRetrieveWindowContent">Retrieve window content</string>
@@ -827,6 +839,11 @@
     <!-- Description for the capability of an accessibility service to perform gestures. -->
     <string name="capability_desc_canCaptureFingerprintGestures">Can capture gestures performed on
         the device\'s fingerprint sensor.</string>
+
+    <!-- Title for the capability of an accessibility service to take screenshot. [CHAR LIMIT=32] -->
+    <string name="capability_title_canTakeScreenshot">Take screenshot</string>
+    <!-- Description for the capability of an accessibility service to take screenshot. [CHAR LIMIT=NONE] -->
+    <string name="capability_desc_canTakeScreenshot">Can take a screenshot of the display.</string>
 
     <!--  Permissions -->
 
@@ -923,7 +940,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readSms" product="tablet">This app can read all SMS (text) messages stored on your tablet.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readSms" product="tv">This app can read all SMS (text) messages stored on your TV.</string>
+    <string name="permdesc_readSms" product="tv">This app can read all SMS (text) messages stored on your Android TV device.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readSms" product="default">This app can read all SMS (text) messages stored on your phone.</string>
 
@@ -986,7 +1003,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_persistentActivity" product="tablet">Allows the app to make parts of itself persistent in memory.  This can limit memory available to other apps slowing down the tablet.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_persistentActivity" product="tv">Allows the app to make parts of itself persistent in memory.  This can limit memory available to other apps slowing down the TV.</string>
+    <string name="permdesc_persistentActivity" product="tv">Allows the app to make parts of itself persistent in memory.  This can limit memory available to other apps slowing down your Android TV device.</string>
     <string name="permdesc_persistentActivity" product="default">Allows the app to make parts of itself persistent in memory.  This can limit memory available to other apps slowing down the phone.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1016,8 +1033,8 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_receiveBootCompleted" product="tv">Allows the app to
         have itself started as soon as the system has finished booting.
-        This can make it take longer to start the TV and allow the
-        app to slow down the overall tablet by always running.</string>
+        This can make it take longer to start your Android TV device and allow the
+        app to slow down the overall device by always running.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_receiveBootCompleted" product="default">Allows the app to
         have itself started as soon as the system has finished booting.
@@ -1034,7 +1051,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_broadcastSticky" product="tv">Allows the app to
     send sticky broadcasts, which remain after the broadcast ends. Excessive use
-    may make the TV slow or unstable by causing it to use too much memory.
+    may make your Android TV device slow or unstable by causing it to use too much memory.
     </string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_broadcastSticky" product="default">Allows the app to
@@ -1046,12 +1063,18 @@
     <string name="permlab_readContacts">read your contacts</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readContacts" product="tablet">Allows the app to read data about your contacts stored on your tablet.
+      Apps will also have access to the accounts on your tablet that have created contacts.
+      This may include accounts created by apps you have installed.
       This permission allows apps to save your contact data, and malicious apps may share contact data without your knowledge.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readContacts" product="tv">Allows the app to read data about your contacts stored on your TV.
+    <string name="permdesc_readContacts" product="tv">Allows the app to read data about your contacts stored on your Android TV device.
+      Apps will also have access to the accounts on your Android TV device that have created contacts.
+      This may include accounts created by apps you have installed.
       This permission allows apps to save your contact data, and malicious apps may share contact data without your knowledge.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readContacts" product="default">Allows the app to read data about your contacts stored on your phone.
+      Apps will also have access to the accounts on your phone that have created contacts.
+      This may include accounts created by apps you have installed.
       This permission allows apps to save your contact data, and malicious apps may share contact data without your knowledge.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1060,7 +1083,7 @@
     <string name="permdesc_writeContacts" product="tablet">Allows the app to modify the data about your contacts stored on your tablet.
       This permission allows apps to delete contact data.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeContacts" product="tv">Allows the app to modify the data about your contacts stored on your TV.
+    <string name="permdesc_writeContacts" product="tv">Allows the app to modify the data about your contacts stored on your Android TV device.
       This permission allows apps to delete contact data.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_writeContacts" product="default">Allows the app to modify the data about your contacts stored on your phone.
@@ -1077,7 +1100,7 @@
     <string name="permdesc_writeCallLog" product="tablet">Allows the app to modify your tablet\'s call log, including data about incoming and outgoing calls.
         Malicious apps may use this to erase or modify your call log.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeCallLog" product="tv">Allows the app to modify your TV\'s call log, including data about incoming and outgoing calls.
+    <string name="permdesc_writeCallLog" product="tv">Allows the app to modify your Android TV device\'s call log, including data about incoming and outgoing calls.
         Malicious apps may use this to erase or modify your call log.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_writeCallLog" product="default">Allows the app to modify your phone\'s call log, including data about incoming and outgoing calls.
@@ -1095,7 +1118,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readCalendar" product="tablet">This app can read all calendar events stored on your tablet and share or save your calendar data.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readCalendar" product="tv">This app can read all calendar events stored on your TV and share or save your calendar data.</string>
+    <string name="permdesc_readCalendar" product="tv">This app can read all calendar events stored on your Android TV device and share or save your calendar data.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readCalendar" product="default">This app can read all calendar events stored on your phone and share or save your calendar data.</string>
 
@@ -1104,11 +1127,12 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_writeCalendar" product="tablet">This app can add, remove, or change calendar events on your tablet. This app can send messages that may appear to come from calendar owners, or change events without notifying their owners.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeCalendar" product="tv">This app can add, remove, or change calendar events on your TV. This app can send messages that may appear to come from calendar owners, or change events without notifying their owners.</string>
+    <string name="permdesc_writeCalendar" product="tv">This app can add, remove, or change calendar events on your Android TV device. This app can send messages that may appear to come from calendar owners, or change events without notifying their owners.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_writeCalendar" product="default">This app can add, remove, or change calendar events on your phone. This app can send messages that may appear to come from calendar owners, or change events without notifying their owners.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the applicatfion to do this. -->
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessLocationExtraCommands">access extra location provider commands</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessLocationExtraCommands">Allows the app to access
@@ -1118,23 +1142,17 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessFineLocation">access precise location only in the foreground</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessFineLocation">This app can get your exact location only when it is in the foreground. These location services must be turned on and available on your phone for the app to be able to use them. This may increase battery consumption.</string>
+    <string name="permdesc_accessFineLocation">This app can get your precise location from location services while the app is in use. Location services for your device must be turned on for the app to get location. This may increase battery usage.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessCoarseLocation">access approximate location (network-based) only in the foreground</string>
+    <string name="permlab_accessCoarseLocation">access approximate location only in the foreground</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessCoarseLocation" product="tablet">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when when the app is in the foreground. These location services must be turned on and available on your tablet for the app to be able to use them.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessCoarseLocation" product="tv">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when when the app is in the foreground. These location services must be turned on and available on your TV for the app to be able to use them.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessCoarseLocation" product="automotive">This app can get your approximate location only when it is in the foreground. These location services must be turned on and available on your car for the app to be able to use them.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessCoarseLocation" product="default">This app can get your location based on network sources such as cell towers and Wi-Fi networks, but only when the app is in the foreground. These location services must be turned on and available on your phone for the app to be able to use them.</string>
+    <string name="permdesc_accessCoarseLocation">This app can get your approximate location from location services while the app is in use. Location services for your device must be turned on for the app to get location.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessBackgroundLocation">access location in the background</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessBackgroundLocation">If this is granted additionally to the approximate or precise location access the app can access the location while running in the background.</string>
+    <string name="permdesc_accessBackgroundLocation">This app can access location at any time, even while the app is not in use.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_modifyAudioSettings">change your audio settings</string>
@@ -1162,6 +1180,11 @@
     <string name="permdesc_camera">This app can take pictures and record videos using the camera at any time.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_systemCamera">Allow an application or service access to system cameras to take pictures and videos</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permdesc_systemCamera">This privileged or system app can take pictures and record videos using a system camera at any time. Requires the android.permission.CAMERA permission to be held by the app as well</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
     <string name="permlab_cameraOpenCloseListener">Allow an application or service to receive callbacks about camera devices being opened or closed.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
     <string name="permdesc_cameraOpenCloseListener">This app can receive callbacks when any camera device is being opened (by what application) or closed.</string>
@@ -1170,6 +1193,8 @@
     <string name="permlab_vibrate">control vibration</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_vibrate">Allows the app to control the vibrator.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_vibrator_state">Allows the app to access the vibrator state.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_callPhone">directly call phone numbers</string>
@@ -1210,6 +1235,14 @@
         device. This includes information such as call numbers for calls and the state of the
         calls.</string>
 
+    <!-- Title of an application permission. When granted the app is exempt from audio record
+    restrictions.
+    [CHAR LIMIT=NONE]-->
+    <string name="permlab_exemptFromAudioRecordRestrictions">exempt from audio record restrictions</string>
+    <!-- Description of an application permission. When granted the app is exempt from audio record
+    restrictions. [CHAR LIMIT=NONE]-->
+    <string name="permdesc_exemptFromAudioRecordRestrictions">Exempt the app from restrictions to record audio.</string>
+
     <!-- Title of an application permission.  When granted the user is giving access to a third
          party app to continue a call which originated in another app.  For example, the user
          could be in a voice call over their carrier's mobile network, and a third party video
@@ -1231,7 +1264,7 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_wakeLock" product="tablet">prevent tablet from sleeping</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_wakeLock" product="tv">prevent TV from sleeping</string>
+    <string name="permlab_wakeLock" product="tv">prevent your Android TV device from sleeping</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_wakeLock" product="default">prevent phone from sleeping</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1239,7 +1272,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_wakeLock" product="tablet">Allows the app to prevent the tablet from going to sleep.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_wakeLock" product="tv">Allows the app to prevent the TV from going to sleep.</string>
+    <string name="permdesc_wakeLock" product="tv">Allows the app to prevent your Android TV device from going to sleep.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_wakeLock" product="default">Allows the app to prevent the phone from going to sleep.</string>
 
@@ -1248,7 +1281,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_transmitIr" product="tablet">Allows the app to use the tablet\'s infrared transmitter.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_transmitIr" product="tv">Allows the app to use the TV\'s infrared transmitter.</string>
+    <string name="permdesc_transmitIr" product="tv">Allows the app to use your Android TV device\'s infrared transmitter.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_transmitIr" product="default">Allows the app to use the phone\'s infrared transmitter.</string>
 
@@ -1267,7 +1300,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_setTimeZone" product="tablet">Allows the app to change the tablet\'s time zone.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setTimeZone" product="tv">Allows the app to change the TV\'s time zone.</string>
+    <string name="permdesc_setTimeZone" product="tv">Allows the app to change your Android TV device\'s time zone.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_setTimeZone" product="default">Allows the app to change the phone\'s time zone.</string>
 
@@ -1279,7 +1312,7 @@
       created by applications you have installed.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_getAccounts" product="tv">Allows the app to get
-      the list of accounts known by the TV.  This may include any accounts
+      the list of accounts known by your Android TV device.  This may include any accounts
       created by applications you have installed.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_getAccounts" product="default">Allows the app to get
@@ -1334,7 +1367,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_changeWifiMulticastState" product="tv">Allows the app to receive
       packets sent to all devices on a Wi-Fi network using multicast addresses,
-      not just your TV.  It uses more power than the non-multicast mode.</string>
+      not just your Android TV device.  It uses more power than the non-multicast mode.</string>
     <string name="permdesc_changeWifiMulticastState" product="default">Allows the app to receive
       packets sent to all devices on a Wi-Fi network using multicast addresses,
       not just your phone.  It uses more power than the non-multicast mode.</string>
@@ -1347,7 +1380,7 @@
       devices.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bluetoothAdmin" product="tv">Allows the app to
-      configure the local Bluetooth TV, and to discover and pair with remote
+      configure Bluetooth on your Android TV device, and to discover and pair with remote
       devices.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bluetoothAdmin" product="default">Allows the app to configure
@@ -1362,7 +1395,7 @@
     <string name="permdesc_changeWimaxState" product="tablet">Allows the app to
       connect the tablet to and disconnect the tablet from WiMAX networks.</string>
     <string name="permdesc_changeWimaxState" product="tv">Allows the app to
-      connect the TV to and disconnect the TV from WiMAX networks.</string>
+      connect your Android TV device to and disconnect your Android TV device from WiMAX networks.</string>
     <string name="permdesc_changeWimaxState" product="default">Allows the app to
       connect the phone to and disconnect the phone from WiMAX networks.</string>
 
@@ -1374,7 +1407,7 @@
       connections with paired devices.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bluetooth" product="tv">Allows the app to view the
-      configuration of Bluetooth on the TV, and to make and accept
+      configuration of Bluetooth on your Android TV device, and to make and accept
       connections with paired devices.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bluetooth" product="default">Allows the app to view the
@@ -1446,7 +1479,7 @@
     <string name="permdesc_mediaLocation">Allows the app to read locations from your media collection.</string>
 
     <!-- Title shown when the system-provided biometric dialog is shown, asking the user to authenticate. [CHAR LIMIT=40] -->
-    <string name="biometric_dialog_default_title">Verify it\u2018s you</string>
+    <string name="biometric_dialog_default_title">Verify it\u2019s you</string>
     <!-- Message shown when biometric hardware is not available [CHAR LIMIT=50] -->
     <string name="biometric_error_hw_unavailable">Biometric hardware unavailable</string>
     <!-- Message shown when biometric authentication was canceled by the user [CHAR LIMIT=50] -->
@@ -1499,6 +1532,8 @@
     <string name="fingerprint_error_no_fingerprints">No fingerprints enrolled.</string>
     <!-- Generic error message shown when the app requests fingerprint authentication on a device without a sensor -->
     <string name="fingerprint_error_hw_not_present">This device does not have a fingerprint sensor.</string>
+    <!-- Generic error message shown when fingerprint is not available due to a security vulnerability. [CHAR LIMIT=50] -->
+    <string name="fingerprint_error_security_update_required">Sensor temporarily disabled.</string>
 
     <!-- Template to be used to name enrolled fingerprints by default. -->
     <string name="fingerprint_name_template">Finger <xliff:g id="fingerId" example="1">%d</xliff:g></string>
@@ -1578,18 +1613,20 @@
     <string name="face_error_no_space">Can\u2019t store new face data. Delete an old one first.</string>
     <!-- Generic error message shown when the face operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user. [CHAR LIMIT=50] -->
     <string name="face_error_canceled">Face operation canceled.</string>
-    <!-- Generic error message shown when the face unlock operation is canceled due to user input. Generally not shown to the user [CHAR LIMIT=54] -->
+    <!-- Generic error message shown when the face unlock operation is canceled due to user input. Generally not shown to the user [CHAR LIMIT=68] -->
     <string name="face_error_user_canceled">Face unlock canceled by user.</string>
     <!-- Generic error message shown when the face operation fails because too many attempts have been made. [CHAR LIMIT=50] -->
     <string name="face_error_lockout">Too many attempts. Try again later.</string>
-    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=71] -->
+    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=77] -->
     <string name="face_error_lockout_permanent">Too many attempts. Face unlock disabled.</string>
     <!-- Generic error message shown when the face hardware can't recognize the face. [CHAR LIMIT=50] -->
     <string name="face_error_unable_to_process">Can\u2019t verify face. Try again.</string>
-    <!-- Generic error message shown when the user has no enrolled face. [CHAR LIMIT=52] -->
+    <!-- Generic error message shown when the user has no enrolled face. [CHAR LIMIT=59] -->
     <string name="face_error_not_enrolled">You haven\u2019t set up face unlock.</string>
     <!-- Generic error message shown when the app requests face unlock on a device without a sensor. [CHAR LIMIT=61] -->
     <string name="face_error_hw_not_present">Face unlock is not supported on this device.</string>
+    <!-- Generic error message shown when face unlock is not available due to a security vulnerability. [CHAR LIMIT=50] -->
+    <string name="face_error_security_update_required">Sensor temporarily disabled.</string>
 
     <!-- Template to be used to name enrolled faces by default. [CHAR LIMIT=10] -->
     <string name="face_name_template">Face <xliff:g id="faceId" example="1">%d</xliff:g></string>
@@ -1756,8 +1793,8 @@
     typed when unlocking the screen, and lock the tablet or erase all the tablet\'s
     data if too many incorrect passwords are typed.</string>
     <!-- Description of policy access to watch user login attempts -->
-    <string name="policydesc_watchLogin" product="TV">Monitor the number of incorrect passwords
-    typed when unlocking the screen, and lock the TV or erase all the TV\'s
+    <string name="policydesc_watchLogin" product="tv">Monitor the number of incorrect passwords
+    typed when unlocking the screen, and lock your Android TV device or erase all your Android TV device\'s
     data if too many incorrect passwords are typed.</string>
     <!-- Description of policy access to watch user login attempts -->
     <string name="policydesc_watchLogin" product="default">Monitor the number of incorrect passwords
@@ -1766,8 +1803,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet">Monitor the number of incorrect passwords
     typed when unlocking the screen, and lock the tablet or erase all this user\'s data
     if too many incorrect passwords are typed.</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV">Monitor the number of incorrect passwords
-    typed when unlocking the screen, and lock the TV or erase all this user\'s data
+    <string name="policydesc_watchLogin_secondaryUser" product="tv">Monitor the number of incorrect passwords
+    typed when unlocking the screen, and lock your Android TV device or erase all this user\'s data
     if too many incorrect passwords are typed.</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default">Monitor the number of incorrect passwords
     typed when unlocking the screen, and lock the phone or erase all this user\'s data
@@ -1785,7 +1822,7 @@
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData" product="tablet">Erase the tablet\'s data without warning by performing a factory data reset.</string>
     <!-- Description of policy access to wipe the user's data -->
-    <string name="policydesc_wipeData" product="tv">Erase the TV\'s data without warning by performing a factory data reset.</string>
+    <string name="policydesc_wipeData" product="tv">Erase your Android TV device\'s data without warning by performing a factory data reset.</string>
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData" product="default">Erase the phone\'s data without warning by performing a factory data reset.</string>
     <!-- Title of policy access to wipe secondary user's data -->
@@ -1793,7 +1830,7 @@
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData_secondaryUser" product="tablet">Erase this user\'s data on this tablet without warning.</string>
     <!-- Description of policy access to wipe the user's data -->
-    <string name="policydesc_wipeData_secondaryUser" product="tv">Erase this user\'s data on this TV without warning.</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv">Erase this user\'s data on this Android TV device without warning.</string>
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData_secondaryUser" product="default">Erase this user\'s data on this phone without warning.</string>
     <!-- Title of policy access to set global proxy -->
@@ -2106,7 +2143,7 @@
     <!-- Shown in the lock screen when there is no SIM card. -->
     <string name="lockscreen_missing_sim_message" product="tablet">No SIM card in tablet.</string>
     <!-- Shown in the lock screen when there is no SIM card. -->
-    <string name="lockscreen_missing_sim_message" product="tv">No SIM card in TV.</string>
+    <string name="lockscreen_missing_sim_message" product="tv">No SIM card in your Android TV device.</string>
     <!-- Shown in the lock screen when there is no SIM card. -->
     <string name="lockscreen_missing_sim_message" product="default">No SIM card in phone.</string>
     <!-- Shown in the lock screen to ask the user to insert a SIM card. -->
@@ -2191,7 +2228,7 @@
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv">
         You have incorrectly drawn your unlock pattern <xliff:g id="number">%1$d</xliff:g> times.
        After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
-       you will be asked to unlock your TV using your Google signin.\n\n
+       you will be asked to unlock your Android TV device using your Google signin.\n\n
        Try again in <xliff:g id="number">%3$d</xliff:g> seconds.
     </string>
 
@@ -2215,9 +2252,9 @@
     <!-- For the unlock screen, informational message shown in dialog when user is almost at the limit
          where the device will be wiped. -->
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv">
-       You have incorrectly attempted to unlock the TV <xliff:g id="number">%1$d</xliff:g> times.
+       You have incorrectly attempted to unlock your Android TV device <xliff:g id="number">%1$d</xliff:g> times.
        After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
-       the TV will be reset to factory default and all user data will be lost.
+       your Android TV device will be reset to factory default and all user data will be lost.
     </string>
 
     <!-- For the unlock screen, informational message shown in dialog when user is almost at the limit
@@ -2238,8 +2275,8 @@
     <!-- For the unlock screen, informational message shown in dialog when user has exceeded the
         maximum attempts and the device will now be wiped -->
     <string name="lockscreen_failed_attempts_now_wiping" product="tv">
-       You have incorrectly attempted to unlock the TV <xliff:g id="number">%d</xliff:g> times.
-       The TV will now be reset to factory default.
+       You have incorrectly attempted to unlock your Android TV device <xliff:g id="number">%d</xliff:g> times.
+       Your Android TV device will now be reset to factory default.
     </string>
 
     <!-- For the unlock screen, informational message shown in dialog when user has exceeded the
@@ -2606,7 +2643,7 @@
     <!-- Description of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->
     <string name="permdesc_writeHistoryBookmarks" product="tv">Allows the
-        app to modify the Browser\'s history or bookmarks stored on your TV.
+        app to modify the Browser\'s history or bookmarks stored on your Android TV device.
         This may allow the app to erase or modify Browser data.  Note: this
         permission may note be enforced by third-party browsers or other
         applications with web browsing capabilities.</string>
@@ -2966,72 +3003,6 @@
     <!-- Title for EditText context menu [CHAR LIMIT=20] -->
     <string name="editTextMenuTitle">Text actions</string>
 
-    <!-- Label for item in the text selection menu to trigger an Email app. Should be a verb. [CHAR LIMIT=30] -->
-    <string name="email">Email</string>
-
-    <!-- Accessibility description for an item in the text selection menu to trigger an Email app [CHAR LIMIT=NONE] -->
-    <string name="email_desc">Email selected address</string>
-
-    <!-- Label for item in the text selection menu to trigger a Dialer app. Should be a verb. [CHAR LIMIT=30] -->
-    <string name="dial">Call</string>
-
-    <!-- Accessibility description for an item in the text selection menu to call a phone number [CHAR LIMIT=NONE] -->
-    <string name="dial_desc">Call selected phone number</string>
-
-    <!-- Label for item in the text selection menu to trigger a Map app. Should be a verb. [CHAR LIMIT=30] -->
-    <string name="map">Map</string>
-
-    <!-- Accessibility description for an item in the text selection menu to open maps for an address [CHAR LIMIT=NONE] -->
-    <string name="map_desc">Locate selected address</string>
-
-    <!-- Label for item in the text selection menu to trigger a Browser app. Should be a verb. [CHAR LIMIT=30] -->
-    <string name="browse">Open</string>
-
-    <!-- Accessibility description for an item in the text selection menu to open a URL in a browser [CHAR LIMIT=NONE] -->
-    <string name="browse_desc">Open selected URL</string>
-
-    <!-- Label for item in the text selection menu to trigger an SMS app. Should be a verb. [CHAR LIMIT=30] -->
-    <string name="sms">Message</string>
-
-    <!-- Accessibility description for an item in the text selection menu to send an SMS to a phone number [CHAR LIMIT=NONE] -->
-    <string name="sms_desc">Message selected phone number</string>
-
-    <!-- Label for item in the text selection menu to trigger adding a contact. Should be a verb. [CHAR LIMIT=30] -->
-    <string name="add_contact">Add</string>
-
-    <!-- Accessibility description for an item in the text selection menu to add the selected detail to contacts [CHAR LIMIT=NONE] -->
-    <string name="add_contact_desc">Add to contacts</string>
-
-    <!-- Label for item in the text selection menu to view the calendar for the selected time/date. Should be a verb. [CHAR LIMIT=30] -->
-    <string name="view_calendar">View</string>
-
-    <!-- Accessibility description for an item in the text selection menu to view the calendar for a date [CHAR LIMIT=NONE]-->
-    <string name="view_calendar_desc">View selected time in calendar</string>
-
-    <!-- Label for item in the text selection menu to create a calendar event at the selected time/date. Should be a verb. [CHAR LIMIT=30] -->
-    <string name="add_calendar_event">Schedule</string>
-
-    <!-- Accessibility description for an item in the text selection menu to schedule an event for a date [CHAR LIMIT=NONE] -->
-    <string name="add_calendar_event_desc">Schedule event for selected time</string>
-
-    <!-- Label for item in the text selection menu to track a selected flight number. Should be a verb. [CHAR LIMIT=30] -->
-    <string name="view_flight">Track</string>
-
-    <!-- Accessibility description for an item in the text selection menu to track a flight [CHAR LIMIT=NONE] -->
-    <string name="view_flight_desc">Track selected flight</string>
-
-    <!-- Label for item in the text selection menu to translate selected text with a translation app. Should be a verb. [CHAR LIMIT=30] -->
-    <string name="translate">Translate</string>
-
-    <!-- Accessibility description for an item in the text selection menu to translate selected text with a translation app. [CHAR LIMIT=NONE] -->
-    <string name="translate_desc">Translate selected text</string>
-
-    <!-- Label for item in the text selection menu to define selected text with a dictionary app. Should be a verb. [CHAR LIMIT=30] -->
-    <string name="define">Define</string>
-
-    <!-- Accessibility description for an item in the text selection menu to define selected text with a dictionary app. Should be a verb. [CHAR LIMIT=NONE] -->
-    <string name="define_desc">Define selected text</string>
-
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the title of that notification. -->
     <string name="low_internal_storage_view_title">Storage space running out</string>
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the message of that notification. -->
@@ -3068,6 +3039,11 @@
     <string name="capital_on">ON</string>
     <!-- Default text for a button that can be toggled on and off. -->
     <string name="capital_off">OFF</string>
+
+    <!-- Default state for CompoundButton for on and off. [CHAR LIMIT=32] -->
+    <string name="checked">checked</string>
+    <!-- Default text for a button that can be toggled on and off. [CHAR LIMIT=32] -->
+    <string name="not_checked">not checked</string>
 
     <!-- Title of intent resolver dialog when selecting an application to run. -->
     <string name="whichApplication">Complete action using</string>
@@ -3367,74 +3343,6 @@
     <!-- If there is ever a ringtone set for some setting, but that ringtone can no longer be resolved, t his is shown instead.  For example, if the ringtone was on a SD card and it had been removed, this woudl be shown for ringtones on that SD card. -->
     <string name="ringtone_unknown">Unknown</string>
 
-    <!-- Start of string constants used to inform the user that the current network may be failing to connect due to not supporting randomized MAC-->
-    <!-- Notification title [CHAR_LIMIT=NONE]-->
-    <string name="wifi_cannot_connect_with_randomized_mac_title">Can\u2019t connect to <xliff:g id="ssid" example="SSID_1">%1$s</xliff:g></string>
-    <!-- Notification text [CHAR_LIMIT=NONE]-->
-    <string name="wifi_cannot_connect_with_randomized_mac_message">Tap to change privacy settings and retry</string>
-    <!-- Title of the dialog which pops up when the notification is tapped. [CHAR_LIMIT=NONE]-->
-    <string name="wifi_disable_mac_randomization_dialog_title">Change privacy setting?</string>
-    <!-- Dialog text [CHAR_LIMIT=NONE]-->
-    <string name="wifi_disable_mac_randomization_dialog_message"><xliff:g id="ssid" example="SSID_1">%1$s</xliff:g> may want to connect using your device MAC address, a unique identifier. This may allow your device\u2019s location to be tracked by nearby devices.
-        \n\nIf you continue, <xliff:g id="ssid" example="SSID_1">%1$s</xliff:g> will change your privacy setting and try to connect again.</string>
-    <!-- Text of the button that will disable MAC randomization for the network when tapped. [CHAR_LIMIT=NONE]-->
-    <string name="wifi_disable_mac_randomization_dialog_confirm_text">Change setting</string>
-    <!-- Toast message which shows up after MAC randomization for the network is disabled. [CHAR_LIMIT=NONE]-->
-    <string name="wifi_disable_mac_randomization_dialog_success">Setting updated. Try connecting again.</string>
-    <!-- Toast message which shows up if the operation failed. [CHAR_LIMIT=NONE]-->
-    <string name="wifi_disable_mac_randomization_dialog_failure">Can\u2019t change privacy setting</string>
-    <!-- Toast message which shows up if the network no longer exists on the device. [CHAR_LIMIT=NONE]-->
-    <string name="wifi_disable_mac_randomization_dialog_network_not_found">Network not found</string>
-    <!-- End of string constants used to inform the user that the current network may be failing to connect due to not supporting randomized MAC-->
-
-    <!-- A notification is shown when there are open wireless networks nearby.  This is the notification's title. -->
-    <plurals name="wifi_available">
-        <item quantity="one">Wi-Fi network available</item>
-        <item quantity="other">Wi-Fi networks available</item>
-    </plurals>
-    <!-- A notification is shown when there are open wireless networks nearby.  This is the notification's message. -->
-    <plurals name="wifi_available_detailed">
-        <item quantity="one">Open Wi-Fi network available</item>
-        <item quantity="other">Open Wi-Fi networks available</item>
-    </plurals>
-
-    <!-- Notification title for a nearby open wireless network.-->
-    <string name="wifi_available_title">Connect to open Wi\u2011Fi network</string>
-    <!-- Notification title for a nearby carrier wireless network.-->
-    <string name="wifi_available_carrier_network_title">Connect to carrier Wi\u2011Fi network</string>
-    <!-- Notification title when the system is connecting to the specified network. The network name is specified in the notification content. -->
-    <string name="wifi_available_title_connecting">Connecting to Wi\u2011Fi network</string>
-    <!-- Notification title when the system has connected to the network. The network name is specified in the notification content. -->
-    <string name="wifi_available_title_connected">Connected to Wi\u2011Fi network</string>
-    <!-- Notification title when the system failed to connect to the specified network. -->
-    <string name="wifi_available_title_failed_to_connect">Could not connect to Wi\u2011Fi network</string>
-    <!-- Notification content when the system failed to connect to the specified network. This informs the user that tapping on this notification will open the wifi picker. -->
-    <string name="wifi_available_content_failed_to_connect">Tap to see all networks</string>
-    <!-- Notification action name for connecting to the network specified in the notification body. -->
-    <string name="wifi_available_action_connect">Connect</string>
-    <!-- Notification action name for opening the wifi picker, showing the user all the nearby networks. -->
-    <string name="wifi_available_action_all_networks">All networks</string>
-
-    <!-- Notification title for a connection to a app suggested wireless network.-->
-    <string name="wifi_suggestion_title">Allow suggested Wi\u2011Fi networks?</string>
-    <!-- Notification content for a connection to a app suggested wireless network.-->
-    <string name="wifi_suggestion_content"><xliff:g id="name" example="App123">%s</xliff:g> suggested networks. Device may connect automatically. </string>
-    <!-- Notification action for allowing app specified in the notification body.-->
-    <string name="wifi_suggestion_action_allow_app">Allow</string>
-    <!-- Notification action for disallowing app specified in the notification body.-->
-    <string name="wifi_suggestion_action_disallow_app">No thanks</string>
-
-    <!--Notification title for Wi-Fi Wake onboarding. This is displayed the first time a user disables Wi-Fi with the feature enabled. -->
-    <string name="wifi_wakeup_onboarding_title">Wi\u2011Fi will turn on automatically</string>
-    <!--Notification subtext for Wi-Fi Wake onboarding.-->
-    <string name="wifi_wakeup_onboarding_subtext">When you\'re near a high quality saved network</string>
-    <!--Notification action to disable Wi-Fi Wake during onboarding.-->
-    <string name="wifi_wakeup_onboarding_action_disable">Don\'t turn back on</string>
-    <!--Notification title for when Wi-Fi Wake enables Wi-Fi.-->
-    <string name="wifi_wakeup_enabled_title">Wi\u2011Fi turned on automatically</string>
-    <!--Notification content for when Wi-Fi Wake enables Wi-Fi. %1$s is the SSID of the nearby saved network that triggered the wakeup. -->
-    <string name="wifi_wakeup_enabled_content">You\u0027re near a saved network: <xliff:g id="network_ssid">%1$s</xliff:g></string>
-
     <!-- A notification is shown when a wifi captive portal network is detected.  This is the notification's title. -->
     <string name="wifi_available_sign_in">Sign in to Wi-Fi network</string>
 
@@ -3465,21 +3373,6 @@
     <!-- A notification is shown when the user connects to a network that doesn't have access to some services (e.g. Push notifications may not work). This is the notification's message. [CHAR LIMIT=50] -->
     <string name="network_partial_connectivity_detailed">Tap to connect anyway</string>
 
-    <!-- A notification is shown when the user's softap config has been changed due to underlying
-         hardware restrictions. This is the notifications's title.
-         [CHAR_LIMIT=NONE] -->
-    <string name="wifi_softap_config_change">Changes to your hotspot settings</string>
-
-    <!-- A notification is shown when the user's softap config has been changed due to underlying
-         hardware restrictions. This is the notification's summary message.
-         [CHAR_LIMIT=NONE] -->
-    <string name="wifi_softap_config_change_summary">Your hotspot band has changed.</string>
-
-    <!-- A notification is shown when the user's softap config has been changed due to underlying
-         hardware restrictions. This is the notification's full message.
-         [CHAR_LIMIT=NONE] -->
-    <string name="wifi_softap_config_change_detailed">This device doesn\u2019t support your preference for 5GHz only. Instead, this device will use the 5GHz band when available.</string>
-
     <!-- A notification might be shown if the device switches to another network type (e.g., mobile data) because it detects that the network it was using (e.g., Wi-Fi) has lost Internet connectivity. This is the notification's title. %1$s is the network type that the device switched to, e.g., cellular data. It is one of the strings in the network_switch_type_name array. -->
     <string name="network_switch_metered">Switched to <xliff:g id="network_type">%1$s</xliff:g></string>
 
@@ -3501,43 +3394,8 @@
     <!-- Network type name displayed if one of the types is not found in network_switch_type_name. -->
     <string name="network_switch_type_name_unknown">an unknown network type</string>
 
-     <!-- A notification is shown when a user's selected SSID is later disabled due to connectivity problems.  This is the notification's title / ticker. -->
-     <string name="wifi_watchdog_network_disabled">Couldn\'t connect to Wi-Fi</string>
-     <!-- A notification is shown when a user's selected SSID is later disabled due to connectivity problems.  The complete alert msg is: <hotspot name> + this string, i.e. "Linksys has a poor internet connection" -->
-    <string name="wifi_watchdog_network_disabled_detailed">\u0020has a poor internet connection.</string>
-
-    <!-- Do not translate. Default access point SSID used for tethering -->
-    <string name="wifi_tether_configure_ssid_default" translatable="false">AndroidAP</string>
-    <!-- Do not translate. Default access point SSID used for local only hotspot -->
-    <string name="wifi_localhotspot_configure_ssid_default" translatable="false">AndroidShare</string>
-
-    <!-- A notification is shown the first time a connection is attempted on an app owned AP -->
-    <!-- title for this message -->
-    <string name="wifi_connect_alert_title">Allow connection?</string>
-    <!-- message explaining who is connecting to what -->
-    <string name="wifi_connect_alert_message">Application %1$s would like to connect to Wifi Network %2$s</string>
-    <!-- default application in case name can not be found -->
-    <string name="wifi_connect_default_application">An application</string>
-
-    <string name="wifi_p2p_dialog_title">Wi-Fi Direct</string>
-    <string name="wifi_p2p_turnon_message">Start Wi-Fi Direct. This will turn off Wi-Fi client/hotspot.</string>
-    <string name="wifi_p2p_failed_message">Couldn\'t start Wi-Fi Direct.</string>
-    <string name="wifi_p2p_enabled_notification_title">Wi-Fi Direct is on</string>
-    <string name="wifi_p2p_enabled_notification_message">Tap for settings</string>
-
     <string name="accept">Accept</string>
     <string name="decline">Decline</string>
-    <string name="wifi_p2p_invitation_sent_title">Invitation sent</string>
-    <string name="wifi_p2p_invitation_to_connect_title">Invitation to connect</string>
-
-    <string name="wifi_p2p_from_message">From: </string>
-    <string name="wifi_p2p_to_message">To: </string>
-    <string name="wifi_p2p_enter_pin_message">Type the required PIN: </string>
-    <string name="wifi_p2p_show_pin_message">PIN: </string>
-
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet">The tablet will temporarily disconnect from Wi-Fi while it\'s connected to <xliff:g id="device_name">%1$s</xliff:g></string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv">The TV will temporarily disconnect from Wi-Fi while it\'s connected to <xliff:g id="device_name">%1$s</xliff:g></string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default">The phone will temporarily disconnect from Wi-Fi while it\'s connected to <xliff:g id="device_name">%1$s</xliff:g></string>
 
     <!-- Name of the dialog that lets the user choose an accented character to insert -->
     <string name="select_character">Insert character</string>
@@ -3662,6 +3520,11 @@
     <!-- Message of notification shown when Test Harness Mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="test_harness_mode_notification_message">Perform a factory reset to disable Test Harness Mode.</string>
 
+    <!-- Title of notification shown when serial console is enabled. [CHAR LIMIT=NONE] -->
+    <string name="console_running_notification_title">Serial console enabled</string>
+    <!-- Message of notification shown when serial console is enabled. [CHAR LIMIT=NONE] -->
+    <string name="console_running_notification_message">Performance is impacted. To disable, check bootloader.</string>
+
     <!-- Title of notification shown when contaminant is detected on the USB port. [CHAR LIMIT=NONE] -->
     <string name="usb_contaminant_detected_title">Liquid or debris in USB port</string>
     <!-- Message of notification shown when contaminant is detected on the USB port. [CHAR LIMIT=NONE] -->
@@ -3736,25 +3599,37 @@
 
     <!-- Notification body when new external media is detected [CHAR LIMIT=30] -->
     <string name="ext_media_new_notification_title">New <xliff:g id="name" example="SD card">%s</xliff:g></string>
+    <!-- Automotive specific notification body when new external media is detected [CHAR LIMIT=30] -->
+    <string name="ext_media_new_notification_title" product="automotive"><xliff:g id="name" example="SD card">%s</xliff:g> isn\u2019t working</string>
     <!-- Notification body when new external media is detected [CHAR LIMIT=NONE] -->
     <string name="ext_media_new_notification_message">Tap to set up</string>
+    <!-- Automotive specific notification body when new external media is detected. [CHAR LIMIT=NONE] -->
+    <string name="ext_media_new_notification_message" product="automotive">You may need to reformat the device. Tap to eject.</string>
 
     <!-- Notification body when external media is ready for use [CHAR LIMIT=NONE] -->
     <string name="ext_media_ready_notification_message">For transferring photos and media</string>
 
     <!-- Notification title when external media is unmountable (corrupt) [CHAR LIMIT=30] -->
     <string name="ext_media_unmountable_notification_title">Issue with <xliff:g id="name" example="SD card">%s</xliff:g></string>
+    <!-- Automotive specific notification title when external media is unmountable (corrupt) [CHAR LIMIT=30] -->
+    <string name="ext_media_unmountable_notification_title" product="automotive"><xliff:g id="name" example="SD card">%s</xliff:g> isn\u2019t working</string>
     <!-- Notification body when external media is unmountable (corrupt) [CHAR LIMIT=NONE] -->
     <string name="ext_media_unmountable_notification_message">Tap to fix</string>
-    <!-- TV-specifiv notification body when external media is unmountable (corrupt) [CHAR LIMIT=NONE] -->
+    <!-- TV-specific notification body when external media is unmountable (corrupt) [CHAR LIMIT=NONE] -->
     <string name="ext_media_unmountable_notification_message" product="tv"><xliff:g id="name" example="SD card">%s</xliff:g> is corrupt. Select to fix.</string>
+    <!-- Automotive specific notification body when external media is unmountable (corrupt) [CHAR LIMIT=NONE] -->
+    <string name="ext_media_unmountable_notification_message" product="automotive">You may need to reformat the device. Tap to eject.</string>
 
     <!-- Notification title when external media is unsupported [CHAR LIMIT=30] -->
     <string name="ext_media_unsupported_notification_title">Unsupported <xliff:g id="name" example="SD card">%s</xliff:g></string>
+    <!-- Automotive specific notification title when external media is unsupported [CHAR LIMIT=30] -->
+    <string name="ext_media_unsupported_notification_title" product="automotive"><xliff:g id="name" example="SD card">%s</xliff:g> isn\u2019t working</string>
     <!-- Notification body when external media is unsupported [CHAR LIMIT=NONE] -->
     <string name="ext_media_unsupported_notification_message">This device doesn\u2019t support this <xliff:g id="name" example="SD card">%s</xliff:g>. Tap to set up in a supported format.</string>
     <!-- TV-specific notification body when external media is unsupported [CHAR LIMIT=NONE] -->
     <string name="ext_media_unsupported_notification_message" product="tv">This device doesn\u2019t support this <xliff:g id="name" example="SD card">%s</xliff:g>. Select to set up in a supported format.</string>
+    <!-- Automotive specific notification body when external media is unsupported [CHAR LIMIT=NONE] -->
+    <string name="ext_media_unsupported_notification_message" product="automotive">You may need to reformat the device</string>
 
     <!-- Notification title when external media is unsafely removed [CHAR LIMIT=30] -->
     <string name="ext_media_badremoval_notification_title"><xliff:g id="name" example="SD card">%s</xliff:g> unexpectedly removed</string>
@@ -4032,6 +3907,19 @@
          information. -->
     <string name="gpsVerifNo">No</string>
 
+    <!-- Notification title shown to user to inform them their device location was accessed by
+         an external entity during an emergency (usually an emergency phone call).
+         [CHAR LIMIT=40] -->
+    <string name="gnss_nfw_notification_title">Emergency location accessed</string>
+    <!-- Notification message shown to user to inform them their device location was accessed by
+         something OEM related during an emergency (usually an emergency phone call).
+         [CHAR LIMIT=NONE] -->
+    <string name="gnss_nfw_notification_message_oem">Your device manufacturer accessed your location during a recent emergency session</string>
+    <!-- Notification message shown to user to inform them their device location was accessed by
+         something carrier related during an emergency (usually an emergency phone call).
+         [CHAR LIMIT=NONE] -->
+    <string name="gnss_nfw_notification_message_carrier">Your carrier accessed your location during a recent emergency session</string>
+
     <!-- Error message when the sync tried to delete too many things -->
     <string name="sync_too_many_deletes">Delete limit exceeded</string>
     <!-- Dialog message for when there are too many deletes that would take place and we want user confirmation -->
@@ -4250,16 +4138,8 @@
     <string name="activity_resolver_use_always">Always</string>
 
     <!-- Title for a button to choose the currently selected activity
-         as the default in the activity resolver. [CHAR LIMIT=50] -->
-    <string name="activity_resolver_set_always">Set to always open</string>
-
-    <!-- Title for a button to choose the currently selected activity
          from the activity resolver to use just this once. [CHAR LIMIT=25] -->
     <string name="activity_resolver_use_once">Just once</string>
-
-    <!-- Title for a button to choose to go to
-          'Open by Default' app settings. [CHAR LIMIT=25] -->
-    <string name="activity_resolver_app_settings">Settings</string>
 
     <!-- Text for the toast that is shown when the user clicks on a launcher that
          doesn't support the work profile. [CHAR LIMIT=100] -->
@@ -4428,9 +4308,9 @@
     </string>
     <!-- Message shown when user is almost at the limit of password attempts where the device will be wiped. -->
     <string name="kg_failed_attempts_almost_at_wipe" product="tv">
-       You have incorrectly attempted to unlock the TV <xliff:g id="number">%1$d</xliff:g> times.
+       You have incorrectly attempted to unlock your Android TV device <xliff:g id="number">%1$d</xliff:g> times.
        After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
-       the TV will be reset to factory default and all user data will be lost.
+       your Android TV device will be reset to factory default and all user data will be lost.
     </string>
     <!-- Message shown when user is almost at the limit of password attempts where the device will be wiped. -->
     <string name="kg_failed_attempts_almost_at_wipe" product="default">
@@ -4445,8 +4325,8 @@
     </string>
     <!-- Message shown in dialog when user has exceeded the maximum attempts and the device will now be wiped -->
     <string name="kg_failed_attempts_now_wiping" product="tv">
-       You have incorrectly attempted to unlock the TV <xliff:g id="number">%d</xliff:g> times.
-       The TV will now be reset to factory default.
+       You have incorrectly attempted to unlock your Android TV device <xliff:g id="number">%d</xliff:g> times.
+       Your Android TV device will now be reset to factory default.
     </string>
     <!-- Message shown in dialog when user has exceeded the maximum attempts and the device will now be wiped -->
     <string name="kg_failed_attempts_now_wiping" product="default">
@@ -4466,7 +4346,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tv">
        You have incorrectly drawn your unlock pattern <xliff:g id="number">%1$d</xliff:g> times.
        After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
-       you will be asked to unlock your TV using an email account.\n\n
+       you will be asked to unlock your Android TV device using an email account.\n\n
        Try again in <xliff:g id="number">%3$d</xliff:g> seconds.
     </string>
     <!-- Message shown in dialog when user is almost at the limit where they will be
@@ -4497,11 +4377,104 @@
     service via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_toogle_warning">
         When the shortcut is on, pressing both volume buttons for 3 seconds will start an
-        accessibility feature.\n\n
-        Current accessibility feature:\n
-        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g>\n\n
-        You can change the feature in Settings > Accessibility.
+        accessibility feature.
     </string>
+
+    <!-- Dialog title for dialog shown when the multiple accessibility shortcut is activated, and we want to confirm that the user understands what's going to happen. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_multiple_service_warning_title">Turn on accessibility features?</string>
+
+    <!-- Message shown in dialog when user is in the process of enabling the multiple accessibility service via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_multiple_service_warning">Holding down both volume keys for a few seconds turns on accessibility features. This may change how your device works.\n\nCurrent features:\n<xliff:g id="service" example="TalkBack">%1$s</xliff:g>\nYou can change selected features in Settings > Accessibility.</string>
+
+    <!-- Used in multiple service warning to list current features. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_multiple_service_list">\t• <xliff:g id="service" example="TalkBack">%1$s</xliff:g>\n</string>
+
+    <!-- Dialog title for dialog shown when this accessibility shortcut is activated, and we want to confirm that the user understands what's going to happen. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_single_service_warning_title">Turn on <xliff:g id="service" example="TalkBack">%1$s</xliff:g>?</string>
+
+    <!-- Message shown in dialog when user is in the process of enabling this accessibility service via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_single_service_warning">Holding down both volume keys for a few seconds turns on <xliff:g id="service" example="TalkBack">%1$s</xliff:g>, an accessibility feature. This may change how your device works.\n\nYou can change this shortcut to another feature in Settings > Accessibility.</string>
+
+    <!-- Text in button that closes the warning dialog about the accessibility shortcut, leaving the
+    shortcut enabled. [CHAR LIMIT=none]-->
+    <string name="accessibility_shortcut_on">Turn on</string>
+
+    <!-- Text in button that closes the warning dialog about the accessibility shortcut, leaving the
+    shortcut enabled. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_off">Don’t turn on</string>
+
+    <!-- Text for a feature status that is enabled. [CHAR LIMIT=20] -->
+    <string name="accessibility_shortcut_menu_item_status_on">ON</string>
+
+    <!-- Text for a feature status that is disabled. [CHAR LIMIT=20] -->
+    <string name="accessibility_shortcut_menu_item_status_off">OFF</string>
+
+    <!-- Title for a warning about security implications of enabling an accessibility
+    service. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_enable_service_title">Allow
+        <xliff:g id="service" example="TalkBack">%1$s</xliff:g> to have full control of your
+        device?</string>
+
+    <!-- Warning that the device data will not be encrypted with password or PIN if
+    enabling an accessibility service and there is a secure lock setup. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_enable_service_encryption_warning">If you turn on
+        <xliff:g id="service" example="TalkBack">%1$s</xliff:g>, your device won’t use your screen
+        lock to enhance data encryption.
+    </string>
+
+    <!-- Warning description that explains that it's appropriate for accessibility
+     services to have full control to help users with accessibility needs. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_service_warning_description">Full control is appropriate for apps
+        that help you with accessibility needs, but not for most apps.
+    </string>
+
+    <!-- Title for the screen control in accessibility dialog. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_service_screen_control_title">View and control screen</string>
+
+    <!-- Description for the screen control in accessibility dialog. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_service_screen_control_description">It can read all content on the
+        screen and display content over other apps.
+    </string>
+
+    <!-- Title for the action perform in accessibility dialog. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_service_action_perform_title">View and perform actions</string>
+
+    <!-- Description for the action perform in accessibility dialog. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_service_action_perform_description">It can track your interactions
+        with an app or a hardware sensor, and interact with apps on your behalf.
+    </string>
+
+    <!-- String for the allow button in accessibility permission dialog. [CHAR LIMIT=10] -->
+    <string name="accessibility_dialog_button_allow">Allow</string>
+    <!-- String for the deny button in accessibility permission dialog. [CHAR LIMIT=10] -->
+    <string name="accessibility_dialog_button_deny">Deny</string>
+
+    <!-- Title for accessibility select shortcut menu dialog. [CHAR LIMIT=100] -->
+    <string name="accessibility_select_shortcut_menu_title">Tap a feature to start using it:</string>
+
+    <!-- Title for accessibility edit shortcut selection menu dialog, and dialog is triggered
+    from accessibility button. [CHAR LIMIT=100] -->
+    <string name="accessibility_edit_shortcut_menu_button_title">Choose features to use with the
+        accessibility button
+    </string>
+
+    <!-- Title for accessibility edit shortcut selection menu dialog, and dialog is triggered
+    from volume key shortcut. [CHAR LIMIT=100] -->
+    <string name="accessibility_edit_shortcut_menu_volume_title">Choose features to use with the
+        volume key shortcut
+    </string>
+
+    <!-- Text for showing the warning to user when uncheck the legacy app item in the accessibility
+    shortcut menu, user can aware the service to be disabled. [CHAR LIMIT=100] -->
+    <string name="accessibility_uncheck_legacy_item_warning">
+        <xliff:g id="service_name" example="TalkBack">%s</xliff:g> has been turned off</string>
+
+    <!-- Text in button that edit the accessibility shortcut menu, user can delete
+    any service item in the menu list. [CHAR LIMIT=100] -->
+    <string name="edit_accessibility_shortcut_menu_button">Edit shortcuts</string>
+
+    <!-- Text in button that complete the accessibility shortcut menu changed status. [CHAR LIMIT=100] -->
+    <string name="done_accessibility_shortcut_menu_button">Done</string>
 
     <!-- Text in button that turns off the accessibility shortcut -->
     <string name="disable_accessibility_shortcut">Turn off Shortcut</string>
@@ -4518,33 +4491,29 @@
      shown in the warning dialog about the accessibility shortcut. -->
     <string name="color_correction_feature_name">Color Correction</string>
 
-    <!-- Text in toast to alert the user that the accessibility shortcut turned on an accessibility
-    service.-->
-    <string name="accessibility_shortcut_enabling_service">Accessibility Shortcut turned
-        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> on</string>
+    <!-- Text in toast to alert the user that the accessibility shortcut turned on an accessibility service. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_enabling_service">Held volume keys. <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> turned on.</string>
 
-    <!-- Text in toast to alert the user that the accessibility shortcut turned off an accessibility
-    service.-->
-    <string name="accessibility_shortcut_disabling_service">Accessibility Shortcut turned
-        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> off</string>
+    <!-- Text in toast to alert the user that the accessibility shortcut turned off an accessibility service. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_disabling_service">Held volume keys. <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> turned off.</string>
 
     <!-- Text spoken when accessibility shortcut warning dialog is shown. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_spoken_feedback">Press and hold both volume keys for three seconds to use
         <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g></string>
 
-    <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. -->
-    <string name="accessibility_button_prompt_text">Choose a service to use when you tap the accessibility button:</string>
+    <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. [CHAR LIMIT=none]-->
+    <string name="accessibility_button_prompt_text">Choose a feature to use when you tap the accessibility button:</string>
     <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button when gesture navigation is enabled [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_prompt_text">Choose a service to use with the accessibility gesture (swipe up from the bottom of the screen with two fingers):</string>
+    <string name="accessibility_gesture_prompt_text">Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with two fingers):</string>
     <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button when gesture navigation and TalkBack is enabled [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_3finger_prompt_text">Choose a service to use with the accessibility gesture (swipe up from the bottom of the screen with three fingers):</string>
+    <string name="accessibility_gesture_3finger_prompt_text">Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with three fingers):</string>
 
-    <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. -->
-    <string name="accessibility_button_instructional_text">To switch between services, touch &amp; hold the accessibility button.</string>
+    <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. [CHAR LIMIT=none]-->
+    <string name="accessibility_button_instructional_text">To switch between features, touch &amp; hold the accessibility button.</string>
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button when gesture navigation is enabled. [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_instructional_text">To switch between services, swipe up with two fingers and hold.</string>
+    <string name="accessibility_gesture_instructional_text">To switch between features, swipe up with two fingers and hold.</string>
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button when gesture navigation and TalkBack is enabled. [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_3finger_instructional_text">To switch between services, swipe up with three fingers and hold.</string>
+    <string name="accessibility_gesture_3finger_instructional_text">To switch between features, swipe up with three fingers and hold.</string>
 
     <!-- Text used to describe system navigation features, shown within a UI allowing a user to assign system magnification features to the Accessibility button in the navigation bar. -->
     <string name="accessibility_magnification_chooser_text">Magnification</string>
@@ -4866,10 +4835,10 @@
     <string name="confirm_battery_saver">OK</string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description, with a "learn more" link. -->
-    <string name="battery_saver_description_with_learn_more">To extend battery life, Battery Saver:\n&#183;Turns on Dark theme\n&#183;Turns off or restricts background activity, some visual effects, and other features like \u201cHey Google\u201d\n\n<annotation id="url">Learn more</annotation></string>
+    <string name="battery_saver_description_with_learn_more">To extend battery life, Battery Saver:\n\n\u2022Turns on Dark theme\n\u2022Turns off or restricts background activity, some visual effects, and other features like \u201cHey Google\u201d\n\n<annotation id="url">Learn more</annotation></string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description, without a "learn more" link. -->
-    <string name="battery_saver_description">To extend battery life, Battery Saver:\n&#183;Turns on Dark theme\n&#183;Turns off or restricts background activity, some visual effects, and other features like \u201cHey Google\u201d</string>
+    <string name="battery_saver_description">To extend battery life, Battery Saver:\n\n\u2022Turns on Dark theme\n\u2022Turns off or restricts background activity, some visual effects, and other features like \u201cHey Google\u201d</string>
 
     <!-- [CHAR_LIMIT=NONE] Data saver: Feature description -->
     <string name="data_saver_description">To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app you’re currently using can access data, but may do so less frequently. This may mean, for example, that images don’t display until you tap them.</string>
@@ -5035,6 +5004,8 @@
     <string name="importance_from_user">You set the importance of these notifications.</string>
     <string name="importance_from_person">This is important because of the people involved.</string>
 
+    <string name="notification_history_title_placeholder">Custom app notification</string>
+
     <!-- Message to user that app trying to create user for an account that already exists. [CHAR LIMIT=none] -->
     <string name="user_creation_account_exists">Allow <xliff:g id="app" example="Gmail">%1$s</xliff:g> to create a new User with <xliff:g id="account" example="foobar@gmail.com">%2$s</xliff:g> (a User with this account already exists) ?</string>
     <!-- Message to user that app is trying to create user for a specified account. [CHAR LIMIT=none] -->
@@ -5068,6 +5039,8 @@
     </string>
     <!-- Title of the button to show users more details about why the app has been suspended [CHAR LIMIT=50]-->
     <string name="app_suspended_more_details">Learn more</string>
+    <!-- Title of the button to unsuspend a suspended app immediately [CHAR LIMIT=50]-->
+    <string name="app_suspended_unsuspend_message">Unpause app</string>
 
     <!-- Title of a dialog. The string is asking if the user wants to turn on their work profile, which contains work apps that are managed by their employer. "Work" is an adjective. [CHAR LIMIT=30] -->
     <string name="work_mode_off_title">Turn on work profile?</string>
@@ -5075,6 +5048,13 @@
     <string name="work_mode_off_message">Your work apps, notifications, data, and other work profile features will be turned on</string>
     <!-- Title for button to turn on work profile. [CHAR LIMIT=NONE] -->
     <string name="work_mode_turn_on">Turn on</string>
+
+    <!-- Title of the dialog that is shown when the user tries to launch a blocked application [CHAR LIMIT=50] -->
+    <string name="app_blocked_title">App is not available</string>
+    <!-- Default message shown in the dialog that is shown when the user tries to launch a blocked application [CHAR LIMIT=NONE] -->
+    <string name="app_blocked_message">
+        <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> is not available right now.
+    </string>
 
     <!-- Message displayed in dialog when app is too old to run on this verison of android. [CHAR LIMIT=NONE] -->
     <string name="deprecated_target_sdk_message">This app was built for an older version of Android and may not work properly. Try checking for updates, or contact the developer.</string>
@@ -5101,8 +5081,12 @@
     <!-- Resolver target actions strings -->
     <!-- Pin this app to the top of the Sharesheet app list. [CHAR LIMIT=60]-->
     <string name="pin_target">Pin</string>
+    <!-- Pin this app to the top of the Sharesheet app list. [CHAR LIMIT=60]-->
+    <string name="pin_specific_target">Pin <xliff:g id="label" example="Tweet">%1$s</xliff:g></string>
     <!-- Un-pin this app in the Sharesheet, so that it is sorted normally. [CHAR LIMIT=60]-->
-    <string name="unpin_target">Unpin</string>
+    <string name="unpin_target">Unpin </string>
+    <!-- Un-pin this app in the Sharesheet, so that it is sorted normally. [CHAR LIMIT=60]-->
+    <string name="unpin_specific_target">Unpin <xliff:g id="label" example="Tweet">%1$s</xliff:g></string>
     <!-- View application info for a target. -->
     <string name="app_info">App info</string>
 
@@ -5208,13 +5192,18 @@
          data (for example, username, password and credit card info) [CHAR LIMIT=NONE] -->
     <string name="autofill_update_title_with_3types">Update these items in <b><xliff:g id="label" example="MyPass">%4$s</xliff:g></b>: <xliff:g id="type" example="Username">%1$s</xliff:g>, <xliff:g id="type" example="Password">%2$s</xliff:g>, and <xliff:g id="type" example="Credit Card">%3$s</xliff:g> ?</string>
 
-
     <!-- Label for the autofill save button [CHAR LIMIT=NONE] -->
     <string name="autofill_save_yes">Save</string>
     <!-- Label for the autofill cancel button [CHAR LIMIT=NONE] -->
     <string name="autofill_save_no">No thanks</string>
+    <!-- Label for the autofill cancel button, saying not to save the filled data at this moment. [CHAR LIMIT=NONE] -->
+    <string name="autofill_save_notnow">Not now</string>
+    <!-- Label for the autofill reject button, saying never to save the filled data. [CHAR LIMIT=NONE] -->
+    <string name="autofill_save_never">Never</string>
     <!-- Label for the autofill update button [CHAR LIMIT=NONE] -->
     <string name="autofill_update_yes">Update</string>
+    <!-- Label for the autofill continue button [CHAR LIMIT=NONE] -->
+    <string name="autofill_continue_yes">Continue</string>
 
     <!-- Label for the type of data being saved for autofill when it represent user credentials with a password [CHAR LIMIT=NONE] -->
     <string name="autofill_save_type_password">password</string>
@@ -5222,6 +5211,12 @@
     <string name="autofill_save_type_address">address</string>
     <!-- Label for the type of data being saved for autofill when it represents a credit card [CHAR LIMIT=NONE] -->
     <string name="autofill_save_type_credit_card">credit card</string>
+    <!-- Label for the type of data being saved for autofill when it represents a debit card [CHAR LIMIT=NONE] -->
+    <string name="autofill_save_type_debit_card">debit card</string>
+    <!-- Label for the type of data being saved for autofill when it represents a payment card [CHAR LIMIT=NONE] -->
+    <string name="autofill_save_type_payment_card">payment card</string>
+    <!-- Label for the type of data being saved for autofill when it represents a card that does not a specified type or cannot identify what the type is for [CHAR LIMIT=NONE] -->
+    <string name="autofill_save_type_generic_card">card</string>
     <!-- Label for the type of data being saved for autofill when it represents an username [CHAR LIMIT=NONE] -->
     <string name="autofill_save_type_username">username</string>
     <!-- Label for the type of data being saved for autofill when it represents an email address [CHAR LIMIT=NONE] -->
@@ -5346,25 +5341,14 @@
     <!-- Battery saver strings -->
     <!-- The user visible name of the notification channel for battery saver notifications [CHAR_LIMIT=80] -->
     <string name="battery_saver_notification_channel_name">Battery Saver</string>
-    <!-- Title of notification letting users know why battery saver didn't turn back on automatically after the device was unplugged [CHAR_LIMIT=NONE] -->
-    <string name="battery_saver_sticky_disabled_notification_title">Battery Saver won\u2019t reactivate until battery low again</string>
-    <!-- Summary of notification letting users know why battery saver didn't turn back on automatically after the device was unplugged [CHAR_LIMIT=NONE] -->
-    <string name="battery_saver_sticky_disabled_notification_summary">Battery has been charged to a sufficient level. Battery Saver won\u2019t reactivate until the battery is low again.</string>
+    <!-- Title of notification letting users know that battery saver is now off [CHAR_LIMIT=80] -->
+    <string name="battery_saver_off_notification_title">Battery Saver turned off</string>
     <!-- Title of notification letting users know the battery level at the time the notification was posted [CHAR_LIMIT=80] -->
-    <string name="battery_saver_charged_notification_title" product="default">Phone <xliff:g id="charge level" example="90%">%1$s</xliff:g> charged</string>
+    <string name="battery_saver_charged_notification_summary" product="default">Phone has enough charge. Features no longer restricted.</string>
     <!-- Title of notification letting users know the battery level at the time the notification was posted [CHAR_LIMIT=80] -->
-    <string name="battery_saver_charged_notification_title" product="tablet">Tablet <xliff:g id="charge level" example="90%">%1$s</xliff:g> charged</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet">Tablet has enough charge. Features no longer restricted.</string>
     <!-- Title of notification letting users know the battery level at the time the notification was posted [CHAR_LIMIT=80] -->
-    <string name="battery_saver_charged_notification_title" product="device">Device <xliff:g id="charge level" example="90%">%1$s</xliff:g> charged</string>
-    <!-- Summary of notification letting users know that battery saver is now off [CHAR_LIMIT=NONE] -->
-    <string name="battery_saver_off_notification_summary">Battery Saver is off. Features no longer restricted.</string>
-    <!-- Alternative summary of notification letting users know that battery saver has been turned off.
-     If it's easy to translate the difference between "Battery Saver turned off. Features no longer restricted."
-     and "Battery Saver is off. Features no longer restricted." into the target language,
-     then translate "Battery Saver turned off. Features no longer restricted."
-     If the translation doesn't make a difference or the difference is hard to capture in the target language,
-     then translate "Battery Saver is off. Features no longer restricted." instead. [CHAR_LIMIT=NONE] -->
-    <string name="battery_saver_off_alternative_notification_summary">Battery Saver turned off. Features no longer restricted.</string>
+    <string name="battery_saver_charged_notification_summary" product="device">Device has enough charge. Features no longer restricted.</string>
 
     <!-- Description of media type: folder or directory that contains additional files. [CHAR LIMIT=32] -->
     <string name="mime_type_folder">Folder</string>
@@ -5425,10 +5409,104 @@
     </plurals>
 
     <!-- ChooserActivity - No direct share targets are available. [CHAR LIMIT=NONE] -->
-    <string name="chooser_no_direct_share_targets">Direct share not available</string>
+    <string name="chooser_no_direct_share_targets">No recommended people to share with</string>
 
     <!-- ChooserActivity - Alphabetically sorted apps list label. [CHAR LIMIT=NONE] -->
     <string name="chooser_all_apps_button_label">Apps list</string>
+
+    <!-- Prompt for the USB device resolver dialog with warning text for USB device dialogs.  [CHAR LIMIT=200] -->
+    <string name="usb_device_resolve_prompt_warn">This app has not been granted record permission but could capture audio through this USB device.</string>
+
+    <!-- Accessibility system actions -->
+    <!-- Label for Home action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_home_label">Home</string>
+    <!-- Label for Back action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_back_label">Back</string>
+    <!-- Label for showing recent apps action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_recents_label">Recent Apps</string>
+    <!-- Label for opening notifications action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_notifications_label">Notifications</string>
+    <!-- Label for opening quick settings action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_quick_settings_label">Quick Settings</string>
+    <!-- Label for opening power dialog action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_power_dialog_label">Power Dialog</string>
+    <!-- Label for lock screen action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_lock_screen_label">Lock Screen</string>
+    <!-- Label for taking screenshot action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_screenshot_label">Screenshot</string>
+    <!-- Label for triggering on-screen accessibility shortcut action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label">On-screen Accessibility Shortcut</string>
+    <!-- Label for showing on-screen accessibility shortcut chooser action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label">On-screen Accessibility Shortcut Chooser</string>
+    <!-- Label for triggering hardware accessibility shortcut action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label">Accessibility Shortcut</string>
+    <!-- Accessibility description of caption view -->
+    <string name="accessibility_freeform_caption">Caption bar of <xliff:g id="app_name">%1$s</xliff:g>.</string>
+
+    <!-- Text to tell the user that a package has been forced by themselves in the RESTRICTED bucket. [CHAR LIMIT=NONE] -->
+    <string name="as_app_forced_to_restricted_bucket">
+        <xliff:g id="package_name" example="com.android.example">%1$s</xliff:g> has been put into the RESTRICTED bucket</string>
+
+    <!-- The way a conversation name is displayed when single line. The text will be displayed to the end of this text with some spacing -->
+    <string name="conversation_single_line_name_display"><xliff:g id="sender_name" example="Sara">%1$s</xliff:g>:</string>
+
+    <!-- Text used when a conversation is displayed in a single-line when the latest message is an image. [CHAR_LIMIT=NONE] -->
+    <string name="conversation_single_line_image_placeholder">sent an image</string>
+
+    <!-- Conversation Title fallback if the there is no name provided in a 1:1 conversation [CHAR LIMIT=40]-->
+    <string name="conversation_title_fallback_one_to_one">Conversation</string>
+
+    <!-- Conversation Title fallback if the there is no name provided in a group chat conversation [CHAR LIMIT=40]-->
+    <string name="conversation_title_fallback_group_chat">Group Conversation</string>
+
+    <!-- Number of unread messages displayed on a conversation notification, when greater-than-or-equal-to 100 [CHAR LIMIT=3]-->
+    <string name="unread_convo_overflow"><xliff:g id="max_unread_count" example="99">%1$d</xliff:g>+</string>
+
+    <!-- ResolverActivity - profile tabs -->
+    <!-- Label of a tab on a screen. A user can tap this tap to switch to the 'Personal' view (that shows their personal content) if they have a work profile on their device. [CHAR LIMIT=NONE] -->
+    <string name="resolver_personal_tab">Personal</string>
+    <!-- Label of a tab on a screen. A user can tap this tab to switch to the 'Work' view (that shows their work content) if they have a work profile on their device. [CHAR LIMIT=NONE] -->
+    <string name="resolver_work_tab">Work</string>
+
+    <!-- Accessibility label for the personal tab button. [CHAR LIMIT=NONE] -->
+    <string name="resolver_personal_tab_accessibility">Personal view</string>
+    <!-- Accessibility label for the work tab button. [CHAR LIMIT=NONE] -->
+    <string name="resolver_work_tab_accessibility">Work view</string>
+
+    <!-- Title of a screen. This text lets the user know that their IT admin doesn't allow them to share this specific content with work apps. [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_share_with_work_apps">Can\u2019t share this with work apps</string>
+    <!-- Error message. This text is explaining that the user's IT admin doesn't allow this specific content to be shared with apps in the work profile. [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_share_with_work_apps_explanation">Your IT admin doesn\u2019t allow you to share this content with apps in your work profile</string>
+
+    <!-- Title of an error screen. This error message lets the user know that their IT admin doesn't allow them to open this specific content with a work app. [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_access_work_apps">Can\u2019t open this with work apps</string>
+    <!-- Error message. This message lets the user know that their IT admin doesn't allow them to open this specific content with an app in their work profile. [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_access_work_apps_explanation">Your IT admin doesn\u2019t allow you to open this content with apps in your work profile</string>
+
+    <!-- Title of a screen. This text lets the user know that their IT admin doesn't allow them to share this specific content with personal apps. [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_share_with_personal_apps">Can\u2019t share this with personal apps</string>
+    <!-- Error message. This text is explaining that the user's IT admin doesn't allow them to share this specific content with apps in their personal profile. [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_share_with_personal_apps_explanation">Your IT admin doesn\u2019t allow you to share this content with apps in your personal profile</string>
+
+    <!-- Title of an error screen. This error message lets the user know that their IT admin doesn't allow them to open this specific content with a personal app. [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_access_personal_apps">Can\u2019t open this with personal apps</string>
+    <!-- Error message. This message lets the user know that their IT admin doesn't allow them to open this specific content with an app in their personal profile. [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_access_personal_apps_explanation">Your IT admin doesn\u2019t allow you to open this content with apps in your personal profile</string>
+
+    <!-- Error message. This text lets the user know that they need to turn on work apps in order to share or open content. There's also a button a user can tap to turn on the apps. [CHAR LIMIT=NONE] -->
+    <string name="resolver_turn_on_work_apps">Work profile is paused</string>
+    <!-- Button text. This button turns on a user's work profile so they can access their work apps and data. [CHAR LIMIT=NONE] -->
+    <string name="resolver_switch_on_work">Turn on</string>
+
+    <!-- Error message. This text lets the user know that their current work apps don't support the specific content that they're trying to share. [CHAR LIMIT=NONE] -->
+    <string name="resolver_no_work_apps_available_share">No work apps can support this content</string>
+    <!-- Error message. This text lets the user know that their current work apps can't open this specific content. [CHAR LIMIT=NONE] -->
+    <string name="resolver_no_work_apps_available_resolve">No work apps can open this content</string>
+
+    <!-- Error message. This text lets the user know that their current personal apps don't support the specific content that they're trying to share. [CHAR LIMIT=NONE] -->
+    <string name="resolver_no_personal_apps_available_share">No personal apps can support this content</string>
+    <!-- Error message. This text lets the user know that their current personal apps can't open this specific content. [CHAR LIMIT=NONE] -->
+    <string name="resolver_no_personal_apps_available_resolve">No personal apps can open this content</string>
 
     <!-- Icc depersonalization related strings -->
     <!-- Label text for PIN entry widget on SIM Network Depersonalization panel [CHAR LIMIT=none] -->
@@ -5663,9 +5741,12 @@ ul.</string>
     <!-- Success message displayed on SIM NS_SP Depersonalization panel [CHAR LIMIT=none] -->
     <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS">Network subset service provider unlock successful.</string>
 
-     <!-- pdp data reject dialog string for cause 29, 33 and 55-->
+    <!-- pdp data reject dialog string for cause 29, 33 and 55 [CHAR LIMIT=100] -->
     <string name="config_pdp_reject_dialog_title"></string>
+    <!-- pdp data reject dialog string for cause 29 (USER_AUTHENTICATION) [CHAR LIMIT=100] -->
     <string name="config_pdp_reject_user_authentication_failed"></string>
+    <!-- pdp data reject dialog string for cause 33 (SERVICE_OPTION_NOT_SUBSCRIBED) [CHAR LIMIT=100] -->
     <string name="config_pdp_reject_service_not_subscribed"></string>
+    <!-- pdp data reject dialog string for cause 55 (MULTI_CONN_TO_SAME_PDN_NOT_ALLOWED) [CHAR LIMIT=100] -->
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed"></string>
 </resources>

@@ -89,7 +89,7 @@ public class OverrideValidatorImpl extends IOverrideValidator.Stub {
             return new OverrideAllowedState(DISABLED_NON_TARGET_SDK, appTargetSdk, minTargetSdk);
         }
         // Only allow to opt-in for a targetSdk gated change.
-        if (disabled || applicationInfo.targetSdkVersion < minTargetSdk) {
+        if (disabled || appTargetSdk <= minTargetSdk) {
             return new OverrideAllowedState(ALLOWED, appTargetSdk, minTargetSdk);
         }
         return new OverrideAllowedState(DISABLED_TARGET_SDK_TOO_HIGH, appTargetSdk, minTargetSdk);

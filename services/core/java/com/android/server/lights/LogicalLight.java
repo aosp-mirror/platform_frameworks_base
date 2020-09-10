@@ -57,12 +57,12 @@ public abstract class LogicalLight {
     /**
      * Set the brightness of a display.
      */
-    public abstract void setBrightness(int brightness);
+    public abstract void setBrightness(float brightness);
 
     /**
      * Set the brightness and mode of a display.
      */
-    public abstract void setBrightness(int brightness, int brightnessMode);
+    public abstract void setBrightness(float brightness, int brightnessMode);
 
     /**
      * Set the color of a light.

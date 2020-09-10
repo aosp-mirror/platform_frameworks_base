@@ -17,16 +17,23 @@ package com.android.statsd.shelltools;
 
 import com.android.os.StatsLog.ConfigMetricsReportList;
 
+import com.google.common.io.Files;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Utilities for local use of statsd.
@@ -80,7 +87,8 @@ public class Utils {
      * @throws InterruptedException
      */
     public static ConfigMetricsReportList getReportList(long configId, boolean clearData,
-            boolean useShellUid, Logger logger) throws IOException, InterruptedException {
+            boolean useShellUid, Logger logger, String deviceSerial)
+            throws IOException, InterruptedException {
         try {
             File outputFile = File.createTempFile("statsdret", ".bin");
             outputFile.deleteOnExit();
@@ -88,6 +96,8 @@ public class Utils {
                     outputFile,
                     logger,
                     "adb",
+                    "-s",
+                    deviceSerial,
                     "shell",
                     CMD_DUMP_REPORT,
                     useShellUid ? SHELL_UID : "",
@@ -117,12 +127,14 @@ public class Utils {
      * @throws IOException
      * @throws InterruptedException
      */
-    public static void logAppBreadcrumb(int label, int state, Logger logger)
+    public static void logAppBreadcrumb(int label, int state, Logger logger, String deviceSerial)
             throws IOException, InterruptedException {
         runCommand(
                 null,
                 logger,
                 "adb",
+                "-s",
+                deviceSerial,
                 "shell",
                 CMD_LOG_APP_BREADCRUMB,
                 String.valueOf(label),
@@ -145,13 +157,14 @@ public class Utils {
      * Algorithm: true if (sdk >= minSdk) || (sdk == minSdk-1 && codeName.startsWith(minCodeName))
      * If all else fails, assume it will work (letting future commands deal with any errors).
      */
-    public static boolean isAcceptableStatsd(Logger logger, int minSdk, String minCodename) {
+    public static boolean isAcceptableStatsd(Logger logger, int minSdk, String minCodename,
+            String deviceSerial) {
         BufferedReader in = null;
         try {
             File outFileSdk = File.createTempFile("shelltools_sdk", "tmp");
             outFileSdk.deleteOnExit();
             runCommand(outFileSdk, logger,
-                    "adb", "shell", "getprop", "ro.build.version.sdk");
+                    "adb", "-s", deviceSerial, "shell", "getprop", "ro.build.version.sdk");
             in = new BufferedReader(new InputStreamReader(new FileInputStream(outFileSdk)));
             // If NullPointerException/NumberFormatException/etc., just catch and return true.
             int sdk = Integer.parseInt(in.readLine().trim());
@@ -162,7 +175,7 @@ public class Utils {
                 File outFileCode = File.createTempFile("shelltools_codename", "tmp");
                 outFileCode.deleteOnExit();
                 runCommand(outFileCode, logger,
-                        "adb", "shell", "getprop", "ro.build.version.codename");
+                        "adb", "-s", deviceSerial, "shell", "getprop", "ro.build.version.codename");
                 in = new BufferedReader(new InputStreamReader(new FileInputStream(outFileCode)));
                 return in.readLine().startsWith(minCodename);
             } else {
@@ -189,5 +202,83 @@ public class Utils {
         public String format(LogRecord record) {
             return record.getMessage() + "\n";
         }
+    }
+
+    /**
+     * Parse the result of "adb devices" to return the list of connected devices.
+     * @param logger Logger to log error messages
+     * @return List of the serial numbers of the connected devices.
+     */
+    public static List<String> getDeviceSerials(Logger logger) {
+        try {
+            ArrayList<String> devices = new ArrayList<>();
+            File outFile = File.createTempFile("device_serial", "tmp");
+            outFile.deleteOnExit();
+            Utils.runCommand(outFile, logger, "adb", "devices");
+            List<String> outputLines = Files.readLines(outFile, Charset.defaultCharset());
+            Pattern regex = Pattern.compile("^(.*)\tdevice$");
+            for (String line : outputLines) {
+                Matcher m = regex.matcher(line);
+                if (m.find()) {
+                    devices.add(m.group(1));
+                }
+            }
+            return devices;
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Failed to list connected devices: " + ex.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Returns ANDROID_SERIAL environment variable, or null if that is undefined or unavailable.
+     * @param logger Destination of error messages.
+     * @return String value of ANDROID_SERIAL environment variable, or null.
+     */
+    public static String getDefaultDevice(Logger logger) {
+        try {
+            return System.getenv("ANDROID_SERIAL");
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Failed to check ANDROID_SERIAL environment variable.",
+                    ex);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the device to use if one can be deduced, or null.
+     * @param device Command-line specified device, or null.
+     * @param connectedDevices List of all connected devices.
+     * @param defaultDevice Environment-variable specified device, or null.
+     * @param logger Destination of error messages.
+     * @return Device to use, or null.
+     */
+    public static String chooseDevice(String device, List<String> connectedDevices,
+            String defaultDevice, Logger logger) {
+        if (connectedDevices == null || connectedDevices.isEmpty()) {
+            logger.severe("No connected device.");
+            return null;
+        }
+        if (device != null) {
+            if (connectedDevices.contains(device)) {
+                return device;
+            }
+            logger.severe("Device not connected: " + device);
+            return null;
+        }
+        if (connectedDevices.size() == 1) {
+            return connectedDevices.get(0);
+        }
+        if (defaultDevice != null) {
+            if (connectedDevices.contains(defaultDevice)) {
+                return defaultDevice;
+            } else {
+                logger.severe("ANDROID_SERIAL device is not connected: " + defaultDevice);
+                return null;
+            }
+        }
+        logger.severe("More than one device is connected. Choose one"
+                + " with -s DEVICE_SERIAL or environment variable ANDROID_SERIAL.");
+        return null;
     }
 }

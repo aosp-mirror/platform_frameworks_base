@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import android.content.IIntentReceiver;
 import android.os.Bundle;
+import android.util.SparseArray;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -47,12 +48,12 @@ public class PackageManagerServiceTest {
             public void sendPackageBroadcast(final String action, final String pkg,
                     final Bundle extras, final int flags, final String targetPkg,
                     final IIntentReceiver finishedReceiver, final int[] userIds,
-                    int[] instantUserIds) {
+                    int[] instantUserIds, SparseArray<int[]> broadcastWhitelist) {
             }
 
             public void sendPackageAddedForNewUsers(String packageName,
                     boolean sendBootComplete, boolean includeStopped, int appId,
-                    int[] userIds, int[] instantUserIds) {
+                    int[] userIds, int[] instantUserIds, int dataLoaderType) {
             }
 
             @Override
@@ -87,8 +88,8 @@ public class PackageManagerServiceTest {
         setting = new PackageSetting("name", "realName", new File("codePath"),
                 new File("resourcePath"), "legacyNativeLibraryPathString",
                 "primaryCpuAbiString", "secondaryCpuAbiString",
-                "cpuAbiOverrideString", 0, 0, 0, "parentPackageName", null, 0,
-                null, null);
+                "cpuAbiOverrideString", 0, 0, 0, 0,
+                null, null, null);
         pri.populateUsers(new int[] {
                 1, 2, 3, 4, 5
         }, setting);
@@ -118,15 +119,13 @@ public class PackageManagerServiceTest {
         String[] partitions = { "system", "vendor", "odm", "oem", "product", "system_ext" };
         String[] appdir = { "app", "priv-app" };
         for (int i = 0; i < partitions.length; i++) {
-            final PackageManagerService.SystemPartition systemPartition =
+            final PackageManagerService.ScanPartition scanPartition =
                     PackageManagerService.SYSTEM_PARTITIONS.get(i);
             for (int j = 0; j < appdir.length; j++) {
-                String canonical = new File("/" + partitions[i]).getCanonicalPath();
-                String path = String.format("%s/%s/A.apk", canonical, appdir[j]);
+                File path = new File(String.format("%s/%s/A.apk", partitions[i], appdir[j]));
+                Assert.assertEquals(j == 1 && i != 3, scanPartition.containsPrivApp(path));
 
-                Assert.assertEquals(j == 1 && i != 3, systemPartition.containsPrivPath(path));
-
-                final int scanFlag = systemPartition.scanFlag;
+                final int scanFlag = scanPartition.scanFlag;
                 Assert.assertEquals(i == 1, scanFlag == PackageManagerService.SCAN_AS_VENDOR);
                 Assert.assertEquals(i == 2, scanFlag == PackageManagerService.SCAN_AS_ODM);
                 Assert.assertEquals(i == 3, scanFlag == PackageManagerService.SCAN_AS_OEM);

@@ -54,7 +54,8 @@ public class ISmsImplBase extends ISms.Stub {
     @Override
     public void sendTextForSubscriber(int subId, String callingPkg, String callingAttributionTag,
             String destAddr, String scAddr, String text, PendingIntent sentIntent,
-            PendingIntent deliveryIntent, boolean persistMessageForNonDefaultSmsApp) {
+            PendingIntent deliveryIntent, boolean persistMessageForNonDefaultSmsApp,
+            long messageId) {
         throw new UnsupportedOperationException();
     }
 
@@ -77,7 +78,8 @@ public class ISmsImplBase extends ISms.Stub {
     public void sendMultipartTextForSubscriber(int subId, String callingPkg,
             String callingAttributionTag, String destinationAddress, String scAddress,
             List<String> parts, List<PendingIntent> sentIntents,
-            List<PendingIntent> deliveryIntents, boolean persistMessageForNonDefaultSmsApp) {
+            List<PendingIntent> deliveryIntents, boolean persistMessageForNonDefaultSmsApp,
+            long messageId) {
         throw new UnsupportedOperationException();
     }
 
@@ -208,6 +210,11 @@ public class ISmsImplBase extends ISms.Stub {
 
     @Override
     public int getSmsCapacityOnIccForSubscriber(int subId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean resetAllCellBroadcastRanges(int subId) {
         throw new UnsupportedOperationException();
     }
 }

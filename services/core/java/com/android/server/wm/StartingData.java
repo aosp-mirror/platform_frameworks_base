@@ -33,9 +33,9 @@ public abstract class StartingData {
      * Creates the actual starting window surface. DO NOT HOLD THE WINDOW MANAGER LOCK WHEN CALLING
      * THIS METHOD.
      *
-     * @param atoken the app to add the starting window to
+     * @param activity the app to add the starting window to
      * @return a class implementing {@link StartingSurface} for easy removal with
      *         {@link StartingSurface#remove}
      */
-    abstract StartingSurface createStartingSurface(AppWindowToken atoken);
+    abstract StartingSurface createStartingSurface(ActivityRecord activity);
 }

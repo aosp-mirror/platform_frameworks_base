@@ -20,15 +20,14 @@
 #include <fstream>
 #include <memory>
 #include <ostream>
-#include <sstream>
-#include <string>
 #include <vector>
 
+#include "androidfw/ResourceTypes.h"
 #include "idmap2/BinaryStreamVisitor.h"
 #include "idmap2/CommandLineOptions.h"
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
-#include "idmap2/Policies.h"
+#include "idmap2/PolicyUtils.h"
 #include "idmap2/SysTrace.h"
 
 using android::ApkAssets;
@@ -36,13 +35,14 @@ using android::idmap2::BinaryStreamVisitor;
 using android::idmap2::CommandLineOptions;
 using android::idmap2::Error;
 using android::idmap2::Idmap;
-using android::idmap2::PoliciesToBitmask;
-using android::idmap2::PolicyBitmask;
-using android::idmap2::PolicyFlags;
 using android::idmap2::Result;
 using android::idmap2::Unit;
 using android::idmap2::utils::kIdmapFilePermissionMask;
+using android::idmap2::utils::PoliciesToBitmaskResult;
 using android::idmap2::utils::UidHasWriteAccessToPath;
+
+using PolicyBitmask = android::ResTable_overlayable_policy_header::PolicyBitmask;
+using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
 
 Result<Unit> Create(const std::vector<std::string>& args) {
   SYSTRACE << "Create " << args;
@@ -78,7 +78,7 @@ Result<Unit> Create(const std::vector<std::string>& args) {
   }
 
   PolicyBitmask fulfilled_policies = 0;
-  auto conv_result = PoliciesToBitmask(policies);
+  auto conv_result = PoliciesToBitmaskResult(policies);
   if (conv_result) {
     fulfilled_policies |= *conv_result;
   } else {
@@ -86,7 +86,7 @@ Result<Unit> Create(const std::vector<std::string>& args) {
   }
 
   if (fulfilled_policies == 0) {
-    fulfilled_policies |= PolicyFlags::POLICY_PUBLIC;
+    fulfilled_policies |= PolicyFlags::PUBLIC;
   }
 
   const std::unique_ptr<const ApkAssets> target_apk = ApkAssets::Load(target_apk_path);
@@ -99,8 +99,8 @@ Result<Unit> Create(const std::vector<std::string>& args) {
     return Error("failed to load apk %s", overlay_apk_path.c_str());
   }
 
-  const auto idmap = Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path,
-                                          *overlay_apk, fulfilled_policies, !ignore_overlayable);
+  const auto idmap =
+      Idmap::FromApkAssets(*target_apk, *overlay_apk, fulfilled_policies, !ignore_overlayable);
   if (!idmap) {
     return Error(idmap.GetError(), "failed to create idmap");
   }

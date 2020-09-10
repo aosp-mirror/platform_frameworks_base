@@ -27,8 +27,12 @@
     </style>
 
     <!-- TV always use dark mode -->
+    <style name="Theme.DeviceDefault.System" parent="Theme.DeviceDefault" />
+    <style name="Theme.DeviceDefault.System.Dialog" parent="Theme.DeviceDefault.Dialog" />
+    <style name="Theme.DeviceDefault.System.Dialog.Alert" parent="Theme.DeviceDefault.Dialog.Alert" />
     <style name="Theme.DeviceDefault.Autofill.Light" parent="Theme.DeviceDefault.Autofill"/>
     <style name="Theme.DeviceDefault.Light.Autofill.Save" parent="Theme.DeviceDefault.Autofill.Save"/>
 
-    <style name="Theme.DeviceDefault.Resolver" parent="Theme.Leanback.Resolver" />
+    <style name="Theme.DeviceDefault.ResolverCommon" parent="Theme.Leanback.Resolver" />
+    <style name="Theme.DeviceDefault.Resolver" parent="Theme.DeviceDefault.ResolverCommon" />
 </resources>

@@ -17,12 +17,19 @@
 package android.app.admin;
 
 import android.annotation.UserIdInt;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.os.UserHandle;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Device policy manager local system service interface.
+ *
+ * Maintenance note: if you need to expose information from DPMS to lower level services such as
+ * PM/UM/AM/etc, then exposing it from DevicePolicyManagerInternal is not safe because it may cause
+ * lock order inversion. Consider using {@link DevicePolicyCache} instead.
  *
  * @hide Only for use within the system server.
  */
@@ -81,6 +88,16 @@ public abstract class DevicePolicyManagerInternal {
     public abstract boolean isActiveAdminWithPolicy(int uid, int reqPolicy);
 
     /**
+     * Checks if an app with given uid is the active supervision admin.
+     *
+     * <p>This takes the DPMS lock. DO NOT call from PM/UM/AM with their lock held.
+     *
+     * @param uid App uid.
+     * @return true if the uid is the active supervision app.
+     */
+    public abstract boolean isActiveSupervisionApp(int uid);
+
+    /**
      * Creates an intent to show the admin support dialog to say that an action is disallowed by
      * the device/profile owner.
      *
@@ -131,15 +148,6 @@ public abstract class DevicePolicyManagerInternal {
     public abstract void reportSeparateProfileChallengeChanged(@UserIdInt int userId);
 
     /**
-     * Check whether the user could have their password reset in an untrusted manor due to there
-     * being an admin which can call {@link #resetPassword} to reset the password without knowledge
-     * of the previous password.
-     *
-     * @param userId The user in question
-     */
-    public abstract boolean canUserHaveUntrustedCredentialReset(@UserIdInt int userId);
-
-    /**
      * Return text of error message if printing is disabled.
      * Called by Print Service when printing is disabled by PO or DO when printing is attempted.
      *
@@ -153,4 +161,65 @@ public abstract class DevicePolicyManagerInternal {
      * Do not call it directly. Use {@link DevicePolicyCache#getInstance()} instead.
      */
     protected abstract DevicePolicyCache getDevicePolicyCache();
+
+    /**
+     * @return cached version of device state related to DPM that can be accessed without risking
+     * deadlocks.
+     * Do not call it directly. Use {@link DevicePolicyCache#getInstance()} instead.
+     */
+    protected abstract DeviceStateCache getDeviceStateCache();
+
+    /**
+     * Returns the combined set of the following:
+     * <ul>
+     * <li>The package names that the admin has previously set as allowed to request user consent
+     * for cross-profile communication, via {@link
+     * DevicePolicyManager#setCrossProfilePackages(ComponentName, Set)}.</li>
+     * <li>The default package names that are allowed to request user consent for cross-profile
+     * communication without being explicitly enabled by the admin, via
+     * {@link com.android.internal.R.array#cross_profile_apps} and
+     * {@link com.android.internal.R.array#vendor_cross_profile_apps}.</li>
+     * </ul>
+     *
+     * @return the combined set of whitelisted package names set via
+     * {@link DevicePolicyManager#setCrossProfilePackages(ComponentName, Set)} and
+     * {@link com.android.internal.R.array#cross_profile_apps} and
+     * {@link com.android.internal.R.array#vendor_cross_profile_apps}
+     *
+     * @hide
+     */
+    public abstract List<String> getAllCrossProfilePackages();
+
+    /**
+     * Returns the default package names set by the OEM that are allowed to request user consent for
+     * cross-profile communication without being explicitly enabled by the admin, via
+     * {@link com.android.internal.R.array#cross_profile_apps} and
+     * {@link com.android.internal.R.array#vendor_cross_profile_apps}.
+     *
+     * @hide
+     */
+    public abstract List<String> getDefaultCrossProfilePackages();
+
+    /**
+     * Sends the {@code intent} to the packages with cross profile capabilities.
+     *
+     * <p>This means the application must have the {@code crossProfile} property and the
+     * corresponding permissions, defined by
+     * {@link
+     * android.content.pm.CrossProfileAppsInternal#verifyPackageHasInteractAcrossProfilePermission}.
+     *
+     * <p>Note: This method doesn't modify {@code intent} but copies it before use.
+     *
+     * @param intent Template for the intent sent to the package.
+     * @param parentHandle Handle of the user that will receive the intents.
+     * @param requiresPermission If false, all packages with the {@code crossProfile} property
+     *                           will receive the intent.
+     */
+    public abstract void broadcastIntentToCrossProfileManifestReceiversAsUser(Intent intent,
+            UserHandle parentHandle, boolean requiresPermission);
+
+    /**
+     * Returns the profile owner component for the given user, or {@code null} if there is not one.
+     */
+    public abstract ComponentName getProfileOwnerAsUser(int userHandle);
 }

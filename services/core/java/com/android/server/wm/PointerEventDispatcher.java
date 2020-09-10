@@ -28,13 +28,11 @@ import com.android.server.UiThread;
 import java.util.ArrayList;
 
 public class PointerEventDispatcher extends InputEventReceiver {
-    private final InputChannel mInputChannel;
     private final ArrayList<PointerEventListener> mListeners = new ArrayList<>();
     private PointerEventListener[] mListenersArray = new PointerEventListener[0];
 
     public PointerEventDispatcher(InputChannel inputChannel) {
         super(inputChannel, UiThread.getHandler().getLooper());
-        mInputChannel = inputChannel;
     }
 
     @Override
@@ -94,7 +92,6 @@ public class PointerEventDispatcher extends InputEventReceiver {
     @Override
     public void dispose() {
         super.dispose();
-        mInputChannel.dispose();
         synchronized (mListeners) {
             mListeners.clear();
             mListenersArray = null;

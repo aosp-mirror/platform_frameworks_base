@@ -177,7 +177,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4562226280528716090">"Спроба видалити забагато вмісту <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="5557552311566179924">"Пам’ять планшетного ПК заповнено. Видаліть якісь файли, щоб звільнити місце."</string>
     <string name="low_memory" product="watch" msgid="3479447988234030194">"Пам’ять годинника заповнено. Видаліть файли, щоб звільнити місце."</string>
-    <string name="low_memory" product="tv" msgid="8803524975509826759">"Пам’ять телевізора заповнено. Видаліть файли, щоб звільнити місце."</string>
+    <string name="low_memory" product="tv" msgid="6663680413790323318">"Пам\'ять пристрою Android TV заповнено. Видаліть непотрібні файли, щоб звільнити місце."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Пам’ять телефону заповнено. Видаліть якісь файли, щоб звільнити місце."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
       <item quantity="one">Центри сертифікації встановлено</item>
@@ -192,14 +192,25 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Додаток адміністратора в робочому профілі відсутній або пошкоджений. У результаті ваш робочий профіль і пов’язані з ним дані видалено. Зверніться до свого адміністратора по допомогу."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Робочий профіль більше не доступний на цьому пристрої"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Забагато спроб ввести пароль"</string>
+    <string name="device_ownership_relinquished" msgid="4080886992183195724">"Адміністратор не дозволив використовувати пристрій для особистих потреб"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Пристрій контролюється"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Адміністратор вашої організації контролює цей пристрій і відстежує мережевий трафік. Торкніться, щоб дізнатися більше."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Додаток має доступ до геоданих"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Дізнатися більше можна в IT-адміністратора"</string>
+    <string name="country_detector" msgid="7023275114706088854">"Визначення країни"</string>
+    <string name="location_service" msgid="2439187616018455546">"Служби локації"</string>
+    <string name="sensor_notification_service" msgid="7474531979178682676">"Сервіс \"Сповіщення датчика\""</string>
+    <string name="twilight_service" msgid="8964898045693187224">"Сервіс \"Сутінки\""</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"З вашого пристрою буде стерто всі дані"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Не можна запускати додаток для адміністраторів. Буде відновлено заводські налаштування пристрою.\n\nЯкщо у вас є запитання, зв’яжіться з адміністратором своєї організації."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Додаток <xliff:g id="OWNER_APP">%s</xliff:g> вимкнув друк."</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Увімкніть робочий профіль"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Особисті додатки заблоковано, доки ви не ввімкнете робочий профіль"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Особисті додатки буде заблоковано <xliff:g id="DATE">%1$s</xliff:g> о <xliff:g id="TIME">%2$s</xliff:g>. Ваш ІТ-адміністратор не дозволяє, щоб робочий профіль був неактивний більше ніж <xliff:g id="NUMBER">%3$d</xliff:g> дн."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Увімкнути"</string>
     <string name="me" msgid="6207584824693813140">"Я"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Парам. пристрою"</string>
-    <string name="power_dialog" product="tv" msgid="5941745051236770764">"Параметри ТБ"</string>
+    <string name="power_dialog" product="tv" msgid="7792839006640933763">"Опції Android TV"</string>
     <string name="power_dialog" product="default" msgid="1107775420270203046">"Параметри тел."</string>
     <string name="silent_mode" msgid="8796112363642579333">"Беззвуч. режим"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"Увімкнути радіо"</string>
@@ -217,7 +228,7 @@
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"Перезавантаження…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"Вимкнення..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Ваш пристрій буде вимкнено."</string>
-    <string name="shutdown_confirm" product="tv" msgid="9187068694573722129">"Телевізор буде вимкнено."</string>
+    <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"Пристрій Android TV буде вимкнено."</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"Годинник буде вимкнено."</string>
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"Ваш телефон буде вимкнено."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"Вимкнути?"</string>
@@ -226,10 +237,12 @@
     <string name="recent_tasks_title" msgid="8183172372995396653">"Останні"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"Жодних останніх програм"</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Парам. пристрою"</string>
-    <string name="global_actions" product="tv" msgid="2020669784083287370">"Параметри ТБ"</string>
+    <string name="global_actions" product="tv" msgid="3871763739487450369">"Опції Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Параметри телеф."</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Блокування екрана"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Вимкнути"</string>
+    <string name="global_action_power_options" msgid="1185286119330160073">"Вимкнути"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Перезапустити"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Екстрений виклик"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Звіт про помилки"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Завершити сеанс"</string>
@@ -246,6 +259,8 @@
       <item quantity="many">Знімок екрана для звіту про помилки буде зроблено через <xliff:g id="NUMBER_1">%d</xliff:g> секунд.</item>
       <item quantity="other">Знімок екрана для звіту про помилки буде зроблено через <xliff:g id="NUMBER_1">%d</xliff:g> секунди.</item>
     </plurals>
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Знімок екрана зі звітом про помилку зроблено"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Не вдалося зробити знімок екрана зі звітом про помилку"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Беззвуч. режим"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Звук ВИМК."</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Звук УВІМК."</string>
@@ -264,6 +279,7 @@
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"Режим автомобіля"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"Статус облікового запису"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"Повідомлення для розробників"</string>
+    <string name="notification_channel_developer_important" msgid="7197281908918789589">"Важливі повідомлення для розробників"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"Оновлення"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"Статус мережі"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"Сповіщення мережі"</string>
@@ -285,40 +301,26 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Перейти в робочий профіль"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Контакти"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"отримувати доступ до контактів"</string>
-    <string name="permgrouprequest_contacts" msgid="7755354139254094668">"Надати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до контактів?"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Геодані"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"доступ до геоданих пристрою"</string>
-    <string name="permgrouprequest_location" msgid="5261379525646615507">"Надати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до геоданих пристрою?"</string>
-    <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"Додаток матиме доступ до геоданих, лише коли ви ним користуєтеся"</string>
-    <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"Дозволити додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; &lt;b&gt;завжди&lt;/b&gt; отримувати доступ до геоданих цього пристрою?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"Зараз додаток має доступ до геоданих, лише коли ви ним користуєтеся"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Календар"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"отримувати доступ до календаря"</string>
-    <string name="permgrouprequest_calendar" msgid="2680538977344557840">"Надати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до календаря?"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"надсилати та переглядати SMS-повідомлення"</string>
-    <string name="permgrouprequest_sms" msgid="3985338150822482831">"Дозволити додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; надсилати та переглядати SMS?"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"Пам’ять"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Файли й мультимедіа"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"отримувати доступ до фотографій, мультимедійного вмісту та файлів на вашому пристрої"</string>
-    <string name="permgrouprequest_storage" msgid="1594774620878445266">"Надати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до фото, медіа та файлів на пристрої?"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Мікрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"записувати аудіо"</string>
-    <string name="permgrouprequest_microphone" msgid="4942966684471718126">"Дозволити додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; записувати аудіо?"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Фізична активність"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"переглядати дані про фізичну активність"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"Надати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до даних про фізичну активність?"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"фотографувати та записувати відео"</string>
-    <string name="permgrouprequest_camera" msgid="2697305443703328372">"Дозволити додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; робити знімки та записувати відео?"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Журнали викликів"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"перегляд і запис журналу викликів телефона"</string>
-    <string name="permgrouprequest_calllog" msgid="7565344038959817408">"Надати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до журналів викликів телефона?"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"телефонувати та керувати дзвінками"</string>
-    <string name="permgrouprequest_phone" msgid="6430085454721364373">"Дозволити додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; здійснювати телефонні дзвінки та керувати ними?"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Датчики на тілі"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"отримувати доступ до інформації датчиків про ваші життєві показники"</string>
-    <string name="permgrouprequest_sensors" msgid="2431000833343586816">"Надати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до життєвих показників із датчиків?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Отримувати вміст вікна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Перевіряти вміст вікна, з яким ви взаємодієте."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Увімкнути функцію дослідження дотиком"</string>
@@ -331,6 +333,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Можна торкатися, проводити пальцем, стискати пальці та виконувати інші жести."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Жести на сканері відбитків пальців"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Може фіксувати жести на сканері відбитків пальців."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Робити знімки екрана"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Може робити знімки екрана."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"вимикати чи змін. рядок стану"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Дозволяє програмі вимикати рядок стану чи додавати та видаляти піктограми системи."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"відображатися як рядок стану"</string>
@@ -359,7 +363,7 @@
     <string name="permdesc_sendSms" msgid="6757089798435130769">"Дозволяє програмі надсилати SMS-повідомлення. Це може спричинити неочікуване стягнення плати. Шкідливі програми можуть надсилати повідомлення без вашого підтвердження, за що з вас стягуватимуться кошти."</string>
     <string name="permlab_readSms" msgid="5164176626258800297">"читати текстові повідомлення (SMS або MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"Цей додаток може переглядати всі SMS-повідомлення, збережені на планшеті."</string>
-    <string name="permdesc_readSms" product="tv" msgid="8967963387951154530">"Цей додаток може переглядати всі SMS-повідомлення, збережені на телевізорі."</string>
+    <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"Додаток може переглядати всі SMS-повідомлення, збережені на пристрої Android TV."</string>
     <string name="permdesc_readSms" product="default" msgid="774753371111699782">"Цей додаток може переглядати всі SMS-повідомлення, збережені на телефоні."</string>
     <string name="permlab_receiveWapPush" msgid="4223747702856929056">"отримувати текстові повідомлення (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"Дозволяє програмі отримувати й обробляти WAP-повідомлення. Це означає, що програма може відстежувати чи видаляти повідомлення, надіслані на ваш пристрій, навіть не показуючи їх вам."</string>
@@ -381,7 +385,7 @@
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Цей додаток може використовувати трафік у фоновому режимі. Можливо, використання трафіку збільшиться."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"заставляти програму постійно функціонувати"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Дозволяє програмі робити свої частини сталими в пам’яті. Це може зменшувати обсяг пам’яті, доступної для інших програм, і сповільнювати роботу планшетного ПК."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="2616944406357387366">"Додаток може робити свої частини сталими в пам’яті. Це може зменшувати обсяг пам’яті, доступної для інших додатків, і сповільнювати роботу телевізора."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Дозволяє додатку частково залишатися в пам\'яті. Це може зменшувати обсяг пам\'яті, доступної для інших додатків, і сповільнювати роботу пристрою Android TV."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Дозволяє програмі робити свої частини сталими в пам’яті. Це може зменшувати обсяг пам’яті, доступної для інших програм, і сповільнювати роботу телефону."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"запускати пріоритетну службу"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Додаток може використовувати пріоритетні служби."</string>
@@ -391,47 +395,44 @@
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"Дозволяє програмі змінювати дані налаштувань системи. Шкідливі програми можуть пошкодити конфігурацію вашої системи."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"виконуватися під час запуску"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"Дозволяє програмі запускатися, щойно завантаження системи закінчиться. Це може затримувати запуск планшетного ПК та дозволяє програмі сповільнювати загальну роботу планшетного ПК своїм постійним функціонуванням."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="2701244540810970401">"Додаток може запускатися, щойно завантаження системи закінчиться. Своїм постійним функціонуванням додаток може затримуватися запуск телевізора та сповільнювати загальну роботу планшета."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"Дозволяє додатку запускатися, щойно закінчиться завантаження системи. Своїм постійним функціонуванням додаток може затримувати запуск пристрою Android TV та сповільнювати його загальну роботу."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="7912677044558690092">"Дозволяє програмі запускатися, щойно завантаження системи закінчиться. Це може затримувати запуск телефону та дозволяє програмі сповільнювати загальну роботу телефону своїм постійним функціонуванням."</string>
     <string name="permlab_broadcastSticky" msgid="4552241916400572230">"надсилати закріпл. запис"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="5058486069846384013">"Дозволяє програмі надсилати закріплені широкомовні повідомлення, які залишаються після відтворення широкомовного повідомлення. Надмірне використання може сповільнювати роботу планшетного ПК або порушувати її стабільність, спричиняючи завелике використання пам’яті."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Додаток може надсилати закріплені широкомовні повідомлення, які залишаються після відтворення широкомовного повідомлення. Надмірне використання може сповільнювати роботу телевізора чи порушувати її стабільність, спричиняючи завелике використання пам’яті."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"Дозволяє додатку надсилати закріплені широкомовні повідомлення, які залишаються після їх відтворення. Надмірне використання може сповільнювати роботу пристрою Android TV або порушувати її стабільність, спричиняючи завелике використання пам\'яті."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Дозволяє програмі надсилати закріплені широкомовні повідомлення, які залишаються після відтворення широкомовного повідомлення. Надмірне використання може сповільнювати роботу телефону або порушувати її стабільність, спричиняючи завелике використання пам’яті."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"читати контакти"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Дозволяє додатку переглядати дані про контакти, які зберігаються на вашому планшеті. Додатки з цим дозволом можуть зберігати ваші контактні дані. Шкідливі додатки можуть надсилати контактні дані без вашого відома."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Дозволяє додатку переглядати дані про контакти, які зберігаються на вашому телевізорі. Додатки з цим дозволом можуть зберігати ваші контактні дані. Шкідливі додатки можуть надсилати контактні дані без вашого відома."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Дозволяє додатку переглядати дані про контакти, які зберігаються на вашому телефоні. Додатки з цим дозволом можуть зберігати ваші контактні дані. Шкідливі додатки можуть надсилати контактні дані без вашого відома."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"Дозволяє додатку переглядати дані про контакти, які зберігаються на вашому планшеті. Додатки також отримають доступ до облікових записів на вашому планшеті (зокрема до створених іншими встановленими додатками), у яких було створено контакти. Додатки з цим дозволом можуть зберігати ваші контактні дані. Шкідливі додатки можуть надсилати контактні дані без вашого відома."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Дозволяє додатку переглядати дані про контакти, які зберігаються на вашому пристрої Android TV. Додатки також отримають доступ до облікових записів на вашому пристрої Android TV (зокрема до створених іншими встановленими додатками), у яких було створено контакти. Додатки з цим дозволом можуть зберігати ваші контактні дані. Шкідливі додатки можуть надсилати контактні дані без вашого відома."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"Дозволяє додатку переглядати дані про контакти, які зберігаються на вашому телефоні. Додатки також отримають доступ до облікових записів на вашому телефоні (зокрема до створених іншими встановленими додатками), у яких було створено контакти. Додатки з цим дозволом можуть зберігати ваші контактні дані. Шкідливі додатки можуть надсилати контактні дані без вашого відома."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"змінювати контакти"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Дозволяє додатку змінювати дані про контакти, які зберігаються на вашому планшеті, а також видаляти їх."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Дозволяє додатку змінювати дані про контакти, які зберігаються на вашому телевізорі, а також видаляти їх."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Дозволяє додатку змінювати дані про контакти, які зберігаються на вашому пристрої Android TV, а також видаляти їх."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Дозволяє додатку змінювати дані про контакти, які зберігаються на вашому телефоні, а також видаляти їх."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"читати журнал викликів"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Цей додаток може переглядати історію викликів."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"записувати в журнал викликів"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Дозволяє програмі змінювати журнал викликів вашого планшетного ПК, включно з даними про вхідні та вихідні дзвінки. Шкідливі програми можуть використовувати це для стирання або зміни вашого журналу викликів."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="220754624705969171">"Додаток може змінювати журнал викликів телевізора, зокрема дані про вхідні та вихідні дзвінки. Шкідливі додатки можуть використовувати це, щоб стирати чи змінювати ваш журнал викликів."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Дозволяє додатку змінювати журнал викликів пристрою, зокрема дані про вхідні та вихідні дзвінки. Шкідливі додатки можуть стирати або змінювати журнал викликів."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Дозволяє програмі змінювати журнал викликів вашого телефону, включно з даними про вхідні та вихідні дзвінки. Шкідливі програми можуть використовувати це для стирання або зміни вашого журналу викликів."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"отримувати дані з датчиків на тілі (наприклад, з пульсометра)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Додаток має доступ до даних із датчиків, які відстежують фізичний стан, зокрема пульс."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Переглядати події календаря й додаткову інформацію"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Цей додаток може переглядати всі події календаря, збережені на вашому планшеті, а також надсилати та зберігати дані календаря."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="4359404686228921749">"Цей додаток може переглядати всі події календаря, збережені на вашому телевізорі, а також надсилати та зберігати дані календаря."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Додаток може переглядати всі події календаря, збережені на вашому пристрої Android TV, а також надсилати та зберігати дані календаря."</string>
     <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"Цей додаток може переглядати всі події календаря, збережені на вашому телефоні, а також надсилати та зберігати дані календаря."</string>
     <string name="permlab_writeCalendar" msgid="6422137308329578076">"додавати та змінювати події календаря, а також надсилати гостям електронні листи без відома власників"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"Цей додаток може додавати, вилучати та змінювати події календаря на вашому планшеті. Він також може надсилати повідомлення від імені власників календаря або редагувати події без відома власників."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="6841397610226826926">"Цей додаток може додавати, вилучати та змінювати події календаря на вашому телевізорі. Він також може надсилати повідомлення від імені власників календаря або редагувати події без відома власників."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"Додаток може додавати, вилучати та змінювати події календаря на вашому пристрої Android TV. Він також може надсилати повідомлення від імені власників календаря або редагувати події без їхнього відома."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Цей додаток може додавати, вилучати та змінювати події календаря на вашому телефоні. Він також може надсилати повідомлення від імені власників календаря або редагувати події без відома власників."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"отр. дост. до додат. команд пров. місцезн."</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Додаток отримуватиме доступ до додаткових команд постачальника геоданих. Можливе втручання додатка в роботу GPS чи інших джерел геоданих."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"отримувати доступ до даних про точне місцезнаходження лише в активному режимі"</string>
-    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"Цей додаток може отримувати дані про ваше точне місцезнаходження лише в активному режимі. Щоб додаток користувався службами локації, вони мають бути наявні й увімкнені на вашому телефоні. Через це може швидше розряджатись акумулятор."</string>
-    <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"отримувати доступ до даних про приблизне місцезнаходження (на основі мережі) лише в активному режимі"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Цей додаток може отримувати дані про ваше місцезнаходження на основі джерел мережі, як-от антен мобільного зв’язку та мереж Wi-Fi, лише в активному режимі. Щоб додаток міг користуватися цими службами локації, вони мають бути доступними й увімкненими на вашому планшеті."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Цей додаток може отримувати дані про ваше місцезнаходження на основі джерел мережі, як-от антен мобільного зв’язку та мереж Wi-Fi, лише в активному режимі. Щоб додаток міг користуватися цими службами локації, вони мають бути доступними й увімкненими на вашому телевізорі."</string>
-    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Цей додаток може отримувати дані про ваше приблизне місцезнаходження лише в активному режимі. Щоб додаток міг використовувати Служби локації, вони мають бути доступні й увімкнені на вашому автомобілі."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Цей додаток може отримувати дані про ваше місцезнаходження на основі джерел мережі, як-от антен мобільного зв’язку та мереж Wi-Fi, лише в активному режимі. Щоб додаток міг користуватися цими службами локації, вони мають бути доступними й увімкненими на вашому телефоні."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Цей додаток може отримувати дані про ваше точне місцезнаходження від Служб локації, коли ви його використовуєте. Для цього на вашому пристрої має бути ввімкнено Служби локації. Це може підвищити використання заряду акумулятора."</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"отримувати доступ до даних про приблизне місцезнаходження лише в активному режимі"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Цей додаток може отримувати дані про ваше приблизне місцезнаходження від Служб локації, коли ви його використовуєте. Для цього на вашому пристрої має бути ввімкнено Служби локації."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"доступ до геоданих у фоновому режимі"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Якщо ви надасте цей дозвіл і доступ до приблизного або точного місцезнаходження, додаток зможе отримувати геодані у фоновому режимі."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Цей додаток може будь-коли отримувати дані про ваше місцезнаходження, навіть якщо ви його не використовуєте."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"змінювати налаштув-ня звуку"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Дозволяє програмі змінювати загальні налаштування звуку, як-от гучність і динамік, який використовується для виводу сигналу."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"запис-ти аудіо"</string>
@@ -442,10 +443,13 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Цей додаток може розпізнавати фізичну активність."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"фотограф. та знімати відео"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Цей додаток може будь-коли робити фотографії та записувати відео за допомогою камери."</string>
+    <string name="permlab_systemCamera" msgid="3642917457796210580">"Дозволити додатку або сервісу отримувати доступ до системних камер, робити фото й записувати відео"</string>
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Цей пріоритетний системний додаток може будь-коли робити фото й записувати відео, використовуючи камеру системи. Додатку потрібен дозвіл android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Дозволити додатку або сервісу отримувати зворотні виклики щодо відкриття чи закриття камер."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Цей додаток може отримувати зворотні виклики, коли одна з камер вмикається (певним додатком) чи вимикається."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"контролювати вібросигнал"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозволяє програмі контролювати вібросигнал."</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Надає додатку доступ до стану вібрації."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"прямо набирати номери тел."</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"Дозволяє програмі набирати номери телефону без вашого відома. Це може спричинити неочікуване стягнення плати чи здійснення дзвінків. Зауважте, що це не дозволяє програмі набирати екстрені номери. Шкідливі програми можуть здійснювати дзвінки без вашого підтвердження, за що з вас стягуватимуться кошти."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"отримувати доступ до телефонної служби IMS"</string>
@@ -456,21 +460,23 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Дозволяє додатку маршрутизувати виклики через систему, щоб було зручніше телефонувати."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"Переглядати виклики через систему й керувати ними."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Додаток може переглядати поточні виклики на пристрої та керувати ними. Це стосується такої інформації, як номери та стан викликів."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"зняти обмеження на запис аудіо"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Зняти для додатка обмеження на запис аудіо."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"продовжувати виклик з іншого додатка"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Додаток може продовжувати виклик, початий в іншому додатку."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"переглядати номери телефону"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Надає додаткам доступ до номерів телефону на пристрої."</string>
     <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"залишати екран автомобіля ввімкненим"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"не доп.перехід пристр.в реж.сну"</string>
-    <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"не допускати перехід телевізора в режим сну"</string>
+    <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"не допускати перехід пристрою Android TV в режим сну"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"Вимкнення режиму сну"</string>
     <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Дозволяє додатку залишати екран автомобіля ввімкненим."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Дозволяє програмі не допускати перехід планшетного ПК у режим сну."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Додаток може не допускати перехід телевізора в режим сну."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Дозволяє додатку не допускати перехід пристрою Android TV в режим сну."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Дозволяє програмі не допускати перехід телефону в режим сну."</string>
     <string name="permlab_transmitIr" msgid="8077196086358004010">"передавати в інфрачервоному діапазоні"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5884738958581810253">"Дозволяє програмі використовувати інфрачервоний передавач планшета."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="4453220932790148184">"Додаток може використовувати інфрачервоний передавач телевізора."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="3278506969529173281">"Дозволяє додатку використовувати інфрачервоний передавач пристрою Android TV."</string>
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Дозволяє програмі використовувати інфрачервоний передавач телефону."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"установити фоновий малюнок"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Дозволяє програмі встановлювати фоновий малюнок системи."</string>
@@ -478,11 +484,11 @@
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Дозволяє програмі встановлювати підказки щодо розміру фонового малюнка системи."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"устан. час. пояс"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1788868809638682503">"Дозволяє програмі змінювати часовий пояс планшетного ПК."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="1000749751269030813">"Додаток може змінювати часовий пояс телевізора."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="9069045914174455938">"Дозволяє додатку змінювати часовий пояс вашого пристрою Android TV."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4611828585759488256">"Дозволяє програмі змінювати часовий пояс телефону."</string>
     <string name="permlab_getAccounts" msgid="5304317160463582791">"знаходити облікові записи на пристрої"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"Дозволяє програмі отримувати список облікових записів, відомих планшетному ПК. Він може включати всі облікові записи, створені встановленими програмами."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="3233589616751852028">"Додаток може отримувати список облікових записів, відомих телевізору. Він може включати всі облікові записи, створені встановленими додатками."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"Дозволяє додатку отримувати список облікових записів, відомих пристрою Android TV, зокрема тих, які створено встановленими додатками."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"Дозволяє програмі отримувати список облікових записів, відомих телефону. Він може включати всі облікові записи, створені встановленими програмами."</string>
     <string name="permlab_accessNetworkState" msgid="2349126720783633918">"переглядати мережеві з’єднання"</string>
     <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"Дозволяє програмі переглядати інформацію про з’єднання з мережами, як-от дані про наявні та під’єднані мережі."</string>
@@ -498,21 +504,21 @@
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Дозволяє програмі під’єднуватися та від’єднуватися від точок доступу Wi-Fi, а також вносити зміни в налаштування пристрою для мереж Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"дозвол. отримання багатоадр. Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Дозволяє програмі отримувати пакети, надіслані за допомогою групової адресації на всі пристрої в мережі Wi-Fi, а не лише на ваш планшетний ПК. Використовує більше заряду, ніж режим небагатоадресних пакетів."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1253281508485111166">"Додаток може отримувати пакети, надіслані за допомогою групової адресації на всі пристрої в мережі Wi-Fi, а не лише на ваш телевізор. Використовує більше живлення, ніж режим небагатоадресних пакетів."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Дозволяє додатку отримувати пакети, надіслані за допомогою групової адресації на всі пристрої в мережі Wi-Fi, а не лише на ваш пристрій Android TV. Використовує більше заряду, ніж режим небагатоадресних пакетів."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Дозволяє програмі отримувати пакети, надіслані за допомогою групової адресації на всі пристрої в мережі Wi-Fi, а не лише на ваш телефон. Використовує більше заряду, ніж режим небагатоадресних пакетів."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"доступ до налаштувань Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Дозволяє програмі налаштовувати планшетний ПК із локальним Bluetooth, а також знаходити віддалені пристрої та створювати з ними пару."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1822785266335294155">"Додаток може налаштовувати локальний телевізор із Bluetooth, а також знаходити віддалені пристрої та під’єднуватися до них."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Дозволяє додатку налаштовувати Bluetooth на вашому пристрої Android TV, а також знаходити віддалені пристрої та створювати з ними пару."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Дозволяє програмі налаштовувати телефон із локальним Bluetooth, а також знаходити віддалені пристрої та створювати з ними пару."</string>
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"під’єднуватися та від’єднуватися від WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"Дозволяє програмі визначати, чи ввімкнено WiMAX, а також переглядати інформацію про будь-які під’єднані мережі WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="6223305780806267462">"змінювати стан WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="4011097664859480108">"Дозволяє програмі під’єднувати планшетний ПК до мереж WiMAX і від’єднувати його від них."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6876948244710106021">"Додаток може під’єднувати телевізор до мереж WiMAX і від’єднувати його від них."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"Дозволяє додатку підключати пристрій Android TV до мереж WiMAX і відключати його від них."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"Дозволяє програмі під’єднувати телефон до мереж WiMAX і від’єднувати його від них."</string>
     <string name="permlab_bluetooth" msgid="586333280736937209">"створення пари з пристроями Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Дозволяє програмі переглядати конфігурацію Bluetooth на планшетному ПК, а також створювати та приймати з’єднання зі спареними пристроями."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3546625329740068213">"Додаток може переглядати конфігурацію Bluetooth на телевізорі, а також створювати та приймати з’єднання з під’єднаними пристроями."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Дозволяє додатку зчитувати конфігурацію Bluetooth на вашому пристрої Android TV, а також створювати та приймати з\'єднання зі спареними пристроями."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Дозволяє програмі переглядати конфігурацію Bluetooth на телефоні, а також створювати та приймати з’єднання зі спареними пристроями."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Використання інформації з платіжного NFC-сервісу"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволяє додатку отримувати доступ до інформації потрібного платіжного NFC-сервісу (наприклад, пов\'язаних ідентифікаторів чи даних про маршрутизацію трансакцій)."</string>
@@ -536,7 +542,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Додаток зможе змінювати вашу колекцію фотографій."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"розпізнавати геодані з колекції медіа-вмісту"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Додаток зможе розпізнавати геодані з вашої колекції медіа-вмісту."</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Підтвердьте, що це ви"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Підтвердьте, що це ви"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Біометричне апаратне забезпечення недоступне"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Автентифікацію скасовано"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Не розпізнано"</string>
@@ -562,6 +568,7 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Повторіть спробу."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Відбитки пальців не зареєстровано."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"На цьому пристрої немає сканера відбитків пальців."</string>
+    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Датчик тимчасово вимкнено."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Відбиток пальця <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -605,6 +612,7 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Не вдається перевірити обличчя. Повторіть спробу."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"Ви не налаштували Фейсконтроль"</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"На цьому пристрої не підтримується Фейсконтроль."</string>
+    <string name="face_error_security_update_required" msgid="5076017208528750161">"Датчик тимчасово вимкнено."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Обличчя <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -671,10 +679,10 @@
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Укажіть максимальну довжину та кількість символів для паролів розблокування екрана та PIN-кодів."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Відстежувати спроби розблокування екрана"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Відстежувати кількість неправильних паролів, введених під час розблокування екрана, і блокувати планшетний ПК або стирати всі його дані, якщо введено забагато неправильних паролів."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="1880525102716729482">"Відстежувати кількість неправильних паролів, введених під час розблокування екрана, і блокувати телевізор або стирати всі його дані, якщо пароль введено неправильно забагато разів."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Відстежуйте кількість неправильних паролів, введених під час розблокування екрана. Блокуйте пристрій Android TV або стирайте всі його дані, якщо пароль введено неправильно забагато разів."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Відстежувати кількість неправильних паролів, введених під час розблокування екрана, і блокувати  телефон або стирати всі його дані, якщо введено забагато неправильних паролів."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Відстежуйте кількість неправильних паролів, введених під час розблокування екрана. Блокуйте планшет або стирайте всі його дані, якщо пароль введено неправильно забагато разів."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="1253625325967736219">"Відстежуйте кількість неправильних паролів, введених під час розблокування екрана. Блокуйте телевізор або стирайте всі його дані, якщо пароль введено неправильно забагато разів."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Відстежуйте кількість неправильних паролів, введених під час розблокування екрана. Блокуйте пристрій Android TV або стирайте всі дані користувача, якщо пароль введено неправильно забагато разів."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Відстежуйте кількість неправильних паролів, введених під час розблокування екрана. Блокуйте телефон або стирайте всі його дані, якщо пароль введено неправильно забагато разів."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Змінити спосіб розблокування екрана"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Змінити спосіб розблокування екрана."</string>
@@ -682,11 +690,11 @@
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Контролювати, як і коли блокується екран."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Видалити всі дані"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Стирати дані планшетного ПК без попередження, відновлюючи заводські налаштування."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="8755409895408717659">"Без попередження стирати дані телевізора, відновлюючи заводські налаштування."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Видаляйте дані пристрою Android TV без попередження шляхом відновлення заводських налаштувань."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Стирати дані телефона без попередження, відновивши заводські налаштування."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Видалення даних користувача"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Видаляйте дані користувача на цьому планшеті без попередження."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="7310266499158746034">"Видаляйте дані користувача на цьому телевізорі без попередження."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Видаляйте дані користувача на цьому пристрої Android TV без попередження."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Видаляйте дані користувача на цьому телефоні без попередження."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Установ. глоб. проксі пристрою"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Використовуйте глобальний проксі-сервер пристрою, коли це правило ввімкнено. Налаштувати глобальний проксі-сервер може лише власник пристрою."</string>
@@ -836,7 +844,7 @@
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Перевищено максимальну кількість спроб розблокування за допомогою функції \"Фейсконтроль\""</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Відсутня SIM-карта"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"У пристр. нема SIM-карти."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1165408361036993077">"У телевізорі немає SIM-карти."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"До пристрою Android TV не підключено SIM-карту."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"У тел. немає SIM-карти."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Вставте SIM-карту."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM-карта відсутня або недоступна для читання. Вставте SIM-карту."</string>
@@ -859,13 +867,13 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Пароль неправильно введено стільки разів: <xliff:g id="NUMBER_0">%1$d</xliff:g>.\n\nПовторіть спробу через <xliff:g id="NUMBER_1">%2$d</xliff:g> сек."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"PIN-код неправильно введено стільки разів: <xliff:g id="NUMBER_0">%1$d</xliff:g>.\n\nПовторіть спробу через <xliff:g id="NUMBER_1">%2$d</xliff:g> сек."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ваш планшетний ПК потрібно буде розблокувати за допомогою входу в Google після ще стількох неуспішних спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>.\n\n Повторіть спробу через <xliff:g id="NUMBER_2">%3$d</xliff:g> сек."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="8418060136796780268">"Ви неправильно намалювали ключ розблокування стільки разів: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Залишилося спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>. У разі невдачі з’явиться запит розблокувати телевізор за допомогою входу в Google.\n\n Повторіть спробу через <xliff:g id="NUMBER_2">%3$d</xliff:g> c."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"Кількість невдалих спроб намалювати ключ розблокування: <xliff:g id="NUMBER_0">%1$d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>. У разі невдачі з\'явиться запит розблокувати пристрій Android TV за допомогою входу в Google.\n\n Повторіть спробу за <xliff:g id="NUMBER_2">%3$d</xliff:g> с."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ваш телефон потрібно буде розблокувати за допомогою входу в Google після ще стількох неуспішних спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>.\n\n Повторіть спробу через <xliff:g id="NUMBER_2">%3$d</xliff:g> сек."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"Кількість невдалих спроб розблокувати пристрій: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Налаштування пристрою буде змінено на заводські за умовчанням, а всі дані користувача буде втрачено після ще стількох невдалих спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="2736747741914666082">"Кількість невдалих спроб розблокувати телевізор: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Залишилося спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>. У разі невдачі всі налаштування телевізора буде змінено на заводські за умовчанням, а всі дані користувача – втрачено."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"Кількість невдалих спроб розблокувати пристрій Android TV: <xliff:g id="NUMBER_0">%1$d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>. У разі невдачі буде відновлено заводські налаштування пристрою Android TV за умовчанням, а всі дані користувача – втрачено."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"Кількість невдалих спроб розблокувати телефон: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Налаштування телефону буде змінено на заводські за умовчанням, а всі дані користувача буде втрачено після ще стількох невдалих спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"Кількість невдалих спроб розблокувати пристрій: <xliff:g id="NUMBER">%d</xliff:g>. Налаштування пристрою буде змінено на заводські за умовчанням."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2373955520011165432">"Кількість невдалих спроб розблокувати телевізор: <xliff:g id="NUMBER">%d</xliff:g>. Налаштування телевізора буде змінено на заводські за умовчанням."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"Кількість невдалих спроб розблокувати пристрій Android TV: <xliff:g id="NUMBER">%d</xliff:g>. Буде відновлено заводські налаштування пристрою Android TV за умовчанням."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"Кількість невдалих спроб розблокувати телефон: <xliff:g id="NUMBER">%d</xliff:g>. Налаштування телефону буде змінено на заводські за умовчанням."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"Спробуйте ще через <xliff:g id="NUMBER">%d</xliff:g> сек."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Забули ключ?"</string>
@@ -952,7 +960,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="2323799501008967852">"Дозволяє програмі читати історію URL-адрес, які відкривалися у веб-переглядачі, і всі закладки веб-переглядача. Зауважте: цей дозвіл не може застосовуватися веб-переглядачами третіх сторін або іншими програмами з можливостями веб-перегляду."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="6090259925187986937">"писати у веб-закладки й історію"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"Дозволяє програмі змінювати історію чи закладки веб-переглядача, збережені у вашому планшетному ПК. Це може дозволити програмі видаляти чи змінювати дані веб-переглядача. Зауважте: цей дозвіл не може застосовуватися веб-переглядачами третіх сторін або іншими програмами з можливостями веб-перегляду."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="755207379344494691">"Додаток може змінювати історію чи закладки веб-переглядача, збережені в телевізорі. Завдяки цьому додаток зможе стирати чи змінювати дані веб-переглядача. Зауважте: цей дозвіл не може застосовуватися веб-переглядачами третіх сторін або іншими додатками з можливостями веб-перегляду."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"Дозволяє додатку змінювати історію або закладки веб-переглядача, збережені на вашому пристрої Android TV. Завдяки цьому додаток може стирати чи змінювати дані веб-переглядача. Примітка: цей дозвіл не може застосовуватися сторонніми веб-переглядачами або іншими додатками з можливостями веб-перегляду."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"Дозволяє програмі змінювати історію чи закладки веб-переглядача, збережені у вашому телефоні. Це може дозволити програмі стирати чи змінювати дані веб-переглядача. Зауважте: цей дозвіл не може застосовуватися веб-переглядачами третіх сторін або іншими програмами з можливостями веб-перегляду."</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"установлювати будильник"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"Дозволяє програмі налаштовувати сигнал у встановленій програмі будильника. У деяких програмах будильника ця функція може не застосовуватися."</string>
@@ -1139,28 +1147,6 @@
     <string name="deleteText" msgid="4200807474529938112">"Видалити"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Метод введення"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Дії з текстом"</string>
-    <string name="email" msgid="2503484245190492693">"Написати лист"</string>
-    <string name="email_desc" msgid="8291893932252173537">"Надіслати електронний лист на вибрану адресу"</string>
-    <string name="dial" msgid="4954567785798679706">"Телефонувати"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"Телефонувати за вибраним номером"</string>
-    <string name="map" msgid="6865483125449986339">"Відкрити карту"</string>
-    <string name="map_desc" msgid="1068169741300922557">"Знайти вибрану адресу"</string>
-    <string name="browse" msgid="8692753594669717779">"Відкрити"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"Відкрити вибрану URL-адресу"</string>
-    <string name="sms" msgid="3976991545867187342">"Написати SMS"</string>
-    <string name="sms_desc" msgid="997349906607675955">"Надіслати повідомлення за вибраним номером телефону"</string>
-    <string name="add_contact" msgid="7404694650594333573">"Додати"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"Додати в контакти"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"Переглянути"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"Переглянути вибраний час у календарі"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"Запланувати"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"Запланувати подію на вибраний час"</string>
-    <string name="view_flight" msgid="2042802613849690108">"Відстежити"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"Відстежувати вибраний авіарейс"</string>
-    <string name="translate" msgid="1416909787202727524">"Перекласти"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"Перекласти виділений текст"</string>
-    <string name="define" msgid="5214255850068764195">"Знайти визначення"</string>
-    <string name="define_desc" msgid="6916651934713282645">"Знайти визначення виділеного тексту"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Закінчується пам’ять"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Деякі системні функції можуть не працювати"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Недостатньо місця для системи. Переконайтесь, що на пристрої є 250 МБ вільного місця, і повторіть спробу."</string>
@@ -1174,6 +1160,8 @@
     <string name="loading" msgid="3138021523725055037">"Завантаження..."</string>
     <string name="capital_on" msgid="2770685323900821829">"УВІМК"</string>
     <string name="capital_off" msgid="7443704171014626777">"ВИМК"</string>
+    <string name="checked" msgid="9179896827054513119">"вибрано"</string>
+    <string name="not_checked" msgid="7972320087569023342">"не вибрано"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Що використовувати?"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Завершити дію за допомогою %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Завершити дію"</string>
@@ -1288,43 +1276,6 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Сигнали будильника"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Сигнали сповіщень"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Невідомо"</string>
-    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Не вдалося підключитися до мережі \"<xliff:g id="SSID">%1$s</xliff:g>\""</string>
-    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Натисніть, щоб змінити налаштування конфіденційності й повторити спробу"</string>
-    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Змінити налаштування конфіденційності?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> може підключитися за допомогою унікального ідентифікатора вашого пристрою – його MAC-адреси. Через це пристрої поруч зможуть відстежувати місцеположення вашого пристрою. \n\nЯкщо продовжити, <xliff:g id="SSID_1">%1$s</xliff:g> змінить ваші налаштування конфіденційності й повторить спробу підключення."</string>
-    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Змінити налаштування"</string>
-    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Налаштування оновлено. Спробуйте підключитися знову."</string>
-    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Не вдалося змінити налаштування конфіденційності"</string>
-    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Мережу не знайдено"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
-      <item quantity="one">Мережі Wi-Fi доступні</item>
-      <item quantity="few">Мережі Wi-Fi доступні</item>
-      <item quantity="many">Мережі Wi-Fi доступні</item>
-      <item quantity="other">Мережі Wi-Fi доступні</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1104430011355500386">
-      <item quantity="one">Відкриті мережі Wi-Fi доступні</item>
-      <item quantity="few">Відкриті мережі Wi-Fi доступні</item>
-      <item quantity="many">Відкриті мережі Wi-Fi доступні</item>
-      <item quantity="other">Відкриті мережі Wi-Fi доступні</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="722493260955778406">"Під’єднайтеся до відкритої мережі Wi-Fi"</string>
-    <string name="wifi_available_carrier_network_title" msgid="7740328884692643968">"Під’єднайтеся до мережі Wi-Fi оператора"</string>
-    <string name="wifi_available_title_connecting" msgid="5249247039230566878">"З’єднання з мережею Wi-Fi"</string>
-    <string name="wifi_available_title_connected" msgid="5892203664604121475">"Під’єднано до мережі Wi-Fi"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="5133141923288104331">"Не вдалося під’єднатися до мережі Wi-Fi"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3555247614042954032">"Торкніться, щоб побачити всі мережі"</string>
-    <string name="wifi_available_action_connect" msgid="924369499736631716">"Під’єднатися"</string>
-    <string name="wifi_available_action_all_networks" msgid="7759049005868147147">"Усі мережі"</string>
-    <string name="wifi_suggestion_title" msgid="5041459385180298879">"Дозволити пропоновані мережі Wi‑Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="477311057093517127">"Мережі, пропоновані додатком <xliff:g id="NAME">%s</xliff:g>. Пристрій може підключитися автоматично."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="6292456946562368121">"Дозволити"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="5544497236277666556">"Ні, дякую"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="2609831579583316922">"Wi-Fi вмикатиметься автоматично"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="6802089127390267217">"Коли ви поблизу збереженої мережі високої якості"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="9093154721154555101">"Не вмикати знову"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="7983113075476310532">"З’єднання Wi-Fi увімкнулось автоматично"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="5672823591753088037">"Ви поблизу збереженої мережі: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="381054692557675237">"Вхід у мережу Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1520342291829283114">"Вхід у мережу"</string>
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
@@ -1336,9 +1287,6 @@
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Немає доступу до приватного DNS-сервера"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"Підключення до мережі <xliff:g id="NETWORK_SSID">%1$s</xliff:g> обмежено"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Натисніть, щоб усе одно підключитися"</string>
-    <string name="wifi_softap_config_change" msgid="9101613252632264297">"Зміни в налаштуваннях точки доступу"</string>
-    <string name="wifi_softap_config_change_summary" msgid="3818290044234944123">"Діапазон точки доступу змінено."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="2531736378103873579">"На цьому пристрої не підтримується налаштування лише 5 ГГц. Замість цього буде використовуватися діапазон 5 ГГц, якщо доступно."</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Пристрій перейшов на мережу <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="1358296010128405906">"Коли мережа <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> не має доступу до Інтернету, використовується <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Може стягуватися плата."</string>
     <string name="network_switch_metered_toast" msgid="501662047275723743">"Пристрій перейшов з мережі <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> на мережу <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1350,27 +1298,8 @@
     <item msgid="9177085807664964627">"Мережа VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"невідомий тип мережі"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="588755196559781297">"Не вдалося під’єднатися до мережі Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5469207538636315968">" має погане з’єднання з Інтернетом."</string>
-    <string name="wifi_connect_alert_title" msgid="2377999802455909057">"Дозволити з’єднання?"</string>
-    <string name="wifi_connect_alert_message" msgid="169228218944976720">"Додаток %1$s хоче під’єднатися до мережі Wi-Fi \"%2$s\""</string>
-    <string name="wifi_connect_default_application" msgid="7577787709633050605">"Додаток"</string>
-    <string name="wifi_p2p_dialog_title" msgid="6334579064086920198">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="804818801818052402">"Запустити Wi-Fi Direct. Це вимкне з’єднання Wi-Fi клієнт/точка доступу."</string>
-    <string name="wifi_p2p_failed_message" msgid="6296397512378755690">"Не вдалося запустити Wi-Fi Direct."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="9128862563403191596">"Wi-Fi Direct увімкнено"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="5571179544720861510">"Торкніться, щоб відкрити налаштування"</string>
     <string name="accept" msgid="5447154347815825107">"Прийняти"</string>
     <string name="decline" msgid="6490507610282145874">"Відхилити"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="355410493918793111">"Запрошення надіслано"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="8082524320754820762">"Запрошення під’єднатися"</string>
-    <string name="wifi_p2p_from_message" msgid="8288949679353111893">"Від:"</string>
-    <string name="wifi_p2p_to_message" msgid="2841587668240064488">"Кому:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="1020819021188731574">"Введіть потрібний PIN-код:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="3598694912050152976">"PIN-код:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="6006673840559201871">"Під час з’єднання з пристроєм <xliff:g id="DEVICE_NAME">%1$s</xliff:g> планшетний ПК тимчасово від’єднається від мережі Wi-Fi"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="1081550817886390524">"Під час з’єднання з пристроєм <xliff:g id="DEVICE_NAME">%1$s</xliff:g> телевізор тимчасово від’єднається від мережі Wi-Fi"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="5357599796604438547">"Під час з’єднання з пристроєм <xliff:g id="DEVICE_NAME">%1$s</xliff:g> телефон тимчасово від’єднається від мережі Wi-Fi"</string>
     <string name="select_character" msgid="3352797107930786979">"Вставл-ня символу"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"Надсил. SMS повідомлень"</string>
     <string name="sms_control_message" msgid="6574313876316388239">"Програма &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; надсилає велику кількість SMS-повідомлень. Дозволити цій програмі й надалі надсилати повідомлення?"</string>
@@ -1425,6 +1354,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Натисніть, щоб вимкнути налагодження."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Увімкнено режим автоматизованого тестування"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Щоб вимкнути режим автоматизованого тестування, відновіть заводські налаштування."</string>
+    <string name="console_running_notification_title" msgid="6087888939261635904">"Послідовну консоль увімкнено"</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Продуктивність зазнала впливу. Щоб вимкнути, перевірте завантажувач операційної системи."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Рідина або сміття в USB-порту"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB-порт автоматично вимкнено. Торкніться, щоб дізнатися більше."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Можна використовувати USB-порт"</string>
@@ -1450,14 +1381,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Перевіряється <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Перевірка поточного вмісту"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Новий пристрій пам’яті (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> не працює"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Торкніться, щоб налаштувати"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Можливо, пристрій доведеться відформатувати. Натисніть, щоб вилучити."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Для перенесення фотографій і медіафайлів"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Проблема з носієм (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> не працює"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Торкніться, щоб виправити"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Пристрій <xliff:g id="NAME">%s</xliff:g> пошкоджено. Виберіть, щоб виправити."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Можливо, пристрій доведеться відформатувати. Натисніть, щоб вилучити."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> не підтримується"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> не працює"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"<xliff:g id="NAME">%s</xliff:g> не підтримується цим пристроєм. Торкніться, щоб налаштувати підтримуваний формат."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"<xliff:g id="NAME">%s</xliff:g> не підтримується на цьому пристрої. Виберіть, щоб налаштувати в підтримуваному форматі."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Можливо, пристрій доведеться відформатувати"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> несподівано вийнято"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Перш ніж виймати носій, відключіть його, щоб не втратити вміст"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"Пристрій пам’яті (<xliff:g id="NAME">%s</xliff:g>) вийнято"</string>
@@ -1565,6 +1502,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Запит зроблено користувачем <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Так"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Ні"</string>
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"Переглянуто геодані в екстреній ситуації"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"Виробник пристрою отримав доступ до ваших геоданих під час нещодавнього екстреного звернення"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"Оператор отримав доступ до ваших геоданих під час нещодавнього екстреного звернення"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Перевищено ліміт видалень"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Для <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, облікового запису <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>, знайдено стільки видалених елементів: <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>. Що робити?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Видалити елементи"</string>
@@ -1650,9 +1590,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Запустити веб-переглядач?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Прийняти виклик?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Завжди"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Вибрати додаток для відкривання посилань"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Лише цього разу"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"Налаштування"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s не підтримує робочий профіль"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Планшетний ПК"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Телевізор"</string>
@@ -1715,32 +1653,56 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"Пароль неправильно введено стільки разів: <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\nПовторіть спробу через <xliff:g id="NUMBER_1">%2$d</xliff:g> с."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\nПовторіть спробу через <xliff:g id="NUMBER_1">%2$d</xliff:g> с."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"Кількість невдалих спроб розблокувати планшетний ПК: <xliff:g id="NUMBER_0">%1$d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>. У разі невдачі налаштування планшетного ПК буде змінено на заводські за умовчанням, а всі дані користувача – втрачено."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="7525614240870652051">"Кількість невдалих спроб розблокувати телевізор: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Залишилося спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>. У разі невдачі всі налаштування телевізора буде змінено на заводські за умовчанням, а всі дані користувача – втрачено."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"Кількість невдалих спроб розблокувати пристрій Android TV: <xliff:g id="NUMBER_0">%1$d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>. У разі невдачі буде відновлено заводські налаштування пристрою Android TV за умовчанням, а всі дані користувача – втрачено."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"Кількість невдалих спроб розблокувати телефон: <xliff:g id="NUMBER_0">%1$d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>. У разі невдачі налаштування телефону буде змінено на заводські за умовчанням, а всі дані користувача – втрачено."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"Кількість невдалих спроб розблокувати планшетний ПК: <xliff:g id="NUMBER">%d</xliff:g>. Налаштування планшетного ПК буде змінено на заводські за умовчанням."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5213981402777341134">"Кількість невдалих спроб розблокувати телевізор: <xliff:g id="NUMBER">%d</xliff:g>. Налаштування телевізора буде змінено на заводські за умовчанням."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"Кількість невдалих спроб розблокувати пристрій Android TV: <xliff:g id="NUMBER">%d</xliff:g>. Буде відновлено заводські налаштування пристрою Android TV за умовчанням."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"Кількість невдалих спроб розблокувати телефон: <xliff:g id="NUMBER">%d</xliff:g>. Налаштування телефону буде змінено на заводські за умовчанням."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%1$d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>. У разі невдачі з’явиться запит розблокувати планшетний ПК за допомогою облікового запису електронної пошти.\n\n Повторіть спробу через <xliff:g id="NUMBER_2">%3$d</xliff:g> сек."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="8057874855853116724">"Ви неправильно намалювали ключ розблокування стільки разів: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Залишилося спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>. У разі невдачі з’явиться запит розблокувати телевізор за допомогою облікового запису електронної пошти.\n\n Повторіть спробу через <xliff:g id="NUMBER_2">%3$d</xliff:g> c."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"Кількість невдалих спроб намалювати ключ розблокування: <xliff:g id="NUMBER_0">%1$d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>. У разі невдачі з\'явиться запит розблокувати пристрій Android TV за допомогою облікового запису електронної пошти.\n\n Повторіть спробу за <xliff:g id="NUMBER_2">%3$d</xliff:g> с."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%1$d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>. У разі невдачі з’явиться запит розблокувати телефон за допомогою облікового запису електронної пошти.\n\n Повторіть спробу через <xliff:g id="NUMBER_2">%3$d</xliff:g> сек."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Вилучити"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Збільшити гучність понад рекомендований рівень?\n\nЯкщо слухати надто гучну музику тривалий час, можна пошкодити слух."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Використовувати швидке ввімкнення?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Коли ярлик увімкнено, після натискання обох клавіш гучності й утримування їх протягом 3 секунд увімкнеться функція спеціальних можливостей.\n\n Поточна функція спеціальних можливостей:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Цю функцію можна змінити в меню \"Налаштування\" &gt; \"Спеціальні можливості\"."</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Якщо цей засіб увімкнено, ви можете активувати спеціальні можливості, утримуючи обидві кнопки гучності протягом трьох секунд."</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Увімкнути спеціальні можливості?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Якщо втримувати обидві клавіші гучності впродовж кількох секунд, вмикаються спеціальні можливості. Це впливає на роботу пристрою.\n\nПоточні функції:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nВибрані функції можна змінити в налаштуваннях у меню спеціальних можливостей."</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Увімкнути <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Якщо втримувати обидві клавіші гучності впродовж кількох секунд, буде ввімкнено спеціальні можливості – <xliff:g id="SERVICE">%1$s</xliff:g>. Це може вплинути на роботу пристрою.\n\nДля цієї комбінації клавіш можна вибрати іншу функцію в меню \"Налаштування &gt; Спеціальні можливості\"."</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Увімкнути"</string>
+    <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Не вмикати"</string>
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"УВІМК."</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ВИМК."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Надати сервісу <xliff:g id="SERVICE">%1$s</xliff:g> повний доступ до вашого пристрою?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Якщо ви ввімкнете сервіс <xliff:g id="SERVICE">%1$s</xliff:g>, дані на пристрої не захищатимуться екраном блокування."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Повний доступ доречний для додатків, які надають спеціальні можливості, але його не варто відкривати для більшості інших додатків."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Перегляд і контроль екрана"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Цей сервіс може переглядати всі дані на екрані й показувати вміст над іншими додатками."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Переглянути й виконати дії"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Цей сервіс може відстежувати вашу взаємодію з додатком чи апаратним датчиком, а також взаємодіяти з додатками від вашого імені."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Дозволити"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Заборонити"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Натисніть функцію, щоб почати використовувати її:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Виберіть функції для кнопки спеціальних можливостей"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Виберіть функції для комбінації з клавішами гучності"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Сервіс <xliff:g id="SERVICE_NAME">%s</xliff:g> вимкнено"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Редагувати засоби"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Вимкнути ярлик"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Використовувати ярлик"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Інверсія кольорів"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Корекція кольорів"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"Сервіс <xliff:g id="SERVICE_NAME">%1$s</xliff:g> увімкнено"</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"Сервіс <xliff:g id="SERVICE_NAME">%1$s</xliff:g> вимкнено"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Утримано клавіші гучності. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> увімкнено."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Утримано клавіші гучності. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> вимкнено."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Щоб скористатися службою <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, утримуйте обидві клавіші гучності впродовж трьох секунд"</string>
-    <string name="accessibility_button_prompt_text" msgid="1634298854002673171">"Виберіть сервіс для кнопки спеціальних можливостей:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"Виберіть сервіс для жесту спеціальних можливостей (проведення двома пальцями знизу вгору):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"Виберіть сервіс для жесту спеціальних можливостей (проведення трьома пальцями знизу вгору):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"Щоб переключитися між сервісами, натисніть і утримуйте кнопку спеціальних можливостей."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"Щоб переключитися між сервісами, проведіть по екрану знизу вгору двома пальцями й утримуйте їх."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"Щоб переключитися між сервісами, проведіть по екрану знизу вгору трьома пальцями й утримуйте їх."</string>
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Виберіть функцію для кнопки спеціальних можливостей:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Виберіть функцію для жесту спеціальних можливостей (проведення двома пальцями знизу вгору):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Виберіть функцію для жесту спеціальних можливостей (проведення трьома пальцями знизу вгору):"</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Щоб переключитися між функціями, натисніть і утримуйте кнопку спеціальних можливостей."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Щоб переключитися між функціями, проведіть по екрану знизу вгору двома пальцями й утримуйте їх."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Щоб переключитися між функціями, проведіть по екрану знизу вгору трьома пальцями й утримуйте їх."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Збільшення"</string>
     <string name="user_switched" msgid="7249833311585228097">"Поточний користувач: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Перехід в обліковий запис \"<xliff:g id="NAME">%1$s</xliff:g>\"…"</string>
@@ -1876,8 +1838,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Оновлено адміністратором"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Видалено адміністратором"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Щоб подовжити час роботи акумулятора, режим енергозбереження:\n·вмикає темну тему;\n·припиняє або обмежує фонову активність, вимикає деякі візуальні ефекти й інші енергозатратні функції, зокрема Ok Google.\n\n"<annotation id="url">"Докладніше"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Щоб подовжити час роботи акумулятора, режим енергозбереження:\n·вмикає темну тему;\n·припиняє або обмежує фонову активність, вимикає деякі візуальні ефекти й інші енергозатратні функції, зокрема команду \"Ok Google\"."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Щоб подовжити час роботи акумулятора, режим енергозбереження:\n\n•вмикає темну тему;\n•припиняє або обмежує фонову активність, вимикає деякі візуальні ефекти та інші енергозатратні функції, зокрема команду \"Ok Google\".\n\n"<annotation id="url">"Докладніше"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"Щоб подовжити час роботи акумулятора, режим енергозбереження:\n\n•вмикає темну тему;\n•припиняє або обмежує фонову активність, вимикає деякі візуальні ефекти та інші енергозатратні функції, зокрема команду \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Щоб зменшити використання трафіку, функція \"Заощадження трафіку\" не дозволяє деяким додаткам надсилати чи отримувати дані у фоновому режимі. Поточний додаток зможе отримувати доступ до таких даних, але рідше. Наприклад, зображення не відображатиметься, доки ви не торкнетеся його."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Увімкнути заощадження трафіку?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Увімкнути"</string>
@@ -1974,6 +1936,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Без категорії"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Ви вказуєте пріоритет цих сповіщень."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Важливе з огляду на учасників."</string>
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Користувацьке сповіщення додатка"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Дозволити додатку <xliff:g id="APP">%1$s</xliff:g> створити нового користувача з обліковим записом <xliff:g id="ACCOUNT">%2$s</xliff:g> (користувач із таким обліковим записом уже існує)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Дозволити додатку <xliff:g id="APP">%1$s</xliff:g> створити нового користувача з обліковим записом <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Додати мову"</string>
@@ -1986,9 +1949,12 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Додаток недоступний"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Додаток <xliff:g id="APP_NAME_0">%1$s</xliff:g> зараз недоступний. Керує додаток <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Докладніше"</string>
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Відновити доступ до додатка"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Увімкнути робочий профіль?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Додатки, сповіщення, дані й інші функції робочого профілю буде ввімкнено"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Увімкнути"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Додаток недоступний"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> зараз недоступний."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Цей додаток створений для старішої версії Android і може працювати неналежним чином. Спробуйте знайти оновлення або зв’яжіться з розробником."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Шукати оновлення"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"У вас є нові повідомлення"</string>
@@ -1999,7 +1965,9 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Під’єднано до пристрою <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Торкніться, щоб переглянути файли"</string>
     <string name="pin_target" msgid="8036028973110156895">"Закріпити"</string>
+    <string name="pin_specific_target" msgid="7824671240625957415">"Закріпити додаток <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Відкріпити"</string>
+    <string name="unpin_specific_target" msgid="3859828252160908146">"Відкріпити додаток <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Про додатки"</string>
     <string name="negative_duration" msgid="1938335096972945232">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Запуск демонстрації…"</string>
@@ -2044,10 +2012,16 @@
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Оновити в сервісі "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" такі дані: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> і <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Зберегти"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Ні, дякую"</string>
+    <string name="autofill_save_notnow" msgid="2853932672029024195">"Не зараз"</string>
+    <string name="autofill_save_never" msgid="6821841919831402526">"Ніколи"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Оновити"</string>
+    <string name="autofill_continue_yes" msgid="7914985605534510385">"Продовжити"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"пароль"</string>
     <string name="autofill_save_type_address" msgid="3111006395818252885">"адреса"</string>
     <string name="autofill_save_type_credit_card" msgid="3583795235862046693">"кредитна картка"</string>
+    <string name="autofill_save_type_debit_card" msgid="3169397504133097468">"дебетова картка"</string>
+    <string name="autofill_save_type_payment_card" msgid="6555012156728690856">"платіжна картка"</string>
+    <string name="autofill_save_type_generic_card" msgid="1019367283921448608">"картка"</string>
     <string name="autofill_save_type_username" msgid="1018816929884640882">"ім’я користувача"</string>
     <string name="autofill_save_type_email_address" msgid="1303262336895591924">"електронна адреса"</string>
     <string name="etws_primary_default_message_earthquake" msgid="8401079517718280669">"Не хвилюйтеся та знайдіть прихисток поблизу."</string>
@@ -2093,13 +2067,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Акумулятор може розрядитися раніше ніж зазвичай"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Режим енергозбереження активовано для збільшення часу роботи акумулятора"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Режим енергозбереження"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Режим енергозбереження не ввімкнеться, доки рівень заряду знову не знизиться"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Акумулятор заряджено достатньо. Режим енергозбереження буде знову ввімкнено, коли рівень заряду знизиться."</string>
-    <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Телефон заряджено на <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Планшет заряджено на <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Пристрій заряджено на <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Режим енергозбереження вимкнено. Функції вже не обмежено."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Режим енергозбереження вимкнено. Функції вже не обмежено."</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Режим енергозбереження вимкнено."</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Телефон має достатньо заряду акумулятора. Функції вже не обмежено."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Планшет має достатньо заряду акумулятора. Функції вже не обмежено."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Пристрій має достатньо заряду акумулятора. Функції вже не обмежено."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Папка"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Додаток Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Файл"</string>
@@ -2126,8 +2097,45 @@
       <item quantity="many"><xliff:g id="FILE_NAME_2">%s</xliff:g> і ще <xliff:g id="COUNT_3">%d</xliff:g> файлів</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> і ще <xliff:g id="COUNT_3">%d</xliff:g> файлу</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="492542066060841139">"Прямий обмін даними недоступний"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Немає рекомендацій щодо людей, з якими можна поділитися"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Список додатків"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Цей додаток не має дозволу на запис, але він може фіксувати звук через цей USB-пристрій."</string>
+    <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"На головний екран"</string>
+    <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Назад"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Нещодавні додатки"</string>
+    <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Сповіщення"</string>
+    <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Швидкі налаштування"</string>
+    <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Відкрити вікно"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Заблокувати екран"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Знімок екрана"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Екранний засіб спеціальних можливостей"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Вибір екранного засобу спеціальних можливостей"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Засіб спеціальних можливостей"</string>
+    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Смуга із субтитрами для додатка <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Пакет \"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>\" додано в сегмент з обмеженнями"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"надіслано зображення"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Чат"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Груповий чат"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Особисте"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"Робоче"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Особистий перегляд"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Робочий перегляд"</string>
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Цей контент не можна надсилати в робочих додатках"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Ваш ІТ-адміністратор не дозволяє надсилати цей контент у додатках у робочому профілі"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Цей контент не можна відкривати в робочих додатках"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Ваш ІТ-адміністратор не дозволяє відкривати цей контент у додатках у робочому профілі"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Цей контент не можна надсилати в особистих додатках"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Ваш ІТ-адміністратор не дозволяє надсилати цей контент у додатках в особистому профілі"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Цей контент не можна відкривати в особистих додатках"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Ваш ІТ-адміністратор не дозволяє відкривати цей контент у додатках в особистому профілі"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Робочий профіль призупинено"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Увімкнути"</string>
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Немає робочих додатків для цього контенту"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Немає робочих додатків, щоб відкрити цей контент"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Особисті додатки не можуть підтримувати цей контент"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Особисті додатки не можуть відкривати цей контент"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код розблокування мережі SIM-карти"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN-код розблокування підгрупи мереж SIM-карти"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN-код розблокування корпоративної SIM-карти"</string>

@@ -42,6 +42,7 @@ import android.os.strictmode.DiskWriteViolation;
 import android.os.strictmode.ExplicitGcViolation;
 import android.os.strictmode.FileUriExposedViolation;
 import android.os.strictmode.ImplicitDirectBootViolation;
+import android.os.strictmode.IncorrectContextUseViolation;
 import android.os.strictmode.InstanceCountViolation;
 import android.os.strictmode.IntentReceiverLeakedViolation;
 import android.os.strictmode.LeakedClosableViolation;
@@ -83,6 +84,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -188,6 +191,9 @@ public final class StrictMode {
     // Only show an annoying dialog at most every 30 seconds
     private static final long MIN_DIALOG_INTERVAL_MS = 30000;
 
+    // Only log a dropbox entry at most every 30 seconds
+    private static final long MIN_DROPBOX_INTERVAL_MS = 3000;
+
     // How many Span tags (e.g. animations) to report.
     private static final int MAX_SPAN_TAGS = 20;
 
@@ -250,6 +256,7 @@ public final class StrictMode {
             DETECT_VM_UNTAGGED_SOCKET,
             DETECT_VM_NON_SDK_API_USAGE,
             DETECT_VM_IMPLICIT_DIRECT_BOOT,
+            DETECT_VM_INCORRECT_CONTEXT_USE,
             PENALTY_GATHER,
             PENALTY_LOG,
             PENALTY_DIALOG,
@@ -289,6 +296,8 @@ public final class StrictMode {
     private static final int DETECT_VM_IMPLICIT_DIRECT_BOOT = 1 << 10;
     /** @hide */
     private static final int DETECT_VM_CREDENTIAL_PROTECTED_WHILE_LOCKED = 1 << 11;
+    /** @hide */
+    private static final int DETECT_VM_INCORRECT_CONTEXT_USE = 1 << 12;
 
     /** @hide */
     private static final int DETECT_VM_ALL = 0x0000ffff;
@@ -813,6 +822,9 @@ public final class StrictMode {
 
             /** @hide */
             public @NonNull Builder permitActivityLeaks() {
+                synchronized (StrictMode.class) {
+                    sExpectedActivityInstanceCount.clear();
+                }
                 return disable(DETECT_VM_ACTIVITY_LEAKS);
             }
 
@@ -870,6 +882,9 @@ public final class StrictMode {
                 }
                 if (targetSdk >= Build.VERSION_CODES.Q) {
                     detectCredentialProtectedWhileLocked();
+                }
+                if (targetSdk >= Build.VERSION_CODES.R) {
+                    detectIncorrectContextUse();
                 }
 
                 // TODO: Decide whether to detect non SDK API usage beyond a certain API level.
@@ -1024,6 +1039,32 @@ public final class StrictMode {
             /** @hide */
             public @NonNull Builder permitCredentialProtectedWhileLocked() {
                 return disable(DETECT_VM_CREDENTIAL_PROTECTED_WHILE_LOCKED);
+            }
+
+            /**
+             * Detect attempts to invoke a method on a {@link Context} that is not suited for such
+             * operation.
+             * <p>An example of this is trying to obtain an instance of visual service (e.g.
+             * {@link android.view.WindowManager}) from a non-visual {@link Context}. This is not
+             * allowed, since a non-visual {@link Context} is not adjusted to any visual area, and
+             * therefore can report incorrect metrics or resources.
+             * @see Context#getDisplay()
+             * @see Context#getSystemService(String)
+             * @hide
+             */
+            @TestApi
+            public @NonNull Builder detectIncorrectContextUse() {
+                return enable(DETECT_VM_INCORRECT_CONTEXT_USE);
+            }
+
+            /**
+             * Disable detection of incorrect context use.
+             * TODO(b/149790106): Fix usages and remove.
+             * @hide
+             */
+            @TestApi
+            public @NonNull Builder permitIncorrectContextUse() {
+                return disable(DETECT_VM_INCORRECT_CONTEXT_USE);
             }
 
             /**
@@ -1716,16 +1757,20 @@ public final class StrictMode {
             // Not perfect, but fast and good enough for dup suppression.
             Integer crashFingerprint = info.hashCode();
             long lastViolationTime = 0;
-            if (mLastViolationTime != null) {
-                Long vtime = mLastViolationTime.get(crashFingerprint);
-                if (vtime != null) {
-                    lastViolationTime = vtime;
-                }
-            } else {
-                mLastViolationTime = new ArrayMap<>(1);
-            }
             long now = SystemClock.uptimeMillis();
-            mLastViolationTime.put(crashFingerprint, now);
+            if (sLogger == LOGCAT_LOGGER) { // Don't throttle it if there is a non-default logger
+                if (mLastViolationTime != null) {
+                    Long vtime = mLastViolationTime.get(crashFingerprint);
+                    if (vtime != null) {
+                        lastViolationTime = vtime;
+                    }
+                    clampViolationTimeMap(mLastViolationTime, Math.max(MIN_LOG_INTERVAL_MS,
+                                Math.max(MIN_DIALOG_INTERVAL_MS, MIN_DROPBOX_INTERVAL_MS)));
+                } else {
+                    mLastViolationTime = new ArrayMap<>(1);
+                }
+                mLastViolationTime.put(crashFingerprint, now);
+            }
             long timeSinceLastViolationMillis =
                     lastViolationTime == 0 ? Long.MAX_VALUE : (now - lastViolationTime);
 
@@ -1744,7 +1789,8 @@ public final class StrictMode {
                 penaltyMask |= PENALTY_DIALOG;
             }
 
-            if (info.penaltyEnabled(PENALTY_DROPBOX) && lastViolationTime == 0) {
+            if (info.penaltyEnabled(PENALTY_DROPBOX)
+                    && timeSinceLastViolationMillis > MIN_DROPBOX_INTERVAL_MS) {
                 penaltyMask |= PENALTY_DROPBOX;
             }
 
@@ -1872,8 +1918,15 @@ public final class StrictMode {
     }
 
     private static class AndroidCloseGuardReporter implements CloseGuard.Reporter {
+
+        @Override
         public void report(String message, Throwable allocationSite) {
             onVmPolicyViolation(new LeakedClosableViolation(message, allocationSite));
+        }
+
+        @Override
+        public void report(String message) {
+            onVmPolicyViolation(new LeakedClosableViolation(message));
         }
     }
 
@@ -2056,6 +2109,11 @@ public final class StrictMode {
     }
 
     /** @hide */
+    public static boolean vmIncorrectContextUseEnabled() {
+        return (sVmPolicy.mask & DETECT_VM_INCORRECT_CONTEXT_USE) != 0;
+    }
+
+    /** @hide */
     public static void onSqliteObjectLeaked(String message, Throwable originStack) {
         onVmPolicyViolation(new SqliteObjectLeakedViolation(message, originStack));
     }
@@ -2129,6 +2187,11 @@ public final class StrictMode {
         onVmPolicyViolation(new ImplicitDirectBootViolation());
     }
 
+    /** @hide */
+    public static void onIncorrectContextUsed(String message, Throwable originStack) {
+        onVmPolicyViolation(new IncorrectContextUseViolation(message, originStack));
+    }
+
     /** Assume locked until we hear otherwise */
     private static volatile boolean sUserKeyUnlocked = false;
 
@@ -2169,6 +2232,23 @@ public final class StrictMode {
     @UnsupportedAppUsage
     private static final HashMap<Integer, Long> sLastVmViolationTime = new HashMap<>();
 
+    /**
+     * Clamp the given map by removing elements with timestamp older than the given retainSince.
+     */
+    private static void clampViolationTimeMap(final @NonNull Map<Integer, Long> violationTime,
+            final long retainSince) {
+        final Iterator<Map.Entry<Integer, Long>> iterator = violationTime.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Integer, Long> e = iterator.next();
+            if (e.getValue() < retainSince) {
+                // Remove stale entries
+                iterator.remove();
+            }
+        }
+        // Ideally we'd cap the total size of the map, though it'll involve quickselect of topK,
+        // seems not worth it (saving some space immediately but they will be obsoleted soon anyway)
+    }
+
     /** @hide */
     public static void onVmPolicyViolation(Violation originStack) {
         onVmPolicyViolation(originStack, false);
@@ -2192,13 +2272,17 @@ public final class StrictMode {
         final long now = SystemClock.uptimeMillis();
         long lastViolationTime;
         long timeSinceLastViolationMillis = Long.MAX_VALUE;
-        synchronized (sLastVmViolationTime) {
-            if (sLastVmViolationTime.containsKey(fingerprint)) {
-                lastViolationTime = sLastVmViolationTime.get(fingerprint);
-                timeSinceLastViolationMillis = now - lastViolationTime;
-            }
-            if (timeSinceLastViolationMillis > MIN_VM_INTERVAL_MS) {
-                sLastVmViolationTime.put(fingerprint, now);
+        if (sLogger == LOGCAT_LOGGER) { // Don't throttle it if there is a non-default logger
+            synchronized (sLastVmViolationTime) {
+                if (sLastVmViolationTime.containsKey(fingerprint)) {
+                    lastViolationTime = sLastVmViolationTime.get(fingerprint);
+                    timeSinceLastViolationMillis = now - lastViolationTime;
+                }
+                if (timeSinceLastViolationMillis > MIN_VM_INTERVAL_MS) {
+                    sLastVmViolationTime.put(fingerprint, now);
+                }
+                clampViolationTimeMap(sLastVmViolationTime,
+                        now - Math.max(MIN_VM_INTERVAL_MS, MIN_LOG_INTERVAL_MS));
             }
         }
         if (timeSinceLastViolationMillis <= MIN_VM_INTERVAL_MS) {
@@ -2543,8 +2627,10 @@ public final class StrictMode {
                 return;
             }
 
+            // Use the instance count from InstanceTracker as initial value.
             Integer expected = sExpectedActivityInstanceCount.get(klass);
-            Integer newExpected = expected == null ? 1 : expected + 1;
+            Integer newExpected =
+                    expected == null ? InstanceTracker.getInstanceCount(klass) + 1 : expected + 1;
             sExpectedActivityInstanceCount.put(klass, newExpected);
         }
     }

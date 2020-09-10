@@ -50,10 +50,6 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    public void handleSetListening(boolean listening) {
-    }
-
-    @Override
     public Intent getLongClickIntent() {
         return new Intent(Settings.ACTION_DATA_SAVER_SETTINGS);
     }

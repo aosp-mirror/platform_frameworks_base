@@ -18,6 +18,9 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
+import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_DISABLED;
+import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_ENABLED;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_DESTROY;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY;
 
@@ -28,9 +31,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_DEFAULT;
-import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_DISABLED;
-import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -41,6 +41,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Matchers.eq;
 
 import android.app.WindowConfiguration;
+import android.content.res.Configuration;
 import android.platform.test.annotations.Presubmit;
 import android.util.Xml;
 import android.view.Display;
@@ -50,14 +51,13 @@ import android.view.Surface;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoSession;
+import org.junit.runner.RunWith;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.io.ByteArrayInputStream;
@@ -77,7 +77,11 @@ import java.nio.charset.StandardCharsets;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class DisplayWindowSettingsTests extends WindowTestsBase {
+
+    private static final byte DISPLAY_PORT = (byte) 0xFF;
+    private static final long DISPLAY_MODEL = 0xEEEEEEEEL;
 
     private static final File TEST_FOLDER = getInstrumentation().getTargetContext().getCacheDir();
     private DisplayWindowSettings mTarget;
@@ -94,7 +98,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     public void setUp() throws Exception {
         deleteRecursively(TEST_FOLDER);
 
-        mWm.setSupportsFreeformWindowManagement(false);
+        mWm.mAtmService.mSupportsFreeformWindowManagement = false;
         mWm.setIsPc(false);
         mWm.setForceDesktopModeOnExternalDisplays(false);
 
@@ -133,7 +137,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testPrimaryDisplayDefaultToFullscreen_HasFreeformSupport_NonPc_NoDesktopMode() {
-        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.mAtmService.mSupportsFreeformWindowManagement = true;
 
         mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
 
@@ -143,7 +147,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testPrimaryDisplayDefaultToFullscreen_HasFreeformSupport_NonPc_HasDesktopMode() {
-        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.mAtmService.mSupportsFreeformWindowManagement = true;
         mWm.setForceDesktopModeOnExternalDisplays(true);
 
         mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
@@ -154,7 +158,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testPrimaryDisplayDefaultToFreeform_HasFreeformSupport_IsPc() {
-        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.mAtmService.mSupportsFreeformWindowManagement = true;
         mWm.setIsPc(true);
 
         mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
@@ -167,7 +171,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     public void testPrimaryDisplayUpdateToFreeform_HasFreeformSupport_IsPc() {
         mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
 
-        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.mAtmService.mSupportsFreeformWindowManagement = true;
         mWm.setIsPc(true);
 
         mTarget.updateSettingsForDisplay(mPrimaryDisplay);
@@ -186,7 +190,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testSecondaryDisplayDefaultToFreeform_HasFreeformSupport_NonPc_NoDesktopMode() {
-        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.mAtmService.mSupportsFreeformWindowManagement = true;
 
         mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
 
@@ -196,7 +200,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testSecondaryDisplayDefaultToFreeform_HasFreeformSupport_NonPc_HasDesktopMode() {
-        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.mAtmService.mSupportsFreeformWindowManagement = true;
         mWm.setForceDesktopModeOnExternalDisplays(true);
 
         mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
@@ -207,7 +211,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testSecondaryDisplayDefaultToFreeform_HasFreeformSupport_IsPc() {
-        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.mAtmService.mSupportsFreeformWindowManagement = true;
         mWm.setIsPc(true);
 
         mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
@@ -273,47 +277,6 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mWm.setForcedDisplayScalingMode(mSecondaryDisplay.getDisplayId(),
                 DisplayContent.FORCE_SCALING_MODE_AUTO);
         assertFalse(mSecondaryDisplay.mDisplayScalingDisabled);
-    }
-
-    @Test
-    public void testDefaultToZeroOverscan() {
-        mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
-
-        assertOverscan(mPrimaryDisplay, 0 /* left */, 0 /* top */, 0 /* right */, 0 /* bottom */);
-    }
-
-    @Test
-    public void testPersistOverscanInSameInstance() {
-        final DisplayInfo info = mPrimaryDisplay.getDisplayInfo();
-        try {
-            mTarget.setOverscanLocked(info, 1 /* left */, 2 /* top */, 3 /* right */,
-                    4 /* bottom */);
-
-            mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
-
-            assertOverscan(mPrimaryDisplay, 1 /* left */, 2 /* top */, 3 /* right */,
-                    4 /* bottom */);
-        } finally {
-            mTarget.setOverscanLocked(info, 0, 0, 0, 0);
-            mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
-        }
-    }
-
-    @Test
-    public void testPersistOverscanAcrossInstances() {
-        final DisplayInfo info = mPrimaryDisplay.getDisplayInfo();
-        try {
-            mTarget.setOverscanLocked(info, 10 /* left */, 20 /* top */, 30 /* right */,
-                    40 /* bottom */);
-
-            applySettingsToDisplayByNewInstance(mPrimaryDisplay);
-
-            assertOverscan(mPrimaryDisplay, 10 /* left */, 20 /* top */, 30 /* right */,
-                    40 /* bottom */);
-        } finally {
-            mTarget.setOverscanLocked(info, 0, 0, 0, 0);
-            mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
-        }
     }
 
     @Test
@@ -443,8 +406,6 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mTarget.setUserRotation(mPrimaryDisplay, WindowManagerPolicy.USER_ROTATION_LOCKED,
                 Surface.ROTATION_0);
 
-        final MockitoSession mockitoSession = ExtendedMockito.mockitoSession()
-                .startMocking();
         final DisplayRotation displayRotation = mock(DisplayRotation.class);
         spyOn(mPrimaryDisplay);
         doReturn(displayRotation).when(mPrimaryDisplay).getDisplayRotation();
@@ -453,15 +414,12 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
         verify(displayRotation).restoreSettings(anyInt(), anyInt(),
                 eq(FIXED_TO_USER_ROTATION_DEFAULT));
-        mockitoSession.finishMocking();
     }
 
     @Test
     public void testSetFixedToUserRotationDisabled() {
         mTarget.setFixedToUserRotation(mPrimaryDisplay, FIXED_TO_USER_ROTATION_DISABLED);
 
-        final MockitoSession mockitoSession = ExtendedMockito.mockitoSession()
-                .startMocking();
         final DisplayRotation displayRotation = mock(DisplayRotation.class);
         spyOn(mPrimaryDisplay);
         doReturn(displayRotation).when(mPrimaryDisplay).getDisplayRotation();
@@ -470,15 +428,12 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
         verify(displayRotation).restoreSettings(anyInt(), anyInt(),
                 eq(FIXED_TO_USER_ROTATION_DISABLED));
-        mockitoSession.finishMocking();
     }
 
     @Test
     public void testSetFixedToUserRotationEnabled() {
         mTarget.setFixedToUserRotation(mPrimaryDisplay, FIXED_TO_USER_ROTATION_ENABLED);
 
-        final MockitoSession mockitoSession = ExtendedMockito.mockitoSession()
-                .startMocking();
         final DisplayRotation displayRotation = mock(DisplayRotation.class);
         spyOn(mPrimaryDisplay);
         doReturn(displayRotation).when(mPrimaryDisplay).getDisplayRotation();
@@ -487,7 +442,6 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
         verify(displayRotation).restoreSettings(anyInt(), anyInt(),
                 eq(FIXED_TO_USER_ROTATION_ENABLED));
-        mockitoSession.finishMocking();
     }
 
     @Test
@@ -528,10 +482,11 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     @Test
     public void testReadingDisplaySettingsFromStorage_UsePortAsId() {
-        final DisplayAddress.Physical displayAddress = DisplayAddress.fromPhysicalDisplayId(123456);
+        final DisplayAddress.Physical displayAddress =
+                DisplayAddress.fromPortAndModel(DISPLAY_PORT, DISPLAY_MODEL);
         mPrimaryDisplay.getDisplayInfo().address = displayAddress;
 
-        final String displayIdentifier = "port:" + displayAddress.getPort();
+        final String displayIdentifier = "port:" + Byte.toUnsignedInt(DISPLAY_PORT);
         prepareDisplaySettings(displayIdentifier, true /* usePortAsId */);
 
         readAndAssertDisplaySettings(mPrimaryDisplay);
@@ -570,7 +525,8 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     @Test
     public void testWritingDisplaySettingsToStorage_UsePortAsId() throws Exception {
         // Store config to use port as identifier.
-        final DisplayAddress.Physical displayAddress = DisplayAddress.fromPhysicalDisplayId(123456);
+        final DisplayAddress.Physical displayAddress =
+                DisplayAddress.fromPortAndModel(DISPLAY_PORT, DISPLAY_MODEL);
         mSecondaryDisplay.getDisplayInfo().address = displayAddress;
         prepareDisplaySettings(null /* displayIdentifier */, true /* usePortAsId */);
 
@@ -581,7 +537,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         assertTrue(mStorage.wasWriteSuccessful());
 
         // Verify that settings were stored correctly.
-        assertEquals("Attribute value must be stored", "port:" + displayAddress.getPort(),
+        assertEquals("Attribute value must be stored", "port:" + Byte.toUnsignedInt(DISPLAY_PORT),
                 getStoredDisplayAttributeValue("name"));
         assertEquals("Attribute value must be stored", "true",
                 getStoredDisplayAttributeValue("shouldShowSystemDecors"));
@@ -604,6 +560,32 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         } finally {
             mWm.setForceDesktopModeOnExternalDisplays(false);
         }
+    }
+
+    @Test
+    public void testDisplayWindowSettingsAppliedOnDisplayReady() {
+        // Set forced densities for two displays in DisplayWindowSettings
+        final DisplayContent dc = createMockSimulatedDisplay();
+        final DisplayWindowSettings settings = new DisplayWindowSettings(mWm, mStorage);
+        settings.setForcedDensity(mPrimaryDisplay, 123, 0 /* userId */);
+        settings.setForcedDensity(dc, 456, 0 /* userId */);
+
+        // Apply settings to displays - the settings will be stored, but config will not be
+        // recalculated immediately.
+        settings.applySettingsToDisplayLocked(mPrimaryDisplay);
+        settings.applySettingsToDisplayLocked(dc);
+        assertFalse(mPrimaryDisplay.mWaitingForConfig);
+        assertFalse(dc.mWaitingForConfig);
+
+        // Notify WM that the displays are ready and check that they are reconfigured.
+        mWm.displayReady();
+        waitUntilHandlersIdle();
+
+        final Configuration config = new Configuration();
+        mPrimaryDisplay.computeScreenConfiguration(config);
+        assertEquals(123, config.densityDpi);
+        dc.computeScreenConfiguration(config);
+        assertEquals(456, config.densityDpi);
     }
 
     /**
@@ -670,16 +652,6 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
             mStorage.closeRead();
         }
         return null;
-    }
-
-    private static void assertOverscan(DisplayContent display, int left, int top, int right,
-            int bottom) {
-        final DisplayInfo info = display.getDisplayInfo();
-
-        assertEquals(left, info.overscanLeft);
-        assertEquals(top, info.overscanTop);
-        assertEquals(right, info.overscanRight);
-        assertEquals(bottom, info.overscanBottom);
     }
 
     /**

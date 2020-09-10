@@ -19,6 +19,7 @@ package android.content;
 import android.content.pm.UserInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 
 import androidx.test.filters.LargeTest;
 
@@ -40,6 +41,6 @@ public class ManagedUserContentResolverTest extends AbstractCrossUserContentReso
     @Override
     protected UserInfo createUser() throws RemoteException {
         return mUm.createProfileForUser("Managed user",
-                UserInfo.FLAG_MANAGED_PROFILE, UserHandle.myUserId());
+                UserManager.USER_TYPE_PROFILE_MANAGED, /* flags */ 0, UserHandle.myUserId());
     }
 }

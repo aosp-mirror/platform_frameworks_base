@@ -16,7 +16,6 @@
 
 package com.android.keyguard;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -31,10 +30,13 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.FrameLayout;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityContainer.SecurityCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.settingslib.Utils;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
@@ -84,7 +86,8 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
                         // the user proved presence via some other way to the trust agent.
                         Log.i(TAG, "TrustAgent dismissed Keyguard.");
                     }
-                    dismiss(false /* authenticated */, userId);
+                    dismiss(false /* authenticated */, userId,
+                            /* bypassSecondaryLockScreen */ false);
                 } else {
                     mViewMediatorCallback.playTrustedSound();
                 }
@@ -99,7 +102,8 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     public static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardViewBase";
 
-    private KeyguardSecurityContainer mSecurityContainer;
+    @VisibleForTesting
+    protected KeyguardSecurityContainer mSecurityContainer;
 
     public KeyguardHostView(Context context) {
         this(context, null);
@@ -107,7 +111,7 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
 
     public KeyguardHostView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).registerCallback(mUpdateCallback);
     }
 
     @Override
@@ -167,8 +171,9 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
      *
      * @param reason a flag indicating which string should be shown, see
      *               {@link KeyguardSecurityView#PROMPT_REASON_NONE},
-     *               {@link KeyguardSecurityView#PROMPT_REASON_RESTART} and
-     *               {@link KeyguardSecurityView#PROMPT_REASON_TIMEOUT}.
+     *               {@link KeyguardSecurityView#PROMPT_REASON_RESTART},
+     *               {@link KeyguardSecurityView#PROMPT_REASON_TIMEOUT}, and
+     *               {@link KeyguardSecurityView#PROMPT_REASON_PREPARE_FOR_UPDATE}.
      */
     public void showPromptReason(int reason) {
         mSecurityContainer.showPromptReason(reason);
@@ -188,7 +193,7 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
      * @return True if the keyguard is done.
      */
     public boolean dismiss(int targetUserId) {
-        return dismiss(false, targetUserId);
+        return dismiss(false, targetUserId, false);
     }
 
     public boolean handleBackKey() {
@@ -204,8 +209,10 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     }
 
     @Override
-    public boolean dismiss(boolean authenticated, int targetUserId) {
-        return mSecurityContainer.showNextSecurityScreenOrFinish(authenticated, targetUserId);
+    public boolean dismiss(boolean authenticated, int targetUserId,
+            boolean bypassSecondaryLockScreen) {
+        return mSecurityContainer.showNextSecurityScreenOrFinish(authenticated, targetUserId,
+                bypassSecondaryLockScreen);
     }
 
     /**
@@ -407,15 +414,6 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         mAudioManager.dispatchMediaKeyEvent(keyEvent);
     }
 
-    @Override
-    public void dispatchSystemUiVisibilityChanged(int visibility) {
-        super.dispatchSystemUiVisibilityChanged(visibility);
-
-        if (!(mContext instanceof Activity)) {
-            setSystemUiVisibility(STATUS_BAR_DISABLE_BACK);
-        }
-    }
-
     /**
      * In general, we enable unlocking the insecure keyguard with the menu key. However, there are
      * some cases where we wish to disable it, notably when the menu button placement or technology
@@ -449,5 +447,12 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
 
     public SecurityMode getCurrentSecurityMode() {
         return mSecurityContainer.getCurrentSecurityMode();
+    }
+
+    /**
+     * When bouncer was visible and is starting to become hidden.
+     */
+    public void onStartingToHide() {
+        mSecurityContainer.onStartingToHide();
     }
 }

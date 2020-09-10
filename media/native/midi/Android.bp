@@ -43,6 +43,8 @@ cc_library_shared {
         "libandroid_runtime",
     ],
 
+    version_script: "libamidi.map.txt",
+
     export_include_dirs: ["include"],
 }
 

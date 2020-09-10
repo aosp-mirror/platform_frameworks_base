@@ -16,6 +16,8 @@
 
 package com.android.systemui.util.wakelock;
 
+import android.content.Context;
+
 import com.android.internal.util.Preconditions;
 
 public class WakeLockFake implements WakeLock {
@@ -47,5 +49,25 @@ public class WakeLockFake implements WakeLock {
 
     public boolean isHeld() {
         return mAcquired > 0;
+    }
+
+    public static class Builder extends WakeLock.Builder {
+        private WakeLock mWakeLock;
+
+        public Builder(Context context) {
+            super(context);
+        }
+
+        public void setWakeLock(WakeLock wakeLock) {
+            mWakeLock = wakeLock;
+        }
+
+        public WakeLock build() {
+            if (mWakeLock != null) {
+                return mWakeLock;
+            }
+
+            return super.build();
+        }
     }
 }

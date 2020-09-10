@@ -18,20 +18,26 @@ package com.android.overlaytest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.LocaleList;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.util.Xml;
+import android.view.LayoutInflater;
+import android.view.View;
 
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.overlaytest.view.TestTextView;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -45,6 +51,7 @@ import java.util.Locale;
 
 @Ignore
 public abstract class OverlayBaseTest {
+    private Context mContext;
     private Resources mResources;
     private final int mMode;
     static final int MODE_NO_OVERLAY = 0;
@@ -61,7 +68,8 @@ public abstract class OverlayBaseTest {
 
     @Before
     public void setUp() {
-        mResources = InstrumentationRegistry.getContext().getResources();
+        mContext = InstrumentationRegistry.getContext();
+        mResources = mContext.getResources();
     }
 
     private int calculateRawResourceChecksum(int resId) throws Throwable {
@@ -319,6 +327,50 @@ public abstract class OverlayBaseTest {
             contents = str.toString();
         }
         assertEquals("com.android.overlaytest", contents);
+    }
+
+    @Test
+    public void testRewrite() throws Throwable {
+        final TypedValue result = new TypedValue();
+        mResources.getValue(R.string.str, result, true);
+        assertEquals(result.resourceId & 0xff000000, 0x7f000000);
+    }
+
+    @Test
+    public void testOverlayLayout() throws Throwable {
+        final LayoutInflater inflater = LayoutInflater.from(mContext);
+        final View layout = inflater.inflate(R.layout.layout, null);
+        assertNotNull(layout.findViewById(R.id.view_1));
+
+        final TestTextView view2 = layout.findViewById(R.id.view_2);
+        assertNotNull(view2);
+        switch (mMode) {
+            case MODE_NO_OVERLAY:
+                assertEquals("none", view2.getCustomAttributeValue());
+                break;
+            case MODE_SINGLE_OVERLAY:
+                assertEquals("single", view2.getCustomAttributeValue());
+                break;
+            case MODE_MULTIPLE_OVERLAYS:
+                assertEquals("multiple", view2.getCustomAttributeValue());
+                break;
+            default:
+                fail("Unknown mode " + mMode);
+        }
+
+        final TestTextView view3 = layout.findViewById(R.id.view_3);
+        assertNotNull(view3);
+        switch (mMode) {
+            case MODE_NO_OVERLAY:
+                assertEquals("none", view3.getCustomAttributeValue());
+                break;
+            case MODE_SINGLE_OVERLAY:
+            case MODE_MULTIPLE_OVERLAYS:
+                assertEquals("overlaid", view3.getCustomAttributeValue());
+                break;
+            default:
+                fail("Unknown mode " + mMode);
+        }
     }
 
     /*

@@ -131,7 +131,7 @@ message AudioTrackData {
  * Logged from:
  *   frameworks/av/media/libstagefright/MediaCodec.cpp
  *   frameworks/av/services/mediaanalytics/statsd_codec.cpp
- * Next Tag: 21
+ * Next Tag: 26
  */
 message CodecData {
     optional string codec = 1;
@@ -154,6 +154,11 @@ message CodecData {
     optional int64 latency_avg = 18;
     optional int64 latency_count = 19;
     optional int64 latency_unknown = 20;
+    optional int32 queue_input_buffer_error = 21;
+    optional int32 queue_secure_input_buffer_error = 22;
+    optional string bitrate_mode = 23;
+    optional int32 bitrate = 24;
+    optional int64 lifetime_millis = 25;
 }
 
 /**

@@ -121,7 +121,12 @@ final class FieldClassificationStrategy {
         synchronized (mLock) {
             if (mServiceConnection != null) {
                 if (sDebug) Slog.d(TAG, "reset(): unbinding service.");
-                mContext.unbindService(mServiceConnection);
+                try {
+                    mContext.unbindService(mServiceConnection);
+                } catch (IllegalArgumentException e) {
+                    // no-op, just log the error message.
+                    Slog.w(TAG, "reset(): " + e.getMessage());
+                }
                 mServiceConnection = null;
             } else {
                 if (sDebug) Slog.d(TAG, "reset(): service is not bound. Do nothing.");

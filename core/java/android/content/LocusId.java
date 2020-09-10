@@ -29,8 +29,9 @@ import java.io.PrintWriter;
  * backup / restore.
  *
  * <p>Locus is a new concept introduced on
- * {@link android.os.Build.VERSION_CODES#Q Android Q} and it lets the Android system correlate
- * state between different subsystems such as content capture, shortcuts, and notifications.
+ * {@link android.os.Build.VERSION_CODES#Q Android Q} and it lets the intelligence service provided
+ * by the Android System to correlate state between different subsystems such as content capture,
+ * shortcuts, and notifications.
  *
  * <p>For example, if your app provides an activiy representing a chat between 2 users
  * (say {@code A} and {@code B}, this chat state could be represented by:

@@ -159,6 +159,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     private boolean mDismissed;
     private Runnable mOnDismissListener;
     private boolean mIncreasedSize;
+    private boolean mShowsConversation;
 
     public StatusBarIconView(Context context, String slot, StatusBarNotification sbn) {
         this(context, slot, sbn, false);
@@ -183,6 +184,16 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         initializeDecorColor();
         reloadDimens();
         maybeUpdateIconScaleDimens();
+    }
+
+    public StatusBarIconView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        mDozer = new NotificationIconDozeHelper(context);
+        mBlocked = false;
+        mAlwaysScaleIcon = true;
+        reloadDimens();
+        maybeUpdateIconScaleDimens();
+        mDensity = context.getResources().getDisplayMetrics().densityDpi;
     }
 
     /** Should always be preceded by {@link #reloadDimens()} */
@@ -277,16 +288,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         maybeUpdateIconScaleDimens();
     }
 
-    public StatusBarIconView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        mDozer = new NotificationIconDozeHelper(context);
-        mBlocked = false;
-        mAlwaysScaleIcon = true;
-        reloadDimens();
-        maybeUpdateIconScaleDimens();
-        mDensity = context.getResources().getDisplayMetrics().densityDpi;
-    }
-
     private static boolean streq(String a, String b) {
         if (a == b) {
             return true;
@@ -307,6 +308,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
             case Icon.TYPE_RESOURCE:
                 return a.getResPackage().equals(b.getResPackage()) && a.getResId() == b.getResId();
             case Icon.TYPE_URI:
+            case Icon.TYPE_URI_ADAPTIVE_BITMAP:
                 return a.getUriString().equals(b.getUriString());
             default:
                 return false;
@@ -616,6 +618,11 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     }
 
     private void updateIconColor() {
+        if (mShowsConversation) {
+            setColorFilter(null);
+            return;
+        }
+
         if (mCurrentSetColor != NO_COLOR) {
             if (mMatrixColorFilter == null) {
                 mMatrix = new float[4 * 5];
@@ -911,7 +918,11 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     }
 
     private void updatePivot() {
-        setPivotX((1 - mIconScale) / 2.0f * getWidth());
+        if (isLayoutRtl()) {
+            setPivotX((1 + mIconScale) / 2.0f * getWidth());
+        } else {
+            setPivotX((1 - mIconScale) / 2.0f * getWidth());
+        }
         setPivotY((getHeight() - mIconScale * getWidth()) / 2.0f);
     }
 
@@ -955,6 +966,27 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     public void setIncreasedSize(boolean increasedSize) {
         mIncreasedSize = increasedSize;
         maybeUpdateIconScaleDimens();
+    }
+
+    /**
+     * Sets whether this icon shows a person and should be tinted.
+     * If the state differs from the supplied setting, this
+     * will update the icon colors.
+     *
+     * @param showsConversation Whether the icon shows a person
+     */
+    public void setShowsConversation(boolean showsConversation) {
+        if (mShowsConversation != showsConversation) {
+            mShowsConversation = showsConversation;
+            updateIconColor();
+        }
+    }
+
+    /**
+     * @return if this icon shows a conversation
+     */
+    public boolean showsConversation() {
+        return mShowsConversation;
     }
 
     public interface OnVisibilityChangedListener {
