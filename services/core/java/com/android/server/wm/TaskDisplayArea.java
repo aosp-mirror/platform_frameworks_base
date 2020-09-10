@@ -1779,7 +1779,8 @@ final class TaskDisplayArea extends DisplayArea<Task> {
                         notifyClients);
             }
         } finally {
-            mAtmService.mStackSupervisor.endActivityVisibilityUpdate();
+            mAtmService.mStackSupervisor.endActivityVisibilityUpdate(starting, configChanges,
+                    preserveWindows, notifyClients);
         }
     }
 

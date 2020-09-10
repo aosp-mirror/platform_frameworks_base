@@ -278,6 +278,27 @@ class KeyguardController {
     }
 
     /**
+     * Checks whether {@param r} should be visible depending on Keyguard state.
+     *
+     * @return true if {@param r} is visible taken Keyguard state into account, false otherwise
+     */
+    boolean checkKeyguardVisibility(ActivityRecord r) {
+        if (r.mDisplayContent.canShowWithInsecureKeyguard() && canDismissKeyguard()) {
+            return true;
+        }
+
+        if (isKeyguardOrAodShowing(r.mDisplayContent.getDisplayId())) {
+            // If keyguard is showing, nothing is visible, except if we are able to dismiss Keyguard
+            // right away and AOD isn't visible.
+            return canShowActivityWhileKeyguardShowing(r, r.containsDismissKeyguardWindow());
+        } else if (isKeyguardLocked()) {
+            return canShowWhileOccluded(r.containsDismissKeyguardWindow(), r.canShowWhenLocked());
+        } else {
+            return true;
+        }
+    }
+
+    /**
      * Makes sure to update lockscreen occluded/dismiss state if needed after completing all
      * visibility updates ({@link ActivityStackSupervisor#endActivityVisibilityUpdate}).
      */
@@ -442,6 +463,7 @@ class KeyguardController {
         private final int mDisplayId;
         private boolean mOccluded;
         private ActivityRecord mDismissingKeyguardActivity;
+        private ActivityRecord mTopTurnScreenOnActivity;
         private boolean mRequestDismissKeyguard;
         private final ActivityTaskManagerService mService;
         private final ActivityTaskManagerInternal.SleepTokenAcquirer mSleepTokenAcquirer;
@@ -455,30 +477,38 @@ class KeyguardController {
 
         void onRemoved() {
             mDismissingKeyguardActivity = null;
+            mTopTurnScreenOnActivity = null;
             mSleepTokenAcquirer.release(mDisplayId);
         }
 
         void visibilitiesUpdated(KeyguardController controller, DisplayContent display) {
             final boolean lastOccluded = mOccluded;
             final ActivityRecord lastDismissActivity = mDismissingKeyguardActivity;
+            final ActivityRecord lastTurnScreenOnActivity = mTopTurnScreenOnActivity;
             mRequestDismissKeyguard = false;
             mOccluded = false;
             mDismissingKeyguardActivity = null;
+            mTopTurnScreenOnActivity = null;
 
+            // only top + focusable + visible task can control occluding.
             final Task stack = getStackForControllingOccluding(display);
             if (stack != null) {
                 final ActivityRecord topDismissing = stack.getTopDismissingKeyguardActivity();
+                final ActivityRecord topTurnScreenOn = stack.getTopTurnScreenOnActivity();
                 mOccluded = stack.topActivityOccludesKeyguard() || (topDismissing != null
                         && stack.topRunningActivity() == topDismissing
                         && controller.canShowWhileOccluded(
                                 true /* dismissKeyguard */,
                                 false /* showWhenLocked */));
-                if (stack.getTopDismissingKeyguardActivity() != null) {
-                    mDismissingKeyguardActivity = stack.getTopDismissingKeyguardActivity();
+                if (topDismissing != null) {
+                    mDismissingKeyguardActivity = topDismissing;
+                }
+                if (topTurnScreenOn != null) {
+                    mTopTurnScreenOnActivity = topTurnScreenOn;
                 }
                 // FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD only apply for secondary display.
-                if (mDisplayId != DEFAULT_DISPLAY) {
-                    mOccluded |= stack.canShowWithInsecureKeyguard()
+                if (mDisplayId != DEFAULT_DISPLAY && stack.mDisplayContent != null) {
+                    mOccluded |= stack.mDisplayContent.canShowWithInsecureKeyguard()
                             && controller.canDismissKeyguard();
                 }
             }
@@ -488,14 +518,20 @@ class KeyguardController {
                         .getDisplayPolicy().isShowingDreamLw();
             }
 
-            if (lastOccluded != mOccluded) {
-                controller.handleOccludedChanged(mDisplayId);
-            }
-            if (lastDismissActivity != mDismissingKeyguardActivity && !mOccluded
+            mRequestDismissKeyguard = lastDismissActivity != mDismissingKeyguardActivity
+                    && !mOccluded
                     && mDismissingKeyguardActivity != null
                     && controller.mWindowManager.isKeyguardSecure(
-                            controller.mService.getCurrentUserId())) {
-                mRequestDismissKeyguard = true;
+                    controller.mService.getCurrentUserId());
+
+            if (mTopTurnScreenOnActivity != null
+                    && mTopTurnScreenOnActivity != lastTurnScreenOnActivity
+                    && !mService.mWindowManager.mPowerManager.isInteractive()) {
+                controller.mStackSupervisor.wakeUp("handleTurnScreenOn");
+            }
+
+            if (lastOccluded != mOccluded) {
+                controller.handleOccludedChanged(mDisplayId);
             }
         }
 
@@ -525,6 +561,8 @@ class KeyguardController {
             sb.append("  Occluded=").append(mOccluded)
                     .append(" DismissingKeyguardActivity=")
                     .append(mDismissingKeyguardActivity)
+                    .append(" TurnScreenOnActivity=")
+                    .append(mTopTurnScreenOnActivity)
                     .append(" at display=")
                     .append(mDisplayId);
             pw.println(sb.toString());

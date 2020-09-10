@@ -534,11 +534,14 @@ public class SystemServicesTestRule implements TestRule {
             doNothing().when(this).scheduleIdleTimeout(any());
             // unit test version does not handle launch wake lock
             doNothing().when(this).acquireLaunchWakelock();
-            doReturn(mock(KeyguardController.class)).when(this).getKeyguardController();
 
             mLaunchingActivityWakeLock = mock(PowerManager.WakeLock.class);
 
             initialize();
+
+            final KeyguardController controller = getKeyguardController();
+            spyOn(controller);
+            doReturn(true).when(controller).checkKeyguardVisibility(any());
         }
     }
 
