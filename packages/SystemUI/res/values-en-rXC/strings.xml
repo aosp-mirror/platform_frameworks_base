@@ -1067,6 +1067,8 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‎‏‏‎‏‎‏‎‎‏‎‎‎‎‎‏‎‏‏‎‎‎‏‏‎‏‎‏‎‎‎‏‎‏‏‏‏‎‏‏‏‏‎‎‎‎‏‏‎‏‏‏‏‎‏‎Hold Power button to see new controls‎‏‎‎‏‎"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‏‎‏‏‎‏‏‏‏‏‎‎‏‎‏‎‏‏‎‎‏‎‎‎‎‏‏‎‏‏‎‏‎‏‏‎‏‏‏‏‎‎‎‏‎‎‏‏‎‎‏‏‎‎‏‎‎Add controls‎‏‎‎‏‎"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‎‎‏‎‏‏‏‎‎‎‎‏‎‎‎‎‏‏‏‎‎‏‏‎‎‎‎‏‎‎‎‏‎‏‎‏‎‏‏‎‏‎‏‎‏‏‎‏‏‎‏‏‏‎‏‏‎‎Edit controls‎‏‎‎‏‎"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‏‏‎‎‏‏‎‎‏‎‏‏‎‏‏‏‏‎‎‎‎‏‎‎‎‏‎‎‎‎‎‏‏‎‏‎‏‏‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‎‎‎‎Using one-handed mode‎‏‎‎‏‎"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‎‎‎‎‏‎‏‎‎‎‏‎‏‏‏‎‏‎‏‎‎‎‏‏‎‏‏‎‏‏‎‎‏‎‏‎‏‎‏‎‏‎‎‎‎‏‎‎‏‏‎‏‏‎‎To exit, swipe up from the bottom of the screen or tap anywhere above the app‎‏‎‎‏‎"</string>
+    <!-- no translation found for one_handed_tutorial_title (6312198435090726656) -->
+    <skip />
+    <!-- no translation found for one_handed_tutorial_description (7674850272340517174) -->
+    <skip />
 </resources>
