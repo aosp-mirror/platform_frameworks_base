@@ -1279,7 +1279,7 @@
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Nooit toestaan"</string>
     <string name="sim_removed_title" msgid="5387212933992546283">"Simkaart verwijderd"</string>
     <string name="sim_removed_message" msgid="9051174064474904617">"Het mobiele netwerk is niet beschikbaar totdat u het apparaat opnieuw start met een geldige simkaart."</string>
-    <string name="sim_done_button" msgid="6464250841528410598">"Gereed"</string>
+    <string name="sim_done_button" msgid="6464250841528410598">"Klaar"</string>
     <string name="sim_added_title" msgid="7930779986759414595">"Simkaart aangesloten"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Start je apparaat opnieuw voor toegang tot het mobiele netwerk."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Opnieuw starten"</string>
@@ -1292,7 +1292,7 @@
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Tijd instellen"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"Datum instellen"</string>
     <string name="date_time_set" msgid="4603445265164486816">"Instellen"</string>
-    <string name="date_time_done" msgid="8363155889402873463">"Gereed"</string>
+    <string name="date_time_done" msgid="8363155889402873463">"Klaar"</string>
     <string name="perms_new_perm_prefix" msgid="6984556020395757087"><font size="12" fgcolor="#ff33b5e5">"NIEUW: "</font></string>
     <string name="perms_description_app" msgid="2747752389870161996">"Geleverd door <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="5729199278862516390">"Geen rechten nodig"</string>
@@ -1379,7 +1379,7 @@
     <string name="ext_media_status_removed" msgid="241223931135751691">"Verwijderd"</string>
     <string name="ext_media_status_unmounted" msgid="8145812017295835941">"Uitgeworpen"</string>
     <string name="ext_media_status_checking" msgid="159013362442090347">"Controleren…"</string>
-    <string name="ext_media_status_mounted" msgid="3459448555811203459">"Gereed"</string>
+    <string name="ext_media_status_mounted" msgid="3459448555811203459">"Klaar"</string>
     <string name="ext_media_status_mounted_ro" msgid="1974809199760086956">"Alleen lezen"</string>
     <string name="ext_media_status_bad_removal" msgid="508448566481406245">"Onveilig verwijderd"</string>
     <string name="ext_media_status_unmountable" msgid="7043574843541087748">"Beschadigd"</string>
@@ -1404,7 +1404,7 @@
     <string name="ime_action_search" msgid="4501435960587287668">"Zoeken"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"Verzenden"</string>
     <string name="ime_action_next" msgid="4169702997635728543">"Volgende"</string>
-    <string name="ime_action_done" msgid="6299921014822891569">"Gereed"</string>
+    <string name="ime_action_done" msgid="6299921014822891569">"Klaar"</string>
     <string name="ime_action_previous" msgid="6548799326860401611">"Vorige"</string>
     <string name="ime_action_default" msgid="8265027027659800121">"Uitvoeren"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"Nummer bellen\nmet <xliff:g id="NUMBER">%s</xliff:g>"</string>
@@ -1451,7 +1451,7 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> van <xliff:g id="TOTAL">%d</xliff:g></item>
       <item quantity="one">1 overeenkomst</item>
     </plurals>
-    <string name="action_mode_done" msgid="2536182504764803222">"Gereed"</string>
+    <string name="action_mode_done" msgid="2536182504764803222">"Klaar"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Gedeelde opslag wissen…"</string>
     <string name="share" msgid="4157615043345227321">"Delen"</string>
     <string name="find" msgid="5015737188624767706">"Vinden"</string>
@@ -1492,7 +1492,7 @@
     <string name="keyboardview_keycode_alt" msgid="8997420058584292385">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Annuleren"</string>
     <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"Delete"</string>
-    <string name="keyboardview_keycode_done" msgid="2524518019001653851">"Gereed"</string>
+    <string name="keyboardview_keycode_done" msgid="2524518019001653851">"Klaar"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"Modus wijzigen"</string>
     <string name="keyboardview_keycode_shift" msgid="3026509237043975573">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Enter"</string>
@@ -1645,7 +1645,7 @@
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Functies kiezen voor gebruik met de sneltoets via de volumeknop"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> is uitgeschakeld"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Snelkoppelingen bewerken"</string>
-    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Gereed"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Klaar"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Sneltoets uitschakelen"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Sneltoets gebruiken"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Kleurinversie"</string>
@@ -1774,7 +1774,7 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Volledig scherm wordt weergegeven"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Swipe omlaag vanaf de bovenkant van het scherm om af te sluiten."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ik snap het"</string>
-    <string name="done_label" msgid="7283767013231718521">"Gereed"</string>
+    <string name="done_label" msgid="7283767013231718521">"Klaar"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Ronde schuifregelaar voor uren"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Ronde schuifregelaar voor minuten"</string>
     <string name="select_hours" msgid="5982889657313147347">"Uren selecteren"</string>
