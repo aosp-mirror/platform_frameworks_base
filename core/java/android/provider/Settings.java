@@ -6801,6 +6801,13 @@ public final class Settings {
         public static final String KEYGUARD_SLICE_URI = "keyguard_slice_uri";
 
         /**
+         * Whether to draw text in bold.
+         *
+         * @hide
+         */
+        public static final String FORCE_BOLD_TEXT = "force_bold_text";
+
+        /**
          * Whether to speak passwords while in accessibility mode.
          *
          * @deprecated The speaking of passwords is controlled by individual accessibility services.
