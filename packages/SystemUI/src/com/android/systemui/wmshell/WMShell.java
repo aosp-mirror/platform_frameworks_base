@@ -45,6 +45,7 @@ import com.android.systemui.shared.tracing.ProtoTraceable;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -76,6 +77,9 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
     private final Optional<Pip> mPipOptional;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<OneHanded> mOneHandedOptional;
+    // Inject the organizer directly in case the optionals aren't loaded to depend on it. There
+    // are non-optional windowing features like FULLSCREEN.
+    private final ShellTaskOrganizer mShellTaskOrganizer;
     private final ProtoTracer mProtoTracer;
 
     @Inject
@@ -89,6 +93,7 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
             Optional<Pip> pipOptional,
             Optional<SplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
+            ShellTaskOrganizer shellTaskOrganizer,
             ProtoTracer protoTracer) {
         super(context);
         mCommandQueue = commandQueue;
@@ -101,6 +106,7 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
         mPipOptional = pipOptional;
         mSplitScreenOptional = splitScreenOptional;
         mOneHandedOptional = oneHandedOptional;
+        mShellTaskOrganizer = shellTaskOrganizer;
         mProtoTracer = protoTracer;
         mProtoTracer.add(this);
     }

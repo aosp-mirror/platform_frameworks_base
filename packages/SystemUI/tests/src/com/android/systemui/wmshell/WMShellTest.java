@@ -35,6 +35,7 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.tracing.ProtoTracer;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedGestureHandler;
@@ -64,6 +65,7 @@ public class WMShellTest extends SysuiTestCase {
     @Mock Pip mPip;
     @Mock SplitScreen mSplitScreen;
     @Mock OneHanded mOneHanded;
+    @Mock ShellTaskOrganizer mTaskOrganizer;
     @Mock ProtoTracer mProtoTracer;
 
     @Before
@@ -72,7 +74,7 @@ public class WMShellTest extends SysuiTestCase {
         mWMShell = new WMShell(mContext, mCommandQueue, mKeyguardUpdateMonitor,
                 mActivityManagerWrapper, mDisplayImeController, mNavigationModeController,
                 mScreenLifecycle, mSysUiState, Optional.of(mPip), Optional.of(mSplitScreen),
-                Optional.of(mOneHanded), mProtoTracer);
+                Optional.of(mOneHanded), mTaskOrganizer, mProtoTracer);
     }
 
     @Test

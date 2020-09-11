@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager.RunningTaskInfo;
@@ -31,6 +32,8 @@ import android.window.ITaskOrganizerController;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+
+import com.android.wm.shell.common.TransactionPool;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +54,7 @@ public class ShellTaskOrganizerTests {
     private ITaskOrganizerController mTaskOrganizerController;
 
     ShellTaskOrganizer mOrganizer;
+    private final TransactionPool mTransactionPool = mock(TransactionPool.class);
 
     private class TrackingTaskListener implements ShellTaskOrganizer.TaskListener {
         final ArrayList<RunningTaskInfo> appeared = new ArrayList<>();
@@ -81,7 +85,7 @@ public class ShellTaskOrganizerTests {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mOrganizer = new ShellTaskOrganizer(mTaskOrganizerController);
+        mOrganizer = new ShellTaskOrganizer(mTaskOrganizerController, mTransactionPool);
     }
 
     @Test
