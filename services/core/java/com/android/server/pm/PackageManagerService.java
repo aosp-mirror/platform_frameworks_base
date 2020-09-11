@@ -3506,7 +3506,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 ver.fingerprint = Build.FINGERPRINT;
             }
 
-            // Grandfather existing (installed before Q) non-system apps to hide
+            // Legacy existing (installed before Q) non-system apps to hide
             // their icons in launcher.
             if (!mOnlyCore && mIsPreQUpgrade) {
                 Slog.i(TAG, "Whitelisting all existing apps to hide their icons");
@@ -16276,7 +16276,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     /**
      * A container of all data needed to commit a package to in-memory data structures and to disk.
-     * TODO: move most of the data contained her into a PackageSetting for commit.
+     * TODO: move most of the data contained here into a PackageSetting for commit.
      */
     private static class ReconciledPackage {
         public final ReconcileRequest request;
