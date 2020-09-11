@@ -18,10 +18,8 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.WindowOrganizerController.CONTROLLABLE_CONFIGS;
@@ -73,11 +71,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     // The set of modes that are currently supports
     // TODO: Remove once the task organizer can support all modes
     @VisibleForTesting
-    static final int[] SUPPORTED_WINDOWING_MODES = {
-            WINDOWING_MODE_PINNED,
-            WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
-            WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
-            WINDOWING_MODE_MULTI_WINDOW,
+    static final int[] UNSUPPORTED_WINDOWING_MODES = {
+            WINDOWING_MODE_UNDEFINED,
+            WINDOWING_MODE_FREEFORM
     };
 
     private final WindowManagerGlobalLock mGlobalLock;
@@ -311,18 +307,17 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             synchronized (mGlobalLock) {
                 ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Register task organizer=%s uid=%d",
                         organizer.asBinder(), uid);
-                for (int winMode : SUPPORTED_WINDOWING_MODES) {
-                    if (!mTaskOrganizerStates.containsKey(organizer.asBinder())) {
-                        mTaskOrganizers.add(organizer);
-                        mTaskOrganizerStates.put(organizer.asBinder(),
-                                new TaskOrganizerState(organizer, uid));
-                    }
-                    mService.mRootWindowContainer.forAllTasks((task) -> {
-                        if (task.getWindowingMode() == winMode) {
-                            task.updateTaskOrganizerState(true /* forceUpdate */);
-                        }
-                    });
+                if (!mTaskOrganizerStates.containsKey(organizer.asBinder())) {
+                    mTaskOrganizers.add(organizer);
+                    mTaskOrganizerStates.put(organizer.asBinder(),
+                            new TaskOrganizerState(organizer, uid));
                 }
+                mService.mRootWindowContainer.forAllTasks((task) -> {
+                    if (ArrayUtils.contains(UNSUPPORTED_WINDOWING_MODES, task.getWindowingMode())) {
+                        return;
+                    }
+                    task.updateTaskOrganizerState(true /* forceUpdate */);
+                });
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -360,12 +355,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     private boolean isSupportedWindowingMode(int winMode) {
-        for (int i = 0; i < SUPPORTED_WINDOWING_MODES.length; i++) {
-            if (SUPPORTED_WINDOWING_MODES[i] == winMode) {
-                return true;
-            }
-        }
-        return false;
+        return !ArrayUtils.contains(UNSUPPORTED_WINDOWING_MODES, winMode);
     }
 
     void onTaskAppeared(ITaskOrganizer organizer, Task task) {
@@ -659,21 +649,18 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.print(prefix); pw.println("TaskOrganizerController:");
-        pw.print(innerPrefix); pw.println("Per windowing mode:");
-        for (int i = 0; i < SUPPORTED_WINDOWING_MODES.length; i++) {
-            final int windowingMode = SUPPORTED_WINDOWING_MODES[i];
-            pw.println(innerPrefix + "  "
-                    + WindowConfiguration.windowingModeToString(windowingMode) + ":");
-            for (final TaskOrganizerState state : mTaskOrganizerStates.values()) {
-                final ArrayList<Task> tasks = state.mOrganizedTasks;
-                pw.print(innerPrefix + "    ");
-                pw.println(state.mOrganizer.mTaskOrganizer + " uid=" + state.mUid + ":");
-                for (int k = 0; k < tasks.size(); k++) {
-                    final Task task = tasks.get(k);
-                    if (windowingMode == task.getWindowingMode()) {
-                        pw.println(innerPrefix + "      " + task);
-                    }
+        for (final TaskOrganizerState state : mTaskOrganizerStates.values()) {
+            final ArrayList<Task> tasks = state.mOrganizedTasks;
+            pw.print(innerPrefix + "  ");
+            pw.println(state.mOrganizer.mTaskOrganizer + " uid=" + state.mUid + ":");
+            for (int k = 0; k < tasks.size(); k++) {
+                final Task task = tasks.get(k);
+                final int mode = task.getWindowingMode();
+                if (ArrayUtils.contains(UNSUPPORTED_WINDOWING_MODES, mode)) {
+                    continue;
                 }
+                pw.println(innerPrefix + "    ("
+                        + WindowConfiguration.windowingModeToString(mode) + ") " + task);
             }
 
         }

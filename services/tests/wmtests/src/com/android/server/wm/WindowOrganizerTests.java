@@ -229,58 +229,32 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final Task task3 = createTask(stack3);
         final ITaskOrganizer organizer = registerMockOrganizer();
 
-        // First organizer is registered, verify a task appears when changing windowing mode
-        stack.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        verify(organizer, times(1))
+        // verify that tasks are appeared on registration
+        verify(organizer, times(3))
                 .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
         assertTrue(stack.isOrganized());
 
         // Now we replace the registration and1 verify the new organizer receives tasks
-        // newly entering the windowing mode.
         final ITaskOrganizer organizer2 = registerMockOrganizer();
-        stack2.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        // One each for task and task2
-        verify(organizer2, times(2))
+        verify(organizer2, times(3))
                 .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
         verify(organizer2, times(0)).onTaskVanished(any());
         // One for task
-        verify(organizer).onTaskVanished(any());
+        verify(organizer, times(3)).onTaskVanished(any());
         assertTrue(stack2.isOrganized());
 
         // Now we unregister the second one, the first one should automatically be reregistered
         // so we verify that it's now seeing changes.
         mWm.mAtmService.mTaskOrganizerController.unregisterTaskOrganizer(organizer2);
-        verify(organizer, times(3))
+        verify(organizer, times(6))
                 .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
-        verify(organizer2, times(2)).onTaskVanished(any());
-
-        stack3.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        verify(organizer, times(4))
-                .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
-        verify(organizer2, times(2)).onTaskVanished(any());
-        assertTrue(stack3.isOrganized());
-    }
-
-    @Test
-    public void testRegisterTaskOrganizerStackWindowingModeChanges() throws RemoteException {
-        final ITaskOrganizer organizer = registerMockOrganizer();
-
-        final Task stack = createStack();
-        final Task task = createTask(stack);
-        final Task task2 = createTask(stack);
-        stack.setWindowingMode(WINDOWING_MODE_PINNED);
-        verify(organizer, times(1))
-                .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
-
-        stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        verify(organizer, times(1)).onTaskVanished(any());
+        verify(organizer2, times(3)).onTaskVanished(any());
     }
 
     @Test
     public void testRegisterTaskOrganizerWithExistingTasks() throws RemoteException {
         final Task stack = createStack();
         final Task task = createTask(stack);
-        stack.setWindowingMode(WINDOWING_MODE_PINNED);
 
         final ITaskOrganizer organizer = registerMockOrganizer();
         verify(organizer, times(1))

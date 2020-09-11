@@ -16,6 +16,8 @@
 
 package com.android.wm.shell;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+
 import android.app.ActivityManager.RunningTaskInfo;
 import android.util.Log;
 import android.util.Pair;
@@ -26,6 +28,7 @@ import android.window.TaskOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
@@ -56,13 +59,16 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     // require us to report to both old and new listeners)
     private final SparseArray<Pair<RunningTaskInfo, SurfaceControl>> mTasks = new SparseArray<>();
 
-    public ShellTaskOrganizer() {
+    public ShellTaskOrganizer(TransactionPool transactionPool) {
         super();
+        addListener(new FullscreenTaskListener(transactionPool), WINDOWING_MODE_FULLSCREEN);
     }
 
     @VisibleForTesting
-    ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController) {
+    ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController,
+                       TransactionPool transactionPool) {
         super(taskOrganizerController);
+        addListener(new FullscreenTaskListener(transactionPool), WINDOWING_MODE_FULLSCREEN);
     }
 
     /**
@@ -125,6 +131,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         Pair<RunningTaskInfo, SurfaceControl> data = mTasks.get(taskInfo.taskId);
         int winMode = getWindowingMode(taskInfo);
         int prevWinMode = getWindowingMode(data.first);
+        mTasks.put(taskInfo.taskId, new Pair<>(taskInfo, data.second));
         if (prevWinMode != -1 && prevWinMode != winMode) {
             // TODO: We currently send vanished/appeared as the task moves between win modes, but
             //       we should consider adding a different mode-changed callback
