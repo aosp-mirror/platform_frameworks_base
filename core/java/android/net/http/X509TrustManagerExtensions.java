@@ -69,7 +69,7 @@ public class X509TrustManagerExtensions {
                     String.class);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Required method"
-                    + " checkServerTrusted(X509Certificate[], String, String, String) missing");
+                    + " checkServerTrusted(X509Certificate[], String, String) missing");
         }
         // Get the option isSameTrustConfiguration method.
         Method isSameTrustConfiguration = null;
