@@ -38,6 +38,7 @@ import "frameworks/base/core/proto/android/net/networkcapabilities.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/connectivity/data_stall_event.proto";
 import "frameworks/base/core/proto/android/server/enums.proto";
+import "frameworks/base/core/proto/android/stats/hdmi/enums.proto";
 import "frameworks/base/core/proto/android/server/job/enums.proto";
 import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
@@ -490,6 +491,8 @@ message Atom {
         UIActionLatencyReported ui_action_latency_reported = 306 [(module) = "framework"];
         WifiDisconnectReported wifi_disconnect_reported = 307 [(module) = "wifi"];
         WifiConnectionStateChanged wifi_connection_state_changed = 308 [(module) = "wifi"];
+        HdmiCecActiveSourceChanged hdmi_cec_active_source_changed = 309 [(module) = "framework"];
+        HdmiCecMessageReported hdmi_cec_message_reported = 310 [(module) = "framework"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -11413,4 +11416,65 @@ message BlobInfo {
 
     // List of leasees of this Blob
     optional BlobLeaseeListProto leasees = 5 [(log_mode) = MODE_BYTES];
+}
+
+/**
+ * Logs when the HDMI CEC active source changes.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/hdmi/HdmiCecAtomWriter.java
+ */
+message HdmiCecActiveSourceChanged {
+    // The logical address of the active source.
+    optional android.stats.hdmi.LogicalAddress active_source_logical_address = 1;
+
+    // The physical address of the active source. Consists of four hexadecimal nibbles.
+    // Examples: 0x1234, 0x0000 (root device). 0xFFFF represents an unknown or invalid address.
+    // See section 8.7 in the HDMI 1.4b spec for details.
+    optional int32 active_source_physical_address = 2;
+
+    // The relationship between this device and the active source.
+    optional android.stats.hdmi.PathRelationship local_relationship = 3;
+}
+
+/**
+ * Logs when an HDMI CEC message is sent or received.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/hdmi/HdmiCecAtomWriter.java
+ */
+message HdmiCecMessageReported {
+    // The calling uid of the application that caused this atom to be written.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Whether a HDMI CEC message is sent from this device, to this device, or neither.
+    optional android.stats.hdmi.MessageDirection direction = 2;
+
+    // The HDMI CEC logical address of the initiator.
+    optional android.stats.hdmi.LogicalAddress initiator_logical_address = 3;
+
+    // The HDMI CEC logical address of the destination.
+    optional android.stats.hdmi.LogicalAddress destination_logical_address = 4;
+
+    // The opcode of the message. Ranges from 0x00 to 0xFF.
+    // For all values, see section "CEC 15 Message Descriptions" in the HDMI CEC 1.4b spec.
+    optional int32 opcode = 5;
+
+    // The result of attempting to send the message on its final retransmission attempt.
+    // Only applicable to outgoing messages; set to SEND_MESSAGE_RESULT_UNKNOWN otherwise.
+    optional android.stats.hdmi.SendMessageResult send_message_result = 6;
+
+    // Fields specific to <User Control Pressed> messages
+
+    // The user control command that was received.
+    optional android.stats.hdmi.UserControlPressedCommand user_control_pressed_command = 7;
+
+    // Fields specific to <Feature Abort> messages
+
+    // The opcode of the message that was feature aborted.
+    // Set to 0x100 when unknown or not applicable.
+    optional int32 feature_abort_opcode = 8;
+
+    // The reason for the feature abort.
+    optional android.stats.hdmi.FeatureAbortReason feature_abort_reason = 9;
 }
