@@ -30,9 +30,8 @@
 
 #include <binder/ProcessState.h>
 
-#include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
-#include <gui/SyncScreenCaptureListener.h>
+#include <gui/ISurfaceComposer.h>
 
 #include <ui/DisplayInfo.h>
 #include <ui/GraphicTypes.h>
@@ -182,18 +181,13 @@ int main(int argc, char** argv)
     ProcessState::self()->setThreadPoolMaxThreadCount(0);
     ProcessState::self()->startThreadPool();
 
-    sp<SyncScreenCaptureListener> captureListener = new SyncScreenCaptureListener();
-    status_t result = ScreenshotClient::captureDisplay(displayId->value, captureListener);
+    ScreenCaptureResults captureResults;
+    status_t result = ScreenshotClient::captureDisplay(displayId->value, captureResults);
     if (result != NO_ERROR) {
         close(fd);
         return 1;
     }
 
-    ScreenCaptureResults captureResults = captureListener->waitForResults();
-    if (captureResults.result != NO_ERROR) {
-        close(fd);
-        return 1;
-    }
     ui::Dataspace dataspace = captureResults.capturedDataspace;
     sp<GraphicBuffer> buffer = captureResults.buffer;
 
