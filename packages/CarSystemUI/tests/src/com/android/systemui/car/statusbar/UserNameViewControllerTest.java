@@ -109,6 +109,13 @@ public class UserNameViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void removeAll_withNoRegisteredListener_doesNotUnregister() {
+        mUserNameViewController.removeAll();
+
+        verifyZeroInteractions(mCarUserManager);
+    }
+
+    @Test
     public void userLifecycleListener_onUserSwitchLifecycleEvent_updatesUserNameView() {
         ArgumentCaptor<CarUserManager.UserLifecycleListener> userLifecycleListenerArgumentCaptor =
                 ArgumentCaptor.forClass(CarUserManager.UserLifecycleListener.class);
