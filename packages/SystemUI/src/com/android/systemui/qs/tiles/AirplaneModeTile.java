@@ -38,6 +38,7 @@ import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.GlobalSetting;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
 
@@ -48,11 +49,14 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
     private final ActivityStarter mActivityStarter;
     private final BroadcastDispatcher mBroadcastDispatcher;
 
+    private final KeyguardStateController mKeyguard;
+
     private boolean mListening;
 
     @Inject
     public AirplaneModeTile(QSHost host, ActivityStarter activityStarter,
-            BroadcastDispatcher broadcastDispatcher) {
+            BroadcastDispatcher broadcastDispatcher,
+            KeyguardStateController keyguardStateController) {
         super(host);
         mActivityStarter = activityStarter;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -63,6 +67,15 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
                 handleRefreshState(value);
             }
         };
+
+        mKeyguard = keyguardStateController;
+        final KeyguardStateController.Callback callback = new KeyguardStateController.Callback() {
+            @Override
+            public void onKeyguardShowingChanged() {
+                refreshState();
+            }
+        };
+        mKeyguard.observe(this, callback);
     }
 
     @Override
@@ -70,8 +83,7 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
         return new BooleanState();
     }
 
-    @Override
-    public void handleClick() {
+    private void handleClickInner() {
         boolean airplaneModeEnabled = mState.value;
         MetricsLogger.action(mContext, getMetricsCategory(), !airplaneModeEnabled);
         if (!airplaneModeEnabled && TelephonyProperties.in_ecm_mode().orElse(false)) {
@@ -80,6 +92,18 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
             return;
         }
         setEnabled(!airplaneModeEnabled);
+    }
+
+    @Override
+    public void handleClick() {
+        if (mKeyguard.isMethodSecure() && mKeyguard.isShowing()) {
+            mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
+                mHost.openPanels();
+                handleClickInner();
+            });
+            return;
+        }
+        handleClickInner();
     }
 
     private void setEnabled(boolean enabled) {
