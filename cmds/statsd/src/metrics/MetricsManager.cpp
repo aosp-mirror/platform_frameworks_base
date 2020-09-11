@@ -91,7 +91,7 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
     // Init allowed pushed atom uids.
     if (config.allowed_log_source_size() == 0) {
         mConfigValid = false;
-        ALOGE("Log source whitelist is empty! This config won't get any data. Suggest adding at "
+        ALOGE("Log source allowlist is empty! This config won't get any data. Suggest adding at "
                       "least AID_SYSTEM and AID_STATSD to the allowed_log_source field.");
     } else {
         for (const auto& source : config.allowed_log_source()) {
