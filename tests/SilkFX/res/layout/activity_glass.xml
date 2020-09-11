@@ -219,6 +219,19 @@
         app:layout_constraintStart_toEndOf="@+id/background2"
         android:src="@drawable/background3" />
 
+    <Button
+        android:id="@+id/pickImage"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginStart="8dp"
+        android:scaleType="centerCrop"
+        android:foreground="?android:attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:onClick="onPickImageClick"
+        app:layout_constraintBottom_toBottomOf="@+id/background1"
+        app:layout_constraintStart_toEndOf="@+id/background3"
+        android:text="Pick file" />
+
     <Switch
         android:id="@+id/lightMaterialSwitch"
         android:layout_width="wrap_content"
