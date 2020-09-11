@@ -533,7 +533,7 @@ public class ScanTests {
                 arrayContaining("some.static.library", "some.other.static.library"));
         assertThat(pkgSetting.usesStaticLibrariesVersions, is(new long[]{234L, 456L}));
         assertThat(pkgSetting.pkg, is(scanResult.request.parsedPackage));
-        assertThat(pkgSetting.getCodePath(), is(new File(createCodePath(packageName))));
+        assertThat(pkgSetting.getPath(), is(new File(createCodePath(packageName))));
         assertThat(pkgSetting.versionCode, is(PackageInfo.composeLongVersionCode(1, 2345)));
     }
 

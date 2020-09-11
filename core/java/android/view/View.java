@@ -14940,20 +14940,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * inside.  In effect, this tells you the available area where content can
      * be placed and remain visible to users.
      *
-     * <p>This function requires an IPC back to the window manager to retrieve
-     * the requested information, so should not be used in performance critical
-     * code like drawing.
-     *
      * @param outRect Filled in with the visible display frame.  If the view
      * is not attached to a window, this is simply the raw display size.
      */
     public void getWindowVisibleDisplayFrame(Rect outRect) {
         if (mAttachInfo != null) {
-            try {
-                mAttachInfo.mSession.getDisplayFrame(mAttachInfo.mWindow, outRect);
-            } catch (RemoteException e) {
-                return;
-            }
+            mAttachInfo.mViewRootImpl.getDisplayFrame(outRect);
             // XXX This is really broken, and probably all needs to be done
             // in the window manager, and we need to know more about whether
             // we want the area behind or in front of the IME.
@@ -14979,11 +14971,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @UnsupportedAppUsage
     public void getWindowDisplayFrame(Rect outRect) {
         if (mAttachInfo != null) {
-            try {
-                mAttachInfo.mSession.getDisplayFrame(mAttachInfo.mWindow, outRect);
-            } catch (RemoteException e) {
-                return;
-            }
+            mAttachInfo.mViewRootImpl.getDisplayFrame(outRect);
             return;
         }
         // The view is not attached to a display so we don't have a context.

@@ -113,7 +113,7 @@ class ParsedMainComponentUtils {
         ParsedIntentInfo intent = intentResult.getResult();
         int actionCount = intent.countActions();
         if (actionCount == 0 && failOnNoActions) {
-            Slog.w(TAG, "No actions in " + parser.getName() + " at " + pkg.getBaseCodePath() + " "
+            Slog.w(TAG, "No actions in " + parser.getName() + " at " + pkg.getBaseApkPath() + " "
                     + parser.getPositionDescription());
             // Backward-compat, do not actually fail
             return input.success(null);

@@ -17,12 +17,14 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.server.pm.test.test_app"
-    android:versionCode="1"
+    android:versionCode="3"
     >
 
     <permission
         android:name="com.android.server.pm.test.test_app.TEST_PERMISSION"
         android:protectionLevel="normal"
         />
+
+    <application/>
 
 </manifest>

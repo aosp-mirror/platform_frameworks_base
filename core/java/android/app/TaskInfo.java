@@ -36,7 +36,8 @@ public class TaskInfo {
     private static final String TAG = "TaskInfo";
 
     /**
-     * The id of the user the task was running as.
+     * The id of the user the task was running as if this is a leaf task. The id of the current
+     * running user of the system otherwise.
      * @hide
      */
     @UnsupportedAppUsage

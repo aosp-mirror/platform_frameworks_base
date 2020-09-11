@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -161,16 +162,16 @@ public class InstantAppNotifier extends SystemUI
                 () -> {
                     ArraySet<Pair<String, Integer>> notifs = new ArraySet<>(mCurrentNotifs);
                     try {
-                        final ActivityManager.StackInfo focusedStack =
-                                ActivityTaskManager.getService().getFocusedStackInfo();
-                        if (focusedStack != null) {
+                        final RootTaskInfo focusedTask =
+                                ActivityTaskManager.getService().getFocusedRootTaskInfo();
+                        if (focusedTask != null) {
                             final int windowingMode =
-                                    focusedStack.configuration.windowConfiguration
+                                    focusedTask.configuration.windowConfiguration
                                             .getWindowingMode();
                             if (windowingMode == WINDOWING_MODE_FULLSCREEN
                                     || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                                     || windowingMode == WINDOWING_MODE_FREEFORM) {
-                                checkAndPostForStack(focusedStack, notifs, noMan, pm);
+                                checkAndPostForStack(focusedTask, notifs, noMan, pm);
                             }
                         }
                         if (mDockedStackExists) {
@@ -205,10 +206,8 @@ public class InstantAppNotifier extends SystemUI
             @NonNull NotificationManager noMan,
             @NonNull IPackageManager pm) {
         try {
-            final ActivityManager.StackInfo info =
-                    ActivityTaskManager.getService()
-                            .getStackInfo(
-                                    WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
+            final RootTaskInfo info = ActivityTaskManager.getService().getRootTaskInfo(
+                    WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
             checkAndPostForStack(info, notifs, noMan, pm);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -221,7 +220,7 @@ public class InstantAppNotifier extends SystemUI
      * exists, this method removes it from {@code notifs} in the arguments.
      */
     private void checkAndPostForStack(
-            @Nullable ActivityManager.StackInfo info,
+            @Nullable RootTaskInfo info,
             @NonNull ArraySet<Pair<String, Integer>> notifs,
             @NonNull NotificationManager noMan,
             @NonNull IPackageManager pm) {
@@ -241,7 +240,7 @@ public class InstantAppNotifier extends SystemUI
                             info.userId,
                             appInfo,
                             noMan,
-                            info.taskIds[info.taskIds.length - 1]);
+                            info.childTaskIds[info.childTaskIds.length - 1]);
                 }
             }
         } catch (RemoteException e) {

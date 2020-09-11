@@ -326,11 +326,11 @@ public class PackageManagerServiceUtils {
     }
 
     public static long getLastModifiedTime(AndroidPackage pkg) {
-        final File srcFile = new File(pkg.getCodePath());
+        final File srcFile = new File(pkg.getPath());
         if (!srcFile.isDirectory()) {
             return srcFile.lastModified();
         }
-        final File baseFile = new File(pkg.getBaseCodePath());
+        final File baseFile = new File(pkg.getBaseApkPath());
         long maxModifiedTime = baseFile.lastModified();
         if (pkg.getSplitCodePaths() != null) {
             for (int i = pkg.getSplitCodePaths().length - 1; i >=0; --i) {

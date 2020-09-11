@@ -137,6 +137,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.ActivityThread;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
@@ -2158,14 +2159,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public ActivityManager.StackInfo getFocusedStackInfo() throws RemoteException {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getStackInfo()");
+    public RootTaskInfo getFocusedRootTaskInfo() throws RemoteException {
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getFocusedRootTaskInfo()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 Task focusedStack = getTopDisplayFocusedStack();
                 if (focusedStack != null) {
-                    return mRootWindowContainer.getStackInfo(focusedStack.mTaskId);
+                    return mRootWindowContainer.getRootTaskInfo(focusedStack.mTaskId);
                 }
                 return null;
             }
@@ -2893,14 +2894,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    // TODO(148895075): deprecate and replace with task equivalents
     @Override
-    public List<ActivityManager.StackInfo> getAllStackInfos() {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getAllStackInfos()");
+    public List<RootTaskInfo> getAllRootTaskInfos() {
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getAllRootTaskInfos()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                return mRootWindowContainer.getAllStackInfos(INVALID_DISPLAY);
+                return mRootWindowContainer.getAllRootTaskInfos(INVALID_DISPLAY);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -2908,26 +2908,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public ActivityManager.StackInfo getStackInfo(int windowingMode, int activityType) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getStackInfo()");
+    public RootTaskInfo getRootTaskInfo(int windowingMode, int activityType) {
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getRootTaskInfo()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                return mRootWindowContainer.getStackInfo(windowingMode, activityType);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    // TODO(148895075): deprecate and replace with task equivalents
-    @Override
-    public List<ActivityManager.StackInfo> getAllStackInfosOnDisplay(int displayId) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getAllStackInfos()");
-        long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                return mRootWindowContainer.getAllStackInfos(displayId);
+                return mRootWindowContainer.getRootTaskInfo(windowingMode, activityType);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -2935,13 +2921,27 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public ActivityManager.StackInfo getStackInfoOnDisplay(int windowingMode, int activityType,
+    public List<RootTaskInfo> getAllRootTaskInfosOnDisplay(int displayId) {
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
+                "getAllRootTaskInfosOnDisplay()");
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                return mRootWindowContainer.getAllRootTaskInfos(displayId);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public RootTaskInfo getRootTaskInfoOnDisplay(int windowingMode, int activityType,
             int displayId) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getStackInfo()");
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getRootTaskInfoOnDisplay()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                return mRootWindowContainer.getStackInfo(windowingMode, activityType, displayId);
+                return mRootWindowContainer.getRootTaskInfo(windowingMode, activityType, displayId);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

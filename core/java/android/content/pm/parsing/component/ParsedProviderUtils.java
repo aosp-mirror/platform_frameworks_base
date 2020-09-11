@@ -246,7 +246,7 @@ public class ParsedProviderUtils {
                 }
 
                 Slog.w(TAG, "Unknown element under <path-permission>: " + name + " at "
-                        + pkg.getBaseCodePath() + " " + parser.getPositionDescription());
+                        + pkg.getBaseApkPath() + " " + parser.getPositionDescription());
             }
 
             return input.success(provider);
@@ -292,7 +292,8 @@ public class ParsedProviderUtils {
                             "No readPermission or writePermission for <path-permission>");
                 }
                 Slog.w(TAG, "No readPermission or writePermission for <path-permission>: "
-                        + name + " at " + pkg.getBaseCodePath() + " " + parser.getPositionDescription());
+                        + name + " at " + pkg.getBaseApkPath() + " "
+                        + parser.getPositionDescription());
                 return input.success(provider);
             }
 
@@ -341,7 +342,7 @@ public class ParsedProviderUtils {
                 }
 
                 Slog.w(TAG, "No path, pathPrefix, or pathPattern for <path-permission>: "
-                        + name + " at " + pkg.getBaseCodePath()
+                        + name + " at " + pkg.getBaseApkPath()
                         + " "
                         + parser.getPositionDescription());
             }

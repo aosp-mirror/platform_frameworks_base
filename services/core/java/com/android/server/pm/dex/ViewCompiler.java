@@ -40,7 +40,7 @@ public class ViewCompiler {
     public boolean compileLayouts(AndroidPackage pkg) {
         try {
             final String packageName = pkg.getPackageName();
-            final String apkPath = pkg.getBaseCodePath();
+            final String apkPath = pkg.getBaseApkPath();
             // TODO(b/143971007): Use a cross-user directory
             File dataDir = PackageInfoWithoutStateUtils.getDataDir(pkg, UserHandle.myUserId());
             final String outDexFile = dataDir.getAbsolutePath() + "/code_cache/compiled_view.dex";

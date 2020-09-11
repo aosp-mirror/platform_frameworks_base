@@ -133,7 +133,6 @@ import static com.android.server.wm.ActivityTaskManagerService.DUMP_STARTER_CMD;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.relaunchReasonToString;
 
-
 import android.Manifest;
 import android.Manifest.permission;
 import android.annotation.BroadcastBehavior;
@@ -143,8 +142,8 @@ import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -342,7 +341,6 @@ import com.android.server.PackageWatchdog;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.UserspaceRebootLogger;
@@ -2835,14 +2833,16 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             final BatteryStatsImpl bstats = mBatteryStatsService.getActiveStatistics();
-            synchronized(bstats) {
-                synchronized(mPidsSelfLocked) {
-                    if (haveNewCpuStats) {
-                        if (bstats.startAddingCpuLocked()) {
-                            int totalUTime = 0;
-                            int totalSTime = 0;
-                            final int N = mProcessCpuTracker.countStats();
-                            for (int i=0; i<N; i++) {
+            synchronized (bstats) {
+                if (haveNewCpuStats) {
+                    if (bstats.startAddingCpuLocked()) {
+                        int totalUTime = 0;
+                        int totalSTime = 0;
+                        final int statsCount = mProcessCpuTracker.countStats();
+                        final long elapsedRealtime = SystemClock.elapsedRealtime();
+                        final long uptime = SystemClock.uptimeMillis();
+                        synchronized (mPidsSelfLocked) {
+                            for (int i = 0; i < statsCount; i++) {
                                 ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
                                 if (!st.working) {
                                     continue;
@@ -2854,7 +2854,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     BatteryStatsImpl.Uid.Proc ps = pr.curProcBatteryStats;
                                     if (ps == null || !ps.isActive()) {
                                         pr.curProcBatteryStats = ps = bstats.getProcessStatsLocked(
-                                                pr.info.uid, pr.processName);
+                                                pr.info.uid, pr.processName,
+                                                elapsedRealtime, uptime);
                                     }
                                     ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
                                     pr.curCpuTime += st.rel_utime + st.rel_stime;
@@ -2865,20 +2866,22 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     BatteryStatsImpl.Uid.Proc ps = st.batteryStats;
                                     if (ps == null || !ps.isActive()) {
                                         st.batteryStats = ps = bstats.getProcessStatsLocked(
-                                                bstats.mapUid(st.uid), st.name);
+                                                bstats.mapUid(st.uid), st.name,
+                                                elapsedRealtime, uptime);
                                     }
                                     ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
                                 }
                             }
-                            final int userTime = mProcessCpuTracker.getLastUserTime();
-                            final int systemTime = mProcessCpuTracker.getLastSystemTime();
-                            final int iowaitTime = mProcessCpuTracker.getLastIoWaitTime();
-                            final int irqTime = mProcessCpuTracker.getLastIrqTime();
-                            final int softIrqTime = mProcessCpuTracker.getLastSoftIrqTime();
-                            final int idleTime = mProcessCpuTracker.getLastIdleTime();
-                            bstats.finishAddingCpuLocked(totalUTime, totalSTime, userTime,
-                                    systemTime, iowaitTime, irqTime, softIrqTime, idleTime);
                         }
+
+                        final int userTime = mProcessCpuTracker.getLastUserTime();
+                        final int systemTime = mProcessCpuTracker.getLastSystemTime();
+                        final int iowaitTime = mProcessCpuTracker.getLastIoWaitTime();
+                        final int irqTime = mProcessCpuTracker.getLastIrqTime();
+                        final int softIrqTime = mProcessCpuTracker.getLastSoftIrqTime();
+                        final int idleTime = mProcessCpuTracker.getLastIdleTime();
+                        bstats.finishAddingCpuLocked(totalUTime, totalSTime, userTime,
+                                systemTime, iowaitTime, irqTime, softIrqTime, idleTime);
                     }
                 }
 
@@ -3076,18 +3079,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.d(TAG_SWITCH,
                     "updateBatteryStats: comp=" + activity + "res=" + resumed);
         }
-        final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
-        FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED,
-                uid, activity.getPackageName(), activity.getShortClassName(),
-                resumed ? FrameworkStatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__STATE__FOREGROUND :
-                        FrameworkStatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__STATE__BACKGROUND);
-        synchronized (stats) {
-            if (resumed) {
-                stats.noteActivityResumedLocked(uid);
-            } else {
-                stats.noteActivityPausedLocked(uid);
-            }
-        }
+        mBatteryStatsService.updateBatteryStatsOnActivityUsage(activity.getPackageName(),
+                activity.getShortClassName(), uid, userId, resumed);
     }
 
     /**
@@ -3626,10 +3619,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
-        synchronized (stats) {
-            stats.noteProcessDiedLocked(app.info.uid, pid);
-        }
+        mBatteryStatsService.noteProcessDied(app.info.uid, pid);
 
         if (!app.killed) {
             if (!fromBinderDied) {
@@ -6418,8 +6408,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public List<StackInfo> getAllStackInfos() {
-        return mActivityTaskManager.getAllStackInfos();
+    public List<RootTaskInfo> getAllRootTaskInfos() {
+        return mActivityTaskManager.getAllRootTaskInfos();
     }
 
     @Override
@@ -14535,10 +14525,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                         timeFormatPreferenceMsgValue, 0);
                         mHandler.sendMessage(updateTimePreferenceMsg);
                     }
-                    BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
-                    synchronized (stats) {
-                        stats.noteCurrentTimeChangedLocked();
-                    }
+                    mBatteryStatsService.noteCurrentTimeChanged();
                     break;
                 case Intent.ACTION_CLEAR_DNS_CACHE:
                     mHandler.sendEmptyMessage(CLEAR_DNS_CACHE_MSG);
@@ -15338,8 +15325,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public StackInfo getFocusedStackInfo() throws RemoteException {
-        return mActivityTaskManager.getFocusedStackInfo();
+    public RootTaskInfo getFocusedRootTaskInfo() throws RemoteException {
+        return mActivityTaskManager.getFocusedRootTaskInfo();
     }
 
     @Override
@@ -15910,7 +15897,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         updateCpuStatsNow();
 
         synchronized (this) {
-            BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
             boolean doCpuKills = true;
             if (mLastPowerCheckUptime == 0) {
                 doCpuKills = false;
@@ -15957,10 +15943,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             cpuLimit = mConstants.POWER_CHECK_MAX_CPU_4;
                         }
                         if (((cputimeUsed * 100) / uptimeSince) >= cpuLimit) {
-                            synchronized (stats) {
-                                stats.reportExcessiveCpuLocked(app.info.uid, app.processName,
+                            mBatteryStatsService.reportExcessiveCpu(app.info.uid, app.processName,
                                         uptimeSince, cputimeUsed);
-                            }
                             app.kill("excessive cpu " + cputimeUsed + " during " + uptimeSince
                                     + " dur=" + checkDur + " limit=" + cpuLimit,
                                     ApplicationExitInfo.REASON_EXCESSIVE_RESOURCE_USAGE,
@@ -17466,19 +17450,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void updateForegroundTimeIfOnBattery(
                 String packageName, int uid, long cpuTimeDiff) {
-            synchronized (ActivityManagerService.this) {
-                if (!mBatteryStatsService.isOnBattery()) {
-                    return;
-                }
-                final BatteryStatsImpl bsi = mBatteryStatsService.getActiveStatistics();
-                synchronized (bsi) {
-                    final BatteryStatsImpl.Uid.Proc ps =
-                            bsi.getProcessStatsLocked(uid, packageName);
-                    if (ps != null) {
-                        ps.addForegroundTimeLocked(cpuTimeDiff);
-                    }
-                }
-            }
+            mBatteryStatsService.updateForegroundTimeIfOnBattery(packageName, uid, cpuTimeDiff);
         }
 
         @Override

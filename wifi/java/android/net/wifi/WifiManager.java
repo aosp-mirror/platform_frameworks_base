@@ -2407,6 +2407,8 @@ public class WifiManager {
     public static final long WIFI_FEATURE_OCE              = 0x1000000000L; // OCE Support
     /** @hide */
     public static final long WIFI_FEATURE_WAPI             = 0x2000000000L; // WAPI
+    /** @hide */
+    public static final long WIFI_FEATURE_INFRA_60G        = 0x4000000000L; // 60 GHz Band Support
 
     /** @hide */
     public static final long WIFI_FEATURE_FILS_SHA256     = 0x4000000000L; // FILS-SHA256
@@ -2563,6 +2565,21 @@ public class WifiManager {
     public boolean is5GHzBandSupported() {
         try {
             return mService.is5GHzBandSupported();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Check if the chipset supports the 60GHz frequency band.
+     *
+     * @return {@code true} if supported, {@code false} otherwise.
+     * @hide
+     */
+    @SystemApi
+    public boolean is60GHzBandSupported() {
+        try {
+            return mService.is60GHzBandSupported();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

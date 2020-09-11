@@ -18,12 +18,12 @@ package com.android.server.pm.dex;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.SharedLibraryInfo;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.os.ClassLoaderFactory;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.File;
 import java.util.List;
@@ -90,7 +90,7 @@ public final class DexoptUtils {
 
         // The splits have an implicit dependency on the base apk.
         // This means that we have to add the base apk file in addition to the shared libraries.
-        String baseApkName = new File(pkg.getBaseCodePath()).getName();
+        String baseApkName = new File(pkg.getBaseApkPath()).getName();
         String baseClassPath = baseApkName;
 
         // The result is stored in classLoaderContexts.
@@ -401,7 +401,7 @@ public final class DexoptUtils {
      * Assumes that the application declares a non-null array of splits.
      */
     private static String[] getSplitRelativeCodePaths(AndroidPackage pkg) {
-        String baseCodePath = new File(pkg.getBaseCodePath()).getParent();
+        String baseCodePath = new File(pkg.getBaseApkPath()).getParent();
         String[] splitCodePaths = pkg.getSplitCodePaths();
         String[] splitRelativeCodePaths = new String[ArrayUtils.size(splitCodePaths)];
         for (int i = 0; i < splitRelativeCodePaths.length; i++) {

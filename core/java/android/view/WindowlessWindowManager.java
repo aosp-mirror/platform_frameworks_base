@@ -26,6 +26,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.MergedConfiguration;
+import android.window.ClientWindowFrames;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -224,9 +225,7 @@ public class WindowlessWindowManager implements IWindowSession {
     @Override
     public int relayout(IWindow window, int seq, WindowManager.LayoutParams inAttrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, long frameNumber,
-            Rect outFrame, Rect outContentInsets, Rect outVisibleInsets,
-            Rect outStableInsets, Rect outBackdropFrame,
-            DisplayCutout.ParcelableWrapper cutout, MergedConfiguration mergedConfiguration,
+            ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls, Point outSurfaceSize,
             SurfaceControl outBLASTSurfaceControl) {
@@ -255,7 +254,8 @@ public class WindowlessWindowManager implements IWindowSession {
             t.hide(sc).apply();
             outSurfaceControl.release();
         }
-        outFrame.set(0, 0, attrs.width, attrs.height);
+        outFrames.frame.set(0, 0, attrs.width, attrs.height);
+        outFrames.displayFrame.set(outFrames.frame);
 
         mergedConfiguration.setConfiguration(mConfiguration, mConfiguration);
 
@@ -289,11 +289,6 @@ public class WindowlessWindowManager implements IWindowSession {
     public void setInsets(android.view.IWindow window, int touchableInsets,
             android.graphics.Rect contentInsets, android.graphics.Rect visibleInsets,
             android.graphics.Region touchableRegion) {
-    }
-
-    @Override
-    public void getDisplayFrame(android.view.IWindow window,
-            android.graphics.Rect outDisplayFrame) {
     }
 
     @Override

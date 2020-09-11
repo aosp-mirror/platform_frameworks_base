@@ -759,8 +759,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         false /* markFrozenIfConfigChanged */, true /* deferResume */);
             }
 
-            if (r.getRootTask().checkKeyguardVisibility(r, true /* shouldBeVisible */,
-                    true /* isTop */) && r.allowMoveToFront()) {
+            if (mKeyguardController.checkKeyguardVisibility(r) && r.allowMoveToFront()) {
                 // We only set the visibility to true if the activity is not being launched in
                 // background, and is allowed to be visible based on keyguard state. This avoids
                 // setting this into motion in window manager that is later cancelled due to later
@@ -2298,11 +2297,15 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     /** Ends a batch of visibility updates. */
-    void endActivityVisibilityUpdate() {
-        mVisibilityTransactionDepth--;
-        if (mVisibilityTransactionDepth == 0) {
+    void endActivityVisibilityUpdate(ActivityRecord starting, int configChanges,
+            boolean preserveWindows, boolean notifyClients) {
+        if (mVisibilityTransactionDepth == 1) {
             getKeyguardController().visibilitiesUpdated();
+            // commit visibility to activities
+            mRootWindowContainer.commitActivitiesVisible(starting, configChanges, preserveWindows,
+                    notifyClients);
         }
+        mVisibilityTransactionDepth--;
     }
 
     /** Returns {@code true} if the caller is on the path to update visibility. */

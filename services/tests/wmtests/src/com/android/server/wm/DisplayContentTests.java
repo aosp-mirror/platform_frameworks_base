@@ -823,7 +823,14 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent newDisplay = createNewDisplay();
 
         final WindowState appWin = createWindow(null, TYPE_APPLICATION, mDisplayContent, "appWin");
+        final Task stack = mDisplayContent.getTopStack();
+        final ActivityRecord activity = stack.topRunningActivity();
+        doReturn(true).when(activity).shouldBeVisibleUnchecked();
+
         final WindowState appWin1 = createWindow(null, TYPE_APPLICATION, newDisplay, "appWin1");
+        final Task stack1 = newDisplay.getTopStack();
+        final ActivityRecord activity1 = stack1.topRunningActivity();
+        doReturn(true).when(activity1).shouldBeVisibleUnchecked();
         appWin.setHasSurface(true);
         appWin1.setHasSurface(true);
 

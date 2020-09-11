@@ -183,10 +183,9 @@ public abstract class RecognitionService extends Service {
             @NonNull String packageName, @Nullable String featureId) {
         if (DBG) Log.d(TAG, "checkPermissions");
         if (forDataDelivery) {
-            if (PermissionChecker.checkCallingPermissionForDataDelivery(this,
+            if (PermissionChecker.checkCallingOrSelfPermissionForDataDelivery(this,
                     android.Manifest.permission.RECORD_AUDIO, packageName, featureId,
-                    null /*message*/)
-                             == PermissionChecker.PERMISSION_GRANTED) {
+                    null /*message*/) == PermissionChecker.PERMISSION_GRANTED) {
                 return true;
             }
         } else {

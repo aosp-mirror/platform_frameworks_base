@@ -18,7 +18,7 @@ package com.android.systemui.car.navigationbar;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.app.ActivityManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.content.ComponentName;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -71,7 +71,7 @@ public class ButtonSelectionStateControllerTest extends SysuiTestCase {
     public void onTaskChanged_buttonDetectableByComponentName_selectsAssociatedButton() {
         CarNavigationButton testButton = mTestView.findViewById(R.id.detectable_by_component_name);
         mComponentName = new ComponentName(TEST_COMPONENT_NAME_PACKAGE, TEST_COMPONENT_NAME_CLASS);
-        List<ActivityManager.StackInfo> testStack = createTestStack(mComponentName);
+        List<RootTaskInfo> testStack = createTestStack(mComponentName);
         testButton.setSelected(false);
         mButtonSelectionStateController.taskChanged(testStack, /* validDisplay= */ -1);
 
@@ -82,7 +82,7 @@ public class ButtonSelectionStateControllerTest extends SysuiTestCase {
     public void onTaskChanged_buttonDetectableByCategory_selectsAssociatedButton() {
         CarNavigationButton testButton = mTestView.findViewById(R.id.detectable_by_category);
         mComponentName = new ComponentName(TEST_CATEGORY, TEST_CATEGORY_CLASS);
-        List<ActivityManager.StackInfo> testStack = createTestStack(mComponentName);
+        List<RootTaskInfo> testStack = createTestStack(mComponentName);
         testButton.setSelected(false);
         mButtonSelectionStateController.taskChanged(testStack, /* validDisplay= */ -1);
 
@@ -93,7 +93,7 @@ public class ButtonSelectionStateControllerTest extends SysuiTestCase {
     public void onTaskChanged_buttonDetectableByPackage_selectsAssociatedButton() {
         CarNavigationButton testButton = mTestView.findViewById(R.id.detectable_by_package);
         mComponentName = new ComponentName(TEST_PACKAGE, TEST_PACKAGE_CLASS);
-        List<ActivityManager.StackInfo> testStack = createTestStack(mComponentName);
+        List<RootTaskInfo> testStack = createTestStack(mComponentName);
         testButton.setSelected(false);
         mButtonSelectionStateController.taskChanged(testStack, /* validDisplay= */ -1);
 
@@ -104,12 +104,12 @@ public class ButtonSelectionStateControllerTest extends SysuiTestCase {
     public void onTaskChanged_deselectsPreviouslySelectedButton() {
         CarNavigationButton oldButton = mTestView.findViewById(R.id.detectable_by_component_name);
         mComponentName = new ComponentName(TEST_COMPONENT_NAME_PACKAGE, TEST_COMPONENT_NAME_CLASS);
-        List<ActivityManager.StackInfo> oldStack = createTestStack(mComponentName);
+        List<RootTaskInfo> oldStack = createTestStack(mComponentName);
         oldButton.setSelected(false);
         mButtonSelectionStateController.taskChanged(oldStack, /* validDisplay= */ -1);
 
         mComponentName = new ComponentName(TEST_PACKAGE, TEST_PACKAGE_CLASS);
-        List<ActivityManager.StackInfo> newStack = createTestStack(mComponentName);
+        List<RootTaskInfo> newStack = createTestStack(mComponentName);
         mButtonSelectionStateController.taskChanged(newStack, /* validDisplay= */ -1);
 
         assertButtonUnselected(oldButton);
@@ -125,12 +125,12 @@ public class ButtonSelectionStateControllerTest extends SysuiTestCase {
         assertThat(button.getAlpha()).isEqualTo(CarNavigationButton.DEFAULT_UNSELECTED_ALPHA);
     }
 
-    private List<ActivityManager.StackInfo> createTestStack(ComponentName componentName) {
-        ActivityManager.StackInfo validStackInfo = new ActivityManager.StackInfo();
+    private List<RootTaskInfo> createTestStack(ComponentName componentName) {
+        RootTaskInfo validStackInfo = new RootTaskInfo();
         validStackInfo.displayId = -1; // No display is assigned to this test view
         validStackInfo.topActivity = componentName;
 
-        List<ActivityManager.StackInfo> testStack = new ArrayList<>();
+        List<RootTaskInfo> testStack = new ArrayList<>();
         testStack.add(validStackInfo);
 
         return testStack;
