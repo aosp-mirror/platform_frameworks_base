@@ -732,6 +732,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
                             + "suggestion with Passpoint configuration");
                 }
                 wifiConfiguration = buildWifiConfigurationForPasspoint();
+                mPasspointConfiguration.setEnhancedMacRandomizationEnabled(
+                        mIsEnhancedMacRandomizationEnabled);
             } else {
                 if (mSsid == null) {
                     throw new IllegalStateException("setSsid should be invoked for suggestion");

@@ -444,6 +444,11 @@ public final class PasspointConfiguration implements Parcelable {
     private boolean mIsMacRandomizationEnabled = true;
 
     /**
+     * Whether this passpoint configuration should use enhanced MAC randomization.
+     */
+    private boolean mIsEnhancedMacRandomizationEnabled = false;
+
+    /**
      * Indicates if the end user has expressed an explicit opinion about the
      * meteredness of this network, such as through the Settings app.
      * This value is one of {@link #METERED_OVERRIDE_NONE}, {@link #METERED_OVERRIDE_METERED},
@@ -478,6 +483,20 @@ public final class PasspointConfiguration implements Parcelable {
      */
     public void setMacRandomizationEnabled(boolean enabled) {
         mIsMacRandomizationEnabled = enabled;
+    }
+
+    /**
+     * This setting is only applicable if MAC randomization is enabled.
+     * If set to true, the framework will periodically generate new MAC addresses for new
+     * connections.
+     * If set to false (the default), the framework will use the same locally generated MAC address
+     * for connections to this passpoint configuration.
+     * @param enabled true to use enhanced MAC randomization, false to use persistent MAC
+     *                randomization.
+     * @hide
+     */
+    public void setEnhancedMacRandomizationEnabled(boolean enabled) {
+        mIsEnhancedMacRandomizationEnabled = enabled;
     }
 
     /**
@@ -531,6 +550,19 @@ public final class PasspointConfiguration implements Parcelable {
     }
 
     /**
+     * When MAC randomization is enabled, this indicates whether enhanced MAC randomization or
+     * persistent MAC randomization will be used for connections to this Passpoint network.
+     * If true, the MAC address used for connections will periodically change. Otherwise, the same
+     * locally generated MAC will be used for all connections to this passpoint configuration.
+     *
+     * @return true for enhanced MAC randomization enabled. False for disabled.
+     * @hide
+     */
+    public boolean isEnhancedMacRandomizationEnabled() {
+        return mIsEnhancedMacRandomizationEnabled;
+    }
+
+    /**
      * Constructor for creating PasspointConfiguration with default values.
      */
     public PasspointConfiguration() {}
@@ -574,6 +606,7 @@ public final class PasspointConfiguration implements Parcelable {
         mCarrierId = source.mCarrierId;
         mIsAutojoinEnabled = source.mIsAutojoinEnabled;
         mIsMacRandomizationEnabled = source.mIsMacRandomizationEnabled;
+        mIsEnhancedMacRandomizationEnabled = source.mIsEnhancedMacRandomizationEnabled;
         mMeteredOverride = source.mMeteredOverride;
     }
 
@@ -606,6 +639,7 @@ public final class PasspointConfiguration implements Parcelable {
         dest.writeInt(mCarrierId);
         dest.writeBoolean(mIsAutojoinEnabled);
         dest.writeBoolean(mIsMacRandomizationEnabled);
+        dest.writeBoolean(mIsEnhancedMacRandomizationEnabled);
         dest.writeInt(mMeteredOverride);
     }
 
@@ -639,6 +673,7 @@ public final class PasspointConfiguration implements Parcelable {
                 && mCarrierId == that.mCarrierId
                 && mIsAutojoinEnabled == that.mIsAutojoinEnabled
                 && mIsMacRandomizationEnabled == that.mIsMacRandomizationEnabled
+                && mIsEnhancedMacRandomizationEnabled == that.mIsEnhancedMacRandomizationEnabled
                 && mMeteredOverride == that.mMeteredOverride
                 && (mServiceFriendlyNames == null ? that.mServiceFriendlyNames == null
                 : mServiceFriendlyNames.equals(that.mServiceFriendlyNames));
@@ -651,7 +686,7 @@ public final class PasspointConfiguration implements Parcelable {
                 mSubscriptionExpirationTimeMillis, mUsageLimitUsageTimePeriodInMinutes,
                 mUsageLimitStartTimeInMillis, mUsageLimitDataLimit, mUsageLimitTimeLimitInMinutes,
                 mServiceFriendlyNames, mCarrierId, mIsAutojoinEnabled, mIsMacRandomizationEnabled,
-                mMeteredOverride);
+                mIsEnhancedMacRandomizationEnabled, mMeteredOverride);
     }
 
     @Override
@@ -707,6 +742,7 @@ public final class PasspointConfiguration implements Parcelable {
         builder.append("CarrierId:" + mCarrierId);
         builder.append("IsAutojoinEnabled:" + mIsAutojoinEnabled);
         builder.append("mIsMacRandomizationEnabled:" + mIsMacRandomizationEnabled);
+        builder.append("mIsEnhancedMacRandomizationEnabled:" + mIsEnhancedMacRandomizationEnabled);
         builder.append("mMeteredOverride:" + mMeteredOverride);
         return builder.toString();
     }
@@ -815,6 +851,7 @@ public final class PasspointConfiguration implements Parcelable {
                 config.mCarrierId = in.readInt();
                 config.mIsAutojoinEnabled = in.readBoolean();
                 config.mIsMacRandomizationEnabled = in.readBoolean();
+                config.mIsEnhancedMacRandomizationEnabled = in.readBoolean();
                 config.mMeteredOverride = in.readInt();
                 return config;
             }
