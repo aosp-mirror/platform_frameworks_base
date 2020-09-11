@@ -57,6 +57,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.IResultReceiver;
 import com.android.server.autofill.ui.InlineFillUi;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CancellationException;
@@ -74,8 +75,9 @@ final class RemoteAugmentedAutofillService
     private final int mRequestTimeoutMs;
     private final ComponentName mComponentName;
     private final RemoteAugmentedAutofillServiceCallbacks mCallbacks;
+    private final AutofillUriGrantsManager mUriGrantsManager;
 
-    RemoteAugmentedAutofillService(Context context, ComponentName serviceName,
+    RemoteAugmentedAutofillService(Context context, int serviceUid, ComponentName serviceName,
             int userId, RemoteAugmentedAutofillServiceCallbacks callbacks,
             boolean bindInstantServiceAllowed, boolean verbose, int idleUnbindTimeoutMs,
             int requestTimeoutMs) {
@@ -87,6 +89,7 @@ final class RemoteAugmentedAutofillService
         mRequestTimeoutMs = requestTimeoutMs;
         mComponentName = serviceName;
         mCallbacks = callbacks;
+        mUriGrantsManager = new AutofillUriGrantsManager(serviceUid);
 
         // Bind right away.
         connect();
@@ -119,6 +122,10 @@ final class RemoteAugmentedAutofillService
 
     public ComponentName getComponentName() {
         return mComponentName;
+    }
+
+    public AutofillUriGrantsManager getAutofillUriGrantsManager() {
+        return mUriGrantsManager;
     }
 
     @Override // from ServiceConnector.Impl
@@ -173,8 +180,8 @@ final class RemoteAugmentedAutofillService
                                     maybeRequestShowInlineSuggestions(sessionId,
                                             inlineSuggestionsRequest, inlineSuggestionsData,
                                             clientState, focusedId, focusedValue,
-                                            inlineSuggestionsCallback,
-                                            client, onErrorCallback, remoteRenderService, userId);
+                                            inlineSuggestionsCallback, client, onErrorCallback,
+                                            remoteRenderService, userId, activityComponent);
                                     if (!showingFillWindow) {
                                         requestAutofill.complete(null);
                                     }
@@ -245,7 +252,8 @@ final class RemoteAugmentedAutofillService
             @Nullable Function<InlineFillUi, Boolean> inlineSuggestionsCallback,
             @NonNull IAutoFillManagerClient client, @NonNull Runnable onErrorCallback,
             @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
-            int userId) {
+            int userId,
+            @NonNull ComponentName targetActivity) {
         if (inlineSuggestionsData == null || inlineSuggestionsData.isEmpty()
                 || inlineSuggestionsCallback == null || request == null
                 || remoteRenderService == null) {
@@ -299,6 +307,8 @@ final class RemoteAugmentedAutofillService
                                     final ArrayList<AutofillId> fieldIds = dataset.getFieldIds();
                                     final ClipData content = dataset.getFieldContent();
                                     if (content != null) {
+                                        mUriGrantsManager.grantUriPermissions(
+                                                targetActivity, userId, content);
                                         final AutofillId fieldId = fieldIds.get(0);
                                         if (sDebug) {
                                             Slog.d(TAG, "Calling client autofillContent(): "
@@ -356,6 +366,12 @@ final class RemoteAugmentedAutofillService
     public String toString() {
         return "RemoteAugmentedAutofillService["
                 + ComponentName.flattenToShortString(mComponentName) + "]";
+    }
+
+    @Override
+    public void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
+        super.dump(prefix, pw);
+        mUriGrantsManager.dump(prefix, pw);
     }
 
     /**
