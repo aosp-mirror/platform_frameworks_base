@@ -66,9 +66,9 @@ import static com.android.server.am.ActivityManagerService.TAG_BACKUP;
 import static com.android.server.am.ActivityManagerService.TAG_LRU;
 import static com.android.server.am.ActivityManagerService.TAG_OOM_ADJ;
 import static com.android.server.am.ActivityManagerService.TAG_PROCESS_OBSERVERS;
-import static com.android.server.am.ActivityManagerService.TAG_PSS;
 import static com.android.server.am.ActivityManagerService.TAG_UID_OBSERVERS;
 import static com.android.server.am.ActivityManagerService.TOP_APP_PRIORITY_BOOST;
+import static com.android.server.am.AppProfiler.TAG_PSS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 
 import android.app.ActivityManager;
@@ -83,7 +83,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ServiceInfo;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManagerInternal;
@@ -102,7 +101,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -819,7 +817,7 @@ public final class OomAdjuster {
         }
 
         if (allChanged) {
-            mService.requestPssAllProcsLocked(now, false,
+            mService.mAppProfiler.requestPssAllProcsLocked(now, false,
                     mService.mProcessStats.isMemFactorLowered());
         }
 
@@ -1075,7 +1073,7 @@ public final class OomAdjuster {
 
         mProcessList.incrementProcStateSeqAndNotifyAppsLocked(activeUids);
 
-        return mService.updateLowMemStateLocked(numCached, numEmpty, numTrimming);
+        return mService.mAppProfiler.updateLowMemStateLocked(numCached, numEmpty, numTrimming);
     }
 
     private void updateAppUidRecLocked(ProcessRecord app) {
@@ -2176,7 +2174,7 @@ public final class OomAdjuster {
                     // normally be a B service, but if we are low on RAM and it
                     // is large we want to force it down since we would prefer to
                     // keep launcher over it.
-                    if (mService.mLastMemoryLevel > ProcessStats.ADJ_MEM_FACTOR_NORMAL
+                    if (!mService.mAppProfiler.isLastMemoryLevelNormal()
                             && app.lastPss >= mProcessList.getCachedRestoreThresholdKb()) {
                         app.serviceHighRam = true;
                         app.serviceb = true;
@@ -2493,45 +2491,16 @@ public final class OomAdjuster {
         }
         if (app.setProcState == PROCESS_STATE_NONEXISTENT
                 || ProcessList.procStatesDifferForMem(app.getCurProcState(), app.setProcState)) {
-            if (false && mService.mTestPssMode
-                    && app.setProcState >= 0 && app.lastStateTime <= (now-200)) {
-                // Experimental code to more aggressively collect pss while
-                // running test...  the problem is that this tends to collect
-                // the data right when a process is transitioning between process
-                // states, which will tend to give noisy data.
-                long start = SystemClock.uptimeMillis();
-                long startTime = SystemClock.currentThreadTimeMillis();
-                long pss = Debug.getPss(app.pid, mTmpLong, null);
-                long endTime = SystemClock.currentThreadTimeMillis();
-                mService.recordPssSampleLocked(app, app.getCurProcState(), pss,
-                        mTmpLong[0], mTmpLong[1], mTmpLong[2],
-                        ProcessStats.ADD_PSS_INTERNAL_SINGLE, endTime-startTime, now);
-                mService.mPendingPssProcesses.remove(app);
-                Slog.i(TAG, "Recorded pss for " + app + " state " + app.setProcState
-                        + " to " + app.getCurProcState() + ": "
-                        + (SystemClock.uptimeMillis()-start) + "ms");
-            }
             app.lastStateTime = now;
-            app.nextPssTime = ProcessList.computeNextPssTime(app.getCurProcState(),
-                    app.procStateMemTracker, mService.mTestPssMode,
-                    mService.mAtmInternal.isSleeping(), now);
-            if (DEBUG_PSS) Slog.d(TAG_PSS, "Process state change from "
-                    + ProcessList.makeProcStateString(app.setProcState) + " to "
-                    + ProcessList.makeProcStateString(app.getCurProcState()) + " next pss in "
-                    + (app.nextPssTime-now) + ": " + app);
-        } else {
-            if (now > app.nextPssTime || (now > (app.lastPssTime+ProcessList.PSS_MAX_INTERVAL)
-                    && now > (app.lastStateTime+ProcessList.minTimeFromStateChange(
-                    mService.mTestPssMode)))) {
-                if (mService.requestPssLocked(app, app.setProcState)) {
-                    app.nextPssTime = ProcessList.computeNextPssTime(app.getCurProcState(),
-                            app.procStateMemTracker, mService.mTestPssMode,
-                            mService.mAtmInternal.isSleeping(), now);
-                }
-            } else if (false && DEBUG_PSS) {
-                Slog.d(TAG_PSS,
-                        "Not requesting pss of " + app + ": next=" + (app.nextPssTime-now));
+            mService.mAppProfiler.updateNextPssTimeLocked(app.getCurProcState(), app, now, true);
+            if (DEBUG_PSS) {
+                Slog.d(TAG_PSS, "Process state change from "
+                        + ProcessList.makeProcStateString(app.setProcState) + " to "
+                        + ProcessList.makeProcStateString(app.getCurProcState()) + " next pss in "
+                        + (app.nextPssTime - now) + ": " + app);
             }
+        } else {
+            mService.mAppProfiler.updateNextPssTimeLocked(app.getCurProcState(), app, now, false);
         }
         if (app.setProcState != app.getCurProcState()) {
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ || mService.mCurOomAdjUid == app.uid) {
