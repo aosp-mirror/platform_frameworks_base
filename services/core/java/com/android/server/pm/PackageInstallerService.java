@@ -746,9 +746,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         synchronized (mSessions) {
             mSessions.put(sessionId, session);
         }
-        if (params.isStaged) {
-            mStagingManager.createSession(session);
-        }
 
         mCallbacks.notifySessionCreated(session.sessionId, session.userId);
 

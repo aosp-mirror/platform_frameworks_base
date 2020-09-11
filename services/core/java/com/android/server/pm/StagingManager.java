@@ -828,6 +828,8 @@ public class StagingManager {
     }
 
     void commitSession(@NonNull PackageInstallerSession session) {
+        // Store this parent session which will be used to check overlapping later
+        createSession(session);
         mPreRebootVerificationHandler.startPreRebootVerification(session);
     }
 
@@ -930,7 +932,7 @@ public class StagingManager {
         }
     }
 
-    void createSession(@NonNull PackageInstallerSession sessionInfo) {
+    private void createSession(@NonNull PackageInstallerSession sessionInfo) {
         synchronized (mStagedSessions) {
             mStagedSessions.append(sessionInfo.sessionId, sessionInfo);
         }
@@ -1006,16 +1008,15 @@ public class StagingManager {
     }
 
     void restoreSession(@NonNull PackageInstallerSession session, boolean isDeviceUpgrading) {
-        PackageInstallerSession sessionToResume = session;
-        synchronized (mStagedSessions) {
-            mStagedSessions.append(session.sessionId, session);
-            if (session.hasParentSessionId()) {
-                // Only parent sessions can be restored
-                return;
-            }
+        if (session.hasParentSessionId()) {
+            // Only parent sessions can be restored
+            return;
         }
+        // Store this parent session which will be used to check overlapping later
+        createSession(session);
         // The preconditions used during pre-reboot verification might have changed when device
         // is upgrading. Updated staged sessions to activation failed before we resume the session.
+        PackageInstallerSession sessionToResume = session;
         if (isDeviceUpgrading && !sessionToResume.isStagedAndInTerminalState()) {
             sessionToResume.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                         "Build fingerprint has changed");
