@@ -23,11 +23,13 @@ import android.widget.Switch;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.SecureSetting;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
 
@@ -38,6 +40,9 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
     @VisibleForTesting
     protected final SecureSetting mSetting;
 
+    private final ActivityStarter mActivityStarter;
+    private final KeyguardStateController mKeyguard;
+
     private int mLevel;
     private boolean mPowerSave;
     private boolean mCharging;
@@ -46,7 +51,8 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
     private Icon mIcon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_battery_saver);
 
     @Inject
-    public BatterySaverTile(QSHost host, BatteryController batteryController) {
+    public BatterySaverTile(QSHost host, BatteryController batteryController,
+            ActivityStarter activityStarter, KeyguardStateController keyguardStateController) {
         super(host);
         mBatteryController = batteryController;
         mBatteryController.observe(getLifecycle(), this);
@@ -58,6 +64,16 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
                 handleRefreshState(null);
             }
         };
+
+        mActivityStarter = activityStarter;
+        mKeyguard = keyguardStateController;
+        final KeyguardStateController.Callback callback = new KeyguardStateController.Callback() {
+            @Override
+            public void onKeyguardShowingChanged() {
+                refreshState();
+            }
+        };
+        mKeyguard.observe(this, callback);
     }
 
     @Override
@@ -95,6 +111,13 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
     @Override
     protected void handleClick() {
         if (getState().state == Tile.STATE_UNAVAILABLE) {
+            return;
+        }
+        if (mKeyguard.isMethodSecure() && mKeyguard.isShowing()) {
+            mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
+                mHost.openPanels();
+                mBatteryController.setPowerSaveMode(!mPowerSave);
+            });
             return;
         }
         mBatteryController.setPowerSaveMode(!mPowerSave);
