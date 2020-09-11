@@ -2250,7 +2250,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return (params.installFlags & PackageManager.INSTALL_APEX) != 0;
     }
 
-    private boolean sessionContains(Predicate<PackageInstallerSession> filter) {
+    boolean sessionContains(Predicate<PackageInstallerSession> filter) {
         if (!isMultiPackage()) {
             return filter.test(this);
         }

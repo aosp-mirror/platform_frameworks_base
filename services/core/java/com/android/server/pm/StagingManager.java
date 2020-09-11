@@ -863,7 +863,9 @@ public class StagingManager {
             // We cannot say a parent session overlaps until we process its children
             return;
         }
-        if (session.getPackageName() == null) {
+
+        String packageName = session.getPackageName();
+        if (packageName == null) {
             throw new PackageManagerException(PackageManager.INSTALL_FAILED_INVALID_APK,
                     "Cannot stage session " + session.sessionId + " with package name null");
         }
@@ -876,40 +878,26 @@ public class StagingManager {
         synchronized (mStagedSessions) {
             for (int i = 0; i < mStagedSessions.size(); i++) {
                 final PackageInstallerSession stagedSession = mStagedSessions.valueAt(i);
-                if (!stagedSession.isCommitted() || stagedSession.isStagedAndInTerminalState()
+                if (stagedSession.hasParentSessionId() || !stagedSession.isCommitted()
+                        || stagedSession.isStagedAndInTerminalState()
                         || stagedSession.isDestroyed()) {
                     continue;
                 }
-                if (stagedSession.isMultiPackage()) {
-                    // This active parent staged session is useless as it doesn't have a package
-                    // name and the session we are checking is not a parent session either.
-                    continue;
-                }
-                // Check if stagedSession has an active parent session or not
-                if (stagedSession.hasParentSessionId()) {
-                    final int parentId = stagedSession.getParentSessionId();
-                    final PackageInstallerSession parentSession = mStagedSessions.get(parentId);
-                    if (parentSession == null || parentSession.isStagedAndInTerminalState()
-                            || parentSession.isDestroyed()) {
-                        // Parent session has been abandoned or terminated already
-                        continue;
-                    }
-                }
 
-                // From here on, stagedSession is a non-parent active staged session
+                // From here on, stagedSession is a parent active staged session
 
                 // Check if session is one of the active sessions
-                if (session.sessionId == stagedSession.sessionId) {
+                if (getSessionIdForParentOrSelf(session) == stagedSession.sessionId) {
                     Slog.w(TAG, "Session " + session.sessionId + " is already staged");
                     continue;
                 }
 
                 // New session cannot have same package name as one of the active sessions
-                if (session.getPackageName().equals(stagedSession.getPackageName())) {
+                if (stagedSession.sessionContains(s -> s.getPackageName().equals(packageName))) {
                     if (isRollback) {
                         // If the new session is a rollback, then it gets priority. The existing
                         // session is failed to unblock rollback.
-                        final PackageInstallerSession root = getParentSessionOrSelf(stagedSession);
+                        final PackageInstallerSession root = stagedSession;
                         if (!ensureActiveApexSessionIsAborted(root)) {
                             Slog.e(TAG, "Failed to abort apex session " + root.sessionId);
                             // Safe to ignore active apex session abort failure since session
@@ -933,8 +921,7 @@ public class StagingManager {
                 // Staging multiple root sessions is not allowed if device doesn't support
                 // checkpoint. If session and stagedSession do not have common ancestor, they are
                 // from two different root sessions.
-                if (!supportsCheckpoint && getSessionIdForParentOrSelf(session)
-                        != getSessionIdForParentOrSelf(stagedSession)) {
+                if (!supportsCheckpoint) {
                     throw new PackageManagerException(
                             PackageManager.INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS,
                             "Cannot stage multiple sessions without checkpoint support", null);
