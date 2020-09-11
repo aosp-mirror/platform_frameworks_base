@@ -37,7 +37,6 @@ import com.android.internal.annotations.GuardedBy;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
-import dalvik.system.VMRuntime;
 
 import libcore.util.ArrayUtils;
 import libcore.util.SneakyThrow;
@@ -309,7 +308,7 @@ public final class Parcel {
     @CriticalNative
     private static native int nativeDataCapacity(long nativePtr);
     @FastNative
-    private static native long nativeSetDataSize(long nativePtr, int size);
+    private static native void nativeSetDataSize(long nativePtr, int size);
     @CriticalNative
     private static native void nativeSetDataPosition(long nativePtr, int pos);
     @FastNative
@@ -338,7 +337,7 @@ public final class Parcel {
     @FastNative
     private static native void nativeWriteStrongBinder(long nativePtr, IBinder val);
     @FastNative
-    private static native long nativeWriteFileDescriptor(long nativePtr, FileDescriptor val);
+    private static native void nativeWriteFileDescriptor(long nativePtr, FileDescriptor val);
 
     private static native byte[] nativeCreateByteArray(long nativePtr);
     private static native boolean nativeReadByteArray(long nativePtr, byte[] dest, int destLen);
@@ -361,14 +360,14 @@ public final class Parcel {
     private static native FileDescriptor nativeReadFileDescriptor(long nativePtr);
 
     private static native long nativeCreate();
-    private static native long nativeFreeBuffer(long nativePtr);
+    private static native void nativeFreeBuffer(long nativePtr);
     private static native void nativeDestroy(long nativePtr);
 
     private static native byte[] nativeMarshall(long nativePtr);
-    private static native long nativeUnmarshall(
+    private static native void nativeUnmarshall(
             long nativePtr, byte[] data, int offset, int length);
     private static native int nativeCompareData(long thisNativePtr, long otherNativePtr);
-    private static native long nativeAppendFrom(
+    private static native void nativeAppendFrom(
             long thisNativePtr, long otherNativePtr, int offset, int length);
     @CriticalNative
     private static native boolean nativeHasFileDescriptors(long nativePtr);
@@ -563,7 +562,7 @@ public final class Parcel {
      * @param size The new number of bytes in the Parcel.
      */
     public final void setDataSize(int size) {
-        updateNativeSize(nativeSetDataSize(mNativePtr, size));
+        nativeSetDataSize(mNativePtr, size);
     }
 
     /**
@@ -615,11 +614,11 @@ public final class Parcel {
      * Set the bytes in data to be the raw bytes of this Parcel.
      */
     public final void unmarshall(@NonNull byte[] data, int offset, int length) {
-        updateNativeSize(nativeUnmarshall(mNativePtr, data, offset, length));
+        nativeUnmarshall(mNativePtr, data, offset, length);
     }
 
     public final void appendFrom(Parcel parcel, int offset, int length) {
-        updateNativeSize(nativeAppendFrom(mNativePtr, parcel.mNativePtr, offset, length));
+        nativeAppendFrom(mNativePtr, parcel.mNativePtr, offset, length);
     }
 
     /** @hide */
@@ -902,24 +901,7 @@ public final class Parcel {
      * if {@link Parcelable#PARCELABLE_WRITE_RETURN_VALUE} is set.</p>
      */
     public final void writeFileDescriptor(@NonNull FileDescriptor val) {
-        updateNativeSize(nativeWriteFileDescriptor(mNativePtr, val));
-    }
-
-    private void updateNativeSize(long newNativeSize) {
-        if (mOwnsNativeParcelObject) {
-            if (newNativeSize > Integer.MAX_VALUE) {
-                newNativeSize = Integer.MAX_VALUE;
-            }
-            if (newNativeSize != mNativeSize) {
-                int delta = (int) (newNativeSize - mNativeSize);
-                if (delta > 0) {
-                    VMRuntime.getRuntime().registerNativeAllocation(delta);
-                } else {
-                    VMRuntime.getRuntime().registerNativeFree(-delta);
-                }
-                mNativeSize = newNativeSize;
-            }
-        }
+        nativeWriteFileDescriptor(mNativePtr, val);
     }
 
     /**
@@ -3571,7 +3553,7 @@ public final class Parcel {
     private void freeBuffer() {
         resetSqaushingState();
         if (mOwnsNativeParcelObject) {
-            updateNativeSize(nativeFreeBuffer(mNativePtr));
+            nativeFreeBuffer(mNativePtr);
         }
         mReadWriteHelper = ReadWriteHelper.DEFAULT;
     }
@@ -3581,7 +3563,6 @@ public final class Parcel {
         if (mNativePtr != 0) {
             if (mOwnsNativeParcelObject) {
                 nativeDestroy(mNativePtr);
-                updateNativeSize(0);
             }
             mNativePtr = 0;
         }
