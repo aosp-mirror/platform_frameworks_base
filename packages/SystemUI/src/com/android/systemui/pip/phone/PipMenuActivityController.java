@@ -27,10 +27,12 @@ import android.content.pm.ParceledListSlice;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Debug;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.pip.phone.PipMediaController.ActionListener;
@@ -94,6 +96,7 @@ public class PipMenuActivityController {
     private int mMenuState;
 
     private PipMenuView mPipMenuView;
+    private IBinder mPipMenuInputToken;
 
     private ActionListener mMediaActionListener = new ActionListener() {
         @Override
@@ -127,6 +130,7 @@ public class PipMenuActivityController {
         mInputConsumerController.unregisterInputConsumer();
         mPipTaskOrganizer.detachPipMenuViewHost();
         mPipMenuView = null;
+        mPipMenuInputToken = null;
     }
 
     public void onPinnedStackAnimationEnded() {
@@ -140,7 +144,13 @@ public class PipMenuActivityController {
             mPipMenuView = new PipMenuView(mContext, this);
 
         }
-        mPipTaskOrganizer.attachPipMenuViewHost(mPipMenuView, getPipMenuLayoutParams(0, 0));
+
+        // If we haven't gotten the input toekn, that means we haven't had a success attempt
+        // yet at attaching the PipMenuView
+        if (mPipMenuInputToken == null) {
+            mPipMenuInputToken = mPipTaskOrganizer.attachPipMenuViewHost(mPipMenuView,
+                    getPipMenuLayoutParams(0, 0));
+        }
     }
 
     /**
@@ -356,6 +366,13 @@ public class PipMenuActivityController {
                 // Once hidden, stop listening for media action changes. This call will trigger
                 // the menu actions to be updated again.
                 mMediaController.removeListener(mMediaActionListener);
+            }
+
+            try {
+                WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(null /* window */,
+                        mPipMenuInputToken, menuState != MENU_STATE_NONE /* grantFocus */);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Unable to update focus as menu appears/disappears", e);
             }
         }
         mMenuState = menuState;

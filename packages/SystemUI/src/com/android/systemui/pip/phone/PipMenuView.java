@@ -154,10 +154,6 @@ public class PipMenuView extends FrameLayout {
                 expandPip();
             }
         });
-        // TODO (b/161710689): Remove this once focusability for Windowless window is working
-        findViewById(R.id.expand_button).setFocusable(false);
-        mDismissButton.setFocusable(false);
-        mSettingsButton.setFocusable(false);
 
         mResizeHandle = findViewById(R.id.resize_handle);
         mResizeHandle.setAlpha(0);
