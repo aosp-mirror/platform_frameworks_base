@@ -115,8 +115,8 @@ import java.util.function.Supplier;
  *     <dt>{@link #MODE_ALLOWED}
  *     <dd>Allow the access
  *     <dt>{@link #MODE_IGNORED}
- *     <dd>Don't allow the access, i.e. don't perform the requested action or return no or dummy
- *     data
+ *     <dd>Don't allow the access, i.e. don't perform the requested action or return no or
+ *     placeholder data
  *     <dt>{@link #MODE_ERRORED}
  *     <dd>Throw a {@link SecurityException} on access. This can be suppressed by using a
  *     {@code ...noThrow} method to check the mode
@@ -135,7 +135,7 @@ import java.util.function.Supplier;
  * <p>Each platform defined runtime permission (beside background modifiers) has an associated app
  * op which is used for tracking but also to allow for silent failures. I.e. if the runtime
  * permission is denied the caller gets a {@link SecurityException}, but if the permission is
- * granted and the app-op is {@link #MODE_IGNORED} then the callers gets dummy behavior, e.g.
+ * granted and the app-op is {@link #MODE_IGNORED} then the callers gets placeholder behavior, e.g.
  * location callbacks would not happen.
  *
  * <h3>App-op permissions</h3>

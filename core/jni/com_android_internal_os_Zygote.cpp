@@ -827,7 +827,7 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
   }
 
   if (mount_mode == MOUNT_EXTERNAL_NONE && !force_mount_namespace) {
-    // Sane default of no storage visible
+    // Valid default of no storage visible
     return;
   }
 
