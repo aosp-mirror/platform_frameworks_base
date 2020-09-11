@@ -1850,7 +1850,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
                     synchronized (mLock) {
                         removeMessages(WRITE_PACKAGE_LIST);
-                        mPermissionManager.writeStateToPackageSettingsTEMP();
                         mSettings.writePackageListLPr(msg.arg1);
                     }
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
@@ -2687,7 +2686,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 (i, pm) ->
                         new Settings(Environment.getDataDirectory(),
                                 i.getPermissionManagerServiceInternal().getPermissionSettings(),
-                                RuntimePermissionsPersistence.createInstance(), lock),
+                                RuntimePermissionsPersistence.createInstance(),
+                                i.getPermissionManagerServiceInternal(), lock),
                 new Injector.LocalServicesProducer<>(ActivityTaskManagerInternal.class),
                 new Injector.LocalServicesProducer<>(ActivityManagerInternal.class),
                 new Injector.LocalServicesProducer<>(DeviceIdleInternal.class),
@@ -4486,8 +4486,8 @@ public class PackageManagerService extends IPackageManager.Stub
         AndroidPackage p = ps.pkg;
         if (p != null) {
             // Compute GIDs only if requested
-            final int[] gids = (flags & PackageManager.GET_GIDS) == 0
-                    ? EMPTY_INT_ARRAY : mPermissionManager.getPackageGids(ps.name, userId);
+            final int[] gids = (flags & PackageManager.GET_GIDS) == 0 ? EMPTY_INT_ARRAY
+                    : mPermissionManager.getGidsForUid(UserHandle.getUid(userId, ps.appId));
             // Compute granted permissions only if package has requested permissions
             final Set<String> permissions = ArrayUtils.isEmpty(p.getRequestedPermissions())
                     ? Collections.emptySet()
@@ -4962,13 +4962,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 // TODO: Shouldn't this be checking for package installed state for userId and
                 // return null?
-                return mPermissionManager.getPackageGids(packageName, userId);
+                return mPermissionManager.getGidsForUid(UserHandle.getUid(userId, ps.appId));
             }
             if ((flags & MATCH_KNOWN_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps != null && ps.isMatch(flags)
                         && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
-                    return mPermissionManager.getPackageGids(packageName, userId);
+                    return mPermissionManager.getGidsForUid(UserHandle.getUid(userId, ps.appId));
                 }
             }
         }
@@ -18967,7 +18967,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                     if ((deletedPs.sharedUser == null || deletedPs.sharedUser.packages.size() == 0)
                             && !isUpdatedSystemApp(deletedPs)) {
-                        mPermissionManager.removePermissionsStateTEMP(removedAppId);
+                        mPermissionManager.removeAppIdStateTEMP(removedAppId);
                     }
                     mPermissionManager.updatePermissions(deletedPs.name, null);
                     if (deletedPs.sharedUser != null) {
@@ -21838,8 +21838,6 @@ public class PackageManagerService extends IPackageManager.Stub
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
-        mPermissionManager.writeStateToPackageSettingsTEMP();
-
         DumpState dumpState = new DumpState();
         boolean fullPreferred = false;
         boolean checkin = false;
@@ -23718,7 +23716,6 @@ public class PackageManagerService extends IPackageManager.Stub
             mDirtyUsers.remove(userId);
             mUserNeedsBadging.delete(userId);
             mPermissionManager.onUserRemoved(userId);
-            mPermissionManager.writeStateToPackageSettingsTEMP();
             mSettings.removeUserLPw(userId);
             mPendingBroadcasts.remove(userId);
             mInstantAppRegistry.onUserRemovedLPw(userId);
