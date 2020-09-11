@@ -25,23 +25,83 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Outline
 import android.graphics.Paint
+import android.graphics.RadialGradient
 import android.graphics.Rect
 import android.graphics.Shader
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewOutlineProvider
+import android.widget.FrameLayout
+import com.android.internal.graphics.ColorUtils
 import com.android.test.silkfx.R
+import kotlin.math.sin
+import kotlin.math.sqrt
 
-class GlassView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
+class GlassView(context: Context, attributeSet: AttributeSet) : FrameLayout(context, attributeSet) {
 
-    var noise = BitmapFactory.decodeResource(resources, R.drawable.noise)
-    var materialPaint = Paint()
-    var scrimPaint = Paint()
-    var noisePaint = Paint()
-    var blurPaint = Paint()
+    private val textureTranslationMultiplier = 200f
 
-    val src = Rect()
-    val dst = Rect()
+    private var gyroXRotation = 0f
+    private var gyroYRotation = 0f
+
+    private var noise = BitmapFactory.decodeResource(resources, R.drawable.noise)
+    private var materialPaint = Paint()
+    private var scrimPaint = Paint()
+    private var noisePaint = Paint()
+    private var blurPaint = Paint()
+
+    private val src = Rect()
+    private val dst = Rect()
+
+    private val sensorManager = context.getSystemService(SensorManager::class.java)
+    private val sensorListener = object : SensorEventListener {
+
+        // Constant to convert nanoseconds to seconds.
+        private val NS2S = 1.0f / 1000000000.0f
+        private val EPSILON = 0.000001f
+        private var timestamp: Float = 0f
+
+        override fun onSensorChanged(event: SensorEvent?) {
+            // This timestep's delta rotation to be multiplied by the current rotation
+            // after computing it from the gyro sample data.
+            if (timestamp != 0f && event != null) {
+                val dT = (event.timestamp - timestamp) * NS2S
+                // Axis of the rotation sample, not normalized yet.
+                var axisX: Float = event.values[0]
+                var axisY: Float = event.values[1]
+                var axisZ: Float = event.values[2]
+
+                // Calculate the angular speed of the sample
+                val omegaMagnitude: Float = sqrt(axisX * axisX + axisY * axisY + axisZ * axisZ)
+
+                // Normalize the rotation vector if it's big enough to get the axis
+                // (that is, EPSILON should represent your maximum allowable margin of error)
+                if (omegaMagnitude > EPSILON) {
+                    axisX /= omegaMagnitude
+                    axisY /= omegaMagnitude
+                    axisZ /= omegaMagnitude
+                }
+
+                // Integrate around this axis with the angular speed by the timestep
+                // in order to get a delta rotation from this sample over the timestep
+                // We will convert this axis-angle representation of the delta rotation
+                // into a quaternion before turning it into the rotation matrix.
+                val thetaOverTwo: Float = omegaMagnitude * dT / 2.0f
+                val sinThetaOverTwo: Float = sin(thetaOverTwo)
+                gyroXRotation += sinThetaOverTwo * axisX
+                gyroYRotation += sinThetaOverTwo * axisY
+
+                invalidate()
+            }
+            timestamp = event?.timestamp?.toFloat() ?: 0f
+        }
+
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) { }
+    }
 
     var backgroundBitmap: Bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
     set(value) {
@@ -97,6 +157,7 @@ class GlassView(context: Context, attributeSet: AttributeSet) : View(context, at
     }
 
     init {
+        setWillNotDraw(false)
         materialPaint.blendMode = BlendMode.SOFT_LIGHT
         noisePaint.blendMode = BlendMode.SOFT_LIGHT
         noisePaint.shader = BitmapShader(noise, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
@@ -112,17 +173,36 @@ class GlassView(context: Context, attributeSet: AttributeSet) : View(context, at
         clipToOutline = true
     }
 
+    override fun onAttachedToWindow() {
+        sensorManager?.getSensorList(Sensor.TYPE_GYROSCOPE)?.firstOrNull().let {
+            sensorManager?.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_GAME)
+        }
+    }
+
+    override fun onDetachedFromWindow() {
+        sensorManager?.unregisterListener(sensorListener)
+    }
+
     override fun onDraw(canvas: Canvas?) {
-        src.set(-width/2, -height/2, width/2, height/2)
+        src.set(-width / 2, -height / 2, width / 2, height / 2)
         src.scale(1.0f + zoom)
         val centerX = left + width / 2
         val centerY = top + height / 2
-        src.set(src.left + centerX, src.top + centerY, src.right + centerX, src.bottom + centerY)
+        val textureXOffset = (textureTranslationMultiplier * gyroYRotation).toInt()
+        val textureYOffset = (textureTranslationMultiplier * gyroXRotation).toInt()
+        src.set(src.left + centerX + textureXOffset, src.top + centerY + textureYOffset,
+                src.right + centerX + textureXOffset, src.bottom + centerY + textureYOffset)
 
         dst.set(0, 0, width, height)
         canvas?.drawBitmap(backgroundBitmap, src, dst, blurPaint)
         canvas?.drawRect(dst, materialPaint)
         canvas?.drawRect(dst, noisePaint)
         canvas?.drawRect(dst, scrimPaint)
+    }
+
+    fun resetGyroOffsets() {
+        gyroXRotation = 0f
+        gyroYRotation = 0f
+        invalidate()
     }
 }
