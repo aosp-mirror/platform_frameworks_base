@@ -229,7 +229,7 @@ public final class OffloadHardwareInterfaceTest {
         }
         when(mNativeHandle.getFileDescriptor()).thenReturn(writeSocket);
 
-        mOffloadHw.sendNetlinkMessage(mNativeHandle, TEST_TYPE, TEST_FLAGS);
+        mOffloadHw.sendIpv4NfGenMsg(mNativeHandle, TEST_TYPE, TEST_FLAGS);
 
         ByteBuffer buffer = ByteBuffer.allocate(StructNlMsgHdr.STRUCT_SIZE);
         int read = Os.read(readSocket, buffer);
