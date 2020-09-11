@@ -439,6 +439,12 @@ public final class SystemServer {
             boolean enabled = false;
             while (true) {
                 int maxFd = getMaxFd();
+                if (maxFd > enableThreshold) {
+                    // Do a manual GC to clean up fds that are hanging around as garbage.
+                    System.gc();
+                    maxFd = getMaxFd();
+                }
+
                 if (maxFd > enableThreshold && !enabled) {
                     Slog.i("System", "fdtrack enable threshold reached, enabling");
                     System.loadLibrary("fdtrack");
