@@ -180,18 +180,18 @@ public class KeyguardPatternViewController
             KeyguardSecurityCallback keyguardSecurityCallback,
             LatencyTracker latencyTracker,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory) {
-        super(view, securityMode, lockPatternUtils, keyguardSecurityCallback);
+        super(view, securityMode, keyguardSecurityCallback);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
         mMessageAreaControllerFactory = messageAreaControllerFactory;
+        KeyguardMessageArea kma = KeyguardMessageArea.findSecurityMessageDisplay(mView);
+        mMessageAreaController = mMessageAreaControllerFactory.create(kma);
+        mLockPatternView = mView.findViewById(R.id.lockPatternView);
     }
 
     @Override
     protected void onViewAttached() {
-        KeyguardMessageArea kma = KeyguardMessageArea.findSecurityMessageDisplay(mView);
-        mMessageAreaController = mMessageAreaControllerFactory.create(kma);
-        mLockPatternView = mView.findViewById(R.id.lockPatternView);
         mLockPatternView.setOnPatternListener(new UnlockPatternListener());
         mLockPatternView.setSaveEnabled(false);
         mLockPatternView.setInStealthMode(!mLockPatternUtils.isVisiblePatternEnabled(

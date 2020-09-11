@@ -24,7 +24,6 @@ import android.view.animation.AnimationUtils;
 
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 
 /**
@@ -40,10 +39,8 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     private ViewGroup mRow1;
     private ViewGroup mRow2;
     private ViewGroup mRow3;
-    private View mDivider;
     private int mDisappearYTranslation;
     private View[][] mViews;
-    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     public KeyguardPINView(Context context) {
         this(context, null);
@@ -63,15 +60,10 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
                         mContext, android.R.interpolator.fast_out_linear_in));
         mDisappearYTranslation = getResources().getDimensionPixelSize(
                 R.dimen.disappear_y_translation);
-        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
     }
 
     @Override
     protected void resetState() {
-        super.resetState();
-        if (mSecurityMessageDisplay != null) {
-            mSecurityMessageDisplay.setMessage("");
-        }
     }
 
     @Override
@@ -88,7 +80,6 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         mRow1 = findViewById(R.id.row1);
         mRow2 = findViewById(R.id.row2);
         mRow3 = findViewById(R.id.row3);
-        mDivider = findViewById(R.id.divider);
         mViews = new View[][]{
                 new View[]{
                         mRow0, null, null
@@ -123,6 +114,16 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     }
 
     @Override
+    public void onPause() {
+
+    }
+
+    @Override
+    public void onResume(int reason) {
+
+    }
+
+    @Override
     public void showUsabilityHint() {
     }
 
@@ -149,22 +150,24 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
 
     @Override
     public boolean startDisappearAnimation(final Runnable finishRunnable) {
+        return false;
+    }
+
+    public boolean startDisappearAnimation(boolean needsSlowUnlockTransition,
+            final Runnable finishRunnable) {
+
         enableClipping(false);
         setTranslationY(0);
         AppearAnimationUtils.startTranslationYAnimation(this, 0 /* delay */, 280 /* duration */,
                 mDisappearYTranslation, mDisappearAnimationUtils.getInterpolator());
-        DisappearAnimationUtils disappearAnimationUtils = mKeyguardUpdateMonitor
-                .needsSlowUnlockTransition()
+        DisappearAnimationUtils disappearAnimationUtils = needsSlowUnlockTransition
                         ? mDisappearAnimationUtilsLocked
                         : mDisappearAnimationUtils;
         disappearAnimationUtils.startAnimation2d(mViews,
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        enableClipping(true);
-                        if (finishRunnable != null) {
-                            finishRunnable.run();
-                        }
+                () -> {
+                    enableClipping(true);
+                    if (finishRunnable != null) {
+                        finishRunnable.run();
                     }
                 });
         return true;
