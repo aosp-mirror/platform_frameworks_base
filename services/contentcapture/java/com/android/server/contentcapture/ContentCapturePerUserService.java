@@ -571,7 +571,7 @@ final class ContentCapturePerUserService
     }
 
     /**
-     * Resets the content capture whitelist.
+     * Resets the content capture allowlist.
      */
     @GuardedBy("mLock")
     private void resetContentCaptureWhitelistLocked() {
@@ -598,7 +598,7 @@ final class ContentCapturePerUserService
             mMaster.mGlobalContentCaptureOptions.setWhitelist(mUserId, packages, activities);
             writeSetWhitelistEvent(getServiceComponentName(), packages, activities);
 
-            // Must disable session that are not the whitelist anymore...
+            // Must disable session that are not the allowlist anymore...
             final int numSessions = mSessions.size();
             if (numSessions <= 0) return;
 

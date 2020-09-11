@@ -200,7 +200,7 @@ class GnssConfiguration {
     }
 
     /**
-     * Updates the GNSS HAL satellite blacklist.
+     * Updates the GNSS HAL satellite denylist.
      */
     void setSatelliteBlacklist(int[] constellations, int[] svids) {
         native_set_satellite_blacklist(constellations, svids);
