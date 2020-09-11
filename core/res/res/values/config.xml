@@ -2495,7 +2495,7 @@
     <string name="config_customAdbPublicKeyConfirmationComponent"
             >com.android.systemui/com.android.systemui.usb.UsbDebuggingActivity</string>
 
-    <!-- Name of the activity that prompts the secondary user to acknowledge she/he needs to
+    <!-- Name of the activity that prompts the secondary user to acknowledge they need to
          switch to the primary user to enable USB debugging.
          Can be customized for other product types -->
     <string name="config_customAdbPublicKeyConfirmationSecondaryUserComponent"
@@ -2507,7 +2507,7 @@
     <string name="config_customAdbWifiNetworkConfirmationComponent"
             >com.android.systemui/com.android.systemui.wifi.WifiDebuggingActivity</string>
 
-    <!-- Name of the activity that prompts the secondary user to acknowledge she/he needs to
+    <!-- Name of the activity that prompts the secondary user to acknowledge they need to
          switch to the primary user to enable wireless debugging.
          Can be customized for other product types -->
     <string name="config_customAdbWifiNetworkConfirmationSecondaryUserComponent"

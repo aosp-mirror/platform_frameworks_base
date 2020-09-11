@@ -354,11 +354,11 @@
     <!-- A notification is shown when the AccountManager is unable to
     supply an auth token without prompting the user to re-enter the
     password.  This is the text that will scroll through the
-    notification bar (will be seen by the user as he uses another application). -->
+    notification bar (will be seen by the user as they use another application). -->
     <string name="notification_title">Signin error for <xliff:g id="account" example="foo@gmail.com">%1$s</xliff:g></string>
 
     <!-- Sync notifications --> <skip />
-    <!-- A notification is shown when there is a sync error.  This is the text that will scroll through the notification bar (will be seen by the user as he uses another application). -->
+    <!-- A notification is shown when there is a sync error.  This is the text that will scroll through the notification bar (will be seen by the user as they use another application). -->
     <string name="contentServiceSync">Sync</string>
     <!-- A notification is shown when there is a sync error.  This is the title of the notification.  It will be seen in the pull-down notification tray. [CHAR LIMIT=NOTIF_TITLE] -->
     <string name="contentServiceSyncNotificationTitle">Can\'t sync</string>
@@ -3120,7 +3120,7 @@
     <string name="use_a_different_app">Use a different app</string>
     <!-- Text displayed when the user selects the check box for setting default application.  See the "Use by default for this action" check box. -->
     <string name="clearDefaultHintMsg">Clear default in System settings &gt; Apps &gt; Downloaded.</string>
-    <!-- Default title for the activity chooser, when one is not given. Android allows multiple activities to perform an action.  for example, there may be many ringtone pickers installed.  A dialog is shown to the user allowing him to pick which activity should be used.  This is the title. -->
+    <!-- Default title for the activity chooser, when one is not given. Android allows multiple activities to perform an action.  for example, there may be many ringtone pickers installed.  A dialog is shown to the user allowing them to pick which activity should be used.  This is the title. -->
     <string name="chooseActivity">Choose an action</string>
     <!-- title for the USB activity chooser. -->
     <string name="chooseUsbActivity">Choose an app for the USB device</string>
@@ -3340,7 +3340,7 @@
     <string name="ringtone_picker_title_alarm">Alarm sounds</string>
     <!-- The title of the notification sound picker dialog [CHAR LIMIT=100] -->
     <string name="ringtone_picker_title_notification">Notification sounds</string>
-    <!-- If there is ever a ringtone set for some setting, but that ringtone can no longer be resolved, t his is shown instead.  For example, if the ringtone was on a SD card and it had been removed, this woudl be shown for ringtones on that SD card. -->
+    <!-- If there is ever a ringtone set for some setting, but that ringtone can no longer be resolved, this is shown instead.  For example, if the ringtone was on a SD card and it had been removed, this would be shown for ringtones on that SD card. -->
     <string name="ringtone_unknown">Unknown</string>
 
     <!-- A notification is shown when a wifi captive portal network is detected.  This is the notification's title. -->
