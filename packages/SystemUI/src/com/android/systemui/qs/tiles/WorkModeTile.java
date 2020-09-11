@@ -23,10 +23,12 @@ import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
 
@@ -37,11 +39,25 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
 
     private final ManagedProfileController mProfileController;
 
+    private final ActivityStarter mActivityStarter;
+    private final KeyguardStateController mKeyguard;
+
     @Inject
-    public WorkModeTile(QSHost host, ManagedProfileController managedProfileController) {
+    public WorkModeTile(QSHost host, ManagedProfileController managedProfileController,
+            ActivityStarter activityStarter, KeyguardStateController keyguardStateController) {
         super(host);
         mProfileController = managedProfileController;
         mProfileController.observe(getLifecycle(), this);
+
+        mActivityStarter = activityStarter;
+        mKeyguard = keyguardStateController;
+        final KeyguardStateController.Callback callback = new KeyguardStateController.Callback() {
+            @Override
+            public void onKeyguardShowingChanged() {
+                refreshState();
+            }
+        };
+        mKeyguard.observe(this, callback);
     }
 
     @Override
@@ -56,6 +72,13 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
 
     @Override
     public void handleClick() {
+        if (mKeyguard.isMethodSecure() && mKeyguard.isShowing()) {
+            mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
+                mHost.openPanels();
+                mProfileController.setWorkModeEnabled(!mState.value);
+            });
+            return;
+        }
         mProfileController.setWorkModeEnabled(!mState.value);
     }
 
