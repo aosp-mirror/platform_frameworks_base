@@ -23,6 +23,8 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
+import static android.system.OsConstants.O_CLOEXEC;
+import static android.system.OsConstants.O_RDONLY;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.server.utils.TimingsTraceAndSlog.SYSTEM_SERVER_TIMING_TAG;
@@ -75,6 +77,8 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.server.ServerProtoEnums;
 import android.sysprop.VoldProperties;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -188,6 +192,7 @@ import dalvik.system.VMRuntime;
 import com.google.android.startop.iorap.IorapForwardingService;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Locale;
@@ -392,11 +397,65 @@ public final class SystemServer {
      */
     private static native void initZygoteChildHeapProfiling();
 
+    private static final String SYSPROP_FDTRACK_ENABLE_THRESHOLD =
+            "persist.sys.debug.fdtrack_enable_threshold";
+    private static final String SYSPROP_FDTRACK_ABORT_THRESHOLD =
+            "persist.sys.debug.fdtrack_abort_threshold";
+    private static final String SYSPROP_FDTRACK_INTERVAL =
+            "persist.sys.debug.fdtrack_interval";
+
+    private static int getMaxFd() {
+        FileDescriptor fd = null;
+        try {
+            fd = Os.open("/dev/null", O_RDONLY | O_CLOEXEC, 0);
+            return fd.getInt$();
+        } catch (ErrnoException ex) {
+            Slog.e("System", "Failed to get maximum fd: " + ex);
+        } finally {
+            if (fd != null) {
+                try {
+                    Os.close(fd);
+                } catch (ErrnoException ex) {
+                    // If Os.close threw, something went horribly wrong.
+                    throw new RuntimeException(ex);
+                }
+            }
+        }
+
+        return Integer.MAX_VALUE;
+    }
+
+    private static native void fdtrackAbort();
 
     /**
      * Spawn a thread that monitors for fd leaks.
      */
-    private static native void spawnFdLeakCheckThread();
+    private static void spawnFdLeakCheckThread() {
+        final int enableThreshold = SystemProperties.getInt(SYSPROP_FDTRACK_ENABLE_THRESHOLD, 1024);
+        final int abortThreshold = SystemProperties.getInt(SYSPROP_FDTRACK_ABORT_THRESHOLD, 2048);
+        final int checkInterval = SystemProperties.getInt(SYSPROP_FDTRACK_INTERVAL, 120);
+
+        new Thread(() -> {
+            boolean enabled = false;
+            while (true) {
+                int maxFd = getMaxFd();
+                if (maxFd > enableThreshold && !enabled) {
+                    Slog.i("System", "fdtrack enable threshold reached, enabling");
+                    System.loadLibrary("fdtrack");
+                    enabled = true;
+                } else if (maxFd > abortThreshold) {
+                    Slog.i("System", "fdtrack abort threshold reached, dumping and aborting");
+                    fdtrackAbort();
+                }
+
+                try {
+                    Thread.sleep(checkInterval);
+                } catch (InterruptedException ex) {
+                    continue;
+                }
+            }
+        }).start();
+    }
 
     /**
      * Start native Incremental Service and get its handle.
