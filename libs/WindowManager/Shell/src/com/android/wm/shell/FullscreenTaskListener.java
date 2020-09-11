@@ -46,6 +46,12 @@ class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
             final SurfaceControl.Transaction t = mTransactionPool.acquire();
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Appeared: #%d",
                     taskInfo.taskId);
+            // Reset several properties back to fullscreen (PiP, for example, leaves all these
+            // properties in a bad state).
+            t.setPosition(leash, 0, 0);
+            t.setWindowCrop(leash, null);
+            t.setAlpha(leash, 1f);
+            t.setMatrix(leash, 1, 0, 0, 1);
             t.show(leash);
             t.apply();
         }
