@@ -23,7 +23,6 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PACKAGE;
 import static java.lang.annotation.ElementType.TYPE;
 
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -41,7 +40,6 @@ import java.lang.annotation.Target;
  */
 @Target({TYPE, FIELD, METHOD, CONSTRUCTOR, ANNOTATION_TYPE, PACKAGE})
 @Retention(RetentionPolicy.RUNTIME)
-@Repeatable(SystemApi.Container.class) // TODO(b/146727827): make this non-repeatable
 public @interface SystemApi {
     enum Client {
         /**
