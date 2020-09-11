@@ -239,14 +239,14 @@ public class SystemBarConfigs {
             e.printStackTrace();
         }
 
-        if (!mTopNavBarEnabled && notificationPanelMediatorUsed.isAssignableFrom(
-                TopNotificationPanelViewMediator.class)) {
+        if (!mTopNavBarEnabled && TopNotificationPanelViewMediator.class.isAssignableFrom(
+                notificationPanelMediatorUsed)) {
             throw new RuntimeException(
                     "Top System Bar must be enabled to use " + notificationPanelMediatorName);
         }
 
-        if (!mBottomNavBarEnabled && notificationPanelMediatorUsed.isAssignableFrom(
-                BottomNotificationPanelViewMediator.class)) {
+        if (!mBottomNavBarEnabled && BottomNotificationPanelViewMediator.class.isAssignableFrom(
+                notificationPanelMediatorUsed)) {
             throw new RuntimeException("Bottom System Bar must be enabled to use "
                     + notificationPanelMediatorName);
         }
