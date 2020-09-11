@@ -65,9 +65,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Handle to an on-screen Surface managed by the system compositor. The SurfaceControl is
@@ -90,10 +87,10 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeWriteToParcel(long nativeObject, Parcel out);
     private static native void nativeRelease(long nativeObject);
     private static native void nativeDisconnect(long nativeObject);
-    private static native int nativeCaptureDisplay(DisplayCaptureArgs captureArgs,
-            ScreenCaptureListener captureListener);
-    private static native int nativeCaptureLayers(LayerCaptureArgs captureArgs,
-            ScreenCaptureListener captureListener);
+    private static native ScreenshotHardwareBuffer nativeCaptureDisplay(
+            DisplayCaptureArgs captureArgs);
+    private static native ScreenshotHardwareBuffer nativeCaptureLayers(
+            LayerCaptureArgs captureArgs);
     private static native long nativeMirrorSurface(long mirrorOfObject);
     private static native long nativeCreateTransaction();
     private static native long nativeGetNativeTransactionFinalizer();
@@ -498,8 +495,6 @@ public final class SurfaceControl implements Parcelable {
     private static final int INTERNAL_DATASPACE_DISPLAY_P3 = 143261696;
     private static final int INTERNAL_DATASPACE_SCRGB = 411107328;
 
-    private static final int SCREENSHOT_WAIT_TIME_S = 1;
-
     private void assignNativeObject(long nativeObject, String callsite) {
         if (mNativeObject != 0) {
             release();
@@ -618,13 +613,6 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
-     * @hide
-     */
-    public abstract static class ScreenCaptureListener {
-        abstract void onScreenCaptureComplete(ScreenshotHardwareBuffer hardwareBuffer);
-    }
-
-    /**
      * A common arguments class used for various screenshot requests. This contains arguments that
      * are shared between {@link DisplayCaptureArgs} and {@link LayerCaptureArgs}
      * @hide
@@ -699,7 +687,7 @@ public final class SurfaceControl implements Parcelable {
     /**
      * The arguments class used to make display capture requests.
      *
-     * @see #nativeCaptureDisplay(DisplayCaptureArgs, ScreenCaptureListener)
+     * @see #nativeCaptureDisplay(DisplayCaptureArgs)
      * @hide
      */
     public static class DisplayCaptureArgs extends CaptureArgs {
@@ -2240,46 +2228,13 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
-     * @param captureArgs Arguments about how to take the screenshot
-     * @param captureListener A listener to receive the screenshot callback
-     * @hide
-     */
-    public static int captureDisplay(@NonNull DisplayCaptureArgs captureArgs,
-            @NonNull ScreenCaptureListener captureListener) {
-        return nativeCaptureDisplay(captureArgs, captureListener);
-    }
-
-    /**
      * Captures all the surfaces in a display and returns a {@link ScreenshotHardwareBuffer} with
      * the content.
      *
      * @hide
      */
     public static ScreenshotHardwareBuffer captureDisplay(DisplayCaptureArgs captureArgs) {
-        final AtomicReference<ScreenshotHardwareBuffer> outHardwareBuffer =
-                new AtomicReference<>(null);
-
-        final CountDownLatch countDownLatch = new CountDownLatch(1);
-        ScreenCaptureListener screenCaptureListener = new ScreenCaptureListener() {
-            @Override
-            void onScreenCaptureComplete(ScreenshotHardwareBuffer hardwareBuffer) {
-                outHardwareBuffer.set(hardwareBuffer);
-                countDownLatch.countDown();
-            }
-        };
-
-        int status = captureDisplay(captureArgs, screenCaptureListener);
-        if (status != 0) {
-            return null;
-        }
-
-        try {
-            countDownLatch.await(SCREENSHOT_WAIT_TIME_S, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to wait for captureDisplay result", e);
-        }
-
-        return outHardwareBuffer.get();
+        return nativeCaptureDisplay(captureArgs);
     }
 
     /**
@@ -2324,37 +2279,14 @@ public final class SurfaceControl implements Parcelable {
                 .setPixelFormat(format)
                 .build();
 
-        return captureLayers(captureArgs);
+        return nativeCaptureLayers(captureArgs);
     }
 
     /**
      * @hide
      */
     public static ScreenshotHardwareBuffer captureLayers(LayerCaptureArgs captureArgs) {
-        final AtomicReference<ScreenshotHardwareBuffer> outHardwareBuffer =
-                new AtomicReference<>(null);
-
-        final CountDownLatch countDownLatch = new CountDownLatch(1);
-        ScreenCaptureListener screenCaptureListener = new ScreenCaptureListener() {
-            @Override
-            void onScreenCaptureComplete(ScreenshotHardwareBuffer hardwareBuffer) {
-                outHardwareBuffer.set(hardwareBuffer);
-                countDownLatch.countDown();
-            }
-        };
-
-        int status = captureLayers(captureArgs, screenCaptureListener);
-        if (status != 0) {
-            return null;
-        }
-
-        try {
-            countDownLatch.await(SCREENSHOT_WAIT_TIME_S, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to wait for captureLayers result", e);
-        }
-
-        return outHardwareBuffer.get();
+        return nativeCaptureLayers(captureArgs);
     }
 
     /**
@@ -2371,17 +2303,7 @@ public final class SurfaceControl implements Parcelable {
                 .setExcludeLayers(exclude)
                 .build();
 
-        return captureLayers(captureArgs);
-    }
-
-    /**
-     * @param captureArgs Arguments about how to take the screenshot
-     * @param captureListener A listener to receive the screenshot callback
-     * @hide
-     */
-    public static int captureLayers(@NonNull LayerCaptureArgs captureArgs,
-            @NonNull ScreenCaptureListener captureListener) {
-        return nativeCaptureLayers(captureArgs, captureListener);
+        return nativeCaptureLayers(captureArgs);
     }
 
     /**
