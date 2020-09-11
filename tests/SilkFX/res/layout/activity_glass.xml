@@ -41,7 +41,16 @@
         app:layout_constraintBottom_toTopOf="@+id/bottomPanel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+        <TextView
+            android:id="@+id/textOverlay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18dp"
+            android:layout_gravity="center"
+            android:textColor="#ffffff"
+            android:text="Lorem Ipsum dolor sit amet." />
+    </com.android.test.silkfx.materials.GlassView>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottomPanel"
@@ -90,7 +99,7 @@
         android:layout_marginEnd="12dp"
         android:layout_marginStart="12dp"
         android:max="150"
-        android:progress="20"
+        android:progress="40"
         app:layout_constraintBottom_toTopOf="@+id/materialOpacityTitle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
@@ -118,7 +127,7 @@
         android:layout_marginEnd="12dp"
         android:layout_marginBottom="24dp"
         android:max="100"
-        android:progress="5"
+        android:progress="15"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -141,7 +150,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginBottom="8dp"
-        android:text="Material Opacity"
+        android:text="Soft light Opacity"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/materialOpacity"
         app:layout_constraintStart_toStartOf="parent" />
