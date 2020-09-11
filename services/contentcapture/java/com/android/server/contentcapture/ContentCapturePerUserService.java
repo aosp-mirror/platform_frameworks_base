@@ -93,7 +93,7 @@ final class ContentCapturePerUserService
      * Reference to the remote service.
      *
      * <p>It's set in the constructor, but it's also updated when the service's updated in the
-     * master's cache (for example, because a temporary service was set).
+     * main service's cache (for example, because a temporary service was set).
      */
     @GuardedBy("mLock")
     @Nullable

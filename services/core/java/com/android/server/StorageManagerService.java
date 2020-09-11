@@ -2969,7 +2969,7 @@ class StorageManagerService extends IStorageManager.Stub
         return 0;
     }
 
-    /** Set the password for encrypting the master key.
+    /** Set the password for encrypting the main key.
      *  @param type One of the CRYPTO_TYPE_XXX consts defined in StorageManager.
      *  @param password The password to set.
      */
@@ -3033,7 +3033,7 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     /**
-     * Get the type of encryption used to encrypt the master key.
+     * Get the type of encryption used to encrypt the main key.
      * @return The type, one of the CRYPT_TYPE_XXX consts from StorageManager.
      */
     @Override

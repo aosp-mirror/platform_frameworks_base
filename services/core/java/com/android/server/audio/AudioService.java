@@ -3169,7 +3169,7 @@ public class AudioService extends IAudioService.Stub
         // For automotive,
         // - the car service is always running as system user
         // - foreground users are non-system users
-        // Car service is in charge of dispatching the key event include master mute to Android.
+        // Car service is in charge of dispatching the key event include global mute to Android.
         // Therefore, the getCurrentUser() is always different to the foreground user.
         if ((isPlatformAutomotive() && userId == UserHandle.USER_SYSTEM)
                 || (getCurrentUserId() == userId)) {
@@ -3181,7 +3181,7 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    /** get master mute state. */
+    /** get global mute state. */
     public boolean isMasterMute() {
         return AudioSystem.getMasterMute();
     }
