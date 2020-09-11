@@ -53,6 +53,14 @@
     <integer name="config_rightSystemBarZOrder">0</integer>
     <integer name="config_bottomSystemBarZOrder">10</integer>
 
+    <!-- If set to true, the corresponding system bar will be hidden when Keyboard (IME) appears.
+         NOTE: hideBottomSystemBarKeyboard must not be overlaid directly here. To change its value,
+         overlay config_automotiveHideNavBarForKeyboard in framework/base/core/res/res. -->
+    <bool name="config_hideTopSystemBarForKeyboard">false</bool>
+    <bool name="config_hideBottomSystemBarForKeyboard">@*android:bool/config_automotiveHideNavBarForKeyboard</bool>
+    <bool name="config_hideLeftSystemBarForKeyboard">false</bool>
+    <bool name="config_hideRightSystemBarForKeyboard">false</bool>
+
     <!-- Disable normal notification rendering; we handle that ourselves -->
     <bool name="config_renderNotifications">false</bool>
 
