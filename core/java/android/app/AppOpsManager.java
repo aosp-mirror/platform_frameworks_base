@@ -1887,7 +1887,7 @@ public class AppOpsManager {
             null, // no permission for writing clipboard
             null, // no permission for taking media buttons
             null, // no permission for taking audio focus
-            null, // no permission for changing master volume
+            null, // no permission for changing global volume
             null, // no permission for changing voice volume
             null, // no permission for changing ring volume
             null, // no permission for changing media volume
@@ -6431,7 +6431,7 @@ public class AppOpsManager {
      * Retrieve current operation state for all applications.
      *
      * The mode of the ops returned are set for the package but may not reflect their effective
-     * state due to UID policy or because it's controlled by a different master op.
+     * state due to UID policy or because it's controlled by a different global op.
      *
      * Use {@link #unsafeCheckOp(String, int, String)}} or
      * {@link #noteOp(String, int, String, String, String)} if the effective mode is needed.
@@ -6455,7 +6455,7 @@ public class AppOpsManager {
      * Retrieve current operation state for all applications.
      *
      * The mode of the ops returned are set for the package but may not reflect their effective
-     * state due to UID policy or because it's controlled by a different master op.
+     * state due to UID policy or because it's controlled by a different global op.
      *
      * Use {@link #unsafeCheckOp(String, int, String)}} or
      * {@link #noteOp(String, int, String, String, String)} if the effective mode is needed.
@@ -6477,7 +6477,7 @@ public class AppOpsManager {
      * Retrieve current operation state for one application.
      *
      * The mode of the ops returned are set for the package but may not reflect their effective
-     * state due to UID policy or because it's controlled by a different master op.
+     * state due to UID policy or because it's controlled by a different global op.
      *
      * Use {@link #unsafeCheckOp(String, int, String)}} or
      * {@link #noteOp(String, int, String, String, String)} if the effective mode is needed.
@@ -6510,7 +6510,7 @@ public class AppOpsManager {
      * package must match.
      *
      * The mode of the ops returned are set for the package but may not reflect their effective
-     * state due to UID policy or because it's controlled by a different master op.
+     * state due to UID policy or because it's controlled by a different global op.
      *
      * Use {@link #unsafeCheckOp(String, int, String)}} or
      * {@link #noteOp(String, int, String, String, String)} if the effective mode is needed.

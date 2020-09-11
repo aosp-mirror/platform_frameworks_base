@@ -2058,7 +2058,7 @@ static void UnmountStorageOnInit(JNIEnv* env) {
     return;
   }
 
-  // Mark rootfs as being a slave so that changes from default
+  // Mark rootfs as being MS_SLAVE so that changes from default
   // namespace only flow into our children.
   if (mount("rootfs", "/", nullptr, (MS_SLAVE | MS_REC), nullptr) == -1) {
     RuntimeAbort(env, __LINE__, "Failed to mount() rootfs as MS_SLAVE");

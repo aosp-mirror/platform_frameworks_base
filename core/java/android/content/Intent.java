@@ -3975,7 +3975,7 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
 
     /**
-     * Broadcast intent sent by the RecoverySystem to inform listeners that a master clear (wipe)
+     * Broadcast intent sent by the RecoverySystem to inform listeners that a global clear (wipe)
      * is about to be performed.
      * @hide
      */

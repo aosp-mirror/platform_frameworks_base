@@ -1532,7 +1532,7 @@
     <!-- Class name of WallpaperManagerService. -->
     <string name="config_wallpaperManagerServiceName" translatable="false">com.android.server.wallpaper.WallpaperManagerService</string>
 
-    <!-- Enables the TimeZoneRuleManager service. This is the master switch for the updateable time
+    <!-- Enables the TimeZoneRuleManager service. This is the global switch for the updateable time
          zone update mechanism. -->
     <bool name="config_enableUpdateableTimeZoneRules">false</bool>
 
@@ -2555,7 +2555,7 @@
     <string name="config_appsAuthorizedForSharedAccounts" translatable="false">;com.android.settings;</string>
 
     <!-- Flag indicating that the media framework should not allow changes or mute on any
-         stream or master volumes. -->
+         stream or global volumes. -->
     <bool name="config_useFixedVolume">false</bool>
 
     <!-- The list of IMEs which should be disabled until used.

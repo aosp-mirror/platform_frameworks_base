@@ -9067,7 +9067,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owners to set the user's master location setting.
+     * Called by device owners to set the user's global location setting.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with
      * @param locationEnabled whether location should be enabled or disabled
@@ -9166,11 +9166,11 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by profile or device owners to set the master volume mute on or off.
+     * Called by profile or device owners to set the global volume mute on or off.
      * This has no effect when set on a managed profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param on {@code true} to mute master volume, {@code false} to turn mute off.
+     * @param on {@code true} to mute global volume, {@code false} to turn mute off.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setMasterVolumeMuted(@NonNull ComponentName admin, boolean on) {
@@ -9185,10 +9185,10 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by profile or device owners to check whether the master volume mute is on or off.
+     * Called by profile or device owners to check whether the global volume mute is on or off.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @return {@code true} if master volume is muted, {@code false} if it's not.
+     * @return {@code true} if global volume is muted, {@code false} if it's not.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean isMasterVolumeMuted(@NonNull ComponentName admin) {

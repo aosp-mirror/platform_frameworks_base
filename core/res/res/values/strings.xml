@@ -3899,7 +3899,7 @@
     <string name="gpsNotifTitle">Location request</string>
     <!-- Network positioning notification message. The name of the user (e.g. John Doe) and
          service (SUPL-service) who sent the request is shown as dynamic strings.
-         Translation should not be longer than master text. -->
+         Translation should not be longer than example text. -->
     <string name="gpsNotifMessage">Requested by <xliff:g id="name">%1$s</xliff:g> (<xliff:g id="service" example="SUPL-service">%2$s</xliff:g>)</string>
     <!-- Network positioning verification Yes. Button to push to share location information. -->
     <string name="gpsVerifYes">Yes</string>
