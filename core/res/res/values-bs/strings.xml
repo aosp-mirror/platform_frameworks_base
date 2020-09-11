@@ -973,7 +973,7 @@
     <string name="save_password_remember" msgid="6490888932657708341">"Zapamti"</string>
     <string name="save_password_never" msgid="6776808375903410659">"Nikad"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Nemate odobrenje za otvaranje ove stranice."</string>
-    <string name="text_copied" msgid="2531420577879738860">"Tekst kopiran u međuspremnik."</string>
+    <string name="text_copied" msgid="2531420577879738860">"Tekst kopiran u međumemoriju."</string>
     <string name="copied" msgid="4675902854553014676">"Kopirano"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Više"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Meni+"</string>

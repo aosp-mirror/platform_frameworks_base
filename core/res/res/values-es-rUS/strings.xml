@@ -423,7 +423,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Esta app puede agregar, quitar o cambiar eventos del calendario en tu teléfono. Puede enviar mensajes que parecen proceder de propietarios del calendario o cambiar eventos sin notificarlos."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"acceder a comandos adicionales del proveedor del lugar"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Permite que la aplicación acceda a comandos adicionales del proveedor de ubicación. Esto puede permitirle a la aplicación interferir con el funcionamiento del GPS o de otras fuentes de ubicación."</string>
-    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"acceder a la ubicación exacta solo en primer plano"</string>
+    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"acceder a la ubicación precisa solo en primer plano"</string>
     <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Mientras la usas, esta app puede obtener tu ubicación exacta mediante los Servicios de ubicación, siempre y cuando el dispositivo los tenga activados. Es posible que esto aumente el uso de batería."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"acceder a la ubicación aproximada solo en primer plano"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Mientras la usas, esta app puede obtener tu ubicación aproximada mediante los Servicios de ubicación, siempre y cuando el dispositivo los tenga activados."</string>
