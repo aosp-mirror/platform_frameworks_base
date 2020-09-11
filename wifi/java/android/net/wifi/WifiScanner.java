@@ -193,8 +193,6 @@ public class WifiScanner {
      * @hide
      */
     public static boolean isFullBandScan(@WifiBand int bandScanned, boolean excludeDfs) {
-        // 5GHz DFS channel is part of 5GHz, mark 5GHz scanned as well.
-        if ((bandScanned & WIFI_BAND_5_GHZ_DFS_ONLY) != 0) bandScanned |= WIFI_BAND_5_GHZ;
         return (bandScanned | WIFI_BAND_6_GHZ | WIFI_BAND_60_GHZ
                 | (excludeDfs ? WIFI_BAND_5_GHZ_DFS_ONLY : 0))
                 == WIFI_BAND_ALL;
