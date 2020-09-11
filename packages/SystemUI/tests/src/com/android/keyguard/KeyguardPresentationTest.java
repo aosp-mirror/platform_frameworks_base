@@ -31,9 +31,7 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.KeyguardDisplayManager.KeyguardPresentation;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.R;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.After;
 import org.junit.Before;
@@ -65,7 +63,6 @@ public class KeyguardPresentationTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         when(mMockKeyguardClockSwitch.getContext()).thenReturn(mContext);
         when(mMockKeyguardSliceView.getContext()).thenReturn(mContext);
         when(mMockKeyguardStatusView.getContext()).thenReturn(mContext);
@@ -77,11 +74,7 @@ public class KeyguardPresentationTest extends SysuiTestCase {
 
         allowTestableLooperAsMainThread();
 
-        InjectionInflationController inflationController = new InjectionInflationController(
-                SystemUIFactory.getInstance()
-                        .getSysUIComponent()
-                        .createViewInstanceCreatorFactory());
-        mLayoutInflater = inflationController.injectable(LayoutInflater.from(mContext));
+        mLayoutInflater = LayoutInflater.from(mContext);
         mLayoutInflater.setPrivateFactory(new LayoutInflater.Factory2() {
 
             @Override

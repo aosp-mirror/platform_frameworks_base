@@ -35,7 +35,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -58,8 +57,6 @@ public class KeyguardSecurityViewFlipperControllerTest extends SysuiTestCase {
     @Mock
     private LayoutInflater mLayoutInflater;
     @Mock
-    private InjectionInflationController mInjectionInflationController;
-    @Mock
     private KeyguardInputViewController.Factory mKeyguardSecurityViewControllerFactory;
     @Mock
     private KeyguardInputViewController mKeyguardInputViewController;
@@ -74,7 +71,6 @@ public class KeyguardSecurityViewFlipperControllerTest extends SysuiTestCase {
 
     @Before
     public void setup() {
-        when(mInjectionInflationController.injectable(mLayoutInflater)).thenReturn(mLayoutInflater);
         when(mKeyguardSecurityViewControllerFactory.create(
                 any(KeyguardInputView.class), any(SecurityMode.class),
                 any(KeyguardSecurityCallback.class)))
@@ -82,8 +78,7 @@ public class KeyguardSecurityViewFlipperControllerTest extends SysuiTestCase {
         when(mView.getWindowInsetsController()).thenReturn(mWindowInsetsController);
 
         mKeyguardSecurityViewFlipperController = new KeyguardSecurityViewFlipperController(mView,
-                mLayoutInflater, mInjectionInflationController,
-                mKeyguardSecurityViewControllerFactory);
+                mLayoutInflater, mKeyguardSecurityViewControllerFactory);
     }
 
     @Test
