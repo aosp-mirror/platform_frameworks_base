@@ -17,6 +17,7 @@
 package com.android.systemui.car.navigationbar;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -97,6 +98,16 @@ public class SystemBarConfigsTest extends SysuiTestCase {
         mSystemBarConfigs = new SystemBarConfigs(mResources);
     }
 
+    @Test(expected = RuntimeException.class)
+    public void onInit_hideBottomSystemBarForKeyboardValueDoNotSync_throwsRuntimeException() {
+        when(mResources.getBoolean(R.bool.config_hideBottomSystemBarForKeyboard)).thenReturn(false);
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_automotiveHideNavBarForKeyboard)).thenReturn(
+                true);
+
+        mSystemBarConfigs = new SystemBarConfigs(mResources);
+    }
+
     @Test
     public void getTopSystemBarLayoutParams_topBarEnabled_returnsTopSystemBarLayoutParams() {
         mSystemBarConfigs = new SystemBarConfigs(mResources);
@@ -114,6 +125,26 @@ public class SystemBarConfigsTest extends SysuiTestCase {
                 SystemBarConfigs.TOP);
 
         assertNull(lp);
+    }
+
+    @Test
+    public void getTopSystemBarHideForKeyboard_hideBarForKeyboard_returnsTrue() {
+        when(mResources.getBoolean(R.bool.config_hideTopSystemBarForKeyboard)).thenReturn(true);
+        mSystemBarConfigs = new SystemBarConfigs(mResources);
+
+        boolean hideKeyboard = mSystemBarConfigs.getHideForKeyboardBySide(SystemBarConfigs.TOP);
+
+        assertTrue(hideKeyboard);
+    }
+
+    @Test
+    public void getTopSystemBarHideForKeyboard_topBarNotEnabled_returnsFalse() {
+        when(mResources.getBoolean(R.bool.config_enableTopNavigationBar)).thenReturn(false);
+        mSystemBarConfigs = new SystemBarConfigs(mResources);
+
+        boolean hideKeyboard = mSystemBarConfigs.getHideForKeyboardBySide(SystemBarConfigs.TOP);
+
+        assertFalse(hideKeyboard);
     }
 
     @Test
@@ -198,5 +229,14 @@ public class SystemBarConfigsTest extends SysuiTestCase {
         when(mResources.getInteger(R.integer.config_bottomSystemBarZOrder)).thenReturn(10);
         when(mResources.getInteger(R.integer.config_leftSystemBarZOrder)).thenReturn(2);
         when(mResources.getInteger(R.integer.config_rightSystemBarZOrder)).thenReturn(3);
+
+        when(mResources.getBoolean(R.bool.config_hideTopSystemBarForKeyboard)).thenReturn(false);
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_automotiveHideNavBarForKeyboard)).thenReturn(
+                false);
+        when(mResources.getBoolean(R.bool.config_hideLeftSystemBarForKeyboard)).thenReturn(
+                false);
+        when(mResources.getBoolean(R.bool.config_hideRightSystemBarForKeyboard)).thenReturn(
+                false);
     }
 }
