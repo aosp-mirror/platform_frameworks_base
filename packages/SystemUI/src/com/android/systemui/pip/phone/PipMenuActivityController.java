@@ -19,8 +19,8 @@ package com.android.systemui.pip.phone;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
-import android.app.ActivityManager.StackInfo;
 import android.app.ActivityTaskManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.RemoteAction;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -312,10 +312,10 @@ public class PipMenuActivityController {
             // Fetch the pinned stack bounds
             Rect stackBounds = null;
             try {
-                StackInfo pinnedStackInfo = ActivityTaskManager.getService().getStackInfo(
+                RootTaskInfo pinnedTaskInfo = ActivityTaskManager.getService().getRootTaskInfo(
                         WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
-                if (pinnedStackInfo != null) {
-                    stackBounds = pinnedStackInfo.bounds;
+                if (pinnedTaskInfo != null) {
+                    stackBounds = pinnedTaskInfo.bounds;
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Error showing PIP menu", e);

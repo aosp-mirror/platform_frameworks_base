@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -377,14 +378,14 @@ public class BrightnessTracker {
         }
 
         try {
-            final ActivityManager.StackInfo focusedStack = mInjector.getFocusedStack();
-            if (focusedStack != null && focusedStack.topActivity != null) {
-                builder.setUserId(focusedStack.userId);
-                builder.setPackageName(focusedStack.topActivity.getPackageName());
+            final RootTaskInfo focusedTask = mInjector.getFocusedStack();
+            if (focusedTask != null && focusedTask.topActivity != null) {
+                builder.setUserId(focusedTask.userId);
+                builder.setPackageName(focusedTask.topActivity.getPackageName());
             } else {
                 // Ignore the event because we can't determine user / package.
                 if (DEBUG) {
-                    Slog.d(TAG, "Ignoring event due to null focusedStack.");
+                    Slog.d(TAG, "Ignoring event due to null focusedTask.");
                 }
                 return;
             }
@@ -1104,8 +1105,8 @@ public class BrightnessTracker {
             }
         }
 
-        public ActivityManager.StackInfo getFocusedStack() throws RemoteException {
-            return ActivityTaskManager.getService().getFocusedStackInfo();
+        public RootTaskInfo getFocusedStack() throws RemoteException {
+            return ActivityTaskManager.getService().getFocusedRootTaskInfo();
         }
 
         public void scheduleIdleJob(Context context) {

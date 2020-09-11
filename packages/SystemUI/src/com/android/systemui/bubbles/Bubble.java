@@ -41,7 +41,6 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
-import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.io.FileDescriptor;
@@ -92,8 +91,9 @@ class Bubble implements BubbleViewProvider {
     }
 
     private FlyoutMessage mFlyoutMessage;
-    private Drawable mBadgedAppIcon;
-    private Bitmap mBadgedImage;
+    private Drawable mBadgeDrawable;
+    // Bitmap with no badge, no dot
+    private Bitmap mBubbleBitmap;
     private int mDotColor;
     private Path mDotPath;
     private int mFlags;
@@ -199,12 +199,13 @@ class Bubble implements BubbleViewProvider {
     }
 
     @Override
-    public Bitmap getBadgedImage() {
-        return mBadgedImage;
+    public Bitmap getBubbleIcon() {
+        return mBubbleBitmap;
     }
 
-    public Drawable getBadgedAppIcon() {
-        return mBadgedAppIcon;
+    @Override
+    public Drawable getAppBadge() {
+        return mBadgeDrawable;
     }
 
     @Override
@@ -340,8 +341,9 @@ class Bubble implements BubbleViewProvider {
         mAppName = info.appName;
         mFlyoutMessage = info.flyoutMessage;
 
-        mBadgedAppIcon = info.badgedAppIcon;
-        mBadgedImage = info.badgedBubbleImage;
+        mBadgeDrawable = info.badgeDrawable;
+        mBubbleBitmap = info.bubbleBitmap;
+
         mDotColor = info.dotColor;
         mDotPath = info.dotPath;
 

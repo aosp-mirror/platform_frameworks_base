@@ -194,7 +194,7 @@ class WindowManagerProxy {
      */
     boolean applyEnterSplit(SplitScreenTaskOrganizer tiles, SplitDisplayLayout layout) {
         // Set launchtile first so that any stack created after
-        // getAllStackInfos and before reparent (even if unlikely) are placed
+        // getAllRootTaskInfos and before reparent (even if unlikely) are placed
         // correctly.
         mTaskOrganizer.setLaunchRoot(DEFAULT_DISPLAY, tiles.mSecondary.token);
         List<ActivityManager.RunningTaskInfo> rootTasks =

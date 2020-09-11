@@ -39,6 +39,7 @@ import android.os.BatteryManagerInternal;
 import android.os.BatteryProperty;
 import android.os.BatteryStats;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.FileUtils;
@@ -59,6 +60,7 @@ import android.os.UEventObserver;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.battery.BatteryServiceDumpProto;
+import android.sysprop.PowerProperties;
 import android.util.EventLog;
 import android.util.MutableInt;
 import android.util.Slog;
@@ -182,6 +184,7 @@ public final class BatteryService extends SystemService {
     private int mChargeStartLevel;
 
     private boolean mUpdatesStopped;
+    private boolean mBatteryInputSuspended;
 
     private Led mLed;
 
@@ -234,6 +237,8 @@ public final class BatteryService extends SystemService {
             invalidChargerObserver.startObserving(
                     "DEVPATH=/devices/virtual/switch/invalid_charger");
         }
+
+        mBatteryInputSuspended = PowerProperties.battery_input_suspended().orElse(false);
     }
 
     @Override
@@ -876,6 +881,10 @@ public final class BatteryService extends SystemService {
         pw.println("  reset [-f]");
         pw.println("    Unfreeze battery state, returning to current hardware values.");
         pw.println("    -f: force a battery change broadcast be sent, prints new sequence.");
+        if (Build.IS_DEBUGGABLE) {
+            pw.println("  disable_charge");
+            pw.println("    Suspend charging even if plugged in. ");
+        }
     }
 
     static final int OPTION_FORCE_UPDATE = 1<<0;
@@ -997,6 +1006,20 @@ public final class BatteryService extends SystemService {
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
+                if (mBatteryInputSuspended) {
+                    PowerProperties.battery_input_suspended(false);
+                    mBatteryInputSuspended = false;
+                }
+            } break;
+            case "suspend_input": {
+                if (!Build.IS_DEBUGGABLE) {
+                    throw new SecurityException(
+                            "battery suspend_input is only supported on debuggable builds");
+                }
+                getContext().enforceCallingOrSelfPermission(
+                        android.Manifest.permission.DEVICE_POWER, null);
+                PowerProperties.battery_input_suspended(true);
+                mBatteryInputSuspended = true;
             } break;
             default:
                 return shell.handleDefaultCommands(cmd);

@@ -28,7 +28,7 @@ class PipAppHelper(
     launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
             .getInstance(instr)
             .launcherStrategy
-) : FlickerAppHelper(instr, "PipApp", launcherStrategy) {
+) : StandardAppHelper(instr, "PipApp", launcherStrategy) {
     fun clickEnterPipButton(device: UiDevice) {
         val enterPipButton = device.findObject(By.res(getPackage(), "enter_pip"))
         Assert.assertNotNull("Pip button not found, this usually happens when the device " +

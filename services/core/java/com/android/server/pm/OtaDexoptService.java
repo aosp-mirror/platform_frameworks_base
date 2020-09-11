@@ -384,17 +384,17 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             if (!PackageDexOptimizer.canOptimizePackage(pkg)) {
                 continue;
             }
-            if (pkg.getCodePath() == null) {
+            if (pkg.getPath() == null) {
                 Slog.w(TAG, "Package " + pkg + " can be optimized but has null codePath");
                 continue;
             }
 
             // If the path is in /system, /vendor, /product or /system_ext, ignore. It will
             // have been ota-dexopted into /data/ota and moved into the dalvik-cache already.
-            if (pkg.getCodePath().startsWith("/system")
-                    || pkg.getCodePath().startsWith("/vendor")
-                    || pkg.getCodePath().startsWith("/product")
-                    || pkg.getCodePath().startsWith("/system_ext")) {
+            if (pkg.getPath().startsWith("/system")
+                    || pkg.getPath().startsWith("/vendor")
+                    || pkg.getPath().startsWith("/product")
+                    || pkg.getPath().startsWith("/system_ext")) {
                 continue;
             }
 
@@ -408,7 +408,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             for (String dexCodeInstructionSet : dexCodeInstructionSets) {
                 for (String path : paths) {
                     String oatDir = PackageDexOptimizer.getOatDir(
-                            new File(pkg.getCodePath())).getAbsolutePath();
+                            new File(pkg.getPath())).getAbsolutePath();
 
                     // TODO: Check first whether there is an artifact, to save the roundtrip time.
 

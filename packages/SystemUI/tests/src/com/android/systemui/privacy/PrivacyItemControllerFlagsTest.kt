@@ -32,6 +32,7 @@ import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -106,6 +107,7 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     }
 
     @Test
+    @Ignore // TODO(b/168209929)
     fun testMicCameraChanged() {
         changeMicCamera(false) // default is true
         executor.runAllReady()
@@ -129,6 +131,7 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     }
 
     @Test
+    @Ignore // TODO(b/168209929)
     fun testBothChanged() {
         changeAll(true)
         changeMicCamera(false)
@@ -150,6 +153,7 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     }
 
     @Test
+    @Ignore // TODO(b/168209929)
     fun testMicCamera_listening() {
         changeMicCamera(true)
         executor.runAllReady()
@@ -158,6 +162,7 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     }
 
     @Test
+    @Ignore // TODO(b/168209929)
     fun testAllFalse_notListening() {
         changeAll(true)
         executor.runAllReady()
@@ -169,6 +174,7 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     }
 
     @Test
+    @Ignore // TODO(b/168209929)
     fun testSomeListening_stillListening() {
         // Mic and camera are true by default
         changeAll(true)
@@ -180,6 +186,7 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     }
 
     @Test
+    @Ignore // TODO(b/168209929)
     fun testAllDeleted_micCameraFalse_stopListening() {
         changeMicCamera(false)
         changeAll(true)
@@ -191,6 +198,7 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     }
 
     @Test
+    @Ignore // TODO(b/168209929)
     fun testMicDeleted_stillListening() {
         changeMicCamera(true)
         executor.runAllReady()

@@ -45,8 +45,8 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     private long mBeginTime = UNKNOWN_TIMESTAMP;
     private long mEndTime = UNKNOWN_TIMESTAMP;
     private boolean mShouldTriggerTrace;
-    private long mTotalFramesCount = 0;
-    private long mMissedFramesCount = 0;
+    private int mTotalFramesCount = 0;
+    private int mMissedFramesCount = 0;
     private long mMaxFrameTimeNanos = 0;
 
     private Session mSession;
@@ -124,6 +124,15 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
         if (mEndTime != UNKNOWN_TIMESTAMP && vsyncTimestamp > mEndTime) {
             // The tracing has been ended, remove the observer, see if need to trigger perfetto.
             mRendererWrapper.removeObserver(mObserver);
+
+            // Log the frame stats as counters to make them easily accessible in traces.
+            Trace.traceCounter(Trace.TRACE_TAG_APP, mSession.getName() + "#missedFrames",
+                    mMissedFramesCount);
+            Trace.traceCounter(Trace.TRACE_TAG_APP, mSession.getName() + "#totalFrames",
+                    mTotalFramesCount);
+            Trace.traceCounter(Trace.TRACE_TAG_APP, mSession.getName() + "#maxFrameTimeMillis",
+                    (int) (mMaxFrameTimeNanos / 1_000_000));
+
             // Trigger perfetto if necessary.
             if (mShouldTriggerTrace) {
                 if (DEBUG) {

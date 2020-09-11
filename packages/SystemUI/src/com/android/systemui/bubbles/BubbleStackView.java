@@ -16,13 +16,6 @@
 
 package com.android.systemui.bubbles;
 
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-
-import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_STACK_VIEW;
-import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
-import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -98,6 +91,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_STACK_VIEW;
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
 /**
  * Renders bubbles in a stack and handles animating expanded and collapsed states.
@@ -658,13 +657,10 @@ public class BubbleStackView extends FrameLayout
                     mStackOnLeftOrWillBe =
                             mStackAnimationController.flingStackThenSpringToEdge(
                                     viewInitialX + dx, velX, velY) <= 0;
-
-                    updateBubbleZOrdersAndDotPosition(true /* animate */);
-
+                    updateBubbleIcons();
                     logBubbleEvent(null /* no bubble associated with bubble stack move */,
                             SysUiStatsLog.BUBBLE_UICHANGED__ACTION__STACK_MOVED);
                 }
-
                 mDismissView.hide();
             }
 
@@ -1468,8 +1464,7 @@ public class BubbleStackView extends FrameLayout
 
         // Set the dot position to the opposite of the side the stack is resting on, since the stack
         // resting slightly off-screen would result in the dot also being off-screen.
-        bubble.getIconView().setDotPositionOnLeft(
-                !mStackOnLeftOrWillBe /* onLeft */, false /* animate */);
+        bubble.getIconView().setDotBadgeOnLeft(!mStackOnLeftOrWillBe /* onLeft */);
 
         bubble.getIconView().setOnClickListener(mBubbleClickListener);
         bubble.getIconView().setOnTouchListener(mBubbleTouchListener);
@@ -1520,7 +1515,7 @@ public class BubbleStackView extends FrameLayout
             Bubble bubble = bubbles.get(i);
             mBubbleContainer.reorderView(bubble.getIconView(), i);
         }
-        updateBubbleZOrdersAndDotPosition(false /* animate */);
+        updateBubbleIcons();
         updatePointerPosition();
     }
 
@@ -2363,7 +2358,7 @@ public class BubbleStackView extends FrameLayout
         // name and icon.
         if (show && mBubbleData.hasBubbleInStackWithKey(mExpandedBubble.getKey())) {
             final Bubble bubble = mBubbleData.getBubbleInStackWithKey(mExpandedBubble.getKey());
-            mManageSettingsIcon.setImageDrawable(bubble.getBadgedAppIcon());
+            mManageSettingsIcon.setImageDrawable(bubble.getAppBadge());
             mManageSettingsText.setText(getResources().getString(
                     R.string.bubbles_app_settings, bubble.getAppName()));
         }
@@ -2551,28 +2546,31 @@ public class BubbleStackView extends FrameLayout
         }
 
         mStackOnLeftOrWillBe = mStackAnimationController.isStackOnLeftSide();
-        updateBubbleZOrdersAndDotPosition(false);
+        updateBubbleIcons();
     }
 
-    /** Sets the appropriate Z-order and dot position for each bubble in the stack. */
-    private void updateBubbleZOrdersAndDotPosition(boolean animate) {
+    /**
+     * Sets the appropriate Z-order, badge, and dot position for each bubble in the stack.
+     * Animate dot and badge changes.
+     */
+    private void updateBubbleIcons() {
         int bubbleCount = getBubbleCount();
         for (int i = 0; i < bubbleCount; i++) {
             BadgedImageView bv = (BadgedImageView) mBubbleContainer.getChildAt(i);
             bv.setZ((mMaxBubbles * mBubbleElevation) - i);
 
-            // If the dot is on the left, and so is the stack, we need to change the dot position.
-            if (bv.getDotPositionOnLeft() == mStackOnLeftOrWillBe) {
-                bv.setDotPositionOnLeft(!mStackOnLeftOrWillBe, animate);
-            }
-
-            if (!mIsExpanded && i > 0) {
-                // If we're collapsed and this bubble is behind other bubbles, suppress its dot.
-                bv.addDotSuppressionFlag(
-                        BadgedImageView.SuppressionFlag.BEHIND_STACK);
-            } else {
+            if (mIsExpanded) {
                 bv.removeDotSuppressionFlag(
                         BadgedImageView.SuppressionFlag.BEHIND_STACK);
+                bv.animateDotBadgePositions(false /* onLeft */);
+            } else if (i == 0) {
+                bv.removeDotSuppressionFlag(
+                        BadgedImageView.SuppressionFlag.BEHIND_STACK);
+                bv.animateDotBadgePositions(!mStackOnLeftOrWillBe);
+            } else {
+                bv.addDotSuppressionFlag(
+                        BadgedImageView.SuppressionFlag.BEHIND_STACK);
+                bv.hideBadge();
             }
         }
     }

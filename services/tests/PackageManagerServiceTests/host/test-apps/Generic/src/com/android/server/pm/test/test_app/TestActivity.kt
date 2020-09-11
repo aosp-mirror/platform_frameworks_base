@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.helpers
+package com.android.server.pm.test.test_app
 
-import android.app.Instrumentation
-import android.support.test.launcherhelper.ILauncherStrategy
-import com.android.server.wm.flicker.StandardAppHelper
+import android.app.Activity
 
-abstract class FlickerAppHelper(
-    instr: Instrumentation,
-    launcherName: String,
-    launcherStrategy: ILauncherStrategy
-) : StandardAppHelper(instr, sFlickerPackage, launcherName, launcherStrategy) {
-    companion object {
-        var sFlickerPackage = "com.android.server.wm.flicker.testapp"
-    }
-}
+class TestActivity : Activity()

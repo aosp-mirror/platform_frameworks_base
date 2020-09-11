@@ -29,12 +29,10 @@ import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.parsing.ApkLiteParseUtils;
-import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.FileUtils;
 
-import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -106,9 +104,9 @@ public class DexMetadataHelperTest {
 
         Map<String, String> packageDexMetadata = AndroidPackageUtils.getPackageDexMetadata(pkg);
         assertEquals(1, packageDexMetadata.size());
-        String baseDexMetadata = packageDexMetadata.get(pkg.getBaseCodePath());
+        String baseDexMetadata = packageDexMetadata.get(pkg.getBaseApkPath());
         assertNotNull(baseDexMetadata);
-        assertTrue(isDexMetadataForApk(baseDexMetadata, pkg.getBaseCodePath()));
+        assertTrue(isDexMetadataForApk(baseDexMetadata, pkg.getBaseApkPath()));
     }
 
     @Test
@@ -122,9 +120,9 @@ public class DexMetadataHelperTest {
 
         Map<String, String> packageDexMetadata = AndroidPackageUtils.getPackageDexMetadata(pkg);
         assertEquals(2, packageDexMetadata.size());
-        String baseDexMetadata = packageDexMetadata.get(pkg.getBaseCodePath());
+        String baseDexMetadata = packageDexMetadata.get(pkg.getBaseApkPath());
         assertNotNull(baseDexMetadata);
-        assertTrue(isDexMetadataForApk(baseDexMetadata, pkg.getBaseCodePath()));
+        assertTrue(isDexMetadataForApk(baseDexMetadata, pkg.getBaseApkPath()));
 
         String splitDexMetadata = packageDexMetadata.get(pkg.getSplitCodePaths()[0]);
         assertNotNull(splitDexMetadata);

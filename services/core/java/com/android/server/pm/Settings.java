@@ -306,8 +306,8 @@ public final class Settings {
     private final ArrayMap<String, KernelPackageState> mKernelMapping = new ArrayMap<>();
 
     // List of replaced system applications
-    private final ArrayMap<String, PackageSetting> mDisabledSysPackages =
-        new ArrayMap<String, PackageSetting>();
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    final ArrayMap<String, PackageSetting> mDisabledSysPackages = new ArrayMap<>();
 
     /** List of packages that are blocked for uninstall for specific users */
     private final SparseArray<ArraySet<String>> mBlockUninstallPackages = new SparseArray<>();
@@ -538,7 +538,7 @@ public final class Settings {
             return null;
         }
         p.getPkgState().setUpdatedSystemApp(false);
-        PackageSetting ret = addPackageLPw(name, p.realName, p.getCodePath(),
+        PackageSetting ret = addPackageLPw(name, p.realName, p.getPath(),
                 p.legacyNativeLibraryPathString, p.primaryCpuAbiString,
                 p.secondaryCpuAbiString, p.cpuAbiOverrideString,
                 p.appId, p.versionCode, p.pkgFlags, p.pkgPrivateFlags,
@@ -645,7 +645,7 @@ public final class Settings {
             if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG, "Package "
                     + pkgName + " is adopting original package " + originalPkg.name);
             pkgSetting = new PackageSetting(originalPkg, pkgName /*realPkgName*/);
-            pkgSetting.setCodePath(codePath);
+            pkgSetting.setPath(codePath);
             pkgSetting.legacyNativeLibraryPathString = legacyNativeLibraryPath;
             pkgSetting.pkgFlags = pkgFlags;
             pkgSetting.pkgPrivateFlags = pkgPrivateFlags;
@@ -770,12 +770,12 @@ public final class Settings {
                     "Updating application package " + pkgName + " failed");
         }
 
-        if (!pkgSetting.getCodePath().equals(codePath)) {
+        if (!pkgSetting.getPath().equals(codePath)) {
             final boolean isSystem = pkgSetting.isSystem();
             Slog.i(PackageManagerService.TAG,
                     "Update" + (isSystem ? " system" : "")
                     + " package " + pkgName
-                    + " code path from " + pkgSetting.getCodePathString()
+                    + " code path from " + pkgSetting.getPathString()
                     + " to " + codePath.toString()
                     + "; Retain data and using new");
             if (!isSystem) {
@@ -797,7 +797,7 @@ public final class Settings {
                 // internal to external storage or vice versa.
                 pkgSetting.legacyNativeLibraryPathString = legacyNativeLibraryPath;
             }
-            pkgSetting.setCodePath(codePath);
+            pkgSetting.setPath(codePath);
         }
         // If what we are scanning is a system (and possibly privileged) package,
         // then make it so, regardless of whether it was previously installed only
@@ -2174,32 +2174,24 @@ public final class Settings {
 
     void readUsesStaticLibLPw(XmlPullParser parser, PackageSetting outPs)
             throws IOException, XmlPullParserException {
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-            String libName = parser.getAttributeValue(null, ATTR_NAME);
-            String libVersionStr = parser.getAttributeValue(null, ATTR_VERSION);
+        String libName = parser.getAttributeValue(null, ATTR_NAME);
+        String libVersionStr = parser.getAttributeValue(null, ATTR_VERSION);
 
-            long libVersion = -1;
-            try {
-                libVersion = Long.parseLong(libVersionStr);
-            } catch (NumberFormatException e) {
-                // ignore
-            }
-
-            if (libName != null && libVersion >= 0) {
-                outPs.usesStaticLibraries = ArrayUtils.appendElement(String.class,
-                        outPs.usesStaticLibraries, libName);
-                outPs.usesStaticLibrariesVersions = ArrayUtils.appendLong(
-                        outPs.usesStaticLibrariesVersions, libVersion);
-            }
-
-            XmlUtils.skipCurrentTag(parser);
+        long libVersion = -1;
+        try {
+            libVersion = Long.parseLong(libVersionStr);
+        } catch (NumberFormatException e) {
+            // ignore
         }
+
+        if (libName != null && libVersion >= 0) {
+            outPs.usesStaticLibraries = ArrayUtils.appendElement(String.class,
+                    outPs.usesStaticLibraries, libName);
+            outPs.usesStaticLibrariesVersions = ArrayUtils.appendLong(
+                    outPs.usesStaticLibrariesVersions, libVersion);
+        }
+
+        XmlUtils.skipCurrentTag(parser);
     }
 
     void writeUsesStaticLibLPw(XmlSerializer serializer, String[] usesStaticLibraries,
@@ -2710,7 +2702,7 @@ public final class Settings {
         if (pkg.realName != null) {
             serializer.attribute(null, "realName", pkg.realName);
         }
-        serializer.attribute(null, "codePath", pkg.getCodePathString());
+        serializer.attribute(null, "codePath", pkg.getPathString());
         serializer.attribute(null, "ft", Long.toHexString(pkg.timeStamp));
         serializer.attribute(null, "it", Long.toHexString(pkg.firstInstallTime));
         serializer.attribute(null, "ut", Long.toHexString(pkg.lastUpdateTime));
@@ -2752,7 +2744,7 @@ public final class Settings {
         if (pkg.realName != null) {
             serializer.attribute(null, "realName", pkg.realName);
         }
-        serializer.attribute(null, "codePath", pkg.getCodePathString());
+        serializer.attribute(null, "codePath", pkg.getPathString());
 
         if (pkg.legacyNativeLibraryPathString != null) {
             serializer.attribute(null, "nativeLibraryPath", pkg.legacyNativeLibraryPathString);
@@ -3875,6 +3867,8 @@ public final class Settings {
                     readDomainVerificationLPw(parser, packageSetting);
                 } else if (tagName.equals(TAG_MIME_GROUP)) {
                     packageSetting.mimeGroups = readMimeGroupLPw(parser, packageSetting.mimeGroups);
+                } else if (tagName.equals(TAG_USES_STATIC_LIB)) {
+                    readUsesStaticLibLPw(parser, packageSetting);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Unknown element under <package>: " + parser.getName());
@@ -4561,9 +4555,9 @@ public final class Settings {
             pw.print(prefix); pw.print("  sharedUser="); pw.println(ps.sharedUser);
         }
         pw.print(prefix); pw.print("  pkg="); pw.println(pkg);
-        pw.print(prefix); pw.print("  codePath="); pw.println(ps.getCodePathString());
+        pw.print(prefix); pw.print("  codePath="); pw.println(ps.getPathString());
         if (permissionNames == null) {
-            pw.print(prefix); pw.print("  resourcePath="); pw.println(ps.getCodePathString());
+            pw.print(prefix); pw.print("  resourcePath="); pw.println(ps.getPathString());
             pw.print(prefix); pw.print("  legacyNativeLibraryDir=");
             pw.println(ps.legacyNativeLibraryPathString);
             pw.print(prefix); pw.print("  extractNativeLibs=");
@@ -4581,6 +4575,7 @@ public final class Settings {
         pw.println();
         if (pkg != null) {
             pw.print(prefix); pw.print("  versionName="); pw.println(pkg.getVersionName());
+            pw.print(prefix); pw.print("  usesNonSdkApi="); pw.println(pkg.isUsesNonSdkApi());
             pw.print(prefix); pw.print("  splits="); dumpSplitNames(pw, pkg); pw.println();
             final int apkSigningVersion = pkg.getSigningDetails().signatureSchemeVersion;
             pw.print(prefix); pw.print("  apkSigningVersion="); pw.println(apkSigningVersion);

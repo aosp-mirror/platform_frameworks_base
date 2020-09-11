@@ -574,16 +574,16 @@ public class PackageManagerTests extends AndroidTestCase {
 
         InstallParams(String outFileName, int rawResId) throws PackageParserException {
             this.pkg = getParsedPackage(outFileName, rawResId);
-            this.packageURI = Uri.fromFile(new File(pkg.getCodePath()));
+            this.packageURI = Uri.fromFile(new File(pkg.getPath()));
         }
 
         InstallParams(ParsingPackage pkg) {
-            this.packageURI = Uri.fromFile(new File(pkg.getCodePath()));
+            this.packageURI = Uri.fromFile(new File(pkg.getPath()));
             this.pkg = pkg;
         }
 
         long getApkSize() {
-            File file = new File(pkg.getCodePath());
+            File file = new File(pkg.getPath());
             return file.length();
         }
     }
@@ -1003,7 +1003,7 @@ public class PackageManagerTests extends AndroidTestCase {
         try {
             cleanUpInstall(ip.pkg.getPackageName());
         } finally {
-            File outFile = new File(ip.pkg.getCodePath());
+            File outFile = new File(ip.pkg.getPath());
             if (outFile != null && outFile.exists()) {
                 outFile.delete();
             }

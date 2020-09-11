@@ -19,8 +19,8 @@ package com.android.systemui.pip.phone;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
-import android.app.ActivityManager.StackInfo;
 import android.app.ActivityTaskManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -40,15 +40,15 @@ public class PipUtils {
             IActivityManager activityManager) {
         try {
             final String sysUiPackageName = context.getPackageName();
-            final StackInfo pinnedStackInfo = ActivityTaskManager.getService().getStackInfo(
+            final RootTaskInfo pinnedTaskInfo = ActivityTaskManager.getService().getRootTaskInfo(
                     WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
-            if (pinnedStackInfo != null && pinnedStackInfo.taskIds != null &&
-                    pinnedStackInfo.taskIds.length > 0) {
-                for (int i = pinnedStackInfo.taskNames.length - 1; i >= 0; i--) {
+            if (pinnedTaskInfo != null && pinnedTaskInfo.childTaskIds != null
+                    && pinnedTaskInfo.childTaskIds.length > 0) {
+                for (int i = pinnedTaskInfo.childTaskNames.length - 1; i >= 0; i--) {
                     ComponentName cn = ComponentName.unflattenFromString(
-                            pinnedStackInfo.taskNames[i]);
+                            pinnedTaskInfo.childTaskNames[i]);
                     if (cn != null && !cn.getPackageName().equals(sysUiPackageName)) {
-                        return new Pair<>(cn, pinnedStackInfo.taskUserIds[i]);
+                        return new Pair<>(cn, pinnedTaskInfo.childTaskUserIds[i]);
                     }
                 }
             }

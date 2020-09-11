@@ -1958,6 +1958,13 @@ public class NotificationManagerService extends SystemService {
             }
 
             @Override
+            void onConsolidatedPolicyChanged() {
+                Binder.withCleanCallingIdentity(() -> {
+                    mRankingHandler.requestSort();
+                });
+            }
+
+            @Override
             void onAutomaticRuleStatusChanged(int userId, String pkg, String id, int status) {
                 Binder.withCleanCallingIdentity(() -> {
                     Intent intent = new Intent(ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED);

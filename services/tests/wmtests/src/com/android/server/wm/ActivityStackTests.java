@@ -1410,7 +1410,7 @@ public class ActivityStackTests extends WindowTestsBase {
                 new ActivityBuilder(mAtm).setTask(mTask).build();
         new ActivityBuilder(mAtm).setTask(mTask).build();
         doReturn(false).when(nonTopVisibleActivity).attachedToProcess();
-        doReturn(true).when(nonTopVisibleActivity).shouldBeVisible(anyBoolean(), anyBoolean());
+        doReturn(true).when(nonTopVisibleActivity).shouldBeVisibleUnchecked();
         doNothing().when(mSupervisor).startSpecificActivity(any(), anyBoolean(),
                 anyBoolean());
 
