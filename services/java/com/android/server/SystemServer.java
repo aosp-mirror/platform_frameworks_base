@@ -152,6 +152,7 @@ import com.android.server.policy.role.LegacyRoleResolutionPolicy;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.power.ThermalManagerService;
+import com.android.server.profcollect.ProfcollectForwardingService;
 import com.android.server.recoverysystem.RecoverySystemService;
 import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.role.RoleManagerService;
@@ -1224,6 +1225,12 @@ public final class SystemServer {
             t.traceBegin("IorapForwardingService");
             mSystemServiceManager.startService(IorapForwardingService.class);
             t.traceEnd();
+
+            if (Build.IS_DEBUGGABLE) {
+                t.traceBegin("ProfcollectForwardingService");
+                mSystemServiceManager.startService(ProfcollectForwardingService.class);
+                t.traceEnd();
+            }
 
             t.traceBegin("SignedConfigService");
             SignedConfigService.registerUpdateReceiver(mSystemContext);
