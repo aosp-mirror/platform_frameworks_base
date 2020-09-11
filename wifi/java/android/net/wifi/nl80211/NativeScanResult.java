@@ -157,7 +157,9 @@ public final class NativeScanResult implements Parcelable {
                     BSS_CAPABILITY_RADIO_MANAGEMENT,
                     BSS_CAPABILITY_DSSS_OFDM,
                     BSS_CAPABILITY_DELAYED_BLOCK_ACK,
-                    BSS_CAPABILITY_IMMEDIATE_BLOCK_ACK
+                    BSS_CAPABILITY_IMMEDIATE_BLOCK_ACK,
+                    BSS_CAPABILITY_DMG_ESS,
+                    BSS_CAPABILITY_DMG_IBSS
             })
     public @interface BssCapabilityBits { }
 
