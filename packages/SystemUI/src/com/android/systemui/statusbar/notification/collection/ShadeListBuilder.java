@@ -513,26 +513,64 @@ public class ShadeListBuilder implements Dumpable {
         }
     }
 
-    private void stabilizeGroupingNotifs(List<ListEntry> list) {
+    private void stabilizeGroupingNotifs(List<ListEntry> topLevelList) {
         if (mNotifStabilityManager == null) {
             return;
         }
 
-        for (int i = 0; i < list.size(); i++) {
-            final ListEntry tle = list.get(i);
-            if (tle.getPreviousAttachState().getParent() == null) {
-                continue; // new entries are allowed
-            }
-
-            final GroupEntry prevParent = tle.getPreviousAttachState().getParent();
-            final GroupEntry assignedParent = tle.getParent();
-            if (prevParent != assignedParent) {
-                if (!mNotifStabilityManager.isGroupChangeAllowed(tle.getRepresentativeEntry())) {
-                    tle.getAttachState().getSuppressedChanges().setParent(assignedParent);
-                    tle.setParent(prevParent);
+        for (int i = 0; i < topLevelList.size(); i++) {
+            final ListEntry tle = topLevelList.get(i);
+            if (tle instanceof GroupEntry) {
+                // maybe put children back into their old group (including moving back to top-level)
+                GroupEntry groupEntry = (GroupEntry) tle;
+                List<NotificationEntry> children = groupEntry.getRawChildren();
+                for (int j = 0; j < groupEntry.getChildren().size(); j++) {
+                    if (maybeSuppressGroupChange(children.get(j), topLevelList)) {
+                        // child was put back into its previous group, so we remove it from this
+                        // group
+                        children.remove(j);
+                        j--;
+                    }
+                }
+            } else {
+                // maybe put top-level-entries back into their previous groups
+                if (maybeSuppressGroupChange(tle.getRepresentativeEntry(), topLevelList)) {
+                    // entry was put back into its previous group, so we remove it from the list of
+                    // top-level-entries
+                    topLevelList.remove(i);
+                    i--;
                 }
             }
         }
+    }
+
+    /**
+     * Returns true if the group change was suppressed, else false
+     */
+    private boolean maybeSuppressGroupChange(NotificationEntry entry, List<ListEntry> out) {
+        if (!entry.wasAttachedInPreviousPass()) {
+            return false; // new entries are allowed
+        }
+
+        final GroupEntry prevParent = entry.getPreviousAttachState().getParent();
+        final GroupEntry assignedParent = entry.getParent();
+        if (prevParent != assignedParent
+                && !mNotifStabilityManager.isGroupChangeAllowed(entry.getRepresentativeEntry())) {
+            entry.getAttachState().getSuppressedChanges().setParent(assignedParent);
+            entry.setParent(prevParent);
+            if (prevParent == ROOT_ENTRY) {
+                out.add(entry);
+            } else if (prevParent != null) {
+                prevParent.addChild(entry);
+                if (!mGroups.containsKey(prevParent.getKey())) {
+                    mGroups.put(prevParent.getKey(), prevParent);
+                }
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     private void promoteNotifs(List<ListEntry> list) {
@@ -577,6 +615,17 @@ public class ShadeListBuilder implements Dumpable {
 
                 } else if (group.getSummary() == null
                         || children.size() < MIN_CHILDREN_FOR_GROUP) {
+
+                    if (group.getSummary() != null
+                            && group.wasAttachedInPreviousPass()
+                            && mNotifStabilityManager != null
+                            && !mNotifStabilityManager.isGroupChangeAllowed(group.getSummary())) {
+                        // if this group was previously attached and group changes aren't
+                        // allowed, keep it around until group changes are allowed again
+                        group.getAttachState().getSuppressedChanges().setWasPruneSuppressed(true);
+                        continue;
+                    }
+
                     // If the group doesn't provide a summary or is too small, ignore it and add
                     // its children (if any) directly to top-level.
 
@@ -715,6 +764,12 @@ public class ShadeListBuilder implements Dumpable {
                 mLogger.logParentChangeSuppressed(
                         mIterationCount,
                         curr.getSuppressedChanges().getParent(),
+                        curr.getParent());
+            }
+
+            if (curr.getSuppressedChanges().getWasPruneSuppressed()) {
+                mLogger.logGroupPruningSuppressed(
+                        mIterationCount,
                         curr.getParent());
             }
 
@@ -867,9 +922,9 @@ public class ShadeListBuilder implements Dumpable {
 
         NotifSection finalSection = newSection;
 
-        // are we changing sections of this entry?
+        // have we seen this entry before and are we changing its section?
         if (mNotifStabilityManager != null
-                && prevAttachState.getParent() != null
+                && entry.wasAttachedInPreviousPass()
                 && newSection != prevAttachState.getSection()) {
 
             // are section changes allowed?
