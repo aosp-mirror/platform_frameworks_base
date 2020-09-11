@@ -19,6 +19,8 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentProvider;
@@ -2092,6 +2094,8 @@ public class MediaPlayer extends PlayerBase
         mOnInfoListener = null;
         mOnVideoSizeChangedListener = null;
         mOnTimedTextListener = null;
+        mOnImsRxNoticeListener = null;
+        mOnImsRxNoticeHandler = null;
         synchronized (mTimeProviderLock) {
             if (mTimeProvider != null) {
                 mTimeProvider.close();
@@ -3299,6 +3303,7 @@ public class MediaPlayer extends PlayerBase
     private static final int MEDIA_META_DATA = 202;
     private static final int MEDIA_DRM_INFO = 210;
     private static final int MEDIA_TIME_DISCONTINUITY = 211;
+    private static final int MEDIA_IMS_RX_NOTICE = 300;
     private static final int MEDIA_AUDIO_ROUTING_CHANGED = 10000;
 
     private TimeProvider mTimeProvider;
@@ -3602,6 +3607,35 @@ public class MediaPlayer extends PlayerBase
                             @Override
                             public void run() {
                                 mediaTimeListener.onMediaTimeDiscontinuity(mMediaPlayer, timestamp);
+                            }
+                        });
+                    }
+                }
+                return;
+
+            case MEDIA_IMS_RX_NOTICE:
+                final OnImsRxNoticeListener imsRxNoticeListener;
+                final Handler imsRxNoticeHandler;
+                imsRxNoticeListener = mOnImsRxNoticeListener;
+                imsRxNoticeHandler = mOnImsRxNoticeHandler;
+                if (imsRxNoticeListener == null) {
+                    return;
+                }
+                if (msg.obj instanceof Parcel) {
+                    Parcel parcel = (Parcel) msg.obj;
+                    byte[] event;
+                    try {
+                        event = parcel.marshall();
+                    } finally {
+                        parcel.recycle();
+                    }
+                    if (imsRxNoticeHandler == null) {
+                        imsRxNoticeListener.onImsRxNotice(mMediaPlayer, event);
+                    } else {
+                        imsRxNoticeHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                imsRxNoticeListener.onImsRxNotice(mMediaPlayer, event);
                             }
                         });
                     }
@@ -4046,6 +4080,146 @@ public class MediaPlayer extends PlayerBase
          */
         public void onTimedMetaDataAvailable(MediaPlayer mp, TimedMetaData data);
     }
+
+    /**
+     * Interface definition of a callback to be invoked when
+     * IMS Rx connection has a notice.
+     *
+     * @see MediaPlayer.setOnImsRxNoticeListener
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface OnImsRxNoticeListener
+    {
+        /**
+         * Called to indicate an IMS event noticed from native media frameworks.
+         * <p></p>
+         * Basic format. All TYPE and ARG are 4 bytes unsigned integer in native byte order.
+         * <pre>{@code
+         * 0                4               8                12
+         * +----------------+---------------+----------------+----------------+
+         * |      TYPE      |      ARG1     |      ARG2      |      ARG3      |
+         * +----------------+---------------+----------------+----------------+
+         * |      ARG4      |      ARG5     |      ...
+         * +----------------+---------------+-------------
+         * 16               20              24
+         *
+         *
+         * TYPE 100 - A notice of the first rtp packet received. No ARGs.
+         * 0
+         * +----------------+
+         * |      100       |
+         * +----------------+
+         *
+         *
+         * TYPE 101 - A notice of the first rtcp packet received. No ARGs.
+         * 0
+         * +----------------+
+         * |      101       |
+         * +----------------+
+         *
+         *
+         * TYPE 102 - A periodic report of a RTP statistics.
+         * TYPE 103 - An emergency report when serious packet loss has been detected
+         *            in between TYPE 102 events.
+         * 0                4               8                12
+         * +----------------+---------------+----------------+----------------+
+         * |   102 or 103   |   FB type=0   |    Bitrate     |   Top #.Seq    |
+         * +----------------+---------------+----------------+----------------+
+         * |   Base #.Seq   |Prev Expt #.Pkt|   Recv #.Pkt   |Prev Recv #.Pkt |
+         * +----------------+---------------+----------------+----------------+
+         * Feedback (FB) type
+         *      - always 0.
+         * Bitrate
+         *      - amount of data received in this period.
+         * Top number of sequence
+         *      - highest RTP sequence number received in this period.
+         *      - monotonically increasing value.
+         * Base number of sequence
+         *      - the first RTP sequence number of the media stream.
+         * Previous Expected number of Packets
+         *      - expected count of packets received in the previous report.
+         * Received number of packet
+         *      - actual count of packets received in this report.
+         * Previous Received number of packet
+         *      - actual count of packets received in the previous report.
+         *
+         *
+         * TYPE 205 - Transport layer Feedback message. (RFC-5104 Sec.4.2)
+         * 0                4               8                12
+         * +----------------+---------------+----------------+----------------+
+         * |      205       |      SSRC     | FB type(1 or 3)|     value      |
+         * +----------------+---------------+----------------+----------------+
+         * SSRC
+         *      - Remote side's SSRC value of the media sender (RFC-3550 Sec.5.1)
+         * Feedback (FB) type: determines the type of the event.
+         *      - if 1, we received a NACK request from the remote side.
+         *      - if 3, we received a TMMBR (Temporary Maximum Media Stream Bit Rate Request) from
+         *        the remote side.
+         * Value: the FCI (Feedback Control Information) depending on the value of FB type
+         *      - if FB type is 1, the Generic NACK as specified in RFC-4585 Sec.6.2.1
+         *      - if FB type is 3, the TMMBR as specified in RFC-5104 Sec.4.2.1.1
+         *
+         *
+         * TYPE 206 - Payload-specific Feedback message. (RFC-5104 Sec.4.3)
+         * 0                4               8
+         * +----------------+---------------+----------------+
+         * |      206       |      SSRC     | FB type(1 or 4)|
+         * +----------------+---------------+----------------+
+         * SSRC
+         *      - Remote side's SSRC value of the media sender (RFC-3550 Sec.5.1)
+         * Feedback (FB) type: determines the type of the event.
+         *      - if 1, we received a PLI request from the remote side.
+         *      - if 4, we received a FIR request from the remote side.
+         *
+         *
+         * TYPE 300 - CVO (RTP Extension) message.
+         * 0                4
+         * +----------------+---------------+
+         * |      101       |     value     |
+         * +----------------+---------------+
+         * value
+         *      - clockwise rotation degrees of a received video (6.2.3 of 3GPP R12 TS 26.114).
+         *      - can be 0 (degree 0), 1 (degree 90), 2 (degree 180) or 3 (degree 270).
+         *
+         *
+         * TYPE 400 - Socket failed during receive. No ARGs.
+         * 0
+         * +----------------+
+         * |      400       |
+         * +----------------+
+         * }</pre>
+         *
+         * @param mp the {@code MediaPlayer} associated with this callback.
+         * @param event an IMS media event serialized as byte[] array.
+         */
+        void onImsRxNotice(@NonNull MediaPlayer mp, @NonNull byte[] event);
+    }
+
+    /**
+     * Register a callback to be invoked when IMS Rx connection has a notice.
+     * The callback required if mediaplayer configured for RTPSource by
+     * MediaPlayer.setDataSource(String8 rtpParams) of mediaplayer.h
+     *
+     * @see MediaPlayer.OnImsRxNoticeListener
+     *
+     * @param listener the callback that will be run
+     * @param handler Specifies Handler object for the thread on which to execute
+     * the callback. If null, the handler on the main looper will be used.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission("android.permission.BIND_IMS_SERVICE")
+    public void setOnImsRxNoticeListener(
+        @Nullable OnImsRxNoticeListener listener, @Nullable Handler handler) {
+        mOnImsRxNoticeListener = listener;
+        mOnImsRxNoticeHandler = handler;
+    }
+
+    private OnImsRxNoticeListener mOnImsRxNoticeListener;
+    private Handler mOnImsRxNoticeHandler;
 
     /**
      * Register a callback to be invoked when a selected track has timed metadata available.
