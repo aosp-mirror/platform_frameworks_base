@@ -77,6 +77,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -1338,13 +1339,15 @@ class ProcessRecord implements WindowProcessListener {
      * {@param originatingToken} if you have one such originating token, this is useful for tracing
      * back the grant in the case of the notification token.
      */
-    void addAllowBackgroundActivityStartsToken(Binder entity, @Nullable IBinder originatingToken) {
-        if (entity == null) return;
-        mWindowProcessController.addAllowBackgroundActivityStartsToken(entity, originatingToken);
+    void addOrUpdateAllowBackgroundActivityStartsToken(Binder entity,
+            @Nullable IBinder originatingToken) {
+        Objects.requireNonNull(entity);
+        mWindowProcessController.addOrUpdateAllowBackgroundActivityStartsToken(entity,
+                originatingToken);
     }
 
     void removeAllowBackgroundActivityStartsToken(Binder entity) {
-        if (entity == null) return;
+        Objects.requireNonNull(entity);
         mWindowProcessController.removeAllowBackgroundActivityStartsToken(entity);
     }
 

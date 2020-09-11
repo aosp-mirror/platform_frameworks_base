@@ -133,7 +133,6 @@ import static com.android.server.wm.ActivityTaskManagerService.DUMP_STARTER_CMD;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.relaunchReasonToString;
 
-
 import android.Manifest;
 import android.Manifest.permission;
 import android.annotation.BroadcastBehavior;
@@ -342,7 +341,6 @@ import com.android.server.PackageWatchdog;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.UserspaceRebootLogger;
@@ -17730,7 +17728,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 try {
                     res = mServices.startServiceLocked(null, service,
                             resolvedType, -1, uid, fgRequired, false, callingPackage,
-                            callingFeatureId, userId, allowBackgroundActivityStarts);
+                            callingFeatureId, userId, allowBackgroundActivityStarts,
+                            backgroundActivityStartsToken);
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }

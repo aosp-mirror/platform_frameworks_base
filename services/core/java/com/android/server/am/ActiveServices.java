@@ -457,13 +457,14 @@ public final class ActiveServices {
             String callingPackage, @Nullable String callingFeatureId, final int userId)
             throws TransactionTooLargeException {
         return startServiceLocked(caller, service, resolvedType, callingPid, callingUid, fgRequired,
-                hideFgNotification, callingPackage, callingFeatureId, userId, false);
+                hideFgNotification, callingPackage, callingFeatureId, userId, false, null);
     }
 
     ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
             int callingPid, int callingUid, boolean fgRequired, boolean hideFgNotification,
             String callingPackage, @Nullable String callingFeatureId, final int userId,
-            boolean allowBackgroundActivityStarts) throws TransactionTooLargeException {
+            boolean allowBackgroundActivityStarts, @Nullable IBinder backgroundActivityStartsToken)
+            throws TransactionTooLargeException {
         if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "startService: " + service
                 + " type=" + resolvedType + " args=" + service.getExtras());
 
@@ -707,7 +708,7 @@ public final class ActiveServices {
             }
         }
         if (allowBackgroundActivityStarts) {
-            r.allowBgActivityStartsOnServiceStart();
+            r.allowBgActivityStartsOnServiceStart(backgroundActivityStartsToken);
         }
         ComponentName cmp = startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
         return cmp;
