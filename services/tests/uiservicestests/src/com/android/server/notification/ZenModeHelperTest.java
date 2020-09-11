@@ -44,6 +44,7 @@ import static com.android.os.AtomsProto.DNDModeProto.ZEN_MODE_FIELD_NUMBER;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
 import static junit.framework.TestCase.fail;
 
@@ -1554,6 +1555,49 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertEquals(NotificationManager.zenModeFromInterruptionFilter(
                 zenRule.getInterruptionFilter(), -1), ruleInConfig.zenMode);
         assertEquals(zenRule.getName(), ruleInConfig.name);
+    }
+
+    @Test
+    public void testRulesWithSameUri() {
+        Uri sharedUri = ZenModeConfig.toScheduleConditionId(new ScheduleInfo());
+        AutomaticZenRule zenRule = new AutomaticZenRule("name",
+                new ComponentName("android", "ScheduleConditionProvider"),
+                sharedUri,
+                NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
+        String id = mZenModeHelperSpy.addAutomaticZenRule(zenRule, "test");
+        AutomaticZenRule zenRule2 = new AutomaticZenRule("name2",
+                new ComponentName("android", "ScheduleConditionProvider"),
+                sharedUri,
+                NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
+        String id2 = mZenModeHelperSpy.addAutomaticZenRule(zenRule2, "test");
+
+        Condition condition = new Condition(sharedUri, "", Condition.STATE_TRUE);
+        mZenModeHelperSpy.setAutomaticZenRuleState(sharedUri, condition);
+
+        for (ZenModeConfig.ZenRule rule : mZenModeHelperSpy.mConfig.automaticRules.values()) {
+            if (rule.id.equals(id)) {
+                assertNotNull(rule.condition);
+                assertTrue(rule.condition.state == Condition.STATE_TRUE);
+            }
+            if (rule.id.equals(id2)) {
+                assertNotNull(rule.condition);
+                assertTrue(rule.condition.state == Condition.STATE_TRUE);
+            }
+        }
+
+        condition = new Condition(sharedUri, "", Condition.STATE_FALSE);
+        mZenModeHelperSpy.setAutomaticZenRuleState(sharedUri, condition);
+
+        for (ZenModeConfig.ZenRule rule : mZenModeHelperSpy.mConfig.automaticRules.values()) {
+            if (rule.id.equals(id)) {
+                assertNotNull(rule.condition);
+                assertTrue(rule.condition.state == Condition.STATE_FALSE);
+            }
+            if (rule.id.equals(id2)) {
+                assertNotNull(rule.condition);
+                assertTrue(rule.condition.state == Condition.STATE_FALSE);
+            }
+        }
     }
 
     private void setupZenConfig() {
