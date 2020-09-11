@@ -33,7 +33,14 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarSystemUiTest;
+import com.android.systemui.car.notification.NotificationPanelViewController;
+import com.android.systemui.car.notification.NotificationPanelViewMediator;
+import com.android.systemui.car.notification.PowerManagerHelper;
+import com.android.systemui.car.notification.TopNotificationPanelViewMediator;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -55,8 +62,6 @@ public class SystemBarConfigsTest extends SysuiTestCase {
     private SystemBarConfigs mSystemBarConfigs;
     @Mock
     private Resources mResources;
-    @Mock
-    private CarNavigationBarView mCarNavigationBarView;
 
     @Before
     public void setUp() {
@@ -104,6 +109,33 @@ public class SystemBarConfigsTest extends SysuiTestCase {
         when(mResources.getBoolean(
                 com.android.internal.R.bool.config_automotiveHideNavBarForKeyboard)).thenReturn(
                 true);
+
+        mSystemBarConfigs = new SystemBarConfigs(mResources);
+    }
+
+    @Test
+    public void onInit_topNotifPanelViewMediatorUsed_topBarEnabled_doesNotThrowException() {
+        when(mResources.getBoolean(R.bool.config_enableTopNavigationBar)).thenReturn(true);
+        when(mResources.getString(R.string.config_notificationPanelViewMediator)).thenReturn(
+                TestTopNotificationPanelViewMediator.class.getName());
+
+        mSystemBarConfigs = new SystemBarConfigs(mResources);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void onInit_topNotifPanelViewMediatorUsed_topBarNotEnabled_throwsRuntimeException() {
+        when(mResources.getBoolean(R.bool.config_enableTopNavigationBar)).thenReturn(false);
+        when(mResources.getString(R.string.config_notificationPanelViewMediator)).thenReturn(
+                TestTopNotificationPanelViewMediator.class.getName());
+
+        mSystemBarConfigs = new SystemBarConfigs(mResources);
+    }
+
+    @Test
+    public void onInit_notificationPanelViewMediatorUsed_topBarNotEnabled_doesNotThrowException() {
+        when(mResources.getBoolean(R.bool.config_enableTopNavigationBar)).thenReturn(false);
+        when(mResources.getString(R.string.config_notificationPanelViewMediator)).thenReturn(
+                NotificationPanelViewMediator.class.getName());
 
         mSystemBarConfigs = new SystemBarConfigs(mResources);
     }
@@ -238,5 +270,21 @@ public class SystemBarConfigsTest extends SysuiTestCase {
                 false);
         when(mResources.getBoolean(R.bool.config_hideRightSystemBarForKeyboard)).thenReturn(
                 false);
+    }
+
+    // Intentionally using a subclass of TopNotificationPanelViewMediator for testing purposes to
+    // ensure that OEM's will be able to implement and use their own NotificationPanelViewMediator.
+    private class TestTopNotificationPanelViewMediator extends
+            TopNotificationPanelViewMediator {
+        TestTopNotificationPanelViewMediator(
+                CarNavigationBarController carNavigationBarController,
+                NotificationPanelViewController notificationPanelViewController,
+                PowerManagerHelper powerManagerHelper,
+                BroadcastDispatcher broadcastDispatcher,
+                CarDeviceProvisionedController carDeviceProvisionedController,
+                ConfigurationController configurationController) {
+            super(carNavigationBarController, notificationPanelViewController, powerManagerHelper,
+                    broadcastDispatcher, carDeviceProvisionedController, configurationController);
+        }
     }
 }
