@@ -150,7 +150,8 @@ public final class ProfcollectForwardingService extends SystemService {
         }
 
         // Sample for a fraction of app launches.
-        int traceFrequency = SystemProperties.getInt("profcollectd.applaunch_trace_freq", 2);
+        int traceFrequency =
+                SystemProperties.getInt("persist.profcollectd.applaunch_trace_freq", 2);
         int randomNum = ThreadLocalRandom.current().nextInt(100);
         if (randomNum < traceFrequency) {
             try {
