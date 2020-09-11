@@ -19862,7 +19862,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final PreferredIntentResolver pir = mSettings.editPreferredActivitiesLPw(userId);
             final ArrayList<PreferredActivity> existing = pir.findFilters(filter);
             if (removeExisting && existing != null) {
-                mSettings.removeFiltersLPw(pir, filter, existing);
+                Settings.removeFilters(pir, filter, existing);
             }
             pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
             scheduleWritePackageRestrictionsLocked(userId);
@@ -19963,7 +19963,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
                 if (existing != null) {
-                    mSettings.removeFiltersLPw(pir, filter, existing);
+                    Settings.removeFilters(pir, filter, existing);
                 }
             }
         }
