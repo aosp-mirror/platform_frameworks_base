@@ -40,21 +40,27 @@ public class FaceSensorProperties implements Parcelable {
      * from above the HAL.
      */
     public final boolean supportsSelfIllumination;
+    /**
+     * Maximum number of enrollments a user/profile can have.
+     */
+    public final int maxTemplatesAllowed;
 
     /**
      * Initializes SensorProperties with specified values
      */
     public FaceSensorProperties(int sensorId, boolean supportsFaceDetection,
-            boolean supportsSelfIllumination) {
+            boolean supportsSelfIllumination, int maxTemplatesAllowed) {
         this.sensorId = sensorId;
         this.supportsFaceDetection = supportsFaceDetection;
         this.supportsSelfIllumination = supportsSelfIllumination;
+        this.maxTemplatesAllowed = maxTemplatesAllowed;
     }
 
     protected FaceSensorProperties(Parcel in) {
         sensorId = in.readInt();
         supportsFaceDetection = in.readBoolean();
         supportsSelfIllumination = in.readBoolean();
+        maxTemplatesAllowed = in.readInt();
     }
 
     public static final Creator<FaceSensorProperties> CREATOR =
@@ -80,5 +86,6 @@ public class FaceSensorProperties implements Parcelable {
         dest.writeInt(sensorId);
         dest.writeBoolean(supportsFaceDetection);
         dest.writeBoolean(supportsSelfIllumination);
+        dest.writeInt(maxTemplatesAllowed);
     }
 }
