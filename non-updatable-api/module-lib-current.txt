@@ -51,6 +51,7 @@ package android.media.session {
   }
 
   public final class MediaSessionManager {
+    method public void addOnActiveSessionsChangedListener(@NonNull android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, @Nullable android.content.ComponentName, int, @Nullable android.os.Handler);
     method public void dispatchMediaKeyEventAsSystemService(@NonNull android.view.KeyEvent);
     method public boolean dispatchMediaKeyEventAsSystemService(@NonNull android.media.session.MediaSession.Token, @NonNull android.view.KeyEvent);
     method public void dispatchVolumeKeyEventAsSystemService(@NonNull android.view.KeyEvent, int);

@@ -20,6 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -259,18 +260,14 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Add a listener to be notified when the list of active sessions
-     * changes.This requires the
-     * android.Manifest.permission.MEDIA_CONTENT_CONTROL permission be held by
-     * the calling app. You may also retrieve this list if your app is an
-     * enabled notification listener using the
-     * {@link NotificationListenerService} APIs, in which case you must pass the
-     * {@link ComponentName} of your enabled listener. Updates will be posted to
-     * the thread that registered the listener.
+     * Add a listener to be notified when the list of active sessions changes. This requires the
+     * {@link android.Manifest.permission#MEDIA_CONTENT_CONTROL} permission be held by the calling
+     * app. You may also retrieve this list if your app is an enabled notification listener using
+     * the {@link NotificationListenerService} APIs, in which case you must pass the
+     * {@link ComponentName} of your enabled listener.
      *
      * @param sessionListener The listener to add.
-     * @param notificationListener The enabled notification listener component.
-     *            May be null.
+     * @param notificationListener The enabled notification listener component. May be null.
      */
     public void addOnActiveSessionsChangedListener(
             @NonNull OnActiveSessionsChangedListener sessionListener,
@@ -279,18 +276,15 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Add a listener to be notified when the list of active sessions
-     * changes.This requires the
-     * android.Manifest.permission.MEDIA_CONTENT_CONTROL permission be held by
-     * the calling app. You may also retrieve this list if your app is an
-     * enabled notification listener using the
-     * {@link NotificationListenerService} APIs, in which case you must pass the
-     * {@link ComponentName} of your enabled listener. Updates will be posted to
-     * the handler specified or to the caller's thread if the handler is null.
+     * Add a listener to be notified when the list of active sessions changes. This requires the
+     * {@link android.Manifest.permission#MEDIA_CONTENT_CONTROL} permission be held by the calling
+     * app. You may also retrieve this list if your app is an enabled notification listener using
+     * the {@link NotificationListenerService} APIs, in which case you must pass the
+     * {@link ComponentName} of your enabled listener. Updates will be posted to the handler
+     * specified or to the caller's thread if the handler is null.
      *
      * @param sessionListener The listener to add.
-     * @param notificationListener The enabled notification listener component.
-     *            May be null.
+     * @param notificationListener The enabled notification listener component. May be null.
      * @param handler The handler to post events to.
      */
     public void addOnActiveSessionsChangedListener(
@@ -301,21 +295,24 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Add a listener to be notified when the list of active sessions
-     * changes.This requires the
-     * android.Manifest.permission.MEDIA_CONTENT_CONTROL permission be held by
-     * the calling app. You may also retrieve this list if your app is an
-     * enabled notification listener using the
-     * {@link NotificationListenerService} APIs, in which case you must pass the
-     * {@link ComponentName} of your enabled listener.
+     * Add a listener to be notified when the list of active sessions changes for the given user.
+     * The calling app must have the {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}
+     * permission if it wants to call this method for a user that is not running the app.
+     * <p>
+     * This requires the {@link android.Manifest.permission#MEDIA_CONTENT_CONTROL} permission be
+     * held by the calling app. You may also retrieve this list if your app is an enabled
+     * notification listener using the {@link NotificationListenerService} APIs, in which case you
+     * must pass the {@link ComponentName} of your enabled listener. Updates will be posted to the
+     * handler specified or to the caller's thread if the handler is null.
      *
      * @param sessionListener The listener to add.
-     * @param notificationListener The enabled notification listener component.
-     *            May be null.
+     * @param notificationListener The enabled notification listener component. May be null.
      * @param userId The userId to listen for changes on.
      * @param handler The handler to post updates on.
      * @hide
      */
+    @SuppressLint({"ExecutorRegistration", "SamShouldBeLast"})
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void addOnActiveSessionsChangedListener(
             @NonNull OnActiveSessionsChangedListener sessionListener,
             @Nullable ComponentName notificationListener, int userId, @Nullable Handler handler) {
