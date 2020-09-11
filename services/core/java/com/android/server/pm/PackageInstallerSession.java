@@ -1600,13 +1600,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         validateApkInstallLocked();
                     }
                 }
-            }
-
-            if (params.isStaged) {
-                mStagingManager.checkNonOverlappingWithStagedSessions(this);
-            }
-
-            synchronized (mLock) {
                 if (mDestroyed) {
                     throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
                             "Session destroyed");
