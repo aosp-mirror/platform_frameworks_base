@@ -97,7 +97,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESS_OBSERVERS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PSS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_WHITELISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BACKUP;
@@ -110,7 +109,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_OOM_ADJ;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_POWER;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PROCESSES;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PROCESS_OBSERVERS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PSS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_UID_OBSERVERS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
@@ -135,7 +133,6 @@ import static com.android.server.wm.ActivityTaskManagerService.relaunchReasonToS
 
 import android.Manifest;
 import android.Manifest.permission;
-import android.annotation.BroadcastBehavior;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -265,7 +262,6 @@ import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.permission.PermissionManagerInternal.CheckPermissionDelegate;
 import android.provider.DeviceConfig;
-import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
 import android.server.ServerProtoEnums;
 import android.sysprop.InitProperties;
@@ -392,11 +388,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 
 public class ActivityManagerService extends IActivityManager.Stub
@@ -422,7 +414,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final String TAG_POWER = TAG + POSTFIX_POWER;
     static final String TAG_PROCESS_OBSERVERS = TAG + POSTFIX_PROCESS_OBSERVERS;
     static final String TAG_PROCESSES = TAG + POSTFIX_PROCESSES;
-    static final String TAG_PSS = TAG + POSTFIX_PSS;
     private static final String TAG_SERVICE = TAG + POSTFIX_SERVICE;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     static final String TAG_UID_OBSERVERS = TAG + POSTFIX_UID_OBSERVERS;
@@ -436,20 +427,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             "com.android.internal.intent.action.BUGREPORT_REQUESTED";
     private static final String SHELL_APP_PACKAGE = "com.android.shell";
 
-    /** Control over CPU and battery monitoring */
-    // write battery stats every 30 minutes.
-    static final long BATTERY_STATS_TIME = 30 * 60 * 1000;
-    static final boolean MONITOR_CPU_USAGE = true;
-    // don't sample cpu less than every 5 seconds.
-    static final long MONITOR_CPU_MIN_TIME = 5 * 1000;
-    // wait possibly forever for next cpu sample.
-    static final long MONITOR_CPU_MAX_TIME = 0x0fffffff;
-    static final boolean MONITOR_THREAD_CPU_USAGE = false;
-
     // The flags that are set for all calls we make to the package manager.
     public static final int STOCK_PM_FLAGS = PackageManager.GET_SHARED_LIBRARY_FILES;
-
-    static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
 
     static final String SYSTEM_USER_HOME_NEEDED = "ro.system_user_home_needed";
 
@@ -493,37 +472,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final String INTENT_REMOTE_BUGREPORT_FINISHED =
             "com.android.internal.intent.action.REMOTE_BUGREPORT_FINISHED";
 
-    /**
-     * Broadcast sent when heap dump collection has been completed.
-     */
-    @BroadcastBehavior(includeBackground = true, protectedBroadcast = true)
-    private static final String ACTION_HEAP_DUMP_FINISHED =
-            "com.android.internal.intent.action.HEAP_DUMP_FINISHED";
-
-    /**
-     * The process we are reporting
-     */
-    private static final String EXTRA_HEAP_DUMP_PROCESS_NAME =
-            "com.android.internal.extra.heap_dump.PROCESS_NAME";
-
-    /**
-     * The size limit the process reached.
-     */
-    private static final String EXTRA_HEAP_DUMP_SIZE_BYTES =
-            "com.android.internal.extra.heap_dump.SIZE_BYTES";
-
-    /**
-     * Whether the user initiated the dump or not.
-     */
-    private static final String EXTRA_HEAP_DUMP_IS_USER_INITIATED =
-            "com.android.internal.extra.heap_dump.IS_USER_INITIATED";
-
-    /**
-     * Optional name of package to directly launch.
-     */
-    private static final String EXTRA_HEAP_DUMP_REPORT_PACKAGE =
-            "com.android.internal.extra.heap_dump.REPORT_PACKAGE";
-
     // If set, we will push process association information in to procstats.
     static final boolean TRACK_PROCSTATS_ASSOCIATIONS = true;
 
@@ -556,7 +504,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final int JAVA_DUMP_MINIMUM_SIZE = 100; // 100 bytes.
 
     OomAdjuster mOomAdjuster;
-    final LowMemDetector mLowMemDetector;
 
     static final String EXTRA_TITLE = "android.intent.extra.TITLE";
     static final String EXTRA_DESCRIPTION = "android.intent.extra.DESCRIPTION";
@@ -918,28 +865,11 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     final ArrayList<ProcessRecord> mProcessesToGc = new ArrayList<ProcessRecord>();
 
-    /**
-     * Processes we want to collect PSS data from.
-     */
-    final ArrayList<ProcessRecord> mPendingPssProcesses = new ArrayList<ProcessRecord>();
-
-    /**
-     * Depth of overlapping activity-start PSS deferral notes
-     */
-    private final AtomicInteger mActivityStartingNesting = new AtomicInteger(0);
-
     private final ActivityMetricsLaunchObserver mActivityLaunchObserver =
             new ActivityMetricsLaunchObserver() {
         @Override
         public void onActivityLaunched(byte[] activity, int temperature) {
-            // This is safe to force to the head of the queue because it relies only
-            // on refcounting to track begin/end of deferrals, not on actual
-            // message ordering.  We don't care *what* activity is being
-            // launched; only that we're doing so.
-            if (mPssDeferralTime > 0) {
-                final Message msg = mBgHandler.obtainMessage(DEFER_PSS_MSG);
-                mBgHandler.sendMessageAtFrontOfQueue(msg);
-            }
+            mAppProfiler.onActivityLaunched();
         }
 
         // The other observer methods are unused
@@ -964,43 +894,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     };
 
-    /**
-     * How long we defer PSS gathering while activities are starting, in milliseconds.
-     * This is adjustable via DeviceConfig.  If it is zero or negative, no PSS deferral
-     * is done.
-     */
-    private volatile long mPssDeferralTime = 0;
-    private static final String ACTIVITY_START_PSS_DEFER_CONFIG = "activity_start_pss_defer";
-
     private boolean mBinderTransactionTrackingEnabled = false;
-
-    /**
-     * Last time we requested PSS data of all processes.
-     */
-    long mLastFullPssTime = SystemClock.uptimeMillis();
-
-    /**
-     * If set, the next time we collect PSS data we should do a full collection
-     * with data from native processes and the kernel.
-     */
-    boolean mFullPssPending = false;
-
-    /**
-     * Observe DeviceConfig changes to the PSS calculation interval
-     */
-    private final DeviceConfig.OnPropertiesChangedListener mPssDelayConfigListener =
-            new DeviceConfig.OnPropertiesChangedListener() {
-                @Override
-                public void onPropertiesChanged(Properties properties) {
-                    if (properties.getKeyset().contains(ACTIVITY_START_PSS_DEFER_CONFIG)) {
-                        mPssDeferralTime = properties.getLong(ACTIVITY_START_PSS_DEFER_CONFIG, 0);
-                        if (DEBUG_PSS) {
-                            Slog.d(TAG_PSS, "Activity-start PSS delay now "
-                                    + mPssDeferralTime + " ms");
-                        }
-                    }
-                }
-            };
 
     /**
      * Fingerprints (hashCode()) of stack traces that we've
@@ -1242,39 +1136,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     int mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
 
     /**
-     * Allow the current computed overall memory level of the system to go down?
-     * This is set to false when we are killing processes for reasons other than
-     * memory management, so that the now smaller process list will not be taken as
-     * an indication that memory is tighter.
-     */
-    boolean mAllowLowerMemLevel = false;
-
-    /**
-     * The last computed memory level, for holding when we are in a state that
-     * processes are going away for other reasons.
-     */
-    int mLastMemoryLevel = ProcessStats.ADJ_MEM_FACTOR_NORMAL;
-
-    /**
-     * The last total number of process we have, to determine if changes actually look
-     * like a shrinking number of process due to lower RAM.
-     */
-    int mLastNumProcesses;
-
-    /**
      * The uptime of the last time we performed idle maintenance.
      */
     long mLastIdleTime = SystemClock.uptimeMillis();
-
-    /**
-     * Total time spent with RAM that has been added in the past since the last idle time.
-     */
-    long mLowRamTimeSinceLastIdle = 0;
-
-    /**
-     * If RAM is currently low, when that horrible situation started.
-     */
-    long mLowRamStartTime = 0;
 
     /**
      * For reporting to battery stats the current top application.
@@ -1295,13 +1159,6 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     boolean mSafeMode;
 
-    /**
-     * If true, we are running under a test environment so will sample PSS from processes
-     * much more rapidly to try to collect better data when the tests are rapidly
-     * running through apps.
-     */
-    boolean mTestPssMode = false;
-
     String mDebugApp = null;
     boolean mWaitForDebugger = false;
     boolean mDebugTransient = false;
@@ -1309,61 +1166,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     boolean mOrigWaitForDebugger = false;
     boolean mAlwaysFinishActivities = false;
 
-    class ProfileData {
-        private String mProfileApp = null;
-        private ProcessRecord mProfileProc = null;
-        private ProfilerInfo mProfilerInfo = null;
-
-        void setProfileApp(String profileApp) {
-            mProfileApp = profileApp;
-            if (mAtmInternal != null) {
-                mAtmInternal.setProfileApp(profileApp);
-            }
-        }
-
-        String getProfileApp() {
-            return mProfileApp;
-        }
-
-        void setProfileProc(ProcessRecord profileProc) {
-            mProfileProc = profileProc;
-            if (mAtmInternal != null) {
-                mAtmInternal.setProfileProc(profileProc == null ? null
-                        : profileProc.getWindowProcessController());
-            }
-        }
-
-        ProcessRecord getProfileProc() {
-            return mProfileProc;
-        }
-
-        void setProfilerInfo(ProfilerInfo profilerInfo) {
-            mProfilerInfo = profilerInfo;
-            if (mAtmInternal != null) {
-                mAtmInternal.setProfilerInfo(profilerInfo);
-            }
-        }
-
-        ProfilerInfo getProfilerInfo() {
-            return mProfilerInfo;
-        }
-    }
-    final ProfileData mProfileData = new ProfileData();
-
-    /**
-     * Stores a map of process name -> agent string. When a process is started and mAgentAppMap
-     * is not null, this map is checked and the mapped agent installed during bind-time. Note:
-     * A non-null agent in mProfileInfo overrides this.
-     */
-    private @Nullable Map<String, String> mAppAgentMap = null;
-
-    int mProfileType = 0;
-    final ProcessMap<Pair<Long, String>> mMemWatchProcesses = new ProcessMap<>();
-    String mMemWatchDumpProcName;
-    Uri mMemWatchDumpUri;
-    int mMemWatchDumpPid;
-    int mMemWatchDumpUid;
-    private boolean mMemWatchIsUserInitiated;
     String mTrackAllocationApp = null;
     String mNativeDebuggingApp = null;
 
@@ -1401,27 +1203,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     final AnrHelper mAnrHelper = new AnrHelper(this);
-
-    /**
-     * Runtime CPU use collection thread.  This object's lock is used to
-     * perform synchronization with the thread (notifying it to run).
-     */
-    final Thread mProcessCpuThread;
-
-    /**
-     * Used to collect per-process CPU use for ANRs, battery stats, etc.
-     * Must acquire this object's lock when accessing it.
-     * NOTE: this lock will be held while doing long operations (trawling
-     * through all processes in /proc), so it should never be acquired by
-     * any critical paths such as when holding the main activity manager lock.
-     */
-    final ProcessCpuTracker mProcessCpuTracker = new ProcessCpuTracker(
-            MONITOR_THREAD_CPU_USAGE);
-    final AtomicLong mLastCpuTime = new AtomicLong(0);
-    final AtomicBoolean mProcessCpuMutexFree = new AtomicBoolean(true);
-    final CountDownLatch mProcessCpuInitLatch = new CountDownLatch(1);
-
-    long mLastWriteTime = 0;
 
     /** Set to true after the system has finished booting. */
     volatile boolean mBooted = false;
@@ -1560,6 +1341,23 @@ public class ActivityManagerService extends IActivityManager.Stub
      * The last time when the binder heavy hitter auto sampler started.
      */
     private long mLastBinderHeavyHitterAutoSamplerStart = 0L;
+
+    final AppProfiler mAppProfiler;
+
+    private static final int INDEX_NATIVE_PSS = 0;
+    private static final int INDEX_NATIVE_SWAP_PSS = 1;
+    private static final int INDEX_NATIVE_RSS = 2;
+    private static final int INDEX_DALVIK_PSS = 3;
+    private static final int INDEX_DALVIK_SWAP_PSS = 4;
+    private static final int INDEX_DALVIK_RSS = 5;
+    private static final int INDEX_OTHER_PSS = 6;
+    private static final int INDEX_OTHER_SWAP_PSS = 7;
+    private static final int INDEX_OTHER_RSS = 8;
+    private static final int INDEX_TOTAL_PSS = 9;
+    private static final int INDEX_TOTAL_SWAP_PSS = 10;
+    private static final int INDEX_TOTAL_RSS = 11;
+    private static final int INDEX_TOTAL_NATIVE_PSS = 12;
+    private static final int INDEX_LAST = 13;
 
     final class UiHandler extends Handler {
         public UiHandler() {
@@ -1752,63 +1550,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 break;
             }
             case POST_DUMP_HEAP_NOTIFICATION_MSG: {
-                final String procName;
-                final int uid;
-                final long memLimit;
-                final String reportPackage;
-                final boolean isUserInitiated;
-                synchronized (ActivityManagerService.this) {
-                    uid = mMemWatchDumpUid;
-                    procName = mMemWatchDumpProcName;
-                    Pair<Long, String> val = mMemWatchProcesses.get(procName, uid);
-                    if (val == null) {
-                        val = mMemWatchProcesses.get(procName, 0);
-                    }
-                    if (val != null) {
-                        memLimit = val.first;
-                        reportPackage = val.second;
-                    } else {
-                        memLimit = 0;
-                        reportPackage = null;
-                    }
-                    isUserInitiated = mMemWatchIsUserInitiated;
-
-                    mMemWatchDumpUri = null;
-                    mMemWatchDumpProcName = null;
-                    mMemWatchDumpPid = -1;
-                    mMemWatchDumpUid = -1;
-                }
-                if (procName == null) {
-                    return;
-                }
-
-                if (DEBUG_PSS) Slog.d(TAG_PSS,
-                        "Showing dump heap notification from " + procName + "/" + uid);
-
-                Intent dumpFinishedIntent = new Intent(ACTION_HEAP_DUMP_FINISHED);
-                // Send this only to the Shell package.
-                dumpFinishedIntent.setPackage("com.android.shell");
-                dumpFinishedIntent.putExtra(Intent.EXTRA_UID, uid);
-                dumpFinishedIntent.putExtra(EXTRA_HEAP_DUMP_IS_USER_INITIATED, isUserInitiated);
-                dumpFinishedIntent.putExtra(EXTRA_HEAP_DUMP_SIZE_BYTES, memLimit);
-                dumpFinishedIntent.putExtra(EXTRA_HEAP_DUMP_REPORT_PACKAGE, reportPackage);
-                dumpFinishedIntent.putExtra(EXTRA_HEAP_DUMP_PROCESS_NAME, procName);
-
-                mContext.sendBroadcastAsUser(dumpFinishedIntent,
-                        UserHandle.getUserHandleForUid(uid));
+                mAppProfiler.handlePostDumpHeapNotification();
             } break;
             case ABORT_DUMPHEAP_MSG: {
-                String procName = (String) msg.obj;
-                if (procName != null) {
-                    synchronized (ActivityManagerService.this) {
-                        if (procName.equals(mMemWatchDumpProcName)) {
-                            mMemWatchDumpProcName = null;
-                            mMemWatchDumpUri = null;
-                            mMemWatchDumpPid = -1;
-                            mMemWatchDumpUid = -1;
-                        }
-                    }
-                }
+                mAppProfiler.handleAbortDumpHeap((String) msg.obj);
             } break;
             case SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG: {
                 IUiAutomationConnection connection = (IUiAutomationConnection) msg.obj;
@@ -1841,147 +1586,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    static final int COLLECT_PSS_BG_MSG = 1;
-    static final int DEFER_PSS_MSG = 2;
-    static final int STOP_DEFERRING_PSS_MSG = 3;
-
-    final Handler mBgHandler = new Handler(BackgroundThread.getHandler().getLooper()) {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-            case COLLECT_PSS_BG_MSG: {
-                long start = SystemClock.uptimeMillis();
-                MemInfoReader memInfo = null;
-                synchronized (ActivityManagerService.this) {
-                    if (mFullPssPending) {
-                        mFullPssPending = false;
-                        memInfo = new MemInfoReader();
-                    }
-                }
-                if (memInfo != null) {
-                    updateCpuStatsNow();
-                    long nativeTotalPss = 0;
-                    final List<ProcessCpuTracker.Stats> stats;
-                    synchronized (mProcessCpuTracker) {
-                        stats = mProcessCpuTracker.getStats( (st)-> {
-                            return st.vsize > 0 && st.uid < FIRST_APPLICATION_UID;
-                        });
-                    }
-                    final int N = stats.size();
-                    for (int j = 0; j < N; j++) {
-                        synchronized (mPidsSelfLocked) {
-                            if (mPidsSelfLocked.indexOfKey(stats.get(j).pid) >= 0) {
-                                // This is one of our own processes; skip it.
-                                continue;
-                            }
-                        }
-                        nativeTotalPss += Debug.getPss(stats.get(j).pid, null, null);
-                    }
-                    memInfo.readMemInfo();
-                    synchronized (mProcessStats.mLock) {
-                        if (DEBUG_PSS) Slog.d(TAG_PSS, "Collected native and kernel memory in "
-                                + (SystemClock.uptimeMillis()-start) + "ms");
-                        final long cachedKb = memInfo.getCachedSizeKb();
-                        final long freeKb = memInfo.getFreeSizeKb();
-                        final long zramKb = memInfo.getZramTotalSizeKb();
-                        final long kernelKb = memInfo.getKernelUsedSizeKb();
-                        EventLogTags.writeAmMeminfo(cachedKb*1024, freeKb*1024, zramKb*1024,
-                                kernelKb*1024, nativeTotalPss*1024);
-                        mProcessStats.addSysMemUsageLocked(cachedKb, freeKb, zramKb, kernelKb,
-                                nativeTotalPss);
-                    }
-                }
-
-                int num = 0;
-                long[] tmp = new long[3];
-                do {
-                    ProcessRecord proc;
-                    int procState;
-                    int statType;
-                    int pid = -1;
-                    long lastPssTime;
-                    synchronized (ActivityManagerService.this) {
-                        if (mPendingPssProcesses.size() <= 0) {
-                            if (mTestPssMode || DEBUG_PSS) Slog.d(TAG_PSS,
-                                    "Collected pss of " + num + " processes in "
-                                    + (SystemClock.uptimeMillis() - start) + "ms");
-                            mPendingPssProcesses.clear();
-                            return;
-                        }
-                        proc = mPendingPssProcesses.remove(0);
-                        procState = proc.pssProcState;
-                        statType = proc.pssStatType;
-                        lastPssTime = proc.lastPssTime;
-                        long now = SystemClock.uptimeMillis();
-                        if (proc.thread != null && procState == proc.setProcState
-                                && (lastPssTime+ProcessList.PSS_SAFE_TIME_FROM_STATE_CHANGE)
-                                        < now) {
-                            pid = proc.pid;
-                        } else {
-                            ProcessList.abortNextPssTime(proc.procStateMemTracker);
-                            if (DEBUG_PSS) Slog.d(TAG_PSS, "Skipped pss collection of " + pid +
-                                    ": still need " +
-                                    (lastPssTime+ProcessList.PSS_SAFE_TIME_FROM_STATE_CHANGE-now) +
-                                    "ms until safe");
-                            proc = null;
-                            pid = 0;
-                        }
-                    }
-                    if (proc != null) {
-                        long startTime = SystemClock.currentThreadTimeMillis();
-                        // skip background PSS calculation of apps that are capturing
-                        // camera imagery
-                        final boolean usingCamera = isCameraActiveForUid(proc.uid);
-                        long pss = usingCamera ? 0 : Debug.getPss(pid, tmp, null);
-                        long endTime = SystemClock.currentThreadTimeMillis();
-                        synchronized (ActivityManagerService.this) {
-                            if (pss != 0 && proc.thread != null && proc.setProcState == procState
-                                    && proc.pid == pid && proc.lastPssTime == lastPssTime) {
-                                num++;
-                                ProcessList.commitNextPssTime(proc.procStateMemTracker);
-                                recordPssSampleLocked(proc, procState, pss, tmp[0], tmp[1], tmp[2],
-                                        statType, endTime-startTime, SystemClock.uptimeMillis());
-                            } else {
-                                ProcessList.abortNextPssTime(proc.procStateMemTracker);
-                                if (DEBUG_PSS) Slog.d(TAG_PSS, "Skipped pss collection of " + pid +
-                                        ": " + (proc.thread == null ? "NO_THREAD " : "") +
-                                        (usingCamera ? "CAMERA " : "") +
-                                        (proc.pid != pid ? "PID_CHANGED " : "") +
-                                        " initState=" + procState + " curState=" +
-                                        proc.setProcState + " " +
-                                        (proc.lastPssTime != lastPssTime ? "TIME_CHANGED" : ""));
-                            }
-                        }
-                    }
-                } while (true);
-            }
-
-            case DEFER_PSS_MSG: {
-                deferPssForActivityStart();
-            } break;
-
-            case STOP_DEFERRING_PSS_MSG: {
-                final int nesting = mActivityStartingNesting.decrementAndGet();
-                if (nesting <= 0) {
-                    if (DEBUG_PSS) {
-                        Slog.d(TAG_PSS, "PSS activity start deferral interval ended; now "
-                                + nesting);
-                    }
-                    if (nesting < 0) {
-                        Slog.wtf(TAG, "Activity start nesting undercount!");
-                        mActivityStartingNesting.incrementAndGet();
-                    }
-                } else {
-                    if (DEBUG_PSS) {
-                        Slog.d(TAG_PSS, "Still deferring PSS, nesting=" + nesting);
-                    }
-                }
-            }
-            break;
-
-            }
-        }
-    };
 
     public void setSystemProcess() {
         try {
@@ -1992,10 +1596,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     DUMP_FLAG_PRIORITY_HIGH);
             ServiceManager.addService("gfxinfo", new GraphicsBinder(this));
             ServiceManager.addService("dbinfo", new DbBinder(this));
-            if (MONITOR_CPU_USAGE) {
-                ServiceManager.addService("cpuinfo", new CpuBinder(this),
-                        /* allowIsolated= */ false, DUMP_FLAG_PRIORITY_CRITICAL);
-            }
+            mAppProfiler.setCpuInfoService();
             ServiceManager.addService("permission", new PermissionController(this));
             ServiceManager.addService("processinfo", new ProcessInfoService(this));
             ServiceManager.addService("cacheinfo", new CacheBinder(this));
@@ -2149,37 +1750,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             } finally {
                 mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.enableFreezer(true);
             }
-        }
-    }
-
-    static class CpuBinder extends Binder {
-        ActivityManagerService mActivityManagerService;
-        private final PriorityDump.PriorityDumper mPriorityDumper =
-                new PriorityDump.PriorityDumper() {
-            @Override
-            public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args,
-                    boolean asProto) {
-                if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
-                        "cpuinfo", pw)) return;
-                synchronized (mActivityManagerService.mProcessCpuTracker) {
-                    if (asProto) {
-                        mActivityManagerService.mProcessCpuTracker.dumpProto(fd);
-                        return;
-                    }
-                    pw.print(mActivityManagerService.mProcessCpuTracker.printCurrentLoad());
-                    pw.print(mActivityManagerService.mProcessCpuTracker.printCurrentState(
-                            SystemClock.uptimeMillis()));
-                }
-            }
-        };
-
-        CpuBinder(ActivityManagerService activityManagerService) {
-            mActivityManagerService = activityManagerService;
-        }
-
-        @Override
-        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            PriorityDump.dump(mPriorityDumper, fd, pw, args);
         }
     }
 
@@ -2425,13 +1995,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPlatformCompat = null;
         mProcessList = injector.getProcessList(this);
         mProcessList.init(this, activeUids, mPlatformCompat);
-        mLowMemDetector = null;
+        mAppProfiler = new AppProfiler(this, BackgroundThread.getHandler().getLooper(), null);
         mOomAdjuster = hasHandlerThread
                 ? new OomAdjuster(this, mProcessList, activeUids, handlerThread) : null;
 
         mIntentFirewall = hasHandlerThread
                 ? new IntentFirewall(new IntentFirewallInterface(), mHandler) : null;
-        mProcessCpuThread = null;
         mProcessStats = null;
         mCpHelper = new ContentProviderHelper(this, false);
         // For the usage of {@link ActiveServices#cleanUpServices} that may be invoked from
@@ -2482,7 +2051,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Context.PLATFORM_COMPAT_SERVICE);
         mProcessList = mInjector.getProcessList(this);
         mProcessList.init(this, activeUids, mPlatformCompat);
-        mLowMemDetector = new LowMemDetector(this);
+        mAppProfiler = new AppProfiler(this, BackgroundThread.getHandler().getLooper(),
+                new LowMemDetector(this));
         mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);
 
         // Broadcast policy parameters
@@ -2554,40 +2124,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 DisplayThread.get().getLooper());
         mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
 
-        mProcessCpuThread = new Thread("CpuTracker") {
-            @Override
-            public void run() {
-                synchronized (mProcessCpuTracker) {
-                    mProcessCpuInitLatch.countDown();
-                    mProcessCpuTracker.init();
-                }
-                while (true) {
-                    try {
-                        try {
-                            synchronized(this) {
-                                final long now = SystemClock.uptimeMillis();
-                                long nextCpuDelay = (mLastCpuTime.get()+MONITOR_CPU_MAX_TIME)-now;
-                                long nextWriteDelay = (mLastWriteTime+BATTERY_STATS_TIME)-now;
-                                //Slog.i(TAG, "Cpu delay=" + nextCpuDelay
-                                //        + ", write delay=" + nextWriteDelay);
-                                if (nextWriteDelay < nextCpuDelay) {
-                                    nextCpuDelay = nextWriteDelay;
-                                }
-                                if (nextCpuDelay > 0) {
-                                    mProcessCpuMutexFree.set(true);
-                                    this.wait(nextCpuDelay);
-                                }
-                            }
-                        } catch (InterruptedException e) {
-                        }
-                        updateCpuStatsNow();
-                    } catch (Exception e) {
-                        Slog.e(TAG, "Unexpected exception collecting process stats", e);
-                    }
-                }
-            }
-        };
-
         mHiddenApiBlacklist = new HiddenApiSettings(mHandler, mContext);
 
         Watchdog.getInstance().addMonitor(this);
@@ -2621,7 +2157,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private void start() {
         removeAllProcessGroups();
-        mProcessCpuThread.start();
 
         mBatteryStatsService.publish();
         mAppOpsService.publish();
@@ -2629,16 +2164,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         LocalServices.addService(ActivityManagerInternal.class, mInternal);
         mActivityTaskManager.onActivityManagerInternalAdded();
         mPendingIntentController.onActivityManagerInternalAdded();
-        // Wait for the synchronized block started in mProcessCpuThread,
-        // so that any other access to mProcessCpuTracker from main thread
-        // will be blocked during mProcessCpuTracker initialization.
-        try {
-            mProcessCpuInitLatch.await();
-        } catch (InterruptedException e) {
-            Slog.wtf(TAG, "Interrupted wait during start", e);
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Interrupted wait during start");
-        }
+        mAppProfiler.onActivityManagerInternalAdded();
     }
 
     public void initPowerManagement() {
@@ -2781,116 +2307,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    void updateCpuStats() {
-        final long now = SystemClock.uptimeMillis();
-        if (mLastCpuTime.get() >= now - MONITOR_CPU_MIN_TIME) {
-            return;
-        }
-        if (mProcessCpuMutexFree.compareAndSet(true, false)) {
-            synchronized (mProcessCpuThread) {
-                mProcessCpuThread.notify();
-            }
-        }
+    void updateCpuStatsLocked() {
+        mAppProfiler.updateCpuStatsLocked();
     }
 
     void updateCpuStatsNow() {
-        synchronized (mProcessCpuTracker) {
-            mProcessCpuMutexFree.set(false);
-            final long now = SystemClock.uptimeMillis();
-            boolean haveNewCpuStats = false;
-
-            if (MONITOR_CPU_USAGE &&
-                    mLastCpuTime.get() < (now-MONITOR_CPU_MIN_TIME)) {
-                mLastCpuTime.set(now);
-                mProcessCpuTracker.update();
-                if (mProcessCpuTracker.hasGoodLastStats()) {
-                    haveNewCpuStats = true;
-                    //Slog.i(TAG, mProcessCpu.printCurrentState());
-                    //Slog.i(TAG, "Total CPU usage: "
-                    //        + mProcessCpu.getTotalCpuPercent() + "%");
-
-                    // Slog the cpu usage if the property is set.
-                    if ("true".equals(SystemProperties.get("events.cpu"))) {
-                        int user = mProcessCpuTracker.getLastUserTime();
-                        int system = mProcessCpuTracker.getLastSystemTime();
-                        int iowait = mProcessCpuTracker.getLastIoWaitTime();
-                        int irq = mProcessCpuTracker.getLastIrqTime();
-                        int softIrq = mProcessCpuTracker.getLastSoftIrqTime();
-                        int idle = mProcessCpuTracker.getLastIdleTime();
-
-                        int total = user + system + iowait + irq + softIrq + idle;
-                        if (total == 0) total = 1;
-
-                        EventLogTags.writeCpu(
-                                ((user + system + iowait + irq + softIrq) * 100) / total,
-                                (user * 100) / total,
-                                (system * 100) / total,
-                                (iowait * 100) / total,
-                                (irq * 100) / total,
-                                (softIrq * 100) / total);
-                    }
-                }
-            }
-
-            final BatteryStatsImpl bstats = mBatteryStatsService.getActiveStatistics();
-            synchronized (bstats) {
-                if (haveNewCpuStats) {
-                    if (bstats.startAddingCpuLocked()) {
-                        int totalUTime = 0;
-                        int totalSTime = 0;
-                        final int statsCount = mProcessCpuTracker.countStats();
-                        final long elapsedRealtime = SystemClock.elapsedRealtime();
-                        final long uptime = SystemClock.uptimeMillis();
-                        synchronized (mPidsSelfLocked) {
-                            for (int i = 0; i < statsCount; i++) {
-                                ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
-                                if (!st.working) {
-                                    continue;
-                                }
-                                ProcessRecord pr = mPidsSelfLocked.get(st.pid);
-                                totalUTime += st.rel_utime;
-                                totalSTime += st.rel_stime;
-                                if (pr != null) {
-                                    BatteryStatsImpl.Uid.Proc ps = pr.curProcBatteryStats;
-                                    if (ps == null || !ps.isActive()) {
-                                        pr.curProcBatteryStats = ps = bstats.getProcessStatsLocked(
-                                                pr.info.uid, pr.processName,
-                                                elapsedRealtime, uptime);
-                                    }
-                                    ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
-                                    pr.curCpuTime += st.rel_utime + st.rel_stime;
-                                    if (pr.lastCpuTime == 0) {
-                                        pr.lastCpuTime = pr.curCpuTime;
-                                    }
-                                } else {
-                                    BatteryStatsImpl.Uid.Proc ps = st.batteryStats;
-                                    if (ps == null || !ps.isActive()) {
-                                        st.batteryStats = ps = bstats.getProcessStatsLocked(
-                                                bstats.mapUid(st.uid), st.name,
-                                                elapsedRealtime, uptime);
-                                    }
-                                    ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
-                                }
-                            }
-                        }
-
-                        final int userTime = mProcessCpuTracker.getLastUserTime();
-                        final int systemTime = mProcessCpuTracker.getLastSystemTime();
-                        final int iowaitTime = mProcessCpuTracker.getLastIoWaitTime();
-                        final int irqTime = mProcessCpuTracker.getLastIrqTime();
-                        final int softIrqTime = mProcessCpuTracker.getLastSoftIrqTime();
-                        final int idleTime = mProcessCpuTracker.getLastIdleTime();
-                        bstats.finishAddingCpuLocked(totalUTime, totalSTime, userTime,
-                                systemTime, iowaitTime, irqTime, softIrqTime, idleTime);
-                    }
-                }
-
-                if (mLastWriteTime < (now-BATTERY_STATS_TIME)) {
-                    mLastWriteTime = now;
-                    mBatteryStatsService.scheduleWriteToDisk();
-                }
-            }
-        }
+        mAppProfiler.updateCpuStatsNow();
     }
 
     @Override
@@ -3510,9 +2932,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        if (mProfileData.getProfileProc() == app) {
-            clearProfilerLocked();
-        }
+        mAppProfiler.onAppDiedLocked(app);
 
         mAtmInternal.handleAppDied(app.getWindowProcessController(), restarting, () -> {
             Slog.w(TAG, "Crash of app " + app.processName
@@ -3556,7 +2976,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // and the app that died was not running instrumentation,
         // then tell everyone we are now low on memory.
         if (!mProcessList.haveBackgroundProcessLocked()) {
-            boolean doReport = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
+            boolean doReport = Build.IS_DEBUGGABLE;
             if (doReport) {
                 long now = SystemClock.uptimeMillis();
                 if (now < (mLastMemUsageReportTime+5*60*1000)) {
@@ -3641,11 +3061,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                         "Process " + app.processName + " (pid " + pid + ") has died: "
                                 + ProcessList.makeOomAdjString(app.setAdj, true) + " "
                                 + ProcessList.makeProcStateString(app.setProcState), app.info.uid);
-                mAllowLowerMemLevel = true;
+                mAppProfiler.setAllowLowerMemLevelLocked(true);
             } else {
                 // Note that we always want to do oom adj to update our state with the
                 // new number of procs.
-                mAllowLowerMemLevel = false;
+                mAppProfiler.setAllowLowerMemLevelLocked(false);
                 doLowMem = false;
             }
             EventLogTags.writeAmProcDied(app.userId, app.pid, app.processName, app.setAdj,
@@ -4141,7 +3561,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (this) {
                 // Allow memory level to go down (the flag needs to be set before updating oom adj)
                 // because this method is also used to simulate low memory.
-                mAllowLowerMemLevel = true;
+                mAppProfiler.setAllowLowerMemLevelLocked(true);
                 mProcessList.killPackageProcessesLocked(null /* packageName */, -1 /* appId */,
                         UserHandle.USER_ALL, ProcessList.CACHED_APP_MIN_ADJ,
                         ApplicationExitInfo.REASON_USER_REQUESTED,
@@ -4926,48 +4346,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ApplicationInfo appInfo = instr != null ? instr.mTargetInfo : app.info;
             app.compat = compatibilityInfoForPackage(appInfo);
 
-            ProfilerInfo profilerInfo = null;
-            String preBindAgent = null;
-            if (mProfileData.getProfileApp() != null
-                    && mProfileData.getProfileApp().equals(processName)) {
-                mProfileData.setProfileProc(app);
-                if (mProfileData.getProfilerInfo() != null) {
-                    // Send a profiler info object to the app if either a file is given, or
-                    // an agent should be loaded at bind-time.
-                    boolean needsInfo = mProfileData.getProfilerInfo().profileFile != null
-                            || mProfileData.getProfilerInfo().attachAgentDuringBind;
-                    profilerInfo = needsInfo
-                            ? new ProfilerInfo(mProfileData.getProfilerInfo()) : null;
-                    if (mProfileData.getProfilerInfo().agent != null) {
-                        preBindAgent = mProfileData.getProfilerInfo().agent;
-                    }
-                }
-            } else if (instr != null && instr.mProfileFile != null) {
-                profilerInfo = new ProfilerInfo(instr.mProfileFile, null, 0, false, false,
-                        null, false);
-            }
-            if (mAppAgentMap != null && mAppAgentMap.containsKey(processName)) {
-                // We need to do a debuggable check here. See setAgentApp for why the check is
-                // postponed to here.
-                if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-                    String agent = mAppAgentMap.get(processName);
-                    // Do not overwrite already requested agent.
-                    if (profilerInfo == null) {
-                        profilerInfo = new ProfilerInfo(null, null, 0, false, false,
-                                mAppAgentMap.get(processName), true);
-                    } else if (profilerInfo.agent == null) {
-                        profilerInfo = profilerInfo.setAgent(mAppAgentMap.get(processName), true);
-                    }
-                }
-            }
-
-            if (profilerInfo != null && profilerInfo.profileFd != null) {
-                profilerInfo.profileFd = profilerInfo.profileFd.dup();
-                if (TextUtils.equals(mProfileData.getProfileApp(), processName)
-                        && mProfileData.getProfilerInfo() != null) {
-                    clearProfilerLocked();
-                }
-            }
+            ProfilerInfo profilerInfo = mAppProfiler.setupProfilerInfoLocked(thread, app, instr);
 
             // We deprecated Build.SERIAL and it is not accessible to
             // Instant Apps and target APIs higher than O MR1. Since access to the serial
@@ -4975,44 +4354,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             final String buildSerial = (!appInfo.isInstantApp()
                     && appInfo.targetSdkVersion < Build.VERSION_CODES.P)
                             ? sTheRealBuildSerial : Build.UNKNOWN;
-
-            // Check if this is a secondary process that should be incorporated into some
-            // currently active instrumentation.  (Note we do this AFTER all of the profiling
-            // stuff above because profiling can currently happen only in the primary
-            // instrumentation process.)
-            if (mActiveInstrumentation.size() > 0 && instr == null) {
-                for (int i = mActiveInstrumentation.size() - 1;
-                        i >= 0 && app.getActiveInstrumentation() == null; i--) {
-                    ActiveInstrumentation aInstr = mActiveInstrumentation.get(i);
-                    if (!aInstr.mFinished && aInstr.mTargetInfo.uid == app.uid) {
-                        if (aInstr.mTargetProcesses.length == 0) {
-                            // This is the wildcard mode, where every process brought up for
-                            // the target instrumentation should be included.
-                            if (aInstr.mTargetInfo.packageName.equals(app.info.packageName)) {
-                                app.setActiveInstrumentation(aInstr);
-                                aInstr.mRunningProcesses.add(app);
-                            }
-                        } else {
-                            for (String proc : aInstr.mTargetProcesses) {
-                                if (proc.equals(app.processName)) {
-                                    app.setActiveInstrumentation(aInstr);
-                                    aInstr.mRunningProcesses.add(app);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // If we were asked to attach an agent on startup, do so now, before we're binding
-            // application code.
-            if (preBindAgent != null) {
-                thread.attachAgent(preBindAgent);
-            }
-            if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-                thread.attachStartupAgents(app.info.dataDir);
-            }
 
             // Figure out whether the app needs to run in autofill compat mode.
             AutofillOptions autofillOptions = null;
@@ -5302,7 +4643,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 boolean sticky, int sendingUser) {
                             synchronized (ActivityManagerService.this) {
                                 mOomAdjuster.mCachedAppOptimizer.compactAllSystem();
-                                requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
+                                mAppProfiler.requestPssAllProcsLocked(
+                                        SystemClock.uptimeMillis(), true, false);
                             }
                         }
                     });
@@ -6902,32 +6244,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                         "Requires permission " + android.Manifest.permission.SET_ACTIVITY_WATCHER);
             }
 
-            if (agent == null) {
-                if (mAppAgentMap != null) {
-                    mAppAgentMap.remove(packageName);
-                    if (mAppAgentMap.isEmpty()) {
-                        mAppAgentMap = null;
-                    }
-                }
-            } else {
-                if (mAppAgentMap == null) {
-                    mAppAgentMap = new HashMap<>();
-                }
-                if (mAppAgentMap.size() >= 100) {
-                    // Limit the size of the map, to avoid OOMEs.
-                    Slog.e(TAG, "App agent map has too many entries, cannot add " + packageName
-                            + "/" + agent);
-                    return;
-                }
-                mAppAgentMap.put(packageName, agent);
-            }
+            mAppProfiler.setAgentAppLocked(packageName, agent);
         }
     }
 
     void setTrackAllocationApp(ApplicationInfo app, String processName) {
         synchronized (this) {
-            boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
-            if (!isDebuggable) {
+            if (!Build.IS_DEBUGGABLE) {
                 if ((app.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
                     throw new SecurityException("Process not debuggable: " + app.packageName);
                 }
@@ -6939,8 +6262,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     void setProfileApp(ApplicationInfo app, String processName, ProfilerInfo profilerInfo) {
         synchronized (this) {
-            boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
-            if (!isDebuggable) {
+            if (!Build.IS_DEBUGGABLE) {
                 boolean isAppDebuggable = (app.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
                 boolean isAppProfileable = app.isProfileableByShell();
                 if (!isAppDebuggable && !isAppProfileable) {
@@ -6948,24 +6270,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                             + "and not profileable by shell: " + app.packageName);
                 }
             }
-            mProfileData.setProfileApp(processName);
-
-            if (mProfileData.getProfilerInfo() != null) {
-                if (mProfileData.getProfilerInfo().profileFd != null) {
-                    try {
-                        mProfileData.getProfilerInfo().profileFd.close();
-                    } catch (IOException e) {
-                    }
-                }
-            }
-            mProfileData.setProfilerInfo(new ProfilerInfo(profilerInfo));
-            mProfileType = 0;
+            mAppProfiler.setProfileAppLocked(processName, profilerInfo);
         }
     }
 
     void setNativeDebuggingAppLocked(ApplicationInfo app, String processName) {
-        boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
-        if (!isDebuggable) {
+        if (!Build.IS_DEBUGGABLE) {
             if ((app.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
                 throw new SecurityException("Process not debuggable: " + app.packageName);
             }
@@ -7047,7 +6357,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             return;
         }
         synchronized (this) {
-            startHeapDumpLocked(pr, true);
+            mAppProfiler.startHeapDumpLocked(pr, true);
         }
     }
 
@@ -7823,10 +7133,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         br.onReceive(mContext, intent);
     }
 
-    private long getLowRamTimeSinceIdle(long now) {
-        return mLowRamTimeSinceLastIdle + (mLowRamStartTime > 0 ? (now-mLowRamStartTime) : 0);
-    }
-
     @Override
     public void performIdleMaintenance() {
         if (checkCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
@@ -7842,12 +7148,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Compact all non-zygote processes to freshen up the page cache.
             mOomAdjuster.mCachedAppOptimizer.compactAllSystem();
 
-            final long lowRamSinceLastIdle = getLowRamTimeSinceIdle(now);
+            final long lowRamSinceLastIdle = mAppProfiler.getLowRamTimeSinceIdleLocked(now);
             mLastIdleTime = now;
-            mLowRamTimeSinceLastIdle = 0;
-            if (mLowRamStartTime != 0) {
-                mLowRamStartTime = now;
-            }
+            mAppProfiler.updateLowRamTimestampLocked(now);
 
             StringBuilder sb = new StringBuilder(128);
             sb.append("Idle maintenance over ");
@@ -7898,8 +7201,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         && proc.setProcState >= ActivityManager.PROCESS_STATE_PERSISTENT) {
                     proc.notCachedSinceIdle = true;
                     proc.initialIdlePss = 0;
-                    proc.nextPssTime = ProcessList.computeNextPssTime(proc.setProcState, null,
-                            mTestPssMode, mAtmInternal.isSleeping(), now);
+                    mAppProfiler.updateNextPssTimeLocked(proc.setProcState, proc, now, true);
                 }
             }
         }
@@ -7937,11 +7239,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 NETWORK_ACCESS_TIMEOUT_MS, NETWORK_ACCESS_TIMEOUT_DEFAULT_MS);
         mHiddenApiBlacklist.registerObserver();
 
-        final long pssDeferralMs = DeviceConfig.getLong(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                ACTIVITY_START_PSS_DEFER_CONFIG, 0L);
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                ActivityThread.currentApplication().getMainExecutor(),
-                mPssDelayConfigListener);
+        mAppProfiler.retrieveSettings();
 
         synchronized (this) {
             mDebugApp = mOrigDebugApp = debugApp;
@@ -7960,7 +7258,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             mUserController.setInitialConfig(userSwitchUiEnabled, maxRunningUsers,
                     delayUserDataLocking);
             mWaitForNetworkTimeoutMs = waitForNetworkTimeoutMs;
-            mPssDeferralTime = pssDeferralMs;
         }
     }
 
@@ -8950,7 +8247,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public int getMemoryTrimLevel() {
         enforceNotIsolatedCaller("getMyMemoryState");
         synchronized (this) {
-            return mLastMemoryLevel;
+            return mAppProfiler.getLastMemoryLevelLocked();
         }
     }
 
@@ -9961,7 +9258,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         needSep = mAppErrors.dumpLocked(fd, pw, needSep, dumpPackage);
 
         needSep = mAtmInternal.dumpForProcesses(fd, pw, dumpAll, dumpPackage, dumpAppId, needSep,
-                mTestPssMode, mWakefulness);
+                mAppProfiler.getTestPssModeLocked(), mWakefulness);
 
         if (dumpAll && mProcessList.mPendingStarts.size() > 0) {
             if (needSep) pw.println();
@@ -10005,35 +9302,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + " mOrigWaitForDebugger=" + mOrigWaitForDebugger);
             }
         }
-        if (mMemWatchProcesses.getMap().size() > 0) {
-            pw.println("  Mem watch processes:");
-            final ArrayMap<String, SparseArray<Pair<Long, String>>> procs
-                    = mMemWatchProcesses.getMap();
-            for (int i=0; i<procs.size(); i++) {
-                final String proc = procs.keyAt(i);
-                final SparseArray<Pair<Long, String>> uids = procs.valueAt(i);
-                for (int j=0; j<uids.size(); j++) {
-                    if (needSep) {
-                        pw.println();
-                        needSep = false;
-                    }
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("    ").append(proc).append('/');
-                    UserHandle.formatUid(sb, uids.keyAt(j));
-                    Pair<Long, String> val = uids.valueAt(j);
-                    sb.append(": "); DebugUtils.sizeValueToString(val.first, sb);
-                    if (val.second != null) {
-                        sb.append(", report to ").append(val.second);
-                    }
-                    pw.println(sb.toString());
-                }
-            }
-            pw.print("  mMemWatchDumpProcName="); pw.println(mMemWatchDumpProcName);
-            pw.print("  mMemWatchDumpUri="); pw.println(mMemWatchDumpUri);
-            pw.print("  mMemWatchDumpPid="); pw.println(mMemWatchDumpPid);
-            pw.print("  mMemWatchDumpUid="); pw.println(mMemWatchDumpUid);
-            pw.print("  mMemWatchIsUserInitiated="); pw.println(mMemWatchIsUserInitiated);
-        }
+        needSep = mAppProfiler.dumpMemWatchProcessesLocked(pw, needSep);
         if (mTrackAllocationApp != null) {
             if (dumpPackage == null || dumpPackage.equals(mTrackAllocationApp)) {
                 if (needSep) {
@@ -10043,29 +9312,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("  mTrackAllocationApp=" + mTrackAllocationApp);
             }
         }
-        if (mProfileData.getProfileApp() != null || mProfileData.getProfileProc() != null
-                || (mProfileData.getProfilerInfo() != null &&
-                (mProfileData.getProfilerInfo().profileFile != null
-                        || mProfileData.getProfilerInfo().profileFd != null))) {
-            if (dumpPackage == null || dumpPackage.equals(mProfileData.getProfileApp())) {
-                if (needSep) {
-                    pw.println();
-                    needSep = false;
-                }
-                pw.println("  mProfileApp=" + mProfileData.getProfileApp()
-                        + " mProfileProc=" + mProfileData.getProfileProc());
-                if (mProfileData.getProfilerInfo() != null) {
-                    pw.println("  mProfileFile=" + mProfileData.getProfilerInfo().profileFile
-                            + " mProfileFd=" + mProfileData.getProfilerInfo().profileFd);
-                    pw.println("  mSamplingInterval="
-                            + mProfileData.getProfilerInfo().samplingInterval +
-                            " mAutoStopProfiler="
-                            + mProfileData.getProfilerInfo().autoStopProfiler +
-                            " mStreamingOutput=" + mProfileData.getProfilerInfo().streamingOutput);
-                    pw.println("  mProfileType=" + mProfileType);
-                }
-            }
-        }
+        needSep = mAppProfiler.dumpProfileDataLocked(pw, dumpPackage, needSep);
         if (mNativeDebuggingApp != null) {
             if (dumpPackage == null || dumpPackage.equals(mNativeDebuggingApp)) {
                 if (needSep) {
@@ -10093,14 +9340,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                         pw.println("");
                 mOomAdjuster.dumpSequenceNumbersLocked(pw);
                 mOomAdjuster.dumpProcCountsLocked(pw);
-                pw.println("  mAllowLowerMemLevel=" + mAllowLowerMemLevel
-                        + " mLastMemoryLevel=" + mLastMemoryLevel
-                        + " mLastNumProcesses=" + mLastNumProcesses);
+                mAppProfiler.dumpMemoryLevelsLocked(pw);
                 long now = SystemClock.uptimeMillis();
                 pw.print("  mLastIdleTime=");
                         TimeUtils.formatDuration(now, mLastIdleTime, pw);
                         pw.print(" mLowRamSinceLastIdle=");
-                        TimeUtils.formatDuration(getLowRamTimeSinceIdle(now), pw);
+                        TimeUtils.formatDuration(
+                                mAppProfiler.getLowRamTimeSinceIdleLocked(now), pw);
                         pw.println();
 
                 pw.println();
@@ -10248,7 +9494,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 dumpPackage);
         mAppErrors.dumpDebug(proto, ActivityManagerServiceDumpProcessesProto.APP_ERRORS,
                 dumpPackage);
-        mAtmInternal.writeProcessesToProto(proto, dumpPackage, mWakefulness, mTestPssMode);
+        mAtmInternal.writeProcessesToProto(proto, dumpPackage, mWakefulness,
+                mAppProfiler.getTestPssModeLocked());
 
         if (dumpPackage == null) {
             mUserController.dumpDebug(proto,
@@ -10285,42 +9532,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        if (mMemWatchProcesses.getMap().size() > 0) {
-            final long token = proto.start(ActivityManagerServiceDumpProcessesProto.MEM_WATCH_PROCESSES);
-            ArrayMap<String, SparseArray<Pair<Long, String>>> procs = mMemWatchProcesses.getMap();
-            for (int i=0; i<procs.size(); i++) {
-                final String proc = procs.keyAt(i);
-                final SparseArray<Pair<Long, String>> uids = procs.valueAt(i);
-                final long ptoken = proto.start(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.PROCS);
-                proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Process.NAME, proc);
-                for (int j=0; j<uids.size(); j++) {
-                    final long utoken = proto.start(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Process.MEM_STATS);
-                    Pair<Long, String> val = uids.valueAt(j);
-                    proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Process.MemStats.UID, uids.keyAt(j));
-                    proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Process.MemStats.SIZE,
-                            DebugUtils.sizeValueToString(val.first, new StringBuilder()));
-                    proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Process.MemStats.REPORT_TO, val.second);
-                    proto.end(utoken);
-                }
-                proto.end(ptoken);
-            }
-
-            final long dtoken = proto.start(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.DUMP);
-            proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.PROC_NAME,
-                    mMemWatchDumpProcName);
-            proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.URI,
-                    mMemWatchDumpUri.toString());
-            proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.PID,
-                    mMemWatchDumpPid);
-            proto.write(ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.UID,
-                    mMemWatchDumpUid);
-            proto.write(
-                    ActivityManagerServiceDumpProcessesProto.MemWatchProcess.Dump.IS_USER_INITIATED,
-                    mMemWatchIsUserInitiated);
-            proto.end(dtoken);
-
-            proto.end(token);
-        }
+        mAppProfiler.writeMemWatchProcessToProtoLocked(proto);
 
         if (mTrackAllocationApp != null) {
             if (dumpPackage == null || dumpPackage.equals(mTrackAllocationApp)) {
@@ -10329,25 +9541,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        if (mProfileData.getProfileApp() != null || mProfileData.getProfileProc() != null
-                || (mProfileData.getProfilerInfo() != null &&
-                (mProfileData.getProfilerInfo().profileFile != null
-                        || mProfileData.getProfilerInfo().profileFd != null))) {
-            if (dumpPackage == null || dumpPackage.equals(mProfileData.getProfileApp())) {
-                final long token = proto.start(ActivityManagerServiceDumpProcessesProto.PROFILE);
-                proto.write(ActivityManagerServiceDumpProcessesProto.Profile.APP_NAME,
-                        mProfileData.getProfileApp());
-                mProfileData.getProfileProc().dumpDebug(proto,
-                        ActivityManagerServiceDumpProcessesProto.Profile.PROC);
-                if (mProfileData.getProfilerInfo() != null) {
-                    mProfileData.getProfilerInfo().dumpDebug(proto,
-                            ActivityManagerServiceDumpProcessesProto.Profile.INFO);
-                    proto.write(ActivityManagerServiceDumpProcessesProto.Profile.TYPE,
-                            mProfileType);
-                }
-                proto.end(token);
-            }
-        }
+        mAppProfiler.writeProfileDataToProtoLocked(proto, dumpPackage);
 
         if (dumpPackage == null || dumpPackage.equals(mNativeDebuggingApp)) {
             proto.write(ActivityManagerServiceDumpProcessesProto.NATIVE_DEBUGGING_APP, mNativeDebuggingApp);
@@ -10365,12 +9559,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             proto.write(ActivityManagerServiceDumpProcessesProto.BOOT_ANIMATION_COMPLETE, mBootAnimationComplete);
             proto.write(ActivityManagerServiceDumpProcessesProto.LAST_POWER_CHECK_UPTIME_MS, mLastPowerCheckUptime);
             mOomAdjuster.dumpProcessListVariablesLocked(proto);
-            proto.write(ActivityManagerServiceDumpProcessesProto.ALLOW_LOWER_MEM_LEVEL, mAllowLowerMemLevel);
-            proto.write(ActivityManagerServiceDumpProcessesProto.LAST_MEMORY_LEVEL, mLastMemoryLevel);
-            proto.write(ActivityManagerServiceDumpProcessesProto.LAST_NUM_PROCESSES, mLastNumProcesses);
+            mAppProfiler.writeMemoryLevelsToProtoLocked(proto);
             long now = SystemClock.uptimeMillis();
             ProtoUtils.toDuration(proto, ActivityManagerServiceDumpProcessesProto.LAST_IDLE_TIME, mLastIdleTime, now);
-            proto.write(ActivityManagerServiceDumpProcessesProto.LOW_RAM_SINCE_LAST_IDLE_MS, getLowRamTimeSinceIdle(now));
+            proto.write(ActivityManagerServiceDumpProcessesProto.LOW_RAM_SINCE_LAST_IDLE_MS,
+                    mAppProfiler.getLowRamTimeSinceIdleLocked(now));
         }
     }
 
@@ -11553,7 +10746,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private final void dumpApplicationMemoryUsage(FileDescriptor fd, PrintWriter pw, String prefix,
-            MemoryUsageDumpOptions opts, String[] innerArgs, boolean brief,
+            MemoryUsageDumpOptions opts, final String[] innerArgs, boolean brief,
             ArrayList<ProcessRecord> procs, PrintWriter categoryPw) {
         long uptime = SystemClock.uptimeMillis();
         long realtime = SystemClock.elapsedRealtime();
@@ -11573,16 +10766,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                         findPid = Integer.parseInt(innerArgs[0]);
                     } catch (NumberFormatException e) {
                     }
-                    synchronized (mProcessCpuTracker) {
-                        final int N = mProcessCpuTracker.countStats();
-                        for (int i=0; i<N; i++) {
-                            ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
-                            if (st.pid == findPid || (st.baseName != null
-                                    && st.baseName.equals(innerArgs[0]))) {
-                                nativeProcs.add(st);
-                            }
+                    final int fFindPid = findPid;
+                    mAppProfiler.forAllCpuStats((st) -> {
+                        if (st.pid == fFindPid || (st.baseName != null
+                                && st.baseName.equals(innerArgs[0]))) {
+                            nativeProcs.add(st);
                         }
-                    }
+                    });
                     if (nativeProcs.size() > 0) {
                         dumpApplicationMemoryUsageHeader(pw, uptime, realtime,
                                 opts.isCheckinRequest, opts.isCompact);
@@ -11640,21 +10830,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         ArrayList<MemItem> procMems = new ArrayList<MemItem>();
         final SparseArray<MemItem> procMemsMap = new SparseArray<MemItem>();
-        long nativePss = 0;
-        long nativeSwapPss = 0;
-        long nativeRss = 0;
-        long dalvikPss = 0;
-        long dalvikSwapPss = 0;
-        long dalvikRss = 0;
+        final long[] ss = new long[INDEX_LAST];
         long[] dalvikSubitemPss = opts.dumpDalvik ? new long[Debug.MemoryInfo.NUM_DVK_STATS] :
                 EmptyArray.LONG;
         long[] dalvikSubitemSwapPss = opts.dumpDalvik ? new long[Debug.MemoryInfo.NUM_DVK_STATS] :
                 EmptyArray.LONG;
         long[] dalvikSubitemRss = opts.dumpDalvik ? new long[Debug.MemoryInfo.NUM_DVK_STATS] :
                 EmptyArray.LONG;
-        long otherPss = 0;
-        long otherSwapPss = 0;
-        long otherRss = 0;
         long[] miscPss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
         long[] miscSwapPss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
         long[] miscRss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
@@ -11665,7 +10847,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         ArrayList<MemItem>[] oomProcs = (ArrayList<MemItem>[])
                 new ArrayList[DUMP_MEM_OOM_LABEL.length];
 
-        long totalPss = 0;
         long totalSwapPss = 0;
         long totalRss = 0;
         long cachedPss = 0;
@@ -11774,40 +10955,40 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
 
                 if (!opts.isCheckinRequest && mi != null) {
-                    totalPss += myTotalPss;
-                    totalSwapPss += myTotalSwapPss;
-                    totalRss += myTotalRss;
+                    ss[INDEX_TOTAL_PSS] += myTotalPss;
+                    ss[INDEX_TOTAL_SWAP_PSS] += myTotalSwapPss;
+                    ss[INDEX_TOTAL_RSS] += myTotalRss;
                     MemItem pssItem = new MemItem(r.processName + " (pid " + pid +
                             (hasActivities ? " / activities)" : ")"), r.processName, myTotalPss,
                             myTotalSwapPss, myTotalRss, pid, hasActivities);
                     procMems.add(pssItem);
                     procMemsMap.put(pid, pssItem);
 
-                    nativePss += mi.nativePss;
-                    nativeSwapPss += mi.nativeSwappedOutPss;
-                    nativeRss += mi.nativeRss;
-                    dalvikPss += mi.dalvikPss;
-                    dalvikSwapPss += mi.dalvikSwappedOutPss;
-                    dalvikRss += mi.dalvikRss;
+                    ss[INDEX_NATIVE_PSS] += mi.nativePss;
+                    ss[INDEX_NATIVE_SWAP_PSS] += mi.nativeSwappedOutPss;
+                    ss[INDEX_NATIVE_RSS] += mi.nativeRss;
+                    ss[INDEX_DALVIK_PSS] += mi.dalvikPss;
+                    ss[INDEX_DALVIK_SWAP_PSS] += mi.dalvikSwappedOutPss;
+                    ss[INDEX_DALVIK_RSS] += mi.dalvikRss;
                     for (int j=0; j<dalvikSubitemPss.length; j++) {
                         dalvikSubitemPss[j] += mi.getOtherPss(Debug.MemoryInfo.NUM_OTHER_STATS + j);
                         dalvikSubitemSwapPss[j] +=
                                 mi.getOtherSwappedOutPss(Debug.MemoryInfo.NUM_OTHER_STATS + j);
                         dalvikSubitemRss[j] += mi.getOtherRss(Debug.MemoryInfo.NUM_OTHER_STATS + j);
                     }
-                    otherPss += mi.otherPss;
-                    otherRss += mi.otherRss;
-                    otherSwapPss += mi.otherSwappedOutPss;
+                    ss[INDEX_OTHER_PSS] += mi.otherPss;
+                    ss[INDEX_OTHER_RSS] += mi.otherRss;
+                    ss[INDEX_OTHER_SWAP_PSS] += mi.otherSwappedOutPss;
                     for (int j=0; j<Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
                         long mem = mi.getOtherPss(j);
                         miscPss[j] += mem;
-                        otherPss -= mem;
+                        ss[INDEX_OTHER_PSS] -= mem;
                         mem = mi.getOtherSwappedOutPss(j);
                         miscSwapPss[j] += mem;
-                        otherSwapPss -= mem;
+                        ss[INDEX_OTHER_SWAP_PSS] -= mem;
                         mem = mi.getOtherRss(j);
                         miscRss[j] += mem;
-                        otherRss -= mem;
+                        ss[INDEX_OTHER_RSS] -= mem;
                     }
 
                     if (oomAdj >= ProcessList.CACHED_APP_MIN_ADJ) {
@@ -11837,86 +11018,87 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (collectNative) {
             mi = null;
-            synchronized (mProcessCpuTracker) {
-                final int N = mProcessCpuTracker.countStats();
-                for (int i=0; i<N; i++) {
-                    ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
-                    if (st.vsize > 0 && procMemsMap.indexOfKey(st.pid) < 0) {
-                        if (mi == null) {
-                            mi = new Debug.MemoryInfo();
-                        }
-                        if (!brief && !opts.oomOnly) {
-                            if (!Debug.getMemoryInfo(st.pid, mi)) {
-                                continue;
-                            }
-                        } else {
-                            long pss = Debug.getPss(st.pid, tmpLong, null);
-                            if (pss == 0) {
-                                continue;
-                            }
-                            mi.nativePss = (int) pss;
-                            mi.nativePrivateDirty = (int) tmpLong[0];
-                            mi.nativeRss = (int) tmpLong[2];
-                        }
-
-                        final long myTotalPss = mi.getTotalPss();
-                        final long myTotalSwapPss = mi.getTotalSwappedOutPss();
-                        final long myTotalRss = mi.getTotalRss();
-                        totalPss += myTotalPss;
-                        totalSwapPss += myTotalSwapPss;
-                        totalRss += myTotalRss;
-                        nativeProcTotalPss += myTotalPss;
-
-                        MemItem pssItem = new MemItem(st.name + " (pid " + st.pid + ")",
-                                st.name, myTotalPss, mi.getSummaryTotalSwapPss(), myTotalRss,
-                                st.pid, false);
-                        procMems.add(pssItem);
-
-                        nativePss += mi.nativePss;
-                        nativeSwapPss += mi.nativeSwappedOutPss;
-                        nativeRss += mi.nativeRss;
-                        dalvikPss += mi.dalvikPss;
-                        dalvikSwapPss += mi.dalvikSwappedOutPss;
-                        dalvikRss += mi.dalvikRss;
-                        for (int j=0; j<dalvikSubitemPss.length; j++) {
-                            dalvikSubitemPss[j] += mi.getOtherPss(Debug.MemoryInfo.NUM_OTHER_STATS + j);
-                            dalvikSubitemSwapPss[j] +=
-                                    mi.getOtherSwappedOutPss(Debug.MemoryInfo.NUM_OTHER_STATS + j);
-                            dalvikSubitemRss[j] += mi.getOtherRss(Debug.MemoryInfo.NUM_OTHER_STATS
-                                    + j);
-                        }
-                        otherPss += mi.otherPss;
-                        otherSwapPss += mi.otherSwappedOutPss;
-                        otherRss += mi.otherRss;
-                        for (int j=0; j<Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
-                            long mem = mi.getOtherPss(j);
-                            miscPss[j] += mem;
-                            otherPss -= mem;
-                            mem = mi.getOtherSwappedOutPss(j);
-                            miscSwapPss[j] += mem;
-                            otherSwapPss -= mem;
-                            mem = mi.getOtherRss(j);
-                            miscRss[j] += mem;
-                            otherRss -= mem;
-                        }
-                        oomPss[0] += myTotalPss;
-                        oomSwapPss[0] += myTotalSwapPss;
-                        if (oomProcs[0] == null) {
-                            oomProcs[0] = new ArrayList<MemItem>();
-                        }
-                        oomProcs[0].add(pssItem);
-                        oomRss[0] += myTotalRss;
+            final Debug.MemoryInfo[] memInfos = new Debug.MemoryInfo[1];
+            mAppProfiler.forAllCpuStats((st) -> {
+                if (st.vsize > 0 && procMemsMap.indexOfKey(st.pid) < 0) {
+                    if (memInfos[0] == null) {
+                        memInfos[0] = new Debug.MemoryInfo();
                     }
+                    final Debug.MemoryInfo info = memInfos[0];
+                    if (!brief && !opts.oomOnly) {
+                        if (!Debug.getMemoryInfo(st.pid, info)) {
+                            return;
+                        }
+                    } else {
+                        long pss = Debug.getPss(st.pid, tmpLong, null);
+                        if (pss == 0) {
+                            return;
+                        }
+                        info.nativePss = (int) pss;
+                        info.nativePrivateDirty = (int) tmpLong[0];
+                        info.nativeRss = (int) tmpLong[2];
+                    }
+
+                    final long myTotalPss = info.getTotalPss();
+                    final long myTotalSwapPss = info.getTotalSwappedOutPss();
+                    final long myTotalRss = info.getTotalRss();
+                    ss[INDEX_TOTAL_PSS] += myTotalPss;
+                    ss[INDEX_TOTAL_SWAP_PSS] += myTotalSwapPss;
+                    ss[INDEX_TOTAL_RSS] += myTotalRss;
+                    ss[INDEX_TOTAL_NATIVE_PSS] += myTotalPss;
+
+                    MemItem pssItem = new MemItem(st.name + " (pid " + st.pid + ")",
+                            st.name, myTotalPss, info.getSummaryTotalSwapPss(), myTotalRss,
+                            st.pid, false);
+                    procMems.add(pssItem);
+
+                    ss[INDEX_NATIVE_PSS] += info.nativePss;
+                    ss[INDEX_NATIVE_SWAP_PSS] += info.nativeSwappedOutPss;
+                    ss[INDEX_NATIVE_RSS] += info.nativeRss;
+                    ss[INDEX_DALVIK_PSS] += info.dalvikPss;
+                    ss[INDEX_DALVIK_SWAP_PSS] += info.dalvikSwappedOutPss;
+                    ss[INDEX_DALVIK_RSS] += info.dalvikRss;
+                    for (int j = 0; j < dalvikSubitemPss.length; j++) {
+                        dalvikSubitemPss[j] += info.getOtherPss(
+                                Debug.MemoryInfo.NUM_OTHER_STATS + j);
+                        dalvikSubitemSwapPss[j] +=
+                                info.getOtherSwappedOutPss(Debug.MemoryInfo.NUM_OTHER_STATS + j);
+                        dalvikSubitemRss[j] += info.getOtherRss(Debug.MemoryInfo.NUM_OTHER_STATS
+                                + j);
+                    }
+                    ss[INDEX_OTHER_PSS] += info.otherPss;
+                    ss[INDEX_OTHER_SWAP_PSS] += info.otherSwappedOutPss;
+                    ss[INDEX_OTHER_RSS] += info.otherRss;
+                    for (int j = 0; j < Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
+                        long mem = info.getOtherPss(j);
+                        miscPss[j] += mem;
+                        ss[INDEX_OTHER_PSS] -= mem;
+                        mem = info.getOtherSwappedOutPss(j);
+                        miscSwapPss[j] += mem;
+                        ss[INDEX_OTHER_SWAP_PSS] -= mem;
+                        mem = info.getOtherRss(j);
+                        miscRss[j] += mem;
+                        ss[INDEX_OTHER_RSS] -= mem;
+                    }
+                    oomPss[0] += myTotalPss;
+                    oomSwapPss[0] += myTotalSwapPss;
+                    if (oomProcs[0] == null) {
+                        oomProcs[0] = new ArrayList<MemItem>();
+                    }
+                    oomProcs[0].add(pssItem);
+                    oomRss[0] += myTotalRss;
                 }
-            }
+            });
 
             ArrayList<MemItem> catMems = new ArrayList<MemItem>();
 
-            catMems.add(new MemItem("Native", "Native", nativePss, nativeSwapPss, nativeRss, -1));
+            catMems.add(new MemItem("Native", "Native",
+                    ss[INDEX_NATIVE_PSS], ss[INDEX_NATIVE_SWAP_PSS], ss[INDEX_NATIVE_RSS], -1));
             final int dalvikId = -2;
-            catMems.add(new MemItem("Dalvik", "Dalvik", dalvikPss, dalvikSwapPss, dalvikRss,
-                    dalvikId));
-            catMems.add(new MemItem("Unknown", "Unknown", otherPss, otherSwapPss, otherRss, -3));
+            catMems.add(new MemItem("Dalvik", "Dalvik", ss[INDEX_DALVIK_PSS],
+                    ss[INDEX_DALVIK_SWAP_PSS], ss[INDEX_DALVIK_RSS], dalvikId));
+            catMems.add(new MemItem("Unknown", "Unknown", ss[INDEX_OTHER_PSS],
+                    ss[INDEX_OTHER_SWAP_PSS], ss[INDEX_OTHER_RSS], -3));
             for (int j=0; j<Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
                 String label = Debug.MemoryInfo.getOtherLabel(j);
                 catMems.add(new MemItem(label, label, miscPss[j], miscSwapPss[j], miscRss[j],  j));
@@ -11982,7 +11164,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 dumpMemItems(out, "  ", "cat", catMems, true, opts.isCompact, false, false);
             }
-            opts.dumpSwapPss = opts.dumpSwapPss && hasSwapPss && totalSwapPss != 0;
+            opts.dumpSwapPss = opts.dumpSwapPss && hasSwapPss && ss[INDEX_TOTAL_SWAP_PSS] != 0;
             if (!brief && !opts.oomOnly && !opts.isCompact) {
                 pw.println();
                 pw.println("Total PSS by process:");
@@ -12008,40 +11190,23 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             MemInfoReader memInfo = new MemInfoReader();
             memInfo.readMemInfo();
-            if (nativeProcTotalPss > 0) {
+            if (ss[INDEX_TOTAL_NATIVE_PSS] > 0) {
                 synchronized (mProcessStats.mLock) {
                     final long cachedKb = memInfo.getCachedSizeKb();
                     final long freeKb = memInfo.getFreeSizeKb();
                     final long zramKb = memInfo.getZramTotalSizeKb();
                     final long kernelKb = memInfo.getKernelUsedSizeKb();
-                    EventLogTags.writeAmMeminfo(cachedKb*1024, freeKb*1024, zramKb*1024,
-                            kernelKb*1024, nativeProcTotalPss*1024);
+                    EventLogTags.writeAmMeminfo(cachedKb * 1024, freeKb * 1024, zramKb * 1024,
+                            kernelKb * 1024, ss[INDEX_TOTAL_NATIVE_PSS] * 1024);
                     mProcessStats.addSysMemUsageLocked(cachedKb, freeKb, zramKb, kernelKb,
-                            nativeProcTotalPss);
+                            ss[INDEX_TOTAL_NATIVE_PSS]);
                 }
             }
             if (!brief) {
                 if (!opts.isCompact) {
                     pw.print("Total RAM: "); pw.print(stringifyKBSize(memInfo.getTotalSizeKb()));
                     pw.print(" (status ");
-                    switch (mLastMemoryLevel) {
-                        case ProcessStats.ADJ_MEM_FACTOR_NORMAL:
-                            pw.println("normal)");
-                            break;
-                        case ProcessStats.ADJ_MEM_FACTOR_MODERATE:
-                            pw.println("moderate)");
-                            break;
-                        case ProcessStats.ADJ_MEM_FACTOR_LOW:
-                            pw.println("low)");
-                            break;
-                        case ProcessStats.ADJ_MEM_FACTOR_CRITICAL:
-                            pw.println("critical)");
-                            break;
-                        default:
-                            pw.print(mLastMemoryLevel);
-                            pw.println(")");
-                            break;
-                    }
+                    mAppProfiler.dumpLastMemoryLevelLocked(pw);
                     pw.print(" Free RAM: ");
                     pw.print(stringifyKBSize(cachedPss + memInfo.getCachedSizeKb()
                             + memInfo.getFreeSizeKb()));
@@ -12056,7 +11221,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.print("ram,"); pw.print(memInfo.getTotalSizeKb()); pw.print(",");
                     pw.print(cachedPss + memInfo.getCachedSizeKb()
                             + memInfo.getFreeSizeKb()); pw.print(",");
-                    pw.println(totalPss - cachedPss);
+                    pw.println(ss[INDEX_TOTAL_PSS] - cachedPss);
                 }
             }
             long kernelUsed = memInfo.getKernelUsedSizeKb();
@@ -12078,13 +11243,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
                 kernelUsed += ionHeap;
             }
-            final long lostRAM = memInfo.getTotalSizeKb() - (totalPss - totalSwapPss)
+            final long lostRAM = memInfo.getTotalSizeKb()
+                    - (ss[INDEX_TOTAL_PSS] - ss[INDEX_TOTAL_SWAP_PSS])
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
                     - kernelUsed - memInfo.getZramTotalSizeKb();
             if (!opts.isCompact) {
-                pw.print(" Used RAM: "); pw.print(stringifyKBSize(totalPss - cachedPss
+                pw.print(" Used RAM: "); pw.print(stringifyKBSize(ss[INDEX_TOTAL_PSS] - cachedPss
                         + kernelUsed)); pw.print(" (");
-                pw.print(stringifyKBSize(totalPss - cachedPss)); pw.print(" used pss + ");
+                pw.print(stringifyKBSize(ss[INDEX_TOTAL_PSS] - cachedPss)); pw.print(" used pss + ");
                 pw.print(stringifyKBSize(kernelUsed)); pw.print(" kernel)\n");
                 pw.print(" Lost RAM: "); pw.println(stringifyKBSize(lostRAM));
             } else {
@@ -12158,7 +11324,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private final void dumpApplicationMemoryUsage(FileDescriptor fd,
-            MemoryUsageDumpOptions opts, String[] innerArgs, boolean brief,
+            MemoryUsageDumpOptions opts, final String[] innerArgs, boolean brief,
             ArrayList<ProcessRecord> procs) {
         final long uptimeMs = SystemClock.uptimeMillis();
         final long realtimeMs = SystemClock.elapsedRealtime();
@@ -12170,7 +11336,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (innerArgs.length > 0) {
                 proc = innerArgs[0];
                 if (proc.charAt(0) != '-') {
-                    ArrayList<ProcessCpuTracker.Stats> nativeProcs
+                    final ArrayList<ProcessCpuTracker.Stats> nativeProcs
                             = new ArrayList<ProcessCpuTracker.Stats>();
                     updateCpuStatsNow();
                     int findPid = -1;
@@ -12178,16 +11344,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                         findPid = Integer.parseInt(innerArgs[0]);
                     } catch (NumberFormatException e) {
                     }
-                    synchronized (mProcessCpuTracker) {
-                        final int N = mProcessCpuTracker.countStats();
-                        for (int i=0; i<N; i++) {
-                            ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
-                            if (st.pid == findPid || (st.baseName != null
-                                    && st.baseName.equals(innerArgs[0]))) {
-                                nativeProcs.add(st);
-                            }
+                    final int fFindPid = findPid;
+                    mAppProfiler.forAllCpuStats((st) -> {
+                        if (st.pid == fFindPid || (st.baseName != null
+                                && st.baseName.equals(innerArgs[0]))) {
+                            nativeProcs.add(st);
                         }
-                    }
+                    });
                     if (nativeProcs.size() > 0) {
                         ProtoOutputStream proto = new ProtoOutputStream(fd);
 
@@ -12251,36 +11414,25 @@ public class ActivityManagerService extends IActivityManager.Stub
         proto.write(MemInfoDumpProto.UPTIME_DURATION_MS, uptimeMs);
         proto.write(MemInfoDumpProto.ELAPSED_REALTIME_MS, realtimeMs);
 
-        ArrayList<MemItem> procMems = new ArrayList<MemItem>();
+        final ArrayList<MemItem> procMems = new ArrayList<MemItem>();
         final SparseArray<MemItem> procMemsMap = new SparseArray<MemItem>();
-        long nativePss = 0;
-        long nativeSwapPss = 0;
-        long nativeRss = 0;
-        long dalvikPss = 0;
-        long dalvikSwapPss = 0;
-        long dalvikRss = 0;
+        final long[] ss = new long[INDEX_LAST];
         long[] dalvikSubitemPss = opts.dumpDalvik ? new long[Debug.MemoryInfo.NUM_DVK_STATS] :
                 EmptyArray.LONG;
         long[] dalvikSubitemSwapPss = opts.dumpDalvik ? new long[Debug.MemoryInfo.NUM_DVK_STATS] :
                 EmptyArray.LONG;
         long[] dalvikSubitemRss = opts.dumpDalvik ? new long[Debug.MemoryInfo.NUM_DVK_STATS] :
                 EmptyArray.LONG;
-        long otherPss = 0;
-        long otherSwapPss = 0;
-        long otherRss = 0;
         long[] miscPss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
         long[] miscSwapPss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
         long[] miscRss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
 
-        long oomPss[] = new long[DUMP_MEM_OOM_LABEL.length];
-        long oomSwapPss[] = new long[DUMP_MEM_OOM_LABEL.length];
-        long[] oomRss = new long[DUMP_MEM_OOM_LABEL.length];
-        ArrayList<MemItem>[] oomProcs = (ArrayList<MemItem>[])
+        final long[] oomPss = new long[DUMP_MEM_OOM_LABEL.length];
+        final long[] oomSwapPss = new long[DUMP_MEM_OOM_LABEL.length];
+        final long[] oomRss = new long[DUMP_MEM_OOM_LABEL.length];
+        final ArrayList<MemItem>[] oomProcs = (ArrayList<MemItem>[])
                 new ArrayList[DUMP_MEM_OOM_LABEL.length];
 
-        long totalPss = 0;
-        long totalSwapPss = 0;
-        long totalRss = 0;
         long cachedPss = 0;
         long cachedSwapPss = 0;
         boolean hasSwapPss = false;
@@ -12381,40 +11533,40 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             if (!opts.isCheckinRequest && mi != null) {
-                totalPss += myTotalPss;
-                totalSwapPss += myTotalSwapPss;
-                totalRss += myTotalRss;
+                ss[INDEX_TOTAL_PSS] += myTotalPss;
+                ss[INDEX_TOTAL_SWAP_PSS] += myTotalSwapPss;
+                ss[INDEX_TOTAL_RSS] += myTotalRss;
                 MemItem pssItem = new MemItem(r.processName + " (pid " + pid +
                         (hasActivities ? " / activities)" : ")"), r.processName, myTotalPss,
                         myTotalSwapPss, myTotalRss, pid, hasActivities);
                 procMems.add(pssItem);
                 procMemsMap.put(pid, pssItem);
 
-                nativePss += mi.nativePss;
-                nativeSwapPss += mi.nativeSwappedOutPss;
-                nativeRss += mi.nativeRss;
-                dalvikPss += mi.dalvikPss;
-                dalvikSwapPss += mi.dalvikSwappedOutPss;
-                dalvikRss += mi.dalvikRss;
+                ss[INDEX_NATIVE_PSS] += mi.nativePss;
+                ss[INDEX_NATIVE_SWAP_PSS] += mi.nativeSwappedOutPss;
+                ss[INDEX_NATIVE_RSS] += mi.nativeRss;
+                ss[INDEX_DALVIK_PSS] += mi.dalvikPss;
+                ss[INDEX_DALVIK_SWAP_PSS] += mi.dalvikSwappedOutPss;
+                ss[INDEX_DALVIK_RSS] += mi.dalvikRss;
                 for (int j=0; j<dalvikSubitemPss.length; j++) {
                     dalvikSubitemPss[j] += mi.getOtherPss(Debug.MemoryInfo.NUM_OTHER_STATS + j);
                     dalvikSubitemSwapPss[j] +=
                             mi.getOtherSwappedOutPss(Debug.MemoryInfo.NUM_OTHER_STATS + j);
                     dalvikSubitemRss[j] += mi.getOtherRss(Debug.MemoryInfo.NUM_OTHER_STATS + j);
                 }
-                otherPss += mi.otherPss;
-                otherRss += mi.otherRss;
-                otherSwapPss += mi.otherSwappedOutPss;
+                ss[INDEX_OTHER_PSS] += mi.otherPss;
+                ss[INDEX_OTHER_RSS] += mi.otherRss;
+                ss[INDEX_OTHER_SWAP_PSS] += mi.otherSwappedOutPss;
                 for (int j=0; j<Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
                     long mem = mi.getOtherPss(j);
                     miscPss[j] += mem;
-                    otherPss -= mem;
+                    ss[INDEX_OTHER_PSS] -= mem;
                     mem = mi.getOtherSwappedOutPss(j);
                     miscSwapPss[j] += mem;
-                    otherSwapPss -= mem;
+                    ss[INDEX_OTHER_SWAP_PSS] -= mem;
                     mem = mi.getOtherRss(j);
                     miscRss[j] += mem;
-                    otherRss -= mem;
+                    ss[INDEX_OTHER_RSS] -= mem;
                 }
 
                 if (oomAdj >= ProcessList.CACHED_APP_MIN_ADJ) {
@@ -12443,86 +11595,87 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (collectNative) {
             mi = null;
-            synchronized (mProcessCpuTracker) {
-                final int N = mProcessCpuTracker.countStats();
-                for (int i=0; i<N; i++) {
-                    ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
-                    if (st.vsize > 0 && procMemsMap.indexOfKey(st.pid) < 0) {
-                        if (mi == null) {
-                            mi = new Debug.MemoryInfo();
-                        }
-                        if (!brief && !opts.oomOnly) {
-                            if (!Debug.getMemoryInfo(st.pid, mi)) {
-                                continue;
-                            }
-                        } else {
-                            long pss = Debug.getPss(st.pid, tmpLong, null);
-                            if (pss == 0) {
-                                continue;
-                            }
-                            mi.nativePss = (int) pss;
-                            mi.nativePrivateDirty = (int) tmpLong[0];
-                            mi.nativeRss = (int) tmpLong[2];
-                        }
-
-                        final long myTotalPss = mi.getTotalPss();
-                        final long myTotalSwapPss = mi.getTotalSwappedOutPss();
-                        final long myTotalRss = mi.getTotalRss();
-                        totalPss += myTotalPss;
-                        totalSwapPss += myTotalSwapPss;
-                        totalRss += myTotalRss;
-                        nativeProcTotalPss += myTotalPss;
-
-                        MemItem pssItem = new MemItem(st.name + " (pid " + st.pid + ")",
-                                st.name, myTotalPss, mi.getSummaryTotalSwapPss(), myTotalRss,
-                                st.pid, false);
-                        procMems.add(pssItem);
-
-                        nativePss += mi.nativePss;
-                        nativeSwapPss += mi.nativeSwappedOutPss;
-                        nativeRss += mi.nativeRss;
-                        dalvikPss += mi.dalvikPss;
-                        dalvikSwapPss += mi.dalvikSwappedOutPss;
-                        dalvikRss += mi.dalvikRss;
-                        for (int j=0; j<dalvikSubitemPss.length; j++) {
-                            dalvikSubitemPss[j] += mi.getOtherPss(Debug.MemoryInfo.NUM_OTHER_STATS + j);
-                            dalvikSubitemSwapPss[j] +=
-                                    mi.getOtherSwappedOutPss(Debug.MemoryInfo.NUM_OTHER_STATS + j);
-                            dalvikSubitemRss[j] += mi.getOtherRss(Debug.MemoryInfo.NUM_OTHER_STATS
-                                    + j);
-                        }
-                        otherPss += mi.otherPss;
-                        otherSwapPss += mi.otherSwappedOutPss;
-                        otherRss += mi.otherRss;
-                        for (int j=0; j<Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
-                            long mem = mi.getOtherPss(j);
-                            miscPss[j] += mem;
-                            otherPss -= mem;
-                            mem = mi.getOtherSwappedOutPss(j);
-                            miscSwapPss[j] += mem;
-                            otherSwapPss -= mem;
-                            mem = mi.getOtherRss(j);
-                            miscRss[j] += mem;
-                            otherRss -= mem;
-                        }
-                        oomPss[0] += myTotalPss;
-                        oomSwapPss[0] += myTotalSwapPss;
-                        if (oomProcs[0] == null) {
-                            oomProcs[0] = new ArrayList<MemItem>();
-                        }
-                        oomProcs[0].add(pssItem);
-                        oomRss[0] += myTotalRss;
+            final Debug.MemoryInfo[] memInfos = new Debug.MemoryInfo[1];
+            mAppProfiler.forAllCpuStats((st) -> {
+                if (st.vsize > 0 && procMemsMap.indexOfKey(st.pid) < 0) {
+                    if (memInfos[0] == null) {
+                        memInfos[0] = new Debug.MemoryInfo();
                     }
+                    final Debug.MemoryInfo info = memInfos[0];
+                    if (!brief && !opts.oomOnly) {
+                        if (!Debug.getMemoryInfo(st.pid, info)) {
+                            return;
+                        }
+                    } else {
+                        long pss = Debug.getPss(st.pid, tmpLong, null);
+                        if (pss == 0) {
+                            return;
+                        }
+                        info.nativePss = (int) pss;
+                        info.nativePrivateDirty = (int) tmpLong[0];
+                        info.nativeRss = (int) tmpLong[2];
+                    }
+
+                    final long myTotalPss = info.getTotalPss();
+                    final long myTotalSwapPss = info.getTotalSwappedOutPss();
+                    final long myTotalRss = info.getTotalRss();
+                    ss[INDEX_TOTAL_PSS] += myTotalPss;
+                    ss[INDEX_TOTAL_SWAP_PSS] += myTotalSwapPss;
+                    ss[INDEX_TOTAL_RSS] += myTotalRss;
+                    ss[INDEX_TOTAL_NATIVE_PSS] += myTotalPss;
+
+                    MemItem pssItem = new MemItem(st.name + " (pid " + st.pid + ")",
+                            st.name, myTotalPss, info.getSummaryTotalSwapPss(), myTotalRss,
+                            st.pid, false);
+                    procMems.add(pssItem);
+
+                    ss[INDEX_NATIVE_PSS] += info.nativePss;
+                    ss[INDEX_NATIVE_SWAP_PSS] += info.nativeSwappedOutPss;
+                    ss[INDEX_NATIVE_RSS] += info.nativeRss;
+                    ss[INDEX_DALVIK_PSS] += info.dalvikPss;
+                    ss[INDEX_DALVIK_SWAP_PSS] += info.dalvikSwappedOutPss;
+                    ss[INDEX_DALVIK_RSS] += info.dalvikRss;
+                    for (int j = 0; j < dalvikSubitemPss.length; j++) {
+                        dalvikSubitemPss[j] += info.getOtherPss(
+                                Debug.MemoryInfo.NUM_OTHER_STATS + j);
+                        dalvikSubitemSwapPss[j] +=
+                                info.getOtherSwappedOutPss(Debug.MemoryInfo.NUM_OTHER_STATS + j);
+                        dalvikSubitemRss[j] += info.getOtherRss(Debug.MemoryInfo.NUM_OTHER_STATS
+                                + j);
+                    }
+                    ss[INDEX_OTHER_PSS] += info.otherPss;
+                    ss[INDEX_OTHER_SWAP_PSS] += info.otherSwappedOutPss;
+                    ss[INDEX_OTHER_RSS] += info.otherRss;
+                    for (int j = 0; j < Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
+                        long mem = info.getOtherPss(j);
+                        miscPss[j] += mem;
+                        ss[INDEX_OTHER_PSS] -= mem;
+                        mem = info.getOtherSwappedOutPss(j);
+                        miscSwapPss[j] += mem;
+                        ss[INDEX_OTHER_SWAP_PSS] -= mem;
+                        mem = info.getOtherRss(j);
+                        miscRss[j] += mem;
+                        ss[INDEX_OTHER_RSS] -= mem;
+                    }
+                    oomPss[0] += myTotalPss;
+                    oomSwapPss[0] += myTotalSwapPss;
+                    if (oomProcs[0] == null) {
+                        oomProcs[0] = new ArrayList<MemItem>();
+                    }
+                    oomProcs[0].add(pssItem);
+                    oomRss[0] += myTotalRss;
                 }
-            }
+            });
 
             ArrayList<MemItem> catMems = new ArrayList<MemItem>();
 
-            catMems.add(new MemItem("Native", "Native", nativePss, nativeSwapPss, nativeRss, -1));
+            catMems.add(new MemItem("Native", "Native", ss[INDEX_NATIVE_PSS],
+                    ss[INDEX_NATIVE_SWAP_PSS], ss[INDEX_NATIVE_RSS], -1));
             final int dalvikId = -2;
-            catMems.add(new MemItem("Dalvik", "Dalvik", dalvikPss, dalvikSwapPss, dalvikRss,
-                    dalvikId));
-            catMems.add(new MemItem("Unknown", "Unknown", otherPss, otherSwapPss, otherRss, -3));
+            catMems.add(new MemItem("Dalvik", "Dalvik", ss[INDEX_DALVIK_PSS],
+                    ss[INDEX_DALVIK_SWAP_PSS], ss[INDEX_DALVIK_RSS], dalvikId));
+            catMems.add(new MemItem("Unknown", "Unknown", ss[INDEX_OTHER_PSS],
+                    ss[INDEX_OTHER_SWAP_PSS], ss[INDEX_OTHER_RSS], -3));
             for (int j=0; j<Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
                 String label = Debug.MemoryInfo.getOtherLabel(j);
                 catMems.add(new MemItem(label, label, miscPss[j], miscSwapPss[j], miscRss[j], j));
@@ -12579,7 +11732,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         catMems, true, false, false);
             }
 
-            opts.dumpSwapPss = opts.dumpSwapPss && hasSwapPss && totalSwapPss != 0;
+            opts.dumpSwapPss = opts.dumpSwapPss && hasSwapPss && ss[INDEX_TOTAL_SWAP_PSS] != 0;
             if (!opts.oomOnly) {
                 dumpMemItems(proto, MemInfoDumpProto.TOTAL_PSS_BY_PROCESS, "proc",
                         procMems, true, true, opts.dumpSwapPss);
@@ -12592,29 +11745,30 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             MemInfoReader memInfo = new MemInfoReader();
             memInfo.readMemInfo();
-            if (nativeProcTotalPss > 0) {
+            if (ss[INDEX_TOTAL_NATIVE_PSS] > 0) {
                 synchronized (mProcessStats.mLock) {
                     final long cachedKb = memInfo.getCachedSizeKb();
                     final long freeKb = memInfo.getFreeSizeKb();
                     final long zramKb = memInfo.getZramTotalSizeKb();
                     final long kernelKb = memInfo.getKernelUsedSizeKb();
-                    EventLogTags.writeAmMeminfo(cachedKb*1024, freeKb*1024, zramKb*1024,
-                            kernelKb*1024, nativeProcTotalPss*1024);
+                    EventLogTags.writeAmMeminfo(cachedKb * 1024, freeKb * 1024, zramKb * 1024,
+                            kernelKb * 1024, ss[INDEX_TOTAL_NATIVE_PSS] * 1024);
                     mProcessStats.addSysMemUsageLocked(cachedKb, freeKb, zramKb, kernelKb,
-                            nativeProcTotalPss);
+                            ss[INDEX_TOTAL_NATIVE_PSS]);
                 }
             }
             if (!brief) {
                 proto.write(MemInfoDumpProto.TOTAL_RAM_KB, memInfo.getTotalSizeKb());
-                proto.write(MemInfoDumpProto.STATUS, mLastMemoryLevel);
+                proto.write(MemInfoDumpProto.STATUS, mAppProfiler.getLastMemoryLevelLocked());
                 proto.write(MemInfoDumpProto.CACHED_PSS_KB, cachedPss);
                 proto.write(MemInfoDumpProto.CACHED_KERNEL_KB, memInfo.getCachedSizeKb());
                 proto.write(MemInfoDumpProto.FREE_KB, memInfo.getFreeSizeKb());
             }
-            long lostRAM = memInfo.getTotalSizeKb() - (totalPss - totalSwapPss)
+            long lostRAM = memInfo.getTotalSizeKb()
+                    - (ss[INDEX_TOTAL_PSS] - ss[INDEX_TOTAL_SWAP_PSS])
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
                     - memInfo.getKernelUsedSizeKb() - memInfo.getZramTotalSizeKb();
-            proto.write(MemInfoDumpProto.USED_PSS_KB, totalPss - cachedPss);
+            proto.write(MemInfoDumpProto.USED_PSS_KB, ss[INDEX_TOTAL_PSS] - cachedPss);
             proto.write(MemInfoDumpProto.USED_KERNEL_KB, memInfo.getKernelUsedSizeKb());
             proto.write(MemInfoDumpProto.LOST_RAM_KB, lostRAM);
             if (!brief) {
@@ -12685,13 +11839,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         updateCpuStatsNow();
         long[] memtrackTmp = new long[1];
         long[] swaptrackTmp = new long[2];
-        final List<ProcessCpuTracker.Stats> stats;
         // Get a list of Stats that have vsize > 0
-        synchronized (mProcessCpuTracker) {
-            stats = mProcessCpuTracker.getStats((st) -> {
-                return st.vsize > 0;
-            });
-        }
+        final List<ProcessCpuTracker.Stats> stats = mAppProfiler.getCpuStats(st -> st.vsize > 0);
         final int statsCount = stats.size();
         for (int i = 0; i < statsCount; i++) {
             ProcessCpuTracker.Stats st = stats.get(i);
@@ -12986,8 +12135,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         mProcessesToGc.remove(app);
-        mPendingPssProcesses.remove(app);
-        ProcessList.abortNextPssTime(app.procStateMemTracker);
+        mAppProfiler.onCleanupApplicationRecordLocked(app);
 
         // Dismiss any open dialogs.
         app.getDialogController().clearAllErrorDialogs();
@@ -15538,229 +14686,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    /** @hide */
-    public static Uri makeHeapDumpUri(String procName) {
-        return Uri.parse("content://com.android.shell.heapdump/" + procName + "_javaheap.bin");
-    }
-
-    private final class RecordPssRunnable implements Runnable {
-        private final ProcessRecord mProc;
-        private final Uri mDumpUri;
-        private final ContentResolver mContentResolver;
-
-        RecordPssRunnable(ProcessRecord proc, Uri dumpUri, ContentResolver contentResolver) {
-            mProc = proc;
-            mDumpUri = dumpUri;
-            mContentResolver = contentResolver;
-        }
-
-        @Override
-        public void run() {
-            try (ParcelFileDescriptor fd = mContentResolver.openFileDescriptor(mDumpUri, "rw")) {
-                IApplicationThread thread = mProc.thread;
-                if (thread != null) {
-                    try {
-                        if (DEBUG_PSS) {
-                            Slog.d(TAG_PSS, "Requesting dump heap from "
-                                    + mProc + " to " + mDumpUri.getPath());
-                        }
-                        thread.dumpHeap(/* managed= */ true,
-                                /* mallocInfo= */ false, /* runGc= */ false,
-                                mDumpUri.getPath(), fd,
-                                /* finishCallback= */ null);
-                    } catch (RemoteException e) {
-                    }
-                }
-            } catch (IOException e) {
-                Slog.e(TAG, "Failed to dump heap", e);
-                // Need to clear the heap dump variables, otherwise no further heap dumps will be
-                // attempted.
-                abortHeapDump(mProc.processName);
-            }
-        }
-    }
-
-    /**
-     * Record new PSS sample for a process.
-     */
-    void recordPssSampleLocked(ProcessRecord proc, int procState, long pss, long uss, long swapPss,
-            long rss, int statType, long pssDuration, long now) {
-        EventLogTags.writeAmPss(proc.pid, proc.uid, proc.processName, pss * 1024, uss * 1024,
-                swapPss * 1024, rss * 1024, statType, procState, pssDuration);
-        proc.lastPssTime = now;
-        synchronized (mProcessStats.mLock) {
-            proc.baseProcessTracker.addPss(
-                    pss, uss, rss, true, statType, pssDuration, proc.pkgList.mPkgList);
-        }
-        for (int ipkg = proc.pkgList.mPkgList.size() - 1; ipkg >= 0; ipkg--) {
-            ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
-            FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
-                    proc.info.uid,
-                    holder.state.getName(),
-                    holder.state.getPackage(),
-                    pss, uss, rss, statType, pssDuration,
-                    holder.appVersion);
-        }
-        if (DEBUG_PSS) Slog.d(TAG_PSS,
-                "pss of " + proc.toShortString() + ": " + pss + " lastPss=" + proc.lastPss
-                + " state=" + ProcessList.makeProcStateString(procState));
-        if (proc.initialIdlePss == 0) {
-            proc.initialIdlePss = pss;
-        }
-        proc.lastPss = pss;
-        proc.lastSwapPss = swapPss;
-        if (procState >= ActivityManager.PROCESS_STATE_HOME) {
-            proc.lastCachedPss = pss;
-            proc.lastCachedSwapPss = swapPss;
-        }
-        proc.mLastRss = rss;
-
-        final SparseArray<Pair<Long, String>> watchUids
-                = mMemWatchProcesses.getMap().get(proc.processName);
-        Long check = null;
-        if (watchUids != null) {
-            Pair<Long, String> val = watchUids.get(proc.uid);
-            if (val == null) {
-                val = watchUids.get(0);
-            }
-            if (val != null) {
-                check = val.first;
-            }
-        }
-        if (check != null) {
-            if ((pss * 1024) >= check && proc.thread != null && mMemWatchDumpProcName == null) {
-                boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
-                if (!isDebuggable) {
-                    if ((proc.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-                        isDebuggable = true;
-                    }
-                }
-                if (isDebuggable) {
-                    Slog.w(TAG, "Process " + proc + " exceeded pss limit " + check + "; reporting");
-                    startHeapDumpLocked(proc, false);
-                } else {
-                    Slog.w(TAG, "Process " + proc + " exceeded pss limit " + check
-                            + ", but debugging not enabled");
-                }
-            }
-        }
-    }
-
-    private void startHeapDumpLocked(ProcessRecord proc, boolean isUserInitiated) {
-        mMemWatchDumpProcName = proc.processName;
-        mMemWatchDumpUri = makeHeapDumpUri(proc.processName);
-        mMemWatchDumpPid = proc.pid;
-        mMemWatchDumpUid = proc.uid;
-        mMemWatchIsUserInitiated = isUserInitiated;
-        Context ctx;
-        try {
-            ctx = mContext.createPackageContextAsUser("android", 0,
-                    UserHandle.getUserHandleForUid(mMemWatchDumpUid));
-        } catch (NameNotFoundException e) {
-            throw new RuntimeException("android package not found.");
-        }
-        BackgroundThread.getHandler().post(
-                new RecordPssRunnable(proc, mMemWatchDumpUri, ctx.getContentResolver()));
-    }
-
-    /**
-     * Schedule PSS collection of a process.
-     */
-    boolean requestPssLocked(ProcessRecord proc, int procState) {
-        if (mPendingPssProcesses.contains(proc)) {
-            return false;
-        }
-        if (mPendingPssProcesses.size() == 0) {
-            final long deferral = (mPssDeferralTime > 0 && mActivityStartingNesting.get() > 0)
-                    ? mPssDeferralTime : 0;
-            if (DEBUG_PSS && deferral > 0) {
-                Slog.d(TAG_PSS, "requestPssLocked() deferring PSS request by "
-                        + deferral + " ms");
-            }
-            mBgHandler.sendEmptyMessageDelayed(COLLECT_PSS_BG_MSG, deferral);
-        }
-        if (DEBUG_PSS) Slog.d(TAG_PSS, "Requesting pss of: " + proc);
-        proc.pssProcState = procState;
-        proc.pssStatType = ProcessStats.ADD_PSS_INTERNAL_SINGLE;
-        mPendingPssProcesses.add(proc);
-        return true;
-    }
-
-    /**
-     * Re-defer a posted PSS collection pass, if one exists.  Assumes deferral is
-     * currently active policy when called.
-     */
-    private void deferPssIfNeededLocked() {
-        if (mPendingPssProcesses.size() > 0) {
-            mBgHandler.removeMessages(COLLECT_PSS_BG_MSG);
-            mBgHandler.sendEmptyMessageDelayed(COLLECT_PSS_BG_MSG, mPssDeferralTime);
-        }
-    }
-
-    private void deferPssForActivityStart() {
-        synchronized (ActivityManagerService.this) {
-            if (mPssDeferralTime > 0) {
-                if (DEBUG_PSS) {
-                    Slog.d(TAG_PSS, "Deferring PSS collection for activity start");
-                }
-                deferPssIfNeededLocked();
-                mActivityStartingNesting.getAndIncrement();
-                mBgHandler.sendEmptyMessageDelayed(STOP_DEFERRING_PSS_MSG, mPssDeferralTime);
-            }
-        }
-    }
-
-    /**
-     * Schedule PSS collection of all processes.
-     */
-    void requestPssAllProcsLocked(long now, boolean always, boolean memLowered) {
-        if (!always) {
-            if (now < (mLastFullPssTime +
-                    (memLowered ? mConstants.FULL_PSS_LOWERED_INTERVAL
-                            : mConstants.FULL_PSS_MIN_INTERVAL))) {
-                return;
-            }
-        }
-        if (DEBUG_PSS) Slog.d(TAG_PSS, "Requesting pss of all procs!  memLowered=" + memLowered);
-        mLastFullPssTime = now;
-        mFullPssPending = true;
-        for (int i = mPendingPssProcesses.size() - 1; i >= 0; i--) {
-            ProcessList.abortNextPssTime(mPendingPssProcesses.get(i).procStateMemTracker);;
-        }
-        mPendingPssProcesses.ensureCapacity(mProcessList.getLruSizeLocked());
-        mPendingPssProcesses.clear();
-        for (int i = mProcessList.getLruSizeLocked() - 1; i >= 0; i--) {
-            ProcessRecord app = mProcessList.mLruProcesses.get(i);
-            if (app.thread == null || app.getCurProcState() == PROCESS_STATE_NONEXISTENT) {
-                continue;
-            }
-            if (memLowered || (always && now >
-                            app.lastStateTime+ProcessList.PSS_SAFE_TIME_FROM_STATE_CHANGE)
-                    || now > (app.lastStateTime+ProcessList.PSS_ALL_INTERVAL)) {
-                app.pssProcState = app.setProcState;
-                app.pssStatType = always ? ProcessStats.ADD_PSS_INTERNAL_ALL_POLL
-                        : ProcessStats.ADD_PSS_INTERNAL_ALL_MEM;
-                app.nextPssTime = ProcessList.computeNextPssTime(app.getCurProcState(),
-                        app.procStateMemTracker, mTestPssMode, mAtmInternal.isSleeping(), now);
-                mPendingPssProcesses.add(app);
-            }
-        }
-        if (!mBgHandler.hasMessages(COLLECT_PSS_BG_MSG)) {
-            mBgHandler.sendEmptyMessage(COLLECT_PSS_BG_MSG);
-        }
-    }
-
-    public void setTestPssMode(boolean enabled) {
-        synchronized (this) {
-            mTestPssMode = enabled;
-            if (enabled) {
-                // Whenever we enable the mode, we want to take a snapshot all of current
-                // process mem use.
-                requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, true);
-            }
-        }
-    }
-
     /**
      * Ask a given process to GC right now.
      */
@@ -16116,187 +15041,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    final boolean updateLowMemStateLocked(int numCached, int numEmpty, int numTrimming) {
-        final int N = mProcessList.getLruSizeLocked();
-        final long now = SystemClock.uptimeMillis();
-        int memFactor;
-        if (mLowMemDetector != null && mLowMemDetector.isAvailable()) {
-            memFactor = mLowMemDetector.getMemFactor();
-        } else {
-            // Now determine the memory trimming level of background processes.
-            // Unfortunately we need to start at the back of the list to do this
-            // properly.  We only do this if the number of background apps we
-            // are managing to keep around is less than half the maximum we desire;
-            // if we are keeping a good number around, we'll let them use whatever
-            // memory they want.
-            if (numCached <= mConstants.CUR_TRIM_CACHED_PROCESSES
-                && numEmpty <= mConstants.CUR_TRIM_EMPTY_PROCESSES) {
-                final int numCachedAndEmpty = numCached + numEmpty;
-                if (numCachedAndEmpty <= ProcessList.TRIM_CRITICAL_THRESHOLD) {
-                    memFactor = ProcessStats.ADJ_MEM_FACTOR_CRITICAL;
-                } else if (numCachedAndEmpty <= ProcessList.TRIM_LOW_THRESHOLD) {
-                    memFactor = ProcessStats.ADJ_MEM_FACTOR_LOW;
-                } else {
-                    memFactor = ProcessStats.ADJ_MEM_FACTOR_MODERATE;
-                }
-            } else {
-                memFactor = ProcessStats.ADJ_MEM_FACTOR_NORMAL;
-            }
-        }
-        // We always allow the memory level to go up (better).  We only allow it to go
-        // down if we are in a state where that is allowed, *and* the total number of processes
-        // has gone down since last time.
-        if (DEBUG_OOM_ADJ) Slog.d(TAG_OOM_ADJ, "oom: memFactor=" + memFactor
-                + " last=" + mLastMemoryLevel + " allowLow=" + mAllowLowerMemLevel
-                + " numProcs=" + mProcessList.getLruSizeLocked() + " last=" + mLastNumProcesses);
-        if (memFactor > mLastMemoryLevel) {
-            if (!mAllowLowerMemLevel || mProcessList.getLruSizeLocked() >= mLastNumProcesses) {
-                memFactor = mLastMemoryLevel;
-                if (DEBUG_OOM_ADJ) Slog.d(TAG_OOM_ADJ, "Keeping last mem factor!");
-            }
-        }
-        if (memFactor != mLastMemoryLevel) {
-            EventLogTags.writeAmMemFactor(memFactor, mLastMemoryLevel);
-            FrameworkStatsLog.write(FrameworkStatsLog.MEMORY_FACTOR_STATE_CHANGED, memFactor);
-        }
-        mLastMemoryLevel = memFactor;
-        mLastNumProcesses = mProcessList.getLruSizeLocked();
-        boolean allChanged;
-        int trackerMemFactor;
-        synchronized (mProcessStats.mLock) {
-            allChanged = mProcessStats.setMemFactorLocked(
-                    memFactor, mAtmInternal != null ? !mAtmInternal.isSleeping() : true, now);
-            trackerMemFactor = mProcessStats.getMemFactorLocked();
-        }
-        if (memFactor != ProcessStats.ADJ_MEM_FACTOR_NORMAL) {
-            if (mLowRamStartTime == 0) {
-                mLowRamStartTime = now;
-            }
-            int step = 0;
-            int fgTrimLevel;
-            switch (memFactor) {
-                case ProcessStats.ADJ_MEM_FACTOR_CRITICAL:
-                    fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
-                    break;
-                case ProcessStats.ADJ_MEM_FACTOR_LOW:
-                    fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
-                    break;
-                default:
-                    fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE;
-                    break;
-            }
-            int factor = numTrimming/3;
-            int minFactor = 2;
-            if (mAtmInternal.getHomeProcess() != null) minFactor++;
-            if (mAtmInternal.getPreviousProcess() != null) minFactor++;
-            if (factor < minFactor) factor = minFactor;
-            int curLevel = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
-            for (int i=N-1; i>=0; i--) {
-                ProcessRecord app = mProcessList.mLruProcesses.get(i);
-                if (allChanged || app.procStateChanged) {
-                    setProcessTrackerStateLocked(app, trackerMemFactor, now);
-                    app.procStateChanged = false;
-                }
-                if (app.getCurProcState() >= ActivityManager.PROCESS_STATE_HOME
-                        && !app.killedByAm) {
-                    if (app.trimMemoryLevel < curLevel && app.thread != null) {
-                        try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
-                                    "Trimming memory of " + app.processName + " to " + curLevel);
-                            app.thread.scheduleTrimMemory(curLevel);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                    app.trimMemoryLevel = curLevel;
-                    step++;
-                    if (step >= factor) {
-                        step = 0;
-                        switch (curLevel) {
-                            case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
-                                curLevel = ComponentCallbacks2.TRIM_MEMORY_MODERATE;
-                                break;
-                            case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
-                                curLevel = ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
-                                break;
-                        }
-                    }
-                } else if (app.getCurProcState() == ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
-                        && !app.killedByAm) {
-                    if (app.trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_BACKGROUND
-                            && app.thread != null) {
-                        try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
-                                    "Trimming memory of heavy-weight " + app.processName
-                                    + " to " + ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
-                            app.thread.scheduleTrimMemory(
-                                    ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                    app.trimMemoryLevel = ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
-                } else {
-                    if ((app.getCurProcState() >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
-                            || app.systemNoUi) && app.hasPendingUiClean()) {
-                        // If this application is now in the background and it
-                        // had done UI, then give it the special trim level to
-                        // have it free UI resources.
-                        final int level = ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
-                        if (app.trimMemoryLevel < level && app.thread != null) {
-                            try {
-                                if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
-                                        "Trimming memory of bg-ui " + app.processName
-                                        + " to " + level);
-                                app.thread.scheduleTrimMemory(level);
-                            } catch (RemoteException e) {
-                            }
-                        }
-                        app.setPendingUiClean(false);
-                    }
-                    if (app.trimMemoryLevel < fgTrimLevel && app.thread != null) {
-                        try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
-                                    "Trimming memory of fg " + app.processName
-                                    + " to " + fgTrimLevel);
-                            app.thread.scheduleTrimMemory(fgTrimLevel);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                    app.trimMemoryLevel = fgTrimLevel;
-                }
-            }
-        } else {
-            if (mLowRamStartTime != 0) {
-                mLowRamTimeSinceLastIdle += now - mLowRamStartTime;
-                mLowRamStartTime = 0;
-            }
-            for (int i=N-1; i>=0; i--) {
-                ProcessRecord app = mProcessList.mLruProcesses.get(i);
-                if (allChanged || app.procStateChanged) {
-                    setProcessTrackerStateLocked(app, trackerMemFactor, now);
-                    app.procStateChanged = false;
-                }
-                if ((app.getCurProcState() >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
-                        || app.systemNoUi) && app.hasPendingUiClean()) {
-                    if (app.trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
-                            && app.thread != null) {
-                        try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
-                                    "Trimming memory of ui hidden " + app.processName
-                                    + " to " + ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
-                            app.thread.scheduleTrimMemory(
-                                    ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                    app.setPendingUiClean(false);
-                }
-                app.trimMemoryLevel = 0;
-            }
-        }
-        return allChanged;
-    }
-
-    @GuardedBy("this")
     final void updateOomAdjLocked(String oomAdjReason) {
         mOomAdjuster.updateOomAdjLocked(oomAdjReason);
     }
@@ -16584,109 +15328,31 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private void stopProfilerLocked(ProcessRecord proc, int profileType) {
-        if (proc == null || proc == mProfileData.getProfileProc()) {
-            proc = mProfileData.getProfileProc();
-            profileType = mProfileType;
-            clearProfilerLocked();
-        }
-        if (proc == null) {
-            return;
-        }
-        try {
-            proc.thread.profilerControl(false, null, profileType);
-        } catch (RemoteException e) {
-            throw new IllegalStateException("Process disappeared");
-        }
-    }
-
-    void clearProfilerLocked() {
-        if (mProfileData.getProfilerInfo() != null
-                && mProfileData.getProfilerInfo().profileFd != null) {
-            try {
-                mProfileData.getProfilerInfo().profileFd.close();
-            } catch (IOException e) {
-            }
-        }
-        mProfileData.setProfileApp(null);
-        mProfileData.setProfileProc(null);
-        mProfileData.setProfilerInfo(null);
-    }
-
     public boolean profileControl(String process, int userId, boolean start,
             ProfilerInfo profilerInfo, int profileType) throws RemoteException {
-
-        try {
-            synchronized (this) {
-                // note: hijacking SET_ACTIVITY_WATCHER, but should be changed to
-                // its own permission.
-                if (checkCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    throw new SecurityException("Requires permission "
-                            + android.Manifest.permission.SET_ACTIVITY_WATCHER);
-                }
-
-                if (start && (profilerInfo == null || profilerInfo.profileFd == null)) {
-                    throw new IllegalArgumentException("null profile info or fd");
-                }
-
-                ProcessRecord proc = null;
-                if (process != null) {
-                    proc = findProcessLocked(process, userId, "profileControl");
-                }
-
-                if (start && (proc == null || proc.thread == null)) {
-                    throw new IllegalArgumentException("Unknown process: " + process);
-                }
-
-                if (start) {
-                    stopProfilerLocked(null, 0);
-                    setProfileApp(proc.info, proc.processName, profilerInfo);
-                    mProfileData.setProfileProc(proc);
-                    mProfileType = profileType;
-                    ParcelFileDescriptor fd = profilerInfo.profileFd;
-                    try {
-                        fd = fd.dup();
-                    } catch (IOException e) {
-                        fd = null;
-                    }
-                    profilerInfo.profileFd = fd;
-                    proc.thread.profilerControl(start, profilerInfo, profileType);
-                    fd = null;
-                    try {
-                        mProfileData.getProfilerInfo().profileFd.close();
-                    } catch (IOException e) {
-                    }
-                    mProfileData.getProfilerInfo().profileFd = null;
-
-                    if (proc.pid == MY_PID) {
-                        // When profiling the system server itself, avoid closing the file
-                        // descriptor, as profilerControl will not create a copy.
-                        // Note: it is also not correct to just set profileFd to null, as the
-                        //       whole ProfilerInfo instance is passed down!
-                        profilerInfo = null;
-                    }
-                } else {
-                    stopProfilerLocked(proc, profileType);
-                    if (profilerInfo != null && profilerInfo.profileFd != null) {
-                        try {
-                            profilerInfo.profileFd.close();
-                        } catch (IOException e) {
-                        }
-                    }
-                }
-
-                return true;
+        synchronized (this) {
+            // note: hijacking SET_ACTIVITY_WATCHER, but should be changed to
+            // its own permission.
+            if (checkCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires permission "
+                        + android.Manifest.permission.SET_ACTIVITY_WATCHER);
             }
-        } catch (RemoteException e) {
-            throw new IllegalStateException("Process disappeared");
-        } finally {
-            if (profilerInfo != null && profilerInfo.profileFd != null) {
-                try {
-                    profilerInfo.profileFd.close();
-                } catch (IOException e) {
-                }
+
+            if (start && (profilerInfo == null || profilerInfo.profileFd == null)) {
+                throw new IllegalArgumentException("null profile info or fd");
             }
+
+            ProcessRecord proc = null;
+            if (process != null) {
+                proc = findProcessLocked(process, userId, "profileControl");
+            }
+
+            if (start && (proc == null || proc.thread == null)) {
+                throw new IllegalArgumentException("Unknown process: " + process);
+            }
+
+            return mAppProfiler.profileControlLocked(proc, start, profilerInfo, profileType);
         }
     }
 
@@ -16746,7 +15412,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw new IllegalArgumentException("Unknown process: " + process);
                 }
 
-                boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
+                boolean isDebuggable = Build.IS_DEBUGGABLE;
                 if (!isDebuggable) {
                     if ((proc.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
                         throw new SecurityException("Process not debuggable: " + proc);
@@ -16805,45 +15471,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
-        synchronized (this) {
-            if (maxMemSize > 0) {
-                mMemWatchProcesses.put(processName, uid, new Pair(maxMemSize, reportPackage));
-            } else {
-                if (uid != 0) {
-                    mMemWatchProcesses.remove(processName, uid);
-                } else {
-                    mMemWatchProcesses.getMap().remove(processName);
-                }
-            }
-        }
+        mAppProfiler.setDumpHeapDebugLimit(processName, uid, maxMemSize, reportPackage);
     }
 
     @Override
     public void dumpHeapFinished(String path) {
-        synchronized (this) {
-            if (Binder.getCallingPid() != mMemWatchDumpPid) {
-                Slog.w(TAG, "dumpHeapFinished: Calling pid " + Binder.getCallingPid()
-                        + " does not match last pid " + mMemWatchDumpPid);
-                return;
-            }
-            if (mMemWatchDumpUri == null || !mMemWatchDumpUri.getPath().equals(path)) {
-                Slog.w(TAG, "dumpHeapFinished: Calling path " + path
-                        + " does not match last path " + mMemWatchDumpUri);
-                return;
-            }
-            if (DEBUG_PSS) Slog.d(TAG_PSS, "Dump heap finished for " + path);
-            mHandler.sendEmptyMessage(POST_DUMP_HEAP_NOTIFICATION_MSG);
-
-            // Forced gc to clean up the remnant hprof fd.
-            Runtime.getRuntime().gc();
-        }
-    }
-
-    /** Clear the currently executing heap dump variables so a new heap dump can be started. */
-    private void abortHeapDump(String procName) {
-        Message msg = mHandler.obtainMessage(ABORT_DUMPHEAP_MSG);
-        msg.obj = procName;
-        mHandler.sendMessage(msg);
+        mAppProfiler.dumpHeapFinished(path, Binder.getCallingPid());
     }
 
     /** In this method we try to acquire our lock to make sure that we have not deadlocked */
@@ -16995,8 +15628,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             return false;
         }
 
-        boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
-        if (!isDebuggable) {
+        if (!Build.IS_DEBUGGABLE) {
             if ((process.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
                 return false;
             }
@@ -17426,7 +16058,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void updateCpuStats() {
             synchronized (ActivityManagerService.this) {
-                ActivityManagerService.this.updateCpuStats();
+                ActivityManagerService.this.updateCpuStatsLocked();
             }
         }
 
@@ -18345,8 +16977,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw new IllegalArgumentException("Unknown process: " + process);
                 }
 
-                boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
-                if (!isDebuggable) {
+                if (!Build.IS_DEBUGGABLE) {
                     if ((proc.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
                         throw new SecurityException("Process not debuggable: " + proc);
                     }

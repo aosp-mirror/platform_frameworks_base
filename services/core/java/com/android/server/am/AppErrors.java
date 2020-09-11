@@ -22,7 +22,6 @@ import static android.content.pm.ApplicationInfo.FLAG_SYSTEM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.MY_PID;
-import static com.android.server.am.ActivityManagerService.SYSTEM_DEBUGGABLE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
@@ -36,10 +35,10 @@ import android.content.Intent;
 import android.content.pm.VersionedPackage;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
@@ -596,7 +595,7 @@ class AppErrors {
 
         return mService.mAtmInternal.handleAppCrashInActivityController(
                 name, pid, shortMsg, longMsg, timeMillis, crashInfo.stackTrace, () -> {
-                if ("1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"))
+                if (Build.IS_DEBUGGABLE
                         && "Native crash".equals(crashInfo.exceptionClassName)) {
                     Slog.w(TAG, "Skip killing native crashed app " + name
                             + "(" + pid + ") during testing");
