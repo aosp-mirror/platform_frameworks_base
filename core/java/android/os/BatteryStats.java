@@ -1776,7 +1776,7 @@ public abstract class BatteryStats implements Parcelable {
         public static final int EVENT_PACKAGE_INACTIVE = 0x000f;
         // Event for a package becoming active due to an interaction.
         public static final int EVENT_PACKAGE_ACTIVE = 0x0010;
-        // Event for a package being on the temporary whitelist.
+        // Event for a package being on the temporary allowlist.
         public static final int EVENT_TEMP_WHITELIST = 0x0011;
         // Event for the screen waking up.
         public static final int EVENT_SCREEN_WAKE_UP = 0x0012;

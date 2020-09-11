@@ -501,7 +501,7 @@ public final class FillResponse implements Parcelable {
          * Disables autofill for the app or activity.
          *
          * <p>This method is useful to optimize performance in cases where the service knows it
-         * can not autofill an app&mdash;for example, when the service has a list of "blacklisted"
+         * can not autofill an app&mdash;for example, when the service has a list of "denylisted"
          * apps such as office suites.
          *
          * <p>By default, it disables autofill for all activities in the app, unless the response is
