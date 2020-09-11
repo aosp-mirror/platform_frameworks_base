@@ -45,6 +45,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 
+import com.android.internal.R;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.fingerprint.FingerprintServiceDumpProto;
@@ -338,8 +339,10 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
                         : FingerprintSensorProperties.TYPE_REAR;
         // resetLockout is controlled by the framework, so hardwareAuthToken is not required
         final boolean resetLockoutRequiresHardwareAuthToken = false;
+        final int maxTemplatesAllowed = mContext.getResources()
+                .getInteger(R.integer.config_fingerprintMaxTemplatesPerUser);
         mSensorProperties = new FingerprintSensorProperties(sensorId, sensorType,
-                resetLockoutRequiresHardwareAuthToken);
+                resetLockoutRequiresHardwareAuthToken, maxTemplatesAllowed);
     }
 
     static Fingerprint21 newInstance(@NonNull Context context, int sensorId,
