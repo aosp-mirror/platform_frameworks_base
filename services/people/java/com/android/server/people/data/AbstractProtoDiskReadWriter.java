@@ -129,7 +129,7 @@ abstract class AbstractProtoDiskReadWriter<T> {
         if (files == null || files.length == 0) {
             return null;
         } else if (files.length > 1) {
-            // This can't possibly happen, but sanity check.
+            // This can't possibly happen, but validity check.
             Slog.w(TAG, "Found multiple files with the same name: " + Arrays.toString(files));
         }
         return parseFile(files[0]);

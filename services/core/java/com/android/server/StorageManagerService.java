@@ -1112,7 +1112,7 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             try {
-                // TODO(b/135341433): Remove paranoid logging when FUSE is stable
+                // TODO(b/135341433): Remove cautious logging when FUSE is stable
                 Slog.i(TAG, "Resetting vold...");
                 mVold.reset();
                 Slog.i(TAG, "Reset vold");
@@ -2238,7 +2238,7 @@ class StorageManagerService extends IStorageManager.Stub
 
     private void mount(VolumeInfo vol) {
         try {
-            // TODO(b/135341433): Remove paranoid logging when FUSE is stable
+            // TODO(b/135341433): Remove cautious logging when FUSE is stable
             Slog.i(TAG, "Mounting volume " + vol);
             mVold.mount(vol.id, vol.mountFlags, vol.mountUserId, new IVoldMountCallback.Stub() {
                 @Override

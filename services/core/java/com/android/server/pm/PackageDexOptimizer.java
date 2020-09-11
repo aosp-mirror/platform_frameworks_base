@@ -193,7 +193,7 @@ public class PackageDexOptimizer {
         String[] classLoaderContexts = DexoptUtils.getClassLoaderContexts(
                 pkg, sharedLibraries, pathsWithCode);
 
-        // Sanity check that we do not call dexopt with inconsistent data.
+        // Validity check that we do not call dexopt with inconsistent data.
         if (paths.size() != classLoaderContexts.length) {
             String[] splitCodePaths = pkg.getSplitCodePaths();
             throw new IllegalStateException("Inconsistent information "

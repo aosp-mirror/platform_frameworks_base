@@ -198,7 +198,7 @@ final class ContentCapturePerUserService
     void onConnected() {
         synchronized (mLock) {
             if (mZombie) {
-                // Sanity check - shouldn't happen
+                // Validity check - shouldn't happen
                 if (mRemoteService == null) {
                     Slog.w(TAG, "Cannot ressurect sessions because remote service is null");
                     return;

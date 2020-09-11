@@ -497,7 +497,7 @@ class ShortcutRequestPinProcessor {
                     Slog.d(TAG, "Temporarily adding " + shortcutId + " as dynamic");
                 }
                 // Add as a dynamic shortcut.  In order for a shortcut to be dynamic, it must
-                // have a target activity, so we set a dummy here.  It's later removed
+                // have a target activity, so we set a placeholder here.  It's later removed
                 // in deleteDynamicWithId().
                 if (original.getActivity() == null) {
                     original.setActivity(mService.getDummyMainActivity(appPackageName));
