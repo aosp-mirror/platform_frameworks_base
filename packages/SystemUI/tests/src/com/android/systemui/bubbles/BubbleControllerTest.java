@@ -45,6 +45,9 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.pm.LauncherApps;
+import android.content.res.Configuration;
+import android.graphics.Insets;
+import android.graphics.Rect;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.face.FaceManager;
 import android.os.Handler;
@@ -80,10 +83,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
-import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowControllerImpl;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -178,8 +179,6 @@ public class BubbleControllerTest extends SysuiTestCase {
     @Mock
     private ShadeController mShadeController;
     @Mock
-    private NotificationShelfComponent mNotificationShelfComponent;
-    @Mock
     private NotifPipeline mNotifPipeline;
     @Mock
     private FeatureFlags mFeatureFlagsOldPipeline;
@@ -191,11 +190,12 @@ public class BubbleControllerTest extends SysuiTestCase {
     private IStatusBarService mStatusBarService;
     @Mock
     private LauncherApps mLauncherApps;
-    @Mock private LockscreenLockIconController mLockIconController;
-
-    @Mock private WindowManagerShellWrapper mWindowManagerShellWrapper;
-
-    @Mock private BubbleLogger mBubbleLogger;
+    @Mock
+    private WindowManagerShellWrapper mWindowManagerShellWrapper;
+    @Mock
+    private BubbleLogger mBubbleLogger;
+    @Mock
+    private BubblePositioner mPositioner;
 
     private BubbleData mBubbleData;
 
@@ -210,7 +210,6 @@ public class BubbleControllerTest extends SysuiTestCase {
         mContext.addMockSystemService(FaceManager.class, mFaceManager);
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
 
-        // Bubbles get added to status bar window view
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
@@ -241,6 +240,13 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mSysUiStateBubblesExpanded =
                         (sysUiFlags & QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED) != 0);
 
+        mBubbleData = new BubbleData(mContext, mBubbleLogger);
+
+        Rect availableRect = new Rect(0, 0, 1000, 5000);
+        when(mPositioner.getAvailableRect()).thenReturn(availableRect);
+        when(mPositioner.getOrientation()).thenReturn(Configuration.ORIENTATION_PORTRAIT);
+        when(mPositioner.getInsets()).thenReturn(Insets.of(0, 0, 0, 0));
+
         TestableNotificationInterruptStateProviderImpl interruptionStateProvider =
                 new TestableNotificationInterruptStateProviderImpl(mContext.getContentResolver(),
                         mock(PowerManager.class),
@@ -252,7 +258,6 @@ public class BubbleControllerTest extends SysuiTestCase {
                         mock(HeadsUpManager.class),
                         mock(Handler.class)
                 );
-        mBubbleData = new BubbleData(mContext, mBubbleLogger);
         when(mFeatureFlagsOldPipeline.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
         mBubbleController = new TestableBubbleController(
                 mContext,
@@ -279,7 +284,8 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mLauncherApps,
                 mBubbleLogger,
                 mock(Handler.class),
-                mock(ShellTaskOrganizer.class));
+                mock(ShellTaskOrganizer.class),
+                mPositioner);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
         // Get a reference to the BubbleController's entry listener
