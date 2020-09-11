@@ -37,6 +37,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.media.KeyguardMediaController;
@@ -44,10 +45,14 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotifCollection;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -101,9 +106,14 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     @Mock private ScrimController mScrimController;
     @Mock private NotificationGroupManagerLegacy mLegacyGroupManager;
     @Mock private SectionHeaderController mSilentHeaderController;
+    @Mock private FeatureFlags mFeatureFlags;
+    @Mock private NotifPipeline mNotifPipeline;
+    @Mock private NotifCollection mNotifCollection;
+    @Mock private NotificationEntryManager mEntryManager;
+    @Mock private IStatusBarService mIStatusBarService;
 
     @Captor
-    ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
+    private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
 
     private NotificationStackScrollLayoutController mController;
 
@@ -112,6 +122,7 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         when(mNotificationSwipeHelperBuilder.build()).thenReturn(mNotificationSwipeHelper);
+        when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
 
         mController = new NotificationStackScrollLayoutController(
                 true,
@@ -136,7 +147,12 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mScrimController,
                 mLegacyGroupManager,
                 mLegacyGroupManager,
-                mSilentHeaderController
+                mSilentHeaderController,
+                mFeatureFlags,
+                mNotifPipeline,
+                mNotifCollection,
+                mEntryManager,
+                mIStatusBarService
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);
@@ -236,7 +252,6 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
 
         UserChangedListener changedListener = userChangedCaptor.getValue();
         changedListener.onUserChanged(0);
-        verify(mNotificationStackScrollLayout).setCurrentUserid(0);
         verify(mNotificationStackScrollLayout).updateSensitiveness(false, true);
     }
 
