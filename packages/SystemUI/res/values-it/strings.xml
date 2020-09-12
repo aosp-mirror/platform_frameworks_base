@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Tieni premuto il tasto di accensione per visualizzare i nuovi controlli"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Aggiungi controlli"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Modifica controlli"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Usare la modalità one-hand"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Per uscire, scorri verso l\'alto dalla parte inferiore dello schermo oppure tocca un punto qualsiasi sopra l\'app"</string>
 </resources>

@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"కొత్త నియంత్రణలను చూడడానికి పవర్ బటన్‌ని నొక్కి పట్టుకోండి"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"నియంత్రణలను జోడించండి"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"నియంత్రణలను ఎడిట్ చేయండి"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"వన్-హ్యాండెడ్ మోడ్‌ను ఉపయోగించడం"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"నిష్క్రమించడానికి, స్క్రీన్ కింది భాగం నుండి పైకి స్వైప్ చేయండి లేదా యాప్ పైన ఎక్కడైనా ట్యాప్ చేయండి"</string>
 </resources>

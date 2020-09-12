@@ -1079,6 +1079,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Za ogled novih kontrolnikov pridržite gumb za vklop"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Dodaj kontrolnike"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Uredi kontrolnike"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Uporaba enoročnega načina"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Za izhod povlecite z dna zaslona navzgor ali se dotaknite na poljubnem mestu nad aplikacijo"</string>
 </resources>

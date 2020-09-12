@@ -1079,6 +1079,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Jei norite peržiūrėti naujus valdiklius, laikykite paspaudę maitinimo mygtuką"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Pridėti valdiklių"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Redaguoti valdiklius"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Vienos rankos režimo naudojimas"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Jei norite išeiti, perbraukite aukštyn nuo ekrano apačios arba palieskite bet kur virš programos"</string>
 </resources>

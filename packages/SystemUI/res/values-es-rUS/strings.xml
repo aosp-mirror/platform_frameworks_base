@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Mantén presionado el botón de encendido para ver los nuevos controles"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Agregar controles"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Editar controles"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Cómo usar el Modo de una mano"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Para salir, desliza el dedo hacia arriba desde la parte inferior de la pantalla o presiona cualquier parte arriba de la app"</string>
 </resources>

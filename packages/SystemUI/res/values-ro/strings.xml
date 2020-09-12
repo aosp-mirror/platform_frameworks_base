@@ -1073,6 +1073,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Apăsați butonul de alimentare pentru a vedea noile comenzi"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Adăugați comenzi"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Editați comenzile"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Folosirea modului cu o mână"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Pentru a ieși, glisați în sus din partea de jos a ecranului sau atingeți oriunde deasupra ferestrei aplicației"</string>
 </resources>

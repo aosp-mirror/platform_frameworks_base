@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"กดปุ่มเปิด/ปิดค้างไว้เพื่อดูตัวควบคุมใหม่ๆ"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"เพิ่มตัวควบคุม"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"แก้ไขตัวควบคุม"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"การใช้โหมดมือเดียว"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"หากต้องการออก ให้เลื่อนขึ้นจากด้านล่างของหน้าจอหรือแตะที่ใดก็ได้เหนือแอป"</string>
 </resources>

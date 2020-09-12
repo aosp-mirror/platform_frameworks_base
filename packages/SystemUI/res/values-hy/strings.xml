@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Սեղմած պահեք սնուցման կոճակը՝ կառավարման նոր տարրերը տեսնելու համար։"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Ավելացնել կառավարման տարրեր"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Փոփոխել կառավարման տարրերը"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Ինչպես օգտվել մեկ ձեռքի ռեժիմից"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Դուրս գալու համար մատը սահեցրեք էկրանի ներքևից վերև կամ հպեք հավելվածի վերևում որևէ տեղ։"</string>
 </resources>

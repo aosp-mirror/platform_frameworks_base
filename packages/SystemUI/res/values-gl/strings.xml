@@ -792,7 +792,7 @@
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Deter"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Seguinte"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Anterior"</string>
-    <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Rebobinar"</string>
+    <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Retroceder"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"Avance rápido"</string>
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Re Páx"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Av Páx"</string>
@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Mantén premido o botón de acendido para ver os novos controis"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Engadir controis"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Editar controis"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Como se usa o modo dunha soa man?"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Para saír, pasa o dedo cara arriba desde a parte inferior da pantalla ou toca calquera lugar da zona situada encima da aplicación"</string>
 </resources>

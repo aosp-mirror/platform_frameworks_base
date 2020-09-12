@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"按住电源按钮即可查看新控件"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"添加控件"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"修改控件"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"使用单手模式"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"如需退出，请从屏幕底部向上滑动，或点按应用上方的任意位置"</string>
 </resources>

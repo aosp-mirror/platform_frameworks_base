@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"새 컨트롤을 보려면 전원 버튼을 길게 누르세요."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"컨트롤 추가"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"컨트롤 수정"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"한 손 사용 모드 사용하기"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"화면 하단에서 위로 스와이프하거나 앱 상단을 탭하여 종료합니다."</string>
 </resources>

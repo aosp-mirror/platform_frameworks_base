@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Hold inne av/på-knappen for å se kontroller"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Legg til kontroller"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Endre kontroller"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Bruk av enhåndsmodus"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"For å avslutte, sveip opp fra bunnen av skjermen eller trykk hvor som helst over appen"</string>
 </resources>
