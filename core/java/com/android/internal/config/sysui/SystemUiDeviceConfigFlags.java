@@ -395,6 +395,11 @@ public final class SystemUiDeviceConfigFlags {
     public static final String PIP_PINCH_RESIZE = "pip_pinch_resize";
 
     /**
+     * (boolean) Whether to enable stashing for PIP.
+     */
+    public static final String PIP_STASHING = "pip_stashing";
+
+    /**
      * (float) Bottom height in DP for Back Gesture.
      */
     public static final String BACK_GESTURE_BOTTOM_HEIGHT = "back_gesture_bottom_height";

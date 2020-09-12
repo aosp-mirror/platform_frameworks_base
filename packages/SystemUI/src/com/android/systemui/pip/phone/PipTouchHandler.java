@@ -16,6 +16,7 @@
 
 package com.android.systemui.pip.phone;
 
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.PIP_STASHING;
 import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_CLOSE;
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_FULL;
@@ -33,6 +34,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.provider.DeviceConfig;
 import android.util.Log;
 import android.util.Size;
 import android.view.Gravity;
@@ -100,6 +102,13 @@ public class PipTouchHandler {
     private final PipMenuActivityController mMenuController;
     private final AccessibilityManager mAccessibilityManager;
     private boolean mShowPipMenuOnAnimationEnd = false;
+
+    /**
+     * Whether PIP stash is enabled or not. When enabled, if at the time of fling-release the
+     * PIP bounds is outside the left/right edge of the screen, it will be shown in "stashed" mode,
+     * where PIP will only show partially.
+     */
+    private boolean mEnableStash = false;
 
     /**
      * MagnetizedObject wrapper for PIP. This allows the magnetic target library to locate and move
@@ -306,6 +315,22 @@ public class PipTouchHandler {
         });
 
         mMagneticTargetAnimator = PhysicsAnimator.getInstance(mTargetView);
+
+        mEnableStash = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                PIP_STASHING,
+                /* defaultValue = */ false);
+        deviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
+                context.getMainExecutor(),
+                new DeviceConfig.OnPropertiesChangedListener() {
+                    @Override
+                    public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                        if (properties.getKeyset().contains(PIP_STASHING)) {
+                            mEnableStash = properties.getBoolean(
+                                    PIP_STASHING, /* defaultValue = */ false);
+                        }
+                    }
+                });
     }
 
     private void reloadResources() {
@@ -986,9 +1011,20 @@ public class PipTouchHandler {
 
                 // Reset the touch state on up before the fling settles
                 mTouchState.reset();
-                mMotionHelper.flingToSnapTarget(vel.x, vel.y,
-                        PipTouchHandler.this::updateDismissFraction /* updateAction */,
-                        this::flingEndAction /* endAction */);
+                final Rect animatingBounds = mMotionHelper.getPossiblyAnimatingBounds();
+                // If User releases the PIP window while it's out of the display bounds, put
+                // PIP into stashed mode.
+                if (mEnableStash
+                        && (animatingBounds.right > mPipBoundsHandler.getDisplayBounds().right
+                        || animatingBounds.left < mPipBoundsHandler.getDisplayBounds().left)) {
+                    mMotionHelper.stashToEdge(vel.x, vel.y,
+                            PipTouchHandler.this::updateDismissFraction /* updateAction */,
+                            this::flingEndAction /* endAction */);
+                } else {
+                    mMotionHelper.flingToSnapTarget(vel.x, vel.y,
+                            PipTouchHandler.this::updateDismissFraction /* updateAction */,
+                            this::flingEndAction /* endAction */);
+                }
             } else if (mTouchState.isDoubleTap()) {
                 // Expand to fullscreen if this is a double tap
                 // the PiP should be frozen until the transition ends
