@@ -227,6 +227,14 @@ public abstract class UserManagerInternal {
     public abstract @NonNull List<UserInfo> getUsers(boolean excludeDying);
 
     /**
+     * Internal implementation of getUsers does not check permissions.
+     * This improves performance for calls from inside system server which already have permissions
+     * checked.
+     */
+    public abstract @NonNull List<UserInfo> getUsers(boolean excludePartial, boolean excludeDying,
+            boolean excludePreCreated);
+
+    /**
      * Checks if the {@code callingUserId} and {@code targetUserId} are same or in same group
      * and that the {@code callingUserId} is not a profile and {@code targetUserId} is enabled.
      *
