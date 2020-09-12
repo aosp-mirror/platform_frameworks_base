@@ -1850,8 +1850,8 @@ class ProcessRecord implements WindowProcessListener {
 
     boolean getCachedIsHeavyWeight() {
         if (mCachedIsHeavyWeight == VALUE_INVALID) {
-            mCachedIsHeavyWeight = mService.mAtmInternal.isHeavyWeightProcess(
-                    getWindowProcessController()) ? VALUE_TRUE : VALUE_FALSE;
+            mCachedIsHeavyWeight = getWindowProcessController().isHeavyWeightProcess()
+                    ? VALUE_TRUE : VALUE_FALSE;
         }
         return mCachedIsHeavyWeight == VALUE_TRUE;
     }

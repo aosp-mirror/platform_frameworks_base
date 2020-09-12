@@ -178,10 +178,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // Whether this process has ever started a service with the BIND_INPUT_METHOD permission.
     private volatile boolean mHasImeService;
 
+    /** Whether {@link #mActivities} is not empty. */
+    private volatile boolean mHasActivities;
     /** All activities running in the process (exclude destroying). */
     private final ArrayList<ActivityRecord> mActivities = new ArrayList<>();
     /** The activities will be removed but still belong to this process. */
     private ArrayList<ActivityRecord> mInactiveActivities;
+    /** Whether {@link #mRecentTasks} is not empty. */
+    private volatile boolean mHasRecentTasks;
     // any tasks this process had run root activities in
     private final ArrayList<Task> mRecentTasks = new ArrayList<>();
     // The most recent top-most activity that was resumed in the process for pre-Q app.
@@ -646,6 +650,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
         mActivities.add(r);
+        mHasActivities = true;
         if (mInactiveActivities != null) {
             mInactiveActivities.remove(r);
         }
@@ -674,20 +679,20 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             mInactiveActivities.remove(r);
         }
         mActivities.remove(r);
+        mHasActivities = !mActivities.isEmpty();
         updateActivityConfigurationListener();
     }
 
     void clearActivities() {
         mInactiveActivities = null;
         mActivities.clear();
+        mHasActivities = false;
         updateActivityConfigurationListener();
     }
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean hasActivities() {
-        synchronized (mAtm.mGlobalLockWithoutBoost) {
-            return !mActivities.isEmpty();
-        }
+        return mHasActivities;
     }
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
@@ -697,9 +702,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     @HotPath(caller = HotPath.LRU_UPDATE)
     public boolean hasActivitiesOrRecentTasks() {
-        synchronized (mAtm.mGlobalLockWithoutBoost) {
-            return !mActivities.isEmpty() || !mRecentTasks.isEmpty();
-        }
+        return mHasActivities || mHasRecentTasks;
     }
 
     private boolean hasActivityInVisibleTask() {
@@ -1480,17 +1483,17 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     void addRecentTask(Task task) {
         mRecentTasks.add(task);
+        mHasRecentTasks = true;
     }
 
     void removeRecentTask(Task task) {
         mRecentTasks.remove(task);
+        mHasRecentTasks = !mRecentTasks.isEmpty();
     }
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean hasRecentTasks() {
-        synchronized (mAtm.mGlobalLockWithoutBoost) {
-            return !mRecentTasks.isEmpty();
-        }
+        return mHasRecentTasks;
     }
 
     void clearRecentTasks() {
@@ -1498,6 +1501,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             mRecentTasks.get(i).clearRootProcess();
         }
         mRecentTasks.clear();
+        mHasRecentTasks = false;
     }
 
     public void appEarlyNotResponding(String annotation, Runnable killAppCallback) {
@@ -1609,16 +1613,17 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean isHomeProcess() {
-        synchronized (mAtm.mGlobalLockWithoutBoost) {
-            return this == mAtm.mHomeProcess;
-        }
+        return this == mAtm.mHomeProcess;
     }
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean isPreviousProcess() {
-        synchronized (mAtm.mGlobalLockWithoutBoost) {
-            return this == mAtm.mPreviousProcess;
-        }
+        return this == mAtm.mPreviousProcess;
+    }
+
+    @HotPath(caller = HotPath.OOM_ADJUSTMENT)
+    public boolean isHeavyWeightProcess() {
+        return this == mAtm.mHeavyWeightProcess;
     }
 
     void setRunningRecentsAnimation(boolean running) {
