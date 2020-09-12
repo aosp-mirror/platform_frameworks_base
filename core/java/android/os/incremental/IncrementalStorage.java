@@ -170,9 +170,10 @@ public final class IncrementalStorage {
      * @param size             Size of the new file in bytes.
      * @param metadata         Metadata bytes.
      * @param v4signatureBytes Serialized V4SignatureProto.
+     * @param content          Optionally set file content.
      */
     public void makeFile(@NonNull String path, long size, @Nullable UUID id,
-            @Nullable byte[] metadata, @Nullable byte[] v4signatureBytes)
+            @Nullable byte[] metadata, @Nullable byte[] v4signatureBytes, @Nullable byte[] content)
             throws IOException {
         try {
             if (id == null && metadata == null) {
@@ -184,7 +185,7 @@ public final class IncrementalStorage {
             params.metadata = (metadata == null ? new byte[0] : metadata);
             params.fileId = idToBytes(id);
             params.signature = v4signatureBytes;
-            int res = mService.makeFile(mId, path, params);
+            int res = mService.makeFile(mId, path, params, content);
             if (res != 0) {
                 throw new IOException("makeFile() failed with errno " + -res);
             }

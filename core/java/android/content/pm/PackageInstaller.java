@@ -1227,7 +1227,10 @@ public class PackageInstaller {
          *                  IntentSender)}.
          * @throws SecurityException if called after the session has been
          *                           committed or abandoned.
+         * @deprecated  use platform-enforced checksums e.g.
+         *              {@link Checksum#WHOLE_MERKLE_ROOT_4K_SHA256}
          */
+        @Deprecated
         public void addChecksums(@NonNull String name, @NonNull List<Checksum> checksums)
                 throws IOException {
             Objects.requireNonNull(name);

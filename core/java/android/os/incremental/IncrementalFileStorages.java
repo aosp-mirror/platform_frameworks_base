@@ -42,6 +42,7 @@ import android.text.TextUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * This class manages storage instances used during a package installation session.
@@ -139,7 +140,7 @@ public final class IncrementalFileStorages {
         final String apkName = apk.name;
         final File targetFile = new File(mStageDir, apkName);
         if (!targetFile.exists()) {
-            mDefaultStorage.makeFile(apkName, apk.size, null, apk.metadata, apk.signature);
+            mDefaultStorage.makeFile(apkName, apk.size, null, apk.metadata, apk.signature, null);
         }
     }
 
@@ -150,6 +151,13 @@ public final class IncrementalFileStorages {
         if (!mDefaultStorage.startLoading()) {
             throw new IOException("Failed to start loading data for Incremental installation.");
         }
+    }
+
+    /**
+     * Creates file in default storage and sets its content.
+     */
+    public void makeFile(@NonNull String name, @NonNull byte[] content) throws IOException {
+        mDefaultStorage.makeFile(name, content.length, UUID.randomUUID(), null, null, content);
     }
 
     /**

@@ -52,6 +52,7 @@ import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyEventLogger;
@@ -153,6 +154,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileFilter;
@@ -240,6 +242,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_SIGNATURE = "signature";
     private static final String ATTR_CHECKSUM_KIND = "checksumKind";
     private static final String ATTR_CHECKSUM_VALUE = "checksumValue";
+    private static final String ATTR_CHECKSUM_PACKAGE = "checksumPackage";
     private static final String ATTR_CHECKSUM_CERTIFICATE = "checksumCertificate";
 
     private static final String PROPERTY_NAME_INHERIT_NATIVE = "pi.inherit_native_on_dont_kill";
@@ -394,15 +397,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     static class CertifiedChecksum {
         final @NonNull Checksum mChecksum;
+        final @NonNull String mPackageName;
         final @NonNull byte[] mCertificate;
 
-        CertifiedChecksum(@NonNull Checksum checksum, @NonNull byte[] certificate) {
+        CertifiedChecksum(@NonNull Checksum checksum, @NonNull String packageName,
+                @NonNull byte[] certificate) {
             mChecksum = checksum;
+            mPackageName = packageName;
             mCertificate = certificate;
         }
 
         Checksum getChecksum() {
             return mChecksum;
+        }
+
+        String getPackageName() {
+            return mPackageName;
         }
 
         byte[] getCertificate() {
@@ -951,23 +961,26 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
-        final PackageManagerInternal pmi = LocalServices.getService(
-                PackageManagerInternal.class);
-        final AndroidPackage callingInstaller = pmi.getPackage(Binder.getCallingUid());
+        final String initiatingPackageName = mInstallSource.initiatingPackageName;
 
+        final AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
+        appOps.checkPackage(Binder.getCallingUid(), initiatingPackageName);
+
+        final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        final AndroidPackage callingInstaller = pmi.getPackage(initiatingPackageName);
         if (callingInstaller == null) {
             throw new IllegalStateException("Can't obtain calling installer's package.");
         }
 
         // Obtaining array of certificates used for signing the installer package.
-        // According to V2/V3 signing schema, the first certificate corresponds to public key
-        // in the signing block.
-        Signature[] certs = callingInstaller.getSigningDetails().signatures;
+        final Signature[] certs = callingInstaller.getSigningDetails().signatures;
         if (certs == null || certs.length == 0 || certs[0] == null) {
             throw new IllegalStateException(
                     "Can't obtain calling installer package's certificates.");
         }
-        byte[] mainCertificateBytes = certs[0].toByteArray();
+        // According to V2/V3 signing schema, the first certificate corresponds to the public key
+        // in the signing block.
+        final byte[] mainCertificateBytes = certs[0].toByteArray();
 
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
@@ -979,7 +992,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     fileChecksums = new ArrayList<>();
                     mChecksums.put(name, fileChecksums);
                 }
-                fileChecksums.add(new CertifiedChecksum(checksum, mainCertificateBytes));
+                fileChecksums.add(new CertifiedChecksum(checksum, initiatingPackageName,
+                        mainCertificateBytes));
             }
         }
     }
@@ -2633,7 +2647,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         for (int i = 0, size = checksums.size(); i < size; ++i) {
             CertifiedChecksum checksum = checksums.get(i);
             result[i] = new ApkChecksum(splitName, checksum.getChecksum(),
-                    checksum.getCertificate());
+                    checksum.getPackageName(), checksum.getCertificate());
         }
         return result;
     }
@@ -2651,11 +2665,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
-        final File targetDigestsFile = new File(stageDir,
-                ApkChecksums.buildDigestsPathForApk(targetFile.getName()));
-        try {
-            ApkChecksums.writeChecksums(targetDigestsFile,
-                    createApkChecksums(splitName, checksums));
+        final String targetDigestsPath = ApkChecksums.buildDigestsPathForApk(targetFile.getName());
+        final File targetDigestsFile = new File(stageDir, targetDigestsPath);
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            ApkChecksums.writeChecksums(os, createApkChecksums(splitName, checksums));
+            final byte[] checksumsBytes = os.toByteArray();
+
+            if (!isIncrementalInstallation() || mIncrementalFileStorages == null) {
+                FileUtils.bytesToFile(targetDigestsFile.getAbsolutePath(), checksumsBytes);
+            } else {
+                mIncrementalFileStorages.makeFile(targetDigestsPath, checksumsBytes);
+            }
         } catch (CertificateException e) {
             throw new PackageManagerException(INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING,
                     "Failed to encode certificate for " + mPackageName, e);
@@ -3975,6 +3995,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     writeIntAttribute(out, ATTR_CHECKSUM_KIND, checksum.getChecksum().getKind());
                     writeByteArrayAttribute(out, ATTR_CHECKSUM_VALUE,
                             checksum.getChecksum().getValue());
+                    writeStringAttribute(out, ATTR_CHECKSUM_PACKAGE, checksum.getPackageName());
                     writeByteArrayAttribute(out, ATTR_CHECKSUM_CERTIFICATE,
                             checksum.getCertificate());
                     out.endTag(null, TAG_SESSION_CHECKSUM);
@@ -4127,6 +4148,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 final CertifiedChecksum certifiedChecksum = new CertifiedChecksum(
                         new Checksum(readIntAttribute(in, ATTR_CHECKSUM_KIND, 0),
                                 readByteArrayAttribute(in, ATTR_CHECKSUM_VALUE)),
+                        readStringAttribute(in, ATTR_CHECKSUM_PACKAGE),
                         readByteArrayAttribute(in, ATTR_CHECKSUM_CERTIFICATE));
 
                 List<CertifiedChecksum> certifiedChecksums = checksums.get(fileName);

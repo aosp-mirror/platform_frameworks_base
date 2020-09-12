@@ -27,6 +27,8 @@ import android.service.dataloader.DataLoaderService;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import libcore.io.IoUtils;
 
 import java.io.IOException;
@@ -112,7 +114,9 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
         }
     }
 
-    static class Metadata {
+    /** @hide */
+    @VisibleForTesting
+    public static class Metadata {
         /**
          * Full files read from stdin.
          */
@@ -137,7 +141,9 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
             return new Metadata(STDIN, fileId);
         }
 
-        static Metadata forLocalFile(String filePath) {
+        /** @hide */
+        @VisibleForTesting
+        public static Metadata forLocalFile(String filePath) {
             return new Metadata(LOCAL_FILE, filePath);
         }
 
@@ -163,7 +169,9 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
             return new Metadata(mode, data);
         }
 
-        byte[] toByteArray() {
+        /** @hide */
+        @VisibleForTesting
+        public byte[] toByteArray() {
             byte[] dataBytes = this.mData.getBytes(StandardCharsets.UTF_8);
             byte[] result = new byte[1 + dataBytes.length];
             result[0] = this.mMode;

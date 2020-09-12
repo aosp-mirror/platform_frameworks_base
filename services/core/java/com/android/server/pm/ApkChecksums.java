@@ -64,7 +64,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -168,12 +167,11 @@ public class ApkChecksums {
     }
 
     /**
-     * Serialize checksums to file in binary format.
+     * Serialize checksums to the stream in binary format.
      */
-    public static void writeChecksums(File file, ApkChecksum[] checksums)
+    public static void writeChecksums(OutputStream os, ApkChecksum[] checksums)
             throws IOException, CertificateException {
-        try (OutputStream os = new FileOutputStream(file);
-             DataOutputStream dos = new DataOutputStream(os)) {
+        try (DataOutputStream dos = new DataOutputStream(os)) {
             dos.writeInt(checksums.length);
             for (ApkChecksum checksum : checksums) {
                 final String splitName = checksum.getSplitName();
@@ -189,6 +187,14 @@ public class ApkChecksums {
                 final byte[] valueBytes = checksum.getValue();
                 dos.writeInt(valueBytes.length);
                 dos.write(valueBytes);
+
+                final String packageName = checksum.getSourcePackageName();
+                if (packageName == null) {
+                    dos.writeInt(-1);
+                } else {
+                    dos.writeInt(packageName.length());
+                    dos.writeUTF(packageName);
+                }
 
                 final Certificate cert = checksum.getSourceCertificate();
                 final byte[] certBytes = (cert == null) ? null : cert.getEncoded();
@@ -218,9 +224,19 @@ public class ApkChecksums {
                 } else {
                     splitName = dis.readUTF();
                 }
+
                 final int kind = dis.readInt();
+
                 final byte[] valueBytes = new byte[dis.readInt()];
                 dis.read(valueBytes);
+
+                final String packageName;
+                if (dis.readInt() < 0) {
+                    packageName = null;
+                } else {
+                    packageName = dis.readUTF();
+                }
+
                 final byte[] certBytes;
                 final int certBytesLength = dis.readInt();
                 if (certBytesLength < 0) {
@@ -230,7 +246,7 @@ public class ApkChecksums {
                     dis.read(certBytes);
                 }
                 checksums[i] = new ApkChecksum(splitName, new Checksum(kind, valueBytes),
-                        certBytes);
+                        packageName, certBytes);
             }
             return checksums;
         }

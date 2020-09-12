@@ -225,6 +225,20 @@ std::optional<T> read(IncFsSpan& data) {
     return res;
 }
 
+static inline unique_fd openLocalFile(JNIEnv* env, const JniIds& jni, jobject shellCommand,
+                                      const std::string& path) {
+    if (shellCommand) {
+        return unique_fd{env->CallStaticIntMethod(jni.packageManagerShellCommandDataLoader,
+                                                  jni.pmscdGetLocalFile, shellCommand,
+                                                  env->NewStringUTF(path.c_str()))};
+    }
+    auto fd = unique_fd(::open(path.c_str(), O_RDONLY | O_CLOEXEC));
+    if (!fd.ok()) {
+        PLOG(ERROR) << "Failed to open file: " << path << ", error code: " << fd.get();
+    }
+    return fd;
+}
+
 static inline InputDescs openLocalFile(JNIEnv* env, const JniIds& jni, jobject shellCommand,
                                        IncFsSize size, const std::string& filePath) {
     InputDescs result;
@@ -232,9 +246,7 @@ static inline InputDescs openLocalFile(JNIEnv* env, const JniIds& jni, jobject s
 
     const std::string idsigPath = filePath + ".idsig";
 
-    unique_fd idsigFd{env->CallStaticIntMethod(jni.packageManagerShellCommandDataLoader,
-                                               jni.pmscdGetLocalFile, shellCommand,
-                                               env->NewStringUTF(idsigPath.c_str()))};
+    unique_fd idsigFd = openLocalFile(env, jni, shellCommand, idsigPath);
     if (idsigFd.ok()) {
         auto treeSize = verityTreeSizeForFile(size);
         auto actualTreeSize = skipIdSigHeaders(idsigFd);
@@ -250,9 +262,7 @@ static inline InputDescs openLocalFile(JNIEnv* env, const JniIds& jni, jobject s
         });
     }
 
-    unique_fd fileFd{env->CallStaticIntMethod(jni.packageManagerShellCommandDataLoader,
-                                              jni.pmscdGetLocalFile, shellCommand,
-                                              env->NewStringUTF(filePath.c_str()))};
+    unique_fd fileFd = openLocalFile(env, jni, shellCommand, filePath);
     if (fileFd.ok()) {
         result.push_back(InputDesc{
                 .fd = std::move(fileFd),
@@ -270,6 +280,11 @@ static inline InputDescs openInputs(JNIEnv* env, const JniIds& jni, jobject shel
         // local file and possibly signature
         return openLocalFile(env, jni, shellCommand, size,
                              std::string(metadata.data, metadata.size));
+    }
+
+    if (!shellCommand) {
+        ALOGE("Missing shell command.");
+        return {};
     }
 
     unique_fd fd{env->CallStaticIntMethod(jni.packageManagerShellCommandDataLoader,
@@ -396,10 +411,6 @@ private:
         jobject shellCommand = env->CallStaticObjectMethod(jni.packageManagerShellCommandDataLoader,
                                                            jni.pmscdLookupShellCommand,
                                                            env->NewStringUTF(mArgs.c_str()));
-        if (!shellCommand) {
-            ALOGE("Missing shell command.");
-            return false;
-        }
 
         std::vector<char> buffer;
         buffer.reserve(BUFFER_SIZE);

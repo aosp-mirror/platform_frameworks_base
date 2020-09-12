@@ -200,16 +200,24 @@ static std::tuple<int, incfs::FileId, incfs::NewFileParams> toMakeFileParams(
     return {0, id, nfp};
 }
 
+static std::span<const uint8_t> toSpan(const ::std::optional<::std::vector<uint8_t>>& content) {
+    if (!content) {
+        return {};
+    }
+    return {content->data(), (int)content->size()};
+}
+
 binder::Status BinderIncrementalService::makeFile(
         int32_t storageId, const std::string& path,
-        const ::android::os::incremental::IncrementalNewFileParams& params, int32_t* _aidl_return) {
+        const ::android::os::incremental::IncrementalNewFileParams& params,
+        const ::std::optional<::std::vector<uint8_t>>& content, int32_t* _aidl_return) {
     auto [err, fileId, nfp] = toMakeFileParams(params);
     if (err) {
         *_aidl_return = err;
         return ok();
     }
 
-    *_aidl_return = mImpl.makeFile(storageId, path, 0777, fileId, nfp);
+    *_aidl_return = mImpl.makeFile(storageId, path, 0777, fileId, nfp, toSpan(content));
     return ok();
 }
 binder::Status BinderIncrementalService::makeFileFromRange(int32_t storageId,
