@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"புதிய கட்டுப்பாடுகளைப் பார்க்க பவர் பட்டனைப் பிடித்திருக்கவும்"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"கட்டுப்பாடுகளைச் சேர்த்தல்"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"கட்டுப்பாடுகளை மாற்றுதல்"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"ஒற்றைக் கைப் பயன்முறையைப் பயன்படுத்துதல்"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"வெளியேற, திரையின் கீழிருந்து மேல்நோக்கி ஸ்வைப் செய்யவும் அல்லது ஆப்ஸுக்கு மேலே எங்காவது தட்டவும்"</string>
 </resources>

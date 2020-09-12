@@ -1079,6 +1079,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Pridržaním vypínača zobrazíte nové ovládacie prvky"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Pridať ovládače"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Upraviť ovládače"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Používanie režimu jednej ruky"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Ukončíte potiahnutím z dolnej časti obrazovky nahor alebo klepnutím kdekoľvek nad aplikáciu"</string>
 </resources>

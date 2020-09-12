@@ -1073,6 +1073,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Zadržite tipku za uključivanje/isključivanje za prikaz novih kontrola"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Dodaj kontrole"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Uredi kontrole"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Korištenje načina rada jednom rukom"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Za izlaz prijeđite prstom od dna zaslona prema gore ili dodirnite bio gdje iznad aplikacije"</string>
 </resources>

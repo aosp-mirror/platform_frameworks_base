@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Hou aan/af-skakelaar in om nuwe kontroles te sien"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Voeg kontroles by"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Wysig kontroles"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Gebruik eenhandmodus"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Swiep van die onderkant van die skerm af op of tik enige plek bo die program om uit te gaan"</string>
 </resources>

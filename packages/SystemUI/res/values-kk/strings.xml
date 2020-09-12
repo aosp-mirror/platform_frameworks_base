@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Жаңа басқару элементтерін көру үшін \"Қуат\" түймесін басып тұрыңыз."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Басқару элементтерін енгізу"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Басқару элементтерін өзгерту"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Бір қолмен енгізу режимін пайдалану"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Шығу үшін экранның төменгі жағынан жоғары қарай сипаңыз немесе қолданбаның үстінен кез келген жерден түртіңіз."</string>
 </resources>

@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Haltu aflrofanum inni til að sjá nýjar stýringar"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Bæta við stýringum"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Breyta stýringum"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Notkun stillingar fyrir eina hönd"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Til að loka skaltu strjúka upp frá neðri hluta skjásins eða ýta hvar sem er fyrir ofan forritið"</string>
 </resources>

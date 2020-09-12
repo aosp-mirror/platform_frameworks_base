@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"નવા નિયંત્રણ જોવા માટે પાવર બટનને દબાવી રાખો"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"નિયંત્રણો ઉમેરો"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"નિયંત્રણોમાં ફેરફાર કરો"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"એક-હાથે વાપરો મોડનો ઉપયોગ કરી રહ્યાં છીએ"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"બહાર નીકળવા માટે, સ્ક્રીનની નીચેના ભાગથી ઉપરની તરફ સ્વાઇપ કરો અથવા ઍપના આઇકન પર ગમે ત્યાં ટૅપ કરો"</string>
 </resources>

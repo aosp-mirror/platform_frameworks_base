@@ -1069,6 +1069,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"नए कंट्रोल देखने के लिए पावर बटन दबाकर रखें"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"कंट्राेल जोड़ें"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"कंट्रोल मेन्यू में बदलाव करें"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"वन-हैंडेड मोड का इस्तेमाल करना"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"इसे बंद करने के लिए, स्क्रीन के सबसे निचले हिस्से से ऊपर की ओर स्वाइप करें या ऐप्लिकेशन के आइकॉन के ऊपर कहीं भी टैप करें"</string>
 </resources>

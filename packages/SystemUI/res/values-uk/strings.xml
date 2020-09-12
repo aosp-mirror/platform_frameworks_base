@@ -1079,6 +1079,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Утримуйте кнопку живлення, щоб переглянути нові елементи керування"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Додати елементи керування"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Змінити елементи керування"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Як користуватись режимом керування однією рукою"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Щоб вийти, проведіть пальцем вверх від низу екрана або торкніться екрана над додатком"</string>
 </resources>

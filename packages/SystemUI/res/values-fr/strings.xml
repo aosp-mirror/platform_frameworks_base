@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Appuyez de manière prolongée sur le bouton Marche/Arrêt pour afficher les nouvelles commandes"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Ajouter des commandes"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Modifier des commandes"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Utiliser le mode une main"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Pour quitter, balayez l\'écran de bas en haut ou appuyez n\'importe où au-dessus de l\'application"</string>
 </resources>

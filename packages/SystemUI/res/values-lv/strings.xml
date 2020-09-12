@@ -1073,6 +1073,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Nospiediet barošanas pogu un turiet to, lai skatītu jaunas vadīklas"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Pievienot vadīklas"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Rediģēt vadīklas"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Vienas rokas režīma izmantošana"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Lai izietu, velciet augšup no ekrāna apakšdaļas vai pieskarieties jebkurā vietā virs lietotnes"</string>
 </resources>
