@@ -30,9 +30,12 @@
 #include <android/hardware/gnss/2.1/IGnssAntennaInfo.h>
 #include <android/hardware/gnss/2.1/IGnssMeasurement.h>
 #include <android/hardware/gnss/3.0/IGnssPsds.h>
+#include <android/hardware/gnss/BnGnss.h>
+#include <android/hardware/gnss/BnGnssPsdsCallback.h>
 #include <android/hardware/gnss/measurement_corrections/1.0/IMeasurementCorrections.h>
 #include <android/hardware/gnss/measurement_corrections/1.1/IMeasurementCorrections.h>
 #include <android/hardware/gnss/visibility_control/1.0/IGnssVisibilityControl.h>
+#include <binder/IServiceManager.h>
 #include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
@@ -142,9 +145,10 @@ static JavaVM* sJvm;
 
 using android::OK;
 using android::sp;
-using android::wp;
 using android::status_t;
 using android::String16;
+using android::wp;
+using android::binder::Status;
 
 using android::hardware::Return;
 using android::hardware::Void;
@@ -152,6 +156,7 @@ using android::hardware::hidl_vec;
 using android::hardware::hidl_string;
 using android::hardware::hidl_death_recipient;
 
+using android::hardware::gnss::PsdsType;
 using android::hardware::gnss::V1_0::GnssLocationFlags;
 using android::hardware::gnss::V1_0::IAGnssRilCallback;
 using android::hardware::gnss::V1_0::IGnssGeofenceCallback;
@@ -161,10 +166,9 @@ using android::hardware::gnss::V1_0::IGnssNavigationMessageCallback;
 using android::hardware::gnss::V1_0::IGnssNi;
 using android::hardware::gnss::V1_0::IGnssNiCallback;
 using android::hardware::gnss::V1_0::IGnssXtra;
+using android::hardware::gnss::V2_0::ElapsedRealtimeFlags;
 using android::hardware::gnss::V3_0::IGnssPsds;
 using android::hardware::gnss::V3_0::IGnssPsdsCallback;
-
-using android::hardware::gnss::V2_0::ElapsedRealtimeFlags;
 
 using MeasurementCorrections_V1_0 = android::hardware::gnss::measurement_corrections::V1_0::MeasurementCorrections;
 using MeasurementCorrections_V1_1 = android::hardware::gnss::measurement_corrections::V1_1::MeasurementCorrections;
@@ -224,6 +228,10 @@ using android::hardware::gnss::measurement_corrections::V1_0::GnssSingleSatCorre
 using android::hardware::gnss::visibility_control::V1_0::IGnssVisibilityControl;
 using android::hardware::gnss::visibility_control::V1_0::IGnssVisibilityControlCallback;
 
+using IGnssAidl = android::hardware::gnss::IGnss;
+using IGnssPsdsAidl = android::hardware::gnss::IGnssPsds;
+using IGnssPsdsCallbackAidl = android::hardware::gnss::IGnssPsdsCallback;
+
 struct GnssDeathRecipient : virtual public hidl_death_recipient
 {
     // hidl_death_recipient interface
@@ -245,7 +253,9 @@ sp<IGnss_V1_1> gnssHal_V1_1 = nullptr;
 sp<IGnss_V2_0> gnssHal_V2_0 = nullptr;
 sp<IGnss_V2_1> gnssHal_V2_1 = nullptr;
 sp<IGnss_V3_0> gnssHal_V3_0 = nullptr;
+sp<IGnssAidl> gnssHalAidl = nullptr;
 sp<IGnssPsds> gnssPsdsIface = nullptr;
+sp<IGnssPsdsAidl> gnssPsdsAidlIface = nullptr;
 sp<IGnssXtra> gnssXtraIface = nullptr;
 sp<IAGnssRil_V1_0> agnssRilIface = nullptr;
 sp<IAGnssRil_V2_0> agnssRilIface_V2_0 = nullptr;
@@ -443,6 +453,19 @@ static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodNa
         LOGE_EX(env);
         env->ExceptionClear();
     }
+}
+
+static jboolean checkAidlStatus(const Status& status, const char* errorMessage,
+                                const bool success) {
+    if (!status.isOk()) {
+        ALOGE("%s AIDL transport error: %s", errorMessage, status.toString8().c_str());
+        return JNI_FALSE;
+    }
+    if (!success) {
+        ALOGE("AIDL return failure: %s", errorMessage);
+        return JNI_FALSE;
+    }
+    return JNI_TRUE;
 }
 
 static jobject createHalInterfaceVersionJavaObject(JNIEnv* env, jint major, jint minor) {
@@ -928,20 +951,31 @@ Return<void> GnssCallback::gnssSetSystemInfoCb(const IGnssCallback_V2_0::GnssSys
  * GnssPsdsCallback class implements the callback methods for the IGnssPsds
  * interface.
  */
+struct GnssPsdsCallbackAidl : public android::hardware::gnss::BnGnssPsdsCallback {
+    Status downloadRequestCb(PsdsType psdsType) override {
+        ALOGD("%s. psdsType: %d", __func__, static_cast<int32_t>(psdsType));
+        JNIEnv* env = getJniEnv();
+        env->CallVoidMethod(mCallbacksObj, method_psdsDownloadRequest, psdsType);
+        checkAndClearExceptionFromCallback(env, __FUNCTION__);
+        return Status::ok();
+    }
+};
+
+/*
+ * GnssPsdsCallback class implements the callback methods for the IGnssPsds
+ * interface.
+ */
 struct GnssPsdsCallback : public IGnssPsdsCallback {
     Return<void> downloadRequestCb() override;
     Return<void> downloadRequestCb_3_0(int32_t psdsType) override;
 };
 
 Return<void> GnssPsdsCallback::downloadRequestCb() {
-    JNIEnv* env = getJniEnv();
-    env->CallVoidMethod(mCallbacksObj, method_psdsDownloadRequest, /* psdsType= */ 1);
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-    return Void();
+    return downloadRequestCb_3_0(/* psdsType= */ 1);
 }
 
 Return<void> GnssPsdsCallback::downloadRequestCb_3_0(int32_t psdsType) {
-    ALOGD("%s: %d", __func__, psdsType);
+    ALOGD("%s. psdsType: %d", __func__, psdsType);
     JNIEnv* env = getJniEnv();
     env->CallVoidMethod(mCallbacksObj, method_psdsDownloadRequest, psdsType);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
@@ -1917,6 +1951,11 @@ struct GnssBatchingCallback_V2_0 : public IGnssBatchingCallback_V2_0 {
 
 /* Initializes the GNSS service handle. */
 static void android_location_GnssLocationProvider_set_gps_service_handle() {
+    gnssHalAidl = waitForVintfService<IGnssAidl>();
+    if (gnssHalAidl != nullptr) {
+        ALOGD("Successfully got GNSS AIDL handle.");
+    }
+
     ALOGD("Trying IGnss_V3_0::getService()");
     gnssHal_V3_0 = IGnss_V3_0::getService();
     if (gnssHal_V3_0 != nullptr) {
@@ -2168,7 +2207,15 @@ static void android_location_GnssNative_init_once(JNIEnv* env, jobject obj,
         ALOGD("Link to death notification successful");
     }
 
-    if (gnssHal_V3_0 != nullptr) {
+    if (gnssHalAidl != nullptr) {
+        sp<IGnssPsdsAidl> gnssPsdsAidl;
+        auto status = gnssHalAidl->getExtensionPsds(&gnssPsdsAidl);
+        if (status.isOk()) {
+            gnssPsdsAidlIface = gnssPsdsAidl;
+        } else {
+            ALOGD("Unable to get a handle to PSDS AIDL interface.");
+        }
+    } else if (gnssHal_V3_0 != nullptr) {
         auto gnssPsds = gnssHal_V3_0->getExtensionPsds();
         if (!gnssPsds.isOk()) {
             ALOGD("Unable to get a handle to Psds");
@@ -2470,19 +2517,28 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* /* env */, jo
     }
 
     // Set IGnssPsds or IGnssXtra callback.
-    sp<IGnssPsdsCallback> gnssPsdsCbIface = new GnssPsdsCallback();
-    if (gnssPsdsIface != nullptr) {
-        result = gnssPsdsIface->setCallback_3_0(gnssPsdsCbIface);
-        if (!checkHidlReturn(result, "IGnssPsds setCallback() failed.")) {
-            gnssPsdsIface = nullptr;
-        }
-    } else if (gnssXtraIface != nullptr) {
-        result = gnssXtraIface->setCallback(gnssPsdsCbIface);
-        if (!checkHidlReturn(result, "IGnssXtra setCallback() failed.")) {
-            gnssXtraIface = nullptr;
+    if (gnssPsdsAidlIface != nullptr) {
+        sp<IGnssPsdsCallbackAidl> gnssPsdsCallbackAidl = new GnssPsdsCallbackAidl();
+        bool success;
+        auto status = gnssPsdsAidlIface->setCallback(gnssPsdsCallbackAidl, &success);
+        if (!checkAidlStatus(status, "IGnssPsdsAidl setCallback() failed.", success)) {
+            gnssPsdsAidlIface = nullptr;
         }
     } else {
-        ALOGI("Unable to initialize IGnssPsds/IGnssXtra interface.");
+        sp<IGnssPsdsCallback> gnssPsdsCbIface = new GnssPsdsCallback();
+        if (gnssPsdsIface != nullptr) {
+            result = gnssPsdsIface->setCallback_3_0(gnssPsdsCbIface);
+            if (!checkHidlReturn(result, "IGnssPsds setCallback() failed.")) {
+                gnssPsdsIface = nullptr;
+            }
+        } else if (gnssXtraIface != nullptr) {
+            result = gnssXtraIface->setCallback(gnssPsdsCbIface);
+            if (!checkHidlReturn(result, "IGnssXtra setCallback() failed.")) {
+                gnssXtraIface = nullptr;
+            }
+        } else {
+            ALOGI("Unable to initialize IGnssPsds/IGnssXtra interface.");
+        }
     }
 
     // Set IAGnss.hal callback.
@@ -2743,19 +2799,29 @@ static void android_location_GnssLocationProvider_inject_location(JNIEnv* /* env
 
 static jboolean android_location_GnssLocationProvider_supports_psds(
         JNIEnv* /* env */, jobject /* obj */) {
-    return (gnssPsdsIface != nullptr || gnssXtraIface != nullptr) ? JNI_TRUE : JNI_FALSE;
+    return (gnssPsdsAidlIface != nullptr || gnssPsdsIface != nullptr || gnssXtraIface != nullptr)
+            ? JNI_TRUE
+            : JNI_FALSE;
 }
 
 static void android_location_GnssLocationProvider_inject_psds_data(JNIEnv* env, jobject /* obj */,
                                                                    jbyteArray data, jint length,
                                                                    jint psdsType) {
-    if (gnssPsdsIface == nullptr && gnssXtraIface == nullptr) {
+    if (gnssPsdsAidlIface == nullptr && gnssPsdsIface == nullptr && gnssXtraIface == nullptr) {
         ALOGE("%s: IGnssPsds or IGnssXtra interface not available.", __func__);
         return;
     }
 
     jbyte* bytes = reinterpret_cast<jbyte *>(env->GetPrimitiveArrayCritical(data, 0));
-    if (gnssPsdsIface != nullptr) {
+    if (gnssPsdsAidlIface != nullptr) {
+        bool success;
+        auto status = gnssPsdsAidlIface->injectPsdsData(static_cast<PsdsType>(psdsType),
+                                                        std::vector<uint8_t>((const uint8_t*)bytes,
+                                                                             (const uint8_t*)bytes +
+                                                                                     length),
+                                                        &success);
+        checkAidlStatus(status, "IGnssPsdsAidl injectPsdsData() failed.", success);
+    } else if (gnssPsdsIface != nullptr) {
         auto result = gnssPsdsIface->injectPsdsData_3_0(psdsType,
                                                         std::string((const char*)bytes, length));
         checkHidlReturn(result, "IGnssPsds injectPsdsData() failed.");
