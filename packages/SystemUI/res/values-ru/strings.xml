@@ -1079,6 +1079,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Удерживайте кнопку питания, чтобы увидеть новые элементы управления"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Добавить виджеты"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Изменить виджеты"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Использование режима управления одной рукой"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"Чтобы выйти, проведите по экрану снизу вверх или нажмите в любой области над значком приложения."</string>
 </resources>

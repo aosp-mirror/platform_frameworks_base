@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"電源ボタンを長押しすると、新しいコントロールが表示されます"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"コントロールを追加"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"コントロールを編集"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"片手モードの使用"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"終了するには、画面を下から上にスワイプするか、アプリの任意の場所をタップします"</string>
 </resources>

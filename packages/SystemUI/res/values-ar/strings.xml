@@ -1091,6 +1091,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"اضغط مع الاستمرار على زر التشغيل لعرض عناصر التحكّم الجديدة."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"إضافة عناصر تحكّم"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"تعديل عناصر التحكّم"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"استخدام وضع \"التصفح بيد واحدة\""</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"للخروج، مرِّر سريعًا من أسفل الشاشة إلى أعلاها أو انقر في أي مكان فوق التطبيق."</string>
 </resources>

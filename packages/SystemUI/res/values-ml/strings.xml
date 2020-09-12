@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"പുതിയ നിയന്ത്രണങ്ങൾ കാണാൻ പവർ ബട്ടൺ പിടിക്കുക"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"നിയന്ത്രണങ്ങൾ ചേർക്കുക"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"നിയന്ത്രണങ്ങൾ എഡിറ്റ് ചെയ്യുക"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"ഒറ്റക്കൈ മോഡ് എങ്ങനെ ഉപയോഗിക്കാം"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"പുറത്ത് കടക്കാൻ, സ്ക്രീനിന്റെ ചുവടെ നിന്ന് മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്യുക അല്ലെങ്കിൽ ആപ്പിന് മുകളിലായി എവിടെയെങ്കിലും ടാപ്പ് ചെയ്യുക"</string>
 </resources>

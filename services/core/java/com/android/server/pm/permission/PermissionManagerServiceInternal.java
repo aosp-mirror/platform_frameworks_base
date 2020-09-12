@@ -266,21 +266,21 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract void removeAllPermissions(@NonNull AndroidPackage pkg, boolean chatty);
 
     /**
-     * Read {@code PermissionsState} from package settings.
+     * Read permission state from package settings.
      *
      * TODO(zhanghai): This is a temporary method because we should not expose
      * {@code PackageSetting} which is a implementation detail that permission should not know.
      * Instead, it should retrieve the legacy state via a defined API.
      */
-    public abstract void readPermissionsStateFromPackageSettingsTEMP();
+    public abstract void readStateFromPackageSettingsTEMP();
 
     /**
-     * Write {@code PermissionsState} from to settings.
+     * Write permission state to package settings.
      *
      * TODO(zhanghai): This is a temporary method and should be removed once we migrated persistence
      * for permission.
      */
-    public abstract void writePermissionsStateToPackageSettingsTEMP();
+    public abstract void writeStateToPackageSettingsTEMP();
 
     /**
      * Notify that a user has been removed and its permission state should be removed as well.

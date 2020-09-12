@@ -26,6 +26,8 @@
     <string name="keyboard_layout_finnish" msgid="5585659438924315466">"फ़िनिश"</string>
     <string name="keyboard_layout_croatian" msgid="4172229471079281138">"क्रोएशियन"</string>
     <string name="keyboard_layout_czech" msgid="1349256901452975343">"चेक"</string>
+    <!-- no translation found for keyboard_layout_czech_qwerty (3331402534128515501) -->
+    <skip />
     <string name="keyboard_layout_estonian" msgid="8775830985185665274">"एस्टोनियाई"</string>
     <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"हंगेरियाई"</string>
     <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"आइसलैंडिक"</string>

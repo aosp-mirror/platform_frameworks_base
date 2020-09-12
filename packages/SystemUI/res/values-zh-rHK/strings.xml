@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"按住「開關」按鈕以查看新控制項"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"新增控制項"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"編輯控制項"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"使用單手模式"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"如要退出，請從螢幕底部向上滑動，或輕按應用程式上方的任何位置"</string>
 </resources>

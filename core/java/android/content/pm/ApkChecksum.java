@@ -34,49 +34,69 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 
 /**
- * A typed checksum.
+ * A typed checksum of an APK.
  *
  * @see PackageManager#getChecksums(String, boolean, int, List, IntentSender)
  */
 @DataClass(genHiddenConstructor = true)
-public final class FileChecksum implements Parcelable {
+@DataClass.Suppress({"getChecksum"})
+public final class ApkChecksum implements Parcelable {
     /**
      * Checksum for which split. Null indicates base.apk.
      */
     private final @Nullable String mSplitName;
     /**
-     * Checksum kind.
+     * Checksum.
      */
-    private final @PackageManager.FileChecksumKind int mKind;
-    /**
-     * Checksum value.
-     */
-    private final @NonNull byte[] mValue;
+    private final @NonNull Checksum mChecksum;
     /**
      * For Installer-provided checksums, certificate of the Installer/AppStore.
      */
     private final @Nullable byte[] mSourceCertificate;
 
     /**
-     * Constructor, internal use only
+     * Constructor, internal use only.
      *
      * @hide
      */
-    public FileChecksum(@Nullable String splitName, @PackageManager.FileChecksumKind int kind,
+    public ApkChecksum(@Nullable String splitName, @Checksum.Kind int kind,
             @NonNull byte[] value) {
-        this(splitName, kind, value, (byte[]) null);
+        this(splitName, new Checksum(kind, value), (byte[]) null);
     }
 
     /**
-     * Constructor, internal use only
+     * Constructor, internal use only.
      *
      * @hide
      */
-    public FileChecksum(@Nullable String splitName, @PackageManager.FileChecksumKind int kind,
+    public ApkChecksum(@Nullable String splitName, @Checksum.Kind int kind,
             @NonNull byte[] value, @Nullable Certificate sourceCertificate)
             throws CertificateEncodingException {
-        this(splitName, kind, value,
+        this(splitName, new Checksum(kind, value),
                 (sourceCertificate != null) ? sourceCertificate.getEncoded() : null);
+    }
+
+
+    /**
+     * Checksum kind.
+     */
+    public @Checksum.Kind int getKind() {
+        return mChecksum.getKind();
+    }
+
+    /**
+     * Checksum value.
+     */
+    public @NonNull byte[] getValue() {
+        return mChecksum.getValue();
+    }
+
+    /**
+     * Returns raw bytes representing encoded certificate of the source of this checksum.
+     * @hide
+     */
+    public @Nullable byte[] getSourceCertificateBytes() {
+        return mSourceCertificate;
     }
 
     /**
@@ -102,7 +122,7 @@ public final class FileChecksum implements Parcelable {
     // CHECKSTYLE:OFF Generated code
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/FileChecksum.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/ApkChecksum.java
     //
     // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
     //   Settings > Editor > Code Style > Formatter Control
@@ -110,31 +130,25 @@ public final class FileChecksum implements Parcelable {
 
 
     /**
-     * Creates a new FileChecksum.
+     * Creates a new ApkChecksum.
      *
      * @param splitName
      *   Checksum for which split. Null indicates base.apk.
-     * @param kind
-     *   Checksum kind.
-     * @param value
-     *   Checksum value.
+     * @param checksum
+     *   Checksum.
      * @param sourceCertificate
      *   For Installer-provided checksums, certificate of the Installer/AppStore.
      * @hide
      */
     @DataClass.Generated.Member
-    public FileChecksum(
+    public ApkChecksum(
             @Nullable String splitName,
-            @PackageManager.FileChecksumKind int kind,
-            @NonNull byte[] value,
+            @NonNull Checksum checksum,
             @Nullable byte[] sourceCertificate) {
         this.mSplitName = splitName;
-        this.mKind = kind;
+        this.mChecksum = checksum;
         com.android.internal.util.AnnotationValidations.validate(
-                PackageManager.FileChecksumKind.class, null, mKind);
-        this.mValue = value;
-        com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mValue);
+                NonNull.class, null, mChecksum);
         this.mSourceCertificate = sourceCertificate;
 
         // onConstructed(); // You can define this method to get a callback
@@ -148,22 +162,6 @@ public final class FileChecksum implements Parcelable {
         return mSplitName;
     }
 
-    /**
-     * Checksum kind.
-     */
-    @DataClass.Generated.Member
-    public @PackageManager.FileChecksumKind int getKind() {
-        return mKind;
-    }
-
-    /**
-     * Checksum value.
-     */
-    @DataClass.Generated.Member
-    public @NonNull byte[] getValue() {
-        return mValue;
-    }
-
     @Override
     @DataClass.Generated.Member
     public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -172,11 +170,10 @@ public final class FileChecksum implements Parcelable {
 
         byte flg = 0;
         if (mSplitName != null) flg |= 0x1;
-        if (mSourceCertificate != null) flg |= 0x8;
+        if (mSourceCertificate != null) flg |= 0x4;
         dest.writeByte(flg);
         if (mSplitName != null) dest.writeString(mSplitName);
-        dest.writeInt(mKind);
-        dest.writeByteArray(mValue);
+        dest.writeTypedObject(mChecksum, flags);
         if (mSourceCertificate != null) dest.writeByteArray(mSourceCertificate);
     }
 
@@ -187,47 +184,43 @@ public final class FileChecksum implements Parcelable {
     /** @hide */
     @SuppressWarnings({"unchecked", "RedundantCast"})
     @DataClass.Generated.Member
-    /* package-private */ FileChecksum(@NonNull Parcel in) {
+    /* package-private */ ApkChecksum(@NonNull Parcel in) {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
         byte flg = in.readByte();
         String splitName = (flg & 0x1) == 0 ? null : in.readString();
-        int kind = in.readInt();
-        byte[] value = in.createByteArray();
-        byte[] sourceCertificate = (flg & 0x8) == 0 ? null : in.createByteArray();
+        Checksum checksum = (Checksum) in.readTypedObject(Checksum.CREATOR);
+        byte[] sourceCertificate = (flg & 0x4) == 0 ? null : in.createByteArray();
 
         this.mSplitName = splitName;
-        this.mKind = kind;
+        this.mChecksum = checksum;
         com.android.internal.util.AnnotationValidations.validate(
-                PackageManager.FileChecksumKind.class, null, mKind);
-        this.mValue = value;
-        com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mValue);
+                NonNull.class, null, mChecksum);
         this.mSourceCertificate = sourceCertificate;
 
         // onConstructed(); // You can define this method to get a callback
     }
 
     @DataClass.Generated.Member
-    public static final @NonNull Parcelable.Creator<FileChecksum> CREATOR
-            = new Parcelable.Creator<FileChecksum>() {
+    public static final @NonNull Parcelable.Creator<ApkChecksum> CREATOR
+            = new Parcelable.Creator<ApkChecksum>() {
         @Override
-        public FileChecksum[] newArray(int size) {
-            return new FileChecksum[size];
+        public ApkChecksum[] newArray(int size) {
+            return new ApkChecksum[size];
         }
 
         @Override
-        public FileChecksum createFromParcel(@NonNull Parcel in) {
-            return new FileChecksum(in);
+        public ApkChecksum createFromParcel(@NonNull Parcel in) {
+            return new ApkChecksum(in);
         }
     };
 
     @DataClass.Generated(
-            time = 1598322801861L,
+            time = 1599845645160L,
             codegenVersion = "1.0.15",
-            sourceFile = "frameworks/base/core/java/android/content/pm/FileChecksum.java",
-            inputSignatures = "private final @android.annotation.Nullable java.lang.String mSplitName\nprivate final @android.content.pm.PackageManager.FileChecksumKind int mKind\nprivate final @android.annotation.NonNull byte[] mValue\nprivate final @android.annotation.Nullable byte[] mSourceCertificate\npublic @android.annotation.Nullable java.security.cert.Certificate getSourceCertificate()\nclass FileChecksum extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true)")
+            sourceFile = "frameworks/base/core/java/android/content/pm/ApkChecksum.java",
+            inputSignatures = "private final @android.annotation.Nullable java.lang.String mSplitName\nprivate final @android.annotation.NonNull android.content.pm.Checksum mChecksum\nprivate final @android.annotation.Nullable byte[] mSourceCertificate\npublic @android.content.pm.Checksum.Kind int getKind()\npublic @android.annotation.NonNull byte[] getValue()\npublic @android.annotation.Nullable byte[] getSourceCertificateBytes()\npublic @android.annotation.Nullable java.security.cert.Certificate getSourceCertificate()\nclass ApkChecksum extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true)")
     @Deprecated
     private void __metadata() {}
 

@@ -105,7 +105,7 @@ public class UserManagerServiceUserInfoTest {
         UserData read = mUserManagerService.readUserLP(
                 data.info.id, new ByteArrayInputStream(bytes));
 
-        assertUserInfoEquals(data.info, read.info);
+        assertUserInfoEquals(data.info, read.info, /* parcelCopy= */ false);
     }
 
     @Test
@@ -123,7 +123,16 @@ public class UserManagerServiceUserInfoTest {
         UserInfo read = UserInfo.CREATOR.createFromParcel(in);
         in.recycle();
 
-        assertUserInfoEquals(info, read);
+        assertUserInfoEquals(info, read, /* parcelCopy= */ true);
+    }
+
+    @Test
+    public void testCopyConstructor() throws Exception {
+        UserInfo info = createUser();
+
+        UserInfo copy = new UserInfo(info);
+
+        assertUserInfoEquals(info, copy, /* parcelCopy= */ false);
     }
 
     @Test
@@ -227,10 +236,11 @@ public class UserManagerServiceUserInfoTest {
         user.partial = true;
         user.guestToRemove = true;
         user.preCreated = true;
+        user.convertedFromPreCreated = true;
         return user;
     }
 
-    private void assertUserInfoEquals(UserInfo one, UserInfo two) {
+    private void assertUserInfoEquals(UserInfo one, UserInfo two, boolean parcelCopy) {
         assertEquals("Id not preserved", one.id, two.id);
         assertEquals("Name not preserved", one.name, two.name);
         assertEquals("Icon path not preserved", one.iconPath, two.iconPath);
@@ -238,11 +248,17 @@ public class UserManagerServiceUserInfoTest {
         assertEquals("UserType not preserved", one.userType, two.userType);
         assertEquals("profile group not preserved", one.profileGroupId,
                 two.profileGroupId);
-        assertEquals("restricted profile parent not preseved", one.restrictedProfileParentId,
+        assertEquals("restricted profile parent not preserved", one.restrictedProfileParentId,
                 two.restrictedProfileParentId);
-        assertEquals("profile badge not preseved", one.profileBadge, two.profileBadge);
-        assertEquals("partial not preseved", one.partial, two.partial);
-        assertEquals("guestToRemove not preseved", one.guestToRemove, two.guestToRemove);
-        assertEquals("preCreated not preseved", one.preCreated, two.preCreated);
+        assertEquals("profile badge not preserved", one.profileBadge, two.profileBadge);
+        assertEquals("partial not preserved", one.partial, two.partial);
+        assertEquals("guestToRemove not preserved", one.guestToRemove, two.guestToRemove);
+        assertEquals("preCreated not preserved", one.preCreated, two.preCreated);
+        if (parcelCopy) {
+            assertFalse("convertedFromPreCreated should not be set", two.convertedFromPreCreated);
+        } else {
+            assertEquals("convertedFromPreCreated not preserved", one.convertedFromPreCreated,
+                    two.convertedFromPreCreated);
+        }
     }
 }

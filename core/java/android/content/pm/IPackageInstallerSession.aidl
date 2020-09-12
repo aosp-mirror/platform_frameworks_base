@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.content.pm.Checksum;
 import android.content.pm.DataLoaderParamsParcel;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.IntentSender;
@@ -32,6 +33,8 @@ interface IPackageInstallerSession {
     ParcelFileDescriptor openRead(String name);
 
     void write(String name, long offsetBytes, long lengthBytes, in ParcelFileDescriptor fd);
+
+    void addChecksums(String name, in Checksum[] checksums);
 
     void removeSplit(String splitName);
 

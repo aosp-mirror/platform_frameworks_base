@@ -1067,6 +1067,4 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Az új vezérlők megtekintéséhez tartsa nyomva a bekapcsológombot"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Vezérlők hozzáadása"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Vezérlők szerkesztése"</string>
-    <string name="one_handed_tutorial_title" msgid="6312198435090726656">"Egykezes mód használata"</string>
-    <string name="one_handed_tutorial_description" msgid="7674850272340517174">"A kilépéshez csúsztasson felfelé a képernyő aljáról, vagy koppintson az alkalmazás felett a képernyő bármelyik részére"</string>
 </resources>
