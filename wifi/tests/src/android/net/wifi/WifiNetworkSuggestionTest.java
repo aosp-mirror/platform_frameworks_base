@@ -682,15 +682,15 @@ public class WifiNetworkSuggestionTest {
     }
 
     /**
-     * Verify that the macRandomizationSetting defaults to RANDOMIZATION_ENHANCED and could be set
-     * to RANDOMIZATION_PERSISTENT.
+     * Verify that the macRandomizationSetting defaults to RANDOMIZATION_PERSISTENT and could be set
+     * to RANDOMIZATION_ENHANCED.
      */
     @Test
     public void testWifiNetworkSuggestionBuilderSetMacRandomization() {
         WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
                 .build();
-        assertEquals(WifiConfiguration.RANDOMIZATION_ENHANCED,
+        assertEquals(WifiConfiguration.RANDOMIZATION_PERSISTENT,
                 suggestion.wifiConfiguration.macRandomizationSetting);
 
         suggestion = new WifiNetworkSuggestion.Builder()
@@ -706,6 +706,31 @@ public class WifiNetworkSuggestionTest {
                 .build();
         assertEquals(WifiConfiguration.RANDOMIZATION_ENHANCED,
                 suggestion.wifiConfiguration.macRandomizationSetting);
+    }
+
+    /**
+     * Verify that the builder creates the appropriate PasspointConfiguration according to the
+     * enhanced MAC randomization setting.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderSetMacRandomizationPasspoint() {
+        PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setPasspointConfig(passpointConfiguration)
+                .build();
+        assertEquals(false, suggestion.passpointConfiguration.isEnhancedMacRandomizationEnabled());
+
+        suggestion = new WifiNetworkSuggestion.Builder()
+                .setPasspointConfig(passpointConfiguration)
+                .setIsEnhancedMacRandomizationEnabled(false)
+                .build();
+        assertEquals(false, suggestion.passpointConfiguration.isEnhancedMacRandomizationEnabled());
+
+        suggestion = new WifiNetworkSuggestion.Builder()
+                .setPasspointConfig(passpointConfiguration)
+                .setIsEnhancedMacRandomizationEnabled(true)
+                .build();
+        assertEquals(true, suggestion.passpointConfiguration.isEnhancedMacRandomizationEnabled());
     }
 
     /**

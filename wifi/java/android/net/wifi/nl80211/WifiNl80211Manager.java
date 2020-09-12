@@ -1048,6 +1048,7 @@ public class WifiNl80211Manager {
      * {@link WifiScanner#WIFI_BAND_5_GHZ},
      * {@link WifiScanner#WIFI_BAND_5_GHZ_DFS_ONLY},
      * {@link WifiScanner#WIFI_BAND_6_GHZ}
+     * {@link WifiScanner.WIFI_BAND_60_GHZ}
      * @return frequencies vector of valid frequencies (MHz), or an empty array for error.
      * @throws IllegalArgumentException if band is not recognized.
      */
@@ -1070,6 +1071,9 @@ public class WifiNl80211Manager {
                     break;
                 case WifiScanner.WIFI_BAND_6_GHZ:
                     result = mWificond.getAvailable6gChannels();
+                    break;
+                case WifiScanner.WIFI_BAND_60_GHZ:
+                    result = mWificond.getAvailable60gChannels();
                     break;
                 default:
                     throw new IllegalArgumentException("unsupported band " + band);

@@ -170,6 +170,30 @@ public class UiAutomationManagerTest {
         verify(mMockSystemSupport).onClientChangeLocked(false);
     }
 
+    @Test
+    public void uiAutomationWithDontUseAccessibilityFlagAfterUnregistering_notifiesSystem()
+            throws Exception {
+        register(UiAutomation.FLAG_DONT_USE_ACCESSIBILITY);
+        unregister();
+        verify(mMockSystemSupport).onClientChangeLocked(false);
+    }
+
+    @Test
+    public void uiAutomationWithDontUseAccessibilityFlag_disableAccessibilityFunctions()
+            throws Exception {
+        register(0);
+        assertTrue(mUiAutomationManager.isUiAutomationRunningLocked());
+        unregister();
+        assertFalse(mUiAutomationManager.isUiAutomationRunningLocked());
+        register(UiAutomation.FLAG_DONT_USE_ACCESSIBILITY);
+        assertTrue(mUiAutomationManager.isUiAutomationRunningLocked());
+        assertFalse(mUiAutomationManager.useAccessibility());
+        assertFalse(mUiAutomationManager.canRetrieveInteractiveWindowsLocked());
+        assertFalse(mUiAutomationManager.isTouchExplorationEnabledLocked());
+        assertEquals(0, mUiAutomationManager.getRelevantEventTypes());
+        assertEquals(0, mUiAutomationManager.getRequestedEventMaskLocked());
+    }
+
     private void register(int flags) {
         mUiAutomationManager.registerUiTestAutomationServiceLocked(mMockOwner,
                 mMockAccessibilityServiceClient, mMockContext, mMockServiceInfo, SERVICE_ID,

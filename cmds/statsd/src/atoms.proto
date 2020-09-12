@@ -488,6 +488,8 @@ message Atom {
         UIInteractionFrameInfoReported ui_interaction_frame_info_reported =
             305 [(module) = "framework"];
         UIActionLatencyReported ui_action_latency_reported = 306 [(module) = "framework"];
+        WifiDisconnectReported wifi_disconnect_reported = 307 [(module) = "wifi"];
+        WifiConnectionStateChanged wifi_connection_state_changed = 308 [(module) = "wifi"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -854,10 +856,10 @@ message WifiFailureStatReported {
 }
 
 /**
- * Logs whether a wifi connection is successful and reasons for failure if it isn't.
+ * Logs whether a Wifi connection attempt was successful and reasons for failure if it wasn't.
  *
  * Logged from:
- *   frameworks/opt/net/wifi/service/java/com/android/server/wifi/ClientModeImpl.java
+ *   frameworks/opt/net/wifi/service/java/com/android/server/wifi/WifiMetrics.java
  */
 message WifiConnectionResultReported {
     enum FailureCode {
@@ -869,13 +871,159 @@ message WifiConnectionResultReported {
         FAILURE_DHCP = 5;
         FAILURE_NETWORK_DISCONNECTION = 6;
         FAILURE_ROAM_TIMEOUT = 7;
+        FAILURE_WRONG_PASSWORD = 8;
     }
-    // true represents a successful connection
+
+    enum Trigger {
+        UNKNOWN = 0;
+        // Connection attempt was initiated manually.
+        MANUAL = 1;
+        // Automatic reconnection to the same network as connected previously.
+        RECONNECT_SAME_NETWORK = 2;
+        // Automatic reconnection to a saved network, but not the previous one.
+        AUTOCONNECT_CONFIGURED_NETWORK = 3;
+        // Automatic first connection attempt after device boot.
+        AUTOCONNECT_BOOT = 4;
+    }
+
+    // True represents a successful connection.
     optional bool connection_result = 1;
-    // reason for the connection failure
+    // Reason for the connection failure.
     optional FailureCode failure_code = 2;
-    // scan rssi before the connection attempt
+    // Scan RSSI before the connection attempt.
     optional int32 rssi = 3;
+    // Time taken by this connection attempt.
+    optional int32 connection_attempt_duration_millis = 4;
+    // Band bucket the connected network is on.
+    optional android.net.wifi.WifiBandBucket band = 5;
+    // Authentication type.
+    optional android.net.wifi.WifiAuthType auth_type = 6;
+    // What triggered this connection attempt.
+    optional Trigger trigger = 7;
+    // Whether this network was used (successfully connected to) previously.
+    optional bool network_used = 8;
+    // Time taken from the last successful connection (or device boot if that's the first one).
+    optional int32 time_since_last_connection_seconds = 9;
+}
+
+/**
+ * Logs when a Wifi connection drops.
+ *
+ * Logged from:
+ *   frameworks/opt/net/wifi/service/java/com/android/server/wifi/WifiMetrics.java
+ */
+message WifiDisconnectReported {
+    enum FailureCode {
+        UNKNOWN = 0;
+
+        // Wifi supplicant failure reason codes (IEEE Std 802.11-2016, 9.4.1.7, Table 9-45).
+        // See ISupplicantStaIfaceCallback.java:ReasonCode
+        UNSPECIFIED = 1;
+        PREV_AUTH_NOT_VALID = 2;
+        DEAUTH_LEAVING = 3;
+        DISASSOC_DUE_TO_INACTIVITY = 4;
+        DISASSOC_AP_BUSY = 5;
+        CLASS2_FRAME_FROM_NONAUTH_STA = 6;
+        CLASS3_FRAME_FROM_NONASSOC_STA = 7;
+        DISASSOC_STA_HAS_LEFT = 8;
+        STA_REQ_ASSOC_WITHOUT_AUTH = 9;
+        PWR_CAPABILITY_NOT_VALID = 10;
+        SUPPORTED_CHANNEL_NOT_VALID = 11;
+        BSS_TRANSITION_DISASSOC = 12;
+        INVALID_IE = 13;
+        MICHAEL_MIC_FAILURE = 14;
+        FOURWAY_HANDSHAKE_TIMEOUT = 15;
+        GROUP_KEY_UPDATE_TIMEOUT = 16;
+        IE_IN_4WAY_DIFFERS = 17;
+        GROUP_CIPHER_NOT_VALID = 18;
+        PAIRWISE_CIPHER_NOT_VALID = 19;
+        AKMP_NOT_VALID = 20;
+        UNSUPPORTED_RSN_IE_VERSION = 21;
+        INVALID_RSN_IE_CAPAB = 22;
+        IEEE_802_1X_AUTH_FAILED = 23;
+        CIPHER_SUITE_REJECTED = 24;
+        TDLS_TEARDOWN_UNREACHABLE = 25;
+        TDLS_TEARDOWN_UNSPECIFIED = 26;
+        SSP_REQUESTED_DISASSOC = 27;
+        NO_SSP_ROAMING_AGREEMENT = 28;
+        BAD_CIPHER_OR_AKM = 29;
+        NOT_AUTHORIZED_THIS_LOCATION = 30;
+        SERVICE_CHANGE_PRECLUDES_TS = 31;
+        UNSPECIFIED_QOS_REASON = 32;
+        NOT_ENOUGH_BANDWIDTH = 33;
+        DISASSOC_LOW_ACK = 34;
+        EXCEEDED_TXOP = 35;
+        STA_LEAVING = 36;
+        END_TS_BA_DLS = 37;
+        UNKNOWN_TS_BA = 38;
+        TIMEOUT = 39;
+        PEERKEY_MISMATCH = 45;
+        AUTHORIZED_ACCESS_LIMIT_REACHED = 46;
+        EXTERNAL_SERVICE_REQUIREMENTS = 47;
+        INVALID_FT_ACTION_FRAME_COUNT = 48;
+        INVALID_PMKID = 49;
+        INVALID_MDE = 50;
+        INVALID_FTE = 51;
+        MESH_PEERING_CANCELLED = 52;
+        MESH_MAX_PEERS = 53;
+        MESH_CONFIG_POLICY_VIOLATION = 54;
+        MESH_CLOSE_RCVD = 55;
+        MESH_MAX_RETRIES = 56;
+        MESH_CONFIRM_TIMEOUT = 57;
+        MESH_INVALID_GTK = 58;
+        MESH_INCONSISTENT_PARAMS = 59;
+        MESH_INVALID_SECURITY_CAP = 60;
+        MESH_PATH_ERROR_NO_PROXY_INFO = 61;
+        MESH_PATH_ERROR_NO_FORWARDING_INFO = 62;
+        MESH_PATH_ERROR_DEST_UNREACHABLE = 63;
+        MAC_ADDRESS_ALREADY_EXISTS_IN_MBSS = 64;
+        MESH_CHANNEL_SWITCH_REGULATORY_REQ = 65;
+        MESH_CHANNEL_SWITCH_UNSPECIFIED = 66;
+
+        // ClientModeImpl error codes
+        // Defined in /frameworks/opt/net/wifi/service/java/com/android/server/wifi/WifiMetrics.java
+        IFACE_DESTROYED = 10000;
+        WIFI_DISABLED = 10001;
+        SUPPLICANT_DISCONNECTED = 10002;
+        CONNECTING_WATCHDOG_TIMER = 10003;
+        ROAM_WATCHDOG_TIMER = 10004;
+    }
+
+    // How long the session lasted from successful connection to disconnect.
+    optional int32 connected_duration_seconds = 1;
+
+    // Reason for the disconnect.
+    optional FailureCode failure_code = 2;
+
+    // Band bucket the connected network was on.
+    optional android.net.wifi.WifiBandBucket band = 3;
+
+    // Authentication type.
+    optional android.net.wifi.WifiAuthType auth_type = 4;
+
+    // Last seen RSSI before the disconnect.
+    optional int32 last_rssi = 5;
+
+    // Last seen link speed before the disconnect.
+    optional int32 last_link_speed = 6;
+}
+
+/**
+ * Logs when Wifi connection is established or dropped.
+ *
+ * Logged from:
+ *   frameworks/opt/net/wifi/service/java/com/android/server/wifi/WifiMetrics.java
+ */
+message WifiConnectionStateChanged {
+    optional bool is_connected = 1;
+
+    // Band bucket the connected network was on.
+    // Filled for both connected and disconnected cases.
+    optional android.net.wifi.WifiBandBucket band = 2;
+
+    // Authentication type.
+    // Filled for both connected and disconnected cases.
+    optional android.net.wifi.WifiAuthType auth_type = 3;
 }
 
 /**

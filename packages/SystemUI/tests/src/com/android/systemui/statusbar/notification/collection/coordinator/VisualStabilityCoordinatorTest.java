@@ -296,6 +296,22 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testNotSuppressingGroupChangesAnymore_invalidationCalled() {
+        // GIVEN visual stability is being maintained b/c panel is expanded
+        setPulsing(false);
+        setScreenOn(true);
+        setPanelExpanded(true);
+
+        assertFalse(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
+
+        // WHEN the panel isn't expanded anymore
+        setPanelExpanded(false);
+
+        //  invalidate is called because we were previously suppressing a group change
+        verifyInvalidateCalled(true);
+    }
+
+    @Test
     public void testHeadsUp_allowedToChangeGroupAndSection() {
         // GIVEN group + section changes disallowed
         setScreenOn(true);

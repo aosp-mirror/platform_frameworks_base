@@ -2500,7 +2500,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         // unregister server channel first otherwise it complains about broken channel
         if (mInputChannel != null) {
-            mWmService.mInputManager.unregisterInputChannel(mInputChannel);
+            mWmService.mInputManager.unregisterInputChannel(mInputChannel.getToken());
 
             mInputChannel.dispose();
             mInputChannel = null;

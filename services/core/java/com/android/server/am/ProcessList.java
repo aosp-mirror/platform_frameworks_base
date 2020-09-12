@@ -48,8 +48,8 @@ import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
 import static com.android.server.am.ActivityManagerService.TAG_LRU;
 import static com.android.server.am.ActivityManagerService.TAG_NETWORK;
 import static com.android.server.am.ActivityManagerService.TAG_PROCESSES;
-import static com.android.server.am.ActivityManagerService.TAG_PSS;
 import static com.android.server.am.ActivityManagerService.TAG_UID_OBSERVERS;
+import static com.android.server.am.AppProfiler.TAG_PSS;
 
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -1323,19 +1323,6 @@ public final class ProcessList {
         return test ? PSS_TEST_MIN_TIME_FROM_STATE_CHANGE : PSS_MIN_TIME_FROM_STATE_CHANGE;
     }
 
-    public static void commitNextPssTime(ProcStateMemTracker tracker) {
-        if (tracker.mPendingMemState >= 0) {
-            tracker.mHighestMem[tracker.mPendingMemState] = tracker.mPendingHighestMemState;
-            tracker.mScalingFactor[tracker.mPendingMemState] = tracker.mPendingScalingFactor;
-            tracker.mTotalHighestMem = tracker.mPendingHighestMemState;
-            tracker.mPendingMemState = -1;
-        }
-    }
-
-    public static void abortNextPssTime(ProcStateMemTracker tracker) {
-        tracker.mPendingMemState = -1;
-    }
-
     public static long computeNextPssTime(int procState, ProcStateMemTracker tracker, boolean test,
             boolean sleeping, long now) {
         boolean first;
@@ -1547,7 +1534,7 @@ public final class ProcessList {
                     ApplicationExitInfo.SUBREASON_LARGE_CACHED,
                     true);
         } else if (proc != null && !keepIfLarge
-                && mService.mLastMemoryLevel > ProcessStats.ADJ_MEM_FACTOR_NORMAL
+                && !mService.mAppProfiler.isLastMemoryLevelNormal()
                 && proc.setProcState >= ActivityManager.PROCESS_STATE_CACHED_EMPTY) {
             if (DEBUG_PSS) Slog.d(TAG_PSS, "May not keep " + proc + ": pss=" + proc
                     .lastCachedPss);
@@ -1772,7 +1759,7 @@ public final class ProcessList {
         mService.mProcessesOnHold.remove(app);
 
         checkSlow(startTime, "startProcess: starting to update cpu stats");
-        mService.updateCpuStats();
+        mService.updateCpuStatsLocked();
         checkSlow(startTime, "startProcess: done updating cpu stats");
 
         try {
@@ -2422,7 +2409,8 @@ public final class ProcessList {
             ProcessList.killProcessGroup(app.uid, app.pid);
             checkSlow(startTime, "startProcess: done killing old proc");
 
-            if (!app.killed || mService.mLastMemoryLevel <= ProcessStats.ADJ_MEM_FACTOR_NORMAL
+            if (!app.killed
+                    || mService.mAppProfiler.isLastMemoryLevelNormal()
                     || app.setProcState < ActivityManager.PROCESS_STATE_CACHED_EMPTY
                     || app.lastCachedPss < getCachedRestoreThresholdKb()) {
                 // Throw a wtf if it's not killed, or killed but not because the system was in

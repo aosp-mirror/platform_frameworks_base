@@ -18,6 +18,7 @@ package com.android.systemui.bubbles;
 
 import android.graphics.Bitmap;
 import android.graphics.Path;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -34,11 +35,16 @@ interface BubbleViewProvider {
 
     String getKey();
 
-    Bitmap getBadgedImage();
+    /** Bubble icon bitmap with no badge and no dot. */
+    Bitmap getBubbleIcon();
+
+    /** App badge drawable to draw above bubble icon. */
+    @Nullable Drawable getAppBadge();
+
+    /** Path of normalized bubble icon to draw dot on. */
+    Path getDotPath();
 
     int getDotColor();
-
-    Path getDotPath();
 
     boolean showDot();
 

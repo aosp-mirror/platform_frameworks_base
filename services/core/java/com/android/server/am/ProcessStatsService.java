@@ -314,7 +314,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     private void scheduleRequestPssAllProcs(boolean always, boolean memLowered) {
         mAm.mHandler.post(() -> {
             synchronized (mAm) {
-                mAm.requestPssAllProcsLocked(SystemClock.uptimeMillis(), always, memLowered);
+                mAm.mAppProfiler.requestPssAllProcsLocked(
+                        SystemClock.uptimeMillis(), always, memLowered);
             }
         });
     }
@@ -1056,17 +1057,13 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                         }
                     }
                 } else if ("--start-testing".equals(arg)) {
-                    synchronized (mAm) {
-                        mAm.setTestPssMode(true);
-                        pw.println("Started high frequency sampling.");
-                        quit = true;
-                    }
+                    mAm.mAppProfiler.setTestPssMode(true);
+                    pw.println("Started high frequency sampling.");
+                    quit = true;
                 } else if ("--stop-testing".equals(arg)) {
-                    synchronized (mAm) {
-                        mAm.setTestPssMode(false);
-                        pw.println("Stopped high frequency sampling.");
-                        quit = true;
-                    }
+                    mAm.mAppProfiler.setTestPssMode(false);
+                    pw.println("Stopped high frequency sampling.");
+                    quit = true;
                 } else if ("--pretend-screen-on".equals(arg)) {
                     synchronized (mLock) {
                         mInjectedScreenState = true;

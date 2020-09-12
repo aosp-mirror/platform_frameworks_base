@@ -640,20 +640,70 @@ public class AppsFilter {
         }
     }
 
-    private void updateEntireShouldFilterCacheAsync() {
-        mBackgroundExecutor.execute(this::updateEntireShouldFilterCache);
-    }
-
     private void updateEntireShouldFilterCache() {
         mStateProvider.runWithState((settings, users) -> {
             SparseArray<SparseBooleanArray> cache =
-                    new SparseArray<>(users.length * settings.size());
-            for (int i = settings.size() - 1; i >= 0; i--) {
-                updateShouldFilterCacheForPackage(cache,
-                        null /*skipPackage*/, settings.valueAt(i), settings, users, i);
-            }
+                    updateEntireShouldFilterCacheInner(settings, users);
             synchronized (mCacheLock) {
                 mShouldFilterCache = cache;
+            }
+        });
+    }
+
+    private SparseArray<SparseBooleanArray> updateEntireShouldFilterCacheInner(
+            ArrayMap<String, PackageSetting> settings, UserInfo[] users) {
+        SparseArray<SparseBooleanArray> cache =
+                new SparseArray<>(users.length * settings.size());
+        for (int i = settings.size() - 1; i >= 0; i--) {
+            updateShouldFilterCacheForPackage(cache,
+                    null /*skipPackage*/, settings.valueAt(i), settings, users, i);
+        }
+        return cache;
+    }
+
+    private void updateEntireShouldFilterCacheAsync() {
+        mBackgroundExecutor.execute(() -> {
+            final ArrayMap<String, PackageSetting> settingsCopy = new ArrayMap<>();
+            final ArrayMap<String, AndroidPackage> packagesCache = new ArrayMap<>();
+            final UserInfo[][] usersRef = new UserInfo[1][];
+            mStateProvider.runWithState((settings, users) -> {
+                packagesCache.ensureCapacity(settings.size());
+                settingsCopy.putAll(settings);
+                usersRef[0] = users;
+                // store away the references to the immutable packages, since settings are retained
+                // during updates.
+                for (int i = 0, max = settings.size(); i < max; i++) {
+                    final AndroidPackage pkg = settings.valueAt(i).pkg;
+                    packagesCache.put(settings.keyAt(i), pkg);
+                }
+            });
+            SparseArray<SparseBooleanArray> cache =
+                    updateEntireShouldFilterCacheInner(settingsCopy, usersRef[0]);
+            boolean[] changed = new boolean[1];
+            // We have a cache, let's make sure the world hasn't changed out from under us.
+            mStateProvider.runWithState((settings, users) -> {
+                if (settings.size() != settingsCopy.size()) {
+                    changed[0] = true;
+                    return;
+                }
+                for (int i = 0, max = settings.size(); i < max; i++) {
+                    final AndroidPackage pkg = settings.valueAt(i).pkg;
+                    if (!Objects.equals(pkg, packagesCache.get(settings.keyAt(i)))) {
+                        changed[0] = true;
+                        return;
+                    }
+                }
+            });
+            if (changed[0]) {
+                // Something has changed, just update the cache inline with the lock held
+                updateEntireShouldFilterCache();
+                if (DEBUG_LOGGING) {
+                    Slog.i(TAG, "Rebuilding cache with lock due to package change.");
+                }
+            } else {
+                synchronized (mCacheLock) {
+                    mShouldFilterCache = cache;
+                }
             }
         });
     }

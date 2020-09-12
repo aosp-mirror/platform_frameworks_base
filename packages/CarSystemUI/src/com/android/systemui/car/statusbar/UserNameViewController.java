@@ -59,6 +59,8 @@ public class UserNameViewController {
         }
     };
 
+    private boolean mUserLifecycleListenerRegistered = false;
+
     private final CarUserManager.UserLifecycleListener mUserLifecycleListener =
             new CarUserManager.UserLifecycleListener() {
                 @Override
@@ -100,9 +102,13 @@ public class UserNameViewController {
      * Clean up the controller and unregister receiver.
      */
     public void removeAll() {
-        mBroadcastDispatcher.unregisterReceiver(mUserUpdateReceiver);
-        if (mCarUserManager != null) {
-            mCarUserManager.removeListener(mUserLifecycleListener);
+        mUserNameView = null;
+        if (mUserLifecycleListenerRegistered) {
+            mBroadcastDispatcher.unregisterReceiver(mUserUpdateReceiver);
+            if (mCarUserManager != null) {
+                mCarUserManager.removeListener(mUserLifecycleListener);
+            }
+            mUserLifecycleListenerRegistered = false;
         }
     }
 
@@ -112,6 +118,7 @@ public class UserNameViewController {
             mCarUserManager = (CarUserManager) car.getCarManager(Car.CAR_USER_SERVICE);
             if (mCarUserManager != null) {
                 mCarUserManager.addListener(Runnable::run, mUserLifecycleListener);
+                mUserLifecycleListenerRegistered = true;
             } else {
                 Log.e(TAG, "CarUserManager could not be obtained.");
             }

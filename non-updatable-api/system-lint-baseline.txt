@@ -6,7 +6,8 @@ ArrayReturn: android.view.contentcapture.ViewNode#getAutofillOptions():
 BuilderSetStyle: android.net.IpSecTransform.Builder#buildTunnelModeTransform(java.net.InetAddress, android.net.IpSecManager.SecurityParameterIndex):
     Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.net.IpSecTransform.Builder.buildTunnelModeTransform(java.net.InetAddress,android.net.IpSecManager.SecurityParameterIndex)
 
-
+ExecutorRegistration: android.media.MediaPlayer#setOnImsRxNoticeListener(android.media.MediaPlayer.OnImsRxNoticeListener, android.os.Handler):
+    
 GenericException: android.app.prediction.AppPredictor#finalize():
     
 GenericException: android.hardware.location.ContextHubClient#finalize():
@@ -180,6 +181,8 @@ SamShouldBeLast: android.media.AudioRecord#registerAudioRecordingCallback(java.u
 SamShouldBeLast: android.media.AudioRecordingMonitor#registerAudioRecordingCallback(java.util.concurrent.Executor, android.media.AudioManager.AudioRecordingCallback):
     
 SamShouldBeLast: android.media.AudioRouting#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
+    
+SamShouldBeLast: android.media.MediaPlayer#setOnImsRxNoticeListener(android.media.MediaPlayer.OnImsRxNoticeListener, android.os.Handler):
     
 SamShouldBeLast: android.media.AudioTrack#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
     

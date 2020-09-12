@@ -65,13 +65,11 @@ class ShadeViewManager constructor(
         return root
     }
 
-    private fun buildNotifNode(entry: ListEntry, parent: NodeSpec): NodeSpec {
-        return when (entry) {
-            is NotificationEntry -> NodeSpecImpl(parent, viewBarn.requireView(entry))
-            is GroupEntry -> NodeSpecImpl(parent, viewBarn.requireView(checkNotNull(entry.summary)))
-                    .apply { entry.children.forEach { children.add(buildNotifNode(it, this)) } }
-            else -> throw RuntimeException("Unexpected entry: $entry")
-        }
+    private fun buildNotifNode(entry: ListEntry, parent: NodeSpec): NodeSpec = when (entry) {
+        is NotificationEntry -> NodeSpecImpl(parent, viewBarn.requireView(entry))
+        is GroupEntry -> NodeSpecImpl(parent, viewBarn.requireView(checkNotNull(entry.summary)))
+                .apply { entry.children.forEach { children.add(buildNotifNode(it, this)) } }
+        else -> throw RuntimeException("Unexpected entry: $entry")
     }
 }
 

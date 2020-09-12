@@ -173,6 +173,8 @@ public class MockingOomAdjusterTests {
                 mock(OomAdjProfiler.class));
         setFieldValue(ActivityManagerService.class, sService, "mUserController",
                 mock(UserController.class));
+        setFieldValue(ActivityManagerService.class, sService, "mAppProfiler",
+                mock(AppProfiler.class));
         doReturn(new ActivityManagerService.ProcessChangeItem()).when(sService)
                 .enqueueProcessChangeItemLocked(anyInt(), anyInt());
         sService.mOomAdjuster = new OomAdjuster(sService, sService.mProcessList,

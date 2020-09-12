@@ -272,9 +272,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"وضع صامت"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"الصوت متوقف"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"الصوت قيد التفعيل"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"وضع الطائرة"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"وضع الطائرة قيد التفعيل"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"وضع الطائرة متوقف"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"وضع الطيران"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"وضع الطيران قيد التفعيل"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"وضع الطيران متوقف"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"الإعدادات"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"مساعدة"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"المساعد الصوتي"</string>
@@ -2156,7 +2156,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"جدول بيانات: <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"عرض تقديمي"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"عرض تقديمي: <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
-    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"سيظل البلوتوث مفعَّلاً أثناء استخدام \"وضع الطائرة\"."</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"سيظل البلوتوث مفعَّلاً أثناء استخدام \"وضع الطيران\"."</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"جارٍ التحميل"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="zero"><xliff:g id="FILE_NAME_2">%s</xliff:g> و<xliff:g id="COUNT_3">%d</xliff:g> ملف</item>

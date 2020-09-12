@@ -282,8 +282,10 @@ class Face10 implements IHwBinder.DeathRecipient {
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         final boolean supportsSelfIllumination = context.getResources()
                 .getBoolean(R.bool.config_faceAuthSupportsSelfIllumination);
+        final int maxTemplatesAllowed = context.getResources()
+                .getInteger(R.integer.config_faceMaxTemplatesPerUser);
         mFaceSensorProperties = new FaceSensorProperties(sensorId, false /* supportsFaceDetect */,
-                supportsSelfIllumination);
+                supportsSelfIllumination, maxTemplatesAllowed);
         mContext = context;
         mSensorId = sensorId;
         mScheduler = new BiometricScheduler(TAG, null /* gestureAvailabilityTracker */);

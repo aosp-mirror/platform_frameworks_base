@@ -1560,17 +1560,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     @GuardedBy("getLockObject()")
     private void migrateToProfileOnOrganizationOwnedDeviceIfCompLocked() {
-        logIfVerbose("Checking whether we need to migrate COMP ");
+        if (VERBOSE_LOG) Slog.d(LOG_TAG, "Checking whether we need to migrate COMP ");
         final int doUserId = mOwners.getDeviceOwnerUserId();
         if (doUserId == UserHandle.USER_NULL) {
-            logIfVerbose("No DO found, skipping migration.");
+            if (VERBOSE_LOG) Slog.d(LOG_TAG, "No DO found, skipping migration.");
             return;
         }
 
         final List<UserInfo> profiles = mUserManager.getProfiles(doUserId);
         if (profiles.size() != 2) {
             if (profiles.size() == 1) {
-                logIfVerbose("Profile not found, skipping migration.");
+                if (VERBOSE_LOG) Slog.d(LOG_TAG, "Profile not found, skipping migration.");
             } else {
                 Slog.wtf(LOG_TAG, "Found " + profiles.size() + " profiles, skipping migration");
             }
@@ -1748,7 +1748,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private void applyManagedProfileRestrictionIfDeviceOwnerLocked() {
         final int doUserId = mOwners.getDeviceOwnerUserId();
         if (doUserId == UserHandle.USER_NULL) {
-            logIfVerbose("No DO found, skipping application of restriction.");
+            if (VERBOSE_LOG) Slog.d(LOG_TAG, "No DO found, skipping application of restriction.");
             return;
         }
 
@@ -8126,7 +8126,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * The Device owner can only be set by adb or an app with the MANAGE_PROFILE_AND_DEVICE_OWNERS
      * permission.
      */
-    private void enforceCanSetDeviceOwnerLocked(@Nullable ComponentName owner, int userId,
+    private void enforceCanSetDeviceOwnerLocked(@Nullable ComponentName owner,
+            @UserIdInt int userId,
             boolean hasIncompatibleAccountsOrNonAdb) {
         if (!isAdb()) {
             enforceCanManageProfileAndDeviceOwners();
@@ -8134,34 +8135,38 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final int code = checkDeviceOwnerProvisioningPreConditionLocked(
                 owner, userId, isAdb(), hasIncompatibleAccountsOrNonAdb);
+        if (code != CODE_OK) {
+            throw new IllegalStateException(computeProvisioningErrorString(code, userId));
+        }
+    }
+
+    private static String computeProvisioningErrorString(int code, @UserIdInt int userId) {
         switch (code) {
             case CODE_OK:
-                return;
+                return "OK";
             case CODE_HAS_DEVICE_OWNER:
-                throw new IllegalStateException(
-                        "Trying to set the device owner, but device owner is already set.");
+                return "Trying to set the device owner, but device owner is already set.";
             case CODE_USER_HAS_PROFILE_OWNER:
-                throw new IllegalStateException("Trying to set the device owner, but the user "
-                        + "already has a profile owner.");
+                return "Trying to set the device owner, but the user already has a profile owner.";
             case CODE_USER_NOT_RUNNING:
-                throw new IllegalStateException("User not running: " + userId);
+                return "User " + userId + " not running.";
             case CODE_NOT_SYSTEM_USER:
-                throw new IllegalStateException("User is not system user");
+                return "User " + userId + " is not system user.";
             case CODE_USER_SETUP_COMPLETED:
-                throw new IllegalStateException(
-                        "Cannot set the device owner if the device is already set-up");
+                return  "Cannot set the device owner if the device is already set-up.";
             case CODE_NONSYSTEM_USER_EXISTS:
-                throw new IllegalStateException("Not allowed to set the device owner because there "
-                        + "are already several users on the device");
+                return "Not allowed to set the device owner because there are already several"
+                        + " users on the device.";
             case CODE_ACCOUNTS_NOT_EMPTY:
-                throw new IllegalStateException("Not allowed to set the device owner because there "
-                        + "are already some accounts on the device");
+                return "Not allowed to set the device owner because there are already some accounts"
+                        + " on the device.";
             case CODE_HAS_PAIRED:
-                throw new IllegalStateException("Not allowed to set the device owner because this "
-                        + "device has already paired");
+                return "Not allowed to set the device owner because this device has already "
+                        + "paired.";
             default:
-                throw new IllegalStateException("Unexpected @ProvisioningPreCondition " + code);
+                return "Unexpected @ProvisioningPreCondition: " + code;
         }
+
     }
 
     private void enforceUserUnlocked(int userId) {
@@ -11836,11 +11841,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return checkProvisioningPreConditionSkipPermission(action, packageName);
     }
 
-    private int checkProvisioningPreConditionSkipPermission(String action, String packageName) {
+    private int checkProvisioningPreConditionSkipPermission(String action,
+            String packageName) {
         if (!mHasFeature) {
+            logMissingFeatureAction("Cannot check provisioning for action " + action);
             return CODE_DEVICE_ADMIN_NOT_SUPPORTED;
         }
+        final int code = checkProvisioningPreConditionSkipPermissionNoLog(action, packageName);
+        if (code != CODE_OK) {
+            Slog.d(LOG_TAG, "checkProvisioningPreCondition(" + action + ", " + packageName
+                    + ") failed: "
+                    + computeProvisioningErrorString(code, mInjector.userHandleGetCallingUserId()));
+        }
+        return code;
+    }
 
+    private int checkProvisioningPreConditionSkipPermissionNoLog(String action,
+            String packageName) {
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         if (action != null) {
             switch (action) {
@@ -11863,7 +11880,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * except for adb command if no accounts or additional users are present on the device.
      */
     private int checkDeviceOwnerProvisioningPreConditionLocked(@Nullable ComponentName owner,
-            int deviceOwnerUserId, boolean isAdb, boolean hasIncompatibleAccountsOrNonAdb) {
+            @UserIdInt int deviceOwnerUserId, boolean isAdb,
+            boolean hasIncompatibleAccountsOrNonAdb) {
         if (mOwners.hasDeviceOwner()) {
             return CODE_HAS_DEVICE_OWNER;
         }
@@ -11908,7 +11926,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private int checkDeviceOwnerProvisioningPreCondition(int deviceOwnerUserId) {
+    private int checkDeviceOwnerProvisioningPreCondition(@UserIdInt int deviceOwnerUserId) {
         synchronized (getLockObject()) {
             // hasIncompatibleAccountsOrNonAdb doesn't matter since the caller is not adb.
             return checkDeviceOwnerProvisioningPreConditionLocked(/* owner unknown */ null,
@@ -11917,7 +11935,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private int checkManagedProfileProvisioningPreCondition(String packageName, int callingUserId) {
+    private int checkManagedProfileProvisioningPreCondition(String packageName,
+            @UserIdInt int callingUserId) {
         if (!hasFeatureManagedUsers()) {
             return CODE_MANAGED_USERS_NOT_SUPPORTED;
         }
@@ -14528,12 +14547,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final List<String> packages =
                     getUserData(identity.getUserId()).mUserControlDisabledPackages;
             return packages == null ? Collections.EMPTY_LIST : packages;
-        }
-    }
-
-    private void logIfVerbose(String message) {
-        if (VERBOSE_LOG) {
-            Slog.d(LOG_TAG, message);
         }
     }
 
