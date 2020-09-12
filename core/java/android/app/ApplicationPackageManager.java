@@ -16,6 +16,14 @@
 
 package android.app;
 
+import static android.content.pm.Checksum.PARTIAL_MERKLE_ROOT_1M_SHA256;
+import static android.content.pm.Checksum.PARTIAL_MERKLE_ROOT_1M_SHA512;
+import static android.content.pm.Checksum.WHOLE_MD5;
+import static android.content.pm.Checksum.WHOLE_MERKLE_ROOT_4K_SHA256;
+import static android.content.pm.Checksum.WHOLE_SHA1;
+import static android.content.pm.Checksum.WHOLE_SHA256;
+import static android.content.pm.Checksum.WHOLE_SHA512;
+
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,6 +40,7 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ChangedPackages;
+import android.content.pm.Checksum;
 import android.content.pm.ComponentInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
@@ -973,7 +982,7 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public void getChecksums(@NonNull String packageName, boolean includeSplits,
-            @FileChecksumKind int required, @Nullable List<Certificate> trustedInstallers,
+            @Checksum.Kind int required, @Nullable List<Certificate> trustedInstallers,
             @NonNull IntentSender statusReceiver)
             throws CertificateEncodingException, IOException, NameNotFoundException {
         Objects.requireNonNull(packageName);

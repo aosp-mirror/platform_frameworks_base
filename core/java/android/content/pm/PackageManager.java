@@ -7844,74 +7844,6 @@ public abstract class PackageManager {
     }
 
     /**
-     * Root SHA256 hash of a 4K Merkle tree computed over all file bytes.
-     * <a href="https://source.android.com/security/apksigning/v4">See APK Signature Scheme V4</a>.
-     * <a href="https://git.kernel.org/pub/scm/fs/fscrypt/fscrypt.git/tree/Documentation/filesystems/fsverity.rst">See fs-verity</a>.
-     *
-     * @see #getChecksums
-     */
-    public static final int WHOLE_MERKLE_ROOT_4K_SHA256 = 0x00000001;
-
-    /**
-     * MD5 hash computed over all file bytes.
-     *
-     * @see #getChecksums
-     */
-    public static final int WHOLE_MD5 = 0x00000002;
-
-    /**
-     * SHA1 hash computed over all file bytes.
-     *
-     * @see #getChecksums
-     */
-    public static final int WHOLE_SHA1 = 0x00000004;
-
-    /**
-     * SHA256 hash computed over all file bytes.
-     *
-     * @see #getChecksums
-     */
-    public static final int WHOLE_SHA256 = 0x00000008;
-
-    /**
-     * SHA512 hash computed over all file bytes.
-     *
-     * @see #getChecksums
-     */
-    public static final int WHOLE_SHA512 = 0x00000010;
-
-    /**
-     * Root SHA256 hash of a 1M Merkle tree computed over protected content.
-     * Excludes signing block.
-     * <a href="https://source.android.com/security/apksigning/v2">See APK Signature Scheme V2</a>.
-     *
-     * @see #getChecksums
-     */
-    public static final int PARTIAL_MERKLE_ROOT_1M_SHA256 = 0x00000020;
-
-    /**
-     * Root SHA512 hash of a 1M Merkle tree computed over protected content.
-     * Excludes signing block.
-     * <a href="https://source.android.com/security/apksigning/v2">See APK Signature Scheme V2</a>.
-     *
-     * @see #getChecksums
-     */
-    public static final int PARTIAL_MERKLE_ROOT_1M_SHA512 = 0x00000040;
-
-    /** @hide */
-    @IntDef(flag = true, prefix = {"WHOLE_", "PARTIAL_"}, value = {
-            WHOLE_MERKLE_ROOT_4K_SHA256,
-            WHOLE_MD5,
-            WHOLE_SHA1,
-            WHOLE_SHA256,
-            WHOLE_SHA512,
-            PARTIAL_MERKLE_ROOT_1M_SHA256,
-            PARTIAL_MERKLE_ROOT_1M_SHA512,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FileChecksumKind {}
-
-    /**
      * Trust any Installer to provide checksums for the package.
      * @see #getChecksums
      */
@@ -7940,12 +7872,12 @@ public abstract class PackageManager {
      *                          {@link #TRUST_ALL} will return checksums from any Installer,
      *                          {@link #TRUST_NONE} disables optimized Installer-enforced checksums.
      * @param statusReceiver called once when the results are available as
-     *                       {@link #EXTRA_CHECKSUMS} of type FileChecksum[].
+     *                       {@link #EXTRA_CHECKSUMS} of type ApkChecksum[].
      * @throws CertificateEncodingException if an encoding error occurs for trustedInstallers.
      * @throws NameNotFoundException if a package with the given name cannot be found on the system.
      */
     public void getChecksums(@NonNull String packageName, boolean includeSplits,
-            @FileChecksumKind int required, @Nullable List<Certificate> trustedInstallers,
+            @Checksum.Kind int required, @Nullable List<Certificate> trustedInstallers,
             @NonNull IntentSender statusReceiver)
             throws CertificateEncodingException, IOException, NameNotFoundException {
         throw new UnsupportedOperationException("getChecksums not implemented in subclass");
