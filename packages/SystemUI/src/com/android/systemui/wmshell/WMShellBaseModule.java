@@ -17,6 +17,7 @@
 package com.android.systemui.wmshell;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.IWindowManager;
@@ -76,8 +77,9 @@ public abstract class WMShellBaseModule {
 
     @SysUISingleton
     @Provides
-    static PipUiEventLogger providePipUiEventLogger(UiEventLogger uiEventLogger) {
-        return new PipUiEventLogger(uiEventLogger);
+    static PipUiEventLogger providePipUiEventLogger(UiEventLogger uiEventLogger,
+            PackageManager packageManager) {
+        return new PipUiEventLogger(uiEventLogger, packageManager);
     }
 
     @SysUISingleton
