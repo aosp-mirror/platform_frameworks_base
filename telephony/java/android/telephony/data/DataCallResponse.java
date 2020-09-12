@@ -67,6 +67,47 @@ public final class DataCallResponse implements Parcelable {
     /** Indicates the data connection is active with physical link up. */
     public static final int LINK_STATUS_ACTIVE = 2;
 
+    /** {@hide} */
+    @IntDef(prefix = "HANDOVER_FAILURE_MODE_", value = {
+            HANDOVER_FAILURE_MODE_LEGACY,
+            HANDOVER_FAILURE_MODE_DO_FALLBACK,
+            HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_HANDOVER,
+            HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_SETUP_NORMAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HandoverFailureMode {}
+
+    /**
+     * Data handover failure mode is unknown.
+     */
+    public static final int HANDOVER_FAILURE_MODE_UNKNOWN = 0;
+
+    /**
+     * Perform fallback to the source data transport on data handover failure using
+     * the legacy logic, which is fallback if the fail cause is
+     * {@link DataFailCause#HANDOFF_PREFERENCE_CHANGED}.
+     */
+    public static final int HANDOVER_FAILURE_MODE_LEGACY = 1;
+
+    /**
+     * Perform fallback to the source data transport on data handover failure.
+     */
+    public static final int HANDOVER_FAILURE_MODE_DO_FALLBACK = 2;
+
+    /**
+     * Do not perform fallback to the source data transport on data handover failure.
+     * Frameworks should keep retrying handover by sending
+     * {@link DataService#REQUEST_REASON_HANDOVER} request to the underlying {@link DataService}.
+     */
+    public static final int HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_HANDOVER = 3;
+
+    /**
+     * Do not perform fallback to the source transport on data handover failure.
+     * Frameworks should retry setup a new data connection by sending
+     * {@link DataService#REQUEST_REASON_NORMAL} request to the underlying {@link DataService}.
+     */
+    public static final int HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_SETUP_NORMAL = 4;
+
     private final @DataFailureCause int mCause;
     private final int mSuggestedRetryTime;
     private final int mId;
@@ -80,6 +121,7 @@ public final class DataCallResponse implements Parcelable {
     private final int mMtu;
     private final int mMtuV4;
     private final int mMtuV6;
+    private final @HandoverFailureMode int mHandoverFailureMode;
 
     /**
      * @param cause Data call fail cause. {@link DataFailCause#NONE} indicates no error.
@@ -126,14 +168,15 @@ public final class DataCallResponse implements Parcelable {
         mPcscfAddresses = (pcscfAddresses == null)
                 ? new ArrayList<>() : new ArrayList<>(pcscfAddresses);
         mMtu = mMtuV4 = mMtuV6 = mtu;
+        mHandoverFailureMode = HANDOVER_FAILURE_MODE_LEGACY;
     }
 
-    /** @hide */
     private DataCallResponse(@DataFailureCause int cause, int suggestedRetryTime, int id,
             @LinkStatus int linkStatus, @ProtocolType int protocolType,
             @Nullable String interfaceName, @Nullable List<LinkAddress> addresses,
             @Nullable List<InetAddress> dnsAddresses, @Nullable List<InetAddress> gatewayAddresses,
-            @Nullable List<InetAddress> pcscfAddresses, int mtu, int mtuV4, int mtuV6) {
+            @Nullable List<InetAddress> pcscfAddresses, int mtu, int mtuV4, int mtuV6,
+            @HandoverFailureMode int handoverFailureMode) {
         mCause = cause;
         mSuggestedRetryTime = suggestedRetryTime;
         mId = id;
@@ -151,6 +194,7 @@ public final class DataCallResponse implements Parcelable {
         mMtu = mtu;
         mMtuV4 = mtuV4;
         mMtuV6 = mtuV6;
+        mHandoverFailureMode = handoverFailureMode;
     }
 
     /** @hide */
@@ -173,6 +217,7 @@ public final class DataCallResponse implements Parcelable {
         mMtu = source.readInt();
         mMtuV4 = source.readInt();
         mMtuV6 = source.readInt();
+        mHandoverFailureMode = source.readInt();
     }
 
     /**
@@ -262,6 +307,13 @@ public final class DataCallResponse implements Parcelable {
         return mMtuV6;
     }
 
+    /**
+     * @return The data handover failure mode.
+     */
+    public @HandoverFailureMode int getHandoverFailureMode() {
+        return mHandoverFailureMode;
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -339,6 +391,7 @@ public final class DataCallResponse implements Parcelable {
         dest.writeInt(mMtu);
         dest.writeInt(mMtuV4);
         dest.writeInt(mMtuV6);
+        dest.writeInt(mHandoverFailureMode);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<DataCallResponse> CREATOR =
@@ -394,6 +447,8 @@ public final class DataCallResponse implements Parcelable {
         private int mMtuV4;
 
         private int mMtuV6;
+
+        private @HandoverFailureMode int mHandoverFailureMode = HANDOVER_FAILURE_MODE_LEGACY;
 
         /**
          * Default constructor for Builder.
@@ -553,6 +608,17 @@ public final class DataCallResponse implements Parcelable {
         }
 
         /**
+         * Set data handover failure mode for the data call response.
+         *
+         * @param failureMode Handover failure mode.
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setHandoverFailureMode(@HandoverFailureMode int failureMode) {
+            mHandoverFailureMode = failureMode;
+            return this;
+        }
+
+        /**
          * Build the DataCallResponse.
          *
          * @return the DataCallResponse object.
@@ -560,7 +626,7 @@ public final class DataCallResponse implements Parcelable {
         public @NonNull DataCallResponse build() {
             return new DataCallResponse(mCause, mSuggestedRetryTime, mId, mLinkStatus,
                     mProtocolType, mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses,
-                    mPcscfAddresses, mMtu, mMtuV4, mMtuV6);
+                    mPcscfAddresses, mMtu, mMtuV4, mMtuV6, mHandoverFailureMode);
         }
     }
 }
