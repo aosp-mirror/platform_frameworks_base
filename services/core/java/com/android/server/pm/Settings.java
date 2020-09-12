@@ -1512,6 +1512,7 @@ public final class Settings {
                     return;
                 }
                 str = new FileInputStream(userPackagesStateFile);
+                if (DEBUG_MU) Log.i(TAG, "Reading " + userPackagesStateFile);
             }
             final XmlPullParser parser = Xml.newPullParser();
             parser.setInput(str, StandardCharsets.UTF_8.name());
@@ -1956,9 +1957,13 @@ public final class Settings {
 
             serializer.startTag(null, TAG_PACKAGE_RESTRICTIONS);
 
+            if (DEBUG_MU) Log.i(TAG, "Writing " + userPackagesStateFile);
             for (final PackageSetting pkg : mPackages.values()) {
                 final PackageUserState ustate = pkg.readUserState(userId);
-                if (DEBUG_MU) Log.i(TAG, "  pkg=" + pkg.name + ", state=" + ustate.enabled);
+                if (DEBUG_MU) {
+                    Log.i(TAG, "  pkg=" + pkg.name + ", installed=" + ustate.installed
+                            + ", state=" + ustate.enabled);
+                }
 
                 serializer.startTag(null, TAG_PACKAGE);
                 serializer.attribute(null, ATTR_NAME, pkg.name);
