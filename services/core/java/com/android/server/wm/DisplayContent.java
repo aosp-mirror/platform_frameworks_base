@@ -3374,6 +3374,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mUpdateImeTarget = updateImeTarget;
         WindowState target = getWindow(mComputeImeTargetPredicate);
 
+        // Keeps the IME target with the last window while swiping up to recents to prevent
+        // flickering due to IME hide animation on top of recents.
+        // TODO(b/166736352): This logic should go away once we switch over target immediately
+        //  and do the screenshot to preserve IME on disappearing target
+        if (target != null && curTarget != null && target.isActivityTypeHome()
+                && curTarget.getInsetsState().getSource(ITYPE_IME).isVisible()) {
+            return curTarget;
+        }
 
         // Yet more tricksyness!  If this window is a "starting" window, we do actually want
         // to be on top of it, but it is not -really- where input will go. So look down below
@@ -3546,7 +3554,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         );
     }
 
-    private void updateImeParent() {
+    void updateImeParent() {
         final SurfaceControl newParent = computeImeParent();
         if (newParent != null) {
             getPendingTransaction().reparent(mImeWindowsContainers.mSurfaceControl, newParent);
