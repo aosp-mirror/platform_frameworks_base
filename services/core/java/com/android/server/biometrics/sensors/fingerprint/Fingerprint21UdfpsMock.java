@@ -35,6 +35,7 @@ import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 
+import com.android.internal.R;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.ClientMonitor;
@@ -408,8 +409,11 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
         mHandler = handler;
         // resetLockout is controlled by the framework, so hardwareAuthToken is not required
         final boolean resetLockoutRequiresHardwareAuthToken = false;
+        final int maxTemplatesAllowed = mContext.getResources()
+                .getInteger(R.integer.config_fingerprintMaxTemplatesPerUser);
         mSensorProperties = new FingerprintSensorProperties(sensorId,
-                FingerprintSensorProperties.TYPE_UDFPS, resetLockoutRequiresHardwareAuthToken);
+                FingerprintSensorProperties.TYPE_UDFPS, resetLockoutRequiresHardwareAuthToken,
+                maxTemplatesAllowed);
         mMockHalResultController = controller;
         mUserHasTrust = new SparseBooleanArray();
         mTrustManager = context.getSystemService(TrustManager.class);

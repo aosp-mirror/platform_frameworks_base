@@ -16,6 +16,7 @@
 package com.android.test.silkfx.materials
 
 import android.app.Activity
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -46,8 +47,14 @@ class GlassActivity : Activity(), SeekBar.OnSeekBarChangeListener {
     lateinit var scrimOpacityValue: TextView
     lateinit var blurRadiusValue: TextView
     lateinit var zoomValue: TextView
+    lateinit var textOverlay: TextView
 
-    lateinit var background: Bitmap
+    var background: Bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+    set(value) {
+        field = value
+        backgroundView.setImageBitmap(background)
+        materialView.backgroundBitmap = background
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,10 +75,9 @@ class GlassActivity : Activity(), SeekBar.OnSeekBarChangeListener {
         scrimOpacityValue = requireViewById(R.id.scrimOpacityValue)
         blurRadiusValue = requireViewById(R.id.blurRadiusValue)
         zoomValue = requireViewById(R.id.zoomValue)
+        textOverlay = requireViewById(R.id.textOverlay)
 
         background = BitmapFactory.decodeResource(resources, R.drawable.background1)
-        backgroundView.setImageBitmap(background)
-        materialView.backgroundBitmap = background
 
         blurRadiusSeekBar.setOnSeekBarChangeListener(this)
         materialOpacitySeekBar.setOnSeekBarChangeListener(this)
@@ -86,6 +92,7 @@ class GlassActivity : Activity(), SeekBar.OnSeekBarChangeListener {
 
         lightMaterialSwitch.setOnCheckedChangeListener { _, isChecked ->
             materialView.color = if (isChecked) Color.WHITE else Color.BLACK
+            textOverlay.setTextColor(if (isChecked) Color.BLACK else Color.WHITE)
         }
     }
 
@@ -116,6 +123,11 @@ class GlassActivity : Activity(), SeekBar.OnSeekBarChangeListener {
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        materialView.resetGyroOffsets()
+    }
+
     override fun onStartTrackingTouch(seekBar: SeekBar?) {}
     override fun onStopTrackingTouch(seekBar: SeekBar?) {}
 
@@ -128,7 +140,23 @@ class GlassActivity : Activity(), SeekBar.OnSeekBarChangeListener {
         }
 
         background = BitmapFactory.decodeResource(resources, resource)
-        backgroundView.setImageBitmap(background)
-        materialView.backgroundBitmap = background
+    }
+
+    fun onPickImageClick(view: View) {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "image/*"
+        }
+        startActivityForResult(intent, 0)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode === RESULT_OK) {
+            data?.data?.also {
+                contentResolver.openFileDescriptor(it, "r").let {
+                    background = BitmapFactory.decodeFileDescriptor(it?.fileDescriptor)
+                }
+            }
+        }
     }
 }

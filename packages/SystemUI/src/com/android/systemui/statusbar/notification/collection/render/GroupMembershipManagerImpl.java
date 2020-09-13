@@ -56,7 +56,7 @@ public class GroupMembershipManagerImpl implements GroupMembershipManager {
             return false;
         }
 
-        return entry.getParent().getChildren().size() == 1;
+        return !isGroupSummary(entry) && entry.getParent().getChildren().size() == 1;
     }
 
     @Nullable

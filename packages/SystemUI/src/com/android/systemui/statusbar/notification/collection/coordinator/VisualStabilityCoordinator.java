@@ -110,7 +110,7 @@ public class VisualStabilityCoordinator implements Coordinator {
                 public boolean isGroupChangeAllowed(NotificationEntry entry) {
                     final boolean isGroupChangeAllowedForEntry =
                             mReorderingAllowed || mHeadsUpManager.isAlerting(entry.getKey());
-                    mIsSuppressingGroupChange |= isGroupChangeAllowedForEntry;
+                    mIsSuppressingGroupChange |= !isGroupChangeAllowedForEntry;
                     return isGroupChangeAllowedForEntry;
                 }
 

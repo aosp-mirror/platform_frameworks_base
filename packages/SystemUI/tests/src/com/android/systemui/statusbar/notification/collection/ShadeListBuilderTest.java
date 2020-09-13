@@ -58,6 +58,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -964,6 +965,198 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
+    public void testStabilizeGroupsDoesNotAllowGrouping() {
+        // GIVEN one group child without a summary yet
+        addGroupChild(0, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+
+        // GIVEN visual stability manager doesn't allow any group changes
+        mListBuilder.setNotifStabilityManager(
+                new TestableStabilityManager().setAllowGroupChanges(false));
+
+        // WHEN we run the pipeline with the addition of a group summary & child
+        addGroupSummary(1, PACKAGE_1, GROUP_1);
+        addGroupChild(2, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+
+        // THEN all notifications are top-level and the summary doesn't show yet
+        // because group changes aren't allowed by the stability manager
+        verifyBuiltList(
+                notif(0),
+                notif(2)
+        );
+    }
+
+    @Test
+    public void testStabilizeGroupsAllowsGroupingAllNewNotifications() {
+        // GIVEN visual stability manager doesn't allow any group changes
+        mListBuilder.setNotifStabilityManager(
+                new TestableStabilityManager().setAllowGroupChanges(false));
+
+        // WHEN we run the pipeline with all new notification groups
+        addGroupChild(0, PACKAGE_1, GROUP_1);
+        addGroupSummary(1, PACKAGE_1, GROUP_1);
+        addGroupChild(2, PACKAGE_1, GROUP_1);
+        addGroupSummary(3, PACKAGE_2, GROUP_2);
+        addGroupChild(4, PACKAGE_2, GROUP_2);
+        addGroupChild(5, PACKAGE_2, GROUP_2);
+
+        dispatchBuild();
+
+        // THEN all notifications are grouped since they're all new
+        verifyBuiltList(
+                group(
+                        summary(1),
+                        child(0),
+                        child(2)
+                ),
+                group(
+                        summary(3),
+                        child(4),
+                        child(5)
+                )
+        );
+    }
+
+
+    @Test
+    public void testStabilizeGroupsAllowsGroupingOnlyNewNotifications() {
+        // GIVEN one group child without a summary yet
+        addGroupChild(0, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+
+        // GIVEN visual stability manager doesn't allow any group changes
+        mListBuilder.setNotifStabilityManager(
+                new TestableStabilityManager().setAllowGroupChanges(false));
+
+        // WHEN we run the pipeline with the addition of a group summary & child
+        addGroupSummary(1, PACKAGE_1, GROUP_1);
+        addGroupChild(2, PACKAGE_1, GROUP_1);
+        addGroupSummary(3, PACKAGE_2, GROUP_2);
+        addGroupChild(4, PACKAGE_2, GROUP_2);
+        addGroupChild(5, PACKAGE_2, GROUP_2);
+
+        dispatchBuild();
+
+        // THEN all notifications are top-level and the summary doesn't show yet
+        // because group changes aren't allowed by the stability manager
+        verifyBuiltList(
+                notif(0),
+                group(
+                        summary(3),
+                        child(4),
+                        child(5)
+                ),
+                notif(2)
+        );
+    }
+
+    @Test
+    public void testStabilizeGroupsHidesGroupSummary() {
+        // GIVEN one group child with a summary
+        addGroupChild(0, PACKAGE_1, GROUP_1);
+        addGroupSummary(1, PACKAGE_1, GROUP_1);
+
+        dispatchBuild(); // group summary is hidden because it needs at least 2 children to group
+
+        // GIVEN visual stability manager doesn't allow any group changes
+        mListBuilder.setNotifStabilityManager(
+                new TestableStabilityManager().setAllowGroupChanges(false));
+
+        // WHEN we run the pipeline with the addition of a child
+        addGroupChild(2, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+
+        // THEN the children notifications are top-level and the summary still doesn't show yet
+        // because group changes aren't allowed by the stability manager
+        verifyBuiltList(
+                notif(0),
+                notif(2)
+        );
+    }
+
+    @Test
+    public void testStabilizeGroupsDelayedSummaryRendersAllNotifsTopLevel() {
+        // GIVEN group children posted without a summary
+        addGroupChild(0, PACKAGE_1, GROUP_1);
+        addGroupChild(1, PACKAGE_1, GROUP_1);
+        addGroupChild(2, PACKAGE_1, GROUP_1);
+        addGroupChild(3, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+
+        // GIVEN visual stability manager doesn't allow any group changes
+        final TestableStabilityManager stabilityManager =
+                new TestableStabilityManager().setAllowGroupChanges(false);
+        mListBuilder.setNotifStabilityManager(stabilityManager);
+
+        // WHEN the delayed summary is posted
+        addGroupSummary(4, PACKAGE_1, GROUP_1);
+
+        dispatchBuild();
+
+        // THEN all entries are top-level since group changes aren't allowed
+        verifyBuiltList(
+                notif(0),
+                notif(1),
+                notif(2),
+                notif(3),
+                notif(4)
+        );
+
+        // WHEN visual stability manager allows group changes again
+        stabilityManager.setAllowGroupChanges(true);
+        stabilityManager.invalidateList();
+
+        // THEN entries are grouped
+        verifyBuiltList(
+                group(
+                        summary(4),
+                        child(0),
+                        child(1),
+                        child(2),
+                        child(3)
+                )
+        );
+    }
+
+    @Test
+    public void testStabilizeSectionDisallowsNewSection() {
+        // GIVEN one non-default sections
+        final NotifSectioner originalSectioner = new PackageSectioner(PACKAGE_1);
+        mListBuilder.setSectioners(List.of(originalSectioner));
+
+        // GIVEN notifications that's sectioned by sectioner1
+        addNotif(0, PACKAGE_1);
+        dispatchBuild();
+        assertEquals(originalSectioner, mEntrySet.get(0).getSection().getSectioner());
+
+        // WHEN section changes aren't allowed
+        final TestableStabilityManager stabilityManager =
+                new TestableStabilityManager().setAllowSectionChanges(false);
+        mListBuilder.setNotifStabilityManager(stabilityManager);
+
+        // WHEN we try to change the section
+        final NotifSectioner newSectioner = new PackageSectioner(PACKAGE_1);
+        mListBuilder.setSectioners(List.of(newSectioner, originalSectioner));
+        dispatchBuild();
+
+        // THEN the section remains the same since section changes aren't allowed
+        assertEquals(originalSectioner, mEntrySet.get(0).getSection().getSectioner());
+
+        // WHEN section changes are allowed again
+        stabilityManager.setAllowSectionChanges(true);
+        stabilityManager.invalidateList();
+
+        // THEN the section updates
+        assertEquals(newSectioner, mEntrySet.get(0).getSection().getSectioner());
+    }
+
+    @Test
     public void testDispatchListOnBeforeSort() {
         // GIVEN a registered OnBeforeSortListener
         RecordingOnBeforeSortListener listener =
@@ -999,8 +1192,8 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     @Test
     public void testDispatchListOnBeforeRender() {
         // GIVEN a registered OnBeforeRenderList
-        RecordingOnBeforeRenderistener listener =
-                new RecordingOnBeforeRenderistener();
+        RecordingOnBeforeRenderListener listener =
+                new RecordingOnBeforeRenderListener();
         mListBuilder.addOnBeforeRenderListListener(listener);
 
         // GIVEN some new notifs out of order
@@ -1450,13 +1643,46 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         }
     }
 
-    private static class RecordingOnBeforeRenderistener
+    private static class RecordingOnBeforeRenderListener
             implements OnBeforeRenderListListener {
         List<ListEntry> mEntriesReceived;
 
         @Override
         public void onBeforeRenderList(List<ListEntry> list) {
             mEntriesReceived = new ArrayList<>(list);
+        }
+    }
+
+    private static class TestableStabilityManager extends NotifStabilityManager {
+        boolean mAllowGroupChanges = true;
+        boolean mAllowSectionChanges = true;
+
+        TestableStabilityManager() {
+            super("Test");
+        }
+
+        TestableStabilityManager setAllowGroupChanges(boolean allowGroupChanges) {
+            mAllowGroupChanges = allowGroupChanges;
+            return this;
+        }
+
+        TestableStabilityManager setAllowSectionChanges(boolean allowSectionChanges) {
+            mAllowSectionChanges = allowSectionChanges;
+            return this;
+        }
+
+        @Override
+        public void onBeginRun() {
+        }
+
+        @Override
+        public boolean isGroupChangeAllowed(NotificationEntry entry) {
+            return mAllowGroupChanges;
+        }
+
+        @Override
+        public boolean isSectionChangeAllowed(NotificationEntry entry) {
+            return mAllowSectionChanges;
         }
     }
 

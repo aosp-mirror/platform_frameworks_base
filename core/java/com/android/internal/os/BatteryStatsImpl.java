@@ -73,6 +73,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.KeyValueListParser;
 import android.util.Log;
@@ -14126,7 +14127,11 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @GuardedBy("this")
     public void dumpConstantsLocked(PrintWriter pw) {
-        mConstants.dumpLocked(pw);
+        final IndentingPrintWriter iPw = new IndentingPrintWriter(pw, "    ");
+        iPw.println("BatteryStats constants:");
+        iPw.increaseIndent();
+        mConstants.dumpLocked(iPw);
+        iPw.decreaseIndent();
     }
 
     @GuardedBy("this")
@@ -16077,6 +16082,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mCameraOnTimer.logState(pr, "  ");
         }
         super.dumpLocked(context, pw, flags, reqUid, histStart);
+
         pw.print("Total cpu time reads: ");
         pw.println(mNumSingleUidCpuTimeReads);
         pw.print("Batched cpu time reads: ");
@@ -16087,5 +16093,8 @@ public class BatteryStatsImpl extends BatteryStats {
         pw.println(mNumAllUidCpuTimeReads);
         pw.print("UIDs removed since the later of device start or stats reset: ");
         pw.println(mNumUidsRemoved);
+
+        pw.println();
+        dumpConstantsLocked(pw);
     }
 }

@@ -709,6 +709,31 @@ public class WifiNetworkSuggestionTest {
     }
 
     /**
+     * Verify that the builder creates the appropriate PasspointConfiguration according to the
+     * enhanced MAC randomization setting.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderSetMacRandomizationPasspoint() {
+        PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setPasspointConfig(passpointConfiguration)
+                .build();
+        assertEquals(false, suggestion.passpointConfiguration.isEnhancedMacRandomizationEnabled());
+
+        suggestion = new WifiNetworkSuggestion.Builder()
+                .setPasspointConfig(passpointConfiguration)
+                .setIsEnhancedMacRandomizationEnabled(false)
+                .build();
+        assertEquals(false, suggestion.passpointConfiguration.isEnhancedMacRandomizationEnabled());
+
+        suggestion = new WifiNetworkSuggestion.Builder()
+                .setPasspointConfig(passpointConfiguration)
+                .setIsEnhancedMacRandomizationEnabled(true)
+                .build();
+        assertEquals(true, suggestion.passpointConfiguration.isEnhancedMacRandomizationEnabled());
+    }
+
+    /**
      * Check that parcel marshalling/unmarshalling works
      */
     @Test

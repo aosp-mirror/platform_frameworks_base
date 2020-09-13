@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -2464,8 +2465,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     private Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
                                     boolean isVoiceInteraction) {
-        if (isOrganized()) {
-            // Defer to the task organizer to run animations
+        if (isOrganized()
+                // TODO(b/161711458): Clean-up when moved to shell.
+                && getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
             return null;
         }
 

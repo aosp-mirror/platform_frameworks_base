@@ -417,7 +417,9 @@ public class ZenModeHelper {
             if (mConfig == null) return;
 
             newConfig = mConfig.copy();
-            setAutomaticZenRuleStateLocked(newConfig, newConfig.automaticRules.get(id), condition);
+            ArrayList<ZenRule> rules = new ArrayList<>();
+            rules.add(newConfig.automaticRules.get(id));
+            setAutomaticZenRuleStateLocked(newConfig, rules, condition);
         }
     }
 
@@ -428,31 +430,34 @@ public class ZenModeHelper {
             newConfig = mConfig.copy();
 
             setAutomaticZenRuleStateLocked(newConfig,
-                    findMatchingRule(newConfig, ruleDefinition, condition),
+                    findMatchingRules(newConfig, ruleDefinition, condition),
                     condition);
         }
     }
 
-    private void setAutomaticZenRuleStateLocked(ZenModeConfig config, ZenRule rule,
+    private void setAutomaticZenRuleStateLocked(ZenModeConfig config, List<ZenRule> rules,
             Condition condition) {
-        if (rule == null) return;
+        if (rules == null || rules.isEmpty()) return;
 
-        rule.condition = condition;
-        updateSnoozing(rule);
-        setConfigLocked(config, rule.component, "conditionChanged");
+        for (ZenRule rule : rules) {
+            rule.condition = condition;
+            updateSnoozing(rule);
+            setConfigLocked(config, rule.component, "conditionChanged");
+        }
     }
 
-    private ZenRule findMatchingRule(ZenModeConfig config, Uri id, Condition condition) {
+    private List<ZenRule> findMatchingRules(ZenModeConfig config, Uri id, Condition condition) {
+        List<ZenRule> matchingRules= new ArrayList<>();
         if (ruleMatches(id, condition, config.manualRule)) {
-            return config.manualRule;
+            matchingRules.add(config.manualRule);
         } else {
             for (ZenRule automaticRule : config.automaticRules.values()) {
                 if (ruleMatches(id, condition, automaticRule)) {
-                    return automaticRule;
+                    matchingRules.add(automaticRule);
                 }
             }
         }
-        return null;
+        return matchingRules;
     }
 
     private boolean ruleMatches(Uri id, Condition condition, ZenRule rule) {

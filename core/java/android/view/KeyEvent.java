@@ -1908,8 +1908,6 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /**
      * Returns whether this key will be sent to the
      * {@link android.media.session.MediaSession.Callback} if not handled.
-     *
-     * @hide
      */
     public static final boolean isMediaSessionKey(int keyCode) {
         switch (keyCode) {
