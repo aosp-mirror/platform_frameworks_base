@@ -1396,7 +1396,7 @@ public class NetworkPolicyManagerServiceTest {
         actualCycleDay = mService.getCycleDayFromCarrierConfig(null, DEFAULT_CYCLE_DAY);
         assertEquals(DEFAULT_CYCLE_DAY, actualCycleDay);
 
-        // Sane, non-default values
+        // Valid, non-default values
         assertCycleDayAsExpected(config, 1, true);
         assertCycleDayAsExpected(config, cal.getMaximum(Calendar.DAY_OF_MONTH), true);
         assertCycleDayAsExpected(config, cal.getMinimum(Calendar.DAY_OF_MONTH), true);

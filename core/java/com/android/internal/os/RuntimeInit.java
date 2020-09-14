@@ -305,7 +305,7 @@ public class RuntimeInit {
 
     /**
      * Returns an HTTP user agent of the form
-     * "Dalvik/1.1.0 (Linux; U; Android Eclair Build/MASTER)".
+     * "Dalvik/1.1.0 (Linux; U; Android Eclair Build/MAIN)".
      */
     private static String getDefaultUserAgent() {
         StringBuilder result = new StringBuilder(64);
@@ -324,7 +324,7 @@ public class RuntimeInit {
                 result.append(model);
             }
         }
-        String id = Build.ID; // "MASTER" or "M4-rc20"
+        String id = Build.ID; // "MAIN" or "M4-rc20"
         if (id.length() > 0) {
             result.append(" Build/");
             result.append(id);

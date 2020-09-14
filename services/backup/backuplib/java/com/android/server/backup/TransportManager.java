@@ -173,7 +173,7 @@ public class TransportManager {
         }
     }
 
-    /** Returns a set with the whitelisted transports. */
+    /** Returns a set with the allowlisted transports. */
     Set<ComponentName> getTransportWhitelist() {
         return mTransportWhitelist;
     }
@@ -590,7 +590,7 @@ public class TransportManager {
         }
     }
 
-    /** Transport has to be whitelisted and privileged. */
+    /** Transport has to be allowlisted and privileged. */
     private boolean isTransportTrusted(ComponentName transport) {
         if (!mTransportWhitelist.contains(transport)) {
             Slog.w(

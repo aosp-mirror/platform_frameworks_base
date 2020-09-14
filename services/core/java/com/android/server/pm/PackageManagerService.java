@@ -2106,7 +2106,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 res.removedInfo.sendPackageRemovedBroadcasts(killApp);
             }
 
-            // Whitelist any restricted permissions first as some may be runtime
+            // Allowlist any restricted permissions first as some may be runtime
             // that the installer requested to be granted at install time.
             if (whitelistedRestrictedPermissions != null
                     && !whitelistedRestrictedPermissions.isEmpty()) {
@@ -3506,7 +3506,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 ver.fingerprint = Build.FINGERPRINT;
             }
 
-            // Grandfather existing (installed before Q) non-system apps to hide
+            // Legacy existing (installed before Q) non-system apps to hide
             // their icons in launcher.
             if (!mOnlyCore && mIsPreQUpgrade) {
                 Slog.i(TAG, "Whitelisting all existing apps to hide their icons");
@@ -7381,7 +7381,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             } else {
                 // we have an instant application locally, but, we can't admit that since
-                // callers shouldn't be able to determine prior browsing. create a dummy
+                // callers shouldn't be able to determine prior browsing. create a placeholder
                 // auxiliary response so the downstream code behaves as if there's an
                 // instant application available externally. when it comes time to start
                 // the instant application, we'll do the right thing.
@@ -10958,7 +10958,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (sharedUserSetting != null && sharedUserSetting.isPrivileged()) {
                 // Exempt SharedUsers signed with the platform key.
                 // TODO(b/72378145) Fix this exemption. Force signature apps
-                // to whitelist their privileged permissions just like other
+                // to allowlist their privileged permissions just like other
                 // priv-apps.
                 synchronized (mLock) {
                     PackageSetting platformPkgSetting = mSettings.mPackages.get("android");
@@ -16287,7 +16287,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     /**
      * A container of all data needed to commit a package to in-memory data structures and to disk.
-     * TODO: move most of the data contained her into a PackageSetting for commit.
+     * TODO: move most of the data contained here into a PackageSetting for commit.
      */
     private static class ReconciledPackage {
         public final ReconcileRequest request;
@@ -17057,7 +17057,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Notify BackgroundDexOptService that the package has been changed.
             // If this is an update of a package which used to fail to compile,
-            // BackgroundDexOptService will remove it from its blacklist.
+            // BackgroundDexOptService will remove it from its denylist.
             // TODO: Layering violation
             BackgroundDexOptService.notifyPackageChanged(packageName);
 

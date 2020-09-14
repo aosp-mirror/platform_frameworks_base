@@ -554,7 +554,7 @@ public class NumberPicker extends LinearLayout {
         public static int SCROLL_STATE_IDLE = 0;
 
         /**
-         * The user is scrolling using touch, and his finger is still on the screen.
+         * The user is scrolling using touch, and their finger is still on the screen.
          */
         public static int SCROLL_STATE_TOUCH_SCROLL = 1;
 
@@ -1675,7 +1675,7 @@ public class NumberPicker extends LinearLayout {
             // Do not draw the middle item if input is visible since the input
             // is shown only if the wheel is static and it covers the middle
             // item. Otherwise, if the user starts editing the text via the
-            // IME he may see a dimmed version of the old value intermixed
+            // IME they may see a dimmed version of the old value intermixed
             // with the new one.
             if ((showSelectorWheel && i != SELECTOR_MIDDLE_ITEM_INDEX) ||
                 (i == SELECTOR_MIDDLE_ITEM_INDEX && mInputText.getVisibility() != VISIBLE)) {

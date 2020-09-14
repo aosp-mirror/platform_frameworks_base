@@ -3199,7 +3199,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         boolean res = false;
         if (mCurMethod != null) {
             if (DEBUG) Slog.d(TAG, "showCurrentInputLocked: mCurToken=" + mCurToken);
-            // create a dummy token for IMS so that IMS cannot inject windows into client app.
+            // create a placeholder token for IMS so that IMS cannot inject windows into client app.
             Binder showInputToken = new Binder();
             mShowRequestWindowMap.put(showInputToken, windowToken);
             executeOrSendMessage(mCurMethod, mCaller.obtainMessageIIOOO(

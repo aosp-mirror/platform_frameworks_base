@@ -2314,7 +2314,7 @@ public class AccountManagerService
                 List<String> accountRemovedReceivers =
                     getAccountRemovedReceivers(account, accounts);
                 accounts.accountsDb.beginTransaction();
-                // Set to a dummy value, this will only be used if the database
+                // Set to a placeholder value, this will only be used if the database
                 // transaction succeeds.
                 long accountId = -1;
                 try {
@@ -6266,7 +6266,7 @@ public class AccountManagerService
                     PRE_N_DATABASE_NAME);
             if (userId == 0) {
                 // Migrate old file, if it exists, to the new location.
-                // Make sure the new file doesn't already exist. A dummy file could have been
+                // Make sure the new file doesn't already exist. A placeholder file could have been
                 // accidentally created in the old location,
                 // causing the new one to become corrupted as well.
                 File oldFile = new File(systemDir, PRE_N_DATABASE_NAME);

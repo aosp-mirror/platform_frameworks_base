@@ -282,7 +282,7 @@ public class CompoundFormulaTest {
         assertThat(compoundFormula.isInstallerFormula()).isTrue();
     }
 
-    /** Returns a builder with all fields filled with some dummy data. */
+    /** Returns a builder with all fields filled with some placeholder data. */
     private AppInstallMetadata.Builder getAppInstallMetadataBuilder() {
         return new AppInstallMetadata.Builder()
                 .setPackageName("abc")

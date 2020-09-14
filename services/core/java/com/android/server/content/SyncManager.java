@@ -728,7 +728,7 @@ public class SyncManager {
         // Sync adapters were able to access the synced account without the accounts
         // permission which circumvents our permission model. Therefore, we require
         // sync adapters that don't have access to the account to get user consent.
-        // This can be noisy, therefore we will white-list sync adapters installed
+        // This can be noisy, therefore we will allowlist sync adapters installed
         // before we started checking for account access because they already know
         // the account (they run before) which is the genie is out of the bottle.
         whiteListExistingSyncAdaptersIfNeeded();
