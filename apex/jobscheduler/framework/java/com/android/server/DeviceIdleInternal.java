@@ -37,7 +37,7 @@ public interface DeviceIdleInternal {
             String reason);
 
     // duration in milliseconds
-    long getNotificationWhitelistDuration();
+    long getNotificationAllowlistDuration();
 
     void setJobsActive(boolean active);
 
