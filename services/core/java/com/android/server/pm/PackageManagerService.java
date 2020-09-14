@@ -1848,7 +1848,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
                     synchronized (mLock) {
                         removeMessages(WRITE_PACKAGE_LIST);
-                        mPermissionManager.writeStateToPackageSettingsTEMP();
+                        mPermissionManager.writePermissionsStateToPackageSettingsTEMP();
                         mSettings.writePackageListLPr(msg.arg1);
                     }
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
@@ -3518,7 +3518,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     + ((SystemClock.uptimeMillis()-startTime)/1000f)
                     + " seconds");
 
-            mPermissionManager.readStateFromPackageSettingsTEMP();
+            mPermissionManager.readPermissionsStateFromPackageSettingsTEMP();
             // If the platform SDK has changed since the last time we booted,
             // we need to re-grant app permission to catch any new ones that
             // appear.  This is really a hack, and means that apps can in some
@@ -21846,7 +21846,7 @@ public class PackageManagerService extends IPackageManager.Stub
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
-        mPermissionManager.writeStateToPackageSettingsTEMP();
+        mPermissionManager.writePermissionsStateToPackageSettingsTEMP();
 
         DumpState dumpState = new DumpState();
         boolean fullPreferred = false;
@@ -23725,7 +23725,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mDirtyUsers.remove(userId);
             mUserNeedsBadging.delete(userId);
             mPermissionManager.onUserRemoved(userId);
-            mPermissionManager.writeStateToPackageSettingsTEMP();
+            mPermissionManager.writePermissionsStateToPackageSettingsTEMP();
             mSettings.removeUserLPw(userId);
             mPendingBroadcasts.remove(userId);
             mInstantAppRegistry.onUserRemovedLPw(userId);
@@ -23826,9 +23826,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     boolean readPermissionStateForUser(@UserIdInt int userId) {
         synchronized (mPackages) {
-            mPermissionManager.writeStateToPackageSettingsTEMP();
+            mPermissionManager.writePermissionsStateToPackageSettingsTEMP();
             mSettings.readPermissionStateForUserSyncLPr(userId);
-            mPermissionManager.readStateFromPackageSettingsTEMP();
+            mPermissionManager.readPermissionsStateFromPackageSettingsTEMP();
             return mPmInternal.isPermissionUpgradeNeeded(userId);
         }
     }
@@ -25842,12 +25842,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
     /**
      * Temporary method that wraps mSettings.writeLPr() and calls
-     * mPermissionManager.writeStateToPackageSettingsTEMP() beforehand.
+     * mPermissionManager.writePermissionsStateToPackageSettingsTEMP() beforehand.
      *
      * TODO(zhanghai): This should be removed once we finish migration of permission storage.
      */
     private void writeSettingsLPrTEMP() {
-        mPermissionManager.writeStateToPackageSettingsTEMP();
+        mPermissionManager.writePermissionsStateToPackageSettingsTEMP();
         mSettings.writeLPr();
     }
 }

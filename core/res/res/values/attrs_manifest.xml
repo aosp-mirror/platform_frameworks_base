@@ -239,9 +239,7 @@
         <!-- Old synonym for "privileged". Deprecated in API level 23. -->
         <flag name="system" value="0x10" />
         <!-- Additional flag from base permission type: this permission can also
-             (optionally) be granted to development applications. Although undocumented, the
-              permission state used to be shared by all users (including future users), but it is
-              managed per-user since API level 31. -->
+             (optionally) be granted to development applications. -->
         <flag name="development" value="0x20" />
         <!-- Additional flag from base permission type: this permission is closely
              associated with an app op for controlling access. -->
