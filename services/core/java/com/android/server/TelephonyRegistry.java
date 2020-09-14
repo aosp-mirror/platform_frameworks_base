@@ -103,6 +103,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * Since phone process can be restarted, this class provides a centralized place
@@ -1828,30 +1829,26 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
-    public void notifyCellLocationForSubscriber(int subId, CellIdentity cellLocation) {
+    public void notifyCellLocationForSubscriber(int subId, CellIdentity cellIdentity) {
         log("notifyCellLocationForSubscriber: subId=" + subId
-                + " cellLocation=" + cellLocation);
+                + " cellIdentity=" + cellIdentity);
         if (!checkNotifyPermission("notifyCellLocation()")) {
             return;
         }
-        if (VDBG) {
-            log("notifyCellLocationForSubscriber: subId=" + subId
-                + " cellLocation=" + cellLocation);
-        }
         int phoneId = getPhoneIdFromSubId(subId);
         synchronized (mRecords) {
-            if (validatePhoneId(phoneId)) {
-                mCellIdentity[phoneId] = cellLocation;
+            if (validatePhoneId(phoneId) && !Objects.equals(cellIdentity, mCellIdentity[phoneId])) {
+                mCellIdentity[phoneId] = cellIdentity;
                 for (Record r : mRecords) {
                     if (validateEventsAndUserLocked(r, PhoneStateListener.LISTEN_CELL_LOCATION) &&
                             idMatch(r.subId, subId, phoneId) &&
                             checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
                         try {
                             if (DBG_LOC) {
-                                log("notifyCellLocation: cellLocation=" + cellLocation
+                                log("notifyCellLocation: cellIdentity=" + cellIdentity
                                         + " r=" + r);
                             }
-                            r.callback.onCellLocationChanged(cellLocation);
+                            r.callback.onCellLocationChanged(cellIdentity);
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }
