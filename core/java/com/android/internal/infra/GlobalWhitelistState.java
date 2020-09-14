@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * Helper class used to manage a {@link WhitelistHelper} per user instance when the main service
  * cannot hold a lock when external entities (typically {@code ActivityManagerService}) needs to
- * get whitelist info.
+ * get allowlist info.
  *
  * <p>This class is thread safe.
  */
@@ -47,7 +47,7 @@ public class GlobalWhitelistState {
     protected SparseArray<WhitelistHelper> mWhitelisterHelpers;
 
     /**
-     * Sets the whitelist for the given user.
+     * Sets the allowlist for the given user.
      */
     public void setWhitelist(@UserIdInt int userId, @Nullable List<String> packageNames,
             @Nullable List<ComponentName> components) {
@@ -65,7 +65,7 @@ public class GlobalWhitelistState {
     }
 
     /**
-     * Checks if the given package is whitelisted for the given user.
+     * Checks if the given package is allowlisted for the given user.
      */
     public boolean isWhitelisted(@UserIdInt int userId, @NonNull String packageName) {
         synchronized (mGlobalWhitelistStateLock) {
@@ -76,7 +76,7 @@ public class GlobalWhitelistState {
     }
 
     /**
-     * Checks if the given component is whitelisted for the given user.
+     * Checks if the given component is allowlisted for the given user.
      */
     public boolean isWhitelisted(@UserIdInt int userId, @NonNull ComponentName componentName) {
         synchronized (mGlobalWhitelistStateLock) {
@@ -87,7 +87,7 @@ public class GlobalWhitelistState {
     }
 
     /**
-     * Gets the whitelisted components for the given package and user.
+     * Gets the allowlisted components for the given package and user.
      */
     public ArraySet<ComponentName> getWhitelistedComponents(@UserIdInt int userId,
             @NonNull String packageName) {
@@ -99,7 +99,7 @@ public class GlobalWhitelistState {
     }
 
     /**
-     * Resets the whitelist for the given user.
+     * Resets the allowlist for the given user.
      */
     public void resetWhitelist(@NonNull int userId) {
         synchronized (mGlobalWhitelistStateLock) {

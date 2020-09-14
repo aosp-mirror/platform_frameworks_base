@@ -368,7 +368,7 @@ public final class ApkAssets {
             try (XmlBlock block = new XmlBlock(null, nativeXmlPtr)) {
                 XmlResourceParser parser = block.newParser();
                 // If nativeOpenXml doesn't throw, it will always return a valid native pointer,
-                // which makes newParser always return non-null. But let's be paranoid.
+                // which makes newParser always return non-null. But let's be careful.
                 if (parser == null) {
                     throw new AssertionError("block.newParser() returned a null parser");
                 }

@@ -333,7 +333,7 @@ public class ZygoteProcess {
      *                             started.
      * @param pkgDataInfoMap Map from related package names to private data directory
      *                       volume UUID and inode number.
-     * @param whitelistedDataInfoMap Map from whitelisted package names to private data directory
+     * @param whitelistedDataInfoMap Map from allowlisted package names to private data directory
      *                       volume UUID and inode number.
      * @param bindMountAppsData whether zygote needs to mount CE and DE data.
      * @param bindMountAppStorageDirs whether zygote needs to mount Android/obb and Android/data.
@@ -615,7 +615,7 @@ public class ZygoteProcess {
      * @param disabledCompatChanges a list of disabled compat changes for the process being started.
      * @param pkgDataInfoMap Map from related package names to private data directory volume UUID
      *                       and inode number.
-     * @param whitelistedDataInfoMap Map from whitelisted package names to private data directory
+     * @param whitelistedDataInfoMap Map from allowlisted package names to private data directory
      *                       volume UUID and inode number.
      * @param bindMountAppsData whether zygote needs to mount CE and DE data.
      * @param bindMountAppStorageDirs whether zygote needs to mount Android/obb and Android/data.

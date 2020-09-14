@@ -7025,7 +7025,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // Parent asked to see how big we want to be
         case MeasureSpec.UNSPECIFIED:
             if (childDimension >= 0) {
-                // Child wants a specific size... let him have it
+                // Child wants a specific size... let them have it
                 resultSize = childDimension;
                 resultMode = MeasureSpec.EXACTLY;
             } else if (childDimension == LayoutParams.MATCH_PARENT) {

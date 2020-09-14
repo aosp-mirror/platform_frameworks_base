@@ -452,20 +452,20 @@ public class InputMethodService extends AbstractInputMethodService {
     /**
      * An opaque {@link Binder} token of window requesting {@link InputMethodImpl#showSoftInput}
      * The original app window token is passed from client app window.
-     * {@link com.android.server.inputmethod.InputMethodManagerService} creates a unique dummy
-     * token to identify this window.
-     * This dummy token is only valid for a single call to {@link InputMethodImpl#showSoftInput},
-     * after which it is set null until next call.
+     * {@link com.android.server.inputmethod.InputMethodManagerService} creates a unique
+     * placeholder token to identify this window.
+     * This placeholder token is only valid for a single call to
+     * {@link InputMethodImpl#showSoftInput}, after which it is set null until next call.
      */
     private IBinder mCurShowInputToken;
 
     /**
      * An opaque {@link Binder} token of window requesting {@link InputMethodImpl#hideSoftInput}
      * The original app window token is passed from client app window.
-     * {@link com.android.server.inputmethod.InputMethodManagerService} creates a unique dummy
-     * token to identify this window.
-     * This dummy token is only valid for a single call to {@link InputMethodImpl#hideSoftInput},
-     * after which it is set {@code null} until next call.
+     * {@link com.android.server.inputmethod.InputMethodManagerService} creates a unique
+     * placeholder token to identify this window.
+     * This placeholder token is only valid for a single call to
+     * {@link InputMethodImpl#hideSoftInput}, after which it is set {@code null} until next call.
      */
     private IBinder mCurHideInputToken;
 

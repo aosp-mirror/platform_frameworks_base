@@ -1795,8 +1795,8 @@ public final class PowerManager {
     }
 
     /**
-     * Return whether the given application package name is on the device's power whitelist.
-     * Apps can be placed on the whitelist through the settings UI invoked by
+     * Return whether the given application package name is on the device's power allowlist.
+     * Apps can be placed on the allowlist through the settings UI invoked by
      * {@link android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}.
      */
     public boolean isIgnoringBatteryOptimizations(String packageName) {
@@ -2219,7 +2219,7 @@ public final class PowerManager {
             = "android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED";
 
     /**
-     * @hide Intent that is broadcast when the set of power save whitelist apps has changed.
+     * @hide Intent that is broadcast when the set of power save allowlist apps has changed.
      * This broadcast is only sent to registered receivers.
      */
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
@@ -2227,7 +2227,7 @@ public final class PowerManager {
             = "android.os.action.POWER_SAVE_WHITELIST_CHANGED";
 
     /**
-     * @hide Intent that is broadcast when the set of temporarily whitelisted apps has changed.
+     * @hide Intent that is broadcast when the set of temporarily allowlisted apps has changed.
      * This broadcast is only sent to registered receivers.
      */
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)

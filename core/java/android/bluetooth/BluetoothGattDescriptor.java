@@ -58,7 +58,7 @@ public class BluetoothGattDescriptor implements Parcelable {
     public static final int PERMISSION_READ_ENCRYPTED = 0x02;
 
     /**
-     * Descriptor permission: Allow reading with man-in-the-middle protection
+     * Descriptor permission: Allow reading with person-in-the-middle protection
      */
     public static final int PERMISSION_READ_ENCRYPTED_MITM = 0x04;
 
@@ -73,7 +73,7 @@ public class BluetoothGattDescriptor implements Parcelable {
     public static final int PERMISSION_WRITE_ENCRYPTED = 0x20;
 
     /**
-     * Descriptor permission: Allow encrypted writes with man-in-the-middle
+     * Descriptor permission: Allow encrypted writes with person-in-the-middle
      * protection
      */
     public static final int PERMISSION_WRITE_ENCRYPTED_MITM = 0x40;
@@ -85,7 +85,7 @@ public class BluetoothGattDescriptor implements Parcelable {
 
     /**
      * Descriptor permission: Allow signed write operations with
-     * man-in-the-middle protection
+     * person-in-the-middle protection
      */
     public static final int PERMISSION_WRITE_SIGNED_MITM = 0x100;
 
