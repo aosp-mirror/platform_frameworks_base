@@ -35,6 +35,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController.DismissReason;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
@@ -60,6 +61,8 @@ import javax.inject.Inject;
 public class BubbleData {
 
     private BubbleLoggerImpl mLogger = new BubbleLoggerImpl();
+
+    private int mCurrentUserId;
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleData" : TAG_BUBBLES;
 
@@ -617,6 +620,10 @@ public class BubbleData {
         mStateChange.selectionChanged = true;
     }
 
+    void setCurrentUserId(int uid) {
+        mCurrentUserId = uid;
+    }
+
     /**
      * Logs the bubble UI event.
      *
@@ -634,7 +641,9 @@ public class BubbleData {
         if (provider == null) {
             mLogger.logStackUiChanged(packageName, action, bubbleCount, normalX, normalY);
         } else if (provider.getKey().equals(BubbleOverflow.KEY)) {
-            mLogger.logShowOverflow(packageName, action, bubbleCount, normalX, normalY);
+            if (action == SysUiStatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED) {
+                mLogger.logShowOverflow(packageName, mCurrentUserId);
+            }
         } else {
             mLogger.logBubbleUiChanged((Bubble) provider, packageName, action, bubbleCount, normalX,
                     normalY, bubbleIndex);
