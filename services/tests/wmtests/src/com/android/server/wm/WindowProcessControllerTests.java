@@ -266,6 +266,15 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
         mWpc.onMergedOverrideConfigurationChanged(config);
         assertEquals(ACTIVITY_TYPE_HOME, config.windowConfiguration.getActivityType());
         assertEquals(ACTIVITY_TYPE_UNDEFINED, mWpc.getActivityType());
+
+        final int globalSeq = 100;
+        mRootWindowContainer.getConfiguration().seq = globalSeq;
+        invertOrientation(mWpc.getConfiguration());
+        new ActivityBuilder(mService).setCreateTask(true).setUseProcess(mWpc).build();
+
+        assertTrue(mWpc.registeredForActivityConfigChanges());
+        assertEquals("Config seq of process should not be affected by activity",
+                mWpc.getConfiguration().seq, globalSeq);
     }
 
     private TestDisplayContent createTestDisplayContentInContainer() {
