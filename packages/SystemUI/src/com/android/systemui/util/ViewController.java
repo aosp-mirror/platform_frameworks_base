@@ -67,10 +67,12 @@ public abstract class ViewController<T extends View> {
         }
         mInited = true;
 
-        if (mView.isAttachedToWindow()) {
-            mOnAttachStateListener.onViewAttachedToWindow(mView);
+        if (mView != null) {
+            if (mView.isAttachedToWindow()) {
+                mOnAttachStateListener.onViewAttachedToWindow(mView);
+            }
+            mView.addOnAttachStateChangeListener(mOnAttachStateListener);
         }
-        mView.addOnAttachStateChangeListener(mOnAttachStateListener);
     }
 
     /**

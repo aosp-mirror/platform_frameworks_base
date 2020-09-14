@@ -397,10 +397,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
         mSecurityViewFlipper = findViewById(R.id.view_flipper);
     }
 
-    public void setLockPatternUtils(LockPatternUtils utils) {
-        mSecurityViewFlipper.setLockPatternUtils(utils);
-    }
-
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
 
@@ -505,16 +501,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
     }
 
     public void reset() {
-        mSecurityViewFlipper.reset();
         mDisappearAnimRunning = false;
-    }
-
-    public KeyguardSecurityCallback getCallback() {
-        return mSecurityViewFlipper.getCallback();
-    }
-
-    public void showUsabilityHint() {
-        mSecurityViewFlipper.showUsabilityHint();
     }
 }
 

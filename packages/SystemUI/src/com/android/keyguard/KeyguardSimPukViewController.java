@@ -69,7 +69,7 @@ public class KeyguardSimPukViewController
             if (simState == TelephonyManager.SIM_STATE_READY) {
                 mRemainingAttempts = -1;
                 mShowDefaultMessage = true;
-                mKeyguardSecurityCallback.dismiss(true, KeyguardUpdateMonitor.getCurrentUser());
+                getKeyguardSecurityCallback().dismiss(true, KeyguardUpdateMonitor.getCurrentUser());
             } else {
                 resetState();
             }
@@ -273,7 +273,7 @@ public class KeyguardSimPukViewController
                             mRemainingAttempts = -1;
                             mShowDefaultMessage = true;
 
-                            mKeyguardSecurityCallback.dismiss(
+                            getKeyguardSecurityCallback().dismiss(
                                     true, KeyguardUpdateMonitor.getCurrentUser());
                         } else {
                             mShowDefaultMessage = false;
@@ -360,6 +360,15 @@ public class KeyguardSimPukViewController
             mRemainingAttemptsDialog.setMessage(msg);
         }
         return mRemainingAttemptsDialog;
+    }
+
+    @Override
+    public void onPause() {
+        // dismiss the dialog.
+        if (mSimUnlockProgressDialog != null) {
+            mSimUnlockProgressDialog.dismiss();
+            mSimUnlockProgressDialog = null;
+        }
     }
 
     /**

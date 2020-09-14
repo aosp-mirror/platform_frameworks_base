@@ -156,6 +156,11 @@ public class KeyguardPasswordViewController
     }
 
     @Override
+    public boolean needsInput() {
+        return true;
+    }
+
+    @Override
     void resetState() {
         mPasswordEntry.setTextOperationUser(UserHandle.of(KeyguardUpdateMonitor.getCurrentUser()));
         mMessageAreaController.setMessage("");

@@ -103,28 +103,6 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
                 new View[]{
                         null, mEcaView, null
                 }};
-
-        View cancelBtn = findViewById(R.id.cancel_button);
-        if (cancelBtn != null) {
-            cancelBtn.setOnClickListener(view -> {
-                mCallback.reset();
-                mCallback.onCancelClicked();
-            });
-        }
-    }
-
-    @Override
-    public void onPause() {
-
-    }
-
-    @Override
-    public void onResume(int reason) {
-
-    }
-
-    @Override
-    public void showUsabilityHint() {
     }
 
     @Override
@@ -146,11 +124,6 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
                         enableClipping(true);
                     }
                 });
-    }
-
-    @Override
-    public boolean startDisappearAnimation(final Runnable finishRunnable) {
-        return false;
     }
 
     public boolean startDisappearAnimation(boolean needsSlowUnlockTransition,

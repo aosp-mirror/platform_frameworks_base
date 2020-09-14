@@ -106,7 +106,7 @@ public class KeyguardSimPinViewController
 
     @Override
     public boolean startDisappearAnimation(Runnable finishRunnable) {
-        return mView.startDisappearAnimation(finishRunnable);
+        return false;
     }
 
     @Override
@@ -137,7 +137,7 @@ public class KeyguardSimPinViewController
             mMessageAreaController.setMessage(
                     com.android.systemui.R.string.kg_invalid_sim_pin_hint);
             mView.resetPasswordText(true /* animate */, true /* announce */);
-            mKeyguardSecurityCallback.userActivity();
+            getKeyguardSecurityCallback().userActivity();
             return;
         }
 
@@ -159,7 +159,7 @@ public class KeyguardSimPinViewController
                             mKeyguardUpdateMonitor.reportSimUnlocked(mSubId);
                             mRemainingAttempts = -1;
                             mShowDefaultMessage = true;
-                            mKeyguardSecurityCallback.dismiss(
+                            getKeyguardSecurityCallback().dismiss(
                                     true, KeyguardUpdateMonitor.getCurrentUser());
                         } else {
                             mShowDefaultMessage = false;
@@ -186,7 +186,7 @@ public class KeyguardSimPinViewController
                                         + " attemptsRemaining=" + result.getAttemptsRemaining());
                             }
                         }
-                        mKeyguardSecurityCallback.userActivity();
+                        getKeyguardSecurityCallback().userActivity();
                         mCheckSimPinThread = null;
                     });
                 }

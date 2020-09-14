@@ -16,9 +16,12 @@
 
 package com.android.keyguard;
 
+import android.view.View;
+
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.systemui.R;
 
 public class KeyguardPinViewController
         extends KeyguardPinBasedInputViewController<KeyguardPINView> {
@@ -34,6 +37,19 @@ public class KeyguardPinViewController
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+    }
+
+    @Override
+    protected void onViewAttached() {
+        super.onViewAttached();
+
+        View cancelBtn = mView.findViewById(R.id.cancel_button);
+        if (cancelBtn != null) {
+            cancelBtn.setOnClickListener(view -> {
+                getKeyguardSecurityCallback().reset();
+                getKeyguardSecurityCallback().onCancelClicked();
+            });
+        }
     }
 
     @Override

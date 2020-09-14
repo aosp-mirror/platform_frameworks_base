@@ -16,6 +16,13 @@
 
 package com.android.keyguard;
 
+import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN;
+import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NONE;
+import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_PREPARE_FOR_UPDATE;
+import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART;
+import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
+import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
+
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
