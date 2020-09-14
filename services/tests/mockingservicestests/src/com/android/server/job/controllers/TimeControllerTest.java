@@ -52,6 +52,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
@@ -629,6 +630,50 @@ public class TimeControllerTest {
         assertTrue(jobLatest.isConstraintSatisfied(JobStatus.CONSTRAINT_DEADLINE));
         inOrder.verify(mAlarmManager, never())
                 .set(anyInt(), anyLong(), anyLong(), anyLong(), anyString(), any(), any(), any());
+    }
+
+    @Test
+    public void testDelayAlarmSchedulingCoalescedIntervals() {
+        doReturn(true).when(mTimeController).wouldBeReadyWithConstraintLocked(any(), anyInt());
+
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+
+        JobStatus jobLatest = createJobStatus("testDelayAlarmSchedulingCoalescedIntervals",
+                createJob().setMinimumLatency(HOUR_IN_MILLIS));
+        JobStatus jobMiddle = createJobStatus("testDelayAlarmSchedulingCoalescedIntervals",
+                createJob().setMinimumLatency(TimeController.DELAY_COALESCE_TIME_MS / 2));
+        JobStatus jobEarliest = createJobStatus("testDelayAlarmSchedulingCoalescedIntervals",
+                createJob().setMinimumLatency(TimeController.DELAY_COALESCE_TIME_MS / 10));
+
+        ArgumentCaptor<AlarmManager.OnAlarmListener> listenerCaptor =
+                ArgumentCaptor.forClass(AlarmManager.OnAlarmListener.class);
+        InOrder inOrder = inOrder(mAlarmManager);
+
+        mTimeController.maybeStartTrackingJobLocked(jobEarliest, null);
+        mTimeController.maybeStartTrackingJobLocked(jobMiddle, null);
+        mTimeController.maybeStartTrackingJobLocked(jobLatest, null);
+        inOrder.verify(mAlarmManager, times(1))
+                .set(anyInt(), eq(now + TimeController.DELAY_COALESCE_TIME_MS / 10), anyLong(),
+                        anyLong(), eq(TAG_DELAY),
+                        listenerCaptor.capture(), any(), any());
+        final AlarmManager.OnAlarmListener delayListener = listenerCaptor.getValue();
+
+        advanceElapsedClock(TimeController.DELAY_COALESCE_TIME_MS / 10);
+        delayListener.onAlarm();
+        // The next delay alarm time should be TimeController.DELAY_COALESCE_TIME_MS after the last
+        // time the delay alarm fired.
+        inOrder.verify(mAlarmManager, times(1))
+                .set(anyInt(), eq(now + TimeController.DELAY_COALESCE_TIME_MS / 10
+                                + TimeController.DELAY_COALESCE_TIME_MS), anyLong(),
+                        anyLong(), eq(TAG_DELAY), any(), any(), any());
+
+        advanceElapsedClock(TimeController.DELAY_COALESCE_TIME_MS);
+        delayListener.onAlarm();
+        // The last job is significantly after the coalesce time, so the 3rd scheduling shouldn't be
+        // affected by the first two jobs' alarms.
+        inOrder.verify(mAlarmManager, times(1))
+                .set(anyInt(), eq(now + HOUR_IN_MILLIS), anyLong(),
+                        anyLong(), eq(TAG_DELAY), any(), any(), any());
     }
 
     @Test
