@@ -816,7 +816,7 @@ public class MediaSessionService extends SystemService implements Monitor {
      * Information about a full user and its corresponding managed profiles.
      *
      * <p>Since the full user runs together with its managed profiles, a user wouldn't differentiate
-     * them when he/she presses a media/volume button. So keeping media sessions for them in one
+     * them when they press a media/volume button. So keeping media sessions for them in one
      * place makes more sense and increases the readability.</p>
      * <p>The contents of this object is guarded by {@link #mLock}.
      */

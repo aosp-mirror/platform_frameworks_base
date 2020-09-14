@@ -93,7 +93,7 @@ final class ContentCapturePerUserService
      * Reference to the remote service.
      *
      * <p>It's set in the constructor, but it's also updated when the service's updated in the
-     * master's cache (for example, because a temporary service was set).
+     * main service's cache (for example, because a temporary service was set).
      */
     @GuardedBy("mLock")
     @Nullable
@@ -198,7 +198,7 @@ final class ContentCapturePerUserService
     void onConnected() {
         synchronized (mLock) {
             if (mZombie) {
-                // Sanity check - shouldn't happen
+                // Validity check - shouldn't happen
                 if (mRemoteService == null) {
                     Slog.w(TAG, "Cannot ressurect sessions because remote service is null");
                     return;
@@ -571,7 +571,7 @@ final class ContentCapturePerUserService
     }
 
     /**
-     * Resets the content capture whitelist.
+     * Resets the content capture allowlist.
      */
     @GuardedBy("mLock")
     private void resetContentCaptureWhitelistLocked() {
@@ -598,7 +598,7 @@ final class ContentCapturePerUserService
             mMaster.mGlobalContentCaptureOptions.setWhitelist(mUserId, packages, activities);
             writeSetWhitelistEvent(getServiceComponentName(), packages, activities);
 
-            // Must disable session that are not the whitelist anymore...
+            // Must disable session that are not the allowlist anymore...
             final int numSessions = mSessions.size();
             if (numSessions <= 0) return;
 

@@ -1186,13 +1186,13 @@ public final class UsageStatsManager {
 
     /**
      * {@hide}
-     * Temporarily whitelist the specified app for a short duration. This is to allow an app
+     * Temporarily allowlist the specified app for a short duration. This is to allow an app
      * receiving a high priority message to be able to access the network and acquire wakelocks
      * even if the device is in power-save mode or the app is currently considered inactive.
-     * @param packageName The package name of the app to whitelist.
-     * @param duration Duration to whitelist the app for, in milliseconds. It is recommended that
+     * @param packageName The package name of the app to allowlist.
+     * @param duration Duration to allowlist the app for, in milliseconds. It is recommended that
      * this be limited to 10s of seconds. Requested duration will be clamped to a few minutes.
-     * @param user The user for whom the package should be whitelisted. Passing in a user that is
+     * @param user The user for whom the package should be allowlisted. Passing in a user that is
      * not the same as the caller's process will require the INTERACT_ACROSS_USERS permission.
      * @see #isAppInactive(String)
      *

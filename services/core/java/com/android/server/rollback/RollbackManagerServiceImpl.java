@@ -1032,7 +1032,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     @AnyThread
     private boolean isRollbackWhitelisted(String packageName) {
-        // TODO: Remove #isModule when the white list is ready.
+        // TODO: Remove #isModule when the allowlist is ready.
         return SystemConfig.getInstance().getRollbackWhitelistedPackages().contains(packageName)
                 || isModule(packageName);
     }

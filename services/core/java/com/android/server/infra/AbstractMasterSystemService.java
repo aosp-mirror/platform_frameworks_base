@@ -70,7 +70,7 @@ import java.util.Objects;
  * <p>See {@code com.android.server.autofill.AutofillManagerService} for a concrete
  * (no pun intended) example of how to use it.
  *
- * @param <M> "master" service class.
+ * @param <M> "main" service class.
  * @param <S> "real" service class.
  *
  * @hide

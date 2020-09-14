@@ -269,7 +269,7 @@ public class ActivityManagerTest extends AndroidTestCase {
         return unmarshalled;
     }
 
-    // If any entries in appear in the list, sanity check them against all running applications
+    // If any entries in appear in the list, validity check them against all running applications
     private void checkErrorListSanity(List<ActivityManager.ProcessErrorStateInfo> errList) {
         if (errList == null) return;
         
@@ -277,7 +277,7 @@ public class ActivityManagerTest extends AndroidTestCase {
         while (iter.hasNext()) {
             ActivityManager.ProcessErrorStateInfo info = iter.next();
             assertNotNull(info);
-            // sanity checks
+            // validity checks
             assertTrue((info.condition == ActivityManager.ProcessErrorStateInfo.CRASHED) ||
                        (info.condition == ActivityManager.ProcessErrorStateInfo.NOT_RESPONDING));
             // TODO look at each of these and consider a stronger test

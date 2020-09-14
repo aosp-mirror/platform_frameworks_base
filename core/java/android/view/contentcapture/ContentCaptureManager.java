@@ -81,7 +81,7 @@ import java.util.function.Consumer;
  *   <a href="https://source.android.com/compatibility/cdd">CDD requirements</a>.
  *   <li><b>Performance:</b> content capture is highly optimized to minimize its impact in the app
  *   jankiness and overall device system health. For example, its only enabled on apps (or even
- *   specific activities from an app) that were explicitly whitelisted by the intelligence service,
+ *   specific activities from an app) that were explicitly allowlisted by the intelligence service,
  *   and it buffers the events so they are sent in a batch to the service (see
  *   {@link #isContentCaptureEnabled()} for other cases when its disabled).
  * </ul>
@@ -495,7 +495,7 @@ public final class ContentCaptureManager {
     /**
      * Gets the (optional) intent used to launch the service-specific settings.
      *
-     * <p>This method is static because it's called by Settings, which might not be whitelisted
+     * <p>This method is static because it's called by Settings, which might not be allowlisted
      * for content capture (in which case the ContentCaptureManager on its context would be null).
      *
      * @hide
@@ -530,8 +530,8 @@ public final class ContentCaptureManager {
      * <p>There are many reasons it could be disabled, such as:
      * <ul>
      *   <li>App itself disabled content capture through {@link #setContentCaptureEnabled(boolean)}.
-     *   <li>Intelligence service did not whitelist content capture for this activity's package.
-     *   <li>Intelligence service did not whitelist content capture for this specific activity.
+     *   <li>Intelligence service did not allowlist content capture for this activity's package.
+     *   <li>Intelligence service did not allowlist content capture for this specific activity.
      *   <li>Intelligence service disabled content capture globally.
      *   <li>User disabled content capture globally through the Android Settings app.
      *   <li>Device manufacturer (OEM) disabled content capture globally.
@@ -566,7 +566,7 @@ public final class ContentCaptureManager {
     public Set<ContentCaptureCondition> getContentCaptureConditions() {
         // NOTE: we could cache the conditions on ContentCaptureOptions, but then it would be stick
         // to the lifetime of the app. OTOH, by dynamically calling the server every time, we allow
-        // the service to fine tune how long-lived apps (like browsers) are whitelisted.
+        // the service to fine tune how long-lived apps (like browsers) are allowlisted.
         if (!isContentCaptureEnabled() && !mOptions.lite) return null;
 
         final SyncResultReceiver resultReceiver = syncRun(

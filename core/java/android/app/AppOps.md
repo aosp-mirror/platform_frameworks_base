@@ -53,7 +53,7 @@ To control access the app-op can be set to:
 : Allow the access but only if the app is currently in the [foreground](#foreground)
 
 `MODE_IGNORED`
-: Don't allow the access, i.e. don't perform the requested action or return dummy data
+: Don't allow the access, i.e. don't perform the requested action or return placeholder data
 
 `MODE_ERRORED`
 : Throw a `SecurityException` on access. This can be suppressed by using a `...noThrow` method to

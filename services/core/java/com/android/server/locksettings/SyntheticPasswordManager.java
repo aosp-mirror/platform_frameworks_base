@@ -149,15 +149,15 @@ public class SyntheticPasswordManager {
     }
 
     /**
-     * This class represents the master cryptographic secret for a given user (a.k.a synthietic
+     * This class represents the main cryptographic secret for a given user (a.k.a synthietic
      * password). This secret is derived from the user's lockscreen credential or password escrow
      * token. All other cryptograhic keys related to the user, including disk encryption key,
      * keystore encryption key, gatekeeper auth key, vendor auth secret and others are directly
      * derived from this token.
      * <p>
-     * The master secret associated with an authentication token is retrievable from
+     * The main secret associated with an authentication token is retrievable from
      * {@link AuthenticationToken#getSyntheticPassword()} and the authentication token can be
-     * reconsturcted from the master secret later with
+     * reconsturcted from the main secret later with
      * {@link AuthenticationToken#recreateDirectly(byte[])}. The first time an authentication token
      * is needed, it should be created with {@link AuthenticationToken#create()} so that the
      * necessary escrow data ({@link #mEncryptedEscrowSplit0} and {@link #mEscrowSplit1}) is
@@ -166,7 +166,7 @@ public class SyntheticPasswordManager {
      * needs to securely store the secret returned from
      * {@link AuthenticationToken#getEscrowSecret()}, and at the time of use, load the escrow data
      * back with {@link AuthenticationToken#setEscrowData(byte[], byte[])} and then re-create the
-     * master secret from the escrow secret via
+     * main secret from the escrow secret via
      * {@link AuthenticationToken#recreateFromEscrow(byte[])}.
      */
     static class AuthenticationToken {

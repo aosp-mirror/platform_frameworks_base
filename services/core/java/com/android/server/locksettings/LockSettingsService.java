@@ -2590,11 +2590,11 @@ public class LockSettingsService extends ILockSettings.Stub {
      *     make it consistent with current behaviour. It also allows ActivityManager to call
      *     unlockUser() with empty secret.
      * 3. Once a user is migrated to have synthetic password, its value will never change, no matter
-     *     whether the user changes his lockscreen PIN or clear/reset it. When the user clears its
+     *     whether the user changes their lockscreen PIN or clear/reset it. When the user clears its
      *     lockscreen PIN, we still maintain the existing synthetic password in a password blob
      *     protected by a default PIN.
      * 4. The user SID is linked with synthetic password, but its cleared/re-created when the user
-     *     clears/re-creates his lockscreen PIN.
+     *     clears/re-creates their lockscreen PIN.
      *
      *
      * Different cases of calling this method:

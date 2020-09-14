@@ -406,7 +406,7 @@ public class KeySyncTaskTest {
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
 
-        // Enter test mode with whitelisted credentials
+        // Enter test mode with allowlisted credentials
         when(mTestOnlyInsecureCertificateHelper.isTestOnlyCertificateAlias(any())).thenReturn(true);
         when(mTestOnlyInsecureCertificateHelper.doesCredentialSupportInsecureMode(anyInt(), any()))
                 .thenReturn(true);
@@ -415,7 +415,7 @@ public class KeySyncTaskTest {
         verify(mTestOnlyInsecureCertificateHelper)
                 .getDefaultCertificateAliasIfEmpty(eq(TEST_ROOT_CERT_ALIAS));
 
-        // run whitelist checks
+        // run allowlist checks
         verify(mTestOnlyInsecureCertificateHelper)
                 .doesCredentialSupportInsecureMode(anyInt(), any());
         verify(mTestOnlyInsecureCertificateHelper)
@@ -424,7 +424,7 @@ public class KeySyncTaskTest {
         KeyChainSnapshot keyChainSnapshot = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
         assertNotNull(keyChainSnapshot); // created snapshot
         List<WrappedApplicationKey> applicationKeys = keyChainSnapshot.getWrappedApplicationKeys();
-        assertThat(applicationKeys).hasSize(0); // non whitelisted key is not included
+        assertThat(applicationKeys).hasSize(0); // non allowlisted key is not included
         verify(mMockScrypt, never()).scrypt(any(), any(), anyInt(), anyInt(), anyInt(), anyInt());
     }
 
@@ -437,7 +437,7 @@ public class KeySyncTaskTest {
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
 
-        // Enter test mode with non whitelisted credentials
+        // Enter test mode with non allowlisted credentials
         when(mTestOnlyInsecureCertificateHelper.isTestOnlyCertificateAlias(any())).thenReturn(true);
         when(mTestOnlyInsecureCertificateHelper.doesCredentialSupportInsecureMode(anyInt(), any()))
                 .thenReturn(false);

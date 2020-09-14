@@ -6240,7 +6240,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final int vpnAppUid = nai.networkCapabilities.getOwnerUid();
         // TODO: this create a window of opportunity for apps to receive traffic between the time
         // when the old rules are removed and the time when new rules are added. To fix this,
-        // make eBPF support two whitelisted interfaces so here new rules can be added before the
+        // make eBPF support two allowlisted interfaces so here new rules can be added before the
         // old rules are being removed.
         if (wasFiltering) {
             mPermissionMonitor.onVpnUidRangesRemoved(oldIface, ranges, vpnAppUid);

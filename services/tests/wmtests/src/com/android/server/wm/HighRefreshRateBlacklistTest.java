@@ -102,7 +102,7 @@ public class HighRefreshRateBlacklistTest {
         final FakeDeviceConfig config = new FakeDeviceConfig();
         mBlacklist = new HighRefreshRateBlacklist(r, config);
 
-        // First check that the default blacklist is in effect
+        // First check that the default denylist is in effect
         assertTrue(mBlacklist.isBlacklisted(APP1));
         assertFalse(mBlacklist.isBlacklisted(APP2));
         assertFalse(mBlacklist.isBlacklisted(APP3));
@@ -130,7 +130,7 @@ public class HighRefreshRateBlacklistTest {
         assertTrue(mBlacklist.isBlacklisted(APP2));
         assertTrue(mBlacklist.isBlacklisted(APP3));
 
-        //  Change an unrelated flag in our namespace and verify that the blacklist is intact
+        //  Change an unrelated flag in our namespace and verify that the denylist is intact
         config.putPropertyAndNotify(DeviceConfig.NAMESPACE_DISPLAY_MANAGER, "someKey", "someValue");
         assertFalse(mBlacklist.isBlacklisted(APP1));
         assertTrue(mBlacklist.isBlacklisted(APP2));

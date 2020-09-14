@@ -188,7 +188,7 @@ public final class CalendarContract {
      * notified when there is a change in the managed profile calendar provider.
      *
      * <p>Throw UnsupportedOperationException if another profile doesn't exist or is disabled, or
-     * if the calling package is not whitelisted to access cross-profile calendar, or if the
+     * if the calling package is not allowlisted to access cross-profile calendar, or if the
      * feature has been disabled by the user in Settings.
      *
      * @see Events#ENTERPRISE_CONTENT_URI
