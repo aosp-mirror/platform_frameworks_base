@@ -334,6 +334,7 @@ cc_defaults {
         "jni/fonts/FontFamily.cpp",
         "jni/text/LineBreaker.cpp",
         "jni/text/MeasuredText.cpp",
+        "jni/text/TextShaper.cpp",
     ],
 
     header_libs: [ "android_graphics_jni_headers" ],
