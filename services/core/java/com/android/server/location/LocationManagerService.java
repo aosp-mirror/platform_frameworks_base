@@ -553,8 +553,9 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void registerLocationListener(LocationRequest request, ILocationListener listener,
-            String packageName, String attributionTag, String listenerId) {
+    public void registerLocationListener(String provider, LocationRequest request,
+            ILocationListener listener, String packageName, String attributionTag,
+            String listenerId) {
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
                 listenerId);
         int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),
@@ -570,16 +571,16 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         request = validateAndSanitizeLocationRequest(request, permissionLevel);
 
-        LocationProviderManager manager = getLocationProviderManager(request.getProvider());
+        LocationProviderManager manager = getLocationProviderManager(provider);
         Preconditions.checkArgument(manager != null,
-                "provider \"" + request.getProvider() + "\" does not exist");
+                "provider \"" + provider + "\" does not exist");
 
         manager.registerLocationRequest(request, identity, permissionLevel, listener);
     }
 
     @Override
-    public void registerLocationPendingIntent(LocationRequest request, PendingIntent pendingIntent,
-            String packageName, String attributionTag) {
+    public void registerLocationPendingIntent(String provider, LocationRequest request,
+            PendingIntent pendingIntent, String packageName, String attributionTag) {
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
                 AppOpsManager.toReceiverId(pendingIntent));
         int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),
@@ -592,24 +593,22 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         request = validateAndSanitizeLocationRequest(request, permissionLevel);
 
-        LocationProviderManager manager = getLocationProviderManager(request.getProvider());
+        LocationProviderManager manager = getLocationProviderManager(provider);
         Preconditions.checkArgument(manager != null,
-                "provider \"" + request.getProvider() + "\" does not exist");
+                "provider \"" + provider + "\" does not exist");
 
         manager.registerLocationRequest(request, identity, permissionLevel, pendingIntent);
     }
 
     private LocationRequest validateAndSanitizeLocationRequest(LocationRequest request,
             @PermissionLevel int permissionLevel) {
-        Objects.requireNonNull(request.getProvider());
-
         WorkSource workSource = request.getWorkSource();
         if (workSource != null && !workSource.isEmpty()) {
             mContext.enforceCallingOrSelfPermission(
                     permission.UPDATE_DEVICE_STATS,
                     "setting a work source requires " + permission.UPDATE_DEVICE_STATS);
         }
-        if (request.getHideFromAppOps()) {
+        if (request.isHiddenFromAppOps()) {
             mContext.enforceCallingOrSelfPermission(
                     permission.UPDATE_APP_OPS_STATS,
                     "hiding from app ops requires " + permission.UPDATE_APP_OPS_STATS);
@@ -620,12 +619,12 @@ public class LocationManagerService extends ILocationManager.Stub {
                     "ignoring location settings requires " + permission.WRITE_SECURE_SETTINGS);
         }
 
-        LocationRequest sanitized = new LocationRequest(request);
+        LocationRequest.Builder sanitized = new LocationRequest.Builder(request);
         if (mContext.checkCallingPermission(permission.LOCATION_HARDWARE) != PERMISSION_GRANTED) {
-            sanitized.setLowPowerMode(false);
+            sanitized.setLowPower(false);
         }
         if (permissionLevel < PERMISSION_FINE) {
-            switch (sanitized.getQuality()) {
+            switch (request.getQuality()) {
                 case LocationRequest.ACCURACY_FINE:
                     sanitized.setQuality(LocationRequest.ACCURACY_BLOCK);
                     break;
@@ -634,24 +633,21 @@ public class LocationManagerService extends ILocationManager.Stub {
                     break;
             }
 
-            if (sanitized.getInterval() < FASTEST_COARSE_INTERVAL_MS) {
-                sanitized.setInterval(FASTEST_COARSE_INTERVAL_MS);
+            if (request.getIntervalMillis() < FASTEST_COARSE_INTERVAL_MS) {
+                sanitized.setIntervalMillis(FASTEST_COARSE_INTERVAL_MS);
             }
-            if (sanitized.getFastestInterval() < FASTEST_COARSE_INTERVAL_MS) {
-                sanitized.setFastestInterval(FASTEST_COARSE_INTERVAL_MS);
+            if (request.getMinUpdateIntervalMillis() < FASTEST_COARSE_INTERVAL_MS) {
+                sanitized.clearMinUpdateIntervalMillis();
             }
         }
-        if (sanitized.getFastestInterval() > sanitized.getInterval()) {
-            sanitized.setFastestInterval(request.getInterval());
-        }
-        if (sanitized.getWorkSource() != null) {
-            if (sanitized.getWorkSource().isEmpty()) {
+        if (request.getWorkSource() != null) {
+            if (request.getWorkSource().isEmpty()) {
                 sanitized.setWorkSource(null);
-            } else if (sanitized.getWorkSource().getPackageName(0) == null) {
+            } else if (request.getWorkSource().getPackageName(0) == null) {
                 Log.w(TAG, "received (and ignoring) illegal worksource with no package name");
                 sanitized.setWorkSource(null);
             } else {
-                List<WorkChain> workChains = sanitized.getWorkSource().getWorkChains();
+                List<WorkChain> workChains = request.getWorkSource().getWorkChains();
                 if (workChains != null && !workChains.isEmpty() && workChains.get(
                         0).getAttributionTag() == null) {
                     Log.w(TAG,
@@ -661,7 +657,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
         }
 
-        return sanitized;
+        return sanitized.build();
     }
 
     @Override
@@ -679,8 +675,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public Location getLastLocation(LocationRequest request, String packageName,
-            String attributionTag) {
+    public Location getLastLocation(String provider, String packageName, String attributionTag) {
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),
                 identity.getPid());
@@ -690,15 +685,12 @@ public class LocationManagerService extends ILocationManager.Stub {
         // clients in the system process must have an attribution tag set
         Preconditions.checkArgument(identity.getPid() != Process.myPid() || attributionTag != null);
 
-        request = validateAndSanitizeLocationRequest(request, permissionLevel);
-
-        LocationProviderManager manager = getLocationProviderManager(request.getProvider());
+        LocationProviderManager manager = getLocationProviderManager(provider);
         if (manager == null) {
             return null;
         }
 
-        Location location = manager.getLastLocation(identity, permissionLevel,
-                request.isLocationSettingsIgnored());
+        Location location = manager.getLastLocation(identity, permissionLevel, false);
 
         // lastly - note app ops
         if (!mInjector.getAppOpsHelper().noteOpNoThrow(LocationPermissions.asAppOp(permissionLevel),
@@ -710,7 +702,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void getCurrentLocation(LocationRequest request,
+    public void getCurrentLocation(String provider, LocationRequest request,
             ICancellationSignal cancellationTransport, ILocationCallback consumer,
             String packageName, String attributionTag, String listenerId) {
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
@@ -725,9 +717,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         request = validateAndSanitizeLocationRequest(request, permissionLevel);
 
-        LocationProviderManager manager = getLocationProviderManager(request.getProvider());
+        LocationProviderManager manager = getLocationProviderManager(provider);
         Preconditions.checkArgument(manager != null,
-                "provider \"" + request.getProvider() + "\" does not exist");
+                "provider \"" + provider + "\" does not exist");
 
         manager.getCurrentLocation(request, identity, permissionLevel, cancellationTransport,
                 consumer);
