@@ -385,7 +385,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         MockitoAnnotations.initMocks(this);
 
         DeviceIdleInternal deviceIdleInternal = mock(DeviceIdleInternal.class);
-        when(deviceIdleInternal.getNotificationWhitelistDuration()).thenReturn(3000L);
+        when(deviceIdleInternal.getNotificationAllowlistDuration()).thenReturn(3000L);
         ActivityManagerInternal activityManagerInternal = mock(ActivityManagerInternal.class);
 
         LocalServices.removeServiceForTest(UriGrantsManagerInternal.class);
