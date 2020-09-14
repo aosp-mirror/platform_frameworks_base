@@ -26,6 +26,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Message;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.OnPropertiesChangedListener;
 import android.provider.DeviceConfig.Properties;
@@ -124,6 +125,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_TOP_TO_FGS_GRACE_DURATION = 15 * 1000;
     private static final int DEFAULT_PENDINGINTENT_WARNING_THRESHOLD = 2000;
     private static final int DEFAULT_MIN_CRASH_INTERVAL = 2 * 60 * 1000;
+    private static final int DEFAULT_MAX_PHANTOM_PROCESSES = 32;
 
 
     // Flag stored in the DeviceConfig API.
@@ -131,6 +133,11 @@ final class ActivityManagerConstants extends ContentObserver {
      * Maximum number of cached processes.
      */
     private static final String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
+
+    /**
+     * Maximum number of cached processes.
+     */
+    private static final String KEY_MAX_PHANTOM_PROCESSES = "max_phantom_processes";
 
     /**
      * Default value for mFlagBackgroundActivityStartsEnabled if not explicitly set in
@@ -364,6 +371,11 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     public final ArraySet<ComponentName> KEEP_WARMING_SERVICES = new ArraySet<ComponentName>();
 
+    /**
+     * Maximum number of phantom processes.
+     */
+    public int MAX_PHANTOM_PROCESSES = DEFAULT_MAX_PHANTOM_PROCESSES;
+
     private List<String> mDefaultImperceptibleKillExemptPackages;
     private List<Integer> mDefaultImperceptibleKillExemptProcStates;
 
@@ -480,6 +492,9 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_BINDER_HEAVY_HITTER_AUTO_SAMPLER_BATCHSIZE:
                             case KEY_BINDER_HEAVY_HITTER_AUTO_SAMPLER_THRESHOLD:
                                 updateBinderHeavyHitterWatcher();
+                                break;
+                            case KEY_MAX_PHANTOM_PROCESSES:
+                                updateMaxPhantomProcesses();
                                 break;
                             default:
                                 break;
@@ -599,6 +614,8 @@ final class ActivityManagerConstants extends ContentObserver {
                 // with defaults.
                 Slog.e("ActivityManagerConstants", "Bad activity manager config settings", e);
             }
+            final long currentPowerCheckInterval = POWER_CHECK_INTERVAL;
+
             BACKGROUND_SETTLE_TIME = mParser.getLong(KEY_BACKGROUND_SETTLE_TIME,
                     DEFAULT_BACKGROUND_SETTLE_TIME);
             FGSERVICE_MIN_SHOWN_TIME = mParser.getLong(KEY_FGSERVICE_MIN_SHOWN_TIME,
@@ -664,6 +681,13 @@ final class ActivityManagerConstants extends ContentObserver {
             PENDINGINTENT_WARNING_THRESHOLD = mParser.getInt(KEY_PENDINGINTENT_WARNING_THRESHOLD,
                     DEFAULT_PENDINGINTENT_WARNING_THRESHOLD);
 
+            if (POWER_CHECK_INTERVAL != currentPowerCheckInterval) {
+                mService.mHandler.removeMessages(
+                        ActivityManagerService.CHECK_EXCESSIVE_POWER_USE_MSG);
+                final Message msg = mService.mHandler.obtainMessage(
+                        ActivityManagerService.CHECK_EXCESSIVE_POWER_USE_MSG);
+                mService.mHandler.sendMessageDelayed(msg, POWER_CHECK_INTERVAL);
+            }
             // For new flags that are intended for server-side experiments, please use the new
             // DeviceConfig package.
         }
@@ -811,6 +835,16 @@ final class ActivityManagerConstants extends ContentObserver {
         mService.scheduleUpdateBinderHeavyHitterWatcherConfig();
     }
 
+    private void updateMaxPhantomProcesses() {
+        final int oldVal = MAX_PHANTOM_PROCESSES;
+        MAX_PHANTOM_PROCESSES = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, KEY_MAX_PHANTOM_PROCESSES,
+                DEFAULT_MAX_PHANTOM_PROCESSES);
+        if (oldVal > MAX_PHANTOM_PROCESSES) {
+            mService.mHandler.post(mService.mPhantomProcessList::trimPhantomProcessesIfNecessary);
+        }
+    }
+
     void dump(PrintWriter pw) {
         pw.println("ACTIVITY MANAGER SETTINGS (dumpsys activity settings) "
                 + Settings.Global.ACTIVITY_MANAGER_CONSTANTS + ":");
@@ -897,6 +931,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(BINDER_HEAVY_HITTER_AUTO_SAMPLER_BATCHSIZE);
         pw.print("  "); pw.print(KEY_BINDER_HEAVY_HITTER_AUTO_SAMPLER_THRESHOLD); pw.print("=");
         pw.println(BINDER_HEAVY_HITTER_AUTO_SAMPLER_THRESHOLD);
+        pw.print("  "); pw.print(KEY_MAX_PHANTOM_PROCESSES); pw.print("=");
+        pw.println(MAX_PHANTOM_PROCESSES);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {
