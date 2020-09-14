@@ -270,9 +270,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"وضع صامت"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"الصوت متوقف"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"الصوت قيد التفعيل"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"وضع الطائرة"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"وضع الطائرة قيد التفعيل"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"وضع الطائرة متوقف"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"وضع الطيران"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"وضع الطيران قيد التفعيل"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"وضع الطيران متوقف"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"الإعدادات"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"مساعدة"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"المساعد الصوتي"</string>
@@ -398,7 +398,7 @@
     <string name="permlab_getPackageSize" msgid="375391550792886641">"قياس مساحة تخزين التطبيق"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"للسماح للتطبيق باسترداد شفرته وبياناته وأحجام ذاكرات التخزين المؤقت"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"تعديل إعدادات النظام"</string>
-    <string name="permdesc_writeSettings" msgid="8293047411196067188">"للسماح للتطبيق بتعديل بيانات إعدادات النظام. يمكن أن تتلف التطبيقات الضارة تهيئة نظامك."</string>
+    <string name="permdesc_writeSettings" msgid="8293047411196067188">"للسماح للتطبيق بتعديل بيانات إعدادات النظام. يمكن أن تتلف التطبيقات الضارة إعداد نظامك."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"العمل عند بدء التشغيل"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"للسماح للتطبيق ببدء تشغيل نفسه عقب انتهاء النظام من التشغيل. قد يؤدي ذلك إلى استغراق المزيد من الوقت عند بدء الجهاز اللوحي والسماح للتطبيق بإبطاء الأداء الإجمالي للجهاز اللوحي من خلال تشغيله دائمًا."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"‏للسماح بتشغيل التطبيق تلقائيًا بعد الانتهاء من بدء تشغيل النظام. وقد يؤدي ذلك إلى إطالة فترة بدء تشغيل جهاز Android TV، بالإضافة إلى أنه يسمح للتطبيق بإبطاء أداء الجهاز بشكل عام لأنه يتم تشغيله بشكل دائم."</string>
@@ -507,7 +507,7 @@
     <string name="permlab_accessWifiState" msgid="5552488500317911052">"‏عرض اتصالات Wi-Fi"</string>
     <string name="permdesc_accessWifiState" msgid="6913641669259483363">"‏للسماح للتطبيق بعرض معلومات حول شبكات Wi-Fi، كعرض معلومات حول ما إذا تم تفعيل Wi-Fi واسم أجهزة Wi-Fi المتصلة."</string>
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"‏التوصيل والفصل من Wi-Fi"</string>
-    <string name="permdesc_changeWifiState" msgid="7170350070554505384">"‏للسماح للتطبيق بالاتصال بنقاط الوصول إلى Wi-Fi وقطع الاتصال بها، وإجراء تغييرات على تهيئة الجهاز لشبكات Wi-Fi."</string>
+    <string name="permdesc_changeWifiState" msgid="7170350070554505384">"‏للسماح للتطبيق بالاتصال بنقاط الوصول إلى Wi-Fi وقطع الاتصال بها، وإجراء تغييرات على إعداد الجهاز لشبكات Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"‏السماح باستقبال بث Wi-Fi متعدد"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"‏للسماح للتطبيق بتلقي الحزم التي يتم إرسالها إلى جميع الأجهزة على شبكة Wi-Fi باستخدام عناوين بث متعدد، وليس باستخدام جهازك اللوحي فقط. ويؤدي ذلك إلى استخدام قدر أكبر من الطاقة يفوق وضع البث غير المتعدد."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"‏للسماح للتطبيق بتلقّي الحِزم التي يتم إرسالها إلى جميع الأجهزة على شبكة Wi-Fi باستخدام عناوين بث متعدد، وليس باستخدام جهاز Android TV فقط. ويؤدي ذلك إلى استخدام قدر أكبر من الطاقة يفوق ما يتم استهلاكه في وضع البث غير المتعدد."</string>
@@ -661,8 +661,8 @@
     <string name="permdesc_bindConditionProviderService" msgid="6106018791256120258">"للسماح للمالك بالربط بواجهة المستوى العلوي لخدمة موفر الحالة. لن تكون هناك حاجة إلى هذا الإعداد مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindDreamService" msgid="4776175992848982706">"‏الالتزام بخدمة dream"</string>
     <string name="permdesc_bindDreamService" msgid="9129615743300572973">"‏للسماح للمالك بالالتزام بواجهة المستوى العلوي لخدمة dream. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="5098810760209818140">"استدعاء تطبيق التهيئة الذي يوفره مشغل شبكة الجوال"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"للسماح للمالك باستدعاء تطبيق التهيئة الذي يوفره مشغل شبكة الجوال. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="5098810760209818140">"استدعاء تطبيق الإعداد الذي يوفره مشغل شبكة الجوال"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"للسماح للمالك باستدعاء تطبيق الإعداد الذي يوفره مشغل شبكة الجوال. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_accessNetworkConditions" msgid="1270732533356286514">"الاستماع إلى ملاحظات حول أحوال الشبكة"</string>
     <string name="permdesc_accessNetworkConditions" msgid="2959269186741956109">"للسماح للتطبيق بالاستماع إلى ملاحظات حول أحوال الشبكة. لا حاجة إلى هذا مع التطبيقات العادية."</string>
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"تغيير معايرة أجهزة الإدخال"</string>
@@ -678,7 +678,7 @@
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"الالتزام بخدمات مشغل شبكة الجوال"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"للسماح للمالك بالالتزام بخدمات مشغل شبكة الجوال. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_access_notification_policy" msgid="5524112842876975537">"الوصول إلى إعداد \"عدم الإزعاج\""</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"للسماح للتطبيق بقراءة تهيئة \"عدم الإزعاج\" وكتابتها."</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"للسماح للتطبيق بقراءة إعداد \"عدم الإزعاج\" وكتابتها."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"بدء استخدام إذن العرض"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"للسماح للمالك ببدء استخدام الإذن لأحد التطبيقات. ولن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"تعيين قواعد كلمة المرور"</string>
@@ -1462,7 +1462,7 @@
     <string name="ext_media_status_unmountable" msgid="7043574843541087748">"تالف"</string>
     <string name="ext_media_status_unsupported" msgid="5460509911660539317">"غير متوافق"</string>
     <string name="ext_media_status_ejecting" msgid="7532403368044013797">"جارٍ إنهاء التحميل…"</string>
-    <string name="ext_media_status_formatting" msgid="774148701503179906">"جارٍ التهيئة…"</string>
+    <string name="ext_media_status_formatting" msgid="774148701503179906">"تجري التهيئة..."</string>
     <string name="ext_media_status_missing" msgid="6520746443048867314">"لم يتم الإدخال"</string>
     <string name="activity_list_empty" msgid="4219430010716034252">"لم يتم العثور على أي أنشطة متطابقة."</string>
     <string name="permlab_route_media_output" msgid="8048124531439513118">"توجيه إخراج الوسائط"</string>
@@ -2155,7 +2155,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"جدول بيانات: <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"عرض تقديمي"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"عرض تقديمي: <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
-    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"سيظل البلوتوث مفعَّلاً أثناء استخدام \"وضع الطائرة\"."</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"سيظل البلوتوث مفعَّلاً أثناء استخدام \"وضع الطيران\"."</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"جارٍ التحميل"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="zero"><xliff:g id="FILE_NAME_2">%s</xliff:g> و<xliff:g id="COUNT_3">%d</xliff:g> ملف</item>
