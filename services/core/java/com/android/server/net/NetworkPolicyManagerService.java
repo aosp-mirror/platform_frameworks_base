@@ -478,7 +478,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     // and "battery saver" are not equivalent.
 
     /**
-     * UIDs that have been white-listed to always be able to have network access
+     * UIDs that have been allowlisted to always be able to have network access
      * in power save mode, except device idle (doze) still applies.
      * TODO: An int array might be sufficient
      */
@@ -486,7 +486,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final SparseBooleanArray mPowerSaveWhitelistExceptIdleAppIds = new SparseBooleanArray();
 
     /**
-     * UIDs that have been white-listed to always be able to have network access
+     * UIDs that have been allowlisted to always be able to have network access
      * in power save mode.
      * TODO: An int array might be sufficient
      */
@@ -497,21 +497,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final SparseBooleanArray mPowerSaveTempWhitelistAppIds = new SparseBooleanArray();
 
     /**
-     * UIDs that have been white-listed temporarily to be able to have network access despite being
+     * UIDs that have been allowlisted temporarily to be able to have network access despite being
      * idle. Other power saving restrictions still apply.
      */
     @GuardedBy("mUidRulesFirstLock")
     private final SparseBooleanArray mAppIdleTempWhitelistAppIds = new SparseBooleanArray();
 
     /**
-     * UIDs that have been initially white-listed by system to avoid restricted background.
+     * UIDs that have been initially allowlisted by system to avoid restricted background.
      */
     @GuardedBy("mUidRulesFirstLock")
     private final SparseBooleanArray mDefaultRestrictBackgroundAllowlistUids =
             new SparseBooleanArray();
 
     /**
-     * UIDs that have been initially white-listed by system to avoid restricted background,
+     * UIDs that have been initially allowlisted by system to avoid restricted background,
      * but later revoked by user.
      */
     @GuardedBy("mUidRulesFirstLock")
@@ -819,7 +819,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // ignored; both services live in system_server
             }
 
-            // listen for changes to power save whitelist
+            // listen for changes to power save allowlist
             final IntentFilter whitelistFilter = new IntentFilter(
                     PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED);
             mContext.registerReceiver(mPowerSaveWhitelistReceiver, whitelistFilter, null, mHandler);
@@ -3775,7 +3775,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     // NOTE: since both fw_dozable and fw_powersave uses the same map
-    // (mPowerSaveTempWhitelistAppIds) for whitelisting, we can reuse their logic in this method.
+    // (mPowerSaveTempWhitelistAppIds) for allowlisting, we can reuse their logic in this method.
     @GuardedBy("mUidRulesFirstLock")
     private void updateRulesForWhitelistedPowerSaveUL(boolean enabled, int chain,
             SparseIntArray rules) {
@@ -3817,12 +3817,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Returns whether a uid is whitelisted from power saving restrictions (eg: Battery Saver, Doze
+     * Returns whether a uid is allowlisted from power saving restrictions (eg: Battery Saver, Doze
      * mode, and app idle).
      *
      * @param deviceIdleMode if true then we don't consider
      *        {@link #mPowerSaveWhitelistExceptIdleAppIds} for checking if the {@param uid} is
-     *        whitelisted.
+     *        allowlisted.
      */
     @GuardedBy("mUidRulesFirstLock")
     private boolean isWhitelistedFromPowerSaveUL(int uid, boolean deviceIdleMode) {
@@ -3836,7 +3836,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     // NOTE: since both fw_dozable and fw_powersave uses the same map
-    // (mPowerSaveTempWhitelistAppIds) for whitelisting, we can reuse their logic in this method.
+    // (mPowerSaveTempWhitelistAppIds) for allowlisting, we can reuse their logic in this method.
     @GuardedBy("mUidRulesFirstLock")
     private void updateRulesForWhitelistedPowerSaveUL(int uid, boolean enabled, int chain) {
         if (enabled) {
@@ -4095,7 +4095,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Set whether or not an app should be whitelisted for network access while in app idle. Other
+     * Set whether or not an app should be allowlisted for network access while in app idle. Other
      * power saving restrictions may still apply.
      */
     @VisibleForTesting
@@ -4124,7 +4124,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    /** Return the list of UIDs currently in the app idle whitelist. */
+    /** Return the list of UIDs currently in the app idle allowlist. */
     @VisibleForTesting
     int[] getAppIdleWhitelist() {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
@@ -4144,7 +4144,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     boolean isUidIdle(int uid) {
         synchronized (mUidRulesFirstLock) {
             if (mAppIdleTempWhitelistAppIds.get(uid)) {
-                // UID is temporarily whitelisted.
+                // UID is temporarily allowlisted.
                 return false;
             }
         }

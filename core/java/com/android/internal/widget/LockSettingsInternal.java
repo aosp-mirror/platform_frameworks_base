@@ -30,7 +30,7 @@ public abstract class LockSettingsInternal {
      * Create an escrow token for the current user, which can later be used to unlock FBE
      * or change user password.
      *
-     * After adding, if the user currently has lockscreen password, he will need to perform a
+     * After adding, if the user currently has lockscreen password, they will need to perform a
      * confirm credential operation in order to activate the token for future use.
      * Once the token is activated, the callback that is passed here is called.   If the user
      * has no secure lockscreen, then the token is activated immediately.

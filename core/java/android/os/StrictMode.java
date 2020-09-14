@@ -2500,7 +2500,7 @@ public final class StrictMode {
      * that happens while this span is active. You must call finish() on the span when done.
      *
      * <p>This will never return null, but on devices without debugging enabled, this may return a
-     * dummy object on which the finish() method is a no-op.
+     * placeholder object on which the finish() method is a no-op.
      *
      * <p>TODO: add CloseGuard to this, verifying callers call finish.
      *

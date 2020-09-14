@@ -373,7 +373,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
      */
     private void notifyInterfaceRemoved(String iface) {
         // netd already clears out quota and alerts for removed ifaces; update
-        // our sanity-checking state.
+        // our validity-checking state.
         mActiveAlerts.remove(iface);
         mActiveQuotas.remove(iface);
         invokeForAllObservers(o -> o.interfaceRemoved(iface));
@@ -1256,7 +1256,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     public void setInterfaceAlert(String iface, long alertBytes) {
         NetworkStack.checkNetworkStackPermission(mContext);
 
-        // quick sanity check
+        // quick validity check
         if (!mActiveQuotas.containsKey(iface)) {
             throw new IllegalStateException("setting alert requires existing quota on iface");
         }

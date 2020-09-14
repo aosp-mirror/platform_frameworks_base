@@ -122,7 +122,7 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
         }
         mSurfaceView = new SurfaceView(context, null, 0, 0, disableSurfaceViewBackgroundLayer);
         // Since ActivityView#getAlpha has been overridden, we should use parent class's alpha
-        // as master to synchronize surface view's alpha value.
+        // as authoritative to synchronize surface view's alpha value.
         mSurfaceView.setAlpha(super.getAlpha());
         mSurfaceView.setUseAlpha();
         mSurfaceCallback = new SurfaceCallback();

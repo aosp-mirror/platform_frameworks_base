@@ -1112,7 +1112,7 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             try {
-                // TODO(b/135341433): Remove paranoid logging when FUSE is stable
+                // TODO(b/135341433): Remove cautious logging when FUSE is stable
                 Slog.i(TAG, "Resetting vold...");
                 mVold.reset();
                 Slog.i(TAG, "Reset vold");
@@ -2238,7 +2238,7 @@ class StorageManagerService extends IStorageManager.Stub
 
     private void mount(VolumeInfo vol) {
         try {
-            // TODO(b/135341433): Remove paranoid logging when FUSE is stable
+            // TODO(b/135341433): Remove cautious logging when FUSE is stable
             Slog.i(TAG, "Mounting volume " + vol);
             mVold.mount(vol.id, vol.mountFlags, vol.mountUserId, new IVoldMountCallback.Stub() {
                 @Override
@@ -2969,7 +2969,7 @@ class StorageManagerService extends IStorageManager.Stub
         return 0;
     }
 
-    /** Set the password for encrypting the master key.
+    /** Set the password for encrypting the main key.
      *  @param type One of the CRYPTO_TYPE_XXX consts defined in StorageManager.
      *  @param password The password to set.
      */
@@ -3033,7 +3033,7 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     /**
-     * Get the type of encryption used to encrypt the master key.
+     * Get the type of encryption used to encrypt the main key.
      * @return The type, one of the CRYPT_TYPE_XXX consts from StorageManager.
      */
     @Override

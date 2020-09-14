@@ -204,7 +204,7 @@ public abstract class AugmentedAutofillService extends Service {
      * <ul>
      *   <li>Service does not recognize what should be autofilled.
      *   <li>Service does not have data to fill the request.
-     *   <li>Service blacklisted that app (or activity) for autofill.
+     *   <li>Service denylisted that app (or activity) for autofill.
      *   <li>App disabled itself for autofill.
      * </ul>
      *

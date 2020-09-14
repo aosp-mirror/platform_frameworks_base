@@ -204,7 +204,7 @@ public class DynamicCodeLoggingService extends JobService {
             //
             // A typical message might look like this:
             // type=1400 audit(0.0:521): avc: granted { execute } for comm="executable"
-            //  path="/data/data/com.dummy.app/executable" dev="sda13" ino=1655302
+            //  path="/data/data/com.placeholder.app/executable" dev="sda13" ino=1655302
             //  scontext=u:r:untrusted_app_27:s0:c66,c257,c512,c768
             //  tcontext=u:object_r:app_data_file:s0:c66,c257,c512,c768 tclass=file
             //

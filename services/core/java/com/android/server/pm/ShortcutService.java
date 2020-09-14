@@ -3963,7 +3963,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     /**
-     * Create a dummy "main activity" component name which is used to create a dynamic shortcut
+     * Create a placeholder "main activity" component name which is used to create a dynamic shortcut
      * with no main activity temporarily.
      */
     @NonNull

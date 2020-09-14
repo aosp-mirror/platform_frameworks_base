@@ -6080,7 +6080,7 @@ public abstract class Context {
     }
 
     /**
-     * Gets the Content Capture options for this context, or {@code null} if it's not whitelisted.
+     * Gets the Content Capture options for this context, or {@code null} if it's not allowlisted.
      *
      * @hide
      */

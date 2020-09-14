@@ -109,7 +109,7 @@ public class UpdateEngine {
          * Error code: an update failed to apply due to a mismatch in payload
          * hash.
          *
-         * <p>Update engine does sanity checks for the given payload and its
+         * <p>Update engine does validity checks for the given payload and its
          * metadata.
          */
         public static final int PAYLOAD_HASH_MISMATCH_ERROR = 10;

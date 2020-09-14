@@ -197,7 +197,7 @@ public class TaskPersister implements PersisterQueue.Listener {
                     mPersisterQueue.addItem(new TaskWriteQueueItem(task, mService), flush);
                 }
             } else {
-                // Dummy. Ensures removeObsoleteFiles is called when LazyTaskThreadWriter is
+                // Placeholder. Ensures removeObsoleteFiles is called when LazyTaskThreadWriter is
                 // notified.
                 mPersisterQueue.addItem(PersisterQueue.EMPTY_ITEM, flush);
             }

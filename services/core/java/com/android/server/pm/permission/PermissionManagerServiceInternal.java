@@ -187,7 +187,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
             @NonNull AndroidPackage pkg, @NonNull int[] userIds,
             @NonNull List<String> permissions, int callingUid,
             @PackageManager.PermissionWhitelistFlags int whitelistFlags);
-    /** Sets the whitelisted, restricted permissions for the given package. */
+    /** Sets the allowlisted, restricted permissions for the given package. */
     public abstract void setWhitelistedRestrictedPermissions(
             @NonNull String packageName, @NonNull List<String> permissions,
             @PackageManager.PermissionWhitelistFlags int flags, int userId);

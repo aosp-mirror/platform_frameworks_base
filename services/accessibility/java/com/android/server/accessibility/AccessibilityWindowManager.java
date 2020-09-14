@@ -1338,7 +1338,7 @@ public class AccessibilityWindowManager {
             mTouchInteractionInProgress = false;
             // We want to set the active window to be current immediately
             // after the user has stopped touching the screen since if the
-            // user types with the IME he should get a feedback for the
+            // user types with the IME they should get a feedback for the
             // letter typed in the text view which is in the input focused
             // window. Note that we always deliver hover accessibility events
             // (they are a result of user touching the screen) so change of

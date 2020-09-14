@@ -521,7 +521,7 @@ public class SearchManager
 
     /**
      * This means that context is voice, and therefore the SearchDialog should
-     * continue showing the microphone until the user indicates that he/she does
+     * continue showing the microphone until the user indicates that they do
      * not want to re-speak (e.g. by typing).
      *
      * @hide

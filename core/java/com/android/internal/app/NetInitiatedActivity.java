@@ -35,7 +35,7 @@ import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.server.LocalServices;
 
 /**
- * This activity is shown to the user for him/her to accept or deny network-initiated
+ * This activity is shown to the user for them to accept or deny network-initiated
  * requests. It uses the alert dialog style. It will be launched from a notification.
  */
 public class NetInitiatedActivity extends AlertActivity implements DialogInterface.OnClickListener {
