@@ -2175,10 +2175,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     /**
      * <p>The desired zoom ratio</p>
-     * <p>Instead of using {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} with dual purposes of crop and zoom, the
-     * application can now choose to use this tag to specify the desired zoom level. The
-     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} can still be used to specify the horizontal or vertical
-     * crop to achieve aspect ratios different than the native camera sensor.</p>
+     * <p>Instead of using {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} for zoom, the application can now choose to
+     * use this tag to specify the desired zoom level.</p>
      * <p>By using this control, the application gains a simpler way to control zoom, which can
      * be a combination of optical and digital zoom. For example, a multi-camera system may
      * contain more than one lens with different focal lengths, and the user can use optical
@@ -2860,11 +2858,18 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * respectively.</p>
      * <p>The camera device may adjust the crop region to account for rounding and other hardware
      * requirements; the final crop region used will be included in the output capture result.</p>
+     * <p>The camera sensor output aspect ratio depends on factors such as output stream
+     * combination and {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE android.control.aeTargetFpsRange}, and shouldn't be adjusted by using
+     * this control. And the camera device will treat different camera sensor output sizes
+     * (potentially with in-sensor crop) as the same crop of
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}. As a result, the application shouldn't assume the
+     * maximum crop region always maps to the same aspect ratio or field of view for the
+     * sensor output.</p>
      * <p>Starting from API level 30, it's strongly recommended to use {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}
      * to take advantage of better support for zoom with logical multi-camera. The benefits
      * include better precision with optical-digital zoom combination, and ability to do
      * zoom-out from 1.0x. When using {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} for zoom, the crop region in
-     * the capture request must be either letterboxing or pillarboxing (but not both). The
+     * the capture request should be left as the default activeArray size. The
      * coordinate system is post-zoom, meaning that the activeArraySize or
      * preCorrectionActiveArraySize covers the camera device's field of view "after" zoom.  See
      * {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} for details.</p>
@@ -2874,6 +2879,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * capability and mode</p>
      * <p>This key is available on all devices.</p>
      *
+     * @see CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE
      * @see CaptureRequest#CONTROL_ZOOM_RATIO
      * @see CaptureRequest#DISTORTION_CORRECTION_MODE
      * @see CameraCharacteristics#SCALER_AVAILABLE_MAX_DIGITAL_ZOOM
