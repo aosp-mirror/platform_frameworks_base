@@ -27,7 +27,6 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
 import static android.content.pm.PackageParser.APEX_FILE_EXTENSION;
 import static android.content.pm.PackageParser.APK_FILE_EXTENSION;
 import static android.system.OsConstants.O_CREAT;
@@ -62,9 +61,7 @@ import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.pm.ApkChecksum;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.Checksum;
 import android.content.pm.DataLoaderManager;
 import android.content.pm.DataLoaderParams;
 import android.content.pm.DataLoaderParamsParcel;
@@ -87,7 +84,6 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ApkLite;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
-import android.content.pm.Signature;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.result.ParseResult;
@@ -122,7 +118,6 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructStat;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.ExceptionUtils;
 import android.util.MathUtils;
@@ -158,7 +153,6 @@ import java.io.FileDescriptor;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -182,7 +176,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     static final String TAG_SESSION = "session";
     static final String TAG_CHILD_SESSION = "childSession";
     static final String TAG_SESSION_FILE = "sessionFile";
-    static final String TAG_SESSION_CHECKSUM = "sessionChecksum";
     private static final String TAG_GRANTED_RUNTIME_PERMISSION = "granted-runtime-permission";
     private static final String TAG_WHITELISTED_RESTRICTED_PERMISSION =
             "whitelisted-restricted-permission";
@@ -237,14 +230,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_LENGTH_BYTES = "lengthBytes";
     private static final String ATTR_METADATA = "metadata";
     private static final String ATTR_SIGNATURE = "signature";
-    private static final String ATTR_CHECKSUM_KIND = "checksumKind";
-    private static final String ATTR_CHECKSUM_VALUE = "checksumValue";
-    private static final String ATTR_CHECKSUM_CERTIFICATE = "checksumCertificate";
 
     private static final String PROPERTY_NAME_INHERIT_NATIVE = "pi.inherit_native_on_dont_kill";
     private static final int[] EMPTY_CHILD_SESSION_ARRAY = EmptyArray.INT;
     private static final InstallationFile[] EMPTY_INSTALLATION_FILE_ARRAY = {};
-    private static final ApkChecksum[] EMPTY_FILE_CHECKSUM_ARRAY = {};
 
     private static final String SYSTEM_DATA_LOADER_PACKAGE = "android";
 
@@ -390,27 +379,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mLock")
     private ArraySet<FileEntry> mFiles = new ArraySet<>();
-
-    static class CertifiedChecksum {
-        final @NonNull Checksum mChecksum;
-        final @NonNull byte[] mCertificate;
-
-        CertifiedChecksum(@NonNull Checksum checksum, @NonNull byte[] certificate) {
-            mChecksum = checksum;
-            mCertificate = certificate;
-        }
-
-        Checksum getChecksum() {
-            return mChecksum;
-        }
-
-        byte[] getCertificate() {
-            return mCertificate;
-        }
-    }
-
-    @GuardedBy("mLock")
-    private ArrayMap<String, List<CertifiedChecksum>> mChecksums = new ArrayMap<>();
 
     @GuardedBy("mLock")
     private boolean mStagedSessionApplied;
@@ -613,9 +581,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             PackageSessionProvider sessionProvider, Looper looper, StagingManager stagingManager,
             int sessionId, int userId, int installerUid, @NonNull InstallSource installSource,
             SessionParams params, long createdMillis,
-            File stageDir, String stageCid, InstallationFile[] files,
-            ArrayMap<String, List<CertifiedChecksum>> checksums,
-            boolean prepared, boolean committed, boolean destroyed, boolean sealed,
+            File stageDir, String stageCid, InstallationFile[] files, boolean prepared,
+            boolean committed, boolean destroyed, boolean sealed,
             @Nullable int[] childSessionIds, int parentSessionId, boolean isReady,
             boolean isFailed, boolean isApplied, int stagedSessionErrorCode,
             String stagedSessionErrorMessage) {
@@ -648,7 +615,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         this.mParentSessionId = parentSessionId;
 
         if (files != null) {
-            mFiles.ensureCapacity(files.length);
             for (int i = 0, size = files.length; i < size; ++i) {
                 InstallationFile file = files[i];
                 if (!mFiles.add(new FileEntry(i, file))) {
@@ -656,10 +622,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             "Trying to add a duplicate installation file");
                 }
             }
-        }
-
-        if (checksums != null) {
-            mChecksums.putAll(checksums);
         }
 
         if (!params.isMultiPackage && (stageDir == null) == (stageCid == null)) {
@@ -942,45 +904,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private List<File> getRemovedFilesLocked() {
         String[] names = getNamesLocked();
         return filterFiles(stageDir, names, sRemovedFilter);
-    }
-
-    @Override
-    public void addChecksums(String name, @NonNull Checksum[] checksums) {
-        if (checksums.length == 0) {
-            return;
-        }
-
-        final PackageManagerInternal pmi = LocalServices.getService(
-                PackageManagerInternal.class);
-        final AndroidPackage callingInstaller = pmi.getPackage(Binder.getCallingUid());
-
-        if (callingInstaller == null) {
-            throw new IllegalStateException("Can't obtain calling installer's package.");
-        }
-
-        // Obtaining array of certificates used for signing the installer package.
-        // According to V2/V3 signing schema, the first certificate corresponds to public key
-        // in the signing block.
-        Signature[] certs = callingInstaller.getSigningDetails().signatures;
-        if (certs == null || certs.length == 0 || certs[0] == null) {
-            throw new IllegalStateException(
-                    "Can't obtain calling installer package's certificates.");
-        }
-        byte[] mainCertificateBytes = certs[0].toByteArray();
-
-        synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
-            assertPreparedAndNotCommittedOrDestroyedLocked("addChecksums");
-
-            for (Checksum checksum : checksums) {
-                List<CertifiedChecksum> fileChecksums = mChecksums.get(name);
-                if (fileChecksums == null) {
-                    fileChecksums = new ArrayList<>();
-                    mChecksums.put(name, fileChecksums);
-                }
-                fileChecksums.add(new CertifiedChecksum(checksum, mainCertificateBytes));
-            }
-        }
     }
 
     @Override
@@ -2232,7 +2155,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         final File targetFile = new File(stageDir, targetName);
-        resolveAndStageFileLocked(addedFile, targetFile, null);
+        resolveAndStageFileLocked(addedFile, targetFile);
         mResolvedBaseFile = targetFile;
 
         // Populate package name of the apex session
@@ -2249,13 +2172,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mPackageName = apk.packageName;
             mVersionCode = apk.getLongVersionCode();
         }
-    }
-
-    private static String splitNameToFileName(String splitName) {
-        if (splitName == null) {
-            return "base";
-        }
-        return "split_" + splitName;
     }
 
     /**
@@ -2343,20 +2259,36 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertApkConsistentLocked(String.valueOf(addedFile), apk);
 
             // Take this opportunity to enforce uniform naming
-            final String fileName = splitNameToFileName(apk.splitName);
-            final String targetName = fileName + APK_FILE_EXTENSION;
+            final String targetName;
+            if (apk.splitName == null) {
+                targetName = "base" + APK_FILE_EXTENSION;
+            } else {
+                targetName = "split_" + apk.splitName + APK_FILE_EXTENSION;
+            }
             if (!FileUtils.isValidExtFilename(targetName)) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Invalid filename: " + targetName);
             }
 
             final File targetFile = new File(stageDir, targetName);
-            resolveAndStageFileLocked(addedFile, targetFile, apk.splitName);
+            resolveAndStageFileLocked(addedFile, targetFile);
 
             // Base is coming from session
             if (apk.splitName == null) {
                 mResolvedBaseFile = targetFile;
                 baseApk = apk;
+            }
+
+            // Validate and add Dex Metadata (.dm).
+            final File dexMetadataFile = DexMetadataHelper.findDexMetadataForFile(addedFile);
+            if (dexMetadataFile != null) {
+                if (!FileUtils.isValidExtFilename(dexMetadataFile.getName())) {
+                    throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                            "Invalid filename: " + dexMetadataFile);
+                }
+                final File targetDexMetadataFile = new File(stageDir,
+                        DexMetadataHelper.buildDexMetadataPathForApk(targetName));
+                resolveAndStageFileLocked(dexMetadataFile, targetDexMetadataFile);
             }
         }
 
@@ -2406,20 +2338,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        if (!mChecksums.isEmpty()) {
-            throw new PackageManagerException(
-                    PackageManager.INSTALL_FAILED_SESSION_INVALID,
-                    "Invalid checksum name(s): " + String.join(",", mChecksums.keySet()));
-        }
-
         if (params.mode == SessionParams.MODE_FULL_INSTALL) {
             // Full installs must include a base package
             if (!stagedSplits.contains(null)) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Full install must include a base package");
             }
+
         } else {
-            final ApplicationInfo appInfo = pkgInfo.applicationInfo;
+            ApplicationInfo appInfo = pkgInfo.applicationInfo;
             ParseResult<PackageLite> pkgLiteResult = ApkLiteParseUtils.parsePackageLite(
                     input.reset(), new File(appInfo.getCodePath()), 0);
             if (pkgLiteResult.isError()) {
@@ -2438,21 +2365,33 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             assertApkConsistentLocked("Existing base", existingBase);
 
-            // Inherit base if not overridden.
+            // Inherit base if not overridden
             if (mResolvedBaseFile == null) {
                 mResolvedBaseFile = new File(appInfo.getBaseCodePath());
-                inheritFileLocked(mResolvedBaseFile);
+                resolveInheritedFileLocked(mResolvedBaseFile);
+                // Inherit the dex metadata if present.
+                final File baseDexMetadataFile =
+                        DexMetadataHelper.findDexMetadataForFile(mResolvedBaseFile);
+                if (baseDexMetadataFile != null) {
+                    resolveInheritedFileLocked(baseDexMetadataFile);
+                }
                 baseApk = existingBase;
             }
 
-            // Inherit splits if not overridden.
+            // Inherit splits if not overridden
             if (!ArrayUtils.isEmpty(existing.splitNames)) {
                 for (int i = 0; i < existing.splitNames.length; i++) {
                     final String splitName = existing.splitNames[i];
                     final File splitFile = new File(existing.splitCodePaths[i]);
                     final boolean splitRemoved = removeSplitList.contains(splitName);
                     if (!stagedSplits.contains(splitName) && !splitRemoved) {
-                        inheritFileLocked(splitFile);
+                        resolveInheritedFileLocked(splitFile);
+                        // Inherit the dex metadata if present.
+                        final File splitDexMetadataFile =
+                                DexMetadataHelper.findDexMetadataForFile(splitFile);
+                        if (splitDexMetadataFile != null) {
+                            resolveInheritedFileLocked(splitDexMetadataFile);
+                        }
                     }
                 }
             }
@@ -2553,15 +2492,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @GuardedBy("mLock")
-    private void stageFileLocked(File origFile, File targetFile)
+    private void resolveAndStageFileLocked(File origFile, File targetFile)
             throws PackageManagerException {
         mResolvedStagedFiles.add(targetFile);
         maybeRenameFile(origFile, targetFile);
-    }
 
-    @GuardedBy("mLock")
-    private void maybeStageFsveritySignatureLocked(File origFile, File targetFile)
-            throws PackageManagerException {
         final File originalSignature = new File(
                 VerityUtils.getFsveritySignatureFilePath(origFile.getPath()));
         // Make sure .fsv_sig exists when it should, then resolve and stage it.
@@ -2586,83 +2521,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         final File stagedSignature = new File(
                 VerityUtils.getFsveritySignatureFilePath(targetFile.getPath()));
-
-        stageFileLocked(originalSignature, stagedSignature);
+        maybeRenameFile(originalSignature, stagedSignature);
+        mResolvedStagedFiles.add(stagedSignature);
     }
 
     @GuardedBy("mLock")
-    private void maybeStageDexMetadataLocked(File origFile, File targetFile)
-            throws PackageManagerException {
-        final File dexMetadataFile = DexMetadataHelper.findDexMetadataForFile(origFile);
-        if (dexMetadataFile == null) {
-            return;
-        }
-
-        if (!FileUtils.isValidExtFilename(dexMetadataFile.getName())) {
-            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
-                    "Invalid filename: " + dexMetadataFile);
-        }
-        final File targetDexMetadataFile = new File(stageDir,
-                DexMetadataHelper.buildDexMetadataPathForApk(targetFile.getName()));
-
-        stageFileLocked(dexMetadataFile, targetDexMetadataFile);
-    }
-
-    private static ApkChecksum[] createApkChecksums(String splitName,
-            List<CertifiedChecksum> checksums) {
-        ApkChecksum[] result = new ApkChecksum[checksums.size()];
-        for (int i = 0, size = checksums.size(); i < size; ++i) {
-            CertifiedChecksum checksum = checksums.get(i);
-            result[i] = new ApkChecksum(splitName, checksum.getChecksum(),
-                    checksum.getCertificate());
-        }
-        return result;
-    }
-
-    @GuardedBy("mLock")
-    private void maybeStageDigestsLocked(File origFile, File targetFile, String splitName)
-            throws PackageManagerException {
-        final List<CertifiedChecksum> checksums = mChecksums.get(origFile.getName());
-        if (checksums == null) {
-            return;
-        }
-        mChecksums.remove(origFile.getName());
-
-        if (checksums.isEmpty()) {
-            return;
-        }
-
-        final File targetDigestsFile = new File(stageDir,
-                ApkChecksums.buildDigestsPathForApk(targetFile.getName()));
-        try {
-            ApkChecksums.writeChecksums(targetDigestsFile,
-                    createApkChecksums(splitName, checksums));
-        } catch (CertificateException e) {
-            throw new PackageManagerException(INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING,
-                    "Failed to encode certificate for " + mPackageName, e);
-        } catch (IOException e) {
-            throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
-                    "Failed to store digests for " + mPackageName, e);
-        }
-
-        stageFileLocked(targetDigestsFile, targetDigestsFile);
-    }
-
-    @GuardedBy("mLock")
-    private void resolveAndStageFileLocked(File origFile, File targetFile, String splitName)
-            throws PackageManagerException {
-        stageFileLocked(origFile, targetFile);
-
-        // Stage fsverity signature if present.
-        maybeStageFsveritySignatureLocked(origFile, targetFile);
-        // Stage dex metadata (.dm) if present.
-        maybeStageDexMetadataLocked(origFile, targetFile);
-        // Stage checksums (.digests) if present.
-        maybeStageDigestsLocked(origFile, targetFile, splitName);
-    }
-
-    @GuardedBy("mLock")
-    private void inheritFileLocked(File origFile) {
+    private void resolveInheritedFileLocked(File origFile) {
         mResolvedInheritedFiles.add(origFile);
 
         // Inherit the fsverity signature file if present.
@@ -2670,17 +2534,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 VerityUtils.getFsveritySignatureFilePath(origFile.getPath()));
         if (fsveritySignatureFile.exists()) {
             mResolvedInheritedFiles.add(fsveritySignatureFile);
-        }
-        // Inherit the dex metadata if present.
-        final File dexMetadataFile =
-                DexMetadataHelper.findDexMetadataForFile(origFile);
-        if (dexMetadataFile != null) {
-            mResolvedInheritedFiles.add(dexMetadataFile);
-        }
-        // Inherit the digests if present.
-        final File digestsFile = ApkChecksums.findDigestsForFile(origFile);
-        if (digestsFile != null) {
-            mResolvedInheritedFiles.add(digestsFile);
         }
     }
 
@@ -3938,22 +3791,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 writeByteArrayAttribute(out, ATTR_SIGNATURE, file.getSignature());
                 out.endTag(null, TAG_SESSION_FILE);
             }
-
-            for (int i = 0, isize = mChecksums.size(); i < isize; ++i) {
-                String fileName = mChecksums.keyAt(i);
-                List<CertifiedChecksum> checksums = mChecksums.valueAt(i);
-                for (int j = 0, jsize = checksums.size(); j < jsize; ++j) {
-                    CertifiedChecksum checksum = checksums.get(j);
-                    out.startTag(null, TAG_SESSION_CHECKSUM);
-                    writeStringAttribute(out, ATTR_NAME, fileName);
-                    writeIntAttribute(out, ATTR_CHECKSUM_KIND, checksum.getChecksum().getKind());
-                    writeByteArrayAttribute(out, ATTR_CHECKSUM_VALUE,
-                            checksum.getChecksum().getValue());
-                    writeByteArrayAttribute(out, ATTR_CHECKSUM_CERTIFICATE,
-                            checksum.getCertificate());
-                    out.endTag(null, TAG_SESSION_CHECKSUM);
-                }
-            }
         }
 
         out.endTag(null, TAG_SESSION);
@@ -4067,7 +3904,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         int autoRevokePermissionsMode = MODE_DEFAULT;
         List<Integer> childSessionIds = new ArrayList<>();
         List<InstallationFile> files = new ArrayList<>();
-        ArrayMap<String, List<CertifiedChecksum>> checksums = new ArrayMap<>();
         int outerDepth = in.getDepth();
         int type;
         while ((type = in.next()) != XmlPullParser.END_DOCUMENT
@@ -4095,20 +3931,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         readLongAttribute(in, ATTR_LENGTH_BYTES, -1),
                         readByteArrayAttribute(in, ATTR_METADATA),
                         readByteArrayAttribute(in, ATTR_SIGNATURE)));
-            }
-            if (TAG_SESSION_CHECKSUM.equals(in.getName())) {
-                final String fileName = readStringAttribute(in, ATTR_NAME);
-                final CertifiedChecksum certifiedChecksum = new CertifiedChecksum(
-                        new Checksum(readIntAttribute(in, ATTR_CHECKSUM_KIND, 0),
-                                readByteArrayAttribute(in, ATTR_CHECKSUM_VALUE)),
-                        readByteArrayAttribute(in, ATTR_CHECKSUM_CERTIFICATE));
-
-                List<CertifiedChecksum> certifiedChecksums = checksums.get(fileName);
-                if (certifiedChecksums == null) {
-                    certifiedChecksums = new ArrayList<>();
-                    checksums.put(fileName, certifiedChecksums);
-                }
-                certifiedChecksums.add(certifiedChecksum);
             }
         }
 
@@ -4142,7 +3964,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 installOriginatingPackageName, installerPackageName, installerAttributionTag);
         return new PackageInstallerSession(callback, context, pm, sessionProvider,
                 installerThread, stagingManager, sessionId, userId, installerUid,
-                installSource, params, createdMillis, stageDir, stageCid, fileArray, checksums,
+                installSource, params, createdMillis, stageDir, stageCid, fileArray,
                 prepared, committed, destroyed, sealed, childSessionIdsArray, parentSessionId,
                 isReady, isFailed, isApplied, stagedSessionErrorCode, stagedSessionErrorMessage);
     }
