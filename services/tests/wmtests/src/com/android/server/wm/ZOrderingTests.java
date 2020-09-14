@@ -345,16 +345,16 @@ public class ZOrderingTests extends WindowTestsBase {
     @Test
     public void testStackLayers() {
         final WindowState anyWindow1 = createWindow("anyWindow");
-        final WindowState pinnedStackWindow = createWindowOnStack(null, WINDOWING_MODE_PINNED,
+        final WindowState pinnedStackWindow = createWindow(null, WINDOWING_MODE_PINNED,
                 ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION, mDisplayContent,
                 "pinnedStackWindow");
-        final WindowState dockedStackWindow = createWindowOnStack(null,
+        final WindowState dockedStackWindow = createWindow(null,
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
                 mDisplayContent, "dockedStackWindow");
-        final WindowState assistantStackWindow = createWindowOnStack(null,
+        final WindowState assistantStackWindow = createWindow(null,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_ASSISTANT, TYPE_BASE_APPLICATION,
                 mDisplayContent, "assistantStackWindow");
-        final WindowState homeActivityWindow = createWindowOnStack(null, WINDOWING_MODE_FULLSCREEN,
+        final WindowState homeActivityWindow = createWindow(null, WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_HOME, TYPE_BASE_APPLICATION,
                 mDisplayContent, "homeActivityWindow");
         final WindowState anyWindow2 = createWindow("anyWindow2");
@@ -432,16 +432,16 @@ public class ZOrderingTests extends WindowTestsBase {
 
     @Test
     public void testDockedDividerPosition() {
-        final WindowState pinnedStackWindow = createWindowOnStack(null, WINDOWING_MODE_PINNED,
+        final WindowState pinnedStackWindow = createWindow(null, WINDOWING_MODE_PINNED,
                 ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION, mDisplayContent,
                 "pinnedStackWindow");
-        final WindowState splitScreenWindow = createWindowOnStack(null,
+        final WindowState splitScreenWindow = createWindow(null,
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
                 mDisplayContent, "splitScreenWindow");
-        final WindowState splitScreenSecondaryWindow = createWindowOnStack(null,
+        final WindowState splitScreenSecondaryWindow = createWindow(null,
                 WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD,
                 TYPE_BASE_APPLICATION, mDisplayContent, "splitScreenSecondaryWindow");
-        final WindowState assistantStackWindow = createWindowOnStack(null,
+        final WindowState assistantStackWindow = createWindow(null,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_ASSISTANT, TYPE_BASE_APPLICATION,
                 mDisplayContent, "assistantStackWindow");
 

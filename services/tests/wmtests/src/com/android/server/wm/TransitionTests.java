@@ -51,8 +51,8 @@ public class TransitionTests extends WindowTestsBase {
                 ACTIVITY_TYPE_STANDARD, mDisplayContent);
         newTask.setHasBeenVisible(true);
         oldTask.setHasBeenVisible(false);
-        final ActivityRecord closing = createActivityRecordInTask(oldTask);
-        final ActivityRecord opening = createActivityRecordInTask(newTask);
+        final ActivityRecord closing = createActivityRecord(oldTask);
+        final ActivityRecord opening = createActivityRecord(newTask);
         closing.setVisible(true);
         closing.mVisibleRequested = false;
         opening.setVisible(false);
@@ -102,9 +102,9 @@ public class TransitionTests extends WindowTestsBase {
                 ACTIVITY_TYPE_STANDARD, mDisplayContent);
         newTask.setHasBeenVisible(true);
         oldTask.setHasBeenVisible(false);
-        final ActivityRecord closing = createActivityRecordInTask(oldTask);
-        final ActivityRecord opening = createActivityRecordInTask(newNestedTask);
-        final ActivityRecord opening2 = createActivityRecordInTask(newNestedTask2);
+        final ActivityRecord closing = createActivityRecord(oldTask);
+        final ActivityRecord opening = createActivityRecord(newNestedTask);
+        final ActivityRecord opening2 = createActivityRecord(newNestedTask2);
         closing.setVisible(true);
         closing.mVisibleRequested = false;
         opening.setVisible(false);
@@ -144,8 +144,8 @@ public class TransitionTests extends WindowTestsBase {
         final DisplayArea tda = showTask.getDisplayArea();
         showTask.setHasBeenVisible(true);
         showTask2.setHasBeenVisible(true);
-        final ActivityRecord showing = createActivityRecordInTask(showNestedTask);
-        final ActivityRecord showing2 = createActivityRecordInTask(showTask2);
+        final ActivityRecord showing = createActivityRecord(showNestedTask);
+        final ActivityRecord showing2 = createActivityRecord(showTask2);
         showing.setVisible(false);
         showing.mVisibleRequested = true;
         showing2.setVisible(false);

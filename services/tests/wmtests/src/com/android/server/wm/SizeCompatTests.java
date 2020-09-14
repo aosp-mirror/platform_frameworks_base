@@ -768,7 +768,7 @@ public class SizeCompatTests extends WindowTestsBase {
         params.setFitInsetsTypes(0);
         final TestWindowState w = new TestWindowState(
                 activity.mWmService, mock(Session.class), new TestIWindow(), params, activity);
-        WindowTestsBase.makeWindowVisible(w);
+        makeWindowVisible(w);
         w.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
         activity.addWindow(w);
         return w;

@@ -67,7 +67,7 @@ public class DisplayAreaGroupTest extends WindowTestsBase {
         mDisplayAreaGroup.addChild(mTaskDisplayArea, POSITION_TOP);
         mStack = mTaskDisplayArea.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        mActivity = new ActivityBuilder(mAtm).setCreateTask(true).setStack(mStack).build();
+        mActivity = new ActivityBuilder(mAtm).setTask(mStack).build();
         mDisplayContent.setLastFocusedTaskDisplayArea(mTaskDisplayArea);
     }
 
