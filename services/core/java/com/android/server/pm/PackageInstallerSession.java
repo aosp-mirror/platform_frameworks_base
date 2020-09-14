@@ -28,6 +28,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
+import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageParser.APEX_FILE_EXTENSION;
 import static android.content.pm.PackageParser.APK_FILE_EXTENSION;
@@ -2230,6 +2231,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             user = UserHandle.ALL;
         } else {
             user = new UserHandle(userId);
+        }
+
+        if (params.isStaged) {
+            params.installFlags |= INSTALL_STAGED;
         }
 
         synchronized (mLock) {

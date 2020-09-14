@@ -66,6 +66,7 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTEN
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_RESTORE;
 import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_SETUP;
+import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
@@ -15977,7 +15978,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 return false;
             }
 
-            final File targetDir = codeFile.getParentFile();
+            final File targetDir = resolveTargetDir();
             final File beforeCodeFile = codeFile;
             final File afterCodeFile = getNextCodePath(targetDir, parsedPackage.getPackageName());
 
@@ -16018,6 +16019,17 @@ public class PackageManagerService extends IPackageManager.Stub
                     afterCodeFile, parsedPackage.getSplitCodePaths()));
 
             return true;
+        }
+
+        // TODO(b/168126411): Once staged install flow starts using the same folder as non-staged
+        //  flow, we won't need this method anymore.
+        private File resolveTargetDir() {
+            boolean isStagedInstall = (installFlags & INSTALL_STAGED) != 0;
+            if (isStagedInstall) {
+                return Environment.getDataAppDirectory(null);
+            } else {
+                return codeFile.getParentFile();
+            }
         }
 
         int doPostInstall(int status, int uid) {
