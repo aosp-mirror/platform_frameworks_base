@@ -40,13 +40,13 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.pip.Pip;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipTaskOrganizer;
-import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder;
 import com.android.systemui.wmshell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 
 import java.io.PrintWriter;
+import java.util.function.Consumer;
 
 /**
  * Manages the picture-in-picture (PIP) UI and states for Phones.
@@ -68,7 +68,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     private PipBoundsHandler mPipBoundsHandler;
     private PipMediaController mMediaController;
     private PipTouchHandler mTouchHandler;
-    private IPinnedStackAnimationListener mPinnedStackAnimationRecentsListener;
+    private Consumer<Boolean> mPinnedStackAnimationRecentsCallback;
     private WindowManagerShellWrapper mWindowManagerShellWrapper;
 
     private boolean mIsInFixedRotation;
@@ -371,8 +371,8 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     }
 
     @Override
-    public void setPinnedStackAnimationListener(IPinnedStackAnimationListener listener) {
-        mHandler.post(() -> mPinnedStackAnimationRecentsListener = listener);
+    public void setPinnedStackAnimationListener(Consumer<Boolean> callback) {
+        mHandler.post(() -> mPinnedStackAnimationRecentsCallback = callback);
     }
 
     @Override
@@ -384,12 +384,8 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         }
         // Disable touches while the animation is running
         mTouchHandler.setTouchEnabled(false);
-        if (mPinnedStackAnimationRecentsListener != null) {
-            try {
-                mPinnedStackAnimationRecentsListener.onPinnedStackAnimationStarted();
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to callback recents", e);
-            }
+        if (mPinnedStackAnimationRecentsCallback != null) {
+            mPinnedStackAnimationRecentsCallback.accept(true);
         }
     }
 

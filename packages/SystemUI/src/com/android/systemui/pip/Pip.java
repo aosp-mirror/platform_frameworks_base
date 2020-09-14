@@ -22,9 +22,9 @@ import android.media.session.MediaController;
 
 import com.android.systemui.pip.phone.PipTouchHandler;
 import com.android.systemui.pip.tv.PipController;
-import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 
 import java.io.PrintWriter;
+import java.util.function.Consumer;
 
 /**
  * Interface to engage picture in picture feature.
@@ -200,9 +200,9 @@ public interface Pip {
     /**
      * Registers the pinned stack animation listener.
      *
-     * @param listener The listener of pinned stack animation.
+     * @param callback The callback of pinned stack animation.
      */
-    default void setPinnedStackAnimationListener(IPinnedStackAnimationListener listener) {
+    default void setPinnedStackAnimationListener(Consumer<Boolean> callback) {
     }
 
     /**

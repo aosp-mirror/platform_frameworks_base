@@ -102,6 +102,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -142,6 +143,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
     private Region mActiveNavBarRegion;
 
+    private IPinnedStackAnimationListener mIPinnedStackAnimationListener;
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
     private boolean mBound;
@@ -158,7 +160,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
     @VisibleForTesting
     public ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
-
         @Override
         public void startScreenPinning(int taskId) {
             if (!verifyCaller("startScreenPinning")) {
@@ -438,10 +439,11 @@ public class OverviewProxyService extends CurrentUserTracker implements
                         + mHasPipFeature);
                 return;
             }
+            mIPinnedStackAnimationListener = listener;
             long token = Binder.clearCallingIdentity();
             try {
                 mPipOptional.ifPresent(
-                        pip -> pip.setPinnedStackAnimationListener(listener));
+                        pip -> pip.setPinnedStackAnimationListener(mPinnedStackAnimationCallback));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -607,6 +609,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final StatusBarWindowCallback mStatusBarWindowCallback = this::onStatusBarStateChanged;
     private final BiConsumer<Rect, Rect> mSplitScreenBoundsChangeListener =
             this::notifySplitScreenBoundsChanged;
+    private final Consumer<Boolean> mPinnedStackAnimationCallback =
+            this::notifyPinnedStackAnimationStarted;
 
     // This is the death handler for the binder from the launcher service
     private final IBinder.DeathRecipient mOverviewServiceDeathRcpt
@@ -736,6 +740,17 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
+    private void notifyPinnedStackAnimationStarted(Boolean isAnimationStarted) {
+        if (mIPinnedStackAnimationListener == null) {
+            return;
+        }
+        try {
+            mIPinnedStackAnimationListener.onPinnedStackAnimationStarted();
+        } catch (RemoteException e) {
+            Log.e(TAG_OPS, "Failed to call onPinnedStackAnimationStarted()", e);
+        }
+    }
+
     private void onStatusBarStateChanged(boolean keyguardShowing, boolean keyguardOccluded,
             boolean bouncerShowing) {
         mSysUiState.setFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING,
@@ -766,7 +781,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
     public void cleanupAfterDeath() {
         if (mInputFocusTransferStarted) {
-            mHandler.post(()-> {
+            mHandler.post(() -> {
                 mStatusBarOptionalLazy.ifPresent(statusBarLazy -> {
                     mInputFocusTransferStarted = false;
                     statusBarLazy.get().onInputFocusTransfer(false, true /* cancel */,
