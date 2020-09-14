@@ -12960,11 +12960,12 @@ package android.webkit {
   }
 
   public interface PacProcessor {
+    method @NonNull public static android.webkit.PacProcessor createInstance();
     method @Nullable public String findProxyForUrl(@NonNull String);
     method @NonNull public static android.webkit.PacProcessor getInstance();
-    method @NonNull public static android.webkit.PacProcessor getInstanceForNetwork(@Nullable android.net.Network);
     method @Nullable public default android.net.Network getNetwork();
     method public default void releasePacProcessor();
+    method public default void setNetwork(@Nullable android.net.Network);
     method public boolean setProxyScript(@NonNull String);
   }
 
@@ -13100,11 +13101,11 @@ package android.webkit {
   }
 
   public interface WebViewFactoryProvider {
+    method @NonNull public default android.webkit.PacProcessor createPacProcessor();
     method public android.webkit.WebViewProvider createWebView(android.webkit.WebView, android.webkit.WebView.PrivateAccess);
     method public android.webkit.CookieManager getCookieManager();
     method public android.webkit.GeolocationPermissions getGeolocationPermissions();
     method @NonNull public default android.webkit.PacProcessor getPacProcessor();
-    method @NonNull public default android.webkit.PacProcessor getPacProcessorForNetwork(@Nullable android.net.Network);
     method public android.webkit.ServiceWorkerController getServiceWorkerController();
     method public android.webkit.WebViewFactoryProvider.Statics getStatics();
     method @Deprecated public android.webkit.TokenBindingService getTokenBindingService();
