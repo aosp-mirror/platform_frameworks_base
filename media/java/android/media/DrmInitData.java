@@ -87,13 +87,13 @@ public abstract class DrmInitData {
         public final byte[] data;
 
         /**
+         * Creates a new instance with the given values.
+         *
          * @param uuid The UUID associated with this scheme initialization data.
          * @param mimeType The mimeType of the initialization data.
          * @param data The initialization data.
-         *
-         * @hide
          */
-        public SchemeInitData(UUID uuid, String mimeType, byte[] data) {
+        public SchemeInitData(@NonNull UUID uuid, @NonNull String mimeType, @NonNull byte[] data) {
             this.uuid = uuid;
             this.mimeType = mimeType;
             this.data = data;
