@@ -118,12 +118,7 @@ public class PipMenuActivityController {
     }
 
     public void onActivityPinned() {
-        if (mPipMenuView == null) {
-            WindowManager.LayoutParams lp =
-                    getPipMenuLayoutParams(0, 0);
-            mPipMenuView = new PipMenuView(mContext, this);
-            mPipTaskOrganizer.attachPipMenuViewHost(mPipMenuView, lp);
-        }
+        attachPipMenuView();
         mInputConsumerController.registerInputConsumer(true /* withSfVsync */);
     }
 
@@ -138,6 +133,14 @@ public class PipMenuActivityController {
         if (isMenuVisible()) {
             mPipMenuView.onPipAnimationEnded();
         }
+    }
+
+    private void attachPipMenuView() {
+        if (mPipMenuView == null) {
+            mPipMenuView = new PipMenuView(mContext, this);
+
+        }
+        mPipTaskOrganizer.attachPipMenuViewHost(mPipMenuView, getPipMenuLayoutParams(0, 0));
     }
 
     /**
@@ -197,10 +200,11 @@ public class PipMenuActivityController {
                     + " callers=\n" + Debug.getCallers(5, "    "));
         }
 
-        if (mPipMenuView == null) {
-            Log.e(TAG, "PipMenu has not been attached yet.");
-            return;
+        if (!mPipTaskOrganizer.isPipMenuViewHostAttached()) {
+            Log.d(TAG, "PipMenu has not been attached yet. Attaching now at showMenuInternal().");
+            attachPipMenuView();
         }
+
         mPipMenuView.showMenu(menuState, stackBounds, allowMenuTimeout, willResizeMenu, withDelay,
                 showResizeHandle);
     }
