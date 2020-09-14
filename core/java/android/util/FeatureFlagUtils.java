@@ -66,6 +66,7 @@ public class FeatureFlagUtils {
 
         DEFAULT_FLAGS.put("settings_tether_all_in_one", "false");
         DEFAULT_FLAGS.put("settings_silky_home", "false");
+        DEFAULT_FLAGS.put("settings_contextual_home", "false");
     }
 
     /**
