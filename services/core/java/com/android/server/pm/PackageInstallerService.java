@@ -732,9 +732,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 installerAttributionTag);
         session = new PackageInstallerSession(mInternalCallback, mContext, mPm, this,
                 mInstallThread.getLooper(), mStagingManager, sessionId, userId, callingUid,
-                installSource, params, createdMillis, stageDir, stageCid, null, null, false, false,
-                false, false, null, SessionInfo.INVALID_ID, false, false, false,
-                SessionInfo.STAGED_SESSION_NO_ERROR, "");
+                installSource, params, createdMillis,
+                stageDir, stageCid, null, false, false, false, false, null, SessionInfo.INVALID_ID,
+                false, false, false, SessionInfo.STAGED_SESSION_NO_ERROR, "");
 
         synchronized (mSessions) {
             mSessions.put(sessionId, session);

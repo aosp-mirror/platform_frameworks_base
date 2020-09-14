@@ -164,7 +164,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.ChangedPackages;
-import android.content.pm.Checksum;
 import android.content.pm.ComponentInfo;
 import android.content.pm.DataLoaderType;
 import android.content.pm.FallbackCategoryProvider;
@@ -2460,8 +2459,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void getChecksums(@NonNull String packageName, boolean includeSplits,
-            @Checksum.Kind int optional,
-            @Checksum.Kind int required, @Nullable List trustedInstallers,
+            @PackageManager.FileChecksumKind int optional,
+            @PackageManager.FileChecksumKind int required, @Nullable List trustedInstallers,
             @NonNull IntentSender statusReceiver, int userId) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(statusReceiver);
