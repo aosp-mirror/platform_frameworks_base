@@ -17,7 +17,8 @@
 
 package com.android.server.companion;
 
-import static com.android.internal.util.CollectionUtils.size;
+import static com.android.internal.util.CollectionUtils.emptyIfNull;
+import static com.android.internal.util.CollectionUtils.forEach;
 import static com.android.internal.util.FunctionalUtils.uncheckExceptions;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
@@ -72,6 +73,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.infra.AndroidFuture;
@@ -95,8 +97,10 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -142,6 +146,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
     private final Object mLock = new Object();
 
+    @GuardedBy("mLock")
+    private @Nullable Set<Association> mCachedAssociations = null;
+
     public CompanionDeviceManagerService(Context context) {
         super(context);
         mImpl = new CompanionDeviceManagerImpl();
@@ -176,7 +183,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             @Override
             public void onPackageModified(String packageName) {
                 int userId = getChangingUserId();
-                if (!ArrayUtils.isEmpty(readAllAssociations(userId, packageName))) {
+                if (!ArrayUtils.isEmpty(getAllAssociations(userId, packageName))) {
                     updateSpecialAccessPermissionForAssociatedPackage(packageName, userId);
                 }
             }
@@ -192,7 +199,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     @Override
     public void onUserUnlocking(@NonNull TargetUser user) {
         int userHandle = user.getUserIdentifier();
-        Set<Association> associations = readAllAssociations(userHandle);
+        Set<Association> associations = getAllAssociations(userHandle);
         if (associations == null || associations.isEmpty()) {
             return;
         }
@@ -222,7 +229,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             }
 
             try {
-                Set<Association> associations = readAllAssociations(userId);
+                Set<Association> associations = getAllAssociations(userId);
                 if (associations == null) {
                     continue;
                 }
@@ -342,7 +349,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 checkUsesFeature(callingPackage, getCallingUserId());
             }
             return new ArrayList<>(CollectionUtils.map(
-                    readAllAssociations(userId, callingPackage),
+                    getAllAssociations(userId, callingPackage),
                     a -> a.getDeviceMacAddress()));
         }
 
@@ -353,7 +360,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                         + android.Manifest.permission.MANAGE_COMPANION_DEVICES);
             }
 
-            return new ArrayList<>(readAllAssociations(userId, null /* packageFilter */));
+            return new ArrayList<>(getAllAssociations(userId, null /* packageFilter */));
         }
 
         //TODO also revoke notification access
@@ -437,14 +444,14 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             }
 
             return CollectionUtils.any(
-                    readAllAssociations(userId, packageName),
+                    getAllAssociations(userId, packageName),
                     a -> Objects.equals(a.getDeviceMacAddress(), macAddress));
         }
 
         private void checkCanCallNotificationApi(String callingPackage) throws RemoteException {
             checkCallerIsSystemOr(callingPackage);
             int userId = getCallingUserId();
-            checkState(!ArrayUtils.isEmpty(readAllAssociations(userId, callingPackage)),
+            checkState(!ArrayUtils.isEmpty(getAllAssociations(userId, callingPackage)),
                     "App must have an association before calling this API");
             checkUsesFeature(callingPackage, userId);
         }
@@ -471,6 +478,21 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver)
                 throws RemoteException {
             new ShellCmd().exec(this, in, out, err, args, callback, resultReceiver);
+        }
+
+        @Override
+        public void dump(@NonNull FileDescriptor fd,
+                @NonNull PrintWriter fout,
+                @Nullable String[] args) {
+            fout.append("Companion Device Associations:").append('\n');
+            synchronized (mLock) {
+                forEach(mCachedAssociations, a -> {
+                    fout.append("  ")
+                            .append("u").append("" + a.getUserId()).append(": ")
+                            .append(a.getPackageName()).append(" - ")
+                            .append(a.getDeviceMacAddress()).append('\n');
+                });
+            }
         }
     }
 
@@ -581,20 +603,37 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
     private void updateAssociations(Function<Set<Association>, Set<Association>> update,
             int userId) {
-        final AtomicFile file = getStorageFileForUser(userId);
-        synchronized (file) {
-            Set<Association> associations = readAllAssociations(userId);
-            final Set<Association> old = CollectionUtils.copyOf(associations);
+        synchronized (mLock) {
+            final Set<Association> old = getAllAssociations(userId);
+            Set<Association> associations = new ArraySet<>(old);
             associations = update.apply(associations);
-            if (size(old) == size(associations)) return;
 
-            Set<Association> finalAssociations = associations;
             Set<String> companionAppPackages = new HashSet<>();
-            for (Association association : finalAssociations) {
+            for (Association association : associations) {
                 companionAppPackages.add(association.getPackageName());
             }
 
-            file.write((out) -> {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "Updating associations: " + old + "  -->  " + associations);
+            }
+            mCachedAssociations = Collections.unmodifiableSet(associations);
+            BackgroundThread.getHandler().sendMessage(PooledLambda.obtainMessage(
+                    CompanionDeviceManagerService::persistAssociations,
+                    this, associations, userId));
+
+            ActivityTaskManagerInternal atmInternal = LocalServices.getService(
+                    ActivityTaskManagerInternal.class);
+            atmInternal.setCompanionAppPackages(userId, companionAppPackages);
+        }
+    }
+
+    private void persistAssociations(Set<Association> associations, int userId) {
+        if (DEBUG) {
+            Slog.i(LOG_TAG, "Writing associations to disk: " + associations);
+        }
+        final AtomicFile file = getStorageFileForUser(userId);
+        synchronized (file) {
+            file.write(out -> {
                 XmlSerializer xml = Xml.newSerializer();
                 try {
                     xml.setOutput(out, StandardCharsets.UTF_8.name());
@@ -602,7 +641,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     xml.startDocument(null, true);
                     xml.startTag(null, XML_TAG_ASSOCIATIONS);
 
-                    CollectionUtils.forEach(finalAssociations, association -> {
+                    forEach(associations, association -> {
                         xml.startTag(null, XML_TAG_ASSOCIATION)
                                 .attribute(null, XML_ATTR_PACKAGE, association.getPackageName())
                                 .attribute(null, XML_ATTR_DEVICE, association.getDeviceMacAddress())
@@ -615,11 +654,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     Slog.e(LOG_TAG, "Error while writing associations file", e);
                     throw ExceptionUtils.propagate(e);
                 }
-
             });
-            ActivityTaskManagerInternal atmInternal = LocalServices.getService(
-                    ActivityTaskManagerInternal.class);
-            atmInternal.setCompanionAppPackages(userId, companionAppPackages);
         }
     }
 
@@ -632,12 +667,27 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     @Nullable
-    private Set<Association> readAllAssociations(int userId) {
-        return readAllAssociations(userId, null);
+    private Set<Association> getAllAssociations(int userId) {
+        synchronized (mLock) {
+            if (mCachedAssociations == null) {
+                mCachedAssociations = Collections.unmodifiableSet(
+                        emptyIfNull(readAllAssociations(userId)));
+                if (DEBUG) {
+                    Slog.i(LOG_TAG, "Read associations from disk: " + mCachedAssociations);
+                }
+            }
+            return mCachedAssociations;
+        }
     }
 
     @Nullable
-    private Set<Association> readAllAssociations(int userId, @Nullable String packageFilter) {
+    private Set<Association> getAllAssociations(int userId, @Nullable String packageFilter) {
+        return CollectionUtils.filter(
+                getAllAssociations(userId),
+                a -> Objects.equals(packageFilter, a.getPackageName()));
+    }
+
+    private Set<Association> readAllAssociations(int userId) {
         final AtomicFile file = getStorageFileForUser(userId);
 
         if (!file.getBaseFile().exists()) return null;
@@ -656,7 +706,6 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     final String deviceAddress = parser.getAttributeValue(null, XML_ATTR_DEVICE);
 
                     if (appPackage == null || deviceAddress == null) continue;
-                    if (packageFilter != null && !packageFilter.equals(appPackage)) continue;
 
                     result = ArrayUtils.add(result,
                             new Association(userId, deviceAddress, appPackage));
@@ -684,8 +733,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         public int onCommand(String cmd) {
             switch (cmd) {
                 case "list": {
-                    CollectionUtils.forEach(
-                            readAllAssociations(getNextArgInt()),
+                    forEach(
+                            getAllAssociations(getNextArgInt()),
                             a -> getOutPrintWriter()
                                     .println(a.getPackageName() + " " + a.getDeviceMacAddress()));
                 } break;
