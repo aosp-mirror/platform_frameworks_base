@@ -616,7 +616,7 @@ class ActivityStarter {
                     voiceInteractor, startFlags, doResume, options, inTask,
                     false /* restrictedBgActivity */, intentGrants);
             mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState,
-                    mLastStartActivityResult, mLastStartActivityRecord);
+                    mLastStartActivityResult, mLastStartActivityRecord, options);
         } finally {
             onExecutionComplete();
         }
@@ -704,7 +704,7 @@ class ActivityStarter {
                 // ActivityMetricsLogger will then wait for the windows to be drawn and populate
                 // WaitResult.
                 mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState, res,
-                        mLastStartActivityRecord);
+                        mLastStartActivityRecord, mOptions);
                 return getExternalResult(mRequest.waitResult == null ? res
                         : waitForResult(res, mLastStartActivityRecord));
             }
