@@ -476,6 +476,26 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         assertFalse(wallpaperWindowToken.hasFixedRotationTransform());
     }
 
+    @Test
+    public void testIsAnimatingByRecents() {
+        final ActivityRecord homeActivity = createHomeActivity();
+        final Task rootTask = createTaskStackOnDisplay(mDefaultDisplay);
+        final Task childTask = createTaskInStack(rootTask, 0 /* userId */);
+        final Task leafTask = createTaskInStack(childTask, 0 /* userId */);
+        spyOn(leafTask);
+        doReturn(true).when(leafTask).isVisible();
+
+        initializeRecentsAnimationController(mController, homeActivity);
+
+        // Verify RecentsAnimationController will animate visible leaf task by default.
+        verify(mController).addAnimation(eq(leafTask), anyBoolean(), anyBoolean(), eq(null));
+        assertTrue(leafTask.isAnimatingByRecents());
+
+        // Make sure isAnimatingByRecents will also return true when it called by the parent task.
+        assertTrue(rootTask.isAnimatingByRecents());
+        assertTrue(childTask.isAnimatingByRecents());
+    }
+
     private ActivityRecord createHomeActivity() {
         final ActivityRecord homeActivity = new ActivityBuilder(mWm.mAtmService)
                 .setStack(mRootHomeTask)

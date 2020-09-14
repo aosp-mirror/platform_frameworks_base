@@ -754,7 +754,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
             // The split screen divider anchor is located above the split screen window.
             mTmpLayerForSplitScreenDividerAnchor = layer++;
         }
-        if (s.isTaskAnimating() || s.isAppTransitioning()) {
+        if (s.isAnimatingByRecents() || s.isAppTransitioning()) {
             // The animation layer is located above the highest animating stack and no
             // higher.
             mTmpLayerForAnimationLayer = layer++;
