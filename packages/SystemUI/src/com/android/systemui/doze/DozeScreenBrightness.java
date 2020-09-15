@@ -30,12 +30,12 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.Display;
 
-import androidx.annotation.Nullable;
-
 import com.android.systemui.doze.dagger.BrightnessSensor;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.doze.dagger.WrappedService;
 import com.android.systemui.util.sensors.AsyncSensorManager;
+
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -56,7 +56,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     private final DozeHost mDozeHost;
     private final Handler mHandler;
     private final SensorManager mSensorManager;
-    private final Sensor mLightSensor;
+    private final Optional<Sensor> mLightSensorOptional;
     private final int[] mSensorToBrightness;
     private final int[] mSensorToScrimOpacity;
 
@@ -77,12 +77,13 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
 
     @Inject
     public DozeScreenBrightness(Context context, @WrappedService DozeMachine.Service service,
-            AsyncSensorManager sensorManager, @Nullable @BrightnessSensor Sensor lightSensor,
-            DozeHost host, Handler handler, AlwaysOnDisplayPolicy alwaysOnDisplayPolicy) {
+            AsyncSensorManager sensorManager,
+            @BrightnessSensor Optional<Sensor> lightSensorOptional, DozeHost host, Handler handler,
+            AlwaysOnDisplayPolicy alwaysOnDisplayPolicy) {
         mContext = context;
         mDozeService = service;
         mSensorManager = sensorManager;
-        mLightSensor = lightSensor;
+        mLightSensorOptional = lightSensorOptional;
         mDozeHost = host;
         mHandler = handler;
 
@@ -149,7 +150,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
             }
 
             int scrimOpacity = -1;
-            if (mLightSensor == null) {
+            if (!mLightSensorOptional.isPresent()) {
                 // No light sensor, scrims are always transparent.
                 scrimOpacity = 0;
             } else if (brightnessReady) {
@@ -193,9 +194,9 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     }
 
     private void setLightSensorEnabled(boolean enabled) {
-        if (enabled && !mRegistered && mLightSensor != null) {
+        if (enabled && !mRegistered && mLightSensorOptional.isPresent()) {
             // Wait until we get an event from the sensor until indicating ready.
-            mRegistered = mSensorManager.registerListener(this, mLightSensor,
+            mRegistered = mSensorManager.registerListener(this, mLightSensorOptional.get(),
                     SensorManager.SENSOR_DELAY_NORMAL, mHandler);
             mLastSensorValue = -1;
         } else if (!enabled && mRegistered) {
