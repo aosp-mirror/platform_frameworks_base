@@ -138,6 +138,11 @@ public class AmbientDisplayConfiguration {
     }
 
     /** {@hide} */
+    public String udfpsLongPressSensorType() {
+        return mContext.getResources().getString(R.string.config_dozeUdfpsLongPressSensorType);
+    }
+
+    /** {@hide} */
     public boolean pulseOnLongPressEnabled(int user) {
         return pulseOnLongPressAvailable() && boolSettingDefaultOff(
                 Settings.Secure.DOZE_PULSE_ON_LONG_PRESS, user);

@@ -59,6 +59,7 @@ public class DozeConfigurationUtil {
         when(config.doubleTapSensorType()).thenReturn(null);
         when(config.tapSensorType()).thenReturn(null);
         when(config.longPressSensorType()).thenReturn(null);
+        when(config.udfpsLongPressSensorType()).thenReturn(null);
 
         when(config.tapGestureEnabled(anyInt())).thenReturn(true);
         when(config.tapSensorAvailable()).thenReturn(true);
