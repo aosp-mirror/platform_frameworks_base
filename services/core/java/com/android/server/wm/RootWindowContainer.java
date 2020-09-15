@@ -2305,10 +2305,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {
             final DisplayContent display = getChildAt(displayNdx);
-            if (display.shouldSleep()) {
-                continue;
-            }
-
             boolean resumedOnDisplay = false;
             for (int tdaNdx = display.getTaskDisplayAreaCount() - 1; tdaNdx >= 0; --tdaNdx) {
                 final TaskDisplayArea taskDisplayArea = display.getTaskDisplayAreaAt(tdaNdx);
