@@ -1257,6 +1257,10 @@ public class AppProfiler {
                 }
             }
 
+            if (haveNewCpuStats) {
+                mService.mPhantomProcessList.updateProcessCpuStatesLocked(mProcessCpuTracker);
+            }
+
             final BatteryStatsImpl bstats = mService.mBatteryStatsService.getActiveStatistics();
             synchronized (bstats) {
                 if (haveNewCpuStats) {
