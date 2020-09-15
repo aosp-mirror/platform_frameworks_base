@@ -9531,10 +9531,16 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
+        // The version of the application on the /system partition is less than or
+        // equal to the version on the /data partition. Throw an exception and use
+        // the application already installed on the /data partition.
         if (scanSystemPartition && isSystemPkgUpdated && !isSystemPkgBetter) {
-            // The version of the application on the /system partition is less than or
-            // equal to the version on the /data partition. Throw an exception and use
-            // the application already installed on the /data partition.
+            // In the case of a skipped package, commitReconciledScanResultLocked is not called to
+            // add the object to the "live" data structures, so this is the final mutation step
+            // for the package. Which means it needs to be finalized here to cache derived fields.
+            // This is relevant for cases where the disabled system package is used for flags or
+            // other metadata.
+            ((ParsedPackage) parsedPackage).hideAsFinal();
             throw new PackageManagerException(Log.WARN, "Package " + parsedPackage.getPackageName()
                     + " at " + parsedPackage.getPath() + " ignored: updated version "
                     + pkgSetting.versionCode + " better than this "

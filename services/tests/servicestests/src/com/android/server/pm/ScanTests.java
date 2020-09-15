@@ -470,11 +470,16 @@ public class ScanTests {
 
     private PackageManagerService.ScanResult executeScan(
             PackageManagerService.ScanRequest scanRequest) throws PackageManagerException {
-        return PackageManagerService.scanPackageOnlyLI(
+        PackageManagerService.ScanResult result = PackageManagerService.scanPackageOnlyLI(
                 scanRequest,
                 mMockInjector,
                 false /*isUnderFactoryTest*/,
                 System.currentTimeMillis());
+
+        // Need to call hideAsFinal to cache derived fields. This is normally done in PMS, but not
+        // in this cut down flow used for the test.
+        ((ParsedPackage) result.pkgSetting.pkg).hideAsFinal();
+        return result;
     }
 
     private static String createCodePath(String packageName) {

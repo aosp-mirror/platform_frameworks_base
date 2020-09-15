@@ -867,7 +867,7 @@ public interface ParsingPackageRead extends Parcelable {
      * @see ApplicationInfo#gwpAsanMode
      * @see R.styleable#AndroidManifest_gwpAsanMode
      */
-    public int getGwpAsanMode();
+    int getGwpAsanMode();
 
     // TODO(b/135203078): Hide and enforce going through PackageInfoUtils
     ApplicationInfo toAppInfoWithoutState();

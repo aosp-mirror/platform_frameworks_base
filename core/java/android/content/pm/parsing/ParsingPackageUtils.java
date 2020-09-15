@@ -185,6 +185,9 @@ public class ParsingPackageUtils {
                         ParsingPackageUtils.getSigningDetails(pkg, false /* skipVerify */));
             }
 
+            // Need to call this to finish the parsing stage
+            pkg.hideAsParsed();
+
             return input.success(pkg);
         } catch (PackageParser.PackageParserException e) {
             return input.error(PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,

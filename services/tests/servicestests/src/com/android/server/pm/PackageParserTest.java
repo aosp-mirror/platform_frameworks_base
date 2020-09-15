@@ -155,8 +155,8 @@ public class PackageParserTest {
     @Test
     public void test_serializePackage() throws Exception {
         try (PackageParser2 pp = PackageParser2.forParsingFileWithDefaults()) {
-            ParsedPackage pkg = pp.parsePackage(FRAMEWORK, 0 /* parseFlags */,
-                    true /* useCaches */);
+            AndroidPackage pkg = pp.parsePackage(FRAMEWORK, 0 /* parseFlags */,
+                    true /* useCaches */).hideAsFinal();
 
             Parcel p = Parcel.obtain();
             pkg.writeToParcel(p, 0 /* flags */);
@@ -591,7 +591,7 @@ public class PackageParserTest {
                         null
                 )
                 .setUse32BitAbi(true)
-                .setVolumeUuid("foo3")
+                .setVolumeUuid("d52ef59a-7def-4541-bf21-4c28ed4b65a0")
                 .addPermission(permission)
                 .addPermissionGroup(new ParsedPermissionGroup())
                 .addActivity(new ParsedActivity())
