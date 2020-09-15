@@ -1340,7 +1340,7 @@
         android:priority="800" />
 
     <!-- Allows an application to access data from sensors that the user uses to
-         measure what is happening inside his/her body, such as heart rate.
+         measure what is happening inside their body, such as heart rate.
          <p>Protection level: dangerous -->
     <permission android:name="android.permission.BODY_SENSORS"
         android:permissionGroup="android.permission-group.UNDEFINED"

@@ -63,7 +63,7 @@ import java.util.Set;
  * Calling #registerMobileNetworkRequest() to bring up mobile DUN/HIPRI network.
  *
  * The methods and data members of this class are only to be accessed and
- * modified from the tethering master state machine thread. Any other
+ * modified from the tethering main state machine thread. Any other
  * access semantics would necessitate the addition of locking.
  *
  * TODO: Move upstream selection logic here.

@@ -27,7 +27,7 @@ import android.net.TetheringRequestParcel;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.testutils.MiscAssertsKt;
+import com.android.testutils.MiscAsserts;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -82,6 +82,6 @@ public class TetheringUtilsTest {
         request.showProvisioningUi = false;
         assertFalse(TetheringUtils.isTetheringRequestEquals(mTetheringRequest, request));
 
-        MiscAssertsKt.assertFieldCountEquals(5, TetheringRequestParcel.class);
+        MiscAsserts.assertFieldCountEquals(5, TetheringRequestParcel.class);
     }
 }

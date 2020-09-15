@@ -380,7 +380,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
 
         setupMockStack(
                 PEOPLE_HEADER,
-                ALERTING.headsUp(),
+                ALERTING,
                 PERSON,
                 ALERTING_HEADER,
                 GENTLE_HEADER,
@@ -403,9 +403,9 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         enablePeopleFiltering();
 
         setupMockStack(
-                PERSON.headsUp(),
+                PERSON,
                 INCOMING_HEADER,
-                ALERTING.headsUp(),
+                ALERTING,
                 PEOPLE_HEADER,
                 PERSON
         );
@@ -425,7 +425,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         enablePeopleFiltering();
 
         setupMockStack(
-                PERSON.headsUp(),
+                PERSON,
                 PEOPLE_HEADER,
                 PERSON
         );
@@ -443,8 +443,8 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         enablePeopleFiltering();
 
         setupMockStack(
-                ALERTING.headsUp(),
-                PERSON.headsUp()
+                ALERTING,
+                PERSON
         );
         mSectionsManager.updateSectionBoundaries();
         verifyMockStack(
@@ -461,7 +461,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
 
         setupMockStack(
                 INCOMING_HEADER,
-                ALERTING.headsUp(),
+                ALERTING,
                 PEOPLE_HEADER,
                 FSN,
                 PERSON,
@@ -502,9 +502,9 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     public void testMediaControls_AddWhenEnterKeyguardWithHeadsUp() {
         enableMediaControls();
 
-        // GIVEN a stack that doesn't include media controls but includes HEADS_UP
+        // GIVEN a stack that doesn't include media
         setupMockStack(
-                ALERTING.headsUp(),
+                ALERTING,
                 ALERTING,
                 GENTLE_HEADER,
                 GENTLE);
@@ -584,6 +584,27 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         );
     }
 
+    @Test
+    public void testIgnoreGoneView() {
+        enablePeopleFiltering();
+
+        setupMockStack(
+                PERSON.gone(),
+                ALERTING,
+                GENTLE
+        );
+
+        mSectionsManager.updateSectionBoundaries();
+
+        verifyMockStack(
+                ChildType.ALERTING_HEADER,
+                ChildType.PERSON,
+                ChildType.ALERTING,
+                ChildType.GENTLE_HEADER,
+                ChildType.GENTLE
+        );
+    }
+
     private void enablePeopleFiltering() {
         when(mSectionsFeatureManager.isFilteringEnabled()).thenReturn(true);
     }
@@ -619,16 +640,16 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                     child = mSectionsManager.getSilentHeaderView();
                     break;
                 case FSN:
-                    child = mockNotification(BUCKET_FOREGROUND_SERVICE, entry.mIsHeadsUp);
+                    child = mockNotification(BUCKET_FOREGROUND_SERVICE, entry.mIsGone);
                     break;
                 case PERSON:
-                    child = mockNotification(BUCKET_PEOPLE, entry.mIsHeadsUp);
+                    child = mockNotification(BUCKET_PEOPLE, entry.mIsGone);
                     break;
                 case ALERTING:
-                    child = mockNotification(BUCKET_ALERTING, entry.mIsHeadsUp);
+                    child = mockNotification(BUCKET_ALERTING, entry.mIsGone);
                     break;
                 case GENTLE:
-                    child = mockNotification(BUCKET_SILENT, entry.mIsHeadsUp);
+                    child = mockNotification(BUCKET_SILENT, entry.mIsGone);
                     break;
                 case OTHER:
                     child = mock(View.class);
@@ -643,7 +664,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         }
     }
 
-    private View mockNotification(int bucket, boolean headsUp) {
+    private View mockNotification(int bucket, boolean isGone) {
         ExpandableNotificationRow notifRow =
                 mock(ExpandableNotificationRow.class, RETURNS_DEEP_STUBS);
         when(notifRow.getVisibility()).thenReturn(View.VISIBLE);
@@ -659,8 +680,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
             return null;
         }).when(mockEntry).setBucket(anyInt());
 
-        when(notifRow.isHeadsUp()).thenReturn(headsUp);
-        when(mockEntry.isRowHeadsUp()).thenReturn(headsUp);
+        when(notifRow.getVisibility()).thenReturn(isGone ? View.GONE : View.VISIBLE);
         return notifRow;
     }
 
@@ -767,16 +787,16 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                     child = mSectionsManager.getSilentHeaderView();
                     break;
                 case FSN:
-                    child = mockNotification(BUCKET_FOREGROUND_SERVICE, entry.mIsHeadsUp);
+                    child = mockNotification(BUCKET_FOREGROUND_SERVICE, entry.mIsGone);
                     break;
                 case PERSON:
-                    child = mockNotification(BUCKET_PEOPLE, entry.mIsHeadsUp);
+                    child = mockNotification(BUCKET_PEOPLE, entry.mIsGone);
                     break;
                 case ALERTING:
-                    child = mockNotification(BUCKET_ALERTING, entry.mIsHeadsUp);
+                    child = mockNotification(BUCKET_ALERTING, entry.mIsGone);
                     break;
                 case GENTLE:
-                    child = mockNotification(BUCKET_SILENT, entry.mIsHeadsUp);
+                    child = mockNotification(BUCKET_SILENT, entry.mIsGone);
                     break;
                 case OTHER:
                     child = mock(View.class);
@@ -796,36 +816,25 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     private static final StackEntry ALERTING_HEADER = new StackEntry(ChildType.ALERTING_HEADER);
     private static final StackEntry GENTLE_HEADER = new StackEntry(ChildType.GENTLE_HEADER);
     private static final StackEntry FSN = new StackEntry(ChildType.FSN);
-    private static final StackEntry.Hunnable PERSON = new StackEntry.Hunnable(ChildType.PERSON);
-    private static final StackEntry.Hunnable ALERTING = new StackEntry.Hunnable(ChildType.ALERTING);
+    private static final StackEntry PERSON = new StackEntry(ChildType.PERSON);
+    private static final StackEntry ALERTING = new StackEntry(ChildType.ALERTING);
     private static final StackEntry GENTLE = new StackEntry(ChildType.GENTLE);
 
     private static class StackEntry {
         final ChildType mChildType;
-        final boolean mIsHeadsUp;
+        final boolean mIsGone;
 
         StackEntry(ChildType childType) {
             this(childType, false);
         }
 
-        StackEntry(ChildType childType, boolean isHeadsUp) {
+        StackEntry(ChildType childType, boolean isGone) {
             mChildType = childType;
-            mIsHeadsUp = isHeadsUp;
+            mIsGone = isGone;
         }
 
-        static class Hunnable extends StackEntry {
-
-            Hunnable(ChildType childType) {
-                super(childType, false);
-            }
-
-            Hunnable(ChildType childType, boolean isHeadsUp) {
-                super(childType, isHeadsUp);
-            }
-
-            public Hunnable headsUp() {
-                return new Hunnable(mChildType, true);
-            }
+        public StackEntry gone() {
+            return new StackEntry(mChildType, true);
         }
     }
 }

@@ -16,6 +16,10 @@
 
 java_test_host {
     name: "FrameworksNetDeflakeTest",
+    // Not built on module branch because these tests depend indirectly
+    // on net-tests-utils (frameworks/libs/net), which could be newer
+    // than frameworks/base.
+    enabled: false,
     srcs: ["src/**/*.kt"],
     libs: [
         "junit",

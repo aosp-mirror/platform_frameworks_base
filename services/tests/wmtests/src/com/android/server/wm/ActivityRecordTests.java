@@ -1100,6 +1100,34 @@ public class ActivityRecordTests extends ActivityTestsBase {
     }
 
     /**
+     * Verify the visibility of a show-when-locked and dismiss keyguard activity on sleeping
+     * display.
+     */
+    @Test
+    public void testDisplaySleeping_activityInvisible() {
+        final KeyguardController keyguardController =
+                mActivity.mStackSupervisor.getKeyguardController();
+        doReturn(true).when(keyguardController).isKeyguardLocked();
+        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        topActivity.mVisibleRequested = true;
+        topActivity.nowVisible = true;
+        topActivity.setState(RESUMED, "test" /*reason*/);
+        doReturn(true).when(topActivity).containsDismissKeyguardWindow();
+        doCallRealMethod().when(mRootWindowContainer).ensureActivitiesVisible(
+                any() /* starting */, anyInt() /* configChanges */,
+                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
+        topActivity.setShowWhenLocked(true);
+
+        // Verify the top activity is occluded keyguard.
+        assertEquals(topActivity, mStack.topRunningActivity());
+        assertTrue(mStack.topActivityOccludesKeyguard());
+
+        final DisplayContent display = mActivity.mDisplayContent;
+        doReturn(true).when(display).isSleeping();
+        assertFalse(topActivity.shouldBeVisible());
+    }
+
+    /**
      * Verify that complete finish request for a show-when-locked activity must ensure the
      * keyguard occluded state being updated.
      */

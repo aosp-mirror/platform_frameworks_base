@@ -898,7 +898,7 @@
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Foydalanuvchi tanlagichi"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Holati"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Kamera"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Media boshqaruvlari"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Media boshqaruvi"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Vidjetlarni saralashni boshlandi."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"Vidjetlarni saralash tugatildi."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> vidjeti o‘chirildi."</string>
@@ -1122,7 +1122,7 @@
     <string name="capital_off" msgid="7443704171014626777">"O"</string>
     <string name="checked" msgid="9179896827054513119">"belgilandi"</string>
     <string name="not_checked" msgid="7972320087569023342">"belgilanmadi"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"Ilovani tanlang"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"Nima ishlatilsin?"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"“%1$s” bilan ochish"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Amalni bajarish"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Ochish…"</string>
@@ -1548,7 +1548,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Brauzer ishga tushirilsinmi?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Qo‘ng‘iroqni qabul qilasizmi?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Har doim"</string>
-    <string name="activity_resolver_use_once" msgid="948462794469672658">"Faqat hozir"</string>
+    <string name="activity_resolver_use_once" msgid="948462794469672658">"Faqat shu safar"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"“%1$s” ishchi profilni qo‘llab-quvvatlamaydi"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Planshet"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>

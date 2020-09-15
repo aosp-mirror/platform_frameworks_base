@@ -4198,13 +4198,9 @@ public class PackageManagerService extends IPackageManager.Stub
         Iterator<ResolveInfo> iter = matches.iterator();
         while (iter.hasNext()) {
             final ResolveInfo rInfo = iter.next();
-            final PackageSetting ps = mSettings.mPackages.get(rInfo.activityInfo.packageName);
-            if (ps != null) {
-                final PermissionsState permissionsState = ps.getPermissionsState();
-                if (permissionsState.hasPermission(Manifest.permission.INSTALL_PACKAGES, 0)
-                        || Build.IS_ENG) {
-                    continue;
-                }
+            if (checkPermission(Manifest.permission.INSTALL_PACKAGES,
+                    rInfo.activityInfo.packageName, 0) == PERMISSION_GRANTED || Build.IS_ENG) {
+                continue;
             }
             iter.remove();
         }
@@ -4380,8 +4376,24 @@ public class PackageManagerService extends IPackageManager.Stub
             final int[] gids = (flags & PackageManager.GET_GIDS) == 0
                     ? EMPTY_INT_ARRAY : permissionsState.computeGids(userId);
             // Compute granted permissions only if package has requested permissions
-            final Set<String> permissions = ArrayUtils.isEmpty(p.getRequestedPermissions())
+            Set<String> permissions = ArrayUtils.isEmpty(p.getRequestedPermissions())
                     ? Collections.emptySet() : permissionsState.getPermissions(userId);
+            if (state.instantApp) {
+                permissions = new ArraySet<>(permissions);
+                permissions.removeIf(permissionName -> {
+                    BasePermission permission = mPermissionManager.getPermissionTEMP(
+                            permissionName);
+                    if (permission == null) {
+                        return true;
+                    }
+                    if (!permission.isInstant()) {
+                        EventLog.writeEvent(0x534e4554, "140256621", UserHandle.getUid(userId,
+                                ps.appId), permissionName);
+                        return true;
+                    }
+                    return false;
+                });
+            }
 
             PackageInfo packageInfo = PackageInfoUtils.generate(p, gids, flags,
                     ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId, ps);
@@ -6432,9 +6444,14 @@ public class PackageManagerService extends IPackageManager.Stub
                     true /*allowDynamicSplits*/);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
+            final boolean queryMayBeFiltered =
+                    UserHandle.getAppId(filterCallingUid) >= Process.FIRST_APPLICATION_UID
+                            && !resolveForStart;
+
             final ResolveInfo bestChoice =
                     chooseBestActivity(
-                            intent, resolvedType, flags, privateResolveFlags, query, userId);
+                            intent, resolvedType, flags, privateResolveFlags, query, userId,
+                            queryMayBeFiltered);
             final boolean nonBrowserOnly =
                     (privateResolveFlags & PackageManagerInternal.RESOLVE_NON_BROWSER_ONLY) != 0;
             if (nonBrowserOnly && bestChoice != null && bestChoice.handleAllWebDataURI) {
@@ -6598,7 +6615,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private ResolveInfo chooseBestActivity(Intent intent, String resolvedType,
-            int flags, int privateResolveFlags, List<ResolveInfo> query, int userId) {
+            int flags, int privateResolveFlags, List<ResolveInfo> query, int userId,
+            boolean queryMayBeFiltered) {
         if (query != null) {
             final int N = query.size();
             if (N == 1) {
@@ -6623,7 +6641,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // If we have saved a preference for a preferred activity for
                 // this Intent, use that.
                 ResolveInfo ri = findPreferredActivityNotLocked(intent, resolvedType,
-                        flags, query, r0.priority, true, false, debug, userId);
+                        flags, query, r0.priority, true, false, debug, userId, queryMayBeFiltered);
                 if (ri != null) {
                     return ri;
                 }
@@ -6805,11 +6823,19 @@ public class PackageManagerService extends IPackageManager.Stub
                 && intent.hasCategory(CATEGORY_DEFAULT);
     }
 
+    ResolveInfo findPreferredActivityNotLocked(Intent intent, String resolvedType, int flags,
+            List<ResolveInfo> query, int priority, boolean always,
+            boolean removeMatches, boolean debug, int userId) {
+        return findPreferredActivityNotLocked(
+                intent, resolvedType, flags, query, priority, always, removeMatches, debug, userId,
+                UserHandle.getAppId(Binder.getCallingUid()) >= Process.FIRST_APPLICATION_UID);
+    }
+
     // TODO: handle preferred activities missing while user has amnesia
     /** <b>must not hold {@link #mLock}</b> */
     ResolveInfo findPreferredActivityNotLocked(Intent intent, String resolvedType, int flags,
             List<ResolveInfo> query, int priority, boolean always,
-            boolean removeMatches, boolean debug, int userId) {
+            boolean removeMatches, boolean debug, int userId, boolean queryMayBeFiltered) {
         if (Thread.holdsLock(mLock)) {
             Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
                     + " is holding mLock", new Throwable());
@@ -6903,10 +6929,12 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                         final boolean excludeSetupWizardHomeActivity = isHomeIntent(intent)
                                 && !isDeviceProvisioned;
+                        final boolean allowSetMutation = !excludeSetupWizardHomeActivity
+                                && !queryMayBeFiltered;
                         if (ai == null) {
                             // Do not remove launcher's preferred activity during SetupWizard
                             // due to it may not install yet
-                            if (excludeSetupWizardHomeActivity) {
+                            if (!allowSetMutation) {
                                 continue;
                             }
 
@@ -6931,7 +6959,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                 continue;
                             }
 
-                            if (removeMatches) {
+                            if (removeMatches && allowSetMutation) {
                                 pir.removeFilter(pa);
                                 changed = true;
                                 if (DEBUG_PREFERRED) {
@@ -6948,7 +6976,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                             if (always && !pa.mPref.sameSet(query, excludeSetupWizardHomeActivity)) {
                                 if (pa.mPref.isSuperset(query, excludeSetupWizardHomeActivity)) {
-                                    if (!excludeSetupWizardHomeActivity) {
+                                    if (allowSetMutation) {
                                         // some components of the set are no longer present in
                                         // the query, but the preferred activity can still be reused
                                         if (DEBUG_PREFERRED) {
@@ -6969,24 +6997,28 @@ public class PackageManagerService extends IPackageManager.Stub
                                         changed = true;
                                     } else {
                                         if (DEBUG_PREFERRED) {
-                                            Slog.i(TAG, "Do not remove preferred activity for launcher"
-                                                    + " during SetupWizard");
+                                            Slog.i(TAG, "Do not remove preferred activity");
                                         }
                                     }
                                 } else {
-                                    Slog.i(TAG,
-                                            "Result set changed, dropping preferred activity for "
-                                                    + intent + " type " + resolvedType);
-                                    if (DEBUG_PREFERRED) {
-                                        Slog.v(TAG, "Removing preferred activity since set changed "
-                                                + pa.mPref.mComponent);
+                                    if (allowSetMutation) {
+                                        Slog.i(TAG,
+                                                "Result set changed, dropping preferred activity "
+                                                        + "for " + intent + " type "
+                                                        + resolvedType);
+                                        if (DEBUG_PREFERRED) {
+                                            Slog.v(TAG,
+                                                    "Removing preferred activity since set changed "
+                                                            + pa.mPref.mComponent);
+                                        }
+                                        pir.removeFilter(pa);
+                                        // Re-add the filter as a "last chosen" entry (!always)
+                                        PreferredActivity lastChosen = new PreferredActivity(
+                                                pa, pa.mPref.mMatch, null, pa.mPref.mComponent,
+                                                false);
+                                        pir.addFilter(lastChosen);
+                                        changed = true;
                                     }
-                                    pir.removeFilter(pa);
-                                    // Re-add the filter as a "last chosen" entry (!always)
-                                    PreferredActivity lastChosen = new PreferredActivity(
-                                            pa, pa.mPref.mMatch, null, pa.mPref.mComponent, false);
-                                    pir.addFilter(lastChosen);
-                                    changed = true;
                                     return null;
                                 }
                             }
@@ -8559,10 +8591,9 @@ public class PackageManagerService extends IPackageManager.Stub
     private void addPackageHoldingPermissions(ArrayList<PackageInfo> list, PackageSetting ps,
             String[] permissions, boolean[] tmp, int flags, int userId) {
         int numMatch = 0;
-        final PermissionsState permissionsState = ps.getPermissionsState();
         for (int i=0; i<permissions.length; i++) {
             final String permission = permissions[i];
-            if (permissionsState.hasPermission(permission, userId)) {
+            if (checkPermission(permission, ps.name, userId) == PERMISSION_GRANTED) {
                 tmp[i] = true;
                 numMatch++;
             } else {
@@ -19165,6 +19196,14 @@ public class PackageManagerService extends IPackageManager.Stub
         final int flags = action.flags;
         final boolean systemApp = isSystemApp(ps);
 
+        // We need to get the permission state before package state is (potentially) destroyed.
+        final SparseBooleanArray hadSuspendAppsPermission = new SparseBooleanArray();
+        // allUserHandles could be null, so call mUserManager.getUserIds() directly which is cached anyway.
+        for (int userId : mUserManager.getUserIds()) {
+            hadSuspendAppsPermission.put(userId, checkPermission(Manifest.permission.SUSPEND_APPS,
+                    packageName, userId) == PERMISSION_GRANTED);
+        }
+
         final int userId = user == null ? UserHandle.USER_ALL : user.getIdentifier();
 
         if ((!systemApp || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)
@@ -19231,8 +19270,7 @@ public class PackageManagerService extends IPackageManager.Stub
             affectedUserIds = resolveUserIds(userId);
         }
         for (final int affectedUserId : affectedUserIds) {
-            if (ps.getPermissionsState().hasPermission(Manifest.permission.SUSPEND_APPS,
-                    affectedUserId)) {
+            if (hadSuspendAppsPermission.get(affectedUserId)) {
                 unsuspendForSuspendingPackage(packageName, affectedUserId);
                 removeAllDistractingPackageRestrictions(affectedUserId);
             }
@@ -20997,8 +21035,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 pkgSetting.setEnabled(newState, userId, callingPackage);
                 if ((newState == COMPONENT_ENABLED_STATE_DISABLED_USER
                         || newState == COMPONENT_ENABLED_STATE_DISABLED)
-                        && pkgSetting.getPermissionsState().hasPermission(
-                                Manifest.permission.SUSPEND_APPS, userId)) {
+                        && checkPermission(Manifest.permission.SUSPEND_APPS, packageName, userId)
+                        == PERMISSION_GRANTED) {
                     // This app should not generally be allowed to get disabled by the UI, but if it
                     // ever does, we don't want to end up with some of the user's apps permanently
                     // suspended.

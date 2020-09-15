@@ -17,8 +17,8 @@
 package android.net;
 
 import static com.android.net.module.util.Inet4AddressUtils.inet4AddressToIntHTL;
-import static com.android.testutils.MiscAssertsKt.assertFieldCountEquals;
-import static com.android.testutils.ParcelUtilsKt.parcelingRoundTrip;
+import static com.android.testutils.MiscAsserts.assertFieldCountEquals;
+import static com.android.testutils.ParcelUtils.parcelingRoundTrip;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

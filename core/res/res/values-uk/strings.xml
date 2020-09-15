@@ -1162,7 +1162,7 @@
     <string name="capital_off" msgid="7443704171014626777">"ВИМК"</string>
     <string name="checked" msgid="9179896827054513119">"вибрано"</string>
     <string name="not_checked" msgid="7972320087569023342">"не вибрано"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"Завершити дію за доп."</string>
+    <string name="whichApplication" msgid="5432266899591255759">"Що використовувати?"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Завершити дію за допомогою %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Завершити дію"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Відкрити за допомогою"</string>

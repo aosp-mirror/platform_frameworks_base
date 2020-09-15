@@ -2942,7 +2942,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 vis = 0;
             }
             if (!mCurPerceptible) {
-                vis = 0;
+                vis &= ~InputMethodService.IME_VISIBLE;
             }
             // mImeWindowVis should be updated before calling shouldShowImeSwitcherLocked().
             final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis);
