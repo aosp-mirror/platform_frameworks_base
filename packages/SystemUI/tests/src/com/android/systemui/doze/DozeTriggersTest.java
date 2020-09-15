@@ -37,6 +37,7 @@ import android.view.Display;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -76,6 +77,8 @@ public class DozeTriggersTest extends SysuiTestCase {
     private DockManager mDockManager;
     @Mock
     private ProximitySensor.ProximityCheck mProximityCheck;
+    @Mock
+    private AuthController mAuthController;
 
     private DozeTriggers mTriggers;
     private FakeSensorManager mSensors;
@@ -100,7 +103,8 @@ public class DozeTriggersTest extends SysuiTestCase {
 
         mTriggers = new DozeTriggers(mContext, mHost, mAlarmManager, config, parameters,
                 asyncSensorManager, wakeLock, mDockManager, mProximitySensor,
-                mProximityCheck, mock(DozeLog.class), mBroadcastDispatcher, new FakeSettings());
+                mProximityCheck, mock(DozeLog.class), mBroadcastDispatcher, new FakeSettings(),
+                mAuthController);
         mTriggers.setDozeMachine(mMachine);
         waitForSensorManager();
     }
@@ -184,6 +188,15 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN, 100, 100,
                 new float[]{1});
         mTriggers.onSensor(DozeLog.REASON_SENSOR_TAP, 100, 100, null);
+    }
+
+    @Test
+    public void testOnSensor_Fingerprint() {
+        final int screenX = 100;
+        final int screenY = 100;
+        final int reason = DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS;
+        mTriggers.onSensor(reason, screenX, screenY, null);
+        verify(mAuthController).onAodInterrupt(eq(screenX), eq(screenY));
     }
 
     private void waitForSensorManager() {
