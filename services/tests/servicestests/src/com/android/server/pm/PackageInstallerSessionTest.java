@@ -176,6 +176,7 @@ public class PackageInstallerSessionTest {
                 /* stageDir */ mTmpDir,
                 /* stageCid */ null,
                 /* files */ null,
+                /* checksums */ null,
                 /* prepared */ true,
                 /* committed */ true,
                 /* destroyed */ staged ? true : false,
