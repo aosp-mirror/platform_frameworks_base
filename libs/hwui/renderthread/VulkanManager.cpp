@@ -516,8 +516,9 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
     flushInfo.fFinishedContext = destroyInfo;
     GrSemaphoresSubmitted submitted = bufferInfo->skSurface->flush(
             SkSurface::BackendSurfaceAccess::kPresent, flushInfo);
-    ALOGE_IF(!bufferInfo->skSurface->getContext(), "Surface is not backed by gpu");
-    bufferInfo->skSurface->getContext()->submit();
+    GrDirectContext* context = GrAsDirectContext(bufferInfo->skSurface->recordingContext());
+    ALOGE_IF(!context, "Surface is not backed by gpu");
+    context->submit();
     if (submitted == GrSemaphoresSubmitted::kYes) {
         VkSemaphoreGetFdInfoKHR getFdInfo;
         getFdInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR;
