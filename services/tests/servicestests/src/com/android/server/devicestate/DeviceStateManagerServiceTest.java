@@ -16,7 +16,7 @@
 
 package com.android.server.devicestate;
 
-import static com.android.server.devicestate.DeviceStateManagerService.INVALID_DEVICE_STATE;
+import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertThrows;
