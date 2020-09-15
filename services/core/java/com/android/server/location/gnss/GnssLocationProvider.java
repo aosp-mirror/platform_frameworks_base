@@ -45,6 +45,7 @@ import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
@@ -700,9 +701,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 Context.LOCATION_SERVICE);
         String provider;
         LocationChangeListener locationListener;
-        LocationRequest locationRequest = new LocationRequest()
-                .setInterval(LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS)
-                .setFastestInterval(LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS);
+        LocationRequest.Builder locationRequest = new LocationRequest.Builder(
+                LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS);
 
         if (independentFromGnss) {
             // For fast GNSS TTFF
@@ -715,8 +715,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             locationListener = mFusedLocationListener;
             locationRequest.setQuality(LocationRequest.ACCURACY_FINE);
         }
-
-        locationRequest.setProvider(provider);
 
         // Ignore location settings if in emergency mode. This is only allowed for
         // isUserEmergency request (introduced in HAL v2.0), or HAL v1.1.
@@ -735,8 +733,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                         provider, durationMillis));
 
         try {
-            locationManager.requestLocationUpdates(locationRequest,
-                    locationListener, mHandler.getLooper());
+            locationManager.requestLocationUpdates(provider, locationRequest.build(),
+                    new HandlerExecutor(mHandler), locationListener);
             locationListener.mNumLocationUpdateRequest++;
             mHandler.postDelayed(() -> {
                 if (--locationListener.mNumLocationUpdateRequest == 0) {
@@ -1952,20 +1950,13 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             // listen for PASSIVE_PROVIDER updates
             LocationManager locManager =
                     (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-            long minTime = 0;
-            float minDistance = 0;
-            LocationRequest request = LocationRequest.createFromDeprecatedProvider(
-                    LocationManager.PASSIVE_PROVIDER,
-                    minTime,
-                    minDistance,
-                    false);
-            // Don't keep track of this request since it's done on behalf of other clients
-            // (which are kept track of separately).
-            request.setHideFromAppOps(true);
             locManager.requestLocationUpdates(
-                    request,
-                    new NetworkLocationListener(),
-                    getLooper());
+                    LocationManager.PASSIVE_PROVIDER,
+                    new LocationRequest.Builder(0)
+                            .setHiddenFromAppOps(true)
+                            .build(),
+                    new HandlerExecutor(this),
+                    new NetworkLocationListener());
 
             updateEnabled();
         }

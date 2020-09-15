@@ -49,7 +49,7 @@ public class LocationUsageLogger {
      * Log a location API usage event.
      */
     public void logLocationApiUsage(int usageType, int apiInUse,
-            String packageName, LocationRequest locationRequest,
+            String packageName, String provider, LocationRequest locationRequest,
             boolean hasListener, boolean hasIntent,
             Geofence geofence, boolean foreground) {
         try {
@@ -64,22 +64,22 @@ public class LocationUsageLogger {
                     usageType, apiInUse, packageName,
                     isLocationRequestNull
                         ? LocationStatsEnums.PROVIDER_UNKNOWN
-                        : bucketizeProvider(locationRequest.getProvider()),
+                        : bucketizeProvider(provider),
                     isLocationRequestNull
                         ? LocationStatsEnums.QUALITY_UNKNOWN
                         : locationRequest.getQuality(),
                     isLocationRequestNull
                         ? LocationStatsEnums.INTERVAL_UNKNOWN
-                        : bucketizeInterval(locationRequest.getInterval()),
+                        : bucketizeInterval(locationRequest.getIntervalMillis()),
                     isLocationRequestNull
                         ? LocationStatsEnums.DISTANCE_UNKNOWN
                         : bucketizeDistance(
-                                locationRequest.getSmallestDisplacement()),
-                    isLocationRequestNull ? 0 : locationRequest.getNumUpdates(),
+                                locationRequest.getMinUpdateDistanceMeters()),
+                    isLocationRequestNull ? 0 : locationRequest.getMaxUpdates(),
                     // only log expireIn for USAGE_STARTED
                     isLocationRequestNull || usageType == LocationStatsEnums.USAGE_ENDED
                         ? LocationStatsEnums.EXPIRATION_UNKNOWN
-                        : bucketizeExpireIn(locationRequest.getExpireIn()),
+                        : bucketizeExpireIn(locationRequest.getDurationMillis()),
                     getCallbackType(apiInUse, hasListener, hasIntent),
                     isGeofenceNull
                         ? LocationStatsEnums.RADIUS_UNKNOWN
