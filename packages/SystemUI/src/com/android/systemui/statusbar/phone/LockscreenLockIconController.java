@@ -502,7 +502,7 @@ public class LockscreenLockIconController {
      * @return true if the visibility changed
      */
     private boolean updateIconVisibility() {
-        boolean onAodOrDocked = mStatusBarStateController.isDozing() && mDocked;
+        boolean onAodOrDocked = mStatusBarStateController.isDozing() || mDocked;
         boolean invisible = onAodOrDocked || mWakeAndUnlockRunning || mShowingLaunchAffordance;
         boolean fingerprintOrBypass = mFingerprintUnlock
                 || mKeyguardBypassController.getBypassEnabled();
