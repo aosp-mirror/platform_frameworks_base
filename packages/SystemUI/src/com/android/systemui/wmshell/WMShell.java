@@ -28,6 +28,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.view.KeyEvent;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -56,6 +57,7 @@ import com.android.wm.shell.protolog.ShellProtoLogImpl;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Optional;
@@ -66,7 +68,8 @@ import javax.inject.Inject;
  * Proxy in SysUiScope to delegate events to controllers in WM Shell library.
  */
 @SysUISingleton
-public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTraceProto> {
+public final class WMShell extends SystemUI
+        implements CommandQueue.Callbacks, ProtoTraceable<SystemUiTraceProto> {
     private final CommandQueue mCommandQueue;
     private final DisplayImeController mDisplayImeController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -100,6 +103,7 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
             ProtoTracer protoTracer) {
         super(context);
         mCommandQueue = commandQueue;
+        mCommandQueue.addCallback(this);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mActivityManagerWrapper = activityManagerWrapper;
         mDisplayImeController = displayImeController;
@@ -293,31 +297,43 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         // Handle commands if provided
-        for (int i = 0; i < args.length; i++) {
-            switch (args[i]) {
-                case "enable-text-logging": {
-                    String[] groups = Arrays.copyOfRange(args, i + 1, args.length);
-                    startTextLogging(groups);
-                    pw.println("Starting logging on groups: " + Arrays.toString(groups));
-                    return;
-                }
-                case "disable-text-logging": {
-                    String[] groups = Arrays.copyOfRange(args, i + 1, args.length);
-                    stopTextLogging(groups);
-                    pw.println("Stopping logging on groups: " + Arrays.toString(groups));
-                    return;
-                }
-            }
+        if (handleLoggingCommand(args, pw)) {
+            return;
         }
 
         // Dump WMShell stuff here if no commands were handled
     }
 
-    private void startTextLogging(String... groups) {
-        ShellProtoLogImpl.getSingleInstance().startTextLogging(mContext, groups);
+    @Override
+    public void handleWindowManagerLoggingCommand(String[] args, ParcelFileDescriptor outFd) {
+        PrintWriter pw = new PrintWriter(new ParcelFileDescriptor.AutoCloseOutputStream(outFd));
+        handleLoggingCommand(args, pw);
+        pw.flush();
+        pw.close();
     }
 
-    private void stopTextLogging(String... groups) {
-        ShellProtoLogImpl.getSingleInstance().stopTextLogging(groups);
+    private boolean handleLoggingCommand(String[] args, PrintWriter pw) {
+        ShellProtoLogImpl protoLogImpl = ShellProtoLogImpl.getSingleInstance();
+        for (int i = 0; i < args.length; i++) {
+            switch (args[i]) {
+                case "enable-text": {
+                    String[] groups = Arrays.copyOfRange(args, i + 1, args.length);
+                    int result = protoLogImpl.startTextLogging(mContext, groups, pw);
+                    if (result == 0) {
+                        pw.println("Starting logging on groups: " + Arrays.toString(groups));
+                    }
+                    return true;
+                }
+                case "disable-text": {
+                    String[] groups = Arrays.copyOfRange(args, i + 1, args.length);
+                    int result = protoLogImpl.stopTextLogging(groups, pw);
+                    if (result == 0) {
+                        pw.println("Stopping logging on groups: " + Arrays.toString(groups));
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

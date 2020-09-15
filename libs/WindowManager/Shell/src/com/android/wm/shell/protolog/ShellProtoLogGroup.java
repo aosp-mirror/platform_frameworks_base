@@ -24,6 +24,8 @@ import com.android.internal.protolog.common.IProtoLogGroup;
  * This file is used by the ProtoLogTool to generate optimized logging code.
  */
 public enum ShellProtoLogGroup implements IProtoLogGroup {
+    // NOTE: Since we enable these from the same WM ShellCommand, these names should not conflict
+    // with those in the framework ProtoLogGroup
     WM_SHELL_TASK_ORG(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
             Consts.TAG_WM_SHELL),
     TEST_GROUP(true, true, false, "WindowManagerShellProtoLogTest");
