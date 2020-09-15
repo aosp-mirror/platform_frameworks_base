@@ -36,6 +36,7 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.DumpState;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageSettingBase;
@@ -137,6 +138,10 @@ public final class BasePermission {
     }
     public void setPermission(@Nullable ParsedPermission perm) {
         this.perm = perm;
+    }
+
+    public boolean hasGids() {
+        return !ArrayUtils.isEmpty(gids);
     }
 
     public int[] computeGids(int userId) {
@@ -419,9 +424,9 @@ public final class BasePermission {
     }
 
     public void enforceDeclaredUsedAndRuntimeOrDevelopment(AndroidPackage pkg,
-            PermissionsState permsState) {
+            UidPermissionState uidState) {
         int index = pkg.getRequestedPermissions().indexOf(name);
-        if (!permsState.hasRequestedPermission(name) && index == -1) {
+        if (!uidState.hasRequestedPermission(name) && index == -1) {
             throw new SecurityException("Package " + pkg.getPackageName()
                     + " has not requested permission " + name);
         }
