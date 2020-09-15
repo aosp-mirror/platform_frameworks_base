@@ -39,6 +39,7 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +48,8 @@ import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -65,16 +68,17 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.ShadeViewRefactor;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -90,6 +94,7 @@ import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.row.ForegroundServiceDungeonView;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
@@ -122,6 +127,7 @@ import kotlin.Unit;
 @StatusBarComponent.StatusBarScope
 public class NotificationStackScrollLayoutController {
     private static final String TAG = "StackScrollerController";
+    private static final boolean DEBUG = false;
 
     private final boolean mAllowLongPress;
     private final NotificationGutsManager mNotificationGutsManager;
@@ -142,6 +148,11 @@ public class NotificationStackScrollLayoutController {
     private final NotifCollection mNotifCollection;
     private final NotificationEntryManager mNotificationEntryManager;
     private final IStatusBarService mIStatusBarService;
+    private final UiEventLogger mUiEventLogger;
+    private final ForegroundServiceDismissalFeatureController mFgFeatureController;
+    private final ForegroundServiceSectionController mFgServicesSectionController;
+    private final LayoutInflater mLayoutInflater;
+    private final NotificationRemoteInputManager mRemoteInputManager;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -156,6 +167,7 @@ public class NotificationStackScrollLayoutController {
     private NotificationSwipeHelper mSwipeHelper;
     private boolean mShowEmptyShadeView;
     private int mBarState;
+    private HeadsUpAppearanceController mHeadsUpAppearanceController;
 
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
@@ -497,29 +509,30 @@ public class NotificationStackScrollLayoutController {
 
     private final OnHeadsUpChangedListener mOnHeadsUpChangedListener =
             new OnHeadsUpChangedListener() {
-        @Override
-        public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
-            mView.setInHeadsUpPinnedMode(inPinnedMode);
-        }
+                @Override
+                public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
+                    mView.setInHeadsUpPinnedMode(inPinnedMode);
+                }
 
-        @Override
-        public void onHeadsUpPinned(NotificationEntry entry) {
+                @Override
+                public void onHeadsUpPinned(NotificationEntry entry) {
+                    mNotificationRoundnessManager.updateView(entry.getRow(), false /* animate */);
+                }
 
-        }
+                @Override
+                public void onHeadsUpUnPinned(NotificationEntry entry) {
+                    mNotificationRoundnessManager.updateView(entry.getRow(), true /* animate */);
+                }
 
-        @Override
-        public void onHeadsUpUnPinned(NotificationEntry entry) {
-
-        }
-
-        @Override
-        public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-            long numEntries = mHeadsUpManager.getAllEntries().count();
-            NotificationEntry topEntry = mHeadsUpManager.getTopEntry();
-            mView.setNumHeadsUp(numEntries);
-            mView.setTopHeadsUpEntry(topEntry);
-        }
-    };
+                @Override
+                public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
+                    long numEntries = mHeadsUpManager.getAllEntries().count();
+                    NotificationEntry topEntry = mHeadsUpManager.getTopEntry();
+                    mView.setNumHeadsUp(numEntries);
+                    mView.setTopHeadsUpEntry(topEntry);
+                    mNotificationRoundnessManager.updateView(entry.getRow(), false /* animate */);
+                }
+            };
 
     private final ZenModeController.Callback mZenModeControllerCallback =
             new ZenModeController.Callback() {
@@ -558,7 +571,12 @@ public class NotificationStackScrollLayoutController {
             NotifPipeline notifPipeline,
             NotifCollection notifCollection,
             NotificationEntryManager notificationEntryManager,
-            IStatusBarService iStatusBarService) {
+            IStatusBarService iStatusBarService,
+            UiEventLogger uiEventLogger,
+            ForegroundServiceDismissalFeatureController fgFeatureController,
+            ForegroundServiceSectionController fgServicesSectionController,
+            LayoutInflater layoutInflater,
+            NotificationRemoteInputManager remoteInputManager) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -599,6 +617,11 @@ public class NotificationStackScrollLayoutController {
         mNotifCollection = notifCollection;
         mNotificationEntryManager = notificationEntryManager;
         mIStatusBarService = iStatusBarService;
+        mUiEventLogger = uiEventLogger;
+        mFgFeatureController = fgFeatureController;
+        mFgServicesSectionController = fgServicesSectionController;
+        mLayoutInflater = layoutInflater;
+        mRemoteInputManager = remoteInputManager;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -607,6 +630,17 @@ public class NotificationStackScrollLayoutController {
         mView.setTouchHandler(new TouchHandler());
         mView.setStatusBar(mStatusBar);
         mView.setDismissAllAnimationListener(this::onAnimationEnd);
+        mView.setDismissListener((selection) -> mUiEventLogger.log(
+                NotificationPanelEvent.fromSelection(selection)));
+        mView.setFooterDismissListener(() ->
+                mMetricsLogger.action(MetricsEvent.ACTION_DISMISS_ALL_NOTES));
+        mView.setRemoteInputManager(mRemoteInputManager);
+
+        if (mFgFeatureController.isForegroundServiceDismissalEnabled()) {
+            mView.initializeForegroundServiceSection(
+                    (ForegroundServiceDungeonView) mFgServicesSectionController.createView(
+                            mLayoutInflater));
+        }
 
         mSwipeHelper = mNotificationSwipeHelperBuilder
                 .setSwipeDirection(SwipeHelper.X)
@@ -633,7 +667,6 @@ public class NotificationStackScrollLayoutController {
         mView.initView(mView.getContext(), mKeyguardBypassController::getBypassEnabled,
                 mSwipeHelper);
 
-        mHeadsUpManager.addListener(mNotificationRoundnessManager); // TODO: why is this here?
         mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
         mHeadsUpManager.setAnimationStateHandler(mView::setHeadsUpGoingAwayAnimationsAllowed);
         mDynamicPrivacyController.addListener(mDynamicPrivacyControllerListener);
@@ -707,6 +740,7 @@ public class NotificationStackScrollLayoutController {
     }
 
     public void setHeadsUpAppearanceController(HeadsUpAppearanceController controller) {
+        mHeadsUpAppearanceController = controller;
         mView.setHeadsUpAppearanceController(controller);
     }
 
@@ -755,6 +789,7 @@ public class NotificationStackScrollLayoutController {
 
     public void setTrackingHeadsUp(ExpandableNotificationRow expandableNotificationRow) {
         mView.setTrackingHeadsUp(expandableNotificationRow);
+        mNotificationRoundnessManager.setTrackingHeadsUp(expandableNotificationRow);
     }
 
     public void wakeUpFromPulse() {
@@ -1293,6 +1328,37 @@ public class NotificationStackScrollLayoutController {
         return mDynamicPrivacyController.isInLockedDownShade();
     }
 
+    /**
+     * Enum for UiEvent logged from this class
+     */
+    enum NotificationPanelEvent implements UiEventLogger.UiEventEnum {
+        INVALID(0),
+        @UiEvent(doc = "User dismissed all notifications from notification panel.")
+        DISMISS_ALL_NOTIFICATIONS_PANEL(312),
+        @UiEvent(doc = "User dismissed all silent notifications from notification panel.")
+        DISMISS_SILENT_NOTIFICATIONS_PANEL(314);
+        private final int mId;
+        NotificationPanelEvent(int id) {
+            mId = id;
+        }
+        @Override public int getId() {
+            return mId;
+        }
+
+        public static UiEventLogger.UiEventEnum fromSelection(@SelectedRows int selection) {
+            if (selection == ROWS_ALL) {
+                return DISMISS_ALL_NOTIFICATIONS_PANEL;
+            }
+            if (selection == NotificationStackScrollLayout.ROWS_GENTLE) {
+                return DISMISS_SILENT_NOTIFICATIONS_PANEL;
+            }
+            if (NotificationStackScrollLayoutController.DEBUG) {
+                throw new IllegalArgumentException("Unexpected selection" + selection);
+            }
+            return INVALID;
+        }
+    }
+
     private class NotificationListContainerImpl implements NotificationListContainer {
 
         @Override
@@ -1408,7 +1474,10 @@ public class NotificationStackScrollLayoutController {
 
         @Override
         public void bindRow(ExpandableNotificationRow row) {
-            mView.bindRow(row);
+            row.setHeadsUpAnimatingAwayListener(animatingAway -> {
+                mNotificationRoundnessManager.updateView(row, false);
+                mHeadsUpAppearanceController.updateHeader(row.getEntry());
+            });
         }
 
         @Override
