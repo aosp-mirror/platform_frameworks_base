@@ -43,6 +43,7 @@ class BubbleOverflow(
     private var bitmapSize = 0
     private var iconBitmapSize = 0
     private var dotColor = 0
+    private var showDot = false
 
     private val inflater: LayoutInflater = LayoutInflater.from(context)
     private val expandedView: BubbleExpandedView = inflater
@@ -118,10 +119,16 @@ class BubbleOverflow(
 
         // Attach BubbleOverflow to BadgedImageView
         overflowBtn.setRenderedBubble(this)
+        overflowBtn.removeDotSuppressionFlag(BadgedImageView.SuppressionFlag.FLYOUT_VISIBLE)
     }
 
     fun setVisible(visible: Int) {
         overflowBtn.visibility = visible
+    }
+
+    fun setShowDot(show: Boolean) {
+        showDot = show
+        overflowBtn.updateDotVisibility(true /* animate */)
     }
 
     override fun getExpandedView(): BubbleExpandedView? {
@@ -141,7 +148,7 @@ class BubbleOverflow(
     }
 
     override fun showDot(): Boolean {
-        return false
+        return showDot
     }
 
     override fun getDotPath(): Path? {
