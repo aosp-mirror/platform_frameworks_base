@@ -219,18 +219,12 @@ public class TaskStackChangedListenerTest {
         activity.setDetachedFromWindowLatch(onDetachedFromWindowLatch);
         final int id = activity.getTaskId();
 
-        // Test for onTaskCreated.
-        waitForCallback(taskCreatedLaunchLatch);
+        // Test for onTaskCreated and onTaskMovedToFront
+        waitForCallback(taskMovedToFrontLatch);
+        assertEquals(0, taskCreatedLaunchLatch.getCount());
         assertEquals(id, params[0]);
         ComponentName componentName = (ComponentName) params[1];
         assertEquals(ActivityTaskChangeCallbacks.class.getName(), componentName.getClassName());
-
-        // Test for onTaskMovedToFront.
-        assertEquals(1, taskMovedToFrontLatch.getCount());
-        mService.moveTaskToFront(null, getInstrumentation().getContext().getPackageName(), id, 0,
-                null);
-        waitForCallback(taskMovedToFrontLatch);
-        assertEquals(activity.getTaskId(), params[0]);
 
         // Test for onTaskRemovalStarted.
         assertEquals(1, taskRemovalStartedLatch.getCount());
