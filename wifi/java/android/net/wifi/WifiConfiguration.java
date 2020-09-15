@@ -2037,7 +2037,8 @@ public class WifiConfiguration implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "RECENT_FAILURE_", value = {
             RECENT_FAILURE_NONE,
-            RECENT_FAILURE_AP_UNABLE_TO_HANDLE_NEW_STA})
+            RECENT_FAILURE_AP_UNABLE_TO_HANDLE_NEW_STA,
+            RECENT_FAILURE_MBO_OCE_DISCONNECT})
     public @interface RecentFailureReason {}
 
     /**
@@ -2053,6 +2054,13 @@ public class WifiConfiguration implements Parcelable {
      */
     @SystemApi
     public static final int RECENT_FAILURE_AP_UNABLE_TO_HANDLE_NEW_STA = 17;
+
+    /**
+     * This network recently disconnected as a result of MBO/OCE.
+     * @hide
+     */
+    @SystemApi
+    public static final int RECENT_FAILURE_MBO_OCE_DISCONNECT = 1001;
 
     /**
      * Get the failure reason for the most recent connection attempt, or
