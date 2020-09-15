@@ -291,6 +291,7 @@ LIBANDROID {
     AThermal_getCurrentThermalStatus; # introduced=30
     AThermal_registerThermalStatusListener; # introduced=30
     AThermal_unregisterThermalStatusListener; # introduced=30
+    AThermal_getThermalHeadroom; # introduced=31
   local:
     *;
 };
