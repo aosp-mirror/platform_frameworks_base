@@ -281,4 +281,13 @@ public final class WindowManagerImpl implements WindowManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    @Override
+    public void holdLock(int durationMs) {
+        try {
+            WindowManagerGlobal.getWindowManagerService().holdLock(durationMs);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

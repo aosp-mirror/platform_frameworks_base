@@ -4796,4 +4796,19 @@ public class ActivityManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Holds the AM lock for the specified amount of milliseconds.
+     * This is intended for use by the tests that need to imitate lock contention.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.INJECT_EVENTS)
+    public void holdLock(int durationMs) {
+        try {
+            getService().holdLock(durationMs);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

@@ -3994,4 +3994,15 @@ public interface WindowManager extends ViewManager {
             }
         }
     }
+
+    /**
+     * Holds the WM lock for the specified amount of milliseconds.
+     * Intended for use by the tests that need to imitate lock contention.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.INJECT_EVENTS)
+    default void holdLock(int durationMs) {
+        throw new UnsupportedOperationException();
+    }
 }
