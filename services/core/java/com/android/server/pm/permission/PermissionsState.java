@@ -86,10 +86,6 @@ public final class PermissionsState {
         copyFrom(prototype);
     }
 
-    public int[] getGlobalGids() {
-        return mGlobalGids;
-    }
-
     /**
      * Sets the global gids, applicable to all users.
      *
@@ -829,7 +825,7 @@ public final class PermissionsState {
 
                 PermissionState userState = mUserStates.get(userId);
                 if (userState == null) {
-                    userState = new PermissionState(mPerm);
+                    userState = new PermissionState(mPerm.getName());
                     mUserStates.put(userId, userState);
                 }
 
@@ -912,7 +908,7 @@ public final class PermissionsState {
                     }
                     return userState.mFlags != oldFlags;
                 } else if (newFlags != 0) {
-                    userState = new PermissionState(mPerm);
+                    userState = new PermissionState(mPerm.getName());
                     userState.mFlags = newFlags;
                     mUserStates.put(userId, userState);
                     return true;
@@ -933,16 +929,16 @@ public final class PermissionsState {
     }
 
     public static final class PermissionState {
-        private final BasePermission mPermission;
+        private final String mName;
         private boolean mGranted;
         private int mFlags;
 
-        public PermissionState(BasePermission permission) {
-            mPermission = permission;
+        public PermissionState(String name) {
+            mName = name;
         }
 
         public PermissionState(PermissionState other) {
-            mPermission = other.mPermission;
+            mName = other.mName;
             mGranted = other.mGranted;
             mFlags = other.mFlags;
         }
@@ -951,12 +947,8 @@ public final class PermissionsState {
             return !mGranted && mFlags == 0;
         }
 
-        public BasePermission getPermission() {
-            return mPermission;
-        }
-
         public String getName() {
-            return mPermission.getName();
+            return mName;
         }
 
         public boolean isGranted() {
