@@ -5854,10 +5854,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return nai == getDefaultNetwork();
     }
 
-    private boolean isDefaultRequest(NetworkRequestInfo nri) {
-        return nri.request.requestId == mDefaultRequest.requestId;
-    }
-
     // TODO : remove this method. It's a stopgap measure to help sheperding a number of dependent
     // changes that would conflict throughout the automerger graph. Having this method temporarily
     // helps with the process of going through with all these dependent changes across the entire
