@@ -41,6 +41,7 @@ import android.hardware.SensorPrivacyManager;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.media.AudioManager;
 import android.media.MediaRouter2Manager;
 import android.media.session.MediaSessionManager;
@@ -171,6 +172,13 @@ public class FrameworkServicesModule {
     static FaceManager provideFaceManager(Context context) {
         return context.getSystemService(FaceManager.class);
 
+    }
+
+    @Provides
+    @Singleton
+    @Nullable
+    static FingerprintManager providesFingerprintManager(Context context) {
+        return context.getSystemService(FingerprintManager.class);
     }
 
     @Provides
