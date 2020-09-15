@@ -551,6 +551,11 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
             return;
         }
 
+        if (mLeash == null) {
+            Log.e(TAG, "PiP Leash is not yet ready.");
+            return;
+        }
+
         if (Looper.getMainLooper() != Looper.myLooper()) {
             throw new RuntimeException("PipMenuView needs to be attached on the main thread.");
         }
@@ -578,6 +583,13 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
             mPipMenuSurface = null;
             mPipViewHost = null;
         }
+    }
+
+    /**
+     * Return whether the PiP Menu has been attached to the leash yet.
+     */
+    public boolean isPipMenuViewHostAttached() {
+        return mPipViewHost != null;
     }
 
 
