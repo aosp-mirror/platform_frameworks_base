@@ -16,66 +16,101 @@
 
 package com.android.internal.location;
 
+import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.location.LocationRequest;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.WorkSource;
 import android.util.TimeUtils;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-/** @hide */
+/**
+ * Location provider request.
+ * @hide
+ */
 public final class ProviderRequest implements Parcelable {
 
-    public static final ProviderRequest EMPTY_REQUEST = new ProviderRequest(false, Long.MAX_VALUE,
-            false, false,
-            Collections.emptyList(), new WorkSource());
+    public static final long INTERVAL_DISABLED = Long.MAX_VALUE;
 
-    /** Location reporting is requested (true) */
-    @UnsupportedAppUsage
+    public static final ProviderRequest EMPTY_REQUEST = new ProviderRequest(
+            INTERVAL_DISABLED, false, false, Collections.emptyList(), new WorkSource());
+
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "{@link "
+            + "ProviderRequest}")
     public final boolean reportLocation;
-
-    /** The smallest requested interval */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "{@link "
+            + "ProviderRequest}")
     public final long interval;
-
-    /**
-     * Whether provider shall make stronger than normal tradeoffs to substantially restrict power
-     * use.
-     */
-    public final boolean lowPowerMode;
-
-    /**
-     * When this flag is true, providers should ignore all location settings, user consents, power
-     * restrictions or any other restricting factors and always satisfy this request to the best of
-     * their ability. This flag should only be used in event of an emergency.
-     */
-    public final boolean locationSettingsIgnored;
-
-    /**
-     * A more detailed set of requests.
-     * <p>Location Providers can optionally use this to
-     * fine tune location updates, for example when there
-     * is a high power slow interval request and a
-     * low power fast interval request.
-     */
-    @UnsupportedAppUsage
+    private final boolean mLowPower;
+    private final boolean mLocationSettingsIgnored;
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "{@link "
+            + "ProviderRequest}")
     public final List<LocationRequest> locationRequests;
+    private final WorkSource mWorkSource;
 
-    public final WorkSource workSource;
+    private ProviderRequest(long intervalMillis, boolean lowPower,
+            boolean locationSettingsIgnored, @NonNull List<LocationRequest> locationRequests,
+            @NonNull WorkSource workSource) {
+        reportLocation = intervalMillis != INTERVAL_DISABLED;
+        interval = intervalMillis;
+        mLowPower = lowPower;
+        mLocationSettingsIgnored = locationSettingsIgnored;
+        this.locationRequests = locationRequests;
+        mWorkSource = workSource;
+    }
 
-    private ProviderRequest(boolean reportLocation, long interval, boolean lowPowerMode,
-            boolean locationSettingsIgnored, List<LocationRequest> locationRequests,
-            WorkSource workSource) {
-        this.reportLocation = reportLocation;
-        this.interval = interval;
-        this.lowPowerMode = lowPowerMode;
-        this.locationSettingsIgnored = locationSettingsIgnored;
-        this.locationRequests = Objects.requireNonNull(locationRequests);
-        this.workSource = Objects.requireNonNull(workSource);
+    /**
+     * True if this is an active request with a valid location reporting interval, false if this
+     * request is inactive and does not require any locations to be reported.
+     */
+    public boolean isActive() {
+        return interval != INTERVAL_DISABLED;
+    }
+
+    /**
+     * The interval at which a provider should report location. Will return
+     * {@link #INTERVAL_DISABLED} for an inactive request.
+     */
+    public @IntRange(from = 0) long getIntervalMillis() {
+        return interval;
+    }
+
+    /**
+     * Whether any applicable hardware low power modes should be used to satisfy this request.
+     */
+    public boolean isLowPower() {
+        return mLowPower;
+    }
+
+    /**
+     * Whether the provider should ignore all location settings, user consents, power restrictions
+     * or any other restricting factors and always satisfy this request to the best of their
+     * ability. This should only be used in case of a user initiated emergency.
+     */
+    public boolean isLocationSettingsIgnored() {
+        return mLocationSettingsIgnored;
+    }
+
+    /**
+     * The full list of location requests contributing to this provider request.
+     */
+    public @NonNull List<LocationRequest> getLocationRequests() {
+        return locationRequests;
+    }
+
+    /**
+     * The power blame for this provider request.
+     */
+    public @NonNull WorkSource getWorkSource() {
+        return mWorkSource;
     }
 
     public static final Parcelable.Creator<ProviderRequest> CREATOR =
@@ -83,9 +118,8 @@ public final class ProviderRequest implements Parcelable {
                 @Override
                 public ProviderRequest createFromParcel(Parcel in) {
                     return new ProviderRequest(
-                            /* reportLocation= */ in.readBoolean(),
-                            /* interval= */ in.readLong(),
-                            /* lowPowerMode= */ in.readBoolean(),
+                            /* intervalMillis= */ in.readLong(),
+                            /* lowPower= */ in.readBoolean(),
                             /* locationSettingsIgnored= */ in.readBoolean(),
                             /* locationRequests= */
                             in.createTypedArrayList(LocationRequest.CREATOR),
@@ -105,29 +139,54 @@ public final class ProviderRequest implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeBoolean(reportLocation);
         parcel.writeLong(interval);
-        parcel.writeBoolean(lowPowerMode);
-        parcel.writeBoolean(locationSettingsIgnored);
+        parcel.writeBoolean(mLowPower);
+        parcel.writeBoolean(mLocationSettingsIgnored);
         parcel.writeTypedList(locationRequests);
-        parcel.writeTypedObject(workSource, flags);
+        parcel.writeTypedObject(mWorkSource, flags);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ProviderRequest that = (ProviderRequest) o;
+        if (interval == INTERVAL_DISABLED) {
+            return that.interval == INTERVAL_DISABLED;
+        } else {
+            return interval == that.interval
+                    && mLowPower == that.mLowPower
+                    && mLocationSettingsIgnored == that.mLocationSettingsIgnored
+                    && locationRequests.equals(that.locationRequests)
+                    && mWorkSource.equals(that.mWorkSource);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(interval, mWorkSource);
     }
 
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
         s.append("ProviderRequest[");
-        if (reportLocation) {
-            s.append("interval=");
+        if (interval != INTERVAL_DISABLED) {
+            s.append("@");
             TimeUtils.formatDuration(interval, s);
-            if (lowPowerMode) {
-                s.append(", lowPowerMode");
+            if (mLowPower) {
+                s.append(", lowPower");
             }
-            if (locationSettingsIgnored) {
+            if (mLocationSettingsIgnored) {
                 s.append(", locationSettingsIgnored");
             }
-            if (!workSource.isEmpty()) {
-                s.append(", ").append(workSource);
+            if (!mWorkSource.isEmpty()) {
+                s.append(", ").append(mWorkSource);
             }
         } else {
             s.append("OFF");
@@ -140,71 +199,64 @@ public final class ProviderRequest implements Parcelable {
      * A Builder for {@link ProviderRequest}s.
      */
     public static class Builder {
-        private long mInterval = Long.MAX_VALUE;
-        private boolean mLowPowerMode;
+        private long mIntervalMillis = INTERVAL_DISABLED;
+        private boolean mLowPower;
         private boolean mLocationSettingsIgnored;
         private List<LocationRequest> mLocationRequests = Collections.emptyList();
         private WorkSource mWorkSource = new WorkSource();
 
-        public long getInterval() {
-            return mInterval;
-        }
-
-        /** Sets the request interval. */
-        public Builder setInterval(long interval) {
-            this.mInterval = interval;
+        /**
+         * Sets the request interval. Use {@link #INTERVAL_DISABLED} for an inactive request.
+         * Defaults to {@link #INTERVAL_DISABLED}.
+         */
+        public @NonNull Builder setIntervalMillis(@IntRange(from = 0) long intervalMillis) {
+            mIntervalMillis = Preconditions.checkArgumentInRange(intervalMillis, 0, Long.MAX_VALUE,
+                    "intervalMillis");
             return this;
         }
 
-        public boolean isLowPowerMode() {
-            return mLowPowerMode;
-        }
-
-        /** Sets whether low power mode is enabled. */
-        public Builder setLowPowerMode(boolean lowPowerMode) {
-            this.mLowPowerMode = lowPowerMode;
+        /**
+         * Sets whether hardware low power mode should be used. False by default.
+         */
+        public @NonNull Builder setLowPower(boolean lowPower) {
+            mLowPower = lowPower;
             return this;
         }
 
-        public boolean isLocationSettingsIgnored() {
-            return mLocationSettingsIgnored;
-        }
-
-        /** Sets whether location settings should be ignored. */
-        public Builder setLocationSettingsIgnored(boolean locationSettingsIgnored) {
+        /**
+         * Sets whether location settings should be ignored. False by default.
+         */
+        public @NonNull Builder setLocationSettingsIgnored(boolean locationSettingsIgnored) {
             this.mLocationSettingsIgnored = locationSettingsIgnored;
             return this;
         }
 
-        public List<LocationRequest> getLocationRequests() {
-            return mLocationRequests;
-        }
-
-        /** Sets the {@link LocationRequest}s associated with this request. */
-        public Builder setLocationRequests(List<LocationRequest> locationRequests) {
+        /**
+         * Sets the {@link LocationRequest}s associated with this request. Empty by default.
+         */
+        public @NonNull Builder setLocationRequests(
+                @NonNull List<LocationRequest> locationRequests) {
             this.mLocationRequests = Objects.requireNonNull(locationRequests);
             return this;
         }
 
-        public WorkSource getWorkSource() {
-            return mWorkSource;
-        }
-
-        /** Sets the work source. */
-        public Builder setWorkSource(WorkSource workSource) {
+        /**
+         * Sets the work source for power blame. Empty by default.
+         */
+        public @NonNull Builder setWorkSource(@NonNull WorkSource workSource) {
             mWorkSource = Objects.requireNonNull(workSource);
             return this;
         }
 
         /**
-         * Builds a ProviderRequest object with the set information.
+         * Builds a ProviderRequest.
          */
-        public ProviderRequest build() {
-            if (mInterval == Long.MAX_VALUE) {
+        public @NonNull ProviderRequest build() {
+            if (mIntervalMillis == INTERVAL_DISABLED) {
                 return EMPTY_REQUEST;
             } else {
-                return new ProviderRequest(true, mInterval, mLowPowerMode,
-                        mLocationSettingsIgnored, mLocationRequests, mWorkSource);
+                return new ProviderRequest(mIntervalMillis, mLowPower, mLocationSettingsIgnored,
+                        mLocationRequests, mWorkSource);
             }
         }
     }

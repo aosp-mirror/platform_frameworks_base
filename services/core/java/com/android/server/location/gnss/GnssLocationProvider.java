@@ -956,8 +956,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         enabled &= !mDisableGpsForPowerManager;
 
         // .. but enable anyway, if there's an active settings-ignored request (e.g. ELS)
-        enabled |= (mProviderRequest != null && mProviderRequest.reportLocation
-                && mProviderRequest.locationSettingsIgnored);
+        enabled |= (mProviderRequest != null
+                && mProviderRequest.isActive()
+                && mProviderRequest.isLocationSettingsIgnored());
 
         // ... and, finally, disable anyway, if device is being shut down
         enabled &= !mShutdown;
@@ -992,20 +993,20 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     // Called when the requirements for GPS may have changed
     private void updateRequirements() {
-        if (mProviderRequest == null || mProviderRequest.workSource == null) {
+        if (mProviderRequest == null || mProviderRequest.getWorkSource() == null) {
             return;
         }
 
         if (DEBUG) Log.d(TAG, "setRequest " + mProviderRequest);
-        if (mProviderRequest.reportLocation && isGpsEnabled()) {
+        if (mProviderRequest.isActive() && isGpsEnabled()) {
             // update client uids
-            updateClientUids(mProviderRequest.workSource);
+            updateClientUids(mProviderRequest.getWorkSource());
 
-            mFixInterval = (int) mProviderRequest.interval;
-            mLowPowerMode = mProviderRequest.lowPowerMode;
+            mFixInterval = (int) mProviderRequest.getIntervalMillis();
+            mLowPowerMode = mProviderRequest.isLowPower();
             // check for overflow
-            if (mFixInterval != mProviderRequest.interval) {
-                Log.w(TAG, "interval overflow: " + mProviderRequest.interval);
+            if (mFixInterval != mProviderRequest.getIntervalMillis()) {
+                Log.w(TAG, "interval overflow: " + mProviderRequest.getIntervalMillis());
                 mFixInterval = Integer.MAX_VALUE;
             }
 
@@ -1205,7 +1206,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             }
 
             int interval = (hasCapability(GPS_CAPABILITY_SCHEDULING) ? mFixInterval : 1000);
-            mLowPowerMode = mProviderRequest.lowPowerMode;
+            mLowPowerMode = mProviderRequest.isLowPower();
             if (!setPositionMode(mPositionMode, GPS_POSITION_RECURRENCE_PERIODIC,
                     interval, 0, 0, mLowPowerMode)) {
                 setStarted(false);
