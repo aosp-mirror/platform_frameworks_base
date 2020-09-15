@@ -467,7 +467,7 @@ public class PackageParserTest {
             ParsedInstrumentation b) {
         assertComponentsEqual(a, b);
 
-        // Sanity check for InstrumentationInfo.
+        // Validity check for InstrumentationInfo.
         assertEquals(a.getTargetPackage(), b.getTargetPackage());
         assertEquals(a.getTargetProcesses(), b.getTargetProcesses());
         assertEquals(a.isHandleProfiling(), b.isHandleProfiling());
@@ -482,7 +482,7 @@ public class PackageParserTest {
     ) {
         assertComponentsEqual(a, b);
 
-        // Sanity check for ServiceInfo.
+        // Validity check for ServiceInfo.
         ServiceInfo aInfo = PackageInfoUtils.generateServiceInfo(aPkg, a, 0,
                 new PackageUserState(), 0, mockPkgSetting(aPkg));
         ServiceInfo bInfo = PackageInfoUtils.generateServiceInfo(bPkg, b, 0,
@@ -509,7 +509,7 @@ public class PackageParserTest {
     ) {
         assertComponentsEqual(a, b);
 
-        // Sanity check for ActivityInfo.
+        // Validity check for ActivityInfo.
         ActivityInfo aInfo = PackageInfoUtils.generateActivityInfo(aPkg, a, 0,
                 new PackageUserState(), 0, mockPkgSetting(aPkg));
         ActivityInfo bInfo = PackageInfoUtils.generateActivityInfo(bPkg, b, 0,
@@ -522,7 +522,7 @@ public class PackageParserTest {
             ParsedPermissionGroup b) {
         assertComponentsEqual(a, b);
 
-        // Sanity check for PermissionGroupInfo.
+        // Validity check for PermissionGroupInfo.
         assertEquals(a.getName(), b.getName());
         assertEquals(a.getDescriptionRes(), b.getDescriptionRes());
     }
@@ -665,13 +665,13 @@ public class PackageParserTest {
             }
 
             if (List.class.isAssignableFrom(fieldType)) {
-                // Sanity check for list fields: Assume they're non-null and contain precisely
+                // Validity check for list fields: Assume they're non-null and contain precisely
                 // one element.
                 List<?> list = (List<?>) f.get(pkg);
                 assertNotNull("List was null: " + f, list);
                 assertEquals(1, list.size());
             } else if (fieldType.getComponentType() != null) {
-                // Sanity check for array fields: Assume they're non-null and contain precisely
+                // Validity check for array fields: Assume they're non-null and contain precisely
                 // one element.
                 Object array = f.get(pkg);
                 assertNotNull(Array.get(array, 0));

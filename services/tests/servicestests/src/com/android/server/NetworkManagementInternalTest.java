@@ -81,14 +81,14 @@ public class NetworkManagementInternalTest {
                 mNmi.isNetworkRestrictedForUid(TEST_UID));
         mInjector.reset();
 
-        // Data saver is on and uid is not whitelisted
+        // Data saver is on and uid is not allowlisted
         mInjector.setDataSaverMode(true);
         mInjector.setUidOnMeteredNetworkList(false, TEST_UID, false);
         assertTrue("Should be true since data saver is on and the uid is not whitelisted",
                 mNmi.isNetworkRestrictedForUid(TEST_UID));
         mInjector.reset();
 
-        // Data saver is on and uid is whitelisted
+        // Data saver is on and uid is allowlisted
         mInjector.setDataSaverMode(true);
         mInjector.setUidOnMeteredNetworkList(false, TEST_UID, true);
         assertFalse("Should be false since data saver is on and the uid is whitelisted",

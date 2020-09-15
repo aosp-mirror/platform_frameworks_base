@@ -382,7 +382,7 @@ public interface InputMethod {
 
     /**
      * Update token of the client window requesting {@link #showSoftInput(int, ResultReceiver)}
-     * @param showInputToken dummy app window token for window requesting
+     * @param showInputToken placeholder app window token for window requesting
      *        {@link InputMethodManager#showSoftInput(View, int)}
      * @hide
      */
@@ -390,7 +390,7 @@ public interface InputMethod {
 
     /**
      * Update token of the client window requesting {@link #hideSoftInput(int, ResultReceiver)}
-     * @param hideInputToken dummy app window token for window requesting
+     * @param hideInputToken placeholder app window token for window requesting
      *        {@link InputMethodManager#hideSoftInputFromWindow(IBinder, int)}
      * @hide
      */

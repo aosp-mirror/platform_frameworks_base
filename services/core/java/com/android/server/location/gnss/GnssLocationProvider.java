@@ -274,7 +274,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     // if the fix interval is below this we leave GPS on,
     // if above then we cycle the GPS driver.
-    // Typical hot TTTF is ~5 seconds, so 10 seconds seems sane.
+    // Typical hot TTTF is ~5 seconds, so 10 seconds seems valid.
     private static final int GPS_POLLING_THRESHOLD_INTERVAL = 10 * 1000;
 
     // how long to wait if we have a network error in NTP or PSDS downloading

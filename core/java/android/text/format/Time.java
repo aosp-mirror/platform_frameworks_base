@@ -345,9 +345,9 @@ public class Time {
     }
 
     /**
-     * Print the current value given the format string provided. See man
-     * strftime for what means what. The final string must be less than 256
-     * characters.
+     * Print the current value given the format string provided. See
+     * strftime(3) manual page for what means what. The final string must be
+     * less than 256 characters.
      * @param format a string containing the desired format.
      * @return a String containing the current time expressed in the current locale.
      */

@@ -2144,7 +2144,7 @@ public class StatsPullAtomService extends SystemService {
             JSONArray app_sizes = json.getJSONArray(DiskStatsFileLogger.APP_SIZES_KEY);
             JSONArray app_data_sizes = json.getJSONArray(DiskStatsFileLogger.APP_DATA_KEY);
             JSONArray app_cache_sizes = json.getJSONArray(DiskStatsFileLogger.APP_CACHES_KEY);
-            // Sanity check: Ensure all 4 lists have the same length.
+            // Validity check: Ensure all 4 lists have the same length.
             int length = pkg_names.length();
             if (app_sizes.length() != length || app_data_sizes.length() != length
                     || app_cache_sizes.length() != length) {

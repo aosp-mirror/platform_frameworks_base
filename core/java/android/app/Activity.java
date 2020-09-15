@@ -8341,7 +8341,7 @@ public class Activity extends ContextThemeWrapper
      *
      * <p>If {@link DevicePolicyManager#isLockTaskPermitted(String)} returns {@code true}
      * for this component, the current task will be launched directly into LockTask mode. Only apps
-     * whitelisted by {@link DevicePolicyManager#setLockTaskPackages(ComponentName, String[])} can
+     * allowlisted by {@link DevicePolicyManager#setLockTaskPackages(ComponentName, String[])} can
      * be launched while LockTask mode is active. The user will not be able to leave this mode
      * until this activity calls {@link #stopLockTask()}. Calling this method while the device is
      * already in LockTask mode has no effect.
@@ -8373,7 +8373,7 @@ public class Activity extends ContextThemeWrapper
      * <p><strong>Note:</strong> If the device is in LockTask mode that is not initially started
      * by this activity, then calling this method will not terminate the LockTask mode, but only
      * finish its own task. The device will remain in LockTask mode, until the activity which
-     * started the LockTask mode calls this method, or until its whitelist authorization is revoked
+     * started the LockTask mode calls this method, or until its allowlist authorization is revoked
      * by {@link DevicePolicyManager#setLockTaskPackages(ComponentName, String[])}.
      *
      * @see #startLockTask()

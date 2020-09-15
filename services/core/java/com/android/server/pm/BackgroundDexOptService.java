@@ -465,7 +465,7 @@ public class BackgroundDexOptService extends JobService {
     }
 
     private int reconcileSecondaryDexFiles(DexManager dm) {
-        // TODO(calin): should we blacklist packages for which we fail to reconcile?
+        // TODO(calin): should we denylist packages for which we fail to reconcile?
         for (String p : dm.getAllPackagesWithSecondaryDexFiles()) {
             if (mAbortIdleOptimization.get()) {
                 return OPTIMIZE_ABORT_BY_JOB_SCHEDULER;

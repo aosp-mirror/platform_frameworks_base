@@ -836,7 +836,7 @@ public class DexManagerTests {
 
     @Test
     public void testOobPackageSelectionWhitelist() {
-        // Various whitelist of apps to run in OOB mode.
+        // Various allowlist of apps to run in OOB mode.
         final String kWhitelistApp0 = "com.priv.app0";
         final String kWhitelistApp1 = "com.priv.app1";
         final String kWhitelistApp2 = "com.priv.app2";
@@ -845,17 +845,17 @@ public class DexManagerTests {
         // Packages that shares the targeting process.
         final Collection<String> runningPackages = Arrays.asList("com.priv.app1", "com.priv.app2");
 
-        // Feature is off, whitelist does not matter
+        // Feature is off, allowlist does not matter
         assertFalse(shouldPackageRunOob(false, kWhitelistApp0, runningPackages));
         assertFalse(shouldPackageRunOob(false, kWhitelistApp1, runningPackages));
         assertFalse(shouldPackageRunOob(false, "", runningPackages));
         assertFalse(shouldPackageRunOob(false, "ALL", runningPackages));
 
-        // Feature is on, app not in whitelist
+        // Feature is on, app not in allowlist
         assertFalse(shouldPackageRunOob(true, kWhitelistApp0, runningPackages));
         assertFalse(shouldPackageRunOob(true, "", runningPackages));
 
-        // Feature is on, app in whitelist
+        // Feature is on, app in allowlist
         assertTrue(shouldPackageRunOob(true, kWhitelistApp1, runningPackages));
         assertTrue(shouldPackageRunOob(true, kWhitelistApp2, runningPackages));
         assertTrue(shouldPackageRunOob(true, kWhitelistApp1AndApp2, runningPackages));

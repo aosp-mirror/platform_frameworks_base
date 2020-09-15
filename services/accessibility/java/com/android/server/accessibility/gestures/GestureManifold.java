@@ -207,7 +207,7 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
     boolean onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         if (mState.isClear()) {
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                // Sanity safeguard: if touch state is clear, then matchers should always be clear
+                // Validity safeguard: if touch state is clear, then matchers should always be clear
                 // before processing the next down event.
                 clear();
             } else {

@@ -684,7 +684,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                         final int modeFlags = readIntAttribute(in, ATTR_MODE_FLAGS);
                         final long createdTime = readLongAttribute(in, ATTR_CREATED_TIME, now);
 
-                        // Sanity check that provider still belongs to source package
+                        // Validity check that provider still belongs to source package
                         // Both direct boot aware and unaware packages are fine as we
                         // will do filtering at query time to avoid multiple parsing.
                         final ProviderInfo pi = getProviderInfo(uri.getAuthority(), sourceUserId,
