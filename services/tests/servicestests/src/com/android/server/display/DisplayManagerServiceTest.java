@@ -343,7 +343,8 @@ public class DisplayManagerServiceTest {
         displayDeviceInfo2.copyFrom(displayDeviceInfo);
         displayDeviceInfo2.displayCutout = null;
         displayDevice.setDisplayDeviceInfo(displayDeviceInfo2);
-        displayManager.handleDisplayDeviceChanged(displayDevice);
+        displayManager.getDisplayDeviceRepository()
+                .onDisplayDeviceEvent(displayDevice, DisplayAdapter.DISPLAY_DEVICE_EVENT_CHANGED);
 
         handler.runWithScissors(() -> {
         }, 0 /* now */);
