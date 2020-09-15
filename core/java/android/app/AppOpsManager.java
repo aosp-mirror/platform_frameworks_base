@@ -81,8 +81,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -5021,8 +5019,7 @@ public class AppOpsManager {
          * @hide
          */
         public static double round(double value) {
-            final BigDecimal decimalScale = new BigDecimal(value);
-            return decimalScale.setScale(0, RoundingMode.HALF_UP).doubleValue();
+            return Math.floor(value + 0.5);
         }
 
         @Override
