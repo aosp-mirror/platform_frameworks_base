@@ -73,10 +73,10 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 TestableLooper.get(this));
         mFirst = testHelper.createRow();
         mFirst.setHeadsUpAnimatingAwayListener(animatingAway
-                -> mRoundnessManager.onHeadsupAnimatingAwayChanged(mFirst, animatingAway));
+                -> mRoundnessManager.updateView(mFirst, false));
         mSecond = testHelper.createRow();
         mSecond.setHeadsUpAnimatingAwayListener(animatingAway
-                -> mRoundnessManager.onHeadsupAnimatingAwayChanged(mSecond, animatingAway));
+                -> mRoundnessManager.updateView(mSecond, false));
         mRoundnessManager.setOnRoundingChangedCallback(mRoundnessCallback);
         mRoundnessManager.setAnimatedChildren(mAnimatedChildren);
         mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
@@ -160,12 +160,12 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
 
         when(testHelper.getStatusBarStateController().isDozing()).thenReturn(true);
         row.setHeadsUp(true);
-        mRoundnessManager.onHeadsUpStateChanged(entry, true);
+        mRoundnessManager.updateView(entry.getRow(), false);
         Assert.assertEquals(1f, row.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(1f, row.getCurrentTopRoundness(), 0.0f);
 
         row.setHeadsUp(false);
-        mRoundnessManager.onHeadsUpStateChanged(entry, false);
+        mRoundnessManager.updateView(entry.getRow(), false);
         Assert.assertEquals(0f, row.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(0f, row.getCurrentTopRoundness(), 0.0f);
     }

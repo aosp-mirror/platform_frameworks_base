@@ -73,9 +73,6 @@ import android.widget.ScrollView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.UiEvent;
-import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardSliceView;
 import com.android.settingslib.Utils;
@@ -95,7 +92,6 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.FakeShadowView;
-import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor;
@@ -264,6 +260,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     protected EmptyShadeView mEmptyShadeView;
     private boolean mDismissAllInProgress;
     private boolean mFadeNotificationsOnDismiss;
+    private FooterDismissListener mFooterDismissListener;
 
     /**
      * Was the scroller scrolled to the top when the down motion was observed?
@@ -318,7 +315,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private HashSet<ExpandableView> mClearTransientViewsWhenFinished = new HashSet<>();
     private HashSet<Pair<ExpandableNotificationRow, Boolean>> mHeadsUpChangeAnimations
             = new HashSet<>();
-    private final NotificationRoundnessManager mRoundnessManager;
     private boolean mTrackingHeadsUp;
     private boolean mForceNoOverlappingRendering;
     private final ArrayList<Pair<ExpandableNotificationRow, Boolean>> mTmpList = new ArrayList<>();
@@ -450,12 +446,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private int mHeadsUpInset;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private final Rect mTmpRect = new Rect();
+    private DismissListener mDismissListener;
     private DismissAllAnimationListener mDismissAllAnimationListener;
-    @VisibleForTesting
-    protected final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
-    protected final UiEventLogger mUiEventLogger;
-    private final NotificationRemoteInputManager mRemoteInputManager =
-            Dependency.get(NotificationRemoteInputManager.class);
+    private NotificationRemoteInputManager mRemoteInputManager;
 
     private final DisplayMetrics mDisplayMetrics = Dependency.get(DisplayMetrics.class);
     private final LockscreenGestureLogger mLockscreenGestureLogger =
@@ -468,7 +461,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private NotificationPanelViewController mNotificationPanelController;
 
     private final NotificationSectionsManager mSectionsManager;
-    private final ForegroundServiceSectionController mFgsSectionController;
     private ForegroundServiceDungeonView mFgsSectionView;
     private boolean mAnimateBottomOnLayout;
     private float mLastSentAppear;
@@ -529,22 +521,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public NotificationStackScrollLayout(
             @Named(VIEW_CONTEXT) Context context,
             AttributeSet attrs,
-            NotificationRoundnessManager notificationRoundnessManager,
-            SysuiStatusBarStateController statusbarStateController,
             NotificationSectionsManager notificationSectionsManager,
-            ForegroundServiceSectionController fgsSectionController,
-            ForegroundServiceDismissalFeatureController fgsFeatureController,
             GroupMembershipManager groupMembershipManager,
             GroupExpansionManager groupExpansionManager,
-            UiEventLogger uiEventLogger
+            SysuiStatusBarStateController statusbarStateController
     ) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
-
-        mRoundnessManager = notificationRoundnessManager;
-        mFgsSectionController = fgsSectionController;
-
         mSectionsManager = notificationSectionsManager;
+
         mSectionsManager.initialize(this, LayoutInflater.from(context));
         mSectionsManager.setOnClearSilentNotifsClickListener(v -> {
             // Leave the shade open if there will be other notifs left over to clear
@@ -589,18 +574,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mGroupMembershipManager = groupMembershipManager;
         mGroupExpansionManager = groupExpansionManager;
         mStatusbarStateController = statusbarStateController;
-        initializeForegroundServiceSection(fgsFeatureController);
-        mUiEventLogger = uiEventLogger;
     }
 
-    private void initializeForegroundServiceSection(
-            ForegroundServiceDismissalFeatureController featureController) {
-        if (featureController.isForegroundServiceDismissalEnabled()) {
-            LayoutInflater li = LayoutInflater.from(mContext);
-            mFgsSectionView =
-                    (ForegroundServiceDungeonView) mFgsSectionController.createView(li);
-            addView(mFgsSectionView, -1);
+    void initializeForegroundServiceSection(ForegroundServiceDungeonView fgsSectionView) {
+        if (mFgsSectionView != null) {
+            return;
         }
+
+        mFgsSectionView = fgsSectionView;
+
+        addView(mFgsSectionView, -1);
     }
 
     void updateDismissRtlSetting(boolean dismissRtl) {
@@ -3222,7 +3205,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mAnimateNextSectionBoundsChange = false;
         }
         mAmbientState.setLastVisibleBackgroundChild(lastChild);
-        mRoundnessManager.updateRoundedChildren(mSections);
+        // TODO: Refactor SectionManager and put the RoundnessManager there.
+        mController.getNoticationRoundessManager().updateRoundedChildren(mSections);
         mAnimateBottomOnLayout = false;
         invalidate();
     }
@@ -3295,14 +3279,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     void setExpandingNotification(ExpandableNotificationRow row) {
         mAmbientState.setExpandingNotification(row);
         requestChildrenUpdate();
-    }
-
-    @ShadeViewRefactor(RefactorComponent.ADAPTER)
-    void bindRow(ExpandableNotificationRow row) {
-        row.setHeadsUpAnimatingAwayListener(animatingAway -> {
-            mRoundnessManager.onHeadsupAnimatingAwayChanged(row, animatingAway);
-            mHeadsUpAppearanceController.updateHeader(row.getEntry());
-        });
     }
 
     public boolean containsView(View v) {
@@ -5022,7 +4998,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public void setTrackingHeadsUp(ExpandableNotificationRow row) {
         mAmbientState.setTrackedHeadsUpRow(row);
         mTrackingHeadsUp = row != null;
-        mRoundnessManager.setTrackingHeadsUp(row);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -5343,16 +5318,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setHeadsUpAppearanceController(
+    void setHeadsUpAppearanceController(
             HeadsUpAppearanceController headsUpAppearanceController) {
         mHeadsUpAppearanceController = headsUpAppearanceController;
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     @VisibleForTesting
-    void clearNotifications(
-            @SelectedRows int selection,
-            boolean closeShade) {
+    void clearNotifications(@SelectedRows int selection, boolean closeShade) {
         // animate-swipe all dismissable notifications, then animate the shade closed
         int numChildren = getChildCount();
 
@@ -5393,8 +5366,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             }
         }
 
-        // Log dismiss event even if there's nothing to dismiss
-        mUiEventLogger.log(NotificationPanelEvent.fromSelection(selection));
+        if (mDismissListener != null) {
+            mDismissListener.onDismiss(selection);
+        }
 
         if (viewsToRemove.isEmpty()) {
             if (closeShade) {
@@ -5484,7 +5458,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         FooterView footerView = (FooterView) LayoutInflater.from(mContext).inflate(
                 R.layout.status_bar_notification_footer, this, false);
         footerView.setDismissButtonClickListener(v -> {
-            mMetricsLogger.action(MetricsEvent.ACTION_DISMISS_ALL_NOTES);
+            if (mFooterDismissListener != null) {
+                mFooterDismissListener.onDismiss();
+            }
             clearNotifications(ROWS_ALL, true /* closeShade */);
         });
         footerView.setManageButtonClickListener(v -> {
@@ -5701,12 +5677,24 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mCheckForLeavebehind;
     }
 
+    void setDismissListener (DismissListener listener) {
+        mDismissListener = listener;
+    }
+
     void setDismissAllAnimationListener(DismissAllAnimationListener dismissAllAnimationListener) {
         mDismissAllAnimationListener = dismissAllAnimationListener;
     }
 
     public void setHighPriorityBeforeSpeedBump(boolean highPriorityBeforeSpeedBump) {
         mHighPriorityBeforeSpeedBump = highPriorityBeforeSpeedBump;
+    }
+
+    void setFooterDismissListener(FooterDismissListener listener) {
+        mFooterDismissListener = listener;
+    }
+
+    public void setRemoteInputManager(NotificationRemoteInputManager remoteInputManager) {
+        mRemoteInputManager = remoteInputManager;
     }
 
     /**
@@ -6312,39 +6300,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /** Only rows where entry.isHighPriority() is false. */
     public static final int ROWS_GENTLE = 2;
 
-    /**
-     * Enum for UiEvent logged from this class
-     */
-    enum NotificationPanelEvent implements UiEventLogger.UiEventEnum {
-        INVALID(0),
-        @UiEvent(doc = "User dismissed all notifications from notification panel.")
-        DISMISS_ALL_NOTIFICATIONS_PANEL(312),
-        @UiEvent(doc = "User dismissed all silent notifications from notification panel.")
-        DISMISS_SILENT_NOTIFICATIONS_PANEL(314);
-        private final int mId;
-        NotificationPanelEvent(int id) {
-            mId = id;
-        }
-        @Override public int getId() {
-            return mId;
-        }
-
-        public static UiEventLogger.UiEventEnum fromSelection(@SelectedRows int selection) {
-            if (selection == ROWS_ALL) {
-                return DISMISS_ALL_NOTIFICATIONS_PANEL;
-            }
-            if (selection == ROWS_GENTLE) {
-                return DISMISS_SILENT_NOTIFICATIONS_PANEL;
-            }
-            if (NotificationStackScrollLayout.DEBUG) {
-                throw new IllegalArgumentException("Unexpected selection" + selection);
-            }
-            return INVALID;
-        }
-    }
-
     interface KeyguardBypassEnabledProvider {
         boolean getBypassEnabled();
+    }
+
+    interface DismissListener {
+        void onDismiss(@SelectedRows int selectedRows);
+    }
+
+    interface FooterDismissListener {
+        void onDismiss();
     }
 
     interface DismissAllAnimationListener {
