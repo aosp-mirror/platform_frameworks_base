@@ -3484,6 +3484,7 @@
      mode -->
     <string-array translatable="false" name="config_priorityOnlyDndExemptPackages">
         <item>com.android.dialer</item>
+        <item>com.android.server.telecom</item>
         <item>com.android.systemui</item>
         <item>android</item>
     </string-array>
