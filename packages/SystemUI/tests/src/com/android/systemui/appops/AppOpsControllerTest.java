@@ -47,6 +47,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 
 import org.junit.Before;
@@ -82,6 +83,8 @@ public class AppOpsControllerTest extends SysuiTestCase {
     private PackageManager mPackageManager;
     @Mock(stubOnly = true)
     private AudioManager mAudioManager;
+    @Mock()
+    private BroadcastDispatcher mDispatcher;
     @Mock(stubOnly = true)
     private AudioManager.AudioRecordingCallback mRecordingCallback;
     @Mock(stubOnly = true)
@@ -120,7 +123,8 @@ public class AppOpsControllerTest extends SysuiTestCase {
                 mTestableLooper.getLooper(),
                 mDumpManager,
                 mFlagsCache,
-                mAudioManager
+                mAudioManager,
+                mDispatcher
         );
     }
 
@@ -128,12 +132,14 @@ public class AppOpsControllerTest extends SysuiTestCase {
     public void testOnlyListenForFewOps() {
         mController.setListening(true);
         verify(mAppOpsManager, times(1)).startWatchingActive(AppOpsControllerImpl.OPS, mController);
+        verify(mDispatcher, times(1)).registerReceiverWithHandler(eq(mController), any(), any());
     }
 
     @Test
     public void testStopListening() {
         mController.setListening(false);
         verify(mAppOpsManager, times(1)).stopWatchingActive(mController);
+        verify(mDispatcher, times(1)).unregisterReceiver(mController);
     }
 
     @Test
