@@ -6151,7 +6151,7 @@ public final class ContactsContract {
              * to display names as well as phone numbers. The filter argument should be passed
              * as an additional path segment after this URI.
              *
-             * <p class="caution"><b>Caution: </b>This field deosn't sort results based on contacts
+             * <p class="caution"><b>Caution: </b>This field doesn't sort results based on contacts
              * frequency. For more information, see the
              * <a href="/guide/topics/providers/contacts-provider#ObsoleteData">Contacts Provider</a>
              * page.
