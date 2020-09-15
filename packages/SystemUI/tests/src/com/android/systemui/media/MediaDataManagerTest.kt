@@ -197,58 +197,6 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testAppBlockedFromResumption() {
-        // GIVEN that the manager has a notification with a resume action
-        val listener = TestListener()
-        mediaDataManager.addListener(listener)
-        whenever(controller.metadata).thenReturn(metadataBuilder.build())
-        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-        val data = listener.data!!
-        assertThat(data.resumption).isFalse()
-        mediaDataManager.onMediaDataLoaded(KEY, null, data.copy(resumeAction = Runnable {}))
-
-        // and the manager should block the package from creating resume controls
-        val blocked = mutableSetOf(PACKAGE_NAME, "com.example.app")
-        mediaDataManager.appsBlockedFromResume = blocked
-
-        // WHEN the notification is removed
-        mediaDataManager.onNotificationRemoved(KEY)
-
-        // THEN the media data is removed
-        assertThat(listener.removedKey!!).isEqualTo(KEY)
-    }
-
-    @Test
-    fun testAppUnblockedFromResumption() {
-        // GIVEN that an app was blocked from resuming
-        val blocked = mutableSetOf(PACKAGE_NAME, "com.example.app")
-        mediaDataManager.appsBlockedFromResume = blocked
-
-        // and GIVEN that the manager has a notification from that app with a resume action
-        val listener = TestListener()
-        mediaDataManager.addListener(listener)
-        whenever(controller.metadata).thenReturn(metadataBuilder.build())
-        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-        val data = listener.data!!
-        assertThat(data.resumption).isFalse()
-        mediaDataManager.onMediaDataLoaded(KEY, null, data.copy(resumeAction = Runnable {}))
-
-        // WHEN the app is unblocked
-        mediaDataManager.appsBlockedFromResume = mutableSetOf("com.example.app")
-
-        // and the notification is removed
-        mediaDataManager.onNotificationRemoved(KEY)
-
-        // THEN the entry will stay as a resume control
-        assertThat(listener.key!!).isEqualTo(PACKAGE_NAME)
-        assertThat(listener.oldKey!!).isEqualTo(KEY)
-    }
-
-    @Test
     fun testAddResumptionControls() {
         val listener = TestListener()
         mediaDataManager.addListener(listener)
