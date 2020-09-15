@@ -714,7 +714,7 @@
     <item msgid="6216981255272016212">"Aangepast"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="7786349763648997741">"Thuis"</item>
+    <item msgid="7786349763648997741">"Privé"</item>
     <item msgid="435564470865989199">"Werk"</item>
     <item msgid="4199433197875490373">"Overig"</item>
     <item msgid="3233938986670468328">"Aangepast"</item>
@@ -772,7 +772,7 @@
     <string name="eventTypeAnniversary" msgid="4684702412407916888">"Jubileum"</string>
     <string name="eventTypeOther" msgid="530671238533887997">"Overig"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"Aangepast"</string>
-    <string name="emailTypeHome" msgid="1597116303154775999">"Thuis"</string>
+    <string name="emailTypeHome" msgid="1597116303154775999">"Privé"</string>
     <string name="emailTypeWork" msgid="2020095414401882111">"Werk"</string>
     <string name="emailTypeOther" msgid="5131130857030897465">"Overig"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"Mobiel"</string>
