@@ -223,7 +223,7 @@ key 200   MEDIA_PLAY
 key 201   MEDIA_PAUSE
 # key 202 "KEY_PROG3"
 # key 203 "KEY_PROG4"
-# key 204 (undefined)
+key 204 NOTIFICATION
 # key 205 "KEY_SUSPEND"
 # key 206 "KEY_CLOSE"
 key 207   MEDIA_PLAY
