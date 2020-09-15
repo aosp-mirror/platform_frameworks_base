@@ -58,6 +58,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     private static final int EXPAND_STACK_TO_MENU_DURATION = 250;
     private static final int LEAVE_PIP_DURATION = 300;
     private static final int SHIFT_DURATION = 300;
+    private static final float STASH_RATIO = 0.25f;
 
     /** Friction to use for PIP when it moves via physics fling animations. */
     private static final float DEFAULT_FRICTION = 2f;
@@ -120,6 +121,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     /** FlingConfig instances provided to PhysicsAnimator for fling gestures. */
     private PhysicsAnimator.FlingConfig mFlingConfigX;
     private PhysicsAnimator.FlingConfig mFlingConfigY;
+    /** FlingConfig instances proviced to PhysicsAnimator for stashing. */
+    private PhysicsAnimator.FlingConfig mStashConfigX;
 
     /** SpringConfig to use for fling-then-spring animations. */
     private final PhysicsAnimator.SpringConfig mSpringConfig =
@@ -383,6 +386,21 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     void flingToSnapTarget(
             float velocityX, float velocityY,
             @Nullable Runnable updateAction, @Nullable Runnable endAction) {
+        movetoTarget(velocityX, velocityY, updateAction, endAction, false /* isStash */);
+    }
+
+    /**
+     * Stash PiP to the closest edge.
+     */
+    void stashToEdge(
+            float velocityX, float velocityY,
+            @Nullable Runnable updateAction, @Nullable Runnable endAction) {
+        movetoTarget(velocityX, velocityY, updateAction, endAction, true /* isStash */);
+    }
+
+    private void movetoTarget(
+            float velocityX, float velocityY,
+            @Nullable Runnable updateAction, @Nullable Runnable endAction, boolean isStash) {
         // If we're flinging to a snap target now, we're not springing to catch up to the touch
         // location now.
         mSpringingToTouch = false;
@@ -391,8 +409,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 .spring(FloatProperties.RECT_WIDTH, mBounds.width(), mSpringConfig)
                 .spring(FloatProperties.RECT_HEIGHT, mBounds.height(), mSpringConfig)
                 .flingThenSpring(
-                        FloatProperties.RECT_X, velocityX, mFlingConfigX, mSpringConfig,
-                        true /* flingMustReachMinOrMax */)
+                        FloatProperties.RECT_X, velocityX, isStash ? mStashConfigX : mFlingConfigX,
+                        mSpringConfig, true /* flingMustReachMinOrMax */)
                 .flingThenSpring(
                         FloatProperties.RECT_Y, velocityY, mFlingConfigY, mSpringConfig)
                 .withEndActions(endAction);
@@ -402,7 +420,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                     (target, values) -> updateAction.run());
         }
 
-        final float xEndValue = velocityX < 0 ? mMovementBounds.left : mMovementBounds.right;
+        final float offset = ((float) mBounds.width()) * (1.0f - STASH_RATIO);
+        final float leftEdge = isStash ? mMovementBounds.left - offset : mMovementBounds.left;
+        final float rightEdge = isStash ?  mMovementBounds.right + offset : mMovementBounds.right;
+
+        final float xEndValue = velocityX < 0 ? leftEdge : rightEdge;
         final float estimatedFlingYEndValue =
                 PhysicsAnimator.estimateFlingEndValue(
                         mTemporaryBounds.top, velocityY, mFlingConfigY);
@@ -506,6 +528,9 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 DEFAULT_FRICTION, mMovementBounds.left, mMovementBounds.right);
         mFlingConfigY = new PhysicsAnimator.FlingConfig(
                 DEFAULT_FRICTION, mMovementBounds.top, mMovementBounds.bottom);
+        final float offset = ((float) mBounds.width()) * (1.0f - STASH_RATIO);
+        mStashConfigX = new PhysicsAnimator.FlingConfig(
+                DEFAULT_FRICTION, mMovementBounds.left - offset, mMovementBounds.right + offset);
     }
 
     /**
