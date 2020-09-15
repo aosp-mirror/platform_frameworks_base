@@ -1219,31 +1219,6 @@ public class PackageInstaller {
         }
 
         /**
-         * Adds installer-provided checksums for the APK file in session.
-         *
-         * @param name      previously written as part of this session.
-         * @param checksums installer intends to make available via
-         *                  {@link PackageManager#getChecksums(String, boolean, int, List,
-         *                  IntentSender)}.
-         * @throws SecurityException if called after the session has been
-         *                           committed or abandoned.
-         */
-        public void addChecksums(@NonNull String name, @NonNull List<Checksum> checksums)
-                throws IOException {
-            Objects.requireNonNull(name);
-            Objects.requireNonNull(checksums);
-
-            try {
-                mSession.addChecksums(name, checksums.toArray(new Checksum[checksums.size()]));
-            } catch (RuntimeException e) {
-                ExceptionUtils.maybeUnwrapIOException(e);
-                throw e;
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-
-        /**
          * Attempt to commit everything staged in this session. This may require
          * user intervention, and so it may not happen immediately. The final
          * result of the commit will be reported through the given callback.
