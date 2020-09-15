@@ -261,9 +261,13 @@ final class RemoteAugmentedAutofillService
                 focusedValue != null && focusedValue.isText()
                         ? focusedValue.getTextValue().toString() : null;
 
+        final InlineFillUi.InlineFillUiInfo inlineFillUiInfo =
+                new InlineFillUi.InlineFillUiInfo(request, focusedId, filterText,
+                        remoteRenderService, userId, sessionId);
+
         final InlineFillUi inlineFillUi =
                 InlineFillUi.forAugmentedAutofill(
-                        request, inlineSuggestionsData, focusedId, filterText,
+                        inlineFillUiInfo, inlineSuggestionsData,
                         new InlineFillUi.InlineSuggestionUiCallback() {
                             @Override
                             public void autofill(Dataset dataset, int datasetIndex) {
@@ -305,15 +309,24 @@ final class RemoteAugmentedAutofillService
                             }
 
                             @Override
-                            public void startIntentSender(IntentSender intentSender,
-                                    Intent intent) {
+                            public void authenticate(int requestId, int datasetIndex) {
+                                Slog.e(TAG, "authenticate not implemented for augmented autofill");
+                            }
+
+                            @Override
+                            public void startIntentSender(IntentSender intentSender) {
                                 try {
-                                    client.startIntentSender(intentSender, intent);
+                                    client.startIntentSender(intentSender, new Intent());
                                 } catch (RemoteException e) {
                                     Slog.w(TAG, "RemoteException starting intent sender");
                                 }
                             }
-                        }, onErrorCallback, remoteRenderService, userId, sessionId);
+
+                            @Override
+                            public void onError() {
+                                onErrorCallback.run();
+                            }
+                        });
 
         if (inlineSuggestionsCallback.apply(inlineFillUi)) {
             mCallbacks.logAugmentedAutofillShown(sessionId, clientState);
