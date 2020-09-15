@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.Lnb;
+import android.media.tv.tuner.TunerVersionChecker;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -43,7 +44,13 @@ public class FrontendStatus {
             FRONTEND_STATUS_TYPE_EWBS, FRONTEND_STATUS_TYPE_AGC, FRONTEND_STATUS_TYPE_LNA,
             FRONTEND_STATUS_TYPE_LAYER_ERROR, FRONTEND_STATUS_TYPE_MER,
             FRONTEND_STATUS_TYPE_FREQ_OFFSET, FRONTEND_STATUS_TYPE_HIERARCHY,
-            FRONTEND_STATUS_TYPE_RF_LOCK, FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO})
+            FRONTEND_STATUS_TYPE_RF_LOCK, FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO,
+            FRONTEND_STATUS_TYPE_BERS, FRONTEND_STATUS_TYPE_CODERATES,
+            FRONTEND_STATUS_TYPE_BANDWIDTH, FRONTEND_STATUS_TYPE_GUARD_INTERVAL,
+            FRONTEND_STATUS_TYPE_TRANSMISSION_MODE, FRONTEND_STATUS_TYPE_UEC,
+            FRONTEND_STATUS_TYPE_T2_SYSTEM_ID, FRONTEND_STATUS_TYPE_INTERLEAVINGS,
+            FRONTEND_STATUS_TYPE_ISDBT_SEGMENTS, FRONTEND_STATUS_TYPE_TS_DATA_RATES,
+            FRONTEND_STATUS_TYPE_MODULATIONS_EXT})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrontendStatusType {}
 
@@ -145,10 +152,83 @@ public class FrontendStatus {
      */
     public static final int FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO =
             Constants.FrontendStatusType.ATSC3_PLP_INFO;
-
+    /**
+     * BERS Type. Only supported in Tuner HAL 1.1 or higher.
+     */
+    public static final int FRONTEND_STATUS_TYPE_BERS =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.BERS;
+    /**
+     * Coderate Type. Only supported in Tuner HAL 1.1 or higher.
+     */
+    public static final int FRONTEND_STATUS_TYPE_CODERATES =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.CODERATES;
+    /**
+     * Bandwidth Type. Only supported in Tuner HAL 1.1 or higher.
+     */
+    public static final int FRONTEND_STATUS_TYPE_BANDWIDTH =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.BANDWIDTH;
+    /**
+     * Guard Interval Type. Only supported in Tuner HAL 1.1 or higher.
+     */
+    public static final int FRONTEND_STATUS_TYPE_GUARD_INTERVAL =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.GUARD_INTERVAL;
+    /**
+     * Transmission Mode Type. Only supported in Tuner HAL 1.1 or higher.
+     */
+    public static final int FRONTEND_STATUS_TYPE_TRANSMISSION_MODE =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.TRANSMISSION_MODE;
+    /**
+     * UEC Type. Only supported in Tuner HAL 1.1 or higher.
+     */
+    public static final int FRONTEND_STATUS_TYPE_UEC =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.UEC;
+    /**
+     * T2 System Id Type. Only supported in Tuner HAL 1.1 or higher.
+     */
+    public static final int FRONTEND_STATUS_TYPE_T2_SYSTEM_ID =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.T2_SYSTEM_ID;
+    /**
+     * Interleavings Type. Only supported in Tuner HAL 1.1 or higher.
+     */
+    public static final int FRONTEND_STATUS_TYPE_INTERLEAVINGS =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.INTERLEAVINGS;
+    /**
+     * ISDBT Segments Type. Only supported in Tuner HAL 1.1 or higher.
+     */
+    public static final int FRONTEND_STATUS_TYPE_ISDBT_SEGMENTS =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.ISDBT_SEGMENTS;
+    /**
+     * TS Data Rates Type. Only supported in Tuner HAL 1.1 or higher.
+     */
+    public static final int FRONTEND_STATUS_TYPE_TS_DATA_RATES =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.TS_DATA_RATES;
+    /**
+     * Extended Modulations Type. Only supported in Tuner HAL 1.1 or higher.
+     */
+    public static final int FRONTEND_STATUS_TYPE_MODULATIONS_EXT =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.MODULATIONS;
 
     /** @hide */
     @IntDef(value = {
+            AtscFrontendSettings.MODULATION_UNDEFINED,
+            AtscFrontendSettings.MODULATION_AUTO,
+            AtscFrontendSettings.MODULATION_MOD_8VSB,
+            AtscFrontendSettings.MODULATION_MOD_16VSB,
+            Atsc3FrontendSettings.MODULATION_UNDEFINED,
+            Atsc3FrontendSettings.MODULATION_AUTO,
+            Atsc3FrontendSettings.MODULATION_MOD_QPSK,
+            Atsc3FrontendSettings.MODULATION_MOD_16QAM,
+            Atsc3FrontendSettings.MODULATION_MOD_64QAM,
+            Atsc3FrontendSettings.MODULATION_MOD_256QAM,
+            Atsc3FrontendSettings.MODULATION_MOD_1024QAM,
+            Atsc3FrontendSettings.MODULATION_MOD_4096QAM,
+            DtmbFrontendSettings.MODULATION_CONSTELLATION_UNDEFINED,
+            DtmbFrontendSettings.MODULATION_CONSTELLATION_AUTO,
+            DtmbFrontendSettings.MODULATION_CONSTELLATION_4QAM,
+            DtmbFrontendSettings.MODULATION_CONSTELLATION_4QAM_NR,
+            DtmbFrontendSettings.MODULATION_CONSTELLATION_16QAM,
+            DtmbFrontendSettings.MODULATION_CONSTELLATION_32QAM,
+            DtmbFrontendSettings.MODULATION_CONSTELLATION_64QAM,
             DvbcFrontendSettings.MODULATION_UNDEFINED,
             DvbcFrontendSettings.MODULATION_AUTO,
             DvbcFrontendSettings.MODULATION_MOD_16QAM,
@@ -171,6 +251,16 @@ public class FrontendStatus {
             DvbsFrontendSettings.MODULATION_MOD_128APSK,
             DvbsFrontendSettings.MODULATION_MOD_256APSK,
             DvbsFrontendSettings.MODULATION_MOD_RESERVED,
+            DvbtFrontendSettings.CONSTELLATION_UNDEFINED,
+            DvbtFrontendSettings.CONSTELLATION_AUTO,
+            DvbtFrontendSettings.CONSTELLATION_QPSK,
+            DvbtFrontendSettings.CONSTELLATION_16QAM,
+            DvbtFrontendSettings.CONSTELLATION_64QAM,
+            DvbtFrontendSettings.CONSTELLATION_256QAM,
+            DvbtFrontendSettings.CONSTELLATION_QPSK_R,
+            DvbtFrontendSettings.CONSTELLATION_16QAM_R,
+            DvbtFrontendSettings.CONSTELLATION_64QAM_R,
+            DvbtFrontendSettings.CONSTELLATION_256QAM_R,
             IsdbsFrontendSettings.MODULATION_UNDEFINED,
             IsdbsFrontendSettings.MODULATION_AUTO,
             IsdbsFrontendSettings.MODULATION_MOD_BPSK,
@@ -192,6 +282,101 @@ public class FrontendStatus {
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrontendModulation {}
 
+    /** @hide */
+    @IntDef(value = {
+            Atsc3FrontendSettings.TIME_INTERLEAVE_MODE_UNDEFINED,
+            Atsc3FrontendSettings.TIME_INTERLEAVE_MODE_AUTO,
+            Atsc3FrontendSettings.TIME_INTERLEAVE_MODE_CTI,
+            Atsc3FrontendSettings.TIME_INTERLEAVE_MODE_HTI,
+            DtmbFrontendSettings.TIME_INTERLEAVE_MODE_UNDEFINED,
+            DtmbFrontendSettings.TIME_INTERLEAVE_MODE_AUTO,
+            DtmbFrontendSettings.TIME_INTERLEAVE_MODE_TIMER_INT_240,
+            DtmbFrontendSettings.TIME_INTERLEAVE_MODE_TIMER_INT_720,
+            DvbcFrontendSettings.TIME_INTERLEAVE_MODE_UNDEFINED,
+            DvbcFrontendSettings.TIME_INTERLEAVE_MODE_AUTO,
+            DvbcFrontendSettings.TIME_INTERLEAVE_MODE_128_1_0,
+            DvbcFrontendSettings.TIME_INTERLEAVE_MODE_128_1_1,
+            DvbcFrontendSettings.TIME_INTERLEAVE_MODE_64_2,
+            DvbcFrontendSettings.TIME_INTERLEAVE_MODE_32_4,
+            DvbcFrontendSettings.TIME_INTERLEAVE_MODE_16_8,
+            DvbcFrontendSettings.TIME_INTERLEAVE_MODE_8_16,
+            DvbcFrontendSettings.TIME_INTERLEAVE_MODE_128_2,
+            DvbcFrontendSettings.TIME_INTERLEAVE_MODE_128_3,
+            DvbcFrontendSettings.TIME_INTERLEAVE_MODE_128_4})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FrontendInterleaveMode {}
+
+    /** @hide */
+    @IntDef(value = {
+            Atsc3FrontendSettings.BANDWIDTH_UNDEFINED,
+            Atsc3FrontendSettings.BANDWIDTH_AUTO,
+            Atsc3FrontendSettings.BANDWIDTH_BANDWIDTH_6MHZ,
+            Atsc3FrontendSettings.BANDWIDTH_BANDWIDTH_7MHZ,
+            Atsc3FrontendSettings.BANDWIDTH_BANDWIDTH_8MHZ,
+            DtmbFrontendSettings.BANDWIDTH_UNDEFINED,
+            DtmbFrontendSettings.BANDWIDTH_AUTO,
+            DtmbFrontendSettings.BANDWIDTH_6MHZ,
+            DtmbFrontendSettings.BANDWIDTH_8MHZ,
+            DvbtFrontendSettings.BANDWIDTH_UNDEFINED,
+            DvbtFrontendSettings.BANDWIDTH_AUTO,
+            DvbtFrontendSettings.BANDWIDTH_8MHZ,
+            DvbtFrontendSettings.BANDWIDTH_7MHZ,
+            DvbtFrontendSettings.BANDWIDTH_6MHZ,
+            DvbtFrontendSettings.BANDWIDTH_5MHZ,
+            DvbtFrontendSettings.BANDWIDTH_1_7MHZ,
+            DvbtFrontendSettings.BANDWIDTH_10MHZ,
+            IsdbtFrontendSettings.BANDWIDTH_UNDEFINED,
+            IsdbtFrontendSettings.BANDWIDTH_AUTO,
+            IsdbtFrontendSettings.BANDWIDTH_8MHZ,
+            IsdbtFrontendSettings.BANDWIDTH_7MHZ,
+            IsdbtFrontendSettings.BANDWIDTH_6MHZ})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FrontendBandwidth {}
+
+    /** @hide */
+    @IntDef(value = {
+            DtmbFrontendSettings.TRANSMISSION_MODE_UNDEFINED,
+            DtmbFrontendSettings.TRANSMISSION_MODE_AUTO,
+            DtmbFrontendSettings.TRANSMISSION_MODE_C1,
+            DtmbFrontendSettings.TRANSMISSION_MODE_C3780,
+            DvbtFrontendSettings.TRANSMISSION_MODE_UNDEFINED,
+            DvbtFrontendSettings.TRANSMISSION_MODE_AUTO,
+            DvbtFrontendSettings.TRANSMISSION_MODE_2K,
+            DvbtFrontendSettings.TRANSMISSION_MODE_8K,
+            DvbtFrontendSettings.TRANSMISSION_MODE_4K,
+            DvbtFrontendSettings.TRANSMISSION_MODE_1K,
+            DvbtFrontendSettings.TRANSMISSION_MODE_16K,
+            DvbtFrontendSettings.TRANSMISSION_MODE_32K,
+            IsdbtFrontendSettings.MODE_UNDEFINED,
+            IsdbtFrontendSettings.MODE_AUTO,
+            IsdbtFrontendSettings.MODE_1,
+            IsdbtFrontendSettings.MODE_2,
+            IsdbtFrontendSettings.MODE_3})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FrontendTransmissionMode {}
+
+    /** @hide */
+    @IntDef(value = {
+            DtmbFrontendSettings.GUARD_INTERVAL_UNDEFINED,
+            DtmbFrontendSettings.GUARD_INTERVAL_AUTO,
+            DtmbFrontendSettings.GUARD_INTERVAL_PN_420_VARIOUS,
+            DtmbFrontendSettings.GUARD_INTERVAL_PN_595_CONST,
+            DtmbFrontendSettings.GUARD_INTERVAL_PN_945_VARIOUS,
+            DtmbFrontendSettings.GUARD_INTERVAL_PN_420_CONST,
+            DtmbFrontendSettings.GUARD_INTERVAL_PN_945_CONST,
+            DtmbFrontendSettings.GUARD_INTERVAL_PN_RESERVED,
+            DvbtFrontendSettings.GUARD_INTERVAL_UNDEFINED,
+            DvbtFrontendSettings.GUARD_INTERVAL_AUTO,
+            DvbtFrontendSettings.GUARD_INTERVAL_1_32,
+            DvbtFrontendSettings.GUARD_INTERVAL_1_16,
+            DvbtFrontendSettings.GUARD_INTERVAL_1_8,
+            DvbtFrontendSettings.GUARD_INTERVAL_1_4,
+            DvbtFrontendSettings.GUARD_INTERVAL_1_128,
+            DvbtFrontendSettings.GUARD_INTERVAL_19_128,
+            DvbtFrontendSettings.GUARD_INTERVAL_19_256,
+            DvbtFrontendSettings.GUARD_INTERVAL_19_128})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FrontendGuardInterval {}
 
     private Boolean mIsDemodLocked;
     private Integer mSnr;
@@ -215,6 +400,18 @@ public class FrontendStatus {
     private Integer mHierarchy;
     private Boolean mIsRfLocked;
     private Atsc3PlpTuningInfo[] mPlpInfo;
+    private int[] mBers;
+    private int[] mCodeRates;
+    private Integer mBandwidth;
+    private Integer mGuardInterval;
+    private Integer mTransmissionMode;
+    private Integer mUec;
+    private Integer mSystemId;
+    private int[] mInterleaving;
+    private int[] mTsDataRate;
+    private int[] mIsdbtSegment;
+    private int[] mModulationsExt;
+
 
     // Constructed and fields set by JNI code.
     private FrontendStatus() {
@@ -323,7 +520,7 @@ public class FrontendStatus {
     /**
      * Gets Spectral Inversion for DVBC.
      */
-    @DvbcFrontendSettings.SpectralInversion
+    @FrontendSettings.FrontendSpectralInversion
     public int getSpectralInversion() {
         if (mInversion == null) {
             throw new IllegalStateException();
@@ -434,6 +631,182 @@ public class FrontendStatus {
             throw new IllegalStateException();
         }
         return mPlpInfo;
+    }
+
+    /**
+     * Gets an array of BERS status.
+     *
+     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     */
+    @NonNull
+    public int[] getBers() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_1_1, "getBers status");
+        if (mBers == null) {
+            throw new IllegalStateException();
+        }
+        return mBers;
+    }
+
+    /**
+     * Gets an array of code rates status.
+     *
+     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     */
+    @NonNull
+    public int[] getCodeRates() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_1_1, "getCodeRates status");
+        if (mCodeRates == null) {
+            throw new IllegalStateException();
+        }
+        return mCodeRates;
+    }
+
+    /**
+     * Gets bandwidth status.
+     *
+     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     */
+    @FrontendBandwidth
+    public int getBandwidth() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_1_1, "getBandwidth status");
+        if (mBandwidth == null) {
+            throw new IllegalStateException();
+        }
+        return mBandwidth;
+    }
+
+    /**
+     * Gets guard interval status.
+     *
+     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     */
+    @FrontendGuardInterval
+    public int getGuardInterval() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_1_1, "getGuardInterval status");
+        if (mGuardInterval == null) {
+            throw new IllegalStateException();
+        }
+        return mGuardInterval;
+    }
+
+    /**
+     * Gets tansmission mode status.
+     *
+     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     */
+    @FrontendTransmissionMode
+    public int getTransmissionMode() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_1_1, "getTransmissionMode status");
+        if (mTransmissionMode == null) {
+            throw new IllegalStateException();
+        }
+        return mTransmissionMode;
+    }
+
+    /**
+     * Gets UEC status.
+     *
+     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     */
+    public int getUec() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_1_1, "getUec status");
+        if (mUec == null) {
+            throw new IllegalStateException();
+        }
+        return mUec;
+    }
+
+    /**
+     * Gets system id status.
+     *
+     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     */
+    public int getSystemId() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_1_1, "getSystemId status");
+        if (mSystemId == null) {
+            throw new IllegalStateException();
+        }
+        return mSystemId;
+    }
+
+    /**
+     * Gets an array of interleaving status. Array value should be withink {@link
+     * FrontendInterleaveMode}.
+     *
+     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     */
+    @NonNull
+    public int[] getInterleaving() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_1_1, "getInterleaving status");
+        if (mInterleaving == null) {
+            throw new IllegalStateException();
+        }
+        return mInterleaving;
+    }
+
+    /**
+     * Gets an array of isdbt segment status.
+     *
+     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     */
+    @NonNull
+    public int[] getIsdbtSegment() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_1_1, "getIsdbtSegment status");
+        if (mIsdbtSegment == null) {
+            throw new IllegalStateException();
+        }
+        return mIsdbtSegment;
+    }
+
+    /**
+     * Gets an array of TS data rate status.
+     *
+     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     */
+    @NonNull
+    public int[] getTsDataRate() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_1_1, "getTsDataRate status");
+        if (mTsDataRate == null) {
+            throw new IllegalStateException();
+        }
+        return mTsDataRate;
+    }
+
+    /**
+     * Gets an array of the extended modulations status. Array value should be withink {@link
+     * FrontendModulation}.
+     *
+     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     */
+    @NonNull
+    public int[] getModulationsExt() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_1_1, "getModulationsExt status");
+        if (mModulationsExt == null) {
+            throw new IllegalStateException();
+        }
+        return mModulationsExt;
     }
 
     /**
