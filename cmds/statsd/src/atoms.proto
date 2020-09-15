@@ -3764,6 +3764,19 @@ message AppStartOccurred {
 
     // The reason why the package was optimized.
     optional int32 package_optimization_compilation_reason = 15;
+
+    enum SourceType {
+        UNAVAILABLE = 0;
+        LAUNCHER = 1;
+        NOTIFICATION = 2;
+        LOCKSCREEN = 3;
+    }
+    // The type of the startup source.
+    optional SourceType source_type = 16;
+
+    // The time from the startup source to the beginning of handling the startup event.
+    // -1 means not available.
+    optional int32 source_event_delay_millis = 17;
 }
 
 message AppStartCanceled {
@@ -3808,6 +3821,19 @@ message AppStartFullyDrawn {
 
     // App startup time (until call to Activity#reportFullyDrawn()).
     optional int64 app_startup_time_millis = 6;
+
+    enum SourceType {
+        UNAVAILABLE = 0;
+        LAUNCHER = 1;
+        NOTIFICATION = 2;
+        LOCKSCREEN = 3;
+    }
+    // The type of the startup source.
+    optional SourceType source_type = 7;
+
+    // The time from the startup source to the beginning of handling the startup event.
+    // -1 means not available.
+    optional int32 source_event_delay_millis = 8;
 }
 
 /**

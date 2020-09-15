@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -37,6 +38,7 @@ import android.hardware.HardwareBuffer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
+import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -54,6 +56,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.window.WindowContainerToken;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 
 /**
@@ -290,6 +294,9 @@ public class ActivityOptions {
     private static final String KEY_EXIT_COORDINATOR_INDEX
             = "android:activity.exitCoordinatorIndex";
 
+    /** See {@link SourceInfo}. */
+    private static final String KEY_SOURCE_INFO = "android.activity.sourceInfo";
+
     private static final String KEY_USAGE_TIME_REPORT = "android:activity.usageTimeReport";
     private static final String KEY_ROTATION_ANIMATION_HINT = "android:activity.rotationAnimationHint";
 
@@ -369,6 +376,7 @@ public class ActivityOptions {
     private boolean mAvoidMoveToFront;
     private boolean mFreezeRecentTasksReordering;
     private AppTransitionAnimationSpec mAnimSpecs[];
+    private SourceInfo mSourceInfo;
     private int mRotationAnimationHint = -1;
     private Bundle mAppVerificationBundle;
     private IAppTransitionAnimationSpecsFuture mSpecsFuture;
@@ -1055,6 +1063,7 @@ public class ActivityOptions {
             mAnimationFinishedListener = IRemoteCallback.Stub.asInterface(
                     opts.getBinder(KEY_ANIMATION_FINISHED_LISTENER));
         }
+        mSourceInfo = opts.getParcelable(KEY_SOURCE_INFO);
         mRotationAnimationHint = opts.getInt(KEY_ROTATION_ANIMATION_HINT, -1);
         mAppVerificationBundle = opts.getBundle(KEY_INSTANT_APP_VERIFICATION_BUNDLE);
         if (opts.containsKey(KEY_SPECS_FUTURE)) {
@@ -1696,6 +1705,9 @@ public class ActivityOptions {
         if (mSpecsFuture != null) {
             b.putBinder(KEY_SPECS_FUTURE, mSpecsFuture.asBinder());
         }
+        if (mSourceInfo != null) {
+            b.putParcelable(KEY_SOURCE_INFO, mSourceInfo);
+        }
         if (mRotationAnimationHint != -1) {
             b.putInt(KEY_ROTATION_ANIMATION_HINT, mRotationAnimationHint);
         }
@@ -1734,6 +1746,28 @@ public class ActivityOptions {
      */
     public void requestUsageTimeReport(PendingIntent receiver) {
         mUsageTimeReport = receiver;
+    }
+
+    /**
+     * Returns the launch source information set by {@link #setSourceInfo}.
+     * @hide
+     */
+    public @Nullable SourceInfo getSourceInfo() {
+        return mSourceInfo;
+    }
+
+    /**
+     * Sets the source information of the launch event.
+     *
+     * @param type The type of the startup source.
+     * @param uptimeMillis The event time of startup source in milliseconds since boot, not
+     *                     including sleep (e.g. from {@link android.view.MotionEvent#getEventTime}
+     *                     or {@link android.os.SystemClock#uptimeMillis}).
+     * @see SourceInfo
+     * @hide
+     */
+    public void setSourceInfo(@SourceInfo.SourceType int type, long uptimeMillis) {
+        mSourceInfo = new SourceInfo(type, uptimeMillis);
     }
 
     /**
@@ -1862,5 +1896,59 @@ public class ActivityOptions {
                 }
             }
         }
+    }
+
+    /**
+     * The information about the source of activity launch. E.g. describe an activity is launched
+     * from launcher by receiving a motion event with a timestamp.
+     * @hide
+     */
+    public static class SourceInfo implements Parcelable {
+        /** Launched from launcher. */
+        public static final int TYPE_LAUNCHER = 1;
+        /** Launched from notification. */
+        public static final int TYPE_NOTIFICATION = 2;
+        /** Launched from lockscreen, including notification while the device is locked. */
+        public static final int TYPE_LOCKSCREEN = 3;
+
+        @IntDef(flag = true, prefix = { "TYPE_" }, value = {
+                TYPE_LAUNCHER,
+                TYPE_NOTIFICATION,
+                TYPE_LOCKSCREEN,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface SourceType {}
+
+        /** The type of the startup source. */
+        public final @SourceType int type;
+
+        /** The timestamp (uptime based) of the source to launch activity. */
+        public final long eventTimeMs;
+
+        SourceInfo(@SourceType int srcType, long uptimeMillis) {
+            type = srcType;
+            eventTimeMs = uptimeMillis;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(type);
+            dest.writeLong(eventTimeMs);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final Creator<SourceInfo> CREATOR = new Creator<SourceInfo>() {
+            public SourceInfo createFromParcel(Parcel in) {
+                return new SourceInfo(in.readInt(), in.readLong());
+            }
+
+            public SourceInfo[] newArray(int size) {
+                return new SourceInfo[size];
+            }
+        };
     }
 }
