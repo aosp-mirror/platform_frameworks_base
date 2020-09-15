@@ -3498,7 +3498,7 @@ public final class PowerManagerService extends SystemService
                 }
                 if (mDeviceIdleMode) {
                     // If we are in idle mode, we will also ignore all partial wake locks that are
-                    // for application uids that are not whitelisted.
+                    // for application uids that are not allowlisted.
                     final UidState state = wakeLock.mUidState;
                     if (Arrays.binarySearch(mDeviceIdleWhitelist, appid) < 0 &&
                             Arrays.binarySearch(mDeviceIdleTempWhitelist, appid) < 0 &&

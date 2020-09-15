@@ -63,7 +63,7 @@ public final class BugReportHandlerUtil {
     }
 
     /**
-     * Launches a bugreport-whitelisted app to handle a bugreport.
+     * Launches a bugreport-allowlisted app to handle a bugreport.
      *
      * <p>Allows a bug report handler app to take bugreports on the user's behalf. The handler can
      * be predefined in the config, meant to be launched with the primary user. The user can
@@ -71,7 +71,7 @@ public final class BugReportHandlerUtil {
      * useful for capturing bug reports from work profile, for instance.
      *
      * @param context Context
-     * @return true if there is a bugreport-whitelisted app to handle a bugreport, or false
+     * @return true if there is a bugreport-allowlisted app to handle a bugreport, or false
      * otherwise
      */
     static boolean launchBugReportHandlerApp(Context context) {
@@ -92,7 +92,7 @@ public final class BugReportHandlerUtil {
             // It looks like the settings are outdated, reset outdated settings.
             //
             // i.e.
-            // If user chooses which profile and which bugreport-whitelisted app in that
+            // If user chooses which profile and which bugreport-allowlisted app in that
             // profile to handle a bugreport, then user remove the profile.
             // === RESULT ===
             // The chosen bugreport handler app is outdated because the profile is removed,
@@ -184,7 +184,7 @@ public final class BugReportHandlerUtil {
     }
 
     private static boolean isBugreportWhitelistedApp(String app) {
-        // Verify the app is bugreport-whitelisted
+        // Verify the app is bugreport-allowlisted
         final ArraySet<String> whitelistedApps = SystemConfig.getInstance()
                 .getBugreportWhitelistedPackages();
         return whitelistedApps.contains(app);

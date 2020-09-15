@@ -371,7 +371,7 @@ public final class InputMethodPrivilegedOperations {
     /**
      * Calls {@link IInputMethodPrivilegedOperations#applyImeVisibility(IBinder, boolean)}.
      *
-     * @param showOrHideInputToken dummy token that maps to window requesting
+     * @param showOrHideInputToken placeholder token that maps to window requesting
      *        {@link android.view.inputmethod.InputMethodManager#showSoftInput(View, int)} or
      *        {@link android.view.inputmethod.InputMethodManager#hideSoftInputFromWindow
      *        (IBinder, int)}

@@ -389,7 +389,7 @@ public class RadioGroup extends LinearLayout {
     /**
      * <p>A pass-through listener acts upon the events and dispatches them
      * to another listener. This allows the table layout to set its own internal
-     * hierarchy change listener without preventing the user to setup his.</p>
+     * hierarchy change listener without preventing the user to setup this.</p>
      */
     private class PassThroughHierarchyChangeListener implements
             ViewGroup.OnHierarchyChangeListener {

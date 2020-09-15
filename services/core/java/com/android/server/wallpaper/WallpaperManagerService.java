@@ -2036,7 +2036,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
                 WallpaperData wd = mWallpaperMap.get(user.id);
                 if (wd == null) {
-                    // User hasn't started yet, so load her settings to peek at the wallpaper
+                    // User hasn't started yet, so load their settings to peek at the wallpaper
                     loadSettingsLocked(user.id, false);
                     wd = mWallpaperMap.get(user.id);
                 }

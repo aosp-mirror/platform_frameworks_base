@@ -69,7 +69,7 @@ public final class ContentCaptureOptions implements Parcelable {
     public final int logHistorySize;
 
     /**
-     * List of activities explicitly whitelisted for content capture (or {@code null} if whitelisted
+     * List of activities explicitly allowlisted for content capture (or {@code null} if allowlisted
      * for all acitivites in the package).
      */
     @Nullable
@@ -147,7 +147,7 @@ public final class ContentCaptureOptions implements Parcelable {
     /** @hide */
     @VisibleForTesting
     public boolean isWhitelisted(@NonNull Context context) {
-        if (whitelistedComponents == null) return true; // whole package is whitelisted
+        if (whitelistedComponents == null) return true; // whole package is allowlisted
         final ContentCaptureClient client = context.getContentCaptureClient();
         if (client == null) {
             // Shouldn't happen, but it doesn't hurt to check...

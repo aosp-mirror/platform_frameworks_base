@@ -80,7 +80,7 @@ public class AuthServiceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        // Dummy test config
+        // Placeholder test config
         final String[] config = {
                 "0:2:15", // ID0:Fingerprint:Strong
                 "1:4:15", // ID1:Iris:Strong

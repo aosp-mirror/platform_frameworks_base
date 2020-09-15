@@ -72,11 +72,11 @@ public abstract class NetworkPolicyManagerInternal {
     }
 
     /**
-     * Informs that an appId has been added or removed from the temp-powersave-whitelist so that
+     * Informs that an appId has been added or removed from the temp-powersave-allowlist so that
      * that network rules for that appId can be updated.
      *
-     * @param appId The appId which has been updated in the whitelist.
-     * @param added Denotes whether the {@param appId} has been added or removed from the whitelist.
+     * @param appId The appId which has been updated in the allowlist.
+     * @param added Denotes whether the {@param appId} has been added or removed from the allowlist.
      */
     public abstract void onTempPowerSaveWhitelistChange(int appId, boolean added);
 
@@ -107,7 +107,7 @@ public abstract class NetworkPolicyManagerInternal {
     public abstract void onAdminDataAvailable();
 
     /**
-     * Control if a UID should be whitelisted even if it's in app idle mode. Other restrictions may
+     * Control if a UID should be allowlisted even if it's in app idle mode. Other restrictions may
      * still be in effect.
      */
     public abstract void setAppIdleWhitelist(int uid, boolean shouldWhitelist);

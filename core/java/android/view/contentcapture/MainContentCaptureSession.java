@@ -397,7 +397,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                         + " after " + numberEvents + " delayed events");
             }
             resetSession(STATE_DISABLED | STATE_NO_RESPONSE);
-            // TODO(b/111276913): blacklist activity / use special flag to indicate that
+            // TODO(b/111276913): denylist activity / use special flag to indicate that
             // when it's launched again
             return;
         }

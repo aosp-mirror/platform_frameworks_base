@@ -2007,7 +2007,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * Updates the hidden API enforcement policy for this app from the given values, if appropriate.
      *
      * This will have no effect if this app is not subject to hidden API enforcement, i.e. if it
-     * is on the package whitelist.
+     * is on the package allowlist.
      *
      * @param policy configured policy for this app, or {@link #HIDDEN_API_ENFORCEMENT_DEFAULT}
      *        if nothing configured.

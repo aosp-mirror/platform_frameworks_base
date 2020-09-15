@@ -69,7 +69,7 @@ public final class IncrementalFileStorages {
             @Nullable StorageHealthCheckParams healthCheckParams,
             @Nullable IStorageHealthListener healthListener,
             List<InstallationFileParcel> addedFiles) throws IOException {
-        // TODO(b/136132412): sanity check if session should not be incremental
+        // TODO(b/136132412): validity check if session should not be incremental
         IncrementalManager incrementalManager = (IncrementalManager) context.getSystemService(
                 Context.INCREMENTAL_SERVICE);
         if (incrementalManager == null) {

@@ -953,7 +953,7 @@ public class Notification implements Parcelable
     public ArraySet<PendingIntent> allPendingIntents;
 
     /**
-     * Token identifying the notification that is applying doze/bgcheck whitelisting to the
+     * Token identifying the notification that is applying doze/bgcheck allowlisting to the
      * pending intents inside of it, so only those will get the behavior.
      *
      * @hide

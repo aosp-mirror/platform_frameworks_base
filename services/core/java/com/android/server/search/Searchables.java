@@ -417,7 +417,7 @@ public class Searchables {
 
         if (activities != null && !activities.isEmpty()) {
             ActivityInfo ai = activities.get(0).activityInfo;
-            // TODO: do some sanity checks here?
+            // TODO: do some validity checks here?
             return new ComponentName(ai.packageName, ai.name);
         }
         Log.w(LOG_TAG, "No web search activity found");

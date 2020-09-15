@@ -5153,7 +5153,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         assertTrue(dpms.isNotificationListenerServicePermitted(packageName, userId));
 
-        // Attempt to set to empty list (which means no listener is whitelisted)
+        // Attempt to set to empty list (which means no listener is allowlisted)
         mContext.binder.callingUid = adminUid;
         assertFalse(dpms.setPermittedCrossProfileNotificationListeners(
                 admin1, Collections.emptyList()));
@@ -5227,7 +5227,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpms.isNotificationListenerServicePermitted(
                 systemListener, MANAGED_PROFILE_USER_ID));
 
-        // Setting only one package in the whitelist
+        // Setting only one package in the allowlist
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         assertTrue(dpms.setPermittedCrossProfileNotificationListeners(
                 admin1, Collections.singletonList(permittedListener)));
@@ -5241,11 +5241,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 permittedListener, MANAGED_PROFILE_USER_ID));
         assertFalse(dpms.isNotificationListenerServicePermitted(
                 notPermittedListener, MANAGED_PROFILE_USER_ID));
-        // System packages are always allowed (even if not in the whitelist)
+        // System packages are always allowed (even if not in the allowlist)
         assertTrue(dpms.isNotificationListenerServicePermitted(
                 systemListener, MANAGED_PROFILE_USER_ID));
 
-        // Setting an empty whitelist - only system listeners allowed
+        // Setting an empty allowlist - only system listeners allowed
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         assertTrue(dpms.setPermittedCrossProfileNotificationListeners(
                 admin1, Collections.emptyList()));
@@ -5256,11 +5256,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 permittedListener, MANAGED_PROFILE_USER_ID));
         assertFalse(dpms.isNotificationListenerServicePermitted(
                 notPermittedListener, MANAGED_PROFILE_USER_ID));
-        // System packages are always allowed (even if not in the whitelist)
+        // System packages are always allowed (even if not in the allowlist)
         assertTrue(dpms.isNotificationListenerServicePermitted(
                 systemListener, MANAGED_PROFILE_USER_ID));
 
-        // Setting a null whitelist - all listeners allowed
+        // Setting a null allowlist - all listeners allowed
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         assertTrue(dpms.setPermittedCrossProfileNotificationListeners(admin1, null));
         assertNull(dpms.getPermittedCrossProfileNotificationListeners(admin1));
@@ -5308,7 +5308,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpms.isNotificationListenerServicePermitted(
                 systemListener, UserHandle.USER_SYSTEM));
 
-        // Setting an empty whitelist - only system listeners allowed in managed profile, but
+        // Setting an empty allowlist - only system listeners allowed in managed profile, but
         // all allowed in primary profile
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         assertTrue(dpms.setPermittedCrossProfileNotificationListeners(

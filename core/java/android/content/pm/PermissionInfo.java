@@ -371,7 +371,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      *
      * <p>This permission is restricted immutably which means that its
      * restriction state may be specified only on the first install of
-     * the app and will stay in this initial whitelist state until
+     * the app and will stay in this initial allowlist state until
      * the app is uninstalled.
      */
     public static final int FLAG_IMMUTABLY_RESTRICTED = 1<<4;

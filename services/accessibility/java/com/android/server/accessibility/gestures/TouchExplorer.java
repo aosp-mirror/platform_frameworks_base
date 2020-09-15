@@ -637,7 +637,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 }
                 // If the user is touch exploring the second pointer may be
                 // performing a double tap to activate an item without need
-                // for the user to lift his exploring finger.
+                // for the user to lift their exploring finger.
                 // It is *important* to use the distance traveled by the pointers
                 // on the screen which may or may not be magnified.
                 final float deltaX =

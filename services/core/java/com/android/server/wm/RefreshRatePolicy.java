@@ -107,7 +107,7 @@ class RefreshRatePolicy {
             return mLowRefreshRateId;
         }
 
-        // If app is blacklisted using higher refresh rate, return default (lower) refresh rate
+        // If app is denylisted using higher refresh rate, return default (lower) refresh rate
         if (mHighRefreshRateBlacklist.isBlacklisted(packageName)) {
             return mLowRefreshRateId;
         }

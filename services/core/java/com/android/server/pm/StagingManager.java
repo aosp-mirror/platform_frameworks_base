@@ -1388,7 +1388,7 @@ public class StagingManager {
         }
 
         /**
-         * A dummy state for starting the pre reboot verification.
+         * A placeholder state for starting the pre reboot verification.
          *
          * See {@link PreRebootVerificationHandler} to see all nodes of pre reboot verification
          */

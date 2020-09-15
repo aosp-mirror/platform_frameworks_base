@@ -2744,7 +2744,7 @@ class PackageManagerShellCommand extends ShellCommand {
         final InstallParams params = new InstallParams();
 
         params.sessionParams = sessionParams;
-        // Whitelist all permissions by default
+        // Allowlist all permissions by default
         sessionParams.installFlags |= PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS;
 
         String opt;
