@@ -272,6 +272,7 @@ class PrivacyItemControllerTest : SysuiTestCase() {
     @Test
     fun testNotListeningWhenIndicatorsDisabled() {
         changeAll(false)
+        changeMicCamera(false)
         privacyItemController.addCallback(callback)
         executor.runAllReady()
         verify(appOpsController, never()).addCallback(eq(PrivacyItemController.OPS),
