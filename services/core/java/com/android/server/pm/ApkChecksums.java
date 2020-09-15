@@ -16,14 +16,15 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.Checksum.PARTIAL_MERKLE_ROOT_1M_SHA256;
+import static android.content.pm.Checksum.PARTIAL_MERKLE_ROOT_1M_SHA512;
+import static android.content.pm.Checksum.WHOLE_MD5;
+import static android.content.pm.Checksum.WHOLE_MERKLE_ROOT_4K_SHA256;
+import static android.content.pm.Checksum.WHOLE_SHA1;
+import static android.content.pm.Checksum.WHOLE_SHA256;
+import static android.content.pm.Checksum.WHOLE_SHA512;
 import static android.content.pm.PackageManager.EXTRA_CHECKSUMS;
-import static android.content.pm.PackageManager.PARTIAL_MERKLE_ROOT_1M_SHA256;
-import static android.content.pm.PackageManager.PARTIAL_MERKLE_ROOT_1M_SHA512;
-import static android.content.pm.PackageManager.WHOLE_MD5;
-import static android.content.pm.PackageManager.WHOLE_MERKLE_ROOT_4K_SHA256;
-import static android.content.pm.PackageManager.WHOLE_SHA1;
-import static android.content.pm.PackageManager.WHOLE_SHA256;
-import static android.content.pm.PackageManager.WHOLE_SHA512;
+import static android.content.pm.PackageParser.APK_FILE_EXTENSION;
 import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256;
 import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512;
 import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_VERITY_CHUNKED_SHA256;
@@ -33,14 +34,16 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.pm.FileChecksum;
-import android.content.pm.PackageManager;
+import android.content.pm.ApkChecksum;
+import android.content.pm.Checksum;
 import android.content.pm.PackageParser;
+import android.content.pm.Signature;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalStorage;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.apk.ApkSignatureSchemeV2Verifier;
@@ -57,24 +60,34 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.security.VerityUtils;
 
 import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.security.DigestException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides checksums for APK.
  */
 public class ApkChecksums {
     static final String TAG = "ApkChecksums";
+
+    private static final String DIGESTS_FILE_EXTENSION = ".digests";
 
     // MessageDigest algorithms.
     static final String ALGO_MD5 = "MD5";
@@ -131,6 +144,100 @@ public class ApkChecksums {
     }
 
     /**
+     * Return the digests path associated with the given code path
+     * (replaces '.apk' extension with '.digests')
+     *
+     * @throws IllegalArgumentException if the code path is not an .apk.
+     */
+    public static String buildDigestsPathForApk(String codePath) {
+        if (!PackageParser.isApkPath(codePath)) {
+            throw new IllegalStateException("Code path is not an apk " + codePath);
+        }
+        return codePath.substring(0, codePath.length() - APK_FILE_EXTENSION.length())
+                + DIGESTS_FILE_EXTENSION;
+    }
+
+    /**
+     * Search for the digests file associated with the given target file.
+     * If it exists, the method returns the digests file; otherwise it returns null.
+     */
+    public static File findDigestsForFile(File targetFile) {
+        String digestsPath = buildDigestsPathForApk(targetFile.getAbsolutePath());
+        File digestsFile = new File(digestsPath);
+        return digestsFile.exists() ? digestsFile : null;
+    }
+
+    /**
+     * Serialize checksums to file in binary format.
+     */
+    public static void writeChecksums(File file, ApkChecksum[] checksums)
+            throws IOException, CertificateException {
+        try (OutputStream os = new FileOutputStream(file);
+             DataOutputStream dos = new DataOutputStream(os)) {
+            dos.writeInt(checksums.length);
+            for (ApkChecksum checksum : checksums) {
+                final String splitName = checksum.getSplitName();
+                if (splitName == null) {
+                    dos.writeInt(-1);
+                } else {
+                    dos.writeInt(splitName.length());
+                    dos.writeUTF(splitName);
+                }
+
+                dos.writeInt(checksum.getKind());
+
+                final byte[] valueBytes = checksum.getValue();
+                dos.writeInt(valueBytes.length);
+                dos.write(valueBytes);
+
+                final Certificate cert = checksum.getSourceCertificate();
+                final byte[] certBytes = (cert == null) ? null : cert.getEncoded();
+                if (certBytes == null) {
+                    dos.writeInt(-1);
+                } else {
+                    dos.writeInt(certBytes.length);
+                    dos.write(certBytes);
+                }
+            }
+        }
+    }
+
+    /**
+     * Deserialize array of checksums previously stored in
+     * {@link #writeChecksums(File, ApkChecksum[])}.
+     */
+    private static ApkChecksum[] readChecksums(File file) throws IOException {
+        try (InputStream is = new FileInputStream(file);
+             DataInputStream dis = new DataInputStream(is)) {
+            final int size = dis.readInt();
+            ApkChecksum[] checksums = new ApkChecksum[size];
+            for (int i = 0; i < size; ++i) {
+                final String splitName;
+                if (dis.readInt() < 0) {
+                    splitName = null;
+                } else {
+                    splitName = dis.readUTF();
+                }
+                final int kind = dis.readInt();
+                final byte[] valueBytes = new byte[dis.readInt()];
+                dis.read(valueBytes);
+                final byte[] certBytes;
+                final int certBytesLength = dis.readInt();
+                if (certBytesLength < 0) {
+                    certBytes = null;
+                } else {
+                    certBytes = new byte[certBytesLength];
+                    dis.read(certBytes);
+                }
+                checksums[i] = new ApkChecksum(splitName, new Checksum(kind, valueBytes),
+                        certBytes);
+            }
+            return checksums;
+        }
+    }
+
+
+    /**
      * Fetch or calculate checksums for the collection of files.
      *
      * @param filesToChecksum   split name, null for base and File to fetch checksums for
@@ -142,20 +249,20 @@ public class ApkChecksums {
      * @param statusReceiver    to receive the resulting checksums
      */
     public static void getChecksums(List<Pair<String, File>> filesToChecksum,
-            @PackageManager.FileChecksumKind int optional,
-            @PackageManager.FileChecksumKind int required,
+            @Checksum.Kind int optional,
+            @Checksum.Kind int required,
             @Nullable Certificate[] trustedInstallers,
             @NonNull IntentSender statusReceiver,
             @NonNull Injector injector) {
-        List<Map<Integer, FileChecksum>> result = new ArrayList<>(filesToChecksum.size());
+        List<Map<Integer, ApkChecksum>> result = new ArrayList<>(filesToChecksum.size());
         for (int i = 0, size = filesToChecksum.size(); i < size; ++i) {
             final String split = filesToChecksum.get(i).first;
             final File file = filesToChecksum.get(i).second;
-            Map<Integer, FileChecksum> checksums = new ArrayMap<>();
+            Map<Integer, ApkChecksum> checksums = new ArrayMap<>();
             result.add(checksums);
 
             try {
-                getAvailableFileChecksums(split, file, optional | required, trustedInstallers,
+                getAvailableApkChecksums(split, file, optional | required, trustedInstallers,
                         checksums);
             } catch (Throwable e) {
                 Slog.e(TAG, "Preferred checksum calculation error", e);
@@ -168,18 +275,18 @@ public class ApkChecksums {
     }
 
     private static void processRequiredChecksums(List<Pair<String, File>> filesToChecksum,
-            List<Map<Integer, FileChecksum>> result,
-            @PackageManager.FileChecksumKind int required,
+            List<Map<Integer, ApkChecksum>> result,
+            @Checksum.Kind int required,
             @NonNull IntentSender statusReceiver,
             @NonNull Injector injector,
             long startTime) {
         final boolean timeout =
                 SystemClock.uptimeMillis() - startTime >= PROCESS_REQUIRED_CHECKSUMS_TIMEOUT_MILLIS;
-        List<FileChecksum> allChecksums = new ArrayList<>();
+        List<ApkChecksum> allChecksums = new ArrayList<>();
         for (int i = 0, size = filesToChecksum.size(); i < size; ++i) {
             final String split = filesToChecksum.get(i).first;
             final File file = filesToChecksum.get(i).second;
-            Map<Integer, FileChecksum> checksums = result.get(i);
+            Map<Integer, ApkChecksum> checksums = result.get(i);
 
             try {
                 if (!timeout || required != 0) {
@@ -192,7 +299,7 @@ public class ApkChecksums {
                         return;
                     }
 
-                    getRequiredFileChecksums(split, file, required, checksums);
+                    getRequiredApkChecksums(split, file, required, checksums);
                 }
                 allChecksums.addAll(checksums.values());
             } catch (Throwable e) {
@@ -202,7 +309,7 @@ public class ApkChecksums {
 
         final Intent intent = new Intent();
         intent.putExtra(EXTRA_CHECKSUMS,
-                allChecksums.toArray(new FileChecksum[allChecksums.size()]));
+                allChecksums.toArray(new ApkChecksum[allChecksums.size()]));
 
         try {
             statusReceiver.sendIntent(injector.getContext(), 1, intent, null, null);
@@ -222,16 +329,16 @@ public class ApkChecksums {
      *                          [] - trust nobody.
      * @param checksums         resulting checksums
      */
-    private static void getAvailableFileChecksums(String split, File file,
-            @PackageManager.FileChecksumKind int kinds,
+    private static void getAvailableApkChecksums(String split, File file,
+            @Checksum.Kind int kinds,
             @Nullable Certificate[] trustedInstallers,
-            Map<Integer, FileChecksum> checksums) {
+            Map<Integer, ApkChecksum> checksums) {
         final String filePath = file.getAbsolutePath();
 
         // Always available: FSI or IncFs.
         if (isRequired(WHOLE_MERKLE_ROOT_4K_SHA256, kinds, checksums)) {
             // Hashes in fs-verity and IncFS are always verified.
-            FileChecksum checksum = extractHashFromFS(split, filePath);
+            ApkChecksum checksum = extractHashFromFS(split, filePath);
             if (checksum != null) {
                 checksums.put(checksum.getKind(), checksum);
             }
@@ -240,22 +347,40 @@ public class ApkChecksums {
         // System enforced: v2/v3.
         if (isRequired(PARTIAL_MERKLE_ROOT_1M_SHA256, kinds, checksums) || isRequired(
                 PARTIAL_MERKLE_ROOT_1M_SHA512, kinds, checksums)) {
-            Map<Integer, FileChecksum> v2v3checksums = extractHashFromV2V3Signature(
+            Map<Integer, ApkChecksum> v2v3checksums = extractHashFromV2V3Signature(
                     split, filePath, kinds);
             if (v2v3checksums != null) {
                 checksums.putAll(v2v3checksums);
             }
         }
 
-        // TODO(b/160605420): Installer provided.
+        if (trustedInstallers == null || trustedInstallers.length > 0) {
+            final File digestsFile = new File(buildDigestsPathForApk(filePath));
+            if (digestsFile.exists()) {
+                try {
+                    final ApkChecksum[] digests = readChecksums(digestsFile);
+                    final Set<Signature> trusted = convertToSet(trustedInstallers);
+                    for (ApkChecksum digest : digests) {
+                        if (isRequired(digest.getKind(), kinds, checksums) && isTrusted(digest,
+                                trusted)) {
+                            checksums.put(digest.getKind(), digest);
+                        }
+                    }
+                } catch (IOException e) {
+                    Slog.e(TAG, "Error reading .digests", e);
+                } catch (CertificateEncodingException e) {
+                    Slog.e(TAG, "Error encoding trustedInstallers", e);
+                }
+            }
+        }
     }
 
     /**
      * Whether the file is available for checksumming or we need to wait.
      */
     private static boolean needToWait(File file,
-            @PackageManager.FileChecksumKind int kinds,
-            Map<Integer, FileChecksum> checksums,
+            @Checksum.Kind int kinds,
+            Map<Integer, ApkChecksum> checksums,
             @NonNull Injector injector) throws IOException {
         if (!isRequired(WHOLE_MERKLE_ROOT_4K_SHA256, kinds, checksums)
                 && !isRequired(WHOLE_MD5, kinds, checksums)
@@ -274,12 +399,13 @@ public class ApkChecksums {
 
         IncrementalManager manager = injector.getIncrementalManager();
         if (manager == null) {
-            throw new IllegalStateException("IncrementalManager is missing.");
+            Slog.e(TAG, "IncrementalManager is missing.");
+            return false;
         }
         IncrementalStorage storage = manager.openStorage(filePath);
         if (storage == null) {
-            throw new IllegalStateException(
-                    "IncrementalStorage is missing for a path on IncFs: " + filePath);
+            Slog.e(TAG, "IncrementalStorage is missing for a path on IncFs: " + filePath);
+            return false;
         }
 
         return !storage.isFileFullyLoaded(filePath);
@@ -293,9 +419,9 @@ public class ApkChecksums {
      * @param kinds     mask to forcefully calculate if not available
      * @param checksums resulting checksums
      */
-    private static void getRequiredFileChecksums(String split, File file,
-            @PackageManager.FileChecksumKind int kinds,
-            Map<Integer, FileChecksum> checksums) {
+    private static void getRequiredApkChecksums(String split, File file,
+            @Checksum.Kind int kinds,
+            Map<Integer, ApkChecksum> checksums) {
         final String filePath = file.getAbsolutePath();
 
         // Manually calculating required checksums if not readily available.
@@ -310,7 +436,7 @@ public class ApkChecksums {
                             }
                         });
                 checksums.put(WHOLE_MERKLE_ROOT_4K_SHA256,
-                        new FileChecksum(split, WHOLE_MERKLE_ROOT_4K_SHA256, generatedRootHash));
+                        new ApkChecksum(split, WHOLE_MERKLE_ROOT_4K_SHA256, generatedRootHash));
             } catch (IOException | NoSuchAlgorithmException | DigestException e) {
                 Slog.e(TAG, "Error calculating WHOLE_MERKLE_ROOT_4K_SHA256", e);
             }
@@ -324,8 +450,8 @@ public class ApkChecksums {
         calculatePartialChecksumsIfRequested(checksums, split, file, kinds);
     }
 
-    private static boolean isRequired(@PackageManager.FileChecksumKind int kind,
-            @PackageManager.FileChecksumKind int kinds, Map<Integer, FileChecksum> checksums) {
+    private static boolean isRequired(@Checksum.Kind int kind,
+            @Checksum.Kind int kinds, Map<Integer, ApkChecksum> checksums) {
         if ((kinds & kind) == 0) {
             return false;
         }
@@ -335,12 +461,36 @@ public class ApkChecksums {
         return true;
     }
 
-    private static FileChecksum extractHashFromFS(String split, String filePath) {
+    /**
+     * Signature class provides a fast way to compare certificates using their hashes.
+     * The hash is exactly the same as in X509/Certificate.
+     */
+    private static Set<Signature> convertToSet(@Nullable Certificate[] array) throws
+            CertificateEncodingException {
+        if (array == null) {
+            return null;
+        }
+        final Set<Signature> set = new ArraySet<>(array.length);
+        for (Certificate item : array) {
+            set.add(new Signature(item.getEncoded()));
+        }
+        return set;
+    }
+
+    private static boolean isTrusted(ApkChecksum checksum, Set<Signature> trusted) {
+        if (trusted == null) {
+            return true;
+        }
+        final Signature signature = new Signature(checksum.getSourceCertificateBytes());
+        return trusted.contains(signature);
+    }
+
+    private static ApkChecksum extractHashFromFS(String split, String filePath) {
         // verity first
         {
             byte[] hash = VerityUtils.getFsverityRootHash(filePath);
             if (hash != null) {
-                return new FileChecksum(split, WHOLE_MERKLE_ROOT_4K_SHA256, hash);
+                return new ApkChecksum(split, WHOLE_MERKLE_ROOT_4K_SHA256, hash);
             }
         }
         // v4 next
@@ -350,7 +500,7 @@ public class ApkChecksums {
             byte[] hash = signer.contentDigests.getOrDefault(CONTENT_DIGEST_VERITY_CHUNKED_SHA256,
                     null);
             if (hash != null) {
-                return new FileChecksum(split, WHOLE_MERKLE_ROOT_4K_SHA256, hash);
+                return new ApkChecksum(split, WHOLE_MERKLE_ROOT_4K_SHA256, hash);
             }
         } catch (SignatureNotFoundException e) {
             // Nothing
@@ -360,7 +510,7 @@ public class ApkChecksums {
         return null;
     }
 
-    private static Map<Integer, FileChecksum> extractHashFromV2V3Signature(
+    private static Map<Integer, ApkChecksum> extractHashFromV2V3Signature(
             String split, String filePath, int kinds) {
         Map<Integer, byte[]> contentDigests = null;
         try {
@@ -377,19 +527,19 @@ public class ApkChecksums {
             return null;
         }
 
-        Map<Integer, FileChecksum> checksums = new ArrayMap<>();
+        Map<Integer, ApkChecksum> checksums = new ArrayMap<>();
         if ((kinds & PARTIAL_MERKLE_ROOT_1M_SHA256) != 0) {
             byte[] hash = contentDigests.getOrDefault(CONTENT_DIGEST_CHUNKED_SHA256, null);
             if (hash != null) {
                 checksums.put(PARTIAL_MERKLE_ROOT_1M_SHA256,
-                        new FileChecksum(split, PARTIAL_MERKLE_ROOT_1M_SHA256, hash));
+                        new ApkChecksum(split, PARTIAL_MERKLE_ROOT_1M_SHA256, hash));
             }
         }
         if ((kinds & PARTIAL_MERKLE_ROOT_1M_SHA512) != 0) {
             byte[] hash = contentDigests.getOrDefault(CONTENT_DIGEST_CHUNKED_SHA512, null);
             if (hash != null) {
                 checksums.put(PARTIAL_MERKLE_ROOT_1M_SHA512,
-                        new FileChecksum(split, PARTIAL_MERKLE_ROOT_1M_SHA512, hash));
+                        new ApkChecksum(split, PARTIAL_MERKLE_ROOT_1M_SHA512, hash));
             }
         }
         return checksums;
@@ -411,17 +561,17 @@ public class ApkChecksums {
         }
     }
 
-    private static void calculateChecksumIfRequested(Map<Integer, FileChecksum> checksums,
+    private static void calculateChecksumIfRequested(Map<Integer, ApkChecksum> checksums,
             String split, File file, int required, int kind) {
         if ((required & kind) != 0 && !checksums.containsKey(kind)) {
-            final byte[] checksum = getFileChecksum(file, kind);
+            final byte[] checksum = getApkChecksum(file, kind);
             if (checksum != null) {
-                checksums.put(kind, new FileChecksum(split, kind, checksum));
+                checksums.put(kind, new ApkChecksum(split, kind, checksum));
             }
         }
     }
 
-    private static byte[] getFileChecksum(File file, int kind) {
+    private static byte[] getApkChecksum(File file, int kind) {
         try (FileInputStream fis = new FileInputStream(file);
              BufferedInputStream bis = new BufferedInputStream(fis)) {
             byte[] dataBytes = new byte[512 * 1024];
@@ -466,7 +616,7 @@ public class ApkChecksums {
         }
     }
 
-    private static void calculatePartialChecksumsIfRequested(Map<Integer, FileChecksum> checksums,
+    private static void calculatePartialChecksumsIfRequested(Map<Integer, ApkChecksum> checksums,
             String split, File file, int required) {
         boolean needSignatureSha256 =
                 (required & PARTIAL_MERKLE_ROOT_1M_SHA256) != 0 && !checksums.containsKey(
@@ -500,7 +650,7 @@ public class ApkChecksums {
             for (int i = 0, size = digestAlgos.length; i < size; ++i) {
                 int checksumKind = getChecksumKindForContentDigestAlgo(digestAlgos[i]);
                 if (checksumKind != -1) {
-                    checksums.put(checksumKind, new FileChecksum(split, checksumKind, digests[i]));
+                    checksums.put(checksumKind, new ApkChecksum(split, checksumKind, digests[i]));
                 }
             }
         } catch (IOException | DigestException e) {
