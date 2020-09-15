@@ -4392,6 +4392,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSecondaryLockscreen_nonSupervisionApp() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
 
+        // Ensure packages are *not* flagged as test_only.
+        doReturn(new ApplicationInfo()).when(getServices().ipackageManager).getApplicationInfo(
+                eq(admin1.getPackageName()),
+                anyInt(),
+                eq(CALLER_USER_HANDLE));
+        doReturn(new ApplicationInfo()).when(getServices().ipackageManager).getApplicationInfo(
+                eq(admin2.getPackageName()),
+                anyInt(),
+                eq(CALLER_USER_HANDLE));
+
         // Initial state is disabled.
         assertFalse(dpm.isSecondaryLockscreenEnabled(UserHandle.of(CALLER_USER_HANDLE)));
 
