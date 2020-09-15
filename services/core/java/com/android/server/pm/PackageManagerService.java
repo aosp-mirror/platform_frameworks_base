@@ -14991,6 +14991,7 @@ public class PackageManagerService extends IPackageManager.Stub
         @Nullable MultiPackageInstallParams mParentInstallParams;
         final boolean forceQueryableOverride;
         final int mDataLoaderType;
+        final long requiredInstalledVersionCode;
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, InstallSource installSource, String volumeUuid,
@@ -15011,6 +15012,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.installReason = PackageManager.INSTALL_REASON_UNKNOWN;
             this.forceQueryableOverride = false;
             this.mDataLoaderType = DataLoaderType.NONE;
+            this.requiredInstalledVersionCode = PackageManager.VERSION_CODE_HIGHEST;
         }
 
         InstallParams(File stagedDir, IPackageInstallObserver2 observer,
@@ -15033,6 +15035,7 @@ public class PackageManagerService extends IPackageManager.Stub
             forceQueryableOverride = sessionParams.forceQueryableOverride;
             mDataLoaderType = (sessionParams.dataLoaderParams != null)
                     ? sessionParams.dataLoaderParams.getType() : DataLoaderType.NONE;
+            requiredInstalledVersionCode = sessionParams.requiredInstalledVersionCode;
         }
 
         @Override
@@ -15179,6 +15182,18 @@ public class PackageManagerService extends IPackageManager.Stub
         public void handleStartCopy() {
             PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
                     origin.resolvedPath, installFlags, packageAbiOverride);
+
+            // For staged session, there is a delay between its verification and install. Device
+            // state can change within this delay and hence we need to re-verify certain conditions.
+            boolean isStaged = (installFlags & INSTALL_STAGED) != 0;
+            if (isStaged) {
+                mRet = verifyReplacingVersionCode(
+                        pkgLite, requiredInstalledVersionCode, installFlags);
+                if (mRet != INSTALL_SUCCEEDED) {
+                    return;
+                }
+            }
+
             mRet = overrideInstallLocation(pkgLite);
         }
 
@@ -15325,65 +15340,20 @@ public class PackageManagerService extends IPackageManager.Stub
             PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
                     origin.resolvedPath, installFlags, packageAbiOverride);
 
-            mRet = verifyReplacingVersionCode(pkgLite);
+            mRet = verifyReplacingVersionCode(pkgLite, requiredInstalledVersionCode, installFlags);
+            if (mRet != INSTALL_SUCCEEDED) {
+                return;
+            }
 
             // Perform package verification and enable rollback (unless we are simply moving the
             // package).
-            if (mRet == INSTALL_SUCCEEDED && !origin.existing) {
+            if (!origin.existing) {
                 sendApkVerificationRequest(pkgLite);
                 if ((installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
                     sendEnableRollbackRequest();
                 }
             }
         }
-
-        private int verifyReplacingVersionCode(PackageInfoLite pkgLite) {
-            String packageName = pkgLite.packageName;
-            synchronized (mLock) {
-                // Package which currently owns the data that the new package will own if installed.
-                // If an app is uninstalled while keeping data (e.g. adb uninstall -k), installedPkg
-                // will be null whereas dataOwnerPkg will contain information about the package
-                // which was uninstalled while keeping its data.
-                AndroidPackage dataOwnerPkg = mPackages.get(packageName);
-                if (dataOwnerPkg  == null) {
-                    PackageSetting ps = mSettings.mPackages.get(packageName);
-                    if (ps != null) {
-                        dataOwnerPkg = ps.pkg;
-                    }
-                }
-
-                if (requiredInstalledVersionCode != PackageManager.VERSION_CODE_HIGHEST) {
-                    if (dataOwnerPkg == null) {
-                        Slog.w(TAG, "Required installed version code was "
-                                + requiredInstalledVersionCode
-                                + " but package is not installed");
-                        return PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION;
-                    }
-
-                    if (dataOwnerPkg.getLongVersionCode() != requiredInstalledVersionCode) {
-                        Slog.w(TAG, "Required installed version code was "
-                                + requiredInstalledVersionCode
-                                + " but actual installed version is "
-                                + dataOwnerPkg.getLongVersionCode());
-                        return PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION;
-                    }
-                }
-
-                if (dataOwnerPkg != null) {
-                    if (!PackageManagerServiceUtils.isDowngradePermitted(installFlags,
-                            dataOwnerPkg.isDebuggable())) {
-                        try {
-                            checkDowngrade(dataOwnerPkg, pkgLite);
-                        } catch (PackageManagerException e) {
-                            Slog.w(TAG, "Downgrade detected: " + e.getMessage());
-                            return PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
-                        }
-                    }
-                }
-            }
-            return PackageManager.INSTALL_SUCCEEDED;
-        }
-
 
         void sendApkVerificationRequest(PackageInfoLite pkgLite) {
             final int verificationId = mPendingVerificationToken++;
@@ -24207,6 +24177,54 @@ public class PackageManagerService extends IPackageManager.Stub
             mHandler.post(() -> deletePackageX(packageName, PackageManager.VERSION_CODE_HIGHEST,
                     0, PackageManager.DELETE_ALL_USERS));
         }
+    }
+
+    private int verifyReplacingVersionCode(PackageInfoLite pkgLite,
+            long requiredInstalledVersionCode, int installFlags) {
+        String packageName = pkgLite.packageName;
+        synchronized (mLock) {
+            // Package which currently owns the data that the new package will own if installed.
+            // If an app is uninstalled while keeping data (e.g. adb uninstall -k), installedPkg
+            // will be null whereas dataOwnerPkg will contain information about the package
+            // which was uninstalled while keeping its data.
+            AndroidPackage dataOwnerPkg = mPackages.get(packageName);
+            if (dataOwnerPkg  == null) {
+                PackageSetting ps = mSettings.mPackages.get(packageName);
+                if (ps != null) {
+                    dataOwnerPkg = ps.pkg;
+                }
+            }
+
+            if (requiredInstalledVersionCode != PackageManager.VERSION_CODE_HIGHEST) {
+                if (dataOwnerPkg == null) {
+                    Slog.w(TAG, "Required installed version code was "
+                            + requiredInstalledVersionCode
+                            + " but package is not installed");
+                    return PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION;
+                }
+
+                if (dataOwnerPkg.getLongVersionCode() != requiredInstalledVersionCode) {
+                    Slog.w(TAG, "Required installed version code was "
+                            + requiredInstalledVersionCode
+                            + " but actual installed version is "
+                            + dataOwnerPkg.getLongVersionCode());
+                    return PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION;
+                }
+            }
+
+            if (dataOwnerPkg != null) {
+                if (!PackageManagerServiceUtils.isDowngradePermitted(installFlags,
+                        dataOwnerPkg.isDebuggable())) {
+                    try {
+                        checkDowngrade(dataOwnerPkg, pkgLite);
+                    } catch (PackageManagerException e) {
+                        Slog.w(TAG, "Downgrade detected: " + e.getMessage());
+                        return PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
+                    }
+                }
+            }
+        }
+        return PackageManager.INSTALL_SUCCEEDED;
     }
 
     /**
