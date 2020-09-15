@@ -315,9 +315,9 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mMediaSessionManager.removeOnActiveSessionsChangedListener(mActiveMediaSessionListener);
         if (removePipStack) {
             try {
-                mActivityTaskManager.removeStack(mPinnedStackId);
+                mActivityTaskManager.removeTask(mPinnedStackId);
             } catch (RemoteException e) {
-                Log.e(TAG, "removeStack failed", e);
+                Log.e(TAG, "removeTask failed", e);
             } finally {
                 mPinnedStackId = INVALID_STACK_ID;
             }

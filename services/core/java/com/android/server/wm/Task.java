@@ -6911,7 +6911,7 @@ class Task extends WindowContainer<WindowContainer> {
         moveToBack("moveTaskToBackLocked", tr);
 
         if (inPinnedWindowingMode()) {
-            mStackSupervisor.removeStack(this);
+            mStackSupervisor.removeRootTask(this);
             return true;
         }
 
