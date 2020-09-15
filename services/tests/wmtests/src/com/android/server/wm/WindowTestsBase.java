@@ -265,6 +265,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
         return activity;
     }
 
+    /** Creates an {@link ActivityRecord} and adds it to the specified {@link Task}. */
+    static ActivityRecord createActivityRecordInTask(Task task) {
+        return createActivityRecordInTask(task.getDisplayContent(), task);
+    }
+
     static ActivityRecord createTestActivityRecord(DisplayContent dc) {
         final ActivityRecord activity = new ActivityBuilder(dc.mWmService.mAtmService).build();
         postCreateActivitySetup(activity, dc);

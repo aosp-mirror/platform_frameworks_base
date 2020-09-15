@@ -1,11 +1,23 @@
 {
   "version": "1.0.0",
   "messages": {
+    "-1534364071": {
+      "message": "onTransitionReady %s: %s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TRANSITIONS",
+      "at": "com\/android\/wm\/shell\/Transitions.java"
+    },
     "-1501874464": {
       "message": "Fullscreen Task Appeared: #%d",
       "level": "VERBOSE",
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/FullscreenTaskListener.java"
+    },
+    "-1480787369": {
+      "message": "Transition requested: type=%d %s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TRANSITIONS",
+      "at": "com\/android\/wm\/shell\/Transitions.java"
     },
     "-1340279385": {
       "message": "Remove listener=%s",
@@ -31,6 +43,12 @@
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
     },
+    "-191422040": {
+      "message": "Transition animations finished, notifying core %s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TRANSITIONS",
+      "at": "com\/android\/wm\/shell\/Transitions.java"
+    },
     "157713005": {
       "message": "Task info changed taskId=%d",
       "level": "VERBOSE",
@@ -52,6 +70,9 @@
   },
   "groups": {
     "WM_SHELL_TASK_ORG": {
+      "tag": "WindowManagerShell"
+    },
+    "WM_SHELL_TRANSITIONS": {
       "tag": "WindowManagerShell"
     }
   }
