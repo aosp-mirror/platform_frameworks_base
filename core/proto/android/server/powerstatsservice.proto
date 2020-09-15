@@ -1,0 +1,67 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package com.android.server.powerstats;
+
+option java_multiple_files = true;
+
+message IncidentReportProto {
+    /** Section number matches that in incident.proto */
+    optional PowerStatsServiceProto incident_report = 3054;
+}
+
+message PowerStatsServiceProto {
+    repeated RailInfoProto rail_info = 1;
+    repeated EnergyDataProto energy_data = 2;
+}
+
+/**
+ * Rail information:
+ * Reports information related to the rails being monitored.
+ */
+message RailInfoProto {
+    /** Index corresponding to the rail */
+    optional int32 index = 1;
+
+    /** Name of the rail (opaque to the framework) */
+    optional string rail_name = 2;
+
+    /** Name of the subsystem to which this rail belongs (opaque to the framework) */
+    optional string subsys_name = 3;
+
+    /** Hardware sampling rate */
+    optional int32 sampling_rate = 4;
+}
+
+/**
+ * Rail level energy measurements:
+ * Reports accumulated energy since boot on each rail.
+ */
+message EnergyDataProto {
+    /**
+     * Index corresponding to the rail. This index matches
+     * the index returned in RailInfo
+     */
+    optional int32 index = 1;
+
+    /** Time since device boot(CLOCK_BOOTTIME) in milli-seconds */
+    optional int64 timestamp_ms = 2;
+
+    /** Accumulated energy since device boot in microwatt-seconds (uWs) */
+    optional int64 energy_uws = 3;
+}

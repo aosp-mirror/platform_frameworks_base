@@ -1,0 +1,10 @@
+java_binary_host {
+    name: "PowerStatsServiceProtoParser",
+    manifest: "PowerStatsServiceProtoParser_manifest.txt",
+    srcs: [
+        "*.java",
+    ],
+    static_libs: [
+        "platformprotos",
+    ],
+}

@@ -150,6 +150,7 @@ import com.android.server.policy.role.LegacyRoleResolutionPolicy;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.power.ThermalManagerService;
+import com.android.server.powerstats.PowerStatsService;
 import com.android.server.profcollect.ProfcollectForwardingService;
 import com.android.server.recoverysystem.RecoverySystemService;
 import com.android.server.restrictions.RestrictionsManagerService;
@@ -759,6 +760,11 @@ public final class SystemServer {
         // Uri Grants Manager.
         t.traceBegin("UriGrantsManagerService");
         mSystemServiceManager.startService(UriGrantsManagerService.Lifecycle.class);
+        t.traceEnd();
+
+        t.traceBegin("StartPowerStatsService");
+        // Tracks rail data to be used for power statistics.
+        mSystemServiceManager.startService(PowerStatsService.class);
         t.traceEnd();
 
         // Activity manager runs the show.

@@ -3384,6 +3384,7 @@ public abstract class Context {
     /** @hide */
     @StringDef(suffix = { "_SERVICE" }, value = {
             POWER_SERVICE,
+            //@hide: POWER_STATS_SERVICE,
             WINDOW_SERVICE,
             LAYOUT_INFLATER_SERVICE,
             ACCOUNT_SERVICE,
@@ -3723,6 +3724,16 @@ public abstract class Context {
      * you're running long tasks.
      */
     public static final String POWER_SERVICE = "power";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.os.PowerStatsService} for accessing power stats
+     * service.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String POWER_STATS_SERVICE = "power_stats";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
