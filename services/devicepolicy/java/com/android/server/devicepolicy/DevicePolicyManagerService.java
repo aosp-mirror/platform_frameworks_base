@@ -5745,14 +5745,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void wipeDataWithReason(int flags, String wipeReasonForUser, boolean parent) {
+    public void wipeDataWithReason(int flags, String wipeReasonForUser,
+            boolean calledOnParentInstance) {
         if (!mHasFeature) {
             return;
         }
         final CallerIdentity caller = getCallerIdentity();
         boolean calledByProfileOwnerOnOrgOwnedDevice =
                 isProfileOwnerOfOrganizationOwnedDevice(caller);
-        if (parent) {
+        if (calledOnParentInstance) {
             Preconditions.checkCallAuthorization(calledByProfileOwnerOnOrgOwnedDevice,
                     "Wiping the entire device can only be done by a profile owner on "
                             + "organization-owned device.");
@@ -5772,7 +5773,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 String.format("No active admin for user %d", caller.getUserId()));
 
         if (TextUtils.isEmpty(wipeReasonForUser)) {
-            if (calledByProfileOwnerOnOrgOwnedDevice && !parent) {
+            if (calledByProfileOwnerOnOrgOwnedDevice && !calledOnParentInstance) {
                 wipeReasonForUser = mContext.getString(R.string.device_ownership_relinquished);
             } else {
                 wipeReasonForUser = mContext.getString(
@@ -5783,7 +5784,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         int userId = admin.getUserHandle().getIdentifier();
         if (calledByProfileOwnerOnOrgOwnedDevice) {
             // When wipeData is called on the parent instance, it implies wiping the entire device.
-            if (parent) {
+            if (calledOnParentInstance) {
                 userId = UserHandle.USER_SYSTEM;
             } else {
                 // when wipeData is _not_ called on the parent instance, it implies relinquishing
@@ -5808,7 +5809,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .createEvent(DevicePolicyEnums.WIPE_DATA_WITH_REASON)
                 .setAdmin(admin.info.getComponent())
                 .setInt(flags)
-                .setStrings(parent ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
+                .setStrings(calledOnParentInstance ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
                 .write();
         String internalReason = String.format(
                 "DevicePolicyManager.wipeDataWithReason() from %s, organization-owned? %s",
@@ -7866,15 +7867,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
         synchronized (getLockObject()) {
+            final ComponentName doComponent = mOwners.getDeviceOwnerComponent();
+            final ComponentName poComponent =
+                    mOwners.getProfileOwnerComponent(userHandle.getIdentifier());
+            // Return test only admin by default.
+            if (isAdminTestOnlyLocked(doComponent, userHandle.getIdentifier())) {
+                return doComponent;
+            } else if (isAdminTestOnlyLocked(poComponent, userHandle.getIdentifier())) {
+                return poComponent;
+            }
             final String supervisor = mContext.getResources().getString(
                     com.android.internal.R.string.config_defaultSupervisionProfileOwnerComponent);
             if (supervisor == null) {
                 return null;
             }
             final ComponentName supervisorComponent = ComponentName.unflattenFromString(supervisor);
-            final ComponentName doComponent = mOwners.getDeviceOwnerComponent();
-            final ComponentName poComponent =
-                    mOwners.getProfileOwnerComponent(userHandle.getIdentifier());
             if (supervisorComponent.equals(doComponent) || supervisorComponent.equals(
                     poComponent)) {
                 return supervisorComponent;
@@ -9527,8 +9534,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         && UserRestrictionsUtils.canProfileOwnerChange(key, userHandle);
                 boolean orgOwnedProfileOwnerCanChangesGlobally = parent
                         && isProfileOwnerOfOrganizationOwnedDevice(caller)
-                        && UserRestrictionsUtils
-                        .canProfileOwnerOfOrganizationOwnedDeviceChange(key);
+                        && UserRestrictionsUtils.canProfileOwnerOfOrganizationOwnedDeviceChange(
+                        key);
 
                 if (!profileOwnerCanChangeOnItself && !orgOwnedProfileOwnerCanChangesGlobally) {
                     throw new SecurityException("Profile owner cannot set user restriction " + key);
@@ -10223,6 +10230,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (isManagedProfile(userId)) {
             throw new SecurityException(
                     "User " + userId + " is not allowed to call setSecondaryLockscreenEnabled");
+        }
+        synchronized (getLockObject()) {
+            if (isAdminTestOnlyLocked(who, userId)) {
+                // Allow testOnly admins to bypass supervision config requirement.
+                return;
+            }
         }
         // Only the default supervision app can use this API.
         final String supervisor = mContext.getResources().getString(

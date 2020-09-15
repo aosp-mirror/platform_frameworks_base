@@ -68,6 +68,7 @@ public class WindowMagnificationManager implements
     private SparseArray<WindowMagnifier> mWindowMagnifiers = new SparseArray<>();
     private int mUserId;
 
+    private boolean mReceiverRegistered = false;
     @VisibleForTesting
     protected final BroadcastReceiver mScreenStateReceiver = new BroadcastReceiver() {
         @Override
@@ -150,10 +151,16 @@ public class WindowMagnificationManager implements
             }
             if (connect) {
                 final IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
-                mContext.registerReceiver(mScreenStateReceiver, intentFilter);
+                if (!mReceiverRegistered) {
+                    mContext.registerReceiver(mScreenStateReceiver, intentFilter);
+                    mReceiverRegistered = true;
+                }
             } else {
                 disableAllWindowMagnifiers();
-                mContext.unregisterReceiver(mScreenStateReceiver);
+                if (mReceiverRegistered) {
+                    mContext.unregisterReceiver(mScreenStateReceiver);
+                    mReceiverRegistered = false;
+                }
             }
         }
 
@@ -240,6 +247,9 @@ public class WindowMagnificationManager implements
     void enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
             @Nullable Runnable endCallback) {
         synchronized (mLock) {
+            if (mConnectionWrapper == null) {
+                return;
+            }
             WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
             if (magnifier == null) {
                 magnifier = createWindowMagnifier(displayId);
@@ -269,7 +279,7 @@ public class WindowMagnificationManager implements
     void disableWindowMagnification(int displayId, boolean clear, Runnable endCallback) {
         synchronized (mLock) {
             WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
-            if (magnifier == null) {
+            if (magnifier == null || mConnectionWrapper == null) {
                 return;
             }
             magnifier.disableWindowMagnificationInternal(endCallback);

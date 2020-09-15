@@ -1848,7 +1848,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarStateController.setPanelExpanded(isExpanded);
         if (isExpanded && mStatusBarStateController.getState() != StatusBarState.KEYGUARD) {
             if (DEBUG) {
-                Log.v(TAG, "clearing notification effects from setExpandedHeight");
+                Log.v(TAG, "clearing notification effects from Height");
             }
             clearNotificationEffects();
         }
@@ -2809,6 +2809,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Trace.beginSection("StatusBar#onReceive");
             if (DEBUG) Log.v(TAG, "onReceive: " + intent);
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
@@ -2833,7 +2834,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mNotificationShadeWindowController.setNotTouchable(false);
                 }
                 if (mBubbleController.isStackExpanded()) {
-                    mBubbleController.collapseStack();
+                    // Post to main thread handler, since updating the UI.
+                    mMainThreadHandler.post(() -> mBubbleController.collapseStack());
                 }
                 finishBarAnimations();
                 resetUserExpandedStates();
@@ -2841,6 +2843,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             else if (DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG.equals(action)) {
                 mQSPanel.showDeviceMonitoringDialog();
             }
+            Trace.endSection();
         }
     };
 

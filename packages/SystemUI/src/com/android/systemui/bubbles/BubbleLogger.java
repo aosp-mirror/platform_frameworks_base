@@ -53,7 +53,10 @@ public interface BubbleLogger extends UiEventLogger {
         BUBBLE_OVERFLOW_REMOVE_BACK_TO_STACK(489),
 
         @UiEvent(doc = "User blocked notification from bubbling, remove bubble from overflow.")
-        BUBBLE_OVERFLOW_REMOVE_BLOCKED(490);
+        BUBBLE_OVERFLOW_REMOVE_BLOCKED(490),
+
+        @UiEvent(doc = "User selected the overflow.")
+        BUBBLE_OVERFLOW_SELECTED(600);
 
         private final int mId;
 

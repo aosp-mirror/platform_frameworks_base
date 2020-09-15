@@ -24,7 +24,6 @@ import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
 import static android.location.Criteria.ACCURACY_COARSE;
 import static android.location.Criteria.ACCURACY_FINE;
 import static android.location.Criteria.POWER_HIGH;
-import static android.location.LocationManager.PASSIVE_PROVIDER;
 import static android.os.PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
 
 import static androidx.test.ext.truth.location.LocationSubject.assertThat;
@@ -356,8 +355,7 @@ public class LocationProviderManagerTest {
     @Test
     public void testPassive_Listener() throws Exception {
         ILocationListener listener = createMockLocationListener();
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(PASSIVE_PROVIDER, 0,
-                0, false);
+        LocationRequest request = new LocationRequest.Builder(0).build();
         mPassive.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
 
         Location loc = createLocation(NAME, mRandom);
@@ -382,8 +380,7 @@ public class LocationProviderManagerTest {
         ArgumentCaptor<Location> locationCaptor = ArgumentCaptor.forClass(Location.class);
 
         ILocationListener listener = createMockLocationListener();
-        mManager.registerLocationRequest(
-                LocationRequest.createFromDeprecatedProvider(NAME, 0, 0, false), IDENTITY,
+        mManager.registerLocationRequest(new LocationRequest.Builder(0).build(), IDENTITY,
                 PERMISSION_FINE, listener);
 
         Location loc = createLocation(NAME, mRandom);
@@ -437,8 +434,7 @@ public class LocationProviderManagerTest {
                 "attribution");
 
         ILocationListener listener = createMockLocationListener();
-        mManager.registerLocationRequest(
-                LocationRequest.createFromDeprecatedProvider(NAME, 0, 0, false), identity,
+        mManager.registerLocationRequest(new LocationRequest.Builder(0).build(), identity,
                 PERMISSION_FINE, listener);
 
         Location loc = createLocation(NAME, mRandom);
@@ -451,8 +447,7 @@ public class LocationProviderManagerTest {
     @Test
     public void testRegisterListener_Unregister() throws Exception {
         ILocationListener listener = createMockLocationListener();
-        mManager.registerLocationRequest(
-                LocationRequest.createFromDeprecatedProvider(NAME, 0, 0, false), IDENTITY,
+        mManager.registerLocationRequest(new LocationRequest.Builder(0).build(), IDENTITY,
                 PERMISSION_FINE, listener);
         mManager.unregisterLocationRequest(listener);
 
@@ -470,8 +465,7 @@ public class LocationProviderManagerTest {
                 "attribution");
 
         ILocationListener listener = createMockLocationListener();
-        mManager.registerLocationRequest(
-                LocationRequest.createFromDeprecatedProvider(NAME, 0, 0, false), identity,
+        mManager.registerLocationRequest(new LocationRequest.Builder(0).build(), identity,
                 PERMISSION_FINE, listener);
 
         CountDownLatch blocker = new CountDownLatch(1);
@@ -493,8 +487,7 @@ public class LocationProviderManagerTest {
     @Test
     public void testRegisterListener_NumUpdates() throws Exception {
         ILocationListener listener = createMockLocationListener();
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0,
-                false).setNumUpdates(5);
+        LocationRequest request = new LocationRequest.Builder(0).setMaxUpdates(5).build();
         mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
 
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
@@ -511,8 +504,7 @@ public class LocationProviderManagerTest {
     @Test
     public void testRegisterListener_ExpiringAlarm() throws Exception {
         ILocationListener listener = createMockLocationListener();
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0,
-                false).setExpireIn(5000);
+        LocationRequest request = new LocationRequest.Builder(0).setDurationMillis(5000).build();
         mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
         long baseTimeMs = SystemClock.elapsedRealtime();
 
@@ -535,8 +527,7 @@ public class LocationProviderManagerTest {
     @Test
     public void testRegisterListener_ExpiringNoAlarm() throws Exception {
         ILocationListener listener = createMockLocationListener();
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0,
-                false).setExpireIn(25);
+        LocationRequest request = new LocationRequest.Builder(0).setDurationMillis(25).build();
         mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
 
         Thread.sleep(25);
@@ -547,22 +538,10 @@ public class LocationProviderManagerTest {
     }
 
     @Test
-    public void testRegisterListener_AlreadyExpired() throws Exception {
-        ILocationListener listener = createMockLocationListener();
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0,
-                false).setExpireIn(-1);
-        mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
-
-        mProvider.setProviderLocation(createLocation(NAME, mRandom));
-        verify(listener, never()).onLocationChanged(any(Location.class),
-                nullable(IRemoteCallback.class));
-    }
-
-    @Test
     public void testRegisterListener_FastestInterval() throws Exception {
         ILocationListener listener = createMockLocationListener();
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(NAME, 5000, 0,
-                false).setFastestInterval(5000);
+        LocationRequest request = new LocationRequest.Builder(5000).setMinUpdateIntervalMillis(
+                5000).build();
         mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
 
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
@@ -575,8 +554,8 @@ public class LocationProviderManagerTest {
     @Test
     public void testRegisterListener_SmallestDisplacement() throws Exception {
         ILocationListener listener = createMockLocationListener();
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(NAME, 5000, 0,
-                false).setSmallestDisplacement(1f);
+        LocationRequest request = new LocationRequest.Builder(5000).setMinUpdateDistanceMeters(
+                1f).build();
         mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
 
         Location loc = createLocation(NAME, mRandom);
@@ -590,7 +569,7 @@ public class LocationProviderManagerTest {
     @Test
     public void testRegisterListener_NoteOpFailure() throws Exception {
         ILocationListener listener = createMockLocationListener();
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0, false);
+        LocationRequest request = new LocationRequest.Builder(0).build();
         mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
 
         mInjector.getAppOpsHelper().setAppOpAllowed(OP_FINE_LOCATION, IDENTITY.getPackageName(),
@@ -608,8 +587,7 @@ public class LocationProviderManagerTest {
                 "attribution");
 
         ILocationListener listener = createMockLocationListener();
-        mManager.registerLocationRequest(
-                LocationRequest.createFromDeprecatedProvider(NAME, 0, 0, false), identity,
+        mManager.registerLocationRequest(new LocationRequest.Builder(0).build(), identity,
                 PERMISSION_FINE, listener);
 
         CountDownLatch blocker = new CountDownLatch(1);
@@ -637,8 +615,7 @@ public class LocationProviderManagerTest {
         ArgumentCaptor<Location> locationCaptor = ArgumentCaptor.forClass(Location.class);
 
         ILocationCallback listener = createMockGetCurrentLocationListener();
-        LocationRequest locationRequest = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0,
-                false);
+        LocationRequest locationRequest = new LocationRequest.Builder(0).build();
         ICancellationSignal cancellationSignal = CancellationSignal.createTransport();
         mManager.getCurrentLocation(locationRequest, IDENTITY,
                 PERMISSION_FINE, cancellationSignal, listener);
@@ -654,8 +631,7 @@ public class LocationProviderManagerTest {
     @Test
     public void testGetCurrentLocation_Cancel() throws Exception {
         ILocationCallback listener = createMockGetCurrentLocationListener();
-        LocationRequest locationRequest = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0,
-                false);
+        LocationRequest locationRequest = new LocationRequest.Builder(0).build();
         ICancellationSignal cancellationSignal = CancellationSignal.createTransport();
         mManager.getCurrentLocation(locationRequest, IDENTITY,
                 PERMISSION_FINE, cancellationSignal, listener);
@@ -669,8 +645,7 @@ public class LocationProviderManagerTest {
     @Test
     public void testGetCurrentLocation_ProviderDisabled() throws Exception {
         ILocationCallback listener = createMockGetCurrentLocationListener();
-        LocationRequest locationRequest = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0,
-                false);
+        LocationRequest locationRequest = new LocationRequest.Builder(0).build();
         ICancellationSignal cancellationSignal = CancellationSignal.createTransport();
         mManager.getCurrentLocation(locationRequest, IDENTITY,
                 PERMISSION_FINE, cancellationSignal, listener);
@@ -686,8 +661,7 @@ public class LocationProviderManagerTest {
         mProvider.setProviderAllowed(false);
 
         ILocationCallback listener = createMockGetCurrentLocationListener();
-        LocationRequest locationRequest = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0,
-                false);
+        LocationRequest locationRequest = new LocationRequest.Builder(0).build();
         ICancellationSignal cancellationSignal = CancellationSignal.createTransport();
         mManager.getCurrentLocation(locationRequest, IDENTITY,
                 PERMISSION_FINE, cancellationSignal, listener);
@@ -705,8 +679,7 @@ public class LocationProviderManagerTest {
         mProvider.setProviderLocation(loc);
 
         ILocationCallback listener = createMockGetCurrentLocationListener();
-        LocationRequest locationRequest = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0,
-                false);
+        LocationRequest locationRequest = new LocationRequest.Builder(0).build();
         ICancellationSignal cancellationSignal = CancellationSignal.createTransport();
         mManager.getCurrentLocation(locationRequest, IDENTITY,
                 PERMISSION_FINE, cancellationSignal, listener);
@@ -718,8 +691,7 @@ public class LocationProviderManagerTest {
     @Test
     public void testGetCurrentLocation_Timeout() throws Exception {
         ILocationCallback listener = createMockGetCurrentLocationListener();
-        LocationRequest locationRequest = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0,
-                false);
+        LocationRequest locationRequest = new LocationRequest.Builder(0).build();
         ICancellationSignal cancellationSignal = CancellationSignal.createTransport();
         mManager.getCurrentLocation(locationRequest, IDENTITY,
                 PERMISSION_FINE, cancellationSignal, listener);
@@ -742,7 +714,7 @@ public class LocationProviderManagerTest {
                 IDENTITY.getPackageName())).isFalse();
 
         ILocationListener listener = createMockLocationListener();
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0, false);
+        LocationRequest request = new LocationRequest.Builder(0).build();
         mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
 
         assertThat(mInjector.getAppOpsHelper().isAppOpStarted(OP_MONITOR_LOCATION,
@@ -771,7 +743,7 @@ public class LocationProviderManagerTest {
         assertThat(mProvider.getRequest().locationRequests).isEmpty();
 
         ILocationListener listener1 = createMockLocationListener();
-        LocationRequest request1 = LocationRequest.createFromDeprecatedProvider(NAME, 5, 0, false);
+        LocationRequest request1 = new LocationRequest.Builder(5).build();
         mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
 
         assertThat(mProvider.getRequest().reportLocation).isTrue();
@@ -782,8 +754,7 @@ public class LocationProviderManagerTest {
         assertThat(mProvider.getRequest().workSource).isNotNull();
 
         ILocationListener listener2 = createMockLocationListener();
-        LocationRequest request2 = LocationRequest.createFromDeprecatedProvider(NAME, 1, 0,
-                false).setLowPowerMode(true);
+        LocationRequest request2 = new LocationRequest.Builder(1).setLowPower(true).build();
         mManager.registerLocationRequest(request2, IDENTITY, PERMISSION_FINE, listener2);
 
         assertThat(mProvider.getRequest().reportLocation).isTrue();
@@ -811,7 +782,7 @@ public class LocationProviderManagerTest {
     @Test
     public void testProviderRequest_BackgroundThrottle() {
         ILocationListener listener1 = createMockLocationListener();
-        LocationRequest request1 = LocationRequest.createFromDeprecatedProvider(NAME, 5, 0, false);
+        LocationRequest request1 = new LocationRequest.Builder(5).build();
         mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
 
         assertThat(mProvider.getRequest().interval).isEqualTo(5);
@@ -827,7 +798,7 @@ public class LocationProviderManagerTest {
                 Collections.singleton(IDENTITY.getPackageName()));
 
         ILocationListener listener1 = createMockLocationListener();
-        LocationRequest request1 = LocationRequest.createFromDeprecatedProvider(NAME, 5, 0, false);
+        LocationRequest request1 = new LocationRequest.Builder(5).build();
         mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
 
         assertThat(mProvider.getRequest().reportLocation).isTrue();
@@ -835,8 +806,8 @@ public class LocationProviderManagerTest {
         assertThat(mProvider.getRequest().locationSettingsIgnored).isFalse();
 
         ILocationListener listener2 = createMockLocationListener();
-        LocationRequest request2 = LocationRequest.createFromDeprecatedProvider(NAME, 1, 0,
-                false).setLocationSettingsIgnored(true);
+        LocationRequest request2 = new LocationRequest.Builder(1).setLocationSettingsIgnored(
+                true).build();
         mManager.registerLocationRequest(request2, IDENTITY, PERMISSION_FINE, listener2);
 
         assertThat(mProvider.getRequest().reportLocation).isTrue();
@@ -850,12 +821,12 @@ public class LocationProviderManagerTest {
                 Collections.singleton(IDENTITY.getPackageName()));
 
         ILocationListener listener1 = createMockLocationListener();
-        LocationRequest request1 = LocationRequest.createFromDeprecatedProvider(NAME, 1, 0, false);
+        LocationRequest request1 = new LocationRequest.Builder(1).build();
         mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
 
         ILocationListener listener2 = createMockLocationListener();
-        LocationRequest request2 = LocationRequest.createFromDeprecatedProvider(NAME, 5, 0,
-                false).setLocationSettingsIgnored(true);
+        LocationRequest request2 = new LocationRequest.Builder(5).setLocationSettingsIgnored(
+                true).build();
         mManager.registerLocationRequest(request2, IDENTITY, PERMISSION_FINE, listener2);
 
         mInjector.getSettingsHelper().setLocationEnabled(false, IDENTITY.getUserId());
@@ -872,8 +843,8 @@ public class LocationProviderManagerTest {
                 Collections.singleton(IDENTITY.getPackageName()));
 
         ILocationListener listener = createMockLocationListener();
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(NAME, 1, 0,
-                false).setLocationSettingsIgnored(true);
+        LocationRequest request = new LocationRequest.Builder(1).setLocationSettingsIgnored(
+                true).build();
         mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
 
         mInjector.getSettingsHelper().setIgnoreSettingsPackageWhitelist(Collections.emptySet());
@@ -889,8 +860,8 @@ public class LocationProviderManagerTest {
                 Collections.singleton(IDENTITY.getPackageName()));
 
         ILocationListener listener1 = createMockLocationListener();
-        LocationRequest request1 = LocationRequest.createFromDeprecatedProvider(NAME, 5, 0,
-                false).setLocationSettingsIgnored(true);
+        LocationRequest request1 = new LocationRequest.Builder(5).setLocationSettingsIgnored(
+                true).build();
         mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
 
         assertThat(mProvider.getRequest().interval).isEqualTo(5);
@@ -905,7 +876,7 @@ public class LocationProviderManagerTest {
                 LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF);
 
         ILocationListener listener = createMockLocationListener();
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(NAME, 5, 0, false);
+        LocationRequest request = new LocationRequest.Builder(5).build();
         mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
 
         assertThat(mProvider.getRequest().reportLocation).isTrue();

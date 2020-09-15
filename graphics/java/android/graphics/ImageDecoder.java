@@ -301,7 +301,7 @@ public final class ImageDecoder implements AutoCloseable {
 
         ImageDecoder decoder = null;
         try {
-            decoder = nCreate(fd, preferAnimation, source);
+            decoder = nCreate(fd, AssetFileDescriptor.UNKNOWN_LENGTH, preferAnimation, source);
         } finally {
             if (decoder == null) {
                 IoUtils.closeQuietly(stream);
@@ -349,7 +349,7 @@ public final class ImageDecoder implements AutoCloseable {
         try {
             try {
                 Os.lseek(fd, offset, SEEK_SET);
-                decoder = nCreate(fd, preferAnimation, source);
+                decoder = nCreate(fd, assetFd.getDeclaredLength(), preferAnimation, source);
             } catch (ErrnoException e) {
                 decoder = createFromStream(new FileInputStream(fd), true, preferAnimation, source);
             }
@@ -2008,7 +2008,7 @@ public final class ImageDecoder implements AutoCloseable {
     private static native ImageDecoder nCreate(InputStream is, byte[] storage,
             boolean preferAnimation, Source src) throws IOException;
     // The fd must be seekable.
-    private static native ImageDecoder nCreate(FileDescriptor fd,
+    private static native ImageDecoder nCreate(FileDescriptor fd, long length,
             boolean preferAnimation, Source src) throws IOException;
     @NonNull
     private static native Bitmap nDecodeBitmap(long nativePtr,

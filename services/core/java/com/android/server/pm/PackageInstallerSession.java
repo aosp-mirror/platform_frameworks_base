@@ -2606,6 +2606,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 DexMetadataHelper.buildDexMetadataPathForApk(targetFile.getName()));
 
         stageFileLocked(dexMetadataFile, targetDexMetadataFile);
+        maybeStageFsveritySignatureLocked(dexMetadataFile, targetDexMetadataFile);
     }
 
     private static ApkChecksum[] createApkChecksums(String splitName,
@@ -2662,20 +2663,27 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @GuardedBy("mLock")
-    private void inheritFileLocked(File origFile) {
-        mResolvedInheritedFiles.add(origFile);
-
+    private void maybeInheritFsveritySignatureLocked(File origFile) {
         // Inherit the fsverity signature file if present.
         final File fsveritySignatureFile = new File(
                 VerityUtils.getFsveritySignatureFilePath(origFile.getPath()));
         if (fsveritySignatureFile.exists()) {
             mResolvedInheritedFiles.add(fsveritySignatureFile);
         }
+    }
+
+    @GuardedBy("mLock")
+    private void inheritFileLocked(File origFile) {
+        mResolvedInheritedFiles.add(origFile);
+
+        maybeInheritFsveritySignatureLocked(origFile);
+
         // Inherit the dex metadata if present.
         final File dexMetadataFile =
                 DexMetadataHelper.findDexMetadataForFile(origFile);
         if (dexMetadataFile != null) {
             mResolvedInheritedFiles.add(dexMetadataFile);
+            maybeInheritFsveritySignatureLocked(dexMetadataFile);
         }
         // Inherit the digests if present.
         final File digestsFile = ApkChecksums.findDigestsForFile(origFile);

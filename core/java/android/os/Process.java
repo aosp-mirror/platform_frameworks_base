@@ -32,6 +32,7 @@ import dalvik.system.VMRuntime;
 import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
@@ -1317,33 +1318,16 @@ public class Process {
      */
     public static void waitForProcessDeath(int pid, int timeout)
             throws InterruptedException, TimeoutException {
-        FileDescriptor pidfd = null;
-        if (sPidFdSupported == PIDFD_UNKNOWN) {
-            int fd = -1;
+        boolean fallback = supportsPidFd();
+        if (!fallback) {
+            FileDescriptor pidfd = null;
             try {
-                fd = nativePidFdOpen(pid, 0);
-                sPidFdSupported = PIDFD_SUPPORTED;
-            } catch (ErrnoException e) {
-                sPidFdSupported = e.errno != OsConstants.ENOSYS
-                    ? PIDFD_SUPPORTED : PIDFD_UNSUPPORTED;
-            } finally {
+                final int fd = nativePidFdOpen(pid, 0);
                 if (fd >= 0) {
                     pidfd = new FileDescriptor();
                     pidfd.setInt$(fd);
-                }
-            }
-        }
-        boolean fallback = sPidFdSupported == PIDFD_UNSUPPORTED;
-        if (!fallback) {
-            try {
-                if (pidfd == null) {
-                    int fd = nativePidFdOpen(pid, 0);
-                    if (fd >= 0) {
-                        pidfd = new FileDescriptor();
-                        pidfd.setInt$(fd);
-                    } else {
-                        fallback = true;
-                    }
+                } else {
+                    fallback = true;
                 }
                 if (pidfd != null) {
                     StructPollfd[] fds = new StructPollfd[] {
@@ -1390,6 +1374,60 @@ public class Process {
             }
         }
         throw new TimeoutException();
+    }
+
+    /**
+     * Determine whether the system supports pidfd APIs
+     *
+     * @return Returns true if the system supports pidfd APIs
+     * @hide
+     */
+    public static boolean supportsPidFd() {
+        if (sPidFdSupported == PIDFD_UNKNOWN) {
+            int fd = -1;
+            try {
+                fd = nativePidFdOpen(myPid(), 0);
+                sPidFdSupported = PIDFD_SUPPORTED;
+            } catch (ErrnoException e) {
+                sPidFdSupported = e.errno != OsConstants.ENOSYS
+                        ? PIDFD_SUPPORTED : PIDFD_UNSUPPORTED;
+            } finally {
+                if (fd >= 0) {
+                    final FileDescriptor f = new FileDescriptor();
+                    f.setInt$(fd);
+                    IoUtils.closeQuietly(f);
+                }
+            }
+        }
+        return sPidFdSupported == PIDFD_SUPPORTED;
+    }
+
+    /**
+     * Open process file descriptor for given pid.
+     *
+     * @param pid The process ID to open for
+     * @param flags Reserved, unused now, must be 0
+     * @return The process file descriptor for given pid
+     * @throws IOException if it can't be opened
+     *
+     * @hide
+     */
+    public static @Nullable FileDescriptor openPidFd(int pid, int flags) throws IOException {
+        if (!supportsPidFd()) {
+            return null;
+        }
+        if (flags != 0) {
+            throw new IllegalArgumentException();
+        }
+        try {
+            FileDescriptor pidfd = new FileDescriptor();
+            pidfd.setInt$(nativePidFdOpen(pid, flags));
+            return pidfd;
+        } catch (ErrnoException e) {
+            IOException ex = new IOException();
+            ex.initCause(e);
+            throw ex;
+        }
     }
 
     private static native int nativePidFdOpen(int pid, int flags) throws ErrnoException;

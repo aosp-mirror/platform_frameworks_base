@@ -17,6 +17,9 @@ package com.android.server.hdmi;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import android.platform.test.annotations.Presubmit;
 import android.util.Slog;
 
@@ -144,5 +147,92 @@ public class HdmiUtilsTest {
         expectedConfig.add(expectedDevice2);
 
         assertThat(config).isEqualTo(expectedConfig);
+    }
+
+    @Test
+    public void isAffectingActiveRoutingPath() {
+        // New path alters the parent
+        assertTrue(HdmiUtils.isAffectingActiveRoutingPath(0x1100, 0x2000));
+        // New path is a sibling
+        assertTrue(HdmiUtils.isAffectingActiveRoutingPath(0x1100, 0x1200));
+        // New path is the descendant of a sibling
+        assertFalse(HdmiUtils.isAffectingActiveRoutingPath(0x1100, 0x1210));
+        // In a completely different path
+        assertFalse(HdmiUtils.isAffectingActiveRoutingPath(0x1000, 0x3200));
+    }
+
+    @Test
+    public void isInActiveRoutingPath() {
+        // New path is a parent
+        assertTrue(HdmiUtils.isInActiveRoutingPath(0x1100, 0x1000));
+        // New path is a descendant
+        assertTrue(HdmiUtils.isInActiveRoutingPath(0x1210, 0x1212));
+        // New path is a sibling
+        assertFalse(HdmiUtils.isInActiveRoutingPath(0x1100, 0x1200));
+        // In a completely different path
+        assertFalse(HdmiUtils.isInActiveRoutingPath(0x1000, 0x2000));
+    }
+
+    @Test
+    public void pathRelationship_unknown() {
+        assertThat(HdmiUtils.pathRelationship(0x1234, Constants.INVALID_PHYSICAL_ADDRESS))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_UNKNOWN);
+        assertThat(HdmiUtils.pathRelationship(Constants.INVALID_PHYSICAL_ADDRESS, 0x1234))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_UNKNOWN);
+        assertThat(HdmiUtils.pathRelationship(Constants.INVALID_PHYSICAL_ADDRESS,
+                Constants.INVALID_PHYSICAL_ADDRESS))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_UNKNOWN);
+    }
+
+    @Test
+    public void pathRelationship_differentBranch() {
+        assertThat(HdmiUtils.pathRelationship(0x1200, 0x2000))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_DIFFERENT_BRANCH);
+        assertThat(HdmiUtils.pathRelationship(0x1234, 0x1224))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_DIFFERENT_BRANCH);
+        assertThat(HdmiUtils.pathRelationship(0x1234, 0x1134))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_DIFFERENT_BRANCH);
+        assertThat(HdmiUtils.pathRelationship(0x1234, 0x2234))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_DIFFERENT_BRANCH);
+    }
+
+    @Test
+    public void pathRelationship_ancestor() {
+        assertThat(HdmiUtils.pathRelationship(0x0000, 0x1230))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_ANCESTOR);
+        assertThat(HdmiUtils.pathRelationship(0x1000, 0x1230))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_ANCESTOR);
+        assertThat(HdmiUtils.pathRelationship(0x1200, 0x1230))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_ANCESTOR);
+    }
+
+    @Test
+    public void pathRelationship_descendant() {
+        assertThat(HdmiUtils.pathRelationship(0x1230, 0x0000))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_DESCENDANT);
+        assertThat(HdmiUtils.pathRelationship(0x1230, 0x1000))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_DESCENDANT);
+        assertThat(HdmiUtils.pathRelationship(0x1230, 0x1200))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_DESCENDANT);
+    }
+
+    @Test
+    public void pathRelationship_sibling() {
+        assertThat(HdmiUtils.pathRelationship(0x1000, 0x2000))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_SIBLING);
+        assertThat(HdmiUtils.pathRelationship(0x1200, 0x1100))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_SIBLING);
+        assertThat(HdmiUtils.pathRelationship(0x1230, 0x1220))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_SIBLING);
+        assertThat(HdmiUtils.pathRelationship(0x1234, 0x1233))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_SIBLING);
+    }
+
+    @Test
+    public void pathRelationship_same() {
+        assertThat(HdmiUtils.pathRelationship(0x0000, 0x0000))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_SAME);
+        assertThat(HdmiUtils.pathRelationship(0x1234, 0x1234))
+                .isEqualTo(Constants.PATH_RELATIONSHIP_SAME);
     }
 }

@@ -2515,7 +2515,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     targetActivity.applyOptionsLocked();
                 } finally {
                     mActivityMetricsLogger.notifyActivityLaunched(launchingState,
-                            START_TASK_TO_FRONT, targetActivity);
+                            START_TASK_TO_FRONT, targetActivity, activityOptions);
                 }
 
                 mService.getActivityStartController().postStartActivityProcessingForLastStarter(

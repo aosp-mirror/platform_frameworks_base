@@ -5938,31 +5938,12 @@ class Task extends WindowContainer<WindowContainer> {
         if (shouldSleepOrShutDownActivities()
                 && mLastPausedActivity == next
                 && mRootWindowContainer.allPausedActivitiesComplete()) {
-            // If the current top activity may be able to occlude keyguard but the occluded state
-            // has not been set, update visibility and check again if we should continue to resume.
-            boolean nothingToResume = true;
-            if (!mAtmService.mShuttingDown) {
-                final boolean canShowWhenLocked = !mTopActivityOccludesKeyguard
-                        && next.canShowWhenLocked();
-                final boolean mayDismissKeyguard = mTopDismissingKeyguardActivity != next
-                        && next.containsDismissKeyguardWindow();
-
-                if (canShowWhenLocked || mayDismissKeyguard) {
-                    ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                            !PRESERVE_WINDOWS);
-                    nothingToResume = shouldSleepActivities();
-                } else if (next.currentLaunchCanTurnScreenOn() && next.canTurnScreenOn()) {
-                    nothingToResume = false;
-                }
-            }
-            if (nothingToResume) {
-                // Make sure we have executed any pending transitions, since there
-                // should be nothing left to do at this point.
-                executeAppTransition(options);
-                if (DEBUG_STATES) Slog.d(TAG_STATES,
-                        "resumeTopActivityLocked: Going to sleep and all paused");
-                return false;
-            }
+            // Make sure we have executed any pending transitions, since there
+            // should be nothing left to do at this point.
+            executeAppTransition(options);
+            if (DEBUG_STATES) Slog.d(TAG_STATES,
+                    "resumeTopActivityLocked: Going to sleep and all paused");
+            return false;
         }
 
         // Make sure that the user who owns this activity is started.  If not,

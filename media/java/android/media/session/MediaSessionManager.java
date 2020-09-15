@@ -68,16 +68,19 @@ public final class MediaSessionManager {
     private static final String TAG = "SessionManager";
 
     /**
-     * Used by IOnMediaKeyListener to indicate that the media key event isn't handled.
+     * Used to indicate that the media key event isn't handled.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int RESULT_MEDIA_KEY_NOT_HANDLED = 0;
 
     /**
-     * Used by IOnMediaKeyListener to indicate that the media key event is handled.
+     * Used to indicate that the media key event is handled.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int RESULT_MEDIA_KEY_HANDLED = 1;
+
     private final ISessionManager mService;
     private final OnMediaKeyEventDispatchedListenerStub mOnMediaKeyEventDispatchedListenerStub =
             new OnMediaKeyEventDispatchedListenerStub();
