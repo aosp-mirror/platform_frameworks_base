@@ -572,7 +572,7 @@ public class ChooseTypeAndAccountActivity extends Activity
     }
 
     /**
-     * Returns a set of whitelisted accounts given by the intent or null if none specified by the
+     * Returns a set of allowlisted accounts given by the intent or null if none specified by the
      * intent.
      */
     private Set<Account> getAllowableAccountSet(final Intent intent) {

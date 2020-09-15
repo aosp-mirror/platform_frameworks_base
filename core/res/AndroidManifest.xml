@@ -894,11 +894,11 @@
 
       <p> This is a soft restricted permission which cannot be held by an app it its
       full form until the installer on record whitelists the permission.
-      Specifically, if the permission is whitelisted the holder app can access
+      Specifically, if the permission is allowlisted the holder app can access
       external storage and the visual and aural media collections while if the
-      permission is not whitelisted the holder app can only access to the visual
+      permission is not allowlisted the holder app can only access to the visual
       and aural medial collections. Also the permission is immutably restricted
-      meaning that the whitelist state can be specified only at install time and
+      meaning that the allowlist state can be specified only at install time and
       cannot change until the app is installed. For more details see
       {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
      <p>Protection level: dangerous -->
@@ -922,7 +922,7 @@
          read/write files in your application-specific directories returned by
          {@link android.content.Context#getExternalFilesDir} and
          {@link android.content.Context#getExternalCacheDir}.
-         <p>If this permission is not whitelisted for an app that targets an API level before
+         <p>If this permission is not allowlisted for an app that targets an API level before
          {@link android.os.Build.VERSION_CODES#Q} this permission cannot be granted to apps.</p>
          <p>Protection level: dangerous</p>
     -->
@@ -3783,7 +3783,7 @@
     <permission android:name="android.permission.UPGRADE_RUNTIME_PERMISSIONS"
                 android:protectionLevel="signature" />
 
-    <!-- @SystemApi Allows an application to whitelist restricted permissions
+    <!-- @SystemApi Allows an application to allowlist restricted permissions
          on any of the whitelists.
     @hide -->
     <permission android:name="android.permission.WHITELIST_RESTRICTED_PERMISSIONS"
@@ -4157,7 +4157,7 @@
     <permission android:name="android.permission.CHANGE_APP_IDLE_STATE"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @hide @SystemApi Allows an application to temporarily whitelist an inactive app to
+    <!-- @hide @SystemApi Allows an application to temporarily allowlist an inactive app to
          access the network and acquire wakelocks.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST"
@@ -4781,7 +4781,7 @@
     <permission android:name="android.permission.ACCESS_VR_STATE"
         android:protectionLevel="signature|preinstalled" />
 
-    <!-- Allows an application to whitelist tasks during lock task mode
+    <!-- Allows an application to allowlist tasks during lock task mode
          @hide <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.UPDATE_LOCK_TASK_PACKAGES"
         android:protectionLevel="signature|setup" />

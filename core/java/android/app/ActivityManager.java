@@ -4725,9 +4725,9 @@ public class ActivityManager {
     }
 
     /**
-     * Get packages of bugreport-whitelisted apps to handle a bug report.
+     * Get packages of bugreport-allowlisted apps to handle a bug report.
      *
-     * @return packages of bugreport-whitelisted apps to handle a bug report.
+     * @return packages of bugreport-allowlisted apps to handle a bug report.
      * @hide
      */
     public List<String> getBugreportWhitelistedPackages() {

@@ -885,11 +885,11 @@ public final class ContentCaptureManagerService extends
             synchronized (mGlobalWhitelistStateLock) {
                 packageWhitelisted = isWhitelisted(userId, packageName);
                 if (!packageWhitelisted) {
-                    // Full package is not whitelisted: check individual components first
+                    // Full package is not allowlisted: check individual components first
                     whitelistedComponents = getWhitelistedComponents(userId, packageName);
                     if (whitelistedComponents == null
                             && packageName.equals(mServicePackages.get(userId))) {
-                        // No components whitelisted either, but let it go because it's the
+                        // No components allowlisted either, but let it go because it's the
                         // service's own package
                         if (verbose) Slog.v(TAG, "getOptionsForPackage() lite for " + packageName);
                         return new ContentCaptureOptions(mDevCfgLoggingLevel);
@@ -897,7 +897,7 @@ public final class ContentCaptureManagerService extends
                 }
             } // synchronized
 
-            // Restrict what temporary services can whitelist
+            // Restrict what temporary services can allowlist
             if (Build.IS_USER && mServiceNameResolver.isTemporary(userId)) {
                 if (!packageName.equals(mServicePackages.get(userId))) {
                     Slog.w(TAG, "Ignoring package " + packageName + " while using temporary "

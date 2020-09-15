@@ -1613,7 +1613,7 @@ public class BaseBundle {
             return;
         }
         int lengthPos = parcel.dataPosition();
-        parcel.writeInt(-1); // dummy, will hold length
+        parcel.writeInt(-1); // placeholder, will hold length
         parcel.writeInt(BUNDLE_MAGIC);
 
         int startPos = parcel.dataPosition();

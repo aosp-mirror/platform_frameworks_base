@@ -227,7 +227,7 @@ class ZygoteArguments {
     String[] mPkgDataInfoList;
 
     /**
-     * A list that stores all whitelisted app data info: volume uuid and inode.
+     * A list that stores all allowlisted app data info: volume uuid and inode.
      * Null if it does need to do app data isolation.
      */
     String[] mWhitelistedDataInfoList;

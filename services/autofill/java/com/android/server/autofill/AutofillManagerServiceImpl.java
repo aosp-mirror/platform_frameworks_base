@@ -313,7 +313,7 @@ final class AutofillManagerServiceImpl
             @NonNull ComponentName componentName, boolean compatMode,
             boolean bindInstantServiceAllowed, int flags) {
         // FLAG_AUGMENTED_AUTOFILL_REQUEST is set in the flags when standard autofill is disabled
-        // but the package is whitelisted for augmented autofill
+        // but the package is allowlisted for augmented autofill
         boolean forAugmentedAutofillOnly = (flags
                 & FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY) != 0;
         if (!isEnabledLocked() && !forAugmentedAutofillOnly) {
@@ -322,7 +322,7 @@ final class AutofillManagerServiceImpl
 
         if (!forAugmentedAutofillOnly && isAutofillDisabledLocked(componentName)) {
             // Standard autofill is enabled, but service disabled autofill for this activity; that
-            // means no session, unless the activity is whitelisted for augmented autofill
+            // means no session, unless the activity is allowlisted for augmented autofill
             if (isWhitelistedForAugmentedAutofillLocked(componentName)) {
                 if (sDebug) {
                     Slog.d(TAG, "startSession(" + componentName + "): disabled by service but "
@@ -1379,7 +1379,7 @@ final class AutofillManagerServiceImpl
     }
 
     /**
-     * Resets the augmented autofill whitelist.
+     * Resets the augmented autofill allowlist.
      */
     @GuardedBy("mLock")
     void resetAugmentedAutofillWhitelistLocked() {

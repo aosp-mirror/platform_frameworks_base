@@ -1268,10 +1268,10 @@ public final class DefaultPermissionGrantPolicy {
                         continue;
                     }
 
-                    // Preserve whitelisting flags.
+                    // Preserve allowlisting flags.
                     newFlags |= (flags & PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT);
 
-                    // If we are whitelisting the permission, update the exempt flag before grant.
+                    // If we are allowlisting the permission, update the exempt flag before grant.
                     if (whitelistRestrictedPermissions && pm.isPermissionRestricted(permission)) {
                         pm.updatePermissionFlags(permission, pkg,
                                 PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT,
