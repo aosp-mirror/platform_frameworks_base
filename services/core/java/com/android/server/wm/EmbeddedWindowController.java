@@ -184,23 +184,13 @@ class EmbeddedWindowController {
 
         InputChannel openInputChannel() {
             final String name = getName();
-
-            final InputChannel[] inputChannels = InputChannel.openInputChannelPair(name);
-            mInputChannel = inputChannels[0];
-            final InputChannel clientChannel = inputChannels[1];
-            mWmService.mInputManager.registerInputChannel(mInputChannel);
-
-            if (mInputChannel.getToken() != clientChannel.getToken()) {
-                throw new IllegalStateException("Client and Server tokens are expected to"
-                        + "be the same");
-            }
-
-            return clientChannel;
+            mInputChannel = mWmService.mInputManager.createInputChannel(name);
+            return mInputChannel;
         }
 
         void onRemoved() {
             if (mInputChannel != null) {
-                mWmService.mInputManager.unregisterInputChannel(mInputChannel.getToken());
+                mWmService.mInputManager.removeInputChannel(mInputChannel.getToken());
                 mInputChannel.dispose();
                 mInputChannel = null;
             }

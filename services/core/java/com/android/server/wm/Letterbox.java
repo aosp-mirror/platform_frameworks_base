@@ -191,7 +191,6 @@ public class Letterbox {
     }
 
     private static class InputInterceptor {
-        final InputChannel mServerChannel;
         final InputChannel mClientChannel;
         final InputWindowHandle mWindowHandle;
         final InputEventReceiver mInputEventReceiver;
@@ -201,13 +200,10 @@ public class Letterbox {
         InputInterceptor(String namePrefix, WindowState win) {
             mWmService = win.mWmService;
             final String name = namePrefix + (win.mActivityRecord != null ? win.mActivityRecord : win);
-            final InputChannel[] channels = InputChannel.openInputChannelPair(name);
-            mServerChannel = channels[0];
-            mClientChannel = channels[1];
+            mClientChannel = mWmService.mInputManager.createInputChannel(name);
             mInputEventReceiver = new SimpleInputReceiver(mClientChannel);
 
-            mWmService.mInputManager.registerInputChannel(mServerChannel);
-            mToken = mServerChannel.getToken();
+            mToken = mClientChannel.getToken();
 
             mWindowHandle = new InputWindowHandle(null /* inputApplicationHandle */,
                     win.getDisplayId());
@@ -239,9 +235,8 @@ public class Letterbox {
         }
 
         void dispose() {
-            mWmService.mInputManager.unregisterInputChannel(mServerChannel.getToken());
+            mWmService.mInputManager.removeInputChannel(mToken);
             mInputEventReceiver.dispose();
-            mServerChannel.dispose();
             mClientChannel.dispose();
         }
 

@@ -36,6 +36,8 @@ extern std::shared_ptr<InputChannel> android_view_InputChannel_getInputChannel(
 extern void android_view_InputChannel_setDisposeCallback(JNIEnv* env, jobject inputChannelObj,
         InputChannelObjDisposeCallback callback, void* data = NULL);
 
+extern jobject android_view_InputChannel_createJavaObject(
+        JNIEnv* env, std::unique_ptr<InputChannel> inputChannel);
 } // namespace android
 
 #endif // _ANDROID_OS_INPUTCHANNEL_H
