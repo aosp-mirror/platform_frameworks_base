@@ -5450,7 +5450,7 @@ class Task extends WindowContainer<WindowContainer> {
             // activities a chance to enter Pip before resuming the next activity.
             final boolean lastResumedCanPip = prev != null && prev.checkEnterPictureInPictureState(
                     "shouldResumeWhilePausing", userLeaving);
-            if (lastResumedCanPip && prev.pictureInPictureArgs.isAutoEnterAllowed()) {
+            if (lastResumedCanPip && prev.pictureInPictureArgs.isAutoEnterEnabled()) {
                 shouldAutoPip = true;
             } else if (!lastResumedCanPip) {
                 pauseImmediately = true;
