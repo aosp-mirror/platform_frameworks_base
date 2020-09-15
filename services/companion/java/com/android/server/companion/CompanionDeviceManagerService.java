@@ -85,7 +85,6 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -170,7 +169,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             public void onPackageRemoved(String packageName, int uid) {
                 updateAssociations(
                         as -> CollectionUtils.filter(as,
-                                a -> !Objects.equals(a.companionAppPackage, packageName)),
+                                a -> !Objects.equals(a.getPackageName(), packageName)),
                         getChangingUserId());
             }
 
@@ -199,7 +198,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
         Set<String> companionAppPackages = new HashSet<>();
         for (Association association : associations) {
-            companionAppPackages.add(association.companionAppPackage);
+            companionAppPackages.add(association.getPackageName());
         }
         ActivityTaskManagerInternal atmInternal = LocalServices.getService(
                 ActivityTaskManagerInternal.class);
@@ -229,10 +228,10 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 }
                 for (Association a : associations) {
                     try {
-                        int uid = pm.getPackageUidAsUser(a.companionAppPackage, userId);
-                        exemptFromAutoRevoke(a.companionAppPackage, uid);
+                        int uid = pm.getPackageUidAsUser(a.getPackageName(), userId);
+                        exemptFromAutoRevoke(a.getPackageName(), uid);
                     } catch (PackageManager.NameNotFoundException e) {
-                        Log.w(LOG_TAG, "Unknown companion package: " + a.companionAppPackage, e);
+                        Log.w(LOG_TAG, "Unknown companion package: " + a.getPackageName(), e);
                     }
                 }
             } finally {
@@ -344,7 +343,17 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             }
             return new ArrayList<>(CollectionUtils.map(
                     readAllAssociations(userId, callingPackage),
-                    a -> a.deviceAddress));
+                    a -> a.getDeviceMacAddress()));
+        }
+
+        @Override
+        public List<Association> getAssociationsForUser(int userId) {
+            if (!callerCanManageCompanionDevices()) {
+                throw new SecurityException("Caller must hold "
+                        + android.Manifest.permission.MANAGE_COMPANION_DEVICES);
+            }
+
+            return new ArrayList<>(readAllAssociations(userId, null /* packageFilter */));
         }
 
         //TODO also revoke notification access
@@ -429,7 +438,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
             return CollectionUtils.any(
                     readAllAssociations(userId, packageName),
-                    a -> Objects.equals(a.deviceAddress, macAddress));
+                    a -> Objects.equals(a.getDeviceMacAddress(), macAddress));
         }
 
         private void checkCanCallNotificationApi(String callingPackage) throws RemoteException {
@@ -479,7 +488,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
     void addAssociation(Association association) {
         updateSpecialAccessPermissionForAssociatedPackage(
-                association.companionAppPackage, association.userId);
+                association.getPackageName(), association.getUserId());
         recordAssociation(association);
     }
 
@@ -582,7 +591,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             Set<Association> finalAssociations = associations;
             Set<String> companionAppPackages = new HashSet<>();
             for (Association association : finalAssociations) {
-                companionAppPackages.add(association.companionAppPackage);
+                companionAppPackages.add(association.getPackageName());
             }
 
             file.write((out) -> {
@@ -595,8 +604,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
                     CollectionUtils.forEach(finalAssociations, association -> {
                         xml.startTag(null, XML_TAG_ASSOCIATION)
-                                .attribute(null, XML_ATTR_PACKAGE, association.companionAppPackage)
-                                .attribute(null, XML_ATTR_DEVICE, association.deviceAddress)
+                                .attribute(null, XML_ATTR_PACKAGE, association.getPackageName())
+                                .attribute(null, XML_ATTR_DEVICE, association.getDeviceMacAddress())
                                 .endTag(null, XML_TAG_ASSOCIATION);
                     });
 
@@ -678,7 +687,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     CollectionUtils.forEach(
                             readAllAssociations(getNextArgInt()),
                             a -> getOutPrintWriter()
-                                    .println(a.companionAppPackage + " " + a.deviceAddress));
+                                    .println(a.getPackageName() + " " + a.getDeviceMacAddress()));
                 } break;
 
                 case "associate": {
