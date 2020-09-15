@@ -17,6 +17,7 @@
 package com.android.systemui.pip;
 
 import android.app.TaskInfo;
+import android.content.pm.PackageManager;
 
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -28,26 +29,48 @@ import com.android.systemui.dagger.SysUISingleton;
 @SysUISingleton
 public class PipUiEventLogger {
 
+    private static final int INVALID_PACKAGE_UID = -1;
+
     private final UiEventLogger mUiEventLogger;
+    private final PackageManager mPackageManager;
 
-    private TaskInfo mTaskInfo;
+    private String mPackageName;
+    private int mPackageUid = INVALID_PACKAGE_UID;
 
-    public PipUiEventLogger(UiEventLogger uiEventLogger) {
+    public PipUiEventLogger(UiEventLogger uiEventLogger, PackageManager packageManager) {
         mUiEventLogger = uiEventLogger;
+        mPackageManager = packageManager;
     }
 
     public void setTaskInfo(TaskInfo taskInfo) {
-        mTaskInfo = taskInfo;
+        if (taskInfo == null) {
+            mPackageName = null;
+            mPackageUid = INVALID_PACKAGE_UID;
+        } else {
+            mPackageName = taskInfo.topActivity.getPackageName();
+            mPackageUid = getUid(mPackageName, taskInfo.userId);
+        }
     }
 
     /**
      * Sends log via UiEvent, reference go/uievent for how to debug locally
      */
     public void log(PipUiEventEnum event) {
-        if (mTaskInfo == null) {
+        if (mPackageName == null || mPackageUid == INVALID_PACKAGE_UID) {
             return;
         }
-        mUiEventLogger.log(event, mTaskInfo.userId, mTaskInfo.topActivity.getPackageName());
+        mUiEventLogger.log(event, mPackageUid, mPackageName);
+    }
+
+    private int getUid(String packageName, int userId) {
+        int uid = INVALID_PACKAGE_UID;
+        try {
+            uid = mPackageManager.getApplicationInfoAsUser(
+                    packageName, 0 /* ApplicationInfoFlags */, userId).uid;
+        } catch (PackageManager.NameNotFoundException e) {
+            // do nothing.
+        }
+        return uid;
     }
 
     /**
