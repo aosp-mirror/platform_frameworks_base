@@ -24,10 +24,11 @@ import android.util.Xml;
 
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
-
 import com.android.server.hdmi.Constants.AbortReason;
 import com.android.server.hdmi.Constants.AudioCodec;
 import com.android.server.hdmi.Constants.FeatureOpcode;
+import com.android.server.hdmi.Constants.PathRelationship;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -311,26 +312,43 @@ final class HdmiUtils {
      * @return true if the new path in the active routing path
      */
     static boolean isInActiveRoutingPath(int activePath, int newPath) {
-        // Check each nibble of the currently active path and the new path till the position
-        // where the active nibble is not zero. For (activePath, newPath),
-        // (1.1.0.0, 1.0.0.0) -> true, new path is a parent
-        // (1.2.1.0, 1.2.1.2) -> true, new path is a descendant
-        // (1.1.0.0, 1.2.0.0) -> false, new path is a sibling
-        // (1.0.0.0, 2.0.0.0) -> false, in a completely different path
-        for (int i = 12; i >= 0; i -= 4) {
-            int nibbleActive = (activePath >> i) & 0xF;
-            if (nibbleActive == 0) {
-                break;
-            }
-            int nibbleNew = (newPath >> i) & 0xF;
-            if (nibbleNew == 0) {
-                break;
-            }
-            if (nibbleActive != nibbleNew) {
-                return false;
+        @PathRelationship int pathRelationship = pathRelationship(newPath, activePath);
+        return (pathRelationship == Constants.PATH_RELATIONSHIP_ANCESTOR
+                || pathRelationship == Constants.PATH_RELATIONSHIP_DESCENDANT
+                || pathRelationship == Constants.PATH_RELATIONSHIP_SAME);
+    }
+
+    /**
+     * Computes the relationship from the first path to the second path.
+     */
+    static @PathRelationship int pathRelationship(int firstPath, int secondPath) {
+        if (firstPath == Constants.INVALID_PHYSICAL_ADDRESS
+                || secondPath == Constants.INVALID_PHYSICAL_ADDRESS) {
+            return Constants.PATH_RELATIONSHIP_UNKNOWN;
+        }
+        // Loop forwards through both paths, looking for the first nibble where the paths differ.
+        // Checking this nibble and the next one distinguishes between most possible relationships.
+        for (int nibbleIndex = 0; nibbleIndex <= 3; nibbleIndex++) {
+            int shift = 12 - nibbleIndex * 4;
+            int firstPathNibble = (firstPath >> shift) & 0xF;
+            int secondPathNibble = (secondPath >> shift) & 0xF;
+            // Found the first nibble where the paths differ.
+            if (firstPathNibble != secondPathNibble) {
+                int firstPathNextNibble = (firstPath >> (shift - 4)) & 0xF;
+                int secondPathNextNibble = (secondPath >> (shift - 4)) & 0xF;
+                if (firstPathNibble == 0) {
+                    return Constants.PATH_RELATIONSHIP_ANCESTOR;
+                } else if (secondPathNibble == 0) {
+                    return Constants.PATH_RELATIONSHIP_DESCENDANT;
+                } else if (nibbleIndex == 3
+                        || (firstPathNextNibble == 0 && secondPathNextNibble == 0)) {
+                    return Constants.PATH_RELATIONSHIP_SIBLING;
+                } else {
+                    return Constants.PATH_RELATIONSHIP_DIFFERENT_BRANCH;
+                }
             }
         }
-        return true;
+        return Constants.PATH_RELATIONSHIP_SAME;
     }
 
     /**
