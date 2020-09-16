@@ -75,6 +75,11 @@ public interface NotificationMenuRowPlugin extends Plugin {
     public MenuItem getLongpressMenuItem(Context context);
 
     /**
+     * @return the {@link MenuItem} to display when app ops icons are pressed.
+     */
+    public MenuItem getAppOpsMenuItem(Context context);
+
+    /**
      * @return the {@link MenuItem} to display when snooze item is pressed.
      */
     public MenuItem getSnoozeMenuItem(Context context);

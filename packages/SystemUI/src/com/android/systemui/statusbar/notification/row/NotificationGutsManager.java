@@ -264,6 +264,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         try {
             if (gutsView instanceof NotificationSnooze) {
                 initializeSnoozeView(row, (NotificationSnooze) gutsView);
+            } else if (gutsView instanceof AppOpsInfo) {
+                initializeAppOpsInfo(row, (AppOpsInfo) gutsView);
             } else if (gutsView instanceof NotificationInfo) {
                 initializeNotificationInfo(row, (NotificationInfo) gutsView);
             } else if (gutsView instanceof NotificationConversationInfo) {
@@ -298,6 +300,36 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         guts.setHeightChangedListener((NotificationGuts g) -> {
             mListContainer.onHeightChanged(row, row.isShown() /* needsAnimation */);
         });
+    }
+
+    /**
+     * Sets up the {@link AppOpsInfo} inside the notification row's guts.
+     *
+     * @param row view to set up the guts for
+     * @param appOpsInfoView view to set up/bind within {@code row}
+     */
+    private void initializeAppOpsInfo(
+            final ExpandableNotificationRow row,
+            AppOpsInfo appOpsInfoView) {
+        NotificationGuts guts = row.getGuts();
+        StatusBarNotification sbn = row.getEntry().getSbn();
+        UserHandle userHandle = sbn.getUser();
+        PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
+                userHandle.getIdentifier());
+
+        AppOpsInfo.OnSettingsClickListener onSettingsClick =
+                (View v, String pkg, int uid, ArraySet<Integer> ops) -> {
+                    mUiEventLogger.logWithInstanceId(
+                            NotificationAppOpsEvent.NOTIFICATION_APP_OPS_SETTINGS_CLICK,
+                            sbn.getUid(), sbn.getPackageName(), sbn.getInstanceId());
+                    mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_OPS_GUTS_SETTINGS);
+                    guts.resetFalsingCheck();
+                    startAppOpsSettingsActivity(pkg, uid, ops, row);
+        };
+        if (!row.getEntry().mActiveAppOps.isEmpty()) {
+            appOpsInfoView.bindGuts(pmUser, onSettingsClick, sbn, mUiEventLogger,
+                    row.getEntry().mActiveAppOps);
+        }
     }
 
     /**

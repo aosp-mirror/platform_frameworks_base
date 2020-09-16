@@ -82,7 +82,8 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
 
         MockitoAnnotations.initMocks(this);
-        mFsc = new ForegroundServiceController(mAppOpsController, mMainHandler);
+        mFsc = new ForegroundServiceController(
+                mEntryManager, mAppOpsController, mMainHandler);
         mListener = new ForegroundServiceNotificationListener(
                 mContext, mFsc, mEntryManager, mNotifPipeline,
                 mock(ForegroundServiceLifetimeExtender.class), mClock);
@@ -111,6 +112,85 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
         } catch (IllegalStateException e) {
             // THEN expect an exception
         }
+    }
+
+    @Test
+    public void testAppOps_appOpChangedBeforeNotificationExists() {
+        // GIVEN app op exists, but notification doesn't exist in NEM yet
+        NotificationEntry entry = createFgEntry();
+        mFsc.onAppOpChanged(
+                AppOpsManager.OP_CAMERA,
+                entry.getSbn().getUid(),
+                entry.getSbn().getPackageName(),
+                true);
+        assertFalse(entry.mActiveAppOps.contains(AppOpsManager.OP_CAMERA));
+
+        // WHEN the notification is added
+        mEntryListener.onPendingEntryAdded(entry);
+
+        // THEN the app op is added to the entry
+        Assert.assertTrue(entry.mActiveAppOps.contains(AppOpsManager.OP_CAMERA));
+    }
+
+    @Test
+    public void testAppOps_appOpAddedToForegroundNotif() {
+        // GIVEN a notification associated with a foreground service
+        NotificationEntry entry = addFgEntry();
+        when(mEntryManager.getPendingOrActiveNotif(entry.getKey())).thenReturn(entry);
+
+        // WHEN we are notified of a new app op for this notification
+        mFsc.onAppOpChanged(
+                AppOpsManager.OP_CAMERA,
+                entry.getSbn().getUid(),
+                entry.getSbn().getPackageName(),
+                true);
+
+        // THEN the app op is added to the entry
+        Assert.assertTrue(entry.mActiveAppOps.contains(AppOpsManager.OP_CAMERA));
+
+        // THEN notification views are updated since the notification is visible
+        verify(mEntryManager, times(1)).updateNotifications(anyString());
+    }
+
+    @Test
+    public void testAppOpsAlreadyAdded() {
+        // GIVEN a foreground service associated notification that already has the correct app op
+        NotificationEntry entry = addFgEntry();
+        entry.mActiveAppOps.add(AppOpsManager.OP_CAMERA);
+        when(mEntryManager.getPendingOrActiveNotif(entry.getKey())).thenReturn(entry);
+
+        // WHEN we are notified of the same app op for this notification
+        mFsc.onAppOpChanged(
+                AppOpsManager.OP_CAMERA,
+                entry.getSbn().getUid(),
+                entry.getSbn().getPackageName(),
+                true);
+
+        // THEN the app op still exists in the notification entry
+        Assert.assertTrue(entry.mActiveAppOps.contains(AppOpsManager.OP_CAMERA));
+
+        // THEN notification views aren't updated since nothing changed
+        verify(mEntryManager, never()).updateNotifications(anyString());
+    }
+
+    @Test
+    public void testAppOps_appOpNotAddedToUnrelatedNotif() {
+        // GIVEN no notification entries correspond to the newly updated appOp
+        NotificationEntry entry = addFgEntry();
+        when(mEntryManager.getPendingOrActiveNotif(entry.getKey())).thenReturn(null);
+
+        // WHEN a new app op is detected
+        mFsc.onAppOpChanged(
+                AppOpsManager.OP_CAMERA,
+                entry.getSbn().getUid(),
+                entry.getSbn().getPackageName(),
+                true);
+
+        // THEN we won't see appOps on the entry
+        Assert.assertFalse(entry.mActiveAppOps.contains(AppOpsManager.OP_CAMERA));
+
+        // THEN notification views aren't updated since nothing changed
+        verify(mEntryManager, never()).updateNotifications(anyString());
     }
 
     @Test
