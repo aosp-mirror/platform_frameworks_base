@@ -297,6 +297,7 @@ public class AudioService extends IAudioService.Stub
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
     private static final int MSG_DISABLE_AUDIO_FOR_UID = 100;
+    private static final int MSG_INIT_STREAMS_VOLUMES = 101;
     // end of messages handled under wakelock
 
     // retry delay in case of failure to indicate system ready to AudioFlinger
@@ -822,7 +823,34 @@ public class AudioService extends IAudioService.Stub
         updateStreamVolumeAlias(false /*updateVolumes*/, TAG);
         readPersistedSettings();
         readUserRestrictions();
-        mSettingsObserver = new SettingsObserver();
+
+        mPlaybackMonitor =
+                new PlaybackActivityMonitor(context, MAX_STREAM_VOLUME[AudioSystem.STREAM_ALARM]);
+        mMediaFocusControl = new MediaFocusControl(mContext, mPlaybackMonitor);
+
+        readAndSetLowRamDevice();
+
+        mIsCallScreeningModeSupported = AudioSystem.isCallScreeningModeSupported();
+
+        if (mSystemServer.isPrivileged()) {
+            LocalServices.addService(AudioManagerInternal.class, new AudioServiceInternal());
+
+            mUserManagerInternal.addUserRestrictionsListener(mUserRestrictionsListener);
+
+            mRecordMonitor.initMonitor();
+        }
+
+        mMonitorRotation = SystemProperties.getBoolean("ro.audio.monitorRotation", false);
+
+        // done with service initialization, continue additional work in our Handler thread
+        queueMsgUnderWakeLock(mAudioHandler, MSG_INIT_STREAMS_VOLUMES,
+                0 /* arg1 */,  0 /* arg2 */, null /* obj */,  0 /* delay */);
+    }
+
+    /**
+     * Called by handling of MSG_INIT_STREAMS_VOLUMES
+     */
+    private void onInitStreamsAndVolumes() {
         createStreamStates();
 
         // must be called after createStreamStates() as it uses MUSIC volume as default if no
@@ -833,52 +861,10 @@ public class AudioService extends IAudioService.Stub
         // relies on audio policy having correct ranges for volume indexes.
         mSafeUsbMediaVolumeIndex = getSafeUsbMediaVolumeIndex();
 
-        mPlaybackMonitor =
-                new PlaybackActivityMonitor(context, MAX_STREAM_VOLUME[AudioSystem.STREAM_ALARM]);
-
-        mMediaFocusControl = new MediaFocusControl(mContext, mPlaybackMonitor);
-
-        readAndSetLowRamDevice();
-
-        mIsCallScreeningModeSupported = AudioSystem.isCallScreeningModeSupported();
-
         // Call setRingerModeInt() to apply correct mute
         // state on streams affected by ringer mode.
         mRingerAndZenModeMutedStreams = 0;
         setRingerModeInt(getRingerModeInternal(), false);
-
-        // Register for device connection intent broadcasts.
-        IntentFilter intentFilter =
-                new IntentFilter(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
-        intentFilter.addAction(BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED);
-        intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
-        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
-        intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
-        intentFilter.addAction(Intent.ACTION_USER_BACKGROUND);
-        intentFilter.addAction(Intent.ACTION_USER_FOREGROUND);
-        intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
-        intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        intentFilter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
-
-        intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-        mMonitorRotation = SystemProperties.getBoolean("ro.audio.monitorRotation", false);
-        if (mMonitorRotation) {
-            RotationHelper.init(mContext, mAudioHandler);
-        }
-
-        intentFilter.addAction(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
-        intentFilter.addAction(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
-
-        context.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null, null);
-
-        if (mSystemServer.isPrivileged()) {
-            LocalServices.addService(AudioManagerInternal.class, new AudioServiceInternal());
-
-            mUserManagerInternal.addUserRestrictionsListener(mUserRestrictionsListener);
-
-            mRecordMonitor.initMonitor();
-        }
 
         final float[] preScale = new float[3];
         preScale[0] = mContext.getResources().getFraction(
@@ -896,8 +882,45 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
+        initExternalEventReceivers();
+
         // check on volume initialization
         checkVolumeRangeInitialization("AudioService()");
+    }
+
+    /**
+     * Initialize intent receives and settings observers for this service.
+     * Must be called after createStreamStates() as the handling of some events
+     * may affect or need volumes, e.g. BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED
+     * (for intent receiver), or Settings.Global.ZEN_MODE (for settings observer)
+     */
+    private void initExternalEventReceivers() {
+        mSettingsObserver = new SettingsObserver();
+
+        // Register for device connection intent broadcasts.
+        IntentFilter intentFilter =
+                new IntentFilter(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
+        intentFilter.addAction(BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED);
+        intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
+        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
+        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
+        intentFilter.addAction(Intent.ACTION_USER_BACKGROUND);
+        intentFilter.addAction(Intent.ACTION_USER_FOREGROUND);
+        intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+        intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        intentFilter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
+
+        intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+        if (mMonitorRotation) {
+            RotationHelper.init(mContext, mAudioHandler);
+        }
+
+        intentFilter.addAction(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
+        intentFilter.addAction(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
+
+        mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null, null);
+
     }
 
     public void systemReady() {
@@ -2593,7 +2616,7 @@ public class AudioService extends IAudioService.Stub
 
     // StreamVolumeCommand contains the information needed to defer the process of
     // setStreamVolume() in case the user has to acknowledge the safe volume warning message.
-    class StreamVolumeCommand {
+    static class StreamVolumeCommand {
         public final int mStreamType;
         public final int mIndex;
         public final int mFlags;
@@ -2612,7 +2635,7 @@ public class AudioService extends IAudioService.Stub
                     .append(mIndex).append(",flags=").append(mFlags).append(",device=")
                     .append(mDevice).append('}').toString();
         }
-    };
+    }
 
     private int getNewRingerMode(int stream, int index, int flags) {
         // setRingerMode does nothing if the device is single volume,so the value would be unchanged
@@ -3321,7 +3344,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     private int mRmtSbmxFullVolRefCount = 0;
-    private ArrayList<RmtSbmxFullVolDeathHandler> mRmtSbmxFullVolDeathHandlers =
+    private final ArrayList<RmtSbmxFullVolDeathHandler> mRmtSbmxFullVolDeathHandlers =
             new ArrayList<RmtSbmxFullVolDeathHandler>();
 
     public void forceRemoteSubmixFullVolume(boolean startForcing, IBinder cb) {
@@ -5882,7 +5905,6 @@ public class AudioService extends IAudioService.Stub
         private final Intent mStreamDevicesChanged;
 
         private VolumeStreamState(String settingName, int streamType) {
-
             mVolumeIndexSettingName = settingName;
 
             mStreamType = streamType;
@@ -6655,6 +6677,11 @@ public class AudioService extends IAudioService.Stub
                 case MSG_DISABLE_AUDIO_FOR_UID:
                     mPlaybackMonitor.disableAudioForUid( msg.arg1 == 1 /* disable */,
                             msg.arg2 /* uid */);
+                    mAudioEventWakeLock.release();
+                    break;
+
+                case MSG_INIT_STREAMS_VOLUMES:
+                    onInitStreamsAndVolumes();
                     mAudioEventWakeLock.release();
                     break;
 
@@ -9216,7 +9243,7 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    private HashMap<IBinder, AsdProxy> mAudioServerStateListeners =
+    private final HashMap<IBinder, AsdProxy> mAudioServerStateListeners =
             new HashMap<IBinder, AsdProxy>();
 
     private void checkMonitorAudioServerStatePermission() {
