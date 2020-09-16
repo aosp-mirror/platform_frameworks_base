@@ -37,12 +37,16 @@ public class FrameNumberTracker {
     /** the completed frame number for each type of capture results */
     private long[] mCompletedFrameNumber = new long[CaptureRequest.REQUEST_TYPE_COUNT];
 
-    /** the skipped frame numbers that don't belong to each type of capture results */
-    private final LinkedList<Long>[] mSkippedOtherFrameNumbers =
+    /** the frame numbers that don't belong to each type of capture results and are yet to be seen
+     * through an updateTracker() call. Each list holds a list of frame numbers that should appear
+     * with request types other than that, to which the list corresponds.
+     */
+    private final LinkedList<Long>[] mPendingFrameNumbersWithOtherType =
             new LinkedList[CaptureRequest.REQUEST_TYPE_COUNT];
 
-    /** the skipped frame numbers that belong to each type of capture results */
-    private final LinkedList<Long>[] mSkippedFrameNumbers =
+    /** the frame numbers that belong to each type of capture results which should appear, but
+     * haven't yet.*/
+    private final LinkedList<Long>[] mPendingFrameNumbers =
             new LinkedList[CaptureRequest.REQUEST_TYPE_COUNT];
 
     /** frame number -> request type */
@@ -53,8 +57,8 @@ public class FrameNumberTracker {
     public FrameNumberTracker() {
         for (int i = 0; i < CaptureRequest.REQUEST_TYPE_COUNT; i++) {
             mCompletedFrameNumber[i] = CameraCaptureSession.CaptureCallback.NO_FRAMES_CAPTURED;
-            mSkippedOtherFrameNumbers[i] = new LinkedList<Long>();
-            mSkippedFrameNumbers[i] = new LinkedList<Long>();
+            mPendingFrameNumbersWithOtherType[i] = new LinkedList<Long>();
+            mPendingFrameNumbers[i] = new LinkedList<Long>();
         }
     }
 
@@ -69,19 +73,20 @@ public class FrameNumberTracker {
                 mCompletedFrameNumber[requestType] = errorFrameNumber;
                 removeError = true;
             } else {
-                if (!mSkippedFrameNumbers[requestType].isEmpty()) {
-                    if (errorFrameNumber == mSkippedFrameNumbers[requestType].element()) {
+                if (!mPendingFrameNumbers[requestType].isEmpty()) {
+                    if (errorFrameNumber == mPendingFrameNumbers[requestType].element()) {
                         mCompletedFrameNumber[requestType] = errorFrameNumber;
-                        mSkippedFrameNumbers[requestType].remove();
+                        mPendingFrameNumbers[requestType].remove();
                         removeError = true;
                     }
                 } else {
                     for (int i = 1; i < CaptureRequest.REQUEST_TYPE_COUNT; i++) {
                         int otherType = (requestType + i) % CaptureRequest.REQUEST_TYPE_COUNT;
-                        if (!mSkippedOtherFrameNumbers[otherType].isEmpty() && errorFrameNumber
-                                == mSkippedOtherFrameNumbers[otherType].element()) {
+                        if (!mPendingFrameNumbersWithOtherType[otherType].isEmpty()
+                                && errorFrameNumber
+                                == mPendingFrameNumbersWithOtherType[otherType].element()) {
                             mCompletedFrameNumber[requestType] = errorFrameNumber;
-                            mSkippedOtherFrameNumbers[otherType].remove();
+                            mPendingFrameNumbersWithOtherType[otherType].remove();
                             removeError = true;
                             break;
                         }
@@ -182,7 +187,7 @@ public class FrameNumberTracker {
      * It validates that all previous frames of the same category have arrived.
      *
      * If there is a gap since previous frame number of the same category, assume the frames in
-     * the gap are other categories and store them in the skipped frame number queue to check
+     * the gap are other categories and store them in the pending frame number queue to check
      * against when frames of those categories arrive.
      */
     private void updateCompletedFrameNumber(long frameNumber,
@@ -199,25 +204,29 @@ public class FrameNumberTracker {
         if (frameNumber < maxOtherFrameNumberSeen) {
             // if frame number is smaller than completed frame numbers of other categories,
             // it must be:
-            // - the head of mSkippedFrameNumbers for this category, or
-            // - in one of other mSkippedOtherFrameNumbers
-            if (!mSkippedFrameNumbers[requestType].isEmpty()) {
-                // frame number must be head of current type of mSkippedFrameNumbers if
-                // mSkippedFrameNumbers isn't empty.
-                if (frameNumber < mSkippedFrameNumbers[requestType].element()) {
+            // - the head of mPendingFrameNumbers for this category, or
+            // - in one of other mPendingFrameNumbersWithOtherType
+            if (!mPendingFrameNumbers[requestType].isEmpty()) {
+                // frame number must be head of current type of mPendingFrameNumbers if
+                // mPendingFrameNumbers isn't empty.
+                Long pendingFrameNumberSameType = mPendingFrameNumbers[requestType].element();
+                if (frameNumber == pendingFrameNumberSameType) {
+                    // frame number matches the head of the pending frame number queue.
+                    // Do this before the inequality checks since this is likely to be the common
+                    // case.
+                    mPendingFrameNumbers[requestType].remove();
+                } else if (frameNumber < pendingFrameNumberSameType) {
                     throw new IllegalArgumentException("frame number " + frameNumber
                             + " is a repeat");
-                } else if (frameNumber > mSkippedFrameNumbers[requestType].element()) {
+                } else {
                     throw new IllegalArgumentException("frame number " + frameNumber
                             + " comes out of order. Expecting "
-                            + mSkippedFrameNumbers[requestType].element());
+                            + pendingFrameNumberSameType);
                 }
-                // frame number matches the head of the skipped frame number queue.
-                mSkippedFrameNumbers[requestType].remove();
             } else {
-                // frame number must be in one of the other mSkippedOtherFrameNumbers.
-                int index1 = mSkippedOtherFrameNumbers[otherType1].indexOf(frameNumber);
-                int index2 = mSkippedOtherFrameNumbers[otherType2].indexOf(frameNumber);
+                // frame number must be in one of the other mPendingFrameNumbersWithOtherType.
+                int index1 = mPendingFrameNumbersWithOtherType[otherType1].indexOf(frameNumber);
+                int index2 = mPendingFrameNumbersWithOtherType[otherType2].indexOf(frameNumber);
                 boolean inSkippedOther1 = index1 != -1;
                 boolean inSkippedOther2 = index2 != -1;
                 if (!(inSkippedOther1 ^ inSkippedOther2)) {
@@ -225,33 +234,39 @@ public class FrameNumberTracker {
                             + " is a repeat or invalid");
                 }
 
-                // We know the category of frame numbers in skippedOtherFrameNumbers leading up
-                // to the current frame number. Move them into the correct skippedFrameNumbers.
+                // We know the category of frame numbers in pendingFrameNumbersWithOtherType leading
+                // up to the current frame number. The destination is the type which isn't the
+                // requestType* and isn't the src. Move them into the correct pendingFrameNumbers.
+                // * : This is since frameNumber is the first frame of requestType that we've
+                // received in the 'others' list, since for each request type frames come in order.
+                // All the frames before frameNumber are of the same type. They're not of
+                // 'requestType', neither of the type of the 'others' list they were found in. The
+                // remaining option is the 3rd type.
                 LinkedList<Long> srcList, dstList;
                 int index;
                 if (inSkippedOther1) {
-                    srcList = mSkippedOtherFrameNumbers[otherType1];
-                    dstList = mSkippedFrameNumbers[otherType2];
+                    srcList = mPendingFrameNumbersWithOtherType[otherType1];
+                    dstList = mPendingFrameNumbers[otherType2];
                     index = index1;
                 } else {
-                    srcList = mSkippedOtherFrameNumbers[otherType2];
-                    dstList = mSkippedFrameNumbers[otherType1];
+                    srcList = mPendingFrameNumbersWithOtherType[otherType2];
+                    dstList = mPendingFrameNumbers[otherType1];
                     index = index2;
                 }
                 for (int i = 0; i < index; i++) {
                     dstList.add(srcList.removeFirst());
                 }
 
-                // Remove current frame number from skippedOtherFrameNumbers
+                // Remove current frame number from pendingFrameNumbersWithOtherType
                 srcList.remove();
             }
         } else {
             // there is a gap of unseen frame numbers which should belong to the other
-            // 2 categories. Put all the skipped frame numbers in the queue.
+            // 2 categories. Put all the pending frame numbers in the queue.
             for (long i =
                     Math.max(maxOtherFrameNumberSeen, mCompletedFrameNumber[requestType]) + 1;
                     i < frameNumber; i++) {
-                mSkippedOtherFrameNumbers[requestType].add(i);
+                mPendingFrameNumbersWithOtherType[requestType].add(i);
             }
         }
 
