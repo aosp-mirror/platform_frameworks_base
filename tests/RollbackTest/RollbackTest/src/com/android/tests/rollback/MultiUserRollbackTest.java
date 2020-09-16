@@ -115,4 +115,32 @@ public class MultiUserRollbackTest {
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
         InstallUtils.processUserData(TestApp.A);
     }
+
+    @Test
+    public void testStagedRollback_Phase1() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(-1);
+        Install.single(TestApp.A1).setStaged().commit();
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(-1);
+    }
+
+    @Test
+    public void testStagedRollback_Phase2() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+        Install.single(TestApp.A2).setStaged().setEnableRollback().commit();
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+    }
+
+    @Test
+    public void testStagedRollback_Phase3() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
+        RollbackInfo rollback = RollbackUtils.waitForAvailableRollback(TestApp.A);
+        assertThat(rollback).packagesContainsExactly(Rollback.from(TestApp.A2).to(TestApp.A1));
+        RollbackUtils.rollback(rollback.getRollbackId());
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
+    }
+
+    @Test
+    public void testStagedRollback_Phase4() {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+    }
 }
