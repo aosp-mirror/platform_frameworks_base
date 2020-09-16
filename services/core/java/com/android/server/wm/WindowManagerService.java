@@ -7974,16 +7974,17 @@ public class WindowManagerService extends IWindowManager.Stub
      * Used by WindowlessWindowManager to enable input on SurfaceControl embedded
      * views.
      */
-    void grantInputChannel(int callingUid, int callingPid, int displayId, SurfaceControl surface,
-            IWindow window, IBinder hostInputToken, int flags, int privateFlags, int type,
-            InputChannel outInputChannel) {
+    void grantInputChannel(Session session, int callingUid, int callingPid, int displayId,
+                           SurfaceControl surface, IWindow window, IBinder hostInputToken,
+                           int flags, int privateFlags, int type, InputChannel outInputChannel) {
         final InputApplicationHandle applicationHandle;
         final String name;
         final InputChannel clientChannel;
         synchronized (mGlobalLock) {
             EmbeddedWindowController.EmbeddedWindow win =
-                    new EmbeddedWindowController.EmbeddedWindow(this, window,
-                            mInputToWindowMap.get(hostInputToken), callingUid, callingPid, type);
+                    new EmbeddedWindowController.EmbeddedWindow(session, this, window,
+                            mInputToWindowMap.get(hostInputToken), callingUid, callingPid, type,
+                            displayId);
             clientChannel = win.openInputChannel();
             mEmbeddedWindowController.add(clientChannel.getToken(), win);
             applicationHandle = win.getApplicationHandle();
@@ -7998,19 +7999,19 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void updateInputChannel(IBinder channelToken, int callingUid, int callingPid,
-            int displayId, SurfaceControl surface, String name,
-            InputApplicationHandle applicationHandle, int flags, int privateFlags, int type,
-            Region region) {
+                                    int displayId, SurfaceControl surface, String name,
+                                    InputApplicationHandle applicationHandle, int flags,
+                                    int privateFlags, int type, Region region) {
         InputWindowHandle h = new InputWindowHandle(applicationHandle, displayId);
         h.token = channelToken;
         h.name = name;
 
         final int sanitizedFlags = flags & (LayoutParams.FLAG_NOT_TOUCHABLE
-                | LayoutParams.FLAG_SLIPPERY);
+                | LayoutParams.FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE);
         h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | sanitizedFlags;
         h.layoutParamsType = type;
         h.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-        h.focusable = false;
+        h.focusable = (flags & LayoutParams.FLAG_NOT_FOCUSABLE) == 0;
         h.hasWallpaper = false;
         h.paused = false;
 
@@ -8194,6 +8195,77 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    void grantEmbeddedWindowFocus(Session session, IBinder targetInputToken, boolean grantFocus) {
+        synchronized (mGlobalLock) {
+            final EmbeddedWindowController.EmbeddedWindow embeddedWindow =
+                    mEmbeddedWindowController.get(targetInputToken);
+            if (embeddedWindow == null) {
+                Slog.e(TAG, "Embedded window not found");
+                return;
+            }
+            if (embeddedWindow.mSession != session) {
+                Slog.e(TAG, "Window not in session:" + session);
+                return;
+            }
+            SurfaceControl.Transaction t = mTransactionFactory.get();
+            final int displayId = embeddedWindow.mDisplayId;
+            if (grantFocus) {
+                t.setFocusedWindow(targetInputToken, displayId).apply();
+            } else {
+                // Search for a new focus target
+                DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+                WindowState newFocusTarget =  displayContent == null
+                        ? null : displayContent.findFocusedWindow();
+                if (newFocusTarget == null) {
+                    ProtoLog.v(WM_DEBUG_FOCUS, "grantEmbeddedWindowFocus remove request for "
+                                    + "win=%s dropped since no candidate was found",
+                            embeddedWindow.getName());
+                    return;
+                }
+                t.requestFocusTransfer(newFocusTarget.mInputWindowHandle.token, targetInputToken,
+                        displayId).apply();
+            }
+            ProtoLog.v(WM_DEBUG_FOCUS, "grantEmbeddedWindowFocus win=%s grantFocus=%s",
+                    embeddedWindow.getName(), grantFocus);
+        }
+    }
+
+    void grantEmbeddedWindowFocus(Session session, IWindow callingWindow, IBinder targetInputToken,
+                                  boolean grantFocus) {
+        synchronized (mGlobalLock) {
+            final WindowState hostWindow =
+                    windowForClientLocked(session, callingWindow, false /* throwOnError*/);
+            if (hostWindow == null) {
+                Slog.e(TAG, "Host window not found");
+                return;
+            }
+            if (hostWindow.mInputChannel == null) {
+                Slog.e(TAG, "Host window does not have an input channel");
+                return;
+            }
+            final EmbeddedWindowController.EmbeddedWindow embeddedWindow =
+                    mEmbeddedWindowController.get(targetInputToken);
+            if (embeddedWindow == null) {
+                Slog.e(TAG, "Embedded window not found");
+                return;
+            }
+            if (embeddedWindow.mHostWindowState != hostWindow) {
+                Slog.e(TAG, "Embedded window does not belong to the host");
+                return;
+            }
+            SurfaceControl.Transaction t = mTransactionFactory.get();
+            if (grantFocus) {
+                t.requestFocusTransfer(targetInputToken, hostWindow.mInputChannel.getToken(),
+                        hostWindow.getDisplayId()).apply();
+            } else {
+                t.requestFocusTransfer(hostWindow.mInputChannel.getToken(), targetInputToken,
+                        hostWindow.getDisplayId()).apply();
+            }
+            ProtoLog.v(WM_DEBUG_FOCUS, "grantEmbeddedWindowFocus win=%s grantFocus=%s",
+                    embeddedWindow.getName(), grantFocus);
         }
     }
 }
