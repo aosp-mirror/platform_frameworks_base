@@ -230,4 +230,19 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         verify(mMockWindowMagnificationMgr, never()).showMagnificationButton(anyInt(),
                 anyInt());
     }
+
+    @SmallTest
+    public void testOnMagnificationTransitionFailed_capabilitiesIsAll_fallBackToPreviousMode() {
+        final AccessibilityUserState userState = mA11yms.mUserStates.get(
+                mA11yms.getCurrentUserIdLocked());
+        userState.setMagnificationCapabilitiesLocked(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
+        userState.setMagnificationModeLocked(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+
+        mA11yms.onMagnificationTransitionEndedLocked(false);
+
+        assertEquals(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                userState.getMagnificationModeLocked());
+    }
 }
