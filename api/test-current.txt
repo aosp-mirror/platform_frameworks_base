@@ -5089,23 +5089,23 @@ package android.util {
     field public static final String SETTINGS_WIFITRACKER2 = "settings_wifitracker2";
   }
 
-  public class SparseArrayMap<T> {
+  public class SparseArrayMap<K, V> {
     ctor public SparseArrayMap();
-    method public void add(int, @NonNull String, @Nullable T);
+    method public void add(int, @NonNull K, @Nullable V);
     method public void clear();
-    method public boolean contains(int, @NonNull String);
+    method public boolean contains(int, @NonNull K);
     method public void delete(int);
-    method @Nullable public T delete(int, @NonNull String);
-    method public void forEach(@NonNull java.util.function.Consumer<T>);
-    method @Nullable public T get(int, @NonNull String);
-    method @Nullable public T getOrDefault(int, @NonNull String, T);
+    method @Nullable public V delete(int, @NonNull K);
+    method public void forEach(@NonNull java.util.function.Consumer<V>);
+    method @Nullable public V get(int, @NonNull K);
+    method @Nullable public V getOrDefault(int, @NonNull K, V);
     method public int indexOfKey(int);
-    method public int indexOfKey(int, @NonNull String);
+    method public int indexOfKey(int, @NonNull K);
     method public int keyAt(int);
-    method @NonNull public String keyAt(int, int);
+    method @NonNull public K keyAt(int, int);
     method public int numElementsForKey(int);
     method public int numMaps();
-    method @Nullable public T valueAt(int, int);
+    method @Nullable public V valueAt(int, int);
   }
 
   public class TimeUtils {
