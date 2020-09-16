@@ -66,10 +66,67 @@ public class HdmiCecMessageValidatorTest {
     @Test
     public void isValid_reportPowerStatus() {
         assertMessageValidity("04:90:00").isEqualTo(OK);
+        assertMessageValidity("04:90:03:05").isEqualTo(OK);
 
         assertMessageValidity("0F:90:00").isEqualTo(ERROR_DESTINATION);
         assertMessageValidity("F0:90").isEqualTo(ERROR_SOURCE);
         assertMessageValidity("04:90").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("04:90:04").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_menuRequest() {
+        assertMessageValidity("40:8D:00").isEqualTo(OK);
+        assertMessageValidity("40:8D:02:04").isEqualTo(OK);
+
+        assertMessageValidity("0F:8D:00").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:8D").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:8D").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:8D:03").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_menuStatus() {
+        assertMessageValidity("40:8E:00").isEqualTo(OK);
+        assertMessageValidity("40:8E:01:00").isEqualTo(OK);
+
+        assertMessageValidity("0F:8E:00").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:8E").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:8E").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:8E:02").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_setSystemAudioMode() {
+        assertMessageValidity("40:72:00").isEqualTo(OK);
+        assertMessageValidity("4F:72:01:03").isEqualTo(OK);
+
+        assertMessageValidity("F0:72").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:72").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:72:02").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_systemAudioModeStatus() {
+        assertMessageValidity("40:7E:00").isEqualTo(OK);
+        assertMessageValidity("40:7E:01:01").isEqualTo(OK);
+
+        assertMessageValidity("0F:7E:00").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:7E").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:7E").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:7E:02").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_setAudioRate() {
+        assertMessageValidity("40:9A:00").isEqualTo(OK);
+        assertMessageValidity("40:9A:03").isEqualTo(OK);
+        assertMessageValidity("40:9A:06:02").isEqualTo(OK);
+
+        assertMessageValidity("0F:9A:00").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:9A").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:9A").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:9A:07").isEqualTo(ERROR_PARAMETER);
     }
 
     @Test

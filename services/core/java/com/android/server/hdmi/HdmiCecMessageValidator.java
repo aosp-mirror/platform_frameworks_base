@@ -152,8 +152,10 @@ public class HdmiCecMessageValidator {
         addValidationInfo(Constants.MESSAGE_SET_OSD_NAME, new AsciiValidator(1, 14), DEST_DIRECT);
 
         // Messages for the Device Menu Control.
-        addValidationInfo(Constants.MESSAGE_MENU_REQUEST, oneByteValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_MENU_STATUS, oneByteValidator, DEST_DIRECT);
+        addValidationInfo(
+                Constants.MESSAGE_MENU_REQUEST, new OneByteRangeValidator(0x00, 0x02), DEST_DIRECT);
+        addValidationInfo(
+                Constants.MESSAGE_MENU_STATUS, new OneByteRangeValidator(0x00, 0x01), DEST_DIRECT);
 
         // Messages for the Remote Control Passthrough.
         // TODO: Parse the first parameter and determine if it can have the next parameter.
@@ -161,7 +163,10 @@ public class HdmiCecMessageValidator {
                 new VariableLengthValidator(1, 2), DEST_DIRECT);
 
         // Messages for the Power Status.
-        addValidationInfo(Constants.MESSAGE_REPORT_POWER_STATUS, oneByteValidator, DEST_DIRECT);
+        addValidationInfo(
+                Constants.MESSAGE_REPORT_POWER_STATUS,
+                new OneByteRangeValidator(0x00, 0x03),
+                DEST_DIRECT);
 
         // Messages for the General Protocol.
         addValidationInfo(Constants.MESSAGE_FEATURE_ABORT,
@@ -173,12 +178,20 @@ public class HdmiCecMessageValidator {
                 new FixedLengthValidator(3), DEST_DIRECT);
         addValidationInfo(Constants.MESSAGE_REQUEST_SHORT_AUDIO_DESCRIPTOR,
                 oneByteValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE, oneByteValidator, DEST_ALL);
-        addValidationInfo(Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS,
-                oneByteValidator, DEST_DIRECT);
+        addValidationInfo(
+                Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE,
+                new OneByteRangeValidator(0x00, 0x01),
+                DEST_ALL);
+        addValidationInfo(
+                Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS,
+                new OneByteRangeValidator(0x00, 0x01),
+                DEST_DIRECT);
 
         // Messages for the Audio Rate Control.
-        addValidationInfo(Constants.MESSAGE_SET_AUDIO_RATE, oneByteValidator, DEST_DIRECT);
+        addValidationInfo(
+                Constants.MESSAGE_SET_AUDIO_RATE,
+                new OneByteRangeValidator(0x00, 0x06),
+                DEST_DIRECT);
 
         // All Messages for the ARC have no parameters.
 
@@ -439,6 +452,24 @@ public class HdmiCecMessageValidator {
                     isValidDisplayControl(params[0])
                     // OSD String
                     && isValidAsciiString(params, 1, 14));
+        }
+    }
+
+    /** Check if the given parameters are one byte parameters and within range. */
+    private class OneByteRangeValidator implements ParameterValidator {
+        private final int mMinValue, mMaxValue;
+
+        OneByteRangeValidator(int minValue, int maxValue) {
+            mMinValue = minValue;
+            mMaxValue = maxValue;
+        }
+
+        @Override
+        public int isValid(byte[] params) {
+            if (params.length < 1) {
+                return ERROR_PARAMETER_SHORT;
+            }
+            return toErrorCode(isWithinRange(params[0], mMinValue, mMaxValue));
         }
     }
 }
