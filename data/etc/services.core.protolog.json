@@ -31,6 +31,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "-2107721178": {
+      "message": "grantEmbeddedWindowFocus win=%s grantFocus=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "-2101985723": {
       "message": "Failed looking up window session=%s callers=%s",
       "level": "WARN",
@@ -1595,6 +1601,12 @@
       "message": "performEnableScreen: Waiting for anim complete",
       "level": "INFO",
       "group": "WM_DEBUG_BOOT",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "397105698": {
+      "message": "grantEmbeddedWindowFocus remove request for win=%s dropped since no candidate was found",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_FOCUS",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "399841913": {
