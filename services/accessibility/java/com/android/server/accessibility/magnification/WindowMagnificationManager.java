@@ -452,6 +452,15 @@ public class WindowMagnificationManager implements
         return magnifier;
     }
 
+    /**
+     * Removes the window magnifier with given id.
+     *
+     * @param displayId The logical display id.
+     */
+    void onDisplayRemoved(int displayId) {
+        disableWindowMagnification(displayId, true);
+    }
+
     private class ConnectionCallback extends IWindowMagnificationConnectionCallback.Stub implements
             IBinder.DeathRecipient {
         private boolean mExpiredDeathRecipient = false;
