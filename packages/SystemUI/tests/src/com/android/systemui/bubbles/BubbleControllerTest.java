@@ -92,7 +92,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.FloatingContentCoordinator;
-import com.android.systemui.wmshell.WindowManagerShellWrapper;
 
 import com.google.common.collect.ImmutableList;
 
@@ -192,8 +191,6 @@ public class BubbleControllerTest extends SysuiTestCase {
     private LauncherApps mLauncherApps;
     @Mock private LockscreenLockIconController mLockIconController;
 
-    @Mock private WindowManagerShellWrapper mWindowManagerShellWrapper;
-
     private BubbleData mBubbleData;
 
     private TestableLooper mTestableLooper;
@@ -272,7 +269,6 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mock(INotificationManager.class),
                 mStatusBarService,
                 mWindowManager,
-                mWindowManagerShellWrapper,
                 mLauncherApps);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 

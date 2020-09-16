@@ -145,10 +145,9 @@ public class PipControlsViewController {
                 return;
             }
             mPipOptional.ifPresent(pip -> {
-                final int playbackState = pip.getPlaybackState();
-                if (playbackState == PipController.PLAYBACK_STATE_PAUSED) {
+                if (pip.getPlaybackState() == PipController.PLAYBACK_STATE_PAUSED) {
                     mMediaController.getTransportControls().play();
-                } else if (playbackState == PipController.PLAYBACK_STATE_PLAYING) {
+                } else if (pip.getPlaybackState() == PipController.PLAYBACK_STATE_PLAYING) {
                     mMediaController.getTransportControls().pause();
                 }
             });

@@ -23,6 +23,7 @@ import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STAT
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_NONE;
 
 import android.annotation.SuppressLint;
+import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
@@ -56,10 +57,13 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.PipAnimationController;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.pip.PipUiEventLogger;
+import com.android.systemui.shared.system.InputConsumerController;
+import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DismissCircleView;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.util.animation.PhysicsAnimator;
@@ -88,6 +92,7 @@ public class PipTouchHandler {
     private final boolean mEnableResize;
     private final Context mContext;
     private final WindowManager mWindowManager;
+    private final IActivityManager mActivityManager;
     private final PipBoundsHandler mPipBoundsHandler;
     private final PipUiEventLogger mPipUiEventLogger;
 
@@ -211,14 +216,18 @@ public class PipTouchHandler {
     }
 
     @SuppressLint("InflateParams")
-    public PipTouchHandler(Context context,
+    public PipTouchHandler(Context context, IActivityManager activityManager,
             PipMenuActivityController menuController,
+            InputConsumerController inputConsumerController,
             PipBoundsHandler pipBoundsHandler,
             PipTaskOrganizer pipTaskOrganizer,
             FloatingContentCoordinator floatingContentCoordinator,
+            DeviceConfigProxy deviceConfig,
+            SysUiState sysUiState,
             PipUiEventLogger pipUiEventLogger) {
         // Initialize the Pip input consumer
         mContext = context;
+        mActivityManager = activityManager;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mPipBoundsHandler = pipBoundsHandler;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
@@ -229,17 +238,21 @@ public class PipTouchHandler {
                 mPipBoundsHandler.getSnapAlgorithm(), floatingContentCoordinator);
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsHandler, mMotionHelper,
-                        pipTaskOrganizer, this::getMovementBounds,
-                        this::updateMovementBounds, pipUiEventLogger, menuController);
+                        deviceConfig, pipTaskOrganizer, this::getMovementBounds,
+                        this::updateMovementBounds, sysUiState, pipUiEventLogger, menuController);
         mTouchState = new PipTouchState(ViewConfiguration.get(context), mHandler,
                 () -> mMenuController.showMenuWithDelay(MENU_STATE_FULL, mMotionHelper.getBounds(),
                         true /* allowMenuTimeout */, willResizeMenu(), shouldShowResizeHandle()),
-                menuController::hideMenu);
+                        menuController::hideMenu);
 
         Resources res = context.getResources();
         mEnableDismissDragToEdge = res.getBoolean(R.bool.config_pipEnableDismissDragToEdge);
         mEnableResize = res.getBoolean(R.bool.config_pipEnableResizeForMenu);
         reloadResources();
+
+        // Register the listener for input consumer touch events
+        inputConsumerController.setInputListener(this::handleTouchEvent);
+        inputConsumerController.setRegistrationListener(this::onRegistrationChanged);
 
         mFloatingContentCoordinator = floatingContentCoordinator;
         mConnection = new PipAccessibilityInteractionConnection(mContext, mMotionHelper,
@@ -307,12 +320,15 @@ public class PipTouchHandler {
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 PIP_STASHING,
                 /* defaultValue = */ false);
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
+        deviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
                 context.getMainExecutor(),
-                properties -> {
-                    if (properties.getKeyset().contains(PIP_STASHING)) {
-                        mEnableStash = properties.getBoolean(
-                                PIP_STASHING, /* defaultValue = */ false);
+                new DeviceConfig.OnPropertiesChangedListener() {
+                    @Override
+                    public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                        if (properties.getKeyset().contains(PIP_STASHING)) {
+                            mEnableStash = properties.getBoolean(
+                                    PIP_STASHING, /* defaultValue = */ false);
+                        }
                     }
                 });
     }
@@ -420,15 +436,6 @@ public class PipTouchHandler {
     public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {
         mIsShelfShowing = shelfVisible;
         mShelfHeight = shelfHeight;
-    }
-
-    /**
-     * Called when SysUI state changed.
-     *
-     * @param isSysUiStateValid Is SysUI valid or not.
-     */
-    public void onSystemUiStateChanged(boolean isSysUiStateValid) {
-        mPipResizeGestureHandler.onSystemUiStateChanged(isSysUiStateValid);
     }
 
     public void adjustBoundsForRotation(Rect outBounds, Rect curBounds, Rect insetBounds) {
@@ -641,10 +648,7 @@ public class PipTouchHandler {
         }
     }
 
-    /**
-     * TODO Add appropriate description
-     */
-    public void onRegistrationChanged(boolean isRegistered) {
+    private void onRegistrationChanged(boolean isRegistered) {
         mAccessibilityManager.setPictureInPictureActionReplacingConnection(isRegistered
                 ? mConnection : null);
         if (!isRegistered && mTouchState.isUserInteracting()) {
@@ -660,10 +664,7 @@ public class PipTouchHandler {
                 shouldShowResizeHandle());
     }
 
-    /**
-     * TODO Add appropriate description
-     */
-    public boolean handleTouchEvent(InputEvent inputEvent) {
+    private boolean handleTouchEvent(InputEvent inputEvent) {
         // Skip any non motion events
         if (!(inputEvent instanceof MotionEvent)) {
             return true;
