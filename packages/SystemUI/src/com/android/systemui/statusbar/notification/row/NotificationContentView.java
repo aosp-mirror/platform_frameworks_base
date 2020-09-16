@@ -1567,6 +1567,18 @@ public class NotificationContentView extends FrameLayout {
         return header;
     }
 
+    public void showAppOpsIcons(ArraySet<Integer> activeOps) {
+        if (mContractedChild != null) {
+            mContractedWrapper.showAppOpsIcons(activeOps);
+        }
+        if (mExpandedChild != null) {
+            mExpandedWrapper.showAppOpsIcons(activeOps);
+        }
+        if (mHeadsUpChild != null) {
+            mHeadsUpWrapper.showAppOpsIcons(activeOps);
+        }
+    }
+
     /** Sets whether the notification being displayed audibly alerted the user. */
     public void setRecentlyAudiblyAlerted(boolean audiblyAlerted) {
         if (mContractedChild != null) {
