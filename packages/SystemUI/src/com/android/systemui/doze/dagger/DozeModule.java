@@ -20,8 +20,6 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.os.Handler;
 
-import androidx.annotation.Nullable;
-
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeAuthRemover;
@@ -43,6 +41,8 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
+
+import java.util.Optional;
 
 import dagger.Module;
 import dagger.Provides;
@@ -93,9 +93,9 @@ public abstract class DozeModule {
 
     @Provides
     @BrightnessSensor
-    @Nullable
-    static Sensor providesBrightnessSensor(AsyncSensorManager sensorManager, Context context) {
-        return DozeSensors.findSensorWithType(sensorManager,
-                context.getString(R.string.doze_brightness_sensor_type));
+    static Optional<Sensor> providesBrightnessSensor(
+            AsyncSensorManager sensorManager, Context context) {
+        return Optional.ofNullable(DozeSensors.findSensorWithType(sensorManager,
+                context.getString(R.string.doze_brightness_sensor_type)));
     }
 }

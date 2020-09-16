@@ -58,6 +58,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class DozeScreenBrightnessTest extends SysuiTestCase {
@@ -97,7 +99,7 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         mAlwaysOnDisplayPolicy.dimmingScrimArray = SENSOR_TO_OPACITY;
         mSensor = fakeSensorManager.getFakeLightSensor();
         mScreen = new DozeScreenBrightness(mContext, mServiceFake, mSensorManager,
-                mSensor.getSensor(), mDozeHost, null /* handler */,
+                Optional.of(mSensor.getSensor()), mDozeHost, null /* handler */,
                 mAlwaysOnDisplayPolicy);
 
         mScreen.onScreenState(Display.STATE_ON);
@@ -167,7 +169,7 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     @Test
     public void testPulsing_withoutLightSensor_setsAoDDimmingScrimTransparent() throws Exception {
         mScreen = new DozeScreenBrightness(mContext, mServiceFake, mSensorManager,
-                null /* sensor */, mDozeHost, null /* handler */,
+                Optional.empty() /* sensor */, mDozeHost, null /* handler */,
                 mAlwaysOnDisplayPolicy);
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE);
@@ -197,7 +199,7 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     @Test
     public void testNullSensor() throws Exception {
         mScreen = new DozeScreenBrightness(mContext, mServiceFake, mSensorManager,
-                null /* sensor */, mDozeHost, null /* handler */,
+                Optional.empty() /* sensor */, mDozeHost, null /* handler */,
                 mAlwaysOnDisplayPolicy);
 
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
