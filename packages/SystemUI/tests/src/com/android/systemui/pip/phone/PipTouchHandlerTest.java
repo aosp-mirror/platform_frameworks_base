@@ -22,7 +22,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.app.IActivityManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
@@ -33,13 +32,10 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.pip.PipUiEventLogger;
-import com.android.systemui.shared.system.InputConsumerController;
-import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
 
 import org.junit.Before;
@@ -63,25 +59,13 @@ public class PipTouchHandlerTest extends SysuiTestCase {
     private PipTouchHandler mPipTouchHandler;
 
     @Mock
-    private IActivityManager mActivityManager;
-
-    @Mock
     private PipMenuActivityController mPipMenuActivityController;
-
-    @Mock
-    private InputConsumerController mInputConsumerController;
 
     @Mock
     private PipTaskOrganizer mPipTaskOrganizer;
 
     @Mock
     private FloatingContentCoordinator mFloatingContentCoordinator;
-
-    @Mock
-    private DeviceConfigProxy mDeviceConfigProxy;
-
-    @Mock
-    private SysUiState mSysUiState;
 
     @Mock
     private PipUiEventLogger mPipUiEventLogger;
@@ -105,9 +89,8 @@ public class PipTouchHandlerTest extends SysuiTestCase {
         mPipBoundsHandler = new PipBoundsHandler(mContext);
         mPipSnapAlgorithm = mPipBoundsHandler.getSnapAlgorithm();
         mPipSnapAlgorithm = new PipSnapAlgorithm(mContext);
-        mPipTouchHandler = new PipTouchHandler(mContext, mActivityManager,
-                mPipMenuActivityController, mInputConsumerController, mPipBoundsHandler,
-                mPipTaskOrganizer, mFloatingContentCoordinator, mDeviceConfigProxy, mSysUiState,
+        mPipTouchHandler = new PipTouchHandler(mContext, mPipMenuActivityController,
+                mPipBoundsHandler, mPipTaskOrganizer, mFloatingContentCoordinator,
                 mPipUiEventLogger);
         mMotionHelper = Mockito.spy(mPipTouchHandler.getMotionHelper());
         mPipResizeGestureHandler = Mockito.spy(mPipTouchHandler.getPipResizeGestureHandler());
