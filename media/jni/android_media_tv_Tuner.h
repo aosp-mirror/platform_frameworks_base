@@ -73,6 +73,7 @@ namespace android {
 
 struct LnbCallback : public ILnbCallback {
     LnbCallback(jweak tunerObj, LnbId id);
+    ~LnbCallback();
     virtual Return<void> onEvent(LnbEventType lnbEventType);
     virtual Return<void> onDiseqcMessage(const hidl_vec<uint8_t>& diseqcMessage);
     jweak mLnb;
