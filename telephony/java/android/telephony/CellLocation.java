@@ -29,7 +29,10 @@ import com.android.internal.telephony.PhoneConstants;
 
 /**
  * Abstract class that represents the location of the device.  {@more}
+ *
+ * @deprecated use {@link android.telephony.CellIdentity CellIdentity}.
  */
+@Deprecated
 public abstract class CellLocation {
 
     /**
