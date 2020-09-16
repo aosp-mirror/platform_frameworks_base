@@ -9897,6 +9897,13 @@ public final class Settings {
                 "hdmi_cec_switch_enabled";
 
         /**
+         * HDMI CEC version to use. Defaults to v1.4b.
+         * @hide
+         */
+        public static final String HDMI_CEC_VERSION =
+                "hdmi_cec_version";
+
+        /**
          * Whether TV will automatically turn on upon reception of the CEC command
          * &lt;Text View On&gt; or &lt;Image View On&gt;. (0 = false, 1 = true)
          *

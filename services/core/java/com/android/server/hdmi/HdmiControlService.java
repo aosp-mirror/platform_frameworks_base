@@ -26,6 +26,7 @@ import static com.android.server.hdmi.Constants.OPTION_MHL_ENABLE;
 import static com.android.server.hdmi.Constants.OPTION_MHL_INPUT_SWITCHING;
 import static com.android.server.hdmi.Constants.OPTION_MHL_POWER_CHARGE;
 import static com.android.server.hdmi.Constants.OPTION_MHL_SERVICE_CONTROL;
+import static com.android.server.hdmi.Constants.VERSION_1_4;
 import static com.android.server.power.ShutdownThread.SHUTDOWN_ACTION_PROPERTY;
 
 import android.annotation.Nullable;
@@ -79,6 +80,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.SystemService;
+import com.android.server.hdmi.Constants.CecVersion;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiCecController.AllocateAddressCallback;
 import com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
@@ -373,6 +375,9 @@ public class HdmiControlService extends SystemService {
     @Nullable
     private Looper mIoLooper;
 
+    @CecVersion
+    private int mCecVersion = Constants.VERSION_1_4;
+
     // Last input port before switching to the MHL port. Should switch back to this port
     // when the mobile device sends the request one touch play with off.
     // Gets invalidated if we go to other port/input.
@@ -660,6 +665,7 @@ public class HdmiControlService extends SystemService {
         String[] settings = new String[] {
                 Global.HDMI_CONTROL_ENABLED,
                 Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED,
+                Global.HDMI_CEC_VERSION,
                 Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
                 Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
                 Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
@@ -687,6 +693,9 @@ public class HdmiControlService extends SystemService {
             switch (option) {
                 case Global.HDMI_CONTROL_ENABLED:
                     setControlEnabled(enabled);
+                    break;
+                case Global.HDMI_CEC_VERSION:
+                    initializeCec(INITIATED_BY_ENABLE_CEC);
                     break;
                 case Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED:
                     setHdmiCecVolumeControlEnabledInternal(enabled);
@@ -753,6 +762,12 @@ public class HdmiControlService extends SystemService {
         return Global.getInt(cr, key, toInt(defVal)) == ENABLED;
     }
 
+    @VisibleForTesting
+    int readIntSetting(String key, int defVal) {
+        ContentResolver cr = getContext().getContentResolver();
+        return Global.getInt(cr, key, defVal);
+    }
+
     void writeBooleanSetting(String key, boolean value) {
         ContentResolver cr = getContext().getContentResolver();
         Global.putInt(cr, key, toInt(value));
@@ -783,6 +798,8 @@ public class HdmiControlService extends SystemService {
 
     private void initializeCec(int initiatedBy) {
         mAddressAllocated = false;
+        mCecVersion = readIntSetting(Global.HDMI_CEC_VERSION, VERSION_1_4);
+
         mCecController.setOption(OptionKey.SYSTEM_CEC_CONTROL, true);
         mCecController.setLanguage(mMenuLanguage);
         initializeLocalDevices(initiatedBy);
@@ -989,8 +1006,9 @@ public class HdmiControlService extends SystemService {
     /**
      * Returns version of CEC.
      */
+    @CecVersion
     int getCecVersion() {
-        return mCecController.getVersion();
+        return mCecVersion;
     }
 
     /**
@@ -2204,6 +2222,7 @@ public class HdmiControlService extends SystemService {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, writer)) return;
             final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
 
+            pw.println("mCecVersion: " + mCecVersion);
             pw.println("mProhibitMode: " + mProhibitMode);
             pw.println("mPowerStatus: " + mPowerStatus);
 
