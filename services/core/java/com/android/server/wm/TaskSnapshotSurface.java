@@ -19,8 +19,8 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.graphics.Color.WHITE;
 import static android.graphics.Color.alpha;
-import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-import static android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES;
@@ -75,7 +75,6 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.window.ClientWindowFrames;
@@ -167,7 +166,7 @@ class TaskSnapshotSurface implements StartingSurface {
         final TaskDescription taskDescription = new TaskDescription();
         taskDescription.setBackgroundColor(WHITE);
         final WindowState topFullscreenOpaqueWindow;
-        final int sysUiVis;
+        final int appearance;
         final int windowFlags;
         final int windowPrivateFlags;
         final int currentOrientation;
@@ -204,8 +203,8 @@ class TaskSnapshotSurface implements StartingSurface {
                         topFullscreenActivity, false /* checkOpening */);
             }
 
-            sysUiVis = topFullscreenOpaqueWindow.getSystemUiVisibility();
             WindowManager.LayoutParams attrs = topFullscreenOpaqueWindow.mAttrs;
+            appearance = attrs.insetsFlags.appearance;
             windowFlags = attrs.flags;
             windowPrivateFlags = attrs.privateFlags;
 
@@ -221,11 +220,8 @@ class TaskSnapshotSurface implements StartingSurface {
             layoutParams.token = activity.token;
             layoutParams.width = LayoutParams.MATCH_PARENT;
             layoutParams.height = LayoutParams.MATCH_PARENT;
-            layoutParams.systemUiVisibility = sysUiVis;
-            layoutParams.insetsFlags.behavior
-                    = topFullscreenOpaqueWindow.mAttrs.insetsFlags.behavior;
-            layoutParams.insetsFlags.appearance
-                    = topFullscreenOpaqueWindow.mAttrs.insetsFlags.appearance;
+            layoutParams.insetsFlags.appearance = appearance;
+            layoutParams.insetsFlags.behavior = attrs.insetsFlags.behavior;
             layoutParams.layoutInDisplayCutoutMode = attrs.layoutInDisplayCutoutMode;
             layoutParams.setFitInsetsTypes(attrs.getFitInsetsTypes());
             layoutParams.setFitInsetsSides(attrs.getFitInsetsSides());
@@ -261,7 +257,7 @@ class TaskSnapshotSurface implements StartingSurface {
             // Local call.
         }
         final TaskSnapshotSurface snapshotSurface = new TaskSnapshotSurface(service, window,
-                surfaceControl, snapshot, layoutParams.getTitle(), taskDescription, sysUiVis,
+                surfaceControl, snapshot, layoutParams.getTitle(), taskDescription, appearance,
                 windowFlags, windowPrivateFlags, taskBounds, currentOrientation, activityType,
                 insetsState);
         window.setOuter(snapshotSurface);
@@ -282,7 +278,7 @@ class TaskSnapshotSurface implements StartingSurface {
     @VisibleForTesting
     TaskSnapshotSurface(WindowManagerService service, Window window, SurfaceControl surfaceControl,
             TaskSnapshot snapshot, CharSequence title, TaskDescription taskDescription,
-            int sysUiVis, int windowFlags, int windowPrivateFlags, Rect taskBounds,
+            int appearance, int windowFlags, int windowPrivateFlags, Rect taskBounds,
             int currentOrientation, int activityType, InsetsState insetsState) {
         mService = service;
         mSurface = service.mSurfaceFactory.get();
@@ -296,7 +292,7 @@ class TaskSnapshotSurface implements StartingSurface {
         mBackgroundPaint.setColor(backgroundColor != 0 ? backgroundColor : WHITE);
         mTaskBounds = taskBounds;
         mSystemBarBackgroundPainter = new SystemBarBackgroundPainter(windowFlags,
-                windowPrivateFlags, sysUiVis, taskDescription, 1f, insetsState);
+                windowPrivateFlags, appearance, taskDescription, 1f, insetsState);
         mStatusBarColor = taskDescription.getStatusBarColor();
         mOrientationOnCreation = currentOrientation;
         mActivityType = activityType;
@@ -554,28 +550,26 @@ class TaskSnapshotSurface implements StartingSurface {
         private final int mNavigationBarColor;
         private final int mWindowFlags;
         private final int mWindowPrivateFlags;
-        private final int mSysUiVis;
         private final float mScale;
         private final InsetsState mInsetsState;
         private final Rect mSystemBarInsets = new Rect();
 
-        SystemBarBackgroundPainter(int windowFlags, int windowPrivateFlags, int sysUiVis,
+        SystemBarBackgroundPainter(int windowFlags, int windowPrivateFlags, int appearance,
                 TaskDescription taskDescription, float scale, InsetsState insetsState) {
             mWindowFlags = windowFlags;
             mWindowPrivateFlags = windowPrivateFlags;
-            mSysUiVis = sysUiVis;
             mScale = scale;
             final Context context = ActivityThread.currentActivityThread().getSystemUiContext();
             final int semiTransparent = context.getColor(
                     R.color.system_bar_background_semi_transparent);
             mStatusBarColor = DecorView.calculateBarColor(windowFlags, FLAG_TRANSLUCENT_STATUS,
-                    semiTransparent, taskDescription.getStatusBarColor(), sysUiVis,
-                    SYSTEM_UI_FLAG_LIGHT_STATUS_BAR,
+                    semiTransparent, taskDescription.getStatusBarColor(), appearance,
+                    APPEARANCE_LIGHT_STATUS_BARS,
                     taskDescription.getEnsureStatusBarContrastWhenTransparent());
             mNavigationBarColor = DecorView.calculateBarColor(windowFlags,
                     FLAG_TRANSLUCENT_NAVIGATION, semiTransparent,
-                    taskDescription.getNavigationBarColor(), sysUiVis,
-                    SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
+                    taskDescription.getNavigationBarColor(), appearance,
+                    APPEARANCE_LIGHT_NAVIGATION_BARS,
                     taskDescription.getEnsureNavigationBarContrastWhenTransparent()
                             && context.getResources().getBoolean(R.bool.config_navBarNeedsScrim));
             mStatusBarPaint.setColor(mStatusBarColor);
@@ -590,11 +584,8 @@ class TaskSnapshotSurface implements StartingSurface {
         int getStatusBarColorViewHeight() {
             final boolean forceBarBackground =
                     (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
-            if (ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL
-                    ? STATUS_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                            mSysUiVis, mStatusBarColor, mWindowFlags, forceBarBackground)
-                    : STATUS_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                            mInsetsState, mStatusBarColor, mWindowFlags, forceBarBackground)) {
+            if (STATUS_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
+                    mInsetsState, mStatusBarColor, mWindowFlags, forceBarBackground)) {
                 return (int) (mSystemBarInsets.top * mScale);
             } else {
                 return 0;
@@ -604,11 +595,8 @@ class TaskSnapshotSurface implements StartingSurface {
         private boolean isNavigationBarColorViewVisible() {
             final boolean forceBarBackground =
                     (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
-            return ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL
-                    ? NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                            mSysUiVis, mNavigationBarColor, mWindowFlags, forceBarBackground)
-                    : NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                            mInsetsState, mNavigationBarColor, mWindowFlags, forceBarBackground);
+            return NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
+                    mInsetsState, mNavigationBarColor, mWindowFlags, forceBarBackground);
         }
 
         void drawDecors(Canvas c, @Nullable Rect alreadyDrawnFrame) {

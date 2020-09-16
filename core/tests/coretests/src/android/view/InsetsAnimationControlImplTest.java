@@ -18,7 +18,6 @@ package android.view;
 
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowInsets.Type.systemBars;
 
 import static org.junit.Assert.assertEquals;
@@ -42,13 +41,10 @@ import android.util.SparseArray;
 import android.view.SurfaceControl.Transaction;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.animation.LinearInterpolator;
-import android.view.test.InsetsModeSession;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -76,21 +72,10 @@ public class InsetsAnimationControlImplTest {
     private SurfaceControl mTopLeash;
     private SurfaceControl mNavLeash;
     private InsetsState mInsetsState;
-    private static InsetsModeSession sInsetsModeSession;
 
     @Mock Transaction mMockTransaction;
     @Mock InsetsController mMockController;
     @Mock WindowInsetsAnimationControlListener mMockListener;
-
-    @BeforeClass
-    public static void setupOnce() {
-        sInsetsModeSession = new InsetsModeSession(NEW_INSETS_MODE_FULL);
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
-        sInsetsModeSession.close();
-    }
 
     @Before
     public void setup() {

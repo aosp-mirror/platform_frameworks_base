@@ -22,7 +22,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
@@ -45,13 +44,10 @@ import static org.mockito.Mockito.spy;
 import android.platform.test.annotations.Presubmit;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.test.InsetsModeSession;
 
 import androidx.test.filters.SmallTest;
 
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -59,19 +55,6 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class InsetsPolicyTest extends WindowTestsBase {
-    private static InsetsModeSession sInsetsModeSession;
-
-    @BeforeClass
-    public static void setUpOnce() {
-        // To let the insets provider control the insets visibility, the insets mode has to be
-        // NEW_INSETS_MODE_FULL.
-        sInsetsModeSession = new InsetsModeSession(NEW_INSETS_MODE_FULL);
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
-        sInsetsModeSession.close();
-    }
 
     @Before
     public void setup() {

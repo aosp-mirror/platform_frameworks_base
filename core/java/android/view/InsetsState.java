@@ -17,10 +17,6 @@
 package android.view;
 
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
-import static android.view.ViewRootImpl.sNewInsetsMode;
 import static android.view.WindowInsets.Type.MANDATORY_SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.displayCutout;
@@ -195,18 +191,6 @@ public class InsetsState implements Parcelable {
                 continue;
             }
 
-            boolean skipNonImeInImeMode = ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_IME
-                    && source.getType() != ITYPE_IME;
-            boolean skipSystemBars = ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL
-                    && (type == ITYPE_STATUS_BAR || type == ITYPE_NAVIGATION_BAR);
-            boolean skipLegacyTypes = ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_NONE
-                    && (type == ITYPE_STATUS_BAR || type == ITYPE_NAVIGATION_BAR
-                            || type == ITYPE_IME);
-            if (skipSystemBars || skipLegacyTypes || skipNonImeInImeMode) {
-                typeVisibilityMap[indexOf(toPublicType(type))] = source.isVisible();
-                continue;
-            }
-
             processSource(source, relativeFrame, false /* ignoreVisibility */, typeInsetsMap,
                     typeSideMap, typeVisibilityMap);
 
@@ -239,8 +223,7 @@ public class InsetsState implements Parcelable {
 
         return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
                 alwaysConsumeSystemBars, cutout, compatInsetsTypes,
-                sNewInsetsMode == NEW_INSETS_MODE_FULL
-                        && (legacySystemUiFlags & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0);
+                (legacySystemUiFlags & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0);
     }
 
     public Rect calculateVisibleInsets(Rect frame, @SoftInputModeFlags int softInputMode) {
@@ -248,9 +231,6 @@ public class InsetsState implements Parcelable {
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
             InsetsSource source = mSources[type];
             if (source == null) {
-                continue;
-            }
-            if (sNewInsetsMode != NEW_INSETS_MODE_FULL && type != ITYPE_IME) {
                 continue;
             }
 

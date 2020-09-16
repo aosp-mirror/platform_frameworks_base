@@ -24,8 +24,6 @@ import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_INVALID;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
-import static android.view.ViewRootImpl.sNewInsetsMode;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
@@ -382,9 +380,6 @@ class InsetsStateController {
      */
     void onControlFakeTargetChanged(@InternalInsetsType int type,
             @Nullable InsetsControlTarget fakeTarget) {
-        if (sNewInsetsMode != NEW_INSETS_MODE_FULL) {
-            return;
-        }
         final InsetsControlTarget previous = mTypeFakeControlTargetMap.get(type);
         if (fakeTarget == previous) {
             return;

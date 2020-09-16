@@ -16,15 +16,12 @@
 
 package com.android.systemui.bubbles;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.graphics.PixelFormat.TRANSPARENT;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
-import static android.view.ViewRootImpl.sNewInsetsMode;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
@@ -48,7 +45,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.Insets;
 import android.graphics.Outline;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -471,11 +467,7 @@ public class BubbleExpandedView extends LinearLayout {
         mKeyboardVisible = false;
         mNeedsNewHeight = false;
         if (mActivityView != null) {
-            if (sNewInsetsMode == NEW_INSETS_MODE_FULL) {
-                setImeWindowToDisplay(0, 0);
-            } else {
-                mActivityView.setForwardedInsets(Insets.of(0, 0, 0, 0));
-            }
+            setImeWindowToDisplay(0, 0);
         }
         if (DEBUG_BUBBLE_EXPANDED_VIEW) {
             Log.d(TAG, "onDetachedFromWindow: bubble=" + getBubbleKey());
@@ -525,13 +517,7 @@ public class BubbleExpandedView extends LinearLayout {
                     insets.getDisplayCutout() != null
                             ? insets.getDisplayCutout().getSafeInsetBottom()
                             : 0);
-            final int insetsBottom = Math.max(activityViewBottom - keyboardTop, 0);
-
-            if (sNewInsetsMode == NEW_INSETS_MODE_FULL) {
-                setImeWindowToDisplay(getWidth(), insetsBottom);
-            } else {
-                mActivityView.setForwardedInsets(Insets.of(0, 0, 0, insetsBottom));
-            }
+            setImeWindowToDisplay(getWidth(), Math.max(activityViewBottom - keyboardTop, 0));
         }
     }
 

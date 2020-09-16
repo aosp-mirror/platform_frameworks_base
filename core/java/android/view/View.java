@@ -17,7 +17,6 @@
 package android.view;
 
 import static android.content.res.Resources.ID_NULL;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DEEP_PRESS;
@@ -5435,8 +5434,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             sAcceptZeroSizeDragShadow = targetSdkVersion < Build.VERSION_CODES.P;
 
-            sBrokenInsetsDispatch = ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL
-                    || targetSdkVersion < Build.VERSION_CODES.R;
+            sBrokenInsetsDispatch = targetSdkVersion < Build.VERSION_CODES.R;
 
             sBrokenWindowBackground = targetSdkVersion < Build.VERSION_CODES.Q;
 
@@ -26260,6 +26258,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
             }
         }
+    }
+
+    /**
+     * This needs to be a better API before it is exposed. For now, only the root view will get
+     * notified.
+     * @hide
+     */
+    public void onSystemBarAppearanceChanged(@WindowInsetsController.Appearance int appearance) {
     }
 
     /**

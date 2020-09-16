@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
-import static android.view.ViewRootImpl.sNewInsetsMode;
 import static android.view.WindowInsets.Type.navigationBars;
 
 import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
@@ -803,12 +801,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private Runnable mMakeNavigationBarVisibleRunnable = new Runnable() {
         @Override
         public void run() {
-            if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL) {
-                mStatusBar.getNotificationShadeWindowView().getWindowInsetsController()
-                        .show(navigationBars());
-            } else {
-                mStatusBar.getNavigationBarView().getRootView().setVisibility(View.VISIBLE);
-            }
+            mStatusBar.getNotificationShadeWindowView().getWindowInsetsController()
+                    .show(navigationBars());
         }
     };
 
@@ -876,12 +870,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 }
             } else {
                 mContainer.removeCallbacks(mMakeNavigationBarVisibleRunnable);
-                if (sNewInsetsMode == NEW_INSETS_MODE_FULL) {
-                    mStatusBar.getNotificationShadeWindowView().getWindowInsetsController()
-                            .hide(navigationBars());
-                } else {
-                    mStatusBar.getNavigationBarView().getRootView().setVisibility(View.GONE);
-                }
+                mStatusBar.getNotificationShadeWindowView().getWindowInsetsController()
+                        .hide(navigationBars());
             }
         }
     }

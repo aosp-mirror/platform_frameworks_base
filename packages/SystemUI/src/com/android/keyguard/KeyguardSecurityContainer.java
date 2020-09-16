@@ -15,8 +15,6 @@
  */
 package com.android.keyguard;
 
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
-import static android.view.ViewRootImpl.sNewInsetsMode;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
@@ -516,14 +514,9 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
 
         // Consume bottom insets because we're setting the padding locally (for IME and navbar.)
-        int inset;
-        if (sNewInsetsMode == NEW_INSETS_MODE_FULL) {
-            int bottomInset = insets.getInsetsIgnoringVisibility(systemBars()).bottom;
-            int imeInset = insets.getInsets(ime()).bottom;
-            inset = max(bottomInset, imeInset);
-        } else {
-            inset = insets.getSystemWindowInsetBottom();
-        }
+        int bottomInset = insets.getInsetsIgnoringVisibility(systemBars()).bottom;
+        int imeInset = insets.getInsets(ime()).bottom;
+        int inset = max(bottomInset, imeInset);
         setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), inset);
         return insets.inset(0, 0, 0, inset);
     }
