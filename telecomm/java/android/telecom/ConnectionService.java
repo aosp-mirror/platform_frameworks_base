@@ -1988,8 +1988,10 @@ public abstract class ConnectionService extends Service {
             connection.setAudioModeIsVoip(true);
         }
         connection.setTelecomCallId(callId);
+        PhoneAccountHandle phoneAccountHandle = connection.getPhoneAccountHandle() == null
+                            ? request.getAccountHandle() : connection.getPhoneAccountHandle();
         if (connection.getState() != Connection.STATE_DISCONNECTED) {
-            addConnection(request.getAccountHandle(), callId, connection);
+            addConnection(phoneAccountHandle, callId, connection);
         }
 
         Uri address = connection.getAddress();
@@ -2005,7 +2007,7 @@ public abstract class ConnectionService extends Service {
                 callId,
                 request,
                 new ParcelableConnection(
-                        request.getAccountHandle(),
+                        phoneAccountHandle,
                         connection.getState(),
                         connection.getConnectionCapabilities(),
                         connection.getConnectionProperties(),
