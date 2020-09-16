@@ -1561,7 +1561,7 @@ public class HdmiControlService extends SystemService {
                         new HdmiDeviceInfo(activeSource.logicalAddress,
                             activeSource.physicalAddress,
                             pathToPortId(activeSource.physicalAddress),
-                            HdmiUtils.getTypeFromAddress(activeSource.logicalAddress), 0,
+                            HdmiUtils.getTypeFromAddress(activeSource.logicalAddress).get(0), 0,
                             HdmiUtils.getDefaultDeviceName(activeSource.logicalAddress))
                         :
                             new HdmiDeviceInfo(activeSource.physicalAddress,
