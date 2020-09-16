@@ -29,6 +29,15 @@
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
+    },
+    {
+      "file_patterns": ["Environment\\.java"],
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.pm.parsing.PackageInfoUserFieldsTest"
+        }
+      ]
     }
   ],
   "postsubmit": [

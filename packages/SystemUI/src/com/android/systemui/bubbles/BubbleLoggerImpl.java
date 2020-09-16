@@ -16,6 +16,8 @@
 
 package com.android.systemui.bubbles;
 
+import android.os.UserHandle;
+
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.systemui.shared.system.SysUiStatsLog;
 
@@ -31,11 +33,7 @@ public class BubbleLoggerImpl extends UiEventLoggerImpl implements BubbleLogger 
      * @param e UI event
      */
     public void log(Bubble b, UiEventEnum e) {
-        if (b.getInstanceId() == null) {
-            // Added from persistence -- TODO log this with specific event?
-            return;
-        }
-        logWithInstanceId(e, b.getAppUid(), b.getPackageName(), b.getInstanceId());
+        super.log(e, b.getUser().getIdentifier(), b.getPackageName());
     }
 
     /**
@@ -82,20 +80,9 @@ public class BubbleLoggerImpl extends UiEventLoggerImpl implements BubbleLogger 
                 false /* isAppForeground (unused) */);
     }
 
-    void logShowOverflow(String packageName, int action, int bubbleCount, float normalX,
-            float normalY) {
-        SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
-                packageName,
-                BubbleOverflow.KEY  /* notification channel */,
-                0 /* notification ID */,
-                0 /* bubble position */,
-                bubbleCount,
-                action,
-                normalX,
-                normalY,
-                false /* unread bubble */,
-                false /* on-going bubble */,
-                false /* isAppForeground (unused) */);
+    void logShowOverflow(String packageName, int currentUserId) {
+        super.log(BubbleLogger.Event.BUBBLE_OVERFLOW_SELECTED, currentUserId,
+                packageName);
     }
 
     void logBubbleUiChanged(Bubble bubble, String packageName, int action, int bubbleCount,

@@ -190,7 +190,7 @@ class AutomaticBrightnessController {
 
     // When the short term model is invalidated, we don't necessarily reset it (i.e. clear the
     // user's adjustment) immediately, but wait for a drastic enough change in the ambient light.
-    // The anchor determines what were the light levels when the user has set her preference, and
+    // The anchor determines what were the light levels when the user has set their preference, and
     // we use a relative threshold to determine when to revert to the OEM curve.
     private boolean mShortTermModelValid;
     private float mShortTermModelAnchor;

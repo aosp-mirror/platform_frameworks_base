@@ -518,7 +518,7 @@ class GnssNetworkConnectivityHandler {
 
         if (mAGpsDataConnectionState == AGPS_DATA_CONNECTION_OPENING) {
             if (apn == null) {
-                // assign a dummy value in the case of C2K as otherwise we will have a runtime
+                // assign a placeholder value in the case of C2K as otherwise we will have a runtime
                 // exception in the following call to native_agps_data_conn_open
                 apn = "dummy-apn";
             }

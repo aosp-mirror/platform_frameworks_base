@@ -1664,7 +1664,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         final String nonExistAppRestrictionsManagerPackage = "com.google.app.restrictions.manager2";
         final String appRestrictionsManagerPackage = "com.google.app.restrictions.manager";
         final String nonDelegateExceptionMessageRegex =
-                "Caller with uid \\d+ is not a delegate of scope delegation-app-restrictions.";
+                "Caller with uid \\d+ is not com.google.app.restrictions.manager";
         final int appRestrictionsManagerAppId = 20987;
         final int appRestrictionsManagerUid = setupPackageInPackageManager(
                 appRestrictionsManagerPackage, appRestrictionsManagerAppId);
@@ -1676,7 +1676,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertFalse(dpm.isCallerApplicationRestrictionsManagingPackage());
         final Bundle rest = new Bundle();
         rest.putString("KEY_STRING", "Foo1");
-        assertExpectException(SecurityException.class, nonDelegateExceptionMessageRegex,
+        assertExpectException(SecurityException.class, INVALID_CALLING_IDENTITY_MSG,
                 () -> dpm.setApplicationRestrictions(null, "pkg1", rest));
 
         // Check via the profile owner that no restrictions were set.
@@ -1725,7 +1725,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = appRestrictionsManagerUid;
         mContext.packageName = appRestrictionsManagerPackage;
         assertFalse(dpm.isCallerApplicationRestrictionsManagingPackage());
-        assertExpectException(SecurityException.class, nonDelegateExceptionMessageRegex,
+        assertExpectException(SecurityException.class, INVALID_CALLING_IDENTITY_MSG,
                 () -> dpm.setApplicationRestrictions(null, "pkg1", null));
     }
 
@@ -2355,13 +2355,13 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Test 2. Caller has DA, but not DO.
         assertExpectException(SecurityException.class,
-                /* messageRegex= */ NOT_ORG_OWNED_PROFILE_OWNER_MSG,
+                /* messageRegex= */ INVALID_CALLING_IDENTITY_MSG,
                 () -> dpm.getWifiMacAddress(admin1));
 
         // Test 3. Caller has PO, but not DO.
         assertTrue(dpm.setProfileOwner(admin1, null, UserHandle.USER_SYSTEM));
         assertExpectException(SecurityException.class,
-                /* messageRegex= */ NOT_ORG_OWNED_PROFILE_OWNER_MSG,
+                /* messageRegex= */ INVALID_CALLING_IDENTITY_MSG,
                 () -> dpm.getWifiMacAddress(admin1));
 
         // Remove PO.
@@ -2878,7 +2878,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     private void setupProfileOwnerOnUser0() throws Exception {
         mContext.callerPermissions.addAll(OWNER_SETUP_PERMISSIONS);
 
-        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.SYSTEM_UID);
         dpm.setActiveAdmin(admin1, false);
         assertTrue(dpm.setProfileOwner(admin1, null, UserHandle.USER_SYSTEM));
 
@@ -3929,7 +3929,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     public void testSetAutoTimeEnabledWithPOOnUser0() throws Exception {
-        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         setupProfileOwnerOnUser0();
         dpm.setAutoTimeEnabled(admin1, true);
         verify(getServices().settings).settingsGlobalPutInt(Settings.Global.AUTO_TIME, 1);
@@ -3967,7 +3967,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     public void testSetAutoTimeZoneEnabledWithPOOnUser0() throws Exception {
-        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         setupProfileOwnerOnUser0();
         dpm.setAutoTimeZoneEnabled(admin1, true);
         verify(getServices().settings).settingsGlobalPutInt(Settings.Global.AUTO_TIME_ZONE, 1);
@@ -4392,6 +4392,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSecondaryLockscreen_nonSupervisionApp() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
 
+        // Ensure packages are *not* flagged as test_only.
+        doReturn(new ApplicationInfo()).when(getServices().ipackageManager).getApplicationInfo(
+                eq(admin1.getPackageName()),
+                anyInt(),
+                eq(CALLER_USER_HANDLE));
+        doReturn(new ApplicationInfo()).when(getServices().ipackageManager).getApplicationInfo(
+                eq(admin2.getPackageName()),
+                anyInt(),
+                eq(CALLER_USER_HANDLE));
+
         // Initial state is disabled.
         assertFalse(dpm.isSecondaryLockscreenEnabled(UserHandle.of(CALLER_USER_HANDLE)));
 
@@ -4755,7 +4765,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // System can retrieve permission grant state.
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
-        mContext.packageName = "com.example.system";
+        mContext.packageName = "android";
         assertEquals(DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED,
                 dpm.getPermissionGrantState(null, app1, permission));
         assertEquals(DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT,
@@ -5138,7 +5148,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         assertTrue(dpms.isNotificationListenerServicePermitted(packageName, userId));
 
-        // Attempt to set to empty list (which means no listener is whitelisted)
+        // Attempt to set to empty list (which means no listener is allowlisted)
         mContext.binder.callingUid = adminUid;
         assertFalse(dpms.setPermittedCrossProfileNotificationListeners(
                 admin1, Collections.emptyList()));
@@ -5212,7 +5222,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpms.isNotificationListenerServicePermitted(
                 systemListener, MANAGED_PROFILE_USER_ID));
 
-        // Setting only one package in the whitelist
+        // Setting only one package in the allowlist
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         assertTrue(dpms.setPermittedCrossProfileNotificationListeners(
                 admin1, Collections.singletonList(permittedListener)));
@@ -5226,11 +5236,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 permittedListener, MANAGED_PROFILE_USER_ID));
         assertFalse(dpms.isNotificationListenerServicePermitted(
                 notPermittedListener, MANAGED_PROFILE_USER_ID));
-        // System packages are always allowed (even if not in the whitelist)
+        // System packages are always allowed (even if not in the allowlist)
         assertTrue(dpms.isNotificationListenerServicePermitted(
                 systemListener, MANAGED_PROFILE_USER_ID));
 
-        // Setting an empty whitelist - only system listeners allowed
+        // Setting an empty allowlist - only system listeners allowed
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         assertTrue(dpms.setPermittedCrossProfileNotificationListeners(
                 admin1, Collections.emptyList()));
@@ -5241,11 +5251,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 permittedListener, MANAGED_PROFILE_USER_ID));
         assertFalse(dpms.isNotificationListenerServicePermitted(
                 notPermittedListener, MANAGED_PROFILE_USER_ID));
-        // System packages are always allowed (even if not in the whitelist)
+        // System packages are always allowed (even if not in the allowlist)
         assertTrue(dpms.isNotificationListenerServicePermitted(
                 systemListener, MANAGED_PROFILE_USER_ID));
 
-        // Setting a null whitelist - all listeners allowed
+        // Setting a null allowlist - all listeners allowed
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         assertTrue(dpms.setPermittedCrossProfileNotificationListeners(admin1, null));
         assertNull(dpms.getPermittedCrossProfileNotificationListeners(admin1));
@@ -5293,7 +5303,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpms.isNotificationListenerServicePermitted(
                 systemListener, UserHandle.USER_SYSTEM));
 
-        // Setting an empty whitelist - only system listeners allowed in managed profile, but
+        // Setting an empty allowlist - only system listeners allowed in managed profile, but
         // all allowed in primary profile
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         assertTrue(dpms.setPermittedCrossProfileNotificationListeners(
@@ -5716,18 +5726,18 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         configureContextForAccess(mContext, false);
 
         // Device owner should be allowed to request Device ID attestation.
-        dpms.enforceCallerCanRequestDeviceIdAttestation(admin1, admin1.getPackageName(),
-                DpmMockContext.CALLER_SYSTEM_USER_UID);
+        dpms.enforceCallerCanRequestDeviceIdAttestation(dpms.getCallerIdentity(admin1));
 
         // Another package must not be allowed to request Device ID attestation.
         assertExpectException(SecurityException.class, null,
-                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(null,
-                        admin2.getPackageName(), DpmMockContext.CALLER_UID));
+                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(
+                        dpms.getCallerIdentity(null, admin2.getPackageName())));
+
         // Another component that is not the admin must not be allowed to request Device ID
         // attestation.
         assertExpectException(SecurityException.class, null,
-                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(admin2,
-                        admin1.getPackageName(), DpmMockContext.CALLER_UID));
+                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(
+                        dpms.getCallerIdentity(admin2)));
     }
 
     public void testEnforceCallerCanRequestDeviceIdAttestation_profileOwnerCaller()
@@ -5736,24 +5746,25 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Make sure a security exception is thrown if the device has no profile owner.
         assertExpectException(SecurityException.class, null,
-                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(admin1,
-                        admin1.getPackageName(), DpmMockContext.CALLER_SYSTEM_USER_UID));
+                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(
+                        dpms.getCallerIdentity(admin1)));
 
         setupProfileOwner();
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
 
         // The profile owner is allowed to request Device ID attestation.
         mServiceContext.binder.callingUid = DpmMockContext.CALLER_UID;
-        dpms.enforceCallerCanRequestDeviceIdAttestation(admin1, admin1.getPackageName(),
-                DpmMockContext.CALLER_UID);
+        dpms.enforceCallerCanRequestDeviceIdAttestation(dpms.getCallerIdentity(admin1));
+
         // But not another package.
         assertExpectException(SecurityException.class, null,
-                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(null,
-                        admin2.getPackageName(), DpmMockContext.CALLER_UID));
+                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(
+                        dpms.getCallerIdentity(null, admin2.getPackageName())));
+
         // Or another component which is not the admin.
         assertExpectException(SecurityException.class, null,
-                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(admin2,
-                        admin2.getPackageName(), DpmMockContext.CALLER_UID));
+                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(
+                        dpms.getCallerIdentity(admin2, admin2.getPackageName())));
     }
 
     public void runAsDelegatedCertInstaller(DpmRunnable action) throws Exception {
@@ -5781,15 +5792,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Make sure that the profile owner can still request Device ID attestation.
         mServiceContext.binder.callingUid = DpmMockContext.CALLER_UID;
-        dpms.enforceCallerCanRequestDeviceIdAttestation(admin1, admin1.getPackageName(),
-                DpmMockContext.CALLER_UID);
+        dpms.enforceCallerCanRequestDeviceIdAttestation(dpms.getCallerIdentity(admin1));
 
-        runAsDelegatedCertInstaller(dpm -> {
-            dpms.enforceCallerCanRequestDeviceIdAttestation(null,
-                    DpmMockContext.DELEGATE_PACKAGE_NAME,
-                    UserHandle.getUid(CALLER_USER_HANDLE,
-                            DpmMockContext.DELEGATE_CERT_INSTALLER_UID));
-        });
+        runAsDelegatedCertInstaller(dpm -> dpms.enforceCallerCanRequestDeviceIdAttestation(
+                dpms.getCallerIdentity(null, DpmMockContext.DELEGATE_PACKAGE_NAME)));
     }
 
     public void testEnforceCallerCanRequestDeviceIdAttestation_delegateCallerWithoutPermissions()
@@ -5802,18 +5808,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 dpm -> dpm.setDelegatedScopes(admin1, DpmMockContext.DELEGATE_PACKAGE_NAME,
                         Arrays.asList(DELEGATION_CERT_INSTALL)));
 
-
         assertExpectException(SecurityException.class, null,
-                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(admin1,
-                        admin1.getPackageName(),
-                        DpmMockContext.CALLER_UID));
+                () -> dpms.enforceCallerCanRequestDeviceIdAttestation(
+                        dpms.getCallerIdentity(admin1)));
 
         runAsDelegatedCertInstaller(dpm -> {
             assertExpectException(SecurityException.class, /* messageRegex= */ null,
-                    () -> dpms.enforceCallerCanRequestDeviceIdAttestation(null,
-                            DpmMockContext.DELEGATE_PACKAGE_NAME,
-                            UserHandle.getUid(CALLER_USER_HANDLE,
-                                    DpmMockContext.DELEGATE_CERT_INSTALLER_UID)));
+                    () -> dpms.enforceCallerCanRequestDeviceIdAttestation(
+                            dpms.getCallerIdentity(null, DpmMockContext.DELEGATE_PACKAGE_NAME)));
         });
     }
 

@@ -297,7 +297,7 @@ class ZygoteServer {
                 mUsapPoolRefillDelayMs = Integer.parseInt(usapPoolRefillDelayMsPropString);
             }
 
-            // Sanity check
+            // Validity check
             if (mUsapPoolSizeMin >= mUsapPoolSizeMax) {
                 Log.w(TAG, "The max size of the USAP pool must be greater than the minimum size."
                         + "  Restoring default values.");

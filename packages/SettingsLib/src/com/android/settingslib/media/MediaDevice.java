@@ -46,6 +46,7 @@ import com.android.settingslib.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 /**
  * MediaDevice represents a media device(such like Bluetooth device, cast device and phone device).
@@ -351,6 +352,13 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             // 6. Phone
             return mType < another.mType ? -1 : 1;
         }
+    }
+
+    /**
+     * Gets the supported features of the route.
+     */
+    public List<String> getFeatures() {
+        return mRouteInfo.getFeatures();
     }
 
     /**

@@ -425,8 +425,7 @@ class Task extends WindowContainer<WindowContainer> {
     int maxRecents;
 
     /** Only used for persistable tasks, otherwise 0. The last time this task was moved. Used for
-     * determining the order when restoring. Sign indicates whether last task movement was to front
-     * (positive) or back (negative). Absolute value indicates time. */
+     *  determining the order when restoring. */
     long mLastTimeMoved;
 
     /** If original intent did not allow relinquishing task identity, save that information */
@@ -952,6 +951,11 @@ class Task extends WindowContainer<WindowContainer> {
         removeImmediately();
         if (isLeafTask()) {
             mAtmService.getTaskChangeNotificationController().notifyTaskRemoved(mTaskId);
+
+            final TaskDisplayArea taskDisplayArea = getDisplayArea();
+            if (taskDisplayArea != null) {
+                taskDisplayArea.onLeafTaskRemoved(mTaskId);
+            }
         }
     }
 
@@ -1525,15 +1529,14 @@ class Task extends WindowContainer<WindowContainer> {
         mStackSupervisor.updateTopResumedActivityIfNeeded();
     }
 
-    void updateTaskMovement(boolean toFront) {
+    void updateTaskMovement(boolean toTop, int position) {
+        EventLogTags.writeWmTaskMoved(mTaskId, toTop ? 1 : 0, position);
+        final TaskDisplayArea taskDisplayArea = getDisplayArea();
+        if (taskDisplayArea != null && isLeafTask()) {
+            taskDisplayArea.onLeafTaskMoved(this, toTop);
+        }
         if (isPersistable) {
             mLastTimeMoved = System.currentTimeMillis();
-            // Sign is used to keep tasks sorted when persisted. Tasks sent to the bottom most
-            // recently will be most negative, tasks sent to the bottom before that will be less
-            // negative. Similarly for recent tasks moved to the top which will be most positive.
-            if (!toFront) {
-                mLastTimeMoved *= -1;
-            }
         }
         mRootWindowContainer.invalidateTaskLayers();
     }
@@ -3180,6 +3183,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     void positionChildAt(int position, WindowContainer child, boolean includingParents) {
+        final boolean toTop = position >= (mChildren.size() - 1);
         position = getAdjustedChildPosition(child, position);
         super.positionChildAt(position, child, includingParents);
 
@@ -3187,10 +3191,9 @@ class Task extends WindowContainer<WindowContainer> {
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "positionChildAt: child=" + child
                 + " position=" + position + " parent=" + this);
 
-        final int toTop = position >= (mChildren.size() - 1) ? 1 : 0;
         final Task task = child.asTask();
         if (task != null) {
-            EventLogTags.writeWmTaskMoved(task.mTaskId, toTop, position);
+            task.updateTaskMovement(toTop, position);
         }
     }
 
@@ -5447,7 +5450,7 @@ class Task extends WindowContainer<WindowContainer> {
             // activities a chance to enter Pip before resuming the next activity.
             final boolean lastResumedCanPip = prev != null && prev.checkEnterPictureInPictureState(
                     "shouldResumeWhilePausing", userLeaving);
-            if (lastResumedCanPip && prev.pictureInPictureArgs.isAutoEnterAllowed()) {
+            if (lastResumedCanPip && prev.pictureInPictureArgs.isAutoEnterEnabled()) {
                 shouldAutoPip = true;
             } else if (!lastResumedCanPip) {
                 pauseImmediately = true;
@@ -5938,31 +5941,12 @@ class Task extends WindowContainer<WindowContainer> {
         if (shouldSleepOrShutDownActivities()
                 && mLastPausedActivity == next
                 && mRootWindowContainer.allPausedActivitiesComplete()) {
-            // If the current top activity may be able to occlude keyguard but the occluded state
-            // has not been set, update visibility and check again if we should continue to resume.
-            boolean nothingToResume = true;
-            if (!mAtmService.mShuttingDown) {
-                final boolean canShowWhenLocked = !mTopActivityOccludesKeyguard
-                        && next.canShowWhenLocked();
-                final boolean mayDismissKeyguard = mTopDismissingKeyguardActivity != next
-                        && next.containsDismissKeyguardWindow();
-
-                if (canShowWhenLocked || mayDismissKeyguard) {
-                    ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                            !PRESERVE_WINDOWS);
-                    nothingToResume = shouldSleepActivities();
-                } else if (next.currentLaunchCanTurnScreenOn() && next.canTurnScreenOn()) {
-                    nothingToResume = false;
-                }
-            }
-            if (nothingToResume) {
-                // Make sure we have executed any pending transitions, since there
-                // should be nothing left to do at this point.
-                executeAppTransition(options);
-                if (DEBUG_STATES) Slog.d(TAG_STATES,
-                        "resumeTopActivityLocked: Going to sleep and all paused");
-                return false;
-            }
+            // Make sure we have executed any pending transitions, since there
+            // should be nothing left to do at this point.
+            executeAppTransition(options);
+            if (DEBUG_STATES) Slog.d(TAG_STATES,
+                    "resumeTopActivityLocked: Going to sleep and all paused");
+            return false;
         }
 
         // Make sure that the user who owns this activity is started.  If not,
@@ -6896,9 +6880,6 @@ class Task extends WindowContainer<WindowContainer> {
             if (!deferResume) {
                 mRootWindowContainer.resumeFocusedStacksTopActivities();
             }
-            EventLogTags.writeWmTaskToFront(tr.mUserId, tr.mTaskId);
-            mAtmService.getTaskChangeNotificationController()
-                    .notifyTaskMovedToFront(tr.getTaskInfo());
         } finally {
             mDisplayContent.continueUpdateImeTarget();
         }
@@ -7284,7 +7265,6 @@ class Task extends WindowContainer<WindowContainer> {
             Slog.i(TAG_WM, "positionChildAt: positioning task=" + task + " at " + position);
         }
         positionChildAt(position, task, includingParents);
-        task.updateTaskMovement(toTop);
         getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
 
 
@@ -7421,7 +7401,6 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         positionChildAt(POSITION_TOP, child, true /* includingParents */);
-        child.updateTaskMovement(true);
 
         final DisplayContent displayContent = getDisplayContent();
         displayContent.layoutAndAssignWindowLayersIfNeeded();
@@ -7434,7 +7413,6 @@ class Task extends WindowContainer<WindowContainer> {
         final Task nextFocusableStack = getDisplayArea().getNextFocusableStack(
                 child.getRootTask(), true /* ignoreCurrent */);
         positionChildAtBottom(child, nextFocusableStack == null /* includingParents */);
-        child.updateTaskMovement(true);
     }
 
     @VisibleForTesting
@@ -7459,12 +7437,6 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         final boolean isTop = getTopChild() == child;
-
-        final Task task = child.asTask();
-        if (task != null) {
-            task.updateTaskMovement(isTop);
-        }
-
         if (isTop) {
             final DisplayContent displayContent = getDisplayContent();
             displayContent.layoutAndAssignWindowLayersIfNeeded();

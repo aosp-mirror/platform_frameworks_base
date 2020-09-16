@@ -700,7 +700,7 @@ public class PackageInstaller {
      * installer was created.
      *
      * <p>This will
-     * {@link PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set) whitelist
+     * {@link PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set) allowlist
      * all restricted permissions}.
      *
      * @param packageName The package to install.
@@ -1219,6 +1219,31 @@ public class PackageInstaller {
         }
 
         /**
+         * Adds installer-provided checksums for the APK file in session.
+         *
+         * @param name      previously written as part of this session.
+         * @param checksums installer intends to make available via
+         *                  {@link PackageManager#getChecksums(String, boolean, int, List,
+         *                  IntentSender)}.
+         * @throws SecurityException if called after the session has been
+         *                           committed or abandoned.
+         */
+        public void addChecksums(@NonNull String name, @NonNull List<Checksum> checksums)
+                throws IOException {
+            Objects.requireNonNull(name);
+            Objects.requireNonNull(checksums);
+
+            try {
+                mSession.addChecksums(name, checksums.toArray(new Checksum[checksums.size()]));
+            } catch (RuntimeException e) {
+                ExceptionUtils.maybeUnwrapIOException(e);
+                throw e;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Attempt to commit everything staged in this session. This may require
          * user intervention, and so it may not happen immediately. The final
          * result of the commit will be reported through the given callback.
@@ -1701,25 +1726,25 @@ public class PackageInstaller {
         }
 
         /**
-         * Sets which restricted permissions to be whitelisted for the app. Whitelisting
+         * Sets which restricted permissions to be allowlisted for the app. Allowlisting
          * is not granting the permissions, rather it allows the app to hold permissions
-         * which are otherwise restricted. Whitelisting a non restricted permission has
+         * which are otherwise restricted. Allowlisting a non restricted permission has
          * no effect.
          *
          * <p> Permissions can be hard restricted which means that the app cannot hold
          * them or soft restricted where the app can hold the permission but in a weaker
          * form. Whether a permission is {@link PermissionInfo#FLAG_HARD_RESTRICTED hard
          * restricted} or {@link PermissionInfo#FLAG_SOFT_RESTRICTED soft restricted}
-         * depends on the permission declaration. Whitelisting a hard restricted permission
-         * allows the app to hold that permission and whitelisting a soft restricted
+         * depends on the permission declaration. Allowlisting a hard restricted permission
+         * allows the app to hold that permission and allowlisting a soft restricted
          * permission allows the app to hold the permission in its full, unrestricted form.
          *
-         * <p> Permissions can also be immutably restricted which means that the whitelist
+         * <p> Permissions can also be immutably restricted which means that the allowlist
          * state of the permission can be determined only at install time and cannot be
          * changed on updated or at a later point via the package manager APIs.
          *
-         * <p>Initially, all restricted permissions are whitelisted but you can change
-         * which ones are whitelisted by calling this method or the corresponding ones
+         * <p>Initially, all restricted permissions are allowlisted but you can change
+         * which ones are allowlisted by calling this method or the corresponding ones
          * on the {@link PackageManager}. Only soft or hard restricted permissions on the current
          * Android version are supported and any invalid entries will be removed.
          *
@@ -2444,7 +2469,7 @@ public class PackageInstaller {
 
         /**
          * Get the value set in {@link SessionParams#setWhitelistedRestrictedPermissions(Set)}.
-         * Note that if all permissions are whitelisted this method returns {@link
+         * Note that if all permissions are allowlisted this method returns {@link
          * SessionParams#RESTRICTED_PERMISSIONS_ALL}.
          *
          * @hide

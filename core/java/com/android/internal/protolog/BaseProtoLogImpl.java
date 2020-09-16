@@ -277,7 +277,6 @@ public class BaseProtoLogImpl {
             String group = groups[i];
             IProtoLogGroup g = LOG_GROUPS.get(group);
             if (g != null) {
-                System.out.println("G: "+ g);
                 if (setTextLogging) {
                     g.setLogToLogcat(value);
                 } else {

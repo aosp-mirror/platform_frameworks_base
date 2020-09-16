@@ -64,6 +64,10 @@
             android:label="@string/keyboard_layout_bulgarian"
             android:keyboardLayout="@raw/keyboard_layout_bulgarian" />
 
+    <keyboard-layout android:name="keyboard_layout_bulgarian_phonetic"
+            android:label="@string/keyboard_layout_bulgarian_phonetic"
+            android:keyboardLayout="@raw/keyboard_layout_bulgarian_phonetic" />
+
     <keyboard-layout android:name="keyboard_layout_italian"
             android:label="@string/keyboard_layout_italian"
             android:keyboardLayout="@raw/keyboard_layout_italian" />

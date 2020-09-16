@@ -1845,7 +1845,7 @@ public final class BluetoothDevice implements Parcelable {
      * socket will be encrypted.
      * <p> Use this socket only if an authenticated socket link is possible.
      * Authentication refers to the authentication of the link key to
-     * prevent man-in-the-middle type of attacks.
+     * prevent person-in-the-middle type of attacks.
      * For example, for Bluetooth 2.1 devices, if any of the devices does not
      * have an input and output capability or just has the ability to
      * display a numeric key, a secure socket connection is not possible.
@@ -1880,7 +1880,7 @@ public final class BluetoothDevice implements Parcelable {
      * socket will be encrypted.
      * <p> Use this socket only if an authenticated socket link is possible.
      * Authentication refers to the authentication of the link key to
-     * prevent man-in-the-middle type of attacks.
+     * prevent person-in-the-middle type of attacks.
      * For example, for Bluetooth 2.1 devices, if any of the devices does not
      * have an input and output capability or just has the ability to
      * display a numeric key, a secure socket connection is not possible.
@@ -1937,7 +1937,7 @@ public final class BluetoothDevice implements Parcelable {
      * socket will be encrypted.
      * <p> Use this socket only if an authenticated socket link is possible.
      * Authentication refers to the authentication of the link key to
-     * prevent man-in-the-middle type of attacks.
+     * prevent person-in-the-middle type of attacks.
      * For example, for Bluetooth 2.1 devices, if any of the devices does not
      * have an input and output capability or just has the ability to
      * display a numeric key, a secure socket connection is not possible.
@@ -1969,7 +1969,7 @@ public final class BluetoothDevice implements Parcelable {
      * Create an RFCOMM {@link BluetoothSocket} socket ready to start an insecure
      * outgoing connection to this remote device using SDP lookup of uuid.
      * <p> The communication channel will not have an authenticated link key
-     * i.e it will be subject to man-in-the-middle attacks. For Bluetooth 2.1
+     * i.e it will be subject to person-in-the-middle attacks. For Bluetooth 2.1
      * devices, the link key will be encrypted, as encryption is mandatory.
      * For legacy devices (pre Bluetooth 2.1 devices) the link key will
      * be not be encrypted. Use {@link #createRfcommSocketToServiceRecord} if an
@@ -2225,7 +2225,7 @@ public final class BluetoothDevice implements Parcelable {
      * <p>The remote device will be authenticated and communication on this socket will be
      * encrypted.
      * <p> Use this socket if an authenticated socket link is possible. Authentication refers
-     * to the authentication of the link key to prevent man-in-the-middle type of attacks.
+     * to the authentication of the link key to prevent person-in-the-middle type of attacks.
      *
      * @param psm dynamic PSM value from remote device
      * @return a CoC #BluetoothSocket ready for an outgoing connection
@@ -2252,7 +2252,7 @@ public final class BluetoothDevice implements Parcelable {
      * <p>Use {@link BluetoothSocket#connect} to initiate the outgoing connection.
      * <p>Application using this API is responsible for obtaining PSM value from remote device.
      * <p> The communication channel may not have an authenticated link key, i.e. it may be subject
-     * to man-in-the-middle attacks. Use {@link #createL2capChannel(int)} if an encrypted and
+     * to person-in-the-middle attacks. Use {@link #createL2capChannel(int)} if an encrypted and
      * authenticated communication channel is possible.
      *
      * @param psm dynamic PSM value from remote device

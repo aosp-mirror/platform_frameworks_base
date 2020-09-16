@@ -16,6 +16,7 @@
 
 package android.content.pm.parsing;
 
+import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
@@ -343,6 +344,6 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     // TODO(b/135203078): This class no longer has access to ParsedPackage, find a replacement
     //  for moving to the next step
-    @Deprecated
+    @CallSuper
     Object hideAsParsed();
 }

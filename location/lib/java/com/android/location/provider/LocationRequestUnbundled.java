@@ -82,25 +82,21 @@ public final class LocationRequestUnbundled {
     }
 
     /**
-     * Get the desired interval of this request, in milliseconds.
+     * Get the location update interval.
      *
-     * @return desired interval in milliseconds, inexact
+     * @return location update interval
      */
     public long getInterval() {
-        return delegate.getInterval();
+        return delegate.getIntervalMillis();
     }
 
     /**
-     * Get the fastest interval of this request, in milliseconds.
+     * Get the minimum delivery interval.
      *
-     * <p>The system will never provide location updates faster
-     * than the minimum of {@link #getFastestInterval} and
-     * {@link #getInterval}.
-     *
-     * @return fastest interval in milliseconds, exact
+     * @return minimum delivery interval
      */
     public long getFastestInterval() {
-        return delegate.getFastestInterval();
+        return delegate.getMinUpdateIntervalMillis();
     }
 
     /**
@@ -118,7 +114,7 @@ public final class LocationRequestUnbundled {
      * @return minimum distance between location updates in meters
      */
     public float getSmallestDisplacement() {
-        return delegate.getSmallestDisplacement();
+        return delegate.getMinUpdateDistanceMeters();
     }
 
     /**

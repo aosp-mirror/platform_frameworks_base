@@ -63,6 +63,9 @@ import java.util.Set;
 /** @hide **/
 public class PackageInfoWithoutStateUtils {
 
+    public static final String SYSTEM_DATA_PATH =
+            Environment.getDataDirectoryPath() + File.separator + "system";
+
     @Nullable
     public static PackageInfo generate(ParsingPackageRead pkg, int[] gids,
             @PackageManager.PackageInfoFlags int flags, long firstInstallTime, long lastUpdateTime,
@@ -168,7 +171,8 @@ public class PackageInfoWithoutStateUtils {
                 info.instrumentation = new InstrumentationInfo[N];
                 for (int i = 0; i < N; i++) {
                     info.instrumentation[i] = generateInstrumentationInfo(
-                            pkg.getInstrumentations().get(i), pkg, flags, userId);
+                            pkg.getInstrumentations().get(i), pkg, flags, userId,
+                            true /* assignUserFields */);
                 }
             }
         }
@@ -332,7 +336,8 @@ public class PackageInfoWithoutStateUtils {
             return null;
         }
 
-        return generateApplicationInfoUnchecked(pkg, flags, state, userId);
+        return generateApplicationInfoUnchecked(pkg, flags, state, userId,
+                true /* assignUserFields */);
     }
 
     /**
@@ -340,15 +345,23 @@ public class PackageInfoWithoutStateUtils {
      * system server.
      *
      * Prefer {@link #generateApplicationInfo(ParsingPackageRead, int, PackageUserState, int)}.
+     *
+     * @param assignUserFields whether to fill the returned {@link ApplicationInfo} with user
+     *                         specific fields. This can be skipped when building from a system
+     *                         server package, as there are cached strings which can be used rather
+     *                         than querying and concatenating the comparatively expensive
+     *                         {@link Environment#getDataDirectory(String)}}.
      */
     @NonNull
     public static ApplicationInfo generateApplicationInfoUnchecked(@NonNull ParsingPackageRead pkg,
-            @PackageManager.ApplicationInfoFlags int flags, PackageUserState state, int userId) {
+            @PackageManager.ApplicationInfoFlags int flags, PackageUserState state, int userId,
+            boolean assignUserFields) {
         // Make shallow copy so we can store the metadata/libraries safely
         ApplicationInfo ai = pkg.toAppInfoWithoutState();
-        // Init handles data directories
-        // TODO(b/135203078): Consolidate the data directory logic, remove initForUser
-        ai.initForUser(userId);
+
+        if (assignUserFields) {
+            assignUserFields(pkg, ai, userId);
+        }
 
         if ((flags & PackageManager.GET_META_DATA) == 0) {
             ai.metaData = null;
@@ -567,9 +580,14 @@ public class PackageInfoWithoutStateUtils {
         return generateProviderInfo(pkg, p, flags, state, null, userId);
     }
 
+    /**
+     * @param assignUserFields see {@link #generateApplicationInfoUnchecked(ParsingPackageRead, int,
+     *                         PackageUserState, int, boolean)}
+     */
     @Nullable
     public static InstrumentationInfo generateInstrumentationInfo(ParsedInstrumentation i,
-            ParsingPackageRead pkg, @PackageManager.ComponentInfoFlags int flags, int userId) {
+            ParsingPackageRead pkg, @PackageManager.ComponentInfoFlags int flags, int userId,
+            boolean assignUserFields) {
         if (i == null) return null;
 
         InstrumentationInfo ii = new InstrumentationInfo();
@@ -585,10 +603,10 @@ public class PackageInfoWithoutStateUtils {
         ii.splitSourceDirs = pkg.getSplitCodePaths();
         ii.splitPublicSourceDirs = pkg.getSplitCodePaths();
         ii.splitDependencies = pkg.getSplitDependencies();
-        ii.dataDir = getDataDir(pkg, userId).getAbsolutePath();
-        ii.deviceProtectedDataDir = getDeviceProtectedDataDir(pkg, userId).getAbsolutePath();
-        ii.credentialProtectedDataDir = getCredentialProtectedDataDir(pkg,
-                userId).getAbsolutePath();
+
+        if (assignUserFields) {
+            assignUserFields(pkg, ii, userId);
+        }
 
         if ((flags & PackageManager.GET_META_DATA) == 0) {
             return ii;
@@ -769,5 +787,56 @@ public class PackageInfoWithoutStateUtils {
     public static File getCredentialProtectedDataDir(ParsingPackageRead pkg, int userId) {
         return Environment.getDataUserCePackageDirectory(pkg.getVolumeUuid(), userId,
                 pkg.getPackageName());
+    }
+
+    private static void assignUserFields(ParsingPackageRead pkg, ApplicationInfo info, int userId) {
+        // This behavior is undefined for no-state ApplicationInfos when called by a public API,
+        // since the uid is never assigned by the system. It will always effectively be appId 0.
+        info.uid = UserHandle.getUid(userId, UserHandle.getAppId(info.uid));
+
+        String pkgName = pkg.getPackageName();
+        if ("android".equals(pkgName)) {
+            info.dataDir = SYSTEM_DATA_PATH;
+            return;
+        }
+
+        // For performance reasons, all these paths are built as strings
+        String baseDataDirPrefix =
+                Environment.getDataDirectoryPath(pkg.getVolumeUuid()) + File.separator;
+        String userIdPkgSuffix = File.separator + userId + File.separator + pkgName;
+        info.credentialProtectedDataDir = baseDataDirPrefix + Environment.DIR_USER_CE
+                + userIdPkgSuffix;
+        info.deviceProtectedDataDir = baseDataDirPrefix + Environment.DIR_USER_DE + userIdPkgSuffix;
+
+        if (pkg.isDefaultToDeviceProtectedStorage()
+                && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
+            info.dataDir = info.deviceProtectedDataDir;
+        } else {
+            info.dataDir = info.credentialProtectedDataDir;
+        }
+    }
+
+    private static void assignUserFields(ParsingPackageRead pkg, InstrumentationInfo info,
+            int userId) {
+        String pkgName = pkg.getPackageName();
+        if ("android".equals(pkgName)) {
+            info.dataDir = SYSTEM_DATA_PATH;
+            return;
+        }
+
+        // For performance reasons, all these paths are built as strings
+        String baseDataDirPrefix =
+                Environment.getDataDirectoryPath(pkg.getVolumeUuid()) + File.separator;
+        String userIdPkgSuffix = File.separator + userId + File.separator + pkgName;
+        info.credentialProtectedDataDir = baseDataDirPrefix + Environment.DIR_USER_CE
+                + userIdPkgSuffix;
+        info.deviceProtectedDataDir = baseDataDirPrefix + Environment.DIR_USER_DE + userIdPkgSuffix;
+
+        if (pkg.isDefaultToDeviceProtectedStorage()
+                && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
+            info.dataDir = info.deviceProtectedDataDir;
+        } else {
+            info.dataDir = info.credentialProtectedDataDir;
+        }
     }
 }

@@ -65,6 +65,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Handle to an on-screen Surface managed by the system compositor. The SurfaceControl is
@@ -87,10 +89,10 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeWriteToParcel(long nativeObject, Parcel out);
     private static native void nativeRelease(long nativeObject);
     private static native void nativeDisconnect(long nativeObject);
-    private static native ScreenshotHardwareBuffer nativeCaptureDisplay(
-            DisplayCaptureArgs captureArgs);
-    private static native ScreenshotHardwareBuffer nativeCaptureLayers(
-            LayerCaptureArgs captureArgs);
+    private static native int nativeCaptureDisplay(DisplayCaptureArgs captureArgs,
+            ScreenCaptureListener captureListener);
+    private static native int nativeCaptureLayers(LayerCaptureArgs captureArgs,
+            ScreenCaptureListener captureListener);
     private static native long nativeMirrorSurface(long mirrorOfObject);
     private static native long nativeCreateTransaction();
     private static native long nativeGetNativeTransactionFinalizer();
@@ -613,6 +615,39 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    public interface ScreenCaptureListener {
+        /**
+         * The callback invoked when the screen capture is complete.
+         * @param hardwareBuffer Data containing info about the screen capture.
+         */
+        void onScreenCaptureComplete(ScreenshotHardwareBuffer hardwareBuffer);
+    }
+
+    private static class SyncScreenCaptureListener implements ScreenCaptureListener {
+        private static final int SCREENSHOT_WAIT_TIME_S = 1;
+        private ScreenshotHardwareBuffer mScreenshotHardwareBuffer;
+        private final CountDownLatch mCountDownLatch = new CountDownLatch(1);
+
+        @Override
+        public void onScreenCaptureComplete(ScreenshotHardwareBuffer hardwareBuffer) {
+            mScreenshotHardwareBuffer = hardwareBuffer;
+            mCountDownLatch.countDown();
+        }
+
+        private ScreenshotHardwareBuffer waitForScreenshot() {
+            try {
+                mCountDownLatch.await(SCREENSHOT_WAIT_TIME_S, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to wait for screen capture result", e);
+            }
+
+            return mScreenshotHardwareBuffer;
+        }
+    }
+
+    /**
      * A common arguments class used for various screenshot requests. This contains arguments that
      * are shared between {@link DisplayCaptureArgs} and {@link LayerCaptureArgs}
      * @hide
@@ -687,7 +722,7 @@ public final class SurfaceControl implements Parcelable {
     /**
      * The arguments class used to make display capture requests.
      *
-     * @see #nativeCaptureDisplay(DisplayCaptureArgs)
+     * @see #nativeCaptureDisplay(DisplayCaptureArgs, ScreenCaptureListener)
      * @hide
      */
     public static class DisplayCaptureArgs extends CaptureArgs {
@@ -2228,13 +2263,30 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
+     * @param captureArgs Arguments about how to take the screenshot
+     * @param captureListener A listener to receive the screenshot callback
+     * @hide
+     */
+    public static int captureDisplay(@NonNull DisplayCaptureArgs captureArgs,
+            @NonNull ScreenCaptureListener captureListener) {
+        return nativeCaptureDisplay(captureArgs, captureListener);
+    }
+
+    /**
      * Captures all the surfaces in a display and returns a {@link ScreenshotHardwareBuffer} with
      * the content.
      *
      * @hide
      */
     public static ScreenshotHardwareBuffer captureDisplay(DisplayCaptureArgs captureArgs) {
-        return nativeCaptureDisplay(captureArgs);
+        SyncScreenCaptureListener screenCaptureListener = new SyncScreenCaptureListener();
+
+        int status = captureDisplay(captureArgs, screenCaptureListener);
+        if (status != 0) {
+            return null;
+        }
+
+        return screenCaptureListener.waitForScreenshot();
     }
 
     /**
@@ -2279,14 +2331,21 @@ public final class SurfaceControl implements Parcelable {
                 .setPixelFormat(format)
                 .build();
 
-        return nativeCaptureLayers(captureArgs);
+        return captureLayers(captureArgs);
     }
 
     /**
      * @hide
      */
     public static ScreenshotHardwareBuffer captureLayers(LayerCaptureArgs captureArgs) {
-        return nativeCaptureLayers(captureArgs);
+        SyncScreenCaptureListener screenCaptureListener = new SyncScreenCaptureListener();
+
+        int status = captureLayers(captureArgs, screenCaptureListener);
+        if (status != 0) {
+            return null;
+        }
+
+        return screenCaptureListener.waitForScreenshot();
     }
 
     /**
@@ -2303,7 +2362,17 @@ public final class SurfaceControl implements Parcelable {
                 .setExcludeLayers(exclude)
                 .build();
 
-        return nativeCaptureLayers(captureArgs);
+        return captureLayers(captureArgs);
+    }
+
+    /**
+     * @param captureArgs Arguments about how to take the screenshot
+     * @param captureListener A listener to receive the screenshot callback
+     * @hide
+     */
+    public static int captureLayers(@NonNull LayerCaptureArgs captureArgs,
+            @NonNull ScreenCaptureListener captureListener) {
+        return nativeCaptureLayers(captureArgs, captureListener);
     }
 
     /**

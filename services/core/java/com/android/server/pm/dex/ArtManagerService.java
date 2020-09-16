@@ -185,7 +185,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             return;
         }
 
-        // Sanity checks on the arguments.
+        // Validity checks on the arguments.
         Objects.requireNonNull(callback);
 
         boolean bootImageProfile = profileType == ArtManager.PROFILE_BOOT_IMAGE;

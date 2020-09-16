@@ -1113,8 +1113,8 @@ public final class OomAdjuster {
                         + " to " + uidRec.curWhitelist);
                 if (ActivityManager.isProcStateBackground(uidRec.getCurProcState())
                         && !uidRec.curWhitelist) {
-                    // UID is now in the background (and not on the temp whitelist).  Was it
-                    // previously in the foreground (or on the temp whitelist)?
+                    // UID is now in the background (and not on the temp allowlist).  Was it
+                    // previously in the foreground (or on the temp allowlist)?
                     if (!ActivityManager.isProcStateBackground(uidRec.setProcState)
                             || uidRec.setWhitelist) {
                         uidRec.lastBackgroundTime = nowElapsed;

@@ -291,7 +291,7 @@ class LocationProviderManager extends
 
         @Override
         protected final ListenerOperation<LocationTransport> onActive() {
-            if (!getRequest().getHideFromAppOps()) {
+            if (!getRequest().isHiddenFromAppOps()) {
                 mLocationAttributionHelper.reportLocationStart(getIdentity(), getName(), getKey());
             }
             onHighPowerUsageChanged();
@@ -301,7 +301,7 @@ class LocationProviderManager extends
         @Override
         protected final ListenerOperation<LocationTransport> onInactive() {
             onHighPowerUsageChanged();
-            if (!getRequest().getHideFromAppOps()) {
+            if (!getRequest().isHiddenFromAppOps()) {
                 mLocationAttributionHelper.reportLocationStop(getIdentity(), getName(), getKey());
             }
             return null;
@@ -343,7 +343,7 @@ class LocationProviderManager extends
             if (isUsingHighPower != mIsUsingHighPower) {
                 mIsUsingHighPower = isUsingHighPower;
 
-                if (!getRequest().getHideFromAppOps()) {
+                if (!getRequest().isHiddenFromAppOps()) {
                     if (mIsUsingHighPower) {
                         mLocationAttributionHelper.reportHighPowerLocationStart(
                                 getIdentity(), getName(), getKey());
@@ -362,7 +362,7 @@ class LocationProviderManager extends
             }
 
             return isActive()
-                    && getRequest().getInterval() < MAX_HIGH_POWER_INTERVAL_MS
+                    && getRequest().getIntervalMillis() < MAX_HIGH_POWER_INTERVAL_MS
                     && getProperties().mPowerRequirement == Criteria.POWER_HIGH;
         }
 
@@ -448,26 +448,26 @@ class LocationProviderManager extends
         }
 
         private LocationRequest calculateProviderLocationRequest() {
-            LocationRequest newRequest = new LocationRequest(super.getRequest());
+            LocationRequest.Builder builder = new LocationRequest.Builder(super.getRequest());
 
-            if (newRequest.isLocationSettingsIgnored()) {
+            if (super.getRequest().isLocationSettingsIgnored()) {
                 // if we are not currently allowed use location settings ignored, disable it
                 if (!mSettingsHelper.getIgnoreSettingsPackageWhitelist().contains(
                         getIdentity().getPackageName()) && !mLocationManagerInternal.isProvider(
                         null, getIdentity())) {
-                    newRequest.setLocationSettingsIgnored(false);
+                    builder.setLocationSettingsIgnored(false);
                 }
             }
 
-            if (!newRequest.isLocationSettingsIgnored() && !isThrottlingExempt()) {
+            if (!super.getRequest().isLocationSettingsIgnored() && !isThrottlingExempt()) {
                 // throttle in the background
                 if (!mForeground) {
-                    newRequest.setInterval(Math.max(newRequest.getInterval(),
+                    builder.setIntervalMillis(Math.max(super.getRequest().getIntervalMillis(),
                             mSettingsHelper.getBackgroundThrottleIntervalMs()));
                 }
             }
 
-            return newRequest;
+            return builder.build();
         }
 
         private boolean isThrottlingExempt() {
@@ -635,14 +635,15 @@ class LocationProviderManager extends
                 long deltaMs = NANOSECONDS.toMillis(
                         location.getElapsedRealtimeNanos()
                                 - mLastLocation.getElapsedRealtimeNanos());
-                if (deltaMs < getRequest().getFastestInterval() - MAX_FASTEST_INTERVAL_JITTER_MS) {
+                if (deltaMs < getRequest().getMinUpdateIntervalMillis()
+                        - MAX_FASTEST_INTERVAL_JITTER_MS) {
                     return null;
                 }
 
                 // check smallest displacement
-                double smallestDisplacement = getRequest().getSmallestDisplacement();
-                if (smallestDisplacement > 0.0 && location.distanceTo(mLastLocation)
-                        <= smallestDisplacement) {
+                double smallestDisplacementM = getRequest().getMinUpdateDistanceMeters();
+                if (smallestDisplacementM > 0.0 && location.distanceTo(mLastLocation)
+                        <= smallestDisplacementM) {
                     return null;
                 }
             }
@@ -692,7 +693,7 @@ class LocationProviderManager extends
                     if (success) {
                         // check num updates - if successful then this function will always be run
                         // from the same thread, and no additional synchronization is necessary
-                        boolean remove = ++mNumLocationsDelivered >= getRequest().getNumUpdates();
+                        boolean remove = ++mNumLocationsDelivered >= getRequest().getMaxUpdates();
                         if (remove) {
                             if (D) {
                                 Log.d(TAG, "removing " + getIdentity() + " from " + mName
@@ -1326,10 +1327,10 @@ class LocationProviderManager extends
     public void getCurrentLocation(LocationRequest request, CallerIdentity callerIdentity,
             int permissionLevel, ICancellationSignal cancellationTransport,
             ILocationCallback callback) {
-        Preconditions.checkArgument(mName.equals(request.getProvider()));
-
-        if (request.getExpireIn() > GET_CURRENT_LOCATION_MAX_TIMEOUT_MS) {
-            request.setExpireIn(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS);
+        if (request.getDurationMillis() > GET_CURRENT_LOCATION_MAX_TIMEOUT_MS) {
+            request = new LocationRequest.Builder(request)
+                    .setDurationMillis(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS)
+                    .build();
         }
 
         GetCurrentLocationListenerRegistration registration =
@@ -1404,8 +1405,6 @@ class LocationProviderManager extends
 
     public void registerLocationRequest(LocationRequest request, CallerIdentity callerIdentity,
             @PermissionLevel int permissionLevel, ILocationListener listener) {
-        Preconditions.checkArgument(mName.equals(request.getProvider()));
-
         synchronized (mLock) {
             long identity = Binder.clearCallingIdentity();
             try {
@@ -1424,8 +1423,6 @@ class LocationProviderManager extends
 
     public void registerLocationRequest(LocationRequest request, CallerIdentity callerIdentity,
             @PermissionLevel int permissionLevel, PendingIntent pendingIntent) {
-        Preconditions.checkArgument(mName.equals(request.getProvider()));
-
         synchronized (mLock) {
             long identity = Binder.clearCallingIdentity();
             try {
@@ -1517,17 +1514,17 @@ class LocationProviderManager extends
                 LocationStatsEnums.USAGE_STARTED,
                 LocationStatsEnums.API_REQUEST_LOCATION_UPDATES,
                 registration.getIdentity().getPackageName(),
+                mName,
                 registration.getRequest(),
                 key instanceof PendingIntent,
-                key instanceof IBinder,
-                /* geofence= */ null,
-                registration.isForeground());
+                /* geofence= */ key instanceof IBinder,
+                null, registration.isForeground());
 
         mLocationRequestStatistics.startRequesting(
                 registration.getIdentity().getPackageName(),
                 registration.getIdentity().getAttributionTag(),
                 mName,
-                registration.getRequest().getInterval(),
+                registration.getRequest().getIntervalMillis(),
                 registration.isForeground());
     }
 
@@ -1547,11 +1544,11 @@ class LocationProviderManager extends
                 LocationStatsEnums.USAGE_ENDED,
                 LocationStatsEnums.API_REQUEST_LOCATION_UPDATES,
                 registration.getIdentity().getPackageName(),
+                mName,
                 registration.getRequest(),
                 key instanceof PendingIntent,
-                key instanceof IBinder,
-                /* geofence= */ null,
-                registration.isForeground());
+                /* geofence= */ key instanceof IBinder,
+                null, registration.isForeground());
     }
 
     @GuardedBy("mLock")
@@ -1643,15 +1640,20 @@ class LocationProviderManager extends
         for (Registration registration : registrations) {
             LocationRequest locationRequest = registration.getRequest();
 
+            // passive requests do not contribute to the provider
+            if (locationRequest.getIntervalMillis() == LocationRequest.PASSIVE_INTERVAL) {
+                continue;
+            }
+
             if (locationRequest.isLocationSettingsIgnored()) {
                 providerRequest.setLocationSettingsIgnored(true);
             }
-            if (!locationRequest.isLowPowerMode()) {
+            if (!locationRequest.isLowPower()) {
                 providerRequest.setLowPowerMode(false);
             }
 
             providerRequest.setInterval(
-                    Math.min(locationRequest.getInterval(), providerRequest.getInterval()));
+                    Math.min(locationRequest.getIntervalMillis(), providerRequest.getInterval()));
             providerRegistrations.add(registration);
         }
 
@@ -1674,7 +1676,7 @@ class LocationProviderManager extends
         }
         for (int i = 0; i < registrationsSize; i++) {
             LocationRequest request = providerRegistrations.get(i).getRequest();
-            if (request.getInterval() <= thresholdIntervalMs) {
+            if (request.getIntervalMillis() <= thresholdIntervalMs) {
                 providerRequest.getWorkSource().add(providerRegistrations.get(i).getWorkSource());
             }
         }

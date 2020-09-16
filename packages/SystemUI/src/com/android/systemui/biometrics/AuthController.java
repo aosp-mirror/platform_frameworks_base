@@ -57,6 +57,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Receives messages sent from {@link com.android.server.biometrics.BiometricService} and shows the
@@ -72,6 +73,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     private final CommandQueue mCommandQueue;
     private final StatusBarStateController mStatusBarStateController;
     private final Injector mInjector;
+    private final Provider<UdfpsController> mUdfpsControllerFactory;
 
     // TODO: These should just be saved from onSaveState
     private SomeArgs mCurrentDialogArgs;
@@ -237,6 +239,34 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         }
     }
 
+    /**
+     * Requests fingerprint scan.
+     *
+     * @param screenX X position of long press
+     * @param screenY Y position of long press
+     */
+    public void onAodInterrupt(int screenX, int screenY) {
+        if (mUdfpsController == null) {
+            return;
+        }
+        mUdfpsController.onAodInterrupt(screenX, screenY);
+    }
+
+    /**
+     * Cancel a fingerprint scan.
+     *
+     * The sensor that triggers an AOD interrupt for fingerprint doesn't give
+     * ACTION_UP/ACTION_CANCEL events, so the scan needs to be cancelled manually. This should be
+     * called when authentication either succeeds or fails. Failing to cancel the scan will leave
+     * the screen in high brightness mode.
+     */
+    private void onCancelAodInterrupt() {
+        if (mUdfpsController == null) {
+            return;
+        }
+        mUdfpsController.onCancelAodInterrupt();
+    }
+
     private void sendResultAndCleanUp(@DismissedReason int reason,
             @Nullable byte[] credentialAttestation) {
         if (mReceiver == null) {
@@ -263,17 +293,21 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
     @Inject
     public AuthController(Context context, CommandQueue commandQueue,
-            StatusBarStateController statusBarStateController) {
-        this(context, commandQueue, statusBarStateController, new Injector());
+            StatusBarStateController statusBarStateController,
+            Provider<UdfpsController> udfpsControllerFactory) {
+        this(context, commandQueue, statusBarStateController, new Injector(),
+                udfpsControllerFactory);
     }
 
     @VisibleForTesting
     AuthController(Context context, CommandQueue commandQueue,
-            StatusBarStateController statusBarStateController, Injector injector) {
+            StatusBarStateController statusBarStateController, Injector injector,
+            Provider<UdfpsController> udfpsControllerFactory) {
         super(context);
         mCommandQueue = commandQueue;
         mStatusBarStateController = statusBarStateController;
         mInjector = injector;
+        mUdfpsControllerFactory = udfpsControllerFactory;
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
@@ -294,7 +328,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     fpm.getSensorProperties();
             for (FingerprintSensorProperties props : fingerprintSensorProperties) {
                 if (props.sensorType == FingerprintSensorProperties.TYPE_UDFPS) {
-                    mUdfpsController = new UdfpsController(mContext, mStatusBarStateController);
+                    mUdfpsController = mUdfpsControllerFactory.get();
                     break;
                 }
             }
@@ -341,6 +375,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     @Override
     public void onBiometricAuthenticated() {
         mCurrentDialog.onAuthenticationSucceeded();
+        onCancelAodInterrupt();
     }
 
     @Override
@@ -390,6 +425,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             if (DEBUG) Log.d(TAG, "onBiometricError, hard error: " + errorMessage);
             mCurrentDialog.onError(errorMessage);
         }
+        onCancelAodInterrupt();
     }
 
     @Override

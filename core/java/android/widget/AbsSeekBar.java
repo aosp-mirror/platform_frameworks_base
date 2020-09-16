@@ -1026,7 +1026,7 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     /**
-     * This is called when the user either releases his touch or the touch is
+     * This is called when the user either releases their touch or the touch is
      * canceled.
      */
     void onStopTrackingTouch() {

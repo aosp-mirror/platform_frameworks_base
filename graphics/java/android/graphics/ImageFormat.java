@@ -47,6 +47,7 @@ public class ImageFormat {
              DEPTH16,
              DEPTH_POINT_CLOUD,
              RAW_DEPTH,
+             RAW_DEPTH10,
              PRIVATE,
              HEIC
      })
@@ -725,6 +726,15 @@ public class ImageFormat {
     public static final int RAW_DEPTH = 0x1002;
 
     /**
+     * Unprocessed implementation-dependent raw
+     * depth measurements, opaque with 10 bit
+     * samples and device specific bit layout.
+     *
+     * @hide
+     */
+    public static final int RAW_DEPTH10 = 0x1003;
+
+    /**
      * Android private opaque image format.
      * <p>
      * The choices of the actual format and pixel data layout are entirely up to
@@ -797,6 +807,7 @@ public class ImageFormat {
             case RAW_DEPTH:
             case RAW_SENSOR:
                 return 16;
+            case RAW_DEPTH10:
             case RAW10:
                 return 10;
             case RAW12:
@@ -838,6 +849,7 @@ public class ImageFormat {
             case DEPTH_POINT_CLOUD:
             case PRIVATE:
             case RAW_DEPTH:
+            case RAW_DEPTH10:
             case Y8:
             case DEPTH_JPEG:
             case HEIC:

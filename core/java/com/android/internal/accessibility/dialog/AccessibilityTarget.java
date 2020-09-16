@@ -36,7 +36,7 @@ import com.android.internal.accessibility.dialog.TargetAdapter.ViewHolder;
 
 /**
  * Abstract base class for creating various target related to accessibility service,
- * accessibility activity, and white listing feature.
+ * accessibility activity, and allowlisting feature.
  */
 public abstract class AccessibilityTarget implements TargetOperations, OnTargetSelectedListener,
         OnTargetCheckedChangeListener {

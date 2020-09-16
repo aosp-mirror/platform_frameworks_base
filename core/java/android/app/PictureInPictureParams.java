@@ -47,7 +47,7 @@ public final class PictureInPictureParams implements Parcelable {
         @Nullable
         private Rect mSourceRectHint;
 
-        private boolean mAutoEnterAllowed;
+        private boolean mAutoEnterEnabled;
 
         /**
          * Sets the aspect ratio.  This aspect ratio is defined as the desired width / height, and
@@ -106,21 +106,21 @@ public final class PictureInPictureParams implements Parcelable {
         }
 
         /**
-         * Sets whether the system is allowed to automatically put the activity in
-         * picture-in-picture mode without needing/waiting for the activity to call
+         * Sets whether the system will automatically put the activity in picture-in-picture mode
+         * without needing/waiting for the activity to call
          * {@link Activity#enterPictureInPictureMode(PictureInPictureParams)}.
          *
          * If true, {@link Activity#onPictureInPictureRequested()} will never be called.
          *
          * This property is false by default.
-         * @param autoEnterAllowed {@code true} if the system is allowed to automatically put the
-         *                                  activity in picture-in-picture mode.
+         * @param autoEnterEnabled {@code true} if the system will automatically put the activity
+         *                                     in picture-in-picture mode.
          *
          * @return this builder instance.
          */
         @NonNull
-        public Builder setAutoEnterAllowed(boolean autoEnterAllowed) {
-            mAutoEnterAllowed = autoEnterAllowed;
+        public Builder setAutoEnterEnabled(boolean autoEnterEnabled) {
+            mAutoEnterEnabled = autoEnterEnabled;
             return this;
         }
 
@@ -133,7 +133,7 @@ public final class PictureInPictureParams implements Parcelable {
          */
         public PictureInPictureParams build() {
             PictureInPictureParams params = new PictureInPictureParams(mAspectRatio, mUserActions,
-                    mSourceRectHint, mAutoEnterAllowed);
+                    mSourceRectHint, mAutoEnterEnabled);
             return params;
         }
     }
@@ -161,7 +161,7 @@ public final class PictureInPictureParams implements Parcelable {
     /**
      * Whether the system is allowed to automatically put the activity in picture-in-picture mode.
      */
-    private boolean mAutoEnterAllowed;
+    private boolean mAutoEnterEnabled;
 
     /** {@hide} */
     PictureInPictureParams() {
@@ -180,17 +180,17 @@ public final class PictureInPictureParams implements Parcelable {
             mSourceRectHint = Rect.CREATOR.createFromParcel(in);
         }
         if (in.readInt() != 0) {
-            mAutoEnterAllowed = in.readBoolean();
+            mAutoEnterEnabled = in.readBoolean();
         }
     }
 
     /** {@hide} */
     PictureInPictureParams(Rational aspectRatio, List<RemoteAction> actions,
-            Rect sourceRectHint, boolean autoEnterAllowed) {
+            Rect sourceRectHint, boolean autoEnterEnabled) {
         mAspectRatio = aspectRatio;
         mUserActions = actions;
         mSourceRectHint = sourceRectHint;
-        mAutoEnterAllowed = autoEnterAllowed;
+        mAutoEnterEnabled = autoEnterEnabled;
     }
 
     /**
@@ -207,7 +207,7 @@ public final class PictureInPictureParams implements Parcelable {
         if (otherArgs.hasSourceBoundsHint()) {
             mSourceRectHint = new Rect(otherArgs.getSourceRectHint());
         }
-        mAutoEnterAllowed = otherArgs.mAutoEnterAllowed;
+        mAutoEnterEnabled = otherArgs.mAutoEnterEnabled;
     }
 
     /**
@@ -280,11 +280,11 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /**
-     * @return whether auto pip allowed.
+     * @return whether auto pip is enabled.
      * @hide
      */
-    public boolean isAutoEnterAllowed() {
-        return mAutoEnterAllowed;
+    public boolean isAutoEnterEnabled() {
+        return mAutoEnterEnabled;
     }
 
     /**
@@ -293,7 +293,7 @@ public final class PictureInPictureParams implements Parcelable {
      */
     public boolean empty() {
         return !hasSourceBoundsHint() && !hasSetActions() && !hasSetAspectRatio()
-                && !mAutoEnterAllowed;
+                && !mAutoEnterEnabled;
     }
 
     @Override
@@ -323,7 +323,7 @@ public final class PictureInPictureParams implements Parcelable {
             out.writeInt(0);
         }
         out.writeInt(1);
-        out.writeBoolean(mAutoEnterAllowed);
+        out.writeBoolean(mAutoEnterEnabled);
     }
 
     public static final @android.annotation.NonNull Creator<PictureInPictureParams> CREATOR =

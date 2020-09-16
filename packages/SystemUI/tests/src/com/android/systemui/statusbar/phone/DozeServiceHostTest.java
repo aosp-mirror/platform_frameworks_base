@@ -179,7 +179,8 @@ public class DozeServiceHostTest extends SysuiTestCase {
         HashSet<Integer> reasonsThatDontPulse = new HashSet<>(
                 Arrays.asList(DozeLog.REASON_SENSOR_PICKUP,
                         DozeLog.REASON_SENSOR_DOUBLE_TAP,
-                        DozeLog.REASON_SENSOR_TAP));
+                        DozeLog.REASON_SENSOR_TAP,
+                        DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS));
 
         doAnswer(invocation -> {
             DozeHost.PulseCallback callback = invocation.getArgument(0);

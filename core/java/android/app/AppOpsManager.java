@@ -115,8 +115,8 @@ import java.util.function.Supplier;
  *     <dt>{@link #MODE_ALLOWED}
  *     <dd>Allow the access
  *     <dt>{@link #MODE_IGNORED}
- *     <dd>Don't allow the access, i.e. don't perform the requested action or return no or dummy
- *     data
+ *     <dd>Don't allow the access, i.e. don't perform the requested action or return no or
+ *     placeholder data
  *     <dt>{@link #MODE_ERRORED}
  *     <dd>Throw a {@link SecurityException} on access. This can be suppressed by using a
  *     {@code ...noThrow} method to check the mode
@@ -135,7 +135,7 @@ import java.util.function.Supplier;
  * <p>Each platform defined runtime permission (beside background modifiers) has an associated app
  * op which is used for tracking but also to allow for silent failures. I.e. if the runtime
  * permission is denied the caller gets a {@link SecurityException}, but if the permission is
- * granted and the app-op is {@link #MODE_IGNORED} then the callers gets dummy behavior, e.g.
+ * granted and the app-op is {@link #MODE_IGNORED} then the callers gets placeholder behavior, e.g.
  * location callbacks would not happen.
  *
  * <h3>App-op permissions</h3>
@@ -1964,7 +1964,7 @@ public class AppOpsManager {
             null, // no permission for writing clipboard
             null, // no permission for taking media buttons
             null, // no permission for taking audio focus
-            null, // no permission for changing master volume
+            null, // no permission for changing global volume
             null, // no permission for changing voice volume
             null, // no permission for changing ring volume
             null, // no permission for changing media volume
@@ -6525,7 +6525,7 @@ public class AppOpsManager {
      * Retrieve current operation state for all applications.
      *
      * The mode of the ops returned are set for the package but may not reflect their effective
-     * state due to UID policy or because it's controlled by a different master op.
+     * state due to UID policy or because it's controlled by a different global op.
      *
      * Use {@link #unsafeCheckOp(String, int, String)}} or
      * {@link #noteOp(String, int, String, String, String)} if the effective mode is needed.
@@ -6549,7 +6549,7 @@ public class AppOpsManager {
      * Retrieve current operation state for all applications.
      *
      * The mode of the ops returned are set for the package but may not reflect their effective
-     * state due to UID policy or because it's controlled by a different master op.
+     * state due to UID policy or because it's controlled by a different global op.
      *
      * Use {@link #unsafeCheckOp(String, int, String)}} or
      * {@link #noteOp(String, int, String, String, String)} if the effective mode is needed.
@@ -6571,7 +6571,7 @@ public class AppOpsManager {
      * Retrieve current operation state for one application.
      *
      * The mode of the ops returned are set for the package but may not reflect their effective
-     * state due to UID policy or because it's controlled by a different master op.
+     * state due to UID policy or because it's controlled by a different global op.
      *
      * Use {@link #unsafeCheckOp(String, int, String)}} or
      * {@link #noteOp(String, int, String, String, String)} if the effective mode is needed.
@@ -6604,7 +6604,7 @@ public class AppOpsManager {
      * package must match.
      *
      * The mode of the ops returned are set for the package but may not reflect their effective
-     * state due to UID policy or because it's controlled by a different master op.
+     * state due to UID policy or because it's controlled by a different global op.
      *
      * Use {@link #unsafeCheckOp(String, int, String)}} or
      * {@link #noteOp(String, int, String, String, String)} if the effective mode is needed.

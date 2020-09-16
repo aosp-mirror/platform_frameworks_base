@@ -46,6 +46,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import javax.inject.Inject;
+
 /**
  * Shows and hides the under-display fingerprint sensor (UDFPS) overlay, handles UDFPS touch events,
  * and coordinates triggering of the high-brightness mode (HBM).
@@ -54,6 +56,7 @@ class UdfpsController implements DozeReceiver {
     private static final String TAG = "UdfpsController";
     // Gamma approximation for the sRGB color space.
     private static final float DISPLAY_GAMMA = 2.2f;
+    private static final long AOD_INTERRUPT_TIMEOUT_MILLIS = 1000;
 
     private final FingerprintManager mFingerprintManager;
     private final WindowManager mWindowManager;
@@ -79,6 +82,13 @@ class UdfpsController implements DozeReceiver {
     // actual brightness value cannot be retrieved.
     private final float mDefaultBrightness;
     private boolean mIsOverlayShowing;
+
+    // The fingerprint AOD trigger doesn't provide an ACTION_UP/ACTION_CANCEL event to tell us when
+    // to turn off high brightness mode. To get around this limitation, the state of the AOD
+    // interrupt is being tracked and a timeout is used as a last resort to turn off high brightness
+    // mode.
+    private boolean mIsAodInterruptActive;
+    private final Runnable mAodInterruptTimeoutAction = this::onCancelAodInterrupt;
 
     public class UdfpsOverlayController extends IUdfpsOverlayController.Stub {
         @Override
@@ -126,6 +136,7 @@ class UdfpsController implements DozeReceiver {
         }
     };
 
+    @Inject
     UdfpsController(@NonNull Context context,
             @NonNull StatusBarStateController statusBarStateController) {
         mFingerprintManager = context.getSystemService(FingerprintManager.class);
@@ -238,6 +249,40 @@ class UdfpsController implements DozeReceiver {
 
         // Interpolate the opacity value from [0.0f, 1.0f] to [0, 255].
         return BrightnessSynchronizer.brightnessFloatToInt(scrimOpacity);
+    }
+
+    /**
+     * Request fingerprint scan.
+     *
+     * This is intented to be called in response to a sensor that triggers an AOD interrupt for the
+     * fingerprint sensor.
+     */
+    void onAodInterrupt(int screenX, int screenY) {
+        if (mIsAodInterruptActive) {
+            return;
+        }
+        mIsAodInterruptActive = true;
+        // Since the sensor that triggers the AOD interrupt doesn't provide ACTION_UP/ACTION_CANCEL,
+        // we need to be careful about not letting the screen accidentally remain in high brightness
+        // mode. As a mitigation, queue a call to cancel the fingerprint scan.
+        mHandler.postDelayed(mAodInterruptTimeoutAction, AOD_INTERRUPT_TIMEOUT_MILLIS);
+        // using a hard-coded value for major and minor until it is available from the sensor
+        onFingerDown(screenX, screenY, 13.0f, 13.0f);
+    }
+
+    /**
+     * Cancel fingerprint scan.
+     *
+     * This is intented to be called after the fingerprint scan triggered by the AOD interrupt
+     * either succeeds or fails.
+     */
+    void onCancelAodInterrupt() {
+        if (!mIsAodInterruptActive) {
+            return;
+        }
+        mHandler.removeCallbacks(mAodInterruptTimeoutAction);
+        mIsAodInterruptActive = false;
+        onFingerUp();
     }
 
     private void onFingerDown(int x, int y, float minor, float major) {

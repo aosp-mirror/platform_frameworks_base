@@ -32,6 +32,7 @@ import android.content.pm.ServiceInfo
 import android.os.Bundle
 import android.os.Debug
 import android.os.Environment
+import android.os.Process
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.pm.PackageManagerService
@@ -54,7 +55,7 @@ open class AndroidPackageParsingTestBase {
 
         private const val VERIFY_ALL_APKS = true
 
-        /** For auditing memory usage differences */
+        // For auditing memory usage differences to /sdcard/AndroidPackageParsingTestBase.hprof
         private const val DUMP_HPROF_TO_EXTERNAL = false
 
         val context: Context = InstrumentationRegistry.getInstrumentation().getContext()
@@ -104,10 +105,12 @@ open class AndroidPackageParsingTestBase {
         @JvmStatic
         @BeforeClass
         fun setUpPackages() {
+            var uid = Process.FIRST_APPLICATION_UID
             apks.mapNotNull {
                 try {
                     packageParser.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false) to
-                    packageParser2.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false)
+                            packageParser2.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR,
+                                    false)
                 } catch (ignored: Exception) {
                     // It is intentional that a failure of either call here will result in failing
                     // both. Having null on one side would mean nothing to compare. Due to the
@@ -117,8 +120,15 @@ open class AndroidPackageParsingTestBase {
                     null
                 }
             }.forEach { (old, new) ->
+                // Assign an arbitrary UID. This is normally done after parsing completes, inside
+                // PackageManagerService, but since that code isn't run here, need to mock it. This
+                // is equivalent to what the system would assign.
+                old.applicationInfo.uid = uid
+                new.uid = uid
+                uid++
+
                 oldPackages += old
-                newPackages += new
+                newPackages += new.hideAsFinal()
             }
 
             if (DUMP_HPROF_TO_EXTERNAL) {
@@ -131,12 +141,29 @@ open class AndroidPackageParsingTestBase {
             }
         }
 
-        fun oldAppInfo(pkg: PackageParser.Package, flags: Int = 0): ApplicationInfo? {
-            return PackageParser.generateApplicationInfo(pkg, flags, dummyUserState, 0)
+        fun oldAppInfo(
+            pkg: PackageParser.Package,
+            flags: Int = 0,
+            userId: Int = 0
+        ): ApplicationInfo? {
+            return PackageParser.generateApplicationInfo(pkg, flags, dummyUserState, userId)
         }
 
-        fun newAppInfo(pkg: AndroidPackage, flags: Int = 0): ApplicationInfo? {
-            return PackageInfoUtils.generateApplicationInfo(pkg, flags, dummyUserState, 0,
+        fun newAppInfo(
+            pkg: AndroidPackage,
+            flags: Int = 0,
+            userId: Int = 0
+        ): ApplicationInfo? {
+            return PackageInfoUtils.generateApplicationInfo(pkg, flags, dummyUserState, userId,
+                    mockPkgSetting(pkg))
+        }
+
+        fun newAppInfoWithoutState(
+            pkg: AndroidPackage,
+            flags: Int = 0,
+            userId: Int = 0
+        ): ApplicationInfo? {
+            return PackageInfoUtils.generateApplicationInfo(pkg, flags, dummyUserState, userId,
                     mockPkgSetting(pkg))
         }
 
@@ -152,6 +179,7 @@ open class AndroidPackageParsingTestBase {
 
         private fun mockPkgSetting(aPkg: AndroidPackage) = mockThrowOnUnmocked<PackageSetting> {
             this.pkg = aPkg
+            this.appId = aPkg.uid
             whenever(pkgState) { PackageStateUnserialized() }
             whenever(readUserState(anyInt())) { dummyUserState }
         }

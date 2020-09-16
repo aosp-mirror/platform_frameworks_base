@@ -44,8 +44,6 @@ public class ShellProtoLogImpl extends BaseProtoLogImpl {
 
     private static ShellProtoLogImpl sServiceInstance = null;
 
-    private final PrintWriter mSystemOutWriter;
-
     static {
         addLogGroupEnum(ShellProtoLogGroup.values());
     }
@@ -111,11 +109,11 @@ public class ShellProtoLogImpl extends BaseProtoLogImpl {
         return sServiceInstance;
     }
 
-    public void startTextLogging(Context context, String... groups) {
+    public int startTextLogging(Context context, String[] groups, PrintWriter pw) {
         try {
             mViewerConfig.loadViewerConfig(
                     context.getResources().openRawResource(R.raw.wm_shell_protolog));
-            setLogging(true /* setTextLogging */, true, mSystemOutWriter, groups);
+            return setLogging(true /* setTextLogging */, true, pw, groups);
         } catch (IOException e) {
             Log.i(TAG, "Unable to load log definitions: IOException while reading "
                     + "wm_shell_protolog. " + e);
@@ -123,16 +121,15 @@ public class ShellProtoLogImpl extends BaseProtoLogImpl {
             Log.i(TAG, "Unable to load log definitions: JSON parsing exception while reading "
                     + "wm_shell_protolog. " + e);
         }
+        return -1;
     }
 
-    public void stopTextLogging(String... groups) {
-        setLogging(true /* setTextLogging */, false, mSystemOutWriter, groups);
+    public int stopTextLogging(String[] groups, PrintWriter pw) {
+        return setLogging(true /* setTextLogging */, false, pw, groups);
     }
 
     private ShellProtoLogImpl() {
-        super(new File(LOG_FILENAME), null, BUFFER_CAPACITY,
-                new ProtoLogViewerConfigReader());
-        mSystemOutWriter = new PrintWriter(System.out, true);
+        super(new File(LOG_FILENAME), null, BUFFER_CAPACITY, new ProtoLogViewerConfigReader());
     }
 }
 

@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -151,6 +152,12 @@ final class TaskDisplayArea extends DisplayArea<Task> {
      * on it to be finished before removing this object.
      */
     private boolean mRemoved;
+
+
+    /**
+     * The id of a leaf task that most recently being moved to front.
+     */
+    private int mLastLeafTaskToFrontId;
 
     TaskDisplayArea(DisplayContent displayContent, WindowManagerService service, String name,
             int displayAreaFeature) {
@@ -382,7 +389,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
                     this /* child */, true /* includingParents */);
         }
 
-        child.updateTaskMovement(moveToTop);
+        child.updateTaskMovement(moveToTop, targetPosition);
 
         mDisplayContent.layoutAndAssignWindowLayersIfNeeded();
 
@@ -403,6 +410,30 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         if (mChildren.indexOf(child) != oldPosition) {
             onStackOrderChanged(child);
         }
+    }
+
+    void onLeafTaskRemoved(int taskId) {
+        if (mLastLeafTaskToFrontId == taskId) {
+            mLastLeafTaskToFrontId = INVALID_TASK_ID;
+        }
+    }
+
+    void onLeafTaskMoved(Task t, boolean toTop) {
+        if (!toTop) {
+            if (t.mTaskId == mLastLeafTaskToFrontId) {
+                mLastLeafTaskToFrontId = INVALID_TASK_ID;
+            }
+            return;
+        }
+        if (t.mTaskId == mLastLeafTaskToFrontId || t.topRunningActivityLocked() == null) {
+            return;
+        }
+
+        mLastLeafTaskToFrontId = t.mTaskId;
+        EventLogTags.writeWmTaskToFront(t.mUserId, t.mTaskId);
+        // Notifying only when a leak task moved to front. Or the listeners would be notified
+        // couple times from the leaf task all the way up to the root task.
+        mAtmService.getTaskChangeNotificationController().notifyTaskMovedToFront(t.getTaskInfo());
     }
 
     @Override

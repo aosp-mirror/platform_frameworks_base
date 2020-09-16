@@ -237,7 +237,7 @@ public class SettingsToPropertiesMapper {
             SystemProperties.set(key, value);
         } catch (Exception e) {
             // Failure to set a property can be caused by SELinux denial. This usually indicates
-            // that the property wasn't whitelisted in sepolicy.
+            // that the property wasn't allowlisted in sepolicy.
             // No need to report it on all user devices, only on debug builds.
             log("Unable to set property " + key + " value '" + value + "'", e);
         }

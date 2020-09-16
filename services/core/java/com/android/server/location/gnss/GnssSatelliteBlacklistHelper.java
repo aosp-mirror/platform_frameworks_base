@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Detects blacklist change and updates the blacklist.
+ * Detects denylist change and updates the denylist.
  */
 class GnssSatelliteBlacklistHelper {
 

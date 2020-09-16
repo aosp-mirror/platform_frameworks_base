@@ -22,6 +22,7 @@ import android.graphics.Rect;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.service.notification.StatusBarNotification;
 
 import com.android.internal.statusbar.StatusBarIcon;
@@ -222,6 +223,11 @@ oneway interface IStatusBar
      * Notifies SystemUI to stop tracing.
      */
     void stopTracing();
+
+    /**
+     * Handles a logging command from the WM shell command.
+     */
+    void handleWindowManagerLoggingCommand(in String[] args, in ParcelFileDescriptor outFd);
 
     /**
      * If true, suppresses the ambient display from showing. If false, re-enables the ambient

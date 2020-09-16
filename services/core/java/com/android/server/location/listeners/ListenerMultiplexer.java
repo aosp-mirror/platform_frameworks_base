@@ -88,7 +88,7 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
     private boolean mServiceRegistered = false;
 
     @GuardedBy("mRegistrations")
-    private TMergedRequest mCurrentRequest;
+    @Nullable private TMergedRequest mCurrentRequest;
 
     /**
      * Should be implemented to register with the backing service with the given merged request, and

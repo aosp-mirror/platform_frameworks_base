@@ -101,7 +101,7 @@ public final class AccessibilityTargetHelper {
 
     /**
      * Returns list of {@link AccessibilityTarget} of the installed accessibility service,
-     * accessibility activity, and white listing feature including accessibility feature's package
+     * accessibility activity, and allowlisting feature including accessibility feature's package
      * name, component id, etc.
      *
      * @param context The context of the application.

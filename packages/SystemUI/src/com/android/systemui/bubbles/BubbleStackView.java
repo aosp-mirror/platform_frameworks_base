@@ -1162,6 +1162,16 @@ public class BubbleStackView extends FrameLayout
         updateOverflowVisibility();
     }
 
+    void updateOverflowButtonDot() {
+        for (Bubble b : mBubbleData.getOverflowBubbles()) {
+            if (b.showDot()) {
+                mBubbleOverflow.setShowDot(true);
+                return;
+            }
+        }
+        mBubbleOverflow.setShowDot(false);
+    }
+
     /**
      * Handle theme changes.
      */
@@ -1487,7 +1497,11 @@ public class BubbleStackView extends FrameLayout
             if (v instanceof BadgedImageView
                     && ((BadgedImageView) v).getKey().equals(bubble.getKey())) {
                 mBubbleContainer.removeViewAt(i);
-                bubble.cleanupViews();
+                if (mBubbleData.hasOverflowBubbleWithKey(bubble.getKey())) {
+                    bubble.cleanupExpandedView();
+                } else {
+                    bubble.cleanupViews();
+                }
                 updatePointerPosition();
                 logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
                 return;

@@ -3384,12 +3384,12 @@ public abstract class ContentResolver implements ContentInterface {
     }
 
     /**
-     * Gets the master auto-sync setting that applies to all the providers and accounts.
+     * Gets the global auto-sync setting that applies to all the providers and accounts.
      * If this is false then the per-provider auto-sync setting is ignored.
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#READ_SYNC_SETTINGS}.
      *
-     * @return the master auto-sync setting that applies to all the providers and accounts
+     * @return the global auto-sync setting that applies to all the providers and accounts
      */
     public static boolean getMasterSyncAutomatically() {
         try {
@@ -3412,12 +3412,12 @@ public abstract class ContentResolver implements ContentInterface {
     }
 
     /**
-     * Sets the master auto-sync setting that applies to all the providers and accounts.
+     * Sets the global auto-sync setting that applies to all the providers and accounts.
      * If this is false then the per-provider auto-sync setting is ignored.
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#WRITE_SYNC_SETTINGS}.
      *
-     * @param sync the master auto-sync setting that applies to all the providers and accounts
+     * @param sync the global auto-sync setting that applies to all the providers and accounts
      */
     public static void setMasterSyncAutomatically(boolean sync) {
         setMasterSyncAutomaticallyAsUser(sync, UserHandle.myUserId());

@@ -164,6 +164,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.ChangedPackages;
+import android.content.pm.Checksum;
 import android.content.pm.ComponentInfo;
 import android.content.pm.DataLoaderType;
 import android.content.pm.FallbackCategoryProvider;
@@ -2141,7 +2142,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 res.removedInfo.sendPackageRemovedBroadcasts(killApp);
             }
 
-            // Whitelist any restricted permissions first as some may be runtime
+            // Allowlist any restricted permissions first as some may be runtime
             // that the installer requested to be granted at install time.
             if (whitelistedRestrictedPermissions != null
                     && !whitelistedRestrictedPermissions.isEmpty()) {
@@ -2459,8 +2460,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void getChecksums(@NonNull String packageName, boolean includeSplits,
-            @PackageManager.FileChecksumKind int optional,
-            @PackageManager.FileChecksumKind int required, @Nullable List trustedInstallers,
+            @Checksum.Kind int optional,
+            @Checksum.Kind int required, @Nullable List trustedInstallers,
             @NonNull IntentSender statusReceiver, int userId) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(statusReceiver);
@@ -3616,7 +3617,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 ver.fingerprint = Build.FINGERPRINT;
             }
 
-            // Grandfather existing (installed before Q) non-system apps to hide
+            // Legacy existing (installed before Q) non-system apps to hide
             // their icons in launcher.
             if (!mOnlyCore && mIsPreQUpgrade) {
                 Slog.i(TAG, "Whitelisting all existing apps to hide their icons");
@@ -7480,7 +7481,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             } else {
                 // we have an instant application locally, but, we can't admit that since
-                // callers shouldn't be able to determine prior browsing. create a dummy
+                // callers shouldn't be able to determine prior browsing. create a placeholder
                 // auxiliary response so the downstream code behaves as if there's an
                 // instant application available externally. when it comes time to start
                 // the instant application, we'll do the right thing.
@@ -9530,10 +9531,16 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
+        // The version of the application on the /system partition is less than or
+        // equal to the version on the /data partition. Throw an exception and use
+        // the application already installed on the /data partition.
         if (scanSystemPartition && isSystemPkgUpdated && !isSystemPkgBetter) {
-            // The version of the application on the /system partition is less than or
-            // equal to the version on the /data partition. Throw an exception and use
-            // the application already installed on the /data partition.
+            // In the case of a skipped package, commitReconciledScanResultLocked is not called to
+            // add the object to the "live" data structures, so this is the final mutation step
+            // for the package. Which means it needs to be finalized here to cache derived fields.
+            // This is relevant for cases where the disabled system package is used for flags or
+            // other metadata.
+            ((ParsedPackage) parsedPackage).hideAsFinal();
             throw new PackageManagerException(Log.WARN, "Package " + parsedPackage.getPackageName()
                     + " at " + parsedPackage.getPath() + " ignored: updated version "
                     + pkgSetting.versionCode + " better than this "
@@ -11100,7 +11107,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (sharedUserSetting != null && sharedUserSetting.isPrivileged()) {
                 // Exempt SharedUsers signed with the platform key.
                 // TODO(b/72378145) Fix this exemption. Force signature apps
-                // to whitelist their privileged permissions just like other
+                // to allowlist their privileged permissions just like other
                 // priv-apps.
                 synchronized (mLock) {
                     PackageSetting platformPkgSetting = mSettings.mPackages.get("android");
@@ -16460,7 +16467,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     /**
      * A container of all data needed to commit a package to in-memory data structures and to disk.
-     * TODO: move most of the data contained her into a PackageSetting for commit.
+     * TODO: move most of the data contained here into a PackageSetting for commit.
      */
     private static class ReconciledPackage {
         public final ReconcileRequest request;
@@ -17230,7 +17237,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Notify BackgroundDexOptService that the package has been changed.
             // If this is an update of a package which used to fail to compile,
-            // BackgroundDexOptService will remove it from its blacklist.
+            // BackgroundDexOptService will remove it from its denylist.
             // TODO: Layering violation
             BackgroundDexOptService.notifyPackageChanged(packageName);
 
@@ -19862,7 +19869,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final PreferredIntentResolver pir = mSettings.editPreferredActivitiesLPw(userId);
             final ArrayList<PreferredActivity> existing = pir.findFilters(filter);
             if (removeExisting && existing != null) {
-                mSettings.removeFiltersLPw(pir, filter, existing);
+                Settings.removeFilters(pir, filter, existing);
             }
             pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
             scheduleWritePackageRestrictionsLocked(userId);
@@ -19963,7 +19970,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
                 if (existing != null) {
-                    mSettings.removeFiltersLPw(pir, filter, existing);
+                    Settings.removeFilters(pir, filter, existing);
                 }
             }
         }

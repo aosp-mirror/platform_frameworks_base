@@ -1001,7 +1001,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Slog.i(TAG, "hasBindAppWidgetPermission() " + UserHandle.getCallingUserId());
         }
 
-        // A special permission is required for managing white listing.
+        // A special permission is required for managing allowlisting.
         mSecurityPolicy.enforceModifyAppWidgetBindPermissions(packageName);
 
         synchronized (mLock) {
@@ -1025,7 +1025,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Slog.i(TAG, "setBindAppWidgetPermission() " + UserHandle.getCallingUserId());
         }
 
-        // A special permission is required for managing white listing.
+        // A special permission is required for managing allowlisting.
         mSecurityPolicy.enforceModifyAppWidgetBindPermissions(packageName);
 
         synchronized (mLock) {
@@ -1117,7 +1117,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
 
         // If the provider is not under the calling user, make sure this
-        // provider is white listed for access from the parent.
+        // provider is allowlisted for access from the parent.
         if (!mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
                 providerComponent.getPackageName(), providerProfileId)) {
             return false;
@@ -1126,7 +1126,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         synchronized (mLock) {
             ensureGroupStateLoadedLocked(userId);
 
-            // A special permission or white listing is required to bind widgets.
+            // A special permission or allowlisting is required to bind widgets.
             if (!mSecurityPolicy.hasCallerBindPermissionOrBindWhiteListedLocked(
                     callingPackage)) {
                 return false;
@@ -1741,7 +1741,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     continue;
                 }
 
-                // Add providers only for the requested profile that are white-listed.
+                // Add providers only for the requested profile that are allowlisted.
                 final int providerProfileId = info.getProfile().getIdentifier();
                 if (providerProfileId == profileId
                         && mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
@@ -3576,7 +3576,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     @Override
     public void onCrossProfileWidgetProvidersChanged(int userId, List<String> packages) {
         final int parentId = mSecurityPolicy.getProfileParent(userId);
-        // We care only if the white-listed package is in a profile of
+        // We care only if the allowlisted package is in a profile of
         // the group parent as only the parent can add widgets from the
         // profile and not the other way around.
         if (parentId != userId) {
@@ -3600,7 +3600,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                             userId, null);
                 }
 
-                // Remove widgets from hosts in parent user for packages not in the whitelist
+                // Remove widgets from hosts in parent user for packages not in the allowlist
                 final int removedCount = previousPackages.size();
                 for (int i = 0; i < removedCount; ++i) {
                     removeWidgetsForPackageLocked(previousPackages.valueAt(i),

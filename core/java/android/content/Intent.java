@@ -2861,7 +2861,7 @@ public class Intent implements Parcelable, Cloneable {
      * This should <em>only</em> be used to determine when the wallpaper
      * has changed to show the new wallpaper to the user.  You should certainly
      * never, in response to this, change the wallpaper or other attributes of
-     * it such as the suggested size.  That would be crazy, right?  You'd cause
+     * it such as the suggested size.  That would be unexpected, right?  You'd cause
      * all kinds of loops, especially if other apps are doing similar things,
      * right?  Of course.  So please don't do this.
      *
@@ -3975,7 +3975,7 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
 
     /**
-     * Broadcast intent sent by the RecoverySystem to inform listeners that a master clear (wipe)
+     * Broadcast intent sent by the RecoverySystem to inform listeners that a global clear (wipe)
      * is about to be performed.
      * @hide
      */

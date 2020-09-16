@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -32,10 +33,12 @@ import static org.mockito.Mockito.when;
 import android.content.res.Resources;
 import android.metrics.LogMaker;
 import android.testing.AndroidTestingRunner;
+import android.view.LayoutInflater;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
@@ -48,15 +51,20 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.ForegroundServiceDungeonView;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -111,6 +119,13 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     @Mock private NotifCollection mNotifCollection;
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private IStatusBarService mIStatusBarService;
+    @Mock private UiEventLogger mUiEventLogger;
+    @Mock private ForegroundServiceDismissalFeatureController mFgFeatureController;
+    @Mock private ForegroundServiceSectionController mFgServicesSectionController;
+    @Mock private ForegroundServiceDungeonView mForegroundServiceDungeonView;
+    @Mock private LayoutInflater mLayoutInflater;
+    @Mock private NotificationRemoteInputManager mRemoteInputManager;
+    @Mock private RemoteInputController mRemoteInputController;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -123,6 +138,9 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
 
         when(mNotificationSwipeHelperBuilder.build()).thenReturn(mNotificationSwipeHelper);
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
+        when(mFgServicesSectionController.createView(mLayoutInflater))
+                .thenReturn(mForegroundServiceDungeonView);
+        when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
 
         mController = new NotificationStackScrollLayoutController(
                 true,
@@ -152,12 +170,16 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mNotifPipeline,
                 mNotifCollection,
                 mEntryManager,
-                mIStatusBarService
+                mIStatusBarService,
+                mUiEventLogger,
+                mFgFeatureController,
+                mFgServicesSectionController,
+                mLayoutInflater,
+                mRemoteInputManager
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);
     }
-
 
     @Test
     public void testAttach_viewAlreadyAttached() {
@@ -270,14 +292,11 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
         verify(mNotificationStackScrollLayout).updateSensitiveness(false, true);
     }
 
-
     @Test
-    public void testOnMenuShownLogging() { ;
-
+    public void testOnMenuShownLogging() {
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class, RETURNS_DEEP_STUBS);
         when(row.getEntry().getSbn().getLogMaker()).thenReturn(new LogMaker(
                 MetricsProto.MetricsEvent.VIEW_UNKNOWN));
-
 
         ArgumentCaptor<OnMenuEventListener> onMenuEventListenerArgumentCaptor =
                 ArgumentCaptor.forClass(OnMenuEventListener.class);
@@ -300,7 +319,6 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
         when(row.getEntry().getSbn().getLogMaker()).thenReturn(new LogMaker(
                 MetricsProto.MetricsEvent.VIEW_UNKNOWN));
 
-
         ArgumentCaptor<OnMenuEventListener> onMenuEventListenerArgumentCaptor =
                 ArgumentCaptor.forClass(OnMenuEventListener.class);
 
@@ -315,6 +333,39 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
         verify(row.getEntry().getSbn()).getLogMaker();  // This writes most of the log data
         verify(mMetricsLogger).write(logMatcher(MetricsProto.MetricsEvent.ACTION_TOUCH_GEAR,
                 MetricsProto.MetricsEvent.TYPE_ACTION));
+    }
+
+    @Test
+    public void testDismissListener() {
+        ArgumentCaptor<NotificationStackScrollLayout.DismissListener>
+                dismissListenerArgumentCaptor = ArgumentCaptor.forClass(
+                NotificationStackScrollLayout.DismissListener.class);
+
+        mController.attach(mNotificationStackScrollLayout);
+
+        verify(mNotificationStackScrollLayout).setDismissListener(
+                dismissListenerArgumentCaptor.capture());
+        NotificationStackScrollLayout.DismissListener dismissListener =
+                dismissListenerArgumentCaptor.getValue();
+
+        dismissListener.onDismiss(ROWS_ALL);
+        verify(mUiEventLogger).log(NotificationPanelEvent.fromSelection(ROWS_ALL));
+    }
+
+    @Test
+    public void testForegroundDismissEnabled() {
+        when(mFgFeatureController.isForegroundServiceDismissalEnabled()).thenReturn(true);
+        mController.attach(mNotificationStackScrollLayout);
+        verify(mNotificationStackScrollLayout).initializeForegroundServiceSection(
+                mForegroundServiceDungeonView);
+    }
+
+    @Test
+    public void testForegroundDismissaDisabled() {
+        when(mFgFeatureController.isForegroundServiceDismissalEnabled()).thenReturn(false);
+        mController.attach(mNotificationStackScrollLayout);
+        verify(mNotificationStackScrollLayout, never()).initializeForegroundServiceSection(
+                any(ForegroundServiceDungeonView.class));
     }
 
     private LogMaker logMatcher(int category, int type) {

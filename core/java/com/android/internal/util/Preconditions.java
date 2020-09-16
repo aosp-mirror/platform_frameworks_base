@@ -207,7 +207,7 @@ public class Preconditions {
      * @param message the message of the security exception to be thrown
      * @throws SecurityException if {@code expression} is false
      */
-    public static void checkSecurity(final boolean expression, final String message) {
+    public static void checkCallAuthorization(final boolean expression, final String message) {
         if (!expression) {
             throw new SecurityException(message);
         }

@@ -59,7 +59,9 @@ class AndroidPackageInfoFlagBehaviorTest : AndroidPackageParsingTestBase() {
 
                 fun appInfo(flag: Int, fieldFunction: (ApplicationInfo) -> List<Any?>) = Param(
                         flag, ApplicationInfo::class.java.simpleName,
-                        ::oldAppInfo, ::newAppInfo, fieldFunction
+                        { pkg, flags -> oldAppInfo(pkg, flags) },
+                        { pkg, flags -> newAppInfo(pkg, flags) },
+                        fieldFunction
                 )
             }
 

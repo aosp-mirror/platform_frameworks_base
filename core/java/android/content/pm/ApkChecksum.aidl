@@ -16,5 +16,5 @@
 
 package android.content.pm;
 
-parcelable FileChecksum;
+parcelable ApkChecksum;
 

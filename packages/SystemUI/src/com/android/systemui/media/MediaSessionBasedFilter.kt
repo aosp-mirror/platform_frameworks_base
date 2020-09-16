@@ -52,9 +52,12 @@ class MediaSessionBasedFilter @Inject constructor(
     private val packageControllers: LinkedHashMap<String, MutableList<MediaController>> =
             LinkedHashMap()
 
-    // Keep track of the key used for the session tokens. This information is used to know when
+    // Keep track of the key used for the session tokens. This information is used to know when to
     // dispatch a removed event so that a media object for a local session will be removed.
-    private val keyedTokens: MutableMap<String, MutableList<MediaSession.Token>> = mutableMapOf()
+    private val keyedTokens: MutableMap<String, MutableSet<MediaSession.Token>> = mutableMapOf()
+
+    // Keep track of which media session tokens have associated notifications.
+    private val tokensWithNotifications: MutableSet<MediaSession.Token> = mutableSetOf()
 
     private val sessionListener = object : MediaSessionManager.OnActiveSessionsChangedListener {
         override fun onActiveSessionsChanged(controllers: List<MediaController>) {
@@ -90,6 +93,9 @@ class MediaSessionBasedFilter @Inject constructor(
      */
     override fun onMediaDataLoaded(key: String, oldKey: String?, info: MediaData) {
         backgroundExecutor.execute {
+            info.token?.let {
+                tokensWithNotifications.add(it)
+            }
             val isMigration = oldKey != null && key != oldKey
             if (isMigration) {
                 keyedTokens.remove(oldKey)?.let { removed -> keyedTokens.put(key, removed) }
@@ -99,7 +105,7 @@ class MediaSessionBasedFilter @Inject constructor(
                     tokens ->
                     tokens.add(info.token)
                 } ?: run {
-                    val tokens = mutableListOf(info.token)
+                    val tokens = mutableSetOf(info.token)
                     keyedTokens.put(key, tokens)
                 }
             }
@@ -110,7 +116,8 @@ class MediaSessionBasedFilter @Inject constructor(
             }
             // Limiting search to only apps with a single remote session.
             val remote = if (remoteControllers?.size == 1) remoteControllers.firstOrNull() else null
-            if (isMigration || remote == null || remote.sessionToken == info.token) {
+            if (isMigration || remote == null || remote.sessionToken == info.token ||
+                    !tokensWithNotifications.contains(remote.sessionToken)) {
                 // Not filtering in this case. Passing the event along to listeners.
                 dispatchMediaDataLoaded(key, oldKey, info)
             } else {
@@ -159,5 +166,6 @@ class MediaSessionBasedFilter @Inject constructor(
                 packageControllers.put(controller.packageName, tokens)
             }
         }
+        tokensWithNotifications.retainAll(controllers.map { it.sessionToken })
     }
 }

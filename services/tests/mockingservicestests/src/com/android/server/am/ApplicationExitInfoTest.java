@@ -120,6 +120,7 @@ public class ApplicationExitInfoTest {
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
         mProcessList = spy(new ProcessList());
+        ProcessList.sKillHandler = null;
         mAppExitInfoTracker = spy(new AppExitInfoTracker());
         setFieldValue(AppExitInfoTracker.class, mAppExitInfoTracker, "mIsolatedUidRecords",
                 spy(mAppExitInfoTracker.new IsolatedUidRecords()));
@@ -147,6 +148,7 @@ public class ApplicationExitInfoTest {
     public void tearDown() {
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         mHandlerThread.quit();
+        ProcessList.sKillHandler = null;
     }
 
     private static <T> void setFieldValue(Class clazz, Object obj, String fieldName, T val) {

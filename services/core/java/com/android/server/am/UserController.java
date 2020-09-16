@@ -423,7 +423,7 @@ class UserController implements Handler.Callback {
         for (Integer userId : mUserLru) {
             UserState uss = mStartedUsers.get(userId);
             if (uss == null) {
-                // Shouldn't happen, but be sane if it does.
+                // Shouldn't happen, but recover if it does.
                 continue;
             }
             if (uss.state == UserState.STATE_STOPPING

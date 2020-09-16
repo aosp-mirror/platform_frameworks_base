@@ -150,6 +150,15 @@ public class DozeSensors {
                         true /* reports touch coordinates */,
                         true /* touchscreen */,
                         dozeLog),
+                new TriggerSensor(
+                        findSensorWithType(config.udfpsLongPressSensorType()),
+                        Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
+                        false /* settingDef */,
+                        true /* configured */,
+                        DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS,
+                        true /* reports touch coordinates */,
+                        true /* touchscreen */,
+                        dozeLog),
                 new PluginSensor(
                         new SensorManagerPlugin.Sensor(TYPE_WAKE_DISPLAY),
                         Settings.Secure.DOZE_WAKE_DISPLAY_GESTURE,

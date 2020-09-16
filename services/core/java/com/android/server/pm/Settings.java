@@ -3183,7 +3183,7 @@ public final class Settings {
         }
     }
 
-    void removeFiltersLPw(@NonNull PreferredIntentResolver pir,
+    static void removeFilters(@NonNull PreferredIntentResolver pir,
             @NonNull IntentFilter filter, @NonNull List<PreferredActivity> existing) {
         if (PackageManagerService.DEBUG_PREFERRED) {
             Slog.i(TAG, existing.size() + " preferred matches for:");
@@ -3405,7 +3405,7 @@ public final class Settings {
             final PreferredIntentResolver pir = editPreferredActivitiesLPw(userId);
             final List<PreferredActivity> existing = pir.findFilters(filter);
             if (existing != null) {
-                removeFiltersLPw(pir, filter, existing);
+                removeFilters(pir, filter, existing);
             }
             PreferredActivity pa = new PreferredActivity(filter, systemMatch, set, cn, true);
             pir.addFilter(pa);
