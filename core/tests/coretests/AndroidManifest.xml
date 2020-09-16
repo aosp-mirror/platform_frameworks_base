@@ -129,6 +129,7 @@
     <!-- virtual display test permissions -->
     <uses-permission android:name="android.permission.CAPTURE_VIDEO_OUTPUT" />
     <uses-permission android:name="android.permission.CAPTURE_SECURE_VIDEO_OUTPUT" />
+    <uses-permission android:name="android.permission.ADD_TRUSTED_DISPLAY" />
 
     <!-- color extraction test permissions -->
     <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />
