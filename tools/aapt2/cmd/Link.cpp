@@ -2334,11 +2334,15 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
   }
 
   // Populate some default no-compress extensions that are already compressed.
-  options_.extensions_to_not_compress.insert(
-      {".jpg",   ".jpeg", ".png",  ".gif", ".wav",  ".mp2",  ".mp3",  ".ogg",
-          ".aac",   ".mpg",  ".mpeg", ".mid", ".midi", ".smf",  ".jet",  ".rtttl",
-          ".imy",   ".xmf",  ".mp4",  ".m4a", ".m4v",  ".3gp",  ".3gpp", ".3g2",
-          ".3gpp2", ".amr",  ".awb",  ".wma", ".wmv",  ".webm", ".mkv"});
+  options_.extensions_to_not_compress.insert({
+      // Image extensions
+      ".jpg", ".jpeg", ".png", ".gif", ".webp",
+      // Audio extensions
+      ".wav", ".mp2", ".mp3", ".ogg", ".aac", ".mid", ".midi", ".smf", ".jet", ".rtttl", ".imy",
+      ".xmf", ".amr", ".awb",
+      // Audio/video extensions
+      ".mpg", ".mpeg", ".mp4", ".m4a", ".m4v", ".3gp", ".3gpp", ".3g2", ".3gpp2", ".wma", ".wmv",
+      ".webm", ".mkv"});
 
   // Turn off auto versioning for static-libs.
   if (context.GetPackageType() == PackageType::kStaticLib) {

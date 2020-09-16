@@ -19,6 +19,7 @@ package com.android.server.pm.parsing;
 import android.annotation.CheckResult;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.apex.ApexInfo;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -56,6 +57,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.pkg.PackageStateUnserialized;
 
 import libcore.util.EmptyArray;
@@ -218,7 +220,9 @@ public class PackageInfoUtils {
         }
 
         ApplicationInfo info = PackageInfoWithoutStateUtils.generateApplicationInfoUnchecked(pkg,
-                flags, state, userId);
+                flags, state, userId, false /* assignUserFields */);
+
+        initForUser(info, pkg, userId);
 
         if (pkgSetting != null) {
             // TODO(b/135203078): Remove PackageParser1/toAppInfoWithoutState and clean all this up
@@ -349,7 +353,11 @@ public class PackageInfoUtils {
         if (i == null) return null;
 
         InstrumentationInfo info =
-                PackageInfoWithoutStateUtils.generateInstrumentationInfo(i, pkg, flags, userId);
+                PackageInfoWithoutStateUtils.generateInstrumentationInfo(i, pkg, flags, userId,
+                        false /* assignUserFields */);
+
+        initForUser(info, pkg, userId);
+
         if (info == null) {
             return null;
         }
@@ -494,6 +502,90 @@ public class PackageInfoUtils {
         // TODO: Add state specific flags
         return pkgWithoutStateFlags;
         // @formatter:on
+    }
+
+    private static void initForUser(ApplicationInfo output, AndroidPackage input,
+            @UserIdInt int userId) {
+        PackageImpl pkg = ((PackageImpl) input);
+        String packageName = input.getPackageName();
+        output.uid = UserHandle.getUid(userId, UserHandle.getAppId(input.getUid()));
+
+        if ("android".equals(packageName)) {
+            output.dataDir = PackageInfoWithoutStateUtils.SYSTEM_DATA_PATH;
+            return;
+        }
+
+        // For performance reasons, all these paths are built as strings
+        if (userId == UserHandle.USER_SYSTEM) {
+            output.credentialProtectedDataDir =
+                    pkg.getBaseAppDataCredentialProtectedDirForSystemUser() + packageName;
+            output.deviceProtectedDataDir =
+                    pkg.getBaseAppDataDeviceProtectedDirForSystemUser() + packageName;
+        } else {
+            // Convert /data/user/0/ -> /data/user/1/com.example.app
+            String userIdString = String.valueOf(userId);
+            int credentialLength = pkg.getBaseAppDataCredentialProtectedDirForSystemUser().length();
+            output.credentialProtectedDataDir =
+                    new StringBuilder(pkg.getBaseAppDataCredentialProtectedDirForSystemUser())
+                            .replace(credentialLength - 2, credentialLength - 1, userIdString)
+                            .append(packageName)
+                            .toString();
+            int deviceLength = pkg.getBaseAppDataDeviceProtectedDirForSystemUser().length();
+            output.deviceProtectedDataDir =
+                    new StringBuilder(pkg.getBaseAppDataDeviceProtectedDirForSystemUser())
+                            .replace(deviceLength - 2, deviceLength - 1, userIdString)
+                            .append(packageName)
+                            .toString();
+        }
+
+        if (input.isDefaultToDeviceProtectedStorage()
+                && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
+            output.dataDir = output.deviceProtectedDataDir;
+        } else {
+            output.dataDir = output.credentialProtectedDataDir;
+        }
+    }
+
+    // This duplicates the ApplicationInfo variant because it uses field assignment and the classes
+    // don't inherit from each other, unfortunately. Consolidating logic would introduce overhead.
+    private static void initForUser(InstrumentationInfo output, AndroidPackage input,
+            @UserIdInt int userId) {
+        PackageImpl pkg = ((PackageImpl) input);
+        String packageName = input.getPackageName();
+        if ("android".equals(packageName)) {
+            output.dataDir = PackageInfoWithoutStateUtils.SYSTEM_DATA_PATH;
+            return;
+        }
+
+        // For performance reasons, all these paths are built as strings
+        if (userId == UserHandle.USER_SYSTEM) {
+            output.credentialProtectedDataDir =
+                    pkg.getBaseAppDataCredentialProtectedDirForSystemUser() + packageName;
+            output.deviceProtectedDataDir =
+                    pkg.getBaseAppDataDeviceProtectedDirForSystemUser() + packageName;
+        } else {
+            // Convert /data/user/0/ -> /data/user/1/com.example.app
+            String userIdString = String.valueOf(userId);
+            int credentialLength = pkg.getBaseAppDataCredentialProtectedDirForSystemUser().length();
+            output.credentialProtectedDataDir =
+                    new StringBuilder(pkg.getBaseAppDataCredentialProtectedDirForSystemUser())
+                            .replace(credentialLength - 2, credentialLength - 1, userIdString)
+                            .append(packageName)
+                            .toString();
+            int deviceLength = pkg.getBaseAppDataDeviceProtectedDirForSystemUser().length();
+            output.deviceProtectedDataDir =
+                    new StringBuilder(pkg.getBaseAppDataDeviceProtectedDirForSystemUser())
+                            .replace(deviceLength - 2, deviceLength - 1, userIdString)
+                            .append(packageName)
+                            .toString();
+        }
+
+        if (input.isDefaultToDeviceProtectedStorage()
+                && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
+            output.dataDir = output.deviceProtectedDataDir;
+        } else {
+            output.dataDir = output.credentialProtectedDataDir;
+        }
     }
 
     /**

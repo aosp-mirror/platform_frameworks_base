@@ -4041,6 +4041,17 @@ message LmkStateChanged {
  *      system/core/lmkd/lmkd.c
  */
 message LmkKillOccurred {
+    enum Reason {
+        UNKNOWN = 0;
+        PRESSURE_AFTER_KILL = 1;
+        NOT_RESPONDING = 2;
+        LOW_SWAP_AND_THRASHING = 3;
+        LOW_MEM_AND_SWAP = 4;
+        LOW_MEM_AND_THRASHING = 5;
+        DIRECT_RECL_AND_THRASHING = 6;
+        LOW_MEM_AND_SWAP_UTIL = 7;
+    }
+
     // The uid if available. -1 means not available.
     optional int32 uid = 1 [(is_uid) = true];
 
@@ -4070,6 +4081,15 @@ message LmkKillOccurred {
 
     // Min oom adj score considered by lmkd.
     optional int32 min_oom_score = 10;
+
+    // Free physical memory on device at LMK time.
+    optional int32 free_mem_kb = 11;
+
+    // Free swap on device at LMK time.
+    optional int32 free_swap_kb = 12;
+
+    // What triggered the LMK event.
+    optional Reason reason = 13;
 }
 
 /*

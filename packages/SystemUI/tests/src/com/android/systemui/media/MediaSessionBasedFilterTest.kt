@@ -225,7 +225,7 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
 
     @Test
     fun remoteSession_loadedEventNotFiltered() {
-        // GIVEN a remove session
+        // GIVEN a remote session
         whenever(controller1.getPlaybackInfo()).thenReturn(remotePlaybackInfo)
         val controllers = listOf(controller1)
         whenever(mediaSessionManager.getActiveSessions(any())).thenReturn(controllers)
@@ -260,6 +260,22 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
     }
 
     @Test
+    fun remoteAndLocalSessions_remoteSessionWithoutNotification() {
+        // GIVEN remote and local sessions
+        whenever(controller2.getPlaybackInfo()).thenReturn(remotePlaybackInfo)
+        val controllers = listOf(controller1, controller2)
+        whenever(mediaSessionManager.getActiveSessions(any())).thenReturn(controllers)
+        sessionListener.onActiveSessionsChanged(controllers)
+        // WHEN a loaded event is received that matches the local session
+        filter.onMediaDataLoaded(KEY, null, mediaData1)
+        bgExecutor.runAllReady()
+        fgExecutor.runAllReady()
+        // THEN the event is not filtered because there isn't a notification for the remote
+        // session.
+        verify(mediaListener).onMediaDataLoaded(eq(KEY), eq(null), eq(mediaData1))
+    }
+
+    @Test
     fun remoteAndLocalHaveDifferentKeys_localLoadedEventFiltered() {
         // GIVEN remote and local sessions
         val key1 = "KEY_1"
@@ -282,6 +298,29 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
         verify(mediaListener, never()).onMediaDataLoaded(eq(key2), eq(null), eq(mediaData2))
         // AND there should be a removed event for key2
         verify(mediaListener).onMediaDataRemoved(eq(key2))
+    }
+
+    @Test
+    fun remoteAndLocalHaveDifferentKeys_remoteSessionWithoutNotification() {
+        // GIVEN remote and local sessions
+        val key1 = "KEY_1"
+        val key2 = "KEY_2"
+        whenever(controller2.getPlaybackInfo()).thenReturn(remotePlaybackInfo)
+        val controllers = listOf(controller1, controller2)
+        whenever(mediaSessionManager.getActiveSessions(any())).thenReturn(controllers)
+        sessionListener.onActiveSessionsChanged(controllers)
+        // WHEN a loaded event is received that matches the local session
+        filter.onMediaDataLoaded(key1, null, mediaData1)
+        bgExecutor.runAllReady()
+        fgExecutor.runAllReady()
+        // THEN the event is not filtered
+        verify(mediaListener).onMediaDataLoaded(eq(key1), eq(null), eq(mediaData1))
+        // WHEN a loaded event is received that matches the remote session
+        filter.onMediaDataLoaded(key2, null, mediaData2)
+        bgExecutor.runAllReady()
+        fgExecutor.runAllReady()
+        // THEN the event is not filtered
+        verify(mediaListener).onMediaDataLoaded(eq(key2), eq(null), eq(mediaData2))
     }
 
     @Test

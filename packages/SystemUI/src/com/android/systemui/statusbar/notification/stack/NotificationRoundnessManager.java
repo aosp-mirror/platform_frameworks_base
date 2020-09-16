@@ -24,6 +24,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import java.util.HashSet;
@@ -34,7 +35,7 @@ import javax.inject.Inject;
  * A class that manages the roundness for notification views
  */
 @SysUISingleton
-public class NotificationRoundnessManager implements OnHeadsUpChangedListener {
+public class NotificationRoundnessManager {
 
     private final ExpandableView[] mFirstInSectionViews;
     private final ExpandableView[] mLastInSectionViews;
@@ -59,27 +60,7 @@ public class NotificationRoundnessManager implements OnHeadsUpChangedListener {
         mBypassController = keyguardBypassController;
     }
 
-    @Override
-    public void onHeadsUpPinned(NotificationEntry headsUp) {
-        updateView(headsUp.getRow(), false /* animate */);
-    }
-
-    @Override
-    public void onHeadsUpUnPinned(NotificationEntry headsUp) {
-        updateView(headsUp.getRow(), true /* animate */);
-    }
-
-    public void onHeadsupAnimatingAwayChanged(ExpandableNotificationRow row,
-            boolean isAnimatingAway) {
-        updateView(row, false /* animate */);
-    }
-
-    @Override
-    public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-        updateView(entry.getRow(), false /* animate */);
-    }
-
-    private void updateView(ExpandableView view, boolean animate) {
+    public void updateView(ExpandableView view, boolean animate) {
         boolean changed = updateViewWithoutCallback(view, animate);
         if (changed) {
             mRoundingChangedCallback.run();

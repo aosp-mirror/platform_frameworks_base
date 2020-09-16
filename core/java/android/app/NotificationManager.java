@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -129,6 +130,73 @@ public class NotificationManager {
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED =
             "android.app.action.NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED";
+
+    /**
+     * Activity action: Toggle notification panel of the specified handler.
+     *
+     * <p><strong>Important:</strong>You must protect the activity that handles this action with
+     * the {@link android.Manifest.permission#STATUS_BAR_SERVICE} permission to ensure that only
+     * the SystemUI can launch this activity. Activities that are not properly protected will not
+     * be launched.
+     *
+     * <p class="note">This is currently only used on TV to allow a system app to handle the
+     * notification panel. The package handling the notification panel has to be specified by
+     * config_notificationHandlerPackage in values/config.xml.
+     *
+     * Input: nothing
+     * Output: nothing
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_TOGGLE_NOTIFICATION_HANDLER_PANEL =
+            "android.app.action.TOGGLE_NOTIFICATION_HANDLER_PANEL";
+
+    /**
+     * Activity action: Open notification panel of the specified handler.
+     *
+     * <p><strong>Important:</strong>You must protect the activity that handles this action with
+     * the {@link android.Manifest.permission#STATUS_BAR_SERVICE} permission to ensure that only
+     * the SystemUI can launch this activity. Activities that are not properly protected will
+     * not be launched.
+     *
+     * <p class="note"> This is currently only used on TV to allow a system app to handle the
+     * notification panel. The package handling the notification panel has to be specified by
+     * config_notificationHandlerPackage in values/config.xml.
+     *
+     * Input: nothing
+     * Output: nothing
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_OPEN_NOTIFICATION_HANDLER_PANEL =
+            "android.app.action.OPEN_NOTIFICATION_HANDLER_PANEL";
+
+    /**
+     * Intent that is broadcast when the notification panel of the specified handler is to be
+     * closed.
+     *
+     * <p><strong>Important:</strong>You should protect the receiver that handles this action with
+     * the {@link android.Manifest.permission#STATUS_BAR_SERVICE} permission to ensure that only
+     * the SystemUI can send this broadcast to the notification handler.
+     *
+     * <p class="note"> This is currently only used on TV to allow a system app to handle the
+     * notification panel. The package handling the notification panel has to be specified by
+     * config_notificationHandlerPackage in values/config.xml. This is a protected intent that can
+     * only be sent by the system.
+     *
+     * Input: nothing.
+     * Output: nothing.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_CLOSE_NOTIFICATION_HANDLER_PANEL =
+            "android.app.action.CLOSE_NOTIFICATION_HANDLER_PANEL";
 
     /**
      * Extra for {@link #ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED} containing the id of the

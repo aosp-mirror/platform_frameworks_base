@@ -671,6 +671,9 @@ package android.app {
     method @Nullable public android.content.ComponentName getAllowedNotificationAssistant();
     method public boolean isNotificationAssistantAccessGranted(@NonNull android.content.ComponentName);
     method public void setNotificationAssistantAccessGranted(@Nullable android.content.ComponentName, boolean);
+    field @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE) public static final String ACTION_CLOSE_NOTIFICATION_HANDLER_PANEL = "android.app.action.CLOSE_NOTIFICATION_HANDLER_PANEL";
+    field @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE) public static final String ACTION_OPEN_NOTIFICATION_HANDLER_PANEL = "android.app.action.OPEN_NOTIFICATION_HANDLER_PANEL";
+    field @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE) public static final String ACTION_TOGGLE_NOTIFICATION_HANDLER_PANEL = "android.app.action.TOGGLE_NOTIFICATION_HANDLER_PANEL";
   }
 
   public final class RuntimeAppOpAccessMessage implements android.os.Parcelable {
@@ -10392,6 +10395,7 @@ package android.telephony.data {
     method public int getCause();
     method @NonNull public java.util.List<java.net.InetAddress> getDnsAddresses();
     method @NonNull public java.util.List<java.net.InetAddress> getGatewayAddresses();
+    method public int getHandoverFailureMode();
     method public int getId();
     method @NonNull public String getInterfaceName();
     method public int getLinkStatus();
@@ -10403,6 +10407,11 @@ package android.telephony.data {
     method public int getSuggestedRetryTime();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.DataCallResponse> CREATOR;
+    field public static final int HANDOVER_FAILURE_MODE_DO_FALLBACK = 2; // 0x2
+    field public static final int HANDOVER_FAILURE_MODE_LEGACY = 1; // 0x1
+    field public static final int HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_HANDOVER = 3; // 0x3
+    field public static final int HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_SETUP_NORMAL = 4; // 0x4
+    field public static final int HANDOVER_FAILURE_MODE_UNKNOWN = 0; // 0x0
     field public static final int LINK_STATUS_ACTIVE = 2; // 0x2
     field public static final int LINK_STATUS_DORMANT = 1; // 0x1
     field public static final int LINK_STATUS_INACTIVE = 0; // 0x0
@@ -10416,6 +10425,7 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.DataCallResponse.Builder setCause(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setDnsAddresses(@NonNull java.util.List<java.net.InetAddress>);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setGatewayAddresses(@NonNull java.util.List<java.net.InetAddress>);
+    method @NonNull public android.telephony.data.DataCallResponse.Builder setHandoverFailureMode(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setId(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setInterfaceName(@NonNull String);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setLinkStatus(int);

@@ -17,6 +17,7 @@ import static android.provider.Settings.Secure.NOTIFICATION_HISTORY_ENABLED;
 import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
 
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -43,8 +44,6 @@ import android.testing.TestableLooper;
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -55,7 +54,6 @@ import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
-import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
@@ -97,7 +95,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private EmptyShadeView mEmptyShadeView;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private RemoteInputController mRemoteInputController;
-    @Mock private MetricsLogger mMetricsLogger;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
     @Mock private KeyguardBypassEnabledProvider mKeyguardBypassEnabledProvider;
     @Mock private NotificationSectionsManager mNotificationSectionsManager;
@@ -106,8 +103,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationSwipeHelper mNotificationSwipeHelper;
     @Mock private NotificationStackScrollLayoutController mStackScrollLayoutController;
     private int mOriginalInterruptionModelSetting;
-    private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
-
 
     @Before
     @UiThreadTest
@@ -127,11 +122,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 NotificationBlockingHelperManager.class,
                 mBlockingHelperManager);
         mDependency.injectTestDependency(SysuiStatusBarStateController.class, mBarState);
-        mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
-        mDependency.injectTestDependency(NotificationRemoteInputManager.class,
-                mRemoteInputManager);
         mDependency.injectMockDependency(ShadeController.class);
-        when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
+
         NotificationShelfController notificationShelfController =
                 mock(NotificationShelfController.class);
         NotificationShelf notificationShelf = mock(NotificationShelf.class);
@@ -140,6 +132,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 new NotificationSection[]{
                         mNotificationSection
                 });
+        when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
+
         // The actual class under test.  You may need to work with this class directly when
         // testing anonymous class members of mStackScroller, like mMenuEventListener,
         // which refer to members of NotificationStackScrollLayout. The spy
@@ -148,14 +142,10 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScrollerInternal = new NotificationStackScrollLayout(
                 getContext(),
                 null,
-                mNotificationRoundnessManager,
-                mStatusBarStateController,
                 mNotificationSectionsManager,
-                mock(ForegroundServiceSectionController.class),
-                mock(ForegroundServiceDismissalFeatureController.class),
                 mGroupMembershipManger,
                 mGroupExpansionManager,
-                mUiEventLoggerFake
+                mStatusBarStateController
         );
         mStackScrollerInternal.initView(getContext(), mKeyguardBypassEnabledProvider,
                 mNotificationSwipeHelper);
@@ -166,7 +156,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         when(mStackScrollLayoutController.getNoticationRoundessManager())
                 .thenReturn(mNotificationRoundnessManager);
         mStackScroller.setController(mStackScrollLayoutController);
-        
+        mStackScroller.setRemoteInputManager(mRemoteInputManager);
+
         // Stub out functionality that isn't necessary to test.
         doNothing().when(mBar)
                 .executeRunnableDismissingKeyguard(any(Runnable.class),
@@ -380,18 +371,30 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     public void testClearNotifications_All() {
+        final int[] numCalls = {0};
+        final int[] selected = {-1};
+        mStackScroller.setDismissListener(selectedRows -> {
+            numCalls[0]++;
+            selected[0] = selectedRows;
+        });
+
         mStackScroller.clearNotifications(ROWS_ALL, true);
-        assertEquals(1, mUiEventLoggerFake.numLogs());
-        assertEquals(NotificationStackScrollLayout.NotificationPanelEvent
-                .DISMISS_ALL_NOTIFICATIONS_PANEL.getId(), mUiEventLoggerFake.eventId(0));
+        assertEquals(1, numCalls[0]);
+        assertEquals(ROWS_ALL, selected[0]);
     }
 
     @Test
     public void testClearNotifications_Gentle() {
+        final int[] numCalls = {0};
+        final int[] selected = {-1};
+        mStackScroller.setDismissListener(selectedRows -> {
+            numCalls[0]++;
+            selected[0] = selectedRows;
+        });
+
         mStackScroller.clearNotifications(NotificationStackScrollLayout.ROWS_GENTLE, false);
-        assertEquals(1, mUiEventLoggerFake.numLogs());
-        assertEquals(NotificationStackScrollLayout.NotificationPanelEvent
-                .DISMISS_SILENT_NOTIFICATIONS_PANEL.getId(), mUiEventLoggerFake.eventId(0));
+        assertEquals(1, numCalls[0]);
+        assertEquals(ROWS_GENTLE, selected[0]);
     }
 
     @Test

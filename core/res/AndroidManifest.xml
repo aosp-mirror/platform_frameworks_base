@@ -107,6 +107,8 @@
     <!-- @deprecated This is rarely used and will be phased out soon. -->
     <protected-broadcast android:name="android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED" />
 
+    <protected-broadcast android:name="android.app.action.CLOSE_NOTIFICATION_HANDLER_PANEL" />
+
     <protected-broadcast android:name="android.app.action.ENTER_CAR_MODE" />
     <protected-broadcast android:name="android.app.action.EXIT_CAR_MODE" />
     <protected-broadcast android:name="android.app.action.ENTER_CAR_MODE_PRIORITIZED" />
