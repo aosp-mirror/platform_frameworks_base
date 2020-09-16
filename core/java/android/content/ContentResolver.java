@@ -776,6 +776,10 @@ public abstract class ContentResolver implements ContentInterface {
     private static final int REMOTE_CONTENT_PROVIDER_TIMEOUT_MILLIS =
             CONTENT_PROVIDER_READY_TIMEOUT_MILLIS + CONTENT_PROVIDER_TIMEOUT_MILLIS;
 
+    /**
+     * Note: passing a {@code null} context here could lead to unexpected behavior in certain
+     * ContentResolver APIs so it is highly recommended to pass a non-null context here.
+     */
     public ContentResolver(@Nullable Context context) {
         this(context, null);
     }
