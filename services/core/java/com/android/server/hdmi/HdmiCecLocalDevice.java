@@ -351,6 +351,8 @@ abstract class HdmiCecLocalDevice {
                 return handleRequestShortAudioDescriptor(message);
             case Constants.MESSAGE_REPORT_SHORT_AUDIO_DESCRIPTOR:
                 return handleReportShortAudioDescriptor(message);
+            case Constants.MESSAGE_GIVE_FEATURES:
+                return handleGiveFeatures(message);
             default:
                 return false;
         }
@@ -549,6 +551,33 @@ abstract class HdmiCecLocalDevice {
 
     protected boolean handleReportShortAudioDescriptor(HdmiCecMessage message) {
         return false;
+    }
+
+    protected abstract int getRcProfile();
+
+    protected abstract List<Integer> getRcFeatures();
+
+    protected abstract List<Integer> getDeviceFeatures();
+
+    protected boolean handleGiveFeatures(HdmiCecMessage message) {
+        if (mService.getCecVersion() < Constants.VERSION_2_0) {
+            return false;
+        }
+
+        List<Integer> localDeviceTypes = new ArrayList<>();
+        for (HdmiCecLocalDevice localDevice : mService.getAllLocalDevices()) {
+            localDeviceTypes.add(localDevice.mDeviceType);
+        }
+
+
+        int rcProfile = getRcProfile();
+        List<Integer> rcFeatures = getRcFeatures();
+        List<Integer> deviceFeatures = getDeviceFeatures();
+
+        mService.sendCecCommand(
+                HdmiCecMessageBuilder.buildReportFeatures(mAddress, mService.getCecVersion(),
+                        localDeviceTypes, rcProfile, rcFeatures, deviceFeatures));
+        return true;
     }
 
     @ServiceThreadOnly

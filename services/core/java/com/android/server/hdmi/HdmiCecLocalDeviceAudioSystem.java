@@ -47,6 +47,8 @@ import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiUtils.CodecSad;
 import com.android.server.hdmi.HdmiUtils.DeviceConfig;
 
+import com.google.android.collect.Lists;
+
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
@@ -173,6 +175,11 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         String tvInputId = mPortIdToTvInputs.get(portId);
         HdmiDeviceInfo info = mTvInputsToDeviceInfo.get(tvInputId);
         return info != null;
+    }
+
+    @Override
+    protected List<Integer> getDeviceFeatures() {
+        return Lists.newArrayList(Constants.DEVICE_FEATURE_SOURCE_SUPPORTS_ARC_RX);
     }
 
     @Override

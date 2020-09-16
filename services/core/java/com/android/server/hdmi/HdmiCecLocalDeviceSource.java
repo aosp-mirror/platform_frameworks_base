@@ -28,6 +28,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.Constants.LocalActivePort;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
+import com.google.android.collect.Lists;
+
 import java.util.List;
 
 /**
@@ -231,6 +233,24 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     // of the device connected to it.
     protected void updateDevicePowerStatus(int logicalAddress, int newPowerStatus) {
         // do nothing
+    }
+
+    @Override
+    protected int getRcProfile() {
+        return Constants.RC_PROFILE_SOURCE;
+    }
+
+    @Override
+    protected List<Integer> getRcFeatures() {
+        return Lists.newArrayList(Constants.RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
+                Constants.RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
+                Constants.RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
+                Constants.RC_PROFILE_SOURCE_HANDLES_TOP_MENU);
+    }
+
+    @Override
+    protected List<Integer> getDeviceFeatures() {
+        return Lists.newArrayList();
     }
 
     // Active source claiming needs to be handled in Service

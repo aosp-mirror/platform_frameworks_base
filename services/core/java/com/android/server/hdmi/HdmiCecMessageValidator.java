@@ -211,6 +211,17 @@ public class HdmiCecMessageValidator {
                 new OneByteRangeValidator(0x00, 0x06),
                 DEST_DIRECT);
 
+        // Messages for Feature Discovery.
+        addValidationInfo(Constants.MESSAGE_GIVE_FEATURES, noneValidator, DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_REPORT_FEATURES, new VariableLengthValidator(4, 14),
+                DEST_BROADCAST);
+
+        // Messages for Dynamic Auto Lipsync
+        addValidationInfo(Constants.MESSAGE_REQUEST_CURRENT_LATENCY, physicalAddressValidator,
+                DEST_BROADCAST);
+        addValidationInfo(Constants.MESSAGE_REPORT_CURRENT_LATENCY,
+                new VariableLengthValidator(4, 14), DEST_BROADCAST);
+
         // All Messages for the ARC have no parameters.
 
         // Messages for the Capability Discovery and Control.
