@@ -95,7 +95,7 @@ abstract class QuotaTracker {
 
     /** "Free quota status" for apps. */
     @GuardedBy("mLock")
-    private final SparseArrayMap<Boolean> mFreeQuota = new SparseArrayMap<>();
+    private final SparseArrayMap<String, Boolean> mFreeQuota = new SparseArrayMap<>();
 
     private final AlarmManager mAlarmManager;
     protected final Context mContext;
