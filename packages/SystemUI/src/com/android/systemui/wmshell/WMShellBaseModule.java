@@ -23,6 +23,7 @@ import android.util.DisplayMetrics;
 import android.view.IWindowManager;
 
 import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.pip.Pip;
@@ -116,6 +117,9 @@ public abstract class WMShellBaseModule {
 
     @BindsOptionalOf
     abstract SplitScreen optionalSplitScreen();
+
+    @BindsOptionalOf
+    abstract Bubbles optionalBubbles();
 
     @BindsOptionalOf
     abstract OneHanded optionalOneHanded();

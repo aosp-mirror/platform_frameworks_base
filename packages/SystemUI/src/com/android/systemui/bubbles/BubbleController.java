@@ -33,7 +33,6 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
-import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_CONTROLLER;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
@@ -130,7 +129,8 @@ import java.util.Objects;
  *
  * The controller manages addition, removal, and visible state of bubbles on screen.
  */
-public class BubbleController implements ConfigurationController.ConfigurationListener, Dumpable {
+public class BubbleController implements Bubbles, ConfigurationController.ConfigurationListener,
+        Dumpable {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleController" : TAG_BUBBLES;
 
@@ -519,6 +519,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     /**
      * See {@link NotifCallback}.
      */
+    @Override
     public void addNotifCallback(NotifCallback callback) {
         mCallbacks.add(callback);
     }
@@ -700,6 +701,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * since we want the scrim's appearance and behavior to be identical to that of the notification
      * shade scrim.
      */
+    @Override
     public ScrimView getScrimForBubble() {
         return mBubbleScrim;
     }
@@ -708,6 +710,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * Called when the status bar has become visible or invisible (either permanently or
      * temporarily).
      */
+    @Override
     public void onStatusBarVisibilityChanged(boolean visible) {
         if (mStackView != null) {
             // Hide the stack temporarily if the status bar has been made invisible, and the stack
@@ -725,14 +728,16 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mInflateSynchronously = inflateSynchronously;
     }
 
-    void setOverflowListener(BubbleData.Listener listener) {
+    @Override
+    public void setOverflowListener(BubbleData.Listener listener) {
         mOverflowListener = listener;
     }
 
     /**
      * @return Bubbles for updating overflow.
      */
-    List<Bubble> getOverflowBubbles() {
+    @Override
+    public List<Bubble> getOverflowBubbles() {
         return mBubbleData.getOverflowBubbles();
     }
 
@@ -955,13 +960,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
     }
 
-    boolean inLandscape() {
-        return mOrientation == Configuration.ORIENTATION_LANDSCAPE;
-    }
-
     /**
      * Set a listener to be notified of bubble expand events.
      */
+    @Override
     public void setExpandListener(BubbleExpandListener listener) {
         mExpandListener = ((isExpanding, key) -> {
             if (listener != null) {
@@ -987,29 +989,17 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         return mBubbleData.hasBubbles();
     }
 
-    /**
-     * Whether the stack of bubbles is expanded or not.
-     */
+    @Override
     public boolean isStackExpanded() {
         return mBubbleData.isExpanded();
     }
 
-    /**
-     * Tell the stack of bubbles to collapse.
-     */
+    @Override
     public void collapseStack() {
         mBubbleData.setExpanded(false /* expanded */);
     }
 
-    /**
-     * True if either:
-     * (1) There is a bubble associated with the provided key and if its notification is hidden
-     *     from the shade.
-     * (2) There is a group summary associated with the provided key that is hidden from the shade
-     *     because it has been dismissed but still has child bubbles active.
-     *
-     * False otherwise.
-     */
+    @Override
     public boolean isBubbleNotificationSuppressedFromShade(NotificationEntry entry) {
         String key = entry.getKey();
         boolean isSuppressedBubble = (mBubbleData.hasAnyBubbleWithKey(key)
@@ -1021,19 +1011,14 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         return (isSummary && isSuppressedSummary) || isSuppressedBubble;
     }
 
-    /**
-     * True if:
-     * (1) The current notification entry same as selected bubble notification entry and the
-     * stack is currently expanded.
-     *
-     * False otherwise.
-     */
+    @Override
     public boolean isBubbleExpanded(NotificationEntry entry) {
         return isStackExpanded() && mBubbleData != null && mBubbleData.getSelectedBubble() != null
                 && mBubbleData.getSelectedBubble().getKey().equals(entry.getKey()) ? true : false;
     }
 
-    void promoteBubbleFromOverflow(Bubble bubble) {
+    @Override
+    public void promoteBubbleFromOverflow(Bubble bubble) {
         mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_BACK_TO_STACK);
         bubble.setInflateSynchronously(mInflateSynchronously);
         bubble.setShouldAutoExpand(true);
@@ -1041,12 +1026,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         setIsBubble(bubble, true /* isBubble */);
     }
 
-    /**
-     * Request the stack expand if needed, then select the specified Bubble as current.
-     * If no bubble exists for this entry, one is created.
-     *
-     * @param entry the notification for the bubble to be selected
-     */
+    @Override
     public void expandStackAndSelectBubble(NotificationEntry entry) {
         if (mStatusBarStateListener.getCurrentState() == SHADE) {
             mNotifEntryToExpandOnShadeUnlock = null;
@@ -1074,12 +1054,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
     }
 
-    /**
-     * When a notification is marked Priority, expand the stack if needed,
-     * then (maybe create and) select the given bubble.
-     *
-     * @param entry the notification for the bubble to show
-     */
+    @Override
     public void onUserChangedImportance(NotificationEntry entry) {
         try {
             int flags = Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
@@ -1094,10 +1069,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
     }
 
-    /**
-     * Directs a back gesture at the bubble stack. When opened, the current expanded bubble
-     * is forwarded a back key down/up pair.
-     */
+    @Override
     public void performBackPressIfNeeded() {
         if (mStackView != null) {
             mStackView.performBackPressIfNeeded();
@@ -1152,15 +1124,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 mContext, mStackView, mBubbleIconFactory, false /* skipInflation */);
     }
 
-    /**
-     * Called when a user has indicated that an active notification should be shown as a bubble.
-     * <p>
-     * This method will collapse the shade, create the bubble without a flyout or dot, and suppress
-     * the notification from appearing in the shade.
-     *
-     * @param entry the notification to change bubble state for.
-     * @param shouldBubble whether the notification should show as a bubble or not.
-     */
+    @Override
     public void onUserChangedBubble(@NonNull final NotificationEntry entry, boolean shouldBubble) {
         NotificationChannel channel = entry.getChannel();
         final String appPkg = entry.getSbn().getPackageName();
@@ -1199,13 +1163,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
     }
 
-    /**
-     * Removes the bubble with the given key.
-     * <p>
-     * Must be called from the main thread.
-     */
     @MainThread
-    void removeBubble(String key, int reason) {
+    @Override
+    public void removeBubble(String key, int reason) {
         if (mBubbleData.hasAnyBubbleWithKey(key)) {
             mBubbleData.dismissBubbleWithKey(key, reason);
         }
@@ -1447,16 +1407,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
     };
 
-    /**
-     * We intercept notification entries (including group summaries) dismissed by the user when
-     * there is an active bubble associated with it. We do this so that developers can still
-     * cancel it (and hence the bubbles associated with it). However, these intercepted
-     * notifications should then be hidden from the shade since the user has cancelled them, so we
-     *  {@link Bubble#setSuppressNotification}.  For the case of suppressed summaries, we also add
-     *  {@link BubbleData#addSummaryToSuppress}.
-     *
-     * @return true if we want to intercept the dismissal of the entry, else false.
-     */
+    @Override
     public boolean handleDismissalInterception(NotificationEntry entry) {
         if (entry == null) {
             return false;
@@ -1579,10 +1530,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mStackView.updateContentDescription();
     }
 
-    /**
-     * The display id of the expanded view, if the stack is expanded and not occluded by the
-     * status bar, otherwise returns {@link Display#INVALID_DISPLAY}.
-     */
+    @Override
     public int getExpandedDisplayId(Context context) {
         if (mStackView == null) {
             return INVALID_DISPLAY;

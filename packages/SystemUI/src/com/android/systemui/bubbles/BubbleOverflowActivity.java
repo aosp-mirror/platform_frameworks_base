@@ -60,7 +60,7 @@ public class BubbleOverflowActivity extends Activity {
     private TextView mEmptyStateTitle;
     private TextView mEmptyStateSubtitle;
     private ImageView mEmptyStateImage;
-    private BubbleController mBubbleController;
+    private Bubbles mBubbles;
     private BubbleOverflowAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private List<Bubble> mOverflowBubbles = new ArrayList<>();
@@ -71,7 +71,8 @@ public class BubbleOverflowActivity extends Activity {
         }
         @Override
         public boolean canScrollVertically() {
-            if (mBubbleController.inLandscape()) {
+            if (getResources().getConfiguration().orientation
+                    == Configuration.ORIENTATION_LANDSCAPE) {
                 return super.canScrollVertically();
             }
             return false;
@@ -93,8 +94,8 @@ public class BubbleOverflowActivity extends Activity {
     }
 
     @Inject
-    public BubbleOverflowActivity(BubbleController controller) {
-        mBubbleController = controller;
+    public BubbleOverflowActivity(Bubbles bubbles) {
+        mBubbles = bubbles;
     }
 
     @Override
@@ -131,15 +132,15 @@ public class BubbleOverflowActivity extends Activity {
         final int viewHeight = recyclerViewHeight / rows;
 
         mAdapter = new BubbleOverflowAdapter(getApplicationContext(), mOverflowBubbles,
-                mBubbleController::promoteBubbleFromOverflow, viewWidth, viewHeight);
+                mBubbles::promoteBubbleFromOverflow, viewWidth, viewHeight);
         mRecyclerView.setAdapter(mAdapter);
 
         mOverflowBubbles.clear();
-        mOverflowBubbles.addAll(mBubbleController.getOverflowBubbles());
+        mOverflowBubbles.addAll(mBubbles.getOverflowBubbles());
         mAdapter.notifyDataSetChanged();
         updateEmptyStateVisibility();
 
-        mBubbleController.setOverflowListener(mDataListener);
+        mBubbles.setOverflowListener(mDataListener);
         updateTheme();
     }
 
@@ -209,8 +210,7 @@ public class BubbleOverflowActivity extends Activity {
 
             if (DEBUG_OVERFLOW) {
                 Log.d(TAG, BubbleDebugConfig.formatBubblesString(
-                        mBubbleController.getOverflowBubbles(),
-                        null));
+                        mBubbles.getOverflowBubbles(), null));
             }
         }
     };

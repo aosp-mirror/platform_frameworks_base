@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.init
 
 import android.service.notification.StatusBarNotification
+import com.android.systemui.bubbles.Bubbles
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption
 import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.NotificationActivityStarter
@@ -25,6 +26,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.phone.StatusBar
 import java.io.FileDescriptor
 import java.io.PrintWriter
+import java.util.Optional
 
 /**
  * The master controller for all notifications-related work
@@ -35,6 +37,7 @@ import java.io.PrintWriter
 interface NotificationsController {
     fun initialize(
         statusBar: StatusBar,
+        bubblesOptional: Optional<Bubbles>,
         presenter: NotificationPresenter,
         listContainer: NotificationListContainer,
         notificationActivityStarter: NotificationActivityStarter,

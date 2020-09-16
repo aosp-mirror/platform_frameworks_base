@@ -22,7 +22,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -50,7 +51,7 @@ public class ShadeControllerImpl implements ShadeController {
     private final int mDisplayId;
     protected final Lazy<StatusBar> mStatusBarLazy;
     private final Lazy<AssistManager> mAssistManagerLazy;
-    private final Lazy<BubbleController> mBubbleControllerLazy;
+    private final Optional<Lazy<Bubbles>> mBubblesOptional;
 
     private final ArrayList<Runnable> mPostCollapseRunnables = new ArrayList<>();
 
@@ -63,7 +64,7 @@ public class ShadeControllerImpl implements ShadeController {
             WindowManager windowManager,
             Lazy<StatusBar> statusBarLazy,
             Lazy<AssistManager> assistManagerLazy,
-            Lazy<BubbleController> bubbleControllerLazy
+            Optional<Lazy<Bubbles>> bubblesOptional
     ) {
         mCommandQueue = commandQueue;
         mStatusBarStateController = statusBarStateController;
@@ -73,7 +74,7 @@ public class ShadeControllerImpl implements ShadeController {
         // TODO: Remove circular reference to StatusBar when possible.
         mStatusBarLazy = statusBarLazy;
         mAssistManagerLazy = assistManagerLazy;
-        mBubbleControllerLazy = bubbleControllerLazy;
+        mBubblesOptional = bubblesOptional;
     }
 
     @Override
@@ -133,8 +134,8 @@ public class ShadeControllerImpl implements ShadeController {
 
             getStatusBar().getNotificationShadeWindowViewController().cancelExpandHelper();
             getStatusBarView().collapsePanel(true /* animate */, delayed, speedUpFactor);
-        } else {
-            mBubbleControllerLazy.get().collapseStack();
+        } else if (mBubblesOptional.isPresent()) {
+            mBubblesOptional.get().get().collapseStack();
         }
     }
 
