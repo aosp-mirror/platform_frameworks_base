@@ -98,6 +98,7 @@ public class SystemBarConfigs {
         readConfigs();
         checkEnabledBarsHaveUniqueBarTypes();
         checkSystemBarEnabledForNotificationPanel();
+        checkHideBottomBarForKeyboardConfigSync();
         setInsetPaddingsForOverlappingCorners();
         sortSystemBarSidesByZOrder();
     }
@@ -120,6 +121,11 @@ public class SystemBarConfigs {
             default:
                 return false;
         }
+    }
+
+    protected boolean getHideForKeyboardBySide(@SystemBarSide int side) {
+        return mSystemBarConfigMap.get(side) != null
+                && mSystemBarConfigMap.get(side).getHideForKeyboard();
     }
 
     protected void insetSystemBar(@SystemBarSide int side, CarNavigationBarView view) {
@@ -167,6 +173,8 @@ public class SystemBarConfigs {
                                     com.android.internal.R.dimen.status_bar_height))
                             .setBarType(mResources.getInteger(R.integer.config_topSystemBarType))
                             .setZOrder(mResources.getInteger(R.integer.config_topSystemBarZOrder))
+                            .setHideForKeyboard(mResources.getBoolean(
+                                    R.bool.config_hideTopSystemBarForKeyboard))
                             .build();
             mSystemBarConfigMap.put(TOP, topBarConfig);
         }
@@ -180,6 +188,8 @@ public class SystemBarConfigs {
                             .setBarType(mResources.getInteger(R.integer.config_bottomSystemBarType))
                             .setZOrder(
                                     mResources.getInteger(R.integer.config_bottomSystemBarZOrder))
+                            .setHideForKeyboard(mResources.getBoolean(
+                                    R.bool.config_hideBottomSystemBarForKeyboard))
                             .build();
             mSystemBarConfigMap.put(BOTTOM, bottomBarConfig);
         }
@@ -192,6 +202,8 @@ public class SystemBarConfigs {
                                     R.dimen.car_left_navigation_bar_width))
                             .setBarType(mResources.getInteger(R.integer.config_leftSystemBarType))
                             .setZOrder(mResources.getInteger(R.integer.config_leftSystemBarZOrder))
+                            .setHideForKeyboard(mResources.getBoolean(
+                                    R.bool.config_hideLeftSystemBarForKeyboard))
                             .build();
             mSystemBarConfigMap.put(LEFT, leftBarConfig);
         }
@@ -204,6 +216,8 @@ public class SystemBarConfigs {
                                     R.dimen.car_right_navigation_bar_width))
                             .setBarType(mResources.getInteger(R.integer.config_rightSystemBarType))
                             .setZOrder(mResources.getInteger(R.integer.config_rightSystemBarZOrder))
+                            .setHideForKeyboard(mResources.getBoolean(
+                                    R.bool.config_hideRightSystemBarForKeyboard))
                             .build();
             mSystemBarConfigMap.put(RIGHT, rightBarConfig);
         }
@@ -249,6 +263,24 @@ public class SystemBarConfigs {
                 notificationPanelMediatorUsed)) {
             throw new RuntimeException("Bottom System Bar must be enabled to use "
                     + notificationPanelMediatorName);
+        }
+    }
+
+    private void checkHideBottomBarForKeyboardConfigSync() throws RuntimeException {
+        if (mBottomNavBarEnabled) {
+            boolean actual = mResources.getBoolean(R.bool.config_hideBottomSystemBarForKeyboard);
+            boolean expected = mResources.getBoolean(
+                    com.android.internal.R.bool.config_automotiveHideNavBarForKeyboard);
+
+            if (actual != expected) {
+                throw new RuntimeException("config_hideBottomSystemBarForKeyboard must not be "
+                        + "overlaid directly and should always refer to"
+                        + "config_automotiveHideNavBarForKeyboard. However, their values "
+                        + "currently do not sync. Set config_hideBottomSystemBarForKeyguard to "
+                        + "@*android:bool/config_automotiveHideNavBarForKeyboard. To change its "
+                        + "value, overlay config_automotiveHideNavBarForKeyboard in "
+                        + "framework/base/core/res/res.");
+            }
         }
     }
 
@@ -320,14 +352,17 @@ public class SystemBarConfigs {
         private final int mBarType;
         private final int mGirth;
         private final int mZOrder;
+        private final boolean mHideForKeyboard;
 
         private int[] mPaddings = new int[]{0, 0, 0, 0};
 
-        private SystemBarConfig(@SystemBarSide int side, int barType, int girth, int zOrder) {
+        private SystemBarConfig(@SystemBarSide int side, int barType, int girth, int zOrder,
+                boolean hideForKeyboard) {
             mSide = side;
             mBarType = barType;
             mGirth = girth;
             mZOrder = zOrder;
+            mHideForKeyboard = hideForKeyboard;
         }
 
         private int getSide() {
@@ -344,6 +379,10 @@ public class SystemBarConfigs {
 
         private int getZOrder() {
             return mZOrder;
+        }
+
+        private boolean getHideForKeyboard() {
+            return mHideForKeyboard;
         }
 
         private int[] getPaddings() {
@@ -383,6 +422,7 @@ public class SystemBarConfigs {
         private int mBarType;
         private int mGirth;
         private int mZOrder;
+        private boolean mHideForKeyboard;
 
         private SystemBarConfigBuilder setSide(@SystemBarSide int side) {
             mSide = side;
@@ -404,8 +444,13 @@ public class SystemBarConfigs {
             return this;
         }
 
+        private SystemBarConfigBuilder setHideForKeyboard(boolean hide) {
+            mHideForKeyboard = hide;
+            return this;
+        }
+
         private SystemBarConfig build() {
-            return new SystemBarConfig(mSide, mBarType, mGirth, mZOrder);
+            return new SystemBarConfig(mSide, mBarType, mGirth, mZOrder, mHideForKeyboard);
         }
     }
 }
