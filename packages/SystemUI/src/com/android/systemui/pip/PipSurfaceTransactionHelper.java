@@ -24,14 +24,16 @@ import android.graphics.RectF;
 import android.view.SurfaceControl;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.wm.shell.R;
 
 /**
  * Abstracts the common operations on {@link SurfaceControl.Transaction} for PiP transition.
  */
 @SysUISingleton
-public class PipSurfaceTransactionHelper {
+public class PipSurfaceTransactionHelper implements ConfigurationController.ConfigurationListener {
 
+    private final Context mContext;
     private final boolean mEnableCornerRadius;
     private int mCornerRadius;
 
@@ -42,21 +44,17 @@ public class PipSurfaceTransactionHelper {
     private final RectF mTmpDestinationRectF = new RectF();
     private final Rect mTmpDestinationRect = new Rect();
 
-    public PipSurfaceTransactionHelper(Context context) {
+    public PipSurfaceTransactionHelper(Context context, ConfigurationController configController) {
         final Resources res = context.getResources();
+        mContext = context;
         mEnableCornerRadius = res.getBoolean(R.bool.config_pipEnableRoundCorner);
+        configController.addCallback(this);
     }
 
-    /**
-     * Called when display size or font size of settings changed
-     *
-     * @param context the current context
-     */
-    public void onDensityOrFontScaleChanged(Context context) {
-        if (mEnableCornerRadius) {
-            final Resources res = context.getResources();
-            mCornerRadius = res.getDimensionPixelSize(R.dimen.pip_corner_radius);
-        }
+    @Override
+    public void onDensityOrFontScaleChanged() {
+        final Resources res = mContext.getResources();
+        mCornerRadius = res.getDimensionPixelSize(R.dimen.pip_corner_radius);
     }
 
     /**
