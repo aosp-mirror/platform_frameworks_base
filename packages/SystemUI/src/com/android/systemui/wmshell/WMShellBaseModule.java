@@ -16,6 +16,7 @@
 
 package com.android.systemui.wmshell;
 
+import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
@@ -28,7 +29,10 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.pip.Pip;
 import com.android.systemui.pip.PipSurfaceTransactionHelper;
 import com.android.systemui.pip.PipUiEventLogger;
-import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.pip.phone.PipAppOpsListener;
+import com.android.systemui.pip.phone.PipMediaController;
+import com.android.systemui.pip.phone.PipTouchHandler;
+import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -71,8 +75,29 @@ public abstract class WMShellBaseModule {
 
     @SysUISingleton
     @Provides
+    static InputConsumerController provideInputConsumerController() {
+        return InputConsumerController.getPipInputConsumer();
+    }
+
+    @SysUISingleton
+    @Provides
     static FloatingContentCoordinator provideFloatingContentCoordinator() {
         return new FloatingContentCoordinator();
+    }
+
+    @SysUISingleton
+    @Provides
+    static PipAppOpsListener providesPipAppOpsListener(Context context,
+            IActivityManager activityManager,
+            PipTouchHandler pipTouchHandler) {
+        return new PipAppOpsListener(context, activityManager, pipTouchHandler.getMotionHelper());
+    }
+
+    @SysUISingleton
+    @Provides
+    static PipMediaController providesPipMediaController(Context context,
+            IActivityManager activityManager) {
+        return new PipMediaController(context, activityManager);
     }
 
     @SysUISingleton
@@ -84,9 +109,8 @@ public abstract class WMShellBaseModule {
 
     @SysUISingleton
     @Provides
-    static PipSurfaceTransactionHelper providesPipSurfaceTransactionHelper(Context context,
-            ConfigurationController configController) {
-        return new PipSurfaceTransactionHelper(context, configController);
+    static PipSurfaceTransactionHelper providesPipSurfaceTransactionHelper(Context context) {
+        return new PipSurfaceTransactionHelper(context);
     }
 
     @SysUISingleton
@@ -102,6 +126,12 @@ public abstract class WMShellBaseModule {
         ShellTaskOrganizer organizer = new ShellTaskOrganizer(transactionPool);
         organizer.registerOrganizer();
         return organizer;
+    }
+
+    @SysUISingleton
+    @Provides
+    static WindowManagerShellWrapper provideWindowManagerShellWrapper() {
+        return new WindowManagerShellWrapper();
     }
 
     @SysUISingleton

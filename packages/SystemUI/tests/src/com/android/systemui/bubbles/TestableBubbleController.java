@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.FloatingContentCoordinator;
+import com.android.systemui.wmshell.WindowManagerShellWrapper;
 
 /**
  * Testable BubbleController subclass that immediately synchronizes surfaces.
@@ -63,6 +64,7 @@ public class TestableBubbleController extends BubbleController {
             INotificationManager notificationManager,
             IStatusBarService statusBarService,
             WindowManager windowManager,
+            WindowManagerShellWrapper windowManagerShellWrapper,
             LauncherApps launcherApps) {
         super(context,
                 notificationShadeWindowController, statusBarStateController, shadeController,
@@ -70,7 +72,7 @@ public class TestableBubbleController extends BubbleController {
                 zenModeController, lockscreenUserManager, groupManager, entryManager,
                 notifPipeline, featureFlags, dumpManager, floatingContentCoordinator,
                 dataRepository, sysUiState, notificationManager, statusBarService,
-                windowManager, launcherApps);
+                windowManager, windowManagerShellWrapper, launcherApps);
         setInflateSynchronously(true);
     }
 }
