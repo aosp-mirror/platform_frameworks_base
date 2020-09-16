@@ -156,8 +156,6 @@ package android.app {
   public class ActivityView extends android.view.ViewGroup {
     ctor public ActivityView(android.content.Context);
     ctor public ActivityView(android.content.Context, android.util.AttributeSet);
-    ctor public ActivityView(android.content.Context, android.util.AttributeSet, int);
-    ctor public ActivityView(android.content.Context, android.util.AttributeSet, int, boolean);
     ctor public ActivityView(@NonNull android.content.Context, @NonNull android.util.AttributeSet, int, boolean, boolean);
     method public int getVirtualDisplayId();
     method public void onLayout(boolean, int, int, int, int);
@@ -170,6 +168,17 @@ package android.app {
     method public void startActivity(@NonNull android.content.Intent, android.os.UserHandle);
     method public void startActivity(@NonNull android.app.PendingIntent);
     method public void startActivity(@NonNull android.app.PendingIntent, @Nullable android.content.Intent, @NonNull android.app.ActivityOptions);
+  }
+
+  public static final class ActivityView.Builder {
+    ctor public ActivityView.Builder(@NonNull android.content.Context);
+    method @NonNull public android.app.ActivityView build();
+    method @NonNull public android.app.ActivityView.Builder setAttributeSet(@Nullable android.util.AttributeSet);
+    method @NonNull public android.app.ActivityView.Builder setDefaultStyle(int);
+    method @NonNull public android.app.ActivityView.Builder setDisableSurfaceViewBackgroundLayer(boolean);
+    method @NonNull public android.app.ActivityView.Builder setSingleInstance(boolean);
+    method @NonNull public android.app.ActivityView.Builder setUsePublicVirtualDisplay(boolean);
+    method @NonNull public android.app.ActivityView.Builder setUseTrustedDisplay(boolean);
   }
 
   public abstract static class ActivityView.StateCallback {
