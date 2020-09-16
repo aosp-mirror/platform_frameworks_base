@@ -486,6 +486,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                 }
             }
 
+            row.showAppOpsIcons(entry.mActiveAppOps);
             row.setLastAudiblyAlertedMs(entry.getLastAudiblyAlertedMs());
         }
 

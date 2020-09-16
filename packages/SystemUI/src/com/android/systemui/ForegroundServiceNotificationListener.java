@@ -172,8 +172,24 @@ public class ForegroundServiceNotificationListener {
                                     sbn.getPackageName(), sbn.getKey());
                         }
                     }
+                    tagAppOps(entry);
                     return true;
                 },
                 true /* create if not found */);
+    }
+
+    // TODO: (b/145659174) remove when moving to NewNotifPipeline. Replaced by
+    //  AppOpsCoordinator
+    private void tagAppOps(NotificationEntry entry) {
+        final StatusBarNotification sbn = entry.getSbn();
+        ArraySet<Integer> activeOps = mForegroundServiceController.getAppOps(
+                sbn.getUserId(),
+                sbn.getPackageName());
+        synchronized (entry.mActiveAppOps) {
+            entry.mActiveAppOps.clear();
+            if (activeOps != null) {
+                entry.mActiveAppOps.addAll(activeOps);
+            }
+        }
     }
 }
