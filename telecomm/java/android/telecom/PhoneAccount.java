@@ -48,11 +48,15 @@ import java.util.Objects;
 public final class PhoneAccount implements Parcelable {
 
     /**
-     * {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which determines the
-     * sort order for {@link PhoneAccount}s from the same
-     * {@link android.telecom.ConnectionService}.
+     * String extra which determines the order in which {@link PhoneAccount}s are sorted
+     *
+     * This is an extras key set via {@link Builder#setExtras} which determines the order in which
+     * {@link PhoneAccount}s from the same {@link ConnectionService} are sorted. The accounts
+     * are sorted by this key via standard lexicographical order, and this ordering is used to
+     * determine priority when a call can be placed via multiple accounts.
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_SORT_ORDER =
             "android.telecom.extra.SORT_ORDER";
 
@@ -85,8 +89,7 @@ public final class PhoneAccount implements Parcelable {
     /**
      * Boolean {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which
      * indicates that all calls from this {@link PhoneAccount} should be treated as VoIP calls
-     * rather than cellular calls.
-     * @hide
+     * rather than cellular calls by the Telecom audio handling logic.
      */
     public static final String EXTRA_ALWAYS_USE_VOIP_AUDIO_MODE =
             "android.telecom.extra.ALWAYS_USE_VOIP_AUDIO_MODE";
@@ -160,6 +163,7 @@ public final class PhoneAccount implements Parcelable {
      * in progress.
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_PLAY_CALL_RECORDING_TONE =
             "android.telecom.extra.PLAY_CALL_RECORDING_TONE";
 
@@ -254,6 +258,7 @@ public final class PhoneAccount implements Parcelable {
      * See {@link #getCapabilities}
      * @hide
      */
+    @SystemApi
     public static final int CAPABILITY_EMERGENCY_CALLS_ONLY = 0x80;
 
     /**
@@ -277,6 +282,7 @@ public final class PhoneAccount implements Parcelable {
      * convert all outgoing video calls to emergency numbers to audio-only.
      * @hide
      */
+    @SystemApi
     public static final int CAPABILITY_EMERGENCY_VIDEO_CALLING = 0x200;
 
     /**
@@ -323,9 +329,9 @@ public final class PhoneAccount implements Parcelable {
 
     /**
      * Flag indicating that this {@link PhoneAccount} is the preferred SIM subscription for
-     * emergency calls. A {@link PhoneAccount} that sets this capabilitiy must also
+     * emergency calls. A {@link PhoneAccount} that sets this capability must also
      * set the {@link #CAPABILITY_SIM_SUBSCRIPTION} and {@link #CAPABILITY_PLACE_EMERGENCY_CALLS}
-     * capabilities. There should only be one emergency preferred {@link PhoneAccount}.
+     * capabilities. There must only be one emergency preferred {@link PhoneAccount} on the device.
      * <p>
      * When set, Telecom will prefer this {@link PhoneAccount} over others for emergency calling,
      * even if the emergency call was placed with a specific {@link PhoneAccount} set using the
@@ -334,6 +340,7 @@ public final class PhoneAccount implements Parcelable {
      *
      * @hide
      */
+    @SystemApi
     public static final int CAPABILITY_EMERGENCY_PREFERRED = 0x2000;
 
     /**
