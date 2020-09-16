@@ -22,7 +22,6 @@ import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.BroadcastReceiver;
@@ -72,7 +71,8 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
     private final CommandQueue mCommandQueue;
     private final StatusBarStateController mStatusBarStateController;
-    private final Injector mInjector;
+    private final IActivityTaskManager mActivityTaskManager;
+    @Nullable private final FingerprintManager mFingerprintManager;
     private final Provider<UdfpsController> mUdfpsControllerFactory;
 
     // TODO: These should just be saved from onSaveState
@@ -85,16 +85,14 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     @Nullable
     private UdfpsController mUdfpsController;
     @VisibleForTesting
-    IActivityTaskManager mActivityTaskManager;
-    @VisibleForTesting
-    BiometricTaskStackListener mTaskStackListener;
+    TaskStackListener mTaskStackListener;
     @VisibleForTesting
     IBiometricSysuiReceiver mReceiver;
 
-    public class BiometricTaskStackListener extends TaskStackListener {
+    private class BiometricTaskStackListener extends TaskStackListener {
         @Override
         public void onTaskStackChanged() {
-            mHandler.post(mTaskStackChangedRunnable);
+            mHandler.post(AuthController.this::handleTaskStackChanged);
         }
     }
 
@@ -121,7 +119,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         }
     };
 
-    private final Runnable mTaskStackChangedRunnable = () -> {
+    private void handleTaskStackChanged() {
         if (mCurrentDialog != null) {
             try {
                 final String clientPackage = mCurrentDialog.getOpPackageName();
@@ -146,7 +144,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 Log.e(TAG, "Remote exception", e);
             }
         }
-    };
+    }
 
     @Override
     public void dozeTimeTick() {
@@ -281,32 +279,17 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         onDialogDismissed(reason);
     }
 
-    public static class Injector {
-        IActivityTaskManager getActivityTaskManager() {
-            return ActivityTaskManager.getService();
-        }
-
-        FingerprintManager getFingerprintManager(Context context) {
-            return context.getSystemService(FingerprintManager.class);
-        }
-    }
-
     @Inject
     public AuthController(Context context, CommandQueue commandQueue,
             StatusBarStateController statusBarStateController,
-            Provider<UdfpsController> udfpsControllerFactory) {
-        this(context, commandQueue, statusBarStateController, new Injector(),
-                udfpsControllerFactory);
-    }
-
-    @VisibleForTesting
-    AuthController(Context context, CommandQueue commandQueue,
-            StatusBarStateController statusBarStateController, Injector injector,
+            IActivityTaskManager activityTaskManager,
+            @Nullable FingerprintManager fingerprintManager,
             Provider<UdfpsController> udfpsControllerFactory) {
         super(context);
         mCommandQueue = commandQueue;
         mStatusBarStateController = statusBarStateController;
-        mInjector = injector;
+        mActivityTaskManager = activityTaskManager;
+        mFingerprintManager = fingerprintManager;
         mUdfpsControllerFactory = udfpsControllerFactory;
 
         IntentFilter filter = new IntentFilter();
@@ -320,12 +303,10 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     public void start() {
         mCommandQueue.addCallback(this);
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        mActivityTaskManager = mInjector.getActivityTaskManager();
 
-        final FingerprintManager fpm = mInjector.getFingerprintManager(mContext);
-        if (fpm != null && fpm.isHardwareDetected()) {
+        if (mFingerprintManager != null && mFingerprintManager.isHardwareDetected()) {
             final List<FingerprintSensorProperties> fingerprintSensorProperties =
-                    fpm.getSensorProperties();
+                    mFingerprintManager.getSensorProperties();
             for (FingerprintSensorProperties props : fingerprintSensorProperties) {
                 if (props.sensorType == FingerprintSensorProperties.TYPE_UDFPS) {
                     mUdfpsController = mUdfpsControllerFactory.get();
