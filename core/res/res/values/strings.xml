@@ -4888,6 +4888,9 @@
         <item quantity="other">For %d hr</item>
     </plurals>
 
+    <!-- Zen mode condition - line two: ending time indicating the next day. [CHAR LIMIT=NONE] -->
+    <string name="zen_mode_until_next_day">Until <xliff:g id="formattedTime" example="Tue, 10 PM">%1$s</xliff:g></string>
+
     <!-- Zen mode condition - line two: ending time. [CHAR LIMIT=NONE] -->
     <string name="zen_mode_until">Until <xliff:g id="formattedTime" example="10:00 PM">%1$s</xliff:g></string>
 
