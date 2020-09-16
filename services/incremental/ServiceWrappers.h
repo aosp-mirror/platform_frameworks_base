@@ -154,6 +154,7 @@ public:
     virtual std::unique_ptr<JniWrapper> getJni() = 0;
     virtual std::unique_ptr<LooperWrapper> getLooper() = 0;
     virtual std::unique_ptr<TimedQueueWrapper> getTimedQueue() = 0;
+    virtual std::unique_ptr<TimedQueueWrapper> getProgressUpdateJobQueue() = 0;
     virtual std::unique_ptr<FsWrapper> getFs() = 0;
 };
 
@@ -170,6 +171,7 @@ public:
     std::unique_ptr<JniWrapper> getJni() final;
     std::unique_ptr<LooperWrapper> getLooper() final;
     std::unique_ptr<TimedQueueWrapper> getTimedQueue() final;
+    std::unique_ptr<TimedQueueWrapper> getProgressUpdateJobQueue() final;
     std::unique_ptr<FsWrapper> getFs() final;
 
 private:
