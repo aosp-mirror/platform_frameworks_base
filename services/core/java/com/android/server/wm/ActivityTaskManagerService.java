@@ -123,7 +123,6 @@ import static com.android.server.wm.Task.ActivityState.DESTROYED;
 import static com.android.server.wm.Task.ActivityState.DESTROYING;
 import static com.android.server.wm.Task.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.wm.Task.REPARENT_KEEP_STACK_AT_FRONT;
-import static com.android.server.wm.Task.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
@@ -3949,52 +3948,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         } finally {
             Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    /**
-     * Try to place task to provided position. The final position might be different depending on
-     * current user and stacks state. The task will be moved to target stack if it's currently in
-     * different stack.
-     */
-    @Override
-    public void positionTaskInStack(int taskId, int stackId, int position) {
-        mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "positionTaskInStack()");
-        synchronized (mGlobalLock) {
-            long ident = Binder.clearCallingIdentity();
-            try {
-                if (DEBUG_STACK) Slog.d(TAG_STACK, "positionTaskInStack: positioning task="
-                        + taskId + " in stackId=" + stackId + " at position=" + position);
-                final Task task = mRootWindowContainer.anyTaskForId(taskId);
-                if (task == null) {
-                    throw new IllegalArgumentException("positionTaskInStack: no task for id="
-                            + taskId);
-                }
-
-                final Task stack = mRootWindowContainer.getStack(stackId);
-
-                if (stack == null) {
-                    throw new IllegalArgumentException("positionTaskInStack: no stack for id="
-                            + stackId);
-                }
-                if (!stack.isActivityTypeStandardOrUndefined()) {
-                    throw new IllegalArgumentException("positionTaskInStack: Attempt to change"
-                            + " the position of task " + taskId + " in/to non-standard stack");
-                }
-
-                // TODO: Have the callers of this API call a separate reparent method if that is
-                // what they intended to do vs. having this method also do reparenting.
-                if (task.getRootTask() == stack) {
-                    // Change position in current stack.
-                    stack.positionChildAt(task, position);
-                } else {
-                    // Reparent to new stack.
-                    task.reparent(stack, position, REPARENT_LEAVE_STACK_IN_PLACE, !ANIMATE,
-                            !DEFER_RESUME, "positionTaskInStack");
-                }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
         }
     }
 

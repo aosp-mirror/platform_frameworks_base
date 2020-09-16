@@ -5745,11 +5745,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void positionTaskInStack(int taskId, int stackId, int position) {
-        mActivityTaskManager.positionTaskInStack(taskId, stackId, position);
-    }
-
-    @Override
     public List<RootTaskInfo> getAllRootTaskInfos() {
         return mActivityTaskManager.getAllRootTaskInfos();
     }

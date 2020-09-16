@@ -2582,8 +2582,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         switch (op) {
             case "move-task":
                 return runStackMoveTask(pw);
-            case "positiontask":
-                return runStackPositionTask(pw);
             case "list":
                 return runStackList(pw);
             case "info":
@@ -2653,18 +2651,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         mTaskInterface.moveTaskToStack(taskId, stackId, toTop);
-        return 0;
-    }
-
-    int runStackPositionTask(PrintWriter pw) throws RemoteException {
-        String taskIdStr = getNextArgRequired();
-        int taskId = Integer.parseInt(taskIdStr);
-        String stackIdStr = getNextArgRequired();
-        int stackId = Integer.parseInt(stackIdStr);
-        String positionStr = getNextArgRequired();
-        int position = Integer.parseInt(positionStr);
-
-        mTaskInterface.positionTaskInStack(taskId, stackId, position);
         return 0;
     }
 
