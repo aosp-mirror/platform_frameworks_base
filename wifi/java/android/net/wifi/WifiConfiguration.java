@@ -1388,7 +1388,9 @@ public class WifiConfiguration implements Parcelable {
                 DISABLED_NO_INTERNET_PERMANENT,
                 DISABLED_BY_WIFI_MANAGER,
                 DISABLED_BY_WRONG_PASSWORD,
-                DISABLED_AUTHENTICATION_NO_SUBSCRIPTION})
+                DISABLED_AUTHENTICATION_NO_SUBSCRIPTION,
+                DISABLED_AUTHENTICATION_FAILURE_GENERIC,
+                DISABLED_AUTHENTICATION_FAILURE_CARRIER_SPECIFIC})
         public @interface NetworkSelectionDisableReason {}
 
         // Quality Network disabled reasons
@@ -1401,8 +1403,16 @@ public class WifiConfiguration implements Parcelable {
         public static final int NETWORK_SELECTION_DISABLED_STARTING_INDEX = 1;
         /** This network is temporarily disabled because of multiple association rejections. */
         public static final int DISABLED_ASSOCIATION_REJECTION = 1;
-        /** This network is temporarily disabled because of multiple authentication failure. */
-        public static final int DISABLED_AUTHENTICATION_FAILURE = 2;
+        /** This network is disabled due to generic authentication failure. */
+        public static final int DISABLED_AUTHENTICATION_FAILURE_GENERIC = 2;
+        /** Separate DISABLED_AUTHENTICATION_FAILURE into DISABLED_AUTHENTICATION_FAILURE_GENERIC
+         *  and DISABLED_AUTHENTICATION_FAILURE_CARRIER_SPECIFIC
+         *  @deprecated Use the {@link #DISABLED_AUTHENTICATION_FAILURE_GENERIC} constant
+         * (which is the same value).
+         */
+        @Deprecated
+        public static final int DISABLED_AUTHENTICATION_FAILURE =
+                DISABLED_AUTHENTICATION_FAILURE_GENERIC;
         /** This network is temporarily disabled because of multiple DHCP failure. */
         public static final int DISABLED_DHCP_FAILURE = 3;
         /** This network is temporarily disabled because it has no Internet access. */
@@ -1420,11 +1430,13 @@ public class WifiConfiguration implements Parcelable {
         public static final int DISABLED_BY_WRONG_PASSWORD = 8;
         /** This network is permanently disabled because service is not subscribed. */
         public static final int DISABLED_AUTHENTICATION_NO_SUBSCRIPTION = 9;
+        /** This network is disabled due to carrier specific EAP failure. */
+        public static final int DISABLED_AUTHENTICATION_FAILURE_CARRIER_SPECIFIC = 10;
         /**
          * All other disable reasons should be strictly less than this value.
          * @hide
          */
-        public static final int NETWORK_SELECTION_DISABLED_MAX = 10;
+        public static final int NETWORK_SELECTION_DISABLED_MAX = 11;
 
         /**
          * Get an integer that is equal to the maximum integer value of all the
@@ -1561,6 +1573,18 @@ public class WifiConfiguration implements Parcelable {
             reasons.append(DISABLED_AUTHENTICATION_NO_SUBSCRIPTION,
                     new DisableReasonInfo(
                             "NETWORK_SELECTION_DISABLED_AUTHENTICATION_NO_SUBSCRIPTION",
+                            1,
+                            Integer.MAX_VALUE));
+
+            reasons.append(DISABLED_AUTHENTICATION_FAILURE_GENERIC,
+                    new DisableReasonInfo(
+                            "NETWORK_SELECTION_DISABLED_AUTHENTICATION_FAILURE_GENERIC",
+                            5,
+                            5 * 60 * 1000));
+
+            reasons.append(DISABLED_AUTHENTICATION_FAILURE_CARRIER_SPECIFIC,
+                    new DisableReasonInfo(
+                            "NETWORK_SELECTION_DISABLED_AUTHENTICATION_FAILURE_CARRIER_SPECIFIC",
                             1,
                             Integer.MAX_VALUE));
 
