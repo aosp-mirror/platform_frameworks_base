@@ -18,6 +18,7 @@ package com.android.systemui.accessibility;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.never;
@@ -28,9 +29,11 @@ import android.annotation.Nullable;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.testing.AndroidTestingRunner;
 import android.view.SurfaceControl;
+import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.animation.AccelerateInterpolator;
 
 import androidx.test.InstrumentationRegistry;
@@ -75,9 +78,9 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     @Mock
     WindowMagnifierCallback mWindowMagnifierCallback;
     @Mock
-    Runnable mAnimationEndCallback;
+    IRemoteMagnificationAnimationCallback mAnimationCallback;
     @Mock
-    Runnable mAnimationEndCallback2;
+    IRemoteMagnificationAnimationCallback mAnimationCallback2;
     private SpyWindowMagnificationController mController;
     private WindowMagnificationController mSpyController;
     private WindowMagnificationAnimationController mWindowMagnificationAnimationController;
@@ -105,8 +108,9 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void enableWindowMagnification_disabled_expectedValuesAndInvokeCallback() {
-        enableWindowMagnificationAndWaitAnimating(mWaitingAnimationPeriod, mAnimationEndCallback);
+    public void enableWindowMagnification_disabled_expectedValuesAndInvokeCallback()
+            throws RemoteException {
+        enableWindowMagnificationAndWaitAnimating(mWaitingAnimationPeriod, mAnimationCallback);
 
         verify(mSpyController, atLeast(2)).enableWindowMagnification(
                 mScaleCaptor.capture(),
@@ -115,28 +119,30 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         verifyStartValue(mCenterXCaptor, DEFAULT_CENTER_X);
         verifyStartValue(mCenterYCaptor, DEFAULT_CENTER_Y);
         verifyFinalSpec(DEFAULT_SCALE, DEFAULT_CENTER_X, DEFAULT_CENTER_Y);
-        verify(mAnimationEndCallback).run();
+        verify(mAnimationCallback).onResult(true);
     }
 
 
     @Test
-    public void enableWindowMagnificationWithScaleOne_disabled_NoAnimationAndInvokeCallback() {
+    public void enableWindowMagnificationWithScaleOne_disabled_NoAnimationAndInvokeCallback()
+            throws RemoteException {
         mInstrumentation.runOnMainSync(
                 () -> {
                     mWindowMagnificationAnimationController.enableWindowMagnification(1,
-                            DEFAULT_CENTER_X, DEFAULT_CENTER_Y, mAnimationEndCallback);
+                            DEFAULT_CENTER_X, DEFAULT_CENTER_Y, mAnimationCallback);
                 });
         SystemClock.sleep(mWaitingAnimationPeriod);
 
         verify(mSpyController).enableWindowMagnification(1, DEFAULT_CENTER_X,
                 DEFAULT_CENTER_Y);
-        verify(mAnimationEndCallback).run();
+        verify(mAnimationCallback).onResult(true);
     }
 
     @Test
-    public void enableWindowMagnification_enabling_expectedValuesAndInvokeCallback() {
+    public void enableWindowMagnification_enabling_expectedValuesAndInvokeCallback()
+            throws RemoteException {
         enableWindowMagnificationAndWaitAnimating(mWaitIntermediateAnimationPeriod,
-                mAnimationEndCallback);
+                mAnimationCallback);
         final float targetScale = DEFAULT_SCALE + 1.0f;
         final float targetCenterX = DEFAULT_CENTER_X + 100;
         final float targetCenterY = DEFAULT_CENTER_Y + 100;
@@ -144,7 +150,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         mInstrumentation.runOnMainSync(() -> {
             Mockito.reset(mSpyController);
             mWindowMagnificationAnimationController.enableWindowMagnification(targetScale,
-                    targetCenterX, targetCenterY, mAnimationEndCallback2);
+                    targetCenterX, targetCenterY, mAnimationCallback2);
             mCurrentScale.set(mController.getScale());
             mCurrentCenterX.set(mController.getCenterX());
             mCurrentCenterY.set(mController.getCenterY());
@@ -158,33 +164,35 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         verifyStartValue(mCenterXCaptor, mCurrentCenterX.get());
         verifyStartValue(mCenterYCaptor, mCurrentCenterY.get());
         verifyFinalSpec(targetScale, targetCenterX, targetCenterY);
-        verify(mAnimationEndCallback, never()).run();
-        verify(mAnimationEndCallback2).run();
+        verify(mAnimationCallback).onResult(false);
+        verify(mAnimationCallback2).onResult(true);
     }
 
     @Test
-    public void enableWindowMagnificationWithSameSpec_enabling_NoAnimationAndInvokeCallback() {
+    public void enableWindowMagnificationWithSameSpec_enabling_NoAnimationAndInvokeCallback()
+            throws RemoteException {
         enableWindowMagnificationAndWaitAnimating(mWaitIntermediateAnimationPeriod,
-                mAnimationEndCallback);
+                mAnimationCallback);
 
         mInstrumentation.runOnMainSync(() -> {
             Mockito.reset(mSpyController);
             mWindowMagnificationAnimationController.enableWindowMagnification(Float.NaN,
-                    Float.NaN, Float.NaN, mAnimationEndCallback2);
+                    Float.NaN, Float.NaN, mAnimationCallback2);
         });
         SystemClock.sleep(mWaitingAnimationPeriod);
 
         verify(mSpyController, never()).enableWindowMagnification(anyFloat(), anyFloat(),
                 anyFloat());
-        verify(mAnimationEndCallback, never()).run();
-        verify(mAnimationEndCallback2).run();
+        verify(mAnimationCallback).onResult(false);
+        verify(mAnimationCallback2).onResult(true);
     }
 
     @Test
-    public void enableWindowMagnification_disabling_expectedValuesAndInvokeCallback() {
+    public void enableWindowMagnification_disabling_expectedValuesAndInvokeCallback()
+            throws RemoteException {
         enableWindowMagnificationAndWaitAnimating(mWaitingAnimationPeriod, null);
         deleteWindowMagnificationAndWaitAnimating(mWaitIntermediateAnimationPeriod,
-                mAnimationEndCallback);
+                mAnimationCallback);
         final float targetScale = DEFAULT_SCALE + 1.0f;
         final float targetCenterX = DEFAULT_CENTER_X + 100;
         final float targetCenterY = DEFAULT_CENTER_Y + 100;
@@ -193,13 +201,14 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
                 () -> {
                     Mockito.reset(mSpyController);
                     mWindowMagnificationAnimationController.enableWindowMagnification(targetScale,
-                            targetCenterX, targetCenterY, mAnimationEndCallback2);
+                            targetCenterX, targetCenterY, mAnimationCallback2);
                     mCurrentScale.set(mController.getScale());
                     mCurrentCenterX.set(mController.getCenterX());
                     mCurrentCenterY.set(mController.getCenterY());
                 });
         // Current spec shouldn't match given spec.
-        verify(mAnimationEndCallback2, never()).run();
+        verify(mAnimationCallback2, never()).onResult(anyBoolean());
+        verify(mAnimationCallback).onResult(false);
         SystemClock.sleep(mWaitingAnimationPeriod);
 
         verify(mSpyController, atLeast(2)).enableWindowMagnification(
@@ -213,34 +222,35 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         assertTrue(mCenterYCaptor.getAllValues().get(0) > mCurrentCenterY.get());
         assertEquals(targetCenterY, mCenterYCaptor.getValue(), 0f);
         verifyFinalSpec(targetScale, targetCenterX, targetCenterY);
-        verify(mAnimationEndCallback, never()).run();
-        verify(mAnimationEndCallback2).run();
+        verify(mAnimationCallback2).onResult(true);
     }
 
     @Test
-    public void enableWindowMagnificationWithSameSpec_disabling_NoAnimationAndInvokeCallback() {
+    public void enableWindowMagnificationWithSameSpec_disabling_NoAnimationAndInvokeCallback()
+            throws RemoteException {
         enableWindowMagnificationAndWaitAnimating(mWaitingAnimationPeriod, null);
         deleteWindowMagnificationAndWaitAnimating(mWaitIntermediateAnimationPeriod,
-                mAnimationEndCallback);
+                mAnimationCallback);
 
         mInstrumentation.runOnMainSync(() -> {
             Mockito.reset(mSpyController);
             mWindowMagnificationAnimationController.enableWindowMagnification(Float.NaN,
-                    Float.NaN, Float.NaN, mAnimationEndCallback2);
+                    Float.NaN, Float.NaN, mAnimationCallback2);
         });
         SystemClock.sleep(mWaitingAnimationPeriod);
 
         verify(mSpyController, never()).enableWindowMagnification(anyFloat(), anyFloat(),
                 anyFloat());
         verify(mSpyController, never()).deleteWindowMagnification();
-        verify(mAnimationEndCallback, never()).run();
-        verify(mAnimationEndCallback2).run();
+        verify(mAnimationCallback).onResult(false);
+        verify(mAnimationCallback2).onResult(true);
     }
 
     @Test
-    public void enableWindowMagnification_enabled_expectedValuesAndInvokeCallback() {
+    public void enableWindowMagnification_enabled_expectedValuesAndInvokeCallback()
+            throws RemoteException {
         enableWindowMagnificationAndWaitAnimating(mWaitIntermediateAnimationPeriod,
-                mAnimationEndCallback);
+                mAnimationCallback);
         final float targetScale = DEFAULT_SCALE + 1.0f;
         final float targetCenterX = DEFAULT_CENTER_X + 100;
         final float targetCenterY = DEFAULT_CENTER_Y + 100;
@@ -248,7 +258,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         mInstrumentation.runOnMainSync(() -> {
             Mockito.reset(mSpyController);
             mWindowMagnificationAnimationController.enableWindowMagnification(targetScale,
-                    targetCenterX, targetCenterY, mAnimationEndCallback2);
+                    targetCenterX, targetCenterY, mAnimationCallback2);
             mCurrentScale.set(mController.getScale());
             mCurrentCenterX.set(mController.getCenterX());
             mCurrentCenterY.set(mController.getCenterY());
@@ -262,19 +272,20 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         verifyStartValue(mCenterXCaptor, mCurrentCenterX.get());
         verifyStartValue(mCenterYCaptor, mCurrentCenterY.get());
         verifyFinalSpec(targetScale, targetCenterX, targetCenterY);
-        verify(mAnimationEndCallback, never()).run();
-        verify(mAnimationEndCallback2).run();
+        verify(mAnimationCallback).onResult(false);
+        verify(mAnimationCallback2).onResult(true);
     }
 
     @Test
-    public void enableWindowMagnificationWithSameScale_enabled_doNothingButInvokeCallback() {
+    public void enableWindowMagnificationWithSameScale_enabled_doNothingButInvokeCallback()
+            throws RemoteException {
         enableWindowMagnificationAndWaitAnimating(mWaitingAnimationPeriod, null);
 
-        enableWindowMagnificationAndWaitAnimating(mWaitingAnimationPeriod, mAnimationEndCallback);
+        enableWindowMagnificationAndWaitAnimating(mWaitingAnimationPeriod, mAnimationCallback);
 
         verify(mSpyController, never()).enableWindowMagnification(anyFloat(), anyFloat(),
                 anyFloat());
-        verify(mAnimationEndCallback).run();
+        verify(mAnimationCallback).onResult(true);
     }
 
     @Test
@@ -289,10 +300,11 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void deleteWindowMagnification_enabled_expectedValuesAndInvokeCallback() {
+    public void deleteWindowMagnification_enabled_expectedValuesAndInvokeCallback()
+            throws RemoteException {
         enableWindowMagnificationAndWaitAnimating(mWaitingAnimationPeriod, null);
 
-        deleteWindowMagnificationAndWaitAnimating(mWaitingAnimationPeriod, mAnimationEndCallback);
+        deleteWindowMagnificationAndWaitAnimating(mWaitingAnimationPeriod, mAnimationCallback);
 
         verify(mSpyController, atLeast(2)).enableWindowMagnification(mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture());
@@ -301,27 +313,29 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         verifyStartValue(mCenterXCaptor, Float.NaN);
         verifyStartValue(mCenterYCaptor, Float.NaN);
         verifyFinalSpec(Float.NaN, Float.NaN, Float.NaN);
-        verify(mAnimationEndCallback).run();
+        verify(mAnimationCallback).onResult(true);
     }
 
     @Test
-    public void deleteWindowMagnification_disabled_doNothingAndInvokeCallback() {
-        deleteWindowMagnificationAndWaitAnimating(mWaitingAnimationPeriod, mAnimationEndCallback);
+    public void deleteWindowMagnification_disabled_doNothingAndInvokeCallback()
+            throws RemoteException {
+        deleteWindowMagnificationAndWaitAnimating(mWaitingAnimationPeriod, mAnimationCallback);
 
         Mockito.verifyNoMoreInteractions(mSpyController);
-        verify(mAnimationEndCallback).run();
+        verify(mAnimationCallback).onResult(true);
     }
 
     @Test
-    public void deleteWindowMagnification_enabling_expectedValuesAndInvokeCallback() {
+    public void deleteWindowMagnification_enabling_expectedValuesAndInvokeCallback()
+            throws RemoteException {
         enableWindowMagnificationAndWaitAnimating(mWaitIntermediateAnimationPeriod,
-                mAnimationEndCallback);
+                mAnimationCallback);
 
         mInstrumentation.runOnMainSync(
                 () -> {
                     Mockito.reset(mSpyController);
                     mWindowMagnificationAnimationController.deleteWindowMagnification(
-                            mAnimationEndCallback2);
+                            mAnimationCallback2);
                     mCurrentScale.set(mController.getScale());
                     mCurrentCenterX.set(mController.getCenterX());
                     mCurrentCenterY.set(mController.getCenterY());
@@ -339,25 +353,25 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         verifyStartValue(mCenterXCaptor, Float.NaN);
         verifyStartValue(mCenterYCaptor, Float.NaN);
         verifyFinalSpec(Float.NaN, Float.NaN, Float.NaN);
-        verify(mAnimationEndCallback, never()).run();
-        verify(mAnimationEndCallback2).run();
+        verify(mAnimationCallback).onResult(false);
+        verify(mAnimationCallback2).onResult(true);
     }
 
     @Test
-    public void deleteWindowMagnification_disabling_checkStartAndValues() {
+    public void deleteWindowMagnification_disabling_checkStartAndValues() throws RemoteException {
         enableWindowMagnificationAndWaitAnimating(mWaitingAnimationPeriod, null);
         deleteWindowMagnificationAndWaitAnimating(mWaitIntermediateAnimationPeriod,
-                mAnimationEndCallback);
+                mAnimationCallback);
 
-        deleteWindowMagnificationAndWaitAnimating(mWaitingAnimationPeriod, mAnimationEndCallback2);
+        deleteWindowMagnificationAndWaitAnimating(mWaitingAnimationPeriod, mAnimationCallback2);
 
         verify(mSpyController, atLeast(2)).enableWindowMagnification(mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture());
         verify(mSpyController).deleteWindowMagnification();
         assertEquals(1.0f, mScaleCaptor.getValue(), 0f);
         verifyFinalSpec(Float.NaN, Float.NaN, Float.NaN);
-        verify(mAnimationEndCallback, never()).run();
-        verify(mAnimationEndCallback2).run();
+        verify(mAnimationCallback).onResult(false);
+        verify(mAnimationCallback2).onResult(true);
     }
 
     @Test
@@ -386,22 +400,22 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     }
 
     private void enableWindowMagnificationAndWaitAnimating(long duration,
-            @Nullable Runnable endCallback) {
+            @Nullable IRemoteMagnificationAnimationCallback callback) {
         mInstrumentation.runOnMainSync(
                 () -> {
                     Mockito.reset(mSpyController);
                     mWindowMagnificationAnimationController.enableWindowMagnification(DEFAULT_SCALE,
-                            DEFAULT_CENTER_X, DEFAULT_CENTER_Y, endCallback);
+                            DEFAULT_CENTER_X, DEFAULT_CENTER_Y, callback);
                 });
         SystemClock.sleep(duration);
     }
 
     private void deleteWindowMagnificationAndWaitAnimating(long duration,
-            @Nullable Runnable endCallback) {
+            @Nullable IRemoteMagnificationAnimationCallback callback) {
         mInstrumentation.runOnMainSync(
                 () -> {
                     resetMockObjects();
-                    mWindowMagnificationAnimationController.deleteWindowMagnification(endCallback);
+                    mWindowMagnificationAnimationController.deleteWindowMagnification(callback);
                 });
         SystemClock.sleep(duration);
     }

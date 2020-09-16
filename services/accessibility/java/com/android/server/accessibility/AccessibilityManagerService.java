@@ -120,6 +120,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.accessibility.magnification.FullScreenMagnificationController;
 import com.android.server.accessibility.magnification.MagnificationGestureHandler;
+import com.android.server.accessibility.magnification.MagnificationTransitionController;
 import com.android.server.accessibility.magnification.WindowMagnificationManager;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
@@ -258,6 +259,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private Point mTempPoint = new Point();
     private boolean mIsAccessibilityButtonShown;
+    private MagnificationTransitionController mMagnificationTransitionController;
 
     private AccessibilityUserState getCurrentUserStateLocked() {
         return getUserStateLocked(mCurrentUserId);
@@ -302,6 +304,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mA11yWindowManager = a11yWindowManager;
         mA11yDisplayListener = a11yDisplayListener;
         mWindowMagnificationMgr = windowMagnificationMgr;
+        mMagnificationTransitionController = new MagnificationTransitionController(this, mLock);
         init();
     }
 
@@ -321,6 +324,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mA11yWindowManager = new AccessibilityWindowManager(mLock, mMainHandler,
                 mWindowManagerService, this, mSecurityPolicy, this);
         mA11yDisplayListener = new AccessibilityDisplayListener(mContext, mMainHandler);
+        mMagnificationTransitionController = new MagnificationTransitionController(this, mLock);
         init();
     }
 
@@ -1550,9 +1554,26 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (fallBackMagnificationModeSettingsLocked(userState)) {
             return;
         }
-        mMainHandler.sendMessage(obtainMessage(
-                AccessibilityManagerService::notifyRefreshMagnificationModeToInputFilter,
-                this));
+        mMagnificationTransitionController.transitionMagnificationModeLocked(
+                Display.DEFAULT_DISPLAY, userState.getMagnificationModeLocked(),
+                this::onMagnificationTransitionEndedLocked);
+    }
+
+    /**
+     * Called when the magnification mode transition is completed.
+     */
+    void onMagnificationTransitionEndedLocked(boolean success) {
+        final AccessibilityUserState userState = getCurrentUserStateLocked();
+        final int previousMode = userState.getMagnificationModeLocked()
+                ^ Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
+        if (!success && previousMode != 0) {
+            userState.setMagnificationModeLocked(previousMode);
+            persistMagnificationModeSettingLocked(previousMode);
+        } else {
+            mMainHandler.sendMessage(obtainMessage(
+                    AccessibilityManagerService::notifyRefreshMagnificationModeToInputFilter,
+                    this));
+        }
     }
 
     private void notifyRefreshMagnificationModeToInputFilter() {
@@ -2962,7 +2983,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         getWindowMagnificationMgr().setConnection(connection);
     }
 
-    WindowMagnificationManager getWindowMagnificationMgr() {
+    /**
+     * Getter of {@link WindowMagnificationManager}.
+     *
+     * @return WindowMagnificationManager
+     */
+    public WindowMagnificationManager getWindowMagnificationMgr() {
         synchronized (mLock) {
             if (mWindowMagnificationMgr == null) {
                 mWindowMagnificationMgr = new WindowMagnificationManager(mContext, mCurrentUserId);
