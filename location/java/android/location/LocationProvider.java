@@ -92,23 +92,23 @@ public class LocationProvider {
         }
 
         if (criteria.getAccuracy() != Criteria.NO_REQUIREMENT &&
-                criteria.getAccuracy() < properties.mAccuracy) {
+                criteria.getAccuracy() < properties.getAccuracy()) {
             return false;
         }
         if (criteria.getPowerRequirement() != Criteria.NO_REQUIREMENT &&
-                criteria.getPowerRequirement() < properties.mPowerRequirement) {
+                criteria.getPowerRequirement() < properties.getPowerRequirement()) {
             return false;
         }
-        if (criteria.isAltitudeRequired() && !properties.mSupportsAltitude) {
+        if (criteria.isAltitudeRequired() && !properties.hasAltitudeSupport()) {
             return false;
         }
-        if (criteria.isSpeedRequired() && !properties.mSupportsSpeed) {
+        if (criteria.isSpeedRequired() && !properties.hasSpeedSupport()) {
             return false;
         }
-        if (criteria.isBearingRequired() && !properties.mSupportsBearing) {
+        if (criteria.isBearingRequired() && !properties.hasBearingSupport()) {
             return false;
         }
-        if (!criteria.isCostAllowed() && properties.mHasMonetaryCost) {
+        if (!criteria.isCostAllowed() && properties.hasMonetaryCost()) {
             return false;
         }
         return true;
@@ -119,7 +119,7 @@ public class LocationProvider {
      * data network (e.g., the Internet), false otherwise.
      */
     public boolean requiresNetwork() {
-        return mProperties.mRequiresNetwork;
+        return mProperties.hasNetworkRequirement();
     }
 
     /**
@@ -128,7 +128,7 @@ public class LocationProvider {
      * otherwise.
      */
     public boolean requiresSatellite() {
-        return mProperties.mRequiresSatellite;
+        return mProperties.hasSatelliteRequirement();
     }
 
     /**
@@ -137,7 +137,7 @@ public class LocationProvider {
      * otherwise.
      */
     public boolean requiresCell() {
-        return mProperties.mRequiresCell;
+        return mProperties.hasCellRequirement();
     }
 
     /**
@@ -146,7 +146,7 @@ public class LocationProvider {
      * each provider to give accurate information.
      */
     public boolean hasMonetaryCost() {
-        return mProperties.mHasMonetaryCost;
+        return mProperties.hasMonetaryCost();
     }
 
     /**
@@ -156,7 +156,7 @@ public class LocationProvider {
      * should return true.
      */
     public boolean supportsAltitude() {
-        return mProperties.mSupportsAltitude;
+        return mProperties.hasAltitudeSupport();
     }
 
     /**
@@ -166,7 +166,7 @@ public class LocationProvider {
      * should return true.
      */
     public boolean supportsSpeed() {
-        return mProperties.mSupportsSpeed;
+        return mProperties.hasSpeedSupport();
     }
 
     /**
@@ -176,7 +176,7 @@ public class LocationProvider {
      * should return true.
      */
     public boolean supportsBearing() {
-        return mProperties.mSupportsBearing;
+        return mProperties.hasBearingSupport();
     }
 
     /**
@@ -186,7 +186,7 @@ public class LocationProvider {
      * constants Criteria.POWER_REQUIREMENT_*.
      */
     public int getPowerRequirement() {
-        return mProperties.mPowerRequirement;
+        return mProperties.getPowerRequirement();
     }
 
     /**
@@ -197,6 +197,6 @@ public class LocationProvider {
      * is returned.
      */
     public int getAccuracy() {
-        return mProperties.mAccuracy;
+        return mProperties.getAccuracy();
     }
 }
