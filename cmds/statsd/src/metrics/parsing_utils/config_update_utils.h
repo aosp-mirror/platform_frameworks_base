@@ -125,23 +125,25 @@ bool updateConditions(const ConfigKey& key, const StatsdConfig& config,
                       std::vector<ConditionState>& conditionCache,
                       std::set<int64_t>& replacedConditions);
 
-// Function to determine if an event metric needs to be updated. Populates updateStatus.
+// Function to determine the update status (preserve/replace/new) of all metrics in the config.
 // [config]: the input StatsdConfig
-// [metric]: the current metric to be updated
 // [oldMetricProducerMap]: metric id to index mapping in the existing MetricsManager
 // [oldMetricProducers]: stores the existing MetricProducers
-// [metricToActivationMap]:  map from metric id to metric activation index.
-// [replacedMatchers]: set of replaced matcher ids. conditions using these matchers must be replaced
+// [metricToActivationMap]:  map from metric id to metric activation index
+// [replacedMatchers]: set of replaced matcher ids. metrics using these matchers must be replaced
+// [replacedConditions]: set of replaced conditions. metrics using these conditions must be replaced
+// [replacedStates]: set of replaced state ids. metrics using these states must be replaced
 // output:
-// [updateStatus]: update status for the metric. Will be changed from UPDATE_UNKNOWN after this call
+// [metricsToUpdate]: update status of each metric. Will be changed from UPDATE_UNKNOWN
 // Returns whether the function was successful or not.
-bool determineEventMetricUpdateStatus(const StatsdConfig& config, const EventMetric& metric,
+bool determineAllMetricUpdateStatuses(const StatsdConfig& config,
                                       const unordered_map<int64_t, int>& oldMetricProducerMap,
                                       const vector<sp<MetricProducer>>& oldMetricProducers,
                                       const unordered_map<int64_t, int>& metricToActivationMap,
                                       const set<int64_t>& replacedMatchers,
                                       const set<int64_t>& replacedConditions,
-                                      UpdateStatus& updateStatus);
+                                      const set<int64_t>& replacedStates,
+                                      vector<UpdateStatus>& metricsToUpdate);
 
 // Update MetricProducers.
 // input:
