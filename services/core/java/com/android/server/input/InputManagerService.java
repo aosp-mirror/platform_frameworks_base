@@ -46,6 +46,7 @@ import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerInternal;
+import android.hardware.input.InputManagerInternal.LidSwitchCallback;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.TouchCalibration;
 import android.media.AudioManager;
@@ -189,6 +190,10 @@ public class InputManagerService extends IInputManager.Stub
     private Map<IBinder, VibratorToken> mVibratorTokens = new ArrayMap<IBinder, VibratorToken>();
     private int mNextVibratorTokenValue;
 
+    // State for lid switch
+    private final Object mLidSwitchLock = new Object();
+    private List<LidSwitchCallback> mLidSwitchCallbacks = new ArrayList<>();
+
     // State for the currently installed input filter.
     final Object mInputFilterLock = new Object();
     IInputFilter mInputFilter; // guarded by mInputFilterLock
@@ -330,6 +335,9 @@ public class InputManagerService extends IInputManager.Stub
     public static final int SW_CAMERA_LENS_COVER_BIT = 1 << SW_CAMERA_LENS_COVER;
     public static final int SW_MUTE_DEVICE_BIT = 1 << SW_MUTE_DEVICE;
 
+    /** Indicates an open state for the lid switch. */
+    public static final int SW_STATE_LID_OPEN = 0;
+
     /** Whether to use the dev/input/event or uevent subsystem for the audio jack. */
     final boolean mUseDevInputEventForAudioJack;
 
@@ -353,11 +361,31 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     public void setWindowManagerCallbacks(WindowManagerCallbacks callbacks) {
+        if (mWindowManagerCallbacks != null) {
+            unregisterLidSwitchCallbackInternal(mWindowManagerCallbacks);
+        }
         mWindowManagerCallbacks = callbacks;
+        registerLidSwitchCallbackInternal(mWindowManagerCallbacks);
     }
 
     public void setWiredAccessoryCallbacks(WiredAccessoryCallbacks callbacks) {
         mWiredAccessoryCallbacks = callbacks;
+    }
+
+    void registerLidSwitchCallbackInternal(@NonNull LidSwitchCallback callback) {
+        boolean lidOpen;
+        synchronized (mLidSwitchLock) {
+            mLidSwitchCallbacks.add(callback);
+            lidOpen = getSwitchState(-1 /* deviceId */, InputDevice.SOURCE_ANY, SW_LID)
+                    == SW_STATE_LID_OPEN;
+        }
+        callback.notifyLidSwitchChanged(0 /* whenNanos */, lidOpen);
+    }
+
+    void unregisterLidSwitchCallbackInternal(@NonNull LidSwitchCallback callback) {
+        synchronized (mLidSwitchLock) {
+            mLidSwitchCallbacks.remove(callback);
+        }
     }
 
     public void start() {
@@ -1934,6 +1962,7 @@ public class InputManagerService extends IInputManager.Stub
         synchronized (mInputFilterLock) { }
         synchronized (mAssociationsLock) { /* Test if blocked by associations lock. */}
         synchronized (mGestureMonitorPidsLock) { /* Test if blocked by gesture monitor pids lock */}
+        synchronized (mLidSwitchLock) { /* Test if blocked by lid switch lock. */ }
         nativeMonitor(mPtr);
     }
 
@@ -1964,7 +1993,15 @@ public class InputManagerService extends IInputManager.Stub
 
         if ((switchMask & SW_LID_BIT) != 0) {
             final boolean lidOpen = ((switchValues & SW_LID_BIT) == 0);
-            mWindowManagerCallbacks.notifyLidSwitchChanged(whenNanos, lidOpen);
+
+            ArrayList<LidSwitchCallback> callbacksCopy;
+            synchronized (mLidSwitchLock) {
+                callbacksCopy = new ArrayList<>(mLidSwitchCallbacks);
+            }
+            for (int i = 0; i < callbacksCopy.size(); i++) {
+                LidSwitchCallback callbacks = callbacksCopy.get(i);
+                callbacks.notifyLidSwitchChanged(whenNanos, lidOpen);
+            }
         }
 
         if ((switchMask & SW_CAMERA_LENS_COVER_BIT) != 0) {
@@ -2263,18 +2300,11 @@ public class InputManagerService extends IInputManager.Stub
     /**
      * Callback interface implemented by the Window Manager.
      */
-    public interface WindowManagerCallbacks {
+    public interface WindowManagerCallbacks extends LidSwitchCallback {
         /**
          * This callback is invoked when the confuguration changes.
          */
         public void notifyConfigurationChanged();
-
-        /**
-         * This callback is invoked when the lid switch changes state.
-         * @param whenNanos the time when the change occurred
-         * @param lidOpen true if the lid is open
-         */
-        public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen);
 
         /**
          * This callback is invoked when the camera lens cover switch changes state.
@@ -2602,6 +2632,16 @@ public class InputManagerService extends IInputManager.Stub
         public boolean transferTouchFocus(@NonNull IBinder fromChannelToken,
                 @NonNull IBinder toChannelToken) {
             return InputManagerService.this.transferTouchFocus(fromChannelToken, toChannelToken);
+        }
+
+        @Override
+        public void registerLidSwitchCallback(LidSwitchCallback callbacks) {
+            registerLidSwitchCallbackInternal(callbacks);
+        }
+
+        @Override
+        public void unregisterLidSwitchCallback(LidSwitchCallback callbacks) {
+            unregisterLidSwitchCallbackInternal(callbacks);
         }
     }
 
