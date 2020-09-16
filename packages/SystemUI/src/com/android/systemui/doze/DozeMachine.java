@@ -430,8 +430,12 @@ public class DozeMachine {
         /** Give the Part a chance to clean itself up. */
         default void destroy() {}
 
-        /** Alerts that the screenstate is being changed. */
-        default void onScreenState(int state) {}
+        /**
+         *  Alerts that the screenstate is being changed.
+         *  Note: This may be called from within a call to transitionTo, so local DozeState may not
+         *  be accurate nor match with the new displayState.
+         */
+        default void onScreenState(int displayState) {}
     }
 
     /** A wrapper interface for {@link android.service.dreams.DreamService} */
