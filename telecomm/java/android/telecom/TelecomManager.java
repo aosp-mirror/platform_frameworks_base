@@ -322,6 +322,7 @@ public class TelecomManager {
      * the remote handle of the new call.
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_UNKNOWN_CALL_HANDLE =
             "android.telecom.extra.UNKNOWN_CALL_HANDLE";
 
@@ -392,6 +393,7 @@ public class TelecomManager {
      * </ul>
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_CALL_TECHNOLOGY_TYPE =
             "android.telecom.extra.CALL_TECHNOLOGY_TYPE";
 
@@ -728,17 +730,57 @@ public class TelecomManager {
     public static final int TTY_MODE_VCO = 3;
 
     /**
-     * Broadcast intent action indicating that the current TTY mode has changed. An intent extra
-     * provides this state as an int.
+     * Broadcast intent action indicating that the current TTY mode has changed.
      *
-     * @see #EXTRA_CURRENT_TTY_MODE
+     * This intent will contain {@link #EXTRA_CURRENT_TTY_MODE} as an intent extra, giving the new
+     * TTY mode.
      * @hide
      */
+    @TestApi
+    @SystemApi
     public static final String ACTION_CURRENT_TTY_MODE_CHANGED =
             "android.telecom.action.CURRENT_TTY_MODE_CHANGED";
 
     /**
-     * The lookup key for an int that indicates the current TTY mode.
+     * Integer extra key that indicates the current TTY mode.
+     *
+     * Used with {@link #ACTION_CURRENT_TTY_MODE_CHANGED}.
+     *
+     * Valid modes are:
+     * <ul>
+     *     <li>{@link #TTY_MODE_OFF}</li>
+     *     <li>{@link #TTY_MODE_FULL}</li>
+     *     <li>{@link #TTY_MODE_HCO}</li>
+     *     <li>{@link #TTY_MODE_VCO}</li>
+     * </ul>
+     *
+     * This TTY mode is distinct from the one sent via {@link #ACTION_TTY_PREFERRED_MODE_CHANGED},
+     * since the current TTY mode will always be {@link #TTY_MODE_OFF}unless a TTY terminal is
+     * plugged into the device.
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final String EXTRA_CURRENT_TTY_MODE =
+            "android.telecom.extra.CURRENT_TTY_MODE";
+
+    /**
+     * Broadcast intent action indicating that the TTY preferred operating mode has changed.
+     *
+     * This intent will contain {@link #EXTRA_TTY_PREFERRED_MODE} as an intent extra, giving the new
+     * preferred TTY mode.
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final String ACTION_TTY_PREFERRED_MODE_CHANGED =
+            "android.telecom.action.TTY_PREFERRED_MODE_CHANGED";
+
+    /**
+     * Integer extra key that indicates the preferred TTY mode.
+     *
+     * Used with {@link #ACTION_TTY_PREFERRED_MODE_CHANGED}.
+     *
      * Valid modes are:
      * <ul>
      *     <li>{@link #TTY_MODE_OFF}</li>
@@ -748,26 +790,8 @@ public class TelecomManager {
      * </ul>
      * @hide
      */
-    public static final String EXTRA_CURRENT_TTY_MODE =
-            "android.telecom.extra.CURRENT_TTY_MODE";
-
-    /**
-     * Broadcast intent action indicating that the TTY preferred operating mode has changed. An
-     * intent extra provides the new mode as an int.
-     *
-     * @see #EXTRA_TTY_PREFERRED_MODE
-     * @hide
-     */
-    public static final String ACTION_TTY_PREFERRED_MODE_CHANGED =
-            "android.telecom.action.TTY_PREFERRED_MODE_CHANGED";
-
-    /**
-     * The lookup key for an int that indicates preferred TTY mode. Valid modes are: -
-     * {@link #TTY_MODE_OFF} - {@link #TTY_MODE_FULL} - {@link #TTY_MODE_HCO} -
-     * {@link #TTY_MODE_VCO}
-     *
-     * @hide
-     */
+    @TestApi
+    @SystemApi
     public static final String EXTRA_TTY_PREFERRED_MODE =
             "android.telecom.extra.TTY_PREFERRED_MODE";
 
@@ -843,8 +867,10 @@ public class TelecomManager {
      * {@link TelecomManager#CALL_SOURCE_EMERGENCY_DIALPAD},
      * {@link TelecomManager#CALL_SOURCE_EMERGENCY_SHORTCUT}.
      *
+     * Intended for use with the platform emergency dialer only.
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_CALL_SOURCE = "android.telecom.extra.CALL_SOURCE";
 
     /**
@@ -852,6 +878,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int CALL_SOURCE_EMERGENCY_SHORTCUT = 2;
 
     /**
@@ -859,6 +886,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int CALL_SOURCE_EMERGENCY_DIALPAD = 1;
 
     /**
@@ -866,6 +894,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int CALL_SOURCE_UNSPECIFIED = 0;
 
     /**
