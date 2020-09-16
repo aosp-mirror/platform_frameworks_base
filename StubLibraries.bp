@@ -51,9 +51,12 @@ stubs_defaults {
         ":android_icu4j_public_api_files",
         "**/package.html",
     ],
-    // TODO(b/147699819): remove below aidl includes.
+    // TODO(b/147699819, b/169090544): remove below aidl includes.
     aidl: {
-        local_include_dirs: ["telephony/java"],
+        local_include_dirs: [
+            "telephony/java",
+            "media/aidl",
+        ],
     },
     libs: ["framework-internal-utils"],
     installable: false,

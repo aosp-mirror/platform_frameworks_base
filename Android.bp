@@ -547,6 +547,7 @@ java_library {
     exclude_srcs: ["core/java/android/content/pm/AndroidTestBaseUpdater.java"],
     aidl: {
         generate_get_transaction_name: true,
+        local_include_dirs: ["media/aidl"],
     },
     dxflags: [
         "--core-library",
@@ -583,6 +584,7 @@ java_library {
         // in favor of an API stubs dependency in java_library "framework" below.
         "mimemap",
         "mediatranscoding_aidl_interface-java",
+        "soundtrigger_middleware-aidl-java",
     ],
     // For backwards compatibility.
     stem: "framework",
