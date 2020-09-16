@@ -76,9 +76,14 @@ public class AppOpsCoordinator implements Coordinator {
         // extend the lifetime of foreground notification services to show for at least 5 seconds
         mNotifPipeline.addNotificationLifetimeExtender(mForegroundLifetimeExtender);
 
+        // listen for new notifications to add appOps
+        mNotifPipeline.addCollectionListener(mNotifCollectionListener);
+
         // filter out foreground service notifications that aren't necessary anymore
         mNotifPipeline.addPreGroupFilter(mNotifFilter);
 
+        // when appOps change, update any relevant notifications to update appOps for
+        mAppOpsController.addCallback(ForegroundServiceController.APP_OPS, this::onAppOpsChanged);
     }
 
     /**
@@ -169,4 +174,82 @@ public class AppOpsCoordinator implements Coordinator {
             }
         }
     };
+
+    /**
+     * Adds appOps to incoming and updating notifications
+     */
+    private NotifCollectionListener mNotifCollectionListener = new NotifCollectionListener() {
+        @Override
+        public void onEntryAdded(NotificationEntry entry) {
+            tagAppOps(entry);
+        }
+
+        @Override
+        public void onEntryUpdated(NotificationEntry entry) {
+            tagAppOps(entry);
+        }
+
+        private void tagAppOps(NotificationEntry entry) {
+            final StatusBarNotification sbn = entry.getSbn();
+            // note: requires that the ForegroundServiceController is updating their appOps first
+            ArraySet<Integer> activeOps =
+                    mForegroundServiceController.getAppOps(
+                            sbn.getUser().getIdentifier(),
+                            sbn.getPackageName());
+
+            entry.mActiveAppOps.clear();
+            if (activeOps != null) {
+                entry.mActiveAppOps.addAll(activeOps);
+            }
+        }
+    };
+
+    private void onAppOpsChanged(int code, int uid, String packageName, boolean active) {
+        mMainExecutor.execute(() -> handleAppOpsChanged(code, uid, packageName, active));
+    }
+
+    /**
+     * Update the appOp for the posted notification associated with the current foreground service
+     *
+     * @param code code for appOp to add/remove
+     * @param uid of user the notification is sent to
+     * @param packageName package that created the notification
+     * @param active whether the appOpCode is active or not
+     */
+    private void handleAppOpsChanged(int code, int uid, String packageName, boolean active) {
+        Assert.isMainThread();
+
+        int userId = UserHandle.getUserId(uid);
+
+        // Update appOps of the app's posted notifications with standard layouts
+        final ArraySet<String> notifKeys =
+                mForegroundServiceController.getStandardLayoutKeys(userId, packageName);
+        if (notifKeys != null) {
+            boolean changed = false;
+            for (int i = 0; i < notifKeys.size(); i++) {
+                final NotificationEntry entry = findNotificationEntryWithKey(notifKeys.valueAt(i));
+                if (entry != null
+                        && uid == entry.getSbn().getUid()
+                        && packageName.equals(entry.getSbn().getPackageName())) {
+                    if (active) {
+                        changed |= entry.mActiveAppOps.add(code);
+                    } else {
+                        changed |= entry.mActiveAppOps.remove(code);
+                    }
+                }
+            }
+            if (changed) {
+                mNotifFilter.invalidateList();
+            }
+        }
+    }
+
+    private NotificationEntry findNotificationEntryWithKey(String key) {
+        for (NotificationEntry entry : mNotifPipeline.getAllNotifs()) {
+            if (entry.getKey().equals(key)) {
+                return entry;
+            }
+        }
+        return null;
+    }
 }

@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.row.wrapper;
 
 import static com.android.systemui.statusbar.notification.TransformState.TRANSFORM_Y;
 
+import android.app.AppOpsManager;
 import android.app.Notification;
 import android.content.Context;
 import android.util.ArraySet;
@@ -63,6 +64,10 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     private TextView mHeaderText;
     private TextView mAppNameText;
     private ImageView mWorkProfileImage;
+    private View mCameraIcon;
+    private View mMicIcon;
+    private View mOverlayIcon;
+    private View mAppOps;
     private View mAudiblyAlertedIcon;
     private FrameLayout mIconContainer;
 
@@ -103,6 +108,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
                     }
                 }, TRANSFORMING_VIEW_TITLE);
         resolveHeaderViews();
+        addAppOpsOnClickListener(row);
     }
 
     protected void resolveHeaderViews() {
@@ -113,10 +119,46 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mExpandButton = mView.findViewById(com.android.internal.R.id.expand_button);
         mWorkProfileImage = mView.findViewById(com.android.internal.R.id.profile_badge);
         mNotificationHeader = mView.findViewById(com.android.internal.R.id.notification_header);
+        mCameraIcon = mView.findViewById(com.android.internal.R.id.camera);
+        mMicIcon = mView.findViewById(com.android.internal.R.id.mic);
+        mOverlayIcon = mView.findViewById(com.android.internal.R.id.overlay);
+        mAppOps = mView.findViewById(com.android.internal.R.id.app_ops);
         mAudiblyAlertedIcon = mView.findViewById(com.android.internal.R.id.alerted_icon);
         if (mNotificationHeader != null) {
             mNotificationHeader.setShowExpandButtonAtEnd(mShowExpandButtonAtEnd);
             mColor = mNotificationHeader.getOriginalIconColor();
+        }
+    }
+
+    private void addAppOpsOnClickListener(ExpandableNotificationRow row) {
+        View.OnClickListener listener = row.getAppOpsOnClickListener();
+        if (mNotificationHeader != null) {
+            mNotificationHeader.setAppOpsOnClickListener(listener);
+        }
+        if (mAppOps != null) {
+            mAppOps.setOnClickListener(listener);
+        }
+    }
+
+    /**
+     * Shows or hides 'app op in use' icons based on app usage.
+     */
+    @Override
+    public void showAppOpsIcons(ArraySet<Integer> appOps) {
+        if (appOps == null) {
+            return;
+        }
+        if (mOverlayIcon != null) {
+            mOverlayIcon.setVisibility(appOps.contains(AppOpsManager.OP_SYSTEM_ALERT_WINDOW)
+                    ? View.VISIBLE : View.GONE);
+        }
+        if (mCameraIcon != null) {
+            mCameraIcon.setVisibility(appOps.contains(AppOpsManager.OP_CAMERA)
+                    ? View.VISIBLE : View.GONE);
+        }
+        if (mMicIcon != null) {
+            mMicIcon.setVisibility(appOps.contains(AppOpsManager.OP_RECORD_AUDIO)
+                    ? View.VISIBLE : View.GONE);
         }
     }
 
@@ -242,6 +284,15 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         if (mIsLowPriority && mHeaderText != null) {
             mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TITLE,
                     mHeaderText);
+        }
+        if (mCameraIcon != null) {
+            mTransformationHelper.addViewTransformingToSimilar(mCameraIcon);
+        }
+        if (mMicIcon != null) {
+            mTransformationHelper.addViewTransformingToSimilar(mMicIcon);
+        }
+        if (mOverlayIcon != null) {
+            mTransformationHelper.addViewTransformingToSimilar(mOverlayIcon);
         }
         if (mAudiblyAlertedIcon != null) {
             mTransformationHelper.addViewTransformingToSimilar(mAudiblyAlertedIcon);
