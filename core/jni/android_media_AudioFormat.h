@@ -47,6 +47,7 @@
 
 #define CHANNEL_INVALID 0
 #define CHANNEL_OUT_DEFAULT 1
+#define CHANNEL_IN_DEFAULT 1
 
 static inline audio_format_t audioFormatToNative(int audioFormat)
 {
@@ -196,12 +197,22 @@ static inline int outChannelMaskFromNative(audio_channel_mask_t nativeMask)
 
 static inline audio_channel_mask_t inChannelMaskToNative(int channelMask)
 {
-    return (audio_channel_mask_t)channelMask;
+    switch (channelMask) {
+        case CHANNEL_IN_DEFAULT:
+            return AUDIO_CHANNEL_NONE;
+        default:
+            return (audio_channel_mask_t)channelMask;
+    }
 }
 
 static inline int inChannelMaskFromNative(audio_channel_mask_t nativeMask)
 {
-    return (int)nativeMask;
+    switch (nativeMask) {
+        case AUDIO_CHANNEL_NONE:
+            return CHANNEL_IN_DEFAULT;
+        default:
+            return (int)nativeMask;
+    }
 }
 
 #endif // ANDROID_MEDIA_AUDIOFORMAT_H

@@ -16,11 +16,9 @@
 
 package android.view.menu;
 
-import android.content.Context;
-import android.graphics.Point;
+import android.graphics.Rect;
 import android.test.ActivityInstrumentationTestCase;
 import android.util.PollingCheck;
-import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.espresso.ContextMenuUtils;
@@ -82,12 +80,9 @@ public class ContextMenuTest extends ActivityInstrumentationTestCase<ContextMenu
      * Returns the minimum of the default display's width and height.
      */
     private int getMinScreenDimension() {
-        final WindowManager windowManager = (WindowManager) getActivity().getSystemService(
-                Context.WINDOW_SERVICE);
-        final Display display = windowManager.getDefaultDisplay();
-        final Point displaySize = new Point();
-        display.getRealSize(displaySize);
-        return Math.min(displaySize.x, displaySize.y);
+        final WindowManager windowManager = getActivity().getSystemService(WindowManager.class);
+        final Rect maxWindowBounds = windowManager.getMaximumWindowMetrics().getBounds();
+        return Math.min(maxWindowBounds.width(), maxWindowBounds.height());
     }
 
     /**

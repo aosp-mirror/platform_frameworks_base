@@ -32,9 +32,15 @@
 #include "text/Printer.h"
 #include "util/Util.h"
 
+#include "idmap2/Policies.h"
+
 using ::aapt::text::Printer;
 using ::android::StringPiece;
 using ::android::base::StringPrintf;
+
+using android::idmap2::policy::kPolicyStringToFlag;
+
+using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
 
 namespace aapt {
 
@@ -178,19 +184,17 @@ class ValueBodyPrinter : public ConstValueVisitor {
   void Visit(const Array* array) override {
     const size_t count = array->elements.size();
     printer_->Print("[");
-    if (count > 0) {
-      for (size_t i = 0u; i < count; i++) {
-        if (i != 0u && i % 4u == 0u) {
-          printer_->Println();
-          printer_->Print(" ");
-        }
-        PrintItem(*array->elements[i]);
-        if (i != count - 1) {
-          printer_->Print(", ");
-        }
+    for (size_t i = 0u; i < count; i++) {
+      if (i != 0u && i % 4u == 0u) {
+        printer_->Println();
+        printer_->Print(" ");
       }
-      printer_->Println("]");
+      PrintItem(*array->elements[i]);
+      if (i != count - 1) {
+        printer_->Print(", ");
+      }
     }
+    printer_->Println("]");
   }
 
   void Visit(const Plural* plural) override {
@@ -312,6 +316,10 @@ void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions&
           case Visibility::Level::kUndefined:
             // Print nothing.
             break;
+        }
+
+        if (entry->overlayable_item) {
+          printer->Print(" OVERLAYABLE");
         }
 
         printer->Println();
@@ -525,6 +533,64 @@ class XmlPrinter : public xml::ConstVisitor {
 void Debug::DumpXml(const xml::XmlResource& doc, Printer* printer) {
   XmlPrinter xml_visitor(printer);
   doc.root->Accept(&xml_visitor);
+}
+
+struct DumpOverlayableEntry {
+  std::string overlayable_section;
+  std::string policy_subsection;
+  std::string resource_name;
+};
+
+void Debug::DumpOverlayable(const ResourceTable& table, text::Printer* printer) {
+  std::vector<DumpOverlayableEntry> items;
+  for (const auto& package : table.packages) {
+    for (const auto& type : package->types) {
+      for (const auto& entry : type->entries) {
+        if (entry->overlayable_item) {
+          const auto& overlayable_item = entry->overlayable_item.value();
+          const auto overlayable_section = StringPrintf(R"(name="%s" actor="%s")",
+              overlayable_item.overlayable->name.c_str(),
+              overlayable_item.overlayable->actor.c_str());
+          const auto policy_subsection = StringPrintf(R"(policies="%s")",
+              android::idmap2::policy::PoliciesToDebugString(overlayable_item.policies).c_str());
+          const auto value =
+            StringPrintf("%s/%s", to_string(type->type).data(), entry->name.c_str());
+          items.push_back(DumpOverlayableEntry{overlayable_section, policy_subsection, value});
+        }
+      }
+    }
+  }
+
+  std::sort(items.begin(), items.end(),
+      [](const DumpOverlayableEntry& a, const DumpOverlayableEntry& b) {
+        if (a.overlayable_section != b.overlayable_section) {
+          return a.overlayable_section < b.overlayable_section;
+        }
+        if (a.policy_subsection != b.policy_subsection) {
+          return a.policy_subsection < b.policy_subsection;
+        }
+        return a.resource_name < b.resource_name;
+      });
+
+  std::string last_overlayable_section;
+  std::string last_policy_subsection;
+  for (const auto& item : items) {
+    if (last_overlayable_section != item.overlayable_section) {
+      printer->Println(item.overlayable_section);
+      last_overlayable_section = item.overlayable_section;
+    }
+    if (last_policy_subsection != item.policy_subsection) {
+      printer->Indent();
+      printer->Println(item.policy_subsection);
+      last_policy_subsection = item.policy_subsection;
+      printer->Undent();
+    }
+    printer->Indent();
+    printer->Indent();
+    printer->Println(item.resource_name);
+    printer->Undent();
+    printer->Undent();
+  }
 }
 
 }  // namespace aapt

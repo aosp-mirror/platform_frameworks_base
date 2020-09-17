@@ -15,42 +15,93 @@
  */
 
 #include "native_writer.h"
-#include "native_writer_q.h"
+
 #include "utils.h"
 
 namespace android {
 namespace stats_log_api_gen {
 
-#if !defined(STATS_SCHEMA_LEGACY)
-static void write_native_key_value_pairs_for_type(FILE* out, const int argIndex,
-        const int typeIndex, const string& type, const string& valueFieldName) {
-    fprintf(out, "    for (const auto& it : arg%d_%d) {\n", argIndex, typeIndex);
-    fprintf(out, "        pairs.push_back("
-            "{ .key = it.first, .valueType = %s, .%s = it.second });\n",
-            type.c_str(), valueFieldName.c_str());
-    fprintf(out, "    }\n");
+static void write_native_annotation_constants(FILE* out) {
+    fprintf(out, "// Annotation constants.\n");
 
+    for (const auto& [id, name] : ANNOTATION_ID_CONSTANTS) {
+        fprintf(out, "const uint8_t %s = %hhu;\n", name.c_str(), id);
+    }
+    fprintf(out, "\n");
+}
+
+static void write_annotations(FILE* out, int argIndex,
+                              const FieldNumberToAtomDeclSet& fieldNumberToAtomDeclSet,
+                              const string& methodPrefix, const string& methodSuffix) {
+    FieldNumberToAtomDeclSet::const_iterator fieldNumberToAtomDeclSetIt =
+            fieldNumberToAtomDeclSet.find(argIndex);
+    if (fieldNumberToAtomDeclSet.end() == fieldNumberToAtomDeclSetIt) {
+        return;
+    }
+    const AtomDeclSet& atomDeclSet = fieldNumberToAtomDeclSetIt->second;
+    for (const shared_ptr<AtomDecl>& atomDecl : atomDeclSet) {
+        const string atomConstant = make_constant_name(atomDecl->name);
+        fprintf(out, "    if (%s == code) {\n", atomConstant.c_str());
+        const AnnotationSet& annotations = atomDecl->fieldNumberToAnnotations.at(argIndex);
+        int resetState = -1;
+        int defaultState = -1;
+        for (const shared_ptr<Annotation>& annotation : annotations) {
+            const string& annotationConstant = ANNOTATION_ID_CONSTANTS.at(annotation->annotationId);
+            switch (annotation->type) {
+                case ANNOTATION_TYPE_INT:
+                    if (ANNOTATION_ID_TRIGGER_STATE_RESET == annotation->annotationId) {
+                        resetState = annotation->value.intValue;
+                    } else if (ANNOTATION_ID_DEFAULT_STATE == annotation->annotationId) {
+                        defaultState = annotation->value.intValue;
+                    } else {
+                        fprintf(out, "        %saddInt32Annotation(%s%s, %d);\n",
+                                methodPrefix.c_str(), methodSuffix.c_str(),
+                                annotationConstant.c_str(), annotation->value.intValue);
+                    }
+                    break;
+                case ANNOTATION_TYPE_BOOL:
+                    // TODO(b/151786433): Write annotation constant name instead of
+                    // annotation id literal.
+                    fprintf(out, "        %saddBoolAnnotation(%s%s, %s);\n", methodPrefix.c_str(),
+                            methodSuffix.c_str(), annotationConstant.c_str(),
+                            annotation->value.boolValue ? "true" : "false");
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (defaultState != -1 && resetState != -1) {
+            const string& annotationConstant =
+                    ANNOTATION_ID_CONSTANTS.at(ANNOTATION_ID_TRIGGER_STATE_RESET);
+            fprintf(out, "        if (arg%d == %d) {\n", argIndex, resetState);
+            fprintf(out, "            %saddInt32Annotation(%s%s, %d);\n", methodPrefix.c_str(),
+                    methodSuffix.c_str(), annotationConstant.c_str(), defaultState);
+            fprintf(out, "        }\n");
+        }
+        fprintf(out, "    }\n");
+    }
 }
 
 static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
-        const AtomDecl& attributionDecl, const string& moduleName, const bool supportQ) {
+                                            const AtomDecl& attributionDecl, const bool supportQ) {
     fprintf(out, "\n");
-    for (auto signature_to_modules_it = atoms.signatures_to_modules.begin();
-        signature_to_modules_it != atoms.signatures_to_modules.end(); signature_to_modules_it++) {
-        if (!signature_needed_for_module(signature_to_modules_it->second, moduleName)) {
+    for (auto signatureInfoMapIt = atoms.signatureInfoMap.begin();
+         signatureInfoMapIt != atoms.signatureInfoMap.end(); signatureInfoMapIt++) {
+        vector<java_type_t> signature = signatureInfoMapIt->first;
+        const FieldNumberToAtomDeclSet& fieldNumberToAtomDeclSet = signatureInfoMapIt->second;
+        // Key value pairs not supported in native.
+        if (find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) != signature.end()) {
             continue;
         }
-        vector<java_type_t> signature = signature_to_modules_it->first;
-
-        write_native_method_signature(out, "int stats_write", signature,
-                attributionDecl, " {");
+        write_native_method_signature(out, "int stats_write", signature, attributionDecl, " {");
 
         int argIndex = 1;
         if (supportQ) {
             fprintf(out, "    StatsEventCompat event;\n");
             fprintf(out, "    event.setAtomId(code);\n");
+            write_annotations(out, ATOM_ID_FIELD_NUMBER, fieldNumberToAtomDeclSet, "event.", "");
             for (vector<java_type_t>::const_iterator arg = signature.begin();
-                    arg != signature.end(); arg++) {
+                 arg != signature.end(); arg++) {
                 switch (*arg) {
                     case JAVA_TYPE_ATTRIBUTION_CHAIN: {
                         const char* uidName = attributionDecl.fields.front().name.c_str();
@@ -59,11 +110,6 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
                                 uidName, uidName, tagName);
                         break;
                     }
-                    case JAVA_TYPE_KEY_VALUE_PAIR:
-                        fprintf(out, "    event.writeKeyValuePairs("
-                                "arg%d_1, arg%d_2, arg%d_3, arg%d_4);\n",
-                                argIndex, argIndex, argIndex, argIndex);
-                        break;
                     case JAVA_TYPE_BYTE_ARRAY:
                         fprintf(out, "    event.writeByteArray(arg%d.arg, arg%d.arg_length);\n",
                                 argIndex, argIndex);
@@ -71,7 +117,7 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
                     case JAVA_TYPE_BOOLEAN:
                         fprintf(out, "    event.writeBool(arg%d);\n", argIndex);
                         break;
-                    case JAVA_TYPE_INT: // Fall through.
+                    case JAVA_TYPE_INT:  // Fall through.
                     case JAVA_TYPE_ENUM:
                         fprintf(out, "    event.writeInt32(arg%d);\n", argIndex);
                         break;
@@ -85,74 +131,66 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
                         fprintf(out, "    event.writeString(arg%d);\n", argIndex);
                         break;
                     default:
-                        // Unsupported types: OBJECT, DOUBLE.
+                        // Unsupported types: OBJECT, DOUBLE, KEY_VALUE_PAIRS.
                         fprintf(stderr, "Encountered unsupported type.");
                         return 1;
                 }
+                write_annotations(out, argIndex, fieldNumberToAtomDeclSet, "event.", "");
                 argIndex++;
             }
             fprintf(out, "    return event.writeToSocket();\n");
         } else {
-            fprintf(out, "    struct stats_event* event = stats_event_obtain();\n");
-            fprintf(out, "    stats_event_set_atom_id(event, code);\n");
+            fprintf(out, "    AStatsEvent* event = AStatsEvent_obtain();\n");
+            fprintf(out, "    AStatsEvent_setAtomId(event, code);\n");
+            write_annotations(out, ATOM_ID_FIELD_NUMBER, fieldNumberToAtomDeclSet, "AStatsEvent_",
+                              "event, ");
             for (vector<java_type_t>::const_iterator arg = signature.begin();
-                    arg != signature.end(); arg++) {
+                 arg != signature.end(); arg++) {
                 switch (*arg) {
                     case JAVA_TYPE_ATTRIBUTION_CHAIN: {
                         const char* uidName = attributionDecl.fields.front().name.c_str();
                         const char* tagName = attributionDecl.fields.back().name.c_str();
                         fprintf(out,
-                                "    stats_event_write_attribution_chain(event, "
+                                "    AStatsEvent_writeAttributionChain(event, "
                                 "reinterpret_cast<const uint32_t*>(%s), %s.data(), "
                                 "static_cast<uint8_t>(%s_length));\n",
                                 uidName, tagName, uidName);
                         break;
                     }
-                    case JAVA_TYPE_KEY_VALUE_PAIR:
-                        fprintf(out, "    std::vector<key_value_pair> pairs;\n");
-                        write_native_key_value_pairs_for_type(
-                                out, argIndex, 1, "INT32_TYPE", "int32Value");
-                        write_native_key_value_pairs_for_type(
-                                out, argIndex, 2, "INT64_TYPE", "int64Value");
-                        write_native_key_value_pairs_for_type(
-                                out, argIndex, 3, "STRING_TYPE", "stringValue");
-                        write_native_key_value_pairs_for_type(
-                                out, argIndex, 4, "FLOAT_TYPE", "floatValue");
-                        fprintf(out,
-                                "    stats_event_write_key_value_pairs(event, pairs.data(), "
-                                "static_cast<uint8_t>(pairs.size()));\n");
-                        break;
                     case JAVA_TYPE_BYTE_ARRAY:
                         fprintf(out,
-                                "    stats_event_write_byte_array(event, "
-                                "reinterpret_cast<const uint8_t*>(arg%d.arg), arg%d.arg_length);\n",
+                                "    AStatsEvent_writeByteArray(event, "
+                                "reinterpret_cast<const uint8_t*>(arg%d.arg), "
+                                "arg%d.arg_length);\n",
                                 argIndex, argIndex);
                         break;
                     case JAVA_TYPE_BOOLEAN:
-                        fprintf(out, "    stats_event_write_bool(event, arg%d);\n", argIndex);
+                        fprintf(out, "    AStatsEvent_writeBool(event, arg%d);\n", argIndex);
                         break;
-                    case JAVA_TYPE_INT: // Fall through.
+                    case JAVA_TYPE_INT:  // Fall through.
                     case JAVA_TYPE_ENUM:
-                        fprintf(out, "    stats_event_write_int32(event, arg%d);\n", argIndex);
+                        fprintf(out, "    AStatsEvent_writeInt32(event, arg%d);\n", argIndex);
                         break;
                     case JAVA_TYPE_FLOAT:
-                        fprintf(out, "    stats_event_write_float(event, arg%d);\n", argIndex);
+                        fprintf(out, "    AStatsEvent_writeFloat(event, arg%d);\n", argIndex);
                         break;
                     case JAVA_TYPE_LONG:
-                        fprintf(out, "    stats_event_write_int64(event, arg%d);\n", argIndex);
+                        fprintf(out, "    AStatsEvent_writeInt64(event, arg%d);\n", argIndex);
                         break;
                     case JAVA_TYPE_STRING:
-                        fprintf(out, "    stats_event_write_string8(event, arg%d);\n", argIndex);
+                        fprintf(out, "    AStatsEvent_writeString(event, arg%d);\n", argIndex);
                         break;
                     default:
-                        // Unsupported types: OBJECT, DOUBLE.
+                        // Unsupported types: OBJECT, DOUBLE, KEY_VALUE_PAIRS
                         fprintf(stderr, "Encountered unsupported type.");
                         return 1;
                 }
+                write_annotations(out, argIndex, fieldNumberToAtomDeclSet, "AStatsEvent_",
+                                  "event, ");
                 argIndex++;
             }
-            fprintf(out, "    const int ret = stats_event_write(event);\n");
-            fprintf(out, "    stats_event_release(event);\n");
+            fprintf(out, "    const int ret = AStatsEvent_write(event);\n");
+            fprintf(out, "    AStatsEvent_release(event);\n");
             fprintf(out, "    return ret;\n");
         }
         fprintf(out, "}\n\n");
@@ -161,17 +199,18 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
 }
 
 static void write_native_stats_write_non_chained_methods(FILE* out, const Atoms& atoms,
-        const AtomDecl& attributionDecl, const string& moduleName) {
+                                                         const AtomDecl& attributionDecl) {
     fprintf(out, "\n");
-    for (auto signature_it = atoms.non_chained_signatures_to_modules.begin();
-            signature_it != atoms.non_chained_signatures_to_modules.end(); signature_it++) {
-        if (!signature_needed_for_module(signature_it->second, moduleName)) {
+    for (auto signature_it = atoms.nonChainedSignatureInfoMap.begin();
+         signature_it != atoms.nonChainedSignatureInfoMap.end(); signature_it++) {
+        vector<java_type_t> signature = signature_it->first;
+        // Key value pairs not supported in native.
+        if (find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) != signature.end()) {
             continue;
         }
-        vector<java_type_t> signature = signature_it->first;
 
         write_native_method_signature(out, "int stats_write_non_chained", signature,
-                attributionDecl, " {");
+                                      attributionDecl, " {");
 
         vector<java_type_t> newSignature;
 
@@ -194,63 +233,42 @@ static void write_native_stats_write_non_chained_methods(FILE* out, const Atoms&
 
         fprintf(out, "}\n\n");
     }
-
 }
-#endif
 
-static void write_native_method_header(
-        FILE* out,
-        const string& methodName,
-        const map<vector<java_type_t>, set<string>>& signatures_to_modules,
-        const AtomDecl &attributionDecl, const string& moduleName) {
+static void write_native_method_header(FILE* out, const string& methodName,
+                                       const SignatureInfoMap& signatureInfoMap,
+                                       const AtomDecl& attributionDecl) {
+    for (auto signatureInfoMapIt = signatureInfoMap.begin();
+         signatureInfoMapIt != signatureInfoMap.end(); signatureInfoMapIt++) {
+        vector<java_type_t> signature = signatureInfoMapIt->first;
 
-    for (auto signature_to_modules_it = signatures_to_modules.begin();
-            signature_to_modules_it != signatures_to_modules.end(); signature_to_modules_it++) {
-        // Skip if this signature is not needed for the module.
-        if (!signature_needed_for_module(signature_to_modules_it->second, moduleName)) {
+        // Key value pairs not supported in native.
+        if (find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) != signature.end()) {
             continue;
         }
-
-        vector<java_type_t> signature = signature_to_modules_it->first;
         write_native_method_signature(out, methodName, signature, attributionDecl, ";");
     }
 }
 
-int write_stats_log_cpp(FILE *out, const Atoms &atoms, const AtomDecl &attributionDecl,
-                        const string& moduleName, const string& cppNamespace,
-                        const string& importHeader, const bool supportQ) {
+int write_stats_log_cpp(FILE* out, const Atoms& atoms, const AtomDecl& attributionDecl,
+                        const string& cppNamespace, const string& importHeader,
+                        const bool supportQ) {
     // Print prelude
     fprintf(out, "// This file is autogenerated\n");
     fprintf(out, "\n");
 
     fprintf(out, "#include <%s>\n", importHeader.c_str());
-#if defined(STATS_SCHEMA_LEGACY)
-    (void)supportQ; // Workaround for unused parameter error.
-    write_native_cpp_includes_q(out);
-#else
     if (supportQ) {
         fprintf(out, "#include <StatsEventCompat.h>\n");
     } else {
         fprintf(out, "#include <stats_event.h>\n");
     }
-#endif
 
     fprintf(out, "\n");
     write_namespace(out, cppNamespace);
 
-#if defined(STATS_SCHEMA_LEGACY)
-    write_native_stats_log_cpp_globals_q(out);
-    write_native_get_timestamp_ns_q(out);
-    write_native_try_stats_write_methods_q(out, atoms, attributionDecl, moduleName);
-    write_native_stats_write_methods_q(out, "int stats_write", atoms, attributionDecl, moduleName,
-            "try_stats_write");
-    write_native_try_stats_write_non_chained_methods_q(out, atoms, attributionDecl, moduleName);
-    write_native_stats_write_non_chained_methods_q(out, "int stats_write_non_chained", atoms,
-            attributionDecl, moduleName, "try_stats_write_non_chained");
-#else
-    write_native_stats_write_methods(out, atoms, attributionDecl, moduleName, supportQ);
-    write_native_stats_write_non_chained_methods(out, atoms, attributionDecl, moduleName);
-#endif
+    write_native_stats_write_methods(out, atoms, attributionDecl, supportQ);
+    write_native_stats_write_non_chained_methods(out, atoms, attributionDecl);
 
     // Print footer
     fprintf(out, "\n");
@@ -259,8 +277,8 @@ int write_stats_log_cpp(FILE *out, const Atoms &atoms, const AtomDecl &attributi
     return 0;
 }
 
-int write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributionDecl,
-        const string& moduleName, const string& cppNamespace) {
+int write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl& attributionDecl,
+                           const string& cppNamespace) {
     // Print prelude
     fprintf(out, "// This file is autogenerated\n");
     fprintf(out, "\n");
@@ -279,36 +297,32 @@ int write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attrib
     fprintf(out, " */\n");
     fprintf(out, "\n");
 
-    write_native_atom_constants(out, atoms, attributionDecl, moduleName);
+    write_native_atom_constants(out, atoms, attributionDecl);
 
     // Print constants for the enum values.
     fprintf(out, "//\n");
     fprintf(out, "// Constants for enum values\n");
     fprintf(out, "//\n\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-        atom != atoms.decls.end(); atom++) {
-        // Skip if the atom is not needed for the module.
-        if (!atom_needed_for_module(*atom, moduleName)) {
-            continue;
-        }
-
-        for (vector<AtomField>::const_iterator field = atom->fields.begin();
-            field != atom->fields.end(); field++) {
+    for (AtomDeclSet::const_iterator atomIt = atoms.decls.begin(); atomIt != atoms.decls.end();
+         atomIt++) {
+        for (vector<AtomField>::const_iterator field = (*atomIt)->fields.begin();
+             field != (*atomIt)->fields.end(); field++) {
             if (field->javaType == JAVA_TYPE_ENUM) {
-                fprintf(out, "// Values for %s.%s\n", atom->message.c_str(),
-                    field->name.c_str());
+                fprintf(out, "// Values for %s.%s\n", (*atomIt)->message.c_str(),
+                        field->name.c_str());
                 for (map<int, string>::const_iterator value = field->enumValues.begin();
-                    value != field->enumValues.end(); value++) {
+                     value != field->enumValues.end(); value++) {
                     fprintf(out, "const int32_t %s__%s__%s = %d;\n",
-                        make_constant_name(atom->message).c_str(),
-                        make_constant_name(field->name).c_str(),
-                        make_constant_name(value->second).c_str(),
-                        value->first);
+                            make_constant_name((*atomIt)->message).c_str(),
+                            make_constant_name(field->name).c_str(),
+                            make_constant_name(value->second).c_str(), value->first);
                 }
                 fprintf(out, "\n");
             }
         }
     }
+
+    write_native_annotation_constants(out);
 
     fprintf(out, "struct BytesField {\n");
     fprintf(out,
@@ -323,14 +337,13 @@ int write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attrib
     fprintf(out, "//\n");
     fprintf(out, "// Write methods\n");
     fprintf(out, "//\n");
-    write_native_method_header(out, "int stats_write", atoms.signatures_to_modules, attributionDecl,
-            moduleName);
+    write_native_method_header(out, "int stats_write", atoms.signatureInfoMap, attributionDecl);
 
     fprintf(out, "//\n");
     fprintf(out, "// Write flattened methods\n");
     fprintf(out, "//\n");
-    write_native_method_header(out, "int stats_write_non_chained",
-            atoms.non_chained_signatures_to_modules, attributionDecl, moduleName);
+    write_native_method_header(out, "int stats_write_non_chained", atoms.nonChainedSignatureInfoMap,
+                               attributionDecl);
 
     fprintf(out, "\n");
     write_closing_namespace(out, cppNamespace);

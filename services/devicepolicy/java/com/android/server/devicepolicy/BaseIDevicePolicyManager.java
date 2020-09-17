@@ -16,6 +16,7 @@
 package com.android.server.devicepolicy;
 
 import android.app.admin.IDevicePolicyManager;
+import android.content.ComponentName;
 
 import com.android.server.SystemService;
 
@@ -55,5 +56,34 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     abstract void handleStopUser(int userId);
 
     public void clearSystemUpdatePolicyFreezePeriodRecord() {
+    }
+
+    public boolean setKeyGrantForApp(ComponentName admin, String callerPackage, String alias,
+            String packageName, boolean hasGrant) {
+        return false;
+    }
+
+    public void setLocationEnabled(ComponentName who, boolean locationEnabled) {}
+
+    public boolean isOrganizationOwnedDeviceWithManagedProfile() {
+        return false;
+    }
+
+    public int getPersonalAppsSuspendedReasons(ComponentName admin) {
+        return 0;
+    }
+
+    public void setPersonalAppsSuspended(ComponentName admin, boolean suspended) {
+    }
+
+    public void setManagedProfileMaximumTimeOff(ComponentName admin, long timeoutMs) {
+    }
+
+    public long getManagedProfileMaximumTimeOff(ComponentName admin) {
+        return 0;
+    }
+
+    public boolean canProfileOwnerResetPasswordWhenLocked(int userId) {
+        return false;
     }
 }

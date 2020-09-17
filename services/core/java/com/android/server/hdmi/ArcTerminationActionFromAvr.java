@@ -76,6 +76,11 @@ public class ArcTerminationActionFromAvr extends HdmiCecFeatureAction {
         sendCommand(HdmiCecMessageBuilder.buildTerminateArc(getSourceAddress(), Constants.ADDR_TV),
             result -> {
                 if (result != SendMessageResult.SUCCESS) {
+                    // If the physical connection is already off or TV does not handle
+                    // Terminate ARC, turn off ARC internally.
+                    if (result == SendMessageResult.NACK) {
+                        audioSystem().setArcStatus(false);
+                    }
                     HdmiLogger.debug("Terminate ARC was not successfully sent.");
                     finish();
                 }

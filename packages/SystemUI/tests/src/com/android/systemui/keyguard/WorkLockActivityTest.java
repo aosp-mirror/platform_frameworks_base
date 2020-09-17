@@ -19,7 +19,10 @@ package com.android.systemui.keyguard;
 import static android.app.ActivityManager.TaskDescription;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.ColorInt;
@@ -35,7 +38,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.keyguard.WorkLockActivity;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -55,12 +58,13 @@ public class WorkLockActivityTest extends SysuiTestCase {
     private @Mock DevicePolicyManager mDevicePolicyManager;
     private @Mock KeyguardManager mKeyguardManager;
     private @Mock Context mContext;
+    private @Mock BroadcastDispatcher mBroadcastDispatcher;
 
     private WorkLockActivity mActivity;
 
     private static class WorkLockActivityTestable extends WorkLockActivity {
-        WorkLockActivityTestable(Context baseContext) {
-            super();
+        WorkLockActivityTestable(Context baseContext, BroadcastDispatcher broadcastDispatcher) {
+            super(broadcastDispatcher);
             attachBaseContext(baseContext);
         }
     }
@@ -77,7 +81,7 @@ public class WorkLockActivityTest extends SysuiTestCase {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
-        mActivity = new WorkLockActivityTestable(mContext);
+        mActivity = new WorkLockActivityTestable(mContext, mBroadcastDispatcher);
     }
 
     @Test
@@ -109,5 +113,12 @@ public class WorkLockActivityTest extends SysuiTestCase {
         mActivity.setIntent(new Intent()
                 .putExtra(Intent.EXTRA_USER_ID, USER_ID));
         assertEquals(orgColor, mActivity.getPrimaryColor());
+    }
+
+    @Test
+    public void testUnregisteredFromDispatcher() {
+        mActivity.unregisterBroadcastReceiver();
+        verify(mBroadcastDispatcher).unregisterReceiver(any());
+        verify(mContext, never()).unregisterReceiver(any());
     }
 }

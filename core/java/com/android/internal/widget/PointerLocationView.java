@@ -98,7 +98,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
         public void clearTrace() {
             mTraceCount = 0;
         }
-        
+
         public void addTrace(float x, float y, boolean current) {
             int traceCapacity = mTraceX.length;
             if (mTraceCount == traceCapacity) {

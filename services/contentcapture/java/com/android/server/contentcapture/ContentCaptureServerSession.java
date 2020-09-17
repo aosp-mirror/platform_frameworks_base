@@ -16,9 +16,9 @@
 package com.android.server.contentcapture;
 
 import static android.service.contentcapture.ContentCaptureService.setClientState;
+import static android.view.contentcapture.ContentCaptureManager.NO_SESSION_ID;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_FALSE;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_TRUE;
-import static android.view.contentcapture.ContentCaptureSession.NO_SESSION_ID;
 import static android.view.contentcapture.ContentCaptureSession.STATE_ACTIVE;
 import static android.view.contentcapture.ContentCaptureSession.STATE_DISABLED;
 import static android.view.contentcapture.ContentCaptureSession.STATE_SERVICE_RESURRECTED;

@@ -238,7 +238,8 @@ public class LocationPermissionChecker {
 
     private boolean noteAppOpAllowed(String op, String pkgName, @Nullable String featureId,
             int uid, @Nullable String message) {
-        return mAppOpsManager.noteOp(op, uid, pkgName) == AppOpsManager.MODE_ALLOWED;
+        return mAppOpsManager.noteOp(op, uid, pkgName, featureId, message)
+                == AppOpsManager.MODE_ALLOWED;
     }
 
     private void checkPackage(int uid, String pkgName)

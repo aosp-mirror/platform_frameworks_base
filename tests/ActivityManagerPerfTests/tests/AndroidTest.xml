@@ -17,6 +17,9 @@
     <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
         <option name="test-file-name" value="ActivityManagerPerfTests.apk"/>
         <option name="test-file-name" value="ActivityManagerPerfTestsTestApp.apk"/>
+        <option name="test-file-name" value="ActivityManagerPerfTestsStubApp1.apk"/>
+        <option name="test-file-name" value="ActivityManagerPerfTestsStubApp2.apk"/>
+        <option name="test-file-name" value="ActivityManagerPerfTestsStubApp3.apk"/>
         <option name="cleanup-apks" value="true"/>
     </target_preparer>
 

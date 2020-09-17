@@ -1062,6 +1062,11 @@ size_t ResStringPool::bytes() const
     return (mError == NO_ERROR) ? mHeader->header.size : 0;
 }
 
+const void* ResStringPool::data() const
+{
+    return mHeader;
+}
+
 bool ResStringPool::isSorted() const
 {
     return (mHeader->flags&ResStringPool_header::SORTED_FLAG)!=0;
@@ -1357,11 +1362,10 @@ int32_t ResXMLParser::getAttributeData(size_t idx) const
                 (((const uint8_t*)tag)
                  + dtohs(tag->attributeStart)
                  + (dtohs(tag->attributeSize)*idx));
-            if (attr->typedValue.dataType != Res_value::TYPE_DYNAMIC_REFERENCE ||
-                    mTree.mDynamicRefTable == NULL) {
+            if (mTree.mDynamicRefTable == NULL ||
+                    !mTree.mDynamicRefTable->requiresLookup(&attr->typedValue)) {
                 return dtohl(attr->typedValue.data);
             }
-
             uint32_t data = dtohl(attr->typedValue.data);
             if (mTree.mDynamicRefTable->lookupResourceId(&data) == NO_ERROR) {
                 return data;
@@ -1607,10 +1611,9 @@ uint32_t ResXMLParser::getSourceResourceId() const
 
 static volatile int32_t gCount = 0;
 
-ResXMLTree::ResXMLTree(const DynamicRefTable* dynamicRefTable)
+ResXMLTree::ResXMLTree(std::shared_ptr<const DynamicRefTable> dynamicRefTable)
     : ResXMLParser(*this)
-    , mDynamicRefTable((dynamicRefTable != nullptr) ? dynamicRefTable->clone()
-                                                    : std::unique_ptr<DynamicRefTable>(nullptr))
+    , mDynamicRefTable(std::move(dynamicRefTable))
     , mError(NO_INIT), mOwnedData(NULL)
 {
     if (kDebugResXMLTree) {
@@ -1621,7 +1624,7 @@ ResXMLTree::ResXMLTree(const DynamicRefTable* dynamicRefTable)
 
 ResXMLTree::ResXMLTree()
     : ResXMLParser(*this)
-    , mDynamicRefTable(std::unique_ptr<DynamicRefTable>(nullptr))
+    , mDynamicRefTable(nullptr)
     , mError(NO_INIT), mOwnedData(NULL)
 {
     if (kDebugResXMLTree) {
@@ -4783,7 +4786,7 @@ void ResTable::setParameters(const ResTable_config* params)
         packageGroup->clearBagCache();
 
         // Find which configurations match the set of parameters. This allows for a much
-        // faster lookup in getEntry() if the set of values is narrowed down.
+        // faster lookup in Lookup() if the set of values is narrowed down.
         for (size_t t = 0; t < packageGroup->types.size(); t++) {
             if (packageGroup->types[t].isEmpty()) {
                 continue;
@@ -6891,13 +6894,6 @@ DynamicRefTable::DynamicRefTable(uint8_t packageId, bool appAsLib)
     mLookupTable[SYS_PACKAGE_ID] = SYS_PACKAGE_ID;
 }
 
-std::unique_ptr<DynamicRefTable> DynamicRefTable::clone() const {
-  std::unique_ptr<DynamicRefTable> clone = std::unique_ptr<DynamicRefTable>(
-      new DynamicRefTable(mAssignedPackageId, mAppAsLib));
-  clone->addMappings(*this);
-  return clone;
-}
-
 status_t DynamicRefTable::load(const ResTable_lib_header* const header)
 {
     const uint32_t entryCount = dtohl(header->count);
@@ -7014,21 +7010,29 @@ status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
     return NO_ERROR;
 }
 
+bool DynamicRefTable::requiresLookup(const Res_value* value) const {
+    // Only resolve non-dynamic references and attributes if the package is loaded as a
+    // library or if a shared library is attempting to retrieve its own resource
+    if ((value->dataType == Res_value::TYPE_REFERENCE ||
+         value->dataType == Res_value::TYPE_ATTRIBUTE) &&
+        (mAppAsLib || (Res_GETPACKAGE(value->data) + 1) == 0)) {
+        return true;
+    }
+    return value->dataType == Res_value::TYPE_DYNAMIC_ATTRIBUTE ||
+           value->dataType == Res_value::TYPE_DYNAMIC_REFERENCE;
+}
+
 status_t DynamicRefTable::lookupResourceValue(Res_value* value) const {
+    if (!requiresLookup(value)) {
+      return NO_ERROR;
+    }
+
     uint8_t resolvedType = Res_value::TYPE_REFERENCE;
     switch (value->dataType) {
         case Res_value::TYPE_ATTRIBUTE:
             resolvedType = Res_value::TYPE_ATTRIBUTE;
             FALLTHROUGH_INTENDED;
         case Res_value::TYPE_REFERENCE:
-            // Only resolve non-dynamic references and attributes if the package is loaded as a
-            // library or if a shared library is attempting to retrieve its own resource
-            if (!(mAppAsLib || (Res_GETPACKAGE(value->data) + 1) == 0)) {
-                return NO_ERROR;
-            }
-
-        // If the package is loaded as shared library, the resource reference
-        // also need to be fixed.
         break;
         case Res_value::TYPE_DYNAMIC_ATTRIBUTE:
             resolvedType = Res_value::TYPE_ATTRIBUTE;

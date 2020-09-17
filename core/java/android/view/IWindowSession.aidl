@@ -2,15 +2,15 @@
 **
 ** Copyright 2006, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 ** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
@@ -18,6 +18,7 @@
 package android.view;
 
 import android.content.ClipData;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
@@ -28,9 +29,11 @@ import android.view.IWindow;
 import android.view.IWindowId;
 import android.view.MotionEvent;
 import android.view.WindowManager;
+import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.Transaction;
 
 import java.util.List;
 
@@ -42,9 +45,14 @@ import java.util.List;
 interface IWindowSession {
     int addToDisplay(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out Rect outFrame,
-            out Rect outContentInsets, out Rect outStableInsets, out Rect outOutsets,
+            out Rect outContentInsets, out Rect outStableInsets,
             out DisplayCutout.ParcelableWrapper displayCutout, out InputChannel outInputChannel,
-            out InsetsState insetsState);
+            out InsetsState insetsState, out InsetsSourceControl[] activeControls);
+    int addToDisplayAsUser(IWindow window, int seq, in WindowManager.LayoutParams attrs,
+                in int viewVisibility, in int layerStackId, in int userId,
+                out Rect outFrame, out Rect outContentInsets, out Rect outStableInsets,
+                out DisplayCutout.ParcelableWrapper displayCutout, out InputChannel outInputChannel,
+                out InsetsState insetsState, out InsetsSourceControl[] activeControls);
     int addToDisplayWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out Rect outContentInsets,
             out Rect outStableInsets, out InsetsState insetsState);
@@ -57,7 +65,7 @@ interface IWindowSession {
      * position should be ignored) and surface of the window.  The surface
      * will be invalid if the window is currently hidden, else you can use it
      * to draw the window's contents.
-     * 
+     *
      * @param window The window being modified.
      * @param seq Ordering sequence number.
      * @param attrs If non-null, new attributes to apply to the window.
@@ -69,9 +77,6 @@ interface IWindowSession {
      * @param frameNumber A frame number in which changes requested in this layout will be rendered.
      * @param outFrame Rect in which is placed the new position/size on
      * screen.
-     * @param outOverscanInsets Rect in which is placed the offsets from
-     * <var>outFrame</var> in which the content of the window are inside
-     * of the display's overlay region.
      * @param outContentInsets Rect in which is placed the offsets from
      * <var>outFrame</var> in which the content of the window should be
      * placed.  This can be used to modify the window layout to ensure its
@@ -92,18 +97,23 @@ interface IWindowSession {
      * since it was last displayed.
      * @param outSurface Object in which is placed the new display surface.
      * @param insetsState The current insets state in the system.
+     * @param outSurfaceSize The width and height of the surface control
+     * @param outBlastSurfaceControl A BLAST SurfaceControl allocated by the WindowManager
+     * the SurfaceControl willl be managed by the client side, but the WindowManager
+     * may use it as a deferTransaction barrier.
      *
      * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_SHOW_FOCUS},
      * {@link WindowManagerGlobal#RELAYOUT_FIRST_TIME}.
      */
     int relayout(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, long frameNumber, out Rect outFrame, out Rect outOverscanInsets,
+            int flags, long frameNumber, out Rect outFrame,
             out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,
-            out Rect outOutsets, out Rect outBackdropFrame,
+            out Rect outBackdropFrame,
             out DisplayCutout.ParcelableWrapper displayCutout,
             out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
-            out InsetsState insetsState);
+            out InsetsState insetsState, out InsetsSourceControl[] activeControls,
+            out Point outSurfaceSize, out SurfaceControl outBlastSurfaceControl);
 
     /*
      * Notify the window manager that an application is relaunching and
@@ -147,8 +157,15 @@ interface IWindowSession {
      */
     void getDisplayFrame(IWindow window, out Rect outDisplayFrame);
 
+    /**
+     * Called when the client has finished drawing the surface, if needed.
+     *
+     * @param postDrawTransaction transaction filled by the client that can be
+     * used to synchronize any post draw transactions with the server. Transaction
+     * is null if there is no sync required.
+     */
     @UnsupportedAppUsage
-    void finishDrawing(IWindow window);
+    void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction);
 
     @UnsupportedAppUsage
     void setInTouchMode(boolean showFocus);
@@ -208,7 +225,20 @@ interface IWindowSession {
      * For multi screen launcher type applications, xstep and ystep indicate
      * how big the increment is from one screen to another.
      */
-    void setWallpaperPosition(IBinder windowToken, float x, float y, float xstep, float ystep);
+    oneway void setWallpaperPosition(IBinder windowToken, float x, float y, float xstep, float ystep);
+
+    /**
+     * For wallpaper windows, sets the scale of the wallpaper based on
+     * SystemUI behavior.
+     */
+    oneway void setWallpaperZoomOut(IBinder windowToken, float scale);
+
+    /**
+     * For wallpaper windows, sets whether the wallpaper should actually be
+     * scaled when setWallpaperZoomOut is called. If set to false, the WallpaperService will
+     * receive the zoom out value but the surface won't be scaled.
+     */
+    void setShouldZoomOutWallpaper(IBinder windowToken, boolean shouldZoom);
 
     @UnsupportedAppUsage
     void wallpaperOffsetsComplete(IBinder window);
@@ -288,17 +318,29 @@ interface IWindowSession {
      * will neither be dispatched to this window nor change the focus to this window. Passing an
      * invalid region will remove the area from the exclude region of this window.
      */
-    void updateTapExcludeRegion(IWindow window, int regionId, in Region region);
+    void updateTapExcludeRegion(IWindow window, in Region region);
 
     /**
      * Called when the client has changed the local insets state, and now the server should reflect
      * that new state.
      */
-    void insetsModified(IWindow window, in InsetsState state);
-
+    oneway void insetsModified(IWindow window, in InsetsState state);
 
     /**
      * Called when the system gesture exclusion has changed.
      */
     oneway void reportSystemGestureExclusionChanged(IWindow window, in List<Rect> exclusionRects);
+
+    /**
+    * Request the server to call setInputWindowInfo on a given Surface, and return
+    * an input channel where the client can receive input.
+    */
+    void grantInputChannel(int displayId, in SurfaceControl surface, in IWindow window,
+            in IBinder hostInputToken, int flags, int type, out InputChannel outInputChannel);
+
+    /**
+     * Update the flags on an input channel associated with a particular surface.
+     */
+    void updateInputChannel(in IBinder channelToken, int displayId, in SurfaceControl surface,
+            int flags, in Region region);
 }

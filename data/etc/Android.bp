@@ -22,6 +22,19 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "preinstalled-packages-platform.xml",
+    sub_dir: "sysconfig",
+    src: "preinstalled-packages-platform.xml",
+}
+
+prebuilt_etc {
+    name: "preinstalled-packages-platform-overlays.xml",
+    product_specific: true,
+    sub_dir: "sysconfig",
+    src: "preinstalled-packages-platform-overlays.xml",
+}
+
+prebuilt_etc {
     name: "hiddenapi-package-whitelist.xml",
     sub_dir: "sysconfig",
     src: "hiddenapi-package-whitelist.xml",
@@ -140,4 +153,9 @@ prebuilt_etc {
     name: "com.android.timezone.updater.xml",
     sub_dir: "permissions",
     src: "com.android.timezone.updater.xml",
+}
+
+filegroup {
+    name: "services.core.protolog.json",
+    srcs: ["services.core.protolog.json"],
 }

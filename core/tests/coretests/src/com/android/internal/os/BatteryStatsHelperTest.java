@@ -37,11 +37,12 @@ import android.content.pm.PackageManager;
 import android.os.BatteryStats;
 import android.os.Process;
 import android.text.format.DateUtils;
-import android.util.StatsLog;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.internal.util.FrameworkStatsLog;
 
 import junit.framework.TestCase;
 
@@ -262,31 +263,31 @@ public class BatteryStatsHelperTest extends TestCase {
     @Test
     public void testDrainTypesSyncedWithProto() {
         assertEquals(BatterySipper.DrainType.AMBIENT_DISPLAY.ordinal(),
-                StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__AMBIENT_DISPLAY);
+                FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__AMBIENT_DISPLAY);
         // AtomsProto has no "APP"
         assertEquals(BatterySipper.DrainType.BLUETOOTH.ordinal(),
-                StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__BLUETOOTH);
+                FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__BLUETOOTH);
         assertEquals(BatterySipper.DrainType.CAMERA.ordinal(),
-                StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__CAMERA);
+                FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__CAMERA);
         assertEquals(BatterySipper.DrainType.CELL.ordinal(),
-                StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__CELL);
+                FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__CELL);
         assertEquals(BatterySipper.DrainType.FLASHLIGHT.ordinal(),
-                StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__FLASHLIGHT);
+                FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__FLASHLIGHT);
         assertEquals(BatterySipper.DrainType.IDLE.ordinal(),
-                StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__IDLE);
+                FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__IDLE);
         assertEquals(BatterySipper.DrainType.MEMORY.ordinal(),
-                StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__MEMORY);
+                FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__MEMORY);
         assertEquals(BatterySipper.DrainType.OVERCOUNTED.ordinal(),
-                StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__OVERCOUNTED);
+                FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__OVERCOUNTED);
         assertEquals(BatterySipper.DrainType.PHONE.ordinal(),
-                StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__PHONE);
+                FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__PHONE);
         assertEquals(BatterySipper.DrainType.SCREEN.ordinal(),
-                StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__SCREEN);
+                FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__SCREEN);
         assertEquals(BatterySipper.DrainType.UNACCOUNTED.ordinal(),
-                StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__UNACCOUNTED);
+                FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__UNACCOUNTED);
         // AtomsProto has no "USER"
         assertEquals(BatterySipper.DrainType.WIFI.ordinal(),
-                StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__WIFI);
+                FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER__DRAIN_TYPE__WIFI);
     }
 
     private BatterySipper createTestSmearBatterySipper(long activityTime, double totalPowerMah,

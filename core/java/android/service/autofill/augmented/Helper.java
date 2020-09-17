@@ -38,7 +38,6 @@ public final class Helper {
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SESSION_ID, mSessionId)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, servicePackageName)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_DURATION, durationMs);
-        System.out.println("LOGGGO: " + log.getEntries()); // felipeal: tmp
         sMetricsLogger.write(log);
     }
 

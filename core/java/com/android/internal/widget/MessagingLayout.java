@@ -16,12 +16,16 @@
 
 package com.android.internal.widget;
 
+import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_AT_END;
+import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_INLINE;
+
 import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.app.Notification;
 import android.app.Person;
+import android.app.RemoteInputHistoryItem;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -57,7 +61,8 @@ import java.util.regex.Pattern;
  * messages and adapts the layout accordingly.
  */
 @RemoteViews.RemoteView
-public class MessagingLayout extends FrameLayout implements ImageMessageConsumer {
+public class MessagingLayout extends FrameLayout
+        implements ImageMessageConsumer, IMessagingLayout {
 
     private static final float COLOR_SHIFT_AMOUNT = 60;
     /**
@@ -119,7 +124,6 @@ public class MessagingLayout extends FrameLayout implements ImageMessageConsumer
     protected void onFinishInflate() {
         super.onFinishInflate();
         mMessagingLinearLayout = findViewById(R.id.notification_messaging);
-        mMessagingLinearLayout.setMessagingLayout(this);
         // We still want to clip, but only on the top, since views can temporarily out of bounds
         // during transitions.
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
@@ -142,9 +146,29 @@ public class MessagingLayout extends FrameLayout implements ImageMessageConsumer
         mNameReplacement = nameReplacement;
     }
 
+    /**
+     * Set this layout to show the collapsed representation.
+     *
+     * @param isCollapsed is it collapsed
+     */
     @RemotableViewMethod
-    public void setDisplayImagesAtEnd(boolean atEnd) {
-        mDisplayImagesAtEnd = atEnd;
+    public void setIsCollapsed(boolean isCollapsed) {
+        mDisplayImagesAtEnd = isCollapsed;
+    }
+
+    @RemotableViewMethod
+    public void setLargeIcon(Icon largeIcon) {
+        // Unused
+    }
+
+    /**
+     * Sets the conversation title of this conversation.
+     *
+     * @param conversationTitle the conversation title
+     */
+    @RemotableViewMethod
+    public void setConversationTitle(CharSequence conversationTitle) {
+        // Unused
     }
 
     @RemotableViewMethod
@@ -161,8 +185,9 @@ public class MessagingLayout extends FrameLayout implements ImageMessageConsumer
         if (headerText != null) {
             mConversationTitle = headerText.getText();
         }
-        addRemoteInputHistoryToMessages(newMessages,
-                extras.getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY));
+        RemoteInputHistoryItem[] history = (RemoteInputHistoryItem[])
+                extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+        addRemoteInputHistoryToMessages(newMessages, history);
         boolean showSpinner =
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
         bind(newMessages, newHistoricMessages, showSpinner);
@@ -175,14 +200,18 @@ public class MessagingLayout extends FrameLayout implements ImageMessageConsumer
 
     private void addRemoteInputHistoryToMessages(
             List<Notification.MessagingStyle.Message> newMessages,
-            CharSequence[] remoteInputHistory) {
+            RemoteInputHistoryItem[] remoteInputHistory) {
         if (remoteInputHistory == null || remoteInputHistory.length == 0) {
             return;
         }
         for (int i = remoteInputHistory.length - 1; i >= 0; i--) {
-            CharSequence message = remoteInputHistory[i];
-            newMessages.add(new Notification.MessagingStyle.Message(
-                    message, 0, (Person) null, true /* remoteHistory */));
+            RemoteInputHistoryItem historyMessage = remoteInputHistory[i];
+            Notification.MessagingStyle.Message message = new Notification.MessagingStyle.Message(
+                    historyMessage.getText(), 0, (Person) null, true /* remoteHistory */);
+            if (historyMessage.getUri() != null) {
+                message.setData(historyMessage.getMimeType(), historyMessage.getUri());
+            }
+            newMessages.add(message);
         }
     }
 
@@ -365,6 +394,15 @@ public class MessagingLayout extends FrameLayout implements ImageMessageConsumer
         mSenderTextColor = color;
     }
 
+
+    /**
+     * @param color the color of the notification background
+     */
+    @RemotableViewMethod
+    public void setNotificationBackgroundColor(int color) {
+        // Nothing to do with this
+    }
+
     @RemotableViewMethod
     public void setMessageTextColor(int color) {
         mMessageTextColor = color;
@@ -411,7 +449,10 @@ public class MessagingLayout extends FrameLayout implements ImageMessageConsumer
                 newGroup = MessagingGroup.createGroup(mMessagingLinearLayout);
                 mAddedGroups.add(newGroup);
             }
-            newGroup.setDisplayImagesAtEnd(mDisplayImagesAtEnd);
+            newGroup.setImageDisplayLocation(mDisplayImagesAtEnd
+                    ? IMAGE_DISPLAY_LOCATION_AT_END
+                    : IMAGE_DISPLAY_LOCATION_INLINE);
+            newGroup.setIsInConversation(false);
             newGroup.setLayoutColor(mLayoutColor);
             newGroup.setTextColors(mSenderTextColor, mMessageTextColor);
             Person sender = senders.get(groupIndex);
@@ -561,5 +602,10 @@ public class MessagingLayout extends FrameLayout implements ImageMessageConsumer
 
     public ArrayList<MessagingGroup> getMessagingGroups() {
         return mGroups;
+    }
+
+    @Override
+    public void setMessagingClippingDisabled(boolean clippingDisabled) {
+        // Don't do anything, this is only used for the ConversationLayout
     }
 }

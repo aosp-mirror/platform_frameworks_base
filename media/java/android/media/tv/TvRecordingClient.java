@@ -172,11 +172,37 @@ public class TvRecordingClient {
      * @throws IllegalStateException If {@link #tune} request hasn't been handled yet.
      */
     public void startRecording(@Nullable Uri programUri) {
+        startRecording(programUri, Bundle.EMPTY);
+    }
+
+    /**
+     * Starts TV program recording in the current recording session. Recording is expected to start
+     * immediately when this method is called. If the current recording session has not yet tuned to
+     * any channel, this method throws an exception.
+     *
+     * <p>The application may supply the URI for a TV program for filling in program specific data
+     * fields in the {@link android.media.tv.TvContract.RecordedPrograms} table.
+     * A non-null {@code programUri} implies the started recording should be of that specific
+     * program, whereas null {@code programUri} does not impose such a requirement and the
+     * recording can span across multiple TV programs. In either case, the application must call
+     * {@link TvRecordingClient#stopRecording()} to stop the recording.
+     *
+     * <p>The recording session will respond by calling {@link RecordingCallback#onError(int)} if
+     * the start request cannot be fulfilled.
+     *
+     * @param programUri The URI for the TV program to record, built by
+     *            {@link TvContract#buildProgramUri(long)}. Can be {@code null}.
+     * @param params Domain-specific data for this request. Keys <em>must</em> be a scoped
+     *            name, i.e. prefixed with a package name you own, so that different developers will
+     *            not create conflicting keys.
+     * @throws IllegalStateException If {@link #tune} request hasn't been handled yet.
+     */
+    public void startRecording(@Nullable Uri programUri, @NonNull Bundle params) {
         if (!mIsTuned) {
             throw new IllegalStateException("startRecording failed - not yet tuned");
         }
         if (mSession != null) {
-            mSession.startRecording(programUri);
+            mSession.startRecording(programUri, params);
             mIsRecordingStarted = true;
         }
     }

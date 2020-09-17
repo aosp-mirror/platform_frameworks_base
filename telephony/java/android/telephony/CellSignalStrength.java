@@ -156,6 +156,8 @@ public abstract class CellSignalStrength {
     /**
      * Returns the number of signal strength levels.
      * @return Number of signal strength levels, enforced to be 5
+     *
+     * @hide
      */
     public static final int getNumSignalStrengthLevels() {
         return NUM_SIGNAL_STRENGTH_BINS;

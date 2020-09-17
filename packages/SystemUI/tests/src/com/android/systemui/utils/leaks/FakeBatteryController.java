@@ -45,6 +45,11 @@ public class FakeBatteryController extends BaseLeakChecker<BatteryStateChangeCal
     }
 
     @Override
+    public boolean isPluggedIn() {
+        return false;
+    }
+
+    @Override
     public boolean isPowerSave() {
         return false;
     }

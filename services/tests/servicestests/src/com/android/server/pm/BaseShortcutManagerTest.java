@@ -24,6 +24,7 @@ import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.set;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -52,6 +53,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ILauncherApps;
@@ -88,11 +90,12 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.LauncherAppsService.LauncherAppsImpl;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
+import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.uri.UriPermissionOwner;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.junit.Assert;
@@ -114,6 +117,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -555,6 +559,16 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         void injectRestoreCallingIdentity(long token) {
             mInjectedCallingUid = (int) token;
         }
+
+        @Override
+        boolean injectHasAccessShortcutsPermission(int callingPid, int callingUid) {
+            return true;
+        }
+
+        @Override
+        boolean injectHasInteractAcrossUsersFullPermission(int callingPid, int callingUid) {
+            return false;
+        }
     }
 
     protected class LauncherAppsTestable extends LauncherApps {
@@ -618,6 +632,9 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected UsageStatsManagerInternal mMockUsageStatsManagerInternal;
     protected ActivityManagerInternal mMockActivityManagerInternal;
     protected ActivityTaskManagerInternal mMockActivityTaskManagerInternal;
+    protected UriGrantsManagerInternal mMockUriGrantsManagerInternal;
+
+    protected UriPermissionOwner mUriPermissionOwner;
 
     protected static final String CALLING_PACKAGE_1 = "com.android.test.1";
     protected static final int CALLING_UID_1 = 10001;
@@ -703,6 +720,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected static final long INTERVAL = 10000;
 
+    // This doesn't need to match the max shortcuts limit in the framework, and tests should either
+    // use this or set their own limit for testing, without assuming any particular max value.
     protected static final int MAX_SHORTCUTS = 10;
 
     protected static final int MAX_UPDATES_PER_INTERVAL = 3;
@@ -759,6 +778,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         mMockUsageStatsManagerInternal = mock(UsageStatsManagerInternal.class);
         mMockActivityManagerInternal = mock(ActivityManagerInternal.class);
         mMockActivityTaskManagerInternal = mock(ActivityTaskManagerInternal.class);
+        mMockUriGrantsManagerInternal = mock(UriGrantsManagerInternal.class);
 
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mMockPackageManagerInternal);
@@ -770,6 +790,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         LocalServices.addService(ActivityTaskManagerInternal.class, mMockActivityTaskManagerInternal);
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         LocalServices.addService(UserManagerInternal.class, mMockUserManagerInternal);
+        LocalServices.removeServiceForTest(UriGrantsManagerInternal.class);
+        LocalServices.addService(UriGrantsManagerInternal.class, mMockUriGrantsManagerInternal);
+
+        mUriPermissionOwner = new UriPermissionOwner(mMockUriGrantsManagerInternal, TAG);
 
         // Prepare injection values.
 
@@ -1241,7 +1265,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected void setCaller(String packageName, int userId) {
         mInjectedClientPackage = packageName;
         mInjectedCallingUid =
-                Preconditions.checkNotNull(getInjectedPackageInfo(packageName, userId, false),
+                Objects.requireNonNull(getInjectedPackageInfo(packageName, userId, false),
                         "Unknown package").applicationInfo.uid;
 
         // Set up LauncherApps for this caller.
@@ -1600,6 +1624,38 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     }
 
     /**
+     * Make a shortcut with an ID and a locus ID.
+     */
+    protected ShortcutInfo makeShortcutWithLocusId(String id, LocusId locusId) {
+        final ShortcutInfo.Builder  b = new ShortcutInfo.Builder(mClientContext, id)
+                .setActivity(new ComponentName(mClientContext.getPackageName(), "main"))
+                .setShortLabel("title-" + id)
+                .setIntent(makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class))
+                .setLocusId(locusId);
+        final ShortcutInfo s = b.build();
+
+        s.setTimestamp(mInjectedCurrentTimeMillis); // HACK
+
+        return s;
+    }
+
+    /**
+     * Make a long lived shortcut with an ID.
+     */
+    protected ShortcutInfo makeLongLivedShortcut(String id) {
+        final ShortcutInfo.Builder  b = new ShortcutInfo.Builder(mClientContext, id)
+                .setActivity(new ComponentName(mClientContext.getPackageName(), "main"))
+                .setShortLabel("title-" + id)
+                .setIntent(makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class))
+                .setLongLived(true);
+        final ShortcutInfo s = b.build();
+
+        s.setTimestamp(mInjectedCurrentTimeMillis); // HACK
+
+        return s;
+    }
+
+    /**
      * Make an intent.
      */
     protected Intent makeIntent(String action, Class<?> clazz, Object... bundleKeysAndValues) {
@@ -1615,6 +1671,13 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected Person makePerson(CharSequence name, String key, String uri) {
         final Person.Builder builder = new Person.Builder();
         return builder.setName(name).setKey(key).setUri(uri).build();
+    }
+
+    /**
+     * Make a LocusId.
+     */
+    protected LocusId makeLocusId(String id) {
+        return new LocusId(id);
     }
 
     /**
@@ -1683,6 +1746,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         final ArgumentCaptor<Intent[]> intentsCaptor = ArgumentCaptor.forClass(Intent[].class);
         verify(mMockActivityTaskManagerInternal).startActivitiesAsPackage(
                 eq(packageName),
+                isNull(),
                 eq(userId),
                 intentsCaptor.capture(),
                 anyOrNull(Bundle.class));
@@ -1741,6 +1805,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         // This shouldn't have been called.
         verify(mMockActivityTaskManagerInternal, times(0)).startActivitiesAsPackage(
                 anyString(),
+                isNull(),
                 anyInt(),
                 any(Intent[].class),
                 anyOrNull(Bundle.class));
@@ -1955,16 +2020,17 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected static ShortcutQuery buildQuery(long changedSince,
             String packageName, ComponentName componentName,
             /* @ShortcutQuery.QueryFlags */ int flags) {
-        return buildQuery(changedSince, packageName, null, componentName, flags);
+        return buildQuery(changedSince, packageName, null, null, componentName, flags);
     }
 
     protected static ShortcutQuery buildQuery(long changedSince,
-            String packageName, List<String> shortcutIds, ComponentName componentName,
-            /* @ShortcutQuery.QueryFlags */ int flags) {
+            String packageName, List<String> shortcutIds, List<LocusId> locusIds,
+            ComponentName componentName, /* @ShortcutQuery.QueryFlags */ int flags) {
         final ShortcutQuery q = new ShortcutQuery();
         q.setChangedSince(changedSince);
         q.setPackage(packageName);
         q.setShortcutIds(shortcutIds);
+        q.setLocusIds(locusIds);
         q.setActivity(componentName);
         q.setQueryFlags(flags);
         return q;
@@ -2139,6 +2205,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         for (ShortcutInfo s : actualShortcuts) {
             assertTrue("ID " + s.getId() + " not have icon res ID", s.hasIconResource());
             assertFalse("ID " + s.getId() + " shouldn't have icon FD", s.hasIconFile());
+            assertFalse("ID " + s.getId() + " shouldn't have icon URI", s.hasIconUri());
         }
         return actualShortcuts;
     }
@@ -2148,6 +2215,17 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         for (ShortcutInfo s : actualShortcuts) {
             assertFalse("ID " + s.getId() + " shouldn't have icon res ID", s.hasIconResource());
             assertTrue("ID " + s.getId() + " not have icon FD", s.hasIconFile());
+            assertFalse("ID " + s.getId() + " shouldn't have icon URI", s.hasIconUri());
+        }
+        return actualShortcuts;
+    }
+
+    public static List<ShortcutInfo> assertAllHaveIconUri(
+            List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertFalse("ID " + s.getId() + " shouldn't have icon res ID", s.hasIconResource());
+            assertFalse("ID " + s.getId() + " shouldn't have have icon FD", s.hasIconFile());
+            assertTrue("ID " + s.getId() + " not have icon URI", s.hasIconUri());
         }
         return actualShortcuts;
     }
@@ -2222,7 +2300,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected void makeUidForeground(int uid) {
         try {
             mService.mUidObserver.onUidStateChanged(
-                    uid, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
+                    uid, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0,
+                    ActivityManager.PROCESS_CAPABILITY_NONE);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
@@ -2235,7 +2314,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected void makeUidBackground(int uid) {
         try {
             mService.mUidObserver.onUidStateChanged(
-                    uid, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0);
+                    uid, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0,
+                    ActivityManager.PROCESS_CAPABILITY_NONE);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }

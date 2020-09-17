@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_description" msgid="8582605799129954556">"നിങ്ങളുടെ പാസ്‌വേഡ് നൽകി ഡൈനാമിക് സിസ്റ്റം അപ്ഡേറ്റുകളിലേക്ക് പോകുക"</string>
+    <string name="notification_install_completed" msgid="6252047868415172643">"ഡെെനാമിക് സിസ്റ്റം തയ്യാറാണ്. അത് ഉപയോഗിച്ച് തുടങ്ങാൻ നിങ്ങളുടെ ഉപകരണം റീസ്റ്റാർട്ട് ചെയ്യുക."</string>
+    <string name="notification_install_inprogress" msgid="7383334330065065017">"ഇൻസ്‌റ്റാൾ ചെയ്യൽ പുരോഗതിയിലാണ്"</string>
+    <string name="notification_install_failed" msgid="4066039210317521404">"ഇൻസ്‌റ്റാൾ ചെയ്യാനായില്ല"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ചിത്രത്തിന്റെ മൂല്യനിർണ്ണയം നടത്താനായില്ല. ഇൻസ്‌റ്റലേഷൻ റദ്ദാക്കുക."</string>
+    <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"നിലവിൽ ഒരു ഡെെനാമിക് സിസ്റ്റം റൺ ചെയ്യുന്നുണ്ട്. ഒറിജിനൽ Android പതിപ്പ് ഉപയോഗിക്കാൻ റീസ്റ്റാർട്ട് ചെയ്യുക."</string>
+    <string name="notification_action_cancel" msgid="5929299408545961077">"റദ്ദാക്കുക"</string>
+    <string name="notification_action_discard" msgid="1817481003134947493">"നിരസിക്കുക"</string>
+    <string name="notification_action_reboot_to_dynsystem" msgid="4015817159115912479">"റീസ്റ്റാർട്ട് ചെയ്യൂ"</string>
+    <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"റീസ്റ്റാർട്ട് ചെയ്യൂ"</string>
+    <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"ഡെെനാമിക് സിസ്റ്റം നിരസിച്ചു"</string>
+    <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"റീസ്റ്റാർട്ട് ചെയ്യാനോ ഡെെനാമിക് സിസ്റ്റം ലോഡ് ചെയ്യാനോ ആവില്ല"</string>
+</resources>

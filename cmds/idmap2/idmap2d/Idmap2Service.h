@@ -20,9 +20,6 @@
 #include <android-base/unique_fd.h>
 #include <binder/BinderService.h>
 
-#include <optional>
-#include <string>
-
 #include "android/os/BnIdmap2.h"
 
 namespace android::os {
@@ -34,18 +31,24 @@ class Idmap2Service : public BinderService<Idmap2Service>, public BnIdmap2 {
   }
 
   binder::Status getIdmapPath(const std::string& overlay_apk_path, int32_t user_id,
-                              std::string* _aidl_return);
+                              std::string* _aidl_return) override;
 
   binder::Status removeIdmap(const std::string& overlay_apk_path, int32_t user_id,
-                             bool* _aidl_return);
+                             bool* _aidl_return) override;
 
-  binder::Status verifyIdmap(const std::string& overlay_apk_path, int32_t fulfilled_policies,
-                             bool enforce_overlayable, int32_t user_id, bool* _aidl_return);
+  binder::Status verifyIdmap(const std::string& target_apk_path,
+                             const std::string& overlay_apk_path, int32_t fulfilled_policies,
+                             bool enforce_overlayable, int32_t user_id,
+                             bool* _aidl_return) override;
 
   binder::Status createIdmap(const std::string& target_apk_path,
                              const std::string& overlay_apk_path, int32_t fulfilled_policies,
                              bool enforce_overlayable, int32_t user_id,
-                             std::optional<std::string>* _aidl_return);
+                             std::optional<std::string>* _aidl_return) override;
+
+ private:
+  // Cache the crc of the android framework package since the crc cannot change without a reboot.
+  std::optional<uint32_t> android_crc_;
 };
 
 }  // namespace android::os

@@ -24,7 +24,7 @@ import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tiles.AirplaneModeTile;
 import com.android.systemui.qs.tiles.BatterySaverTile;
@@ -36,11 +36,11 @@ import com.android.systemui.qs.tiles.DataSaverTile;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.FlashlightTile;
 import com.android.systemui.qs.tiles.HotspotTile;
-import com.android.systemui.qs.tiles.IntentTile;
 import com.android.systemui.qs.tiles.LocationTile;
 import com.android.systemui.qs.tiles.NfcTile;
 import com.android.systemui.qs.tiles.NightDisplayTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
+import com.android.systemui.qs.tiles.ScreenRecordTile;
 import com.android.systemui.qs.tiles.UiModeNightTile;
 import com.android.systemui.qs.tiles.UserTile;
 import com.android.systemui.qs.tiles.WifiTile;
@@ -50,6 +50,8 @@ import com.android.systemui.util.leak.GarbageMonitor;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 @Singleton
 public class QSFactoryImpl implements QSFactory {
@@ -75,11 +77,13 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<NfcTile> mNfcTileProvider;
     private final Provider<GarbageMonitor.MemoryTile> mMemoryTileProvider;
     private final Provider<UiModeNightTile> mUiModeNightTileProvider;
+    private final Provider<ScreenRecordTile> mScreenRecordTileProvider;
 
-    private QSTileHost mHost;
+    private final Lazy<QSHost> mQsHostLazy;
 
     @Inject
-    public QSFactoryImpl(Provider<WifiTile> wifiTileProvider,
+    public QSFactoryImpl(Lazy<QSHost> qsHostLazy,
+            Provider<WifiTile> wifiTileProvider,
             Provider<BluetoothTile> bluetoothTileProvider,
             Provider<CellularTile> cellularTileProvider,
             Provider<DndTile> dndTileProvider,
@@ -97,7 +101,9 @@ public class QSFactoryImpl implements QSFactory {
             Provider<NightDisplayTile> nightDisplayTileProvider,
             Provider<NfcTile> nfcTileProvider,
             Provider<GarbageMonitor.MemoryTile> memoryTileProvider,
-            Provider<UiModeNightTile> uiModeNightTileProvider) {
+            Provider<UiModeNightTile> uiModeNightTileProvider,
+            Provider<ScreenRecordTile> screenRecordTileProvider) {
+        mQsHostLazy = qsHostLazy;
         mWifiTileProvider = wifiTileProvider;
         mBluetoothTileProvider = bluetoothTileProvider;
         mCellularTileProvider = cellularTileProvider;
@@ -117,10 +123,7 @@ public class QSFactoryImpl implements QSFactory {
         mNfcTileProvider = nfcTileProvider;
         mMemoryTileProvider = memoryTileProvider;
         mUiModeNightTileProvider = uiModeNightTileProvider;
-    }
-
-    public void setHost(QSTileHost host) {
-        mHost = host;
+        mScreenRecordTileProvider = screenRecordTileProvider;
     }
 
     public QSTile createTile(String tileSpec) {
@@ -170,11 +173,15 @@ public class QSFactoryImpl implements QSFactory {
                 return mNfcTileProvider.get();
             case "dark":
                 return mUiModeNightTileProvider.get();
+            case "screenrecord":
+                return mScreenRecordTileProvider.get();
         }
 
-        // Intent tiles.
-        if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(mHost, tileSpec);
-        if (tileSpec.startsWith(CustomTile.PREFIX)) return CustomTile.create(mHost, tileSpec);
+        // Custom tiles
+        if (tileSpec.startsWith(CustomTile.PREFIX)) {
+            return CustomTile.create(mQsHostLazy.get(), tileSpec,
+                    mQsHostLazy.get().getUserContext());
+        }
 
         // Debug tiles.
         if (Build.IS_DEBUGGABLE) {
@@ -190,7 +197,7 @@ public class QSFactoryImpl implements QSFactory {
 
     @Override
     public QSTileView createTileView(QSTile tile, boolean collapsedView) {
-        Context context = new ContextThemeWrapper(mHost.getContext(), R.style.qs_theme);
+        Context context = new ContextThemeWrapper(mQsHostLazy.get().getContext(), R.style.qs_theme);
         QSIconView icon = tile.createTileView(context);
         if (collapsedView) {
             return new QSTileBaseView(context, icon, collapsedView);

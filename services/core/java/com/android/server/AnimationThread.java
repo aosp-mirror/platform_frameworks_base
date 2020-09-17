@@ -21,6 +21,8 @@ import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 import android.os.Handler;
 import android.os.Trace;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * Thread for handling all legacy window animations, or anything that's directly impacting
  * animations like starting windows or traversals.
@@ -53,6 +55,22 @@ public final class AnimationThread extends ServiceThread {
         synchronized (AnimationThread.class) {
             ensureThreadLocked();
             return sHandler;
+        }
+    }
+
+    /**
+     * Disposes current animation thread if it's initialized. Should only be used in tests to set up
+     * a new environment.
+     */
+    @VisibleForTesting
+    public static void dispose() {
+        synchronized (AnimationThread.class) {
+            if (sInstance == null) {
+                return;
+            }
+
+            getHandler().runWithScissors(() -> sInstance.quit(), 0 /* timeout */);
+            sInstance = null;
         }
     }
 }

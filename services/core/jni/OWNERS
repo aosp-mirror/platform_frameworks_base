@@ -1,0 +1,13 @@
+# Display
+per-file com_android_server_lights_LightsService.cpp = michaelwr@google.com, santoscordon@google.com
+
+# Haptics
+per-file com_android_server_VibratorService.cpp = michaelwr@google.com
+
+# Input
+per-file com_android_server_input_InputManagerService.cpp = michaelwr@google.com, svv@google.com
+
+# Power
+per-file com_android_server_HardwarePropertiesManagerService.cpp = michaelwr@google.com, santoscordon@google.com
+per-file com_android_server_power_PowerManagerService.* = michaelwr@google.com, santoscordon@google.com
+

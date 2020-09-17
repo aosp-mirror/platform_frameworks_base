@@ -229,17 +229,17 @@ public class SmsCbHeader {
     }
 
     @UnsupportedAppUsage
-    int getGeographicalScope() {
+    public int getGeographicalScope() {
         return mGeographicalScope;
     }
 
     @UnsupportedAppUsage
-    int getSerialNumber() {
+    public int getSerialNumber() {
         return mSerialNumber;
     }
 
     @UnsupportedAppUsage
-    int getServiceCategory() {
+    public int getServiceCategory() {
         return mMessageIdentifier;
     }
 
@@ -252,12 +252,12 @@ public class SmsCbHeader {
     }
 
     @UnsupportedAppUsage
-    int getPageIndex() {
+    public int getPageIndex() {
         return mPageIndex;
     }
 
     @UnsupportedAppUsage
-    int getNumberOfPages() {
+    public int getNumberOfPages() {
         return mNrOfPages;
     }
 

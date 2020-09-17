@@ -16,6 +16,7 @@
 
 package android.drm;
 
+import android.annotation.NonNull;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -37,6 +38,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -44,7 +47,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * The main programming interface for the DRM framework. An application must instantiate this class
  * to access DRM agents through the DRM framework.
  *
+ * @deprecated Please use {@link android.media.MediaDrm}
  */
+@Deprecated
 public class DrmManagerClient implements AutoCloseable {
     /**
      * Indicates that a request was successful or that no error occurred.
@@ -367,6 +372,17 @@ public class DrmManagerClient implements AutoCloseable {
 
         String[] drmEngines = new String[descriptions.size()];
         return descriptions.toArray(drmEngines);
+    }
+
+    /**
+     * Retrieves information about all the DRM plug-ins (agents) that are
+     * registered with the DRM framework.
+     *
+     * @return List of all the DRM plug-ins (agents) that are registered with
+     *         the DRM framework.
+     */
+    public @NonNull Collection<DrmSupportInfo> getAvailableDrmSupportInfo() {
+        return Arrays.asList(_getAllSupportInfo(mUniqueId));
     }
 
     /**

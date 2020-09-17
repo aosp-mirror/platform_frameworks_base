@@ -22,10 +22,9 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Collection of parameters which define a key derivation function.
@@ -109,7 +108,7 @@ public final class KeyDerivationParams implements Parcelable {
     private KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt,
             int memoryDifficulty) {
         mAlgorithm = algorithm;
-        mSalt = Preconditions.checkNotNull(salt);
+        mSalt = Objects.requireNonNull(salt);
         mMemoryDifficulty = memoryDifficulty;
     }
 

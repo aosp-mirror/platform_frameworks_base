@@ -106,9 +106,11 @@ public final class LauncherIcons {
         Resources overlayableRes =
                 ActivityThread.currentActivityThread().getApplication().getResources();
 
+        // ic_corp_icon_badge_shadow is not work-profile-specific.
         Drawable badgeShadow = overlayableRes.getDrawable(
                 com.android.internal.R.drawable.ic_corp_icon_badge_shadow);
 
+        // ic_corp_icon_badge_color is not work-profile-specific.
         Drawable badgeColor = overlayableRes.getDrawable(
                 com.android.internal.R.drawable.ic_corp_icon_badge_color)
                 .getConstantState().newDrawable().mutate();

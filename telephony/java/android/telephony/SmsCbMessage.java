@@ -594,6 +594,7 @@ public final class SmsCbMessage implements Parcelable {
         SmsCbEtwsInfo etwsInfo = getEtwsWarningInfo();
         if (etwsInfo != null) {
             cv.put(CellBroadcasts.ETWS_WARNING_TYPE, etwsInfo.getWarningType());
+            cv.put(CellBroadcasts.ETWS_IS_PRIMARY, etwsInfo.isPrimary());
         }
 
         SmsCbCmasInfo cmasInfo = getCmasWarningInfo();
@@ -667,9 +668,12 @@ public final class SmsCbMessage implements Parcelable {
 
         SmsCbEtwsInfo etwsInfo;
         int etwsWarningTypeColumn = cursor.getColumnIndex(CellBroadcasts.ETWS_WARNING_TYPE);
-        if (etwsWarningTypeColumn != -1 && !cursor.isNull(etwsWarningTypeColumn)) {
+        int etwsIsPrimaryColumn = cursor.getColumnIndex(CellBroadcasts.ETWS_IS_PRIMARY);
+        if (etwsWarningTypeColumn != -1 && !cursor.isNull(etwsWarningTypeColumn)
+                && etwsIsPrimaryColumn != -1 && !cursor.isNull(etwsIsPrimaryColumn)) {
             int warningType = cursor.getInt(etwsWarningTypeColumn);
-            etwsInfo = new SmsCbEtwsInfo(warningType, false, false, false, null);
+            boolean isPrimary = cursor.getInt(etwsIsPrimaryColumn) != 0;
+            etwsInfo = new SmsCbEtwsInfo(warningType, false, false, isPrimary, null);
         } else {
             etwsInfo = null;
         }

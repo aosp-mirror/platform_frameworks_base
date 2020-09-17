@@ -20,6 +20,7 @@ import android.os.RemoteCallback;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
+import com.android.internal.infra.AndroidFuture;
 
 /**
  * Interface for system apps to communication with the permission controller.
@@ -28,17 +29,19 @@ import android.os.UserHandle;
  */
 oneway interface IPermissionController {
     void revokeRuntimePermissions(in Bundle request, boolean doDryRun, int reason,
-            String callerPackageName, in RemoteCallback callback);
+            String callerPackageName, in AndroidFuture callback);
     void getRuntimePermissionBackup(in UserHandle user, in ParcelFileDescriptor pipe);
-    void restoreRuntimePermissionBackup(in UserHandle user, in ParcelFileDescriptor pipe);
-    void restoreDelayedRuntimePermissionBackup(String packageName, in UserHandle user,
-            in RemoteCallback callback);
-    void getAppPermissions(String packageName, in RemoteCallback callback);
+    void stageAndApplyRuntimePermissionsBackup(in UserHandle user, in ParcelFileDescriptor pipe);
+    void applyStagedRuntimePermissionBackup(String packageName, in UserHandle user,
+            in AndroidFuture callback);
+    void getAppPermissions(String packageName, in AndroidFuture callback);
     void revokeRuntimePermission(String packageName, String permissionName);
     void countPermissionApps(in List<String> permissionNames, int flags,
-            in RemoteCallback callback);
-    void getPermissionUsages(boolean countSystem, long numMillis, in RemoteCallback callback);
+            in AndroidFuture callback);
+    void getPermissionUsages(boolean countSystem, long numMillis, in AndroidFuture callback);
     void setRuntimePermissionGrantStateByDeviceAdmin(String callerPackageName, String packageName,
-            String permission, int grantState, in RemoteCallback callback);
-    void grantOrUpgradeDefaultRuntimePermissions(in RemoteCallback callback);
+                String permission, int grantState, in AndroidFuture callback);
+    void grantOrUpgradeDefaultRuntimePermissions(in AndroidFuture callback);
+    void notifyOneTimePermissionSessionTimeout(String packageName);
+    void updateUserSensitiveForApp(int uid, in AndroidFuture callback);
 }

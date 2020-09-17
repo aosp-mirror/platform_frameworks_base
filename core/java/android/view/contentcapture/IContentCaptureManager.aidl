@@ -20,7 +20,10 @@ import android.content.ComponentName;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureEvent;
 import android.view.contentcapture.DataRemovalRequest;
+import android.view.contentcapture.DataShareRequest;
+import android.view.contentcapture.IDataShareWriteAdapter;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -59,9 +62,14 @@ oneway interface IContentCaptureManager {
     void getServiceComponentName(in IResultReceiver result);
 
     /**
-     * Requests the removal of content capture data for the calling user.
+     * Requests the removal of content catpure data for the calling user.
      */
     void removeData(in DataRemovalRequest request);
+
+    /**
+    * Requests sharing of a binary data with the content capture service.
+    */
+    void shareData(in DataShareRequest request, in IDataShareWriteAdapter adapter);
 
     /**
      * Returns whether the content capture feature is enabled for the calling user.

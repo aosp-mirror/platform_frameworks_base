@@ -26,16 +26,22 @@ package android.hardware.biometrics;
 oneway interface IBiometricServiceReceiverInternal {
     // Notify BiometricService that authentication was successful. If user confirmation is required,
     // the auth token must be submitted into KeyStore.
-    void onAuthenticationSucceeded(boolean requireConfirmation, in byte[] token);
-    // Notify BiometricService that an error has occurred.
-    void onAuthenticationFailed(int cookie, boolean requireConfirmation);
+    // TODO(b/151967372): Strength should be changed to authenticatorId
+    void onAuthenticationSucceeded(boolean requireConfirmation, in byte[] token,
+            boolean isStrongBiometric);
+    // Notify BiometricService authentication was rejected.
+    void onAuthenticationFailed();
     // Notify BiometricService than an error has occured. Forward to the correct receiver depending
     // on the cookie.
-    void onError(int cookie, int error, String message);
+    void onError(int cookie, int modality, int error, int vendorCode);
     // Notifies that a biometric has been acquired.
     void onAcquired(int acquiredInfo, String message);
     // Notifies that the SystemUI dialog has been dismissed.
-    void onDialogDismissed(int reason);
+    void onDialogDismissed(int reason, in byte[] credentialAttestation);
     // Notifies that the user has pressed the "try again" button on SystemUI
     void onTryAgainPressed();
+    // Notifies that the user has pressed the "use password" button on SystemUI
+    void onDeviceCredentialPressed();
+    // Notifies the client that an internal event, e.g. back button has occurred.
+    void onSystemEvent(int event);
 }

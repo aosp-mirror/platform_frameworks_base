@@ -16,7 +16,9 @@
 
 package android.os;
 
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -28,9 +30,14 @@ import android.hardware.vibrator.V1_3.Effect;
 import android.net.Uri;
 import android.util.MathUtils;
 
+import com.android.internal.util.Preconditions;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * A VibrationEffect describes a haptic effect to be performed by a {@link Vibrator}.
@@ -41,6 +48,8 @@ public abstract class VibrationEffect implements Parcelable {
     private static final int PARCEL_TOKEN_ONE_SHOT = 1;
     private static final int PARCEL_TOKEN_WAVEFORM = 2;
     private static final int PARCEL_TOKEN_EFFECT = 3;
+    private static final int PARCEL_TOKEN_COMPOSITION = 4;
+
 
     /**
      * The default vibration strength of the device.
@@ -212,15 +221,16 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * Waveform vibrations are a potentially repeating series of timing and amplitude pairs. For
      * each pair, the value in the amplitude array determines the strength of the vibration and the
-     * value in the timing array determines how long it vibrates for. An amplitude of 0 implies no
-     * vibration (i.e. off), and any pairs with a timing value of 0 will be ignored.
+     * value in the timing array determines how long it vibrates for, in milliseconds. Amplitude
+     * values must be between 0 and 255, and an amplitude of 0 implies no vibration (i.e. off). Any
+     * pairs with a timing value of 0 will be ignored.
      * </p><p>
      * To cause the pattern to repeat, pass the index into the timings array at which to start the
      * repetition, or -1 to disable repeating.
      * </p>
      *
-     * @param timings The timing values of the timing / amplitude pairs. Timing values of 0
-     *                will cause the pair to be ignored.
+     * @param timings The timing values, in milliseconds, of the timing / amplitude pairs. Timing
+     *                values of 0 will cause the pair to be ignored.
      * @param amplitudes The amplitude values of the timing / amplitude pairs. Amplitude values
      *                   must be between 0 and 255, or equal to {@link #DEFAULT_AMPLITUDE}. An
      *                   amplitude value of 0 implies the motor is off.
@@ -328,6 +338,14 @@ public abstract class VibrationEffect implements Parcelable {
     @TestApi
     @Nullable
     public static VibrationEffect get(Uri uri, Context context) {
+        String[] uris = context.getResources().getStringArray(
+                com.android.internal.R.array.config_ringtoneEffectUris);
+
+        // Skip doing any IPC if we don't have any effects configured.
+        if (uris.length == 0) {
+            return null;
+        }
+
         final ContentResolver cr = context.getContentResolver();
         Uri uncanonicalUri = cr.uncanonicalize(uri);
         if (uncanonicalUri == null) {
@@ -336,8 +354,7 @@ public abstract class VibrationEffect implements Parcelable {
             // place.
             uncanonicalUri = uri;
         }
-        String[] uris = context.getResources().getStringArray(
-                com.android.internal.R.array.config_ringtoneEffectUris);
+
         for (int i = 0; i < uris.length && i < RINGTONES.length; i++) {
             if (uris[i] == null) {
                 continue;
@@ -351,6 +368,16 @@ public abstract class VibrationEffect implements Parcelable {
             }
         }
         return null;
+    }
+
+    /**
+     * Start composing a haptic effect.
+     *
+     * @see VibrationEffect.Composition
+     */
+    @NonNull
+    public static VibrationEffect.Composition startComposition() {
+        return new VibrationEffect.Composition();
     }
 
     @Override
@@ -833,6 +860,366 @@ public abstract class VibrationEffect implements Parcelable {
             };
     }
 
+    /** @hide */
+    public static final class Composed extends VibrationEffect implements Parcelable {
+        private final ArrayList<Composition.PrimitiveEffect> mPrimitiveEffects;
+
+        /**
+         * @hide
+         */
+        @SuppressWarnings("unchecked")
+        public Composed(@NonNull Parcel in) {
+            this(in.readArrayList(Composed.class.getClassLoader()));
+        }
+
+        /**
+         * @hide
+         */
+        public Composed(List<Composition.PrimitiveEffect> effects) {
+            mPrimitiveEffects = new ArrayList<>(Objects.requireNonNull(effects));
+        }
+
+        /**
+         * @hide
+         */
+        @NonNull
+        public List<Composition.PrimitiveEffect> getPrimitiveEffects() {
+            return mPrimitiveEffects;
+        }
+
+        @Override
+        public long getDuration() {
+            return -1;
+        }
+
+        /**
+         * Scale all primitives of this effect.
+         *
+         * @param gamma the gamma adjustment to apply
+         * @param maxAmplitude the new maximum amplitude of the effect, must be between 0 and
+         *         MAX_AMPLITUDE
+         * @throws IllegalArgumentException if maxAmplitude less than 0 or more than MAX_AMPLITUDE
+         *
+         * @return A {@link Composed} effect with same but scaled primitives.
+         */
+        public Composed scale(float gamma, int maxAmplitude) {
+            if (maxAmplitude > MAX_AMPLITUDE || maxAmplitude < 0) {
+                throw new IllegalArgumentException(
+                        "Amplitude is negative or greater than MAX_AMPLITUDE");
+            }
+            if (gamma == 1.0f && maxAmplitude == MAX_AMPLITUDE) {
+                // Just return a copy of the original if there's no scaling to be done.
+                return new Composed(mPrimitiveEffects);
+            }
+            List<Composition.PrimitiveEffect> scaledPrimitives = new ArrayList<>();
+            for (Composition.PrimitiveEffect primitive : mPrimitiveEffects) {
+                float adjustedScale = MathUtils.pow(primitive.scale, gamma);
+                float newScale = adjustedScale * maxAmplitude / (float) MAX_AMPLITUDE;
+                scaledPrimitives.add(new Composition.PrimitiveEffect(
+                        primitive.id, newScale, primitive.delay));
+            }
+            return new Composed(scaledPrimitives);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void validate() {
+            for (Composition.PrimitiveEffect effect : mPrimitiveEffects) {
+                Composition.checkPrimitive(effect.id);
+                Preconditions.checkArgumentInRange(
+                        effect.scale, 0.0f, 1.0f, "scale");
+            }
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel out, int flags) {
+            out.writeInt(PARCEL_TOKEN_COMPOSITION);
+            out.writeList(mPrimitiveEffects);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Composed composed = (Composed) o;
+            return mPrimitiveEffects.equals(composed.mPrimitiveEffects);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mPrimitiveEffects);
+        }
+
+        @Override
+        public String toString() {
+            return "Composed{mPrimitiveEffects=" + mPrimitiveEffects + '}';
+        }
+
+        public static final @NonNull Parcelable.Creator<Composed> CREATOR =
+                new Parcelable.Creator<Composed>() {
+                    @Override
+                    public Composed createFromParcel(@NonNull Parcel in) {
+                        // Skip the type token
+                        in.readInt();
+                        return new Composed(in);
+                    }
+
+                    @Override
+                    @NonNull
+                    public Composed[] newArray(int size) {
+                        return new Composed[size];
+                    }
+                };
+    }
+
+    /**
+     * A composition of haptic primitives that, when combined, create a single haptic effect.
+     *
+     * @see VibrationEffect#startComposition()
+     */
+    public static final class Composition {
+        /** @hide */
+        @IntDef(prefix = { "PRIMITIVE_" }, value = {
+                PRIMITIVE_CLICK,
+                PRIMITIVE_THUD,
+                PRIMITIVE_SPIN,
+                PRIMITIVE_QUICK_RISE,
+                PRIMITIVE_SLOW_RISE,
+                PRIMITIVE_QUICK_FALL,
+                PRIMITIVE_TICK,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Primitive {}
+
+        /**
+         * No haptic effect. Used to generate extended delays between primitives.
+         * @hide
+         */
+        public static final int PRIMITIVE_NOOP = 0;
+        /**
+         * This effect should produce a sharp, crisp click sensation.
+         */
+        public static final int PRIMITIVE_CLICK = 1;
+        /**
+         * A haptic effect that simulates downwards movement with gravity. Often
+         * followed by extra energy of hitting and reverberation to augment
+         * physicality.
+         *
+         * @hide Not confident enough to expose publicly yet
+         */
+        public static final int PRIMITIVE_THUD = 2;
+        /**
+         * A haptic effect that simulates spinning momentum.
+         *
+         * @hide Not confident enough to expose publicly yet
+         */
+        public static final int PRIMITIVE_SPIN = 3;
+        /**
+         * A haptic effect that simulates quick upward movement against gravity.
+         */
+        public static final int PRIMITIVE_QUICK_RISE = 4;
+        /**
+         * A haptic effect that simulates slow upward movement against gravity.
+         */
+        public static final int PRIMITIVE_SLOW_RISE = 5;
+        /**
+         * A haptic effect that simulates quick downwards movement with gravity.
+         */
+        public static final int PRIMITIVE_QUICK_FALL = 6;
+        /**
+         * This very short effect should produce a light crisp sensation intended
+         * to be used repetitively for dynamic feedback.
+         */
+        // Internally this maps to the HAL constant CompositePrimitive::LIGHT_TICK
+        public static final int PRIMITIVE_TICK = 7;
+
+
+        private ArrayList<PrimitiveEffect> mEffects = new ArrayList<>();
+
+        Composition() { }
+
+        /**
+         * Add a haptic primitive to the end of the current composition.
+         *
+         * Similar to {@link #addPrimitive(int, float, int)}, but with no delay and a
+         * default scale applied.
+         *
+         * @param primitiveId The primitive to add
+         *
+         * @return The {@link Composition} object to enable adding multiple primitives in one chain.
+         */
+        @NonNull
+        public Composition addPrimitive(@Primitive int primitiveId) {
+            addPrimitive(primitiveId, /*scale*/ 1.0f, /*delay*/ 0);
+            return this;
+        }
+
+        /**
+         * Add a haptic primitive to the end of the current composition.
+         *
+         * Similar to {@link #addPrimitive(int, float, int)}, but with no delay.
+         *
+         * @param primitiveId The primitive to add
+         * @param scale The scale to apply to the intensity of the primitive.
+         *
+         * @return The {@link Composition} object to enable adding multiple primitives in one chain.
+         */
+        @NonNull
+        public Composition addPrimitive(@Primitive int primitiveId,
+                @FloatRange(from = 0f, to = 1f) float scale) {
+            addPrimitive(primitiveId, scale, /*delay*/ 0);
+            return this;
+        }
+
+        /**
+         * Add a haptic primitive to the end of the current composition.
+         *
+         * @param primitiveId The primitive to add
+         * @param scale The scale to apply to the intensity of the primitive.
+         * @param delay The amount of time, in milliseconds, to wait between playing the prior
+         *              primitive and this one
+         * @return The {@link Composition} object to enable adding multiple primitives in one chain.
+         */
+        @NonNull
+        public Composition addPrimitive(@Primitive int primitiveId,
+                @FloatRange(from = 0f, to = 1f) float scale, @IntRange(from = 0) int delay) {
+            mEffects.add(new PrimitiveEffect(checkPrimitive(primitiveId), scale, delay));
+            return this;
+        }
+
+        /**
+         * Compose all of the added primitives together into a single {@link VibrationEffect}.
+         *
+         * The {@link Composition} object is still valid after this call, so you can continue adding
+         * more primitives to it and generating more {@link VibrationEffect}s by calling this method
+         * again.
+         *
+         * @return The {@link VibrationEffect} resulting from the composition of the primitives.
+         */
+        @NonNull
+        public VibrationEffect compose() {
+            if (mEffects.isEmpty()) {
+                throw new IllegalStateException(
+                        "Composition must have at least one element to compose.");
+            }
+            return new VibrationEffect.Composed(mEffects);
+        }
+
+        /**
+         * @throws IllegalArgumentException throws if the primitive ID is not within the valid range
+         * @hide
+         *
+         */
+        static int checkPrimitive(int primitiveId) {
+            Preconditions.checkArgumentInRange(primitiveId, PRIMITIVE_NOOP, PRIMITIVE_TICK,
+                    "primitiveId");
+            return primitiveId;
+        }
+
+        /**
+         * Convert the primitive ID to a human readable string for debugging
+         * @param id The ID to convert
+         * @return The ID in a human readable format.
+         * @hide
+         */
+        public static String primitiveToString(@Primitive int id) {
+            switch (id) {
+                case PRIMITIVE_NOOP:
+                    return "PRIMITIVE_NOOP";
+                case PRIMITIVE_CLICK:
+                    return "PRIMITIVE_CLICK";
+                case PRIMITIVE_THUD:
+                    return "PRIMITIVE_THUD";
+                case PRIMITIVE_SPIN:
+                    return "PRIMITIVE_SPIN";
+                case PRIMITIVE_QUICK_RISE:
+                    return "PRIMITIVE_QUICK_RISE";
+                case PRIMITIVE_SLOW_RISE:
+                    return "PRIMITIVE_SLOW_RISE";
+                case PRIMITIVE_QUICK_FALL:
+                    return "PRIMITIVE_QUICK_FALL";
+                case PRIMITIVE_TICK:
+                    return "PRIMITIVE_TICK";
+
+                default:
+                    return Integer.toString(id);
+
+            }
+        }
+
+
+        /**
+         * @hide
+         */
+        public static class PrimitiveEffect implements Parcelable {
+            public int id;
+            public float scale;
+            public int delay;
+
+            PrimitiveEffect(int id, float scale, int delay) {
+                this.id = id;
+                this.scale = scale;
+                this.delay = delay;
+            }
+
+            @Override
+            public void writeToParcel(Parcel dest, int flags) {
+                dest.writeInt(id);
+                dest.writeFloat(scale);
+                dest.writeInt(delay);
+            }
+
+            @Override
+            public int describeContents() {
+                return 0;
+            }
+
+            @Override
+            public String toString() {
+                return "PrimitiveEffect{"
+                        + "id=" + primitiveToString(id)
+                        + ", scale=" + scale
+                        + ", delay=" + delay
+                        + '}';
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                PrimitiveEffect that = (PrimitiveEffect) o;
+                return id == that.id
+                        && Float.compare(that.scale, scale) == 0
+                        && delay == that.delay;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(id, scale, delay);
+            }
+
+
+            public static final @NonNull Parcelable.Creator<PrimitiveEffect> CREATOR =
+                    new Parcelable.Creator<PrimitiveEffect>() {
+                        @Override
+                        public PrimitiveEffect createFromParcel(Parcel in) {
+                            return new PrimitiveEffect(in.readInt(), in.readFloat(), in.readInt());
+                        }
+                        @Override
+                        public PrimitiveEffect[] newArray(int size) {
+                            return new PrimitiveEffect[size];
+                        }
+                    };
+        }
+    }
+
     public static final @NonNull Parcelable.Creator<VibrationEffect> CREATOR =
             new Parcelable.Creator<VibrationEffect>() {
                 @Override
@@ -844,6 +1231,8 @@ public abstract class VibrationEffect implements Parcelable {
                         return new Waveform(in);
                     } else if (token == PARCEL_TOKEN_EFFECT) {
                         return new Prebaked(in);
+                    } else if (token == PARCEL_TOKEN_COMPOSITION) {
+                        return new Composed(in);
                     } else {
                         throw new IllegalStateException(
                                 "Unexpected vibration event type token in parcel.");

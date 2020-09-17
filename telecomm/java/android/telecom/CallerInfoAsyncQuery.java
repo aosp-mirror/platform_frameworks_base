@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.app.ActivityManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -34,6 +35,7 @@ import android.provider.ContactsContract.PhoneLookup;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,6 +80,10 @@ public class CallerInfoAsyncQuery {
      * classes.
      */
     private static final class CookieWrapper {
+        @UnsupportedAppUsage
+        private CookieWrapper() {
+        }
+
         public OnQueryCompleteListener listener;
         public Object cookie;
         public int event;
@@ -525,6 +531,7 @@ public class CallerInfoAsyncQuery {
     /**
      * Releases the relevant data.
      */
+    @UnsupportedAppUsage
     private void release() {
         mHandler.mContext = null;
         mHandler.mQueryUri = null;

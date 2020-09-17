@@ -22,8 +22,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.validateMockitoUsage;
@@ -34,6 +35,7 @@ import android.content.Context;
 import android.net.wifi.WifiScanner.PnoSettings;
 import android.net.wifi.WifiScanner.PnoSettings.PnoNetwork;
 import android.net.wifi.WifiScanner.ScanData;
+import android.net.wifi.WifiScanner.ScanListener;
 import android.net.wifi.WifiScanner.ScanSettings;
 import android.os.Bundle;
 import android.os.Handler;
@@ -52,8 +54,10 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.util.Arrays;
+import java.util.concurrent.Executor;
 
 /**
  * Unit tests for {@link android.net.wifi.WifiScanner}.
@@ -64,19 +68,23 @@ public class WifiScannerTest {
     private Context mContext;
     @Mock
     private IWifiScanner mService;
+    @Spy
+    private Executor mExecutor = new SynchronousExecutor();
+    @Mock
+    private ScanListener mScanListener;
+    @Mock
+    private WifiScanner.ParcelableScanData mParcelableScanData;
+    private ScanData[] mScanData = {};
 
     private static final boolean TEST_PNOSETTINGS_IS_CONNECTED = false;
     private static final int TEST_PNOSETTINGS_MIN_5GHZ_RSSI = -60;
     private static final int TEST_PNOSETTINGS_MIN_2GHZ_RSSI = -70;
-    private static final int TEST_PNOSETTINGS_INITIAL_SCORE_MAX = 50;
-    private static final int TEST_PNOSETTINGS_CURRENT_CONNECTION_BONUS = 10;
-    private static final int TEST_PNOSETTINGS_SAME_NETWORK_BONUS = 11;
-    private static final int TEST_PNOSETTINGS_SECURE_BONUS = 12;
-    private static final int TEST_PNOSETTINGS_BAND_5GHZ_BONUS = 13;
+    private static final int TEST_PNOSETTINGS_MIN_6GHZ_RSSI = -55;
     private static final String TEST_SSID_1 = "TEST1";
     private static final String TEST_SSID_2 = "TEST2";
     private static final int[] TEST_FREQUENCIES_1 = {};
-    private static final int[] TEST_FREQUENCIES_2 = {2500, 5124};
+    private static final int[] TEST_FREQUENCIES_2 = {2500, 5124, 6245};
+    private static final String DESCRIPTION_NOT_AUTHORIZED = "Not authorized";
 
     private WifiScanner mWifiScanner;
     private TestLooper mLooper;
@@ -96,6 +104,7 @@ public class WifiScannerTest {
         when(mService.getMessenger()).thenReturn(mBidirectionalAsyncChannelServer.getMessenger());
         mWifiScanner = new WifiScanner(mContext, mService, mLooper.getLooper());
         mLooper.dispatchAll();
+        when(mParcelableScanData.getResults()).thenReturn(mScanData);
     }
 
     /**
@@ -112,7 +121,7 @@ public class WifiScannerTest {
     @Test
     public void verifyScanSettingsParcelWithBand() throws Exception {
         ScanSettings writeSettings = new ScanSettings();
-        writeSettings.type = WifiScanner.TYPE_LOW_POWER;
+        writeSettings.type = WifiScanner.SCAN_TYPE_LOW_POWER;
         writeSettings.band = WifiScanner.WIFI_BAND_BOTH_WITH_DFS;
 
         ScanSettings readSettings = parcelWriteRead(writeSettings);
@@ -127,7 +136,7 @@ public class WifiScannerTest {
     @Test
     public void verifyScanSettingsParcelWithChannels() throws Exception {
         ScanSettings writeSettings = new ScanSettings();
-        writeSettings.type = WifiScanner.TYPE_HIGH_ACCURACY;
+        writeSettings.type = WifiScanner.SCAN_TYPE_HIGH_ACCURACY;
         writeSettings.band = WifiScanner.WIFI_BAND_UNSPECIFIED;
         writeSettings.channels = new WifiScanner.ChannelSpec[] {
                 new WifiScanner.ChannelSpec(5),
@@ -170,11 +179,7 @@ public class WifiScannerTest {
         pnoSettings.isConnected = TEST_PNOSETTINGS_IS_CONNECTED;
         pnoSettings.min5GHzRssi = TEST_PNOSETTINGS_MIN_5GHZ_RSSI;
         pnoSettings.min24GHzRssi = TEST_PNOSETTINGS_MIN_2GHZ_RSSI;
-        pnoSettings.initialScoreMax = TEST_PNOSETTINGS_INITIAL_SCORE_MAX;
-        pnoSettings.currentConnectionBonus = TEST_PNOSETTINGS_CURRENT_CONNECTION_BONUS;
-        pnoSettings.sameNetworkBonus = TEST_PNOSETTINGS_SAME_NETWORK_BONUS;
-        pnoSettings.secureBonus = TEST_PNOSETTINGS_SECURE_BONUS;
-        pnoSettings.band5GHzBonus = TEST_PNOSETTINGS_BAND_5GHZ_BONUS;
+        pnoSettings.min6GHzRssi = TEST_PNOSETTINGS_MIN_6GHZ_RSSI;
 
         Parcel parcel = Parcel.obtain();
         pnoSettings.writeToParcel(parcel, 0);
@@ -187,13 +192,7 @@ public class WifiScannerTest {
         assertEquals(TEST_PNOSETTINGS_IS_CONNECTED, pnoSettingsDeserialized.isConnected);
         assertEquals(TEST_PNOSETTINGS_MIN_5GHZ_RSSI, pnoSettingsDeserialized.min5GHzRssi);
         assertEquals(TEST_PNOSETTINGS_MIN_2GHZ_RSSI, pnoSettingsDeserialized.min24GHzRssi);
-        assertEquals(TEST_PNOSETTINGS_INITIAL_SCORE_MAX, pnoSettingsDeserialized.initialScoreMax);
-        assertEquals(TEST_PNOSETTINGS_CURRENT_CONNECTION_BONUS,
-                pnoSettingsDeserialized.currentConnectionBonus);
-        assertEquals(TEST_PNOSETTINGS_SAME_NETWORK_BONUS,
-                pnoSettingsDeserialized.sameNetworkBonus);
-        assertEquals(TEST_PNOSETTINGS_SECURE_BONUS, pnoSettingsDeserialized.secureBonus);
-        assertEquals(TEST_PNOSETTINGS_BAND_5GHZ_BONUS, pnoSettingsDeserialized.band5GHzBonus);
+        assertEquals(TEST_PNOSETTINGS_MIN_6GHZ_RSSI, pnoSettingsDeserialized.min6GHzRssi);
 
         // Test parsing of PnoNetwork
         assertEquals(pnoSettings.networkList.length, pnoSettingsDeserialized.networkList.length);
@@ -244,13 +243,13 @@ public class WifiScannerTest {
 
 
     /**
-     * Test behavior of {@link WifiScanner#startScan(ScanSettings, WifiScanner.ScanListener)}
+     * Test behavior of {@link WifiScanner#startScan(ScanSettings, ScanListener)}
      * @throws Exception
      */
     @Test
     public void testStartScan() throws Exception {
         ScanSettings scanSettings = new ScanSettings();
-        WifiScanner.ScanListener scanListener = mock(WifiScanner.ScanListener.class);
+        ScanListener scanListener = mock(ScanListener.class);
 
         mWifiScanner.startScan(scanSettings, scanListener);
         mLooper.dispatchAll();
@@ -268,17 +267,19 @@ public class WifiScannerTest {
         assertNull(messageBundle.getParcelable(WifiScanner.SCAN_PARAMS_WORK_SOURCE_KEY));
         assertEquals(mContext.getOpPackageName(),
                 messageBundle.getParcelable(WifiScanner.REQUEST_PACKAGE_NAME_KEY));
+        assertEquals(mContext.getAttributionTag(),
+                messageBundle.getParcelable(WifiScanner.REQUEST_FEATURE_ID_KEY));
 
     }
 
     /**
-     * Test behavior of {@link WifiScanner#stopScan(WifiScanner.ScanListener)}
+     * Test behavior of {@link WifiScanner#stopScan(ScanListener)}
      * @throws Exception
      */
     @Test
     public void testStopScan() throws Exception {
         ScanSettings scanSettings = new ScanSettings();
-        WifiScanner.ScanListener scanListener = mock(WifiScanner.ScanListener.class);
+        ScanListener scanListener = mock(ScanListener.class);
 
         mWifiScanner.startScan(scanSettings, scanListener);
         mLooper.dispatchAll();
@@ -296,17 +297,18 @@ public class WifiScannerTest {
         Bundle messageBundle = (Bundle) message.obj;
         assertEquals(mContext.getOpPackageName(),
                 messageBundle.getParcelable(WifiScanner.REQUEST_PACKAGE_NAME_KEY));
-
+        assertEquals(mContext.getAttributionTag(),
+                messageBundle.getParcelable(WifiScanner.REQUEST_FEATURE_ID_KEY));
     }
 
     /**
-     * Test behavior of {@link WifiScanner#startScan(ScanSettings, WifiScanner.ScanListener)}
+     * Test behavior of {@link WifiScanner#startScan(ScanSettings, ScanListener)}
      * @throws Exception
      */
     @Test
     public void testStartScanListenerOnSuccess() throws Exception {
         ScanSettings scanSettings = new ScanSettings();
-        WifiScanner.ScanListener scanListener = mock(WifiScanner.ScanListener.class);
+        ScanListener scanListener = mock(ScanListener.class);
 
         mWifiScanner.startScan(scanSettings, scanListener);
         mLooper.dispatchAll();
@@ -330,13 +332,13 @@ public class WifiScannerTest {
     }
 
     /**
-     * Test behavior of {@link WifiScanner#startScan(ScanSettings, WifiScanner.ScanListener)}
+     * Test behavior of {@link WifiScanner#startScan(ScanSettings, ScanListener)}
      * @throws Exception
      */
     @Test
     public void testStartScanListenerOnResults() throws Exception {
         ScanSettings scanSettings = new ScanSettings();
-        WifiScanner.ScanListener scanListener = mock(WifiScanner.ScanListener.class);
+        ScanListener scanListener = mock(ScanListener.class);
 
         mWifiScanner.startScan(scanSettings, scanListener);
         mLooper.dispatchAll();
@@ -364,7 +366,7 @@ public class WifiScannerTest {
 
     /**
      * Test behavior of {@link WifiScanner#startDisconnectedPnoScan(ScanSettings, PnoSettings,
-     * WifiScanner.PnoScanListener)}
+     * Executor, WifiScanner.PnoScanListener)}
      * @throws Exception
      */
     @Test
@@ -373,7 +375,8 @@ public class WifiScannerTest {
         PnoSettings pnoSettings = new PnoSettings();
         WifiScanner.PnoScanListener pnoScanListener = mock(WifiScanner.PnoScanListener.class);
 
-        mWifiScanner.startDisconnectedPnoScan(scanSettings, pnoSettings, pnoScanListener);
+        mWifiScanner.startDisconnectedPnoScan(
+                scanSettings, pnoSettings, mock(Executor.class), pnoScanListener);
         mLooper.dispatchAll();
 
         ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
@@ -394,7 +397,7 @@ public class WifiScannerTest {
 
     /**
      * Test behavior of {@link WifiScanner#startConnectedPnoScan(ScanSettings, PnoSettings,
-     * WifiScanner.PnoScanListener)}
+     * Executor, WifiScanner.PnoScanListener)}
      * @throws Exception
      */
     @Test
@@ -403,7 +406,8 @@ public class WifiScannerTest {
         PnoSettings pnoSettings = new PnoSettings();
         WifiScanner.PnoScanListener pnoScanListener = mock(WifiScanner.PnoScanListener.class);
 
-        mWifiScanner.startConnectedPnoScan(scanSettings, pnoSettings, pnoScanListener);
+        mWifiScanner.startConnectedPnoScan(
+                scanSettings, pnoSettings, mock(Executor.class), pnoScanListener);
         mLooper.dispatchAll();
 
         ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
@@ -423,8 +427,8 @@ public class WifiScannerTest {
     }
 
     /**
-     * Test behavior of {@link WifiScanner#stopPnoScan(WifiScanner.ScanListener)}
-     * WifiScanner.PnoScanListener)}
+     * Test behavior of {@link WifiScanner#stopPnoScan(ScanListener)}
+     * Executor, WifiScanner.PnoScanListener)}
      * @throws Exception
      */
     @Test
@@ -433,7 +437,8 @@ public class WifiScannerTest {
         PnoSettings pnoSettings = new PnoSettings();
         WifiScanner.PnoScanListener pnoScanListener = mock(WifiScanner.PnoScanListener.class);
 
-        mWifiScanner.startDisconnectedPnoScan(scanSettings, pnoSettings, pnoScanListener);
+        mWifiScanner.startDisconnectedPnoScan(
+                scanSettings, pnoSettings, mock(Executor.class), pnoScanListener);
         mLooper.dispatchAll();
         mWifiScanner.stopPnoScan(pnoScanListener);
         mLooper.dispatchAll();
@@ -444,5 +449,186 @@ public class WifiScannerTest {
         assertNotNull(message);
 
         assertEquals(WifiScanner.CMD_STOP_PNO_SCAN, message.what);
+    }
+
+    @Test
+    public void testScanDataAddResults() throws Exception {
+        ScanResult scanResult1 = new ScanResult();
+        scanResult1.SSID = TEST_SSID_1;
+        ScanData scanData = new ScanData(0, 0, new ScanResult[]{scanResult1});
+
+        ScanResult scanResult2 = new ScanResult();
+        scanResult2.SSID = TEST_SSID_2;
+        scanData.addResults(new ScanResult[]{scanResult2});
+
+        ScanResult[] consolidatedScanResults = scanData.getResults();
+        assertEquals(2, consolidatedScanResults.length);
+        assertEquals(TEST_SSID_1, consolidatedScanResults[0].SSID);
+        assertEquals(TEST_SSID_2, consolidatedScanResults[1].SSID);
+    }
+
+    @Test
+    public void testScanDataParcel() throws Exception {
+        ScanResult scanResult1 = new ScanResult();
+        scanResult1.SSID = TEST_SSID_1;
+        ScanData scanData = new ScanData(5, 4, new ScanResult[]{scanResult1});
+
+        Parcel parcel = Parcel.obtain();
+        scanData.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);    // Rewind data position back to the beginning for read.
+        ScanData readScanData = ScanData.CREATOR.createFromParcel(parcel);
+
+        assertEquals(scanData.getId(), readScanData.getId());
+        assertEquals(scanData.getFlags(), readScanData.getFlags());
+        assertEquals(scanData.getResults().length, readScanData.getResults().length);
+        assertEquals(scanData.getResults()[0].SSID, readScanData.getResults()[0].SSID);
+    }
+
+    /** Tests that upon registration success, {@link ScanListener#onSuccess()} is called. */
+    @Test
+    public void testRegisterScanListenerSuccess() throws Exception {
+        mWifiScanner.registerScanListener(mExecutor, mScanListener);
+        mLooper.dispatchAll();
+
+        ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
+        verify(mHandler).handleMessage(messageArgumentCaptor.capture());
+        Message sentMessage = messageArgumentCaptor.getValue();
+        assertNotNull(sentMessage);
+
+        assertEquals(1, mBidirectionalAsyncChannelServer.getClientMessengers().size());
+        Messenger scannerMessenger =
+                mBidirectionalAsyncChannelServer.getClientMessengers().iterator().next();
+
+        Message responseMessage = Message.obtain();
+        responseMessage.what = WifiScanner.CMD_OP_SUCCEEDED;
+        responseMessage.arg2 = sentMessage.arg2;
+        scannerMessenger.send(responseMessage);
+        mLooper.dispatchAll();
+
+        verify(mExecutor).execute(any());
+        verify(mScanListener).onSuccess();
+    }
+
+    /**
+     * Tests that upon registration failed, {@link ScanListener#onFailure(int, String)} is called.
+     */
+    @Test
+    public void testRegisterScanListenerFailed() throws Exception {
+        mWifiScanner.registerScanListener(mExecutor, mScanListener);
+        mLooper.dispatchAll();
+
+        ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
+        verify(mHandler).handleMessage(messageArgumentCaptor.capture());
+        Message sentMessage = messageArgumentCaptor.getValue();
+        assertNotNull(sentMessage);
+
+        assertEquals(1, mBidirectionalAsyncChannelServer.getClientMessengers().size());
+        Messenger scannerMessenger =
+                mBidirectionalAsyncChannelServer.getClientMessengers().iterator().next();
+
+        {
+            Message responseMessage = Message.obtain();
+            responseMessage.what = WifiScanner.CMD_OP_FAILED;
+            responseMessage.arg2 = sentMessage.arg2;
+            responseMessage.obj = new WifiScanner.OperationResult(
+                    WifiScanner.REASON_NOT_AUTHORIZED, DESCRIPTION_NOT_AUTHORIZED);
+            scannerMessenger.send(responseMessage);
+            mLooper.dispatchAll();
+        }
+
+        verify(mExecutor).execute(any());
+        verify(mScanListener).onFailure(
+                WifiScanner.REASON_NOT_AUTHORIZED, DESCRIPTION_NOT_AUTHORIZED);
+
+        // CMD_OP_FAILED should have caused the removal of the listener, verify this
+        {
+            Message responseMessage = Message.obtain();
+            responseMessage.what = WifiScanner.CMD_SCAN_RESULT;
+            responseMessage.arg2 = sentMessage.arg2;
+            responseMessage.obj = mParcelableScanData;
+            scannerMessenger.send(responseMessage);
+            mLooper.dispatchAll();
+        }
+        // execute() called once before, not called again
+        verify(mExecutor, times(1)).execute(any());
+        // onResults() never triggered
+        verify(mScanListener, never()).onResults(any());
+    }
+
+    /**
+     * Tests that when the ScanListener is triggered, {@link ScanListener#onResults(ScanData[])}
+     * is called.
+     */
+    @Test
+    public void testRegisterScanListenerReceiveScanResults() throws Exception {
+        mWifiScanner.registerScanListener(mExecutor, mScanListener);
+        mLooper.dispatchAll();
+
+        ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
+        verify(mHandler).handleMessage(messageArgumentCaptor.capture());
+        Message sentMessage = messageArgumentCaptor.getValue();
+        assertNotNull(sentMessage);
+
+        assertEquals(1, mBidirectionalAsyncChannelServer.getClientMessengers().size());
+        Messenger scannerMessenger =
+                mBidirectionalAsyncChannelServer.getClientMessengers().iterator().next();
+
+        Message responseMessage = Message.obtain();
+        responseMessage.what = WifiScanner.CMD_SCAN_RESULT;
+        responseMessage.arg2 = sentMessage.arg2;
+        responseMessage.obj = mParcelableScanData;
+        scannerMessenger.send(responseMessage);
+        mLooper.dispatchAll();
+
+        verify(mExecutor).execute(any());
+        verify(mScanListener).onResults(mScanData);
+    }
+
+    /**
+     * Tests that after unregistering a scan listener, {@link ScanListener#onResults(ScanData[])}
+     * is not called.
+     */
+    @Test
+    public void testUnregisterScanListener() throws Exception {
+        mWifiScanner.registerScanListener(mExecutor, mScanListener);
+        mWifiScanner.unregisterScanListener(mScanListener);
+        mLooper.dispatchAll();
+
+        assertEquals(1, mBidirectionalAsyncChannelServer.getClientMessengers().size());
+        Messenger scannerMessenger =
+                mBidirectionalAsyncChannelServer.getClientMessengers().iterator().next();
+
+        ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
+        verify(mHandler, times(2)).handleMessage(messageArgumentCaptor.capture());
+        Message sentMessage = messageArgumentCaptor.getValue();
+        assertNotNull(sentMessage);
+
+        Message responseMessage = Message.obtain();
+        responseMessage.what = WifiScanner.CMD_SCAN_RESULT;
+        responseMessage.obj = mParcelableScanData;
+        responseMessage.arg2 = sentMessage.arg2;
+        scannerMessenger.send(responseMessage);
+        mLooper.dispatchAll();
+
+        verify(mExecutor, never()).execute(any());
+        verify(mScanListener, never()).onResults(mScanData);
+    }
+
+    /**
+     * Tests isFullBandScan() method with and without DFS check
+     */
+    @Test
+    public void testIsFullBandScan() throws Exception {
+        assertFalse(WifiScanner.isFullBandScan(WifiScanner.WIFI_BAND_24_GHZ, true));
+        assertFalse(WifiScanner.isFullBandScan(WifiScanner.WIFI_BAND_5_GHZ, true));
+        assertFalse(WifiScanner.isFullBandScan(WifiScanner.WIFI_BAND_6_GHZ, true));
+        assertFalse(WifiScanner.isFullBandScan(
+                WifiScanner.WIFI_BAND_6_GHZ | WifiScanner.WIFI_BAND_5_GHZ, true));
+        assertTrue(WifiScanner.isFullBandScan(
+                WifiScanner.WIFI_BAND_24_GHZ | WifiScanner.WIFI_BAND_5_GHZ, true));
+        assertFalse(WifiScanner.isFullBandScan(
+                WifiScanner.WIFI_BAND_24_GHZ | WifiScanner.WIFI_BAND_5_GHZ, false));
+        assertTrue(WifiScanner.isFullBandScan(WifiScanner.WIFI_BAND_BOTH_WITH_DFS, true));
+        assertTrue(WifiScanner.isFullBandScan(WifiScanner.WIFI_BAND_BOTH_WITH_DFS, false));
     }
 }

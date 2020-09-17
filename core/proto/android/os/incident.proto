@@ -17,10 +17,12 @@
 syntax = "proto2";
 option java_multiple_files = true;
 
+import "frameworks/base/core/proto/android/nfc/nfc_service.proto";
 import "frameworks/base/core/proto/android/os/backtrace.proto";
 import "frameworks/base/core/proto/android/os/batterytype.proto";
 import "frameworks/base/core/proto/android/os/cpufreq.proto";
 import "frameworks/base/core/proto/android/os/cpuinfo.proto";
+import "frameworks/base/core/proto/android/os/cpu_usage.proto";
 import "frameworks/base/core/proto/android/os/data.proto";
 import "frameworks/base/core/proto/android/os/header.proto";
 import "frameworks/base/core/proto/android/os/kernelwake.proto";
@@ -33,8 +35,10 @@ import "frameworks/base/core/proto/android/os/system_properties.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/server/activitymanagerservice.proto";
 import "frameworks/base/core/proto/android/server/alarmmanagerservice.proto";
+import "frameworks/base/core/proto/android/server/bluetooth_manager_service.proto";
 import "frameworks/base/core/proto/android/server/fingerprint.proto";
 import "frameworks/base/core/proto/android/server/jobscheduler.proto";
+import "frameworks/base/core/proto/android/server/location/context_hub.proto";
 import "frameworks/base/core/proto/android/server/powermanagerservice.proto";
 import "frameworks/base/core/proto/android/server/rolemanagerservice.proto";
 import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
@@ -42,6 +46,7 @@ import "frameworks/base/core/proto/android/service/appwidget.proto";
 import "frameworks/base/core/proto/android/service/battery.proto";
 import "frameworks/base/core/proto/android/service/batterystats.proto";
 import "frameworks/base/core/proto/android/service/diskstats.proto";
+import "frameworks/base/core/proto/android/service/dropbox.proto";
 import "frameworks/base/core/proto/android/service/graphicsstats.proto";
 import "frameworks/base/core/proto/android/service/netstats.proto";
 import "frameworks/base/core/proto/android/service/notification.proto";
@@ -49,11 +54,14 @@ import "frameworks/base/core/proto/android/service/package.proto";
 import "frameworks/base/core/proto/android/service/print.proto";
 import "frameworks/base/core/proto/android/service/procstats.proto";
 import "frameworks/base/core/proto/android/service/restricted_image.proto";
+import "frameworks/base/core/proto/android/service/sensor_service.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/util/event_log_tags.proto";
 import "frameworks/base/core/proto/android/util/log.proto";
+import "frameworks/base/core/proto/android/util/textdump.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
 import "frameworks/base/core/proto/android/section.proto";
+import "frameworks/base/proto/src/ipconnectivity.proto";
 
 package android.os;
 
@@ -87,42 +95,85 @@ message IncidentProto {
 
     optional android.util.LogProto main_logs = 1101 [
         (section).type = SECTION_LOG,
-        (section).args = "LOG_ID_MAIN"
+        (section).args = "main"
     ];
 
     optional android.util.LogProto radio_logs = 1102 [
         (section).type = SECTION_LOG,
-        (section).args = "LOG_ID_RADIO"
+        (section).args = "radio"
     ];
 
     optional android.util.LogProto events_logs = 1103 [
         (section).type = SECTION_LOG,
-        (section).args = "LOG_ID_EVENTS"
+        (section).args = "events"
     ];
 
     optional android.util.LogProto system_logs = 1104 [
         (section).type = SECTION_LOG,
-        (section).args = "LOG_ID_SYSTEM"
+        (section).args = "system"
     ];
 
     optional android.util.LogProto crash_logs = 1105 [
         (section).type = SECTION_LOG,
-        (section).args = "LOG_ID_CRASH"
+        (section).args = "crash"
     ];
 
     optional android.util.LogProto stats_logs = 1106 [
         (section).type = SECTION_LOG,
-        (section).args = "LOG_ID_STATS"
+        (section).args = "stats"
     ];
 
     optional android.util.LogProto security_logs = 1107 [
         (section).type = SECTION_LOG,
-        (section).args = "LOG_ID_SECURITY"
+        (section).args = "security"
     ];
 
     optional android.util.LogProto kernel_logs = 1108 [
         (section).type = SECTION_LOG,
-        (section).args = "LOG_ID_KERNEL"
+        (section).args = "kernel"
+    ];
+
+    // Last logcat sections.
+    // Note that kernel logs is not persisted since it's contained in last kmsg.
+    optional android.util.LogProto last_main_logs = 1109 [
+        (section).type = SECTION_LOG,
+        (section).args = "main -L"
+    ];
+
+    optional android.util.LogProto last_radio_logs = 1110 [
+        (section).type = SECTION_LOG,
+        (section).args = "radio -L"
+    ];
+
+    optional android.util.LogProto last_events_logs = 1111 [
+        (section).type = SECTION_LOG,
+        (section).args = "events -L"
+    ];
+
+    optional android.util.LogProto last_system_logs = 1112 [
+        (section).type = SECTION_LOG,
+        (section).args = "system -L"
+    ];
+
+    optional android.util.LogProto last_crash_logs = 1113 [
+        (section).type = SECTION_LOG,
+        (section).args = "crash -L"
+    ];
+
+    optional android.util.LogProto last_stats_logs = 1114 [
+        (section).type = SECTION_LOG,
+        (section).args = "stats -L"
+    ];
+
+    // security logs is only available with "Device Owner" mode
+    optional android.util.LogProto last_security_logs = 1115 [
+        (section).type = SECTION_LOG,
+        (section).args = "security -L"
+    ];
+
+    optional android.util.PersistedLogProto persisted_logs = 1116 [
+        (section).type = SECTION_COMMAND,
+        (section).args = "/system/bin/sh /system/bin/incident-helper-cmd -l run persisted_logs --limit 10MB"
     ];
 
     // Stack dumps
@@ -325,8 +376,149 @@ message IncidentProto {
     optional bytes system_trace = 3026 [
         (section).type = SECTION_FILE,
         (section).args = "/data/misc/perfetto-traces/incident-trace",
-        (privacy).dest = DEST_AUTOMATIC,
-        (section).userdebug_and_eng_only = true
+        (privacy).dest = DEST_AUTOMATIC
+    ];
+
+    // Dropbox entries split by tags.
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_data_app_crash = 3027 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto data_app_crash"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_data_app_anr = 3028 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto data_app_anr"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_data_app_native_crash = 3029 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto data_app_native_crash"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_data_app_strictmode = 3030 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto data_app_strictmode"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_data_app_wtf = 3031 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto data_app_wtf"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_app_crash = 3032 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_app_crash"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_app_anr = 3033 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_app_anr"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_app_native_crash = 3034 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_app_native_crash"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_app_strictmode = 3035 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_app_strictmode"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_app_wtf = 3036 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_app_wtf"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_crash = 3037 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_server_crash"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_anr = 3038 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_server_anr"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_native_crash = 3039 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_server_native_crash"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_lowmem= 3040 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_server_lowmem"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_strictmode = 3041 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_server_strictmode"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_watchdog = 3042 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_server_watchdog"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_wtf = 3043 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_server_wtf"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_recovery_log = 3044 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto SYSTEM_RECOVERY_LOG"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_tombstone = 3045 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto SYSTEM_TOMBSTONE"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_subsystem_restart = 3046 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto SubsystemRestart"
+    ];
+
+    optional CpuUsageProto process_cpu_usage = 3047 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "cpuinfo --proto"
+    ];
+
+    optional .clearcut.connectivity.IpConnectivityLog ip_connectivity_metrics = 3049 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "connmetrics --proto"
+    ];
+
+    optional com.android.server.BluetoothManagerServiceDumpProto bluetooth_manager = 3050 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "bluetooth_manager --proto"
+    ];
+
+    optional com.android.server.location.ContextHubServiceProto context_hub = 3051 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "contexthub --proto"
+    ];
+
+    optional com.android.nfc.NfcServiceDumpProto nfc_service  = 3052 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "nfc --proto"
+    ];
+
+    optional android.service.SensorServiceProto sensor_service = 3053 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "sensorservice --proto"
+    ];
+
+    // Dumps in text format (on userdebug and eng builds only): 4000 ~ 4999
+    optional android.util.TextDumpProto textdump_wifi = 4000 [
+        (section).type = SECTION_TEXT_DUMPSYS,
+        (section).args = "wifi"
+    ];
+
+    optional android.util.TextDumpProto textdump_bluetooth = 4001 [
+        (section).type = SECTION_TEXT_DUMPSYS,
+        (section).args = "bluetooth_manager"
     ];
 
     // Reserved for OEMs.

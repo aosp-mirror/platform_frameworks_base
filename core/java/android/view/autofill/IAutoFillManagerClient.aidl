@@ -18,6 +18,7 @@ package android.view.autofill;
 
 import java.util.List;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Rect;
@@ -43,13 +44,14 @@ oneway interface IAutoFillManagerClient {
     /**
       * Autofills the activity with the contents of a dataset.
       */
-    void autofill(int sessionId, in List<AutofillId> ids, in List<AutofillValue> values);
+    void autofill(int sessionId, in List<AutofillId> ids, in List<AutofillValue> values,
+            boolean hideHighlight);
 
     /**
       * Authenticates a fill response or a data set.
       */
     void authenticate(int sessionId, int authenticationId, in IntentSender intent,
-            in Intent fillInIntent);
+            in Intent fillInIntent, boolean authenticateInline);
 
     /**
       * Sets the views to track. If saveOnAllViewsInvisible is set and all these view are invisible
@@ -75,6 +77,18 @@ oneway interface IAutoFillManagerClient {
      * sessionFinishedState != 0).
      */
     void notifyNoFillUi(int sessionId, in AutofillId id, int sessionFinishedState);
+
+    /**
+     * Notifies that the fill UI was shown by the system (e.g. as inline chips in the keyboard).
+     */
+    void notifyFillUiShown(int sessionId, in AutofillId id);
+
+    /**
+     * Notifies that the fill UI previously shown by the system has been hidden by the system.
+     *
+     * @see #notifyFillUiShown
+     */
+    void notifyFillUiHidden(int sessionId, in AutofillId id);
 
     /**
      * Dispatches unhandled keyevent from autofill ui. Autofill ui handles DPAD and ENTER events,
@@ -111,4 +125,13 @@ oneway interface IAutoFillManagerClient {
     */
    void getAugmentedAutofillClient(in IResultReceiver result);
 
+   /**
+    * Notifies disables autofill for the app or activity.
+    */
+   void notifyDisableAutofill(long disableDuration, in ComponentName componentName);
+
+   /**
+    * Requests to show the soft input method if the focus is on the given id.
+    */
+   void requestShowSoftInput(in AutofillId id);
 }

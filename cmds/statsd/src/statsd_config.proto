@@ -35,7 +35,7 @@ enum Position {
 
 enum TimeUnit {
   TIME_UNIT_UNSPECIFIED = 0;
-  ONE_MINUTE = 1;
+  ONE_MINUTE = 1;  // WILL BE GUARDRAILED TO 5 MINS UNLESS UID = SHELL OR ROOT
   FIVE_MINUTES = 2;
   TEN_MINUTES = 3;
   THIRTY_MINUTES = 4;
@@ -44,6 +44,7 @@ enum TimeUnit {
   SIX_HOURS = 7;
   TWELVE_HOURS = 8;
   ONE_DAY = 9;
+  ONE_WEEK = 10;
   CTS = 1000;
 }
 
@@ -130,7 +131,7 @@ message SimplePredicate {
     UNKNOWN = 0;
     FALSE = 1;
   }
-  optional InitialValue initial_value = 5 [default = FALSE];
+  optional InitialValue initial_value = 5 [default = UNKNOWN];
 
   optional FieldMatcher dimensions = 6;
 }
@@ -150,12 +151,38 @@ message Predicate {
   }
 }
 
+message StateMap {
+  message StateGroup {
+    optional int64 group_id = 1;
+
+    repeated int32 value = 2;
+  }
+
+  repeated StateGroup group = 1;
+}
+
+message State {
+  optional int64 id = 1;
+
+  optional int32 atom_id = 2;
+
+  optional StateMap map = 3;
+}
+
 message MetricConditionLink {
   optional int64 condition = 1;
 
   optional FieldMatcher fields_in_what = 2;
 
   optional FieldMatcher fields_in_condition = 3;
+}
+
+message MetricStateLink {
+  optional int32 state_atom_id = 1;
+
+  optional FieldMatcher fields_in_what = 2;
+
+  optional FieldMatcher fields_in_state = 3;
 }
 
 message FieldFilter {
@@ -171,6 +198,9 @@ message EventMetric {
   optional int64 condition = 3;
 
   repeated MetricConditionLink links = 4;
+
+  reserved 100;
+  reserved 101;
 }
 
 message CountMetric {
@@ -182,11 +212,18 @@ message CountMetric {
 
   optional FieldMatcher dimensions_in_what = 4;
 
-  optional FieldMatcher dimensions_in_condition = 7;
+  repeated int64 slice_by_state = 8;
 
   optional TimeUnit bucket = 5;
 
   repeated MetricConditionLink links = 6;
+
+  repeated MetricStateLink state_link = 9;
+
+  optional FieldMatcher dimensions_in_condition = 7 [deprecated = true];
+
+  reserved 100;
+  reserved 101;
 }
 
 message DurationMetric {
@@ -196,7 +233,11 @@ message DurationMetric {
 
   optional int64 condition = 3;
 
+  repeated int64 slice_by_state = 9;
+
   repeated MetricConditionLink links = 4;
+
+  repeated MetricStateLink state_link = 10;
 
   enum AggregationType {
     SUM = 1;
@@ -207,9 +248,12 @@ message DurationMetric {
 
   optional FieldMatcher dimensions_in_what = 6;
 
-  optional FieldMatcher dimensions_in_condition = 8;
-
   optional TimeUnit bucket = 7;
+
+  optional FieldMatcher dimensions_in_condition = 8 [deprecated = true];
+
+  reserved 100;
+  reserved 101;
 }
 
 message GaugeMetric {
@@ -225,7 +269,7 @@ message GaugeMetric {
 
   optional FieldMatcher dimensions_in_what = 5;
 
-  optional FieldMatcher dimensions_in_condition = 8;
+  optional FieldMatcher dimensions_in_condition = 8 [deprecated = true];
 
   optional TimeUnit bucket = 6;
 
@@ -243,9 +287,12 @@ message GaugeMetric {
 
   optional int64 max_num_gauge_atoms_per_bucket = 11 [default = 10];
 
-  optional int32 max_pull_delay_sec = 13 [default = 10];
+  optional int32 max_pull_delay_sec = 13 [default = 30];
 
   optional bool split_bucket_for_app_upgrade = 14 [default = true];
+
+  reserved 100;
+  reserved 101;
 }
 
 message ValueMetric {
@@ -259,11 +306,13 @@ message ValueMetric {
 
   optional FieldMatcher dimensions_in_what = 5;
 
-  optional FieldMatcher dimensions_in_condition = 9;
+  repeated int64 slice_by_state = 18;
 
   optional TimeUnit bucket = 6;
 
   repeated MetricConditionLink links = 7;
+
+  repeated MetricStateLink state_link = 19;
 
   enum AggregationType {
     SUM = 1;
@@ -291,9 +340,14 @@ message ValueMetric {
 
   optional bool skip_zero_diff_output = 14 [default = true];
 
-  optional int32 max_pull_delay_sec = 16 [default = 10];
+  optional int32 max_pull_delay_sec = 16 [default = 30];
 
   optional bool split_bucket_for_app_upgrade = 17 [default = true];
+
+  optional FieldMatcher dimensions_in_condition = 9 [deprecated = true];
+
+  reserved 100;
+  reserved 101;
 }
 
 message Alert {
@@ -393,6 +447,12 @@ message MetricActivation {
   repeated EventActivation event_activation = 2;
 }
 
+message PullAtomPackages {
+    optional int32 atom_id = 1;
+
+    repeated string packages = 2;
+}
+
 message StatsdConfig {
   optional int64 id = 1;
 
@@ -437,6 +497,14 @@ message StatsdConfig {
   optional bool installer_in_metric_report = 19;
 
   optional bool persist_locally = 20 [default = false];
+
+  repeated State state = 21;
+
+  repeated string default_pull_packages = 22;
+
+  repeated PullAtomPackages pull_atom_packages = 23;
+
+  repeated int32 whitelisted_atom_ids = 24;
 
   // Field number 1000 is reserved for later use.
   reserved 1000;

@@ -39,4 +39,7 @@ interface ICompanionDeviceManager {
 
     boolean hasNotificationAccess(in ComponentName component);
     PendingIntent requestNotificationAccess(in ComponentName component);
+
+    boolean isDeviceAssociatedForWifiConnection(in String packageName, in String macAddress,
+        int userId);
 }

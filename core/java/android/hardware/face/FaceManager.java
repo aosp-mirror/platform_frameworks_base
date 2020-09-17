@@ -94,8 +94,10 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         }
 
         @Override // binder call
-        public void onAuthenticationSucceeded(long deviceId, Face face, int userId) {
-            mHandler.obtainMessage(MSG_AUTHENTICATION_SUCCEEDED, userId, 0, face).sendToTarget();
+        public void onAuthenticationSucceeded(long deviceId, Face face, int userId,
+                boolean isStrongBiometric) {
+            mHandler.obtainMessage(MSG_AUTHENTICATION_SUCCEEDED, userId, isStrongBiometric ? 1 : 0,
+                    face).sendToTarget();
         }
 
         @Override // binder call
@@ -504,8 +506,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     public boolean isHardwareDetected() {
         if (mService != null) {
             try {
-                long deviceId = 0; /* TODO: plumb hardware id to FPMS */
-                return mService.isHardwareDetected(deviceId, mContext.getOpPackageName());
+                return mService.isHardwareDetected(mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -513,25 +514,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             Log.w(TAG, "isFaceHardwareDetected(): Service not connected!");
         }
         return false;
-    }
-
-    /**
-     * Retrieves the authenticator token for binding keys to the lifecycle
-     * of the calling user's face. Used only by internal clients.
-     *
-     * @hide
-     */
-    public long getAuthenticatorId() {
-        if (mService != null) {
-            try {
-                return mService.getAuthenticatorId(mContext.getOpPackageName());
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        } else {
-            Log.w(TAG, "getAuthenticatorId(): Service not connected!");
-        }
-        return 0;
     }
 
     /**
@@ -630,6 +612,9 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 return context.getString(com.android.internal.R.string.face_error_not_enrolled);
             case FACE_ERROR_HW_NOT_PRESENT:
                 return context.getString(com.android.internal.R.string.face_error_hw_not_present);
+            case BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED:
+                return context.getString(
+                        com.android.internal.R.string.face_error_security_update_required);
             case FACE_ERROR_VENDOR: {
                 String[] msgArray = context.getResources().getStringArray(
                         com.android.internal.R.array.face_error_vendor);
@@ -742,6 +727,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         private Face mFace;
         private CryptoObject mCryptoObject;
         private int mUserId;
+        private boolean mIsStrongBiometric;
 
         /**
          * Authentication result
@@ -750,10 +736,12 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
          * @param face   the recognized face data, if allowed.
          * @hide
          */
-        public AuthenticationResult(CryptoObject crypto, Face face, int userId) {
+        public AuthenticationResult(CryptoObject crypto, Face face, int userId,
+                boolean isStrongBiometric) {
             mCryptoObject = crypto;
             mFace = face;
             mUserId = userId;
+            mIsStrongBiometric = isStrongBiometric;
         }
 
         /**
@@ -784,6 +772,16 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
          */
         public int getUserId() {
             return mUserId;
+        }
+
+        /**
+         * Check whether the strength of the face modality associated with this operation is strong
+         * (i.e. not weak or convenience).
+         *
+         * @hide
+         */
+        public boolean isStrongBiometric() {
+            return mIsStrongBiometric;
         }
     }
 
@@ -984,7 +982,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                             msg.arg2 /* vendorCode */);
                     break;
                 case MSG_AUTHENTICATION_SUCCEEDED:
-                    sendAuthenticatedSucceeded((Face) msg.obj, msg.arg1 /* userId */);
+                    sendAuthenticatedSucceeded((Face) msg.obj, msg.arg1 /* userId */,
+                            msg.arg2 == 1 /* isStrongBiometric */);
                     break;
                 case MSG_AUTHENTICATION_FAILED:
                     sendAuthenticatedFailed();
@@ -1061,10 +1060,10 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         }
     }
 
-    private void sendAuthenticatedSucceeded(Face face, int userId) {
+    private void sendAuthenticatedSucceeded(Face face, int userId, boolean isStrongBiometric) {
         if (mAuthenticationCallback != null) {
             final AuthenticationResult result =
-                    new AuthenticationResult(mCryptoObject, face, userId);
+                    new AuthenticationResult(mCryptoObject, face, userId, isStrongBiometric);
             mAuthenticationCallback.onAuthenticationSucceeded(result);
         }
     }

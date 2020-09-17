@@ -23,6 +23,7 @@ android_test {
         "androidx.test.rules",
         "services.core",
         "services.net",
+        "truth-prebuilt",
     ],
     libs: ["android.test.runner"],
     jni_libs: [

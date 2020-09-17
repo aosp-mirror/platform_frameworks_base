@@ -44,8 +44,6 @@ import android.app.AppOpsManager.PackageOps;
 import android.app.IActivityManager;
 import android.app.IUidObserver;
 import android.app.usage.UsageStatsManager;
-import android.app.usage.UsageStatsManagerInternal;
-import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -64,9 +62,14 @@ import android.test.mock.MockContentResolver;
 import android.util.ArraySet;
 import android.util.Pair;
 
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.server.AppStateTracker.Listener;
+import com.android.server.usage.AppStandbyInternal;
+import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -78,6 +81,7 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -85,14 +89,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
-
 /**
  * Tests for {@link AppStateTracker}
  *
- * Run with:
- atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/mockingservicestests/src/com/android/server/AppStateTrackerTest.java
+ * Run with: atest com.android.server.AppStateTrackerTest
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -129,8 +129,8 @@ public class AppStateTrackerTest {
         }
 
         @Override
-        UsageStatsManagerInternal injectUsageStatsManagerInternal() {
-            return mMockUsageStatsManagerInternal;
+        AppStandbyInternal injectAppStandbyInternal() {
+            return mMockAppStandbyInternal;
         }
 
         @Override
@@ -176,7 +176,7 @@ public class AppStateTrackerTest {
     private PowerManagerInternal mMockPowerManagerInternal;
 
     @Mock
-    private UsageStatsManagerInternal mMockUsageStatsManagerInternal;
+    private AppStandbyInternal mMockAppStandbyInternal;
 
     private MockContentResolver mMockContentResolver;
 
@@ -272,7 +272,7 @@ public class AppStateTrackerTest {
 
         verify(mMockContext).registerReceiver(
                 receiverCaptor.capture(), any(IntentFilter.class));
-        verify(mMockUsageStatsManagerInternal).addAppIdleStateChangeListener(
+        verify(mMockAppStandbyInternal).addListener(
                 appIdleStateChangeListenerCaptor.capture());
 
         mIUidObserver = uidObserverArgumentCaptor.getValue();
@@ -513,7 +513,8 @@ public class AppStateTrackerTest {
 
 
         mIUidObserver.onUidStateChanged(UID_2,
-                ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE, 0);
+                ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE, 0,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
 
         waitUntilMainHandlerDrain();
         assertTrue(instance.isUidActive(UID_1));
@@ -530,7 +531,8 @@ public class AppStateTrackerTest {
 
 
         mIUidObserver.onUidStateChanged(UID_1,
-                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
+                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
 
         waitUntilMainHandlerDrain();
         assertTrue(instance.isUidActive(UID_1));
@@ -564,7 +566,8 @@ public class AppStateTrackerTest {
         assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
 
         mIUidObserver.onUidStateChanged(UID_1,
-                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0);
+                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
 
         waitUntilMainHandlerDrain();
         assertFalse(instance.isUidActive(UID_1));
@@ -576,7 +579,8 @@ public class AppStateTrackerTest {
         assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
 
         mIUidObserver.onUidStateChanged(UID_1,
-                ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0);
+                ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
 
         waitUntilMainHandlerDrain();
         assertFalse(instance.isUidActive(UID_1));
@@ -685,10 +689,12 @@ public class AppStateTrackerTest {
         List<OpEntry> entries = new ArrayList<>();
         entries.add(new OpEntry(
                 AppOpsManager.OP_ACCESS_NOTIFICATIONS,
-                AppOpsManager.MODE_IGNORED));
+                AppOpsManager.MODE_IGNORED,
+                Collections.emptyMap()));
         entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
-                AppOpsManager.MODE_IGNORED));
+                AppOpsManager.MODE_IGNORED,
+                Collections.emptyMap()));
 
         ops.add(new PackageOps(PACKAGE_1, UID_1, entries));
 
@@ -696,7 +702,8 @@ public class AppStateTrackerTest {
         entries = new ArrayList<>();
         entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
-                AppOpsManager.MODE_IGNORED));
+                AppOpsManager.MODE_IGNORED,
+                Collections.emptyMap()));
 
         ops.add(new PackageOps(PACKAGE_2, UID_2, entries));
 
@@ -704,7 +711,8 @@ public class AppStateTrackerTest {
         entries = new ArrayList<>();
         entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
-                AppOpsManager.MODE_ALLOWED));
+                AppOpsManager.MODE_ALLOWED,
+                Collections.emptyMap()));
 
         ops.add(new PackageOps(PACKAGE_1, UID_10_1, entries));
 
@@ -712,10 +720,12 @@ public class AppStateTrackerTest {
         entries = new ArrayList<>();
         entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
-                AppOpsManager.MODE_IGNORED));
+                AppOpsManager.MODE_IGNORED,
+                Collections.emptyMap()));
         entries.add(new OpEntry(
                 AppOpsManager.OP_ACCESS_NOTIFICATIONS,
-                AppOpsManager.MODE_IGNORED));
+                AppOpsManager.MODE_IGNORED,
+                Collections.emptyMap()));
 
         ops.add(new PackageOps(PACKAGE_3, UID_10_3, entries));
 

@@ -28,7 +28,7 @@
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Vælg for at dele din fejlrapport uden et screenshot, eller vent på, at et screenshot er klar"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Tryk for at dele din fejlrapport uden et screenshot, eller vent på, at screenshott fuldføres"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Tryk for at dele din fejlrapport uden et screenshot, eller vent på, at screenshott fuldføres"</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"Fejlrapporter indeholder data fra systemets forskellige logfiler, som kan være data, du mener er følsomme, f.eks. appforbrug og placeringsdata. Del kun fejlrapporter med personer og apps, du har tillid til."</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Fejlrapporter indeholder data fra systemets forskellige logfiler, og der kan være følsomme data imellem (f.eks. appforbrug og placeringsdata). Del kun fejlrapporter med personer og apps, du har tillid til."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Vis ikke igen"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Fejlrapporter"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Fejlrapportfilen kunne ikke læses"</string>

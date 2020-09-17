@@ -23,6 +23,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.Slog;
@@ -33,6 +34,9 @@ import android.view.SurfaceControl.Transaction;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.function.Supplier;
 
 /**
  * A class that can run animations on objects that have a set of child surfaces. We do this by
@@ -45,8 +49,10 @@ import java.io.PrintWriter;
 class SurfaceAnimator {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "SurfaceAnimator" : TAG_WM;
+
     private final WindowManagerService mService;
     private AnimationAdapter mAnimation;
+    private @AnimationType int mAnimationType;
 
     @VisibleForTesting
     SurfaceControl mLeash;
@@ -54,28 +60,33 @@ class SurfaceAnimator {
     final Animatable mAnimatable;
     private final OnAnimationFinishedCallback mInnerAnimationFinishedCallback;
     @VisibleForTesting
-    final Runnable mAnimationFinishedCallback;
+    @Nullable
+    final OnAnimationFinishedCallback mStaticAnimationFinishedCallback;
+    @Nullable
+    private OnAnimationFinishedCallback mAnimationFinishedCallback;
     private boolean mAnimationStartDelayed;
 
     /**
      * @param animatable The object to animate.
-     * @param animationFinishedCallback Callback to invoke when an animation has finished running.
+     * @param staticAnimationFinishedCallback Callback to invoke when an animation has finished
+     *                                         running.
      */
-    SurfaceAnimator(Animatable animatable, @Nullable Runnable animationFinishedCallback,
+    SurfaceAnimator(Animatable animatable,
+            @Nullable OnAnimationFinishedCallback staticAnimationFinishedCallback,
             WindowManagerService service) {
         mAnimatable = animatable;
         mService = service;
-        mAnimationFinishedCallback = animationFinishedCallback;
-        mInnerAnimationFinishedCallback = getFinishedCallback(animationFinishedCallback);
+        mStaticAnimationFinishedCallback = staticAnimationFinishedCallback;
+        mInnerAnimationFinishedCallback = getFinishedCallback(staticAnimationFinishedCallback);
     }
 
     private OnAnimationFinishedCallback getFinishedCallback(
-            @Nullable Runnable animationFinishedCallback) {
-        return anim -> {
+            @Nullable OnAnimationFinishedCallback staticAnimationFinishedCallback) {
+        return (type, anim) -> {
             synchronized (mService.mGlobalLock) {
                 final SurfaceAnimator target = mService.mAnimationTransferMap.remove(anim);
                 if (target != null) {
-                    target.mInnerAnimationFinishedCallback.onAnimationFinished(anim);
+                    target.mInnerAnimationFinishedCallback.onAnimationFinished(type, anim);
                     return;
                 }
 
@@ -88,12 +99,20 @@ class SurfaceAnimator {
                     if (anim != mAnimation) {
                         return;
                     }
+                    final OnAnimationFinishedCallback animationFinishCallback =
+                            mAnimationFinishedCallback;
                     reset(mAnimatable.getPendingTransaction(), true /* destroyLeash */);
-                    if (animationFinishedCallback != null) {
-                        animationFinishedCallback.run();
+                    if (staticAnimationFinishedCallback != null) {
+                        staticAnimationFinishedCallback.onAnimationFinished(type, anim);
+                    }
+                    if (animationFinishCallback != null) {
+                        animationFinishCallback.onAnimationFinished(type, anim);
                     }
                 };
-                if (!mAnimatable.shouldDeferAnimationFinish(resetAndInvokeFinish)) {
+                // If both the Animatable and AnimationAdapter requests to be deferred, only the
+                // first one will be called.
+                if (!(mAnimatable.shouldDeferAnimationFinish(resetAndInvokeFinish)
+                        || anim.shouldDeferAnimationFinish(resetAndInvokeFinish))) {
                     resetAndInvokeFinish.run();
                 }
             }
@@ -110,24 +129,46 @@ class SurfaceAnimator {
      * @param hidden Whether the container holding the child surfaces is currently visible or not.
      *               This is important as it will start with the leash hidden or visible before
      *               handing it to the component that is responsible to run the animation.
+     * @param animationFinishedCallback The callback being triggered when the animation finishes.
      */
-    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden) {
+    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
+            @AnimationType int type,
+            @Nullable OnAnimationFinishedCallback animationFinishedCallback,
+            @Nullable SurfaceFreezer freezer) {
         cancelAnimation(t, true /* restarting */, true /* forwardCancel */);
         mAnimation = anim;
+        mAnimationType = type;
+        mAnimationFinishedCallback = animationFinishedCallback;
         final SurfaceControl surface = mAnimatable.getSurfaceControl();
         if (surface == null) {
             Slog.w(TAG, "Unable to start animation, surface is null or no children.");
             cancelAnimation();
             return;
         }
-        mLeash = createAnimationLeash(surface, t,
-                mAnimatable.getSurfaceWidth(), mAnimatable.getSurfaceHeight(), hidden);
-        mAnimatable.onAnimationLeashCreated(t, mLeash);
+        mLeash = freezer != null ? freezer.takeLeashForAnimation() : null;
+        if (mLeash == null) {
+            mLeash = createAnimationLeash(mAnimatable, surface, t, type,
+                    mAnimatable.getSurfaceWidth(), mAnimatable.getSurfaceHeight(), 0 /* x */,
+                    0 /* y */, hidden, mService.mTransactionFactory);
+            mAnimatable.onAnimationLeashCreated(t, mLeash);
+        }
+        mAnimatable.onLeashAnimationStarting(t, mLeash);
         if (mAnimationStartDelayed) {
             if (DEBUG_ANIM) Slog.i(TAG, "Animation start delayed");
             return;
         }
-        mAnimation.startAnimation(mLeash, t, mInnerAnimationFinishedCallback);
+        mAnimation.startAnimation(mLeash, t, type, mInnerAnimationFinishedCallback);
+    }
+
+    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
+            @AnimationType int type,
+            @Nullable OnAnimationFinishedCallback animationFinishedCallback) {
+        startAnimation(t, anim, hidden, type, animationFinishedCallback, null /* freezer */);
+    }
+
+    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
+            @AnimationType int type) {
+        startAnimation(t, anim, hidden, type, null /* animationFinishedCallback */);
     }
 
     /**
@@ -151,7 +192,7 @@ class SurfaceAnimator {
         mAnimationStartDelayed = false;
         if (delayed && mAnimation != null) {
             mAnimation.startAnimation(mLeash, mAnimatable.getPendingTransaction(),
-                    mInnerAnimationFinishedCallback);
+                    mAnimationType, mInnerAnimationFinishedCallback);
             mAnimatable.commitPendingTransaction();
         }
     }
@@ -162,6 +203,11 @@ class SurfaceAnimator {
      */
     boolean isAnimating() {
         return mAnimation != null;
+    }
+
+    @AnimationType
+    int getAnimationType() {
+        return mAnimationType;
     }
 
     /**
@@ -231,6 +277,8 @@ class SurfaceAnimator {
         cancelAnimation(t, true /* restarting */, true /* forwardCancel */);
         mLeash = from.mLeash;
         mAnimation = from.mAnimation;
+        mAnimationType = from.mAnimationType;
+        mAnimationFinishedCallback = from.mAnimationFinishedCallback;
 
         // Cancel source animation, but don't let animation runner cancel the animation.
         from.cancelAnimation(t, false /* restarting */, false /* forwardCancel */);
@@ -257,13 +305,20 @@ class SurfaceAnimator {
         if (DEBUG_ANIM) Slog.i(TAG, "Cancelling animation restarting=" + restarting);
         final SurfaceControl leash = mLeash;
         final AnimationAdapter animation = mAnimation;
+        final @AnimationType int animationType = mAnimationType;
+        final OnAnimationFinishedCallback animationFinishedCallback = mAnimationFinishedCallback;
         reset(t, false);
         if (animation != null) {
             if (!mAnimationStartDelayed && forwardCancel) {
                 animation.onAnimationCancelled(leash);
             }
             if (!restarting) {
-                mAnimationFinishedCallback.run();
+                if (mStaticAnimationFinishedCallback != null) {
+                    mStaticAnimationFinishedCallback.onAnimationFinished(animationType, animation);
+                }
+                if (animationFinishedCallback != null) {
+                    animationFinishedCallback.onAnimationFinished(animationType, animation);
+                }
             }
         }
 
@@ -278,15 +333,31 @@ class SurfaceAnimator {
     }
 
     private void reset(Transaction t, boolean destroyLeash) {
-        final SurfaceControl surface = mAnimatable.getSurfaceControl();
-        final SurfaceControl parent = mAnimatable.getParentSurfaceControl();
+        mService.mAnimationTransferMap.remove(mAnimation);
+        mAnimation = null;
+        mAnimationFinishedCallback = null;
+        mAnimationType = ANIMATION_TYPE_NONE;
+        if (mLeash == null) {
+            return;
+        }
+        SurfaceControl leash = mLeash;
+        mLeash = null;
+        final boolean scheduleAnim = removeLeash(t, mAnimatable, leash, destroyLeash);
+        if (scheduleAnim) {
+            mService.scheduleAnimationLocked();
+        }
+    }
 
+    static boolean removeLeash(Transaction t, Animatable animatable, @NonNull SurfaceControl leash,
+            boolean destroy) {
         boolean scheduleAnim = false;
+        final SurfaceControl surface = animatable.getSurfaceControl();
+        final SurfaceControl parent = animatable.getParentSurfaceControl();
 
         // If the surface was destroyed or the leash is invalid, we don't care to reparent it back.
         // Note that we also set this variable to true even if the parent isn't valid anymore, in
         // order to ensure onAnimationLeashLost still gets called in this case.
-        final boolean reparent = mLeash != null && surface != null;
+        final boolean reparent = surface != null;
         if (reparent) {
             if (DEBUG_ANIM) Slog.i(TAG, "Reparenting to original parent: " + parent);
             // We shouldn't really need these isValid checks but we do
@@ -296,37 +367,42 @@ class SurfaceAnimator {
                 scheduleAnim = true;
             }
         }
-        mService.mAnimationTransferMap.remove(mAnimation);
-        if (mLeash != null && destroyLeash) {
-            t.remove(mLeash);
+        if (destroy) {
+            t.remove(leash);
             scheduleAnim = true;
         }
-        mLeash = null;
-        mAnimation = null;
 
         if (reparent) {
             // Make sure to inform the animatable after the surface was reparented (or reparent
             // wasn't possible, but we still need to invoke the callback)
-            mAnimatable.onAnimationLeashLost(t);
+            animatable.onAnimationLeashLost(t);
             scheduleAnim = true;
         }
-
-        if (scheduleAnim) {
-            mService.scheduleAnimationLocked();
-        }
+        return scheduleAnim;
     }
 
-    private SurfaceControl createAnimationLeash(SurfaceControl surface, Transaction t, int width,
-            int height, boolean hidden) {
+    static SurfaceControl createAnimationLeash(Animatable animatable, SurfaceControl surface,
+            Transaction t, @AnimationType int type, int width, int height, int x, int y,
+            boolean hidden, Supplier<Transaction> transactionFactory) {
         if (DEBUG_ANIM) Slog.i(TAG, "Reparenting to leash");
-        final SurfaceControl.Builder builder = mAnimatable.makeAnimationLeash()
-                .setParent(mAnimatable.getAnimationLeashParent())
-                .setName(surface + " - animation-leash");
+        final SurfaceControl.Builder builder = animatable.makeAnimationLeash()
+                .setParent(animatable.getAnimationLeashParent())
+                .setName(surface + " - animation-leash")
+                // TODO(b/151665759) Defer reparent calls
+                // We want the leash to be visible immediately because the transaction which shows
+                // the leash may be deferred but the reparent will not. This will cause the leashed
+                // surface to be invisible until the deferred transaction is applied. If this
+                // doesn't work, you will can see the 2/3 button nav bar flicker during seamless
+                // rotation.
+                .setHidden(hidden)
+                .setEffectLayer()
+                .setCallsite("SurfaceAnimator.createAnimationLeash");
         final SurfaceControl leash = builder.build();
         t.setWindowCrop(leash, width, height);
+        t.setPosition(leash, x, y);
         t.show(leash);
-        // TODO: change this back to use show instead of alpha when b/138459974 is fixed.
         t.setAlpha(leash, hidden ? 0 : 1);
+
         t.reparent(surface, leash);
         return leash;
     }
@@ -339,13 +415,13 @@ class SurfaceAnimator {
      * @param fieldId Field Id of the SurfaceAnimator as defined in the parent message.
      * @hide
      */
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         if (mAnimation != null) {
-            mAnimation.writeToProto(proto, ANIMATION_ADAPTER);
+            mAnimation.dumpDebug(proto, ANIMATION_ADAPTER);
         }
         if (mLeash != null) {
-            mLeash.writeToProto(proto, LEASH);
+            mLeash.dumpDebug(proto, LEASH);
         }
         proto.write(ANIMATION_START_DELAYED, mAnimationStartDelayed);
         proto.end(token);
@@ -353,25 +429,93 @@ class SurfaceAnimator {
 
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mLeash="); pw.print(mLeash);
-        if (mAnimationStartDelayed) {
-            pw.print(" mAnimationStartDelayed="); pw.println(mAnimationStartDelayed);
-        } else {
-            pw.println();
-        }
-        pw.print(prefix); pw.println("Animation:");
+        pw.print(" mAnimationType=" + mAnimationType);
+        pw.println(mAnimationStartDelayed ? " mAnimationStartDelayed=true" : "");
+        pw.print(prefix); pw.print("Animation: "); pw.println(mAnimation);
         if (mAnimation != null) {
             mAnimation.dump(pw, prefix + "  ");
-        } else {
-            pw.print(prefix); pw.println("null");
         }
     }
+
+
+    /**
+     * No animation is specified.
+     * @hide
+     */
+    static final int ANIMATION_TYPE_NONE = 0;
+
+    /**
+     * Animation for an app transition.
+     * @hide
+     */
+    static final int ANIMATION_TYPE_APP_TRANSITION = 1;
+
+    /**
+     * Animation for screen rotation.
+     * @hide
+     */
+    static final int ANIMATION_TYPE_SCREEN_ROTATION = 1 << 1;
+
+    /**
+     * Animation for dimming.
+     * @hide
+     */
+    static final int ANIMATION_TYPE_DIMMER = 1 << 2;
+
+    /**
+     * Animation for recent apps.
+     * @hide
+     */
+    static final int ANIMATION_TYPE_RECENTS = 1 << 3;
+
+    /**
+     * Animation for a {@link WindowState} without animating the activity.
+     * @hide
+     */
+    static final int ANIMATION_TYPE_WINDOW_ANIMATION = 1 << 4;
+
+    /**
+     * Animation to control insets. This is actually not an animation, but is used to give the
+     * client a leash over the system window causing insets.
+     * @hide
+     */
+    static final int ANIMATION_TYPE_INSETS_CONTROL = 1 << 5;
+
+    /**
+     * Animation when a fixed rotation transform is applied to a window token.
+     * @hide
+     */
+    static final int ANIMATION_TYPE_FIXED_TRANSFORM = 1 << 6;
+
+    /**
+     * Bitmask to include all animation types. This is NOT an {@link AnimationType}
+     * @hide
+     */
+    static final int ANIMATION_TYPE_ALL = -1;
+
+    /**
+     * The type of the animation.
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "ANIMATION_TYPE_" }, value = {
+            ANIMATION_TYPE_NONE,
+            ANIMATION_TYPE_APP_TRANSITION,
+            ANIMATION_TYPE_SCREEN_ROTATION,
+            ANIMATION_TYPE_DIMMER,
+            ANIMATION_TYPE_RECENTS,
+            ANIMATION_TYPE_WINDOW_ANIMATION,
+            ANIMATION_TYPE_INSETS_CONTROL,
+            ANIMATION_TYPE_FIXED_TRANSFORM
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface AnimationType {}
 
     /**
      * Callback to be passed into {@link AnimationAdapter#startAnimation} to be invoked by the
      * component that is running the animation when the animation is finished.
      */
     interface OnAnimationFinishedCallback {
-        void onAnimationFinished(AnimationAdapter anim);
+        void onAnimationFinished(@AnimationType int type, AnimationAdapter anim);
     }
 
     /**
@@ -390,12 +534,21 @@ class SurfaceAnimator {
         void commitPendingTransaction();
 
         /**
-         * Called when the was created.
+         * Called when the animation leash is created. Note that this is also called by
+         * {@link SurfaceFreezer}, so this doesn't mean we're about to start animating.
          *
          * @param t The transaction to use to apply any necessary changes.
          * @param leash The leash that was created.
          */
         void onAnimationLeashCreated(Transaction t, SurfaceControl leash);
+
+        /**
+         * Called when the animator is about to start animating the leash.
+         *
+         * @param t The transaction to use to apply any necessary changes.
+         * @param leash The leash that was created.
+         */
+        default void onLeashAnimationStarting(Transaction t, SurfaceControl leash) { }
 
         /**
          * Called when the leash is being destroyed, or when the leash is being transferred to
@@ -442,6 +595,12 @@ class SurfaceAnimator {
          * Gets called when the animation is about to finish and gives the client the opportunity to
          * defer finishing the animation, i.e. it keeps the leash around until the client calls
          * {@link #cancelAnimation}.
+         * <p>
+         * {@link AnimationAdapter} has a similar method which is called only if this method returns
+         * false. This mean that if both this {@link Animatable} and the {@link AnimationAdapter}
+         * request to be deferred, this method is the sole responsible to call
+         * endDeferFinishCallback. On the other hand, the animation finish might still be deferred
+         * if this method return false and the one from the {@link AnimationAdapter} returns true.
          *
          * @param endDeferFinishCallback The callback to call when defer finishing should be ended.
          * @return Whether the client would like to defer the animation finish.

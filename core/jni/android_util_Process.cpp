@@ -28,7 +28,12 @@
 #include <meminfo/sysmeminfo.h>
 #include <processgroup/processgroup.h>
 #include <processgroup/sched_policy.h>
+#include <android-base/unique_fd.h>
 
+#include <algorithm>
+#include <array>
+#include <limits>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -45,21 +50,34 @@
 #include <pwd.h>
 #include <signal.h>
 #include <string.h>
+#include <sys/epoll.h>
 #include <sys/errno.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
+#include <sys/syscall.h>
 #include <sys/sysinfo.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 
 #define GUARD_THREAD_PRIORITY 0
 
 using namespace android;
 
-static const bool kDebugPolicy = false;
-static const bool kDebugProc = false;
-// When reading `proc` files, how many bytes to read at a time
-static const int kReadSize = 4096;
+static constexpr bool kDebugPolicy = false;
+static constexpr bool kDebugProc = false;
+
+// Stack reservation for reading small proc files.  Most callers of
+// readProcFile() are reading files under this threshold, e.g.,
+// /proc/pid/stat.  /proc/pid/time_in_state ends up being about 520
+// bytes, so use 1024 for the stack to provide a bit of slack.
+static constexpr ssize_t kProcReadStackBufferSize = 1024;
+
+// The other files we read from proc tend to be a bit larger (e.g.,
+// /proc/stat is about 3kB), so once we exhaust the stack buffer,
+// retry with a relatively large heap-allocated buffer.  We double
+// this size and retry until the whole file fits.
+static constexpr ssize_t kProcReadMinHeapBufferSize = 4096;
 
 #if GUARD_THREAD_PRIORITY
 Mutex gKeyCreateMutex;
@@ -176,11 +194,24 @@ jint android_os_Process_getGidForName(JNIEnv* env, jobject clazz, jstring name)
     return -1;
 }
 
+static bool verifyGroup(JNIEnv* env, int grp)
+{
+    if (grp < SP_DEFAULT || grp  >= SP_CNT) {
+        signalExceptionForError(env, EINVAL, grp);
+        return false;
+    }
+    return true;
+}
+
 void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int tid, jint grp)
 {
     ALOGV("%s tid=%d grp=%" PRId32, __func__, tid, grp);
-    SchedPolicy sp = (SchedPolicy) grp;
-    int res = set_sched_policy(tid, sp);
+    if (!verifyGroup(env, grp)) {
+        return;
+    }
+
+    int res = SetTaskProfiles(tid, {get_sched_policy_profile_name((SchedPolicy)grp)}, true) ? 0 : -1;
+
     if (res != NO_ERROR) {
         signalExceptionForGroupError(env, -res, tid);
     }
@@ -189,14 +220,12 @@ void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int tid, jint
 void android_os_Process_setThreadGroupAndCpuset(JNIEnv* env, jobject clazz, int tid, jint grp)
 {
     ALOGV("%s tid=%d grp=%" PRId32, __func__, tid, grp);
-    SchedPolicy sp = (SchedPolicy) grp;
-    int res = set_sched_policy(tid, sp);
-
-    if (res != NO_ERROR) {
-        signalExceptionForGroupError(env, -res, tid);
+    if (!verifyGroup(env, grp)) {
+        return;
     }
 
-    res = set_cpuset_policy(tid, sp);
+    int res = SetTaskProfiles(tid, {get_cpuset_policy_profile_name((SchedPolicy)grp)}, true) ? 0 : -1;
+
     if (res != NO_ERROR) {
         signalExceptionForGroupError(env, -res, tid);
     }
@@ -209,7 +238,11 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     char proc_path[255];
     struct dirent *de;
 
-    if ((grp == SP_FOREGROUND) || (grp > SP_MAX)) {
+    if (!verifyGroup(env, grp)) {
+        return;
+    }
+
+    if (grp == SP_FOREGROUND) {
         signalExceptionForGroupError(env, EINVAL, pid);
         return;
     }
@@ -219,7 +252,6 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         grp = SP_FOREGROUND;
         isDefault = true;
     }
-    SchedPolicy sp = (SchedPolicy) grp;
 
     if (kDebugPolicy) {
         char cmdline[32];
@@ -235,7 +267,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
             close(fd);
         }
 
-        if (sp == SP_BACKGROUND) {
+        if (grp == SP_BACKGROUND) {
             ALOGD("setProcessGroup: vvv pid %d (%s)", pid, cmdline);
         } else {
             ALOGD("setProcessGroup: ^^^ pid %d (%s)", pid, cmdline);
@@ -253,6 +285,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     while ((de = readdir(d))) {
         int t_pid;
         int t_pri;
+        int err;
 
         if (de->d_name[0] == '.')
             continue;
@@ -278,28 +311,16 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
             if (t_pri >= ANDROID_PRIORITY_BACKGROUND) {
                 // This task wants to stay at background
                 // update its cpuset so it doesn't only run on bg core(s)
-                if (cpusets_enabled()) {
-                    int err = set_cpuset_policy(t_pid, sp);
-                    if (err != NO_ERROR) {
-                        signalExceptionForGroupError(env, -err, t_pid);
-                        break;
-                    }
+                err = SetTaskProfiles(t_pid, {get_cpuset_policy_profile_name((SchedPolicy)grp)}, true) ? 0 : -1;
+                if (err != NO_ERROR) {
+                    signalExceptionForGroupError(env, -err, t_pid);
+                    break;
                 }
                 continue;
             }
         }
-        int err;
 
-        if (cpusets_enabled()) {
-            // set both cpuset and cgroup for general threads
-            err = set_cpuset_policy(t_pid, sp);
-            if (err != NO_ERROR) {
-                signalExceptionForGroupError(env, -err, t_pid);
-                break;
-            }
-        }
-
-        err = set_sched_policy(t_pid, sp);
+        err = SetTaskProfiles(t_pid, {get_cpuset_policy_profile_name((SchedPolicy)grp)}, true) ? 0 : -1;
         if (err != NO_ERROR) {
             signalExceptionForGroupError(env, -err, t_pid);
             break;
@@ -307,6 +328,38 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
 
     }
     closedir(d);
+}
+
+void android_os_Process_setProcessFrozen(
+        JNIEnv *env, jobject clazz, jint pid, jint uid, jboolean freeze)
+{
+    bool success = true;
+
+    if (freeze) {
+        success = SetProcessProfiles(uid, pid, {"Frozen"});
+    } else {
+        success = SetProcessProfiles(uid, pid, {"Unfrozen"});
+    }
+
+    if (!success) {
+        signalExceptionForGroupError(env, EINVAL, pid);
+    }
+}
+
+void android_os_Process_enableFreezer(
+        JNIEnv *env, jobject clazz, jboolean enable)
+{
+    bool success = true;
+
+    if (enable) {
+        success = SetTaskProfiles(0, {"FreezerFrozen"}, true);
+    } else {
+        success = SetTaskProfiles(0, {"FreezerThawed"}, true);
+    }
+
+    if (!success) {
+        jniThrowException(env, "java/lang/RuntimeException", "Unknown error");
+    }
 }
 
 jint android_os_Process_getProcessGroup(JNIEnv* env, jobject clazz, jint pid)
@@ -616,14 +669,16 @@ static int pid_compare(const void* v1, const void* v2)
 
 static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
 {
-    static const std::vector<std::string> memFreeTags = {
+    std::array<std::string_view, 2> memFreeTags = {
         ::android::meminfo::SysMemInfo::kMemFree,
         ::android::meminfo::SysMemInfo::kMemCached,
     };
     std::vector<uint64_t> mem(memFreeTags.size());
     ::android::meminfo::SysMemInfo smi;
 
-    if (!smi.ReadMemInfo(memFreeTags, &mem)) {
+    if (!smi.ReadMemInfo(memFreeTags.size(),
+                         memFreeTags.data(),
+                         mem.data())) {
         jniThrowRuntimeException(env, "SysMemInfo read failed to get Free Memory");
         return -1L;
     }
@@ -1010,9 +1065,9 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
         return JNI_FALSE;
     }
-    int fd = open(file8, O_RDONLY | O_CLOEXEC);
 
-    if (fd < 0) {
+    ::android::base::unique_fd fd(open(file8, O_RDONLY | O_CLOEXEC));
+    if (!fd.ok()) {
         if (kDebugProc) {
             ALOGW("Unable to open process file: %s\n", file8);
         }
@@ -1021,35 +1076,52 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
     }
     env->ReleaseStringUTFChars(file, file8);
 
-    std::vector<char> fileBuffer(kReadSize);
-    int numBytesRead = 0;
-    while (true) {
-        // Resize buffer to make space for contents. This might be more than we need, but once we've
-        // read we resize back down
-        fileBuffer.resize(numBytesRead + kReadSize, 0);
-        // Read in contents
-        int len = TEMP_FAILURE_RETRY(read(fd, fileBuffer.data() + numBytesRead, kReadSize));
-        numBytesRead += len;
-        if (len < 0) {
-            // If `len` is negative, an error occurred on read
+    // Most proc files we read are small, so we only go through the
+    // loop once and use the stack buffer.  We allocate a buffer big
+    // enough for the whole file.
+
+    char readBufferStack[kProcReadStackBufferSize];
+    std::unique_ptr<char[]> readBufferHeap;
+    char* readBuffer = &readBufferStack[0];
+    ssize_t readBufferSize = kProcReadStackBufferSize;
+    ssize_t numberBytesRead;
+    for (;;) {
+        // By using pread, we can avoid an lseek to rewind the FD
+        // before retry, saving a system call.
+        numberBytesRead = pread(fd, readBuffer, readBufferSize, 0);
+        if (numberBytesRead < 0 && errno == EINTR) {
+            continue;
+        }
+        if (numberBytesRead < 0) {
             if (kDebugProc) {
-                ALOGW("Unable to open process file: %s fd=%d\n", file8, fd);
+                ALOGW("Unable to open process file: %s fd=%d\n", file8, fd.get());
             }
-            close(fd);
             return JNI_FALSE;
-        } else if (len == 0) {
-            // If nothing read, we're done
+        }
+        if (numberBytesRead < readBufferSize) {
             break;
         }
+        if (readBufferSize > std::numeric_limits<ssize_t>::max() / 2) {
+            if (kDebugProc) {
+                ALOGW("Proc file too big: %s fd=%d\n", file8, fd.get());
+            }
+            return JNI_FALSE;
+        }
+        readBufferSize = std::max(readBufferSize * 2,
+                                  kProcReadMinHeapBufferSize);
+        readBufferHeap.reset();  // Free address space before getting more.
+        readBufferHeap = std::make_unique<char[]>(readBufferSize);
+        if (!readBufferHeap) {
+            jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+            return JNI_FALSE;
+        }
+        readBuffer = readBufferHeap.get();
     }
-    // Resize back down to the amount we read
-    fileBuffer.resize(numBytesRead);
-    // Terminate buffer with null byte
-    fileBuffer.push_back('\0');
-    close(fd);
 
-    return android_os_Process_parseProcLineArray(env, clazz, fileBuffer.data(), 0, numBytesRead,
-            format, outStrings, outLongs, outFloats);
+    // parseProcLineArray below modifies the buffer while parsing!
+    return android_os_Process_parseProcLineArray(
+        env, clazz, readBuffer, 0, numberBytesRead,
+        format, outStrings, outLongs, outFloats);
 }
 
 void android_os_Process_setApplicationObject(JNIEnv* env, jobject clazz,
@@ -1234,39 +1306,80 @@ void android_os_Process_removeAllProcessGroups(JNIEnv* env, jobject clazz)
     return removeAllProcessGroups();
 }
 
+static void throwErrnoException(JNIEnv* env, const char* functionName, int error) {
+    ScopedLocalRef<jstring> detailMessage(env, env->NewStringUTF(functionName));
+    if (detailMessage.get() == NULL) {
+        // Not really much we can do here. We're probably dead in the water,
+        // but let's try to stumble on...
+        env->ExceptionClear();
+    }
+    static jclass errnoExceptionClass =
+            MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/system/ErrnoException"));
+
+    static jmethodID errnoExceptionCtor =
+            GetMethodIDOrDie(env, errnoExceptionClass, "<init>", "(Ljava/lang/String;I)V");
+
+    jobject exception =
+            env->NewObject(errnoExceptionClass, errnoExceptionCtor, detailMessage.get(), error);
+    env->Throw(reinterpret_cast<jthrowable>(exception));
+}
+
+// Wrapper function to the syscall pidfd_open, which creates a file
+// descriptor that refers to the process whose PID is specified in pid.
+static inline int sys_pidfd_open(pid_t pid, unsigned int flags) {
+    return syscall(__NR_pidfd_open, pid, flags);
+}
+
+static jint android_os_Process_nativePidFdOpen(JNIEnv* env, jobject, jint pid, jint flags) {
+    int fd = sys_pidfd_open(pid, flags);
+    if (fd < 0) {
+        throwErrnoException(env, "nativePidFdOpen", errno);
+        return -1;
+    }
+    return fd;
+}
+
 static const JNINativeMethod methods[] = {
-    {"getUidForName",       "(Ljava/lang/String;)I", (void*)android_os_Process_getUidForName},
-    {"getGidForName",       "(Ljava/lang/String;)I", (void*)android_os_Process_getGidForName},
-    {"setThreadPriority",   "(II)V", (void*)android_os_Process_setThreadPriority},
-    {"setThreadScheduler",  "(III)V", (void*)android_os_Process_setThreadScheduler},
-    {"setCanSelfBackground", "(Z)V", (void*)android_os_Process_setCanSelfBackground},
-    {"setThreadPriority",   "(I)V", (void*)android_os_Process_setCallingThreadPriority},
-    {"getThreadPriority",   "(I)I", (void*)android_os_Process_getThreadPriority},
-    {"getThreadScheduler",   "(I)I", (void*)android_os_Process_getThreadScheduler},
-    {"setThreadGroup",      "(II)V", (void*)android_os_Process_setThreadGroup},
-    {"setThreadGroupAndCpuset", "(II)V", (void*)android_os_Process_setThreadGroupAndCpuset},
-    {"setProcessGroup",     "(II)V", (void*)android_os_Process_setProcessGroup},
-    {"getProcessGroup",     "(I)I", (void*)android_os_Process_getProcessGroup},
-    {"getExclusiveCores",   "()[I", (void*)android_os_Process_getExclusiveCores},
-    {"setSwappiness",   "(IZ)Z", (void*)android_os_Process_setSwappiness},
-    {"setArgV0",    "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
-    {"setUid", "(I)I", (void*)android_os_Process_setUid},
-    {"setGid", "(I)I", (void*)android_os_Process_setGid},
-    {"sendSignal", "(II)V", (void*)android_os_Process_sendSignal},
-    {"sendSignalQuiet", "(II)V", (void*)android_os_Process_sendSignalQuiet},
-    {"getFreeMemory", "()J", (void*)android_os_Process_getFreeMemory},
-    {"getTotalMemory", "()J", (void*)android_os_Process_getTotalMemory},
-    {"readProcLines", "(Ljava/lang/String;[Ljava/lang/String;[J)V", (void*)android_os_Process_readProcLines},
-    {"getPids", "(Ljava/lang/String;[I)[I", (void*)android_os_Process_getPids},
-    {"readProcFile", "(Ljava/lang/String;[I[Ljava/lang/String;[J[F)Z", (void*)android_os_Process_readProcFile},
-    {"parseProcLine", "([BII[I[Ljava/lang/String;[J[F)Z", (void*)android_os_Process_parseProcLine},
-    {"getElapsedCpuTime", "()J", (void*)android_os_Process_getElapsedCpuTime},
-    {"getPss", "(I)J", (void*)android_os_Process_getPss},
-    {"getRss", "(I)[J", (void*)android_os_Process_getRss},
-    {"getPidsForCommands", "([Ljava/lang/String;)[I", (void*)android_os_Process_getPidsForCommands},
-    //{"setApplicationObject", "(Landroid/os/IBinder;)V", (void*)android_os_Process_setApplicationObject},
-    {"killProcessGroup", "(II)I", (void*)android_os_Process_killProcessGroup},
-    {"removeAllProcessGroups", "()V", (void*)android_os_Process_removeAllProcessGroups},
+        {"getUidForName", "(Ljava/lang/String;)I", (void*)android_os_Process_getUidForName},
+        {"getGidForName", "(Ljava/lang/String;)I", (void*)android_os_Process_getGidForName},
+        {"setThreadPriority", "(II)V", (void*)android_os_Process_setThreadPriority},
+        {"setThreadScheduler", "(III)V", (void*)android_os_Process_setThreadScheduler},
+        {"setCanSelfBackground", "(Z)V", (void*)android_os_Process_setCanSelfBackground},
+        {"setThreadPriority", "(I)V", (void*)android_os_Process_setCallingThreadPriority},
+        {"getThreadPriority", "(I)I", (void*)android_os_Process_getThreadPriority},
+        {"getThreadScheduler", "(I)I", (void*)android_os_Process_getThreadScheduler},
+        {"setThreadGroup", "(II)V", (void*)android_os_Process_setThreadGroup},
+        {"setThreadGroupAndCpuset", "(II)V", (void*)android_os_Process_setThreadGroupAndCpuset},
+        {"setProcessGroup", "(II)V", (void*)android_os_Process_setProcessGroup},
+        {"getProcessGroup", "(I)I", (void*)android_os_Process_getProcessGroup},
+        {"getExclusiveCores", "()[I", (void*)android_os_Process_getExclusiveCores},
+        {"setSwappiness", "(IZ)Z", (void*)android_os_Process_setSwappiness},
+        {"setArgV0", "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
+        {"setUid", "(I)I", (void*)android_os_Process_setUid},
+        {"setGid", "(I)I", (void*)android_os_Process_setGid},
+        {"sendSignal", "(II)V", (void*)android_os_Process_sendSignal},
+        {"sendSignalQuiet", "(II)V", (void*)android_os_Process_sendSignalQuiet},
+        {"setProcessFrozen", "(IIZ)V", (void*)android_os_Process_setProcessFrozen},
+        {"enableFreezer", "(Z)V", (void*)android_os_Process_enableFreezer},
+        {"getFreeMemory", "()J", (void*)android_os_Process_getFreeMemory},
+        {"getTotalMemory", "()J", (void*)android_os_Process_getTotalMemory},
+        {"readProcLines", "(Ljava/lang/String;[Ljava/lang/String;[J)V",
+         (void*)android_os_Process_readProcLines},
+        {"getPids", "(Ljava/lang/String;[I)[I", (void*)android_os_Process_getPids},
+        {"readProcFile", "(Ljava/lang/String;[I[Ljava/lang/String;[J[F)Z",
+         (void*)android_os_Process_readProcFile},
+        {"parseProcLine", "([BII[I[Ljava/lang/String;[J[F)Z",
+         (void*)android_os_Process_parseProcLine},
+        {"getElapsedCpuTime", "()J", (void*)android_os_Process_getElapsedCpuTime},
+        {"getPss", "(I)J", (void*)android_os_Process_getPss},
+        {"getRss", "(I)[J", (void*)android_os_Process_getRss},
+        {"getPidsForCommands", "([Ljava/lang/String;)[I",
+         (void*)android_os_Process_getPidsForCommands},
+        //{"setApplicationObject", "(Landroid/os/IBinder;)V",
+        //(void*)android_os_Process_setApplicationObject},
+        {"killProcessGroup", "(II)I", (void*)android_os_Process_killProcessGroup},
+        {"removeAllProcessGroups", "()V", (void*)android_os_Process_removeAllProcessGroups},
+        {"nativePidFdOpen", "(II)I", (void*)android_os_Process_nativePidFdOpen},
 };
 
 int register_android_os_Process(JNIEnv* env)

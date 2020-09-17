@@ -1,0 +1,14 @@
+filegroup {
+    name: "services.wifi-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
+java_library_static {
+    name: "services.wifi",
+    defaults: ["services_defaults"],
+    srcs: [
+        ":services.wifi-sources",
+    ],
+}

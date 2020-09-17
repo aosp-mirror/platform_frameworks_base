@@ -20,7 +20,6 @@
 #include <memory>
 #include <ostream>
 #include <set>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -28,30 +27,33 @@
 #include "Commands.h"
 #include "android-base/properties.h"
 #include "idmap2/CommandLineOptions.h"
+#include "idmap2/CommandUtils.h"
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
+#include "idmap2/Policies.h"
+#include "idmap2/PolicyUtils.h"
 #include "idmap2/ResourceUtils.h"
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
-#include "idmap2/Xml.h"
-#include "idmap2/ZipFile.h"
+#include "idmap2/XmlParser.h"
 
 using android::idmap2::CommandLineOptions;
 using android::idmap2::Error;
 using android::idmap2::Idmap;
-using android::idmap2::kPolicyOdm;
-using android::idmap2::kPolicyOem;
-using android::idmap2::kPolicyProduct;
-using android::idmap2::kPolicyPublic;
-using android::idmap2::kPolicySystem;
-using android::idmap2::kPolicyVendor;
-using android::idmap2::PolicyBitmask;
-using android::idmap2::PolicyFlags;
 using android::idmap2::Result;
 using android::idmap2::Unit;
+using android::idmap2::policy::kPolicyOdm;
+using android::idmap2::policy::kPolicyOem;
+using android::idmap2::policy::kPolicyProduct;
+using android::idmap2::policy::kPolicyPublic;
+using android::idmap2::policy::kPolicySystem;
+using android::idmap2::policy::kPolicyVendor;
 using android::idmap2::utils::ExtractOverlayManifestInfo;
 using android::idmap2::utils::FindFiles;
 using android::idmap2::utils::OverlayManifestInfo;
+using android::idmap2::utils::PoliciesToBitmaskResult;
+
+using PolicyBitmask = android::ResTable_overlayable_policy_header::PolicyBitmask;
 
 namespace {
 
@@ -98,6 +100,7 @@ Result<std::unique_ptr<std::vector<std::string>>> FindApkFiles(const std::vector
 }
 
 std::vector<std::string> PoliciesForPath(const std::string& apk_path) {
+  // clang-format off
   static const std::vector<std::pair<std::string, std::string>> values = {
       {"/odm/", kPolicyOdm},
       {"/oem/", kPolicyOem},
@@ -106,6 +109,7 @@ std::vector<std::string> PoliciesForPath(const std::string& apk_path) {
       {"/system_ext/", kPolicySystem},
       {"/vendor/", kPolicyVendor},
   };
+  // clang-format on
 
   std::vector<std::string> fulfilled_policies = {kPolicyPublic};
   for (auto const& pair : values) {
@@ -178,11 +182,11 @@ Result<Unit> Scan(const std::vector<std::string>& args) {
 
     // Note that conditional property enablement/exclusion only applies if
     // the attribute is present. In its absence, all overlays are presumed enabled.
-    if (!overlay_info->requiredSystemPropertyName.empty()
-        && !overlay_info->requiredSystemPropertyValue.empty()) {
+    if (!overlay_info->requiredSystemPropertyName.empty() &&
+        !overlay_info->requiredSystemPropertyValue.empty()) {
       // if property set & equal to value, then include overlay - otherwise skip
-      if (android::base::GetProperty(overlay_info->requiredSystemPropertyName, "")
-          != overlay_info->requiredSystemPropertyValue) {
+      if (android::base::GetProperty(overlay_info->requiredSystemPropertyName, "") !=
+          overlay_info->requiredSystemPropertyValue) {
         continue;
       }
     }
@@ -215,7 +219,15 @@ Result<Unit> Scan(const std::vector<std::string>& args) {
 
   std::stringstream stream;
   for (const auto& overlay : interesting_apks) {
-    if (!Verify(std::vector<std::string>({"--idmap-path", overlay.idmap_path}))) {
+    const auto policy_bitmask = PoliciesToBitmaskResult(overlay.policies);
+    if (!policy_bitmask) {
+      LOG(WARNING) << "failed to create idmap for overlay apk path \"" << overlay.apk_path
+                   << "\": " << policy_bitmask.GetErrorMessage();
+      continue;
+    }
+
+    if (!Verify(overlay.idmap_path, target_apk_path, overlay.apk_path, *policy_bitmask,
+                !overlay.ignore_overlayable)) {
       std::vector<std::string> create_args = {"--target-apk-path",  target_apk_path,
                                               "--overlay-apk-path", overlay.apk_path,
                                               "--idmap-path",       overlay.idmap_path};

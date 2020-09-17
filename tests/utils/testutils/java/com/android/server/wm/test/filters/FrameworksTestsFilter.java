@@ -38,12 +38,18 @@ public final class FrameworksTestsFilter extends SelectTest {
             "android.app.activity.ActivityThreadClientTest",
             // Test specifications for FrameworksCoreTests.
             "android.app.servertransaction.", // all tests under the package.
+            "android.view.CutoutSpecificationTest",
             "android.view.DisplayCutoutTest",
             "android.view.InsetsAnimationControlImplTest",
             "android.view.InsetsControllerTest",
+            "android.view.InsetsFlagsTest",
             "android.view.InsetsSourceTest",
             "android.view.InsetsSourceConsumerTest",
             "android.view.InsetsStateTest",
+            "android.view.WindowMetricsTest",
+            "android.view.PendingInsetsControllerTest",
+            "android.app.WindowContextTest",
+            "android.window.WindowMetricsHelperTest"
     };
 
     public FrameworksTestsFilter(Bundle testArgs) {

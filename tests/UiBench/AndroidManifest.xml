@@ -306,5 +306,14 @@
                 <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="WindowInsetsControllerActivity"
+            android:label="WindowInsetsControllerActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.row.wrapper;
 
 import android.annotation.ColorInt;
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -24,9 +25,11 @@ import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.util.ArraySet;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +38,7 @@ import android.widget.TextView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.ContrastColorUtil;
+import com.android.internal.widget.ConversationLayout;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.notification.TransformState;
@@ -48,6 +52,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     protected final View mView;
     protected final ExpandableNotificationRow mRow;
+    private final Rect mTmpRect = new Rect();
 
     protected int mBackgroundColor = 0;
 
@@ -61,9 +66,12 @@ public abstract class NotificationViewWrapper implements TransformableView {
                 return new NotificationMediaTemplateViewWrapper(ctx, v, row);
             } else if ("messaging".equals(v.getTag())) {
                 return new NotificationMessagingTemplateViewWrapper(ctx, v, row);
+            } else if ("conversation".equals(v.getTag())) {
+                return new NotificationConversationTemplateViewWrapper(ctx, (ConversationLayout) v,
+                        row);
             }
             Class<? extends Notification.Style> style =
-                    row.getEntry().notification.getNotification().getNotificationStyle();
+                    row.getEntry().getSbn().getNotification().getNotificationStyle();
             if (Notification.DecoratedCustomViewStyle.class.equals(style)) {
                 return new NotificationDecoratedCustomViewWrapper(ctx, v, row);
             }
@@ -86,6 +94,14 @@ public abstract class NotificationViewWrapper implements TransformableView {
      * @param row the row this wrapper is attached to
      */
     public void onContentUpdated(ExpandableNotificationRow row) {
+    }
+
+    /**
+     * Show a set of app opp icons in the layout.
+     *
+     * @param appOps which app ops to show
+     */
+    public void showAppOpsIcons(ArraySet<Integer> appOps) {
     }
 
     public void onReinflated() {
@@ -224,6 +240,29 @@ public abstract class NotificationViewWrapper implements TransformableView {
         return null;
     }
 
+    /**
+     * @return the expand button if it exists
+     */
+    public @Nullable View getExpandButton() {
+        return null;
+    }
+
+    public int getOriginalIconColor() {
+        return Notification.COLOR_INVALID;
+    }
+
+    /**
+     * @return get the transformation target of the shelf, which usually is the icon
+     */
+    public @Nullable View getShelfTransformationTarget() {
+        return null;
+    }
+
+    /**
+     * Set the shelf icon to be visible and hide our own icons.
+     */
+    public void setShelfIconVisible(boolean shelfIconVisible) {}
+
     public int getHeaderTranslation(boolean forceNoHeader) {
         return 0;
     }
@@ -252,7 +291,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     @Override
     public void transformFrom(TransformableView notification, float transformationAmount) {
-        CrossFadeHelper.fadeIn(mView, transformationAmount);
+        CrossFadeHelper.fadeIn(mView, transformationAmount, true /* remap */);
     }
 
     @Override
@@ -301,6 +340,26 @@ public abstract class NotificationViewWrapper implements TransformableView {
         return false;
     }
 
+    /**
+     * Is a given x and y coordinate on a view.
+     *
+     * @param view the view to be checked
+     * @param x the x coordinate, relative to the ExpandableNotificationRow
+     * @param y the y coordinate, relative to the ExpandableNotificationRow
+     * @return {@code true} if it is on the view
+     */
+    protected boolean isOnView(View view, float x, float y) {
+        View searchView = (View) view.getParent();
+        while (searchView != null && !(searchView instanceof ExpandableNotificationRow)) {
+            searchView.getHitRect(mTmpRect);
+            x -= mTmpRect.left;
+            y -= mTmpRect.top;
+            searchView = (View) searchView.getParent();
+        }
+        view.getHitRect(mTmpRect);
+        return mTmpRect.contains((int) x,(int) y);
+    }
+
     public int getMinLayoutHeight() {
         return 0;
     }
@@ -318,5 +377,11 @@ public abstract class NotificationViewWrapper implements TransformableView {
      */
     public int getExtraMeasureHeight() {
         return 0;
+    }
+
+    /**
+     * Set the view to have recently visibly alerted.
+     */
+    public void setRecentlyAudiblyAlerted(boolean audiblyAlerted) {
     }
 }

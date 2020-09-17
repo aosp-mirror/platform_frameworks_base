@@ -58,7 +58,7 @@ public:
      * projection receiver then all projected children (excluding direct children) will be drawn
      * last. Any projected node not matching those requirements will not be drawn by this function.
      */
-    void forceDraw(SkCanvas* canvas);
+    void forceDraw(SkCanvas* canvas) const;
 
     /**
      * Returns readonly render properties for this render node.
@@ -113,7 +113,7 @@ private:
      * @param nestLevel should be always 0. Used to track how far we are from the receiver.
      */
     void drawBackwardsProjectedNodes(SkCanvas* canvas, const SkiaDisplayList& displayList,
-                                     int nestLevel = 0);
+                                     int nestLevel = 0) const;
 
     /**
      * Applies the rendering properties of a view onto a SkCanvas.

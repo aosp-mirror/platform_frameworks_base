@@ -29,8 +29,12 @@ import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.RuntimeShader;
 import android.os.Bundle;
 import android.view.View;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 @SuppressWarnings({"UnusedDeclaration"})
 public class ColorFiltersMutateActivity extends Activity {
@@ -47,11 +51,20 @@ public class ColorFiltersMutateActivity extends Activity {
         private final Paint mColorMatrixPaint;
         private final Paint mLightingPaint;
         private final Paint mBlendPaint;
+        private final Paint mShaderPaint;
 
         private float mSaturation = 0.0f;
         private int mLightAdd = 0;
         private int mLightMul = 0;
         private int mPorterDuffColor = 0;
+
+        static final String sSkSL =
+                "uniform float param1;\n"
+                + "void main(float x, float y, inout half4 color) {\n"
+                + "color = half4(color.r, half(param1), color.b, 1.0);\n"
+                + "}\n";
+
+        private byte[] mUniforms = new byte[4];
 
         BitmapsView(Context c) {
             super(c);
@@ -69,6 +82,10 @@ public class ColorFiltersMutateActivity extends Activity {
 
             mBlendPaint = new Paint();
             mBlendPaint.setColorFilter(new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_OVER));
+
+            mShaderPaint = new Paint();
+            mShaderPaint.setShader(new RuntimeShader(sSkSL, mUniforms, true));
+            setShaderParam1(0.0f);
 
             ObjectAnimator sat = ObjectAnimator.ofFloat(this, "saturation", 1.0f);
             sat.setDuration(1000);
@@ -96,6 +113,12 @@ public class ColorFiltersMutateActivity extends Activity {
             color.setRepeatCount(ObjectAnimator.INFINITE);
             color.setRepeatMode(ObjectAnimator.REVERSE);
             color.start();
+
+            ObjectAnimator shaderUniform = ObjectAnimator.ofFloat(this, "shaderParam1", 1.0f);
+            shaderUniform.setDuration(1000);
+            shaderUniform.setRepeatCount(ObjectAnimator.INFINITE);
+            shaderUniform.setRepeatMode(ObjectAnimator.REVERSE);
+            shaderUniform.start();
         }
 
         public int getPorterDuffColor() {
@@ -148,6 +171,23 @@ public class ColorFiltersMutateActivity extends Activity {
             return mSaturation;
         }
 
+        public void setShaderParam1(float value) {
+            RuntimeShader shader = (RuntimeShader) mShaderPaint.getShader();
+            ByteBuffer buffer = ByteBuffer.wrap(mUniforms);
+            buffer.order(ByteOrder.LITTLE_ENDIAN);
+            buffer.putFloat(value);
+            shader.updateUniforms(mUniforms);
+            invalidate();
+        }
+
+        // If either valueFrom or valueTo is null, then a getter function will also be derived
+        // and called by the animator class.
+        public float getShaderParam1() {
+            ByteBuffer buffer = ByteBuffer.wrap(mUniforms);
+            buffer.order(ByteOrder.LITTLE_ENDIAN);
+            return buffer.getFloat();
+        }
+
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
@@ -163,6 +203,10 @@ public class ColorFiltersMutateActivity extends Activity {
 
             canvas.translate(0.0f, 50.0f + mBitmap1.getHeight());
             canvas.drawBitmap(mBitmap1, 0.0f, 0.0f, mBlendPaint);
+
+            canvas.translate(0.0f, 50.0f + mBitmap1.getHeight());
+            canvas.drawRect(0.0f, 0.0f, mBitmap1.getWidth(), mBitmap1.getHeight(),
+                    mShaderPaint);
             canvas.restore();
 
             canvas.save();
@@ -174,6 +218,10 @@ public class ColorFiltersMutateActivity extends Activity {
 
             canvas.translate(0.0f, 50.0f + mBitmap2.getHeight());
             canvas.drawBitmap(mBitmap2, 0.0f, 0.0f, mBlendPaint);
+
+            canvas.translate(0.0f, 50.0f + mBitmap2.getHeight());
+            canvas.drawRoundRect(0.0f, 0.0f, mBitmap2.getWidth(), mBitmap2.getHeight(), 20, 20,
+                    mShaderPaint);
             canvas.restore();
         }
     }

@@ -16,24 +16,22 @@
 
 package android.hardware.camera2;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import static android.hardware.camera2.ICameraDeviceUser.NORMAL_MODE;
-import static android.hardware.camera2.ICameraDeviceUser.CONSTRAINED_HIGH_SPEED_MODE;
 import android.hardware.camera2.params.InputConfiguration;
-import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Handler;
 import android.view.Surface;
 
-import java.util.List;
-import java.util.Set;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
+import java.util.Set;
 
 /**
  * <p>The CameraDevice class is a representation of a single camera connected to an
@@ -164,6 +162,37 @@ public abstract class CameraDevice implements AutoCloseable {
           TEMPLATE_MANUAL})
      public @interface RequestTemplate {};
 
+     /**
+      * No vibration or sound muting for this camera device. This is the default
+      * mode for all camera devices.
+      *
+      * @see #setCameraAudioRestriction
+      */
+     public static final int AUDIO_RESTRICTION_NONE = 0;
+
+     /**
+      * Mute vibration from ringtones, alarms or notifications while this camera device is in use.
+      *
+      * @see #setCameraAudioRestriction
+      */
+     public static final int AUDIO_RESTRICTION_VIBRATION = 1;
+
+     /**
+      * Mute vibration and sound from ringtones, alarms or notifications while this camera device is
+      * in use.
+      *
+      * @see #setCameraAudioRestriction
+      */
+     public static final int AUDIO_RESTRICTION_VIBRATION_SOUND = 3;
+
+     /** @hide */
+     @Retention(RetentionPolicy.SOURCE)
+     @IntDef(prefix = {"AUDIO_RESTRICTION_"}, value =
+         {AUDIO_RESTRICTION_NONE,
+          AUDIO_RESTRICTION_VIBRATION,
+          AUDIO_RESTRICTION_VIBRATION_SOUND})
+     public @interface CAMERA_AUDIO_RESTRICTION {};
+
     /**
      * Get the ID of this camera device.
      *
@@ -189,6 +218,224 @@ public abstract class CameraDevice implements AutoCloseable {
      * <p>Create a new camera capture session by providing the target output set of Surfaces to the
      * camera device.</p>
      *
+     * @param outputs The new set of Surfaces that should be made available as
+     *                targets for captured image data.
+     * @param callback The callback to notify about the status of the new capture session.
+     * @param handler The handler on which the callback should be invoked, or {@code null} to use
+     *                the current thread's {@link android.os.Looper looper}.
+     *
+     * @throws IllegalArgumentException if the set of output Surfaces do not meet the requirements,
+     *                                  the callback is null, or the handler is null but the current
+     *                                  thread has no looper.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
+     *
+     * @see CameraCaptureSession
+     * @see StreamConfigurationMap#getOutputFormats()
+     * @see StreamConfigurationMap#getOutputSizes(int)
+     * @see StreamConfigurationMap#getOutputSizes(Class)
+     * @deprecated Please use @{link
+     *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
+     *      full set of configuration options available.
+     */
+    @Deprecated
+    public abstract void createCaptureSession(@NonNull List<Surface> outputs,
+            @NonNull CameraCaptureSession.StateCallback callback, @Nullable Handler handler)
+            throws CameraAccessException;
+
+    /**
+     * <p>Create a new camera capture session by providing the target output set of Surfaces and
+     * its corresponding surface configuration to the camera device.</p>
+     *
+     * @see #createCaptureSession
+     * @see OutputConfiguration
+     * @deprecated Please use @{link
+     *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
+     *      full set of configuration options available.
+     */
+    @Deprecated
+    public abstract void createCaptureSessionByOutputConfigurations(
+            List<OutputConfiguration> outputConfigurations,
+            CameraCaptureSession.StateCallback callback, @Nullable Handler handler)
+            throws CameraAccessException;
+    /**
+     * Create a new reprocessable camera capture session by providing the desired reprocessing
+     * input Surface configuration and the target output set of Surfaces to the camera device.
+     *
+     * @param inputConfig The configuration for the input {@link Surface}
+     * @param outputs The new set of Surfaces that should be made available as
+     *                targets for captured image data.
+     * @param callback The callback to notify about the status of the new capture session.
+     * @param handler The handler on which the callback should be invoked, or {@code null} to use
+     *                the current thread's {@link android.os.Looper looper}.
+     *
+     * @throws IllegalArgumentException if the input configuration is null or not supported, the set
+     *                                  of output Surfaces do not meet the requirements, the
+     *                                  callback is null, or the handler is null but the current
+     *                                  thread has no looper.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
+     *
+     * @see #createCaptureSession
+     * @see CameraCaptureSession
+     * @see StreamConfigurationMap#getInputFormats
+     * @see StreamConfigurationMap#getInputSizes
+     * @see StreamConfigurationMap#getValidOutputFormatsForInput
+     * @see StreamConfigurationMap#getOutputSizes
+     * @see android.media.ImageWriter
+     * @see android.media.ImageReader
+     * @deprecated Please use @{link
+     *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
+     *      full set of configuration options available.
+     */
+    @Deprecated
+    public abstract void createReprocessableCaptureSession(@NonNull InputConfiguration inputConfig,
+            @NonNull List<Surface> outputs, @NonNull CameraCaptureSession.StateCallback callback,
+            @Nullable Handler handler)
+            throws CameraAccessException;
+
+    /**
+     * Create a new reprocessable camera capture session by providing the desired reprocessing
+     * input configuration and output {@link OutputConfiguration}
+     * to the camera device.
+     *
+     * @see #createReprocessableCaptureSession
+     * @see OutputConfiguration
+     * @deprecated Please use @{link
+     *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
+     *      full set of configuration options available.
+     */
+    @Deprecated
+    public abstract void createReprocessableCaptureSessionByConfigurations(
+            @NonNull InputConfiguration inputConfig,
+            @NonNull List<OutputConfiguration> outputs,
+            @NonNull CameraCaptureSession.StateCallback callback,
+            @Nullable Handler handler)
+            throws CameraAccessException;
+
+    /**
+     * <p>Create a new constrained high speed capture session.</p>
+     *
+     * @param outputs The new set of Surfaces that should be made available as
+     *                targets for captured high speed image data.
+     * @param callback The callback to notify about the status of the new capture session.
+     * @param handler The handler on which the callback should be invoked, or {@code null} to use
+     *                the current thread's {@link android.os.Looper looper}.
+     *
+     * @throws IllegalArgumentException if the set of output Surfaces do not meet the requirements,
+     *                                  the callback is null, or the handler is null but the current
+     *                                  thread has no looper, or the camera device doesn't support
+     *                                  high speed video capability.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
+     *
+     * @see #createCaptureSession
+     * @see CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE
+     * @see StreamConfigurationMap#getHighSpeedVideoSizes
+     * @see StreamConfigurationMap#getHighSpeedVideoFpsRangesFor
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @see CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO
+     * @see CameraCaptureSession#captureBurst
+     * @see CameraCaptureSession#setRepeatingBurst
+     * @see CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList
+     * @deprecated Please use @{link
+     *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
+     *      full set of configuration options available.
+     */
+    @Deprecated
+    public abstract void createConstrainedHighSpeedCaptureSession(@NonNull List<Surface> outputs,
+            @NonNull CameraCaptureSession.StateCallback callback,
+            @Nullable Handler handler)
+            throws CameraAccessException;
+
+    /**
+     * Standard camera operation mode.
+     *
+     * @see #createCustomCaptureSession
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int SESSION_OPERATION_MODE_NORMAL =
+            0; // ICameraDeviceUser.NORMAL_MODE;
+
+    /**
+     * Constrained high-speed operation mode.
+     *
+     * @see #createCustomCaptureSession
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int SESSION_OPERATION_MODE_CONSTRAINED_HIGH_SPEED =
+            1; // ICameraDeviceUser.CONSTRAINED_HIGH_SPEED_MODE;
+
+    /**
+     * First vendor-specific operating mode
+     *
+     * @see #createCustomCaptureSession
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int SESSION_OPERATION_MODE_VENDOR_START =
+            0x8000; // ICameraDeviceUser.VENDOR_MODE_START;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"SESSION_OPERATION_MODE"}, value =
+            {SESSION_OPERATION_MODE_NORMAL,
+             SESSION_OPERATION_MODE_CONSTRAINED_HIGH_SPEED,
+             SESSION_OPERATION_MODE_VENDOR_START})
+    public @interface SessionOperatingMode {};
+
+    /**
+     * Create a new camera capture session with a custom operating mode.
+     *
+     * @param inputConfig The configuration for the input {@link Surface} if a reprocessing session
+     *                is desired, or {@code null} otherwise.
+     * @param outputs The new set of {@link OutputConfiguration OutputConfigurations} that should be
+     *                made available as targets for captured image data.
+     * @param operatingMode The custom operating mode to use; a nonnegative value, either a custom
+     *                vendor value or one of the SESSION_OPERATION_MODE_* values.
+     * @param callback The callback to notify about the status of the new capture session.
+     * @param handler The handler on which the callback should be invoked, or {@code null} to use
+     *                the current thread's {@link android.os.Looper looper}.
+     *
+     * @throws IllegalArgumentException if the input configuration is null or not supported, the set
+     *                                  of output Surfaces do not meet the requirements, the
+     *                                  callback is null, or the handler is null but the current
+     *                                  thread has no looper.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
+     *
+     * @see #createCaptureSession
+     * @see #createReprocessableCaptureSession
+     * @see CameraCaptureSession
+     * @see OutputConfiguration
+     * @deprecated Please use @{link
+     *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
+     *      full set of configuration options available.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @Deprecated
+    public abstract void createCustomCaptureSession(
+            InputConfiguration inputConfig,
+            @NonNull List<OutputConfiguration> outputs,
+            @SessionOperatingMode int operatingMode,
+            @NonNull CameraCaptureSession.StateCallback callback,
+            @Nullable Handler handler)
+            throws CameraAccessException;
+
+    /**
+     * <p>Create a new {@link CameraCaptureSession} using a {@link SessionConfiguration} helper
+     * object that aggregates all supported parameters.</p>
      * <p>The active capture session determines the set of potential output Surfaces for
      * the camera device for each capture request. A given request may use all
      * or only some of the outputs. Once the CameraCaptureSession is created, requests can be
@@ -277,11 +524,15 @@ public abstract class CameraDevice implements AutoCloseable {
      * <p>Configuring a session with an empty or null list will close the current session, if
      * any. This can be used to release the current session's target surfaces for another use.</p>
      *
+     * <h3>Regular capture</h3>
+     *
      * <p>While any of the sizes from {@link StreamConfigurationMap#getOutputSizes} can be used when
      * a single output stream is configured, a given camera device may not be able to support all
      * combination of sizes, formats, and targets when multiple outputs are configured at once.  The
      * tables below list the maximum guaranteed resolutions for combinations of streams and targets,
-     * given the capabilities of the camera device.</p>
+     * given the capabilities of the camera device. These are valid for when the
+     * {@link android.hardware.camera2.params.SessionConfiguration#setInputConfiguration
+     * input configuration} is not set and therefore no reprocessing is active.</p>
      *
      * <p>If an application tries to create a session using a set of targets that exceed the limits
      * described in the below tables, one of three possibilities may occur. First, the session may
@@ -429,11 +680,37 @@ public abstract class CameraDevice implements AutoCloseable {
      * </table><br>
      * </p>
      *
+     *<p>BACKWARD_COMPATIBLE devices capable of streaming concurrently with other devices as described by
+     * {@link android.hardware.camera2.CameraManager#getConcurrentCameraIds} have the
+     * following guaranteed streams (when streaming concurrently with other devices)</p>
+     *
+     * <table>
+     * <tr><th colspan="5">Concurrent stream guaranteed configurations</th></tr>
+     * <tr><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th rowspan="2">Sample use case(s)</th> </tr>
+     * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th> </tr>
+     * <tr> <td>{@code YUV}</td><td id="rb">{@code s1440p}</td>  <td colspan="2" id="rb"></td> <td>In-app video / image processing.</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code s1440p}</td>  <td colspan="2" id="rb"></td> <td>In-app viewfinder analysis.</td> </tr>
+     * <tr> <td>{@code JPEG}</td><td id="rb">{@code s1440p}</td>  <td colspan="2" id="rb"></td> <td>No viewfinder still image capture.</td> </tr>
+     * <tr> <td>{@code YUV / PRIV}</td><td id="rb">{@code s720p}</td> <td>{@code JPEG}</td><td id="rb">{@code s1440p}</td> <td> Standard still imaging.</td> </tr>
+     * <tr> <td>{@code YUV / PRIV}</td><td id="rb">{@code s720p}</td> <td>{@code YUV / PRIV }</td><td id="rb">{@code s1440p}</td> <td>In-app video / processing with preview.</td> </tr>
+     * </table><br>
+     * </p>
+     *
+     * <p> Devices which are not backwards-compatible, support a mandatory single stream of size sVGA with image format {@code DEPTH16} during concurrent operation.
+     *
+     * <p> For guaranteed concurrent stream configurations:</p>
+     * <p> sVGA refers to the camera device's maximum resolution for that format from {@link StreamConfigurationMap#getOutputSizes} or
+     * VGA resolution (640X480) whichever is lower. </p>
+     * <p> s720p refers to the camera device's maximum resolution for that format from {@link StreamConfigurationMap#getOutputSizes} or
+     * 720p(1280X720) whichever is lower. </p>
+     * <p> s1440p refers to the camera device's maximum resolution for that format from {@link StreamConfigurationMap#getOutputSizes} or
+     * 1440p(1920X1440) whichever is lower. </p>
      * <p>MONOCHROME-capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES}
      * includes {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME MONOCHROME}) devices
      * supporting {@link android.graphics.ImageFormat#Y8 Y8} support substituting {@code YUV}
      * streams with {@code Y8} in all guaranteed stream combinations for the device's hardware level
      * and capabilities.</p>
+     *
      *
      * <p>Devices capable of outputting HEIC formats ({@link StreamConfigurationMap#getOutputFormats}
      * contains {@link android.graphics.ImageFormat#HEIC}) will support substituting {@code JPEG}
@@ -457,56 +734,22 @@ public abstract class CameraDevice implements AutoCloseable {
      * (either width or height) might not be supported, and capture session creation will fail if it
      * is not.</p>
      *
-     * @param outputs The new set of Surfaces that should be made available as
-     *                targets for captured image data.
-     * @param callback The callback to notify about the status of the new capture session.
-     * @param handler The handler on which the callback should be invoked, or {@code null} to use
-     *                the current thread's {@link android.os.Looper looper}.
-     *
-     * @throws IllegalArgumentException if the set of output Surfaces do not meet the requirements,
-     *                                  the callback is null, or the handler is null but the current
-     *                                  thread has no looper.
-     * @throws CameraAccessException if the camera device is no longer connected or has
-     *                               encountered a fatal error
-     * @throws IllegalStateException if the camera device has been closed
-     *
-     * @see CameraCaptureSession
-     * @see StreamConfigurationMap#getOutputFormats()
-     * @see StreamConfigurationMap#getOutputSizes(int)
-     * @see StreamConfigurationMap#getOutputSizes(Class)
-     */
-    public abstract void createCaptureSession(@NonNull List<Surface> outputs,
-            @NonNull CameraCaptureSession.StateCallback callback, @Nullable Handler handler)
-            throws CameraAccessException;
-
-    /**
-     * <p>Create a new camera capture session by providing the target output set of Surfaces and
-     * its corresponding surface configuration to the camera device.</p>
-     *
-     * @see #createCaptureSession
-     * @see OutputConfiguration
-     */
-    public abstract void createCaptureSessionByOutputConfigurations(
-            List<OutputConfiguration> outputConfigurations,
-            CameraCaptureSession.StateCallback callback, @Nullable Handler handler)
-            throws CameraAccessException;
-    /**
-     * Create a new reprocessable camera capture session by providing the desired reprocessing
-     * input Surface configuration and the target output set of Surfaces to the camera device.
+     * <h3>Reprocessing</h3>
      *
      * <p>If a camera device supports YUV reprocessing
      * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING}) or PRIVATE
      * reprocessing
-     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_PRIVATE_REPROCESSING}), besides
-     * the capture session created via {@link #createCaptureSession createCaptureSession}, the
+     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_PRIVATE_REPROCESSING}), the
      * application can also create a reprocessable capture session to submit reprocess capture
-     * requests in addition to regular capture requests. A reprocess capture request takes the next
-     * available buffer from the session's input Surface, and sends it through the camera device's
-     * processing pipeline again, to produce buffers for the request's target output Surfaces. No
-     * new image data is captured for a reprocess request. However the input buffer provided by
-     * the application must be captured previously by the same camera device in the same session
-     * directly (e.g. for Zero-Shutter-Lag use case) or indirectly (e.g. combining multiple output
-     * images).</p>
+     * requests in addition to regular capture requests, by setting an
+     * {@link android.hardware.camera2.params.SessionConfiguration#setInputConfiguration
+     * input configuration} for the session. A reprocess capture request takes the next available
+     * buffer from the
+     * session's input Surface, and sends it through the camera device's processing pipeline again,
+     * to produce buffers for the request's target output Surfaces. No new image data is captured
+     * for a reprocess request. However the input buffer provided by the application must be
+     * captured previously by the same camera device in the same session directly (e.g. for
+     * Zero-Shutter-Lag use case) or indirectly (e.g. combining multiple output images).</p>
      *
      * <p>The active reprocessable capture session determines an input {@link Surface} and the set
      * of potential output Surfaces for the camera devices for each capture request. The application
@@ -536,10 +779,10 @@ public abstract class CameraDevice implements AutoCloseable {
      * match one of the supported input sizes for {@link android.graphics.ImageFormat#PRIVATE}
      * format. Otherwise, creating a reprocessable capture session will fail.</p>
      *
-     * <p>The guaranteed stream configurations listed in
-     * {@link #createCaptureSession createCaptureSession} are also guaranteed to work for
-     * {@link #createReprocessableCaptureSession createReprocessableCaptureSession}. In addition,
-     * the configurations in the tables below are also guaranteed for creating a reprocessable
+     * <p>Starting from API level 30, recreating a reprocessable capture session will flush all the
+     * queued but not yet processed buffers from the input surface.</p>
+     *
+     * <p>The configurations in the tables below are guaranteed for creating a reprocessable
      * capture session if the camera device supports YUV reprocessing or PRIVATE reprocessing.
      * However, not all output targets used to create a reprocessable session may be used in a
      * {@link CaptureRequest} simultaneously. For devices that support only 1 output target in a
@@ -568,7 +811,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * <p>LIMITED-level ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL}
      * {@code == }{@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED}) devices
      * support at least the following stream combinations for creating a reprocessable capture
-     * session in addition to those listed in {@link #createCaptureSession createCaptureSession} for
+     * session in addition to those listed earlier for regular captures for
      * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED} devices:
      *
      * <table>
@@ -637,74 +880,30 @@ public abstract class CameraDevice implements AutoCloseable {
      * </table><br>
      * </p>
      *
-     * <p>Clients can access the above mandatory stream combination tables via
-     * {@link android.hardware.camera2.params.MandatoryStreamCombination}.</p>
+     * <h3>Constrained high-speed recording</h3>
      *
-     * @param inputConfig The configuration for the input {@link Surface}
-     * @param outputs The new set of Surfaces that should be made available as
-     *                targets for captured image data.
-     * @param callback The callback to notify about the status of the new capture session.
-     * @param handler The handler on which the callback should be invoked, or {@code null} to use
-     *                the current thread's {@link android.os.Looper looper}.
-     *
-     * @throws IllegalArgumentException if the input configuration is null or not supported, the set
-     *                                  of output Surfaces do not meet the requirements, the
-     *                                  callback is null, or the handler is null but the current
-     *                                  thread has no looper.
-     * @throws CameraAccessException if the camera device is no longer connected or has
-     *                               encountered a fatal error
-     * @throws IllegalStateException if the camera device has been closed
-     *
-     * @see #createCaptureSession
-     * @see CameraCaptureSession
-     * @see StreamConfigurationMap#getInputFormats
-     * @see StreamConfigurationMap#getInputSizes
-     * @see StreamConfigurationMap#getValidOutputFormatsForInput
-     * @see StreamConfigurationMap#getOutputSizes
-     * @see android.media.ImageWriter
-     * @see android.media.ImageReader
-     */
-    public abstract void createReprocessableCaptureSession(@NonNull InputConfiguration inputConfig,
-            @NonNull List<Surface> outputs, @NonNull CameraCaptureSession.StateCallback callback,
-            @Nullable Handler handler)
-            throws CameraAccessException;
-
-    /**
-     * Create a new reprocessable camera capture session by providing the desired reprocessing
-     * input configuration and output {@link OutputConfiguration}
-     * to the camera device.
-     *
-     * @see #createReprocessableCaptureSession
-     * @see OutputConfiguration
-     *
-     */
-    public abstract void createReprocessableCaptureSessionByConfigurations(
-            @NonNull InputConfiguration inputConfig,
-            @NonNull List<OutputConfiguration> outputs,
-            @NonNull CameraCaptureSession.StateCallback callback,
-            @Nullable Handler handler)
-            throws CameraAccessException;
-
-    /**
-     * <p>Create a new constrained high speed capture session.</p>
-     *
-     * <p>The application can use normal capture session (created via {@link #createCaptureSession})
+     * <p>The application can use a
+     * {@link android.hardware.camera2.params.SessionConfiguration#SESSION_REGULAR
+     * normal capture session}
      * for high speed capture if the desired high speed FPS ranges are advertised by
      * {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES}, in which case all API
      * semantics associated with normal capture sessions applies.</p>
      *
-     * <p>The method creates a specialized capture session that is only targeted at high speed
-     * video recording (>=120fps) use case if the camera device supports high speed video
-     * capability (i.e., {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES} contains
-     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO}).
-     * Therefore, it has special characteristics compared with a normal capture session:</p>
+     * <p>A
+     * {@link android.hardware.camera2.params.SessionConfiguration#SESSION_HIGH_SPEED
+     * high-speed capture session}
+     * can be use for high speed video recording (>=120fps) when the camera device supports high
+     * speed video capability (i.e., {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES}
+     * contains {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO}).
+     * A constrained high-speed capture session has special limitations compared with a normal
+     * capture session:</p>
      *
      * <ul>
      *
-     * <li>In addition to the output target Surface requirements specified by the
-     *   {@link #createCaptureSession} method, an active high speed capture session will support up
-     *   to 2 output Surfaces, though the application might choose to configure just one Surface
-     *   (e.g., preview only). All Surfaces must be either video encoder surfaces (acquired by
+     * <li>In addition to the output target Surface requirements specified above for regular
+     *   captures, a high speed capture session will only support up to 2 output Surfaces, though
+     *   the application might choose to configure just one Surface (e.g., preview only). All
+     *   Surfaces must be either video encoder surfaces (acquired by
      *   {@link android.media.MediaRecorder#getSurface} or
      *   {@link android.media.MediaCodec#createInputSurface}) or preview surfaces (obtained from
      *   {@link android.view.SurfaceView}, {@link android.graphics.SurfaceTexture} via
@@ -740,116 +939,6 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * </ul>
      *
-     * @param outputs The new set of Surfaces that should be made available as
-     *                targets for captured high speed image data.
-     * @param callback The callback to notify about the status of the new capture session.
-     * @param handler The handler on which the callback should be invoked, or {@code null} to use
-     *                the current thread's {@link android.os.Looper looper}.
-     *
-     * @throws IllegalArgumentException if the set of output Surfaces do not meet the requirements,
-     *                                  the callback is null, or the handler is null but the current
-     *                                  thread has no looper, or the camera device doesn't support
-     *                                  high speed video capability.
-     * @throws CameraAccessException if the camera device is no longer connected or has
-     *                               encountered a fatal error
-     * @throws IllegalStateException if the camera device has been closed
-     *
-     * @see #createCaptureSession
-     * @see CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE
-     * @see StreamConfigurationMap#getHighSpeedVideoSizes
-     * @see StreamConfigurationMap#getHighSpeedVideoFpsRangesFor
-     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
-     * @see CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO
-     * @see CameraCaptureSession#captureBurst
-     * @see CameraCaptureSession#setRepeatingBurst
-     * @see CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList
-     */
-    public abstract void createConstrainedHighSpeedCaptureSession(@NonNull List<Surface> outputs,
-            @NonNull CameraCaptureSession.StateCallback callback,
-            @Nullable Handler handler)
-            throws CameraAccessException;
-
-    /**
-     * Standard camera operation mode.
-     *
-     * @see #createCustomCaptureSession
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    public static final int SESSION_OPERATION_MODE_NORMAL =
-            0; // ICameraDeviceUser.NORMAL_MODE;
-
-    /**
-     * Constrained high-speed operation mode.
-     *
-     * @see #createCustomCaptureSession
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    public static final int SESSION_OPERATION_MODE_CONSTRAINED_HIGH_SPEED =
-            1; // ICameraDeviceUser.CONSTRAINED_HIGH_SPEED_MODE;
-
-    /**
-     * First vendor-specific operating mode
-     *
-     * @see #createCustomCaptureSession
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    public static final int SESSION_OPERATION_MODE_VENDOR_START =
-            0x8000; // ICameraDeviceUser.VENDOR_MODE_START;
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"SESSION_OPERATION_MODE"}, value =
-            {SESSION_OPERATION_MODE_NORMAL,
-             SESSION_OPERATION_MODE_CONSTRAINED_HIGH_SPEED,
-             SESSION_OPERATION_MODE_VENDOR_START})
-    public @interface SessionOperatingMode {};
-
-    /**
-     * Create a new camera capture session with a custom operating mode.
-     *
-     * @param inputConfig The configuration for the input {@link Surface} if a reprocessing session
-     *                is desired, or {@code null} otherwise.
-     * @param outputs The new set of {@link OutputConfiguration OutputConfigurations} that should be
-     *                made available as targets for captured image data.
-     * @param operatingMode The custom operating mode to use; a nonnegative value, either a custom
-     *                vendor value or one of the SESSION_OPERATION_MODE_* values.
-     * @param callback The callback to notify about the status of the new capture session.
-     * @param handler The handler on which the callback should be invoked, or {@code null} to use
-     *                the current thread's {@link android.os.Looper looper}.
-     *
-     * @throws IllegalArgumentException if the input configuration is null or not supported, the set
-     *                                  of output Surfaces do not meet the requirements, the
-     *                                  callback is null, or the handler is null but the current
-     *                                  thread has no looper.
-     * @throws CameraAccessException if the camera device is no longer connected or has
-     *                               encountered a fatal error
-     * @throws IllegalStateException if the camera device has been closed
-     *
-     * @see #createCaptureSession
-     * @see #createReprocessableCaptureSession
-     * @see CameraCaptureSession
-     * @see OutputConfiguration
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    public abstract void createCustomCaptureSession(
-            InputConfiguration inputConfig,
-            @NonNull List<OutputConfiguration> outputs,
-            @SessionOperatingMode int operatingMode,
-            @NonNull CameraCaptureSession.StateCallback callback,
-            @Nullable Handler handler)
-            throws CameraAccessException;
-
-    /**
-     * <p>Create a new {@link CameraCaptureSession} using a {@link SessionConfiguration} helper
-     * object that aggregates all supported parameters.</p>
      *
      * @param config A session configuration (see {@link SessionConfiguration}).
      *
@@ -963,7 +1052,7 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * @see CaptureRequest.Builder
      * @see TotalCaptureResult
-     * @see CameraDevice#createReprocessableCaptureSession
+     * @see CameraDevice#createCaptureSession(android.hardware.camera2.params.SessionConfiguration)
      * @see android.media.ImageWriter
      */
     @NonNull
@@ -994,7 +1083,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * <p>This method performs a runtime check of a given {@link SessionConfiguration}. The result
      * confirms whether or not the passed session configuration can be successfully used to
      * create a camera capture session using
-     * {@link CameraDevice#createCaptureSession(SessionConfiguration)}.
+     * {@link CameraDevice#createCaptureSession(
+     * android.hardware.camera2.params.SessionConfiguration)}.
      * </p>
      *
      * <p>The method can be called at any point before, during and after active capture session.
@@ -1205,6 +1295,57 @@ public abstract class CameraDevice implements AutoCloseable {
          */
         public abstract void onError(@NonNull CameraDevice camera,
                 @ErrorCode int error); // Must implement
+    }
+
+    /**
+     * Set audio restriction mode when this CameraDevice is being used.
+     *
+     * <p>Some camera hardware (e.g. devices with optical image stabilization support)
+     * are sensitive to device vibration and video recordings can be ruined by unexpected sounds.
+     * Applications can use this method to suppress vibration or sounds coming from
+     * ringtones, alarms or notifications.
+     * Other vibration or sounds (e.g. media playback or accessibility) will not be muted.</p>
+     *
+     * <p>The mute mode is a system-wide setting. When multiple CameraDevice objects
+     * are setting different modes, the system will pick a the mode that's union of
+     * all modes set by CameraDevice. Applications can also use
+     * {@link #getCameraAudioRestriction} to query current system-wide camera
+     * mute mode in effect.</p>
+     *
+     * <p>The mute settings from this CameraDevice will be automatically removed when the
+     * CameraDevice is closed or the application is disconnected from the camera.</p>
+     *
+     * @param mode An enumeration selecting the audio restriction mode for this camera device.
+     *
+     * @throws IllegalArgumentException if the mode is not supported
+     *
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
+     *
+     * @see #getCameraAudioRestriction
+     */
+    public void setCameraAudioRestriction(
+            @CAMERA_AUDIO_RESTRICTION int mode) throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
+    }
+
+    /**
+     * Get currently applied global camera audio restriction mode.
+     *
+     * <p>Application can use this method to retrieve the system-wide camera audio restriction
+     * settings described in {@link #setCameraAudioRestriction}.</p>
+     *
+     * @return The current system-wide mute mode setting in effect
+     *
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
+     *
+     * @see #setCameraAudioRestriction
+     */
+    public @CAMERA_AUDIO_RESTRICTION int getCameraAudioRestriction() throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
     }
 
     /**

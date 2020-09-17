@@ -81,6 +81,14 @@ class Context : public IAaptContext {
     return min_sdk_version_;
   }
 
+  void SetMinSdkVersion(int min_sdk_version) {
+    min_sdk_version_ = min_sdk_version;
+  }
+
+ const std::set<std::string>& GetSplitNameDependencies() override {
+    return split_name_dependencies_;
+  }
+
  private:
   DISALLOW_COPY_AND_ASSIGN(Context);
 
@@ -93,6 +101,7 @@ class Context : public IAaptContext {
   NameMangler name_mangler_;
   SymbolTable symbols_;
   int min_sdk_version_;
+  std::set<std::string> split_name_dependencies_;
 };
 
 class ContextBuilder {
@@ -124,6 +133,11 @@ class ContextBuilder {
 
   ContextBuilder& SetMinSdkVersion(int min_sdk) {
     context_->min_sdk_version_ = min_sdk;
+    return *this;
+  }
+
+  ContextBuilder& SetSplitNameDependencies(const std::set<std::string>& split_name_dependencies) {
+    context_->split_name_dependencies_ = split_name_dependencies;
     return *this;
   }
 

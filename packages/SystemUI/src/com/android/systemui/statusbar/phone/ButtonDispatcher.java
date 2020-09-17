@@ -203,10 +203,16 @@ public class ButtonDispatcher {
             mFadeAnimator.addUpdateListener(mAlphaListener);
             mFadeAnimator.start();
         } else {
-            mAlpha = alpha;
-            final int N = mViews.size();
-            for (int i = 0; i < N; i++) {
-                mViews.get(i).setAlpha(alpha);
+            // Discretize the alpha updates to prevent too frequent updates when there is a long
+            // alpha animation
+            int prevAlpha = (int) (getAlpha() * 255);
+            int nextAlpha = (int) (alpha * 255);
+            if (prevAlpha != nextAlpha) {
+                mAlpha = nextAlpha / 255f;
+                final int N = mViews.size();
+                for (int i = 0; i < N; i++) {
+                    mViews.get(i).setAlpha(mAlpha);
+                }
             }
         }
     }

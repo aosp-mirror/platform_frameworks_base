@@ -1,0 +1,122 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package com.android.nfc;
+
+import "frameworks/base/core/proto/android/app/pendingintent.proto";
+import "frameworks/base/core/proto/android/content/intent.proto";
+import "frameworks/base/core/proto/android/nfc/card_emulation.proto";
+import "frameworks/base/core/proto/android/nfc/ndef.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
+
+option java_multiple_files = true;
+
+// Debugging information for com.android.nfc.NfcService
+message NfcServiceDumpProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    enum State {
+        STATE_UNKNOWN = 0;
+        STATE_OFF = 1;
+        STATE_TURNING_ON = 2;
+        STATE_ON = 3;
+        STATE_TURNING_OFF = 4;
+    }
+
+    enum ScreenState {
+        SCREEN_STATE_UNKNOWN = 0;
+        SCREEN_STATE_OFF_UNLOCKED = 1;
+        SCREEN_STATE_OFF_LOCKED = 2;
+        SCREEN_STATE_ON_LOCKED = 3;
+        SCREEN_STATE_ON_UNLOCKED = 4;
+    }
+
+    optional State state = 1;
+    optional bool in_provision_mode = 2;
+    optional bool ndef_push_enabled = 3;
+    optional ScreenState screen_state = 4;
+    optional bool secure_nfc_enabled = 5;
+    optional bool polling_paused = 6;
+    optional int32 num_tags_detected = 7;
+    optional int32 num_p2p_detected = 8;
+    optional int32 num_hce_detected = 9;
+    optional bool hce_capable = 10;
+    optional bool hce_f_capable = 11;
+    optional bool beam_capable = 12;
+    optional bool secure_nfc_capable = 13;
+    optional bool vr_mode_enabled = 14;
+    optional DiscoveryParamsProto discovery_params = 15;
+    optional P2pLinkManagerProto p2p_link_manager = 16;
+    optional com.android.nfc.cardemulation.CardEmulationManagerProto card_emulation_manager = 17;
+    optional NfcDispatcherProto nfc_dispatcher = 18;
+    optional string native_crash_logs = 19 [(.android.privacy).dest = DEST_EXPLICIT];
+}
+
+// Debugging information for com.android.nfc.NfcDiscoveryParameters
+message DiscoveryParamsProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 tech_mask = 1;
+    optional bool enable_lpd = 2;
+    optional bool enable_reader = 3;
+    optional bool enable_host_routing = 4;
+    optional bool enable_p2p = 5;
+}
+
+// Debugging information for com.android.nfc.P2pLinkManager
+message P2pLinkManagerProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    enum LinkState {
+        LINK_STATE_UNKNOWN = 0;
+        LINK_STATE_DOWN = 1;
+        LINK_STATE_DEBOUNCE = 2;
+        LINK_STATE_UP = 3;
+    }
+
+    enum SendState {
+        SEND_STATE_UNKNOWN = 0;
+        SEND_STATE_NOTHING_TO_SEND = 1;
+        SEND_STATE_NEED_CONFIRMATION = 2;
+        SEND_STATE_SENDING = 3;
+        SEND_STATE_COMPLETE = 4;
+        SEND_STATE_CANCELED = 5;
+    }
+
+    optional int32 default_miu = 1;
+    optional int32 default_rw_size = 2;
+    optional LinkState link_state = 3;
+    optional SendState send_state = 4;
+    optional int32 send_flags = 5;
+    optional bool send_enabled = 6;
+    optional bool receive_enabled = 7;
+    optional string callback_ndef = 8 [(.android.privacy).dest = DEST_EXPLICIT];
+    optional .android.nfc.NdefMessageProto message_to_send = 9;
+    repeated string uris_to_send = 10 [(.android.privacy).dest = DEST_EXPLICIT];
+}
+
+// Debugging information for com.android.nfc.NfcDispatcher
+message NfcDispatcherProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional bool device_supports_bluetooth = 1;
+    optional bool bluetooth_enabled_by_nfc = 2;
+    optional bool provisioning_only = 3;
+    optional .android.app.PendingIntentProto override_intent = 4;
+    repeated .android.content.IntentFilterProto override_filters = 5;
+    optional string override_tech_lists = 6;
+}

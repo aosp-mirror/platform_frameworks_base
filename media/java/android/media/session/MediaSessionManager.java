@@ -45,6 +45,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,6 +62,8 @@ import java.util.concurrent.Executor;
  * @see MediaSession
  * @see MediaController
  */
+// TODO: (jinpark) Add API for getting and setting session policies from MediaSessionService once
+//  b/149006225 is fixed.
 @SystemService(Context.MEDIA_SESSION_SERVICE)
 public final class MediaSessionManager {
     private static final String TAG = "SessionManager";
@@ -876,6 +879,68 @@ public final class MediaSessionManager {
     }
 
     /**
+     * Set the component name for the custom
+     * {@link com.android.server.media.MediaKeyDispatcher} class. Set to null to restore to the
+     * custom {@link com.android.server.media.MediaKeyDispatcher} class name retrieved from the
+     * config value.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public void setCustomMediaKeyDispatcherForTesting(@Nullable String name) {
+        try {
+            mService.setCustomMediaKeyDispatcherForTesting(name);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to set custom media key dispatcher name", e);
+        }
+    }
+
+    /**
+     * Set the component name for the custom
+     * {@link com.android.server.media.SessionPolicyProvider} class. Set to null to restore to the
+     * custom {@link com.android.server.media.SessionPolicyProvider} class name retrieved from the
+     * config value.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public void setCustomSessionPolicyProviderForTesting(@Nullable String name) {
+        try {
+            mService.setCustomSessionPolicyProviderForTesting(name);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to set custom session policy provider name", e);
+        }
+    }
+
+    /**
+     * Get session policies of the specified {@link MediaSession.Token}.
+     *
+     * @hide
+     */
+    @Nullable
+    public int getSessionPolicies(@NonNull MediaSession.Token token) {
+        try {
+            return mService.getSessionPolicies(token);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to get session policies", e);
+        }
+        return 0;
+    }
+
+    /**
+     * Set new session policies to the specified {@link MediaSession.Token}.
+     *
+     * @hide
+     */
+    public void setSessionPolicies(@NonNull MediaSession.Token token, @Nullable int policies) {
+        try {
+            mService.setSessionPolicies(token, policies);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to set session policies", e);
+        }
+    }
+
+    /**
      * Listens for changes to the list of active sessions. This can be added
      * using {@link #addOnActiveSessionsChangedListener}.
      */
@@ -932,7 +997,7 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Listener to receive when the media session service
+     * Listener to be called when the media session service dispatches a media key event.
      * @hide
      */
     @SystemApi
@@ -940,20 +1005,19 @@ public final class MediaSessionManager {
         /**
          * Called when a media key event is dispatched through the media session service. The
          * session token can be {@link null} if the framework has sent the media key event to the
-         * media button receiver to revive the media app's playback.
-         *
-         * the session is dead when , but the framework sent
+         * media button receiver to revive the media app's playback after the corresponding session
+         * is released.
          *
          * @param event Dispatched media key event.
-         * @param packageName Package
+         * @param packageName The package name
          * @param sessionToken The media session's token. Can be {@code null}.
          */
-        default void onMediaKeyEventDispatched(@NonNull KeyEvent event, @NonNull String packageName,
-                @NonNull MediaSession.Token sessionToken) { }
+        void onMediaKeyEventDispatched(@NonNull KeyEvent event, @NonNull String packageName,
+                @Nullable MediaSession.Token sessionToken);
     }
 
     /**
-     * Listener to receive changes in the media key event session, which would receive the media key
+     * Listener to receive changes in the media key event session, which would receive a media key
      * event unless specified.
      * @hide
      */
@@ -965,13 +1029,14 @@ public final class MediaSessionManager {
          * has specified the target.
          * <p>
          * The session token can be {@link null} if the media button session is unset. In that case,
-         * framework would dispatch to the last sessions's media button receiver.
+         * framework would dispatch to the last sessions's media button receiver. If the media
+         * button receive isn't set as well, then it
          *
          * @param packageName The package name who would receive the media key event. Can be empty.
-         * @param sessionToken The media session's token. Can be {@code null.}
+         * @param sessionToken The media session's token. Can be {@code null}.
          */
-        default void onMediaKeyEventSessionChanged(@NonNull String packageName,
-                @Nullable MediaSession.Token sessionToken) { }
+        void onMediaKeyEventSessionChanged(@NonNull String packageName,
+                @Nullable MediaSession.Token sessionToken);
     }
 
     /**

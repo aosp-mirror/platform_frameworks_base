@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="dock_alignment_slow_charging" product="default" msgid="6997633396534416792">"দ্রুত চার্জের জন্য ফোনটিকে সঠিকভাবে রাখুন"</string>
+    <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"ওয়্যারলেস চার্জ করতে ফোনটিকে সঠিকভাবে রাখুন"</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV ডিভাইস শীঘ্রই বন্ধ হয়ে যাবে, চালু রাখতে বোতাম প্রেস করুন।"</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"ডিভাইস শীঘ্রই বন্ধ হয়ে যাবে, চালু রাখতে প্রেস করুন।"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"ট্যাবলেটের মধ্যে কোনও সিম কার্ড নেই।"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"ফোনে কোনও সিম কার্ড নেই।"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"পিন কোডগুলি মিলছে না"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল পদ্ধতিতে ট্যাবলেট আনলক করার চেষ্টা করেছেন। আরও <xliff:g id="NUMBER_1">%2$d</xliff:g> বার এটি করলে ট্যাবলেটটি রিসেট করা হবে এবং তার ফলে সমস্ত ডেটা মুছে যাবে।"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল পদ্ধতিতে ফোন আনলক করার চেষ্টা করেছেন। আরও <xliff:g id="NUMBER_1">%2$d</xliff:g> বার এটি করলে ফোনটি রিসেট করা হবে এবং তার ফলে সমস্ত ডেটা মুছে যাবে।"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="8710104080409538587">"আপনি <xliff:g id="NUMBER">%d</xliff:g> বার ভুল পদ্ধতিতে ট্যাবলেট আনলক করার চেষ্টা করেছেন। এই ট্যাবলেটটি রিসেট করা হবে, যার ফলে এর সমস্ত ডেটা মুছে যাবে।"</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="6381835450014881813">"আপনি <xliff:g id="NUMBER">%d</xliff:g> বার ভুল পদ্ধতিতে ফোন আনলক করার চেষ্টা করেছেন। এই ফোনটিকে রিসেট করা হবে, যার ফলে এর সমস্ত ডেটা মুছে যাবে।"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="7325071812832605911">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল পদ্ধতিতে ট্যাবলেট আনলক করার চেষ্টা করেছেন। আরও <xliff:g id="NUMBER_1">%2$d</xliff:g> বার এটি করলে ব্যবহারকারীকে সরিয়ে দেওয়া হবে এবং তার ফলে ব্যবহারকারীর সমস্ত ডেটা মুছে যাবে।"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="8110939900089863103">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল পদ্ধতিতে ফোন আনলক করার চেষ্টা করেছেন। আরও <xliff:g id="NUMBER_1">%2$d</xliff:g> বার এটি করলে ব্যবহারকারীকে সরিয়ে দেওয়া হবে এবং তার ফলে ব্যবহারকারীর সমস্ত ডেটা মুছে যাবে।"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="8509811676952707883">"আপনি <xliff:g id="NUMBER">%d</xliff:g> বার ভুল পদ্ধতিতে ট্যাবলেট আনলক করার চেষ্টা করেছেন। এই ব্যবহারকারীকে সরিয়ে দেওয়া হবে, যার ফলে ব্যবহারকারীর সমস্ত ডেটা মুছে যাবে।"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3051962486994265014">"আপনি <xliff:g id="NUMBER">%d</xliff:g> বার ভুল পদ্ধতিতে ফোন আনলক করার চেষ্টা করেছেন। এই ব্যবহারকারীকে সরিয়ে দেওয়া হবে, যার ফলে ব্যবহারকারীর সমস্ত ডেটা মুছে যাবে।"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="1049523640263353830">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল পদ্ধতিতে ট্যাবলেটটি আনলক করার চেষ্টা করেছেন। আরও <xliff:g id="NUMBER_1">%2$d</xliff:g> বার এটি করলে অফিস প্রোফাইলটি সরিয়ে দেওয়া হবে এবং তার ফলে প্রোফাইলের সমস্ত ডেটা মুছে যাবে।"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="3280816298678433681">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল পদ্ধতিতে ফোন আনলক করার চেষ্টা করেছেন। আরও <xliff:g id="NUMBER_1">%2$d</xliff:g> বার এটি করলে অফিস প্রোফাইলটি সরিয়ে দেওয়া হবে এবং তার ফলে সমস্ত ডেটা মুছে যাবে।"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4417100487251371559">"আপনি <xliff:g id="NUMBER">%d</xliff:g> বার ভুল পদ্ধতিতে ট্যাবলেট আনলক করার চেষ্টা করেছেন। অফিস প্রোফাইলটি সরিয়ে দেওয়া হবে, যার ফলে প্রোফাইলের সমস্ত ডেটা মুছে যাবে।"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"আপনি <xliff:g id="NUMBER">%d</xliff:g> বার ভুল পদ্ধতিতে ফোন আনলক করার চেষ্টা করেছেন। অফিস প্রোফাইলটি সরিয়ে দেওয়া হবে, যার ফলে প্রোফাইলের সমস্ত ডেটা মুছে যাবে।"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল পদ্ধতিতে প্যাটার্ন আনলক করার চেষ্টা করেছেন। আরও <xliff:g id="NUMBER_1">%2$d</xliff:g> বার এটি করলে আপনাকে প্যাটার্ন আনলক করতে একটি ইমেল অ্যাকাউন্ট ব্যবহার করতে বলা হবে।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> সেকেন্ড পরে আবার চেষ্টা করুন।"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল পদ্ধতিতে প্যাটার্ন আনলক করার চেষ্টা করেছেন। আরও <xliff:g id="NUMBER_1">%2$d</xliff:g> বার এটি করলে আপনাকে প্যাটার্ন আনলক করতে একটি ইমেল অ্যাকাউন্ট ব্যবহারের করতে বলা হবে।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> সেকেন্ড পরে আবার চেষ্টা করুন।"</string>
+    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"আরও বিকল্প দেখতে আপনার ফোন আনলক করুন"</string>
+    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"আরও বিকল্প দেখতে আপনার ট্যাবলেট আনলক করুন"</string>
+    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"আরও বিকল্প দেখতে আপনার ডিভাইস আনলক করুন"</string>
+</resources>

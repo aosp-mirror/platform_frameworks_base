@@ -37,11 +37,13 @@ import java.util.List;
 
 /**
  * Used to sort resolved activities in {@link ResolverListController}.
+ *
+ * @hide
  */
 public abstract class AbstractResolverComparator implements Comparator<ResolvedComponentInfo> {
 
     private static final int NUM_OF_TOP_ANNOTATIONS_TO_USE = 3;
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final String TAG = "AbstractResolverComp";
 
     protected AfterCompute mAfterCompute;
@@ -52,8 +54,6 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
 
     // True if the current share is a link.
     private final boolean mHttp;
-    // can be null if mHttp == false or current user has no default browser package
-    private final String mDefaultBrowserPackageName;
 
     // message types
     static final int RANKER_SERVICE_RESULT = 0;
@@ -100,9 +100,6 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
         getContentAnnotations(intent);
         mPm = context.getPackageManager();
         mUsm = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
-        mDefaultBrowserPackageName = mHttp
-                ? mPm.getDefaultBrowserPackageNameAsUser(UserHandle.myUserId())
-                : null;
         mAzComparator = new AzInfoComparator(context);
     }
 
@@ -155,17 +152,6 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
         }
 
         if (mHttp) {
-            // Special case: we want filters that match URI paths/schemes to be
-            // ordered before others.  This is for the case when opening URIs,
-            // to make native apps go above browsers - except for 1 even more special case
-            // which is the default browser, as we want that to go above them all.
-            if (isDefaultBrowser(lhs)) {
-                return -1;
-            }
-
-            if (isDefaultBrowser(rhs)) {
-                return 1;
-            }
             final boolean lhsSpecific = ResolverActivity.isSpecificUriMatch(lhs.match);
             final boolean rhsSpecific = ResolverActivity.isSpecificUriMatch(rhs.match);
             if (lhsSpecific != rhsSpecific) {
@@ -219,6 +205,12 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
      */
     abstract float getScore(ComponentName name);
 
+    /**
+     * Returns the list of top K component names which have highest
+     * {@link #getScore(ComponentName)}
+     */
+    abstract List<ComponentName> getTopComponentNames(int topK);
+
     /** Handles result message sent to mHandler. */
     abstract void handleResultMessage(Message message);
 
@@ -261,20 +253,7 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
         mHandler.removeMessages(RANKER_SERVICE_RESULT);
         mHandler.removeMessages(RANKER_RESULT_TIMEOUT);
         afterCompute();
-    }
-
-    private boolean isDefaultBrowser(ResolveInfo ri) {
-        // It makes sense to prefer the default browser
-        // only if the targeted user is the current user
-        if (ri.targetUserId != UserHandle.USER_CURRENT) {
-            return false;
-        }
-
-        if (ri.activityInfo.packageName != null
-                    && ri.activityInfo.packageName.equals(mDefaultBrowserPackageName)) {
-            return true;
-        }
-        return false;
+        mAfterCompute = null;
     }
 
     /**

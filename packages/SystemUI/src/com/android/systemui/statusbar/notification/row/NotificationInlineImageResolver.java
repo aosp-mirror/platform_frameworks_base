@@ -19,12 +19,17 @@ package com.android.systemui.statusbar.notification.row;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
 
+import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ImageResolver;
 import com.android.internal.widget.LocalImageResolver;
 import com.android.internal.widget.MessagingMessage;
@@ -36,6 +41,10 @@ import java.util.Set;
 
 /**
  * Custom resolver with built-in image cache for image messages.
+ *
+ * If the URL points to a bitmap that's larger than the maximum width or height, the bitmap
+ * will be resized down to that maximum size before being cached. See {@link #getMaxImageWidth()},
+ * {@link #getMaxImageHeight()}, and {@link #resolveImage(Uri)} for the downscaling implementation.
  */
 public class NotificationInlineImageResolver implements ImageResolver {
     private static final String TAG = NotificationInlineImageResolver.class.getSimpleName();
@@ -43,6 +52,13 @@ public class NotificationInlineImageResolver implements ImageResolver {
     private final Context mContext;
     private final ImageCache mImageCache;
     private Set<Uri> mWantedUriSet;
+
+    // max allowed bitmap width, in pixels
+    @VisibleForTesting
+    protected int mMaxImageWidth;
+    // max allowed bitmap height, in pixels
+    @VisibleForTesting
+    protected int mMaxImageHeight;
 
     /**
      * Constructor.
@@ -56,6 +72,8 @@ public class NotificationInlineImageResolver implements ImageResolver {
         if (mImageCache != null) {
             mImageCache.setImageResolver(this);
         }
+
+        updateMaxImageSizes();
     }
 
     /**
@@ -66,21 +84,67 @@ public class NotificationInlineImageResolver implements ImageResolver {
         return mImageCache != null && !ActivityManager.isLowRamDeviceStatic();
     }
 
+    private boolean isLowRam() {
+        return ActivityManager.isLowRamDeviceStatic();
+    }
+
     /**
-     * To resolve image from specified uri directly.
+     * Update the maximum width and height allowed for bitmaps, ex. after a configuration change.
+     */
+    public void updateMaxImageSizes() {
+        mMaxImageWidth = getMaxImageWidth();
+        mMaxImageHeight = getMaxImageHeight();
+    }
+
+    @VisibleForTesting
+    protected int getMaxImageWidth() {
+        return mContext.getResources().getDimensionPixelSize(isLowRam()
+                ? R.dimen.notification_custom_view_max_image_width_low_ram
+                : R.dimen.notification_custom_view_max_image_width);
+    }
+
+    @VisibleForTesting
+    protected int getMaxImageHeight() {
+        return mContext.getResources().getDimensionPixelSize(isLowRam()
+                ? R.dimen.notification_custom_view_max_image_height_low_ram
+                : R.dimen.notification_custom_view_max_image_height);
+    }
+
+    @VisibleForTesting
+    protected BitmapDrawable resolveImageInternal(Uri uri) throws IOException {
+        return (BitmapDrawable) LocalImageResolver.resolveImage(uri, mContext);
+    }
+
+    /**
+     * To resolve image from specified uri directly. If the resulting image is larger than the
+     * maximum allowed size, scale it down.
      * @param uri Uri of the image.
      * @return Drawable of the image.
      * @throws IOException Throws if failed at resolving the image.
      */
     Drawable resolveImage(Uri uri) throws IOException {
-        return LocalImageResolver.resolveImage(uri, mContext);
+        BitmapDrawable image = resolveImageInternal(uri);
+        if (image == null || image.getBitmap() == null) {
+            throw new IOException("resolveImageInternal returned null for uri: " + uri);
+        }
+        Bitmap bitmap = image.getBitmap();
+        image.setBitmap(Icon.scaleDownIfNecessary(bitmap, mMaxImageWidth, mMaxImageHeight));
+        return image;
     }
 
     @Override
     public Drawable loadImage(Uri uri) {
         Drawable result = null;
         try {
-            result = hasCache() ? mImageCache.get(uri) : resolveImage(uri);
+            if (hasCache()) {
+                // if the uri isn't currently cached, try caching it first
+                if (!mImageCache.hasEntry(uri)) {
+                    mImageCache.preload((uri));
+                }
+                result = mImageCache.get(uri);
+            } else {
+                result = resolveImage(uri);
+            }
         } catch (IOException | SecurityException ex) {
             Log.d(TAG, "loadImage: Can't load image from " + uri, ex);
         }

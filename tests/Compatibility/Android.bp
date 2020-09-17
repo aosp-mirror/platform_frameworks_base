@@ -19,4 +19,7 @@ android_test {
     srcs: ["src/**/*.java"],
     platform_apis: true,
     certificate: "platform",
+    test_suites: [
+        "csuite"
+    ],
 }

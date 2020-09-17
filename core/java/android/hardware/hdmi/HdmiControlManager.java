@@ -16,6 +16,9 @@
 
 package android.hardware.hdmi;
 
+import static com.android.internal.os.RoSystemProperties.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH;
+
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -26,16 +29,21 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.RemoteException;
-import android.sysprop.HdmiProperties;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
+import com.android.internal.annotations.GuardedBy;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * The {@link HdmiControlManager} class is used to send HDMI control messages
@@ -50,6 +58,7 @@ import java.util.List;
  * @hide
  */
 @SystemApi
+@TestApi
 @SystemService(Context.HDMI_CONTROL_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_HDMI_CEC)
 public final class HdmiControlManager {
@@ -59,7 +68,31 @@ public final class HdmiControlManager {
 
     private static final int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
 
-    private int mPhysicalAddress = INVALID_PHYSICAL_ADDRESS;
+    /**
+     * A cache of the current device's physical address. When device's HDMI out port
+     * is not connected to any device, it is set to {@link #INVALID_PHYSICAL_ADDRESS}.
+     *
+     * <p>Otherwise it is updated by the {@link ClientHotplugEventListener} registered
+     * with {@link com.android.server.hdmi.HdmiControlService} by the
+     * {@link #addHotplugEventListener(HotplugEventListener)} and the address is from
+     * {@link com.android.server.hdmi.HdmiControlService#getPortInfo()}
+     */
+    @GuardedBy("mLock")
+    private int mLocalPhysicalAddress = INVALID_PHYSICAL_ADDRESS;
+
+    private void setLocalPhysicalAddress(int physicalAddress) {
+        synchronized (mLock) {
+            mLocalPhysicalAddress = physicalAddress;
+        }
+    }
+
+    private int getLocalPhysicalAddress() {
+        synchronized (mLock) {
+            return mLocalPhysicalAddress;
+        }
+    }
+
+    private final Object mLock = new Object();
 
     /**
      * Broadcast Action: Display OSD message.
@@ -108,6 +141,8 @@ public final class HdmiControlManager {
     public static final int POWER_STATUS_TRANSIENT_TO_ON = 2;
     public static final int POWER_STATUS_TRANSIENT_TO_STANDBY = 3;
 
+    /** @hide */
+    @SystemApi
     @IntDef ({
         RESULT_SUCCESS,
         RESULT_TIMEOUT,
@@ -314,7 +349,39 @@ public final class HdmiControlManager {
         mHasPlaybackDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_PLAYBACK);
         mHasAudioSystemDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         mHasSwitchDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH);
-        mIsSwitchDevice = HdmiProperties.is_switch().orElse(false);
+        mIsSwitchDevice = SystemProperties.getBoolean(
+            PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
+        addHotplugEventListener(new ClientHotplugEventListener());
+    }
+
+    private final class ClientHotplugEventListener implements HotplugEventListener {
+
+        @Override
+        public void onReceived(HdmiHotplugEvent event) {
+            List<HdmiPortInfo> ports = new ArrayList<>();
+            try {
+                ports = mService.getPortInfo();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            if (ports.isEmpty()) {
+                Log.e(TAG, "Can't find port info, not updating connected status. "
+                        + "Hotplug event:" + event);
+                return;
+            }
+            // If the HDMI OUT port is plugged or unplugged, update the mLocalPhysicalAddress
+            for (HdmiPortInfo port : ports) {
+                if (port.getId() == event.getPort()) {
+                    if (port.getType() == HdmiPortInfo.PORT_OUTPUT) {
+                        setLocalPhysicalAddress(
+                                event.isConnected()
+                                ? port.getAddress()
+                                : INVALID_PHYSICAL_ADDRESS);
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     private static boolean hasDeviceType(int[] types, int type) {
@@ -337,8 +404,11 @@ public final class HdmiControlManager {
      * See {@link HdmiDeviceInfo#DEVICE_PLAYBACK}
      * See {@link HdmiDeviceInfo#DEVICE_TV}
      * See {@link HdmiDeviceInfo#DEVICE_AUDIO_SYSTEM}
+     *
+     * @hide
      */
     @Nullable
+    @SystemApi
     @SuppressLint("Doclava125")
     public HdmiClient getClient(int type) {
         if (mService == null) {
@@ -367,8 +437,11 @@ public final class HdmiControlManager {
      * system if the system is configured to host more than one type of HDMI-CEC logical devices.
      *
      * @return {@link HdmiPlaybackClient} instance. {@code null} on failure.
+     *
+     * @hide
      */
     @Nullable
+    @SystemApi
     @SuppressLint("Doclava125")
     public HdmiPlaybackClient getPlaybackClient() {
         return (HdmiPlaybackClient) getClient(HdmiDeviceInfo.DEVICE_PLAYBACK);
@@ -382,8 +455,11 @@ public final class HdmiControlManager {
      * system if the system is configured to host more than one type of HDMI-CEC logical devices.
      *
      * @return {@link HdmiTvClient} instance. {@code null} on failure.
+     *
+     * @hide
      */
     @Nullable
+    @SystemApi
     @SuppressLint("Doclava125")
     public HdmiTvClient getTvClient() {
         return (HdmiTvClient) getClient(HdmiDeviceInfo.DEVICE_TV);
@@ -415,10 +491,8 @@ public final class HdmiControlManager {
      * system if the system is configured to host more than one type of HDMI-CEC logical device.
      *
      * @return {@link HdmiSwitchClient} instance. {@code null} on failure.
-     * @hide
      */
     @Nullable
-    @SystemApi
     @SuppressLint("Doclava125")
     public HdmiSwitchClient getSwitchClient() {
         return (HdmiSwitchClient) getClient(HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH);
@@ -472,7 +546,7 @@ public final class HdmiControlManager {
      */
     @SystemApi
     public void powerOffDevice(@NonNull HdmiDeviceInfo deviceInfo) {
-        Preconditions.checkNotNull(deviceInfo);
+        Objects.requireNonNull(deviceInfo);
         try {
             mService.powerOffRemoteDevice(
                     deviceInfo.getLogicalAddress(), deviceInfo.getDevicePowerStatus());
@@ -489,7 +563,7 @@ public final class HdmiControlManager {
     @Deprecated
     @SystemApi
     public void powerOffRemoteDevice(@NonNull HdmiDeviceInfo deviceInfo) {
-        Preconditions.checkNotNull(deviceInfo);
+        Objects.requireNonNull(deviceInfo);
         try {
             mService.powerOffRemoteDevice(
                     deviceInfo.getLogicalAddress(), deviceInfo.getDevicePowerStatus());
@@ -509,7 +583,7 @@ public final class HdmiControlManager {
      * @hide
      */
     public void powerOnDevice(HdmiDeviceInfo deviceInfo) {
-        Preconditions.checkNotNull(deviceInfo);
+        Objects.requireNonNull(deviceInfo);
         try {
             mService.powerOnRemoteDevice(
                     deviceInfo.getLogicalAddress(), deviceInfo.getDevicePowerStatus());
@@ -526,7 +600,7 @@ public final class HdmiControlManager {
     @Deprecated
     @SystemApi
     public void powerOnRemoteDevice(HdmiDeviceInfo deviceInfo) {
-        Preconditions.checkNotNull(deviceInfo);
+        Objects.requireNonNull(deviceInfo);
         try {
             mService.powerOnRemoteDevice(
                     deviceInfo.getLogicalAddress(), deviceInfo.getDevicePowerStatus());
@@ -550,7 +624,7 @@ public final class HdmiControlManager {
      */
     @SystemApi
     public void setActiveSource(@NonNull HdmiDeviceInfo deviceInfo) {
-        Preconditions.checkNotNull(deviceInfo);
+        Objects.requireNonNull(deviceInfo);
         try {
             mService.askRemoteDeviceToBecomeActiveSource(deviceInfo.getPhysicalAddress());
         } catch (RemoteException e) {
@@ -566,7 +640,7 @@ public final class HdmiControlManager {
     @Deprecated
     @SystemApi
     public void requestRemoteDeviceToBecomeActiveSource(@NonNull HdmiDeviceInfo deviceInfo) {
-        Preconditions.checkNotNull(deviceInfo);
+        Objects.requireNonNull(deviceInfo);
         try {
             mService.askRemoteDeviceToBecomeActiveSource(deviceInfo.getPhysicalAddress());
         } catch (RemoteException e) {
@@ -584,6 +658,68 @@ public final class HdmiControlManager {
     public void setStandbyMode(boolean isStandbyModeOn) {
         try {
             mService.setStandbyMode(isStandbyModeOn);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Controls whether volume control commands via HDMI CEC are enabled.
+     *
+     * <p>When disabled:
+     * <ul>
+     *     <li>the device will not send any HDMI CEC audio messages
+     *     <li>received HDMI CEC audio messages are responded to with {@code <Feature Abort>}
+     * </ul>
+     *
+     * <p>Effects on different device types:
+     * <table>
+     *     <tr><th>HDMI CEC device type</th><th>enabled</th><th>disabled</th></tr>
+     *     <tr>
+     *         <td>TV (type: 0)</td>
+     *         <td>Per CEC specification.</td>
+     *         <td>TV changes system volume. TV no longer reacts to incoming volume changes via
+     *         {@code <User Control Pressed>}. TV no longer handles {@code <Report Audio Status>}
+     *         .</td>
+     *     </tr>
+     *     <tr>
+     *         <td>Playback device (type: 4)</td>
+     *         <td>Device sends volume commands to TV/Audio system via {@code <User Control
+     *         Pressed>}</td><td>Device does not send volume commands via {@code <User Control
+     *         Pressed>}.</td>
+     *     </tr>
+     *     <tr>
+     *         <td>Audio device (type: 5)</td>
+     *         <td>Full "System Audio Control" capabilities.</td>
+     *         <td>Audio device no longer reacts to incoming {@code <User Control Pressed>}
+     *         volume commands. Audio device no longer reports volume changes via {@code <Report
+     *         Audio Status>}.</td>
+     *     </tr>
+     * </table>
+     *
+     * <p> Due to the resulting behavior, usage on TV and Audio devices is discouraged.
+     *
+     * @param isHdmiCecVolumeControlEnabled target state of HDMI CEC volume control.
+     * @see Settings.Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setHdmiCecVolumeControlEnabled(boolean isHdmiCecVolumeControlEnabled) {
+        try {
+            mService.setHdmiCecVolumeControlEnabled(isHdmiCecVolumeControlEnabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether volume changes via HDMI CEC are enabled.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public boolean isHdmiCecVolumeControlEnabled() {
+        try {
+            return mService.isHdmiCecVolumeControlEnabled();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -613,15 +749,7 @@ public final class HdmiControlManager {
      */
     @SystemApi
     public int getPhysicalAddress() {
-        if (mPhysicalAddress != INVALID_PHYSICAL_ADDRESS) {
-            return mPhysicalAddress;
-        }
-        try {
-            mPhysicalAddress = mService.getPhysicalAddress();
-            return mPhysicalAddress;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getLocalPhysicalAddress();
     }
 
     /**
@@ -637,16 +765,16 @@ public final class HdmiControlManager {
      */
     @SystemApi
     public boolean isDeviceConnected(@NonNull HdmiDeviceInfo targetDevice) {
-        Preconditions.checkNotNull(targetDevice);
-        mPhysicalAddress = getPhysicalAddress();
-        if (mPhysicalAddress == INVALID_PHYSICAL_ADDRESS) {
+        Objects.requireNonNull(targetDevice);
+        int physicalAddress = getLocalPhysicalAddress();
+        if (physicalAddress == INVALID_PHYSICAL_ADDRESS) {
             return false;
         }
         int targetPhysicalAddress = targetDevice.getPhysicalAddress();
         if (targetPhysicalAddress == INVALID_PHYSICAL_ADDRESS) {
             return false;
         }
-        return HdmiUtils.getLocalPortFromPhysicalAddress(targetPhysicalAddress, mPhysicalAddress)
+        return HdmiUtils.getLocalPortFromPhysicalAddress(targetPhysicalAddress, physicalAddress)
             != HdmiUtils.TARGET_NOT_UNDER_LOCAL_DEVICE;
     }
 
@@ -658,22 +786,25 @@ public final class HdmiControlManager {
     @Deprecated
     @SystemApi
     public boolean isRemoteDeviceConnected(@NonNull HdmiDeviceInfo targetDevice) {
-        Preconditions.checkNotNull(targetDevice);
-        mPhysicalAddress = getPhysicalAddress();
-        if (mPhysicalAddress == INVALID_PHYSICAL_ADDRESS) {
+        Objects.requireNonNull(targetDevice);
+        int physicalAddress = getLocalPhysicalAddress();
+        if (physicalAddress == INVALID_PHYSICAL_ADDRESS) {
             return false;
         }
         int targetPhysicalAddress = targetDevice.getPhysicalAddress();
         if (targetPhysicalAddress == INVALID_PHYSICAL_ADDRESS) {
             return false;
         }
-        return HdmiUtils.getLocalPortFromPhysicalAddress(targetPhysicalAddress, mPhysicalAddress)
+        return HdmiUtils.getLocalPortFromPhysicalAddress(targetPhysicalAddress, physicalAddress)
             != HdmiUtils.TARGET_NOT_UNDER_LOCAL_DEVICE;
     }
 
     /**
      * Listener used to get hotplug event from HDMI port.
+     *
+     * @hide
      */
+    @SystemApi
     public interface HotplugEventListener {
         void onReceived(HdmiHotplugEvent event);
     }
@@ -704,8 +835,29 @@ public final class HdmiControlManager {
             mHdmiControlStatusChangeListeners = new ArrayMap<>();
 
     /**
-     * Listener used to get vendor-specific commands.
+     * Listener used to get the status of the HDMI CEC volume control feature (enabled/disabled).
+     * @hide
      */
+    public interface HdmiCecVolumeControlFeatureListener {
+        /**
+         * Called when the HDMI Control (CEC) volume control feature is enabled/disabled.
+         *
+         * @param enabled status of HDMI CEC volume control feature
+         * @see {@link HdmiControlManager#setHdmiCecVolumeControlEnabled(boolean)} ()}
+         **/
+        void onHdmiCecVolumeControlFeature(boolean enabled);
+    }
+
+    private final ArrayMap<HdmiCecVolumeControlFeatureListener,
+            IHdmiCecVolumeControlFeatureListener>
+            mHdmiCecVolumeControlFeatureListeners = new ArrayMap<>();
+
+    /**
+     * Listener used to get vendor-specific commands.
+     *
+     * @hide
+     */
+    @SystemApi
     public interface VendorCommandListener {
         /**
          * Called when a vendor command is received.
@@ -744,7 +896,10 @@ public final class HdmiControlManager {
      *
      * @param listener {@link HotplugEventListener} instance
      * @see HdmiControlManager#removeHotplugEventListener(HotplugEventListener)
+     *
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void addHotplugEventListener(HotplugEventListener listener) {
         if (mService == null) {
@@ -768,7 +923,10 @@ public final class HdmiControlManager {
      * Removes a listener to stop getting informed of {@link HdmiHotplugEvent}.
      *
      * @param listener {@link HotplugEventListener} instance to be removed
+     *
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void removeHotplugEventListener(HotplugEventListener listener) {
         if (mService == null) {
@@ -865,4 +1023,76 @@ public final class HdmiControlManager {
         };
     }
 
+    /**
+     * Adds a listener to get informed of changes to the state of the HDMI CEC volume control
+     * feature.
+     *
+     * Upon adding a listener, the current state of the HDMI CEC volume control feature will be
+     * sent immediately.
+     *
+     * <p>To stop getting the notification,
+     * use {@link #removeHdmiCecVolumeControlFeatureListener(HdmiCecVolumeControlFeatureListener)}.
+     *
+     * @param listener {@link HdmiCecVolumeControlFeatureListener} instance
+     * @hide
+     * @see #removeHdmiCecVolumeControlFeatureListener(HdmiCecVolumeControlFeatureListener)
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void addHdmiCecVolumeControlFeatureListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull HdmiCecVolumeControlFeatureListener listener) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            return;
+        }
+        if (mHdmiCecVolumeControlFeatureListeners.containsKey(listener)) {
+            Log.e(TAG, "listener is already registered");
+            return;
+        }
+        IHdmiCecVolumeControlFeatureListener wrappedListener =
+                createHdmiCecVolumeControlFeatureListenerWrapper(executor, listener);
+        mHdmiCecVolumeControlFeatureListeners.put(listener, wrappedListener);
+        try {
+            mService.addHdmiCecVolumeControlFeatureListener(wrappedListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes a listener to stop getting informed of changes to the state of the HDMI CEC volume
+     * control feature.
+     *
+     * @param listener {@link HdmiCecVolumeControlFeatureListener} instance to be removed
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void removeHdmiCecVolumeControlFeatureListener(
+            HdmiCecVolumeControlFeatureListener listener) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            return;
+        }
+        IHdmiCecVolumeControlFeatureListener wrappedListener =
+                mHdmiCecVolumeControlFeatureListeners.remove(listener);
+        if (wrappedListener == null) {
+            Log.e(TAG, "tried to remove not-registered listener");
+            return;
+        }
+        try {
+            mService.removeHdmiCecVolumeControlFeatureListener(wrappedListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private IHdmiCecVolumeControlFeatureListener createHdmiCecVolumeControlFeatureListenerWrapper(
+            Executor executor, final HdmiCecVolumeControlFeatureListener listener) {
+        return new android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener.Stub() {
+            @Override
+            public void onHdmiCecVolumeControlFeature(boolean enabled) {
+                Binder.clearCallingIdentity();
+                executor.execute(() -> listener.onHdmiCecVolumeControlFeature(enabled));
+            }
+        };
+    }
 }

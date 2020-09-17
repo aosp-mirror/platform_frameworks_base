@@ -105,7 +105,7 @@ public class TimeControllerTest {
         JobSchedulerService.sSystemClock =
                 Clock.fixed(Clock.systemUTC().instant(), ZoneOffset.UTC);
         JobSchedulerService.sUptimeMillisClock =
-                Clock.fixed(SystemClock.uptimeMillisClock().instant(), ZoneOffset.UTC);
+                Clock.fixed(SystemClock.uptimeClock().instant(), ZoneOffset.UTC);
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(SystemClock.elapsedRealtimeClock().instant(), ZoneOffset.UTC);
 
@@ -159,18 +159,7 @@ public class TimeControllerTest {
     }
 
     @Test
-    public void testMaybeStartTrackingJobLocked_DelayInOrder_NoSkipping() {
-        mConstants.SKIP_NOT_READY_JOBS = false;
-        mTimeController.onConstantsUpdatedLocked();
-
-        runTestMaybeStartTrackingJobLocked_DelayInOrder();
-    }
-
-    @Test
-    public void testMaybeStartTrackingJobLocked_DelayInOrder_WithSkipping_AllReady() {
-        mConstants.SKIP_NOT_READY_JOBS = true;
-        mTimeController.onConstantsUpdatedLocked();
-
+    public void testMaybeStartTrackingJobLocked_DelayInOrder_AllReady() {
         doReturn(true).when(mTimeController).wouldBeReadyWithConstraintLocked(any(), anyInt());
 
         runTestMaybeStartTrackingJobLocked_DelayInOrder();
@@ -201,9 +190,7 @@ public class TimeControllerTest {
     }
 
     @Test
-    public void testMaybeStartTrackingJobLocked_DelayInOrder_WithSkipping_SomeNotReady() {
-        mConstants.SKIP_NOT_READY_JOBS = true;
-        mTimeController.onConstantsUpdatedLocked();
+    public void testMaybeStartTrackingJobLocked_DelayInOrder_SomeNotReady() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 
         JobStatus jobLatest = createJobStatus("testMaybeStartTrackingJobLocked_DelayInOrder",
@@ -235,18 +222,7 @@ public class TimeControllerTest {
     }
 
     @Test
-    public void testMaybeStartTrackingJobLocked_DelayReverseOrder_NoSkipping() {
-        mConstants.SKIP_NOT_READY_JOBS = false;
-        mTimeController.onConstantsUpdatedLocked();
-
-        runTestMaybeStartTrackingJobLocked_DelayReverseOrder();
-    }
-
-    @Test
-    public void testMaybeStartTrackingJobLocked_DelayReverseOrder_WithSkipping_AllReady() {
-        mConstants.SKIP_NOT_READY_JOBS = true;
-        mTimeController.onConstantsUpdatedLocked();
-
+    public void testMaybeStartTrackingJobLocked_DelayReverseOrder_AllReady() {
         doReturn(true).when(mTimeController).wouldBeReadyWithConstraintLocked(any(), anyInt());
 
         runTestMaybeStartTrackingJobLocked_DelayReverseOrder();
@@ -279,9 +255,7 @@ public class TimeControllerTest {
     }
 
     @Test
-    public void testMaybeStartTrackingJobLocked_DelayReverseOrder_WithSkipping_SomeNotReady() {
-        mConstants.SKIP_NOT_READY_JOBS = true;
-        mTimeController.onConstantsUpdatedLocked();
+    public void testMaybeStartTrackingJobLocked_DelayReverseOrder_SomeNotReady() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 
         JobStatus jobLatest = createJobStatus("testMaybeStartTrackingJobLocked_DelayReverseOrder",
@@ -315,18 +289,7 @@ public class TimeControllerTest {
     }
 
     @Test
-    public void testMaybeStartTrackingJobLocked_DeadlineInOrder_NoSkipping() {
-        mConstants.SKIP_NOT_READY_JOBS = false;
-        mTimeController.onConstantsUpdatedLocked();
-
-        runTestMaybeStartTrackingJobLocked_DeadlineInOrder();
-    }
-
-    @Test
-    public void testMaybeStartTrackingJobLocked_DeadlineInOrder_WithSkipping_AllReady() {
-        mConstants.SKIP_NOT_READY_JOBS = true;
-        mTimeController.onConstantsUpdatedLocked();
-
+    public void testMaybeStartTrackingJobLocked_DeadlineInOrder_AllReady() {
         doReturn(true).when(mTimeController).wouldBeReadyWithConstraintLocked(any(), anyInt());
 
         runTestMaybeStartTrackingJobLocked_DeadlineInOrder();
@@ -357,9 +320,7 @@ public class TimeControllerTest {
     }
 
     @Test
-    public void testMaybeStartTrackingJobLocked_DeadlineInOrder_WithSkipping_SomeNotReady() {
-        mConstants.SKIP_NOT_READY_JOBS = true;
-        mTimeController.onConstantsUpdatedLocked();
+    public void testMaybeStartTrackingJobLocked_DeadlineInOrder_SomeNotReady() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 
         JobStatus jobLatest = createJobStatus("testMaybeStartTrackingJobLocked_DeadlineInOrder",
@@ -391,18 +352,7 @@ public class TimeControllerTest {
     }
 
     @Test
-    public void testMaybeStartTrackingJobLocked_DeadlineReverseOrder_NoSkipping() {
-        mConstants.SKIP_NOT_READY_JOBS = false;
-        mTimeController.onConstantsUpdatedLocked();
-
-        runTestMaybeStartTrackingJobLocked_DeadlineReverseOrder();
-    }
-
-    @Test
-    public void testMaybeStartTrackingJobLocked_DeadlineReverseOrder_WithSkipping_AllReady() {
-        mConstants.SKIP_NOT_READY_JOBS = true;
-        mTimeController.onConstantsUpdatedLocked();
-
+    public void testMaybeStartTrackingJobLocked_DeadlineReverseOrder_AllReady() {
         doReturn(true).when(mTimeController).wouldBeReadyWithConstraintLocked(any(), anyInt());
 
         runTestMaybeStartTrackingJobLocked_DeadlineReverseOrder();
@@ -438,9 +388,7 @@ public class TimeControllerTest {
     }
 
     @Test
-    public void testMaybeStartTrackingJobLocked_DeadlineReverseOrder_WithSkipping_SomeNotReady() {
-        mConstants.SKIP_NOT_READY_JOBS = true;
-        mTimeController.onConstantsUpdatedLocked();
+    public void testMaybeStartTrackingJobLocked_DeadlineReverseOrder_SomeNotReady() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 
         JobStatus jobLatest = createJobStatus(
@@ -478,102 +426,7 @@ public class TimeControllerTest {
     }
 
     @Test
-    public void testJobSkipToggling() {
-        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
-
-        JobStatus jobLatest = createJobStatus(
-                "testMaybeStartTrackingJobLocked_DeadlineReverseOrder",
-                createJob().setOverrideDeadline(HOUR_IN_MILLIS));
-        JobStatus jobEarliest = createJobStatus(
-                "testMaybeStartTrackingJobLocked_DeadlineReverseOrder",
-                createJob().setOverrideDeadline(5 * MINUTE_IN_MILLIS));
-
-        doReturn(true).when(mTimeController)
-                .wouldBeReadyWithConstraintLocked(eq(jobLatest), anyInt());
-        doReturn(false).when(mTimeController)
-                .wouldBeReadyWithConstraintLocked(eq(jobEarliest), anyInt());
-
-        // Starting off with the skipping off, we should still set an alarm for the earlier job.
-        mConstants.SKIP_NOT_READY_JOBS = false;
-        mTimeController.recheckAlarmsLocked();
-        InOrder inOrder = inOrder(mAlarmManager);
-
-        mTimeController.maybeStartTrackingJobLocked(jobEarliest, null);
-        mTimeController.maybeStartTrackingJobLocked(jobLatest, null);
-        inOrder.verify(mAlarmManager, times(1))
-                .set(anyInt(), eq(now + 5 * MINUTE_IN_MILLIS), anyLong(), anyLong(),
-                        eq(TAG_DEADLINE), any(), any(), any());
-
-        // Turn it on, use alarm for later job.
-        mConstants.SKIP_NOT_READY_JOBS = true;
-        mTimeController.recheckAlarmsLocked();
-
-        inOrder.verify(mAlarmManager, times(1))
-                .set(anyInt(), eq(now + HOUR_IN_MILLIS), anyLong(), anyLong(), eq(TAG_DEADLINE),
-                        any(), any(), any());
-
-        // Back off, use alarm for earlier job.
-        mConstants.SKIP_NOT_READY_JOBS = false;
-        mTimeController.recheckAlarmsLocked();
-
-        inOrder.verify(mAlarmManager, times(1))
-                .set(anyInt(), eq(now + 5 * MINUTE_IN_MILLIS), anyLong(), anyLong(),
-                        eq(TAG_DEADLINE), any(), any(), any());
-    }
-
-    @Test
-    public void testCheckExpiredDelaysAndResetAlarm_NoSkipping() {
-        mConstants.SKIP_NOT_READY_JOBS = false;
-        mTimeController.recheckAlarmsLocked();
-
-        runTestCheckExpiredDelaysAndResetAlarm();
-    }
-
-    @Test
-    public void testJobDelayWakeupAlarmToggling() {
-        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
-
-        JobStatus job = createJobStatus(
-                "testMaybeStartTrackingJobLocked_DeadlineReverseOrder",
-                createJob().setMinimumLatency(HOUR_IN_MILLIS));
-
-        doReturn(true).when(mTimeController)
-                .wouldBeReadyWithConstraintLocked(eq(job), anyInt());
-
-        // Starting off with using a wakeup alarm.
-        mConstants.USE_NON_WAKEUP_ALARM_FOR_DELAY = false;
-        InOrder inOrder = inOrder(mAlarmManager);
-
-        mTimeController.maybeStartTrackingJobLocked(job, null);
-        inOrder.verify(mAlarmManager, times(1))
-                .set(eq(AlarmManager.ELAPSED_REALTIME_WAKEUP), eq(now + HOUR_IN_MILLIS), anyLong(),
-                        anyLong(),
-                        eq(TAG_DELAY), any(), any(), any());
-
-        // Use a non wakeup alarm.
-        mConstants.USE_NON_WAKEUP_ALARM_FOR_DELAY = true;
-
-        mTimeController.maybeStartTrackingJobLocked(job, null);
-        inOrder.verify(mAlarmManager, times(1))
-                .set(eq(AlarmManager.ELAPSED_REALTIME), eq(now + HOUR_IN_MILLIS), anyLong(),
-                        anyLong(), eq(TAG_DELAY),
-                        any(), any(), any());
-
-        // Back off, use a wakeup alarm.
-        mConstants.USE_NON_WAKEUP_ALARM_FOR_DELAY = false;
-
-        mTimeController.maybeStartTrackingJobLocked(job, null);
-        inOrder.verify(mAlarmManager, times(1))
-                .set(eq(AlarmManager.ELAPSED_REALTIME_WAKEUP), eq(now + HOUR_IN_MILLIS), anyLong(),
-                        anyLong(),
-                        eq(TAG_DELAY), any(), any(), any());
-    }
-
-    @Test
-    public void testCheckExpiredDelaysAndResetAlarm_WithSkipping_AllReady() {
-        mConstants.SKIP_NOT_READY_JOBS = true;
-        mTimeController.recheckAlarmsLocked();
-
+    public void testCheckExpiredDelaysAndResetAlarm_AllReady() {
         doReturn(true).when(mTimeController).wouldBeReadyWithConstraintLocked(any(), anyInt());
 
         runTestCheckExpiredDelaysAndResetAlarm();
@@ -629,9 +482,7 @@ public class TimeControllerTest {
     }
 
     @Test
-    public void testCheckExpiredDelaysAndResetAlarm_WithSkipping_SomeNotReady() {
-        mConstants.SKIP_NOT_READY_JOBS = true;
-        mTimeController.recheckAlarmsLocked();
+    public void testCheckExpiredDelaysAndResetAlarm_SomeNotReady() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 
         JobStatus jobLatest = createJobStatus("testCheckExpiredDelaysAndResetAlarm",
@@ -679,18 +530,47 @@ public class TimeControllerTest {
     }
 
     @Test
-    public void testCheckExpiredDeadlinesAndResetAlarm_NoSkipping() {
-        mConstants.SKIP_NOT_READY_JOBS = false;
-        mTimeController.recheckAlarmsLocked();
+    public void testJobDelayWakeupAlarmToggling() {
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 
-        runTestCheckExpiredDeadlinesAndResetAlarm();
+        JobStatus job = createJobStatus(
+                "testMaybeStartTrackingJobLocked_DeadlineReverseOrder",
+                createJob().setMinimumLatency(HOUR_IN_MILLIS));
+
+        doReturn(true).when(mTimeController)
+                .wouldBeReadyWithConstraintLocked(eq(job), anyInt());
+
+        // Starting off with using a wakeup alarm.
+        mConstants.USE_NON_WAKEUP_ALARM_FOR_DELAY = false;
+        InOrder inOrder = inOrder(mAlarmManager);
+
+        mTimeController.maybeStartTrackingJobLocked(job, null);
+        inOrder.verify(mAlarmManager, times(1))
+                .set(eq(AlarmManager.ELAPSED_REALTIME_WAKEUP), eq(now + HOUR_IN_MILLIS), anyLong(),
+                        anyLong(),
+                        eq(TAG_DELAY), any(), any(), any());
+
+        // Use a non wakeup alarm.
+        mConstants.USE_NON_WAKEUP_ALARM_FOR_DELAY = true;
+
+        mTimeController.maybeStartTrackingJobLocked(job, null);
+        inOrder.verify(mAlarmManager, times(1))
+                .set(eq(AlarmManager.ELAPSED_REALTIME), eq(now + HOUR_IN_MILLIS), anyLong(),
+                        anyLong(), eq(TAG_DELAY),
+                        any(), any(), any());
+
+        // Back off, use a wakeup alarm.
+        mConstants.USE_NON_WAKEUP_ALARM_FOR_DELAY = false;
+
+        mTimeController.maybeStartTrackingJobLocked(job, null);
+        inOrder.verify(mAlarmManager, times(1))
+                .set(eq(AlarmManager.ELAPSED_REALTIME_WAKEUP), eq(now + HOUR_IN_MILLIS), anyLong(),
+                        anyLong(),
+                        eq(TAG_DELAY), any(), any(), any());
     }
 
     @Test
-    public void testCheckExpiredDeadlinesAndResetAlarm_WithSkipping_AllReady() {
-        mConstants.SKIP_NOT_READY_JOBS = true;
-        mTimeController.recheckAlarmsLocked();
-
+    public void testCheckExpiredDeadlinesAndResetAlarm_AllReady() {
         doReturn(true).when(mTimeController).wouldBeReadyWithConstraintLocked(any(), anyInt());
 
         runTestCheckExpiredDeadlinesAndResetAlarm();
@@ -746,9 +626,7 @@ public class TimeControllerTest {
     }
 
     @Test
-    public void testCheckExpiredDeadlinesAndResetAlarm_WithSkipping_SomeNotReady() {
-        mConstants.SKIP_NOT_READY_JOBS = true;
-        mTimeController.recheckAlarmsLocked();
+    public void testCheckExpiredDeadlinesAndResetAlarm_SomeNotReady() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 
         JobStatus jobLatest = createJobStatus("testCheckExpiredDeadlinesAndResetAlarm",
@@ -796,28 +674,14 @@ public class TimeControllerTest {
     }
 
     @Test
-    public void testEvaluateStateLocked_SkippingOff() {
-        mConstants.SKIP_NOT_READY_JOBS = false;
-        mTimeController.recheckAlarmsLocked();
-        JobStatus job = createJobStatus("testEvaluateStateLocked_SkippingOff",
-                createJob().setOverrideDeadline(HOUR_IN_MILLIS));
-
-        mTimeController.evaluateStateLocked(job);
-        verify(mAlarmManager, never())
-                .set(anyInt(), anyLong(), anyLong(), anyLong(), anyString(), any(), any(), any());
-    }
-
-    @Test
-    public void testEvaluateStateLocked_SkippingOn_Delay() {
-        mConstants.SKIP_NOT_READY_JOBS = true;
-        mTimeController.recheckAlarmsLocked();
+    public void testEvaluateStateLocked_Delay() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 
-        JobStatus jobLatest = createJobStatus("testEvaluateStateLocked_SkippingOn_Delay",
+        JobStatus jobLatest = createJobStatus("testEvaluateStateLocked_Delay",
                 createJob().setMinimumLatency(HOUR_IN_MILLIS));
-        JobStatus jobMiddle = createJobStatus("testEvaluateStateLocked_SkippingOn_Delay",
+        JobStatus jobMiddle = createJobStatus("testEvaluateStateLocked_Delay",
                 createJob().setMinimumLatency(30 * MINUTE_IN_MILLIS));
-        JobStatus jobEarliest = createJobStatus("testEvaluateStateLocked_SkippingOn_Delay",
+        JobStatus jobEarliest = createJobStatus("testEvaluateStateLocked_Delay",
                 createJob().setMinimumLatency(5 * MINUTE_IN_MILLIS));
 
         doReturn(false).when(mTimeController)
@@ -867,16 +731,14 @@ public class TimeControllerTest {
     }
 
     @Test
-    public void testEvaluateStateLocked_SkippingOn_Deadline() {
-        mConstants.SKIP_NOT_READY_JOBS = true;
-        mTimeController.recheckAlarmsLocked();
+    public void testEvaluateStateLocked_Deadline() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 
-        JobStatus jobLatest = createJobStatus("testEvaluateStateLocked_SkippingOn_Deadline",
+        JobStatus jobLatest = createJobStatus("testEvaluateStateLocked_Deadline",
                 createJob().setOverrideDeadline(HOUR_IN_MILLIS));
-        JobStatus jobMiddle = createJobStatus("testEvaluateStateLocked_SkippingOn_Deadline",
+        JobStatus jobMiddle = createJobStatus("testEvaluateStateLocked_Deadline",
                 createJob().setOverrideDeadline(30 * MINUTE_IN_MILLIS));
-        JobStatus jobEarliest = createJobStatus("testEvaluateStateLocked_SkippingOn_Deadline",
+        JobStatus jobEarliest = createJobStatus("testEvaluateStateLocked_Deadline",
                 createJob().setOverrideDeadline(5 * MINUTE_IN_MILLIS));
 
         doReturn(false).when(mTimeController)

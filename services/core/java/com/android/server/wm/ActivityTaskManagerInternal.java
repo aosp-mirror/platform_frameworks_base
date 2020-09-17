@@ -32,9 +32,7 @@ import android.content.res.CompatibilityInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.service.voice.IVoiceInteractionSession;
-import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.app.IVoiceInteractor;
@@ -154,38 +152,15 @@ public abstract class ActivityTaskManagerInternal {
             IVoiceInteractor mInteractor);
 
     /**
-     * Callback for window manager to let activity manager know that we are finally starting the
-     * app transition;
-     *
-     * @param reasons A map from windowing mode to a reason integer why the transition was started,
-     *                which must be one of the APP_TRANSITION_* values.
-     * @param timestamp The time at which the app transition started in
-     *                  {@link SystemClock#uptimeMillis()} timebase.
-     */
-    public abstract void notifyAppTransitionStarting(SparseIntArray reasons, long timestamp);
-
-    /**
-     * Callback for window manager to let activity manager know that the app transition was
-     * cancelled.
-     */
-    public abstract void notifyAppTransitionCancelled();
-
-    /**
-     * Callback for window manager to let activity manager know that the app transition is finished.
-     */
-    public abstract void notifyAppTransitionFinished();
-
-    /**
      * Returns the top activity from each of the currently visible stacks. The first entry will be
      * the focused activity.
      */
     public abstract List<IBinder> getTopVisibleActivities();
 
     /**
-     * Callback for window manager to let activity manager know that docked stack changes its
-     * minimized state.
+     * Returns whether {@code uid} has any resumed activity.
      */
-    public abstract void notifyDockedStackMinimizedChanged(boolean minimized);
+    public abstract boolean hasResumedActivity(int uid);
 
     /**
      * Notify listeners that contents are drawn for the first time on a single task display.
@@ -195,14 +170,15 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void notifySingleTaskDisplayDrawn(int displayId);
 
     /**
-     * Start activity {@code intents} as if {@code packageName} on user {@code userId} did it.
+     * Start activity {@code intents} as if {@code packageName/featureId} on user {@code userId} did
+     * it.
      *
      * - DO NOT call it with the calling UID cleared.
      * - All the necessary caller permission checks must be done at callsites.
      *
      * @return error codes used by {@link IActivityManager#startActivity} and its siblings.
      */
-    public abstract int startActivitiesAsPackage(String packageName,
+    public abstract int startActivitiesAsPackage(String packageName, String featureId,
             int userId, Intent[] intents, Bundle bOptions);
 
     /**
@@ -212,6 +188,7 @@ public abstract class ActivityTaskManagerInternal {
      * @param realCallingPid PID of the real caller.
      * @param realCallingUid UID of the real caller.
      * @param callingPackage Make a call as if this package did.
+     * @param callingFeatureId Make a call as if this feature in the package did.
      * @param intents Intents to start.
      * @param userId Start the intents on this user.
      * @param validateIncomingUser Set true to skip checking {@code userId} with the calling UID.
@@ -221,16 +198,17 @@ public abstract class ActivityTaskManagerInternal {
      *        from originatingPendingIntent
      */
     public abstract int startActivitiesInPackage(int uid, int realCallingPid, int realCallingUid,
-            String callingPackage, Intent[] intents, String[] resolvedTypes, IBinder resultTo,
-            SafeActivityOptions options, int userId, boolean validateIncomingUser,
-            PendingIntentRecord originatingPendingIntent,
+            String callingPackage, @Nullable String callingFeatureId, Intent[] intents,
+            String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
+            boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
             boolean allowBackgroundActivityStart);
 
     public abstract int startActivityInPackage(int uid, int realCallingPid, int realCallingUid,
-            String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, int startFlags, SafeActivityOptions options,
-            int userId, TaskRecord inTask, String reason, boolean validateIncomingUser,
-            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart);
+            String callingPackage, @Nullable String callingFeaturId, Intent intent,
+            String resolvedType, IBinder resultTo, String resultWho, int requestCode,
+            int startFlags, SafeActivityOptions options, int userId, Task inTask, String reason,
+            boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
+            boolean allowBackgroundActivityStart);
 
     /**
      * Start activity {@code intent} without calling user-id check.
@@ -241,7 +219,8 @@ public abstract class ActivityTaskManagerInternal {
      * @return error codes used by {@link IActivityManager#startActivity} and its siblings.
      */
     public abstract int startActivityAsUser(IApplicationThread caller, String callingPackage,
-            Intent intent, @Nullable Bundle options, int userId);
+            @Nullable String callingFeatureId, Intent intent, @Nullable IBinder resultTo,
+            int startFlags, @Nullable Bundle options, int userId);
 
     /**
      * Called when Keyguard flags might have changed.
@@ -300,6 +279,11 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void notifyActiveVoiceInteractionServiceChanged(ComponentName component);
 
     /**
+     * Called when the device changes its dreaming state.
+     */
+    public abstract void notifyDreamStateChanged(boolean dreaming);
+
+    /**
      * Set a uid that is allowed to bypass stopped app switches, launching an app
      * whenever it wants.
      *
@@ -311,11 +295,9 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void setAllowAppSwitches(@NonNull String type, int uid, int userId);
 
     /**
-     * Called when a user has been deleted. This can happen during normal device usage
-     * or just at startup, when partially removed users are purged. Any state persisted by the
-     * ActivityManager should be purged now.
+     * Called when a user has been stopped.
      *
-     * @param userId The user being cleaned up.
+     * @param userId The user being stopped.
      */
     public abstract void onUserStopped(int userId);
     public abstract boolean isGetTasksAllowed(String caller, int callingPid, int callingUid);
@@ -328,6 +310,7 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void clearHeavyWeightProcessIfEquals(WindowProcessController proc);
     public abstract void finishHeavyWeightApp();
 
+    public abstract boolean isDreaming();
     public abstract boolean isSleeping();
     public abstract boolean isShuttingDown();
     public abstract boolean shuttingDown(boolean booted, int timeout);
@@ -401,7 +384,7 @@ public abstract class ActivityTaskManagerInternal {
     public abstract ActivityTokens getTopActivityForTask(int taskId);
 
     public abstract IIntentSender getIntentSender(int type, String packageName,
-            int callingUid, int userId, IBinder token, String resultWho,
+            @Nullable String featureId, int callingUid, int userId, IBinder token, String resultWho,
             int requestCode, Intent[] intents, String[] resolvedTypes, int flags,
             Bundle bOptions);
 
@@ -558,9 +541,12 @@ public abstract class ActivityTaskManagerInternal {
 
     /**
      * Gets bitmap snapshot of the provided task id.
+     *
+     * <p>Warning! this may restore the snapshot from disk so can block, don't call in a latency
+     * sensitive environment.
      */
-    public abstract ActivityManager.TaskSnapshot getTaskSnapshotNoRestore(int taskId,
-            boolean reducedResolution);
+    public abstract ActivityManager.TaskSnapshot getTaskSnapshotBlocking(int taskId,
+            boolean isLowResolution);
 
     /** Returns true if uid is considered foreground for activity start purposes. */
     public abstract boolean isUidForeground(int uid);

@@ -39,9 +39,11 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
+import com.android.internal.widget.LockscreenCredential;
 import com.android.settingslib.animation.AppearAnimationCreator;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 
 import java.util.List;
@@ -117,7 +119,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
     public KeyguardPatternView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mAppearAnimationUtils = new AppearAnimationUtils(context,
                 AppearAnimationUtils.DEFAULT_APPEAR_DURATION, 1.5f /* translationScale */,
                 2.0f /* delayScale */, AnimationUtils.loadInterpolator(
@@ -280,6 +282,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
         @Override
         public void onPatternDetected(final List<LockPatternView.Cell> pattern) {
+            mKeyguardUpdateMonitor.setCredentialAttempted();
             mLockPatternView.disableInput();
             if (mPendingLockCheck != null) {
                 mPendingLockCheck.cancel(false);
@@ -296,9 +299,9 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 LatencyTracker.getInstance(mContext).onActionStart(ACTION_CHECK_CREDENTIAL);
                 LatencyTracker.getInstance(mContext).onActionStart(ACTION_CHECK_CREDENTIAL_UNLOCKED);
             }
-            mPendingLockCheck = LockPatternChecker.checkPattern(
+            mPendingLockCheck = LockPatternChecker.checkCredential(
                     mLockPatternUtils,
-                    pattern,
+                    LockscreenCredential.createPattern(pattern),
                     userId,
                     new LockPatternChecker.OnCheckCallback() {
 
@@ -435,6 +438,9 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 break;
             case PROMPT_REASON_USER_REQUEST:
                 mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_user_request);
+                break;
+            case PROMPT_REASON_PREPARE_FOR_UPDATE:
+                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_timeout_pattern);
                 break;
             case PROMPT_REASON_NONE:
                 break;

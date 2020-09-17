@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_description" msgid="8582605799129954556">"डाइनैमिक सिस्टम अपडेट की सुविधा जारी रखने के लिए कृपया अपना पासवर्ड डालें"</string>
+    <string name="notification_install_completed" msgid="6252047868415172643">"डाइनैमिक सिस्टम तैयार है. इसका इस्तेमाल करने के लिए, अपना डिवाइस रीस्टार्ट करें."</string>
+    <string name="notification_install_inprogress" msgid="7383334330065065017">"इंस्टॉल हो रहा है"</string>
+    <string name="notification_install_failed" msgid="4066039210317521404">"इंस्टॉल नहीं हो सका"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"इमेज की पुष्टि नहीं हो सकी. इंस्टॉल करने की प्रक्रिया रद्द करें."</string>
+    <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"फ़िलहाल, हम एक डाइनैमिक सिस्टम चला रहे हैं. Android का मूल वर्शन इस्तेमाल करने के लिए रीस्टार्ट करें."</string>
+    <string name="notification_action_cancel" msgid="5929299408545961077">"रद्द करें"</string>
+    <string name="notification_action_discard" msgid="1817481003134947493">"खारिज करें"</string>
+    <string name="notification_action_reboot_to_dynsystem" msgid="4015817159115912479">"रीस्टार्ट करें"</string>
+    <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"रीस्टार्ट करें"</string>
+    <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"डाइनैमिक सिस्टम खारिज किया गया"</string>
+    <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"डाइनैमिक सिस्टम रीस्टार्ट या लोड नहीं हो सका"</string>
+</resources>

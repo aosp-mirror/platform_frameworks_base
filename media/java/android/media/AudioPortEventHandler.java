@@ -78,7 +78,8 @@ class AudioPortEventHandler {
                                     listeners.add((AudioManager.OnAudioPortUpdateListener)msg.obj);
                                 }
                             } else {
-                                listeners = mListeners;
+                                listeners = (ArrayList<AudioManager.OnAudioPortUpdateListener>)
+                                        mListeners.clone();
                             }
                         }
                         // reset audio port cache if the event corresponds to a change coming

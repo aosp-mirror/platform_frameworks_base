@@ -94,6 +94,7 @@ public class CdmaSmsAddress extends SmsAddress {
      * are stored in the parent class address and origBytes fields,
      * respectively.
      */
+
     @UnsupportedAppUsage
     public CdmaSmsAddress(){
     }

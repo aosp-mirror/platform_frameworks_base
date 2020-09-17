@@ -16,8 +16,12 @@
 
 package android.os;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -29,7 +33,9 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.hardware.display.DisplayManager;
 import android.provider.Settings;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -38,7 +44,6 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Display;
-import android.view.WindowManager;
 
 import libcore.io.Streams;
 
@@ -612,8 +617,8 @@ public class RecoverySystem {
 
             // On TV, reboot quiescently if the screen is off
             if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
-                WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-                if (wm.getDefaultDisplay().getState() != Display.STATE_ON) {
+                DisplayManager dm = context.getSystemService(DisplayManager.class);
+                if (dm.getDisplay(DEFAULT_DISPLAY).getState() != Display.STATE_ON) {
                     reason += ",quiescent";
                 }
             }
@@ -624,22 +629,94 @@ public class RecoverySystem {
     }
 
     /**
-     * Schedule to install the given package on next boot. The caller needs to
-     * ensure that the package must have been processed (uncrypt'd) if needed.
-     * It sets up the command in BCB (bootloader control block), which will
-     * be read by the bootloader and the recovery image.
+     * Prepare to apply an unattended update by asking the user for their Lock Screen Knowledge
+     * Factor (LSKF). If supplied, the {@code intentSender} will be called when the system is setup
+     * and ready to apply the OTA.
+     * <p>
+     * When the system is already prepared for update and this API is called again with the same
+     * {@code updateToken}, it will not call the intent sender nor request the user enter their Lock
+     * Screen Knowledge Factor.
+     * <p>
+     * When this API is called again with a different {@code updateToken}, the prepared-for-update
+     * status is reset and process repeats as though it's the initial call to this method as
+     * described in the first paragraph.
      *
-     * @param Context      the Context to use.
-     * @param packageFile  the package to be installed.
-     *
-     * @throws IOException if there were any errors setting up the BCB.
-     *
+     * @param context the Context to use.
+     * @param updateToken token used to indicate which update was prepared
+     * @param intentSender the intent to call when the update is prepared; may be {@code null}
+     * @throws IOException if there were any errors setting up unattended update
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.RECOVERY)
-    public static void scheduleUpdateOnBoot(Context context, File packageFile)
+    public static void prepareForUnattendedUpdate(@NonNull Context context,
+            @NonNull String updateToken, @Nullable IntentSender intentSender) throws IOException {
+        if (updateToken == null) {
+            throw new NullPointerException("updateToken == null");
+        }
+        RecoverySystem rs = (RecoverySystem) context.getSystemService(Context.RECOVERY_SERVICE);
+        if (!rs.requestLskf(updateToken, intentSender)) {
+            throw new IOException("preparation for update failed");
+        }
+    }
+
+    /**
+     * Request that any previously requested Lock Screen Knowledge Factor (LSKF) is cleared and
+     * the preparation for unattended update is reset.
+     *
+     * @param context the Context to use.
+     * @throws IOException if there were any errors clearing the unattended update state
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.RECOVERY)
+    public static void clearPrepareForUnattendedUpdate(@NonNull Context context)
             throws IOException {
+        RecoverySystem rs = (RecoverySystem) context.getSystemService(Context.RECOVERY_SERVICE);
+        if (!rs.clearLskf()) {
+            throw new IOException("could not reset unattended update state");
+        }
+    }
+
+    /**
+     * Request that the device reboot and apply the update that has been prepared. The
+     * {@code updateToken} must match what was given for {@link #prepareForUnattendedUpdate} or
+     * this will return {@code false}.
+     *
+     * @param context the Context to use.
+     * @param updateToken the token used to call {@link #prepareForUnattendedUpdate} before
+     * @param reason the reboot reason to give to the {@link PowerManager}
+     * @throws IOException if the reboot couldn't proceed because the device wasn't ready for an
+     *               unattended reboot or if the {@code updateToken} did not match the previously
+     *               given token
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.RECOVERY)
+    public static void rebootAndApply(@NonNull Context context, @NonNull String updateToken,
+            @NonNull String reason) throws IOException {
+        if (updateToken == null) {
+            throw new NullPointerException("updateToken == null");
+        }
+        RecoverySystem rs = (RecoverySystem) context.getSystemService(Context.RECOVERY_SERVICE);
+        if (!rs.rebootWithLskf(updateToken, reason)) {
+            throw new IOException("system not prepared to apply update");
+        }
+    }
+
+    /**
+     * Schedule to install the given package on next boot. The caller needs to ensure that the
+     * package must have been processed (uncrypt'd) if needed. It sets up the command in BCB
+     * (bootloader control block), which will be read by the bootloader and the recovery image.
+     *
+     * @param context the Context to use.
+     * @param packageFile the package to be installed.
+     * @throws IOException if there were any errors setting up the BCB.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.RECOVERY)
+    public static void scheduleUpdateOnBoot(Context context, File packageFile) throws IOException {
         String filename = packageFile.getCanonicalPath();
         boolean securityUpdate = filename.endsWith("_s.zip");
 
@@ -1200,6 +1277,49 @@ public class RecoverySystem {
         try {
             mService.rebootRecoveryWithCommand(command);
         } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Begins the process of asking the user for the Lock Screen Knowledge Factor.
+     *
+     * @param updateToken token that will be used in calls to {@link #rebootAndApply} to ensure
+     *                    that the preparation was for the correct update
+     * @return true if the request was correct
+     * @throws IOException if the recovery system service could not be contacted
+     */
+    private boolean requestLskf(String updateToken, IntentSender sender) throws IOException {
+        try {
+            return mService.requestLskf(updateToken, sender);
+        } catch (RemoteException e) {
+            throw new IOException("could request update");
+        }
+    }
+
+    /**
+     * Calls the recovery system service and clears the setup for the OTA.
+     *
+     * @return true if the setup for OTA was cleared
+     * @throws IOException if the recovery system service could not be contacted
+     */
+    private boolean clearLskf() throws IOException {
+        try {
+            return mService.clearLskf();
+        } catch (RemoteException e) {
+            throw new IOException("could not clear LSKF");
+        }
+    }
+
+    /**
+     * Calls the recovery system service to reboot and apply update.
+     *
+     * @param updateToken the update token for which the update was prepared
+     */
+    private boolean rebootWithLskf(String updateToken, String reason) throws IOException {
+        try {
+            return mService.rebootWithLskf(updateToken, reason);
+        } catch (RemoteException e) {
+            throw new IOException("could not reboot for update");
         }
     }
 

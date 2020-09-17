@@ -28,7 +28,7 @@ import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 
 import java.util.stream.Stream;
 
@@ -65,7 +65,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
             Log.v(TAG, "showNotification");
         }
         addAlertEntry(entry);
-        updateNotification(entry.key, true /* alert */);
+        updateNotification(entry.getKey(), true /* alert */);
         entry.setInterruption();
     }
 
@@ -182,7 +182,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
     protected final void addAlertEntry(@NonNull NotificationEntry entry) {
         AlertEntry alertEntry = createAlertEntry();
         alertEntry.setEntry(entry);
-        mAlertEntries.put(entry.key, alertEntry);
+        mAlertEntries.put(entry.getKey(), alertEntry);
         onAlertEntryAdded(alertEntry);
         entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
     }
@@ -251,7 +251,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
 
     @Override
     public boolean shouldExtendLifetime(NotificationEntry entry) {
-        return !canRemoveImmediately(entry.key);
+        return !canRemoveImmediately(entry.getKey());
     }
 
     @Override
@@ -260,7 +260,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
             mExtendedLifetimeAlertEntries.add(entry);
             // We need to make sure that entries are stopping to alert eventually, let's remove
             // this as soon as possible.
-            AlertEntry alertEntry = mAlertEntries.get(entry.key);
+            AlertEntry alertEntry = mAlertEntries.get(entry.getKey());
             alertEntry.removeAsSoonAsPossible();
         } else {
             mExtendedLifetimeAlertEntries.remove(entry);
@@ -276,7 +276,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
         @Nullable protected Runnable mRemoveAlertRunnable;
 
         public void setEntry(@NonNull final NotificationEntry entry) {
-            setEntry(entry, () -> removeAlertEntry(entry.key));
+            setEntry(entry, () -> removeAlertEntry(entry.getKey()));
         }
 
         public void setEntry(@NonNull final NotificationEntry entry,
@@ -316,7 +316,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
          * of the timer and should be removed externally.
          * @return true if the notification is sticky
          */
-        protected boolean isSticky() {
+        public boolean isSticky() {
             return false;
         }
 
@@ -332,7 +332,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
         public int compareTo(@NonNull AlertEntry alertEntry) {
             return (mPostTime < alertEntry.mPostTime)
                     ? 1 : ((mPostTime == alertEntry.mPostTime)
-                            ? mEntry.key.compareTo(alertEntry.mEntry.key) : -1);
+                            ? mEntry.getKey().compareTo(alertEntry.mEntry.getKey()) : -1);
         }
 
         public void reset() {

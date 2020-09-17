@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2020 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.perftests.packagemanager">
+
+    <permission android:name="com.android.perftests.packagemanager.TestPermission" />
+    <uses-permission android:name="com.android.perftests.packagemanager.TestPermission" />
+
+    <queries>
+        <package android:name="com.android.perftests.appenumeration0" />
+        <package android:name="com.android.perftests.appenumeration1" />
+        <package android:name="com.android.perftests.appenumeration2" />
+        <package android:name="com.android.perftests.appenumeration3" />
+        <package android:name="com.android.perftests.appenumeration4" />
+        <package android:name="com.android.perftests.appenumeration5" />
+        <package android:name="com.android.perftests.appenumeration6" />
+        <package android:name="com.android.perftests.appenumeration7" />
+        <package android:name="com.android.perftests.appenumeration8" />
+        <package android:name="com.android.perftests.appenumeration9" />
+        <package android:name="com.android.perftests.appenumeration10" />
+        <package android:name="com.android.perftests.appenumeration11" />
+        <package android:name="com.android.perftests.appenumeration12" />
+        <package android:name="com.android.perftests.appenumeration13" />
+        <package android:name="com.android.perftests.appenumeration14" />
+        <package android:name="com.android.perftests.appenumeration15" />
+        <package android:name="com.android.perftests.appenumeration16" />
+        <package android:name="com.android.perftests.appenumeration17" />
+        <package android:name="com.android.perftests.appenumeration18" />
+        <package android:name="com.android.perftests.appenumeration19" />
+        <package android:name="com.android.perftests.appenumeration20" />
+        <package android:name="com.android.perftests.appenumeration21" />
+        <package android:name="com.android.perftests.appenumeration22" />
+        <package android:name="com.android.perftests.appenumeration23" />
+        <package android:name="com.android.perftests.appenumeration24" />
+        <package android:name="com.android.perftests.appenumeration25" />
+        <package android:name="com.android.perftests.appenumeration26" />
+        <package android:name="com.android.perftests.appenumeration27" />
+        <package android:name="com.android.perftests.appenumeration28" />
+        <package android:name="com.android.perftests.appenumeration29" />
+        <package android:name="com.android.perftests.appenumeration30" />
+        <package android:name="com.android.perftests.appenumeration31" />
+        <package android:name="com.android.perftests.appenumeration32" />
+        <package android:name="com.android.perftests.appenumeration33" />
+        <package android:name="com.android.perftests.appenumeration34" />
+        <package android:name="com.android.perftests.appenumeration35" />
+        <package android:name="com.android.perftests.appenumeration36" />
+        <package android:name="com.android.perftests.appenumeration37" />
+        <package android:name="com.android.perftests.appenumeration38" />
+        <package android:name="com.android.perftests.appenumeration39" />
+        <package android:name="com.android.perftests.appenumeration40" />
+        <package android:name="com.android.perftests.appenumeration41" />
+        <package android:name="com.android.perftests.appenumeration42" />
+        <package android:name="com.android.perftests.appenumeration43" />
+        <package android:name="com.android.perftests.appenumeration44" />
+        <package android:name="com.android.perftests.appenumeration45" />
+        <package android:name="com.android.perftests.appenumeration46" />
+        <package android:name="com.android.perftests.appenumeration47" />
+        <package android:name="com.android.perftests.appenumeration48" />
+        <package android:name="com.android.perftests.appenumeration49" />
+    </queries>
+
+    <application>
+        <uses-library android:name="android.test.runner" />
+        <activity android:name="android.perftests.utils.PerfTestActivity">
+          <intent-filter>
+            <action android:name="com.android.perftests.packagemanager.PERFTEST" />
+          </intent-filter>
+        </activity>
+    </application>
+
+    <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
+        android:targetPackage="com.android.perftests.packagemanager"/>
+
+</manifest>

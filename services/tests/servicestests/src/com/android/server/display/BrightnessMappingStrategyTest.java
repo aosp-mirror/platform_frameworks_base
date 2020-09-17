@@ -466,7 +466,7 @@ public class BrightnessMappingStrategyTest {
         Resources resources = createResources(GAMMA_CORRECTION_LUX, GAMMA_CORRECTION_NITS,
                 DISPLAY_LEVELS_NITS, DISPLAY_LEVELS_BACKLIGHT);
         BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(resources);
-        // Let's start with a sanity check:
+        // Let's start with a validity check:
         assertEquals(y1, strategy.getBrightness(x1), 0.01f /* tolerance */);
         assertEquals(y2, strategy.getBrightness(x2), 0.01f /* tolerance */);
         assertEquals(y3, strategy.getBrightness(x3), 0.01f /* tolerance */);
@@ -494,7 +494,7 @@ public class BrightnessMappingStrategyTest {
         Resources resources = createResources(GAMMA_CORRECTION_LUX, GAMMA_CORRECTION_NITS,
                 DISPLAY_LEVELS_NITS, DISPLAY_LEVELS_BACKLIGHT);
         BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(resources);
-        // Sanity check:
+        // Validity check:
         assertEquals(y1, strategy.getBrightness(x1), 0.01f /* tolerance */);
         assertEquals(y2, strategy.getBrightness(x2), 0.01f /* tolerance */);
         assertEquals(y3, strategy.getBrightness(x3), 0.01f /* tolerance */);
@@ -540,7 +540,7 @@ public class BrightnessMappingStrategyTest {
         Resources resources = createResources(GAMMA_CORRECTION_LUX, GAMMA_CORRECTION_NITS,
                 DISPLAY_LEVELS_NITS, DISPLAY_LEVELS_BACKLIGHT);
         BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(resources);
-        // Sanity, as per tradition:
+        // Validity, as per tradition:
         assertEquals(y0, strategy.getBrightness(x0), 0.01f /* tolerance */);
         assertEquals(y2, strategy.getBrightness(x2), 0.01f /* tolerance */);
         assertEquals(y4, strategy.getBrightness(x4), 0.01f /* tolerance */);

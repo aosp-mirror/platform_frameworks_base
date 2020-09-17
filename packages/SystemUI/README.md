@@ -24,12 +24,6 @@ the main path for onConfigurationChanged, now also happens through
 ConfigurationController). They also receive a callback for onBootCompleted
 since these objects may be started before the device has finished booting.
 
-SystemUI and SystemUIApplication also have methods for putComponent and
-getComponent which were existing systems to get a hold of other parts of
-sysui before Dependency existed. Generally new things should not be added
-to putComponent, instead Dependency and other refactoring is preferred to
-make sysui structure cleaner.
-
 Each SystemUI service is expected to be a major part of system ui and the
 goal is to minimize communication between them. So in general they should be
 relatively silo'd.
@@ -80,11 +74,6 @@ Provides custom dependency injection.
 
 Creates/initializes the channels sysui uses when posting notifications.
 
-### [com.android.systemui.statusbar.CommandQueue$CommandQueueStart](/packages/SystemUI/src/com/android/systemui/sstatusbar/CommandQueue.java)
-
-Creates CommandQueue and calls putComponent because its always been there
-and sysui expects it to be there :/
-
 ### [com.android.systemui.keyguard.KeyguardViewMediator](/packages/SystemUI/src/com/android/systemui/keyguard/KeyguardViewMediator.java)
 
 Manages keyguard view state.
@@ -103,12 +92,6 @@ it should be shown.
 
 Shows the drag handle for the divider between two apps when in split screen
 mode.
-
-### [com.android.systemui.SystemBars](/packages/SystemUI/src/com/android/systemui/SystemBars.java)
-
-This is a proxy to the actual SystemUI for the status bar. This loads from
-config_statusBarComponent which defaults to StatusBar. (maybe this should be
-removed and copy how config_systemUiVendorServiceComponent works)
 
 ### [com.android.systemui.status.phone.StatusBar](/packages/SystemUI/src/com/android/systemui/status/phone/StatusBar.java)
 

@@ -59,7 +59,7 @@ public class DisplayRotationUtil {
     }
 
     /**
-     * Compute bounds after rotating teh screen.
+     * Compute bounds after rotating the screen.
      *
      * @param bounds Bounds before the rotation. The array must contain exactly 4 non-null elements.
      * @param rotation rotation constant defined in android.view.Surface.

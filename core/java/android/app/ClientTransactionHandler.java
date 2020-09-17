@@ -25,6 +25,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.util.MergedConfiguration;
+import android.view.DisplayAdjustments.FixedRotationAdjustments;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
@@ -119,7 +120,6 @@ public abstract class ClientTransactionHandler {
     /**
      * Stop the activity.
      * @param token Target activity token.
-     * @param show Flag indicating whether activity is still shown.
      * @param configChanges Activity configuration changes.
      * @param pendingActions Pending actions to be used on this or later stages of activity
      *                       transaction.
@@ -127,7 +127,7 @@ public abstract class ClientTransactionHandler {
      *                          request for a transaction.
      * @param reason Reason for performing this operation.
      */
-    public abstract void handleStopActivity(IBinder token, boolean show, int configChanges,
+    public abstract void handleStopActivity(IBinder token, int configChanges,
             PendingTransactionActions pendingActions, boolean finalStateRequest, String reason);
 
     /** Report that activity was stopped to server. */
@@ -147,26 +147,18 @@ public abstract class ClientTransactionHandler {
     /** Deliver result from another activity. */
     public abstract void handleSendResult(IBinder token, List<ResultInfo> results, String reason);
 
-    /** Deliver multi-window mode change notification. */
-    public abstract void handleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode,
-            Configuration overrideConfig);
-
     /** Deliver new intent. */
     public abstract void handleNewIntent(IBinder token, List<ReferrerIntent> intents);
 
-    /** Deliver picture-in-picture mode change notification. */
-    public abstract void handlePictureInPictureModeChanged(IBinder token, boolean isInPipMode,
-            Configuration overrideConfig);
-
-    /** Update window visibility. */
-    public abstract void handleWindowVisibility(IBinder token, boolean show);
+    /** Request that an activity enter picture-in-picture. */
+    public abstract void handlePictureInPictureRequested(IBinder token);
 
     /** Perform activity launch. */
     public abstract Activity handleLaunchActivity(ActivityThread.ActivityClientRecord r,
             PendingTransactionActions pendingActions, Intent customIntent);
 
     /** Perform activity start. */
-    public abstract void handleStartActivity(ActivityThread.ActivityClientRecord r,
+    public abstract void handleStartActivity(IBinder token,
             PendingTransactionActions pendingActions);
 
     /** Get package info. */
@@ -175,6 +167,10 @@ public abstract class ClientTransactionHandler {
 
     /** Deliver app configuration change notification. */
     public abstract void handleConfigurationChanged(Configuration config);
+
+    /** Apply addition adjustments to override display information. */
+    public abstract void handleFixedRotationAdjustments(IBinder token,
+            FixedRotationAdjustments fixedRotationAdjustments);
 
     /**
      * Get {@link android.app.ActivityThread.ActivityClientRecord} instance that corresponds to the

@@ -235,7 +235,7 @@ public class RecentLocationApps {
         public final CharSequence contentDescription;
         public final long requestFinishTime;
 
-        private Request(String packageName, UserHandle userHandle, Drawable icon,
+        public Request(String packageName, UserHandle userHandle, Drawable icon,
                 CharSequence label, boolean isHighBattery, CharSequence contentDescription,
                 long requestFinishTime) {
             this.packageName = packageName;

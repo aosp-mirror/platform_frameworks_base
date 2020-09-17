@@ -18,11 +18,13 @@
 
 #include <gtest/gtest_prod.h>
 #include "config/ConfigListener.h"
+#include "logd/LogEvent.h"
 #include "metrics/MetricsManager.h"
 #include "packages/UidMap.h"
 #include "external/StatsPullerManager.h"
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "frameworks/base/cmds/statsd/src/statsd_metadata.pb.h"
 
 #include <stdio.h>
 #include <unordered_map>
@@ -88,6 +90,23 @@ public:
     /* Load configs containing metrics with active activations from disk. */
     void LoadActiveConfigsFromDisk();
 
+    /* Persist metadata for configs and metrics to disk. */
+    void SaveMetadataToDisk(int64_t currentWallClockTimeNs, int64_t systemElapsedTimeNs);
+
+    /* Writes the statsd metadata for all configs and metrics to StatsMetadataList. */
+    void WriteMetadataToProto(int64_t currentWallClockTimeNs,
+                              int64_t systemElapsedTimeNs,
+                              metadata::StatsMetadataList* metadataList);
+
+    /* Load stats metadata for configs and metrics from disk. */
+    void LoadMetadataFromDisk(int64_t currentWallClockTimeNs,
+                              int64_t systemElapsedTimeNs);
+
+    /* Sets the metadata for all configs and metrics */
+    void SetMetadataState(const metadata::StatsMetadataList& statsMetadataList,
+                          int64_t currentWallClockTimeNs,
+                          int64_t systemElapsedTimeNs);
+
     /* Sets the active status/ttl for all configs and metrics to the status in ActiveConfigList. */
     void SetConfigsActiveState(const ActiveConfigList& activeConfigList, int64_t currentTimeNs);
 
@@ -100,6 +119,11 @@ public:
 
     /* Notify all MetricsManagers of uid map snapshots received */
     void onUidMapReceived(const int64_t& eventTimeNs) override;
+
+    /* Notify all metrics managers of boot completed
+     * This will force a bucket split when the boot is finished.
+     */
+    void onStatsdInitCompleted(const int64_t& elapsedTimeNs);
 
     // Reset all configs.
     void resetConfigs();
@@ -157,6 +181,8 @@ private:
 
     sp<AlarmMonitor> mPeriodicAlarmMonitor;
 
+    void OnLogEvent(LogEvent* event, int64_t elapsedRealtimeNs);
+
     void resetIfConfigTtlExpiredLocked(const int64_t timestampNs);
 
     void OnConfigUpdatedLocked(
@@ -170,8 +196,17 @@ private:
     void SetConfigsActiveStateLocked(const ActiveConfigList& activeConfigList,
                                      int64_t currentTimeNs);
 
+    void SetMetadataStateLocked(const metadata::StatsMetadataList& statsMetadataList,
+                                int64_t currentWallClockTimeNs,
+                                int64_t systemElapsedTimeNs);
+
+    void WriteMetadataToProtoLocked(int64_t currentWallClockTimeNs,
+                                    int64_t systemElapsedTimeNs,
+                                    metadata::StatsMetadataList* metadataList);
+
     void WriteDataToDiskLocked(const DumpReportReason dumpReportReason,
                                const DumpLatency dumpLatency);
+
     void WriteDataToDiskLocked(const ConfigKey& key, const int64_t timestampNs,
                                const DumpReportReason dumpReportReason,
                                const DumpLatency dumpLatency);
@@ -186,14 +221,29 @@ private:
 
     /* Check if we should send a broadcast if approaching memory limits and if we're over, we
      * actually delete the data. */
-    void flushIfNecessaryLocked(int64_t timestampNs, const ConfigKey& key,
-                                MetricsManager& metricsManager);
+    void flushIfNecessaryLocked(const ConfigKey& key, MetricsManager& metricsManager);
 
     // Maps the isolated uid in the log event to host uid if the log event contains uid fields.
     void mapIsolatedUidToHostUidIfNecessaryLocked(LogEvent* event) const;
 
     // Handler over the isolated uid change event.
     void onIsolatedUidChangedEventLocked(const LogEvent& event);
+
+    // Handler over the binary push state changed event.
+    void onBinaryPushStateChangedEventLocked(LogEvent* event);
+
+    // Handler over the watchdog rollback occurred event.
+    void onWatchdogRollbackOccurredLocked(LogEvent* event);
+
+    // Updates train info on disk based on binary push state changed info and
+    // write disk info into parameters.
+    void getAndUpdateTrainInfoOnDisk(bool is_rollback, InstallTrainInfo* trainInfoIn);
+
+    // Gets experiment ids on disk for associated train and updates them
+    // depending on rollback type. Then writes them back to disk and returns
+    // them.
+    std::vector<int64_t> processWatchdogRollbackOccurred(const int32_t rollbackTypeIn,
+                                                          const string& packageName);
 
     // Reset all configs.
     void resetConfigsLocked(const int64_t timestampNs);
@@ -223,6 +273,9 @@ private:
     // Last time we wrote active metrics to disk.
     int64_t mLastActiveMetricsWriteNs = 0;
 
+    //Last time we wrote metadata to disk.
+    int64_t mLastMetadataWriteNs = 0;
+
 #ifdef VERY_VERBOSE_PRINTING
     bool mPrintAllLogs = false;
 #endif
@@ -231,6 +284,7 @@ private:
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitByteSize);
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitBroadcast);
     FRIEND_TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge);
+    FRIEND_TEST(StatsLogProcessorTest, InvalidConfigRemoved);
     FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
     FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBoot);
     FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBootMultipleActivations);
@@ -254,25 +308,12 @@ private:
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsWithActivation);
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsNoCondition);
     FRIEND_TEST(GaugeMetricE2eTest, TestConditionChangeToTrueSamplePulledEvents);
-    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents);
-    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm);
-    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_WithActivation);
-
-    FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_NoLink_OR_CombinationCondition);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_Link_OR_CombinationCondition);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_OR_CombinationCondition);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_Link_OR_CombinationCondition);
-
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_SimpleCondition);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_Link_SimpleCondition);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_PartialLink_SimpleCondition);
-
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_PartialLink_AND_CombinationCondition);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_AND_CombinationCondition);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_Link_AND_CombinationCondition);
 
     FRIEND_TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_single_bucket);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_multiple_buckets);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestCountMetric_save_refractory_to_disk_no_data_written);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestCountMetric_save_refractory_to_disk);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestCountMetric_load_refractory_from_disk);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_single_bucket);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_multiple_buckets);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_long_refractory_period);
@@ -285,12 +326,31 @@ private:
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations);
 
+    FRIEND_TEST(CountMetricE2eTest, TestInitialConditionChanges);
+    FRIEND_TEST(CountMetricE2eTest, TestSlicedState);
+    FRIEND_TEST(CountMetricE2eTest, TestSlicedStateWithMap);
+    FRIEND_TEST(CountMetricE2eTest, TestMultipleSlicedStates);
+    FRIEND_TEST(CountMetricE2eTest, TestSlicedStateWithPrimaryFields);
+
     FRIEND_TEST(DurationMetricE2eTest, TestOneBucket);
     FRIEND_TEST(DurationMetricE2eTest, TestTwoBuckets);
     FRIEND_TEST(DurationMetricE2eTest, TestWithActivation);
     FRIEND_TEST(DurationMetricE2eTest, TestWithCondition);
     FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedCondition);
     FRIEND_TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedState);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithConditionAndSlicedState);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedStateMapped);
+    FRIEND_TEST(DurationMetricE2eTest, TestSlicedStatePrimaryFieldsNotSubsetDimInWhat);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset);
+
+    FRIEND_TEST(ValueMetricE2eTest, TestInitialConditionChanges);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_WithActivation);
+    FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState);
+    FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithDimensions);
+    FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithIncorrectDimensions);
 };
 
 }  // namespace statsd

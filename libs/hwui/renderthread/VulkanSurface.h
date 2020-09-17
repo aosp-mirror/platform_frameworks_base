@@ -17,6 +17,8 @@
 
 #include <system/graphics.h>
 #include <system/window.h>
+#include <ui/BufferQueueDefs.h>
+#include <ui/PixelFormat.h>
 #include <vulkan/vulkan.h>
 
 #include <SkRefCnt.h>
@@ -101,11 +103,12 @@ private:
         SkMatrix preTransform;
     };
 
-    VulkanSurface(ANativeWindow* window, const WindowInfo& windowInfo, SkISize minWindowSize,
-                  SkISize maxWindowSize, GrContext* grContext);
+    VulkanSurface(ANativeWindow* window, const WindowInfo& windowInfo, GrContext* grContext);
+    static bool InitializeWindowInfoStruct(ANativeWindow* window, ColorMode colorMode,
+                                           SkColorType colorType, sk_sp<SkColorSpace> colorSpace,
+                                           const VulkanManager& vkManager, uint32_t extraBuffers,
+                                           WindowInfo* outWindowInfo);
     static bool UpdateWindow(ANativeWindow* window, const WindowInfo& windowInfo);
-    static void ComputeWindowSizeAndTransform(WindowInfo* windowInfo, const SkISize& minSize,
-                                              const SkISize& maxSize);
     void releaseBuffers();
 
     // TODO: Just use a vector?
@@ -117,9 +120,6 @@ private:
 
     uint32_t mPresentCount = 0;
     NativeBufferInfo* mCurrentBufferInfo = nullptr;
-
-    const SkISize mMinWindowSize;
-    const SkISize mMaxWindowSize;
 };
 
 } /* namespace renderthread */

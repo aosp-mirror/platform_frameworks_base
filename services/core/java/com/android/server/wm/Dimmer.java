@@ -20,6 +20,7 @@ import static com.android.server.wm.AlphaAnimationSpecProto.DURATION_MS;
 import static com.android.server.wm.AlphaAnimationSpecProto.FROM;
 import static com.android.server.wm.AlphaAnimationSpecProto.TO;
 import static com.android.server.wm.AnimationSpecProto.ALPHA;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_DIMMER;
 
 import android.graphics.Rect;
 import android.util.Log;
@@ -28,6 +29,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.wm.SurfaceAnimator.AnimationType;
 
 import java.io.PrintWriter;
 
@@ -49,7 +51,7 @@ class Dimmer {
 
         @Override
         public SurfaceControl.Transaction getPendingTransaction() {
-            return mHost.getPendingTransaction();
+            return mHost.getSyncTransaction();
         }
 
         @Override
@@ -134,7 +136,7 @@ class Dimmer {
             mDimLayer = dimLayer;
             mDimming = true;
             final DimAnimatable dimAnimatable = new DimAnimatable(dimLayer);
-            mSurfaceAnimator = new SurfaceAnimator(dimAnimatable, () -> {
+            mSurfaceAnimator = new SurfaceAnimator(dimAnimatable, (type, anim) -> {
                 if (!mDimming) {
                     dimAnimatable.removeSurface();
                 }
@@ -156,7 +158,7 @@ class Dimmer {
     @VisibleForTesting
     interface SurfaceAnimatorStarter {
         void startAnimation(SurfaceAnimator surfaceAnimator, SurfaceControl.Transaction t,
-                AnimationAdapter anim, boolean hidden);
+                AnimationAdapter anim, boolean hidden, @AnimationType int type);
     }
 
     Dimmer(WindowContainer host) {
@@ -173,6 +175,7 @@ class Dimmer {
                 .setParent(mHost.getSurfaceControl())
                 .setColorLayer()
                 .setName("Dim Layer for - " + mHost.getName())
+                .setCallsite("Dimmer.makeDimLayer")
                 .build();
     }
 
@@ -342,7 +345,8 @@ class Dimmer {
             SurfaceControl.Transaction t, float startAlpha, float endAlpha) {
         mSurfaceAnimatorStarter.startAnimation(animator, t, new LocalAnimationAdapter(
                 new AlphaAnimationSpec(startAlpha, endAlpha, getDimDuration(container)),
-                mHost.mWmService.mSurfaceAnimationRunner), false /* hidden */);
+                mHost.mWmService.mSurfaceAnimationRunner), false /* hidden */,
+                ANIMATION_TYPE_DIMMER);
     }
 
     private long getDimDuration(WindowContainer container) {
@@ -376,8 +380,8 @@ class Dimmer {
 
         @Override
         public void apply(SurfaceControl.Transaction t, SurfaceControl sc, long currentPlayTime) {
-            float alpha = ((float) currentPlayTime / getDuration()) * (mToAlpha - mFromAlpha)
-                    + mFromAlpha;
+            final float fraction = getFraction(currentPlayTime);
+            final float alpha = fraction * (mToAlpha - mFromAlpha) + mFromAlpha;
             t.setAlpha(sc, alpha);
         }
 
@@ -389,7 +393,7 @@ class Dimmer {
         }
 
         @Override
-        public void writeToProtoInner(ProtoOutputStream proto) {
+        public void dumpDebugInner(ProtoOutputStream proto) {
             final long token = proto.start(ALPHA);
             proto.write(FROM, mFromAlpha);
             proto.write(TO, mToAlpha);

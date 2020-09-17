@@ -14,8 +14,8 @@
 
 package com.android.systemui.qs.tileimpl;
 
-import static androidx.lifecycle.Lifecycle.State.DESTROYED;
 import static androidx.lifecycle.Lifecycle.State.RESUMED;
+import static androidx.lifecycle.Lifecycle.State.STARTED;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_CLICK;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_LONG_PRESS;
@@ -27,6 +27,8 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_ACTION;
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
+import android.annotation.CallSuper;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -41,13 +43,14 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
@@ -61,8 +64,10 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.PagedTileLayout.TilePage;
+import com.android.systemui.qs.QSEvent;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QuickStatusBarHeader;
+import com.android.systemui.qs.logging.QSLogger;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -93,11 +98,14 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     private final StatusBarStateController
             mStatusBarStateController = Dependency.get(StatusBarStateController.class);
+    private final UiEventLogger mUiEventLogger;
+    private final QSLogger mQSLogger;
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     private final Object mStaleListener = new Object();
-    protected TState mState = newTileState();
-    private TState mTmpState = newTileState();
+    protected TState mState;
+    private TState mTmpState;
+    private final InstanceId mInstanceId;
     private boolean mAnnounceNextStateChange;
 
     private String mTileSpec;
@@ -107,10 +115,31 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
 
+    /**
+     * Provides a new {@link TState} of the appropriate type to use between this tile and the
+     * corresponding view.
+     *
+     * @return new state to use by the tile.
+     */
     public abstract TState newTileState();
 
+    /**
+     * Handles clicks by the user.
+     *
+     * Calls to the controller should be made here to set the new state of the device.
+     */
     abstract protected void handleClick();
 
+    /**
+     * Update state of the tile based on device state
+     *
+     * Called whenever the state of the tile needs to be updated, either after user
+     * interaction or from callbacks from the controller. It populates {@code state} with the
+     * information to display to the user.
+     *
+     * @param state {@link TState} to populate with information to display
+     * @param arg additional arguments needed to populate {@code state}
+     */
     abstract protected void handleUpdateState(TState state, Object arg);
 
     /**
@@ -124,12 +153,27 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     protected QSTileImpl(QSHost host) {
         mHost = host;
         mContext = host.getContext();
+        mInstanceId = host.getNewInstanceId();
+        mState = newTileState();
+        mTmpState = newTileState();
+        mQSLogger = host.getQSLogger();
+        mUiEventLogger = host.getUiEventLogger();
+    }
+
+    protected final void resetStates() {
+        mState = newTileState();
+        mTmpState = newTileState();
     }
 
     @NonNull
     @Override
     public Lifecycle getLifecycle() {
         return mLifecycle;
+    }
+
+    @Override
+    public InstanceId getInstanceId() {
+        return mInstanceId;
     }
 
     /**
@@ -161,6 +205,12 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         return mHost;
     }
 
+    /**
+     * Return the {@link QSIconView} to be used by this tile's view.
+     *
+     * @param context view context for the view
+     * @return icon view for this tile
+     */
     public QSIconView createTileView(Context context) {
         return new QSIconViewImpl(context);
     }
@@ -200,6 +250,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mMetricsLogger.write(populate(new LogMaker(ACTION_QS_CLICK).setType(TYPE_ACTION)
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
+        mUiEventLogger.logWithInstanceId(QSEvent.QS_ACTION_CLICK, 0, getMetricsSpec(),
+                getInstanceId());
+        mQSLogger.logTileClick(mTileSpec, mStatusBarStateController.getState(), mState.state);
         mHandler.sendEmptyMessage(H.CLICK);
     }
 
@@ -207,6 +260,10 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mMetricsLogger.write(populate(new LogMaker(ACTION_QS_SECONDARY_CLICK).setType(TYPE_ACTION)
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
+        mUiEventLogger.logWithInstanceId(QSEvent.QS_ACTION_SECONDARY_CLICK, 0, getMetricsSpec(),
+                getInstanceId());
+        mQSLogger.logTileSecondaryClick(mTileSpec, mStatusBarStateController.getState(),
+                mState.state);
         mHandler.sendEmptyMessage(H.SECONDARY_CLICK);
     }
 
@@ -214,6 +271,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mMetricsLogger.write(populate(new LogMaker(ACTION_QS_LONG_PRESS).setType(TYPE_ACTION)
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
+        mUiEventLogger.logWithInstanceId(QSEvent.QS_ACTION_LONG_PRESS, 0, getMetricsSpec(),
+                getInstanceId());
+        mQSLogger.logTileLongClick(mTileSpec, mStatusBarStateController.getState(), mState.state);
         mHandler.sendEmptyMessage(H.LONG_CLICK);
 
         Prefs.putInt(
@@ -282,22 +342,37 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mCallbacks.clear();
     }
 
+    /**
+     * Handles secondary click on the tile.
+     *
+     * Defaults to {@link QSTileImpl#handleClick}
+     */
     protected void handleSecondaryClick() {
         // Default to normal click.
         handleClick();
     }
 
+    /**
+     * Handles long click on the tile by launching the {@link Intent} defined in
+     * {@link QSTileImpl#getLongClickIntent}
+     */
     protected void handleLongClick() {
         Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
                 getLongClickIntent(), 0);
     }
 
+    /**
+     * Returns an intent to be launched when the tile is long pressed.
+     *
+     * @return the intent to launch
+     */
     public abstract Intent getLongClickIntent();
 
     protected void handleRefreshState(Object arg) {
         handleUpdateState(mTmpState, arg);
         final boolean changed = mTmpState.copyTo(mState);
         if (changed) {
+            mQSLogger.logTileUpdated(mTileSpec, mState);
             handleStateChanged();
         }
         mHandler.removeMessages(H.STALE);
@@ -357,17 +432,19 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     }
 
     private void handleSetListeningInternal(Object listener, boolean listening) {
+        // This should be used to go from resumed to paused. Listening for ON_RESUME and ON_PAUSE
+        // in this lifecycle will determine the listening window.
         if (listening) {
             if (mListeners.add(listener) && mListeners.size() == 1) {
                 if (DEBUG) Log.d(TAG, "handleSetListening true");
-                mLifecycle.markState(RESUMED);
+                mLifecycle.setCurrentState(RESUMED);
                 handleSetListening(listening);
                 refreshState(); // Ensure we get at least one refresh after listening.
             }
         } else {
             if (mListeners.remove(listener) && mListeners.size() == 0) {
                 if (DEBUG) Log.d(TAG, "handleSetListening false");
-                mLifecycle.markState(DESTROYED);
+                mLifecycle.setCurrentState(STARTED);
                 handleSetListening(listening);
             }
         }
@@ -384,13 +461,20 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mIsFullQs = 0;
     }
 
-    protected abstract void handleSetListening(boolean listening);
+    @CallSuper
+    protected void handleSetListening(boolean listening) {
+        if (mTileSpec != null) {
+            mQSLogger.logTileChangeListening(mTileSpec, listening);
+        }
+    }
 
     protected void handleDestroy() {
+        mQSLogger.logTileDestroyed(mTileSpec, "Handle destroy");
         if (mListeners.size() != 0) {
             handleSetListening(false);
         }
         mCallbacks.clear();
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     protected void checkIfRestrictionEnforcedByAdminOnly(State state, String userRestriction) {
@@ -406,6 +490,15 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         }
     }
 
+    @Override
+    public String getMetricsSpec() {
+        return mTileSpec;
+    }
+
+    /**
+     * Provides a default label for the tile.
+     * @return default label for the tile.
+     */
     public abstract CharSequence getTileLabel();
 
     public static int getColorForState(Context context, int state) {
@@ -526,6 +619,12 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         public Drawable getInvisibleDrawable(Context context) {
             return mInvisibleDrawable;
         }
+
+        @Override
+        @NonNull
+        public String toString() {
+            return "DrawableIcon";
+        }
     }
 
     public static class DrawableIconWithRes extends DrawableIcon {
@@ -539,6 +638,12 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         @Override
         public boolean equals(Object o) {
             return o instanceof DrawableIconWithRes && ((DrawableIconWithRes) o).mId == mId;
+        }
+
+        @Override
+        @NonNull
+        public String toString() {
+            return String.format("DrawableIconWithRes[resId=0x%08x]", mId);
         }
     }
 
@@ -576,6 +681,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         }
 
         @Override
+        @NonNull
         public String toString() {
             return String.format("ResourceIcon[resId=0x%08x]", mResId);
         }
@@ -594,8 +700,19 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
             // workaround: get a clean state for every new AVD
             return context.getDrawable(mAnimatedResId).getConstantState().newDrawable();
         }
+
+        @Override
+        @NonNull
+        public String toString() {
+            return String.format("AnimationIcon[resId=0x%08x]", mResId);
+        }
     }
 
+    /**
+     * Dumps the state of this tile along with its name.
+     *
+     * This may be used for CTS testing of tiles.
+     */
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(this.getClass().getSimpleName() + ":");

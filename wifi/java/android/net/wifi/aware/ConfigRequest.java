@@ -47,6 +47,7 @@ public final class ConfigRequest implements Parcelable {
      */
     public static final int NAN_BAND_24GHZ = 0;
     public static final int NAN_BAND_5GHZ = 1;
+    public static final int NAN_BAND_6GHZ = 2;
 
     /**
      * Magic values for Discovery Window (DW) interval configuration
@@ -58,6 +59,11 @@ public final class ConfigRequest implements Parcelable {
      * Indicates whether 5G band support is requested.
      */
     public final boolean mSupport5gBand;
+
+    /**
+     * Indicates whether 6G band support is requested.
+     */
+    public final boolean mSupport6gBand;
 
     /**
      * Specifies the desired master preference.
@@ -81,9 +87,10 @@ public final class ConfigRequest implements Parcelable {
      */
     public final int mDiscoveryWindowInterval[];
 
-    private ConfigRequest(boolean support5gBand, int masterPreference, int clusterLow,
-            int clusterHigh, int discoveryWindowInterval[]) {
+    private ConfigRequest(boolean support5gBand, boolean support6gBand, int masterPreference,
+            int clusterLow, int clusterHigh, int[] discoveryWindowInterval) {
         mSupport5gBand = support5gBand;
+        mSupport6gBand = support6gBand;
         mMasterPreference = masterPreference;
         mClusterLow = clusterLow;
         mClusterHigh = clusterHigh;
@@ -92,10 +99,12 @@ public final class ConfigRequest implements Parcelable {
 
     @Override
     public String toString() {
-        return "ConfigRequest [mSupport5gBand=" + mSupport5gBand + ", mMasterPreference="
-                + mMasterPreference + ", mClusterLow=" + mClusterLow + ", mClusterHigh="
-                + mClusterHigh + ", mDiscoveryWindowInterval="
-                + Arrays.toString(mDiscoveryWindowInterval) + "]";
+        return "ConfigRequest [mSupport5gBand=" + mSupport5gBand
+                + ", mSupport6gBand=" + mSupport6gBand
+                + ", mMasterPreference=" + mMasterPreference
+                + ", mClusterLow=" + mClusterLow
+                + ", mClusterHigh=" + mClusterHigh
+                + ", mDiscoveryWindowInterval=" + Arrays.toString(mDiscoveryWindowInterval) + "]";
     }
 
     @Override
@@ -106,6 +115,7 @@ public final class ConfigRequest implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mSupport5gBand ? 1 : 0);
+        dest.writeInt(mSupport6gBand ? 1 : 0);
         dest.writeInt(mMasterPreference);
         dest.writeInt(mClusterLow);
         dest.writeInt(mClusterHigh);
@@ -121,13 +131,14 @@ public final class ConfigRequest implements Parcelable {
         @Override
         public ConfigRequest createFromParcel(Parcel in) {
             boolean support5gBand = in.readInt() != 0;
+            boolean support6gBand = in.readInt() != 0;
             int masterPreference = in.readInt();
             int clusterLow = in.readInt();
             int clusterHigh = in.readInt();
             int discoveryWindowInterval[] = in.createIntArray();
 
-            return new ConfigRequest(support5gBand, masterPreference, clusterLow, clusterHigh,
-                    discoveryWindowInterval);
+            return new ConfigRequest(support5gBand, support6gBand, masterPreference, clusterLow,
+                    clusterHigh, discoveryWindowInterval);
         }
     };
 
@@ -143,7 +154,9 @@ public final class ConfigRequest implements Parcelable {
 
         ConfigRequest lhs = (ConfigRequest) o;
 
-        return mSupport5gBand == lhs.mSupport5gBand && mMasterPreference == lhs.mMasterPreference
+        return mSupport5gBand == lhs.mSupport5gBand
+                && mSupport6gBand == lhs.mSupport6gBand
+                && mMasterPreference == lhs.mMasterPreference
                 && mClusterLow == lhs.mClusterLow && mClusterHigh == lhs.mClusterHigh
                 && Arrays.equals(mDiscoveryWindowInterval, lhs.mDiscoveryWindowInterval);
     }
@@ -153,6 +166,7 @@ public final class ConfigRequest implements Parcelable {
         int result = 17;
 
         result = 31 * result + (mSupport5gBand ? 1 : 0);
+        result = 31 * result + (mSupport6gBand ? 1 : 0);
         result = 31 * result + mMasterPreference;
         result = 31 * result + mClusterLow;
         result = 31 * result + mClusterHigh;
@@ -190,9 +204,9 @@ public final class ConfigRequest implements Parcelable {
             throw new IllegalArgumentException(
                     "Invalid argument combination - must have Cluster Low <= Cluster High");
         }
-        if (mDiscoveryWindowInterval.length != 2) {
+        if (mDiscoveryWindowInterval.length != 3) {
             throw new IllegalArgumentException(
-                    "Invalid discovery window interval: must have 2 elements (2.4 & 5");
+                    "Invalid discovery window interval: must have 3 elements (2.4 & 5 & 6");
         }
         if (mDiscoveryWindowInterval[NAN_BAND_24GHZ] != DW_INTERVAL_NOT_INIT &&
                 (mDiscoveryWindowInterval[NAN_BAND_24GHZ] < 1 // valid for 2.4GHz: [1-5]
@@ -206,7 +220,12 @@ public final class ConfigRequest implements Parcelable {
             throw new IllegalArgumentException(
                 "Invalid discovery window interval for 5GHz: valid is UNSET or [0,5]");
         }
-
+        if (mDiscoveryWindowInterval[NAN_BAND_6GHZ] != DW_INTERVAL_NOT_INIT
+                && (mDiscoveryWindowInterval[NAN_BAND_6GHZ] < 0 // valid for 6GHz: [0-5]
+                || mDiscoveryWindowInterval[NAN_BAND_6GHZ] > 5)) {
+            throw new IllegalArgumentException(
+                "Invalid discovery window interval for 6GHz: valid is UNSET or [0,5]");
+        }
     }
 
     /**
@@ -214,10 +233,12 @@ public final class ConfigRequest implements Parcelable {
      */
     public static final class Builder {
         private boolean mSupport5gBand = true;
+        private boolean mSupport6gBand = false;
         private int mMasterPreference = 0;
         private int mClusterLow = CLUSTER_ID_MIN;
         private int mClusterHigh = CLUSTER_ID_MAX;
-        private int mDiscoveryWindowInterval[] = {DW_INTERVAL_NOT_INIT, DW_INTERVAL_NOT_INIT};
+        private int[] mDiscoveryWindowInterval = {DW_INTERVAL_NOT_INIT, DW_INTERVAL_NOT_INIT,
+                DW_INTERVAL_NOT_INIT};
 
         /**
          * Specify whether 5G band support is required in this request. Disabled by default.
@@ -229,6 +250,19 @@ public final class ConfigRequest implements Parcelable {
          */
         public Builder setSupport5gBand(boolean support5gBand) {
             mSupport5gBand = support5gBand;
+            return this;
+        }
+
+        /**
+         * Specify whether 6G band support is required in this request. Disabled by default.
+         *
+         * @param support6gBand Support for 6G band is required.
+         *
+         * @return The builder to facilitate chaining
+         *         {@code builder.setXXX(..).setXXX(..)}.
+         */
+        public Builder setSupport6gBand(boolean support6gBand) {
+            mSupport6gBand = support6gBand;
             return this;
         }
 
@@ -310,7 +344,8 @@ public final class ConfigRequest implements Parcelable {
          * awake. The configuration enables trading off latency vs. power (higher interval means
          * higher discovery latency but lower power).
          *
-         * @param band Either {@link #NAN_BAND_24GHZ} or {@link #NAN_BAND_5GHZ}.
+         * @param band Either {@link #NAN_BAND_24GHZ} or {@link #NAN_BAND_5GHZ} or
+         *        {@link #NAN_BAND_6GHZ}.
          * @param interval A value of 1, 2, 3, 4, or 5 indicating an interval of 2^(interval-1). For
          *                 the 5GHz band a value of 0 indicates that the device will not be awake
          *                 for any discovery windows.
@@ -319,13 +354,14 @@ public final class ConfigRequest implements Parcelable {
          *         {@code builder.setDiscoveryWindowInterval(...).setMasterPreference(...)}.
          */
         public Builder setDiscoveryWindowInterval(int band, int interval) {
-            if (band != NAN_BAND_24GHZ && band != NAN_BAND_5GHZ) {
+            if (band != NAN_BAND_24GHZ && band != NAN_BAND_5GHZ && band != NAN_BAND_6GHZ) {
                 throw new IllegalArgumentException("Invalid band value");
             }
             if ((band == NAN_BAND_24GHZ && (interval < 1 || interval > 5))
-                    || (band == NAN_BAND_5GHZ && (interval < 0 || interval > 5))) {
+                    || (band == NAN_BAND_5GHZ && (interval < 0 || interval > 5))
+                    || (band == NAN_BAND_6GHZ && (interval < 0 || interval > 5))) {
                 throw new IllegalArgumentException(
-                        "Invalid interval value: 2.4 GHz [1,5] or 5GHz [0,5]");
+                        "Invalid interval value: 2.4 GHz [1,5] or 5GHz/6GHz [0,5]");
             }
 
             mDiscoveryWindowInterval[band] = interval;
@@ -342,8 +378,8 @@ public final class ConfigRequest implements Parcelable {
                         "Invalid argument combination - must have Cluster Low <= Cluster High");
             }
 
-            return new ConfigRequest(mSupport5gBand, mMasterPreference, mClusterLow, mClusterHigh,
-                    mDiscoveryWindowInterval);
+            return new ConfigRequest(mSupport5gBand, mSupport6gBand, mMasterPreference, mClusterLow,
+                    mClusterHigh, mDiscoveryWindowInterval);
         }
     }
 }

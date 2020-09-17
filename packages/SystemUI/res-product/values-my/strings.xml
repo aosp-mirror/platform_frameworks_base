@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="dock_alignment_slow_charging" product="default" msgid="6997633396534416792">"ဖုန်းကို မြန်ဆန်စွာ အားသွင်းနိုင်ရန် ပြန်၍ချိန်ပါ"</string>
+    <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"ကြိုးမဲ့အားသွင်းရန် ဖုန်းကို ပြန်၍ချိန်ပါ"</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV စက်သည် မကြာမီ ပိတ်သွားပါမည်၊ ဆက်ဖွင့်ထားရန် ခလုတ်တစ်ခုကို နှိပ်ပါ။"</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"စက်သည် မကြာမီ ပိတ်သွားပါမည်၊ ဆက်ဖွင့်ထားရန် နှိပ်ပါ။"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"တက်ဘလက်ထဲတွင် ဆင်းမ်ကတ် မရှိပါ။"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"ဖုန်းထဲတွင် ဆင်းမ်ကတ် မရှိပါ။"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"ပင်နံပါတ် ကိုက်ညီမှု မရှိပါ"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"တက်ဘလက်ကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းခဲ့လျှင် ဤတက်ဘလက်ကို ပြင်ဆင်သတ်မှတ်လိုက်မည် ဖြစ်ပြီး ၎င်းအတွင်းရှိ ဒေတာအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"ဖုန်းကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းခဲ့လျှင် ဤဖုန်းကို ပြင်ဆင်သတ်မှတ်လိုက်မည် ဖြစ်ပြီး ၎င်းအတွင်းရှိ ဒေတာအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="8710104080409538587">"တက်ဘလက်ကို <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ ဤတက်ဘလက်ကို ပြင်ဆင်သတ်မှတ်လိုက်မည် ဖြစ်ပြီး ၎င်းအတွင်းရှိ ဒေတာအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="6381835450014881813">"ဖုန်းကို <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ ဤဖုန်းကို ပြင်ဆင်သတ်မှတ်လိုက်မည် ဖြစ်ပြီး ၎င်းအတွင်းရှိ ဒေတာအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="7325071812832605911">"တက်ဘလက်ကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းခဲ့လျှင် ဤအသုံးပြုသူကို ဖယ်ရှားလိုက်မည်ဖြစ်ပြီး အသုံးပြုသူဒေတာအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="8110939900089863103">"ဖုန်းကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းသွားလျှင် ဤအသုံးပြုသူကို ဖယ်ရှားလိုက်မည်ဖြစ်ပြီး အသုံးပြုသူဒေတာအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="8509811676952707883">"တက်ဘလက်ကို <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ ဤအသုံးပြုသူကို ဖယ်ရှားလိုက်မည်ဖြစ်ပြီး အသုံးပြုသူဒေတာအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3051962486994265014">"ဖုန်းကို <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ ဤအသုံးပြုသူကို ဖယ်ရှားလိုက်မည်ဖြစ်ပြီး အသုံးပြုသူဒေတာအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="1049523640263353830">"တက်ဘလက်ကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံ မှားယွင်းသွားလျှင် အလုပ်ပရိုဖိုင်ကို ဖယ်ရှားလိုက်မည်ဖြစ်ပြီး ပရိုဖိုင်ဒေတာအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="3280816298678433681">"ဖုန်းကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းသွားလျှင် အလုပ်ပရိုဖိုင်ကို ဖယ်ရှားလိုက်မည်ဖြစ်ပြီး ပရိုဖိုင်ဒေတာ အားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4417100487251371559">"တက်ဘလက်ကို <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ အလုပ်ပရိုဖိုင်ကို ဖယ်ရှားလိုက်မည်ဖြစ်ပြီး ပရိုဖိုင်ဒေတာအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"ဖုန်းကို <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ အလုပ်ပရိုဖိုင်ကို ဖယ်ရှားလိုက်မည်ဖြစ်ပြီး ပရိုဖိုင်ဒေတာ အားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"သင်သည် သင်၏ လော့ခ်ဖွင့်ခြင်းပုံစံကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ ဆွဲခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းပြီးသည့်နောက်တွင် သင့်အီးမေးလ်အကောင့်အား အသုံးပြု၍ တက်ဘလက်ကို လော့ခ်ဖွင့်ရန် တောင်းဆိုသွားပါမည်။\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> စက္ကန့်အကြာတွင် ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"သင်သည် သင်၏ လော့ခ်ဖွင့်ခြင်းပုံစံကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ ဆွဲခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းပြီးသည့်နောက်တွင် သင့်အီးမေးလ်အကောင့်အား အသုံးပြု၍ ဖုန်းကို လော့ခ်ဖွင့်ရန် တောင်းဆိုသွားပါမည်။\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> စက္ကန့်အကြာတွင် ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"နောက်ထပ် ထိန်းချုပ်မှုများအတွက် သင့်ဖုန်းကို လော့ခ်ဖွင့်ပါ"</string>
+    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"နောက်ထပ် ထိန်းချုပ်မှုများအတွက် သင့်တက်ဘလက်ကို လော့ခ်ဖွင့်ပါ"</string>
+    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"နောက်ထပ် ထိန်းချုပ်မှုများအတွက် သင့်စက်ကို လော့ခ်ဖွင့်ပါ"</string>
+</resources>

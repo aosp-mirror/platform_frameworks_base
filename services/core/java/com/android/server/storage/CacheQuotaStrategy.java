@@ -42,13 +42,13 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
+import android.util.AtomicFile;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseLongArray;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.AtomicFile;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.server.pm.Installer;
@@ -66,6 +66,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * CacheQuotaStrategy is a strategy for determining cache quotas using usage stats and foreground
@@ -95,10 +96,10 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
     public CacheQuotaStrategy(
             Context context, UsageStatsManagerInternal usageStatsManager, Installer installer,
             ArrayMap<String, SparseLongArray> quotaMap) {
-        mContext = Preconditions.checkNotNull(context);
-        mUsageStats = Preconditions.checkNotNull(usageStatsManager);
-        mInstaller = Preconditions.checkNotNull(installer);
-        mQuotaMap = Preconditions.checkNotNull(quotaMap);
+        mContext = Objects.requireNonNull(context);
+        mUsageStats = Objects.requireNonNull(usageStatsManager);
+        mInstaller = Objects.requireNonNull(installer);
+        mQuotaMap = Objects.requireNonNull(quotaMap);
         mPreviousValuesFile = new AtomicFile(new File(
                 new File(Environment.getDataDirectory(), "system"), "cachequota.xml"));
     }

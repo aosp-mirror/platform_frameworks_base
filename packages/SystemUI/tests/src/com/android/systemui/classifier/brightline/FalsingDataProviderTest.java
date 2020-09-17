@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.closeTo;
 import static org.junit.Assert.assertThat;
 
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 
@@ -36,7 +35,6 @@ import java.util.List;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
 public class FalsingDataProviderTest extends ClassifierTest {
 
     private FalsingDataProvider mDataProvider;

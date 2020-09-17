@@ -73,11 +73,15 @@ public class ParameterUtils {
         public final Rect previewCrop;
         /** Reported crop-region given the zoom index, coordinates relative to active-array */
         public final Rect reportedCrop;
+        /** Reported zoom ratio given the zoom index */
+        public final float reportedZoomRatio;
 
-        public ZoomData(int zoomIndex, Rect previewCrop, Rect reportedCrop) {
+        public ZoomData(int zoomIndex, Rect previewCrop, Rect reportedCrop,
+                float reportedZoomRatio) {
             this.zoomIndex = zoomIndex;
             this.previewCrop = previewCrop;
             this.reportedCrop = reportedCrop;
+            this.reportedZoomRatio = reportedZoomRatio;
         }
     }
 
@@ -371,7 +375,8 @@ public class ParameterUtils {
      * @throws NullPointerException if any of the args were {@code null}
      */
     public static int getClosestAvailableZoomCrop(
-            Camera.Parameters params, Rect activeArray, Size streamSize, Rect cropRegion,
+            Camera.Parameters params, Rect activeArray,
+            Size streamSize, Rect cropRegion,
             /*out*/
             Rect reportedCropRegion,
             Rect previewCropRegion) {
@@ -733,6 +738,92 @@ public class ParameterUtils {
     }
 
     /**
+     * Convert the user-specified crop region/zoom into zoom data; which can be used
+     * to set the parameters to a specific zoom index, or to report back to the user what
+     * the actual zoom was, or for other calculations requiring the current preview crop region.
+     *
+     * <p>None of the parameters are mutated.<p>
+     *
+     * @param activeArraySize active array size of the sensor (e.g. max jpeg size)
+     * @param cropRegion the user-specified crop region
+     * @param zoomRatio the user-specified zoom ratio
+     * @param previewSize the current preview size (in pixels)
+     * @param params the current camera parameters (not mutated)
+     *
+     * @return the zoom index, and the effective/reported crop regions (relative to active array)
+     */
+    public static ZoomData convertToLegacyZoom(Rect activeArraySize, Rect
+            cropRegion, Float zoomRatio, Size previewSize, Camera.Parameters params) {
+        final float FLOAT_EQUAL_THRESHOLD = 0.0001f;
+        if (zoomRatio != null &&
+                Math.abs(1.0f - zoomRatio) > FLOAT_EQUAL_THRESHOLD) {
+            // User uses CONTROL_ZOOM_RATIO to control zoom
+            return convertZoomRatio(activeArraySize, zoomRatio, previewSize, params);
+        }
+
+        return convertScalerCropRegion(activeArraySize, cropRegion, previewSize, params);
+    }
+
+    /**
+     * Convert the user-specified zoom ratio into zoom data; which can be used
+     * to set the parameters to a specific zoom index, or to report back to the user what the
+     * actual zoom was, or for other calculations requiring the current preview crop region.
+     *
+     * <p>None of the parameters are mutated.</p>
+     *
+     * @param activeArraySize active array size of the sensor (e.g. max jpeg size)
+     * @param zoomRatio the current zoom ratio
+     * @param previewSize the current preview size (in pixels)
+     * @param params the current camera parameters (not mutated)
+     *
+     * @return the zoom index, and the effective/reported crop regions (relative to active array)
+     */
+    public static ZoomData convertZoomRatio(Rect activeArraySize, float zoomRatio,
+            Size previewSize, Camera.Parameters params) {
+        if (DEBUG) {
+            Log.v(TAG, "convertZoomRatio - user zoom ratio was " + zoomRatio);
+        }
+
+        List<Rect> availableReportedCropRegions =
+                getAvailableZoomCropRectangles(params, activeArraySize);
+        List<Rect> availablePreviewCropRegions =
+                getAvailablePreviewZoomCropRectangles(params, activeArraySize, previewSize);
+        if (availableReportedCropRegions.size() != availablePreviewCropRegions.size()) {
+            throw new AssertionError("available reported/preview crop region size mismatch");
+        }
+
+        // Find the best matched legacy zoom ratio for the requested camera2 zoom ratio.
+        int bestZoomIndex = 0;
+        Rect reportedCropRegion = new Rect(availableReportedCropRegions.get(0));
+        Rect previewCropRegion = new Rect(availablePreviewCropRegions.get(0));
+        float reportedZoomRatio = 1.0f;
+        if (params.isZoomSupported()) {
+            List<Integer> zoomRatios = params.getZoomRatios();
+            for (int i = 1; i < zoomRatios.size(); i++) {
+                if (zoomRatio * ZOOM_RATIO_MULTIPLIER >= zoomRatios.get(i)) {
+                    bestZoomIndex = i;
+                    reportedCropRegion = availableReportedCropRegions.get(i);
+                    previewCropRegion = availablePreviewCropRegions.get(i);
+                    reportedZoomRatio = zoomRatios.get(i);
+                } else {
+                    break;
+                }
+            }
+        }
+
+        if (DEBUG) {
+            Log.v(TAG, "convertZoomRatio - zoom calculated to: " +
+                    "zoomIndex = " + bestZoomIndex +
+                    ", reported crop region = " + reportedCropRegion +
+                    ", preview crop region = " + previewCropRegion +
+                    ", reported zoom ratio = " + reportedZoomRatio);
+        }
+
+        return new ZoomData(bestZoomIndex, reportedCropRegion,
+                previewCropRegion, reportedZoomRatio);
+    }
+
+    /**
      * Convert the user-specified crop region into zoom data; which can be used
      * to set the parameters to a specific zoom index, or to report back to the user what the
      * actual zoom was, or for other calculations requiring the current preview crop region.
@@ -767,15 +858,17 @@ public class ParameterUtils {
         final int zoomIdx = ParameterUtils.getClosestAvailableZoomCrop(params, activeArraySizeOnly,
                 previewSize, userCropRegion,
                 /*out*/reportedCropRegion, /*out*/previewCropRegion);
+        final float reportedZoomRatio = 1.0f;
 
         if (DEBUG) {
             Log.v(TAG, "convertScalerCropRegion - zoom calculated to: " +
                     "zoomIndex = " + zoomIdx +
                     ", reported crop region = " + reportedCropRegion +
-                    ", preview crop region = " + previewCropRegion);
+                    ", preview crop region = " + previewCropRegion +
+                    ", reported zoom ratio = " + reportedZoomRatio);
         }
 
-        return new ZoomData(zoomIdx, previewCropRegion, reportedCropRegion);
+        return new ZoomData(zoomIdx, previewCropRegion, reportedCropRegion, reportedZoomRatio);
     }
 
     /**

@@ -48,6 +48,6 @@ interface ISession {
 
     // These commands relate to volume handling
     void setPlaybackToLocal(in AudioAttributes attributes);
-    void setPlaybackToRemote(int control, int max);
+    void setPlaybackToRemote(int control, int max, @nullable String controlId);
     void setCurrentVolume(int currentVolume);
 }

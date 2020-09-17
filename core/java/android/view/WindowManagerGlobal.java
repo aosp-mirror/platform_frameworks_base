@@ -56,6 +56,8 @@ import java.util.ArrayList;
 public final class WindowManagerGlobal {
     private static final String TAG = "WindowManager";
 
+    private static boolean sUseBLASTAdapter = false;
+
     /**
      * The user is navigating with keys (not the touch screen), so
      * navigational focus should be shown.
@@ -100,6 +102,14 @@ public final class WindowManagerGlobal {
     public static final int RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS = 0x40;
 
     /**
+     * This flag indicates the client should not directly submit it's next frame,
+     * but instead should pass it in the postDrawTransaction of
+     * {@link WindowManagerService#finishDrawing}. This is used by the WM
+     * BLASTSyncEngine to synchronize rendering of multiple windows.
+     */
+    public static final int RELAYOUT_RES_BLAST_SYNC = 0x80;
+
+    /**
      * Flag for relayout: the client will be later giving
      * internal insets; as a result, the window will not impact other window
      * layouts until the insets are given.
@@ -114,8 +124,10 @@ public final class WindowManagerGlobal {
      */
     public static final int RELAYOUT_DEFER_SURFACE_DESTROY = 0x2;
 
+    public static final int ADD_FLAG_IN_TOUCH_MODE = 0x1;
     public static final int ADD_FLAG_APP_VISIBLE = 0x2;
-    public static final int ADD_FLAG_IN_TOUCH_MODE = RELAYOUT_RES_IN_TOUCH_MODE;
+    public static final int ADD_FLAG_USE_TRIPLE_BUFFERING = 0x4;
+    public static final int ADD_FLAG_USE_BLAST = 0x8;
 
     /**
      * Like {@link #RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS}, but as a "hint" when adding the
@@ -134,6 +146,8 @@ public final class WindowManagerGlobal {
     public static final int ADD_PERMISSION_DENIED = -8;
     public static final int ADD_INVALID_DISPLAY = -9;
     public static final int ADD_INVALID_TYPE = -10;
+    public static final int ADD_INVALID_USER = -11;
+    public static final int ADD_TOO_MANY_TOKENS = -12;
 
     @UnsupportedAppUsage
     private static WindowManagerGlobal sDefaultWindowManager;
@@ -184,6 +198,7 @@ public final class WindowManagerGlobal {
                     if (sWindowManagerService != null) {
                         ValueAnimator.setDurationScale(
                                 sWindowManagerService.getCurrentAnimatorScale());
+                        sUseBLASTAdapter = sWindowManagerService.useBLAST();
                     }
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
@@ -223,6 +238,13 @@ public final class WindowManagerGlobal {
         synchronized (WindowManagerGlobal.class) {
             return sWindowSession;
         }
+    }
+
+    /**
+     * Whether or not to use BLAST for ViewRootImpl
+     */
+    public static boolean useBLAST() {
+        return sUseBLASTAdapter;
     }
 
     @UnsupportedAppUsage
@@ -307,7 +329,7 @@ public final class WindowManagerGlobal {
     }
 
     public void addView(View view, ViewGroup.LayoutParams params,
-            Display display, Window parentWindow) {
+            Display display, Window parentWindow, int userId) {
         if (view == null) {
             throw new IllegalArgumentException("view must not be null");
         }
@@ -384,7 +406,7 @@ public final class WindowManagerGlobal {
 
             // do this last because it fires off messages to start doing things
             try {
-                root.setView(view, wparams, panelParentView);
+                root.setView(view, wparams, panelParentView, userId);
             } catch (RuntimeException e) {
                 // BadTokenException or InvalidDisplayException, clean up.
                 if (index >= 0) {
@@ -481,11 +503,8 @@ public final class WindowManagerGlobal {
         ViewRootImpl root = mRoots.get(index);
         View view = root.getView();
 
-        if (view != null) {
-            InputMethodManager imm = view.getContext().getSystemService(InputMethodManager.class);
-            if (imm != null) {
-                imm.windowDismissed(mViews.get(index).getWindowToken());
-            }
+        if (root != null) {
+            root.getImeFocusController().onWindowDismissed();
         }
         boolean deferred = root.die(immediate);
         if (view != null) {
@@ -497,6 +516,7 @@ public final class WindowManagerGlobal {
     }
 
     void doRemoveView(ViewRootImpl root) {
+        boolean allViewsRemoved;
         synchronized (mLock) {
             final int index = mRoots.indexOf(root);
             if (index >= 0) {
@@ -505,9 +525,16 @@ public final class WindowManagerGlobal {
                 final View view = mViews.remove(index);
                 mDyingViews.remove(view);
             }
+            allViewsRemoved = mRoots.isEmpty();
         }
         if (ThreadedRenderer.sTrimForeground && ThreadedRenderer.isAvailable()) {
             doTrimForeground();
+        }
+
+        // If we don't have any views anymore in our process, we no longer need the
+        // InsetsAnimationThread to save some resources.
+        if (allViewsRemoved) {
+            InsetsAnimationThread.release();
         }
     }
 
@@ -604,26 +631,24 @@ public final class WindowManagerGlobal {
 
                 pw.println("\nView hierarchy:\n");
 
-                int viewsCount = 0;
-                int displayListsSize = 0;
-                int[] info = new int[2];
+                ViewRootImpl.GfxInfo totals = new ViewRootImpl.GfxInfo();
 
                 for (int i = 0; i < count; i++) {
                     ViewRootImpl root = mRoots.get(i);
-                    root.dumpGfxInfo(info);
+                    ViewRootImpl.GfxInfo info = root.getGfxInfo();
+                    totals.add(info);
 
                     String name = getWindowName(root);
-                    pw.printf("  %s\n  %d views, %.2f kB of display lists",
-                            name, info[0], info[1] / 1024.0f);
+                    pw.printf("  %s\n  %d views, %.2f kB of render nodes",
+                            name, info.viewCount, info.renderNodeMemoryUsage / 1024.f);
                     pw.printf("\n\n");
-
-                    viewsCount += info[0];
-                    displayListsSize += info[1];
                 }
 
-                pw.printf("\nTotal ViewRootImpl: %d\n", count);
-                pw.printf("Total Views:        %d\n", viewsCount);
-                pw.printf("Total DisplayList:  %.2f kB\n\n", displayListsSize / 1024.0f);
+                pw.printf("\nTotal %-15s: %d\n", "ViewRootImpl", count);
+                pw.printf("Total %-15s: %d\n", "attached Views", totals.viewCount);
+                pw.printf("Total %-15s: %.2f kB (used) / %.2f kB (capacity)\n\n", "RenderNode",
+                        totals.renderNodeMemoryUsage / 1024.0f,
+                        totals.renderNodeMemoryAllocated / 1024.0f);
             }
         } finally {
             pw.flush();

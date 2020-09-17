@@ -40,15 +40,7 @@ public:
     // The ConditionTracker at [conditionIndex] can be a CombinationConditionTracker. In this case,
     // the conditionParameters contains the parameters for it's children SimpleConditionTrackers.
     virtual ConditionState query(const int conditionIndex, const ConditionKey& conditionParameters,
-                                 const vector<Matcher>& dimensionFields,
-                                 const bool isSubOutputDimensionFields,
-                                 const bool isPartialLink,
-                                 std::unordered_set<HashableDimensionKey>* dimensionKeySet);
-
-    virtual ConditionState getMetConditionDimension(
-            const int index, const vector<Matcher>& dimensionFields,
-            const bool isSubOutputDimensionFields,
-            std::unordered_set<HashableDimensionKey>* dimensionsKeySet) const;
+                                 const bool isPartialLink);
 
     virtual const std::set<HashableDimensionKey>* getChangedToTrueDimensions(const int index) const;
     virtual const std::set<HashableDimensionKey>* getChangedToFalseDimensions(

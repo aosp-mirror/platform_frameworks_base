@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.app.AppOpsManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -27,6 +28,7 @@ import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Size;
 import android.util.SizeF;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
@@ -267,7 +269,9 @@ public final class Parcel {
     private static final int EX_UNSUPPORTED_OPERATION = -7;
     private static final int EX_SERVICE_SPECIFIC = -8;
     private static final int EX_PARCELABLE = -9;
-    private static final int EX_HAS_REPLY_HEADER = -128;  // special; see below
+    /** @hide */
+    public static final int EX_HAS_NOTED_APPOPS_REPLY_HEADER = -127; // special; see below
+    private static final int EX_HAS_STRICTMODE_REPLY_HEADER = -128;  // special; see below
     // EX_TRANSACTION_FAILED is used exclusively in native code.
     // see libbinder's binder/Status.h
     private static final int EX_TRANSACTION_FAILED = -129;
@@ -302,8 +306,13 @@ public final class Parcel {
     private static native void nativeWriteFloat(long nativePtr, float val);
     @FastNative
     private static native void nativeWriteDouble(long nativePtr, double val);
-    static native void nativeWriteString(long nativePtr, String val);
+    @FastNative
+    private static native void nativeWriteString8(long nativePtr, String val);
+    @FastNative
+    private static native void nativeWriteString16(long nativePtr, String val);
+    @FastNative
     private static native void nativeWriteStrongBinder(long nativePtr, IBinder val);
+    @FastNative
     private static native long nativeWriteFileDescriptor(long nativePtr, FileDescriptor val);
 
     private static native byte[] nativeCreateByteArray(long nativePtr);
@@ -317,8 +326,13 @@ public final class Parcel {
     private static native float nativeReadFloat(long nativePtr);
     @CriticalNative
     private static native double nativeReadDouble(long nativePtr);
-    static native String nativeReadString(long nativePtr);
+    @FastNative
+    private static native String nativeReadString8(long nativePtr);
+    @FastNative
+    private static native String nativeReadString16(long nativePtr);
+    @FastNative
     private static native IBinder nativeReadStrongBinder(long nativePtr);
+    @FastNative
     private static native FileDescriptor nativeReadFileDescriptor(long nativePtr);
 
     private static native long nativeCreate();
@@ -376,8 +390,12 @@ public final class Parcel {
          * must use {@link #writeStringNoHelper(String)} to avoid
          * infinity recursive calls.
          */
-        public void writeString(Parcel p, String s) {
-            nativeWriteString(p.mNativePtr, s);
+        public void writeString8(Parcel p, String s) {
+            p.writeString8NoHelper(s);
+        }
+
+        public void writeString16(Parcel p, String s) {
+            p.writeString16NoHelper(s);
         }
 
         /**
@@ -385,8 +403,12 @@ public final class Parcel {
          * must use {@link #readStringNoHelper()} to avoid
          * infinity recursive calls.
          */
-        public String readString(Parcel p) {
-            return nativeReadString(p.mNativePtr);
+        public String readString8(Parcel p) {
+            return p.readString8NoHelper();
+        }
+
+        public String readString16(Parcel p) {
+            return p.readString16NoHelper();
         }
     }
 
@@ -749,7 +771,17 @@ public final class Parcel {
      * growing dataCapacity() if needed.
      */
     public final void writeString(@Nullable String val) {
-        mReadWriteHelper.writeString(this, val);
+        writeString16(val);
+    }
+
+    /** {@hide} */
+    public final void writeString8(@Nullable String val) {
+        mReadWriteHelper.writeString8(this, val);
+    }
+
+    /** {@hide} */
+    public final void writeString16(@Nullable String val) {
+        mReadWriteHelper.writeString16(this, val);
     }
 
     /**
@@ -760,7 +792,17 @@ public final class Parcel {
      * @hide
      */
     public void writeStringNoHelper(@Nullable String val) {
-        nativeWriteString(mNativePtr, val);
+        writeString16NoHelper(val);
+    }
+
+    /** {@hide} */
+    public void writeString8NoHelper(@Nullable String val) {
+        nativeWriteString8(mNativePtr, val);
+    }
+
+    /** {@hide} */
+    public void writeString16NoHelper(@Nullable String val) {
+        nativeWriteString16(mNativePtr, val);
     }
 
     /**
@@ -1354,24 +1396,39 @@ public final class Parcel {
     }
 
     public final void writeStringArray(@Nullable String[] val) {
+        writeString16Array(val);
+    }
+
+    @Nullable
+    public final String[] createStringArray() {
+        return createString16Array();
+    }
+
+    public final void readStringArray(@NonNull String[] val) {
+        readString16Array(val);
+    }
+
+    /** {@hide} */
+    public final void writeString8Array(@Nullable String[] val) {
         if (val != null) {
             int N = val.length;
             writeInt(N);
             for (int i=0; i<N; i++) {
-                writeString(val[i]);
+                writeString8(val[i]);
             }
         } else {
             writeInt(-1);
         }
     }
 
+    /** {@hide} */
     @Nullable
-    public final String[] createStringArray() {
+    public final String[] createString8Array() {
         int N = readInt();
         if (N >= 0) {
             String[] val = new String[N];
             for (int i=0; i<N; i++) {
-                val[i] = readString();
+                val[i] = readString8();
             }
             return val;
         } else {
@@ -1379,11 +1436,52 @@ public final class Parcel {
         }
     }
 
-    public final void readStringArray(@NonNull String[] val) {
+    /** {@hide} */
+    public final void readString8Array(@NonNull String[] val) {
         int N = readInt();
         if (N == val.length) {
             for (int i=0; i<N; i++) {
-                val[i] = readString();
+                val[i] = readString8();
+            }
+        } else {
+            throw new RuntimeException("bad array lengths");
+        }
+    }
+
+    /** {@hide} */
+    public final void writeString16Array(@Nullable String[] val) {
+        if (val != null) {
+            int N = val.length;
+            writeInt(N);
+            for (int i=0; i<N; i++) {
+                writeString16(val[i]);
+            }
+        } else {
+            writeInt(-1);
+        }
+    }
+
+    /** {@hide} */
+    @Nullable
+    public final String[] createString16Array() {
+        int N = readInt();
+        if (N >= 0) {
+            String[] val = new String[N];
+            for (int i=0; i<N; i++) {
+                val[i] = readString16();
+            }
+            return val;
+        } else {
+            return null;
+        }
+    }
+
+    /** {@hide} */
+    public final void readString16Array(@NonNull String[] val) {
+        int N = readInt();
+        if (N == val.length) {
+            for (int i=0; i<N; i++) {
+                val[i] = readString16();
             }
         } else {
             throw new RuntimeException("bad array lengths");
@@ -1806,11 +1904,188 @@ public final class Parcel {
         p.writeToParcel(this, parcelableFlags);
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
+    /**
+     * Flatten the name of the class of the Parcelable into this Parcel.
+     *
+     * @param p The Parcelable object to be written.
+     * @see #readParcelableCreator
+     */
     public final void writeParcelableCreator(@NonNull Parcelable p) {
         String name = p.getClass().getName();
         writeString(name);
+    }
+
+    /**
+     * A map used by {@link #maybeWriteSquashed} to keep track of what parcelables have
+     * been seen, and what positions they were written. The value is the absolute position of
+     * each parcelable.
+     */
+    private ArrayMap<Parcelable, Integer> mWrittenSquashableParcelables;
+
+    private void ensureWrittenSquashableParcelables() {
+        if (mWrittenSquashableParcelables != null) {
+            return;
+        }
+        mWrittenSquashableParcelables = new ArrayMap<>();
+    }
+
+    private boolean mAllowSquashing = false;
+
+    /**
+     * Allow "squashing" writes in {@link #maybeWriteSquashed}. This allows subsequent calls to
+     * {@link #maybeWriteSquashed(Parcelable)} to "squash" the same instances into one in a Parcel.
+     *
+     * Typically, this method is called at the beginning of {@link Parcelable#writeToParcel}. The
+     * caller must retain the return value from this method and call {@link #restoreAllowSquashing}
+     * with it.
+     *
+     * See {@link #maybeWriteSquashed(Parcelable)} for the details.
+     *
+     * @see #restoreAllowSquashing(boolean)
+     * @see #maybeWriteSquashed(Parcelable)
+     * @see #readSquashed(SquashReadHelper)
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean allowSquashing() {
+        boolean previous = mAllowSquashing;
+        mAllowSquashing = true;
+        return previous;
+    }
+
+    /**
+     * @see #allowSquashing()
+     * @hide
+     */
+    @TestApi
+    public void restoreAllowSquashing(boolean previous) {
+        mAllowSquashing = previous;
+        if (!mAllowSquashing) {
+            mWrittenSquashableParcelables = null;
+        }
+    }
+
+    private void resetSqaushingState() {
+        if (mAllowSquashing) {
+            Slog.wtf(TAG, "allowSquashing wasn't restored.");
+        }
+        mWrittenSquashableParcelables = null;
+        mReadSquashableParcelables = null;
+        mAllowSquashing = false;
+    }
+
+    /**
+     * A map used by {@link #readSquashed} to cache parcelables. It's a map from
+     * an absolute position in a Parcel to the parcelable stored at the position.
+     */
+    private ArrayMap<Integer, Parcelable> mReadSquashableParcelables;
+
+    private void ensureReadSquashableParcelables() {
+        if (mReadSquashableParcelables != null) {
+            return;
+        }
+        mReadSquashableParcelables = new ArrayMap<>();
+    }
+
+    /**
+     * Write a parcelable with "squash" -- that is, when the same instance is written to the
+     * same Parcelable multiple times, instead of writing the entire instance multiple times,
+     * only write it once, and in subsequent writes we'll only write the offset to the original
+     * object.
+     *
+     * This approach does not work of the resulting Parcel is copied with {@link #appendFrom} with
+     * a non-zero offset, so we do not enable this behavior by default. Instead, we only enable
+     * it between {@link #allowSquashing} and {@link #restoreAllowSquashing}, in order to make sure
+     * we only do so within each "top level" Parcelable.
+     *
+     * Usage: Use this method in {@link Parcelable#writeToParcel}.
+     * If this method returns TRUE, it's a subsequent call, and the offset is already written,
+     * so the caller doesn't have to do anything. If this method returns FALSE, it's the first
+     * time for the instance to be written to this parcel. The caller has to proceed with its
+     * {@link Parcelable#writeToParcel}.
+     *
+     * (See {@code ApplicationInfo} for the example.)
+     *
+     * @param p the target Parcelable to write.
+     *
+     * @see #allowSquashing()
+     * @see #restoreAllowSquashing(boolean)
+     * @see #readSquashed(SquashReadHelper)
+     *
+     * @hide
+     */
+    public boolean maybeWriteSquashed(@NonNull Parcelable p) {
+        if (!mAllowSquashing) {
+            // Don't squash, and don't put it in the map either.
+            writeInt(0);
+            return false;
+        }
+        ensureWrittenSquashableParcelables();
+        final Integer firstPos = mWrittenSquashableParcelables.get(p);
+        if (firstPos != null) {
+            // Already written.
+            // Write the relative offset from the current position to the first position.
+            final int pos = dataPosition();
+
+            // We want the offset from the next byte of this integer, so we need to +4.
+            writeInt(pos - firstPos + 4);
+            return true;
+        }
+        // First time seen, write a marker.
+        writeInt(0);
+
+        // Remember the position.
+        final int pos = dataPosition();
+        mWrittenSquashableParcelables.put(p, pos);
+
+        // Return false and let the caller actually write the content.
+        return false;
+    }
+
+    /**
+     * Helper function that's used by {@link #readSquashed(SquashReadHelper)}
+     * @hide
+     */
+    public interface SquashReadHelper<T> {
+        /** Read and instantiate {@code T} from a Parcel. */
+        @NonNull
+        T readRawParceled(@NonNull Parcel p);
+    }
+
+    /**
+     * Read a {@link Parcelable} that's written with {@link #maybeWriteSquashed}.
+     *
+     * @param reader a callback function that instantiates an instance from a parcel.
+     * Typicallly, a lambda to the instructor that takes a {@link Parcel} is passed.
+     *
+     * @see #maybeWriteSquashed(Parcelable)
+     *
+     * @hide
+     */
+    @SuppressWarnings("unchecked")
+    @Nullable
+    public <T extends Parcelable> T readSquashed(SquashReadHelper<T> reader) {
+        final int offset = readInt();
+        final int pos = dataPosition();
+
+        if (offset == 0) {
+            // First time read. Unparcel, and remember it.
+            final T p = reader.readRawParceled(this);
+            ensureReadSquashableParcelables();
+            mReadSquashableParcelables.put(pos, p);
+            return p;
+        }
+        // Subsequent read.
+        final int firstAbsolutePos = pos - offset;
+
+        final Parcelable p = mReadSquashableParcelables.get(firstAbsolutePos);
+        if (p == null) {
+            Slog.wtfStack(TAG, "Map doesn't contain offset "
+                    + firstAbsolutePos
+                    + " : contains=" + new ArrayList<>(mReadSquashableParcelables.keySet()));
+        }
+        return (T) p;
     }
 
     /**
@@ -1871,6 +2146,45 @@ public final class Parcel {
      * @see #readException
      */
     public final void writeException(@NonNull Exception e) {
+        AppOpsManager.prefixParcelWithAppOpsIfNeeded(this);
+
+        int code = getExceptionCode(e);
+        writeInt(code);
+        StrictMode.clearGatheredViolations();
+        if (code == 0) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            throw new RuntimeException(e);
+        }
+        writeString(e.getMessage());
+        final long timeNow = sParcelExceptionStackTrace ? SystemClock.elapsedRealtime() : 0;
+        if (sParcelExceptionStackTrace && (timeNow - sLastWriteExceptionStackTrace
+                > WRITE_EXCEPTION_STACK_TRACE_THRESHOLD_MS)) {
+            sLastWriteExceptionStackTrace = timeNow;
+            writeStackTrace(e);
+        } else {
+            writeInt(0);
+        }
+        switch (code) {
+            case EX_SERVICE_SPECIFIC:
+                writeInt(((ServiceSpecificException) e).errorCode);
+                break;
+            case EX_PARCELABLE:
+                // Write parceled exception prefixed by length
+                final int sizePosition = dataPosition();
+                writeInt(0);
+                writeParcelable((Parcelable) e, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+                final int payloadPosition = dataPosition();
+                setDataPosition(sizePosition);
+                writeInt(payloadPosition - sizePosition);
+                setDataPosition(payloadPosition);
+                break;
+        }
+    }
+
+    /** @hide */
+    public static int getExceptionCode(@NonNull Throwable e) {
         int code = 0;
         if (e instanceof Parcelable
                 && (e.getClass().getClassLoader() == Parcelable.class.getClassLoader())) {
@@ -1894,51 +2208,25 @@ public final class Parcel {
         } else if (e instanceof ServiceSpecificException) {
             code = EX_SERVICE_SPECIFIC;
         }
-        writeInt(code);
-        StrictMode.clearGatheredViolations();
-        if (code == 0) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            }
-            throw new RuntimeException(e);
+        return code;
+    }
+
+    /** @hide */
+    public void writeStackTrace(@NonNull Throwable e) {
+        final int sizePosition = dataPosition();
+        writeInt(0); // Header size will be filled in later
+        StackTraceElement[] stackTrace = e.getStackTrace();
+        final int truncatedSize = Math.min(stackTrace.length, 5);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < truncatedSize; i++) {
+            sb.append("\tat ").append(stackTrace[i]).append('\n');
         }
-        writeString(e.getMessage());
-        final long timeNow = sParcelExceptionStackTrace ? SystemClock.elapsedRealtime() : 0;
-        if (sParcelExceptionStackTrace && (timeNow - sLastWriteExceptionStackTrace
-                > WRITE_EXCEPTION_STACK_TRACE_THRESHOLD_MS)) {
-            sLastWriteExceptionStackTrace = timeNow;
-            final int sizePosition = dataPosition();
-            writeInt(0); // Header size will be filled in later
-            StackTraceElement[] stackTrace = e.getStackTrace();
-            final int truncatedSize = Math.min(stackTrace.length, 5);
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < truncatedSize; i++) {
-                sb.append("\tat ").append(stackTrace[i]).append('\n');
-            }
-            writeString(sb.toString());
-            final int payloadPosition = dataPosition();
-            setDataPosition(sizePosition);
-            // Write stack trace header size. Used in native side to skip the header
-            writeInt(payloadPosition - sizePosition);
-            setDataPosition(payloadPosition);
-        } else {
-            writeInt(0);
-        }
-        switch (code) {
-            case EX_SERVICE_SPECIFIC:
-                writeInt(((ServiceSpecificException) e).errorCode);
-                break;
-            case EX_PARCELABLE:
-                // Write parceled exception prefixed by length
-                final int sizePosition = dataPosition();
-                writeInt(0);
-                writeParcelable((Parcelable) e, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
-                final int payloadPosition = dataPosition();
-                setDataPosition(sizePosition);
-                writeInt(payloadPosition - sizePosition);
-                setDataPosition(payloadPosition);
-                break;
-        }
+        writeString(sb.toString());
+        final int payloadPosition = dataPosition();
+        setDataPosition(sizePosition);
+        // Write stack trace header size. Used in native side to skip the header
+        writeInt(payloadPosition - sizePosition);
+        setDataPosition(payloadPosition);
     }
 
     /**
@@ -1949,6 +2237,8 @@ public final class Parcel {
      * @see #readException
      */
     public final void writeNoException() {
+        AppOpsManager.prefixParcelWithAppOpsIfNeeded(this);
+
         // Despite the name of this function ("write no exception"),
         // it should instead be thought of as "write the RPC response
         // header", but because this function name is written out by
@@ -1956,14 +2246,14 @@ public final class Parcel {
         //
         // The response header, in the non-exception case (see also
         // writeException above, also called by the AIDL compiler), is
-        // either a 0 (the default case), or EX_HAS_REPLY_HEADER if
+        // either a 0 (the default case), or EX_HAS_STRICTMODE_REPLY_HEADER if
         // StrictMode has gathered up violations that have occurred
         // during a Binder call, in which case we write out the number
         // of violations and their details, serialized, before the
         // actual RPC respons data.  The receiving end of this is
         // readException(), below.
         if (StrictMode.hasGatheredViolations()) {
-            writeInt(EX_HAS_REPLY_HEADER);
+            writeInt(EX_HAS_STRICTMODE_REPLY_HEADER);
             final int sizePosition = dataPosition();
             writeInt(0);  // total size of fat header, to be filled in later
             StrictMode.writeGatheredViolationsToParcel(this);
@@ -2010,7 +2300,13 @@ public final class Parcel {
     @TestApi
     public final int readExceptionCode() {
         int code = readInt();
-        if (code == EX_HAS_REPLY_HEADER) {
+        if (code == EX_HAS_NOTED_APPOPS_REPLY_HEADER) {
+            AppOpsManager.readAndLogNotedAppops(this);
+            // Read next header or real exception if there is no more header
+            code = readInt();
+        }
+
+        if (code == EX_HAS_STRICTMODE_REPLY_HEADER) {
             int headerSize = readInt();
             if (headerSize == 0) {
                 Log.e(TAG, "Unexpected zero-sized Parcel reply header.");
@@ -2046,14 +2342,7 @@ public final class Parcel {
         if (remoteStackTrace != null) {
             RemoteException cause = new RemoteException(
                     "Remote stack trace:\n" + remoteStackTrace, null, false, false);
-            try {
-                Throwable rootCause = ExceptionUtils.getRootCause(e);
-                if (rootCause != null) {
-                    rootCause.initCause(cause);
-                }
-            } catch (RuntimeException ex) {
-                Log.e(TAG, "Cannot set cause " + cause + " for " + e, ex);
-            }
+            ExceptionUtils.appendCause(e, cause);
         }
         SneakyThrow.sneakyThrow(e);
     }
@@ -2065,6 +2354,14 @@ public final class Parcel {
      * @param msg The exception message.
      */
     private Exception createException(int code, String msg) {
+        Exception exception = createExceptionOrNull(code, msg);
+        return exception != null
+                ? exception
+                : new RuntimeException("Unknown exception code: " + code + " msg " + msg);
+    }
+
+    /** @hide */
+    public Exception createExceptionOrNull(int code, String msg) {
         switch (code) {
             case EX_PARCELABLE:
                 if (readInt() > 0) {
@@ -2088,9 +2385,9 @@ public final class Parcel {
                 return new UnsupportedOperationException(msg);
             case EX_SERVICE_SPECIFIC:
                 return new ServiceSpecificException(readInt(), msg);
+            default:
+                return null;
         }
-        return new RuntimeException("Unknown exception code: " + code
-                + " msg " + msg);
     }
 
     /**
@@ -2128,7 +2425,17 @@ public final class Parcel {
      */
     @Nullable
     public final String readString() {
-        return mReadWriteHelper.readString(this);
+        return readString16();
+    }
+
+    /** {@hide} */
+    public final @Nullable String readString8() {
+        return mReadWriteHelper.readString8(this);
+    }
+
+    /** {@hide} */
+    public final @Nullable String readString16() {
+        return mReadWriteHelper.readString16(this);
     }
 
     /**
@@ -2138,9 +2445,18 @@ public final class Parcel {
      *
      * @hide
      */
-    @Nullable
-    public String readStringNoHelper() {
-        return nativeReadString(mNativePtr);
+    public @Nullable String readStringNoHelper() {
+        return readString16NoHelper();
+    }
+
+    /** {@hide} */
+    public @Nullable String readString8NoHelper() {
+        return nativeReadString8(mNativePtr);
+    }
+
+    /** {@hide} */
+    public @Nullable String readString16NoHelper() {
+        return nativeReadString16(mNativePtr);
     }
 
     /**
@@ -2381,20 +2697,7 @@ public final class Parcel {
     @UnsupportedAppUsage
     @Nullable
     public final String[] readStringArray() {
-        String[] array = null;
-
-        int length = readInt();
-        if (length >= 0)
-        {
-            array = new String[length];
-
-            for (int i = 0 ; i < length ; i++)
-            {
-                array[i] = readString();
-            }
-        }
-
-        return array;
+        return createString16Array();
     }
 
     /**
@@ -2992,8 +3295,19 @@ public final class Parcel {
         return (T) creator.createFromParcel(this);
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
+    /**
+     * Read and return a Parcelable.Creator from the parcel. The given class loader will be used to
+     * load the {@link Parcelable.Creator}. If it is null, the default class loader will be used.
+     *
+     * @param loader A ClassLoader from which to instantiate the {@link Parcelable.Creator}
+     * object, or null for the default class loader.
+     * @return the previously written {@link Parcelable.Creator}, or null if a null Creator was
+     * written.
+     * @throws BadParcelableException Throws BadParcelableException if there was an error trying to
+     * read the {@link Parcelable.Creator}.
+     *
+     * @see #writeParcelableCreator
+     */
     @Nullable
     public final Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader loader) {
         String name = readString();
@@ -3201,6 +3515,7 @@ public final class Parcel {
     }
 
     private void freeBuffer() {
+        resetSqaushingState();
         if (mOwnsNativeParcelObject) {
             updateNativeSize(nativeFreeBuffer(mNativePtr));
         }
@@ -3208,6 +3523,7 @@ public final class Parcel {
     }
 
     private void destroy() {
+        resetSqaushingState();
         if (mNativePtr != 0) {
             if (mOwnsNativeParcelObject) {
                 nativeDestroy(mNativePtr);
@@ -3215,7 +3531,6 @@ public final class Parcel {
             }
             mNativePtr = 0;
         }
-        mReadWriteHelper = null;
     }
 
     @Override

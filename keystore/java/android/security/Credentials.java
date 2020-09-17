@@ -71,6 +71,9 @@ public class Credentials {
     /** Key prefix for WIFI. */
     public static final String WIFI = "WIFI_";
 
+    /** Key prefix for App Source certificates. */
+    public static final String APP_SOURCE_CERTIFICATE = "FSV_";
+
     /** Key containing suffix of lockdown VPN profile. */
     public static final String LOCKDOWN_VPN = "LOCKDOWN_VPN";
 
@@ -82,6 +85,9 @@ public class Credentials {
 
     /** Name of WIFI certificate usage. */
     public static final String CERTIFICATE_USAGE_WIFI = "wifi";
+
+    /** Name of App Source certificate usage. */
+    public static final String CERTIFICATE_USAGE_APP_SOURCE = "appsrc";
 
     /** Data type for public keys. */
     public static final String EXTRA_PUBLIC_KEY = "KEY";

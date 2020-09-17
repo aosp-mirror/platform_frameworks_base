@@ -16,7 +16,6 @@
 
 package com.android.server.net;
 
-import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.NETWORK_STATS_PROVIDER;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.UPDATE_DEVICE_STATS;
@@ -48,6 +47,7 @@ import static android.net.NetworkTemplate.buildTemplateMobileWildcard;
 import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
 import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
+import static android.net.TrafficStats.UNSUPPORTED;
 import static android.os.Trace.TRACE_TAG_NETWORK;
 import static android.provider.Settings.Global.NETSTATS_AUGMENT_ENABLED;
 import static android.provider.Settings.Global.NETSTATS_COMBINE_SUBTYPE_ENABLED;
@@ -892,7 +892,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @Override
     public NetworkStats getDataLayerSnapshotForUid(int uid) throws RemoteException {
         if (Binder.getCallingUid() != uid) {
-            mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+            Log.w(TAG, "Snapshots only available for calling UID");
+            return new NetworkStats(SystemClock.elapsedRealtime(), 0);
         }
 
         // TODO: switch to data layer stats once kernel exports
@@ -1068,6 +1069,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public long getUidStats(int uid, int type) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != android.os.Process.SYSTEM_UID && callingUid != uid) {
+            return UNSUPPORTED;
+        }
         return nativeGetUidStat(uid, type, checkBpfStatsEnable());
     }
 
@@ -1851,10 +1856,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_INTERFACES, mActiveIfaces);
         dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_UID_INTERFACES, mActiveUidIfaces);
-        mDevRecorder.writeToProtoLocked(proto, NetworkStatsServiceDumpProto.DEV_STATS);
-        mXtRecorder.writeToProtoLocked(proto, NetworkStatsServiceDumpProto.XT_STATS);
-        mUidRecorder.writeToProtoLocked(proto, NetworkStatsServiceDumpProto.UID_STATS);
-        mUidTagRecorder.writeToProtoLocked(proto, NetworkStatsServiceDumpProto.UID_TAG_STATS);
+        mDevRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.DEV_STATS);
+        mXtRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.XT_STATS);
+        mUidRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.UID_STATS);
+        mUidTagRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.UID_TAG_STATS);
 
         proto.flush();
     }
@@ -1865,7 +1870,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             final long start = proto.start(tag);
 
             proto.write(NetworkInterfaceProto.INTERFACE, ifaces.keyAt(i));
-            ifaces.valueAt(i).writeToProto(proto, NetworkInterfaceProto.IDENTITIES);
+            ifaces.valueAt(i).dumpDebug(proto, NetworkInterfaceProto.IDENTITIES);
 
             proto.end(start);
         }

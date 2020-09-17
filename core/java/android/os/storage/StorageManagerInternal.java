@@ -16,8 +16,11 @@
 
 package android.os.storage;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IVold;
+
+import java.util.Set;
 
 /**
  * Mount service local interface.
@@ -97,6 +100,13 @@ public abstract class StorageManagerInternal {
     }
 
     /**
+     * Create storage directories if it does not exist.
+     * Return true if the directories were setup correctly, otherwise false.
+     */
+    public abstract boolean prepareStorageDirs(int userId, Set<String> packageList,
+            String processName);
+
+    /**
      * Add a listener to listen to reset event in StorageManagerService.
      *
      * @param listener The listener that will be notified on reset events.
@@ -109,4 +119,35 @@ public abstract class StorageManagerInternal {
      */
     public abstract void onAppOpsChanged(int code, int uid,
             @Nullable String packageName, int mode);
+
+    /**
+     * Asks the StorageManager to reset all state for the provided user; this will result
+     * in the unmounting for all volumes of the user, and, if the user is still running, the
+     * volumes will be re-mounted as well.
+     *
+     * @param userId the userId for which to reset storage
+     */
+    public abstract void resetUser(int userId);
+
+    /**
+     * Returns {@code true} if the immediate last installed version of an app with {@code uid} had
+     * legacy storage, {@code false} otherwise.
+     */
+    public abstract boolean hasLegacyExternalStorage(int uid);
+
+    /**
+     * Makes sure app-private data directories on external storage are setup correctly
+     * after an application is installed or upgraded. The main use for this is OBB dirs,
+     * which can be created/modified by the installer.
+     *
+     * @param packageName the package name of the package
+     * @param uid the uid of the package
+     */
+    public abstract void prepareAppDataAfterInstall(@NonNull String packageName, int uid);
+
+
+    /**
+     * Return true if uid is external storage service.
+     */
+    public abstract boolean isExternalStorageService(int uid);
 }

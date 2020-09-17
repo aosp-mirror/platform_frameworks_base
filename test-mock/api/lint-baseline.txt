@@ -21,10 +21,6 @@ MissingNullability: android.test.mock.MockContentProvider#getStreamTypes(android
     Missing nullability on parameter `url` in method `getStreamTypes`
 MissingNullability: android.test.mock.MockContentProvider#getStreamTypes(android.net.Uri, String) parameter #1:
     Missing nullability on parameter `mimeTypeFilter` in method `getStreamTypes`
-MissingNullability: android.test.mock.MockContentResolver#notifyChange(android.net.Uri, android.database.ContentObserver, boolean) parameter #0:
-    Missing nullability on parameter `uri` in method `notifyChange`
-MissingNullability: android.test.mock.MockContentResolver#notifyChange(android.net.Uri, android.database.ContentObserver, boolean) parameter #1:
-    Missing nullability on parameter `observer` in method `notifyChange`
 MissingNullability: android.test.mock.MockContext#bindIsolatedService(android.content.Intent, int, String, java.util.concurrent.Executor, android.content.ServiceConnection) parameter #0:
     Missing nullability on parameter `service` in method `bindIsolatedService`
 MissingNullability: android.test.mock.MockContext#bindIsolatedService(android.content.Intent, int, String, java.util.concurrent.Executor, android.content.ServiceConnection) parameter #2:
@@ -39,6 +35,10 @@ MissingNullability: android.test.mock.MockContext#bindService(android.content.In
     Missing nullability on parameter `executor` in method `bindService`
 MissingNullability: android.test.mock.MockContext#bindService(android.content.Intent, int, java.util.concurrent.Executor, android.content.ServiceConnection) parameter #3:
     Missing nullability on parameter `conn` in method `bindService`
+MissingNullability: android.test.mock.MockContext#createWindowContext(int, android.os.Bundle) parameter #1:
+    Missing nullability on parameter `options` in method `createWindowContext`
+MissingNullability: android.test.mock.MockContext#getDisplay():
+    Missing nullability on method `getDisplay` return
 MissingNullability: android.test.mock.MockContext#getMainExecutor():
     Missing nullability on method `getMainExecutor` return
 MissingNullability: android.test.mock.MockContext#sendOrderedBroadcast(android.content.Intent, String, String, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle) parameter #0:

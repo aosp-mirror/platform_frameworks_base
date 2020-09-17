@@ -60,8 +60,8 @@
         <group gid="log" />
     </permission>
 
-    <permission name="android.permission.WRITE_MEDIA_STORAGE" >
-        <group gid="media_rw" />
+    <permission name="android.permission.MANAGE_EXTERNAL_STORAGE" >
+        <group gid="external_storage" />
     </permission>
 
     <permission name="android.permission.ACCESS_MTP" >
@@ -171,6 +171,7 @@
     <assign-permission name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE" uid="cameraserver" />
     <assign-permission name="android.permission.PACKAGE_USAGE_STATS" uid="cameraserver" />
     <assign-permission name="android.permission.WATCH_APPOPS" uid="cameraserver" />
+    <assign-permission name="android.permission.MANAGE_APP_OPS_MODES" uid="cameraserver" />
 
     <assign-permission name="android.permission.ACCESS_SURFACE_FLINGER" uid="graphics" />
 
@@ -178,21 +179,26 @@
     <assign-permission name="android.permission.PACKAGE_USAGE_STATS" uid="incidentd" />
     <assign-permission name="android.permission.INTERACT_ACROSS_USERS" uid="incidentd" />
     <assign-permission name="android.permission.REQUEST_INCIDENT_REPORT_APPROVAL" uid="incidentd" />
+    <assign-permission name="android.permission.PEEK_DROPBOX_DATA" uid="incidentd" />
 
     <assign-permission name="android.permission.ACCESS_LOWPAN_STATE" uid="lowpan" />
     <assign-permission name="android.permission.MANAGE_LOWPAN_INTERFACES" uid="lowpan" />
 
-    <assign-permission name="android.permission.BATTERY_STATS" uid="statsd" />
     <assign-permission name="android.permission.DUMP" uid="statsd" />
     <assign-permission name="android.permission.PACKAGE_USAGE_STATS" uid="statsd" />
     <assign-permission name="android.permission.STATSCOMPANION" uid="statsd" />
     <assign-permission name="android.permission.UPDATE_APP_OPS_STATS" uid="statsd" />
+
+    <assign-permission name="android.permission.REGISTER_STATS_PULL_ATOM" uid="gpu_service" />
 
     <split-permission name="android.permission.ACCESS_FINE_LOCATION">
         <new-permission name="android.permission.ACCESS_COARSE_LOCATION" />
     </split-permission>
     <split-permission name="android.permission.WRITE_EXTERNAL_STORAGE">
         <new-permission name="android.permission.READ_EXTERNAL_STORAGE" />
+    </split-permission>
+    <split-permission name="android.permission.READ_PRIVILEGED_PHONE_STATE">
+        <new-permission name="android.permission.READ_PHONE_STATE" />
     </split-permission>
     <split-permission name="android.permission.READ_CONTACTS"
                       targetSdk="16">
@@ -243,6 +249,7 @@
     <allow-in-data-usage-save package="com.android.providers.downloads" />
 
     <!-- This is a core platform component that needs to freely run in the background -->
+    <allow-in-power-save package="com.android.cellbroadcastreceiver.module" />
     <allow-in-power-save package="com.android.cellbroadcastreceiver" />
     <allow-in-power-save package="com.android.shell" />
 

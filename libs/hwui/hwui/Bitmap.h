@@ -23,7 +23,11 @@
 #include <SkImageInfo.h>
 #include <SkPixelRef.h>
 #include <cutils/compiler.h>
-#include <ui/GraphicBuffer.h>
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
+#include <android/hardware_buffer.h>
+#endif
+
+class SkWStream;
 
 namespace android {
 
@@ -71,11 +75,17 @@ public:
     /* The createFrom factories construct a new Bitmap object by wrapping the already allocated
      * memory that is provided as an input param.
      */
-    static sk_sp<Bitmap> createFrom(sp<GraphicBuffer> graphicBuffer,
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
+    static sk_sp<Bitmap> createFrom(AHardwareBuffer* hardwareBuffer,
+                                    sk_sp<SkColorSpace> colorSpace,
+                                    BitmapPalette palette = BitmapPalette::Unknown);
+
+    static sk_sp<Bitmap> createFrom(AHardwareBuffer* hardwareBuffer,
                                     SkColorType colorType,
                                     sk_sp<SkColorSpace> colorSpace,
-                                    SkAlphaType alphaType = kPremul_SkAlphaType,
-                                    BitmapPalette palette = BitmapPalette::Unknown);
+                                    SkAlphaType alphaType,
+                                    BitmapPalette palette);
+#endif
     static sk_sp<Bitmap> createFrom(const SkImageInfo& info, size_t rowBytes, int fd, void* addr,
                                     size_t size, bool readOnly);
     static sk_sp<Bitmap> createFrom(const SkImageInfo&, SkPixelRef&);
@@ -105,7 +115,9 @@ public:
 
     PixelStorageType pixelStorageType() const { return mPixelStorageType; }
 
-    GraphicBuffer* graphicBuffer();
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
+     AHardwareBuffer* hardwareBuffer();
+#endif
 
     /**
      * Creates or returns a cached SkImage and is safe to be invoked from either
@@ -128,6 +140,24 @@ public:
         return mPalette;
     }
 
+  // returns true if rowBytes * height can be represented by a positive int32_t value
+  // and places that value in size.
+  static bool computeAllocationSize(size_t rowBytes, int height, size_t* size);
+
+  // These must match the int values of CompressFormat in Bitmap.java, as well as
+  // AndroidBitmapCompressFormat.
+  enum class JavaCompressFormat {
+    Jpeg = 0,
+    Png = 1,
+    Webp = 2,
+    WebpLossy = 3,
+    WebpLossless = 4,
+  };
+
+  bool compress(JavaCompressFormat format, int32_t quality, SkWStream* stream);
+
+  static bool compress(const SkBitmap& bitmap, JavaCompressFormat format,
+                       int32_t quality, SkWStream* stream);
 private:
     static sk_sp<Bitmap> allocateAshmemBitmap(size_t size, const SkImageInfo& i, size_t rowBytes);
     static sk_sp<Bitmap> allocateHeapBitmap(size_t size, const SkImageInfo& i, size_t rowBytes);
@@ -136,7 +166,16 @@ private:
     Bitmap(void* address, void* context, FreeFunc freeFunc, const SkImageInfo& info,
            size_t rowBytes);
     Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes);
-    Bitmap(GraphicBuffer* buffer, const SkImageInfo& info, BitmapPalette palette);
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
+    Bitmap(AHardwareBuffer* buffer, const SkImageInfo& info, size_t rowBytes,
+           BitmapPalette palette);
+
+    // Common code for the two public facing createFrom(AHardwareBuffer*, ...)
+    // methods.
+    // bufferDesc is only used to compute rowBytes.
+    static sk_sp<Bitmap> createFrom(AHardwareBuffer* hardwareBuffer, const SkImageInfo& info,
+                                    const AHardwareBuffer_Desc& bufferDesc, BitmapPalette palette);
+#endif
 
     virtual ~Bitmap();
     void* getStorage() const;
@@ -165,9 +204,11 @@ private:
             void* address;
             size_t size;
         } heap;
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
         struct {
-            GraphicBuffer* buffer;
+            AHardwareBuffer* buffer;
         } hardware;
+#endif
     } mPixelStorage;
 
     sk_sp<SkImage> mImage;  // Cache is used only for HW Bitmaps with Skia pipeline.

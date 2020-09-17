@@ -16,9 +16,11 @@
 
 #pragma once
 
-#include <android/os/IStatsPullerCallback.h>
-
+#include <aidl/android/os/IPullAtomCallback.h>
 #include "StatsPuller.h"
+
+using aidl::android::os::IPullAtomCallback;
+using std::shared_ptr;
 
 namespace android {
 namespace os {
@@ -26,11 +28,17 @@ namespace statsd {
 
 class StatsCallbackPuller : public StatsPuller {
 public:
-    explicit StatsCallbackPuller(int tagId, const sp<IStatsPullerCallback>& callback);
+    explicit StatsCallbackPuller(int tagId, const shared_ptr<IPullAtomCallback>& callback,
+                                 const int64_t coolDownNs, const int64_t timeoutNs,
+                                 const std::vector<int> additiveFields);
 
 private:
-    bool PullInternal(vector<std::shared_ptr<LogEvent> >* data) override;
-    const sp<IStatsPullerCallback> mCallback;
+    bool PullInternal(vector<std::shared_ptr<LogEvent>>* data) override;
+    const shared_ptr<IPullAtomCallback> mCallback;
+
+    FRIEND_TEST(StatsCallbackPullerTest, PullFail);
+    FRIEND_TEST(StatsCallbackPullerTest, PullSuccess);
+    FRIEND_TEST(StatsCallbackPullerTest, PullTimeout);
 };
 
 }  // namespace statsd

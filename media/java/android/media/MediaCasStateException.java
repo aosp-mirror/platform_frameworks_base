@@ -18,8 +18,7 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-
-import android.hardware.cas.V1_0.Status;
+import android.hardware.cas.V1_2.Status;
 
 /**
  * Base class for MediaCas runtime exceptions
@@ -48,39 +47,60 @@ public class MediaCasStateException extends IllegalStateException {
 
         String diagnosticInfo = "";
         switch (err) {
-        case Status.ERROR_CAS_UNKNOWN:
-            diagnosticInfo = "General CAS error";
-            break;
-        case Status.ERROR_CAS_NO_LICENSE:
-            diagnosticInfo = "No license";
-            break;
-        case Status.ERROR_CAS_LICENSE_EXPIRED:
-            diagnosticInfo = "License expired";
-            break;
-        case Status.ERROR_CAS_SESSION_NOT_OPENED:
-            diagnosticInfo = "Session not opened";
-            break;
-        case Status.ERROR_CAS_CANNOT_HANDLE:
-            diagnosticInfo = "Unsupported scheme or data format";
-            break;
-        case Status.ERROR_CAS_INVALID_STATE:
-            diagnosticInfo = "Invalid CAS state";
-            break;
-        case Status.ERROR_CAS_INSUFFICIENT_OUTPUT_PROTECTION:
-            diagnosticInfo = "Insufficient output protection";
-            break;
-        case Status.ERROR_CAS_TAMPER_DETECTED:
-            diagnosticInfo = "Tamper detected";
-            break;
-        case Status.ERROR_CAS_DECRYPT_UNIT_NOT_INITIALIZED:
-            diagnosticInfo = "Not initialized";
-            break;
-        case Status.ERROR_CAS_DECRYPT:
-            diagnosticInfo = "Decrypt error";
-            break;
-        default:
-            diagnosticInfo = "Unknown CAS state exception";
-            break;
+            case Status.ERROR_CAS_UNKNOWN:
+                diagnosticInfo = "General CAS error";
+                break;
+            case Status.ERROR_CAS_NO_LICENSE:
+                diagnosticInfo = "No license";
+                break;
+            case Status.ERROR_CAS_LICENSE_EXPIRED:
+                diagnosticInfo = "License expired";
+                break;
+            case Status.ERROR_CAS_SESSION_NOT_OPENED:
+                diagnosticInfo = "Session not opened";
+                break;
+            case Status.ERROR_CAS_CANNOT_HANDLE:
+                diagnosticInfo = "Unsupported scheme or data format";
+                break;
+            case Status.ERROR_CAS_INVALID_STATE:
+                diagnosticInfo = "Invalid CAS state";
+                break;
+            case Status.ERROR_CAS_INSUFFICIENT_OUTPUT_PROTECTION:
+                diagnosticInfo = "Insufficient output protection";
+                break;
+            case Status.ERROR_CAS_TAMPER_DETECTED:
+                diagnosticInfo = "Tamper detected";
+                break;
+            case Status.ERROR_CAS_DECRYPT_UNIT_NOT_INITIALIZED:
+                diagnosticInfo = "Not initialized";
+                break;
+            case Status.ERROR_CAS_DECRYPT:
+                diagnosticInfo = "Decrypt error";
+                break;
+            case Status.ERROR_CAS_NEED_ACTIVATION:
+                diagnosticInfo = "Need Activation";
+                break;
+            case Status.ERROR_CAS_NEED_PAIRING:
+                diagnosticInfo = "Need Pairing";
+                break;
+            case Status.ERROR_CAS_NO_CARD:
+                diagnosticInfo = "No Card";
+                break;
+            case Status.ERROR_CAS_CARD_MUTE:
+                diagnosticInfo = "Card Muted";
+                break;
+            case Status.ERROR_CAS_CARD_INVALID:
+                diagnosticInfo = "Card Invalid";
+                break;
+            case Status.ERROR_CAS_BLACKOUT:
+                diagnosticInfo = "Blackout";
+                break;
+            case Status.ERROR_CAS_REBOOTING:
+                diagnosticInfo = "Rebooting";
+                break;
+            default:
+                diagnosticInfo = "Unknown CAS state exception";
+                break;
         }
         throw new MediaCasStateException(err, msg,
                 String.format("%s (err=%d)", diagnosticInfo, err));

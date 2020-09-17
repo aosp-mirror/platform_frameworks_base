@@ -32,6 +32,7 @@ import android.view.LayoutInflater;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Observer;
 
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManager.DockEventListener;
@@ -42,6 +43,7 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.InjectionInflationController;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -73,8 +75,8 @@ public final class ClockManager {
     private final ContentObserver mContentObserver =
             new ContentObserver(mMainHandler) {
                 @Override
-                public void onChange(boolean selfChange, Uri uri, int userId) {
-                    super.onChange(selfChange, uri, userId);
+                public void onChange(boolean selfChange, Collection<Uri> uris,
+                        int flags, int userId) {
                     if (Objects.equals(userId,
                             mCurrentUserObservable.getCurrentUser().getValue())) {
                         reload();
@@ -125,9 +127,9 @@ public final class ClockManager {
     @Inject
     public ClockManager(Context context, InjectionInflationController injectionInflater,
             PluginManager pluginManager, SysuiColorExtractor colorExtractor,
-            @Nullable DockManager dockManager) {
+            @Nullable DockManager dockManager, BroadcastDispatcher broadcastDispatcher) {
         this(context, injectionInflater, pluginManager, colorExtractor,
-                context.getContentResolver(), new CurrentUserObservable(context),
+                context.getContentResolver(), new CurrentUserObservable(broadcastDispatcher),
                 new SettingsWrapper(context.getContentResolver()), dockManager);
     }
 
@@ -148,8 +150,6 @@ public final class ClockManager {
         LayoutInflater layoutInflater = injectionInflater.injectable(LayoutInflater.from(context));
 
         addBuiltinClock(() -> new DefaultClockController(res, layoutInflater, colorExtractor));
-        addBuiltinClock(() -> new BubbleClockController(res, layoutInflater, colorExtractor));
-        addBuiltinClock(() -> new AnalogClockController(res, layoutInflater, colorExtractor));
 
         // Store the size of the display for generation of clock preview.
         DisplayMetrics dm = res.getDisplayMetrics();
@@ -210,7 +210,8 @@ public final class ClockManager {
         return mContentObserver;
     }
 
-    private void addBuiltinClock(Supplier<ClockPlugin> pluginSupplier) {
+    @VisibleForTesting
+    void addBuiltinClock(Supplier<ClockPlugin> pluginSupplier) {
         ClockPlugin plugin = pluginSupplier.get();
         mPreviewClocks.addClockPlugin(plugin);
         mBuiltinClocks.add(pluginSupplier);

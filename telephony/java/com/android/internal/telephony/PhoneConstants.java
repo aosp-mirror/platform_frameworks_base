@@ -37,12 +37,9 @@ public class PhoneConstants {
     @UnsupportedAppUsage(implicitMember =
             "values()[Lcom/android/internal/telephony/PhoneConstants$State;")
     public enum State {
-        @UnsupportedAppUsage
-        IDLE,
-        @UnsupportedAppUsage
-        RINGING,
-        @UnsupportedAppUsage
-        OFFHOOK;
+        @UnsupportedAppUsage IDLE,
+        @UnsupportedAppUsage RINGING,
+        @UnsupportedAppUsage OFFHOOK;
     };
 
     /**

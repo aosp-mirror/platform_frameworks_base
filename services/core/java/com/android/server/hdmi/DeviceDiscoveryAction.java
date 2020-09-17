@@ -26,6 +26,7 @@ import com.android.server.hdmi.HdmiControlService.DevicePollingCallback;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Feature action that handles device discovery sequences.
@@ -106,7 +107,7 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
      */
     DeviceDiscoveryAction(HdmiCecLocalDevice source, DeviceDiscoveryCallback callback, int delay) {
         super(source);
-        mCallback = Preconditions.checkNotNull(callback);
+        mCallback = Objects.requireNonNull(callback);
         mDelayPeriod = delay;
     }
 
@@ -333,7 +334,8 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
         current.mPhysicalAddress = HdmiUtils.twoBytesToInt(params);
         current.mPortId = getPortId(current.mPhysicalAddress);
         current.mDeviceType = params[2] & 0xFF;
-        current.mDisplayName = HdmiUtils.getDefaultDeviceName(current.mDeviceType);
+        // Keep display name empty. TIF fallbacks to the service label provided by the package mg.
+        current.mDisplayName = "";
 
         // This is to manager CEC device separately in case they don't have address.
         if (mIsTvDevice) {
@@ -359,17 +361,13 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
             return;
         }
 
-        String displayName = null;
+        String displayName = "";
         try {
-            if (cmd.getOpcode() == Constants.MESSAGE_FEATURE_ABORT) {
-                displayName = HdmiUtils.getDefaultDeviceName(current.mLogicalAddress);
-            } else {
+            if (cmd.getOpcode() != Constants.MESSAGE_FEATURE_ABORT) {
                 displayName = new String(cmd.getParams(), "US-ASCII");
             }
         } catch (UnsupportedEncodingException e) {
             Slog.w(TAG, "Failed to decode display name: " + cmd.toString());
-            // If failed to get display name, use the default name of device.
-            displayName = HdmiUtils.getDefaultDeviceName(current.mLogicalAddress);
         }
         current.mDisplayName = displayName;
         increaseProcessedDeviceCount();

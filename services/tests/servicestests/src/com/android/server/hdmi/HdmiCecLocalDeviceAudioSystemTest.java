@@ -24,6 +24,7 @@ import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_2;
 import static com.android.server.hdmi.Constants.ADDR_TUNER_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
+import static com.android.server.hdmi.Constants.MESSAGE_GIVE_AUDIO_STATUS;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 import static com.android.server.hdmi.HdmiControlService.STANDBY_SCREEN_OFF;
 
@@ -47,6 +48,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
+
 @SmallTest
 @RunWith(JUnit4.class)
 /** Tests for {@link HdmiCecLocalDeviceAudioSystem} class. */
@@ -75,6 +77,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     private HdmiDeviceInfo mDeviceInfo;
     private boolean mArcSupport;
     private HdmiPortInfo[] mHdmiPortInfo;
+    private boolean mWokenUp;
 
     @Before
     public void setUp() {
@@ -137,7 +140,9 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 }
 
                 @Override
-                void wakeUp() {}
+                void wakeUp() {
+                    mWokenUp = true;
+                }
 
                 @Override
                 void invokeDeviceEventListeners(HdmiDeviceInfo device, int status) {
@@ -160,6 +165,8 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                     }
                 }
             };
+
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
 
         mMyLooper = mTestLooper.getLooper();
         mHdmiCecLocalDeviceAudioSystem = new HdmiCecLocalDeviceAudioSystem(mHdmiControlService);
@@ -228,6 +235,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    @Ignore("b/120845532")
     public void handleGiveSystemAudioModeStatus_originalOff() throws Exception {
         HdmiCecMessage expectedMessage =
                 HdmiCecMessageBuilder.buildReportSystemAudioMode(
@@ -297,6 +305,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    @Ignore("b/120845532")
     public void handleSetSystemAudioMode_setOn_orignalOff() throws Exception {
         mMusicMute = true;
         HdmiCecMessage messageSet =
@@ -324,6 +333,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    @Ignore("b/120845532")
     public void handleSystemAudioModeRequest_turnOffByTv() throws Exception {
         assertThat(mMusicMute).isFalse();
         // Check if feature correctly turned off
@@ -493,6 +503,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    @Ignore("b/120845532")
     public void handleRequestArcTerminate_arcIsNotOn() throws Exception {
         assertThat(mHdmiCecLocalDeviceAudioSystem.isArcEnabled()).isFalse();
         HdmiCecMessage message =
@@ -527,6 +538,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    @Ignore("b/151150320")
     public void handleSystemAudioModeRequest_fromNonTV_tVNotSupport() {
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildSystemAudioModeRequest(
@@ -576,6 +588,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    @Ignore("b/151150320")
     public void handleRoutingChange_currentActivePortIsHome() {
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildRoutingChange(ADDR_TV, 0x3000, SELF_PHYSICAL_ADDRESS);
@@ -668,6 +681,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    @Ignore("b/120845532")
     public void handleReportPhysicalAddress_differentPath_addDevice() {
         assertThat(mInvokeDeviceEventState).isNotEqualTo(DEVICE_EVENT_ADD_DEVICE);
         HdmiDeviceInfo oldDevice = new HdmiDeviceInfo(
@@ -688,5 +702,127 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mHdmiCecLocalDeviceAudioSystem
             .getCecDeviceInfo(differentDevice.getLogicalAddress())).isEqualTo(differentDevice);
         assertThat(mInvokeDeviceEventState).isEqualTo(DEVICE_EVENT_ADD_DEVICE);
+    }
+
+    @Test
+    public void doNotWakeUpOnHotPlug_PlugIn() {
+        mWokenUp = false;
+        mHdmiCecLocalDeviceAudioSystem.onHotplug(0, true);
+        assertThat(mWokenUp).isFalse();
+    }
+
+    @Test
+    public void doNotWakeUpOnHotPlug_PlugOut() {
+        mWokenUp = false;
+        mHdmiCecLocalDeviceAudioSystem.onHotplug(0, false);
+        assertThat(mWokenUp).isFalse();
+    }
+
+    @Test
+    public void giveAudioStatus_volumeEnabled() {
+        mMusicVolume = 50;
+        mMusicMaxVolume = 100;
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiCecLocalDeviceAudioSystem.setSystemAudioControlFeatureEnabled(true);
+
+        int volume = mHdmiControlService.getAudioManager()
+                .getStreamVolume(AudioManager.STREAM_MUSIC);
+        boolean mute = mHdmiControlService.getAudioManager()
+                .isStreamMute(AudioManager.STREAM_MUSIC);
+        int maxVolume = mHdmiControlService.getAudioManager()
+                .getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        int scaledVolume = VolumeControlAction.scaleToCecVolume(volume, maxVolume);
+        HdmiCecMessage expected = HdmiCecMessageBuilder.buildReportAudioStatus(ADDR_AUDIO_SYSTEM,
+                ADDR_TV, scaledVolume, mute);
+        HdmiCecMessage featureAbort = HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                ADDR_AUDIO_SYSTEM, ADDR_TV, MESSAGE_GIVE_AUDIO_STATUS, Constants.ABORT_REFUSED);
+
+        HdmiCecMessage giveAudioStatus = HdmiCecMessageBuilder.buildGiveAudioStatus(ADDR_TV,
+                ADDR_AUDIO_SYSTEM);
+        mNativeWrapper.clearResultMessages();
+        boolean handled = mHdmiCecLocalDeviceAudioSystem.handleGiveAudioStatus(giveAudioStatus);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(expected);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(featureAbort);
+        assertThat(handled).isTrue();
+    }
+
+    @Test
+    public void giveAudioStatus_volumeDisabled() {
+        mMusicVolume = 50;
+        mMusicMaxVolume = 100;
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        mHdmiCecLocalDeviceAudioSystem.setSystemAudioControlFeatureEnabled(true);
+
+        int volume = mHdmiControlService.getAudioManager()
+                .getStreamVolume(AudioManager.STREAM_MUSIC);
+        boolean mute = mHdmiControlService.getAudioManager()
+                .isStreamMute(AudioManager.STREAM_MUSIC);
+        int maxVolume = mHdmiControlService.getAudioManager()
+                .getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        int scaledVolume = VolumeControlAction.scaleToCecVolume(volume, maxVolume);
+        HdmiCecMessage unexpected = HdmiCecMessageBuilder.buildReportAudioStatus(ADDR_AUDIO_SYSTEM,
+                ADDR_TV, scaledVolume, mute);
+        HdmiCecMessage featureAbort = HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                ADDR_AUDIO_SYSTEM, ADDR_TV, MESSAGE_GIVE_AUDIO_STATUS, Constants.ABORT_REFUSED);
+
+        HdmiCecMessage giveAudioStatus = HdmiCecMessageBuilder.buildGiveAudioStatus(ADDR_TV,
+                ADDR_AUDIO_SYSTEM);
+        mNativeWrapper.clearResultMessages();
+        boolean handled = mHdmiCecLocalDeviceAudioSystem.handleGiveAudioStatus(giveAudioStatus);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(featureAbort);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(unexpected);
+        assertThat(handled).isTrue();
+    }
+
+    @Test
+    public void reportAudioStatus_volumeEnabled() {
+        mMusicVolume = 50;
+        mMusicMaxVolume = 100;
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiCecLocalDeviceAudioSystem.setSystemAudioControlFeatureEnabled(true);
+
+        int volume = mHdmiControlService.getAudioManager()
+                .getStreamVolume(AudioManager.STREAM_MUSIC);
+        boolean mute = mHdmiControlService.getAudioManager()
+                .isStreamMute(AudioManager.STREAM_MUSIC);
+        int maxVolume = mHdmiControlService.getAudioManager()
+                .getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        int scaledVolume = VolumeControlAction.scaleToCecVolume(volume, maxVolume);
+        HdmiCecMessage expected = HdmiCecMessageBuilder.buildReportAudioStatus(ADDR_AUDIO_SYSTEM,
+                ADDR_TV, scaledVolume, mute);
+
+        mNativeWrapper.clearResultMessages();
+        mHdmiCecLocalDeviceAudioSystem.reportAudioStatus(ADDR_TV);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(expected);
+    }
+
+    @Test
+    public void reportAudioStatus_volumeDisabled() {
+        mMusicVolume = 50;
+        mMusicMaxVolume = 100;
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        mHdmiCecLocalDeviceAudioSystem.setSystemAudioControlFeatureEnabled(true);
+
+        int volume = mHdmiControlService.getAudioManager()
+                .getStreamVolume(AudioManager.STREAM_MUSIC);
+        boolean mute = mHdmiControlService.getAudioManager()
+                .isStreamMute(AudioManager.STREAM_MUSIC);
+        int maxVolume = mHdmiControlService.getAudioManager()
+                .getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        int scaledVolume = VolumeControlAction.scaleToCecVolume(volume, maxVolume);
+        HdmiCecMessage unexpected = HdmiCecMessageBuilder.buildReportAudioStatus(ADDR_AUDIO_SYSTEM,
+                ADDR_TV, scaledVolume, mute);
+
+        mNativeWrapper.clearResultMessages();
+        mHdmiCecLocalDeviceAudioSystem.reportAudioStatus(ADDR_TV);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(unexpected);
     }
 }

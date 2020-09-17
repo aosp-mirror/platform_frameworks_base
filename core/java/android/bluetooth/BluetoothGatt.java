@@ -134,14 +134,14 @@ public final class BluetoothGatt implements BluetoothProfile {
     /*package*/ static final int AUTHENTICATION_NONE = 0;
 
     /**
-     * Authentication requested; no man-in-the-middle protection required.
+     * Authentication requested; no person-in-the-middle protection required.
      *
      * @hide
      */
     /*package*/ static final int AUTHENTICATION_NO_MITM = 1;
 
     /**
-     * Authentication with man-in-the-middle protection requested.
+     * Authentication with person-in-the-middle protection requested.
      *
      * @hide
      */

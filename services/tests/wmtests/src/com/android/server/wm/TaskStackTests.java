@@ -16,38 +16,50 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 
+import android.app.WindowConfiguration;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
- * Tests for the {@link TaskStack} class.
+ * Tests for the {@link ActivityStack} class.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:TaskStackTests
+ *  atest WmTests:TaskStackTests
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class TaskStackTests extends WindowTestsBase {
 
     @Test
     public void testStackPositionChildAt() {
-        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
         final Task task2 = createTaskInStack(stack, 1 /* userId */);
 
@@ -60,64 +72,68 @@ public class TaskStackTests extends WindowTestsBase {
         stack.positionChildAt(WindowContainer.POSITION_TOP, task2, false /* includingParents */);
         assertEquals(stack.mChildren.get(0), task2);
         assertEquals(stack.mChildren.get(1), task1);
+
+        // Non-leaf task should be moved to top regardless of the user id.
+        createTaskInStack((ActivityStack) task2, 0 /* userId */);
+        createTaskInStack((ActivityStack) task2, 1 /* userId */);
+        stack.positionChildAt(WindowContainer.POSITION_TOP, task2, false /* includingParents */);
+        assertEquals(stack.mChildren.get(0), task1);
+        assertEquals(stack.mChildren.get(1), task2);
     }
 
     @Test
     public void testClosingAppDifferentStackOrientation() {
-        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
-        WindowTestUtils.TestAppWindowToken appWindowToken1 =
-                WindowTestUtils.createTestAppWindowToken(mDisplayContent);
-        task1.addChild(appWindowToken1, 0);
-        appWindowToken1.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        ActivityRecord activity1 =
+                WindowTestUtils.createTestActivityRecord(mDisplayContent);
+        task1.addChild(activity1, 0);
+        activity1.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         final Task task2 = createTaskInStack(stack, 1 /* userId */);
-        WindowTestUtils.TestAppWindowToken appWindowToken2 =
-                WindowTestUtils.createTestAppWindowToken(mDisplayContent);
-        task2.addChild(appWindowToken2, 0);
-        appWindowToken2.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
+        ActivityRecord activity2=
+                WindowTestUtils.createTestActivityRecord(mDisplayContent);
+        task2.addChild(activity2, 0);
+        activity2.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
 
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, stack.getOrientation());
-        mDisplayContent.mClosingApps.add(appWindowToken2);
+        mDisplayContent.mClosingApps.add(activity2);
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, stack.getOrientation());
     }
 
     @Test
     public void testMoveTaskToBackDifferentStackOrientation() {
-        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
-        WindowTestUtils.TestAppWindowToken appWindowToken1 =
-                WindowTestUtils.createTestAppWindowToken(mDisplayContent);
-        task1.addChild(appWindowToken1, 0);
-        appWindowToken1.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        ActivityRecord activity1 =
+                WindowTestUtils.createTestActivityRecord(mDisplayContent);
+        task1.addChild(activity1, 0);
+        activity1.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         final Task task2 = createTaskInStack(stack, 1 /* userId */);
-        WindowTestUtils.TestAppWindowToken appWindowToken2 =
-                WindowTestUtils.createTestAppWindowToken(mDisplayContent);
-        task2.addChild(appWindowToken2, 0);
-        appWindowToken2.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
-
+        ActivityRecord activity2 =
+                WindowTestUtils.createTestActivityRecord(mDisplayContent);
+        task2.addChild(activity2, 0);
+        activity2.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, stack.getOrientation());
-        task2.setSendingToBottom(true);
-        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, stack.getOrientation());
     }
 
     @Test
     public void testStackRemoveImmediately() {
-        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        assertEquals(stack, task.mStack);
+        assertEquals(stack, task.getStack());
 
         // Remove stack and check if its child is also removed.
         stack.removeImmediately();
         assertNull(stack.getDisplayContent());
-        assertNull(task.mStack);
+        assertNull(task.getParent());
     }
 
     @Test
     public void testRemoveContainer() {
-        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
-        final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stack);
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
 
         assertNotNull(stack);
         assertNotNull(task);
@@ -127,16 +143,18 @@ public class TaskStackTests extends WindowTestsBase {
         assertEquals(0, stack.getChildCount());
         assertNull(stack.getDisplayContent());
         assertNull(task.getDisplayContent());
-        assertNull(task.mStack);
+        assertNull(task.getParent());
     }
 
     @Test
     public void testRemoveContainer_deferRemoval() {
-        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
-        final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stack);
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
 
         // Stack removal is deferred if one of its child is animating.
-        task.setLocalIsAnimating(true);
+        doReturn(true).when(stack).hasWindowsAlive();
+        doReturn(stack).when(task).getAnimatingContainer(
+                eq(TRANSITION | CHILDREN), anyInt());
 
         stack.removeIfPossible();
         // For the case of deferred removal the task controller will still be connected to the its
@@ -149,40 +167,45 @@ public class TaskStackTests extends WindowTestsBase {
         // After removing, the task will be isolated.
         assertNull(task.getParent());
         assertEquals(0, task.getChildCount());
-        assertNull(task.getController());
     }
 
     @Test
     public void testReparent() {
         // Create first stack on primary display.
-        final TaskStack stack1 = createTaskStackOnDisplay(mDisplayContent);
-        final WindowTestUtils.TestTask task1 = WindowTestUtils.createTestTask(stack1);
-        task1.mOnDisplayChangedCalled = false;
+        final ActivityStack stack1 = createTaskStackOnDisplay(mDisplayContent);
+        final Task task1 = createTaskInStack(stack1, 0 /* userId */);
 
         // Create second display and put second stack on it.
         final DisplayContent dc = createNewDisplay();
-        final TaskStack stack2 = createTaskStackOnDisplay(dc);
+        final ActivityStack stack2 = createTaskStackOnDisplay(dc);
 
         // Reparent
-        stack1.reparent(dc.getDisplayId(), new Rect(), true /* onTop */);
+        clearInvocations(task1); // reset the number of onDisplayChanged for task.
+        stack1.reparent(dc.getDefaultTaskDisplayArea(), true /* onTop */);
         assertEquals(dc, stack1.getDisplayContent());
         final int stack1PositionInParent = stack1.getParent().mChildren.indexOf(stack1);
         final int stack2PositionInParent = stack1.getParent().mChildren.indexOf(stack2);
         assertEquals(stack1PositionInParent, stack2PositionInParent + 1);
-        assertTrue(task1.mOnDisplayChangedCalled);
+        verify(task1, times(1)).onDisplayChanged(any());
     }
 
     @Test
     public void testStackOutset() {
-        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final int stackOutset = 10;
-        // Clear the handler and hold the lock for mock, to prevent multi-thread issue.
-        waitUntilHandlersIdle();
-        synchronized (mWm.mGlobalLock) {
-            spyOn(stack);
+        spyOn(stack);
+        doReturn(stackOutset).when(stack).getTaskOutset();
+        doReturn(true).when(stack).inMultiWindowMode();
 
-            doReturn(stackOutset).when(stack).getStackOutset();
-        }
+        // Mock the resolved override windowing mode to non-fullscreen
+        final WindowConfiguration windowConfiguration =
+                stack.getResolvedOverrideConfiguration().windowConfiguration;
+        spyOn(windowConfiguration);
+        doReturn(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY)
+                .when(windowConfiguration).getWindowingMode();
+
+        // Prevent adjust task dimensions
+        doNothing().when(stack).adjustForMinimalTaskDimensions(any(), any(), any());
 
         final Rect stackBounds = new Rect(200, 200, 800, 1000);
         // Update surface position and size by the given bounds.
@@ -192,5 +215,23 @@ public class TaskStackTests extends WindowTestsBase {
         assertEquals(stackBounds.height() + 2 * stackOutset, stack.getLastSurfaceSize().y);
         assertEquals(stackBounds.left - stackOutset, stack.getLastSurfacePosition().x);
         assertEquals(stackBounds.top - stackOutset, stack.getLastSurfacePosition().y);
+    }
+
+    @Test
+    public void testActivityAndTaskGetsProperType() {
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task task1 = createTaskInStack(stack, 0 /* userId */);
+        ActivityRecord activity1 = WindowTestUtils.createTestActivityRecord(mDisplayContent);
+
+        // First activity should become standard
+        task1.addChild(activity1, 0);
+        assertEquals(WindowConfiguration.ACTIVITY_TYPE_STANDARD, activity1.getActivityType());
+        assertEquals(WindowConfiguration.ACTIVITY_TYPE_STANDARD, task1.getActivityType());
+
+        // Second activity should also become standard
+        ActivityRecord activity2 = WindowTestUtils.createTestActivityRecord(mDisplayContent);
+        task1.addChild(activity2, WindowContainer.POSITION_TOP);
+        assertEquals(WindowConfiguration.ACTIVITY_TYPE_STANDARD, activity2.getActivityType());
+        assertEquals(WindowConfiguration.ACTIVITY_TYPE_STANDARD, task1.getActivityType());
     }
 }

@@ -18,26 +18,16 @@
 #include "Log.h"
 
 #include "statscompanion_util.h"
+#include <android/binder_auto_utils.h>
+#include <android/binder_manager.h>
 
 namespace android {
 namespace os {
 namespace statsd {
 
-sp <IStatsCompanionService> getStatsCompanionService() {
-    sp<IStatsCompanionService> statsCompanion = nullptr;
-    // Get statscompanion service from service manager
-    static const sp <IServiceManager> sm(defaultServiceManager());
-    if (statsCompanion == nullptr) {
-        if (sm != nullptr) {
-            const String16 name("statscompanion");
-            statsCompanion = interface_cast<IStatsCompanionService>(sm->checkService(name));
-            if (statsCompanion == nullptr) {
-                ALOGW("statscompanion service unavailable!");
-                return nullptr;
-            }
-        }
-    }
-    return statsCompanion;
+shared_ptr<IStatsCompanionService> getStatsCompanionService() {
+    ::ndk::SpAIBinder binder(AServiceManager_getService("statscompanion"));
+    return IStatsCompanionService::fromBinder(binder);
 }
 
 }  // namespace statsd

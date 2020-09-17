@@ -16,126 +16,76 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
-
 import android.content.Context;
-import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
-import android.view.View;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Dependency;
-import com.android.systemui.SysUiServiceProvider;
-import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.statusbar.AutoHideUiElement;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
-/** A controller to control all auto-hide things. */
-public class AutoHideController implements CommandQueue.Callbacks {
+/** A controller to control all auto-hide things. Also see {@link AutoHideUiElement}. */
+public class AutoHideController {
     private static final String TAG = "AutoHideController";
+    private static final long AUTO_HIDE_TIMEOUT_MS = 2250;
 
     private final IWindowManager mWindowManagerService;
-
     private final Handler mHandler;
-    private final NotificationRemoteInputManager mRemoteInputManager;
-    private final CommandQueue mCommandQueue;
-    private StatusBar mStatusBar;
-    private AutoHideElement mNavigationBar;
 
-    @VisibleForTesting
-    int mDisplayId;
-    @VisibleForTesting
-    int mSystemUiVisibility;
-    // last value sent to window manager
-    private int mLastDispatchedSystemUiVisibility = ~View.SYSTEM_UI_FLAG_VISIBLE;
+    private AutoHideUiElement mStatusBar;
+    private AutoHideUiElement mNavigationBar;
+    private int mDisplayId;
 
     private boolean mAutoHideSuspended;
 
-    private static final long AUTOHIDE_TIMEOUT_MS = 2250;
-
     private final Runnable mAutoHide = () -> {
-        int requested = mSystemUiVisibility & ~getTransientMask();
-        if (mSystemUiVisibility != requested) {
-            notifySystemUiVisibilityChanged(requested);
+        if (isAnyTransientBarShown()) {
+            hideTransientBars();
         }
     };
 
     @Inject
-    public AutoHideController(Context context, @Named(MAIN_HANDLER_NAME) Handler handler) {
-        mCommandQueue = SysUiServiceProvider.getComponent(context, CommandQueue.class);
-        mCommandQueue.addCallback(this);
+    public AutoHideController(Context context, @Main Handler handler,
+            IWindowManager iWindowManager) {
         mHandler = handler;
-        mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
-        mWindowManagerService = Dependency.get(IWindowManager.class);
+        mWindowManagerService = iWindowManager;
 
         mDisplayId = context.getDisplayId();
     }
 
-    @Override
-    public void onDisplayRemoved(int displayId) {
-        if (displayId == mDisplayId) {
-            mCommandQueue.removeCallback(this);
-        }
+    /**
+     * Sets a {@link AutoHideUiElement} status bar that should be controlled by the
+     * {@link AutoHideController}.
+     */
+    public void setStatusBar(AutoHideUiElement element) {
+        mStatusBar = element;
     }
 
-    public void setStatusBar(StatusBar statusBar) {
-        mStatusBar = statusBar;
+    /**
+     * Sets a {@link AutoHideUiElement} navigation bar that should be controlled by the
+     * {@link AutoHideController}.
+     */
+    public void setNavigationBar(AutoHideUiElement element) {
+        mNavigationBar = element;
     }
 
-    public void setNavigationBar(AutoHideElement navigationBar) {
-        mNavigationBar = navigationBar;
-    }
-
-    @Override
-    public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
-            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds,
-            boolean navbarColorManagedByIme) {
-        if (displayId != mDisplayId) {
-            return;
-        }
-        int oldVal = mSystemUiVisibility;
-        int newVal = (oldVal & ~mask) | (vis & mask);
-        int diff = newVal ^ oldVal;
-
-        if (diff != 0) {
-            mSystemUiVisibility = newVal;
-
-            // ready to unhide
-            if (hasStatusBar() && (vis & View.STATUS_BAR_UNHIDE) != 0) {
-                mSystemUiVisibility &= ~View.STATUS_BAR_UNHIDE;
-            }
-
-            if (hasNavigationBar() && (vis & View.NAVIGATION_BAR_UNHIDE) != 0) {
-                mSystemUiVisibility &= ~View.NAVIGATION_BAR_UNHIDE;
-            }
-
-            // Re-send setSystemUiVisibility to update un-hide status.
-            if (mSystemUiVisibility != newVal) {
-                mCommandQueue.setSystemUiVisibility(mDisplayId, mSystemUiVisibility,
-                        fullscreenStackVis, dockedStackVis, mask, fullscreenStackBounds,
-                        dockedStackBounds, navbarColorManagedByIme);
-            }
-
-            notifySystemUiVisibilityChanged(mSystemUiVisibility);
-        }
-    }
-
-    @VisibleForTesting
-    void notifySystemUiVisibilityChanged(int vis) {
+    private void hideTransientBars() {
         try {
-            if (mLastDispatchedSystemUiVisibility != vis) {
-                mWindowManagerService.statusBarVisibilityChanged(mDisplayId, vis);
-                mLastDispatchedSystemUiVisibility = vis;
-            }
+            mWindowManagerService.hideTransientBars(mDisplayId);
         } catch (RemoteException ex) {
             Log.w(TAG, "Cannot get WindowManager");
+        }
+
+        if (mStatusBar != null) {
+            mStatusBar.hide();
+        }
+
+        if (mNavigationBar != null) {
+            mNavigationBar.hide();
         }
     }
 
@@ -155,14 +105,13 @@ public class AutoHideController implements CommandQueue.Callbacks {
         if (checkBarModesRunnable != null) {
             mHandler.removeCallbacks(checkBarModesRunnable);
         }
-        mAutoHideSuspended = (mSystemUiVisibility & getTransientMask()) != 0;
+        mAutoHideSuspended = isAnyTransientBarShown();
     }
 
-    /** Schedule auto hide if necessary otherwise cancel any pending runnables. */
+    /** Schedules or cancels auto hide behavior based on current system bar state. */
     public void touchAutoHide() {
         // update transient bar auto hide
-        if ((hasStatusBar() && mStatusBar.getStatusBarMode() == MODE_SEMI_TRANSPARENT)
-                || hasNavigationBar() && mNavigationBar.isSemiTransparent()) {
+        if (isAnyTransientBarShown()) {
             scheduleAutoHide();
         } else {
             cancelAutoHide();
@@ -170,63 +119,56 @@ public class AutoHideController implements CommandQueue.Callbacks {
     }
 
     private Runnable getCheckBarModesRunnable() {
-        if (hasStatusBar()) {
-            return () -> mStatusBar.checkBarModes();
-        } else if (hasNavigationBar()) {
+        if (mStatusBar != null) {
+            return () -> mStatusBar.synchronizeState();
+        } else if (mNavigationBar != null) {
             return () -> mNavigationBar.synchronizeState();
         } else {
             return null;
         }
     }
 
-    /** Remove any scheduled auto hide runnables. */
-    public void cancelAutoHide() {
+    private void cancelAutoHide() {
         mAutoHideSuspended = false;
         mHandler.removeCallbacks(mAutoHide);
     }
 
     private void scheduleAutoHide() {
         cancelAutoHide();
-        mHandler.postDelayed(mAutoHide, AUTOHIDE_TIMEOUT_MS);
+        mHandler.postDelayed(mAutoHide, AUTO_HIDE_TIMEOUT_MS);
     }
 
     void checkUserAutoHide(MotionEvent event) {
-        boolean shouldAutoHide =
-                (mSystemUiVisibility & getTransientMask()) != 0  // a transient bar is revealed.
+        boolean shouldHide = isAnyTransientBarShown()
                 && event.getAction() == MotionEvent.ACTION_OUTSIDE // touch outside the source bar.
                 && event.getX() == 0 && event.getY() == 0;
-        if (hasStatusBar()) {
-            // a touch outside both bars
-            shouldAutoHide &= !mRemoteInputManager.getController().isRemoteInputActive();
+
+        if (mStatusBar != null) {
+            shouldHide &= mStatusBar.shouldHideOnTouch();
         }
-        if (shouldAutoHide) {
+        if (mNavigationBar != null) {
+            shouldHide &= mNavigationBar.shouldHideOnTouch();
+        }
+
+        if (shouldHide) {
             userAutoHide();
         }
     }
 
-    /** Schedule auto hide. */
-    public void userAutoHide() {
+    private void userAutoHide() {
         cancelAutoHide();
         mHandler.postDelayed(mAutoHide, 350); // longer than app gesture -> flag clear
     }
 
-    private int getTransientMask() {
-        int mask = 0;
-        if (hasStatusBar()) {
-            mask |= View.STATUS_BAR_TRANSIENT;
+    private boolean isAnyTransientBarShown() {
+        if (mStatusBar != null && mStatusBar.isVisible()) {
+            return true;
         }
-        if (hasNavigationBar()) {
-            mask |= View.NAVIGATION_BAR_TRANSIENT;
+
+        if (mNavigationBar != null && mNavigationBar.isVisible()) {
+            return true;
         }
-        return mask;
-    }
 
-    boolean hasNavigationBar() {
-        return mNavigationBar != null;
-    }
-
-    @VisibleForTesting
-    boolean hasStatusBar() {
-        return mStatusBar != null;
+        return false;
     }
 }

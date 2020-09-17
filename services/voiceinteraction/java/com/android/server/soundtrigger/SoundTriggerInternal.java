@@ -16,17 +16,17 @@
 
 package com.android.server.soundtrigger;
 
+import android.annotation.Nullable;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
+import android.hardware.soundtrigger.ModelParams;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.Keyphrase;
-import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionEvent;
-import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
+import android.hardware.soundtrigger.SoundTrigger.ModelParamRange;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
-import android.hardware.soundtrigger.SoundTrigger.RecognitionEvent;
-import android.hardware.soundtrigger.SoundTrigger.SoundModelEvent;
-import android.hardware.soundtrigger.SoundTriggerModule;
+
+import com.android.server.voiceinteraction.VoiceInteractionManagerService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -69,6 +69,58 @@ public abstract class SoundTriggerInternal {
     public abstract int stopRecognition(int keyphraseId, IRecognitionStatusCallback listener);
 
     public abstract ModuleProperties getModuleProperties();
+
+    /**
+     * Set a model specific {@link ModelParams} with the given value. This
+     * parameter will keep its value for the duration the model is loaded regardless of starting and
+     * stopping recognition. Once the model is unloaded, the value will be lost.
+     * {@link SoundTriggerInternal#queryParameter} should be checked first before calling this
+     * method.
+     *
+     * @param keyphraseId The identifier of the keyphrase for which
+     *        to modify model parameters
+     * @param modelParam   {@link ModelParams}
+     * @param value        Value to set
+     * @return - {@link SoundTrigger#STATUS_OK} in case of success
+     *         - {@link SoundTrigger#STATUS_NO_INIT} if the native service cannot be reached
+     *         - {@link SoundTrigger#STATUS_BAD_VALUE} invalid input parameter
+     *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence or
+     *           if API is not supported by HAL
+     */
+    public abstract int setParameter(int keyphraseId, @ModelParams int modelParam, int value);
+
+    /**
+     * Get a model specific {@link ModelParams}. This parameter will keep its value
+     * for the duration the model is loaded regardless of starting and stopping recognition.
+     * Once the model is unloaded, the value will be lost. If the value is not set, a default
+     * value is returned. See ModelParams for parameter default values.
+     * {@link SoundTriggerInternal#queryParameter} should be checked first before calling this
+     * method.
+     *
+     * @param keyphraseId The identifier of the keyphrase for which
+     *        to modify model parameters
+     * @param modelParam   {@link ModelParams}
+     * @return value of parameter
+     * @throws UnsupportedOperationException if hal or model do not support this API.
+     *         queryParameter should be checked first.
+     * @throws IllegalArgumentException if invalid model handle or parameter is passed.
+     *         queryParameter should be checked first.
+     */
+    public abstract int getParameter(int keyphraseId, @ModelParams int modelParam);
+
+    /**
+     * Determine if parameter control is supported for the given model handle.
+     * This method should be checked prior to calling {@link SoundTriggerInternal#setParameter}
+     * or {@link SoundTriggerInternal#getParameter}.
+     *
+     * @param keyphraseId The identifier of the keyphrase for which
+     *        to modify model parameters
+     * @param modelParam {@link ModelParams}
+     * @return supported range of parameter, null if not supported
+     */
+    @Nullable
+    public abstract ModelParamRange queryParameter(int keyphraseId,
+            @ModelParams int modelParam);
 
     /**
      * Unloads (and stops if running) the given keyphraseId

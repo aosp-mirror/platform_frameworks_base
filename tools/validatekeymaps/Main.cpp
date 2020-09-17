@@ -16,8 +16,8 @@
 
 #include <input/KeyCharacterMap.h>
 #include <input/KeyLayoutMap.h>
+#include <input/PropertyMap.h>
 #include <input/VirtualKeyMap.h>
-#include <utils/PropertyMap.h>
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -137,7 +137,6 @@ static bool validateFile(const char* filename) {
     }
     }
 
-    log("No errors.\n\n");
     return true;
 }
 

@@ -16,14 +16,11 @@
 
 package com.android.test.voiceinteraction;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.os.Bundle;
 import android.service.voice.AlwaysOnHotwordDetector;
 import android.service.voice.AlwaysOnHotwordDetector.Callback;
 import android.service.voice.AlwaysOnHotwordDetector.EventPayload;
 import android.service.voice.VoiceInteractionService;
-import android.service.voice.VoiceInteractionSession;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -68,7 +65,8 @@ public class MainInteractionService extends VoiceInteractionService {
         Log.i(TAG, "Creating " + this);
         Log.i(TAG, "Keyphrase enrollment error? " + getKeyphraseEnrollmentInfo().getParseError());
         Log.i(TAG, "Keyphrase enrollment meta-data: "
-                + Arrays.toString(getKeyphraseEnrollmentInfo().listKeyphraseMetadata()));
+                + Arrays.toString(getKeyphraseEnrollmentInfo().listKeyphraseMetadata().toArray(
+                new android.hardware.soundtrigger.KeyphraseMetadata[0])));
 
         mHotwordDetector = createAlwaysOnHotwordDetector(
                 "Hello There", Locale.forLanguageTag("en-US"), mHotwordCallback);

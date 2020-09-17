@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+
+<!-- Layout for media controls inside QSPanel carousel -->
+<com.android.systemui.util.animation.TransitionLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/qs_media_controls"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:gravity="center_horizontal|fill_vertical"
+    android:forceHasOverlappingRendering="false"
+    android:background="@drawable/qs_media_background">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/center_vertical_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5"
+        />
+
+    <!-- As per Material Design on Biderectionality, this is forced to LTR in code -->
+    <FrameLayout
+        android:id="@+id/notification_media_progress_time"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:forceHasOverlappingRendering="false">
+        <!-- width is set to "match_parent" to avoid extra layout calls -->
+        <TextView
+            android:id="@+id/media_elapsed_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:fontFamily="@*android:string/config_bodyFontFamily"
+            android:textColor="@color/media_primary_text"
+            android:gravity="start"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/media_total_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:fontFamily="@*android:string/config_bodyFontFamily"
+            android:textColor="@color/media_primary_text"
+            android:gravity="end"
+            android:textSize="14sp" />
+    </FrameLayout>
+
+    <!--  Actions must be ordered left-to-right even in RTL layout.  However, they appear in a chain
+    with the album art and the title, and must as a group appear at the end of that chain.  This is
+    accomplished by having all actions appear in a LTR chain within the parent, and then biasing it
+    to the right side, then this barrier is used to bound the text views.  -->
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/media_action_barrier"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:barrierDirection="start"
+        app:constraint_referenced_ids="action0,action1,action2,action3,action4"
+        />
+
+    <ImageButton
+        android:id="@+id/action0"
+        style="@style/MediaPlayer.Button"
+        android:layout_width="48dp"
+        android:layout_height="48dp" />
+
+    <ImageButton
+        android:id="@+id/action1"
+        style="@style/MediaPlayer.Button"
+        android:layout_width="48dp"
+        android:layout_height="48dp" />
+
+    <ImageButton
+        android:id="@+id/action2"
+        style="@style/MediaPlayer.Button"
+        android:layout_width="52dp"
+        android:layout_height="52dp" />
+
+    <ImageButton
+        android:id="@+id/action3"
+        style="@style/MediaPlayer.Button"
+        android:layout_width="48dp"
+        android:layout_height="48dp" />
+
+    <ImageButton
+        android:id="@+id/action4"
+        style="@style/MediaPlayer.Button"
+        android:layout_width="48dp"
+        android:layout_height="48dp" />
+
+    <!-- Album Art -->
+    <ImageView
+        android:id="@+id/album_art"
+        android:layout_width="@dimen/qs_media_album_size"
+        android:layout_height="@dimen/qs_media_album_size" />
+
+    <!-- Seamless Output Switcher -->
+    <LinearLayout
+        android:id="@+id/media_seamless"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:foreground="@drawable/qs_media_seamless_background"
+        android:background="@drawable/qs_media_light_source"
+        android:orientation="horizontal"
+        android:forceHasOverlappingRendering="false"
+        android:paddingStart="12dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="6dp">
+
+        <ImageView
+            android:id="@+id/media_seamless_image"
+            android:layout_width="@dimen/qs_seamless_icon_size"
+            android:layout_height="@dimen/qs_seamless_icon_size"
+            android:layout_marginEnd="8dp"
+            android:layout_gravity="center_vertical"
+            android:tint="@color/media_primary_text"
+            android:src="@*android:drawable/ic_media_seamless" />
+
+        <TextView
+            android:id="@+id/media_seamless_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:fontFamily="@*android:string/config_headlineFontFamily"
+            android:singleLine="true"
+            android:text="@*android:string/ext_media_seamless_action"
+            android:textColor="@color/media_primary_text"
+            android:textDirection="locale"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/media_seamless_fallback"
+        android:layout_width="@dimen/qs_seamless_icon_size"
+        android:layout_height="@dimen/qs_seamless_icon_size"
+        android:tint="@color/media_primary_text"
+        android:src="@drawable/ic_cast_connected"
+        android:forceHasOverlappingRendering="false" />
+
+    <!-- Seek Bar -->
+    <!-- As per Material Design on Biderectionality, this is forced to LTR in code -->
+    <SeekBar
+        android:id="@+id/media_progress_bar"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:maxHeight="@dimen/qs_media_enabled_seekbar_height"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:thumbTint="@color/media_primary_text"
+        android:progressTint="@color/media_seekbar_progress"
+        android:progressBackgroundTint="@color/media_disabled"
+        android:splitTrack="false" />
+
+    <!-- App name -->
+    <TextView
+        android:id="@+id/app_name"
+        android:textColor="@color/media_primary_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:fontFamily="@*android:string/config_headlineFontFamily"
+        android:textDirection="locale"
+        android:textSize="14sp" />
+
+    <!-- Song name -->
+    <TextView
+        android:id="@+id/header_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+        android:singleLine="true"
+        android:textColor="@color/media_primary_text"
+        android:textSize="16sp" />
+
+    <!-- Artist name -->
+    <TextView
+        android:id="@+id/header_artist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@*android:string/config_headlineFontFamily"
+        android:singleLine="true"
+        android:textColor="@color/media_secondary_text"
+        android:textSize="14sp" />
+
+    <com.android.internal.widget.CachingIconView
+        android:id="@+id/icon"
+        android:tint="@color/media_primary_text"
+        android:layout_width="@dimen/qs_media_icon_size"
+        android:layout_height="@dimen/qs_media_icon_size" />
+
+    <!-- Buttons to remove this view when no longer needed -->
+    <include
+        layout="@layout/qs_media_panel_options"
+        android:visibility="gone" />
+</com.android.systemui.util.animation.TransitionLayout>

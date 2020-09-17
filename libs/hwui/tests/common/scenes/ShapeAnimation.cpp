@@ -30,14 +30,14 @@ public:
     void createContent(int width, int height, Canvas& canvas) override {
         card = TestUtils::createNode(
                 0, 0, width, height, [width](RenderProperties& props, Canvas& canvas) {
-                    std::function<void(Canvas&, float, const SkPaint&)> ops[] = {
-                            [](Canvas& canvas, float size, const SkPaint& paint) {
+                    std::function<void(Canvas&, float, const Paint&)> ops[] = {
+                            [](Canvas& canvas, float size, const Paint& paint) {
                                 canvas.drawArc(0, 0, size, size, 50, 189, true, paint);
                             },
-                            [](Canvas& canvas, float size, const SkPaint& paint) {
+                            [](Canvas& canvas, float size, const Paint& paint) {
                                 canvas.drawOval(0, 0, size, size, paint);
                             },
-                            [](Canvas& canvas, float size, const SkPaint& paint) {
+                            [](Canvas& canvas, float size, const Paint& paint) {
                                 SkPath diamondPath;
                                 diamondPath.moveTo(size / 2, 0);
                                 diamondPath.lineTo(size, size / 2);
@@ -46,18 +46,18 @@ public:
                                 diamondPath.close();
                                 canvas.drawPath(diamondPath, paint);
                             },
-                            [](Canvas& canvas, float size, const SkPaint& paint) {
+                            [](Canvas& canvas, float size, const Paint& paint) {
                                 float data[] = {0, 0, size, size, 0, size, size, 0};
                                 canvas.drawLines(data, sizeof(data) / sizeof(float), paint);
                             },
-                            [](Canvas& canvas, float size, const SkPaint& paint) {
+                            [](Canvas& canvas, float size, const Paint& paint) {
                                 float data[] = {0, 0, size, size, 0, size, size, 0};
                                 canvas.drawPoints(data, sizeof(data) / sizeof(float), paint);
                             },
-                            [](Canvas& canvas, float size, const SkPaint& paint) {
+                            [](Canvas& canvas, float size, const Paint& paint) {
                                 canvas.drawRect(0, 0, size, size, paint);
                             },
-                            [](Canvas& canvas, float size, const SkPaint& paint) {
+                            [](Canvas& canvas, float size, const Paint& paint) {
                                 float rad = size / 4;
                                 canvas.drawRoundRect(0, 0, size, size, rad, rad, paint);
                             }};
@@ -66,7 +66,7 @@ public:
 
                     // each combination of strokeWidth + style gets a column
                     int outerCount = canvas.save(SaveFlags::MatrixClip);
-                    SkPaint paint;
+                    Paint paint;
                     paint.setAntiAlias(true);
                     SkPaint::Style styles[] = {SkPaint::kStroke_Style, SkPaint::kFill_Style,
                                                SkPaint::kStrokeAndFill_Style};

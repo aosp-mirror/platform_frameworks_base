@@ -80,12 +80,15 @@ public class SettingsToPropertiesMapper {
     @VisibleForTesting
     static final String[] sDeviceConfigScopes = new String[] {
         DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
+        DeviceConfig.NAMESPACE_CONFIGURATION,
         DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,
         DeviceConfig.NAMESPACE_INTELLIGENCE_CONTENT_SUGGESTIONS,
         DeviceConfig.NAMESPACE_MEDIA_NATIVE,
         DeviceConfig.NAMESPACE_NETD_NATIVE,
         DeviceConfig.NAMESPACE_RUNTIME_NATIVE,
         DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
+        DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+        DeviceConfig.NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT,
     };
 
     private final String[] mGlobalSettings;
@@ -234,7 +237,7 @@ public class SettingsToPropertiesMapper {
             SystemProperties.set(key, value);
         } catch (Exception e) {
             // Failure to set a property can be caused by SELinux denial. This usually indicates
-            // that the property wasn't whitelisted in sepolicy.
+            // that the property wasn't allowlisted in sepolicy.
             // No need to report it on all user devices, only on debug builds.
             log("Unable to set property " + key + " value '" + value + "'", e);
         }

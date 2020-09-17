@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ActivityNotFoundException;
@@ -519,7 +521,7 @@ public class SearchManager
 
     /**
      * This means that context is voice, and therefore the SearchDialog should
-     * continue showing the microphone until the user indicates that he/she does
+     * continue showing the microphone until the user indicates that they do
      * not want to re-speak (e.g. by typing).
      *
      * @hide
@@ -973,37 +975,22 @@ public class SearchManager
     }
 
     /**
-     * Starts the assistant.
+     * Starts the {@link android.provider.Settings.Secure#ASSISTANT assistant}.
      *
-     * @param args the args to pass to the assistant
+     * @param args a {@code Bundle} that will be passed to the assistant's
+     *         {@link android.service.voice.VoiceInteractionSession#onShow VoiceInteractionSession}
+     *         (or as {@link Intent#getExtras() extras} along
+     *         {@link Intent#ACTION_ASSIST ACTION_ASSIST} for legacy assistants)
      *
      * @hide
      */
-    @UnsupportedAppUsage
-    public void launchAssist(Bundle args) {
+    @SystemApi
+    public void launchAssist(@Nullable Bundle args) {
         try {
             if (mService == null) {
                 return;
             }
-            mService.launchAssist(args);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Starts the legacy assistant (i.e. the {@link Intent#ACTION_ASSIST}).
-     *
-     * @param args the args to pass to the assistant
-     *
-     * @hide
-     */
-    public boolean launchLegacyAssist(String hint, int userHandle, Bundle args) {
-        try {
-            if (mService == null) {
-                return false;
-            }
-            return mService.launchLegacyAssist(hint, userHandle, args);
+            mService.launchAssist(mContext.getUserId(), args);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

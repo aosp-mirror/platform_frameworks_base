@@ -45,8 +45,12 @@ import java.util.stream.Collectors;
  * <table>
  * <tr><th>Name</th><th>Value Type</th><th>Description</th></tr>
  * <tr><td>{@link #KEY_MIME}</td><td>String</td><td>The type of the format.</td></tr>
+ * <tr><td>{@link #KEY_CODECS_STRING}</td><td>String</td><td>optional, the RFC 6381 codecs string of the MediaFormat</td></tr>
  * <tr><td>{@link #KEY_MAX_INPUT_SIZE}</td><td>Integer</td><td>optional, maximum size of a buffer of input data</td></tr>
+ * <tr><td>{@link #KEY_PIXEL_ASPECT_RATIO_WIDTH}</td><td>Integer</td><td>optional, the pixel aspect ratio width</td></tr>
+ * <tr><td>{@link #KEY_PIXEL_ASPECT_RATIO_HEIGHT}</td><td>Integer</td><td>optional, the pixel aspect ratio height</td></tr>
  * <tr><td>{@link #KEY_BIT_RATE}</td><td>Integer</td><td><b>encoder-only</b>, desired bitrate in bits/second</td></tr>
+ * <tr><td>{@link #KEY_DURATION}</td><td>long</td><td>the duration of the content (in microseconds)</td></tr>
  * </table>
  *
  * Video formats have the following keys:
@@ -98,7 +102,11 @@ import java.util.stream.Collectors;
  * <tr><td>{@link #KEY_AAC_DRC_HEAVY_COMPRESSION}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies whether to use heavy compression.</td></tr>
  * <tr><td>{@link #KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the maximum number of channels the decoder outputs.</td></tr>
  * <tr><td>{@link #KEY_AAC_DRC_EFFECT_TYPE}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the MPEG-D DRC effect type to use.</td></tr>
+ * <tr><td>{@link #KEY_AAC_DRC_OUTPUT_LOUDNESS}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, returns the DRC output loudness.</td></tr>
+ * <tr><td>{@link #KEY_AAC_DRC_ALBUM_MODE}</td><td>Integer</td><td><b>decoder-only</b>, optional, if content is AAC audio, specifies the whether MPEG-D DRC Album Mode is active or not.</td></tr>
  * <tr><td>{@link #KEY_CHANNEL_MASK}</td><td>Integer</td><td>optional, a mask of audio channel assignments</td></tr>
+ * <tr><td>{@link #KEY_ENCODER_DELAY}</td><td>Integer</td><td>optional, the number of frames to trim from the start of the decoded audio stream.</td></tr>
+ * <tr><td>{@link #KEY_ENCODER_PADDING}</td><td>Integer</td><td>optional, the number of frames to trim from the end of the decoded audio stream.</td></tr>
  * <tr><td>{@link #KEY_FLAC_COMPRESSION_LEVEL}</td><td>Integer</td><td><b>encoder-only</b>, optional, if content is FLAC audio, specifies the desired compression level.</td></tr>
  * </table>
  *
@@ -106,6 +114,7 @@ import java.util.stream.Collectors;
  * <table>
  * <tr><td>{@link #KEY_MIME}</td><td>String</td><td>The type of the format.</td></tr>
  * <tr><td>{@link #KEY_LANGUAGE}</td><td>String</td><td>The language of the content.</td></tr>
+ * <tr><td>{@link #KEY_CAPTION_SERVICE_NUMBER}</td><td>int</td><td>optional, the closed-caption service or channel number.</td></tr>
  * </table>
  *
  * Image formats have the following keys:
@@ -211,10 +220,35 @@ public final class MediaFormat {
     public static final String KEY_MIME = "mime";
 
     /**
+     * A key describing the codecs string of the MediaFormat. See RFC 6381 section 3.2 for the
+     * syntax of the value. The value does not hold {@link MediaCodec}-exposed codec names.
+     * The associated value is a string.
+     *
+     * @see MediaParser.TrackData#mediaFormat
+     */
+    public static final String KEY_CODECS_STRING = "codecs-string";
+
+    /**
+     * An optional key describing the low latency decoding mode. This is an optional parameter
+     * that applies only to decoders. If enabled, the decoder doesn't hold input and output
+     * data more than required by the codec standards.
+     * The associated value is an integer (0 or 1): 1 when low-latency decoding is enabled,
+     * 0 otherwise. The default value is 0.
+     */
+    public static final String KEY_LOW_LATENCY = "low-latency";
+
+    /**
      * A key describing the language of the content, using either ISO 639-1
      * or 639-2/T codes.  The associated value is a string.
      */
     public static final String KEY_LANGUAGE = "language";
+
+    /**
+     * A key describing the closed caption service number. For CEA-608 caption tracks, holds the
+     * channel number. For CEA-708, holds the service number.
+     * The associated value is an int.
+     */
+    public static final String KEY_CAPTION_SERVICE_NUMBER = "caption-service-number";
 
     /**
      * A key describing the sample rate of an audio format.
@@ -261,10 +295,30 @@ public final class MediaFormat {
     public static final String KEY_MAX_INPUT_SIZE = "max-input-size";
 
     /**
+     * A key describing the pixel aspect ratio width.
+     * The associated value is an integer
+     */
+    public static final String KEY_PIXEL_ASPECT_RATIO_WIDTH = "sar-width";
+
+    /**
+     * A key describing the pixel aspect ratio height.
+     * The associated value is an integer
+     */
+    public static final String KEY_PIXEL_ASPECT_RATIO_HEIGHT = "sar-height";
+
+    /**
      * A key describing the average bitrate in bits/sec.
      * The associated value is an integer
      */
     public static final String KEY_BIT_RATE = "bitrate";
+
+    /**
+     * A key describing the hardware AV sync id.
+     * The associated value is an integer
+     *
+     * See android.media.tv.tuner.Tuner#getAvSyncHwId.
+     */
+    public static final String KEY_HARDWARE_AV_SYNC_ID = "hw-av-sync-id";
 
     /**
      * A key describing the max bitrate in bits/sec.
@@ -560,6 +614,18 @@ public final class MediaFormat {
     public static final String KEY_CHANNEL_MASK = "channel-mask";
 
     /**
+     * A key describing the number of frames to trim from the start of the decoded audio stream.
+     * The associated value is an integer.
+     */
+    public static final String KEY_ENCODER_DELAY = "encoder-delay";
+
+    /**
+     * A key describing the number of frames to trim from the end of the decoded audio stream.
+     * The associated value is an integer.
+     */
+    public static final String KEY_ENCODER_PADDING = "encoder-padding";
+
+    /**
      * A key describing the AAC profile to be used (AAC audio formats only).
      * Constants are declared in {@link android.media.MediaCodecInfo.CodecProfileLevel}.
      */
@@ -590,16 +656,20 @@ public final class MediaFormat {
     public static final String KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT = "aac-max-output-channel_count";
 
     /**
-     * A key describing a gain to be applied so that the output loudness matches the
-     * Target Reference Level. This is typically used to normalize loudness across program items.
-     * The gain is derived as the difference between the Target Reference Level and the
-     * Program Reference Level. The latter can be given in the bitstream and indicates the actual
-     * loudness value of the program item.
+     * A key describing the Target Reference Level (Target Loudness).
+     * <p>For normalizing loudness across program items, a gain is applied to the audio output so
+     * that the output loudness matches the Target Reference Level. The gain is derived as the
+     * difference between the Target Reference Level and the Program Reference Level (Program
+     * Loudness). The latter can be given in the bitstream and indicates the actual loudness value
+     * of the program item.</p>
      * <p>The Target Reference Level controls loudness normalization for both MPEG-4 DRC and
      * MPEG-D DRC.
      * <p>The value is given as an integer value between
      * 40 and 127, and is calculated as -4 * Target Reference Level in LKFS.
      * Therefore, it represents the range of -10 to -31.75 LKFS.
+     * <p>For MPEG-4 DRC, a value of -1 switches off loudness normalization and DRC processing.</p>
+     * <p>For MPEG-D DRC, a value of -1 switches off loudness normalization only. For DRC processing
+     * options of MPEG-D DRC, see {@link #KEY_AAC_DRC_EFFECT_TYPE}</p>
      * <p>The default value on mobile devices is 64 (-16 LKFS).
      * <p>This key is only used during decoding.
      */
@@ -620,7 +690,7 @@ public final class MediaFormat {
      * <tr><th>6</th><th>General compression</th></tr>
      * </table>
      * <p>The value -1 (Off) disables DRC processing, while loudness normalization may still be
-     * active and dependent on KEY_AAC_DRC_TARGET_REFERENCE_LEVEL.<br>
+     * active and dependent on {@link #KEY_AAC_DRC_TARGET_REFERENCE_LEVEL}.<br>
      * The value 0 (None) automatically enables DRC processing if necessary to prevent signal
      * clipping<br>
      * The value 6 (General compression) can be used for enabling MPEG-D DRC without particular
@@ -637,8 +707,8 @@ public final class MediaFormat {
      * 0 and 127, which is calculated as -4 * Encoded Target Level in LKFS.
      * If the Encoded Target Level is unknown, the value can be set to -1.
      * <p>The default value is -1 (unknown).
-     * <p>The value is ignored when heavy compression is used (see
-     * {@link #KEY_AAC_DRC_HEAVY_COMPRESSION}).
+     * <p>The value is ignored when heavy compression (see {@link #KEY_AAC_DRC_HEAVY_COMPRESSION})
+     * or MPEG-D DRC is used.
      * <p>This key is only used during decoding.
      */
     public static final String KEY_AAC_ENCODED_TARGET_LEVEL = "aac-encoded-target-level";
@@ -679,17 +749,17 @@ public final class MediaFormat {
     public static final String KEY_AAC_DRC_ATTENUATION_FACTOR = "aac-drc-cut-level";
 
     /**
-     * A key describing the selection of the heavy compression profile for DRC.
-     * Two separate DRC gain sequences can be transmitted in one bitstream: MPEG-4 DRC light
-     * compression, and DVB-specific heavy compression. When selecting the application of the heavy
-     * compression, one of the sequences is selected:
+     * A key describing the selection of the heavy compression profile for MPEG-4 DRC.
+     * <p>Two separate DRC gain sequences can be transmitted in one bitstream: light compression
+     * and heavy compression. When selecting the application of the heavy compression, one of
+     * the sequences is selected:
      * <ul>
      * <li>0 enables light compression,</li>
      * <li>1 enables heavy compression instead.
      * </ul>
-     * Note that only light compression offers the features of scaling of DRC gains
+     * Note that heavy compression doesn't offer the features of scaling of DRC gains
      * (see {@link #KEY_AAC_DRC_BOOST_FACTOR} and {@link #KEY_AAC_DRC_ATTENUATION_FACTOR} for the
-     * boost and attenuation factors, and frequency-selective (multiband) DRC.
+     * boost and attenuation factors), and frequency-selective (multiband) DRC.
      * Light compression usually contains clipping prevention for stereo downmixing while heavy
      * compression, if additionally provided in the bitstream, is usually stronger, and contains
      * clipping prevention for stereo and mono downmixing.
@@ -697,6 +767,37 @@ public final class MediaFormat {
      * <p>This key is only used during decoding.
      */
     public static final String KEY_AAC_DRC_HEAVY_COMPRESSION = "aac-drc-heavy-compression";
+
+    /**
+     * A key to retrieve the output loudness of a decoded bitstream.
+     * <p>If loudness normalization is active, the value corresponds to the Target Reference Level
+     * (see {@link #KEY_AAC_DRC_TARGET_REFERENCE_LEVEL}).<br>
+     * If loudness normalization is not active, the value corresponds to the loudness metadata
+     * given in the bitstream.
+     * <p>The value is retrieved with getInteger() and is given as an integer value between 0 and
+     * 231. It is calculated as -4 * Output Loudness in LKFS. Therefore, it represents the range of
+     * 0 to -57.75 LKFS.
+     * <p>A value of -1 indicates that no loudness metadata is present in the bitstream.
+     * <p>Loudness metadata can originate from MPEG-4 DRC or MPEG-D DRC.
+     * <p>This key is only used during decoding.
+     */
+    public static final String KEY_AAC_DRC_OUTPUT_LOUDNESS = "aac-drc-output-loudness";
+
+    /**
+     * A key describing the album mode for MPEG-D DRC as defined in ISO/IEC 23003-4.
+     * <p>The associated value is an integer and can be set to following values:
+     * <table>
+     * <tr><th>Value</th><th>Album Mode</th></tr>
+     * <tr><th>0</th><th>disabled</th></tr>
+     * <tr><th>1</th><th>enabled</th></tr>
+     * </table>
+     * <p>Disabled album mode leads to application of gain sequences for fading in and out, if
+     * provided in the bitstream. Enabled album mode makes use of dedicated album loudness
+     * information, if provided in the bitstream.
+     * <p>The default value is 0 (album mode disabled).
+     * <p>This key is only used during decoding.
+     */
+    public static final String KEY_AAC_DRC_ALBUM_MODE = "aac-drc-album-mode";
 
     /**
      * A key describing the FLAC compression level to be used (FLAC audio format only).
@@ -1156,7 +1257,7 @@ public final class MediaFormat {
      * @throws ClassCastException if the stored value for the key is ByteBuffer or String
      */
     public final @Nullable Number getNumber(@NonNull String name) {
-        return ((Number)mMap.get(name));
+        return (Number) mMap.get(name);
     }
 
     /**
@@ -1179,7 +1280,7 @@ public final class MediaFormat {
      *         String
      */
     public final int getInteger(@NonNull String name) {
-        return ((Integer)mMap.get(name)).intValue();
+        return (int) mMap.get(name);
     }
 
     /**
@@ -1207,11 +1308,11 @@ public final class MediaFormat {
      *         String
      */
     public final long getLong(@NonNull String name) {
-        return ((Long)mMap.get(name)).longValue();
+        return (long) mMap.get(name);
     }
 
     /**
-     * Returns the value of an long key, or the default value if the key is missing.
+     * Returns the value of a long key, or the default value if the key is missing.
      *
      * @return defaultValue if the key does not exist or the stored value for the key is null
      * @throws ClassCastException if the stored value for the key is int, float, ByteBuffer or
@@ -1235,23 +1336,19 @@ public final class MediaFormat {
      *         String
      */
     public final float getFloat(@NonNull String name) {
-        return ((Float)mMap.get(name)).floatValue();
+        return (float) mMap.get(name);
     }
 
     /**
-     * Returns the value of an float key, or the default value if the key is missing.
+     * Returns the value of a float key, or the default value if the key is missing.
      *
      * @return defaultValue if the key does not exist or the stored value for the key is null
      * @throws ClassCastException if the stored value for the key is int, long, ByteBuffer or
      *         String
      */
     public final float getFloat(@NonNull String name, float defaultValue) {
-        try {
-            return getFloat(name);
-        } catch (NullPointerException  e) {
-            /* no such field or field is null */
-            return defaultValue;
-        }
+        Object value = mMap.get(name);
+        return value != null ? (float) value : defaultValue;
     }
 
     /**
@@ -1265,7 +1362,7 @@ public final class MediaFormat {
     }
 
     /**
-     * Returns the value of an string key, or the default value if the key is missing.
+     * Returns the value of a string key, or the default value if the key is missing.
      *
      * @return defaultValue if the key does not exist or the stored value for the key is null
      * @throws ClassCastException if the stored value for the key is int, long, float or ByteBuffer
@@ -1318,21 +1415,21 @@ public final class MediaFormat {
      * Sets the value of an integer key.
      */
     public final void setInteger(@NonNull String name, int value) {
-        mMap.put(name, Integer.valueOf(value));
+        mMap.put(name, value);
     }
 
     /**
      * Sets the value of a long key.
      */
     public final void setLong(@NonNull String name, long value) {
-        mMap.put(name, Long.valueOf(value));
+        mMap.put(name, value);
     }
 
     /**
      * Sets the value of a float key.
      */
     public final void setFloat(@NonNull String name, float value) {
-        mMap.put(name, new Float(value));
+        mMap.put(name, value);
     }
 
     /**
@@ -1457,7 +1554,7 @@ public final class MediaFormat {
 
         @Override
         public int size() {
-            return (int)mKeys.stream().filter(k -> keepKey(k)).count();
+            return (int) mKeys.stream().filter(this::keepKey).count();
         }
     }
 

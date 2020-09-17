@@ -23,14 +23,17 @@ import android.app.INotificationManager;
 import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.ServiceManager;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
+import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
@@ -38,12 +41,18 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
-import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.R;
+import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.CurrentUserContextTracker;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -52,6 +61,8 @@ import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
+import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -60,14 +71,14 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import javax.inject.Provider;
+
+import dagger.Lazy;
 
 /**
  * Handles various NotificationGuts related tasks, such as binding guts to a row, opening and
  * closing guts, and keeping track of the currently exposed notification guts.
  */
-@Singleton
 public class NotificationGutsManager implements Dumpable, NotificationLifetimeExtender {
     private static final String TAG = "NotificationGutsManager";
 
@@ -78,6 +89,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     private final Context mContext;
     private final VisualStabilityManager mVisualStabilityManager;
     private final AccessibilityManager mAccessibilityManager;
+    private final HighPriorityProvider mHighPriorityProvider;
+    private final ChannelEditorDialogController mChannelEditorDialogController;
 
     // Dependencies:
     private final NotificationLockscreenUserManager mLockscreenUserManager =
@@ -99,17 +112,48 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     @VisibleForTesting
     protected String mKeyToRemoveOnGutsClosed;
 
-    private StatusBar mStatusBar;
+    private final Lazy<StatusBar> mStatusBarLazy;
+    private final Handler mMainHandler;
+    private final Handler mBgHandler;
+    private final BubbleController mBubbleController;
     private Runnable mOpenRunnable;
+    private final INotificationManager mNotificationManager;
+    private final LauncherApps mLauncherApps;
+    private final ShortcutManager mShortcutManager;
+    private final CurrentUserContextTracker mContextTracker;
+    private final Provider<PriorityOnboardingDialogController.Builder> mBuilderProvider;
+    private final UiEventLogger mUiEventLogger;
 
-    @Inject
-    public NotificationGutsManager(
-            Context context,
-            VisualStabilityManager visualStabilityManager) {
+    /**
+     * Injected constructor. See {@link NotificationsModule}.
+     */
+    public NotificationGutsManager(Context context, VisualStabilityManager visualStabilityManager,
+            Lazy<StatusBar> statusBarLazy, @Main Handler mainHandler, @Background Handler bgHandler,
+            AccessibilityManager accessibilityManager,
+            HighPriorityProvider highPriorityProvider,
+            INotificationManager notificationManager,
+            LauncherApps launcherApps,
+            ShortcutManager shortcutManager,
+            ChannelEditorDialogController channelEditorDialogController,
+            CurrentUserContextTracker contextTracker,
+            Provider<PriorityOnboardingDialogController.Builder> builderProvider,
+            BubbleController bubbleController,
+            UiEventLogger uiEventLogger) {
         mContext = context;
         mVisualStabilityManager = visualStabilityManager;
-        mAccessibilityManager = (AccessibilityManager)
-                mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        mStatusBarLazy = statusBarLazy;
+        mMainHandler = mainHandler;
+        mBgHandler = bgHandler;
+        mAccessibilityManager = accessibilityManager;
+        mHighPriorityProvider = highPriorityProvider;
+        mNotificationManager = notificationManager;
+        mLauncherApps = launcherApps;
+        mShortcutManager = shortcutManager;
+        mContextTracker = contextTracker;
+        mBuilderProvider = builderProvider;
+        mChannelEditorDialogController = channelEditorDialogController;
+        mBubbleController = bubbleController;
+        mUiEventLogger = uiEventLogger;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -119,7 +163,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mListContainer = listContainer;
         mCheckSaveListener = checkSave;
         mOnSettingsClickListener = onSettingsClick;
-        mStatusBar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
     }
 
     public void setNotificationActivityStarter(
@@ -170,7 +213,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             if (ops.contains(OP_CAMERA) || ops.contains(OP_RECORD_AUDIO)) {
                 startAppDetailsSettingsActivity(pkg, uid, null, row);
             } else {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_OVERLAY_PERMISSION);
                 intent.setData(Uri.fromParts("package", pkg, null));
                 mNotificationActivityStarter.startNotificationGutsIntent(intent, uid, row);
             }
@@ -181,6 +224,11 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         }
     }
 
+    private void startConversationSettingsActivity(int uid, ExpandableNotificationRow row) {
+        final Intent intent = new Intent(Settings.ACTION_CONVERSATION_SETTINGS);
+        mNotificationActivityStarter.startNotificationGutsIntent(intent, uid, row);
+    }
+
     private boolean bindGuts(final ExpandableNotificationRow row) {
         row.ensureGutsInflated();
         return bindGuts(row, mGutsMenuItem);
@@ -189,7 +237,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     @VisibleForTesting
     protected boolean bindGuts(final ExpandableNotificationRow row,
             NotificationMenuRowPlugin.MenuItem item) {
-        StatusBarNotification sbn = row.getStatusBarNotification();
+        StatusBarNotification sbn = row.getEntry().getSbn();
 
         row.setGutsView(item);
         row.setTag(sbn.getPackageName());
@@ -220,6 +268,12 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 initializeAppOpsInfo(row, (AppOpsInfo) gutsView);
             } else if (gutsView instanceof NotificationInfo) {
                 initializeNotificationInfo(row, (NotificationInfo) gutsView);
+            } else if (gutsView instanceof NotificationConversationInfo) {
+                initializeConversationNotificationInfo(
+                        row, (NotificationConversationInfo) gutsView);
+            } else if (gutsView instanceof PartialConversationInfo) {
+                initializePartialConversationNotificationInfo(row,
+                        (PartialConversationInfo) gutsView);
             }
             return true;
         } catch (Exception e) {
@@ -238,11 +292,11 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             final ExpandableNotificationRow row,
             NotificationSnooze notificationSnoozeView) {
         NotificationGuts guts = row.getGuts();
-        StatusBarNotification sbn = row.getStatusBarNotification();
+        StatusBarNotification sbn = row.getEntry().getSbn();
 
         notificationSnoozeView.setSnoozeListener(mListContainer.getSwipeActionHelper());
         notificationSnoozeView.setStatusBarNotification(sbn);
-        notificationSnoozeView.setSnoozeOptions(row.getEntry().snoozeCriteria);
+        notificationSnoozeView.setSnoozeOptions(row.getEntry().getSnoozeCriteria());
         guts.setHeightChangedListener((NotificationGuts g) -> {
             mListContainer.onHeightChanged(row, row.isShown() /* needsAnimation */);
         });
@@ -258,19 +312,23 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             final ExpandableNotificationRow row,
             AppOpsInfo appOpsInfoView) {
         NotificationGuts guts = row.getGuts();
-        StatusBarNotification sbn = row.getStatusBarNotification();
+        StatusBarNotification sbn = row.getEntry().getSbn();
         UserHandle userHandle = sbn.getUser();
         PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
                 userHandle.getIdentifier());
 
         AppOpsInfo.OnSettingsClickListener onSettingsClick =
                 (View v, String pkg, int uid, ArraySet<Integer> ops) -> {
-            mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_OPS_GUTS_SETTINGS);
-            guts.resetFalsingCheck();
-            startAppOpsSettingsActivity(pkg, uid, ops, row);
+                    mUiEventLogger.logWithInstanceId(
+                            NotificationAppOpsEvent.NOTIFICATION_APP_OPS_SETTINGS_CLICK,
+                            sbn.getUid(), sbn.getPackageName(), sbn.getInstanceId());
+                    mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_OPS_GUTS_SETTINGS);
+                    guts.resetFalsingCheck();
+                    startAppOpsSettingsActivity(pkg, uid, ops, row);
         };
         if (!row.getEntry().mActiveAppOps.isEmpty()) {
-            appOpsInfoView.bindGuts(pmUser, onSettingsClick, sbn, row.getEntry().mActiveAppOps);
+            appOpsInfoView.bindGuts(pmUser, onSettingsClick, sbn, mUiEventLogger,
+                    row.getEntry().mActiveAppOps);
         }
     }
 
@@ -284,15 +342,13 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             final ExpandableNotificationRow row,
             NotificationInfo notificationInfoView) throws Exception {
         NotificationGuts guts = row.getGuts();
-        StatusBarNotification sbn = row.getStatusBarNotification();
+        StatusBarNotification sbn = row.getEntry().getSbn();
         String packageName = sbn.getPackageName();
         // Settings link is only valid for notifications that specify a non-system user
         NotificationInfo.OnSettingsClickListener onSettingsClick = null;
         UserHandle userHandle = sbn.getUser();
         PackageManager pmUser = StatusBar.getPackageManagerForUser(
                 mContext, userHandle.getIdentifier());
-        INotificationManager iNotificationManager = INotificationManager.Stub.asInterface(
-                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         final NotificationInfo.OnAppSettingsClickListener onAppSettingsClick =
                 (View v, Intent intent) -> {
                     mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_APP_NOTE_SETTINGS);
@@ -300,7 +356,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                     mNotificationActivityStarter.startNotificationGutsIntent(intent, sbn.getUid(),
                             row);
                 };
-        boolean isForBlockingHelper = row.isBlockingHelperShowing();
 
         if (!userHandle.equals(UserHandle.ALL)
                 || mLockscreenUserManager.getCurrentUserId() == UserHandle.USER_SYSTEM) {
@@ -314,21 +369,132 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
 
         notificationInfoView.bindNotification(
                 pmUser,
-                iNotificationManager,
+                mNotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 packageName,
-                row.getEntry().channel,
+                row.getEntry().getChannel(),
                 row.getUniqueChannels(),
-                sbn,
-                mCheckSaveListener,
+                row.getEntry(),
                 onSettingsClick,
                 onAppSettingsClick,
+                mUiEventLogger,
                 mDeviceProvisionedController.isDeviceProvisioned(),
                 row.getIsNonblockable(),
-                isForBlockingHelper,
-                row.getEntry().importance,
-                row.getEntry().isHighPriority());
+                mHighPriorityProvider.isHighPriority(row.getEntry()));
+    }
 
+    /**
+     * Sets up the {@link PartialConversationInfo} inside the notification row's guts.
+     * @param row view to set up the guts for
+     * @param notificationInfoView view to set up/bind within {@code row}
+     */
+    @VisibleForTesting
+    void initializePartialConversationNotificationInfo(
+            final ExpandableNotificationRow row,
+            PartialConversationInfo notificationInfoView) throws Exception {
+        NotificationGuts guts = row.getGuts();
+        StatusBarNotification sbn = row.getEntry().getSbn();
+        String packageName = sbn.getPackageName();
+        // Settings link is only valid for notifications that specify a non-system user
+        NotificationInfo.OnSettingsClickListener onSettingsClick = null;
+        UserHandle userHandle = sbn.getUser();
+        PackageManager pmUser = StatusBar.getPackageManagerForUser(
+                mContext, userHandle.getIdentifier());
+
+        if (!userHandle.equals(UserHandle.ALL)
+                || mLockscreenUserManager.getCurrentUserId() == UserHandle.USER_SYSTEM) {
+            onSettingsClick = (View v, NotificationChannel channel, int appUid) -> {
+                mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_NOTE_INFO);
+                guts.resetFalsingCheck();
+                mOnSettingsClickListener.onSettingsClick(sbn.getKey());
+                startAppNotificationSettingsActivity(packageName, appUid, channel, row);
+            };
+        }
+
+        notificationInfoView.bindNotification(
+                pmUser,
+                mNotificationManager,
+                mChannelEditorDialogController,
+                packageName,
+                row.getEntry().getChannel(),
+                row.getUniqueChannels(),
+                row.getEntry(),
+                onSettingsClick,
+                mDeviceProvisionedController.isDeviceProvisioned(),
+                row.getIsNonblockable());
+    }
+
+    /**
+     * Sets up the {@link ConversationInfo} inside the notification row's guts.
+     * @param row view to set up the guts for
+     * @param notificationInfoView view to set up/bind within {@code row}
+     */
+    @VisibleForTesting
+    void initializeConversationNotificationInfo(
+            final ExpandableNotificationRow row,
+            NotificationConversationInfo notificationInfoView) throws Exception {
+        NotificationGuts guts = row.getGuts();
+        NotificationEntry entry = row.getEntry();
+        StatusBarNotification sbn = entry.getSbn();
+        String packageName = sbn.getPackageName();
+        // Settings link is only valid for notifications that specify a non-system user
+        NotificationConversationInfo.OnSettingsClickListener onSettingsClick = null;
+        UserHandle userHandle = sbn.getUser();
+        PackageManager pmUser = StatusBar.getPackageManagerForUser(
+                mContext, userHandle.getIdentifier());
+        final NotificationConversationInfo.OnAppSettingsClickListener onAppSettingsClick =
+                (View v, Intent intent) -> {
+                    mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_APP_NOTE_SETTINGS);
+                    guts.resetFalsingCheck();
+                    mNotificationActivityStarter.startNotificationGutsIntent(intent, sbn.getUid(),
+                            row);
+                };
+
+        final NotificationConversationInfo.OnSnoozeClickListener onSnoozeClickListener =
+                (View v, int hours) -> {
+                    mListContainer.getSwipeActionHelper().snooze(sbn, hours);
+                };
+
+        final NotificationConversationInfo.OnConversationSettingsClickListener
+                onConversationSettingsListener =
+                () -> {
+                    startConversationSettingsActivity(sbn.getUid(), row);
+                };
+
+        if (!userHandle.equals(UserHandle.ALL)
+                || mLockscreenUserManager.getCurrentUserId() == UserHandle.USER_SYSTEM) {
+            onSettingsClick = (View v, NotificationChannel channel, int appUid) -> {
+                mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_NOTE_INFO);
+                guts.resetFalsingCheck();
+                mOnSettingsClickListener.onSettingsClick(sbn.getKey());
+                startAppNotificationSettingsActivity(packageName, appUid, channel, row);
+            };
+        }
+        ConversationIconFactory iconFactoryLoader = new ConversationIconFactory(mContext,
+                mLauncherApps, pmUser, IconDrawableFactory.newInstance(mContext, false),
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_guts_conversation_icon_size));
+
+        notificationInfoView.bindNotification(
+                mShortcutManager,
+                pmUser,
+                mNotificationManager,
+                mVisualStabilityManager,
+                packageName,
+                entry.getChannel(),
+                entry,
+                entry.getBubbleMetadata(),
+                onSettingsClick,
+                onSnoozeClickListener,
+                iconFactoryLoader,
+                mContextTracker.getCurrentUserContext(),
+                mBuilderProvider,
+                mDeviceProvisionedController.isDeviceProvisioned(),
+                mMainHandler,
+                mBgHandler,
+                onConversationSettingsListener,
+                mBubbleController);
     }
 
     /**
@@ -383,23 +549,27 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             int x,
             int y,
             NotificationMenuRowPlugin.MenuItem menuItem) {
-        if (menuItem.getGutsView() instanceof NotificationInfo) {
-            if (mStatusBarStateController instanceof StatusBarStateControllerImpl) {
-                ((StatusBarStateControllerImpl) mStatusBarStateController)
-                        .setLeaveOpenOnKeyguardHide(true);
+        if (menuItem.getGutsView() instanceof NotificationGuts.GutsContent) {
+            NotificationGuts.GutsContent gutsView =
+                    (NotificationGuts.GutsContent)  menuItem.getGutsView();
+            if (gutsView.needsFalsingProtection()) {
+                if (mStatusBarStateController instanceof StatusBarStateControllerImpl) {
+                    ((StatusBarStateControllerImpl) mStatusBarStateController)
+                            .setLeaveOpenOnKeyguardHide(true);
+                }
+
+                Runnable r = () -> mMainHandler.post(
+                        () -> openGutsInternal(view, x, y, menuItem));
+
+                mStatusBarLazy.get().executeRunnableDismissingKeyguard(
+                        r,
+                        null /* cancelAction */,
+                        false /* dismissShade */,
+                        true /* afterKeyguardGone */,
+                        true /* deferred */);
+
+                return true;
             }
-
-            Runnable r = () -> Dependency.get(Dependency.MAIN_HANDLER).post(
-                    () -> openGutsInternal(view, x, y, menuItem));
-
-            mStatusBar.executeRunnableDismissingKeyguard(
-                    r,
-                    null /* cancelAction */,
-                    false /* dismissShade */,
-                    true /* afterKeyguardGone */,
-                    true /* deferred */);
-
-            return true;
         }
         return openGutsInternal(view, x, y, menuItem);
     }
@@ -494,15 +664,17 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     @Override
     public void setShouldManageLifetime(NotificationEntry entry, boolean shouldExtend) {
         if (shouldExtend) {
-            mKeyToRemoveOnGutsClosed = entry.key;
+            mKeyToRemoveOnGutsClosed = entry.getKey();
             if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Keeping notification because it's showing guts. " + entry.key);
+                Log.d(TAG, "Keeping notification because it's showing guts. " + entry.getKey());
             }
         } else {
-            if (mKeyToRemoveOnGutsClosed != null && mKeyToRemoveOnGutsClosed.equals(entry.key)) {
+            if (mKeyToRemoveOnGutsClosed != null
+                    && mKeyToRemoveOnGutsClosed.equals(entry.getKey())) {
                 mKeyToRemoveOnGutsClosed = null;
                 if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Notification that was kept for guts was updated. " + entry.key);
+                    Log.d(TAG, "Notification that was kept for guts was updated. "
+                            + entry.getKey());
                 }
             }
         }

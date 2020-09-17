@@ -33,17 +33,22 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Background;
 
 import com.google.android.collect.Sets;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Controls the application of theme overlays across the system for all users.
@@ -54,12 +59,23 @@ import java.util.Set;
  * - Observing work profile changes and applying overlays from the primary user to their
  * associated work profiles
  */
+@Singleton
 public class ThemeOverlayController extends SystemUI {
     private static final String TAG = "ThemeOverlayController";
     private static final boolean DEBUG = false;
 
     private ThemeOverlayManager mThemeManager;
     private UserManager mUserManager;
+    private BroadcastDispatcher mBroadcastDispatcher;
+    private final Handler mBgHandler;
+
+    @Inject
+    public ThemeOverlayController(Context context, BroadcastDispatcher broadcastDispatcher,
+            @Background Handler bgHandler) {
+        super(context);
+        mBroadcastDispatcher = broadcastDispatcher;
+        mBgHandler = bgHandler;
+    }
 
     @Override
     public void start() {
@@ -70,23 +86,24 @@ public class ThemeOverlayController extends SystemUI {
                 AsyncTask.THREAD_POOL_EXECUTOR,
                 mContext.getString(R.string.launcher_overlayable_package),
                 mContext.getString(R.string.themepicker_overlayable_package));
-        final Handler bgHandler = Dependency.get(Dependency.BG_HANDLER);
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
-        mContext.registerReceiverAsUser(new BroadcastReceiver() {
+        mBroadcastDispatcher.registerReceiverWithHandler(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (DEBUG) Log.d(TAG, "Updating overlays for user switch / profile added.");
                 updateThemeOverlays();
             }
-        }, UserHandle.ALL, filter, null, bgHandler);
+        }, filter, mBgHandler, UserHandle.ALL);
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES),
                 false,
-                new ContentObserver(bgHandler) {
+                new ContentObserver(mBgHandler) {
+
                     @Override
-                    public void onChange(boolean selfChange, Uri uri, int userId) {
+                    public void onChange(boolean selfChange, Collection<Uri> uris, int flags,
+                            int userId) {
                         if (DEBUG) Log.d(TAG, "Overlay changed for user: " + userId);
                         if (ActivityManager.getCurrentUser() == userId) {
                             updateThemeOverlays();

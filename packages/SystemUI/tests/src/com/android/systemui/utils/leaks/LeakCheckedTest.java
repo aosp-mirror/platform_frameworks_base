@@ -14,8 +14,6 @@
 
 package com.android.systemui.utils.leaks;
 
-import static org.mockito.Matchers.any;
-
 import android.testing.LeakCheck;
 import android.util.ArrayMap;
 
@@ -29,7 +27,7 @@ import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HotspotController;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
@@ -60,7 +58,7 @@ public abstract class LeakCheckedTest extends SysuiTestCase {
             HotspotController.class,
             FlashlightController.class,
             UserInfoController.class,
-            KeyguardMonitor.class,
+            KeyguardStateController.class,
             BatteryController.class,
             SecurityController.class,
             ManagedProfileController.class,
@@ -118,8 +116,8 @@ public abstract class LeakCheckedTest extends SysuiTestCase {
                     obj = new FakeFlashlightController(this);
                 } else if (cls == UserInfoController.class) {
                     obj = new FakeUserInfoController(this);
-                } else if (cls == KeyguardMonitor.class) {
-                    obj = new FakeKeyguardMonitor(this);
+                } else if (cls == KeyguardStateController.class) {
+                    obj = new FakeKeyguardStateController(this);
                 } else if (cls == BatteryController.class) {
                     obj = new FakeBatteryController(this);
                 } else if (cls == SecurityController.class) {
