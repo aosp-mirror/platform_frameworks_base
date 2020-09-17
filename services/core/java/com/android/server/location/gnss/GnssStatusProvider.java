@@ -31,6 +31,8 @@ import com.android.server.location.util.AppOpsHelper;
 import com.android.server.location.util.Injector;
 import com.android.server.location.util.LocationUsageLogger;
 
+import java.util.Collection;
+
 /**
  * Implementation of a handler for {@link IGnssStatusListener}.
  */
@@ -51,7 +53,8 @@ public class GnssStatusProvider extends GnssListenerMultiplexer<Void, IGnssStatu
     }
 
     @Override
-    protected boolean registerWithService(Void ignored) {
+    protected boolean registerWithService(Void ignored,
+            Collection<GnssListenerRegistration> registrations) {
         if (D) {
             Log.d(TAG, "starting gnss status");
         }
