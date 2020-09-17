@@ -382,7 +382,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private AppOpsManager mAppOpsManager;
     /** All active uids in the system. */
     private final MirrorActiveUids mActiveUids = new MirrorActiveUids();
-    private final SparseArray<String> mPendingTempWhitelist = new SparseArray<>();
+    private final SparseArray<String> mPendingTempAllowlist = new SparseArray<>();
     /** All processes currently running that might have a window organized by name. */
     final ProcessMap<WindowProcessController> mProcessNames = new ProcessMap<>();
     /** All processes we currently have running mapped by pid and uid */
@@ -1099,7 +1099,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public int startActivityIntentSender(IApplicationThread caller, IIntentSender target,
-            IBinder whitelistToken, Intent fillInIntent, String resolvedType, IBinder resultTo,
+            IBinder allowlistToken, Intent fillInIntent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int flagsMask, int flagsValues, Bundle bOptions) {
         enforceNotIsolatedCaller("startActivityIntentSender");
         // Refuse possible leaked file descriptors
@@ -1122,7 +1122,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mAppSwitchesAllowedTime = 0;
             }
         }
-        return pir.sendInner(0, fillInIntent, resolvedType, whitelistToken, null, null,
+        return pir.sendInner(0, fillInIntent, resolvedType, allowlistToken, null, null,
                 resultTo, resultWho, requestCode, flagsMask, flagsValues, bOptions);
     }
 
@@ -3025,7 +3025,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // system or a specific app.
         // * System-initiated requests will only start the pinned mode (screen pinning)
         // * App-initiated requests
-        //   - will put the device in fully locked mode (LockTask), if the app is whitelisted
+        //   - will put the device in fully locked mode (LockTask), if the app is allowlisted
         //   - will start the pinned mode, otherwise
         final int callingUid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
@@ -3073,7 +3073,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     "updateLockTaskPackages()");
         }
         synchronized (mGlobalLock) {
-            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Whitelisting " + userId + ":"
+            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Allowlisting " + userId + ":"
                     + Arrays.toString(packages));
             getLockTaskController().updateLockTaskPackages(userId, packages);
         }
@@ -5962,11 +5962,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
-     * @return whitelist tag for a uid from mPendingTempWhitelist, null if not currently on
-     * the whitelist
+     * @return allowlist tag for a uid from mPendingTempAllowlist, null if not currently on
+     * the allowlist
      */
-    String getPendingTempWhitelistTagForUidLocked(int uid) {
-        return mPendingTempWhitelist.get(uid);
+    String getPendingTempAllowlistTagForUidLocked(int uid) {
+        return mPendingTempAllowlist.get(uid);
     }
 
     void logAppTooSlow(WindowProcessController app, long startTime, String msg) {
@@ -7295,16 +7295,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void onUidAddedToPendingTempWhitelist(int uid, String tag) {
+        public void onUidAddedToPendingTempAllowlist(int uid, String tag) {
             synchronized (mGlobalLockWithoutBoost) {
-                mPendingTempWhitelist.put(uid, tag);
+                mPendingTempAllowlist.put(uid, tag);
             }
         }
 
         @Override
-        public void onUidRemovedFromPendingTempWhitelist(int uid) {
+        public void onUidRemovedFromPendingTempAllowlist(int uid) {
             synchronized (mGlobalLockWithoutBoost) {
-                mPendingTempWhitelist.remove(uid);
+                mPendingTempAllowlist.remove(uid);
             }
         }
 
