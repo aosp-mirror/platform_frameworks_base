@@ -3,7 +3,10 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at * *      http://www.apache.org/licenses/LICENSE-2.0 *
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,7 +34,6 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -65,6 +67,7 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -117,7 +120,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 1, UserHandle.USER_CURRENT);
 
         // Inject dependencies before initializing the layout
-        mDependency.injectMockDependency(VisualStabilityManager.class);
         mDependency.injectTestDependency(
                 NotificationBlockingHelperManager.class,
                 mBlockingHelperManager);
@@ -217,12 +219,20 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Test
     @UiThreadTest
     public void testSetExpandedHeight_blockingHelperManagerReceivedCallbacks() {
-        mStackScroller.setExpandedHeight(0f);
-        verify(mBlockingHelperManager).setNotificationShadeExpanded(0f);
-        reset(mBlockingHelperManager);
+        final float expectedHeight[] = {0f};
+        final float expectedAppear[] = {0f};
 
-        mStackScroller.setExpandedHeight(100f);
-        verify(mBlockingHelperManager).setNotificationShadeExpanded(100f);
+        mStackScroller.addOnExpandedHeightChangedListener((height, appear) -> {
+            Assert.assertEquals(expectedHeight[0], height, 0);
+            Assert.assertEquals(expectedAppear[0], appear, .1);
+        });
+        expectedHeight[0] = 1f;
+        expectedAppear[0] = 1f;
+        mStackScroller.setExpandedHeight(expectedHeight[0]);
+
+        expectedHeight[0] = 100f;
+        expectedAppear[0] = 0f;
+        mStackScroller.setExpandedHeight(expectedHeight[0]);
     }
 
     @Test
