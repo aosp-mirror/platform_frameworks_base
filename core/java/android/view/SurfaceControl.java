@@ -182,9 +182,6 @@ public final class SurfaceControl implements Parcelable {
             IBinder displayToken, int mode);
     private static native void nativeDeferTransactionUntil(long transactionObj, long nativeObject,
             long barrierObject, long frame);
-    private static native void nativeDeferTransactionUntilSurface(long transactionObj,
-            long nativeObject,
-            long surfaceObject, long frame);
     private static native void nativeReparentChildren(long transactionObj, long nativeObject,
             long newParentObject);
     private static native void nativeReparent(long transactionObj, long nativeObject,
@@ -2939,22 +2936,6 @@ public final class SurfaceControl implements Parcelable {
             checkPreconditions(sc);
             nativeDeferTransactionUntil(mNativeObject, sc.mNativeObject, barrier.mNativeObject,
                     frameNumber);
-            return this;
-        }
-
-        /**
-         * @hide
-         */
-        @Deprecated
-        @UnsupportedAppUsage
-        public Transaction deferTransactionUntilSurface(SurfaceControl sc, Surface barrierSurface,
-                long frameNumber) {
-            if (frameNumber < 0) {
-                return this;
-            }
-            checkPreconditions(sc);
-            nativeDeferTransactionUntilSurface(mNativeObject, sc.mNativeObject,
-                    barrierSurface.mNativeObject, frameNumber);
             return this;
         }
 

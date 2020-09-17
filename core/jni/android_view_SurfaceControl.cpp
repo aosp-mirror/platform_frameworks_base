@@ -1333,17 +1333,6 @@ static void nativeDeferTransactionUntil(JNIEnv* env, jclass clazz, jlong transac
     transaction->deferTransactionUntil_legacy(ctrl, barrier, frameNumber);
 }
 
-static void nativeDeferTransactionUntilSurface(JNIEnv* env, jclass clazz, jlong transactionObj,
-        jlong nativeObject,
-        jlong surfaceObject, jlong frameNumber) {
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-
-    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    sp<Surface> barrier = reinterpret_cast<Surface *>(surfaceObject);
-
-    transaction->deferTransactionUntil_legacy(ctrl, barrier, frameNumber);
-}
-
 static void nativeReparentChildren(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject,
         jlong newParentObject) {
@@ -1692,8 +1681,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetProtectedContentSupport },
     {"nativeDeferTransactionUntil", "(JJJJ)V",
             (void*)nativeDeferTransactionUntil },
-    {"nativeDeferTransactionUntilSurface", "(JJJJ)V",
-            (void*)nativeDeferTransactionUntilSurface },
     {"nativeReparentChildren", "(JJJ)V",
             (void*)nativeReparentChildren } ,
     {"nativeReparent", "(JJJ)V",
