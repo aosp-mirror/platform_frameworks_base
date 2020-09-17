@@ -66,7 +66,7 @@ class PassiveLocationProviderManager extends LocationProviderManager {
     @Override
     protected ProviderRequest mergeRequests(Collection<Registration> registrations) {
         ProviderRequest.Builder providerRequest = new ProviderRequest.Builder()
-                .setInterval(0);
+                .setIntervalMillis(0);
 
         ArrayList<LocationRequest> requests = new ArrayList<>(registrations.size());
         for (Registration registration : registrations) {

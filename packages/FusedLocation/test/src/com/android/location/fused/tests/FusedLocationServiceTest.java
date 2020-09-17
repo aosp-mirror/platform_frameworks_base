@@ -124,7 +124,7 @@ public class FusedLocationServiceTest {
 
         mProvider.setRequest(
                         new ProviderRequest.Builder()
-                                .setInterval(1000)
+                                .setIntervalMillis(1000)
                                 .setLocationRequests(Collections.singletonList(request))
                                 .build(),
                 new WorkSource());
@@ -143,7 +143,7 @@ public class FusedLocationServiceTest {
 
         mProvider.setRequest(
                 new ProviderRequest.Builder()
-                        .setInterval(1000)
+                        .setIntervalMillis(1000)
                         .setLocationRequests(Collections.singletonList(request))
                         .build(),
                 new WorkSource());

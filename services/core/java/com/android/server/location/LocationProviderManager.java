@@ -35,6 +35,7 @@ import static com.android.server.location.LocationPermissions.PERMISSION_COARSE;
 import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 import static com.android.server.location.LocationPermissions.PERMISSION_NONE;
 
+import static java.lang.Math.min;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import android.annotation.Nullable;
@@ -363,7 +364,7 @@ class LocationProviderManager extends
 
             return isActive()
                     && getRequest().getIntervalMillis() < MAX_HIGH_POWER_INTERVAL_MS
-                    && getProperties().mPowerRequirement == Criteria.POWER_HIGH;
+                    && getProperties().getPowerRequirement() == Criteria.POWER_HIGH;
         }
 
         @GuardedBy("mLock")
@@ -1224,7 +1225,7 @@ class LocationProviderManager extends
                 throw new IllegalArgumentException(mName + " provider is not a test provider");
             }
 
-            return mProvider.getCurrentRequest().locationRequests;
+            return mProvider.getCurrentRequest().getLocationRequests();
         }
     }
 
@@ -1632,11 +1633,12 @@ class LocationProviderManager extends
             Preconditions.checkState(Thread.holdsLock(mLock));
         }
 
-        ProviderRequest.Builder providerRequest = new ProviderRequest.Builder();
-        // initialize the low power mode to true and set to false if any of the records requires
-        providerRequest.setLowPowerMode(true);
-
         ArrayList<Registration> providerRegistrations = new ArrayList<>(registrations.size());
+
+        long intervalMs = Long.MAX_VALUE;
+        boolean locationSettingsIgnored = false;
+        boolean lowPower = true;
+        ArrayList<LocationRequest> locationRequests = new ArrayList<>(registrations.size());
         for (Registration registration : registrations) {
             LocationRequest locationRequest = registration.getRequest();
 
@@ -1645,43 +1647,38 @@ class LocationProviderManager extends
                 continue;
             }
 
-            if (locationRequest.isLocationSettingsIgnored()) {
-                providerRequest.setLocationSettingsIgnored(true);
-            }
-            if (!locationRequest.isLowPower()) {
-                providerRequest.setLowPowerMode(false);
-            }
-
-            providerRequest.setInterval(
-                    Math.min(locationRequest.getIntervalMillis(), providerRequest.getInterval()));
             providerRegistrations.add(registration);
+            intervalMs = min(locationRequest.getIntervalMillis(), intervalMs);
+            locationSettingsIgnored |= locationRequest.isLocationSettingsIgnored();
+            lowPower &= locationRequest.isLowPower();
+            locationRequests.add(locationRequest);
         }
-
-        // collect contributing location requests
-        ArrayList<LocationRequest> providerRequests = new ArrayList<>(providerRegistrations.size());
-        final int registrationsSize = providerRegistrations.size();
-        for (int i = 0; i < registrationsSize; i++) {
-            providerRequests.add(providerRegistrations.get(i).getRequest());
-        }
-
-        providerRequest.setLocationRequests(providerRequests);
 
         // calculate who to blame for power in a somewhat arbitrary fashion. we pick a threshold
         // interval slightly higher that the minimum interval, and spread the blame across all
-        // contributing registrations under that threshold.
-        long thresholdIntervalMs = (providerRequest.getInterval() + 1000) * 3 / 2;
+        // contributing registrations under that threshold (since worksource does not allow us to
+        // represent differing power blame ratios).
+        WorkSource workSource = new WorkSource();
+        long thresholdIntervalMs = (intervalMs + 1000) * 3 / 2;
         if (thresholdIntervalMs < 0) {
-            // handle overflow
-            thresholdIntervalMs = Long.MAX_VALUE;
+            // handle overflow by setting to one below the passive interval
+            thresholdIntervalMs = Long.MAX_VALUE - 1;
         }
-        for (int i = 0; i < registrationsSize; i++) {
-            LocationRequest request = providerRegistrations.get(i).getRequest();
-            if (request.getIntervalMillis() <= thresholdIntervalMs) {
-                providerRequest.getWorkSource().add(providerRegistrations.get(i).getWorkSource());
+        final int providerRegistrationsSize = providerRegistrations.size();
+        for (int i = 0; i < providerRegistrationsSize; i++) {
+            Registration registration = providerRegistrations.get(i);
+            if (registration.getRequest().getIntervalMillis() <= thresholdIntervalMs) {
+                workSource.add(providerRegistrations.get(i).getWorkSource());
             }
         }
 
-        return providerRequest.build();
+        return new ProviderRequest.Builder()
+                .setIntervalMillis(intervalMs)
+                .setLocationSettingsIgnored(locationSettingsIgnored)
+                .setLowPower(lowPower)
+                .setLocationRequests(locationRequests)
+                .setWorkSource(workSource)
+                .build();
     }
 
     private void onUserChanged(int userId, int change) {

@@ -44,14 +44,17 @@ package com.android.location.provider {
   }
 
   public final class ProviderPropertiesUnbundled {
-    method public static com.android.location.provider.ProviderPropertiesUnbundled create(boolean, boolean, boolean, boolean, boolean, boolean, boolean, int, int);
+    method @NonNull public static com.android.location.provider.ProviderPropertiesUnbundled create(boolean, boolean, boolean, boolean, boolean, boolean, boolean, int, int);
   }
 
   public final class ProviderRequestUnbundled {
     method public long getInterval();
-    method public java.util.List<com.android.location.provider.LocationRequestUnbundled> getLocationRequests();
+    method @NonNull public java.util.List<com.android.location.provider.LocationRequestUnbundled> getLocationRequests();
     method public boolean getReportLocation();
+    method @NonNull @RequiresApi(android.os.Build.VERSION_CODES.S) public android.os.WorkSource getWorkSource();
     method @RequiresApi(android.os.Build.VERSION_CODES.Q) public boolean isLocationSettingsIgnored();
+    method @RequiresApi(android.os.Build.VERSION_CODES.S) public boolean isLowPower();
+    field public static final long INTERVAL_DISABLED = 9223372036854775807L; // 0x7fffffffffffffffL
   }
 
 }
