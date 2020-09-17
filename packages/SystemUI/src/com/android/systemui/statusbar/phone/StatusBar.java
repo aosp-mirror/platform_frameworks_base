@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
-import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowType;
@@ -37,7 +35,6 @@ import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASL
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
 import static com.android.systemui.shared.system.WindowManagerWrapper.NAV_BAR_POS_INVALID;
-import static com.android.systemui.shared.system.WindowManagerWrapper.NAV_BAR_POS_LEFT;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
@@ -174,7 +171,6 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.Snoo
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
-import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.WindowManagerWrapper;
@@ -718,7 +714,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             DozeScrimController dozeScrimController,
             VolumeComponent volumeComponent,
             CommandQueue commandQueue,
-            Optional<Recents> recentsOptional,
             Provider<StatusBarComponent.Builder> statusBarComponentBuilder,
             PluginManager pluginManager,
             Optional<SplitScreen> splitScreenOptional,
@@ -799,7 +794,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationShadeDepthControllerLazy = notificationShadeDepthControllerLazy;
         mVolumeComponent = volumeComponent;
         mCommandQueue = commandQueue;
-        mRecentsOptional = recentsOptional;
         mStatusBarComponentBuilder = statusBarComponentBuilder;
         mPluginManager = pluginManager;
         mSplitScreenOptional = splitScreenOptional;
@@ -1548,35 +1542,37 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public boolean toggleSplitScreenMode(int metricsDockAction, int metricsUndockAction) {
-        if (!mRecentsOptional.isPresent()) {
+        if (!mSplitScreenOptional.isPresent()) {
             return false;
         }
 
-        if (mSplitScreenOptional.isPresent()) {
-            SplitScreen splitScreen = mSplitScreenOptional.get();
-            if (splitScreen.isDividerVisible()) {
-                if (splitScreen.isMinimized()
-                        && !splitScreen.isHomeStackResizable()) {
-                    // Undocking from the minimized state is not supported
-                    return false;
-                } else {
-                    splitScreen.onUndockingTask();
-                    if (metricsUndockAction != -1) {
-                        mMetricsLogger.action(metricsUndockAction);
-                    }
-                }
-                return true;
+        final SplitScreen splitScreen = mSplitScreenOptional.get();
+        if (splitScreen.isDividerVisible()) {
+            if (splitScreen.isMinimized() && !splitScreen.isHomeStackResizable()) {
+                // Undocking from the minimized state is not supported
+                return false;
             }
+
+            splitScreen.onUndockingTask();
+            if (metricsUndockAction != -1) {
+                mMetricsLogger.action(metricsUndockAction);
+            }
+            return true;
         }
 
         final int navbarPos = WindowManagerWrapper.getInstance().getNavBarPosition(mDisplayId);
         if (navbarPos == NAV_BAR_POS_INVALID) {
             return false;
         }
-        int createMode = navbarPos == NAV_BAR_POS_LEFT
-                ? SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT
-                : SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
-        return mRecentsOptional.get().splitPrimaryTask(createMode, null, metricsDockAction);
+
+        if (splitScreen.splitPrimaryTask()) {
+            if (metricsDockAction != -1) {
+                mMetricsLogger.action(metricsDockAction);
+            }
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -4120,8 +4116,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected Display mDisplay;
     private int mDisplayId;
-
-    private final Optional<Recents> mRecentsOptional;
 
     protected NotificationShelfController mNotificationShelfController;
 
