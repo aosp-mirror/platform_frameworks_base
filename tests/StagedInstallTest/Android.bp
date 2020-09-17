@@ -31,7 +31,6 @@ java_test_host {
         "testng",
         "compatibility-tradefed",
         "frameworks-base-hostutils",
-        "module_test_util",
         "cts-install-lib-host",
     ],
     data: [
