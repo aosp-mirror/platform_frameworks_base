@@ -49,7 +49,7 @@ class DetailDialog(
         private const val EXTRA_USE_PANEL = "controls.DISPLAY_IN_PANEL"
     }
 
-    var activityView = ActivityView(context, null, 0, false)
+    var activityView = ActivityView(context)
 
     val stateCallback: ActivityView.StateCallback = object : ActivityView.StateCallback() {
         override fun onActivityViewReady(view: ActivityView) {

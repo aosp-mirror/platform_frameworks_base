@@ -133,7 +133,7 @@ public class ScrollView extends FrameLayout {
     /**
      * True if the user is currently dragging this ScrollView around. This is
      * not the same as 'is being flinged', which can be checked by
-     * mScroller.isFinished() (flinging begins when the user lifts his finger).
+     * mScroller.isFinished() (flinging begins when the user lifts their finger).
      */
     @UnsupportedAppUsage
     private boolean mIsBeingDragged = false;
@@ -593,7 +593,7 @@ public class ScrollView extends FrameLayout {
 
         /*
         * Shortcut the most recurring case: the user is in the dragging
-        * state and he is moving his finger.  We want to intercept this
+        * state and they is moving their finger.  We want to intercept this
         * motion.
         */
         final int action = ev.getAction();
@@ -616,7 +616,7 @@ public class ScrollView extends FrameLayout {
             case MotionEvent.ACTION_MOVE: {
                 /*
                  * mIsBeingDragged == false, otherwise the shortcut would have caught it. Check
-                 * whether the user has moved far enough from his original down touch.
+                 * whether the user has moved far enough from their original down touch.
                  */
 
                 /*

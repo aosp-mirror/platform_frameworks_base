@@ -23,6 +23,8 @@ import android.annotation.SystemService;
 import android.content.Context;
 import android.content.pm.DataLoaderParams;
 import android.content.pm.IDataLoaderStatusListener;
+import android.content.pm.IPackageLoadingProgressCallback;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.SparseArray;
 
@@ -76,25 +78,12 @@ public final class IncrementalManager {
     }
 
     private final @Nullable IIncrementalService mService;
-    @GuardedBy("mStorages")
-    private final SparseArray<IncrementalStorage> mStorages = new SparseArray<>();
+
+    private final LoadingProgressCallbacks mLoadingProgressCallbacks =
+            new LoadingProgressCallbacks();
 
     public IncrementalManager(IIncrementalService service) {
         mService = service;
-    }
-
-    /**
-     * Returns a storage object given a storage ID.
-     *
-     * @param storageId The storage ID to identify the storage object.
-     * @return IncrementalStorage object corresponding to storage ID.
-     */
-    // TODO(b/136132412): remove this
-    @Nullable
-    public IncrementalStorage getStorage(int storageId) {
-        synchronized (mStorages) {
-            return mStorages.get(storageId);
-        }
     }
 
     /**
@@ -123,9 +112,6 @@ public final class IncrementalManager {
                 return null;
             }
             final IncrementalStorage storage = new IncrementalStorage(mService, id);
-            synchronized (mStorages) {
-                mStorages.put(id, storage);
-            }
             if (autoStartDataLoader) {
                 storage.startLoading();
             }
@@ -150,9 +136,6 @@ public final class IncrementalManager {
                 return null;
             }
             final IncrementalStorage storage = new IncrementalStorage(mService, id);
-            synchronized (mStorages) {
-                mStorages.put(id, storage);
-            }
             return storage;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -173,11 +156,7 @@ public final class IncrementalManager {
             if (id < 0) {
                 return null;
             }
-            final IncrementalStorage storage = new IncrementalStorage(mService, id);
-            synchronized (mStorages) {
-                mStorages.put(id, storage);
-            }
-            return storage;
+            return new IncrementalStorage(mService, id);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -263,25 +242,6 @@ public final class IncrementalManager {
     }
 
     /**
-     * Closes a storage specified by the absolute path. If the path is not Incremental, do nothing.
-     * Unbinds the target dir and deletes the corresponding storage instance.
-     */
-    public void closeStorage(@NonNull String path) {
-        try {
-            final int id = mService.openStorage(path);
-            if (id < 0) {
-                return;
-            }
-            mService.deleteStorage(id);
-            synchronized (mStorages) {
-                mStorages.remove(id);
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Checks if Incremental feature is enabled on this device.
      */
     public static boolean isFeatureEnabled() {
@@ -309,6 +269,149 @@ public final class IncrementalManager {
      */
     public static @Nullable byte[] unsafeGetFileSignature(@NonNull String path) {
         return nativeUnsafeGetFileSignature(path);
+    }
+
+    /**
+     * Closes a storage specified by the absolute path. If the path is not Incremental, do nothing.
+     * Unbinds the target dir and deletes the corresponding storage instance.
+     * Deletes the package name and associated storage id from maps.
+     */
+    public void onPackageRemoved(@NonNull String codePath) {
+        try {
+            final IncrementalStorage storage = openStorage(codePath);
+            if (storage == null) {
+                return;
+            }
+            mLoadingProgressCallbacks.cleanUpCallbacks(storage);
+            mService.deleteStorage(storage.getId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called when a new callback wants to listen to the loading progress of an installed package.
+     * Increment the count of callbacks associated to the corresponding storage.
+     * Only register storage listener if there hasn't been any existing callback on the storage yet.
+     * @param codePath Path of the installed package. This path is on an Incremental Storage.
+     * @param callback To report loading progress to.
+     * @return True if the package name and associated storage id are valid. False otherwise.
+     */
+    public boolean registerCallback(@NonNull String codePath,
+            @NonNull IPackageLoadingProgressCallback callback) {
+        final IncrementalStorage storage = openStorage(codePath);
+        if (storage == null) {
+            // storage does not exist, package not installed
+            return false;
+        }
+        return mLoadingProgressCallbacks.registerCallback(storage, callback);
+    }
+
+    /**
+     * Called when a callback wants to stop listen to the loading progress of an installed package.
+     * Decrease the count of the callbacks on the associated to the corresponding storage.
+     * If the count becomes zero, unregister the storage listener.
+     * @param codePath Path of the installed package
+     * @return True if the package name and associated storage id are valid. False otherwise.
+     */
+    public boolean unregisterCallback(@NonNull String codePath,
+            @NonNull IPackageLoadingProgressCallback callback) {
+        final IncrementalStorage storage = openStorage(codePath);
+        if (storage == null) {
+            // storage does not exist, package not installed
+            return false;
+        }
+        return mLoadingProgressCallbacks.unregisterCallback(storage, callback);
+    }
+
+    private static class LoadingProgressCallbacks extends IStorageLoadingProgressListener.Stub {
+        @GuardedBy("mCallbacks")
+        private final SparseArray<RemoteCallbackList<IPackageLoadingProgressCallback>> mCallbacks =
+                new SparseArray<>();
+
+        // TODO(b/165841827): disable callbacks when app state changes to fully loaded
+        public void cleanUpCallbacks(@NonNull IncrementalStorage storage) {
+            final int storageId = storage.getId();
+            final RemoteCallbackList<IPackageLoadingProgressCallback> callbacksForStorage;
+            synchronized (mCallbacks) {
+                callbacksForStorage = mCallbacks.removeReturnOld(storageId);
+            }
+            if (callbacksForStorage == null) {
+                return;
+            }
+            // Unregister all existing callbacks on this storage
+            callbacksForStorage.kill();
+            storage.unregisterLoadingProgressListener();
+        }
+
+        // TODO(b/165841827): handle reboot and app update
+        public boolean registerCallback(@NonNull IncrementalStorage storage,
+                @NonNull IPackageLoadingProgressCallback callback) {
+            final int storageId = storage.getId();
+            synchronized (mCallbacks) {
+                RemoteCallbackList<IPackageLoadingProgressCallback> callbacksForStorage =
+                        mCallbacks.get(storageId);
+                if (callbacksForStorage == null) {
+                    callbacksForStorage = new RemoteCallbackList<>();
+                    mCallbacks.put(storageId, callbacksForStorage);
+                }
+                // Registration in RemoteCallbackList needs to be done first, such that when events
+                // come from Incremental Service, the callback is already registered
+                callbacksForStorage.register(callback);
+                if (callbacksForStorage.getRegisteredCallbackCount() > 1) {
+                    // already listening for progress for this storage
+                    return true;
+                }
+            }
+            return storage.registerLoadingProgressListener(this);
+        }
+
+        public boolean unregisterCallback(@NonNull IncrementalStorage storage,
+                @NonNull IPackageLoadingProgressCallback callback) {
+            final int storageId = storage.getId();
+            final RemoteCallbackList<IPackageLoadingProgressCallback> callbacksForStorage;
+            synchronized (mCallbacks) {
+                callbacksForStorage = mCallbacks.get(storageId);
+                if (callbacksForStorage == null) {
+                    // no callback has ever been registered on this storage
+                    return false;
+                }
+                if (!callbacksForStorage.unregister(callback)) {
+                    // the callback was not registered
+                    return false;
+                }
+                if (callbacksForStorage.getRegisteredCallbackCount() > 0) {
+                    // other callbacks are still listening on this storage
+                    return true;
+                }
+                mCallbacks.delete(storageId);
+            }
+            // stop listening for this storage
+            return storage.unregisterLoadingProgressListener();
+        }
+
+        @Override
+        public void onStorageLoadingProgressChanged(int storageId, float progress) {
+            final RemoteCallbackList<IPackageLoadingProgressCallback> callbacksForStorage;
+            synchronized (mCallbacks) {
+                callbacksForStorage = mCallbacks.get(storageId);
+            }
+            if (callbacksForStorage == null) {
+                // no callback has ever been registered on this storage
+                return;
+            }
+            final int n = callbacksForStorage.beginBroadcast();
+            // RemoteCallbackList use ArrayMap internally and it's safe to iterate this way
+            for (int i = 0; i < n; i++) {
+                final IPackageLoadingProgressCallback callback =
+                        callbacksForStorage.getBroadcastItem(i);
+                try {
+                    callback.onPackageLoadingProgressChanged(progress);
+                } catch (RemoteException ignored) {
+                }
+            }
+            callbacksForStorage.finishBroadcast();
+        }
     }
 
     /* Native methods */

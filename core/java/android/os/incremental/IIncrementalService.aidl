@@ -19,6 +19,7 @@ package android.os.incremental;
 import android.content.pm.DataLoaderParamsParcel;
 import android.content.pm.IDataLoaderStatusListener;
 import android.os.incremental.IncrementalNewFileParams;
+import android.os.incremental.IStorageLoadingProgressListener;
 import android.os.incremental.IStorageHealthListener;
 import android.os.incremental.StorageHealthCheckParams;
 
@@ -133,4 +134,14 @@ interface IIncrementalService {
      * Waits until all native library extraction is done for the storage
      */
     boolean waitForNativeBinariesExtraction(int storageId);
+
+    /**
+     * Register to start listening for loading progress change for a storage.
+     */
+    boolean registerLoadingProgressListener(int storageId, IStorageLoadingProgressListener listener);
+
+    /**
+     * Stop listening for the loading progress change for a storage.
+     */
+    boolean unregisterLoadingProgressListener(int storageId);
 }

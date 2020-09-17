@@ -830,7 +830,7 @@ public class UserManager {
     public static final String DISALLOW_UNMUTE_MICROPHONE = "no_unmute_microphone";
 
     /**
-     * Specifies if a user is disallowed from adjusting the master volume. If set, the master volume
+     * Specifies if a user is disallowed from adjusting the global volume. If set, the global volume
      * will be muted. This can be set by device owners from API 21 and profile owners from API 24.
      * The default value is <code>false</code>.
      *
@@ -1056,7 +1056,7 @@ public class UserManager {
     public static final String DISALLOW_CAMERA = "no_camera";
 
     /**
-     * Specifies if a user is not allowed to unmute the device's master volume.
+     * Specifies if a user is not allowed to unmute the device's global volume.
      *
      * @see DevicePolicyManager#setMasterVolumeMuted(ComponentName, boolean)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)

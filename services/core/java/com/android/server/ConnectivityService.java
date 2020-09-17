@@ -5875,10 +5875,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return nai == getDefaultNetwork();
     }
 
-    private boolean isDefaultRequest(NetworkRequestInfo nri) {
-        return nri.request.requestId == mDefaultRequest.requestId;
-    }
-
     // TODO : remove this method. It's a stopgap measure to help sheperding a number of dependent
     // changes that would conflict throughout the automerger graph. Having this method temporarily
     // helps with the process of going through with all these dependent changes across the entire
@@ -6240,7 +6236,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final int vpnAppUid = nai.networkCapabilities.getOwnerUid();
         // TODO: this create a window of opportunity for apps to receive traffic between the time
         // when the old rules are removed and the time when new rules are added. To fix this,
-        // make eBPF support two whitelisted interfaces so here new rules can be added before the
+        // make eBPF support two allowlisted interfaces so here new rules can be added before the
         // old rules are being removed.
         if (wasFiltering) {
             mPermissionMonitor.onVpnUidRangesRemoved(oldIface, ranges, vpnAppUid);

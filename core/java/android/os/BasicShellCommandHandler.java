@@ -264,6 +264,18 @@ public abstract class BasicShellCommandHandler {
     }
 
     /**
+     * @return all the remaining arguments in the command without moving the current position.
+     */
+    public String[] peekRemainingArgs() {
+        int remaining = getRemainingArgsCount();
+        String[] args = new String[remaining];
+        for (int pos = mArgPos; pos < mArgs.length; pos++) {
+            args[pos - mArgPos] = mArgs[pos];
+        }
+        return args;
+    }
+
+    /**
      * Returns number of arguments that haven't been processed yet.
      */
     public int getRemainingArgsCount() {

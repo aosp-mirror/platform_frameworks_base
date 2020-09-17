@@ -16,19 +16,24 @@
 
 package com.android.location.provider;
 
+import android.annotation.NonNull;
+
 import com.android.internal.location.ProviderProperties;
 
+import java.util.Objects;
+
 /**
- * This class is an interface to Provider Properties for unbundled applications.
+ * Represents provider properties for unbundled applications.
  *
- * <p>IMPORTANT: This class is effectively a public API for unbundled
- * applications, and must remain API stable. See README.txt in the root
- * of this package for more information.
+ * <p>IMPORTANT: This class is effectively a public API for unbundled applications, and must remain
+ * API stable.
  */
 public final class ProviderPropertiesUnbundled {
-    private final ProviderProperties mProperties;
 
-    public static ProviderPropertiesUnbundled create(boolean requiresNetwork,
+    /**
+     * Create new instance of {@link ProviderPropertiesUnbundled} with the given arguments.
+     */
+    public static @NonNull ProviderPropertiesUnbundled create(boolean requiresNetwork,
             boolean requiresSatellite, boolean requiresCell, boolean hasMonetaryCost,
             boolean supportsAltitude, boolean supportsSpeed, boolean supportsBearing,
             int powerRequirement, int accuracy) {
@@ -37,17 +42,37 @@ public final class ProviderPropertiesUnbundled {
                 supportsBearing, powerRequirement, accuracy));
     }
 
+    private final ProviderProperties mProperties;
+
     private ProviderPropertiesUnbundled(ProviderProperties properties) {
-        mProperties = properties;
+        mProperties = Objects.requireNonNull(properties);
     }
 
     /** @hide */
-    public ProviderProperties getProviderProperties() {
+    public @NonNull ProviderProperties getProviderProperties() {
         return mProperties;
     }
 
     @Override
     public String toString() {
         return mProperties.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ProviderPropertiesUnbundled that = (ProviderPropertiesUnbundled) o;
+        return mProperties.equals(that.mProperties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mProperties);
     }
 }

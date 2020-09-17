@@ -24,11 +24,11 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.SurfaceControl;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 
@@ -101,10 +101,10 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
 
     @MainThread
     void enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
-            @Nullable RemoteCallback endCallback) {
+            @Nullable IRemoteMagnificationAnimationCallback callback) {
         //TODO: b/144080869 support multi-display.
         mWindowMagnificationAnimationController.enableWindowMagnification(scale, centerX, centerY,
-                endCallback != null ? () -> endCallback.sendResult(null) : null);
+                callback);
     }
 
     @MainThread
@@ -120,10 +120,10 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
     }
 
     @MainThread
-    void disableWindowMagnification(int displayId, @Nullable RemoteCallback endCallback) {
+    void disableWindowMagnification(int displayId,
+            @Nullable IRemoteMagnificationAnimationCallback callback) {
         //TODO: b/144080869 support multi-display.
-        mWindowMagnificationAnimationController.deleteWindowMagnification(
-                endCallback != null ? () -> endCallback.sendResult(null) : null);
+        mWindowMagnificationAnimationController.deleteWindowMagnification(callback);
     }
 
     @Override
@@ -182,10 +182,10 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
 
         @Override
         public void enableWindowMagnification(int displayId, float scale, float centerX,
-                float centerY, RemoteCallback remoteCallback) {
+                float centerY, IRemoteMagnificationAnimationCallback callback) {
             mHandler.post(
                     () -> mWindowMagnification.enableWindowMagnification(displayId, scale, centerX,
-                            centerY, remoteCallback));
+                            centerY, callback));
         }
 
         @Override
@@ -194,9 +194,10 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
         }
 
         @Override
-        public void disableWindowMagnification(int displayId, RemoteCallback remoteCallback) {
+        public void disableWindowMagnification(int displayId,
+                IRemoteMagnificationAnimationCallback callback) {
             mHandler.post(() -> mWindowMagnification.disableWindowMagnification(displayId,
-                    remoteCallback));
+                    callback));
         }
 
         @Override

@@ -16,8 +16,10 @@
 
 package com.android.location.provider;
 
+import android.annotation.NonNull;
 import android.location.LocationRequest;
 import android.os.Build;
+import android.os.WorkSource;
 
 import androidx.annotation.RequiresApi;
 
@@ -27,13 +29,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class is an interface to Provider Requests for unbundled applications.
+ * Represents a provider request for unbundled applications.
  *
- * <p>IMPORTANT: This class is effectively a public API for unbundled
- * applications, and must remain API stable. See README.txt in the root
- * of this package for more information.
+ * <p>IMPORTANT: This class is effectively a public API for unbundled applications, and must remain
+ * API stable.
  */
 public final class ProviderRequestUnbundled {
+
+    /**
+     * Represents a disabled request.
+     */
+    public static final long INTERVAL_DISABLED = ProviderRequest.INTERVAL_DISABLED;
 
     private final ProviderRequest mRequest;
 
@@ -42,29 +48,58 @@ public final class ProviderRequestUnbundled {
         mRequest = request;
     }
 
+    /**
+     * True if this is an active request with a valid location reporting interval, false if this
+     * request is inactive and does not require any locations to be reported.
+     */
     public boolean getReportLocation() {
-        return mRequest.reportLocation;
-    }
-
-    public long getInterval() {
-        return mRequest.interval;
-    }
-
-    @RequiresApi(Build.VERSION_CODES.Q)
-    public boolean isLocationSettingsIgnored() {
-        return mRequest.locationSettingsIgnored;
+        return mRequest.isActive();
     }
 
     /**
-     * Never null.
+     * The interval at which a provider should report location. Will return
+     * {@link #INTERVAL_DISABLED} for an inactive request.
      */
-    public List<LocationRequestUnbundled> getLocationRequests() {
+    public long getInterval() {
+        return mRequest.getIntervalMillis();
+    }
+
+    /**
+     * Whether any applicable hardware low power modes should be used to satisfy this request.
+     */
+    @RequiresApi(Build.VERSION_CODES.S)
+    public boolean isLowPower() {
+        return mRequest.isLowPower();
+    }
+
+    /**
+     * Whether the provider should ignore all location settings, user consents, power restrictions
+     * or any other restricting factors and always satisfy this request to the best of their
+     * ability. This should only be used in case of a user initiated emergency.
+     */
+    @RequiresApi(Build.VERSION_CODES.Q)
+    public boolean isLocationSettingsIgnored() {
+        return mRequest.isLocationSettingsIgnored();
+    }
+
+    /**
+     * The full list of location requests contributing to this provider request.
+     */
+    public @NonNull List<LocationRequestUnbundled> getLocationRequests() {
         List<LocationRequestUnbundled> result = new ArrayList<>(
-                mRequest.locationRequests.size());
-        for (LocationRequest r : mRequest.locationRequests) {
-          result.add(new LocationRequestUnbundled(r));
+                mRequest.getLocationRequests().size());
+        for (LocationRequest r : mRequest.getLocationRequests()) {
+            result.add(new LocationRequestUnbundled(r));
         }
         return result;
+    }
+
+    /**
+     * The power blame for this provider request.
+     */
+    @RequiresApi(Build.VERSION_CODES.S)
+    public @NonNull WorkSource getWorkSource() {
+        return mRequest.getWorkSource();
     }
 
     @Override

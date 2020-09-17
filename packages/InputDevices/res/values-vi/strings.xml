@@ -26,8 +26,7 @@
     <string name="keyboard_layout_finnish" msgid="5585659438924315466">"Tiếng Phần Lan"</string>
     <string name="keyboard_layout_croatian" msgid="4172229471079281138">"Tiếng Croatia"</string>
     <string name="keyboard_layout_czech" msgid="1349256901452975343">"Tiếng Séc"</string>
-    <!-- no translation found for keyboard_layout_czech_qwerty (3331402534128515501) -->
-    <skip />
+    <string name="keyboard_layout_czech_qwerty" msgid="3331402534128515501">"Kiểu QWERTY tiếng Séc"</string>
     <string name="keyboard_layout_estonian" msgid="8775830985185665274">"Tiếng Estonia"</string>
     <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"Tiếng Hungary"</string>
     <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"Tiếng Ai-xơ-len"</string>

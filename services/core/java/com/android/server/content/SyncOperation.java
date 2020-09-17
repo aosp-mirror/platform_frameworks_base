@@ -50,7 +50,7 @@ public class SyncOperation {
     public static final int REASON_IS_SYNCABLE = -5;
     /** Sync started because it has just been set to sync automatically. */
     public static final int REASON_SYNC_AUTO = -6;
-    /** Sync started because master sync automatically has been set to true. */
+    /** Sync started because global sync automatically has been set to true. */
     public static final int REASON_MASTER_SYNC_AUTO = -7;
     public static final int REASON_USER_START = -8;
 

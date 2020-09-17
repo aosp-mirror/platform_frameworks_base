@@ -1133,7 +1133,7 @@ public class WorkSource implements Parcelable {
         ArrayList<WorkChain> newChains = null;
         ArrayList<WorkChain> goneChains = null;
 
-        // TODO(narayan): This is a dumb O(M*N) algorithm that determines what has changed across
+        // TODO(narayan): This is a naive O(M*N) algorithm that determines what has changed across
         // WorkSource objects. We can replace this with something smarter, for e.g by defining
         // a Comparator between WorkChains. It's unclear whether that will be more efficient if
         // the number of chains associated with a WorkSource is expected to be small

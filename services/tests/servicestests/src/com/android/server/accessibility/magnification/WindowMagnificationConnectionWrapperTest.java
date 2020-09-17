@@ -17,14 +17,17 @@
 package com.android.server.accessibility.magnification;
 
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
-import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.view.Display;
+import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
+import android.view.accessibility.MagnificationAnimationCallback;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,26 +43,29 @@ public class WindowMagnificationConnectionWrapperTest {
 
     private static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY;
 
-    @Mock
     private IWindowMagnificationConnection mConnection;
     @Mock
     private IWindowMagnificationConnectionCallback mCallback;
     @Mock
-    private RemoteCallback.OnResultListener mOnResultListener;
-    private RemoteCallback mRemoteCallback;
+    private MagnificationAnimationCallback mAnimationCallback;
+
+    private MockWindowMagnificationConnection mMockWindowMagnificationConnection;
     private WindowMagnificationConnectionWrapper mConnectionWrapper;
 
     @Before
-    public void setUp() {
+    public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
+        mMockWindowMagnificationConnection = new MockWindowMagnificationConnection();
+        mConnection = mMockWindowMagnificationConnection.getConnection();
         mConnectionWrapper = new WindowMagnificationConnectionWrapper(mConnection);
-        mRemoteCallback = new RemoteCallback(mOnResultListener);
     }
 
     @Test
     public void enableWindowMagnification() throws RemoteException {
-        mConnectionWrapper.enableWindowMagnification(TEST_DISPLAY, 2, 100f, 200f, mRemoteCallback);
-        verify(mConnection).enableWindowMagnification(TEST_DISPLAY, 2, 100f, 200f, mRemoteCallback);
+        mConnectionWrapper.enableWindowMagnification(TEST_DISPLAY, 2, 100f, 200f,
+                mAnimationCallback);
+
+        verify(mAnimationCallback).onResult(true);
     }
 
     @Test
@@ -70,8 +76,11 @@ public class WindowMagnificationConnectionWrapperTest {
 
     @Test
     public void disableWindowMagnification() throws RemoteException {
-        mConnectionWrapper.disableWindowMagnification(TEST_DISPLAY, mRemoteCallback);
-        verify(mConnection).disableWindowMagnification(TEST_DISPLAY, mRemoteCallback);
+        mConnectionWrapper.disableWindowMagnification(TEST_DISPLAY, mAnimationCallback);
+
+        verify(mConnection).disableWindowMagnification(eq(TEST_DISPLAY),
+                any(IRemoteMagnificationAnimationCallback.class));
+        verify(mAnimationCallback).onResult(true);
     }
 
     @Test
@@ -99,5 +108,4 @@ public class WindowMagnificationConnectionWrapperTest {
         mConnectionWrapper.setConnectionCallback(mCallback);
         verify(mConnection).setConnectionCallback(mCallback);
     }
-
 }

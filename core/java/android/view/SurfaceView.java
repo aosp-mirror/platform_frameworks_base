@@ -506,7 +506,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         // It's possible to create a SurfaceView using the default constructor and never
         // attach it to a view hierarchy, this is a common use case when dealing with
         // OpenGL. A developer will probably create a new GLSurfaceView, and let it manage
-        // the lifecycle. Instead of attaching it to a view, he/she can just pass
+        // the lifecycle. Instead of attaching it to a view, they can just pass
         // the SurfaceHolder forward, most live wallpapers do it.
         if (viewRoot != null) {
             viewRoot.removeSurfaceChangedCallback(this);
@@ -1843,6 +1843,23 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             if (mSurface.isValid()) {
                 mSurface.forceScopedDisconnect();
             }
+        }
+    }
+
+    @Override
+    protected void onFocusChanged(boolean gainFocus, @FocusDirection int direction,
+                                  @Nullable Rect previouslyFocusedRect) {
+        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
+        final ViewRootImpl viewRoot = getViewRootImpl();
+        if (mSurfacePackage == null || viewRoot == null) {
+            return;
+        }
+        try {
+            viewRoot.mWindowSession.grantEmbeddedWindowFocus(viewRoot.mWindow,
+                    mSurfacePackage.getInputToken(), gainFocus);
+        } catch (Exception e) {
+            Log.e(TAG, System.identityHashCode(this)
+                    + "Exception requesting focus on embedded window", e);
         }
     }
 

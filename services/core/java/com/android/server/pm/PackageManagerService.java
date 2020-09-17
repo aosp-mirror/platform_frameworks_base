@@ -176,6 +176,7 @@ import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstaller;
+import android.content.pm.IPackageLoadingProgressCallback;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageManagerNative;
 import android.content.pm.IPackageMoveObserver;
@@ -2142,7 +2143,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 res.removedInfo.sendPackageRemovedBroadcasts(killApp);
             }
 
-            // Whitelist any restricted permissions first as some may be runtime
+            // Allowlist any restricted permissions first as some may be runtime
             // that the installer requested to be granted at install time.
             if (whitelistedRestrictedPermissions != null
                     && !whitelistedRestrictedPermissions.isEmpty()) {
@@ -3617,7 +3618,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 ver.fingerprint = Build.FINGERPRINT;
             }
 
-            // Grandfather existing (installed before Q) non-system apps to hide
+            // Legacy existing (installed before Q) non-system apps to hide
             // their icons in launcher.
             if (!mOnlyCore && mIsPreQUpgrade) {
                 Slog.i(TAG, "Whitelisting all existing apps to hide their icons");
@@ -7481,7 +7482,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             } else {
                 // we have an instant application locally, but, we can't admit that since
-                // callers shouldn't be able to determine prior browsing. create a dummy
+                // callers shouldn't be able to determine prior browsing. create a placeholder
                 // auxiliary response so the downstream code behaves as if there's an
                 // instant application available externally. when it comes time to start
                 // the instant application, we'll do the right thing.
@@ -11107,7 +11108,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (sharedUserSetting != null && sharedUserSetting.isPrivileged()) {
                 // Exempt SharedUsers signed with the platform key.
                 // TODO(b/72378145) Fix this exemption. Force signature apps
-                // to whitelist their privileged permissions just like other
+                // to allowlist their privileged permissions just like other
                 // priv-apps.
                 synchronized (mLock) {
                     PackageSetting platformPkgSetting = mSettings.mPackages.get("android");
@@ -15999,7 +16000,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             String codePath = codeFile.getAbsolutePath();
             if (mIncrementalManager != null && isIncrementalPath(codePath)) {
-                mIncrementalManager.closeStorage(codePath);
+                mIncrementalManager.onPackageRemoved(codePath);
             }
 
             removeCodePathLI(codeFile);
@@ -16467,7 +16468,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     /**
      * A container of all data needed to commit a package to in-memory data structures and to disk.
-     * TODO: move most of the data contained her into a PackageSetting for commit.
+     * TODO: move most of the data contained here into a PackageSetting for commit.
      */
     private static class ReconciledPackage {
         public final ReconcileRequest request;
@@ -17131,10 +17132,11 @@ public class PackageManagerService extends IPackageManager.Stub
                             & PackageManagerService.SCAN_AS_INSTANT_APP) != 0);
             final AndroidPackage pkg = reconciledPkg.pkgSetting.pkg;
             final String packageName = pkg.getPackageName();
+            final String codePath = pkg.getPath();
             final boolean onIncremental = mIncrementalManager != null
-                    && isIncrementalPath(pkg.getPath());
+                    && isIncrementalPath(codePath);
             if (onIncremental) {
-                IncrementalStorage storage = mIncrementalManager.openStorage(pkg.getPath());
+                IncrementalStorage storage = mIncrementalManager.openStorage(codePath);
                 if (storage == null) {
                     throw new IllegalArgumentException(
                             "Install: null storage for incremental package " + packageName);
@@ -17237,7 +17239,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Notify BackgroundDexOptService that the package has been changed.
             // If this is an update of a package which used to fail to compile,
-            // BackgroundDexOptService will remove it from its blacklist.
+            // BackgroundDexOptService will remove it from its denylist.
             // TODO: Layering violation
             BackgroundDexOptService.notifyPackageChanged(packageName);
 
@@ -25364,6 +25366,56 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public boolean isSuspendingAnyPackages(String suspendingPackage, int userId) {
             return PackageManagerService.this.isSuspendingAnyPackages(suspendingPackage, userId);
+        }
+
+        @Override
+        public boolean registerInstalledLoadingProgressCallback(String packageName,
+                PackageManagerInternal.InstalledLoadingProgressCallback callback, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            mPermissionManager.enforceCrossUserPermission(
+                    callingUid, userId, true, false,
+                    "registerLoadingProgressCallback");
+            final PackageSetting ps;
+            synchronized (mLock) {
+                ps = mSettings.mPackages.get(packageName);
+                if (ps == null) {
+                    Slog.w(TAG, "Failed registering loading progress callback. Package "
+                            + packageName + " is not installed");
+                    return false;
+                }
+                if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
+                    Slog.w(TAG, "Failed registering loading progress callback. Package "
+                            + packageName + " is not visible to the calling app");
+                    return false;
+                }
+                // TODO(b/165841827): return false if package is fully loaded
+            }
+            if (mIncrementalManager == null) {
+                Slog.w(TAG,
+                        "Failed registering loading progress callback. Incremental is not enabled");
+                return false;
+            }
+            return mIncrementalManager.registerCallback(ps.getPathString(),
+                    (IPackageLoadingProgressCallback) callback.getBinder());
+        }
+
+        @Override
+        public boolean unregisterInstalledLoadingProgressCallback(String packageName,
+                PackageManagerInternal.InstalledLoadingProgressCallback callback) {
+            final PackageSetting ps;
+            synchronized (mLock) {
+                ps = mSettings.mPackages.get(packageName);
+                if (ps == null) {
+                    Slog.w(TAG, "Failed unregistering loading progress callback. Package "
+                            + packageName + " is not installed");
+                    return false;
+                }
+            }
+            if (mIncrementalManager == null) {
+                return false;
+            }
+            return mIncrementalManager.unregisterCallback(ps.getPathString(),
+                    (IPackageLoadingProgressCallback) callback.getBinder());
         }
     }
 

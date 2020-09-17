@@ -1058,7 +1058,7 @@ public final class AssetManager implements AutoCloseable {
             XmlResourceParser parser = block.newParser();
             // If openXmlBlockAsset doesn't throw, it will always return an XmlBlock object with
             // a valid native pointer, which makes newParser always return non-null. But let's
-            // be paranoid.
+            // be careful.
             if (parser == null) {
                 throw new AssertionError("block.newParser() returned a null parser");
             }

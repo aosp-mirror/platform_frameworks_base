@@ -44,6 +44,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
+import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.InsetsState.InternalInsetsType;
@@ -59,7 +61,9 @@ import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.tracing.ProtoTracer;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * This class takes the functions from IStatusBar that come in on
@@ -70,6 +74,8 @@ import java.util.ArrayList;
  */
 public class CommandQueue extends IStatusBar.Stub implements CallbackController<Callbacks>,
         DisplayManager.DisplayListener {
+    private static final String TAG = CommandQueue.class.getSimpleName();
+
     private static final int INDEX_MASK = 0xffff;
     private static final int MSG_SHIFT  = 16;
     private static final int MSG_MASK   = 0xffff << MSG_SHIFT;
@@ -131,6 +137,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     private static final int MSG_TRACING_STATE_CHANGED             = 55 << MSG_SHIFT;
     private static final int MSG_SUPPRESS_AMBIENT_DISPLAY          = 56 << MSG_SHIFT;
     private static final int MSG_REQUEST_WINDOW_MAGNIFICATION_CONNECTION = 57 << MSG_SHIFT;
+    private static final int MSG_HANDLE_WINDOW_MANAGER_LOGGING_COMMAND = 58 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -353,6 +360,11 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
          * @param connect {@code true} if needs connection, otherwise set the connection to null.
          */
         default void requestWindowMagnificationConnection(boolean connect) { }
+
+        /**
+         * Handles a window manager shell logging command.
+         */
+        default void handleWindowManagerLoggingCommand(String[] args, ParcelFileDescriptor outFd) {}
     }
 
     public CommandQueue(Context context) {
@@ -984,6 +996,17 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     }
 
     @Override
+    public void handleWindowManagerLoggingCommand(String[] args, ParcelFileDescriptor outFd) {
+        synchronized (mLock) {
+            SomeArgs internalArgs = SomeArgs.obtain();
+            internalArgs.arg1 = args;
+            internalArgs.arg2 = outFd;
+            mHandler.obtainMessage(MSG_HANDLE_WINDOW_MANAGER_LOGGING_COMMAND, internalArgs)
+                    .sendToTarget();
+        }
+    }
+
+    @Override
     public void suppressAmbientDisplay(boolean suppress) {
         synchronized (mLock) {
             mHandler.obtainMessage(MSG_SUPPRESS_AMBIENT_DISPLAY, suppress).sendToTarget();
@@ -1333,6 +1356,18 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).requestWindowMagnificationConnection((Boolean) msg.obj);
                     }
+                    break;
+                case MSG_HANDLE_WINDOW_MANAGER_LOGGING_COMMAND:
+                    args = (SomeArgs) msg.obj;
+                    try (ParcelFileDescriptor pfd = (ParcelFileDescriptor) args.arg2) {
+                        for (int i = 0; i < mCallbacks.size(); i++) {
+                            mCallbacks.get(i).handleWindowManagerLoggingCommand(
+                                    (String[]) args.arg1, pfd);
+                        }
+                    } catch (IOException e) {
+                        Log.e(TAG, "Failed to handle logging command", e);
+                    }
+                    args.recycle();
                     break;
             }
         }

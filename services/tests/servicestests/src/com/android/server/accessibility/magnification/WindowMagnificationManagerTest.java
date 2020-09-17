@@ -47,7 +47,9 @@ import android.test.mock.MockContentResolver;
 import android.view.Display;
 import android.view.InputDevice;
 import android.view.MotionEvent;
+import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
+import android.view.accessibility.MagnificationAnimationCallback;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
@@ -73,7 +75,7 @@ public class WindowMagnificationManagerTest {
     @Mock
     private StatusBarManagerInternal mMockStatusBarManagerInternal;
     @Mock
-    private Runnable mEndCallback;
+    private MagnificationAnimationCallback mAnimationCallback;
     private MockContentResolver mResolver;
     private WindowMagnificationManager mWindowMagnificationManager;
 
@@ -177,9 +179,11 @@ public class WindowMagnificationManagerTest {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
 
         mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 2f, 200f, 300f,
-                mEndCallback);
+                mAnimationCallback);
 
-        verify(mEndCallback).run();
+        verify(mMockConnection.getConnection()).enableWindowMagnification(eq(TEST_DISPLAY), eq(2f),
+                eq(200f), eq(300f), any(IRemoteMagnificationAnimationCallback.class));
+        verify(mAnimationCallback).onResult(true);
     }
 
     @Test
@@ -194,13 +198,17 @@ public class WindowMagnificationManagerTest {
     }
 
     @Test
-    public void disableWithCallback_hasConnectionAndEnabled_disableWindowMagnification() {
+    public void disableWithCallback_hasConnectionAndEnabled_disableWindowMagnification()
+            throws RemoteException {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f, NaN, NaN);
 
-        mWindowMagnificationManager.disableWindowMagnification(TEST_DISPLAY,  false, mEndCallback);
+        mWindowMagnificationManager.disableWindowMagnification(TEST_DISPLAY, false,
+                mAnimationCallback);
 
-        verify(mEndCallback).run();
+        verify(mMockConnection.getConnection()).disableWindowMagnification(eq(TEST_DISPLAY),
+                any(IRemoteMagnificationAnimationCallback.class));
+        verify(mAnimationCallback).onResult(true);
     }
 
     @Test
@@ -350,6 +358,15 @@ public class WindowMagnificationManagerTest {
         verify(mMockConnection.getConnection()).removeMagnificationButton(TEST_DISPLAY);
         verify(mMockConnection.getConnection()).disableWindowMagnification(TEST_DISPLAY, null);
         assertFalse(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
+    }
+
+    @Test
+    public void centerGetter_enabledOnTestDisplay_expectedValues() {
+        mWindowMagnificationManager.requestConnection(true);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f, 100f, 200f);
+
+        assertEquals(mWindowMagnificationManager.getCenterX(TEST_DISPLAY), 100f);
+        assertEquals(mWindowMagnificationManager.getCenterY(TEST_DISPLAY), 200f);
     }
 
     private MotionEvent generatePointersDownEvent(PointF[] pointersLocation) {

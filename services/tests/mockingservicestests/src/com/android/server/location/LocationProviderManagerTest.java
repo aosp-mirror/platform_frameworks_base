@@ -739,44 +739,45 @@ public class LocationProviderManagerTest {
 
     @Test
     public void testProviderRequest() {
-        assertThat(mProvider.getRequest().reportLocation).isFalse();
-        assertThat(mProvider.getRequest().locationRequests).isEmpty();
+        assertThat(mProvider.getRequest().isActive()).isFalse();
+        assertThat(mProvider.getRequest().getLocationRequests()).isEmpty();
 
         ILocationListener listener1 = createMockLocationListener();
         LocationRequest request1 = new LocationRequest.Builder(5).build();
         mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
 
-        assertThat(mProvider.getRequest().reportLocation).isTrue();
-        assertThat(mProvider.getRequest().locationRequests).containsExactly(request1);
-        assertThat(mProvider.getRequest().locationSettingsIgnored).isFalse();
-        assertThat(mProvider.getRequest().interval).isEqualTo(5);
-        assertThat(mProvider.getRequest().lowPowerMode).isFalse();
-        assertThat(mProvider.getRequest().workSource).isNotNull();
+        assertThat(mProvider.getRequest().isActive()).isTrue();
+        assertThat(mProvider.getRequest().getLocationRequests()).containsExactly(request1);
+        assertThat(mProvider.getRequest().isLocationSettingsIgnored()).isFalse();
+        assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(5);
+        assertThat(mProvider.getRequest().isLowPower()).isFalse();
+        assertThat(mProvider.getRequest().getWorkSource()).isNotNull();
 
         ILocationListener listener2 = createMockLocationListener();
         LocationRequest request2 = new LocationRequest.Builder(1).setLowPower(true).build();
         mManager.registerLocationRequest(request2, IDENTITY, PERMISSION_FINE, listener2);
 
-        assertThat(mProvider.getRequest().reportLocation).isTrue();
-        assertThat(mProvider.getRequest().locationRequests).containsExactly(request1, request2);
-        assertThat(mProvider.getRequest().locationSettingsIgnored).isFalse();
-        assertThat(mProvider.getRequest().interval).isEqualTo(1);
-        assertThat(mProvider.getRequest().lowPowerMode).isFalse();
-        assertThat(mProvider.getRequest().workSource).isNotNull();
+        assertThat(mProvider.getRequest().isActive()).isTrue();
+        assertThat(mProvider.getRequest().getLocationRequests()).containsExactly(request1,
+                request2);
+        assertThat(mProvider.getRequest().isLocationSettingsIgnored()).isFalse();
+        assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(1);
+        assertThat(mProvider.getRequest().isLowPower()).isFalse();
+        assertThat(mProvider.getRequest().getWorkSource()).isNotNull();
 
         mManager.unregisterLocationRequest(listener1);
 
-        assertThat(mProvider.getRequest().reportLocation).isTrue();
-        assertThat(mProvider.getRequest().locationRequests).containsExactly(request2);
-        assertThat(mProvider.getRequest().locationSettingsIgnored).isFalse();
-        assertThat(mProvider.getRequest().interval).isEqualTo(1);
-        assertThat(mProvider.getRequest().lowPowerMode).isTrue();
-        assertThat(mProvider.getRequest().workSource).isNotNull();
+        assertThat(mProvider.getRequest().isActive()).isTrue();
+        assertThat(mProvider.getRequest().getLocationRequests()).containsExactly(request2);
+        assertThat(mProvider.getRequest().isLocationSettingsIgnored()).isFalse();
+        assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(1);
+        assertThat(mProvider.getRequest().isLowPower()).isTrue();
+        assertThat(mProvider.getRequest().getWorkSource()).isNotNull();
 
         mManager.unregisterLocationRequest(listener2);
 
-        assertThat(mProvider.getRequest().reportLocation).isFalse();
-        assertThat(mProvider.getRequest().locationRequests).isEmpty();
+        assertThat(mProvider.getRequest().isActive()).isFalse();
+        assertThat(mProvider.getRequest().getLocationRequests()).isEmpty();
     }
 
     @Test
@@ -785,10 +786,10 @@ public class LocationProviderManagerTest {
         LocationRequest request1 = new LocationRequest.Builder(5).build();
         mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
 
-        assertThat(mProvider.getRequest().interval).isEqualTo(5);
+        assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(5);
 
         mInjector.getAppForegroundHelper().setAppForeground(IDENTITY.getUid(), false);
-        assertThat(mProvider.getRequest().interval).isEqualTo(
+        assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(
                 mInjector.getSettingsHelper().getBackgroundThrottleIntervalMs());
     }
 
@@ -801,18 +802,18 @@ public class LocationProviderManagerTest {
         LocationRequest request1 = new LocationRequest.Builder(5).build();
         mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
 
-        assertThat(mProvider.getRequest().reportLocation).isTrue();
-        assertThat(mProvider.getRequest().interval).isEqualTo(5);
-        assertThat(mProvider.getRequest().locationSettingsIgnored).isFalse();
+        assertThat(mProvider.getRequest().isActive()).isTrue();
+        assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(5);
+        assertThat(mProvider.getRequest().isLocationSettingsIgnored()).isFalse();
 
         ILocationListener listener2 = createMockLocationListener();
         LocationRequest request2 = new LocationRequest.Builder(1).setLocationSettingsIgnored(
                 true).build();
         mManager.registerLocationRequest(request2, IDENTITY, PERMISSION_FINE, listener2);
 
-        assertThat(mProvider.getRequest().reportLocation).isTrue();
-        assertThat(mProvider.getRequest().interval).isEqualTo(1);
-        assertThat(mProvider.getRequest().locationSettingsIgnored).isTrue();
+        assertThat(mProvider.getRequest().isActive()).isTrue();
+        assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(1);
+        assertThat(mProvider.getRequest().isLocationSettingsIgnored()).isTrue();
     }
 
     @Test
@@ -831,10 +832,10 @@ public class LocationProviderManagerTest {
 
         mInjector.getSettingsHelper().setLocationEnabled(false, IDENTITY.getUserId());
 
-        assertThat(mProvider.getRequest().reportLocation).isTrue();
-        assertThat(mProvider.getRequest().locationRequests).containsExactly(request2);
-        assertThat(mProvider.getRequest().interval).isEqualTo(5);
-        assertThat(mProvider.getRequest().locationSettingsIgnored).isTrue();
+        assertThat(mProvider.getRequest().isActive()).isTrue();
+        assertThat(mProvider.getRequest().getLocationRequests()).containsExactly(request2);
+        assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(5);
+        assertThat(mProvider.getRequest().isLocationSettingsIgnored()).isTrue();
     }
 
     @Test
@@ -849,9 +850,9 @@ public class LocationProviderManagerTest {
 
         mInjector.getSettingsHelper().setIgnoreSettingsPackageWhitelist(Collections.emptySet());
 
-        assertThat(mProvider.getRequest().reportLocation).isTrue();
-        assertThat(mProvider.getRequest().interval).isEqualTo(1);
-        assertThat(mProvider.getRequest().locationSettingsIgnored).isFalse();
+        assertThat(mProvider.getRequest().isActive()).isTrue();
+        assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(1);
+        assertThat(mProvider.getRequest().isLocationSettingsIgnored()).isFalse();
     }
 
     @Test
@@ -864,10 +865,10 @@ public class LocationProviderManagerTest {
                 true).build();
         mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
 
-        assertThat(mProvider.getRequest().interval).isEqualTo(5);
+        assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(5);
 
         mInjector.getAppForegroundHelper().setAppForeground(IDENTITY.getUid(), false);
-        assertThat(mProvider.getRequest().interval).isEqualTo(5);
+        assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(5);
     }
 
     @Test
@@ -879,10 +880,10 @@ public class LocationProviderManagerTest {
         LocationRequest request = new LocationRequest.Builder(5).build();
         mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
 
-        assertThat(mProvider.getRequest().reportLocation).isTrue();
+        assertThat(mProvider.getRequest().isActive()).isTrue();
 
         mInjector.getScreenInteractiveHelper().setScreenInteractive(false);
-        assertThat(mProvider.getRequest().reportLocation).isFalse();
+        assertThat(mProvider.getRequest().isActive()).isFalse();
     }
 
     private ILocationListener createMockLocationListener() {

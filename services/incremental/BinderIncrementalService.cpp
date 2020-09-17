@@ -301,6 +301,20 @@ binder::Status BinderIncrementalService::waitForNativeBinariesExtraction(int sto
     return ok();
 }
 
+binder::Status BinderIncrementalService::registerLoadingProgressListener(
+        int32_t storageId,
+        const ::android::sp<::android::os::incremental::IStorageLoadingProgressListener>&
+                progressListener,
+        bool* _aidl_return) {
+    *_aidl_return = mImpl.registerLoadingProgressListener(storageId, progressListener);
+    return ok();
+}
+binder::Status BinderIncrementalService::unregisterLoadingProgressListener(int32_t storageId,
+                                                                           bool* _aidl_return) {
+    *_aidl_return = mImpl.unregisterLoadingProgressListener(storageId);
+    return ok();
+}
+
 } // namespace android::os::incremental
 
 jlong Incremental_IncrementalService_Start(JNIEnv* env) {

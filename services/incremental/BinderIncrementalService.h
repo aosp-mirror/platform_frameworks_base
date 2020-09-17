@@ -81,6 +81,12 @@ public:
                                            const std::string& abi, bool extractNativeLibs,
                                            bool* _aidl_return) final;
     binder::Status waitForNativeBinariesExtraction(int storageId, bool* _aidl_return) final;
+    binder::Status registerLoadingProgressListener(
+            int32_t storageId,
+            const ::android::sp<::android::os::incremental::IStorageLoadingProgressListener>&
+                    progressListener,
+            bool* _aidl_return) final;
+    binder::Status unregisterLoadingProgressListener(int32_t storageId, bool* _aidl_return) final;
 
 private:
     android::incremental::IncrementalService mImpl;

@@ -271,7 +271,7 @@
         <flag name="runtime" value="0x2000" />
         <!-- Additional flag from base permission type: this permission can be granted only
              if its protection level is signature, the requesting app resides on the OEM partition,
-             and the OEM has white-listed the app to receive this permission by the OEM.
+             and the OEM has allowlisted the app to receive this permission by the OEM.
          -->
         <flag name="oem" value="0x4000" />
         <!-- Additional flag from base permission type: this permission can be granted to
@@ -338,7 +338,7 @@
         <flag name="softRestricted" value="0x8" />
         <!-- This permission is restricted immutably which means that its
              restriction state may be specified only on the first install of
-             the app and will stay in this initial whitelist state until
+             the app and will stay in this initial allowlist state until
              the app is uninstalled.
         -->
         <flag name="immutablyRestricted" value="0x10" />
@@ -1407,13 +1407,13 @@
     <attr name="lockTaskMode">
         <!-- This is the default value. Tasks will not launch into lockTask mode but can be
              placed there by calling {@link android.app.Activity#startLockTask}. If a task with
-             this mode has been whitelisted using {@link
+             this mode has been allowlisted using {@link
              android.app.admin.DevicePolicyManager#setLockTaskPackages} then calling
              {@link android.app.Activity#startLockTask} will enter lockTask mode immediately,
              otherwise the user will be presented with a dialog to approve entering pinned mode.
              <p>If the system is already in lockTask mode when a new task rooted at this activity
              is launched that task will or will not start depending on whether the package of this
-             activity has been whitelisted.
+             activity has been allowlisted.
              <p>Tasks rooted at this activity can only exit lockTask mode using
              {@link android.app.Activity#stopLockTask}. -->
         <enum name="normal" value="0"/>

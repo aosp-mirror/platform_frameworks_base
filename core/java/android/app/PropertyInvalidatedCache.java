@@ -168,8 +168,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * this local case, there's no IPC, so use of the cache is (depending on exact
  * circumstance) unnecessary.
  *
- * For security, there is a whitelist of processes that are allowed to invalidate a cache.
- * The whitelist includes normal runtime processes but does not include test processes.
+ * For security, there is a allowlist of processes that are allowed to invalidate a cache.
+ * The allowlist includes normal runtime processes but does not include test processes.
  * Test processes must call {@code PropertyInvalidatedCache.disableForTestMode()} to disable
  * all cache activity in that process.
  *

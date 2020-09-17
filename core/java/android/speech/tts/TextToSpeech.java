@@ -834,7 +834,7 @@ public class TextToSpeech {
 
         // NOTE: The API currently does not allow the caller to query whether
         // they are actually connected to any engine. This might fail for various
-        // reasons like if the user disables all her TTS engines.
+        // reasons like if the user disables all their TTS engines.
 
         mCurrentEngine = null;
         dispatchOnInit(ERROR);

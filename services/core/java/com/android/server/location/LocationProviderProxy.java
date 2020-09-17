@@ -101,7 +101,7 @@ public class LocationProviderProxy extends AbstractLocationProvider {
 
             ProviderRequest request = mRequest;
             if (!request.equals(ProviderRequest.EMPTY_REQUEST)) {
-                provider.setRequest(request, request.workSource);
+                provider.setRequest(request, request.getWorkSource());
             }
         }
     }
@@ -119,7 +119,7 @@ public class LocationProviderProxy extends AbstractLocationProvider {
         mRequest = request;
         mServiceWatcher.runOnBinder(binder -> {
             ILocationProvider provider = ILocationProvider.Stub.asInterface(binder);
-            provider.setRequest(request, request.workSource);
+            provider.setRequest(request, request.getWorkSource());
         });
     }
 

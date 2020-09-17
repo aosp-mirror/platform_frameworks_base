@@ -20,11 +20,12 @@ import static android.os.IBinder.DeathRecipient;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
+import android.view.accessibility.MagnificationAnimationCallback;
 
 /**
  * A wrapper of {@link IWindowMagnificationConnection}.
@@ -50,9 +51,10 @@ class WindowMagnificationConnectionWrapper {
     }
 
     boolean enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
-            @Nullable RemoteCallback endCallback) {
+            @Nullable MagnificationAnimationCallback callback) {
         try {
-            mConnection.enableWindowMagnification(displayId, scale, centerX, centerY, endCallback);
+            mConnection.enableWindowMagnification(displayId, scale, centerX, centerY,
+                    transformToRemoteCallback(callback));
         } catch (RemoteException e) {
             if (DBG) {
                 Slog.e(TAG, "Error calling enableWindowMagnification()", e);
@@ -74,9 +76,10 @@ class WindowMagnificationConnectionWrapper {
         return true;
     }
 
-    boolean disableWindowMagnification(int displayId, @Nullable RemoteCallback endCallback) {
+    boolean disableWindowMagnification(int displayId,
+            @Nullable MagnificationAnimationCallback callback) {
         try {
-            mConnection.disableWindowMagnification(displayId, endCallback);
+            mConnection.disableWindowMagnification(displayId, transformToRemoteCallback(callback));
         } catch (RemoteException e) {
             if (DBG) {
                 Slog.e(TAG, "Error calling disableWindowMagnification()", e);
@@ -134,4 +137,27 @@ class WindowMagnificationConnectionWrapper {
         return true;
     }
 
+    private static @Nullable
+            IRemoteMagnificationAnimationCallback transformToRemoteCallback(
+            MagnificationAnimationCallback callback) {
+        if (callback == null) {
+            return null;
+        }
+        return new RemoteAnimationCallback(callback);
+    }
+
+    private static class RemoteAnimationCallback extends
+            IRemoteMagnificationAnimationCallback.Stub {
+
+        private final MagnificationAnimationCallback mCallback;
+
+        RemoteAnimationCallback(@NonNull MagnificationAnimationCallback callback) {
+            mCallback = callback;
+        }
+
+        @Override
+        public void onResult(boolean success) throws RemoteException {
+            mCallback.onResult(success);
+        }
+    }
 }

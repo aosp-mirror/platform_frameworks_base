@@ -206,7 +206,7 @@ public final class Zygote {
     /** List of packages with the same uid, and its app data info: volume uuid and inode. */
     public static final String PKG_DATA_INFO_MAP = "--pkg-data-info-map";
 
-    /** List of whitelisted packages and its app data info: volume uuid and inode. */
+    /** List of allowlisted packages and its app data info: volume uuid and inode. */
     public static final String WHITELISTED_DATA_INFO_MAP = "--whitelisted-data-info-map";
 
     /** Bind mount app storage dirs to lower fs not via fuse */
@@ -327,7 +327,7 @@ public final class Zygote {
      * @param isTopApp true if the process is for top (high priority) application.
      * @param pkgDataInfoList A list that stores related packages and its app data
      * info: volume uuid and inode.
-     * @param whitelistedDataInfoList Like pkgDataInfoList, but it's for whitelisted apps.
+     * @param whitelistedDataInfoList Like pkgDataInfoList, but it's for allowlisted apps.
      * @param bindMountAppDataDirs  True if the zygote needs to mount data dirs.
      * @param bindMountAppStorageDirs  True if the zygote needs to mount storage dirs.
      *
@@ -395,7 +395,7 @@ public final class Zygote {
      * volume uuid and CE dir inode. For example, pkgDataInfoList = [app_a_pkg_name,
      * app_a_data_volume_uuid, app_a_ce_inode, app_b_pkg_name, app_b_data_volume_uuid,
      * app_b_ce_inode, ...];
-     * @param whitelistedDataInfoList Like pkgDataInfoList, but it's for whitelisted apps.
+     * @param whitelistedDataInfoList Like pkgDataInfoList, but it's for allowlisted apps.
      * @param bindMountAppDataDirs  True if the zygote needs to mount data dirs.
      * @param bindMountAppStorageDirs  True if the zygote needs to mount storage dirs.
      */

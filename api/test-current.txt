@@ -156,8 +156,6 @@ package android.app {
   public class ActivityView extends android.view.ViewGroup {
     ctor public ActivityView(android.content.Context);
     ctor public ActivityView(android.content.Context, android.util.AttributeSet);
-    ctor public ActivityView(android.content.Context, android.util.AttributeSet, int);
-    ctor public ActivityView(android.content.Context, android.util.AttributeSet, int, boolean);
     ctor public ActivityView(@NonNull android.content.Context, @NonNull android.util.AttributeSet, int, boolean, boolean);
     method public int getVirtualDisplayId();
     method public void onLayout(boolean, int, int, int, int);
@@ -170,6 +168,17 @@ package android.app {
     method public void startActivity(@NonNull android.content.Intent, android.os.UserHandle);
     method public void startActivity(@NonNull android.app.PendingIntent);
     method public void startActivity(@NonNull android.app.PendingIntent, @Nullable android.content.Intent, @NonNull android.app.ActivityOptions);
+  }
+
+  public static final class ActivityView.Builder {
+    ctor public ActivityView.Builder(@NonNull android.content.Context);
+    method @NonNull public android.app.ActivityView build();
+    method @NonNull public android.app.ActivityView.Builder setAttributeSet(@Nullable android.util.AttributeSet);
+    method @NonNull public android.app.ActivityView.Builder setDefaultStyle(int);
+    method @NonNull public android.app.ActivityView.Builder setDisableSurfaceViewBackgroundLayer(boolean);
+    method @NonNull public android.app.ActivityView.Builder setSingleInstance(boolean);
+    method @NonNull public android.app.ActivityView.Builder setUsePublicVirtualDisplay(boolean);
+    method @NonNull public android.app.ActivityView.Builder setUseTrustedDisplay(boolean);
   }
 
   public abstract static class ActivityView.StateCallback {
@@ -3993,6 +4002,10 @@ package android.telecom {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean isInEmergencyCall();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRinging();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUserSelectedOutgoingPhoneAccount(@Nullable android.telecom.PhoneAccountHandle);
+    field public static final String ACTION_CURRENT_TTY_MODE_CHANGED = "android.telecom.action.CURRENT_TTY_MODE_CHANGED";
+    field public static final String ACTION_TTY_PREFERRED_MODE_CHANGED = "android.telecom.action.TTY_PREFERRED_MODE_CHANGED";
+    field public static final String EXTRA_CURRENT_TTY_MODE = "android.telecom.extra.CURRENT_TTY_MODE";
+    field public static final String EXTRA_TTY_PREFERRED_MODE = "android.telecom.extra.TTY_PREFERRED_MODE";
     field public static final int TTY_MODE_FULL = 1; // 0x1
     field public static final int TTY_MODE_HCO = 2; // 0x2
     field public static final int TTY_MODE_OFF = 0; // 0x0
@@ -5076,23 +5089,23 @@ package android.util {
     field public static final String SETTINGS_WIFITRACKER2 = "settings_wifitracker2";
   }
 
-  public class SparseArrayMap<T> {
+  public class SparseArrayMap<K, V> {
     ctor public SparseArrayMap();
-    method public void add(int, @NonNull String, @Nullable T);
+    method public void add(int, @NonNull K, @Nullable V);
     method public void clear();
-    method public boolean contains(int, @NonNull String);
+    method public boolean contains(int, @NonNull K);
     method public void delete(int);
-    method @Nullable public T delete(int, @NonNull String);
-    method public void forEach(@NonNull java.util.function.Consumer<T>);
-    method @Nullable public T get(int, @NonNull String);
-    method @Nullable public T getOrDefault(int, @NonNull String, T);
+    method @Nullable public V delete(int, @NonNull K);
+    method public void forEach(@NonNull java.util.function.Consumer<V>);
+    method @Nullable public V get(int, @NonNull K);
+    method @Nullable public V getOrDefault(int, @NonNull K, V);
     method public int indexOfKey(int);
-    method public int indexOfKey(int, @NonNull String);
+    method public int indexOfKey(int, @NonNull K);
     method public int keyAt(int);
-    method @NonNull public String keyAt(int, int);
+    method @NonNull public K keyAt(int, int);
     method public int numElementsForKey(int);
     method public int numMaps();
-    method @Nullable public T valueAt(int, int);
+    method @Nullable public V valueAt(int, int);
   }
 
   public class TimeUtils {

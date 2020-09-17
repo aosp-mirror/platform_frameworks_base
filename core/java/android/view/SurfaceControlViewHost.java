@@ -70,10 +70,13 @@ public class SurfaceControlViewHost {
     public static final class SurfacePackage implements Parcelable {
         private SurfaceControl mSurfaceControl;
         private final IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
+        private final IBinder mInputToken;
 
-        SurfacePackage(SurfaceControl sc, IAccessibilityEmbeddedConnection connection) {
+        SurfacePackage(SurfaceControl sc, IAccessibilityEmbeddedConnection connection,
+                       IBinder inputToken) {
             mSurfaceControl = sc;
             mAccessibilityEmbeddedConnection = connection;
+            mInputToken = inputToken;
         }
 
         private SurfacePackage(Parcel in) {
@@ -81,6 +84,7 @@ public class SurfaceControlViewHost {
             mSurfaceControl.readFromParcel(in);
             mAccessibilityEmbeddedConnection = IAccessibilityEmbeddedConnection.Stub.asInterface(
                     in.readStrongBinder());
+            mInputToken = in.readStrongBinder();
         }
 
         /**
@@ -124,6 +128,15 @@ public class SurfaceControlViewHost {
                 mSurfaceControl.release();
              }
              mSurfaceControl = null;
+        }
+
+        /**
+         * Returns an input token used which can be used to request focus on the embedded surface.
+         *
+         * @hide
+         */
+        public IBinder getInputToken() {
+            return mInputToken;
         }
 
         public static final @NonNull Creator<SurfacePackage> CREATOR
@@ -198,7 +211,8 @@ public class SurfaceControlViewHost {
      */
     public @Nullable SurfacePackage getSurfacePackage() {
         if (mSurfaceControl != null && mAccessibilityEmbeddedConnection != null) {
-            return new SurfacePackage(mSurfaceControl, mAccessibilityEmbeddedConnection);
+            return new SurfacePackage(mSurfaceControl, mAccessibilityEmbeddedConnection,
+                    mViewRoot.getInputToken());
         } else {
             return null;
         }
@@ -210,6 +224,7 @@ public class SurfaceControlViewHost {
     @TestApi
     public void setView(@NonNull View view, @NonNull WindowManager.LayoutParams attrs) {
         Objects.requireNonNull(view);
+        view.setLayoutParams(attrs);
         mViewRoot.setView(view, attrs, null);
     }
 

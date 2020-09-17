@@ -505,7 +505,7 @@ public class JobStoreTest {
                 first.getTransientExtras().toString(), second.getTransientExtras().toString());
 
         // Since people can forget to add tests here for new fields, do one last
-        // sanity check based on bits-on-wire equality.
+        // validity check based on bits-on-wire equality.
         final byte[] firstBytes = marshall(first);
         final byte[] secondBytes = marshall(second);
         if (!Arrays.equals(firstBytes, secondBytes)) {

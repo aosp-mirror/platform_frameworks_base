@@ -70,7 +70,7 @@ import java.util.Map;
 public class AccessibilityShortcutController {
     private static final String TAG = "AccessibilityShortcutController";
 
-    // Dummy component names for framework features
+    // Placeholder component names for framework features
     public static final ComponentName COLOR_INVERSION_COMPONENT_NAME =
             new ComponentName("com.android.server.accessibility", "ColorInversion");
     public static final ComponentName DALTONIZER_COMPONENT_NAME =
@@ -109,8 +109,8 @@ public class AccessibilityShortcutController {
     public FrameworkObjectProvider mFrameworkObjectProvider = new FrameworkObjectProvider();
 
     /**
-     * @return An immutable map from dummy component names to feature info for toggling a framework
-     *         feature
+     * @return An immutable map from placeholder component names to feature
+     *         info for toggling a framework feature
      */
     public static Map<ComponentName, ToggleableFrameworkFeatureInfo>
         getFrameworkShortcutFeaturesMap() {

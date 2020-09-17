@@ -17,6 +17,7 @@
 package com.android.systemui.wmshell;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -88,7 +89,8 @@ public class WMShellTest extends SysuiTestCase {
     public void initPip_registersCommandQueueCallback() {
         mWMShell.initPip(mPip);
 
-        verify(mCommandQueue).addCallback(any(CommandQueue.Callbacks.class));
+        // Once for the shell, once for pip
+        verify(mCommandQueue, times(2)).addCallback(any(CommandQueue.Callbacks.class));
     }
 
     @Test
@@ -106,7 +108,8 @@ public class WMShellTest extends SysuiTestCase {
         mWMShell.initOneHanded(mOneHanded);
 
         verify(mKeyguardUpdateMonitor).registerCallback(any(KeyguardUpdateMonitorCallback.class));
-        verify(mCommandQueue).addCallback(any(CommandQueue.Callbacks.class));
+        // Once for the shell, once for the one handed mode
+        verify(mCommandQueue, times(2)).addCallback(any(CommandQueue.Callbacks.class));
         verify(mScreenLifecycle).addObserver(any(ScreenLifecycle.Observer.class));
         verify(mNavigationModeController).addListener(
                 any(NavigationModeController.ModeChangedListener.class));
