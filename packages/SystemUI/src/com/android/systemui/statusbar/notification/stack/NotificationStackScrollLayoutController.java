@@ -21,11 +21,11 @@ import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_N
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
-import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
-import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_HIGH_PRIORITY;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.OnEmptySpaceClickListener;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.OnOverscrollTopChangedListener;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_HIGH_PRIORITY;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.SelectedRows;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.canChildBeDismissed;
 import static com.android.systemui.statusbar.phone.NotificationIconAreaController.HIGH_PRIORITY;
@@ -85,6 +85,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.NotificationGroup;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.OnGroupChangeListener;
+import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
@@ -95,6 +96,7 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.ForegroundServiceDungeonView;
+import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
@@ -104,6 +106,7 @@ import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -139,7 +142,6 @@ public class NotificationStackScrollLayoutController {
     private final ZenModeController mZenModeController;
     private final MetricsLogger mMetricsLogger;
     private final FalsingManager mFalsingManager;
-    private final NotificationSectionsManager mNotificationSectionsManager;
     private final Resources mResources;
     private final NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
     private final ScrimController mScrimController;
@@ -153,6 +155,9 @@ public class NotificationStackScrollLayoutController {
     private final ForegroundServiceSectionController mFgServicesSectionController;
     private final LayoutInflater mLayoutInflater;
     private final NotificationRemoteInputManager mRemoteInputManager;
+    private final VisualStabilityManager mVisualStabilityManager;
+    private final NotificationBlockingHelperManager mNotificationBlockingHelperManager;
+    private final ShadeController mShadeController;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -559,7 +564,6 @@ public class NotificationStackScrollLayoutController {
             NotificationLockscreenUserManager lockscreenUserManager,
             MetricsLogger metricsLogger,
             FalsingManager falsingManager,
-            NotificationSectionsManager notificationSectionsManager,
             @Main Resources resources,
             NotificationSwipeHelper.Builder notificationSwipeHelperBuilder,
             StatusBar statusBar,
@@ -576,7 +580,10 @@ public class NotificationStackScrollLayoutController {
             ForegroundServiceDismissalFeatureController fgFeatureController,
             ForegroundServiceSectionController fgServicesSectionController,
             LayoutInflater layoutInflater,
-            NotificationRemoteInputManager remoteInputManager) {
+            NotificationRemoteInputManager remoteInputManager,
+            VisualStabilityManager visualStabilityManager,
+            NotificationBlockingHelperManager notificationBlockingHelperManager,
+            ShadeController shadeController) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -592,14 +599,12 @@ public class NotificationStackScrollLayoutController {
         mLockscreenUserManager = lockscreenUserManager;
         mMetricsLogger = metricsLogger;
         mFalsingManager = falsingManager;
-        mNotificationSectionsManager = notificationSectionsManager;
         mResources = resources;
         mNotificationSwipeHelperBuilder = notificationSwipeHelperBuilder;
         mStatusBar = statusBar;
         mScrimController = scrimController;
-        groupManager.registerGroupExpansionChangeListener((changedRow, expanded) -> {
-            mView.onGroupExpandChanged(changedRow, expanded);
-        });
+        groupManager.registerGroupExpansionChangeListener(
+                (changedRow, expanded) -> mView.onGroupExpandChanged(changedRow, expanded));
         legacyGroupManager.registerGroupChangeListener(new OnGroupChangeListener() {
             @Override
             public void onGroupCreatedFromChildren(NotificationGroup group) {
@@ -622,6 +627,9 @@ public class NotificationStackScrollLayoutController {
         mFgServicesSectionController = fgServicesSectionController;
         mLayoutInflater = layoutInflater;
         mRemoteInputManager = remoteInputManager;
+        mVisualStabilityManager = visualStabilityManager;
+        mNotificationBlockingHelperManager = notificationBlockingHelperManager;
+        mShadeController = shadeController;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -635,6 +643,7 @@ public class NotificationStackScrollLayoutController {
         mView.setFooterDismissListener(() ->
                 mMetricsLogger.action(MetricsEvent.ACTION_DISMISS_ALL_NOTES));
         mView.setRemoteInputManager(mRemoteInputManager);
+        mView.setShadeController(mShadeController);
 
         if (mFgFeatureController.isForegroundServiceDismissalEnabled()) {
             mView.initializeForegroundServiceSection(
@@ -681,6 +690,12 @@ public class NotificationStackScrollLayoutController {
         mNotificationRoundnessManager.setOnRoundingChangedCallback(mView::invalidate);
         mView.addOnExpandedHeightChangedListener(mNotificationRoundnessManager::setExpanded);
 
+        mVisualStabilityManager.setVisibilityLocationProvider(this::isInVisibleLocation);
+        // Blocking helper manager wants to know the expanded state, update as well.
+        mView.addOnExpandedHeightChangedListener((height, unused) ->
+                mNotificationBlockingHelperManager.setNotificationShadeExpanded(height)
+        );
+
         mTunerService.addTunable(
                 (key, newValue) -> {
                     switch (key) {
@@ -721,6 +736,22 @@ public class NotificationStackScrollLayoutController {
         }
         mView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
         mSilentHeaderController.setOnClearAllClickListener(v -> clearSilentNotifications());
+    }
+
+    private boolean isInVisibleLocation(NotificationEntry entry) {
+        ExpandableNotificationRow row = entry.getRow();
+        ExpandableViewState childViewState = row.getViewState();
+
+        if (childViewState == null) {
+            return false;
+        }
+        if ((childViewState.location & ExpandableViewState.VISIBLE_LOCATIONS) == 0) {
+            return false;
+        }
+        if (row.getVisibility() != View.VISIBLE) {
+            return false;
+        }
+        return true;
     }
 
     public void addOnExpandedHeightChangedListener(BiConsumer<Float, Float> listener) {
@@ -1459,7 +1490,7 @@ public class NotificationStackScrollLayoutController {
 
         @Override
         public boolean isInVisibleLocation(NotificationEntry entry) {
-            return mView.isInVisibleLocation(entry);
+            return NotificationStackScrollLayoutController.this.isInVisibleLocation(entry);
         }
 
         @Override
