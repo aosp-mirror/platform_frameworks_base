@@ -27,6 +27,8 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -43,6 +45,17 @@ import java.util.Objects;
  * An encapsulation of various parameters for requesting location via {@link LocationManager}.
  */
 public final class LocationRequest implements Parcelable {
+
+    /**
+     * For apps targeting Android S and above, all LocationRequest objects marked as low power will
+     * throw exceptions if the caller does not have the LOCATION_HARDWARE permission, instead of
+     * silently dropping the low power part of the request.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
+    public static final long LOW_POWER_EXCEPTIONS = 168936375L;
 
     /**
      * Represents a passive only request. Such a request will not trigger any active locations or
