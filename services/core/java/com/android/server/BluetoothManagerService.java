@@ -417,7 +417,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             if (BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED.equals(action)) {
                 String newName = intent.getStringExtra(BluetoothAdapter.EXTRA_LOCAL_NAME);
                 if (DBG) {
-                    Slog.d(TAG, "Bluetooth Adapter name changed to " + newName);
+                    Slog.d(TAG, "Bluetooth Adapter name changed to " + newName + " by "
+                            + mContext.getPackageName());
                 }
                 if (newName != null) {
                     storeNameAndAddress(newName, null);
