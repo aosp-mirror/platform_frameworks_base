@@ -240,9 +240,9 @@ public class StagingManager {
             @NonNull PackageInstallerSession session) throws PackageManagerException {
         final IntArray childSessionIds = new IntArray();
         if (session.isMultiPackage()) {
-            for (int id : session.getChildSessionIds()) {
-                if (isApexSession(getStagedSession(id))) {
-                    childSessionIds.add(id);
+            for (PackageInstallerSession s : session.getChildSessions()) {
+                if (isApexSession(s)) {
+                    childSessionIds.add(s.sessionId);
                 }
             }
         }
@@ -356,18 +356,12 @@ public class StagingManager {
         if (!session.isMultiPackage()) {
             return filter.test(session);
         }
-        synchronized (mStagedSessions) {
-            final int[] childSessionIds = session.getChildSessionIds();
-            for (int id : childSessionIds) {
-                // Retrieve cached sessions matching ids.
-                final PackageInstallerSession s = mStagedSessions.get(id);
-                // Filter only the ones containing APEX.
-                if (filter.test(s)) {
-                    return true;
-                }
+        for (PackageInstallerSession s : session.getChildSessions()) {
+            if (filter.test(s)) {
+                return true;
             }
-            return false;
         }
+        return false;
     }
 
     private boolean sessionContainsApex(@NonNull PackageInstallerSession session) {
@@ -423,19 +417,9 @@ public class StagingManager {
     private List<PackageInstallerSession> extractApexSessions(PackageInstallerSession session) {
         List<PackageInstallerSession> apexSessions = new ArrayList<>();
         if (session.isMultiPackage()) {
-            List<PackageInstallerSession> childrenSessions = new ArrayList<>();
-            synchronized (mStagedSessions) {
-                for (int childSessionId : session.getChildSessionIds()) {
-                    PackageInstallerSession childSession = mStagedSessions.get(childSessionId);
-                    if (childSession != null) {
-                        childrenSessions.add(childSession);
-                    }
-                }
-            }
-            for (int i = 0, size = childrenSessions.size(); i < size; i++) {
-                final PackageInstallerSession childSession = childrenSessions.get(i);
-                if (sessionContainsApex(childSession)) {
-                    apexSessions.add(childSession);
+            for (PackageInstallerSession s : session.getChildSessions()) {
+                if (sessionContainsApex(s)) {
+                    apexSessions.add(s);
                 }
             }
         } else {
@@ -782,13 +766,9 @@ public class StagingManager {
             // carrying over all the session parameters and unmarking them as staged. On commit the
             // sessions will be installed atomically.
             final List<PackageInstallerSession> childSessions = new ArrayList<>();
-            synchronized (mStagedSessions) {
-                final int[] childSessionIds = session.getChildSessionIds();
-                for (int id : childSessionIds) {
-                    final PackageInstallerSession s = mStagedSessions.get(id);
-                    if (!isApexSession(s)) {
-                        childSessions.add(s);
-                    }
+            for (PackageInstallerSession s : session.getChildSessions()) {
+                if (!isApexSession(s)) {
+                    childSessions.add(s);
                 }
             }
             if (childSessions.isEmpty()) {
@@ -834,14 +814,10 @@ public class StagingManager {
         if (!session.isMultiPackage()) {
             return;
         }
-        final int[] childSessionIds = session.getChildSessionIds();
         final Set<String> apkNames = new ArraySet<>();
-        synchronized (mStagedSessions) {
-            for (int id : childSessionIds) {
-                final PackageInstallerSession s = mStagedSessions.get(id);
-                if (!isApexSession(s)) {
-                    apkNames.add(s.getPackageName());
-                }
+        for (PackageInstallerSession s : session.getChildSessions()) {
+            if (!isApexSession(s)) {
+                apkNames.add(s.getPackageName());
             }
         }
         final List<PackageInstallerSession> apexSessions = extractApexSessions(session);
@@ -1088,46 +1064,13 @@ public class StagingManager {
                 || apexSessionInfo.isRevertFailed;
     }
 
-    @GuardedBy("mStagedSessions")
-    private boolean isMultiPackageSessionComplete(@NonNull PackageInstallerSession session) {
-        // This method assumes that the argument is either a parent session of a multi-package
-        // i.e. isMultiPackage() returns true, or that it is a child session, i.e.
-        // hasParentSessionId() returns true.
-        if (session.isMultiPackage()) {
-            // Parent session of a multi-package group. Check that we restored all the children.
-            for (int childSession : session.getChildSessionIds()) {
-                if (mStagedSessions.get(childSession) == null) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        if (session.hasParentSessionId()) {
-            PackageInstallerSession parent = mStagedSessions.get(session.getParentSessionId());
-            if (parent == null) {
-                return false;
-            }
-            return isMultiPackageSessionComplete(parent);
-        }
-        Slog.wtf(TAG, "Attempting to restore an invalid multi-package session.");
-        return false;
-    }
-
     void restoreSession(@NonNull PackageInstallerSession session, boolean isDeviceUpgrading) {
         PackageInstallerSession sessionToResume = session;
         synchronized (mStagedSessions) {
             mStagedSessions.append(session.sessionId, session);
-            // For multi-package sessions, we don't know in which order they will be restored. We
-            // need to wait until we have restored all the session in a group before restoring them.
-            if (session.isMultiPackage() || session.hasParentSessionId()) {
-                if (!isMultiPackageSessionComplete(session)) {
-                    // Still haven't recovered all sessions of the group, return.
-                    return;
-                }
-                // Group recovered, find the parent if necessary and resume the installation.
-                if (session.hasParentSessionId()) {
-                    sessionToResume = mStagedSessions.get(session.getParentSessionId());
-                }
+            if (session.hasParentSessionId()) {
+                // Only parent sessions can be restored
+                return;
             }
         }
         // The preconditions used during pre-reboot verification might have changed when device

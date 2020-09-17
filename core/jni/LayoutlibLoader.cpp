@@ -17,9 +17,9 @@
 #include "jni.h"
 #include "core_jni_helpers.h"
 
-#include <sstream>
-#include <iostream>
 #include <unicode/putil.h>
+#include <clocale>
+#include <sstream>
 #include <unordered_map>
 #include <vector>
 
@@ -198,6 +198,8 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
     u_setDataDirectory(path);
     env->ReleaseStringUTFChars(stringPath, path);
 
+    // Use English locale for number format to ensure correct parsing of floats when using strtof
+    setlocale(LC_NUMERIC, "en_US.UTF-8");
 
     return JNI_VERSION_1_6;
 }

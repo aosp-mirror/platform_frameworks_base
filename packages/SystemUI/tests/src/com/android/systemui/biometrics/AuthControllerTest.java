@@ -90,6 +90,8 @@ public class AuthControllerTest extends SysuiTestCase {
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
+    private IActivityTaskManager mActivityTaskManager;
+    @Mock
     private FingerprintManager mFingerprintManager;
     @Mock
     private UdfpsController mUdfpsController;
@@ -123,7 +125,7 @@ public class AuthControllerTest extends SysuiTestCase {
         when(mFingerprintManager.getSensorProperties()).thenReturn(props);
 
         mAuthController = new TestableAuthController(context, mCommandQueue,
-                mStatusBarStateController, new MockInjector(),
+                mStatusBarStateController, mActivityTaskManager, mFingerprintManager,
                 () -> mUdfpsController);
 
         mAuthController.start();
@@ -438,7 +440,7 @@ public class AuthControllerTest extends SysuiTestCase {
         taskInfo.topActivity = mock(ComponentName.class);
         when(taskInfo.topActivity.getPackageName()).thenReturn("other_package");
         tasks.add(taskInfo);
-        when(mAuthController.mActivityTaskManager.getTasks(anyInt())).thenReturn(tasks);
+        when(mActivityTaskManager.getTasks(anyInt())).thenReturn(tasks);
 
         mAuthController.mTaskStackListener.onTaskStackChanged();
         waitForIdleSync();
@@ -544,10 +546,12 @@ public class AuthControllerTest extends SysuiTestCase {
         private PromptInfo mLastBiometricPromptInfo;
 
         TestableAuthController(Context context, CommandQueue commandQueue,
-                StatusBarStateController statusBarStateController, Injector injector,
+                StatusBarStateController statusBarStateController,
+                IActivityTaskManager activityTaskManager,
+                FingerprintManager fingerprintManager,
                 Provider<UdfpsController> udfpsControllerFactory) {
-            super(context, commandQueue, statusBarStateController, injector,
-                    udfpsControllerFactory);
+            super(context, commandQueue, statusBarStateController, activityTaskManager,
+                    fingerprintManager, udfpsControllerFactory);
         }
 
         @Override
@@ -567,18 +571,6 @@ public class AuthControllerTest extends SysuiTestCase {
             }
             mBuildCount++;
             return dialog;
-        }
-    }
-
-    private final class MockInjector extends AuthController.Injector {
-        @Override
-        IActivityTaskManager getActivityTaskManager() {
-            return mock(IActivityTaskManager.class);
-        }
-
-        @Override
-        FingerprintManager getFingerprintManager(Context context) {
-            return mFingerprintManager;
         }
     }
 }

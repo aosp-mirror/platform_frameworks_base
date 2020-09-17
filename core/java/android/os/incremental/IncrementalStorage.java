@@ -519,4 +519,29 @@ public final class IncrementalStorage {
             return false;
         }
     }
+
+    /**
+     * Register to listen to loading progress of all the files on this storage.
+     * @param listener To report progress from Incremental Service to the caller.
+     */
+    public boolean registerLoadingProgressListener(IStorageLoadingProgressListener listener) {
+        try {
+            return mService.registerLoadingProgressListener(mId, listener);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return false;
+        }
+    }
+
+    /**
+     * Unregister to stop listening to storage loading progress.
+     */
+    public boolean unregisterLoadingProgressListener() {
+        try {
+            return mService.unregisterLoadingProgressListener(mId);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return false;
+        }
+    }
 }

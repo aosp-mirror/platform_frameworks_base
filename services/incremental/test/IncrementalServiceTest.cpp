@@ -504,6 +504,14 @@ public:
     int32_t mStatus = -1;
 };
 
+class MockStorageLoadingProgressListener : public IStorageLoadingProgressListener {
+public:
+    MockStorageLoadingProgressListener() = default;
+    MOCK_METHOD2(onStorageLoadingProgressChanged,
+                 binder::Status(int32_t storageId, float progress));
+    MOCK_METHOD0(onAsBinder, IBinder*());
+};
+
 class MockServiceManager : public ServiceManagerWrapper {
 public:
     MockServiceManager(std::unique_ptr<MockVoldService> vold,
@@ -513,6 +521,7 @@ public:
                        std::unique_ptr<MockJniWrapper> jni,
                        std::unique_ptr<MockLooperWrapper> looper,
                        std::unique_ptr<MockTimedQueueWrapper> timedQueue,
+                       std::unique_ptr<MockTimedQueueWrapper> progressUpdateJobQueue,
                        std::unique_ptr<MockFsWrapper> fs)
           : mVold(std::move(vold)),
             mDataLoaderManager(std::move(dataLoaderManager)),
@@ -521,6 +530,7 @@ public:
             mJni(std::move(jni)),
             mLooper(std::move(looper)),
             mTimedQueue(std::move(timedQueue)),
+            mProgressUpdateJobQueue(std::move(progressUpdateJobQueue)),
             mFs(std::move(fs)) {}
     std::unique_ptr<VoldServiceWrapper> getVoldService() final { return std::move(mVold); }
     std::unique_ptr<DataLoaderManagerWrapper> getDataLoaderManager() final {
@@ -533,6 +543,9 @@ public:
     std::unique_ptr<JniWrapper> getJni() final { return std::move(mJni); }
     std::unique_ptr<LooperWrapper> getLooper() final { return std::move(mLooper); }
     std::unique_ptr<TimedQueueWrapper> getTimedQueue() final { return std::move(mTimedQueue); }
+    std::unique_ptr<TimedQueueWrapper> getProgressUpdateJobQueue() final {
+        return std::move(mProgressUpdateJobQueue);
+    }
     std::unique_ptr<FsWrapper> getFs() final { return std::move(mFs); }
 
 private:
@@ -543,6 +556,7 @@ private:
     std::unique_ptr<MockJniWrapper> mJni;
     std::unique_ptr<MockLooperWrapper> mLooper;
     std::unique_ptr<MockTimedQueueWrapper> mTimedQueue;
+    std::unique_ptr<MockTimedQueueWrapper> mProgressUpdateJobQueue;
     std::unique_ptr<MockFsWrapper> mFs;
 };
 
@@ -567,19 +581,19 @@ public:
         mLooper = looper.get();
         auto timedQueue = std::make_unique<NiceMock<MockTimedQueueWrapper>>();
         mTimedQueue = timedQueue.get();
+        auto progressUpdateJobQueue = std::make_unique<NiceMock<MockTimedQueueWrapper>>();
+        mProgressUpdateJobQueue = progressUpdateJobQueue.get();
         auto fs = std::make_unique<NiceMock<MockFsWrapper>>();
         mFs = fs.get();
-        mIncrementalService =
-                std::make_unique<IncrementalService>(MockServiceManager(std::move(vold),
-                                                                        std::move(
-                                                                                dataloaderManager),
-                                                                        std::move(incFs),
-                                                                        std::move(appOps),
-                                                                        std::move(jni),
-                                                                        std::move(looper),
-                                                                        std::move(timedQueue),
-                                                                        std::move(fs)),
-                                                     mRootDir.path);
+        mIncrementalService = std::make_unique<
+                IncrementalService>(MockServiceManager(std::move(vold),
+                                                       std::move(dataloaderManager),
+                                                       std::move(incFs), std::move(appOps),
+                                                       std::move(jni), std::move(looper),
+                                                       std::move(timedQueue),
+                                                       std::move(progressUpdateJobQueue),
+                                                       std::move(fs)),
+                                    mRootDir.path);
         mDataLoaderParcel.packageName = "com.test";
         mDataLoaderParcel.arguments = "uri";
         mDataLoaderManager->unbindFromDataLoaderSuccess();
@@ -624,6 +638,7 @@ protected:
     NiceMock<MockJniWrapper>* mJni = nullptr;
     NiceMock<MockLooperWrapper>* mLooper = nullptr;
     NiceMock<MockTimedQueueWrapper>* mTimedQueue = nullptr;
+    NiceMock<MockTimedQueueWrapper>* mProgressUpdateJobQueue = nullptr;
     NiceMock<MockFsWrapper>* mFs = nullptr;
     NiceMock<MockDataLoader>* mDataLoader = nullptr;
     std::unique_ptr<IncrementalService> mIncrementalService;
@@ -1165,5 +1180,45 @@ TEST_F(IncrementalServiceTest, testGetLoadingProgressSuccess) {
                                                        {}, {}, {});
     EXPECT_CALL(*mIncFs, countFilledBlocks(_, _)).Times(3);
     ASSERT_EQ(0.5, mIncrementalService->getLoadingProgress(storageId));
+}
+
+TEST_F(IncrementalServiceTest, testRegisterLoadingProgressListenerSuccess) {
+    mIncFs->countFilledBlocksSuccess();
+    mFs->hasFiles();
+
+    TemporaryDir tempDir;
+    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+                                                       IncrementalService::CreateOptions::CreateNew,
+                                                       {}, {}, {});
+    sp<NiceMock<MockStorageLoadingProgressListener>> listener{
+            new NiceMock<MockStorageLoadingProgressListener>};
+    NiceMock<MockStorageLoadingProgressListener>* listenerMock = listener.get();
+    EXPECT_CALL(*listenerMock, onStorageLoadingProgressChanged(_, _)).Times(2);
+    EXPECT_CALL(*mProgressUpdateJobQueue, addJob(_, _, _)).Times(2);
+    mIncrementalService->registerLoadingProgressListener(storageId, listener);
+    // Timed callback present.
+    ASSERT_EQ(storageId, mProgressUpdateJobQueue->mId);
+    ASSERT_EQ(mProgressUpdateJobQueue->mAfter, 1000ms);
+    auto timedCallback = mProgressUpdateJobQueue->mWhat;
+    timedCallback();
+    ASSERT_EQ(storageId, mProgressUpdateJobQueue->mId);
+    ASSERT_EQ(mProgressUpdateJobQueue->mAfter, 1000ms);
+    mIncrementalService->unregisterLoadingProgressListener(storageId);
+    ASSERT_EQ(mProgressUpdateJobQueue->mAfter, Milliseconds{});
+}
+
+TEST_F(IncrementalServiceTest, testRegisterLoadingProgressListenerFailsToGetProgress) {
+    mIncFs->countFilledBlocksFails();
+    mFs->hasFiles();
+
+    TemporaryDir tempDir;
+    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+                                                       IncrementalService::CreateOptions::CreateNew,
+                                                       {}, {}, {});
+    sp<NiceMock<MockStorageLoadingProgressListener>> listener{
+            new NiceMock<MockStorageLoadingProgressListener>};
+    NiceMock<MockStorageLoadingProgressListener>* listenerMock = listener.get();
+    EXPECT_CALL(*listenerMock, onStorageLoadingProgressChanged(_, _)).Times(0);
+    mIncrementalService->registerLoadingProgressListener(storageId, listener);
 }
 } // namespace android::os::incremental

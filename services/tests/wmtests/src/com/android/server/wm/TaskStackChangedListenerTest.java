@@ -603,8 +603,7 @@ public class TaskStackChangedListenerTest {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            mActivityView = new ActivityView(this, null /* attrs */, 0 /* defStyle */,
-                    true /* singleTaskInstance */);
+            mActivityView = new ActivityView.Builder(this).setSingleInstance(true).build();
             setContentView(mActivityView);
 
             ViewGroup.LayoutParams layoutParams = mActivityView.getLayoutParams();

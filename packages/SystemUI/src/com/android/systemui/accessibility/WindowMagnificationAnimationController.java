@@ -22,7 +22,9 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.RemoteException;
 import android.util.Log;
+import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.animation.AccelerateInterpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -38,7 +40,7 @@ import java.lang.annotation.RetentionPolicy;
 class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUpdateListener,
         Animator.AnimatorListener {
 
-    private static final String TAG = "WindowMagnificationBridge";
+    private static final String TAG = "WindowMagnificationAnimationController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     @Retention(RetentionPolicy.SOURCE)
@@ -61,7 +63,7 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
     private final Context mContext;
     // Called when the animation is ended successfully without cancelling or mStartSpec and
     // mEndSpec are equal.
-    private Runnable mAnimationEndCallback;
+    private IRemoteMagnificationAnimationCallback mAnimationCallback;
     // The flag to ignore the animation end callback.
     private boolean mEndAnimationCanceled = false;
     @MagnificationState
@@ -93,14 +95,16 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
      *                or {@link Float#NaN} to leave unchanged.
      * @param centerY The screen-relative Y coordinate around which to center,
      *                or {@link Float#NaN} to leave unchanged.
-     * @param animationEndCallback Called when the transition is complete or the given arguments
-     *                      are as same as current values.
+     * @param animationCallback Called when the transition is complete, the given arguments
+     *                          are as same as current values, or the transition is interrupted
+     *                          due to the new transition request.
      *
      * @see #onAnimationUpdate(ValueAnimator)
      */
     void enableWindowMagnification(float scale, float centerX, float centerY,
-            @Nullable Runnable animationEndCallback) {
-        mAnimationEndCallback = animationEndCallback;
+            @Nullable IRemoteMagnificationAnimationCallback animationCallback) {
+        sendAnimationCallback(false);
+        mAnimationCallback = animationCallback;
         setupEnableAnimationSpecs(scale, centerX, centerY);
         if (mEndSpec.equals(mStartSpec)) {
             if (mState == STATE_DISABLED) {
@@ -108,7 +112,7 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
             } else if (mState == STATE_ENABLING || mState == STATE_DISABLING) {
                 mValueAnimator.cancel();
             }
-            sendCallbackIfNeeded();
+            sendAnimationCallback(true);
             setState(STATE_ENABLED);
         } else {
             if (mState == STATE_DISABLING) {
@@ -160,14 +164,17 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
      * Wraps {@link WindowMagnificationController#deleteWindowMagnification()}} with transition
      * animation. If the window magnification is enabling, it runs the animation in reverse.
      *
-     * @param animationEndCallback Called when the transition is complete or the window
-     *                    magnification is disabled already.
+     * @param animationCallback Called when the transition is complete, the given arguments
+     *                          are as same as current values, or the transition is interrupted
+     *                          due to the new transition request.
      */
-    void deleteWindowMagnification(@Nullable Runnable animationEndCallback) {
-        mAnimationEndCallback = animationEndCallback;
+    void deleteWindowMagnification(
+            @Nullable IRemoteMagnificationAnimationCallback animationCallback) {
+        sendAnimationCallback(false);
+        mAnimationCallback = animationCallback;
         if (mState == STATE_DISABLED || mState == STATE_DISABLING) {
             if (mState == STATE_DISABLED) {
-                sendCallbackIfNeeded();
+                sendAnimationCallback(true);
             }
             return;
         }
@@ -220,7 +227,7 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
         } else {
             setState(STATE_ENABLED);
         }
-        sendCallbackIfNeeded();
+        sendAnimationCallback(true);
     }
 
     @Override
@@ -236,10 +243,17 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
     public void onAnimationRepeat(Animator animation) {
     }
 
-    private void sendCallbackIfNeeded() {
-        if (mAnimationEndCallback != null) {
-            mAnimationEndCallback.run();
-            mAnimationEndCallback = null;
+    private void sendAnimationCallback(boolean success) {
+        if (mAnimationCallback != null) {
+            try {
+                mAnimationCallback.onResult(success);
+                if (DEBUG) {
+                    Log.d(TAG, "sendAnimationCallback success = " + success);
+                }
+            } catch (RemoteException e) {
+                Log.w(TAG, "sendAnimationCallback failed : " + e);
+            }
+            mAnimationCallback = null;
         }
     }
 

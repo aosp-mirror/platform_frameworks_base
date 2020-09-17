@@ -161,6 +161,7 @@ import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -1599,8 +1600,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @GuardedBy("mLock")
-    private @Nullable List<PackageInstallerSession> getChildSessionsLocked() {
-        List<PackageInstallerSession> childSessions = null;
+    private @NonNull List<PackageInstallerSession> getChildSessionsLocked() {
+        List<PackageInstallerSession> childSessions = Collections.EMPTY_LIST;
         if (isMultiPackage()) {
             int size = mChildSessions.size();
             childSessions = new ArrayList<>(size);
@@ -1609,6 +1610,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
         return childSessions;
+    }
+
+    @NonNull List<PackageInstallerSession> getChildSessions() {
+        synchronized (mLock) {
+            return getChildSessionsLocked();
+        }
     }
 
     /**
@@ -3639,7 +3646,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void cleanStageDir(List<PackageInstallerSession> childSessions) {
-        if (childSessions != null) {
+        if (isMultiPackage()) {
             for (PackageInstallerSession childSession : childSessions) {
                 childSession.cleanStageDir();
             }

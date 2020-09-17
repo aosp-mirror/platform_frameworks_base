@@ -303,9 +303,11 @@ public class BubbleExpandedView extends LinearLayout {
                 R.dimen.bubble_manage_button_height);
         mSettingsIcon = findViewById(R.id.settings_button);
 
-        mActivityView = new ActivityView(mContext, null /* attrs */, 0 /* defStyle */,
-                true /* singleTaskInstance */, false /* usePublicVirtualDisplay*/,
-                true /* disableSurfaceViewBackgroundLayer */, true /* useTrustedDisplay */);
+        mActivityView = new ActivityView.Builder(mContext)
+                .setSingleInstance(true)
+                .setDisableSurfaceViewBackgroundLayer(true)
+                .setUseTrustedDisplay(true)
+                .build();
 
         // Set ActivityView's alpha value as zero, since there is no view content to be shown.
         setContentVisibility(false);

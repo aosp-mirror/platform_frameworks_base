@@ -32,11 +32,11 @@ import android.graphics.Bitmap;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.util.NotificationChannels;
 import com.android.wm.shell.R;
 
@@ -163,8 +163,7 @@ public class PipNotification {
         }
     };
 
-    public PipNotification(Context context, BroadcastDispatcher broadcastDispatcher,
-            PipController pipController) {
+    public PipNotification(Context context, PipController pipController) {
         mPackageManager = context.getPackageManager();
 
         mNotificationManager = (NotificationManager) context.getSystemService(
@@ -185,7 +184,7 @@ public class PipNotification {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ACTION_MENU);
         intentFilter.addAction(ACTION_CLOSE);
-        broadcastDispatcher.registerReceiver(mEventReceiver, intentFilter);
+        context.registerReceiver(mEventReceiver, intentFilter, UserHandle.USER_ALL);
 
         onConfigurationChanged(context);
     }
