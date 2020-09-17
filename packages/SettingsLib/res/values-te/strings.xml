@@ -510,7 +510,7 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ఫోన్ స్పీకర్"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"కనెక్ట్ చేయడంలో సమస్య ఉంది. పరికరాన్ని ఆఫ్ చేసి, ఆపై తిరిగి ఆన్ చేయండి"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"వైర్ గల ఆడియో పరికరం"</string>
-    <string name="help_label" msgid="3528360748637781274">"సహాయం &amp; అభిప్రాయం"</string>
+    <string name="help_label" msgid="3528360748637781274">"సహాయం &amp; ఫీడ్‌బ్యాక్"</string>
     <string name="storage_category" msgid="2287342585424631813">"నిల్వ"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"షేర్ చేసిన డేటా"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"షేర్ చేసిన డేటాను చూసి, సవరించండి"</string>
