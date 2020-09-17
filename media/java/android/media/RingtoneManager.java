@@ -1129,14 +1129,12 @@ public class RingtoneManager {
             }
 
             // Try finding the scanned ringtone
-            final String whichAudio = getQueryStringForType(type);
             final String filename = getDefaultRingtoneFilename(type);
-            final String where = MediaColumns.DISPLAY_NAME + "=?," + whichAudio + "=?";
             final Uri baseUri = MediaStore.Audio.Media.INTERNAL_CONTENT_URI;
             try (Cursor cursor = context.getContentResolver().query(baseUri,
                     new String[] { MediaColumns._ID },
-                    where,
-                    new String[] { filename , "1"}, null)) {
+                    MediaColumns.DISPLAY_NAME + "=?",
+                    new String[] { filename }, null)) {
                 if (cursor.moveToFirst()) {
                     final Uri ringtoneUri = context.getContentResolver().canonicalizeOrElse(
                             ContentUris.withAppendedId(baseUri, cursor.getLong(0)));
@@ -1161,15 +1159,6 @@ public class RingtoneManager {
             case TYPE_RINGTONE: return SystemProperties.get("ro.config.ringtone");
             case TYPE_NOTIFICATION: return SystemProperties.get("ro.config.notification_sound");
             case TYPE_ALARM: return SystemProperties.get("ro.config.alarm_alert");
-            default: throw new IllegalArgumentException();
-        }
-    }
-
-    private static String getQueryStringForType(int type) {
-        switch (type) {
-            case TYPE_RINGTONE: return MediaStore.Audio.AudioColumns.IS_RINGTONE;
-            case TYPE_NOTIFICATION: return MediaStore.Audio.AudioColumns.IS_NOTIFICATION;
-            case TYPE_ALARM: return MediaStore.Audio.AudioColumns.IS_ALARM;
             default: throw new IllegalArgumentException();
         }
     }
