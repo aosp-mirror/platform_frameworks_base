@@ -1,0 +1,17 @@
+BasedOnStyle: Google
+AllowShortIfStatementsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: false
+AllowShortLoopsOnASingleLine: true
+BinPackArguments: true
+BinPackParameters: true
+ColumnLimit: 100
+CommentPragmas: NOLINT:.*
+ContinuationIndentWidth: 8
+DerivePointerAlignment: false
+IndentWidth: 4
+PointerAlignment: Left
+TabWidth: 4
+AccessModifierOffset: -4
+IncludeCategories:
+  - Regex:    '^"Log\.h"'
+    Priority:    -1

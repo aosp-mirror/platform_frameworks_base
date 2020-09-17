@@ -1,0 +1,226 @@
+// Signature format: 2.0
+package android.media {
+
+  public class MediaController2 implements java.lang.AutoCloseable {
+    method public void cancelSessionCommand(@NonNull Object);
+    method public void close();
+    method @Nullable public android.media.Session2Token getConnectedToken();
+    method public boolean isPlaybackActive();
+    method @NonNull public Object sendSessionCommand(@NonNull android.media.Session2Command, @Nullable android.os.Bundle);
+  }
+
+  public static final class MediaController2.Builder {
+    ctor public MediaController2.Builder(@NonNull android.content.Context, @NonNull android.media.Session2Token);
+    method @NonNull public android.media.MediaController2 build();
+    method @NonNull public android.media.MediaController2.Builder setConnectionHints(@NonNull android.os.Bundle);
+    method @NonNull public android.media.MediaController2.Builder setControllerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.MediaController2.ControllerCallback);
+  }
+
+  public abstract static class MediaController2.ControllerCallback {
+    ctor public MediaController2.ControllerCallback();
+    method public void onCommandResult(@NonNull android.media.MediaController2, @NonNull Object, @NonNull android.media.Session2Command, @NonNull android.media.Session2Command.Result);
+    method public void onConnected(@NonNull android.media.MediaController2, @NonNull android.media.Session2CommandGroup);
+    method public void onDisconnected(@NonNull android.media.MediaController2);
+    method public void onPlaybackActiveChanged(@NonNull android.media.MediaController2, boolean);
+    method @Nullable public android.media.Session2Command.Result onSessionCommand(@NonNull android.media.MediaController2, @NonNull android.media.Session2Command, @Nullable android.os.Bundle);
+  }
+
+  public final class MediaParser {
+    method public boolean advance(@NonNull android.media.MediaParser.SeekableInputReader) throws java.io.IOException;
+    method @NonNull public static android.media.MediaParser create(@NonNull android.media.MediaParser.OutputConsumer, @NonNull java.lang.String...);
+    method @NonNull public static android.media.MediaParser createByName(@NonNull String, @NonNull android.media.MediaParser.OutputConsumer);
+    method @NonNull public String getParserName();
+    method @NonNull public static java.util.List<java.lang.String> getParserNames(@NonNull android.media.MediaFormat);
+    method public void release();
+    method public void seek(@NonNull android.media.MediaParser.SeekPoint);
+    method @NonNull public android.media.MediaParser setParameter(@NonNull String, @NonNull Object);
+    method public boolean supportsParameter(@NonNull String);
+    field public static final String PARAMETER_ADTS_ENABLE_CBR_SEEKING = "android.media.mediaparser.adts.enableCbrSeeking";
+    field public static final String PARAMETER_AMR_ENABLE_CBR_SEEKING = "android.media.mediaparser.amr.enableCbrSeeking";
+    field public static final String PARAMETER_FLAC_DISABLE_ID3 = "android.media.mediaparser.flac.disableId3";
+    field public static final String PARAMETER_MATROSKA_DISABLE_CUES_SEEKING = "android.media.mediaparser.matroska.disableCuesSeeking";
+    field public static final String PARAMETER_MP3_DISABLE_ID3 = "android.media.mediaparser.mp3.disableId3";
+    field public static final String PARAMETER_MP3_ENABLE_CBR_SEEKING = "android.media.mediaparser.mp3.enableCbrSeeking";
+    field public static final String PARAMETER_MP3_ENABLE_INDEX_SEEKING = "android.media.mediaparser.mp3.enableIndexSeeking";
+    field public static final String PARAMETER_MP4_IGNORE_EDIT_LISTS = "android.media.mediaparser.mp4.ignoreEditLists";
+    field public static final String PARAMETER_MP4_IGNORE_TFDT_BOX = "android.media.mediaparser.mp4.ignoreTfdtBox";
+    field public static final String PARAMETER_MP4_TREAT_VIDEO_FRAMES_AS_KEYFRAMES = "android.media.mediaparser.mp4.treatVideoFramesAsKeyframes";
+    field public static final String PARAMETER_TS_ALLOW_NON_IDR_AVC_KEYFRAMES = "android.media.mediaparser.ts.allowNonIdrAvcKeyframes";
+    field public static final String PARAMETER_TS_DETECT_ACCESS_UNITS = "android.media.mediaparser.ts.ignoreDetectAccessUnits";
+    field public static final String PARAMETER_TS_ENABLE_HDMV_DTS_AUDIO_STREAMS = "android.media.mediaparser.ts.enableHdmvDtsAudioStreams";
+    field public static final String PARAMETER_TS_IGNORE_AAC_STREAM = "android.media.mediaparser.ts.ignoreAacStream";
+    field public static final String PARAMETER_TS_IGNORE_AVC_STREAM = "android.media.mediaparser.ts.ignoreAvcStream";
+    field public static final String PARAMETER_TS_IGNORE_SPLICE_INFO_STREAM = "android.media.mediaparser.ts.ignoreSpliceInfoStream";
+    field public static final String PARAMETER_TS_MODE = "android.media.mediaparser.ts.mode";
+    field public static final String PARSER_NAME_AC3 = "android.media.mediaparser.Ac3Parser";
+    field public static final String PARSER_NAME_AC4 = "android.media.mediaparser.Ac4Parser";
+    field public static final String PARSER_NAME_ADTS = "android.media.mediaparser.AdtsParser";
+    field public static final String PARSER_NAME_AMR = "android.media.mediaparser.AmrParser";
+    field public static final String PARSER_NAME_FLAC = "android.media.mediaparser.FlacParser";
+    field public static final String PARSER_NAME_FLV = "android.media.mediaparser.FlvParser";
+    field public static final String PARSER_NAME_FMP4 = "android.media.mediaparser.FragmentedMp4Parser";
+    field public static final String PARSER_NAME_MATROSKA = "android.media.mediaparser.MatroskaParser";
+    field public static final String PARSER_NAME_MP3 = "android.media.mediaparser.Mp3Parser";
+    field public static final String PARSER_NAME_MP4 = "android.media.mediaparser.Mp4Parser";
+    field public static final String PARSER_NAME_OGG = "android.media.mediaparser.OggParser";
+    field public static final String PARSER_NAME_PS = "android.media.mediaparser.PsParser";
+    field public static final String PARSER_NAME_TS = "android.media.mediaparser.TsParser";
+    field public static final String PARSER_NAME_UNKNOWN = "android.media.mediaparser.UNKNOWN";
+    field public static final String PARSER_NAME_WAV = "android.media.mediaparser.WavParser";
+    field public static final int SAMPLE_FLAG_DECODE_ONLY = -2147483648; // 0x80000000
+    field public static final int SAMPLE_FLAG_ENCRYPTED = 1073741824; // 0x40000000
+    field public static final int SAMPLE_FLAG_HAS_SUPPLEMENTAL_DATA = 268435456; // 0x10000000
+    field public static final int SAMPLE_FLAG_KEY_FRAME = 1; // 0x1
+    field public static final int SAMPLE_FLAG_LAST_SAMPLE = 536870912; // 0x20000000
+  }
+
+  public static interface MediaParser.InputReader {
+    method public long getLength();
+    method public long getPosition();
+    method public int read(@NonNull byte[], int, int) throws java.io.IOException;
+  }
+
+  public static interface MediaParser.OutputConsumer {
+    method public void onSampleCompleted(int, long, int, int, int, @Nullable android.media.MediaCodec.CryptoInfo);
+    method public void onSampleDataFound(int, @NonNull android.media.MediaParser.InputReader) throws java.io.IOException;
+    method public void onSeekMapFound(@NonNull android.media.MediaParser.SeekMap);
+    method public void onTrackCountFound(int);
+    method public void onTrackDataFound(int, @NonNull android.media.MediaParser.TrackData);
+  }
+
+  public static final class MediaParser.ParsingException extends java.io.IOException {
+  }
+
+  public static final class MediaParser.SeekMap {
+    method public long getDurationMicros();
+    method @NonNull public android.util.Pair<android.media.MediaParser.SeekPoint,android.media.MediaParser.SeekPoint> getSeekPoints(long);
+    method public boolean isSeekable();
+    field public static final int UNKNOWN_DURATION = -2147483648; // 0x80000000
+  }
+
+  public static final class MediaParser.SeekPoint {
+    field @NonNull public static final android.media.MediaParser.SeekPoint START;
+    field public final long position;
+    field public final long timeMicros;
+  }
+
+  public static interface MediaParser.SeekableInputReader extends android.media.MediaParser.InputReader {
+    method public void seekToPosition(long);
+  }
+
+  public static final class MediaParser.TrackData {
+    field @Nullable public final android.media.DrmInitData drmInitData;
+    field @NonNull public final android.media.MediaFormat mediaFormat;
+  }
+
+  public static final class MediaParser.UnrecognizedInputFormatException extends java.io.IOException {
+  }
+
+  public class MediaSession2 implements java.lang.AutoCloseable {
+    method public void broadcastSessionCommand(@NonNull android.media.Session2Command, @Nullable android.os.Bundle);
+    method public void cancelSessionCommand(@NonNull android.media.MediaSession2.ControllerInfo, @NonNull Object);
+    method public void close();
+    method @NonNull public java.util.List<android.media.MediaSession2.ControllerInfo> getConnectedControllers();
+    method @NonNull public String getId();
+    method @NonNull public android.media.Session2Token getToken();
+    method public boolean isPlaybackActive();
+    method @NonNull public Object sendSessionCommand(@NonNull android.media.MediaSession2.ControllerInfo, @NonNull android.media.Session2Command, @Nullable android.os.Bundle);
+    method public void setPlaybackActive(boolean);
+  }
+
+  public static final class MediaSession2.Builder {
+    ctor public MediaSession2.Builder(@NonNull android.content.Context);
+    method @NonNull public android.media.MediaSession2 build();
+    method @NonNull public android.media.MediaSession2.Builder setExtras(@NonNull android.os.Bundle);
+    method @NonNull public android.media.MediaSession2.Builder setId(@NonNull String);
+    method @NonNull public android.media.MediaSession2.Builder setSessionActivity(@Nullable android.app.PendingIntent);
+    method @NonNull public android.media.MediaSession2.Builder setSessionCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.MediaSession2.SessionCallback);
+  }
+
+  public static final class MediaSession2.ControllerInfo {
+    method @NonNull public android.os.Bundle getConnectionHints();
+    method @NonNull public String getPackageName();
+    method @NonNull public android.media.session.MediaSessionManager.RemoteUserInfo getRemoteUserInfo();
+    method public int getUid();
+  }
+
+  public abstract static class MediaSession2.SessionCallback {
+    ctor public MediaSession2.SessionCallback();
+    method public void onCommandResult(@NonNull android.media.MediaSession2, @NonNull android.media.MediaSession2.ControllerInfo, @NonNull Object, @NonNull android.media.Session2Command, @NonNull android.media.Session2Command.Result);
+    method @Nullable public android.media.Session2CommandGroup onConnect(@NonNull android.media.MediaSession2, @NonNull android.media.MediaSession2.ControllerInfo);
+    method public void onDisconnected(@NonNull android.media.MediaSession2, @NonNull android.media.MediaSession2.ControllerInfo);
+    method public void onPostConnect(@NonNull android.media.MediaSession2, @NonNull android.media.MediaSession2.ControllerInfo);
+    method @Nullable public android.media.Session2Command.Result onSessionCommand(@NonNull android.media.MediaSession2, @NonNull android.media.MediaSession2.ControllerInfo, @NonNull android.media.Session2Command, @Nullable android.os.Bundle);
+  }
+
+  public abstract class MediaSession2Service extends android.app.Service {
+    ctor public MediaSession2Service();
+    method public final void addSession(@NonNull android.media.MediaSession2);
+    method @NonNull public final java.util.List<android.media.MediaSession2> getSessions();
+    method @CallSuper @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
+    method @Nullable public abstract android.media.MediaSession2 onGetSession(@NonNull android.media.MediaSession2.ControllerInfo);
+    method @Nullable public abstract android.media.MediaSession2Service.MediaNotification onUpdateNotification(@NonNull android.media.MediaSession2);
+    method public final void removeSession(@NonNull android.media.MediaSession2);
+    field public static final String SERVICE_INTERFACE = "android.media.MediaSession2Service";
+  }
+
+  public static class MediaSession2Service.MediaNotification {
+    ctor public MediaSession2Service.MediaNotification(int, @NonNull android.app.Notification);
+    method @NonNull public android.app.Notification getNotification();
+    method public int getNotificationId();
+  }
+
+  public final class Session2Command implements android.os.Parcelable {
+    ctor public Session2Command(int);
+    ctor public Session2Command(@NonNull String, @Nullable android.os.Bundle);
+    method public int describeContents();
+    method public int getCommandCode();
+    method @Nullable public String getCustomAction();
+    method @Nullable public android.os.Bundle getCustomExtras();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int COMMAND_CODE_CUSTOM = 0; // 0x0
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.Session2Command> CREATOR;
+  }
+
+  public static final class Session2Command.Result {
+    ctor public Session2Command.Result(int, @Nullable android.os.Bundle);
+    method public int getResultCode();
+    method @Nullable public android.os.Bundle getResultData();
+    field public static final int RESULT_ERROR_UNKNOWN_ERROR = -1; // 0xffffffff
+    field public static final int RESULT_INFO_SKIPPED = 1; // 0x1
+    field public static final int RESULT_SUCCESS = 0; // 0x0
+  }
+
+  public final class Session2CommandGroup implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.Set<android.media.Session2Command> getCommands();
+    method public boolean hasCommand(@NonNull android.media.Session2Command);
+    method public boolean hasCommand(int);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.Session2CommandGroup> CREATOR;
+  }
+
+  public static final class Session2CommandGroup.Builder {
+    ctor public Session2CommandGroup.Builder();
+    ctor public Session2CommandGroup.Builder(@NonNull android.media.Session2CommandGroup);
+    method @NonNull public android.media.Session2CommandGroup.Builder addCommand(@NonNull android.media.Session2Command);
+    method @NonNull public android.media.Session2CommandGroup build();
+    method @NonNull public android.media.Session2CommandGroup.Builder removeCommand(@NonNull android.media.Session2Command);
+  }
+
+  public final class Session2Token implements android.os.Parcelable {
+    ctor public Session2Token(@NonNull android.content.Context, @NonNull android.content.ComponentName);
+    method public int describeContents();
+    method @NonNull public android.os.Bundle getExtras();
+    method @NonNull public String getPackageName();
+    method @Nullable public String getServiceName();
+    method public int getType();
+    method public int getUid();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.Session2Token> CREATOR;
+    field public static final int TYPE_SESSION = 0; // 0x0
+    field public static final int TYPE_SESSION_SERVICE = 1; // 0x1
+  }
+
+}
+

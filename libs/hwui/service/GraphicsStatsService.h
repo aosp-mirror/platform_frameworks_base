@@ -20,6 +20,7 @@
 
 #include "JankTracker.h"
 #include "utils/Macros.h"
+#include <stats_pull_atom_callback.h>
 
 namespace android {
 namespace uirenderer {
@@ -40,6 +41,7 @@ public:
     enum class DumpType {
         Text,
         Protobuf,
+        ProtobufStatsd,
     };
 
     ANDROID_API static void saveBuffer(const std::string& path, const std::string& package,
@@ -52,6 +54,8 @@ public:
                                       int64_t startTime, int64_t endTime, const ProfileData* data);
     ANDROID_API static void addToDump(Dump* dump, const std::string& path);
     ANDROID_API static void finishDump(Dump* dump);
+    ANDROID_API static void finishDumpInMemory(Dump* dump, AStatsEventList* data,
+                                               bool lastFullDay);
 
     // Visible for testing
     static bool parseFromFile(const std::string& path, protos::GraphicsStatsProto* output);

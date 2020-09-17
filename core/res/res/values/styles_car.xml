@@ -87,6 +87,11 @@
     </style>
 
     <!-- Action bar -->
+    <style name="ActionBarTitle" parent="@style/Widget.DeviceDefault.TextView">
+        <item name="android:singleLine">true</item>
+        <item name="android:textAppearance">?attr/textAppearanceLarge</item>
+    </style>
+
     <style name="ActionBarButton"
            parent="@style/Widget.DeviceDefault.Button.Borderless.Colored">
         <item name="android:textAppearance">@style/ActionBarButtonTextAppearance</item>
@@ -94,11 +99,11 @@
         <item name="android:paddingStart">@*android:dimen/car_padding_3</item>
         <item name="android:paddingEnd">@*android:dimen/car_padding_3</item>
         <item name="android:drawablePadding">@*android:dimen/car_padding_2</item>
+        <item name="android:maxWidth">@*android:dimen/action_bar_button_max_width</item>
     </style>
 
     <style name="ActionBarButtonTextAppearance"
            parent="@style/TextAppearance.DeviceDefault.Widget.Button.Borderless.Colored">
-        <item name="android:singleLine">true</item>
         <item name="android:textAllCaps">false</item>
     </style>
 </resources>

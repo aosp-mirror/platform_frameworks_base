@@ -16,6 +16,7 @@ package com.android.systemui.qs;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_MORE_SETTINGS;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -33,11 +34,13 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,10 +57,13 @@ public class QSDetailTest extends SysuiTestCase {
     private ActivityStarter mActivityStarter;
     private DetailAdapter mMockDetailAdapter;
     private TestableLooper mTestableLooper;
+    private UiEventLoggerFake mUiEventLogger;
 
     @Before
     public void setup() throws Exception {
         mTestableLooper = TestableLooper.get(this);
+        mUiEventLogger = QSEvents.INSTANCE.setLoggerForTesting();
+
         mTestableLooper.runWithLooper(() -> {
             mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
             mActivityStarter = mDependency.injectMockDependency(ActivityStarter.class);
@@ -70,6 +76,19 @@ public class QSDetailTest extends SysuiTestCase {
             when(mMockDetailAdapter.createDetailView(any(), any(), any()))
                     .thenReturn(mock(View.class));
         });
+
+        // Only detail in use is the user detail
+        when(mMockDetailAdapter.openDetailEvent())
+                .thenReturn(QSUserSwitcherEvent.QS_USER_DETAIL_OPEN);
+        when(mMockDetailAdapter.closeDetailEvent())
+                .thenReturn(QSUserSwitcherEvent.QS_USER_DETAIL_CLOSE);
+        when(mMockDetailAdapter.moreSettingsEvent())
+                .thenReturn(QSUserSwitcherEvent.QS_USER_MORE_SETTINGS);
+    }
+
+    @After
+    public void tearDown() {
+        QSEvents.INSTANCE.resetLogger();
     }
 
     @Test
@@ -79,8 +98,15 @@ public class QSDetailTest extends SysuiTestCase {
 
         mQsDetail.handleShowingDetail(mMockDetailAdapter, 0, 0, false);
         verify(mMetricsLogger).visible(eq(mMockDetailAdapter.getMetricsCategory()));
+        assertEquals(1, mUiEventLogger.numLogs());
+        assertEquals(QSUserSwitcherEvent.QS_USER_DETAIL_OPEN.getId(), mUiEventLogger.eventId(0));
+        mUiEventLogger.getLogs().clear();
+
         mQsDetail.handleShowingDetail(null, 0, 0, false);
         verify(mMetricsLogger).hidden(eq(mMockDetailAdapter.getMetricsCategory()));
+
+        assertEquals(1, mUiEventLogger.numLogs());
+        assertEquals(QSUserSwitcherEvent.QS_USER_DETAIL_CLOSE.getId(), mUiEventLogger.eventId(0));
 
         ViewUtils.detachView(mQsDetail);
         mTestableLooper.processAllMessages();
@@ -92,10 +118,13 @@ public class QSDetailTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         mQsDetail.handleShowingDetail(mMockDetailAdapter, 0, 0, false);
-        mQsDetail.findViewById(android.R.id.button2).performClick();
+        mUiEventLogger.getLogs().clear();
+        mQsDetail.requireViewById(android.R.id.button2).performClick();
 
         int metricsCategory = mMockDetailAdapter.getMetricsCategory();
         verify(mMetricsLogger).action(eq(ACTION_QS_MORE_SETTINGS), eq(metricsCategory));
+        assertEquals(1, mUiEventLogger.numLogs());
+        assertEquals(QSUserSwitcherEvent.QS_USER_MORE_SETTINGS.getId(), mUiEventLogger.eventId(0));
 
         verify(mActivityStarter).postStartActivityDismissingKeyguard(any(), anyInt());
 
@@ -105,7 +134,9 @@ public class QSDetailTest extends SysuiTestCase {
 
     @Test
     public void testNullAdapterClick() {
-        mQsDetail.setupDetailFooter(mock(DetailAdapter.class));
-        mQsDetail.findViewById(android.R.id.button2).performClick();
+        DetailAdapter mock = mock(DetailAdapter.class);
+        when(mock.moreSettingsEvent()).thenReturn(DetailAdapter.INVALID);
+        mQsDetail.setupDetailFooter(mock);
+        mQsDetail.requireViewById(android.R.id.button2).performClick();
     }
 }

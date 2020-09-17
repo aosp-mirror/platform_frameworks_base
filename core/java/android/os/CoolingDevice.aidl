@@ -16,4 +16,4 @@
 
 package android.os;
 
-parcelable CoolingDevice;
+parcelable CoolingDevice cpp_header "android/CoolingDevice.h";

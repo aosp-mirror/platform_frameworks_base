@@ -16,55 +16,31 @@
 #include <vector>
 #include "benchmark/benchmark.h"
 #include "logd/LogEvent.h"
+#include "stats_event.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-using std::vector;
+static size_t createAndParseStatsEvent(uint8_t* msg) {
+    AStatsEvent* event = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(event, 100);
+    AStatsEvent_writeInt32(event, 2);
+    AStatsEvent_writeFloat(event, 2.0);
+    AStatsEvent_build(event);
 
-/* Special markers for android_log_list_element type */
-static const char EVENT_TYPE_LIST_STOP = '\n'; /* declare end of list  */
-static const char EVENT_TYPE_UNKNOWN = '?';    /* protocol error       */
-
-static const char EVENT_TYPE_INT = 0;
-static const char EVENT_TYPE_LONG = 1;
-static const char EVENT_TYPE_STRING = 2;
-static const char EVENT_TYPE_LIST = 3;
-static const char EVENT_TYPE_FLOAT = 4;
-
-static const int kLogMsgHeaderSize = 28;
-
-static void write4Bytes(int val, vector<char>* buffer) {
-    buffer->push_back(static_cast<char>(val));
-    buffer->push_back(static_cast<char>((val >> 8) & 0xFF));
-    buffer->push_back(static_cast<char>((val >> 16) & 0xFF));
-    buffer->push_back(static_cast<char>((val >> 24) & 0xFF));
-}
-
-static void getSimpleLogMsgData(log_msg* msg) {
-    vector<char> buffer;
-    // stats_log tag id
-    write4Bytes(1937006964, &buffer);
-    buffer.push_back(EVENT_TYPE_LIST);
-    buffer.push_back(2);  // field counts;
-    buffer.push_back(EVENT_TYPE_INT);
-    write4Bytes(10 /* atom id */, &buffer);
-    buffer.push_back(EVENT_TYPE_INT);
-    write4Bytes(99 /* a value to log*/, &buffer);
-    buffer.push_back(EVENT_TYPE_LIST_STOP);
-
-    msg->entry.len = buffer.size();
-    msg->entry.hdr_size = kLogMsgHeaderSize;
-    msg->entry.sec = time(nullptr);
-    std::copy(buffer.begin(), buffer.end(), msg->buf + kLogMsgHeaderSize);
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(event, &size);
+    memcpy(msg, buf, size);
+    return size;
 }
 
 static void BM_LogEventCreation(benchmark::State& state) {
-    log_msg msg;
-    getSimpleLogMsgData(&msg);
+    uint8_t msg[LOGGER_ENTRY_MAX_PAYLOAD];
+    size_t size = createAndParseStatsEvent(msg);
     while (state.KeepRunning()) {
-        benchmark::DoNotOptimize(LogEvent(msg));
+        LogEvent event(/*uid=*/ 1000, /*pid=*/ 1001);
+        benchmark::DoNotOptimize(event.parseBuffer(msg, size));
     }
 }
 BENCHMARK(BM_LogEventCreation);

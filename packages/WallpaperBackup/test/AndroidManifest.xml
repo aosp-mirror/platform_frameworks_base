@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.android.wallpaperbackup.tests">
+
+    <application android:label="WallpaperBackup Tests">
+        <uses-library android:name="android.test.runner" />
+    </application>
+
+    <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
+                     android:targetPackage="com.android.wallpaperbackup.tests"
+                     android:label="WallpaperBackup Tests"/>
+</manifest>
+

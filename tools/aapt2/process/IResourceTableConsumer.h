@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <list>
+#include <set>
 #include <sstream>
 
 #include "Diagnostics.h"
@@ -50,6 +51,7 @@ struct IAaptContext {
   virtual NameMangler* GetNameMangler() = 0;
   virtual bool IsVerbose() = 0;
   virtual int GetMinSdkVersion() = 0;
+  virtual const std::set<std::string>& GetSplitNameDependencies() = 0;
 };
 
 struct IResourceTableConsumer {

@@ -44,6 +44,7 @@ import androidx.test.filters.MediumTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for the {@link ActivityStackSupervisor} class.
@@ -53,12 +54,13 @@ import org.junit.Test;
  */
 @MediumTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class ActivityStackSupervisorTests extends ActivityTestsBase {
     private ActivityStack mFullscreenStack;
 
     @Before
     public void setUp() throws Exception {
-        mFullscreenStack = mRootActivityContainer.getDefaultDisplay().createStack(
+        mFullscreenStack = mRootWindowContainer.getDefaultTaskDisplayArea().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
     }
 
@@ -79,32 +81,28 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
     /**
      * Ensures that waiting results are notified of launches.
      */
-    @SuppressWarnings("SynchronizeOnNonFinalField")
     @Test
     public void testReportWaitingActivityLaunchedIfNeeded() {
         final ActivityRecord firstActivity = new ActivityBuilder(mService).setCreateTask(true)
                 .setStack(mFullscreenStack).build();
 
-        // #notifyAll will be called on the ActivityManagerService. we must hold the object lock
-        // when this happens.
-        synchronized (mService.mGlobalLock) {
-            final WaitResult taskToFrontWait = new WaitResult();
-            mSupervisor.mWaitingActivityLaunched.add(taskToFrontWait);
-            mSupervisor.reportWaitingActivityLaunchedIfNeeded(firstActivity, START_TASK_TO_FRONT);
+        final WaitResult taskToFrontWait = new WaitResult();
+        mSupervisor.mWaitingActivityLaunched.add(taskToFrontWait);
+        // #notifyAll will be called on the ActivityTaskManagerService#mGlobalLock. The lock is hold
+        // implicitly by WindowManagerGlobalLockRule.
+        mSupervisor.reportWaitingActivityLaunchedIfNeeded(firstActivity, START_TASK_TO_FRONT);
 
-            assertThat(mSupervisor.mWaitingActivityLaunched).isEmpty();
-            assertEquals(taskToFrontWait.result, START_TASK_TO_FRONT);
-            assertNull(taskToFrontWait.who);
+        assertThat(mSupervisor.mWaitingActivityLaunched).isEmpty();
+        assertEquals(taskToFrontWait.result, START_TASK_TO_FRONT);
+        assertNull(taskToFrontWait.who);
 
-            final WaitResult deliverToTopWait = new WaitResult();
-            mSupervisor.mWaitingActivityLaunched.add(deliverToTopWait);
-            mSupervisor.reportWaitingActivityLaunchedIfNeeded(firstActivity,
-                    START_DELIVERED_TO_TOP);
+        final WaitResult deliverToTopWait = new WaitResult();
+        mSupervisor.mWaitingActivityLaunched.add(deliverToTopWait);
+        mSupervisor.reportWaitingActivityLaunchedIfNeeded(firstActivity, START_DELIVERED_TO_TOP);
 
-            assertThat(mSupervisor.mWaitingActivityLaunched).isEmpty();
-            assertEquals(deliverToTopWait.result, START_DELIVERED_TO_TOP);
-            assertEquals(deliverToTopWait.who, firstActivity.mActivityComponent);
-        }
+        assertThat(mSupervisor.mWaitingActivityLaunched).isEmpty();
+        assertEquals(deliverToTopWait.result, START_DELIVERED_TO_TOP);
+        assertEquals(deliverToTopWait.who, firstActivity.mActivityComponent);
     }
 
     /**
@@ -114,11 +112,11 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
     @Test
     public void testHandleNonResizableTaskOnSecondaryDisplay() {
         // Create an unresizable task on secondary display.
-        final ActivityDisplay newDisplay = addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
-        final ActivityStack stack = new StackBuilder(mRootActivityContainer)
+        final DisplayContent newDisplay = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
+        final ActivityStack stack = new StackBuilder(mRootWindowContainer)
                 .setDisplay(newDisplay).build();
-        final ActivityRecord unresizableActivity = stack.getTopActivity();
-        final TaskRecord task = unresizableActivity.getTaskRecord();
+        final ActivityRecord unresizableActivity = stack.getTopNonFinishingActivity();
+        final Task task = unresizableActivity.getTask();
         unresizableActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
         task.setResizeMode(unresizableActivity.info.resizeMode);
 
@@ -127,9 +125,9 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         spyOn(taskChangeNotifier);
 
         mSupervisor.handleNonResizableTaskIfNeeded(task, newDisplay.getWindowingMode(),
-                newDisplay.mDisplayId, stack);
+                newDisplay.getDefaultTaskDisplayArea(), stack);
         // The top activity is unresizable, so it should notify the activity is forced resizing.
-        verify(taskChangeNotifier).notifyActivityForcedResizable(eq(task.taskId),
+        verify(taskChangeNotifier).notifyActivityForcedResizable(eq(task.mTaskId),
                 eq(FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY),
                 eq(unresizableActivity.packageName));
         reset(taskChangeNotifier);
@@ -140,10 +138,39 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         resizableActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
 
         mSupervisor.handleNonResizableTaskIfNeeded(task, newDisplay.getWindowingMode(),
-                newDisplay.mDisplayId, stack);
+                newDisplay.getDefaultTaskDisplayArea(), stack);
         // For the resizable activity, it is no need to force resizing or dismiss the docked stack.
         verify(taskChangeNotifier, never()).notifyActivityForcedResizable(anyInt() /* taskId */,
                 anyInt() /* reason */, anyString() /* packageName */);
         verify(taskChangeNotifier, never()).notifyActivityDismissingDockedStack();
+    }
+
+    /**
+     * Ensures that notify focus task changes.
+     */
+    @Test
+    public void testNotifyTaskFocusChanged() {
+        final ActivityRecord fullScreenActivityA = new ActivityBuilder(mService).setCreateTask(true)
+                .setStack(mFullscreenStack).build();
+        final Task taskA = fullScreenActivityA.getTask();
+
+        final TaskChangeNotificationController taskChangeNotifier =
+                mService.getTaskChangeNotificationController();
+        spyOn(taskChangeNotifier);
+
+        mService.setResumedActivityUncheckLocked(fullScreenActivityA, "resumeA");
+        verify(taskChangeNotifier).notifyTaskFocusChanged(eq(taskA.mTaskId) /* taskId */,
+                eq(true) /* focused */);
+        reset(taskChangeNotifier);
+
+        final ActivityRecord fullScreenActivityB = new ActivityBuilder(mService).setCreateTask(true)
+                .setStack(mFullscreenStack).build();
+        final Task taskB = fullScreenActivityB.getTask();
+
+        mService.setResumedActivityUncheckLocked(fullScreenActivityB, "resumeB");
+        verify(taskChangeNotifier).notifyTaskFocusChanged(eq(taskA.mTaskId) /* taskId */,
+                eq(false) /* focused */);
+        verify(taskChangeNotifier).notifyTaskFocusChanged(eq(taskB.mTaskId) /* taskId */,
+                eq(true) /* focused */);
     }
 }

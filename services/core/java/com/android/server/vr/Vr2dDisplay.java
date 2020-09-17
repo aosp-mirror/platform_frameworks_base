@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
+import android.hardware.display.VirtualDisplayConfig;
 import android.media.ImageReader;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -295,10 +296,12 @@ class Vr2dDisplay {
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
 
+            final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
+                    DISPLAY_NAME, mVirtualDisplayWidth, mVirtualDisplayHeight, mVirtualDisplayDpi);
+            builder.setUniqueId(UNIQUE_DISPLAY_ID);
+            builder.setFlags(flags);
             mVirtualDisplay = mDisplayManager.createVirtualDisplay(null /* projection */,
-                    DISPLAY_NAME, mVirtualDisplayWidth, mVirtualDisplayHeight, mVirtualDisplayDpi,
-                    null /* surface */, flags, null /* callback */, null /* handler */,
-                    UNIQUE_DISPLAY_ID);
+                    builder.build(), null /* callback */, null /* handler */);
 
             if (mVirtualDisplay != null) {
                 updateDisplayId(mVirtualDisplay.getDisplay().getDisplayId());

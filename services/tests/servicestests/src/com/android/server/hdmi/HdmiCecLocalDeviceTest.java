@@ -19,6 +19,7 @@ import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_TV;
 
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
+import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.Constants.ADDR_UNREGISTERED;
 import static com.android.server.hdmi.Constants.MESSAGE_DEVICE_VENDOR_ID;
@@ -184,5 +185,65 @@ public class HdmiCecLocalDeviceTest {
         mHdmiLocalDevice.handleStandby(
                 HdmiCecMessageBuilder.buildStandby(ADDR_TV, ADDR_AUDIO_SYSTEM));
         assertTrue(mStandbyMessageReceived);
+    }
+
+    @Test
+    public void handleUserControlPressed_volumeUp() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        boolean result = mHdmiLocalDevice.handleUserControlPressed(
+                HdmiCecMessageBuilder.buildUserControlPressed(ADDR_PLAYBACK_1, ADDR_TV,
+                        HdmiCecKeycode.CEC_KEYCODE_VOLUME_UP));
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void handleUserControlPressed_volumeDown() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        boolean result = mHdmiLocalDevice.handleUserControlPressed(
+                HdmiCecMessageBuilder.buildUserControlPressed(ADDR_PLAYBACK_1, ADDR_TV,
+                        HdmiCecKeycode.CEC_KEYCODE_VOLUME_DOWN));
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void handleUserControlPressed_volumeMute() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        boolean result = mHdmiLocalDevice.handleUserControlPressed(
+                HdmiCecMessageBuilder.buildUserControlPressed(ADDR_PLAYBACK_1, ADDR_TV,
+                        HdmiCecKeycode.CEC_KEYCODE_MUTE));
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void handleUserControlPressed_volumeUp_disabled() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        boolean result = mHdmiLocalDevice.handleUserControlPressed(
+                HdmiCecMessageBuilder.buildUserControlPressed(ADDR_PLAYBACK_1, ADDR_TV,
+                        HdmiCecKeycode.CEC_KEYCODE_VOLUME_UP));
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void handleUserControlPressed_volumeDown_disabled() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        boolean result = mHdmiLocalDevice.handleUserControlPressed(
+                HdmiCecMessageBuilder.buildUserControlPressed(ADDR_PLAYBACK_1, ADDR_TV,
+                        HdmiCecKeycode.CEC_KEYCODE_VOLUME_DOWN));
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void handleUserControlPressed_volumeMute_disabled() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        boolean result = mHdmiLocalDevice.handleUserControlPressed(
+                HdmiCecMessageBuilder.buildUserControlPressed(ADDR_PLAYBACK_1, ADDR_TV,
+                        HdmiCecKeycode.CEC_KEYCODE_MUTE));
+
+        assertFalse(result);
     }
 }

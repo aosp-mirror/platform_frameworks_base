@@ -22,9 +22,8 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
-import android.content.pm.PackageParser.PackageParserException;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -53,12 +52,12 @@ public class PackageUtil {
     /**
      * Utility method to get package information for a given {@link File}
      */
-    public static PackageParser.Package getPackageInfo(Context context, File sourceFile) {
-        final PackageParser parser = new PackageParser();
-        parser.setCallback(new PackageParser.CallbackImpl(context.getPackageManager()));
+    @Nullable
+    public static PackageInfo getPackageInfo(Context context, File sourceFile, int flags) {
         try {
-            return parser.parsePackage(sourceFile, 0);
-        } catch (PackageParserException e) {
+            return context.getPackageManager().getPackageArchiveInfo(sourceFile.getAbsolutePath(),
+                    flags);
+        } catch (Exception ignored) {
             return null;
         }
     }

@@ -94,6 +94,7 @@ public final class KeymasterDefs {
     public static final int KM_TAG_ATTESTATION_ID_MEID = KM_BYTES | 715;
     public static final int KM_TAG_ATTESTATION_ID_MANUFACTURER = KM_BYTES | 716;
     public static final int KM_TAG_ATTESTATION_ID_MODEL = KM_BYTES | 717;
+    public static final int KM_TAG_DEVICE_UNIQUE_ATTESTATION = KM_BOOL | 720;
 
     public static final int KM_TAG_ASSOCIATED_DATA = KM_BYTES | 1000;
     public static final int KM_TAG_NONCE = KM_BYTES | 1001;

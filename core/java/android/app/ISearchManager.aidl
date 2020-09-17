@@ -31,6 +31,5 @@ interface ISearchManager {
    @UnsupportedAppUsage
    ComponentName getGlobalSearchActivity();
    ComponentName getWebSearchActivity();
-   void launchAssist(in Bundle args);
-   boolean launchLegacyAssist(String hint, int userHandle, in Bundle args);
+   void launchAssist(int userHandle, in Bundle args);
 }

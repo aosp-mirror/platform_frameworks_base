@@ -16,7 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -27,7 +29,11 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.DisplayInfo;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.Animation;
+
+import java.util.function.Consumer;
 
 /**
  * A token that represents a set of wallpaper windows.
@@ -40,6 +46,7 @@ class WallpaperWindowToken extends WindowToken {
             DisplayContent dc, boolean ownerCanManageAppTokens) {
         super(service, token, TYPE_WALLPAPER, explicit, dc, ownerCanManageAppTokens);
         dc.mWallpaperController.addWallpaperToken(this);
+        setWindowingMode(WINDOWING_MODE_FULLSCREEN);
     }
 
     @Override
@@ -53,7 +60,6 @@ class WallpaperWindowToken extends WindowToken {
             final WindowState wallpaper = mChildren.get(j);
             wallpaper.hideWallpaperWindow(wasDeferred, reason);
         }
-        setHidden(true);
     }
 
     void sendWindowWallpaperCommand(
@@ -69,11 +75,11 @@ class WallpaperWindowToken extends WindowToken {
         }
     }
 
-    void updateWallpaperOffset(int dw, int dh, boolean sync) {
+    void updateWallpaperOffset(boolean sync) {
         final WallpaperController wallpaperController = mDisplayContent.mWallpaperController;
         for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
             final WindowState wallpaper = mChildren.get(wallpaperNdx);
-            if (wallpaperController.updateWallpaperOffset(wallpaper, dw, dh, sync)) {
+            if (wallpaperController.updateWallpaperOffset(wallpaper, sync)) {
                 // We only want to be synchronous with one wallpaper.
                 sync = false;
             }
@@ -81,13 +87,7 @@ class WallpaperWindowToken extends WindowToken {
     }
 
     void updateWallpaperVisibility(boolean visible) {
-        final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
-        final int dw = displayInfo.logicalWidth;
-        final int dh = displayInfo.logicalHeight;
-
-        if (isHidden() == visible) {
-            setHidden(!visible);
-
+        if (isVisible() != visible) {
             // Need to do a layout to ensure the wallpaper now has the correct size.
             mDisplayContent.setLayoutNeeded();
         }
@@ -96,7 +96,7 @@ class WallpaperWindowToken extends WindowToken {
         for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
             final WindowState wallpaper = mChildren.get(wallpaperNdx);
             if (visible) {
-                wallpaperController.updateWallpaperOffset(wallpaper, dw, dh, false);
+                wallpaperController.updateWallpaperOffset(wallpaper, false /* sync */);
             }
 
             wallpaper.dispatchWallpaperVisibility(visible);
@@ -115,23 +115,40 @@ class WallpaperWindowToken extends WindowToken {
 
     void updateWallpaperWindows(boolean visible) {
 
-        if (isHidden() == visible) {
+        if (isVisible() != visible) {
             if (DEBUG_WALLPAPER_LIGHT) Slog.d(TAG,
-                    "Wallpaper token " + token + " hidden=" + !visible);
-            setHidden(!visible);
+                    "Wallpaper token " + token + " visible=" + visible);
             // Need to do a layout to ensure the wallpaper now has the correct size.
             mDisplayContent.setLayoutNeeded();
         }
 
-        final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
-        final int dw = displayInfo.logicalWidth;
-        final int dh = displayInfo.logicalHeight;
         final WallpaperController wallpaperController = mDisplayContent.mWallpaperController;
+        final WindowState wallpaperTarget = wallpaperController.getWallpaperTarget();
+
+        if (visible && wallpaperTarget != null) {
+            final RecentsAnimationController recentsAnimationController =
+                    mWmService.getRecentsAnimationController();
+            if (recentsAnimationController != null
+                    && recentsAnimationController.isAnimatingTask(wallpaperTarget.getTask())) {
+                // If the Recents animation is running, and the wallpaper target is the animating
+                // task we want the wallpaper to be rotated in the same orientation as the
+                // RecentsAnimation's target (e.g the launcher)
+                recentsAnimationController.linkFixedRotationTransformIfNeeded(this);
+            } else if ((wallpaperTarget.mActivityRecord == null
+                    // Ignore invisible activity because it may be moving to background.
+                    || wallpaperTarget.mActivityRecord.mVisibleRequested)
+                    && wallpaperTarget.mToken.hasFixedRotationTransform()) {
+                // If the wallpaper target has a fixed rotation, we want the wallpaper to follow its
+                // rotation
+                linkFixedRotationTransform(wallpaperTarget.mToken);
+            }
+        }
+
         for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
             final WindowState wallpaper = mChildren.get(wallpaperNdx);
 
             if (visible) {
-                wallpaperController.updateWallpaperOffset(wallpaper, dw, dh, false);
+                wallpaperController.updateWallpaperOffset(wallpaper, false /* sync */);
             }
 
             // First, make sure the client has the current visibility state.
@@ -142,6 +159,23 @@ class WallpaperWindowToken extends WindowToken {
         }
     }
 
+    @Override
+    void adjustWindowParams(WindowState win, WindowManager.LayoutParams attrs) {
+        if (attrs.height == ViewGroup.LayoutParams.MATCH_PARENT
+                || attrs.width == ViewGroup.LayoutParams.MATCH_PARENT) {
+            return;
+        }
+
+        final DisplayInfo displayInfo = win.getDisplayInfo();
+
+        final float layoutScale = Math.max(
+                (float) displayInfo.logicalHeight / (float) attrs.height,
+                (float) displayInfo.logicalWidth / (float) attrs.width);
+        attrs.height = (int) (attrs.height * layoutScale);
+        attrs.width = (int) (attrs.width * layoutScale);
+        attrs.flags |= WindowManager.LayoutParams.FLAG_SCALED;
+    }
+
     boolean hasVisibleNotDrawnWallpaper() {
         for (int j = mChildren.size() - 1; j >= 0; --j) {
             final WindowState wallpaper = mChildren.get(j);
@@ -150,6 +184,11 @@ class WallpaperWindowToken extends WindowToken {
             }
         }
         return false;
+    }
+
+    @Override
+    void forAllWallpaperWindows(Consumer<WallpaperWindowToken> callback) {
+        callback.accept(this);
     }
 
     @Override

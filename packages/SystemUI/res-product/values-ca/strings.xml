@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="dock_alignment_slow_charging" product="default" msgid="6997633396534416792">"Col·loca bé el telèfon per carregar-lo més ràpidament"</string>
+    <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Col·loca bé el telèfon per carregar-lo sense fil"</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"El dispositiu Android TV s\'apagarà aviat; prem un botó per mantenir-lo encès."</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"El dispositiu s\'apagarà aviat; prem per mantenir-lo encès."</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"No hi ha cap targeta SIM a la tauleta."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"No hi ha cap targeta SIM al telèfon."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"Els PIN no coincideixen"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, la tauleta es restablirà i se\'n suprimiran totes les dades."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, el telèfon es restablirà i se\'n suprimiran totes les dades."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="8710104080409538587">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER">%d</xliff:g> vegades de manera incorrecta. La tauleta es restablirà i se\'n suprimiran totes les dades."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="6381835450014881813">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER">%d</xliff:g> vegades de manera incorrecta. El telèfon es restablirà i se\'n suprimiran totes les dades."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="7325071812832605911">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, l\'usuari se suprimirà, juntament amb totes les seves dades."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="8110939900089863103">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, l\'usuari se suprimirà, juntament amb totes les seves dades."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="8509811676952707883">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER">%d</xliff:g> vegades de manera incorrecta. L\'usuari se suprimirà, juntament amb totes les seves dades."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3051962486994265014">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER">%d</xliff:g> vegades de manera incorrecta. L\'usuari se suprimirà, juntament amb totes les seves dades."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="1049523640263353830">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, el perfil de treball se suprimirà, juntament amb totes les dades que contingui."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="3280816298678433681">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, el perfil de treball se suprimirà, juntament amb totes les dades que contingui."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4417100487251371559">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER">%d</xliff:g> vegades de manera incorrecta. El perfil de treball se suprimirà, juntament amb totes les dades que contingui."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER">%d</xliff:g> vegades de manera incorrecta. El perfil de treball se suprimirà, juntament amb totes les dades que contingui."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, se\'t demanarà que desbloquegis la tauleta amb un compte de correu electrònic.\n\n Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%3$d</xliff:g> segons."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, se\'t demanarà que desbloquegis el telèfon amb un compte de correu electrònic.\n\n Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%3$d</xliff:g> segons."</string>
+    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Desbloqueja el teu telèfon per veure més opcions"</string>
+    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Desbloqueja la teva tauleta per veure més opcions"</string>
+    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Desbloqueja el teu dispositiu per veure més opcions"</string>
+</resources>

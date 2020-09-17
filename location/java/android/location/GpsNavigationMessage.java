@@ -26,8 +26,11 @@ import java.security.InvalidParameterException;
 /**
  * A class containing a GPS satellite Navigation Message.
  *
+ * @deprecated use {@link GnssNavigationMessage} instead.
+ *
  * @hide
  */
+@Deprecated
 @SystemApi
 public class GpsNavigationMessage implements Parcelable {
 

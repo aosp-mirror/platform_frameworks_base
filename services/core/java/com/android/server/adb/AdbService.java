@@ -34,6 +34,7 @@ import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -137,12 +138,12 @@ public class AdbService extends IAdbManager.Stub {
 
         @Override
         public File getAdbKeysFile() {
-            return mDebuggingManager.getUserKeyFile();
+            return mDebuggingManager == null ? null : mDebuggingManager.getUserKeyFile();
         }
 
         @Override
         public File getAdbTempKeysFile() {
-            return mDebuggingManager.getAdbTempKeysFile();
+            return mDebuggingManager == null ? null : mDebuggingManager.getAdbTempKeysFile();
         }
 
         @Override
@@ -506,6 +507,14 @@ public class AdbService extends IAdbManager.Stub {
         if (mDebuggingManager != null) {
             mDebuggingManager.setAdbEnabled(enable, transportType);
         }
+    }
+
+    @Override
+    public int handleShellCommand(ParcelFileDescriptor in, ParcelFileDescriptor out,
+            ParcelFileDescriptor err, String[] args) {
+        return new AdbShellCommand(this).exec(
+                this, in.getFileDescriptor(), out.getFileDescriptor(), err.getFileDescriptor(),
+                args);
     }
 
     @Override

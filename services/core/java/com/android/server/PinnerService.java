@@ -21,11 +21,11 @@ import static android.app.ActivityManager.UID_OBSERVER_GONE;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
-
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
 import android.app.IUidObserver;
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -45,6 +45,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.system.ErrnoException;
@@ -59,24 +60,23 @@ import com.android.internal.app.ResolverActivity;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
-
 import com.android.server.wm.ActivityTaskManagerInternal;
+
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
 
-import java.io.FileDescriptor;
 import java.io.Closeable;
-import java.io.InputStream;
 import java.io.DataInputStream;
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.List;
 import java.util.ArrayList;
-
-import java.util.zip.ZipFile;
+import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * <p>PinnerService pins important files for key processes in memory.</p>
@@ -96,11 +96,26 @@ public final class PinnerService extends SystemService {
 
     private static final int KEY_CAMERA = 0;
     private static final int KEY_HOME = 1;
+    private static final int KEY_ASSISTANT = 2;
+
+    // Pin the camera application. Default to the system property only if the experiment phenotype
+    // property is not set.
+    private static boolean PROP_PIN_CAMERA =
+            DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
+                                    "pin_camera",
+                                    SystemProperties.getBoolean("pinner.pin_camera", false));
+    // Pin using pinlist.meta when pinning apps.
+    private static boolean PROP_PIN_PINLIST = SystemProperties.getBoolean(
+            "pinner.use_pinlist", true);
+    // Pin the whole odex/vdex/etc file when pinning apps.
+    private static boolean PROP_PIN_ODEX = SystemProperties.getBoolean(
+            "pinner.whole_odex", true);
 
     private static final int MAX_CAMERA_PIN_SIZE = 80 * (1 << 20); // 80MB max for camera app.
     private static final int MAX_HOME_PIN_SIZE = 6 * (1 << 20); // 6MB max for home app.
+    private static final int MAX_ASSISTANT_PIN_SIZE = 60 * (1 << 20); // 60MB max for assistant app.
 
-    @IntDef({KEY_CAMERA, KEY_HOME})
+    @IntDef({KEY_CAMERA, KEY_HOME, KEY_ASSISTANT})
     @Retention(RetentionPolicy.SOURCE)
     public @interface AppKey {}
 
@@ -109,6 +124,7 @@ public final class PinnerService extends SystemService {
     private final ActivityManagerInternal mAmInternal;
     private final IActivityManager mAm;
     private final UserManager mUserManager;
+    private SearchManager mSearchManager;
 
     /** The list of the statically pinned files. */
     @GuardedBy("this")
@@ -159,11 +175,20 @@ public final class PinnerService extends SystemService {
                 com.android.internal.R.bool.config_pinnerCameraApp);
         boolean shouldPinHome = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_pinnerHomeApp);
+        boolean shouldPinAssistant = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_pinnerAssistantApp);
         if (shouldPinCamera) {
-            mPinKeys.add(KEY_CAMERA);
+            if (PROP_PIN_CAMERA) {
+                mPinKeys.add(KEY_CAMERA);
+            } else if (DEBUG) {
+                Slog.i(TAG, "Pinner - skip pinning camera app");
+            }
         }
         if (shouldPinHome) {
             mPinKeys.add(KEY_HOME);
+        }
+        if (shouldPinAssistant) {
+            mPinKeys.add(KEY_ASSISTANT);
         }
         mPinnerHandler = new PinnerHandler(BackgroundThread.get().getLooper());
 
@@ -193,6 +218,15 @@ public final class PinnerService extends SystemService {
 
         mPinnerHandler.obtainMessage(PinnerHandler.PIN_ONSTART_MSG).sendToTarget();
         sendPinAppsMessage(UserHandle.USER_SYSTEM);
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        // SearchManagerService is started after PinnerService, wait for PHASE_SYSTEM_SERVICES_READY
+        if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
+            mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
+            sendPinAppsMessage(UserHandle.USER_SYSTEM);
+        }
     }
 
     /**
@@ -304,14 +338,14 @@ public final class PinnerService extends SystemService {
                 }
 
                 @Override
-                public void onUidStateChanged(int uid, int procState, long procStateSeq)
-                        throws RemoteException {
+                public void onUidStateChanged(int uid, int procState, long procStateSeq,
+                        int capability) throws RemoteException {
                 }
 
                 @Override
                 public void onUidCachedChanged(int uid, boolean cached) throws RemoteException {
                 }
-            }, UID_OBSERVER_GONE | UID_OBSERVER_ACTIVE, 0, "system");
+            }, UID_OBSERVER_GONE | UID_OBSERVER_ACTIVE, 0, null);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to register uid observer", e);
         }
@@ -395,6 +429,14 @@ public final class PinnerService extends SystemService {
     private ApplicationInfo getHomeInfo(int userHandle) {
         Intent intent = mAtmInternal.getHomeIntent();
         return getApplicationInfoForIntent(intent, userHandle, false);
+    }
+
+    private ApplicationInfo getAssistantInfo(int userHandle) {
+        if (mSearchManager != null) {
+            Intent intent = mSearchManager.getAssistIntent(false);
+            return getApplicationInfoForIntent(intent, userHandle, true);
+        }
+        return null;
     }
 
     private ApplicationInfo getApplicationInfoForIntent(Intent intent, int userHandle,
@@ -509,6 +551,8 @@ public final class PinnerService extends SystemService {
                 return getCameraInfo(userHandle);
             case KEY_HOME:
                 return getHomeInfo(userHandle);
+            case KEY_ASSISTANT:
+                return getAssistantInfo(userHandle);
             default:
                 return null;
         }
@@ -523,6 +567,8 @@ public final class PinnerService extends SystemService {
                 return "Camera";
             case KEY_HOME:
                 return "Home";
+            case KEY_ASSISTANT:
+                return "Assistant";
             default:
                 return null;
         }
@@ -537,6 +583,8 @@ public final class PinnerService extends SystemService {
                 return MAX_CAMERA_PIN_SIZE;
             case KEY_HOME:
                 return MAX_HOME_PIN_SIZE;
+            case KEY_ASSISTANT:
+                return MAX_ASSISTANT_PIN_SIZE;
             default:
                 return 0;
         }
@@ -574,17 +622,9 @@ public final class PinnerService extends SystemService {
         }
 
         // determine the ABI from either ApplicationInfo or Build
-        String arch = "arm";
-        if (appInfo.primaryCpuAbi != null) {
-            if (VMRuntime.is64BitAbi(appInfo.primaryCpuAbi)) {
-                arch = arch + "64";
-            }
-        } else {
-            if (VMRuntime.is64BitAbi(Build.SUPPORTED_ABIS[0])) {
-                arch = arch + "64";
-            }
-        }
-
+        String abi = appInfo.primaryCpuAbi != null ? appInfo.primaryCpuAbi :
+                Build.SUPPORTED_ABIS[0];
+        String arch = VMRuntime.getInstructionSet(abi);
         // get the path to the odex or oat file
         String baseCodePath = appInfo.getBaseCodePath();
         String[] files = null;
@@ -600,10 +640,16 @@ public final class PinnerService extends SystemService {
             pf = pinFile(file, pinSizeLimit, /*attemptPinIntrospection=*/false);
             if (pf != null) {
                 synchronized (this) {
-                    pinnedApp.mFiles.add(pf);
+                    if (PROP_PIN_ODEX) {
+                      pinnedApp.mFiles.add(pf);
+                    }
                 }
                 if (DEBUG) {
-                    Slog.i(TAG, "Pinned " + pf.fileName);
+                    if (PROP_PIN_ODEX) {
+                        Slog.i(TAG, "Pinned " + pf.fileName);
+                    } else {
+                        Slog.i(TAG, "Pinned [skip] " + pf.fileName);
+                    }
                 }
             }
         }
@@ -697,6 +743,13 @@ public final class PinnerService extends SystemService {
      * @return Open input stream or null on any error
      */
     private static InputStream maybeOpenPinMetaInZip(ZipFile zipFile, String fileName) {
+        if (!PROP_PIN_PINLIST) {
+            if (DEBUG) {
+                Slog.i(TAG, "Pin - skip pinlist.meta in " + fileName);
+            }
+            return null;
+        }
+
         ZipEntry pinMetaEntry = zipFile.getEntry(PIN_META_FILENAME);
         InputStream pinMetaStream = null;
         if (pinMetaEntry != null) {

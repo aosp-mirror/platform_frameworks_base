@@ -36,7 +36,7 @@ public class PipUtils {
      * @return the ComponentName and user id of the top non-SystemUI activity in the pinned stack.
      *         The component name may be null if no such activity exists.
      */
-    public static Pair<ComponentName, Integer> getTopPinnedActivity(Context context,
+    public static Pair<ComponentName, Integer> getTopPipActivity(Context context,
             IActivityManager activityManager) {
         try {
             final String sysUiPackageName = context.getPackageName();

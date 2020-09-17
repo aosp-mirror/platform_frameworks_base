@@ -31,6 +31,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.ResourcesImpl;
 import android.content.res.ResourcesKey;
+import android.content.res.loader.ResourcesLoader;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.IBinder;
 import android.os.Process;
@@ -50,11 +51,17 @@ import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.WeakHashMap;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /** @hide */
@@ -63,12 +70,6 @@ public class ResourcesManager {
     private static final boolean DEBUG = false;
 
     private static ResourcesManager sResourcesManager;
-
-    /**
-     * Predicate that returns true if a WeakReference is gc'ed.
-     */
-    private static final Predicate<WeakReference<Resources>> sEmptyReferencePredicate =
-            weakRef -> weakRef == null || weakRef.get() == null;
 
     /**
      * The global compatibility settings.
@@ -95,6 +96,7 @@ public class ResourcesManager {
      */
     @UnsupportedAppUsage
     private final ArrayList<WeakReference<Resources>> mResourceReferences = new ArrayList<>();
+    private final ReferenceQueue<Resources> mResourcesReferencesQueue = new ReferenceQueue<>();
 
     private static class ApkKey {
         public final String path;
@@ -150,6 +152,7 @@ public class ResourcesManager {
         }
         public final Configuration overrideConfig = new Configuration();
         public final ArrayList<WeakReference<Resources>> activityResources = new ArrayList<>();
+        final ReferenceQueue<Resources> activityResourcesQueue = new ReferenceQueue<>();
     }
 
     /**
@@ -165,6 +168,11 @@ public class ResourcesManager {
      */
     private final ArrayMap<Pair<Integer, DisplayAdjustments>, WeakReference<Display>>
             mAdjustedDisplays = new ArrayMap<>();
+
+    /**
+     * Callback implementation for handling updates to Resources objects.
+     */
+    private final UpdateHandler mUpdateCallbacks = new UpdateHandler();
 
     @UnsupportedAppUsage
     public ResourcesManager() {
@@ -188,16 +196,29 @@ public class ResourcesManager {
     public void invalidatePath(String path) {
         synchronized (this) {
             int count = 0;
-            for (int i = 0; i < mResourceImpls.size();) {
+
+            for (int i = mResourceImpls.size() - 1; i >= 0; i--) {
                 final ResourcesKey key = mResourceImpls.keyAt(i);
                 if (key.isPathReferenced(path)) {
-                    cleanupResourceImpl(key);
+                    ResourcesImpl impl = mResourceImpls.removeAt(i).get();
+                    if (impl != null) {
+                        impl.flushLayoutCache();
+                    }
                     count++;
-                } else {
-                    i++;
                 }
             }
+
             Log.i(TAG, "Invalidated " + count + " asset managers that referenced " + path);
+
+            for (int i = mCachedApkAssets.size() - 1; i >= 0; i--) {
+                final ApkKey key = mCachedApkAssets.keyAt(i);
+                if (key.path.equals(path)) {
+                    WeakReference<ApkAssets> apkAssetsRef = mCachedApkAssets.removeAt(i);
+                    if (apkAssetsRef != null && apkAssetsRef.get() != null) {
+                        apkAssetsRef.get().close();
+                    }
+                }
+            }
         }
     }
 
@@ -312,15 +333,6 @@ public class ResourcesManager {
         }
     }
 
-    private void cleanupResourceImpl(ResourcesKey removedKey) {
-        // Remove resource key to resource impl mapping and flush cache
-        final ResourcesImpl res = mResourceImpls.remove(removedKey).get();
-
-        if (res != null) {
-            res.flushLayoutCache();
-        }
-    }
-
     private static String overlayPathToIdmapPath(String path) {
         return "/data/resource-cache/" + path.substring(1).replace('/', '@') + "@idmap";
     }
@@ -331,7 +343,7 @@ public class ResourcesManager {
         ApkAssets apkAssets = null;
         if (mLoadedApkAssets != null) {
             apkAssets = mLoadedApkAssets.get(newKey);
-            if (apkAssets != null) {
+            if (apkAssets != null && apkAssets.isUpToDate()) {
                 return apkAssets;
             }
         }
@@ -340,7 +352,7 @@ public class ResourcesManager {
         final WeakReference<ApkAssets> apkAssetsRef = mCachedApkAssets.get(newKey);
         if (apkAssetsRef != null) {
             apkAssets = apkAssetsRef.get();
-            if (apkAssets != null) {
+            if (apkAssets != null && apkAssets.isUpToDate()) {
                 if (mLoadedApkAssets != null) {
                     mLoadedApkAssets.put(newKey, apkAssets);
                 }
@@ -354,10 +366,9 @@ public class ResourcesManager {
 
         // We must load this from disk.
         if (overlay) {
-            apkAssets = ApkAssets.loadOverlayFromPath(overlayPathToIdmapPath(path),
-                    false /*system*/);
+            apkAssets = ApkAssets.loadOverlayFromPath(overlayPathToIdmapPath(path), 0 /*flags*/);
         } else {
-            apkAssets = ApkAssets.loadFromPath(path, false /*system*/, sharedLib);
+            apkAssets = ApkAssets.loadFromPath(path, sharedLib ? ApkAssets.PROPERTY_DYNAMIC : 0);
         }
 
         if (mLoadedApkAssets != null) {
@@ -406,19 +417,6 @@ public class ResourcesManager {
             }
         }
 
-        if (key.mOverlayDirs != null) {
-            for (final String idmapPath : key.mOverlayDirs) {
-                try {
-                    builder.addApkAssets(loadApkAssets(idmapPath, false /*sharedLib*/,
-                            true /*overlay*/));
-                } catch (IOException e) {
-                    Log.w(TAG, "failed to add overlay path " + idmapPath);
-
-                    // continue.
-                }
-            }
-        }
-
         if (key.mLibDirs != null) {
             for (final String libDir : key.mLibDirs) {
                 if (libDir.endsWith(".apk")) {
@@ -434,6 +432,25 @@ public class ResourcesManager {
                         // continue.
                     }
                 }
+            }
+        }
+
+        if (key.mOverlayDirs != null) {
+            for (final String idmapPath : key.mOverlayDirs) {
+                try {
+                    builder.addApkAssets(loadApkAssets(idmapPath, false /*sharedLib*/,
+                            true /*overlay*/));
+                } catch (IOException e) {
+                    Log.w(TAG, "failed to add overlay path " + idmapPath);
+
+                    // continue.
+                }
+            }
+        }
+
+        if (key.mLoaders != null) {
+            for (final ResourcesLoader loader : key.mLoaders) {
+                builder.addLoader(loader);
             }
         }
 
@@ -574,11 +591,11 @@ public class ResourcesManager {
      */
     private @Nullable ResourcesKey findKeyForResourceImplLocked(
             @NonNull ResourcesImpl resourceImpl) {
-        final int refCount = mResourceImpls.size();
+        int refCount = mResourceImpls.size();
         for (int i = 0; i < refCount; i++) {
             WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
             ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
-            if (impl != null && resourceImpl == impl) {
+            if (resourceImpl == impl) {
                 return mResourceImpls.keyAt(i);
             }
         }
@@ -620,35 +637,43 @@ public class ResourcesManager {
         return activityResources;
     }
 
-    /**
-     * Gets an existing Resources object tied to this Activity, or creates one if it doesn't exist
-     * or the class loader is different.
-     */
-    private @NonNull Resources getOrCreateResourcesForActivityLocked(@NonNull IBinder activityToken,
+    @Nullable
+    private Resources findResourcesForActivityLocked(@NonNull IBinder targetActivityToken,
+            @NonNull ResourcesKey targetKey, @NonNull ClassLoader targetClassLoader) {
+        ActivityResources activityResources = getOrCreateActivityResourcesStructLocked(
+                targetActivityToken);
+
+        final int size = activityResources.activityResources.size();
+        for (int index = 0; index < size; index++) {
+            WeakReference<Resources> ref = activityResources.activityResources.get(index);
+            Resources resources = ref.get();
+            ResourcesKey key = resources == null ? null : findKeyForResourceImplLocked(
+                    resources.getImpl());
+
+            if (key != null
+                    && Objects.equals(resources.getClassLoader(), targetClassLoader)
+                    && Objects.equals(key, targetKey)) {
+                return resources;
+            }
+        }
+
+        return null;
+    }
+
+    private @NonNull Resources createResourcesForActivityLocked(@NonNull IBinder activityToken,
             @NonNull ClassLoader classLoader, @NonNull ResourcesImpl impl,
             @NonNull CompatibilityInfo compatInfo) {
         final ActivityResources activityResources = getOrCreateActivityResourcesStructLocked(
                 activityToken);
-
-        final int refCount = activityResources.activityResources.size();
-        for (int i = 0; i < refCount; i++) {
-            WeakReference<Resources> weakResourceRef = activityResources.activityResources.get(i);
-            Resources resources = weakResourceRef.get();
-
-            if (resources != null
-                    && Objects.equals(resources.getClassLoader(), classLoader)
-                    && resources.getImpl() == impl) {
-                if (DEBUG) {
-                    Slog.d(TAG, "- using existing ref=" + resources);
-                }
-                return resources;
-            }
-        }
+        cleanupReferences(activityResources.activityResources,
+                activityResources.activityResourcesQueue);
 
         Resources resources = compatInfo.needsCompatResources() ? new CompatResources(classLoader)
                 : new Resources(classLoader);
         resources.setImpl(impl);
-        activityResources.activityResources.add(new WeakReference<>(resources));
+        resources.setCallbacks(mUpdateCallbacks);
+        activityResources.activityResources.add(
+                new WeakReference<>(resources, activityResources.activityResourcesQueue));
         if (DEBUG) {
             Slog.d(TAG, "- creating new ref=" + resources);
             Slog.d(TAG, "- setting ref=" + resources + " with impl=" + impl);
@@ -656,32 +681,15 @@ public class ResourcesManager {
         return resources;
     }
 
-    /**
-     * Gets an existing Resources object if the class loader and ResourcesImpl are the same,
-     * otherwise creates a new Resources object.
-     */
-    private @NonNull Resources getOrCreateResourcesLocked(@NonNull ClassLoader classLoader,
+    private @NonNull Resources createResourcesLocked(@NonNull ClassLoader classLoader,
             @NonNull ResourcesImpl impl, @NonNull CompatibilityInfo compatInfo) {
-        // Find an existing Resources that has this ResourcesImpl set.
-        final int refCount = mResourceReferences.size();
-        for (int i = 0; i < refCount; i++) {
-            WeakReference<Resources> weakResourceRef = mResourceReferences.get(i);
-            Resources resources = weakResourceRef.get();
-            if (resources != null &&
-                    Objects.equals(resources.getClassLoader(), classLoader) &&
-                    resources.getImpl() == impl) {
-                if (DEBUG) {
-                    Slog.d(TAG, "- using existing ref=" + resources);
-                }
-                return resources;
-            }
-        }
+        cleanupReferences(mResourceReferences, mResourcesReferencesQueue);
 
-        // Create a new Resources reference and use the existing ResourcesImpl object.
         Resources resources = compatInfo.needsCompatResources() ? new CompatResources(classLoader)
                 : new Resources(classLoader);
         resources.setImpl(impl);
-        mResourceReferences.add(new WeakReference<>(resources));
+        resources.setCallbacks(mUpdateCallbacks);
+        mResourceReferences.add(new WeakReference<>(resources, mResourcesReferencesQueue));
         if (DEBUG) {
             Slog.d(TAG, "- creating new ref=" + resources);
             Slog.d(TAG, "- setting ref=" + resources + " with impl=" + impl);
@@ -690,26 +698,26 @@ public class ResourcesManager {
     }
 
     /**
-     * Creates base resources for an Activity. Calls to
+     * Creates base resources for a binder token. Calls to
      * {@link #getResources(IBinder, String, String[], String[], String[], int, Configuration,
-     * CompatibilityInfo, ClassLoader)} with the same activityToken will have their override
+     * CompatibilityInfo, ClassLoader, List)} with the same binder token will have their override
      * configurations merged with the one specified here.
      *
-     * @param activityToken Represents an Activity.
+     * @param token Represents an {@link Activity} or {@link WindowContext}.
      * @param resDir The base resource path. Can be null (only framework resources will be loaded).
      * @param splitResDirs An array of split resource paths. Can be null.
      * @param overlayDirs An array of overlay paths. Can be null.
      * @param libDirs An array of resource library paths. Can be null.
      * @param displayId The ID of the display for which to create the resources.
      * @param overrideConfig The configuration to apply on top of the base configuration. Can be
-     *                       null. This provides the base override for this Activity.
+     *                       {@code null}. This provides the base override for this token.
      * @param compatInfo The compatibility settings to use. Cannot be null. A default to use is
      *                   {@link CompatibilityInfo#DEFAULT_COMPATIBILITY_INFO}.
      * @param classLoader The class loader to use when inflating Resources. If null, the
      *                    {@link ClassLoader#getSystemClassLoader()} is used.
      * @return a Resources object from which to access resources.
      */
-    public @Nullable Resources createBaseActivityResources(@NonNull IBinder activityToken,
+    public @Nullable Resources createBaseTokenResources(@NonNull IBinder token,
             @Nullable String resDir,
             @Nullable String[] splitResDirs,
             @Nullable String[] overlayDirs,
@@ -717,7 +725,8 @@ public class ResourcesManager {
             int displayId,
             @Nullable Configuration overrideConfig,
             @NonNull CompatibilityInfo compatInfo,
-            @Nullable ClassLoader classLoader) {
+            @Nullable ClassLoader classLoader,
+            @Nullable List<ResourcesLoader> loaders) {
         try {
             Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
                     "ResourcesManager#createBaseActivityResources");
@@ -728,33 +737,80 @@ public class ResourcesManager {
                     libDirs,
                     displayId,
                     overrideConfig != null ? new Configuration(overrideConfig) : null, // Copy
-                    compatInfo);
+                    compatInfo,
+                    loaders == null ? null : loaders.toArray(new ResourcesLoader[0]));
             classLoader = classLoader != null ? classLoader : ClassLoader.getSystemClassLoader();
 
             if (DEBUG) {
-                Slog.d(TAG, "createBaseActivityResources activity=" + activityToken
+                Slog.d(TAG, "createBaseActivityResources activity=" + token
                         + " with key=" + key);
             }
 
             synchronized (this) {
                 // Force the creation of an ActivityResourcesStruct.
-                getOrCreateActivityResourcesStructLocked(activityToken);
+                getOrCreateActivityResourcesStructLocked(token);
             }
 
             // Update any existing Activity Resources references.
-            updateResourcesForActivity(activityToken, overrideConfig, displayId,
+            updateResourcesForActivity(token, overrideConfig, displayId,
                     false /* movedToDifferentDisplay */);
 
+            rebaseKeyForActivity(token, key);
+
+            synchronized (this) {
+                Resources resources = findResourcesForActivityLocked(token, key,
+                        classLoader);
+                if (resources != null) {
+                    return resources;
+                }
+            }
+
             // Now request an actual Resources object.
-            return getOrCreateResources(activityToken, key, classLoader);
+            return createResources(token, key, classLoader);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
     }
 
     /**
-     * Gets an existing Resources object set with a ResourcesImpl object matching the given key,
-     * or creates one if it doesn't exist.
+     * Rebases a key's override config on top of the Activity's base override.
+     */
+    private void rebaseKeyForActivity(IBinder activityToken, ResourcesKey key) {
+        synchronized (this) {
+            final ActivityResources activityResources =
+                    getOrCreateActivityResourcesStructLocked(activityToken);
+
+            // Rebase the key's override config on top of the Activity's base override.
+            if (key.hasOverrideConfiguration()
+                    && !activityResources.overrideConfig.equals(Configuration.EMPTY)) {
+                final Configuration temp = new Configuration(activityResources.overrideConfig);
+                temp.updateFrom(key.mOverrideConfiguration);
+                key.mOverrideConfiguration.setTo(temp);
+            }
+        }
+    }
+
+    /**
+     * Check WeakReferences and remove any dead references so they don't pile up.
+     */
+    private static <T> void cleanupReferences(ArrayList<WeakReference<T>> references,
+            ReferenceQueue<T> referenceQueue) {
+        Reference<? extends T> enduedRef = referenceQueue.poll();
+        if (enduedRef == null) {
+            return;
+        }
+
+        final HashSet<Reference<? extends T>> deadReferences = new HashSet<>();
+        for (; enduedRef != null; enduedRef = referenceQueue.poll()) {
+            deadReferences.add(enduedRef);
+        }
+
+        ArrayUtils.unstableRemoveIf(references,
+                (ref) -> ref == null || deadReferences.contains(ref));
+    }
+
+    /**
+     * Creates a Resources object set with a ResourcesImpl object matching the given key.
      *
      * @param activityToken The Activity this Resources object should be associated with.
      * @param key The key describing the parameters of the ResourcesImpl object.
@@ -764,7 +820,7 @@ public class ResourcesManager {
      *         {@link #applyConfigurationToResourcesLocked(Configuration, CompatibilityInfo)}
      *         is called.
      */
-    private @Nullable Resources getOrCreateResources(@Nullable IBinder activityToken,
+    private @Nullable Resources createResources(@Nullable IBinder activityToken,
             @NonNull ResourcesKey key, @NonNull ClassLoader classLoader) {
         synchronized (this) {
             if (DEBUG) {
@@ -773,66 +829,17 @@ public class ResourcesManager {
                 Slog.w(TAG, "!! Get resources for activity=" + activityToken + " key=" + key, here);
             }
 
-            if (activityToken != null) {
-                final ActivityResources activityResources =
-                        getOrCreateActivityResourcesStructLocked(activityToken);
-
-                // Clean up any dead references so they don't pile up.
-                ArrayUtils.unstableRemoveIf(activityResources.activityResources,
-                        sEmptyReferencePredicate);
-
-                // Rebase the key's override config on top of the Activity's base override.
-                if (key.hasOverrideConfiguration()
-                        && !activityResources.overrideConfig.equals(Configuration.EMPTY)) {
-                    final Configuration temp = new Configuration(activityResources.overrideConfig);
-                    temp.updateFrom(key.mOverrideConfiguration);
-                    key.mOverrideConfiguration.setTo(temp);
-                }
-
-                ResourcesImpl resourcesImpl = findResourcesImplForKeyLocked(key);
-                if (resourcesImpl != null) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "- using existing impl=" + resourcesImpl);
-                    }
-                    return getOrCreateResourcesForActivityLocked(activityToken, classLoader,
-                            resourcesImpl, key.mCompatInfo);
-                }
-
-                // We will create the ResourcesImpl object outside of holding this lock.
-
-            } else {
-                // Clean up any dead references so they don't pile up.
-                ArrayUtils.unstableRemoveIf(mResourceReferences, sEmptyReferencePredicate);
-
-                // Not tied to an Activity, find a shared Resources that has the right ResourcesImpl
-                ResourcesImpl resourcesImpl = findResourcesImplForKeyLocked(key);
-                if (resourcesImpl != null) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "- using existing impl=" + resourcesImpl);
-                    }
-                    return getOrCreateResourcesLocked(classLoader, resourcesImpl, key.mCompatInfo);
-                }
-
-                // We will create the ResourcesImpl object outside of holding this lock.
-            }
-
-            // If we're here, we didn't find a suitable ResourcesImpl to use, so create one now.
-            ResourcesImpl resourcesImpl = createResourcesImpl(key);
+            ResourcesImpl resourcesImpl = findOrCreateResourcesImplForKeyLocked(key);
             if (resourcesImpl == null) {
                 return null;
             }
 
-            // Add this ResourcesImpl to the cache.
-            mResourceImpls.put(key, new WeakReference<>(resourcesImpl));
-
-            final Resources resources;
             if (activityToken != null) {
-                resources = getOrCreateResourcesForActivityLocked(activityToken, classLoader,
+                return createResourcesForActivityLocked(activityToken, classLoader,
                         resourcesImpl, key.mCompatInfo);
             } else {
-                resources = getOrCreateResourcesLocked(classLoader, resourcesImpl, key.mCompatInfo);
+                return createResourcesLocked(classLoader, resourcesImpl, key.mCompatInfo);
             }
-            return resources;
         }
     }
 
@@ -863,7 +870,8 @@ public class ResourcesManager {
      * {@link ClassLoader#getSystemClassLoader()} is used.
      * @return a Resources object from which to access resources.
      */
-    public @Nullable Resources getResources(@Nullable IBinder activityToken,
+    public @Nullable Resources getResources(
+            @Nullable IBinder activityToken,
             @Nullable String resDir,
             @Nullable String[] splitResDirs,
             @Nullable String[] overlayDirs,
@@ -871,7 +879,8 @@ public class ResourcesManager {
             int displayId,
             @Nullable Configuration overrideConfig,
             @NonNull CompatibilityInfo compatInfo,
-            @Nullable ClassLoader classLoader) {
+            @Nullable ClassLoader classLoader,
+            @Nullable List<ResourcesLoader> loaders) {
         try {
             Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, "ResourcesManager#getResources");
             final ResourcesKey key = new ResourcesKey(
@@ -881,9 +890,15 @@ public class ResourcesManager {
                     libDirs,
                     displayId,
                     overrideConfig != null ? new Configuration(overrideConfig) : null, // Copy
-                    compatInfo);
+                    compatInfo,
+                    loaders == null ? null : loaders.toArray(new ResourcesLoader[0]));
             classLoader = classLoader != null ? classLoader : ClassLoader.getSystemClassLoader();
-            return getOrCreateResources(activityToken, key, classLoader);
+
+            if (activityToken != null) {
+                rebaseKeyForActivity(activityToken, key);
+            }
+
+            return createResources(activityToken, key, classLoader);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
@@ -891,10 +906,10 @@ public class ResourcesManager {
 
     /**
      * Updates an Activity's Resources object with overrideConfig. The Resources object
-     * that was previously returned by
-     * {@link #getResources(IBinder, String, String[], String[], String[], int, Configuration,
-     * CompatibilityInfo, ClassLoader)} is
-     * still valid and will have the updated configuration.
+     * that was previously returned by {@link #getResources(IBinder, String, String[], String[],
+     * String[], int, Configuration, CompatibilityInfo, ClassLoader, List)} is still valid and will
+     * have the updated configuration.
+     *
      * @param activityToken The Activity token.
      * @param overrideConfig The configuration override to update.
      * @param displayId Id of the display where activity currently resides.
@@ -939,71 +954,98 @@ public class ResourcesManager {
                             here);
                 }
 
-                final boolean activityHasOverrideConfig =
-                        !activityResources.overrideConfig.equals(Configuration.EMPTY);
 
                 // Rebase each Resources associated with this Activity.
                 final int refCount = activityResources.activityResources.size();
                 for (int i = 0; i < refCount; i++) {
-                    WeakReference<Resources> weakResRef = activityResources.activityResources.get(
-                            i);
-                    Resources resources = weakResRef.get();
+                    final WeakReference<Resources> weakResRef =
+                            activityResources.activityResources.get(i);
+
+                    final Resources resources = weakResRef.get();
                     if (resources == null) {
                         continue;
                     }
 
-                    // Extract the ResourcesKey that was last used to create the Resources for this
-                    // activity.
-                    final ResourcesKey oldKey = findKeyForResourceImplLocked(resources.getImpl());
-                    if (oldKey == null) {
-                        Slog.e(TAG, "can't find ResourcesKey for resources impl="
-                                + resources.getImpl());
-                        continue;
-                    }
-
-                    // Build the new override configuration for this ResourcesKey.
-                    final Configuration rebasedOverrideConfig = new Configuration();
-                    if (overrideConfig != null) {
-                        rebasedOverrideConfig.setTo(overrideConfig);
-                    }
-
-                    if (activityHasOverrideConfig && oldKey.hasOverrideConfiguration()) {
-                        // Generate a delta between the old base Activity override configuration and
-                        // the actual final override configuration that was used to figure out the
-                        // real delta this Resources object wanted.
-                        Configuration overrideOverrideConfig = Configuration.generateDelta(
-                                oldConfig, oldKey.mOverrideConfiguration);
-                        rebasedOverrideConfig.updateFrom(overrideOverrideConfig);
-                    }
-
-                    // Create the new ResourcesKey with the rebased override config.
-                    final ResourcesKey newKey = new ResourcesKey(oldKey.mResDir,
-                            oldKey.mSplitResDirs,
-                            oldKey.mOverlayDirs, oldKey.mLibDirs, displayId,
-                            rebasedOverrideConfig, oldKey.mCompatInfo);
-
-                    if (DEBUG) {
-                        Slog.d(TAG, "rebasing ref=" + resources + " from oldKey=" + oldKey
-                                + " to newKey=" + newKey + ", displayId=" + displayId);
-                    }
-
-                    ResourcesImpl resourcesImpl = findResourcesImplForKeyLocked(newKey);
-                    if (resourcesImpl == null) {
-                        resourcesImpl = createResourcesImpl(newKey);
-                        if (resourcesImpl != null) {
-                            mResourceImpls.put(newKey, new WeakReference<>(resourcesImpl));
-                        }
-                    }
-
-                    if (resourcesImpl != null && resourcesImpl != resources.getImpl()) {
-                        // Set the ResourcesImpl, updating it for all users of this Resources
-                        // object.
-                        resources.setImpl(resourcesImpl);
+                    final ResourcesKey newKey = rebaseActivityOverrideConfig(resources, oldConfig,
+                            overrideConfig, displayId);
+                    if (newKey != null) {
+                        updateActivityResources(resources, newKey, false);
                     }
                 }
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+        }
+    }
+
+    /**
+     * Rebases an updated override config over any old override config and returns the new one
+     * that an Activity's Resources should be set to.
+     */
+    @Nullable
+    private ResourcesKey rebaseActivityOverrideConfig(@NonNull Resources resources,
+            @NonNull Configuration oldOverrideConfig, @Nullable Configuration newOverrideConfig,
+            int displayId) {
+        // Extract the ResourcesKey that was last used to create the Resources for this
+        // activity.
+        final ResourcesKey oldKey = findKeyForResourceImplLocked(resources.getImpl());
+        if (oldKey == null) {
+            Slog.e(TAG, "can't find ResourcesKey for resources impl="
+                    + resources.getImpl());
+            return null;
+        }
+
+        // Build the new override configuration for this ResourcesKey.
+        final Configuration rebasedOverrideConfig = new Configuration();
+        if (newOverrideConfig != null) {
+            rebasedOverrideConfig.setTo(newOverrideConfig);
+        }
+
+        final boolean hadOverrideConfig = !oldOverrideConfig.equals(Configuration.EMPTY);
+        if (hadOverrideConfig && oldKey.hasOverrideConfiguration()) {
+            // Generate a delta between the old base Activity override configuration and
+            // the actual final override configuration that was used to figure out the
+            // real delta this Resources object wanted.
+            Configuration overrideOverrideConfig = Configuration.generateDelta(
+                    oldOverrideConfig, oldKey.mOverrideConfiguration);
+            rebasedOverrideConfig.updateFrom(overrideOverrideConfig);
+        }
+
+        // Create the new ResourcesKey with the rebased override config.
+        final ResourcesKey newKey = new ResourcesKey(oldKey.mResDir,
+                oldKey.mSplitResDirs, oldKey.mOverlayDirs, oldKey.mLibDirs,
+                displayId, rebasedOverrideConfig, oldKey.mCompatInfo, oldKey.mLoaders);
+
+        if (DEBUG) {
+            Slog.d(TAG, "rebasing ref=" + resources + " from oldKey=" + oldKey
+                    + " to newKey=" + newKey + ", displayId=" + displayId);
+        }
+
+        return newKey;
+    }
+
+    private void updateActivityResources(Resources resources, ResourcesKey newKey,
+            boolean hasLoader) {
+        final ResourcesImpl resourcesImpl;
+
+        if (hasLoader) {
+            // Loaders always get new Impls because they cannot be shared
+            resourcesImpl = createResourcesImpl(newKey);
+        } else {
+            resourcesImpl = findOrCreateResourcesImplForKeyLocked(newKey);
+        }
+
+        if (resourcesImpl != null && resourcesImpl != resources.getImpl()) {
+            // Set the ResourcesImpl, updating it for all users of this Resources
+            // object.
+            resources.setImpl(resourcesImpl);
+        }
+    }
+
+    public final boolean applyConfigurationToResources(@NonNull Configuration config,
+            @Nullable CompatibilityInfo compat) {
+        synchronized(this) {
+            return applyConfigurationToResourcesLocked(config, compat);
         }
     }
 
@@ -1037,51 +1079,15 @@ public class ResourcesManager {
             ApplicationPackageManager.configurationChanged();
             //Slog.i(TAG, "Configuration changed in " + currentPackageName());
 
-            Configuration tmpConfig = null;
+            Configuration tmpConfig = new Configuration();
 
             for (int i = mResourceImpls.size() - 1; i >= 0; i--) {
                 ResourcesKey key = mResourceImpls.keyAt(i);
                 WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
                 ResourcesImpl r = weakImplRef != null ? weakImplRef.get() : null;
                 if (r != null) {
-                    if (DEBUG || DEBUG_CONFIGURATION) Slog.v(TAG, "Changing resources "
-                            + r + " config to: " + config);
-                    int displayId = key.mDisplayId;
-                    boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
-                    DisplayMetrics dm = defaultDisplayMetrics;
-                    final boolean hasOverrideConfiguration = key.hasOverrideConfiguration();
-                    if (!isDefaultDisplay || hasOverrideConfiguration) {
-                        if (tmpConfig == null) {
-                            tmpConfig = new Configuration();
-                        }
-                        tmpConfig.setTo(config);
-
-                        // Get new DisplayMetrics based on the DisplayAdjustments given
-                        // to the ResourcesImpl. Update a copy if the CompatibilityInfo
-                        // changed, because the ResourcesImpl object will handle the
-                        // update internally.
-                        DisplayAdjustments daj = r.getDisplayAdjustments();
-                        if (compat != null) {
-                            daj = new DisplayAdjustments(daj);
-                            daj.setCompatibilityInfo(compat);
-                        }
-                        dm = getDisplayMetrics(displayId, daj);
-
-                        if (!isDefaultDisplay) {
-                            applyNonDefaultDisplayMetricsToConfiguration(dm, tmpConfig);
-                        }
-
-                        if (hasOverrideConfiguration) {
-                            tmpConfig.updateFrom(key.mOverrideConfiguration);
-                        }
-                        r.updateConfiguration(tmpConfig, dm, compat);
-                    } else {
-                        r.updateConfiguration(config, dm, compat);
-                    }
-                    //Slog.i(TAG, "Updated app resources " + v.getKey()
-                    //        + " " + r + ": " + r.getConfiguration());
+                    applyConfigurationToResourcesLocked(config, compat, tmpConfig, key, r);
                 } else {
-                    //Slog.i(TAG, "Removing old resources " + v.getKey());
                     mResourceImpls.removeAt(i);
                 }
             }
@@ -1090,6 +1096,51 @@ public class ResourcesManager {
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
+    }
+
+    private void applyConfigurationToResourcesLocked(@NonNull Configuration config,
+            @Nullable CompatibilityInfo compat, Configuration tmpConfig,
+            ResourcesKey key, ResourcesImpl resourcesImpl) {
+        if (DEBUG || DEBUG_CONFIGURATION) {
+            Slog.v(TAG, "Changing resources "
+                    + resourcesImpl + " config to: " + config);
+        }
+
+        tmpConfig.setTo(config);
+
+        // Apply the override configuration before setting the display adjustments to ensure that
+        // the process config does not override activity display adjustments.
+        final boolean hasOverrideConfiguration = key.hasOverrideConfiguration();
+        if (hasOverrideConfiguration) {
+            tmpConfig.updateFrom(key.mOverrideConfiguration);
+        }
+
+        // Get new DisplayMetrics based on the DisplayAdjustments given to the ResourcesImpl. Update
+        // a copy if the CompatibilityInfo changed, because the ResourcesImpl object will handle the
+        // update internally.
+        DisplayAdjustments daj = resourcesImpl.getDisplayAdjustments();
+        if (compat != null) {
+            daj = new DisplayAdjustments(daj);
+            daj.setCompatibilityInfo(compat);
+        }
+
+        final int displayId = key.mDisplayId;
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            daj.setConfiguration(tmpConfig);
+        }
+        DisplayMetrics dm = getDisplayMetrics(displayId, daj);
+        if (displayId != Display.DEFAULT_DISPLAY) {
+            applyNonDefaultDisplayMetricsToConfiguration(dm, tmpConfig);
+
+            // Re-apply the override configuration to ensure that configuration contexts based on
+            // a display context (ex: createDisplayContext().createConfigurationContext()) have the
+            // correct override.
+            if (hasOverrideConfiguration) {
+                tmpConfig.updateFrom(key.mOverrideConfiguration);
+            }
+        }
+
+        resourcesImpl.updateConfiguration(tmpConfig, dm, compat);
     }
 
     /**
@@ -1127,7 +1178,7 @@ public class ResourcesManager {
                                 ArrayUtils.appendElement(String.class, newLibAssets, libAsset);
                     }
 
-                    if (newLibAssets != key.mLibDirs) {
+                    if (!Arrays.equals(newLibAssets, key.mLibDirs)) {
                         updatedResourceKeys.put(impl, new ResourcesKey(
                                 key.mResDir,
                                 key.mSplitResDirs,
@@ -1135,7 +1186,8 @@ public class ResourcesManager {
                                 newLibAssets,
                                 key.mDisplayId,
                                 key.mOverrideConfiguration,
-                                key.mCompatInfo));
+                                key.mCompatInfo,
+                                key.mLoaders));
                     }
                 }
             }
@@ -1183,7 +1235,8 @@ public class ResourcesManager {
                             key.mLibDirs,
                             key.mDisplayId,
                             key.mOverrideConfiguration,
-                            key.mCompatInfo
+                            key.mCompatInfo,
+                            key.mLoaders
                     ));
                 }
             }
@@ -1235,6 +1288,93 @@ public class ResourcesManager {
                         r.setImpl(impl);
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Overrides the display adjustments of all resources which are associated with the given token.
+     *
+     * @param token The token that owns the resources.
+     * @param override The operation to override the existing display adjustments. If it is null,
+     *                 the override adjustments will be cleared.
+     * @return {@code true} if the override takes effect.
+     */
+    public boolean overrideTokenDisplayAdjustments(IBinder token,
+            @Nullable Consumer<DisplayAdjustments> override) {
+        boolean handled = false;
+        synchronized (this) {
+            final ActivityResources tokenResources = mActivityResourceReferences.get(token);
+            if (tokenResources == null) {
+                return false;
+            }
+            final ArrayList<WeakReference<Resources>> resourcesRefs =
+                    tokenResources.activityResources;
+            for (int i = resourcesRefs.size() - 1; i >= 0; i--) {
+                final Resources res = resourcesRefs.get(i).get();
+                if (res != null) {
+                    res.overrideDisplayAdjustments(override);
+                    handled = true;
+                }
+            }
+        }
+        return handled;
+    }
+
+    private class UpdateHandler implements Resources.UpdateCallbacks {
+
+        /**
+         * Updates the list of {@link ResourcesLoader ResourcesLoader(s)} that the {@code resources}
+         * instance uses.
+         */
+        @Override
+        public void onLoadersChanged(@NonNull Resources resources,
+                @NonNull List<ResourcesLoader> newLoader) {
+            synchronized (ResourcesManager.this) {
+                final ResourcesKey oldKey = findKeyForResourceImplLocked(resources.getImpl());
+                if (oldKey == null) {
+                    throw new IllegalArgumentException("Cannot modify resource loaders of"
+                            + " ResourcesImpl not registered with ResourcesManager");
+                }
+
+                final ResourcesKey newKey = new ResourcesKey(
+                        oldKey.mResDir,
+                        oldKey.mSplitResDirs,
+                        oldKey.mOverlayDirs,
+                        oldKey.mLibDirs,
+                        oldKey.mDisplayId,
+                        oldKey.mOverrideConfiguration,
+                        oldKey.mCompatInfo,
+                        newLoader.toArray(new ResourcesLoader[0]));
+
+                final ResourcesImpl impl = findOrCreateResourcesImplForKeyLocked(newKey);
+                resources.setImpl(impl);
+            }
+        }
+
+        /**
+         * Refreshes the {@link AssetManager} of all {@link ResourcesImpl} that contain the
+         * {@code loader} to apply any changes of the set of {@link ApkAssets}.
+         **/
+        @Override
+        public void onLoaderUpdated(@NonNull ResourcesLoader loader) {
+            synchronized (ResourcesManager.this) {
+                final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceImplKeys =
+                        new ArrayMap<>();
+
+                for (int i = mResourceImpls.size() - 1; i >= 0; i--) {
+                    final ResourcesKey key = mResourceImpls.keyAt(i);
+                    final WeakReference<ResourcesImpl> impl = mResourceImpls.valueAt(i);
+                    if (impl == null || impl.get() == null
+                            || !ArrayUtils.contains(key.mLoaders, loader)) {
+                        continue;
+                    }
+
+                    mResourceImpls.remove(key);
+                    updatedResourceImplKeys.put(impl.get(), key);
+                }
+
+                redirectResourcesToNewImplLocked(updatedResourceImplKeys);
             }
         }
     }

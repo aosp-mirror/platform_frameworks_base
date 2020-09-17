@@ -59,6 +59,7 @@ import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -81,6 +82,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
+@FlakyTest
 public class SuspendPackagesTest {
     private static final String TAG = SuspendPackagesTest.class.getSimpleName();
     private static final String TEST_APP_LABEL = "Suspend Test App";

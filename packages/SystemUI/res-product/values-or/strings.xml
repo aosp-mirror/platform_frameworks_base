@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="dock_alignment_slow_charging" product="default" msgid="6997633396534416792">"ଶୀଘ୍ର ଚାର୍ଜିଂ ପାଇଁ ଫୋନ୍‌କୁ ଠିକ୍ ଭାବରେ ରଖନ୍ତୁ"</string>
+    <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"ୱାୟାର୍‌ଲେସ୍ ଭାବେ ଚାର୍ଜ କରିବାକୁ ଫୋନ୍‌କୁ ଠିକ୍ ଭାବରେ ରଖନ୍ତୁ"</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV ଡିଭାଇସ୍ ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯିବ; ଏହା ଚାଲୁ ରଖିବା ପାଇଁ ଏକ ବଟନ୍ ଦବାନ୍ତୁ।"</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"ଡିଭାଇସ୍‌ଟି ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯିବ; ଏହାକୁ ଚାଲୁ ରଖିବା ପାଇଁ ଦବାନ୍ତୁ।"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"ଟାବ୍‌ଲେଟ୍‌ରେ କୌଣସି SIM କାର୍ଡ ନାହିଁ।"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"ଫୋନ୍‌ରେ କୌଣସି SIM କାର୍ଡ ନାହିଁ।"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"PIN କୋଡ୍‌ଗୁଡ଼ିକ ମେଳ ଖାଉନାହିଁ"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"ଆପଣ ଟାବ୍‌ଲେଟ୍‌କୁ ଅନ୍‌ଲକ୍ କରିବାକୁ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ପ୍ରୟାସ କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ୍ ପ୍ରୟାସ ପରେ, ଏହି ଟାବ୍‌ଲେଟ୍‌କୁ ରିସେଟ୍ କରିଦିଆଯିବ, ଯାହାଦ୍ୱାରା ଏହାର ସମସ୍ତ ଡାଟା ଡିଲିଟ୍ ହେବ।"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"ଆପଣ ଫୋନ୍‌କୁ ଅନ୍‌ଲକ୍ କରିବାକୁ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ପ୍ରୟାସ କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ୍ ପ୍ରୟାସ ପରେ, ଏହି ଫୋନ୍‌କୁ ରିସେଟ୍ କରିଦିଆଯିବ, ଯାହାଦ୍ୱାରା ଏହାର ସମସ୍ତ ଡାଟା ଡିଲିଟ୍ ହେବ।"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="8710104080409538587">"ଆପଣ ଟାବ୍‌ଲେଟ୍‌କୁ ଅନ୍‌ଲକ୍ କରିବାକୁ <xliff:g id="NUMBER">%d</xliff:g>ଥର ଭୁଲ ପ୍ରୟାସ କରିଛନ୍ତି। ଏହି ଟାବ୍‌ଲେଟ୍‌ଟି ରିସେଟ୍ କରିଦିଆଯିବ, ଫଳରେ ଏହାର ସମସ୍ତ ଡାଟା ଡିଲିଟ୍ ହେବ।"</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="6381835450014881813">"ଆପଣ ଫୋନ୍‌କୁ ଅନ୍‌ଲକ୍ କରିବାକୁ <xliff:g id="NUMBER">%d</xliff:g>ଥର ଭୁଲ ପ୍ରୟାସ କରିଛନ୍ତି। ଏହି ଫୋନ୍‌ଟି ରିସେଟ୍ କରିଦିଆଯିବ, ଫଳରେ ଏହାର ସମସ୍ତ ଡାଟା ଡିଲିଟ୍ ହେବ।"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="7325071812832605911">"ଆପଣ ଟାବ୍‌ଲେଟ୍‌କୁ ଅନ୍‌ଲକ୍ କରିବାକୁ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ପ୍ରୟାସ କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ୍ ପ୍ରୟାସ ପରେ, ଏହି ଉପଯୋଗକର୍ତ୍ତା ପ୍ରୋଫାଇଲ୍‌କୁ କାଢ଼ିଦିଆଯିବ, ଯାହା ଫଳରେ ସମସ୍ତ ଉପଯୋଗକର୍ତ୍ତା ଡାଟା ଡିଲିଟ୍ ହେବ।"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="8110939900089863103">"ଆପଣ ଫୋନ୍‌କୁ ଅନ୍‌ଲକ୍ କରିବାକୁ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ପ୍ରୟାସ କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ୍ ପ୍ରୟାସ ପରେ, ଏହି ଉପଯୋଗକର୍ତ୍ତା ପ୍ରୋଫାଇଲ୍‌କୁ କାଢ଼ିଦିଆଯିବ, ଯାହା ଫଳରେ ସମସ୍ତ ଉପଯୋଗକର୍ତ୍ତା ଡାଟା ଡିଲିଟ୍ ହେବ।"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="8509811676952707883">"ଆପଣ ଟାବ୍‌ଲେଟ୍‌କୁ ଅନ୍‌ଲକ୍ କରିବାକୁ <xliff:g id="NUMBER">%d</xliff:g>ଥର ଭୁଲ ପ୍ରୟାସ କରିଛନ୍ତି। ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ବାହାର କରିଦିଆଯିବ, ଯାହାଦ୍ୱାରା ସମସ୍ତ ଉପଯୋଗକର୍ତ୍ତା ଡାଟା ଡିଲିଟ୍ ହେବ।"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3051962486994265014">"ଆପଣ ଫୋନ୍‌କୁ ଅନ୍‌ଲକ୍ କରିବାକୁ <xliff:g id="NUMBER">%d</xliff:g>ଥର ଭୁଲ୍ ପ୍ରୟାସ କରିଛନ୍ତି। ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ବାହାର କରିଦିଆଯିବ, ଯାହାଦ୍ୱାରା ସମସ୍ତ ଉପଯୋଗକର୍ତ୍ତା ଡାଟା ଡିଲିଟ୍ ହେବ।"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="1049523640263353830">"ଆପଣ ଟାବ୍‌ଲେଟ୍‌କୁ ଅନ୍‌ଲକ୍ କରିବାକୁ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ପ୍ରୟାସ କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ୍ ପ୍ରୟାସ ପରେ, ୱାର୍କ ପ୍ରୋଫାଇଲ୍‌କୁ ବାହାର କରିଦିଆଯିବ, ଯାହା ଫଳରେ ସମସ୍ତ ପ୍ରୋଫାଇଲ୍ ଡାଟା ଡିଲିଟ୍ ହେବ।"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="3280816298678433681">"ଆପଣ ଫୋନ୍‌କୁ ଅନ୍‌ଲକ୍ କରିବାକୁ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ପ୍ରୟାସ କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ୍ ପ୍ରୟାସ ପରେ, ୱାର୍କ ପ୍ରୋଫାଇଲ୍‌କୁ ବାହାର କରିଦିଆଯିବ, ଯାହା ଫଳରେ ସମସ୍ତ ପ୍ରୋଫାଇଲ୍ ଡାଟା ଡିଲିଟ୍ ହେବ।"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4417100487251371559">"ଆପଣ ଟାବ୍‌ଲେଟ୍‌କୁ ଅନ୍‌ଲକ୍ କରିବାକୁ<xliff:g id="NUMBER">%d</xliff:g>ଥର ଭୁଲ ପ୍ରୟାସ କରିଛନ୍ତି। କାର୍ଯ୍ୟ ପ୍ରୋଫାଇଲ୍ ବାହାର କରିଦିଆଯିବ, ଯାହା ଫଳରେ ସମସ୍ତ ପ୍ରୋଫାଇଲ୍ ଡାଟା ଡିଲିଟ୍ ହେବ।"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"ଆପଣ ଫୋନ୍‌କୁ ଅନ୍‌ଲକ୍ କରିବାକୁ<xliff:g id="NUMBER">%d</xliff:g>ଥର ଭୁଲ ପ୍ରୟାସ କରିଛନ୍ତି। କାର୍ଯ୍ୟ ପ୍ରୋଫାଇଲ୍ ବାହାର କରିଦିଆଯିବ, ଯାହା ଫଳରେ ସମସ୍ତ ପ୍ରୋଫାଇଲ୍ ଡାଟା ଡିଲିଟ୍ ହେବ।"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"ଆପଣ ଆପଣଙ୍କ ଅନ୍‌ଲକ୍ ପାଟର୍ନକୁ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ଭାବେ ଡ୍ର କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ ପ୍ରୟାସ ପରେ ଆପଣଙ୍କୁ ଏକ ଇମେଲ୍ ଆକାଉଣ୍ଟ ବ୍ୟବହାର କରି ଆପଣଙ୍କ ଟାବ୍‌ଲୋଟ୍‌କୁ ଅନ୍‌ଲକ୍ କରିବା ପାଇଁ କୁହାଯିବ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"ଆପଣ ଆପଣଙ୍କ ଅନ୍‌ଲକ୍ ପାଟର୍ନକୁ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ଭାବେ ଡ୍ର କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ ପ୍ରୟାସ ପରେ ଆପଣଙ୍କୁ ଏକ ଇମେଲ୍ ଆକାଉଣ୍ଟ ବ୍ୟବହାର କରି ଆପଣଙ୍କ ଫୋନ୍‌କୁ ଅନ୍‌ଲକ୍‌ କରିବା ପାଇଁ କୁହାଯିବ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଆପଣଙ୍କ ଫୋନ୍ ଅନଲକ୍ କରନ୍ତୁ"</string>
+    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଆପଣଙ୍କ ଟାବଲେଟ୍ ଅନଲକ୍ କରନ୍ତୁ"</string>
+    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଆପଣଙ୍କ ଡିଭାଇସ୍ ଅନଲକ୍ କରନ୍ତୁ"</string>
+</resources>

@@ -39,7 +39,6 @@
     <bool name="def_bluetooth_on">true</bool>
     <bool name="def_wifi_display_on">false</bool>
     <bool name="def_install_non_market_apps">false</bool>
-    <bool name="def_package_verifier_enable">true</bool>
     <!-- 0 == off, 3 == on -->
     <integer name="def_location_mode">3</integer>
     <bool name="assisted_gps_enabled">true</bool>
@@ -225,7 +224,7 @@
     <bool name="def_charging_sounds_enabled">true</bool>
 
     <!-- Default for Settings.Secure.NOTIFICATION_BUBBLES -->
-    <bool name="def_notification_bubbles">false</bool>
+    <bool name="def_notification_bubbles">true</bool>
 
     <!-- Default for Settings.Secure.AWARE_ENABLED -->
     <bool name="def_aware_enabled">false</bool>
@@ -238,4 +237,7 @@
 
     <!-- Default for Settings.Secure.AWARE_LOCK_ENABLED -->
     <bool name="def_aware_lock_enabled">false</bool>
+
+    <!-- Default for setting for Settings.Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED -->
+    <bool name="def_hdmiControlAutoDeviceOff">false</bool>
 </resources>

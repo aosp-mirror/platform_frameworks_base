@@ -109,7 +109,7 @@ public class PasswordSlotManager {
     public void markSlotInUse(int slot) throws RuntimeException {
         ensureSlotMapLoaded();
         if (mSlotMap.containsKey(slot) && !mSlotMap.get(slot).equals(getMode())) {
-            throw new RuntimeException("password slot " + slot + " is not available");
+            throw new IllegalStateException("password slot " + slot + " is not available");
         }
         mSlotMap.put(slot, getMode());
         saveSlotMap();
@@ -123,7 +123,7 @@ public class PasswordSlotManager {
     public void markSlotDeleted(int slot) throws RuntimeException {
         ensureSlotMapLoaded();
         if (mSlotMap.containsKey(slot) && !mSlotMap.get(slot).equals(getMode())) {
-            throw new RuntimeException("password slot " + slot + " cannot be deleted");
+            throw new IllegalStateException("password slot " + slot + " cannot be deleted");
         }
         mSlotMap.remove(slot);
         saveSlotMap();

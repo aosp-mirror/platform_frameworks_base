@@ -14,7 +14,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.SysUiServiceProvider.getComponent;
 import static com.android.systemui.statusbar.phone.StatusBar.CLOSE_PANEL_WHEN_EMPTIED;
 import static com.android.systemui.statusbar.phone.StatusBar.DEBUG;
 import static com.android.systemui.statusbar.phone.StatusBar.MULTIUSER_DEBUG;
@@ -23,7 +22,6 @@ import static com.android.systemui.statusbar.phone.StatusBar.SPEW;
 import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.service.notification.StatusBarNotification;
@@ -50,6 +48,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -60,36 +59,37 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
+import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class StatusBarNotificationPresenter implements NotificationPresenter,
         ConfigurationController.ConfigurationListener,
-        NotificationRowBinderImpl.BindRowCallback {
+        NotificationRowBinderImpl.BindRowCallback,
+        CommandQueue.Callbacks {
 
     private final LockscreenGestureLogger mLockscreenGestureLogger =
             Dependency.get(LockscreenGestureLogger.class);
 
     private static final String TAG = "StatusBarNotificationPresenter";
 
-    private final ShadeController mShadeController = Dependency.get(ShadeController.class);
     private final ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
-    private final KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+    private final KeyguardStateController mKeyguardStateController;
     private final NotificationViewHierarchyManager mViewHierarchyManager =
             Dependency.get(NotificationViewHierarchyManager.class);
     private final NotificationLockscreenUserManager mLockscreenUserManager =
@@ -98,8 +98,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             (SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class);
     private final NotificationEntryManager mEntryManager =
             Dependency.get(NotificationEntryManager.class);
-    private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider =
-            Dependency.get(NotificationInterruptionStateProvider.class);
     private final NotificationMediaManager mMediaManager =
             Dependency.get(NotificationMediaManager.class);
     private final VisualStabilityManager mVisualStabilityManager =
@@ -107,12 +105,15 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private final NotificationGutsManager mGutsManager =
             Dependency.get(NotificationGutsManager.class);
 
-    private final NotificationPanelView mNotificationPanel;
+    private final NotificationPanelViewController mNotificationPanel;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final AboveShelfObserver mAboveShelfObserver;
     private final DozeScrimController mDozeScrimController;
     private final ScrimController mScrimController;
     private final Context mContext;
+    private final KeyguardIndicationController mKeyguardIndicationController;
+    private final StatusBar mStatusBar;
+    private final ShadeController mShadeController;
     private final CommandQueue mCommandQueue;
 
     private final AccessibilityManager mAccessibilityManager;
@@ -123,28 +124,37 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private final DynamicPrivacyController mDynamicPrivacyController;
     private boolean mReinflateNotificationsOnUserSwitched;
     private boolean mDispatchUiModeChangeOnUserSwitched;
-    private final UnlockMethodCache mUnlockMethodCache;
     private TextView mNotificationPanelDebugText;
 
     protected boolean mVrMode;
     private int mMaxKeyguardNotifications;
 
     public StatusBarNotificationPresenter(Context context,
-            NotificationPanelView panel,
+            NotificationPanelViewController panel,
             HeadsUpManagerPhone headsUp,
-            StatusBarWindowView statusBarWindow,
+            NotificationShadeWindowView statusBarWindow,
             ViewGroup stackScroller,
             DozeScrimController dozeScrimController,
             ScrimController scrimController,
             ActivityLaunchAnimator activityLaunchAnimator,
             DynamicPrivacyController dynamicPrivacyController,
-            NotificationAlertingManager notificationAlertingManager,
-            NotificationRowBinderImpl notificationRowBinder) {
+            KeyguardStateController keyguardStateController,
+            KeyguardIndicationController keyguardIndicationController,
+            StatusBar statusBar,
+            ShadeController shadeController,
+            CommandQueue commandQueue,
+            InitController initController,
+            NotificationInterruptStateProvider notificationInterruptStateProvider) {
         mContext = context;
+        mKeyguardStateController = keyguardStateController;
         mNotificationPanel = panel;
         mHeadsUpManager = headsUp;
         mDynamicPrivacyController = dynamicPrivacyController;
-        mCommandQueue = getComponent(context, CommandQueue.class);
+        mKeyguardIndicationController = keyguardIndicationController;
+        // TODO: use KeyguardStateController#isOccluded to remove this dependency
+        mStatusBar = statusBar;
+        mShadeController = shadeController;
+        mCommandQueue = commandQueue;
         mAboveShelfObserver = new AboveShelfObserver(stackScroller);
         mActivityLaunchAnimator = activityLaunchAnimator;
         mAboveShelfObserver.setListener(statusBarWindow.findViewById(
@@ -152,7 +162,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mDozeScrimController = dozeScrimController;
         mScrimController = scrimController;
-        mUnlockMethodCache = UnlockMethodCache.getInstance(mContext);
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mMaxAllowedKeyguardNotifications = context.getResources().getInteger(
                 R.integer.keyguard_max_notification_count);
@@ -160,7 +169,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
         if (MULTIUSER_DEBUG) {
-            mNotificationPanelDebugText = mNotificationPanel.findViewById(R.id.header_debug_info);
+            mNotificationPanelDebugText = mNotificationPanel.getHeaderDebugInfo();
             mNotificationPanelDebugText.setVisibility(View.VISIBLE);
         }
 
@@ -179,29 +188,19 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 Dependency.get(NotificationRemoteInputManager.Callback.class),
                 mNotificationPanel.createRemoteInputDelegate());
         remoteInputManager.getController().addCallback(
-                Dependency.get(StatusBarWindowController.class));
+                Dependency.get(NotificationShadeWindowController.class));
 
         NotificationListContainer notifListContainer = (NotificationListContainer) stackScroller;
-        Dependency.get(InitController.class).addPostInitTask(() -> {
+        initController.addPostInitTask(() -> {
             NotificationEntryListener notificationEntryListener = new NotificationEntryListener() {
-                @Override
-                public void onNotificationAdded(NotificationEntry entry) {
-                    // Recalculate the position of the sliding windows and the titles.
-                    mShadeController.updateAreThereNotifications();
-                }
-
-                @Override
-                public void onPostEntryUpdated(NotificationEntry entry) {
-                    mShadeController.updateAreThereNotifications();
-                }
-
                 @Override
                 public void onEntryRemoved(
                         @Nullable NotificationEntry entry,
                         NotificationVisibility visibility,
-                        boolean removedByUser) {
+                        boolean removedByUser,
+                        int reason) {
                     StatusBarNotificationPresenter.this.onNotificationRemoved(
-                            entry.key, entry.notification);
+                            entry.getKey(), entry.getSbn());
                     if (removedByUser) {
                         maybeEndAmbientPulse();
                     }
@@ -209,16 +208,13 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             };
 
             mViewHierarchyManager.setUpWithPresenter(this, notifListContainer);
-            mEntryManager.setUpWithPresenter(this, notifListContainer, mHeadsUpManager);
+            mEntryManager.setUpWithPresenter(this);
             mEntryManager.addNotificationEntryListener(notificationEntryListener);
             mEntryManager.addNotificationLifetimeExtender(mHeadsUpManager);
             mEntryManager.addNotificationLifetimeExtender(mGutsManager);
             mEntryManager.addNotificationLifetimeExtenders(
                     remoteInputManager.getLifetimeExtenders());
-            notificationRowBinder.setUpWithPresenter(this, notifListContainer, mHeadsUpManager,
-                    mEntryManager, this);
-            mNotificationInterruptionStateProvider.setUpWithPresenter(
-                    this, mHeadsUpManager, this::canHeadsUp);
+            notificationInterruptStateProvider.addSuppressor(mInterruptSuppressor);
             mLockscreenUserManager.setUpWithPresenter(this);
             mMediaManager.setUpWithPresenter(this);
             mVisualStabilityManager.setUpWithPresenter(this);
@@ -232,15 +228,13 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             onUserSwitched(mLockscreenUserManager.getCurrentUserId());
         });
         Dependency.get(ConfigurationController.class).addCallback(this);
-
-        notificationAlertingManager.setHeadsUpManager(mHeadsUpManager);
     }
 
     @Override
     public void onDensityOrFontScaleChanged() {
         MessagingMessage.dropCache();
         MessagingGroup.dropCache();
-        if (!KeyguardUpdateMonitor.getInstance(mContext).isSwitchingUser()) {
+        if (!Dependency.get(KeyguardUpdateMonitor.class).isSwitchingUser()) {
             updateNotificationsOnDensityOrFontScaleChanged();
         } else {
             mReinflateNotificationsOnUserSwitched = true;
@@ -249,7 +243,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
 
     @Override
     public void onUiModeChanged() {
-        if (!KeyguardUpdateMonitor.getInstance(mContext).isSwitchingUser()) {
+        if (!Dependency.get(KeyguardUpdateMonitor.class).isSwitchingUser()) {
             updateNotificationOnUiModeChanged();
         } else {
             mDispatchUiModeChangeOnUserSwitched = true;
@@ -262,8 +256,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     private void updateNotificationOnUiModeChanged() {
-        ArrayList<NotificationEntry> userNotifications
-                = mEntryManager.getNotificationData().getNotificationsForCurrentUser();
+        List<NotificationEntry> userNotifications =
+                mEntryManager.getActiveNotificationsForCurrentUser();
         for (int i = 0; i < userNotifications.size(); i++) {
             NotificationEntry entry = userNotifications.get(i);
             ExpandableNotificationRow row = entry.getRow();
@@ -274,8 +268,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     private void updateNotificationsOnDensityOrFontScaleChanged() {
-        ArrayList<NotificationEntry> userNotifications =
-                mEntryManager.getNotificationData().getNotificationsForCurrentUser();
+        List<NotificationEntry> userNotifications =
+                mEntryManager.getActiveNotificationsForCurrentUser();
         for (int i = 0; i < userNotifications.size(); i++) {
             NotificationEntry entry = userNotifications.get(i);
             entry.onDensityOrFontScaleChanged();
@@ -303,20 +297,20 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     @Override
-    public void updateNotificationViews() {
+    public void updateNotificationViews(final String reason) {
         // The function updateRowStates depends on both of these being non-null, so check them here.
         // We may be called before they are set from DeviceProvisionedController's callback.
         if (mScrimController == null) return;
 
         // Do not modify the notifications during collapse.
         if (isCollapsing()) {
-            mShadeController.addPostCollapseAction(this::updateNotificationViews);
+            mShadeController.addPostCollapseAction(() -> updateNotificationViews(reason));
             return;
         }
 
         mViewHierarchyManager.updateNotificationViews();
 
-        mNotificationPanel.updateNotificationViews();
+        mNotificationPanel.updateNotificationViews(reason);
     }
 
     public void onNotificationRemoved(String key, StatusBarNotification old) {
@@ -329,48 +323,14 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                     mCommandQueue.animateCollapsePanels();
                 } else if (mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED
                         && !isCollapsing()) {
-                    mShadeController.goToKeyguard();
+                    mStatusBarStateController.setState(StatusBarState.KEYGUARD);
                 }
             }
         }
-        mShadeController.updateAreThereNotifications();
     }
 
     public boolean hasActiveNotifications() {
-        return !mEntryManager.getNotificationData().getActiveNotifications().isEmpty();
-    }
-
-    public boolean canHeadsUp(NotificationEntry entry, StatusBarNotification sbn) {
-        if (mShadeController.isOccluded()) {
-            boolean devicePublic = mLockscreenUserManager.
-                    isLockscreenPublicMode(mLockscreenUserManager.getCurrentUserId());
-            boolean userPublic = devicePublic
-                    || mLockscreenUserManager.isLockscreenPublicMode(sbn.getUserId());
-            boolean needsRedaction = mLockscreenUserManager.needsRedaction(entry);
-            if (userPublic && needsRedaction) {
-                // TODO(b/135046837): we can probably relax this with dynamic privacy
-                return false;
-            }
-        }
-
-        if (!mCommandQueue.panelsEnabled()) {
-            if (DEBUG) {
-                Log.d(TAG, "No heads up: disabled panel : " + sbn.getKey());
-            }
-            return false;
-        }
-
-        if (sbn.getNotification().fullScreenIntent != null) {
-            if (mAccessibilityManager.isTouchExplorationEnabled()) {
-                if (DEBUG) Log.d(TAG, "No heads up: accessible fullscreen: " + sbn.getKey());
-                return false;
-            } else {
-                // we only allow head-up on the lockscreen if it doesn't have a fullscreen intent
-                return !mKeyguardMonitor.isShowing()
-                        || mShadeController.isOccluded();
-            }
-        }
-        return true;
+        return mEntryManager.hasActiveNotifications();
     }
 
     @Override
@@ -388,17 +348,16 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             updateNotificationOnUiModeChanged();
             mDispatchUiModeChangeOnUserSwitched = false;
         }
-        updateNotificationViews();
+        updateNotificationViews("user switched");
         mMediaManager.clearCurrentMediaNotification();
-        mShadeController.setLockscreenUser(newUserId);
+        mStatusBar.setLockscreenUser(newUserId);
         updateMediaMetaData(true, false);
     }
 
     @Override
-    public void onBindRow(NotificationEntry entry, PackageManager pmUser,
-            StatusBarNotification sbn, ExpandableNotificationRow row) {
+    public void onBindRow(ExpandableNotificationRow row) {
         row.setAboveShelfChangedListener(mAboveShelfObserver);
-        row.setSecureStateProvider(mUnlockMethodCache::canSkipBouncer);
+        row.setSecureStateProvider(mKeyguardStateController::canDismissLockScreen);
     }
 
     @Override
@@ -416,6 +375,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         mLockscreenGestureLogger.write(
                 MetricsEvent.ACTION_LS_NOTE,
                 0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
+        mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_NOTIFICATION_FALSE_TOUCH);
         mNotificationPanel.showTransientIndication(R.string.notification_tap_again);
         ActivatableNotificationView previousView = mNotificationPanel.getActivatedChild();
         if (previousView != null) {
@@ -427,7 +387,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     public void onActivationReset(ActivatableNotificationView view) {
         if (view == mNotificationPanel.getActivatedChild()) {
             mNotificationPanel.setActivatedChild(null);
-            mShadeController.onActivationReset();
+            mKeyguardIndicationController.hideTransientIndication();
         }
     }
 
@@ -509,6 +469,68 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             } catch (RemoteException e) {
                 // if we're here we're dead
             }
+        }
+    };
+
+    private final NotificationInterruptSuppressor mInterruptSuppressor =
+            new NotificationInterruptSuppressor() {
+        @Override
+        public String getName() {
+            return TAG;
+        }
+
+        @Override
+        public boolean suppressAwakeHeadsUp(NotificationEntry entry) {
+            final StatusBarNotification sbn = entry.getSbn();
+            if (mStatusBar.isOccluded()) {
+                boolean devicePublic = mLockscreenUserManager
+                        .isLockscreenPublicMode(mLockscreenUserManager.getCurrentUserId());
+                boolean userPublic = devicePublic
+                        || mLockscreenUserManager.isLockscreenPublicMode(sbn.getUserId());
+                boolean needsRedaction = mLockscreenUserManager.needsRedaction(entry);
+                if (userPublic && needsRedaction) {
+                    // TODO(b/135046837): we can probably relax this with dynamic privacy
+                    return true;
+                }
+            }
+
+            if (!mCommandQueue.panelsEnabled()) {
+                if (DEBUG) {
+                    Log.d(TAG, "No heads up: disabled panel : " + sbn.getKey());
+                }
+                return true;
+            }
+
+            if (sbn.getNotification().fullScreenIntent != null) {
+                // we don't allow head-up on the lockscreen (unless there's a
+                // "showWhenLocked" activity currently showing)  if
+                // the potential HUN has a fullscreen intent
+                if (mKeyguardStateController.isShowing() && !mStatusBar.isOccluded()) {
+                    if (DEBUG) {
+                        Log.d(TAG, "No heads up: entry has fullscreen intent on lockscreen "
+                                + sbn.getKey());
+                    }
+                    return true;
+                }
+
+                if (mAccessibilityManager.isTouchExplorationEnabled()) {
+                    if (DEBUG) {
+                        Log.d(TAG, "No heads up: accessible fullscreen: " + sbn.getKey());
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public boolean suppressAwakeInterruptions(NotificationEntry entry) {
+            return isDeviceInVrMode();
+        }
+
+        @Override
+        public boolean suppressInterruptions(NotificationEntry entry) {
+            return mStatusBar.areNotificationAlertsDisabled();
         }
     };
 }

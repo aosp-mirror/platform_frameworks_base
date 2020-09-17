@@ -21,7 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
+import java.util.Objects;
 
 /** A class describing nano apps.
  * A nano app is a piece of executable code that can be
@@ -198,12 +198,12 @@ public class NanoApp implements Parcelable {
      *               needed Sensors
      */
     public void setNeededSensors(int[] neededSensors) {
-        Preconditions.checkNotNull(neededSensors, "neededSensors must not be null");
+        Objects.requireNonNull(neededSensors, "neededSensors must not be null");
         mNeededSensors = neededSensors;
     }
 
     public void setOutputEvents(int[] outputEvents) {
-        Preconditions.checkNotNull(outputEvents, "outputEvents must not be null");
+        Objects.requireNonNull(outputEvents, "outputEvents must not be null");
         mOutputEvents = outputEvents;
     }
 
@@ -213,7 +213,7 @@ public class NanoApp implements Parcelable {
      * @param appBinary generated events
      */
     public void setAppBinary(byte[] appBinary) {
-        Preconditions.checkNotNull(appBinary, "appBinary must not be null");
+        Objects.requireNonNull(appBinary, "appBinary must not be null");
         mAppBinary = appBinary;
     }
 

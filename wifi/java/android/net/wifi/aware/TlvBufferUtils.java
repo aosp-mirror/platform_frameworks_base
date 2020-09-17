@@ -18,8 +18,6 @@ package android.net.wifi.aware;
 
 import android.annotation.Nullable;
 
-import libcore.io.Memory;
-
 import java.nio.BufferOverflowException;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -266,7 +264,7 @@ public class TlvBufferUtils {
         public TlvConstructor putShort(int type, short data) {
             checkLength(2);
             addHeader(type, 2);
-            Memory.pokeShort(mArray, mPosition, data, mByteOrder);
+            pokeShort(mArray, mPosition, data, mByteOrder);
             mPosition += 2;
             return this;
         }
@@ -284,7 +282,7 @@ public class TlvBufferUtils {
         public TlvConstructor putInt(int type, int data) {
             checkLength(4);
             addHeader(type, 4);
-            Memory.pokeInt(mArray, mPosition, data, mByteOrder);
+            pokeInt(mArray, mPosition, data, mByteOrder);
             mPosition += 4;
             return this;
         }
@@ -349,14 +347,14 @@ public class TlvBufferUtils {
             if (mTypeSize == 1) {
                 mArray[mPosition] = (byte) type;
             } else if (mTypeSize == 2) {
-                Memory.pokeShort(mArray, mPosition, (short) type, mByteOrder);
+                pokeShort(mArray, mPosition, (short) type, mByteOrder);
             }
             mPosition += mTypeSize;
 
             if (mLengthSize == 1) {
                 mArray[mPosition] = (byte) length;
             } else if (mLengthSize == 2) {
-                Memory.pokeShort(mArray, mPosition, (short) length, mByteOrder);
+                pokeShort(mArray, mPosition, (short) length, mByteOrder);
             }
             mPosition += mLengthSize;
         }
@@ -445,7 +443,7 @@ public class TlvBufferUtils {
                 throw new IllegalArgumentException(
                         "Accesing a short from a TLV element of length " + length);
             }
-            return Memory.peekShort(mRefArray, offset, byteOrder);
+            return peekShort(mRefArray, offset, byteOrder);
         }
 
         /**
@@ -460,7 +458,7 @@ public class TlvBufferUtils {
                 throw new IllegalArgumentException(
                         "Accesing an int from a TLV element of length " + length);
             }
-            return Memory.peekInt(mRefArray, offset, byteOrder);
+            return peekInt(mRefArray, offset, byteOrder);
         }
 
         /**
@@ -590,7 +588,7 @@ public class TlvBufferUtils {
                     if (mTypeSize == 1) {
                         type = mArray[mOffset];
                     } else if (mTypeSize == 2) {
-                        type = Memory.peekShort(mArray, mOffset, mByteOrder);
+                        type = peekShort(mArray, mOffset, mByteOrder);
                     }
                     mOffset += mTypeSize;
 
@@ -598,7 +596,7 @@ public class TlvBufferUtils {
                     if (mLengthSize == 1) {
                         length = mArray[mOffset];
                     } else if (mLengthSize == 2) {
-                        length = Memory.peekShort(mArray, mOffset, mByteOrder);
+                        length = peekShort(mArray, mOffset, mByteOrder);
                     }
                     mOffset += mLengthSize;
 
@@ -661,10 +659,56 @@ public class TlvBufferUtils {
             if (lengthSize == 1) {
                 nextTlvIndex += lengthSize + array[nextTlvIndex];
             } else {
-                nextTlvIndex += lengthSize + Memory.peekShort(array, nextTlvIndex, byteOrder);
+                nextTlvIndex += lengthSize + peekShort(array, nextTlvIndex, byteOrder);
             }
         }
 
         return nextTlvIndex == array.length;
+    }
+
+    private static void pokeShort(byte[] dst, int offset, short value, ByteOrder order) {
+        if (order == ByteOrder.BIG_ENDIAN) {
+            dst[offset++] = (byte) ((value >> 8) & 0xff);
+            dst[offset  ] = (byte) ((value >> 0) & 0xff);
+        } else {
+            dst[offset++] = (byte) ((value >> 0) & 0xff);
+            dst[offset  ] = (byte) ((value >> 8) & 0xff);
+        }
+    }
+
+    private static void pokeInt(byte[] dst, int offset, int value, ByteOrder order) {
+        if (order == ByteOrder.BIG_ENDIAN) {
+            dst[offset++] = (byte) ((value >> 24) & 0xff);
+            dst[offset++] = (byte) ((value >> 16) & 0xff);
+            dst[offset++] = (byte) ((value >>  8) & 0xff);
+            dst[offset  ] = (byte) ((value >>  0) & 0xff);
+        } else {
+            dst[offset++] = (byte) ((value >>  0) & 0xff);
+            dst[offset++] = (byte) ((value >>  8) & 0xff);
+            dst[offset++] = (byte) ((value >> 16) & 0xff);
+            dst[offset  ] = (byte) ((value >> 24) & 0xff);
+        }
+    }
+
+    private static short peekShort(byte[] src, int offset, ByteOrder order) {
+        if (order == ByteOrder.BIG_ENDIAN) {
+            return (short) ((src[offset] << 8) | (src[offset + 1] & 0xff));
+        } else {
+            return (short) ((src[offset + 1] << 8) | (src[offset] & 0xff));
+        }
+    }
+
+    private static int peekInt(byte[] src, int offset, ByteOrder order) {
+        if (order == ByteOrder.BIG_ENDIAN) {
+            return ((src[offset++] & 0xff) << 24)
+                    | ((src[offset++] & 0xff) << 16)
+                    | ((src[offset++] & 0xff) <<  8)
+                    | ((src[offset  ] & 0xff) <<  0);
+        } else {
+            return ((src[offset++] & 0xff) <<  0)
+                    | ((src[offset++] & 0xff) <<  8)
+                    | ((src[offset++] & 0xff) << 16)
+                    | ((src[offset  ] & 0xff) << 24);
+        }
     }
 }

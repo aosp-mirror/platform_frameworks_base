@@ -22,9 +22,12 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.content.ContentInterface;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -37,6 +40,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VibrationEffectTest {
+    private static final float SCALE_TOLERANCE = 1e-2f;
+
     private static final String RINGTONE_URI_1 = "content://test/system/ringtone_1";
     private static final String RINGTONE_URI_2 = "content://test/system/ringtone_2";
     private static final String RINGTONE_URI_3 = "content://test/system/ringtone_3";
@@ -54,6 +59,12 @@ public class VibrationEffectTest {
             VibrationEffect.createOneShot(TEST_TIMING, VibrationEffect.DEFAULT_AMPLITUDE);
     private static final VibrationEffect TEST_WAVEFORM =
             VibrationEffect.createWaveform(TEST_TIMINGS, TEST_AMPLITUDES, -1);
+    private static final VibrationEffect TEST_COMPOSED =
+            VibrationEffect.startComposition()
+                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f, 10)
+                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0, 100)
+                    .compose();
 
     @Test
     public void getRingtones_noPrebakedRingtones() {
@@ -123,8 +134,14 @@ public class VibrationEffectTest {
 
     @Test
     public void testScaleWaveform() {
-        VibrationEffect.Waveform scaled =
-                ((VibrationEffect.Waveform) TEST_WAVEFORM).scale(1.1f, 200);
+        VibrationEffect.Waveform initial = (VibrationEffect.Waveform) TEST_WAVEFORM;
+
+        VibrationEffect.Waveform copied = initial.scale(1f, 255);
+        assertEquals(255, copied.getAmplitudes()[0]);
+        assertEquals(0, copied.getAmplitudes()[1]);
+        assertEquals(-1, copied.getAmplitudes()[2]);
+
+        VibrationEffect.Waveform scaled = initial.scale(1.1f, 200);
         assertEquals(200, scaled.getAmplitudes()[0]);
         assertEquals(0, scaled.getAmplitudes()[1]);
     }
@@ -156,6 +173,66 @@ public class VibrationEffectTest {
         }
     }
 
+    @Test
+    public void testScaleComposed() {
+        VibrationEffect.Composed initial = (VibrationEffect.Composed) TEST_COMPOSED;
+
+        VibrationEffect.Composed copied = initial.scale(1, 255);
+        assertEquals(1f, copied.getPrimitiveEffects().get(0).scale);
+        assertEquals(0.5f, copied.getPrimitiveEffects().get(1).scale);
+        assertEquals(0f, copied.getPrimitiveEffects().get(2).scale);
+
+        VibrationEffect.Composed halved = initial.scale(1, 128);
+        assertEquals(0.5f, halved.getPrimitiveEffects().get(0).scale, SCALE_TOLERANCE);
+        assertEquals(0.25f, halved.getPrimitiveEffects().get(1).scale, SCALE_TOLERANCE);
+        assertEquals(0f, halved.getPrimitiveEffects().get(2).scale);
+
+        VibrationEffect.Composed scaledUp = initial.scale(0.5f, 255);
+        assertEquals(1f, scaledUp.getPrimitiveEffects().get(0).scale); // does not scale up from 1
+        assertTrue(0.5f < scaledUp.getPrimitiveEffects().get(1).scale);
+        assertEquals(0f, scaledUp.getPrimitiveEffects().get(2).scale);
+
+        VibrationEffect.Composed restored = scaledUp.scale(2, 255);
+        assertEquals(1f, restored.getPrimitiveEffects().get(0).scale, SCALE_TOLERANCE);
+        assertEquals(0.5f, restored.getPrimitiveEffects().get(1).scale, SCALE_TOLERANCE);
+        assertEquals(0f, restored.getPrimitiveEffects().get(2).scale);
+
+        VibrationEffect.Composed scaledDown = initial.scale(2, 255);
+        assertEquals(1f, scaledDown.getPrimitiveEffects().get(0).scale, SCALE_TOLERANCE);
+        assertTrue(0.5f > scaledDown.getPrimitiveEffects().get(1).scale);
+        assertEquals(0f, scaledDown.getPrimitiveEffects().get(2).scale, SCALE_TOLERANCE);
+
+        VibrationEffect.Composed changeMax = initial.scale(1f, 51);
+        assertEquals(0.2f, changeMax.getPrimitiveEffects().get(0).scale, SCALE_TOLERANCE);
+        assertEquals(0.1f, changeMax.getPrimitiveEffects().get(1).scale, SCALE_TOLERANCE);
+        assertEquals(0f, changeMax.getPrimitiveEffects().get(2).scale);
+    }
+
+    @Test
+    public void testScaleComposedFailsWhenMaxAmplitudeAboveThreshold() {
+        try {
+            ((VibrationEffect.Composed) TEST_COMPOSED).scale(1.1f, 1000);
+            fail("Max amplitude above threshold, should throw IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testScaleAppliesSameAdjustmentsOnAllEffects() {
+        VibrationEffect.OneShot oneShot = new VibrationEffect.OneShot(TEST_TIMING, TEST_AMPLITUDE);
+        VibrationEffect.Waveform waveform = new VibrationEffect.Waveform(
+                new long[] { TEST_TIMING }, new int[]{ TEST_AMPLITUDE }, -1);
+        VibrationEffect.Composed composed =
+                (VibrationEffect.Composed) VibrationEffect.startComposition()
+                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, TEST_AMPLITUDE / 255f)
+                    .compose();
+
+        assertEquals(oneShot.scale(2f, 128).getAmplitude(),
+                waveform.scale(2f, 128).getAmplitudes()[0]);
+        assertEquals(oneShot.scale(2f, 128).getAmplitude() / 255f, // convert amplitude to scale
+                composed.scale(2f, 128).getPrimitiveEffects().get(0).scale,
+                SCALE_TOLERANCE);
+    }
 
     private Resources mockRingtoneResources() {
         return mockRingtoneResources(new String[] {
@@ -172,9 +249,22 @@ public class VibrationEffectTest {
         return mockResources;
     }
 
-    private Context mockContext(Resources r) {
-        Context ctx = mock(Context.class);
-        when(ctx.getResources()).thenReturn(r);
-        return ctx;
+    private Context mockContext(Resources resources) {
+        Context context = mock(Context.class);
+        ContentInterface contentInterface = mock(ContentInterface.class);
+        ContentResolver contentResolver = ContentResolver.wrap(contentInterface);
+
+        try {
+            // ContentResolver#uncanonicalize is final, so we need to mock the ContentInterface it
+            // delegates the call to for the tests that require matching with the mocked URIs.
+            when(contentInterface.uncanonicalize(any())).then(
+                    invocation -> invocation.getArgument(0));
+            when(context.getContentResolver()).thenReturn(contentResolver);
+            when(context.getResources()).thenReturn(resources);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+
+        return context;
     }
 }

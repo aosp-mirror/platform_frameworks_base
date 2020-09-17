@@ -15,11 +15,10 @@
  */
 package android.media;
 
+import android.annotation.NonNull;
 import android.media.MediaDrm;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -38,14 +37,46 @@ public abstract class DrmInitData {
      *
      * @param schemeUuid The DRM scheme's UUID.
      * @return The initialization data for the scheme, or null if the scheme is not supported.
+     * @deprecated Use {@link #getSchemeInitDataCount} and {@link #getSchemeInitDataAt} instead.
      */
+    @Deprecated
     public abstract SchemeInitData get(UUID schemeUuid);
+
+    /**
+     * Returns the number of {@link SchemeInitData} elements available through {@link
+     * #getSchemeInitDataAt}.
+     */
+    public int getSchemeInitDataCount() {
+        return 0;
+    }
+
+    /**
+     * Returns the {@link SchemeInitData} with the given {@code index}.
+     *
+     * @param index The index of the {@link SchemeInitData} to return.
+     * @return The {@link SchemeInitData} associated with the given {@code index}.
+     * @throws IndexOutOfBoundsException If the given {@code index} is negative or greater than
+     *         {@link #getSchemeInitDataCount}{@code - 1}.
+     */
+    @NonNull public SchemeInitData getSchemeInitDataAt(int index) {
+        throw new IndexOutOfBoundsException();
+    }
 
     /**
      * Scheme initialization data.
      */
     public static final class SchemeInitData {
 
+        /**
+         * The Nil UUID, as defined in RFC 4122, section 4.1.7.
+         */
+        @NonNull public static final UUID UUID_NIL = new UUID(0, 0);
+
+        /**
+         * The UUID associated with this scheme initialization data. May be {@link #UUID_NIL} if
+         * unknown or not applicable.
+         */
+        @NonNull public final UUID uuid;
         /**
          * The mimeType of {@link #data}.
          */
@@ -56,12 +87,14 @@ public abstract class DrmInitData {
         public final byte[] data;
 
         /**
+         * @param uuid The UUID associated with this scheme initialization data.
          * @param mimeType The mimeType of the initialization data.
          * @param data The initialization data.
          *
          * @hide
          */
-        public SchemeInitData(String mimeType, byte[] data) {
+        public SchemeInitData(UUID uuid, String mimeType, byte[] data) {
+            this.uuid = uuid;
             this.mimeType = mimeType;
             this.data = data;
         }
@@ -76,12 +109,14 @@ public abstract class DrmInitData {
             }
 
             SchemeInitData other = (SchemeInitData) obj;
-            return mimeType.equals(other.mimeType) && Arrays.equals(data, other.data);
+            return uuid.equals(other.uuid)
+                    && mimeType.equals(other.mimeType)
+                    && Arrays.equals(data, other.data);
         }
 
         @Override
         public int hashCode() {
-            return mimeType.hashCode() + 31 * Arrays.hashCode(data);
+            return uuid.hashCode() + 31 * (mimeType.hashCode() + 31 * Arrays.hashCode(data));
         }
 
     }

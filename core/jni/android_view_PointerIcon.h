@@ -21,8 +21,8 @@
 
 #include <vector>
 
+#include <android/graphics/bitmap.h>
 #include <utils/Errors.h>
-#include <SkBitmap.h>
 
 namespace android {
 
@@ -68,10 +68,10 @@ struct PointerIcon {
     }
 
     int32_t style;
-    SkBitmap bitmap;
+    graphics::Bitmap bitmap;
     float hotSpotX;
     float hotSpotY;
-    std::vector<SkBitmap> bitmapFrames;
+    std::vector<graphics::Bitmap> bitmapFrames;
     int32_t durationPerFrame;
 
     inline bool isNullIcon() {

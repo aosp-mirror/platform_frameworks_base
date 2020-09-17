@@ -17,7 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -40,12 +40,14 @@ import android.view.animation.Animation;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.wm.WindowState.PowerManagerWrapper;
 
 import java.io.PrintWriter;
 import java.util.function.Supplier;
 
 class TestWindowManagerPolicy implements WindowManagerPolicy {
     private final Supplier<WindowManagerService> mWmSupplier;
+    private final PowerManagerWrapper mPowerManagerWrapper;
 
     int mRotationToReport = 0;
     boolean mKeyguardShowingAndNotOccluded = false;
@@ -53,8 +55,10 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     private Runnable mRunnableWhenAddingSplashScreen;
 
-    TestWindowManagerPolicy(Supplier<WindowManagerService> wmSupplier) {
+    TestWindowManagerPolicy(Supplier<WindowManagerService> wmSupplier,
+            PowerManagerWrapper powerManagerWrapper) {
         mWmSupplier = wmSupplier;
+        mPowerManagerWrapper = powerManagerWrapper;
     }
 
     @Override
@@ -71,13 +75,9 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public int checkAddPermission(WindowManager.LayoutParams attrs, int[] outAppOp) {
+    public int checkAddPermission(int type, boolean isRoundedCornerOverlay, String packageName,
+            int[] outAppOp) {
         return 0;
-    }
-
-    @Override
-    public boolean checkShowToOwnerOnly(WindowManager.LayoutParams attrs) {
-        return false;
     }
 
     @Override
@@ -92,7 +92,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public boolean isKeyguardHostWindow(WindowManager.LayoutParams attrs) {
-        return attrs.type == TYPE_STATUS_BAR;
+        return attrs.type == TYPE_NOTIFICATION_SHADE;
     }
 
     @Override
@@ -113,16 +113,16 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes, int icon,
             int logo, int windowFlags, Configuration overrideConfig, int displayId) {
         final com.android.server.wm.WindowState window;
-        final AppWindowToken atoken;
+        final ActivityRecord activity;
         final WindowManagerService wm = mWmSupplier.get();
         synchronized (wm.mGlobalLock) {
-            atoken = wm.mRoot.getAppWindowToken(appToken);
+            activity = wm.mRoot.getActivityRecord(appToken);
             IWindow iWindow = mock(IWindow.class);
             doReturn(mock(IBinder.class)).when(iWindow).asBinder();
-            window = WindowTestsBase.createWindow(null, TYPE_APPLICATION_STARTING, atoken,
-                    "Starting window", 0 /* ownerId */, false /* internalWindows */, wm,
-                    mock(Session.class), iWindow);
-            atoken.startingWindow = window;
+            window = WindowTestsBase.createWindow(null, TYPE_APPLICATION_STARTING, activity,
+                    "Starting window", 0 /* ownerId */, 0 /* userId*/, false /* internalWindows */,
+                    wm, mock(Session.class), iWindow, mPowerManagerWrapper);
+            activity.startingWindow = window;
         }
         if (mRunnableWhenAddingSplashScreen != null) {
             mRunnableWhenAddingSplashScreen.run();
@@ -130,8 +130,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
         }
         return () -> {
             synchronized (wm.mGlobalLock) {
-                atoken.removeChild(window);
-                atoken.startingWindow = null;
+                activity.removeChild(window);
+                activity.startingWindow = null;
             }
         };
     }
@@ -163,12 +163,13 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public long interceptKeyBeforeDispatching(WindowState win, KeyEvent event, int policyFlags) {
+    public long interceptKeyBeforeDispatching(IBinder focusedToken, KeyEvent event,
+            int policyFlags) {
         return 0;
     }
 
     @Override
-    public KeyEvent dispatchUnhandledKey(WindowState win, KeyEvent event, int policyFlags) {
+    public KeyEvent dispatchUnhandledKey(IBinder focusedToken, KeyEvent event, int policyFlags) {
         return null;
     }
 
@@ -260,6 +261,11 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public boolean isKeyguardTrustedLw() {
         return false;
+    }
+
+    @Override
+    public boolean isKeyguardShowing() {
+        return mKeyguardShowingAndNotOccluded;
     }
 
     @Override
@@ -363,7 +369,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
     }
 
     @Override
@@ -398,10 +404,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public boolean canDismissBootAnimation() {
         return true;
-    }
-
-    @Override
-    public void requestUserActivityNotification() {
     }
 
     @Override

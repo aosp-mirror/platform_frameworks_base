@@ -220,7 +220,7 @@ status_t JDescrambler::descramble(
         return NO_MEMORY;
     }
 
-    memcpy(mMem->pointer(),
+    memcpy(mMem->unsecurePointer(),
             (const void*)((const uint8_t*)srcPtr + srcOffset), totalLength);
 
     DestinationBuffer dstBuffer;
@@ -248,7 +248,8 @@ status_t JDescrambler::descramble(
 
     if (*status == Status::OK) {
         if (*bytesWritten > 0 && (ssize_t) *bytesWritten <= totalLength) {
-            memcpy((void*)((uint8_t*)dstPtr + dstOffset), mMem->pointer(), *bytesWritten);
+            memcpy((void*)((uint8_t*)dstPtr + dstOffset), mMem->unsecurePointer(),
+                *bytesWritten);
         } else {
             // status seems OK but bytesWritten is invalid, we really
             // have no idea what is wrong.

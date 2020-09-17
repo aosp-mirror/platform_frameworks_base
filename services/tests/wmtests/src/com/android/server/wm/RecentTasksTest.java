@@ -17,32 +17,39 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.RECENT_WITH_EXCLUDED;
-import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import static java.lang.Integer.MAX_VALUE;
 
@@ -51,19 +58,17 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
-import android.util.MutableLong;
 import android.util.SparseBooleanArray;
 
 import androidx.test.filters.MediumTest;
@@ -72,6 +77,7 @@ import com.android.server.wm.RecentTasks.Callbacks;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -79,6 +85,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Build/Install/Run:
@@ -86,45 +93,48 @@ import java.util.Set;
  */
 @MediumTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class RecentTasksTest extends ActivityTestsBase {
     private static final int TEST_USER_0_ID = 0;
     private static final int TEST_USER_1_ID = 10;
     private static final int TEST_QUIET_USER_ID = 20;
     private static final UserInfo DEFAULT_USER_INFO = new UserInfo();
-    private static final UserInfo QUIET_USER_INFO = new UserInfo();
-    private static int sLastTaskId = 1;
-    private static int sLastStackId = 1;
+    private static final UserInfo QUIET_PROFILE_USER_INFO = new UserInfo(TEST_QUIET_USER_ID,
+            "quiet_profile", null /* iconPath */, UserInfo.FLAG_QUIET_MODE,
+            UserManager.USER_TYPE_PROFILE_MANAGED);
     private static final int INVALID_STACK_ID = 999;
 
-    private TestActivityTaskManagerService mTestService;
-    private ActivityDisplay mDisplay;
-    private ActivityDisplay mOtherDisplay;
-    private ActivityDisplay mSingleTaskDisplay;
+    private TaskDisplayArea mTaskContainer;
     private ActivityStack mStack;
-    private ActivityStack mHomeStack;
     private TestTaskPersister mTaskPersister;
     private TestRecentTasks mRecentTasks;
     private TestRunningTasks mRunningTasks;
 
-    private ArrayList<TaskRecord> mTasks;
-    private ArrayList<TaskRecord> mSameDocumentTasks;
+    private ArrayList<Task> mTasks;
+    private ArrayList<Task> mSameDocumentTasks;
 
     private CallbacksRecorder mCallbacksRecorder;
 
     @Before
     public void setUp() throws Exception {
         mTaskPersister = new TestTaskPersister(mContext.getFilesDir());
-        mTestService = new MyTestActivityTaskManagerService(mContext);
-        mRecentTasks = (TestRecentTasks) mTestService.getRecentTasks();
+        spyOn(mTaskPersister);
+        mTaskContainer = mRootWindowContainer.getDefaultTaskDisplayArea();
+
+        // Set the recent tasks we should use for testing in this class.
+        mRecentTasks = new TestRecentTasks(mService, mTaskPersister);
+        spyOn(mRecentTasks);
+        mService.setRecentTasks(mRecentTasks);
         mRecentTasks.loadParametersFromResources(mContext.getResources());
-        mRunningTasks = (TestRunningTasks) mTestService.mStackSupervisor.mRunningTasks;
-        mHomeStack = mTestService.mRootActivityContainer.getDefaultDisplay().getOrCreateStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
-        mStack = mTestService.mRootActivityContainer.getDefaultDisplay().createStack(
+
+        // Set the running tasks we should use for testing in this class.
+        mRunningTasks = new TestRunningTasks();
+        mService.mStackSupervisor.setRunningTasks(mRunningTasks);
+
+        mStack = mTaskContainer.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         mCallbacksRecorder = new CallbacksRecorder();
         mRecentTasks.registerCallback(mCallbacksRecorder);
-        QUIET_USER_INFO.flags = UserInfo.FLAG_MANAGED_PROFILE | UserInfo.FLAG_QUIET_MODE;
 
         mTasks = new ArrayList<>();
         mTasks.add(createTaskBuilder(".Task1").build());
@@ -168,11 +178,51 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     @Test
+    public void testPersister() {
+        // Add some tasks, ensure the persister is woken
+        mRecentTasks.add(mTasks.get(0));
+        mRecentTasks.add(mTasks.get(1));
+        verify(mTaskPersister, times(1)).wakeup(eq(mTasks.get(0)), anyBoolean());
+        verify(mTaskPersister, times(1)).wakeup(eq(mTasks.get(1)), anyBoolean());
+        reset(mTaskPersister);
+
+        // Update a task, ensure the persister is woken
+        mRecentTasks.add(mTasks.get(0));
+        verify(mTaskPersister, times(1)).wakeup(eq(mTasks.get(0)), anyBoolean());
+        reset(mTaskPersister);
+
+        // Remove some tasks, ensure the persister is woken
+        mRecentTasks.remove(mTasks.get(0));
+        mRecentTasks.remove(mTasks.get(1));
+        verify(mTaskPersister, times(1)).wakeup(eq(mTasks.get(0)), anyBoolean());
+        verify(mTaskPersister, times(1)).wakeup(eq(mTasks.get(1)), anyBoolean());
+        reset(mTaskPersister);
+    }
+
+    @Test
+    public void testPersisterTrimmed() {
+        mRecentTasks.setOnlyTestVisibleRange();
+
+        // Limit the global maximum number of recent tasks to a fixed size
+        mRecentTasks.setGlobalMaxNumTasks(1 /* globalMaxNumTasks */);
+
+        mRecentTasks.add(mTasks.get(0));
+        verify(mTaskPersister, times(1)).wakeup(eq(mTasks.get(0)), anyBoolean());
+        reset(mTaskPersister);
+
+        // Add N+1 tasks to ensure the previous task is trimmed
+        mRecentTasks.add(mTasks.get(1));
+        verify(mTaskPersister, times(1)).wakeup(eq(mTasks.get(0)), anyBoolean());
+        verify(mTaskPersister, times(1)).wakeup(eq(mTasks.get(1)), anyBoolean());
+        assertTrimmed(mTasks.get(0));
+    }
+
+    @Test
     public void testAddTasksNoMultiple_expectNoTrim() {
         // Add same non-multiple-task document tasks will remove the task (to re-add it) but not
         // trim it
-        TaskRecord documentTask1 = createDocumentTask(".DocumentTask1");
-        TaskRecord documentTask2 = createDocumentTask(".DocumentTask1");
+        Task documentTask1 = createDocumentTask(".DocumentTask1");
+        Task documentTask2 = createDocumentTask(".DocumentTask1");
         mRecentTasks.add(documentTask1);
         mRecentTasks.add(documentTask2);
         assertThat(mCallbacksRecorder.mAdded).contains(documentTask1);
@@ -185,8 +235,8 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void testAddTasksMaxTaskRecents_expectNoTrim() {
         // Add a task hitting max-recents for that app will remove the task (to add the next one)
         // but not trim it
-        TaskRecord documentTask1 = createDocumentTask(".DocumentTask1");
-        TaskRecord documentTask2 = createDocumentTask(".DocumentTask1");
+        Task documentTask1 = createDocumentTask(".DocumentTask1");
+        Task documentTask2 = createDocumentTask(".DocumentTask1");
         documentTask1.maxRecents = 1;
         documentTask2.maxRecents = 1;
         mRecentTasks.add(documentTask1);
@@ -201,7 +251,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void testAddTasksSameTask_expectNoTrim() {
         // Add a task that is already in the task list does not trigger any callbacks, it just
         // moves in the list
-        TaskRecord documentTask1 = createDocumentTask(".DocumentTask1");
+        Task documentTask1 = createDocumentTask(".DocumentTask1");
         mRecentTasks.add(documentTask1);
         mRecentTasks.add(documentTask1);
         assertThat(mCallbacksRecorder.mAdded).hasSize(1);
@@ -213,9 +263,9 @@ public class RecentTasksTest extends ActivityTestsBase {
     @Test
     public void testAddTasksMultipleDocumentTasks_expectNoTrim() {
         // Add same multiple-task document tasks does not trim the first tasks
-        TaskRecord documentTask1 = createDocumentTask(".DocumentTask1",
+        Task documentTask1 = createDocumentTask(".DocumentTask1",
                 FLAG_ACTIVITY_MULTIPLE_TASK);
-        TaskRecord documentTask2 = createDocumentTask(".DocumentTask1",
+        Task documentTask2 = createDocumentTask(".DocumentTask1",
                 FLAG_ACTIVITY_MULTIPLE_TASK);
         mRecentTasks.add(documentTask1);
         mRecentTasks.add(documentTask2);
@@ -227,13 +277,38 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     @Test
+    public void testAddTasksInVisibilityUpdate_expectNoTrim() {
+        mRecentTasks.setOnlyTestVisibleRange();
+        mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
+        mRecentTasks.add(mTasks.get(0));
+
+        doAnswer(invocation -> {
+            assertTrue(mSupervisor.inActivityVisibilityUpdate());
+            // Simulate an activity is resumed by EnsureActivitiesVisibleHelper. If its state is
+            // change to RESUMED, it will also be added to recents.
+            mRecentTasks.add(mTasks.get(1));
+            invocation.callRealMethod();
+            return null;
+        }).when(mSupervisor).endActivityVisibilityUpdate();
+
+        mTaskContainer.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                false /* preserveWindows */, false /* notifyClients */);
+
+        assertFalse(mSupervisor.inActivityVisibilityUpdate());
+        assertThat(mCallbacksRecorder.mAdded).hasSize(2);
+        // Expect nothing is trimmed because we don't want the loop of ensure-visibility to be
+        // impacted by the arbitrary number of task removals.
+        assertNoTasksTrimmed();
+    }
+
+    @Test
     public void testAddTasksMultipleTasks_expectRemovedNoTrim() {
         // Add multiple same-affinity non-document tasks, ensure that it removes the other task,
         // but that it does not trim it
-        TaskRecord task1 = createTaskBuilder(".Task1")
+        Task task1 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK)
                 .build();
-        TaskRecord task2 = createTaskBuilder(".Task1")
+        Task task2 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK)
                 .build();
         mRecentTasks.add(task1);
@@ -254,10 +329,10 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void testAddTasksDifferentStacks_expectNoRemove() {
         // Adding the same task with different activity types should not trigger removal of the
         // other task
-        TaskRecord task1 = createTaskBuilder(".Task1")
+        Task task1 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK)
-                .setStack(mHomeStack).build();
-        TaskRecord task2 = createTaskBuilder(".Task1")
+                .setStack(mTaskContainer.getRootHomeTask()).build();
+        Task task2 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK)
                 .setStack(mStack).build();
         mRecentTasks.add(task1);
@@ -273,7 +348,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void testAddTaskCompatibleActivityType_expectRemove() {
         // Test with undefined activity type since the type is not persisted by the task persister
         // and we want to ensure that a new task will match a restored task
-        TaskRecord task1 = createTaskBuilder(".Task1")
+        Task task1 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK)
                 .setStack(mStack)
                 .build();
@@ -282,7 +357,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.add(task1);
         mCallbacksRecorder.clear();
 
-        TaskRecord task2 = createTaskBuilder(".Task1")
+        Task task2 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK)
                 .setStack(mStack)
                 .build();
@@ -297,7 +372,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
     @Test
     public void testAddTaskCompatibleActivityTypeDifferentUser_expectNoRemove() {
-        TaskRecord task1 = createTaskBuilder(".Task1")
+        Task task1 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK)
                 .setStack(mStack)
                 .setUserId(TEST_USER_0_ID)
@@ -307,7 +382,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.add(task1);
         mCallbacksRecorder.clear();
 
-        TaskRecord task2 = createTaskBuilder(".Task1")
+        Task task2 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK)
                 .setStack(mStack)
                 .setUserId(TEST_USER_1_ID)
@@ -322,7 +397,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
     @Test
     public void testAddTaskCompatibleWindowingMode_expectRemove() {
-        TaskRecord task1 = createTaskBuilder(".Task1")
+        Task task1 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK)
                 .setStack(mStack)
                 .build();
@@ -331,7 +406,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.add(task1);
         mCallbacksRecorder.clear();
 
-        TaskRecord task2 = createTaskBuilder(".Task1")
+        Task task2 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK)
                 .setStack(mStack)
                 .build();
@@ -348,7 +423,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
     @Test
     public void testAddTaskIncompatibleWindowingMode_expectNoRemove() {
-        TaskRecord task1 = createTaskBuilder(".Task1")
+        Task task1 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK)
                 .setStack(mStack)
                 .build();
@@ -356,7 +431,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         assertEquals(WINDOWING_MODE_FULLSCREEN, task1.getWindowingMode());
         mRecentTasks.add(task1);
 
-        TaskRecord task2 = createTaskBuilder(".Task1")
+        Task task2 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK)
                 .setStack(mStack)
                 .build();
@@ -372,8 +447,44 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     @Test
+    public void testAddTasksHomeClearUntrackedTasks_expectFinish() {
+        // There may be multiple tasks with the same base intent by flags (FLAG_ACTIVITY_NEW_TASK |
+        // FLAG_ACTIVITY_MULTIPLE_TASK). If the previous task is still active, it should be removed
+        // because user may not be able to return to the task.
+        final String className = ".PermissionsReview";
+        final Function<Boolean, Task> taskBuilder = visible -> {
+            final Task task = createTaskBuilder(className).build();
+            // Make the task non-empty.
+            final ActivityRecord r = new ActivityBuilder(mService).setTask(task).build();
+            r.setVisibility(visible);
+            return task;
+        };
+
+        final Task task1 = taskBuilder.apply(false /* visible */);
+        mRecentTasks.add(task1);
+        final Task task2 = taskBuilder.apply(true /* visible */);
+        mRecentTasks.add(task2);
+        final Task task3 = createTaskBuilder(className).build();
+        mRecentTasks.add(task3);
+        // Only the last added task is kept in recents and the previous 2 tasks will become hidden
+        // tasks because their intents are identical.
+        mRecentTasks.add(task1);
+        // Go home to trigger the removal of untracked tasks.
+        mRecentTasks.add(createTaskBuilder(".Home").setStack(mTaskContainer.getRootHomeTask())
+                .build());
+
+        // The task was added into recents again so it is not hidden and shouldn't be removed.
+        assertNotNull(task1.getTopNonFinishingActivity());
+        // All activities in the invisible task should be finishing or removed.
+        assertNull(task3.getTopNonFinishingActivity());
+        // The visible task should not be affected.
+        assertNotNull(task2.getTopNonFinishingActivity());
+    }
+
+    @Test
     public void testUsersTasks() {
         mRecentTasks.setOnlyTestVisibleRange();
+        mRecentTasks.unloadUserDataFromMemoryLocked(TEST_USER_0_ID);
 
         // Setup some tasks for the users
         mTaskPersister.mUserTaskIdsOverride = new SparseBooleanArray();
@@ -420,25 +531,25 @@ public class RecentTasksTest extends ActivityTestsBase {
     @Test
     public void testOrderedIteration() {
         mRecentTasks.setOnlyTestVisibleRange();
-        TaskRecord task1 = createTaskBuilder(".Task1").build();
+        Task task1 = createTaskBuilder(".Task1").build();
         task1.lastActiveTime = new Random().nextInt();
-        TaskRecord task2 = createTaskBuilder(".Task1").build();
+        Task task2 = createTaskBuilder(".Task1").build();
         task2.lastActiveTime = new Random().nextInt();
-        TaskRecord task3 = createTaskBuilder(".Task1").build();
+        Task task3 = createTaskBuilder(".Task1").build();
         task3.lastActiveTime = new Random().nextInt();
-        TaskRecord task4 = createTaskBuilder(".Task1").build();
+        Task task4 = createTaskBuilder(".Task1").build();
         task4.lastActiveTime = new Random().nextInt();
         mRecentTasks.add(task1);
         mRecentTasks.add(task2);
         mRecentTasks.add(task3);
         mRecentTasks.add(task4);
 
-        MutableLong prevLastActiveTime = new MutableLong(0);
-        final ArrayList<TaskRecord> tasks = mRecentTasks.getRawTasks();
+        long prevLastActiveTime = 0;
+        final ArrayList<Task> tasks = mRecentTasks.getRawTasks();
         for (int i = 0; i < tasks.size(); i++) {
-            final TaskRecord task = tasks.get(i);
-            assertThat(prevLastActiveTime.value).isLessThan(task.lastActiveTime);
-            prevLastActiveTime.value = task.lastActiveTime;
+            final Task task = tasks.get(i);
+            assertThat(prevLastActiveTime).isLessThan(task.lastActiveTime);
+            prevLastActiveTime = task.lastActiveTime;
         }
     }
 
@@ -461,8 +572,8 @@ public class RecentTasksTest extends ActivityTestsBase {
     @Test
     public void testTrimQuietProfileTasks() {
         mRecentTasks.setOnlyTestVisibleRange();
-        TaskRecord qt1 = createTaskBuilder(".QuietTask1").setUserId(TEST_QUIET_USER_ID).build();
-        TaskRecord qt2 = createTaskBuilder(".QuietTask2").setUserId(TEST_QUIET_USER_ID).build();
+        Task qt1 = createTaskBuilder(".QuietTask1").setUserId(TEST_QUIET_USER_ID).build();
+        Task qt2 = createTaskBuilder(".QuietTask2").setUserId(TEST_QUIET_USER_ID).build();
         mRecentTasks.add(qt1);
         mRecentTasks.add(qt2);
 
@@ -478,14 +589,14 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.setOnlyTestVisibleRange();
         mRecentTasks.setParameters(-1 /* min */, -1 /* max */, 50 /* ms */);
 
-        TaskRecord t1 = createTaskBuilder(".Task1").build();
+        Task t1 = createTaskBuilder(".Task1").build();
         t1.touchActiveTime();
         mRecentTasks.add(t1);
 
         // Force a small sleep just beyond the session duration
         SystemClock.sleep(75);
 
-        TaskRecord t2 = createTaskBuilder(".Task2").build();
+        Task t2 = createTaskBuilder(".Task2").build();
         t2.touchActiveTime();
         mRecentTasks.add(t2);
 
@@ -498,10 +609,10 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.setOnlyTestVisibleRange();
         mRecentTasks.setParameters(-1 /* min */, 4 /* max */, -1 /* ms */);
 
-        TaskRecord excludedTask1 = createTaskBuilder(".ExcludedTask1")
+        Task excludedTask1 = createTaskBuilder(".ExcludedTask1")
                 .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                 .build();
-        TaskRecord excludedTask2 = createTaskBuilder(".ExcludedTask2")
+        Task excludedTask2 = createTaskBuilder(".ExcludedTask2")
                 .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                 .build();
 
@@ -518,12 +629,12 @@ public class RecentTasksTest extends ActivityTestsBase {
     @Test
     public void testVisibleTasks_excludedFromRecents_firstTaskNotVisible() {
         // Create some set of tasks, some of which are visible and some are not
-        TaskRecord homeTask = setTaskActivityType(
+        Task homeTask = setTaskActivityType(
                 createTaskBuilder("com.android.pkg1", ".HomeTask").build(),
                 ACTIVITY_TYPE_HOME);
         homeTask.mUserSetupComplete = true;
         mRecentTasks.add(homeTask);
-        TaskRecord excludedTask1 = createTaskBuilder(".ExcludedTask1")
+        Task excludedTask1 = createTaskBuilder(".ExcludedTask1")
                 .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                 .build();
         excludedTask1.mUserSetupComplete = true;
@@ -536,25 +647,25 @@ public class RecentTasksTest extends ActivityTestsBase {
     @Test
     public void testVisibleTasks_excludedFromRecents_withExcluded() {
         // Create some set of tasks, some of which are visible and some are not
-        TaskRecord t1 = createTaskBuilder("com.android.pkg1", ".Task1").build();
+        Task t1 = createTaskBuilder("com.android.pkg1", ".Task1").build();
         t1.mUserSetupComplete = true;
         mRecentTasks.add(t1);
-        TaskRecord homeTask = setTaskActivityType(
+        Task homeTask = setTaskActivityType(
                 createTaskBuilder("com.android.pkg1", ".HomeTask").build(),
                 ACTIVITY_TYPE_HOME);
         homeTask.mUserSetupComplete = true;
         mRecentTasks.add(homeTask);
-        TaskRecord excludedTask1 = createTaskBuilder(".ExcludedTask1")
+        Task excludedTask1 = createTaskBuilder(".ExcludedTask1")
                 .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                 .build();
         excludedTask1.mUserSetupComplete = true;
         mRecentTasks.add(excludedTask1);
-        TaskRecord excludedTask2 = createTaskBuilder(".ExcludedTask2")
+        Task excludedTask2 = createTaskBuilder(".ExcludedTask2")
                 .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                 .build();
         excludedTask2.mUserSetupComplete = true;
         mRecentTasks.add(excludedTask2);
-        TaskRecord t2 = createTaskBuilder("com.android.pkg2", ".Task1").build();
+        Task t2 = createTaskBuilder("com.android.pkg2", ".Task1").build();
         t2.mUserSetupComplete = true;
         mRecentTasks.add(t2);
 
@@ -567,7 +678,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.setParameters(5 /* min */, -1 /* max */, 25 /* ms */);
 
         for (int i = 0; i < 4; i++) {
-            final TaskRecord task = mTasks.get(i);
+            final Task task = mTasks.get(i);
             task.touchActiveTime();
             mRecentTasks.add(task);
         }
@@ -588,7 +699,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.setParameters(-1 /* min */, 3 /* max */, -1 /* ms */);
 
         for (int i = 0; i < 5; i++) {
-            final TaskRecord task = mTasks.get(i);
+            final Task task = mTasks.get(i);
             task.touchActiveTime();
             mRecentTasks.add(task);
         }
@@ -601,21 +712,19 @@ public class RecentTasksTest extends ActivityTestsBase {
      * Tests that tasks on singleTaskDisplay are not visible and not trimmed/removed.
      */
     @Test
-    public void testVisibleTasks_singleTaskDisplay() {
+    public void testVisibleTasks_alwaysOnTop() {
         mRecentTasks.setOnlyTestVisibleRange();
         mRecentTasks.setParameters(-1 /* min */, 3 /* max */, -1 /* ms */);
 
-        ActivityStack singleTaskStack = mSingleTaskDisplay.createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
+        final Task alwaysOnTopTask = taskDisplayArea.createStack(WINDOWING_MODE_MULTI_WINDOW,
+                ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        alwaysOnTopTask.setAlwaysOnTop(true);
 
-        TaskRecord excludedTask1 = createTaskBuilder(".ExcludedTask1")
-                .setStack(singleTaskStack)
-                .build();
+        assertFalse("Always on top tasks should not be visible recents",
+                mRecentTasks.isVisibleRecentTask(alwaysOnTopTask));
 
-        assertFalse("Tasks on singleTaskDisplay should not be visible recents",
-                mRecentTasks.isVisibleRecentTask(excludedTask1));
-
-        mRecentTasks.add(excludedTask1);
+        mRecentTasks.add(alwaysOnTopTask);
 
         // Add N+1 visible tasks.
         mRecentTasks.add(mTasks.get(0));
@@ -722,7 +831,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         ActivityStack stack = mTasks.get(2).getStack();
         stack.moveToFront("", mTasks.get(2));
-        doReturn(stack).when(mTestService.mRootActivityContainer).getTopDisplayFocusedStack();
+        doReturn(stack).when(mService.mRootWindowContainer).getTopDisplayFocusedStack();
 
         // Simulate the reset from the timeout
         mRecentTasks.resetFreezeTaskListReorderingOnTimeout();
@@ -741,10 +850,9 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void testBackStackTasks_expectNoTrim() {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
 
-        final MyTestActivityStackSupervisor supervisor =
-                (MyTestActivityStackSupervisor) mTestService.mStackSupervisor;
-        final ActivityStack homeStack = mDisplay.getHomeStack();
-        final ActivityStack aboveHomeStack = new MyTestActivityStack(mDisplay, supervisor);
+        final ActivityStack homeStack = mTaskContainer.getRootHomeTask();
+        final ActivityStack aboveHomeStack = mTaskContainer.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Add a number of tasks (beyond the max) but ensure that nothing is trimmed because all
         // the tasks belong in stacks above the home stack
@@ -760,15 +868,15 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void testBehindHomeStackTasks_expectTaskTrimmed() {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
 
-        final MyTestActivityStackSupervisor supervisor =
-                (MyTestActivityStackSupervisor) mTestService.mStackSupervisor;
-        final ActivityStack behindHomeStack = new MyTestActivityStack(mDisplay, supervisor);
-        final ActivityStack homeStack = mDisplay.getHomeStack();
-        final ActivityStack aboveHomeStack = new MyTestActivityStack(mDisplay, supervisor);
+        final ActivityStack behindHomeStack = mTaskContainer.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final ActivityStack homeStack = mTaskContainer.getRootHomeTask();
+        final ActivityStack aboveHomeStack = mTaskContainer.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Add a number of tasks (beyond the max) but ensure that only the task in the stack behind
         // the home stack is trimmed once a new task is added
-        final TaskRecord behindHomeTask = createTaskBuilder(".Task1")
+        final Task behindHomeTask = createTaskBuilder(".Task1")
                 .setStack(behindHomeStack)
                 .build();
         mRecentTasks.add(behindHomeTask);
@@ -782,10 +890,10 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void testOtherDisplayTasks_expectNoTrim() {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
 
-        final MyTestActivityStackSupervisor supervisor =
-                (MyTestActivityStackSupervisor) mTestService.mStackSupervisor;
-        final ActivityStack homeStack = mDisplay.getHomeStack();
-        final ActivityStack otherDisplayStack = new MyTestActivityStack(mOtherDisplay, supervisor);
+        final ActivityStack homeStack = mTaskContainer.getRootHomeTask();
+        final DisplayContent otherDisplay = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
+        final ActivityStack otherDisplayStack = otherDisplay.getDefaultTaskDisplayArea()
+                .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Add a number of tasks (beyond the max) on each display, ensure that the tasks are not
         // removed
@@ -806,7 +914,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.add(createTaskBuilder("com.android.pkg1", ".Task4").build());
         mRecentTasks.removeTasksByPackageName("com.android.pkg1", TEST_USER_0_ID);
 
-        final ArrayList<TaskRecord> tasks = mRecentTasks.getRawTasks();
+        final ArrayList<Task> tasks = mRecentTasks.getRawTasks();
         for (int i = 0; i < tasks.size(); i++) {
             if (tasks.get(i).intent.getComponent().getPackageName().equals("com.android.pkg1")) {
                 fail("Expected com.android.pkg1 tasks to be removed");
@@ -819,30 +927,30 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.setParameters(-1 /* min */, 3 /* max */, 100 /* ms */);
 
         // Create some set of tasks, some of which are visible and some are not
-        TaskRecord t1 = createTaskBuilder("com.android.pkg1", ".Task1").build();
+        Task t1 = createTaskBuilder("com.android.pkg1", ".Task1").build();
         mRecentTasks.add(t1);
         mRecentTasks.add(setTaskActivityType(
                 createTaskBuilder("com.android.pkg1", ".HomeTask").build(),
                 ACTIVITY_TYPE_HOME));
-        TaskRecord t2 = createTaskBuilder("com.android.pkg2", ".Task2").build();
+        Task t2 = createTaskBuilder("com.android.pkg2", ".Task2").build();
         mRecentTasks.add(t2);
         mRecentTasks.add(setTaskWindowingMode(
                 createTaskBuilder("com.android.pkg1", ".PipTask").build(),
                 WINDOWING_MODE_PINNED));
-        TaskRecord t3 = createTaskBuilder("com.android.pkg3", ".Task3").build();
+        Task t3 = createTaskBuilder("com.android.pkg3", ".Task3").build();
         mRecentTasks.add(t3);
 
         // Create some more tasks that are out of visible range, but are still visible
-        TaskRecord t4 = createTaskBuilder("com.android.pkg3", ".Task4").build();
+        Task t4 = createTaskBuilder("com.android.pkg3", ".Task4").build();
         mRecentTasks.add(t4);
-        TaskRecord t5 = createTaskBuilder("com.android.pkg3", ".Task5").build();
+        Task t5 = createTaskBuilder("com.android.pkg3", ".Task5").build();
         mRecentTasks.add(t5);
 
         // Create some more tasks that are out of the active session range, but are still visible
-        TaskRecord t6 = createTaskBuilder("com.android.pkg3", ".Task6").build();
+        Task t6 = createTaskBuilder("com.android.pkg3", ".Task6").build();
         t6.lastActiveTime = SystemClock.elapsedRealtime() - 200;
         mRecentTasks.add(t6);
-        TaskRecord t7 = createTaskBuilder("com.android.pkg3", ".Task7").build();
+        Task t7 = createTaskBuilder("com.android.pkg3", ".Task7").build();
         t7.lastActiveTime = SystemClock.elapsedRealtime() - 200;
         mRecentTasks.add(t7);
 
@@ -856,17 +964,17 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.setParameters(-1 /* min */, 3 /* max */, 100 /* ms */);
 
         // Create a visible task per user
-        TaskRecord t1 = createTaskBuilder(".Task1")
+        Task t1 = createTaskBuilder(".Task1")
                 .setUserId(TEST_USER_0_ID)
                 .build();
         mRecentTasks.add(t1);
 
-        TaskRecord t2 = createTaskBuilder(".Task2")
+        Task t2 = createTaskBuilder(".Task2")
                 .setUserId(TEST_QUIET_USER_ID)
                 .build();
         mRecentTasks.add(t2);
 
-        TaskRecord t3 = createTaskBuilder(".Task3")
+        Task t3 = createTaskBuilder(".Task3")
                 .setUserId(TEST_USER_1_ID)
                 .build();
         mRecentTasks.add(t3);
@@ -878,35 +986,95 @@ public class RecentTasksTest extends ActivityTestsBase {
 
     @Test
     public void testNotRestoreRecentTaskApis() {
-        final TaskRecord task = createTaskBuilder(".Task").build();
-        final int taskId = task.taskId;
+        final Task task = createTaskBuilder(".Task").build();
+        final int taskId = task.mTaskId;
         mRecentTasks.add(task);
         // Only keep the task in RecentTasks.
-        task.removeWindowContainer();
-        mStack.remove();
+        task.removeIfPossible();
+        mStack.removeIfPossible();
 
         // The following APIs should not restore task from recents to the active list.
-        assertNotRestoreTask(() -> mTestService.setFocusedTask(taskId));
-        assertNotRestoreTask(() -> mTestService.startSystemLockTaskMode(taskId));
-        assertNotRestoreTask(() -> mTestService.cancelTaskWindowTransition(taskId));
+        assertNotRestoreTask(() -> mService.setFocusedTask(taskId));
+        assertNotRestoreTask(() -> mService.startSystemLockTaskMode(taskId));
+        assertNotRestoreTask(() -> mService.cancelTaskWindowTransition(taskId));
         assertNotRestoreTask(
-                () -> mTestService.resizeTask(taskId, null /* bounds */, 0 /* resizeMode */));
+                () -> mService.resizeTask(taskId, null /* bounds */, 0 /* resizeMode */));
         assertNotRestoreTask(
-                () -> mTestService.setTaskWindowingMode(taskId, WINDOWING_MODE_FULLSCREEN,
+                () -> mService.setTaskWindowingMode(taskId, WINDOWING_MODE_FULLSCREEN,
                         false/* toTop */));
         assertNotRestoreTask(
-                () -> mTestService.setTaskWindowingModeSplitScreenPrimary(taskId,
-                        SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT,
-                        false /* toTop */, false /* animate */, null /* initialBounds */,
-                        true /* showRecents */));
+                () -> mService.setTaskWindowingModeSplitScreenPrimary(taskId, false /* toTop */));
+    }
+
+    @Test
+    public void addTask_callsTaskNotificationController() {
+        final Task task = createTaskBuilder(".Task").build();
+
+        mRecentTasks.add(task);
+        mRecentTasks.remove(task);
+
+        TaskChangeNotificationController controller =
+                mService.getTaskChangeNotificationController();
+        verify(controller, times(2)).notifyTaskListUpdated();
+    }
+
+    @Test
+    public void removeTask_callsTaskNotificationController() {
+        final Task task = createTaskBuilder(".Task").build();
+
+        mRecentTasks.add(task);
+        mRecentTasks.remove(task);
+
+        // 2 calls - Once for add and once for remove
+        TaskChangeNotificationController controller =
+                mService.getTaskChangeNotificationController();
+        verify(controller, times(2)).notifyTaskListUpdated();
+    }
+
+    @Test
+    public void removeALlVisibleTask_callsTaskNotificationController_twice() {
+        final Task task1 = createTaskBuilder(".Task").build();
+        final Task task2 = createTaskBuilder(".Task2").build();
+
+        mRecentTasks.add(task1);
+        mRecentTasks.add(task2);
+        mRecentTasks.removeAllVisibleTasks(TEST_USER_0_ID);
+
+        // 4 calls - Twice for add and twice for remove
+        TaskChangeNotificationController controller =
+                mService.getTaskChangeNotificationController();
+        verify(controller, times(4)).notifyTaskListUpdated();
+    }
+
+    @Test
+    public void testTaskInfo_expectNoExtras() {
+        doNothing().when(mRecentTasks).loadUserRecentsLocked(anyInt());
+        doReturn(true).when(mRecentTasks).isUserRunning(anyInt(), anyInt());
+
+        final Bundle data = new Bundle();
+        data.putInt("key", 100);
+        final Task task1 = createTaskBuilder(".Task").build();
+        final ActivityRecord r1 = new ActivityBuilder(mService)
+                .setTask(task1)
+                .setIntentExtras(data)
+                .build();
+        mRecentTasks.add(r1.getTask());
+
+        final List<RecentTaskInfo> infos = mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
+                true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList();
+        assertTrue(infos.size() == 1);
+        for (int i = 0; i < infos.size(); i++)  {
+            final Bundle extras = infos.get(i).baseIntent.getExtras();
+            assertTrue(extras == null || extras.isEmpty());
+        }
     }
 
     /**
      * Ensures that the raw recent tasks list is in the provided order. Note that the expected tasks
      * should be ordered from least to most recent.
      */
-    private void assertRecentTasksOrder(TaskRecord... expectedTasks) {
-        ArrayList<TaskRecord> tasks = mRecentTasks.getRawTasks();
+    private void assertRecentTasksOrder(Task... expectedTasks) {
+        ArrayList<Task> tasks = mRecentTasks.getRawTasks();
         assertTrue(expectedTasks.length == tasks.size());
         for (int i = 0; i < tasks.size(); i++)  {
             assertTrue(expectedTasks[i] == tasks.get(i));
@@ -917,29 +1085,28 @@ public class RecentTasksTest extends ActivityTestsBase {
      * Ensures that the recent tasks list is in the provided order. Note that the expected tasks
      * should be ordered from least to most recent.
      */
-    private void assertGetRecentTasksOrder(int getRecentTaskFlags, TaskRecord... expectedTasks) {
+    private void assertGetRecentTasksOrder(int getRecentTaskFlags, Task... expectedTasks) {
         doNothing().when(mRecentTasks).loadUserRecentsLocked(anyInt());
         doReturn(true).when(mRecentTasks).isUserRunning(anyInt(), anyInt());
         List<RecentTaskInfo> infos = mRecentTasks.getRecentTasks(MAX_VALUE, getRecentTaskFlags,
-                true /* getTasksAllowed */, false /* getDetailedTasks */,
-                TEST_USER_0_ID, 0).getList();
+                true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList();
         assertTrue(expectedTasks.length == infos.size());
         for (int i = 0; i < infos.size(); i++)  {
-            assertTrue(expectedTasks[i].taskId == infos.get(i).taskId);
+            assertTrue(expectedTasks[i].mTaskId == infos.get(i).taskId);
         }
     }
 
     private void assertNotRestoreTask(Runnable action) {
         // Verify stack count doesn't change because task with fullscreen mode and standard type
         // would have its own stack.
-        final int orignalStackCount = mDisplay.getChildCount();
+        final int originalStackCount = mTaskContainer.getStackCount();
         action.run();
-        assertEquals(orignalStackCount, mDisplay.getChildCount());
+        assertEquals(originalStackCount, mTaskContainer.getStackCount());
     }
 
     @Test
     public void testNotRecentsComponent_denyApiAccess() throws Exception {
-        doReturn(PackageManager.PERMISSION_DENIED).when(mTestService)
+        doReturn(PackageManager.PERMISSION_DENIED).when(mService)
                 .checkGetTasksPermission(anyString(), anyInt(), anyInt());
         // Expect the following methods to fail due to recents component not being set
         mRecentTasks.setIsCallerRecentsOverride(TestRecentTasks.DENY_THROW_SECURITY_EXCEPTION);
@@ -951,7 +1118,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
     @Test
     public void testRecentsComponent_allowApiAccessWithoutPermissions() {
-        doReturn(PackageManager.PERMISSION_DENIED).when(mTestService)
+        doReturn(PackageManager.PERMISSION_DENIED).when(mService)
                 .checkGetTasksPermission(anyString(), anyInt(), anyInt());
         // Set the recents component and ensure that the following calls do not fail
         mRecentTasks.setIsCallerRecentsOverride(TestRecentTasks.GRANT);
@@ -960,62 +1127,50 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     private void doTestRecentTasksApis(boolean expectCallable) {
-        assertSecurityException(expectCallable, () -> mTestService.removeStack(INVALID_STACK_ID));
+        assertSecurityException(expectCallable, () -> mService.removeStack(INVALID_STACK_ID));
         assertSecurityException(expectCallable,
-                () -> mTestService.removeStacksInWindowingModes(
+                () -> mService.removeStacksInWindowingModes(
                         new int[]{WINDOWING_MODE_UNDEFINED}));
         assertSecurityException(expectCallable,
-                () -> mTestService.removeStacksWithActivityTypes(
+                () -> mService.removeStacksWithActivityTypes(
                         new int[]{ACTIVITY_TYPE_UNDEFINED}));
-        assertSecurityException(expectCallable, () -> mTestService.removeTask(0));
+        assertSecurityException(expectCallable, () -> mService.removeTask(0));
         assertSecurityException(expectCallable,
-                () -> mTestService.setTaskWindowingMode(0, WINDOWING_MODE_UNDEFINED, true));
+                () -> mService.setTaskWindowingMode(0, WINDOWING_MODE_UNDEFINED, true));
         assertSecurityException(expectCallable,
-                () -> mTestService.moveTaskToStack(0, INVALID_STACK_ID, true));
+                () -> mService.moveTaskToStack(0, INVALID_STACK_ID, true));
         assertSecurityException(expectCallable,
-                () -> mTestService.setTaskWindowingModeSplitScreenPrimary(0,
-                        SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT, true, true, new Rect(), true));
-        assertSecurityException(expectCallable, () -> mTestService.dismissSplitScreenMode(true));
-        assertSecurityException(expectCallable, () -> mTestService.dismissPip(true, 0));
+                () -> mService.setTaskWindowingModeSplitScreenPrimary(0, true));
         assertSecurityException(expectCallable,
-                () -> mTestService.moveTopActivityToPinnedStack(INVALID_STACK_ID, new Rect()));
+                () -> mService.moveTopActivityToPinnedStack(INVALID_STACK_ID, new Rect()));
+        assertSecurityException(expectCallable, () -> mService.getAllStackInfos());
         assertSecurityException(expectCallable,
-                () -> mTestService.resizeStack(INVALID_STACK_ID, new Rect(), true, true, true, 0));
-        assertSecurityException(expectCallable,
-                () -> mTestService.resizeDockedStack(new Rect(), new Rect(), new Rect(), new Rect(),
-                        new Rect()));
-        assertSecurityException(expectCallable,
-                () -> mTestService.resizePinnedStack(new Rect(), new Rect()));
-        assertSecurityException(expectCallable, () -> mTestService.getAllStackInfos());
-        assertSecurityException(expectCallable,
-                () -> mTestService.getStackInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_UNDEFINED));
+                () -> mService.getStackInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_UNDEFINED));
         assertSecurityException(expectCallable, () -> {
             try {
-                mTestService.getFocusedStackInfo();
+                mService.getFocusedStackInfo();
             } catch (RemoteException e) {
                 // Ignore
             }
         });
         assertSecurityException(expectCallable,
-                () -> mTestService.moveTasksToFullscreenStack(INVALID_STACK_ID, true));
+                () -> mService.startActivityFromRecents(0, new Bundle()));
+        assertSecurityException(expectCallable, () -> mService.getTaskSnapshot(0, true));
+        assertSecurityException(expectCallable, () -> mService.registerTaskStackListener(null));
         assertSecurityException(expectCallable,
-                () -> mTestService.startActivityFromRecents(0, new Bundle()));
-        assertSecurityException(expectCallable, () -> mTestService.getTaskSnapshot(0, true));
-        assertSecurityException(expectCallable, () -> mTestService.registerTaskStackListener(null));
-        assertSecurityException(expectCallable,
-                () -> mTestService.unregisterTaskStackListener(null));
-        assertSecurityException(expectCallable, () -> mTestService.getTaskDescription(0));
-        assertSecurityException(expectCallable, () -> mTestService.cancelTaskWindowTransition(0));
-        assertSecurityException(expectCallable, () -> mTestService.startRecentsActivity(null, null,
+                () -> mService.unregisterTaskStackListener(null));
+        assertSecurityException(expectCallable, () -> mService.getTaskDescription(0));
+        assertSecurityException(expectCallable, () -> mService.cancelTaskWindowTransition(0));
+        assertSecurityException(expectCallable, () -> mService.startRecentsActivity(null, null,
                 null));
-        assertSecurityException(expectCallable, () -> mTestService.cancelRecentsAnimation(true));
-        assertSecurityException(expectCallable, () -> mTestService.stopAppSwitches());
-        assertSecurityException(expectCallable, () -> mTestService.resumeAppSwitches());
+        assertSecurityException(expectCallable, () -> mService.cancelRecentsAnimation(true));
+        assertSecurityException(expectCallable, () -> mService.stopAppSwitches());
+        assertSecurityException(expectCallable, () -> mService.resumeAppSwitches());
     }
 
     private void testGetTasksApis(boolean expectCallable) {
-        mTestService.getRecentTasks(MAX_VALUE, 0, TEST_USER_0_ID);
-        mTestService.getTasks(MAX_VALUE);
+        mService.getRecentTasks(MAX_VALUE, 0, TEST_USER_0_ID);
+        mService.getTasks(MAX_VALUE);
         if (expectCallable) {
             assertTrue(mRecentTasks.mLastAllowed);
             assertTrue(mRunningTasks.mLastAllowed);
@@ -1030,19 +1185,18 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     private TaskBuilder createTaskBuilder(String packageName, String className) {
-        return new TaskBuilder(mTestService.mStackSupervisor)
+        return new TaskBuilder(mService.mStackSupervisor)
                 .setComponent(new ComponentName(packageName, className))
                 .setStack(mStack)
-                .setTaskId(sLastTaskId++)
                 .setUserId(TEST_USER_0_ID);
     }
 
-    private TaskRecord createDocumentTask(String className) {
+    private Task createDocumentTask(String className) {
         return createDocumentTask(className, 0);
     }
 
-    private TaskRecord createDocumentTask(String className, int flags) {
-        TaskRecord task = createTaskBuilder(className)
+    private Task createDocumentTask(String className, int flags) {
+        Task task = createTaskBuilder(className)
                 .setFlags(FLAG_ACTIVITY_NEW_DOCUMENT | flags)
                 .build();
         task.affinity = null;
@@ -1050,7 +1204,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         return task;
     }
 
-    private TaskRecord setTaskActivityType(TaskRecord task,
+    private Task setTaskActivityType(Task task,
             @WindowConfiguration.ActivityType int activityType) {
         Configuration config1 = new Configuration();
         config1.windowConfiguration.setActivityType(activityType);
@@ -1058,7 +1212,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         return task;
     }
 
-    private TaskRecord setTaskWindowingMode(TaskRecord task,
+    private Task setTaskWindowingMode(Task task,
             @WindowConfiguration.WindowingMode int windowingMode) {
         Configuration config1 = new Configuration();
         config1.windowConfiguration.setWindowingMode(windowingMode);
@@ -1070,14 +1224,14 @@ public class RecentTasksTest extends ActivityTestsBase {
         assertTrimmed();
     }
 
-    private void assertTrimmed(TaskRecord... tasks) {
-        final ArrayList<TaskRecord> trimmed = mCallbacksRecorder.mTrimmed;
-        final ArrayList<TaskRecord> removed = mCallbacksRecorder.mRemoved;
+    private void assertTrimmed(Task... tasks) {
+        final ArrayList<Task> trimmed = mCallbacksRecorder.mTrimmed;
+        final ArrayList<Task> removed = mCallbacksRecorder.mRemoved;
         assertWithMessage("Expected " + tasks.length + " trimmed tasks, got " + trimmed.size())
                 .that(trimmed).hasSize(tasks.length);
         assertWithMessage("Expected " + tasks.length + " removed tasks, got " + removed.size())
                 .that(removed).hasSize(tasks.length);
-        for (TaskRecord task : tasks) {
+        for (Task task : tasks) {
             assertWithMessage("Expected trimmed task: " + task).that(trimmed).contains(task);
             assertWithMessage("Expected removed task: " + task).that(removed).contains(task);
         }
@@ -1098,72 +1252,10 @@ public class RecentTasksTest extends ActivityTestsBase {
         }
     }
 
-    private class MyTestActivityTaskManagerService extends TestActivityTaskManagerService {
-        MyTestActivityTaskManagerService(Context context) {
-            super(context);
-        }
-
-        @Override
-        protected RecentTasks createRecentTasks() {
-            return spy(new TestRecentTasks(this, mTaskPersister));
-        }
-
-        @Override
-        protected ActivityStackSupervisor createStackSupervisor() {
-            if (mTestStackSupervisor == null) {
-                mTestStackSupervisor = new MyTestActivityStackSupervisor(this, mH.getLooper());
-            }
-            return mTestStackSupervisor;
-        }
-
-        @Override
-        void createDefaultDisplay() {
-            super.createDefaultDisplay();
-            mDisplay = mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY);
-            mOtherDisplay = TestActivityDisplay.create(mTestStackSupervisor, DEFAULT_DISPLAY + 1);
-            mSingleTaskDisplay = TestActivityDisplay.create(mTestStackSupervisor,
-                    DEFAULT_DISPLAY + 2);
-            mSingleTaskDisplay.setDisplayToSingleTaskInstance();
-            mRootActivityContainer.addChild(mOtherDisplay, ActivityDisplay.POSITION_TOP);
-            mRootActivityContainer.addChild(mDisplay, ActivityDisplay.POSITION_TOP);
-            mRootActivityContainer.addChild(mSingleTaskDisplay, ActivityDisplay.POSITION_TOP);
-        }
-    }
-
-    private class MyTestActivityStackSupervisor extends TestActivityStackSupervisor {
-        MyTestActivityStackSupervisor(ActivityTaskManagerService service, Looper looper) {
-            super(service, looper);
-        }
-
-        @Override
-        RunningTasks createRunningTasks() {
-            mRunningTasks = new TestRunningTasks();
-            return mRunningTasks;
-        }
-    }
-
-    private static class MyTestActivityStack extends TestActivityStack {
-        private ActivityDisplay mDisplay = null;
-
-        MyTestActivityStack(ActivityDisplay display, ActivityStackSupervisor supervisor) {
-            super(display, sLastStackId++, supervisor, WINDOWING_MODE_FULLSCREEN,
-                    ACTIVITY_TYPE_STANDARD, true /* onTop */, false /* createActivity */);
-            mDisplay = display;
-        }
-
-        @Override
-        ActivityDisplay getDisplay() {
-            if (mDisplay != null) {
-                return mDisplay;
-            }
-            return super.getDisplay();
-        }
-    }
-
     private static class CallbacksRecorder implements Callbacks {
-        public final ArrayList<TaskRecord> mAdded = new ArrayList<>();
-        public final ArrayList<TaskRecord> mTrimmed = new ArrayList<>();
-        public final ArrayList<TaskRecord> mRemoved = new ArrayList<>();
+        public final ArrayList<Task> mAdded = new ArrayList<>();
+        public final ArrayList<Task> mTrimmed = new ArrayList<>();
+        public final ArrayList<Task> mRemoved = new ArrayList<>();
 
         void clear() {
             mAdded.clear();
@@ -1172,12 +1264,12 @@ public class RecentTasksTest extends ActivityTestsBase {
         }
 
         @Override
-        public void onRecentTaskAdded(TaskRecord task) {
+        public void onRecentTaskAdded(Task task) {
             mAdded.add(task);
         }
 
         @Override
-        public void onRecentTaskRemoved(TaskRecord task, boolean wasTrimmed, boolean killProcess) {
+        public void onRecentTaskRemoved(Task task, boolean wasTrimmed, boolean killProcess) {
             if (wasTrimmed) {
                 mTrimmed.add(task);
             }
@@ -1187,7 +1279,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
     private static class TestTaskPersister extends TaskPersister {
         public SparseBooleanArray mUserTaskIdsOverride;
-        public ArrayList<TaskRecord> mUserTasksOverride;
+        public ArrayList<Task> mUserTasksOverride;
 
         TestTaskPersister(File workingDir) {
             super(workingDir);
@@ -1202,7 +1294,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         }
 
         @Override
-        List<TaskRecord> restoreTasksForUserLocked(int userId, SparseBooleanArray preaddedTasks) {
+        List<Task> restoreTasksForUserLocked(int userId, SparseBooleanArray preaddedTasks) {
             if (mUserTasksOverride != null) {
                 return mUserTasksOverride;
             }
@@ -1240,7 +1332,7 @@ public class RecentTasksTest extends ActivityTestsBase {
                 case TEST_USER_1_ID:
                     return DEFAULT_USER_INFO;
                 case TEST_QUIET_USER_ID:
-                    return QUIET_USER_INFO;
+                    return QUIET_PROFILE_USER_INFO;
             }
             return null;
         }
@@ -1282,15 +1374,13 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         @Override
         ParceledListSlice<RecentTaskInfo> getRecentTasks(int maxNum, int flags,
-                boolean getTasksAllowed,
-                boolean getDetailedTasks, int userId, int callingUid) {
+                boolean getTasksAllowed, int userId, int callingUid) {
             mLastAllowed = getTasksAllowed;
-            return super.getRecentTasks(maxNum, flags, getTasksAllowed, getDetailedTasks, userId,
-                    callingUid);
+            return super.getRecentTasks(maxNum, flags, getTasksAllowed, userId, callingUid);
         }
 
         @Override
-        protected boolean isTrimmable(TaskRecord task) {
+        protected boolean isTrimmable(Task task) {
             return mIsTrimmableOverride || super.isTrimmable(task);
         }
     }
@@ -1299,12 +1389,12 @@ public class RecentTasksTest extends ActivityTestsBase {
         public boolean mLastAllowed;
 
         @Override
-        void getTasks(int maxNum, List<RunningTaskInfo> list, int ignoreActivityType,
-                int ignoreWindowingMode, ArrayList<ActivityDisplay> activityDisplays,
-                int callingUid, boolean allowed, boolean crossUser, ArraySet<Integer> profileIds) {
+        void getTasks(int maxNum, List<RunningTaskInfo> list, boolean filterOnlyVisibleRecents,
+                RootWindowContainer root, int callingUid, boolean allowed, boolean crossUser,
+                ArraySet<Integer> profileIds) {
             mLastAllowed = allowed;
-            super.getTasks(maxNum, list, ignoreActivityType, ignoreWindowingMode, activityDisplays,
-                    callingUid, allowed, crossUser, profileIds);
+            super.getTasks(maxNum, list, filterOnlyVisibleRecents, root, callingUid, allowed,
+                    crossUser, profileIds);
         }
     }
 }

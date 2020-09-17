@@ -216,8 +216,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         return true;
     }
 
-    public int startVoiceActivityLocked(int callingPid, int callingUid, IBinder token,
-            Intent intent, String resolvedType) {
+    public int startVoiceActivityLocked(@Nullable String callingFeatureId, int callingPid,
+            int callingUid, IBinder token, Intent intent, String resolvedType) {
         try {
             if (mActiveSession == null || token != mActiveSession.mToken) {
                 Slog.w(TAG, "startVoiceActivity does not match active session");
@@ -230,16 +230,16 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             intent = new Intent(intent);
             intent.addCategory(Intent.CATEGORY_VOICE);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-            return mAtm.startVoiceActivity(mComponent.getPackageName(), callingPid, callingUid,
-                    intent, resolvedType, mActiveSession.mSession, mActiveSession.mInteractor,
-                    0, null, null, mUser);
+            return mAtm.startVoiceActivity(mComponent.getPackageName(), callingFeatureId,
+                    callingPid, callingUid, intent, resolvedType, mActiveSession.mSession,
+                    mActiveSession.mInteractor, 0, null, null, mUser);
         } catch (RemoteException e) {
             throw new IllegalStateException("Unexpected remote error", e);
         }
     }
 
-    public int startAssistantActivityLocked(int callingPid, int callingUid, IBinder token,
-            Intent intent, String resolvedType) {
+    public int startAssistantActivityLocked(@Nullable String callingFeatureId, int callingPid,
+            int callingUid, IBinder token, Intent intent, String resolvedType) {
         try {
             if (mActiveSession == null || token != mActiveSession.mToken) {
                 Slog.w(TAG, "startAssistantActivity does not match active session");
@@ -253,8 +253,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             final ActivityOptions options = ActivityOptions.makeBasic();
             options.setLaunchActivityType(ACTIVITY_TYPE_ASSISTANT);
-            return mAtm.startAssistantActivity(mComponent.getPackageName(), callingPid, callingUid,
-                    intent, resolvedType, options.toBundle(), mUser);
+            return mAtm.startAssistantActivity(mComponent.getPackageName(), callingFeatureId,
+                    callingPid, callingUid, intent, resolvedType, options.toBundle(), mUser);
         } catch (RemoteException e) {
             throw new IllegalStateException("Unexpected remote error", e);
         }

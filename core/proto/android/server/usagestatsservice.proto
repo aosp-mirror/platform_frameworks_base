@@ -93,6 +93,8 @@ message IntervalStatsProto {
     optional int32 task_root_package_index = 15;
     // task_root_class_index contains the index + 1 of the task root class name in the string pool
     optional int32 task_root_class_index = 16;
+    // locus_id_index contains the index + 1 of the locus id in the string pool
+    optional int32 locus_id_index = 17;
   }
 
   // The following fields contain supplemental data used to build IntervalStats, such as a string

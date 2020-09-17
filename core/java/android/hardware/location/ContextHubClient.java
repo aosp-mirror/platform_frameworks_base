@@ -20,12 +20,12 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.os.RemoteException;
-
-import com.android.internal.util.Preconditions;
+import android.util.Log;
 
 import dalvik.system.CloseGuard;
 
 import java.io.Closeable;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -38,6 +38,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 @SystemApi
 public class ContextHubClient implements Closeable {
+    private static final String TAG = "ContextHubClient";
+
     /*
      * The proxy to the client interface at the service.
      */
@@ -77,7 +79,7 @@ public class ContextHubClient implements Closeable {
      * @param clientProxy the proxy of the client at the service
      */
     /* package */ void setClientProxy(IContextHubClient clientProxy) {
-        Preconditions.checkNotNull(clientProxy, "IContextHubClient cannot be null");
+        Objects.requireNonNull(clientProxy, "IContextHubClient cannot be null");
         if (mClientProxy != null) {
             throw new IllegalStateException("Cannot change client proxy multiple times");
         }
@@ -134,10 +136,21 @@ public class ContextHubClient implements Closeable {
      * @see NanoAppMessage
      * @see ContextHubTransaction.Result
      */
-    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.LOCATION_HARDWARE,
+            android.Manifest.permission.ACCESS_CONTEXT_HUB
+    })
     @ContextHubTransaction.Result
     public int sendMessageToNanoApp(@NonNull NanoAppMessage message) {
-        Preconditions.checkNotNull(message, "NanoAppMessage cannot be null");
+        Objects.requireNonNull(message, "NanoAppMessage cannot be null");
+
+        int maxPayloadBytes = mAttachedHub.getMaxPacketLengthBytes();
+        byte[] payload = message.getMessageBody();
+        if (payload != null && payload.length > maxPayloadBytes) {
+            Log.e(TAG, "Message (" + payload.length + " bytes) exceeds max payload length ("
+                    + maxPayloadBytes + " bytes)");
+            return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
+        }
 
         try {
             return mClientProxy.sendMessageToNanoApp(message);

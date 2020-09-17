@@ -30,6 +30,7 @@ import com.android.systemui.SysuiTestCase;
 
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -187,6 +188,30 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
                 .isFalse();
     }
 
+    @Test
+    public void needReinflate_bothConversation() {
+        assertThat(NotificationUiAdjustment.needReinflate(
+                createUiAdjustmentForConversation("first", true),
+                createUiAdjustmentForConversation("first", true)))
+                .isFalse();
+    }
+
+    @Test
+    public void needReinflate_neitherConversation() {
+        assertThat(NotificationUiAdjustment.needReinflate(
+                createUiAdjustmentForConversation("first", false),
+                createUiAdjustmentForConversation("first", false)))
+                .isFalse();
+    }
+
+    @Test
+    public void needReinflate_differentIsConversation() {
+        assertThat(NotificationUiAdjustment.needReinflate(
+                createUiAdjustmentForConversation("first", false),
+                createUiAdjustmentForConversation("first", true)))
+                .isTrue();
+    }
+
     private Notification.Action.Builder createActionBuilder(
             String title, int drawableRes, PendingIntent pendingIntent) {
         return new Notification.Action.Builder(
@@ -199,11 +224,16 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
 
     private NotificationUiAdjustment createUiAdjustmentFromSmartActions(
             String key, List<Notification.Action> actions) {
-        return new NotificationUiAdjustment(key, actions, new CharSequence[0]);
+        return new NotificationUiAdjustment(key, actions, null, false);
     }
 
     private NotificationUiAdjustment createUiAdjustmentFromSmartReplies(
             String key, CharSequence[] replies) {
-        return new NotificationUiAdjustment(key, Collections.emptyList(), replies);
+        return new NotificationUiAdjustment(key, null, Arrays.asList(replies), false);
+    }
+
+    private NotificationUiAdjustment createUiAdjustmentForConversation(
+            String key, boolean isConversation) {
+        return new NotificationUiAdjustment(key, null, null, isConversation);
     }
 }

@@ -47,6 +47,7 @@ public class ServiceListing {
     private final String mIntentAction;
     private final String mPermission;
     private final String mNoun;
+    private final boolean mAddDeviceLockedFlags;
     private final HashSet<ComponentName> mEnabledServices = new HashSet<>();
     private final List<ServiceInfo> mServices = new ArrayList<>();
     private final List<Callback> mCallbacks = new ArrayList<>();
@@ -54,7 +55,8 @@ public class ServiceListing {
     private boolean mListening;
 
     private ServiceListing(Context context, String tag,
-            String setting, String intentAction, String permission, String noun) {
+            String setting, String intentAction, String permission, String noun,
+            boolean addDeviceLockedFlags) {
         mContentResolver = context.getContentResolver();
         mContext = context;
         mTag = tag;
@@ -62,6 +64,7 @@ public class ServiceListing {
         mIntentAction = intentAction;
         mPermission = permission;
         mNoun = noun;
+        mAddDeviceLockedFlags = addDeviceLockedFlags;
     }
 
     public void addCallback(Callback callback) {
@@ -125,11 +128,15 @@ public class ServiceListing {
         mServices.clear();
         final int user = ActivityManager.getCurrentUser();
 
+        int flags = PackageManager.GET_SERVICES | PackageManager.GET_META_DATA;
+        if (mAddDeviceLockedFlags) {
+            flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE
+                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+        }
+
         final PackageManager pmWrapper = mContext.getPackageManager();
         List<ResolveInfo> installedServices = pmWrapper.queryIntentServicesAsUser(
-                new Intent(mIntentAction),
-                PackageManager.GET_SERVICES | PackageManager.GET_META_DATA,
-                user);
+                new Intent(mIntentAction), flags, user);
 
         for (ResolveInfo resolveInfo : installedServices) {
             ServiceInfo info = resolveInfo.serviceInfo;
@@ -186,6 +193,7 @@ public class ServiceListing {
         private String mIntentAction;
         private String mPermission;
         private String mNoun;
+        private boolean mAddDeviceLockedFlags = false;
 
         public Builder(Context context) {
             mContext = context;
@@ -216,8 +224,19 @@ public class ServiceListing {
             return this;
         }
 
+        /**
+         * Set to true to add support for both MATCH_DIRECT_BOOT_AWARE and
+         * MATCH_DIRECT_BOOT_UNAWARE flags when querying PackageManager. Required to get results
+         * prior to the user unlocking the device for the first time.
+         */
+        public Builder setAddDeviceLockedFlags(boolean addDeviceLockedFlags) {
+            mAddDeviceLockedFlags = addDeviceLockedFlags;
+            return this;
+        }
+
         public ServiceListing build() {
-            return new ServiceListing(mContext, mTag, mSetting, mIntentAction, mPermission, mNoun);
+            return new ServiceListing(mContext, mTag, mSetting, mIntentAction, mPermission, mNoun,
+                    mAddDeviceLockedFlags);
         }
     }
 }

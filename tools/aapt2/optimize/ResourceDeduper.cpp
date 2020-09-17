@@ -63,13 +63,14 @@ class DominatedKeyValueRemover : public DominatorTree::BottomUpVisitor {
     // Compare compatible configs for this entry and ensure the values are
     // equivalent.
     const ConfigDescription& node_configuration = node_value->config;
-    for (const auto& sibling : entry_->values) {
-      if (!sibling->value) {
+    for (const auto& sibling : parent->children()) {
+      ResourceConfigValue* sibling_value = sibling->value();
+      if (!sibling_value->value) {
         // Sibling was already removed.
         continue;
       }
-      if (node_configuration.IsCompatibleWith(sibling->config) &&
-          !node_value->value->Equals(sibling->value.get())) {
+      if (node_configuration.IsCompatibleWith(sibling_value->config) &&
+          !node_value->value->Equals(sibling_value->value.get())) {
         // The configurations are compatible, but the value is
         // different, so we can't remove this value.
         return;

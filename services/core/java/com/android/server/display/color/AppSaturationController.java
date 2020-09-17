@@ -17,6 +17,7 @@
 package com.android.server.display.color;
 
 import android.annotation.UserIdInt;
+import android.util.ArrayMap;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -61,11 +62,12 @@ class AppSaturationController {
      * Set the saturation level ({@code ColorDisplayManager#SaturationLevel} constant for a given
      * package name and userId.
      */
-    public boolean setSaturationLevel(String packageName, @UserIdInt int userId,
+    public boolean setSaturationLevel(String callingPackageName, String affectedPackageName,
+            @UserIdInt int userId,
             int saturationLevel) {
         synchronized (mLock) {
-            return getSaturationControllerLocked(packageName, userId)
-                    .setSaturationLevel(saturationLevel);
+            return getSaturationControllerLocked(affectedPackageName, userId)
+                    .setSaturationLevel(callingPackageName, saturationLevel);
         }
     }
 
@@ -148,13 +150,19 @@ class AppSaturationController {
 
     private static class SaturationController {
 
+        private static final int FULL_SATURATION = 100;
+
         private final List<WeakReference<ColorTransformController>> mControllerRefs =
                 new ArrayList<>();
-        private int mSaturationLevel = 100;
+        private final ArrayMap<String, Integer> mSaturationLevels = new ArrayMap<>();
         private float[] mTransformMatrix = new float[9];
 
-        private boolean setSaturationLevel(int saturationLevel) {
-            mSaturationLevel = saturationLevel;
+        private boolean setSaturationLevel(String callingPackageName, int saturationLevel) {
+            if (saturationLevel == FULL_SATURATION) {
+                mSaturationLevels.remove(callingPackageName);
+            } else {
+                mSaturationLevels.put(callingPackageName, saturationLevel);
+            }
             if (!mControllerRefs.isEmpty()) {
                 return updateState();
             }
@@ -163,17 +171,27 @@ class AppSaturationController {
 
         private boolean addColorTransformController(
                 WeakReference<ColorTransformController> controller) {
+            clearExpiredReferences();
             mControllerRefs.add(controller);
-            if (mSaturationLevel != 100) {
+            if (!mSaturationLevels.isEmpty()) {
                 return updateState();
-            } else {
-                clearExpiredReferences();
             }
             return false;
         }
 
+        private int calculateSaturationLevel() {
+            int saturationLevel = FULL_SATURATION;
+            for (int i = 0; i < mSaturationLevels.size(); i++) {
+                final int level = mSaturationLevels.valueAt(i);
+                if (level < saturationLevel) {
+                    saturationLevel = level;
+                }
+            }
+            return saturationLevel;
+        }
+
         private boolean updateState() {
-            computeGrayscaleTransformMatrix(mSaturationLevel / 100f, mTransformMatrix);
+            computeGrayscaleTransformMatrix(calculateSaturationLevel() / 100f, mTransformMatrix);
 
             boolean updated = false;
             final Iterator<WeakReference<ColorTransformController>> iterator = mControllerRefs
@@ -190,7 +208,6 @@ class AppSaturationController {
                 }
             }
             return updated;
-
         }
 
         private void clearExpiredReferences() {
@@ -206,7 +223,7 @@ class AppSaturationController {
         }
 
         private void dump(PrintWriter pw) {
-            pw.println("            mSaturationLevel: " + mSaturationLevel);
+            pw.println("            mSaturationLevels: " + mSaturationLevels);
             pw.println("            mControllerRefs count: " + mControllerRefs.size());
         }
     }

@@ -56,9 +56,10 @@ public final class UsbStrings {
         sDescriptorNames.put(UsbDescriptor.DESCRIPTORTYPE_HID, "HID");
         sDescriptorNames.put(UsbDescriptor.DESCRIPTORTYPE_REPORT, "Report");
         sDescriptorNames.put(UsbDescriptor.DESCRIPTORTYPE_PHYSICAL, "Physical");
-        sDescriptorNames.put(UsbDescriptor.DESCRIPTORTYPE_AUDIO_INTERFACE,
-                "Audio Class Interface");
-        sDescriptorNames.put(UsbDescriptor.DESCRIPTORTYPE_AUDIO_ENDPOINT, "Audio Class Endpoint");
+        sDescriptorNames.put(UsbDescriptor.DESCRIPTORTYPE_CLASSSPECIFIC_INTERFACE,
+                "Class-specific Interface");
+        sDescriptorNames.put(UsbDescriptor.DESCRIPTORTYPE_CLASSSPECIFIC_ENDPOINT,
+                "Class-specific Endpoint");
         sDescriptorNames.put(UsbDescriptor.DESCRIPTORTYPE_HUB, "Hub");
         sDescriptorNames.put(UsbDescriptor.DESCRIPTORTYPE_SUPERSPEED_HUB, "Superspeed Hub");
         sDescriptorNames.put(UsbDescriptor.DESCRIPTORTYPE_ENDPOINT_COMPANION,

@@ -45,6 +45,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.PixelCopy;
@@ -62,6 +63,7 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Android magnifier widget. Can be used by any view which is attached to a window.
@@ -75,6 +77,8 @@ public final class Magnifier {
     // the Handler of this Thread when the copy is finished.
     private static final HandlerThread sPixelCopyHandlerThread =
             new HandlerThread("magnifier pixel copy result handler");
+    // The width of the ramp region in DP on the left & right sides of the fish-eye effect.
+    private static final float FISHEYE_RAMP_WIDTH = 12f;
 
     // The view to which this magnifier is attached.
     private final View mView;
@@ -85,7 +89,7 @@ public final class Magnifier {
     // The width of the window containing the magnifier.
     private final int mWindowWidth;
     // The height of the window containing the magnifier.
-    private final int mWindowHeight;
+    private int mWindowHeight;
     // The zoom applied to the view region copied to the magnifier view.
     private float mZoom;
     // The width of the content that will be copied to the magnifier.
@@ -136,6 +140,20 @@ public final class Magnifier {
     // Lock to synchronize between the UI thread and the thread that handles pixel copy results.
     // Only sync mWindow writes from UI thread with mWindow reads from sPixelCopyHandlerThread.
     private final Object mLock = new Object();
+
+    // Members for new styled magnifier (Eloquent style).
+
+    // Whether the magnifier is in new style.
+    private boolean mIsFishEyeStyle;
+    // The width of the cut region on the left edge of the pixel copy source rect.
+    private int mLeftCutWidth = 0;
+    // The width of the cut region on the right edge of the pixel copy source rect.
+    private int mRightCutWidth = 0;
+    // The horizontal bounds of the content source in pixels, relative to the view.
+    private int mLeftBound = Integer.MIN_VALUE;
+    private int mRightBound = Integer.MAX_VALUE;
+    // The width of the ramp region in pixels on the left & right sides of the fish-eye effect.
+    private final int mRamp;
 
     /**
      * Initializes a magnifier.
@@ -195,8 +213,14 @@ public final class Magnifier {
         mWindowWidth = params.mWidth;
         mWindowHeight = params.mHeight;
         mZoom = params.mZoom;
-        mSourceWidth = Math.round(mWindowWidth / mZoom);
-        mSourceHeight = Math.round(mWindowHeight / mZoom);
+        mIsFishEyeStyle = params.mIsFishEyeStyle;
+        if (params.mSourceWidth > 0 && params.mSourceHeight > 0) {
+            mSourceWidth = params.mSourceWidth;
+            mSourceHeight = params.mSourceHeight;
+        } else {
+            mSourceWidth = Math.round(mWindowWidth / mZoom);
+            mSourceHeight = Math.round(mWindowHeight / mZoom);
+        }
         mWindowElevation = params.mElevation;
         mWindowCornerRadius = params.mCornerRadius;
         mOverlay = params.mOverlay;
@@ -211,10 +235,24 @@ public final class Magnifier {
         mBottomContentBound = params.mBottomContentBound;
         // The view's surface coordinates will not be updated until the magnifier is first shown.
         mViewCoordinatesInSurface = new int[2];
+        mRamp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, FISHEYE_RAMP_WIDTH,
+                mView.getContext().getResources().getDisplayMetrics());
     }
 
     static {
         sPixelCopyHandlerThread.start();
+    }
+
+    /**
+     * Sets the horizontal bounds of the source when showing the magnifier.
+     * This is used for new style magnifier. e.g. limit the source bounds by the text line bounds.
+     *
+     * @param left the left of the bounds, relative to the view.
+     * @param right the right of the bounds, relative to the view.
+     */
+    void setSourceHorizontalBounds(int left, int right) {
+        mLeftBound = left;
+        mRightBound = right;
     }
 
     /**
@@ -262,20 +300,76 @@ public final class Magnifier {
 
         obtainSurfaces();
         obtainContentCoordinates(sourceCenterX, sourceCenterY);
+
+        int startX = mClampedCenterZoomCoords.x - mSourceWidth / 2;
+        final int startY = mClampedCenterZoomCoords.y - mSourceHeight / 2;
+
+        if (mIsFishEyeStyle) {
+            // The magnifier center is the same as source center in new style.
+            magnifierCenterX = mClampedCenterZoomCoords.x - mViewCoordinatesInSurface[0];
+            magnifierCenterY = mClampedCenterZoomCoords.y - mViewCoordinatesInSurface[1];
+
+            // mLeftBound & mRightBound (typically the text line left/right) is for magnified
+            // content. However the PixelCopy requires the pre-magnified bounds.
+            // The below logic calculates the leftBound & rightBound for the pre-magnified bounds.
+            final float rampPre =
+                    (mSourceWidth - (mSourceWidth - 2 * mRamp) / mZoom) / 2;
+
+            // Calculates the pre-zoomed left edge.
+            // The leftEdge moves from the left of view towards to sourceCenterX, considering the
+            // fisheye-like zooming.
+            final float x0 = sourceCenterX - mSourceWidth / 2;
+            final float rampX0 = x0 + mRamp;
+            float leftEdge = 0;
+            if (leftEdge > rampX0) {
+                // leftEdge is in the zoom range, the distance from leftEdge to sourceCenterX
+                // should reduce per mZoom.
+                leftEdge = sourceCenterX - (sourceCenterX - leftEdge) / mZoom;
+            } else if (leftEdge > x0) {
+                // leftEdge is in the ramp range, the distance from leftEdge to rampX0 should
+                // increase per ramp zoom (ramp / rampPre).
+                leftEdge = x0 + rampPre - (rampX0 - leftEdge) * rampPre / mRamp;
+            }
+            int leftBound = Math.min(Math.max((int) leftEdge, mLeftBound), mRightBound);
+
+            // Calculates the pre-zoomed right edge.
+            // The rightEdge moves from the right of view towards to sourceCenterX, considering the
+            // fisheye-like zooming.
+            final float x1 = sourceCenterX + mSourceWidth / 2;
+            final float rampX1 = x1 - mRamp;
+            float rightEdge = mView.getWidth();
+            if (rightEdge < rampX1) {
+                // rightEdge is in the zoom range, the distance from rightEdge to sourceCenterX
+                // should reduce per mZoom.
+                rightEdge = sourceCenterX + (rightEdge - sourceCenterX) / mZoom;
+            } else if (rightEdge < x1) {
+                // rightEdge is in the ramp range, the distance from rightEdge to rampX1 should
+                // increase per ramp zoom (ramp / rampPre).
+                rightEdge = x1 - rampPre + (rightEdge - rampX1) * rampPre / mRamp;
+            }
+            int rightBound = Math.max(leftBound, Math.min((int) rightEdge, mRightBound));
+
+            // Gets the startX for new style, which should be bounded by the horizontal bounds.
+            // Also calculates the left/right cut width for pixel copy.
+            leftBound = Math.max(leftBound + mViewCoordinatesInSurface[0], 0);
+            rightBound = Math.min(
+                rightBound + mViewCoordinatesInSurface[0], mContentCopySurface.mWidth);
+            mLeftCutWidth = Math.max(0, leftBound - startX);
+            mRightCutWidth = Math.max(0, startX + mSourceWidth - rightBound);
+            startX = Math.max(startX, leftBound);
+        }
         obtainWindowCoordinates(magnifierCenterX, magnifierCenterY);
 
-        final int startX = mClampedCenterZoomCoords.x - mSourceWidth / 2;
-        final int startY = mClampedCenterZoomCoords.y - mSourceHeight / 2;
         if (sourceCenterX != mPrevShowSourceCoords.x || sourceCenterY != mPrevShowSourceCoords.y
                 || mDirtyState) {
             if (mWindow == null) {
                 synchronized (mLock) {
                     mWindow = new InternalPopupWindow(mView.getContext(), mView.getDisplay(),
-                            mParentSurface.mSurfaceControl, mWindowWidth, mWindowHeight,
-                            mWindowElevation, mWindowCornerRadius,
+                            mParentSurface.mSurfaceControl, mWindowWidth, mWindowHeight, mZoom,
+                            mRamp, mWindowElevation, mWindowCornerRadius,
                             mOverlay != null ? mOverlay : new ColorDrawable(Color.TRANSPARENT),
                             Handler.getMain() /* draw the magnifier on the UI thread */, mLock,
-                            mCallback);
+                            mCallback, mIsFishEyeStyle);
                 }
             }
             performPixelCopy(startX, startY, true /* update window position */);
@@ -384,9 +478,24 @@ public final class Magnifier {
     public void setZoom(@FloatRange(from = 0f) float zoom) {
         Preconditions.checkArgumentPositive(zoom, "Zoom should be positive");
         mZoom = zoom;
-        mSourceWidth = Math.round(mWindowWidth / mZoom);
+        mSourceWidth = mIsFishEyeStyle ? mWindowWidth : Math.round(mWindowWidth / mZoom);
         mSourceHeight = Math.round(mWindowHeight / mZoom);
         mDirtyState = true;
+    }
+
+    /**
+     * Updates the factors of source which may impact the magnifier's size.
+     * This can be called while the magnifier is showing and moving.
+     * @param sourceHeight the new source height.
+     * @param zoom the new zoom factor.
+     */
+    void updateSourceFactors(final int sourceHeight, final float zoom) {
+        mZoom = zoom;
+        mSourceHeight = sourceHeight;
+        mWindowHeight = (int) (sourceHeight * zoom);
+        if (mWindow != null) {
+            mWindow.updateContentFactors(mWindowHeight, zoom);
+        }
     }
 
     /**
@@ -631,8 +740,10 @@ public final class Magnifier {
         resolvedBottom = Math.max(resolvedBottom, resolvedTop + mSourceHeight);
 
         // Finally compute the coordinates of the source center.
-        mClampedCenterZoomCoords.x = Math.max(resolvedLeft + mSourceWidth / 2, Math.min(
-                zoomCenterX, resolvedRight - mSourceWidth / 2));
+        mClampedCenterZoomCoords.x = mIsFishEyeStyle
+                ? Math.max(resolvedLeft, Math.min(zoomCenterX, resolvedRight))
+                : Math.max(resolvedLeft + mSourceWidth / 2, Math.min(
+                        zoomCenterX, resolvedRight - mSourceWidth / 2));
         mClampedCenterZoomCoords.y = Math.max(resolvedTop + mSourceHeight / 2, Math.min(
                 zoomCenterY, resolvedBottom - mSourceHeight / 2));
     }
@@ -675,11 +786,22 @@ public final class Magnifier {
         // Perform the pixel copy.
         mPixelCopyRequestRect.set(startXInSurface,
                 startYInSurface,
-                startXInSurface + mSourceWidth,
+                startXInSurface + mSourceWidth - mLeftCutWidth - mRightCutWidth,
                 startYInSurface + mSourceHeight);
+        mPrevStartCoordsInSurface.x = startXInSurface;
+        mPrevStartCoordsInSurface.y = startYInSurface;
+        mDirtyState = false;
+
         final InternalPopupWindow currentWindowInstance = mWindow;
+        if (mPixelCopyRequestRect.width() == 0) {
+            // If the copy rect is empty, updates an empty bitmap to the window.
+            mWindow.updateContent(
+                    Bitmap.createBitmap(mSourceWidth, mSourceHeight, Bitmap.Config.ALPHA_8));
+            return;
+        }
         final Bitmap bitmap =
-                Bitmap.createBitmap(mSourceWidth, mSourceHeight, Bitmap.Config.ARGB_8888);
+                Bitmap.createBitmap(mSourceWidth - mLeftCutWidth - mRightCutWidth,
+                        mSourceHeight, Bitmap.Config.ARGB_8888);
         PixelCopy.request(mContentCopySurface.mSurface, mPixelCopyRequestRect, bitmap,
                 result -> {
                     if (result != PixelCopy.SUCCESS) {
@@ -693,15 +815,25 @@ public final class Magnifier {
                         }
                         if (updateWindowPosition) {
                             // TODO: pull the position update outside #performPixelCopy
-                            mWindow.setContentPositionForNextDraw(windowCoords.x, windowCoords.y);
+                            mWindow.setContentPositionForNextDraw(windowCoords.x,
+                                    windowCoords.y);
                         }
-                        mWindow.updateContent(bitmap);
+                        if (bitmap.getWidth() < mSourceWidth) {
+                            // When bitmap width has been cut, re-fills it with full width bitmap.
+                            // This only happens in new styled magnifier.
+                            final Bitmap newBitmap = Bitmap.createBitmap(
+                                    mSourceWidth, bitmap.getHeight(), bitmap.getConfig());
+                            final Canvas can = new Canvas(newBitmap);
+                            final Rect dstRect = new Rect(mLeftCutWidth, 0,
+                                    mSourceWidth - mRightCutWidth, bitmap.getHeight());
+                            can.drawBitmap(bitmap, null, dstRect, null);
+                            mWindow.updateContent(newBitmap);
+                        } else {
+                            mWindow.updateContent(bitmap);
+                        }
                     }
                 },
                 sPixelCopyHandlerThread.getThreadHandler());
-        mPrevStartCoordsInSurface.x = startXInSurface;
-        mPrevStartCoordsInSurface.y = startYInSurface;
-        mDirtyState = false;
     }
 
     private void onPixelCopyFailed() {
@@ -786,10 +918,7 @@ public final class Magnifier {
         private final Display mDisplay;
         // The size of the content of the magnifier.
         private final int mContentWidth;
-        private final int mContentHeight;
-        // The size of the allocated surface.
-        private final int mSurfaceWidth;
-        private final int mSurfaceHeight;
+        private int mContentHeight;
         // The insets of the content inside the allocated surface.
         private final int mOffsetX;
         private final int mOffsetY;
@@ -798,6 +927,7 @@ public final class Magnifier {
         // The surface we allocate for the magnifier content + shadow.
         private final SurfaceSession mSurfaceSession;
         private final SurfaceControl mSurfaceControl;
+        private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
         private final Surface mSurface;
         // The renderer used for the allocated surface.
         private final ThreadedRenderer.SimpleRenderer mRenderer;
@@ -811,9 +941,6 @@ public final class Magnifier {
         private final Handler mHandler;
         // The callback to be run after the next draw.
         private Callback mCallback;
-        // The position of the magnifier content when the last draw was requested.
-        private int mLastDrawContentPositionX;
-        private int mLastDrawContentPositionY;
 
         // Members below describe the state of the magnifier. Reads/writes to them
         // have to be synchronized between the UI thread and the thread that handles
@@ -834,10 +961,22 @@ public final class Magnifier {
         // The current content of the magnifier. It is mBitmap + mOverlay, only used for testing.
         private Bitmap mCurrentContent;
 
+        private float mZoom;
+        // The width of the ramp region in pixels on the left & right sides of the fish-eye effect.
+        private final int mRamp;
+        // Whether is in the new magnifier style.
+        private boolean mIsFishEyeStyle;
+        // The mesh matrix for the fish-eye effect.
+        private float[] mMeshLeft;
+        private float[] mMeshRight;
+        private int mMeshWidth;
+        private int mMeshHeight;
+
         InternalPopupWindow(final Context context, final Display display,
                 final SurfaceControl parentSurfaceControl, final int width, final int height,
-                final float elevation, final float cornerRadius, final Drawable overlay,
-                final Handler handler, final Object lock, final Callback callback) {
+                final float zoom, final int ramp, final float elevation, final float cornerRadius,
+                final Drawable overlay, final Handler handler, final Object lock,
+                final Callback callback, final boolean isFishEyeStyle) {
             mDisplay = display;
             mOverlay = overlay;
             mLock = lock;
@@ -845,18 +984,21 @@ public final class Magnifier {
 
             mContentWidth = width;
             mContentHeight = height;
+            mZoom = zoom;
+            mRamp = ramp;
             mOffsetX = (int) (1.05f * elevation);
             mOffsetY = (int) (1.05f * elevation);
             // Setup the surface we will use for drawing the content and shadow.
-            mSurfaceWidth = mContentWidth + 2 * mOffsetX;
-            mSurfaceHeight = mContentHeight + 2 * mOffsetY;
+            final int surfaceWidth = mContentWidth + 2 * mOffsetX;
+            final int surfaceHeight = mContentHeight + 2 * mOffsetY;
             mSurfaceSession = new SurfaceSession();
             mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
                     .setFormat(PixelFormat.TRANSLUCENT)
-                    .setBufferSize(mSurfaceWidth, mSurfaceHeight)
+                    .setBufferSize(surfaceWidth, surfaceHeight)
                     .setName("magnifier surface")
                     .setFlags(SurfaceControl.HIDDEN)
                     .setParent(parentSurfaceControl)
+                    .setCallsite("InternalPopupWindow")
                     .build();
             mSurface = new Surface();
             mSurface.copyFrom(mSurfaceControl);
@@ -882,11 +1024,11 @@ public final class Magnifier {
 
             final RecordingCanvas canvas = mRenderer.getRootNode().beginRecording(width, height);
             try {
-                canvas.insertReorderBarrier();
+                canvas.enableZ();
                 canvas.drawRenderNode(mBitmapRenderNode);
-                canvas.insertInorderBarrier();
+                canvas.disableZ();
                 canvas.drawRenderNode(mOverlayRenderNode);
-                canvas.insertInorderBarrier();
+                canvas.disableZ();
             } finally {
                 mRenderer.getRootNode().endRecording();
             }
@@ -900,6 +1042,88 @@ public final class Magnifier {
             mHandler = handler;
             mMagnifierUpdater = this::doDraw;
             mFrameDrawScheduled = false;
+            mIsFishEyeStyle = isFishEyeStyle;
+
+            if (mIsFishEyeStyle) {
+                createMeshMatrixForFishEyeEffect();
+            }
+        }
+
+        /**
+         * Updates the factors of content which may resize the window.
+         * @param contentHeight the new height of content.
+         * @param zoom the new zoom factor.
+         */
+        private void updateContentFactors(final int contentHeight, final float zoom) {
+            if (mContentHeight == contentHeight && mZoom == zoom) {
+              return;
+            }
+            if (mContentHeight < contentHeight) {
+                // Grows the surface height as necessary.
+                new SurfaceControl.Transaction().setBufferSize(
+                        mSurfaceControl, mContentWidth, contentHeight).apply();
+                mSurface.copyFrom(mSurfaceControl);
+                mRenderer.setSurface(mSurface);
+
+                final Outline outline = new Outline();
+                outline.setRoundRect(0, 0, mContentWidth, contentHeight, 0);
+                outline.setAlpha(1.0f);
+
+                mBitmapRenderNode.setLeftTopRightBottom(mOffsetX, mOffsetY,
+                        mOffsetX + mContentWidth, mOffsetY + contentHeight);
+                mBitmapRenderNode.setOutline(outline);
+
+                mOverlayRenderNode.setLeftTopRightBottom(mOffsetX, mOffsetY,
+                        mOffsetX + mContentWidth, mOffsetY + contentHeight);
+                mOverlayRenderNode.setOutline(outline);
+
+                final RecordingCanvas canvas =
+                        mRenderer.getRootNode().beginRecording(mContentWidth, contentHeight);
+                try {
+                    canvas.enableZ();
+                    canvas.drawRenderNode(mBitmapRenderNode);
+                    canvas.disableZ();
+                    canvas.drawRenderNode(mOverlayRenderNode);
+                    canvas.disableZ();
+                } finally {
+                    mRenderer.getRootNode().endRecording();
+                }
+            }
+            mContentHeight = contentHeight;
+            mZoom = zoom;
+            fillMeshMatrix();
+        }
+
+        private void createMeshMatrixForFishEyeEffect() {
+            mMeshWidth = 1;
+            mMeshHeight = 6;
+            mMeshLeft = new float[2 * (mMeshWidth + 1) * (mMeshHeight + 1)];
+            mMeshRight = new float[2 * (mMeshWidth + 1) * (mMeshHeight + 1)];
+            fillMeshMatrix();
+        }
+
+        private void fillMeshMatrix() {
+            mMeshWidth = 1;
+            mMeshHeight = 6;
+            final float w = mContentWidth;
+            final float h = mContentHeight;
+            final float h0 = h / mZoom;
+            final float dh = h - h0;
+            for (int i = 0; i < 2 * (mMeshWidth + 1) * (mMeshHeight + 1); i += 2) {
+                // Calculates X value.
+                final int colIndex = i % (2 * (mMeshWidth + 1)) / 2;
+                mMeshLeft[i] = (float) colIndex * mRamp / mMeshWidth;
+                mMeshRight[i] = w - mRamp + colIndex * mRamp / mMeshWidth;
+
+                // Calculates Y value.
+                final int rowIndex = i / 2 / (mMeshWidth + 1);
+                final float hl = h0 + dh * colIndex / mMeshWidth;
+                final float yl = (h - hl) / 2;
+                mMeshLeft[i + 1] = yl + hl * rowIndex / mMeshHeight;
+                final float hr = h - dh * colIndex / mMeshWidth;
+                final float yr = (h - hr) / 2;
+                mMeshRight[i + 1] = yr + hr * rowIndex / mMeshHeight;
+            }
         }
 
         private RenderNode createRenderNodeForBitmap(final String name,
@@ -1039,6 +1263,7 @@ public final class Magnifier {
             if (mBitmap != null) {
                 mBitmap.recycle();
             }
+            mOverlay.setCallback(null);
         }
 
         private void doDraw() {
@@ -1056,15 +1281,35 @@ public final class Magnifier {
                 final RecordingCanvas canvas =
                         mBitmapRenderNode.beginRecording(mContentWidth, mContentHeight);
                 try {
-                    final Rect srcRect = new Rect(0, 0, mBitmap.getWidth(), mBitmap.getHeight());
-                    final Rect dstRect = new Rect(0, 0, mContentWidth, mContentHeight);
+                    final int w = mBitmap.getWidth();
+                    final int h = mBitmap.getHeight();
                     final Paint paint = new Paint();
                     paint.setFilterBitmap(true);
-                    canvas.drawBitmap(mBitmap, srcRect, dstRect, paint);
+                    if (mIsFishEyeStyle) {
+                        final int margin =
+                            (int)((mContentWidth - (mContentWidth - 2 * mRamp) / mZoom) / 2);
+
+                        // Draws the middle part.
+                        final Rect srcRect = new Rect(margin, 0, w - margin, h);
+                        final Rect dstRect = new Rect(
+                            mRamp, 0, mContentWidth - mRamp, mContentHeight);
+                        canvas.drawBitmap(mBitmap, srcRect, dstRect, paint);
+
+                        // Draws the left/right parts with mesh matrixes.
+                        canvas.drawBitmapMesh(
+                                Bitmap.createBitmap(mBitmap, 0, 0, margin, h),
+                                mMeshWidth, mMeshHeight, mMeshLeft, 0, null, 0, paint);
+                        canvas.drawBitmapMesh(
+                                Bitmap.createBitmap(mBitmap, w - margin, 0, margin, h),
+                                mMeshWidth, mMeshHeight, mMeshRight, 0, null, 0, paint);
+                    } else {
+                        final Rect srcRect = new Rect(0, 0, w, h);
+                        final Rect dstRect = new Rect(0, 0, mContentWidth, mContentHeight);
+                        canvas.drawBitmap(mBitmap, srcRect, dstRect, paint);
+                    }
                 } finally {
                     mBitmapRenderNode.endRecording();
                 }
-
                 if (mPendingWindowPositionUpdate || mFirstDraw) {
                     // If the window has to be shown or moved, defer this until the next draw.
                     final boolean firstDraw = mFirstDraw;
@@ -1079,24 +1324,26 @@ public final class Magnifier {
                             return;
                         }
                         // Show or move the window at the content draw frame.
-                        SurfaceControl.openTransaction();
-                        mSurfaceControl.deferTransactionUntil(mSurface, frame);
+                        mTransaction.deferTransactionUntil(mSurfaceControl, mSurfaceControl,
+                                frame);
                         if (updateWindowPosition) {
-                            mSurfaceControl.setPosition(pendingX, pendingY);
+                            mTransaction.setPosition(mSurfaceControl, pendingX, pendingY);
                         }
                         if (firstDraw) {
-                            mSurfaceControl.setLayer(SURFACE_Z);
-                            mSurfaceControl.show();
+                            mTransaction.setLayer(mSurfaceControl, SURFACE_Z)
+                                .show(mSurfaceControl);
+
                         }
-                        SurfaceControl.closeTransaction();
+                        mTransaction.apply();
                     };
-                    mRenderer.setLightCenter(mDisplay, pendingX, pendingY);
+                    if (!mIsFishEyeStyle) {
+                        // The new style magnifier doesn't need the light/shadow.
+                        mRenderer.setLightCenter(mDisplay, pendingX, pendingY);
+                    }
                 } else {
                     callback = null;
                 }
 
-                mLastDrawContentPositionX = mWindowPositionX + mOffsetX;
-                mLastDrawContentPositionY = mWindowPositionY + mOffsetY;
                 mFrameDrawScheduled = false;
             }
 
@@ -1145,13 +1392,16 @@ public final class Magnifier {
         private @SourceBound int mTopContentBound;
         private @SourceBound int mRightContentBound;
         private @SourceBound int  mBottomContentBound;
+        private boolean mIsFishEyeStyle;
+        private int mSourceWidth;
+        private int mSourceHeight;
 
         /**
          * Construct a new builder for {@link Magnifier} objects.
          * @param view the view this magnifier is attached to
          */
         public Builder(@NonNull View view) {
-            mView = Preconditions.checkNotNull(view);
+            mView = Objects.requireNonNull(view);
             applyDefaults();
         }
 
@@ -1173,6 +1423,7 @@ public final class Magnifier {
             mTopContentBound = SOURCE_BOUND_MAX_VISIBLE;
             mRightContentBound = SOURCE_BOUND_MAX_VISIBLE;
             mBottomContentBound = SOURCE_BOUND_MAX_VISIBLE;
+            mIsFishEyeStyle = false;
         }
 
         /**
@@ -1331,6 +1582,25 @@ public final class Magnifier {
             mTopContentBound = top;
             mRightContentBound = right;
             mBottomContentBound = bottom;
+            return this;
+        }
+
+        /**
+         * Sets the source width/height.
+         */
+        @NonNull
+        Builder setSourceSize(int width, int height) {
+            mSourceWidth = width;
+            mSourceHeight = height;
+            return this;
+        }
+
+        /**
+         * Sets the magnifier as the new fish-eye style.
+         */
+        @NonNull
+        Builder setFishEyeStyle() {
+            mIsFishEyeStyle = true;
             return this;
         }
 

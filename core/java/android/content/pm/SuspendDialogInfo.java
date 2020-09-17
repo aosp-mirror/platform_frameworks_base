@@ -19,6 +19,7 @@ package android.content.pm;
 import static android.content.res.Resources.ID_NULL;
 
 import android.annotation.DrawableRes;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
@@ -36,20 +37,21 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Locale;
 import java.util.Objects;
 
 /**
  * A container to describe the dialog to be shown when the user tries to launch a suspended
- * application.
- * The suspending app can customize the dialog's following attributes:
+ * application. The suspending app can customize the dialog's following attributes:
  * <ul>
  * <li>The dialog icon, by providing a resource id.
  * <li>The title text, by providing a resource id.
  * <li>The text of the dialog's body, by providing a resource id or a string.
- * <li>The text on the neutral button which starts the
- * {@link android.content.Intent#ACTION_SHOW_SUSPENDED_APP_DETAILS SHOW_SUSPENDED_APP_DETAILS}
- * activity, by providing a resource id.
+ * <li>The text on the neutral button by providing a resource id.
+ * <li>The action performed on tapping the neutral button. Only {@link #BUTTON_ACTION_UNSUSPEND}
+ * and {@link #BUTTON_ACTION_MORE_DETAILS} are currently supported.
  * </ul>
  * System defaults are used whenever any of these are not provided, or any of the provided resource
  * ids cannot be resolved at the time of displaying the dialog.
@@ -67,12 +69,47 @@ public final class SuspendDialogInfo implements Parcelable {
     private static final String XML_ATTR_DIALOG_MESSAGE_RES_ID = "dialogMessageResId";
     private static final String XML_ATTR_DIALOG_MESSAGE = "dialogMessage";
     private static final String XML_ATTR_BUTTON_TEXT_RES_ID = "buttonTextResId";
+    private static final String XML_ATTR_BUTTON_ACTION = "buttonAction";
 
     private final int mIconResId;
     private final int mTitleResId;
     private final int mDialogMessageResId;
     private final String mDialogMessage;
     private final int mNeutralButtonTextResId;
+    private final int mNeutralButtonAction;
+
+    /**
+     * Used with {@link Builder#setNeutralButtonAction(int)} to create a neutral button that
+     * starts the {@link android.content.Intent#ACTION_SHOW_SUSPENDED_APP_DETAILS} activity.
+     * @see Builder#setNeutralButtonAction(int)
+     */
+    public static final int BUTTON_ACTION_MORE_DETAILS = 0;
+
+    /**
+     * Used with {@link Builder#setNeutralButtonAction(int)} to create a neutral button that
+     * unsuspends the app that the user was trying to launch and continues with the launch. The
+     * system also sends the broadcast
+     * {@link android.content.Intent#ACTION_PACKAGE_UNSUSPENDED_MANUALLY} to the suspending app
+     * when this happens.
+     * @see Builder#setNeutralButtonAction(int)
+     * @see android.content.Intent#ACTION_PACKAGE_UNSUSPENDED_MANUALLY
+     */
+    public static final int BUTTON_ACTION_UNSUSPEND = 1;
+
+    /**
+     * Button actions to specify what happens when the user taps on the neutral button.
+     * To be used with {@link Builder#setNeutralButtonAction(int)}.
+     *
+     * @hide
+     * @see Builder#setNeutralButtonAction(int)
+     */
+    @IntDef(flag = true, prefix = {"BUTTON_ACTION_"}, value = {
+            BUTTON_ACTION_MORE_DETAILS,
+            BUTTON_ACTION_UNSUSPEND
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ButtonAction {
+    }
 
     /**
      * @return the resource id of the icon to be used with the dialog
@@ -102,8 +139,8 @@ public final class SuspendDialogInfo implements Parcelable {
     }
 
     /**
-     * @return the text to be shown in the dialog's body. Returns {@code null} if
-     * {@link #getDialogMessageResId()} returns a valid resource id.
+     * @return the text to be shown in the dialog's body. Returns {@code null} if {@link
+     * #getDialogMessageResId()} returns a valid resource id
      * @hide
      */
     @Nullable
@@ -118,6 +155,15 @@ public final class SuspendDialogInfo implements Parcelable {
     @StringRes
     public int getNeutralButtonTextResId() {
         return mNeutralButtonTextResId;
+    }
+
+    /**
+     * @return The {@link ButtonAction} that happens on tapping this button
+     * @hide
+     */
+    @ButtonAction
+    public int getNeutralButtonAction() {
+        return mNeutralButtonAction;
     }
 
     /**
@@ -138,6 +184,7 @@ public final class SuspendDialogInfo implements Parcelable {
         if (mNeutralButtonTextResId != ID_NULL) {
             XmlUtils.writeIntAttribute(out, XML_ATTR_BUTTON_TEXT_RES_ID, mNeutralButtonTextResId);
         }
+        XmlUtils.writeIntAttribute(out, XML_ATTR_BUTTON_ACTION, mNeutralButtonAction);
     }
 
     /**
@@ -150,6 +197,8 @@ public final class SuspendDialogInfo implements Parcelable {
             final int titleId = XmlUtils.readIntAttribute(in, XML_ATTR_TITLE_RES_ID, ID_NULL);
             final int buttonTextId = XmlUtils.readIntAttribute(in, XML_ATTR_BUTTON_TEXT_RES_ID,
                     ID_NULL);
+            final int buttonAction = XmlUtils.readIntAttribute(in, XML_ATTR_BUTTON_ACTION,
+                    BUTTON_ACTION_MORE_DETAILS);
             final int dialogMessageResId = XmlUtils.readIntAttribute(
                     in, XML_ATTR_DIALOG_MESSAGE_RES_ID, ID_NULL);
             final String dialogMessage = XmlUtils.readStringAttribute(in, XML_ATTR_DIALOG_MESSAGE);
@@ -168,6 +217,7 @@ public final class SuspendDialogInfo implements Parcelable {
             } else if (dialogMessage != null) {
                 dialogInfoBuilder.setMessage(dialogMessage);
             }
+            dialogInfoBuilder.setNeutralButtonAction(buttonAction);
         } catch (Exception e) {
             Slog.e(TAG, "Exception while parsing from xml. Some fields may default", e);
         }
@@ -181,6 +231,7 @@ public final class SuspendDialogInfo implements Parcelable {
         hashCode = 31 * hashCode + mNeutralButtonTextResId;
         hashCode = 31 * hashCode + mDialogMessageResId;
         hashCode = 31 * hashCode + Objects.hashCode(mDialogMessage);
+        hashCode = 31 * hashCode + mNeutralButtonAction;
         return hashCode;
     }
 
@@ -197,6 +248,7 @@ public final class SuspendDialogInfo implements Parcelable {
                 && mTitleResId == otherDialogInfo.mTitleResId
                 && mDialogMessageResId == otherDialogInfo.mDialogMessageResId
                 && mNeutralButtonTextResId == otherDialogInfo.mNeutralButtonTextResId
+                && mNeutralButtonAction == otherDialogInfo.mNeutralButtonAction
                 && Objects.equals(mDialogMessage, otherDialogInfo.mDialogMessage);
     }
 
@@ -228,6 +280,8 @@ public final class SuspendDialogInfo implements Parcelable {
             builder.append(mDialogMessage);
             builder.append("\" ");
         }
+        builder.append("mNeutralButtonAction = ");
+        builder.append(mNeutralButtonAction);
         builder.append("}");
         return builder.toString();
     }
@@ -244,6 +298,7 @@ public final class SuspendDialogInfo implements Parcelable {
         dest.writeInt(mDialogMessageResId);
         dest.writeString(mDialogMessage);
         dest.writeInt(mNeutralButtonTextResId);
+        dest.writeInt(mNeutralButtonAction);
     }
 
     private SuspendDialogInfo(Parcel source) {
@@ -252,6 +307,7 @@ public final class SuspendDialogInfo implements Parcelable {
         mDialogMessageResId = source.readInt();
         mDialogMessage = source.readString();
         mNeutralButtonTextResId = source.readInt();
+        mNeutralButtonAction = source.readInt();
     }
 
     SuspendDialogInfo(Builder b) {
@@ -260,9 +316,11 @@ public final class SuspendDialogInfo implements Parcelable {
         mDialogMessageResId = b.mDialogMessageResId;
         mDialogMessage = (mDialogMessageResId == ID_NULL) ? b.mDialogMessage : null;
         mNeutralButtonTextResId = b.mNeutralButtonTextResId;
+        mNeutralButtonAction = b.mNeutralButtonAction;
     }
 
-    public static final @android.annotation.NonNull Creator<SuspendDialogInfo> CREATOR = new Creator<SuspendDialogInfo>() {
+    public static final @NonNull Creator<SuspendDialogInfo> CREATOR =
+            new Creator<SuspendDialogInfo>() {
         @Override
         public SuspendDialogInfo createFromParcel(Parcel source) {
             return new SuspendDialogInfo(source);
@@ -283,6 +341,7 @@ public final class SuspendDialogInfo implements Parcelable {
         private int mTitleResId = ID_NULL;
         private int mIconResId = ID_NULL;
         private int mNeutralButtonTextResId = ID_NULL;
+        private int mNeutralButtonAction = BUTTON_ACTION_MORE_DETAILS;
 
         /**
          * Set the resource id of the icon to be used. If not provided, no icon will be shown.
@@ -333,8 +392,8 @@ public final class SuspendDialogInfo implements Parcelable {
 
         /**
          * Set the resource id of the dialog message to be shown. If no dialog message is provided
-         * via either this method or {@link #setMessage(String)}, the system will use a
-         * default message.
+         * via either this method or {@link #setMessage(String)}, the system will use a default
+         * message.
          * <p>
          * The system will use {@link android.content.res.Resources#getString(int, Object...)
          * getString} to insert the suspended app name into the message, so an example format string
@@ -353,9 +412,10 @@ public final class SuspendDialogInfo implements Parcelable {
         }
 
         /**
-         * Set the resource id of text to be shown on the neutral button. Tapping this button starts
-         * the {@link android.content.Intent#ACTION_SHOW_SUSPENDED_APP_DETAILS} activity. If this is
-         * not provided, the system will use a default text.
+         * Set the resource id of text to be shown on the neutral button. Tapping this button would
+         * perform the {@link ButtonAction action} specified through
+         * {@link #setNeutralButtonAction(int)}. If this is not provided, the system will use a
+         * default text.
          *
          * @param resId The resource id of the button text
          * @return this builder object.
@@ -364,6 +424,22 @@ public final class SuspendDialogInfo implements Parcelable {
         public Builder setNeutralButtonText(@StringRes int resId) {
             Preconditions.checkArgument(ResourceId.isValid(resId), "Invalid resource id provided");
             mNeutralButtonTextResId = resId;
+            return this;
+        }
+
+        /**
+         * Set the action expected to happen on neutral button tap. Defaults to
+         * {@link #BUTTON_ACTION_MORE_DETAILS} if this is not provided.
+         *
+         * @param buttonAction Either {@link #BUTTON_ACTION_MORE_DETAILS} or
+         *                     {@link #BUTTON_ACTION_UNSUSPEND}.
+         * @return this builder object
+         */
+        @NonNull
+        public Builder setNeutralButtonAction(@ButtonAction int buttonAction) {
+            Preconditions.checkArgument(buttonAction == BUTTON_ACTION_MORE_DETAILS
+                    || buttonAction == BUTTON_ACTION_UNSUSPEND, "Invalid button action");
+            mNeutralButtonAction = buttonAction;
             return this;
         }
 

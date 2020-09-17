@@ -18,6 +18,7 @@ package android.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 
 /**
@@ -38,19 +39,19 @@ import android.util.AttributeSet;
  * guide.</p>
  *
  * <p><strong>XML attributes</strong></p>
- * <p> 
- * See {@link android.R.styleable#CompoundButton CompoundButton Attributes}, 
- * {@link android.R.styleable#Button Button Attributes}, 
- * {@link android.R.styleable#TextView TextView Attributes}, 
+ * <p>
+ * See {@link android.R.styleable#CompoundButton CompoundButton Attributes},
+ * {@link android.R.styleable#Button Button Attributes},
+ * {@link android.R.styleable#TextView TextView Attributes},
  * {@link android.R.styleable#View View Attributes}
  * </p>
  */
 public class RadioButton extends CompoundButton {
-    
+
     public RadioButton(Context context) {
         this(context, null);
     }
-    
+
     public RadioButton(Context context, AttributeSet attrs) {
         this(context, attrs, com.android.internal.R.attr.radioButtonStyle);
     }
@@ -80,5 +81,21 @@ public class RadioButton extends CompoundButton {
     @Override
     public CharSequence getAccessibilityClassName() {
         return RadioButton.class.getName();
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        if (getParent() instanceof RadioGroup) {
+            RadioGroup radioGroup = (RadioGroup) getParent();
+            if (radioGroup.getOrientation() == LinearLayout.HORIZONTAL) {
+                info.setCollectionItemInfo(AccessibilityNodeInfo.CollectionItemInfo.obtain(0, 1,
+                        radioGroup.getIndexWithinVisibleButtons(this), 1, false, isChecked()));
+            } else {
+                info.setCollectionItemInfo(AccessibilityNodeInfo.CollectionItemInfo.obtain(
+                        radioGroup.getIndexWithinVisibleButtons(this), 1, 0, 1,
+                        false, isChecked()));
+            }
+        }
     }
 }

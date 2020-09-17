@@ -171,6 +171,7 @@ public final class PreciseDataConnectionState implements Parcelable {
      *
      * @deprecated use {@link getNetworkType()}
      * @hide
+     * @removed Removed from the R preview SDK but was never part of the stable API surface.
      */
     @Deprecated
     @SystemApi
@@ -222,6 +223,7 @@ public final class PreciseDataConnectionState implements Parcelable {
      *
      * @deprecated use {@link #getLinkProperties()}
      * @hide
+     * @removed Removed from the R preview SDK but was never part of the stable API surface.
      */
     @Deprecated
     @SystemApi
@@ -256,8 +258,7 @@ public final class PreciseDataConnectionState implements Parcelable {
      * Return the cause code for the most recent change in {@link #getState}. In the event of an
      * error, this cause code will be non-zero.
      */
-    // FIXME(b144774287): some of these cause codes should have a prescribed meaning.
-    public int getLastCauseCode() {
+    public @DataFailureCause int getLastCauseCode() {
         return mFailCause;
     }
 

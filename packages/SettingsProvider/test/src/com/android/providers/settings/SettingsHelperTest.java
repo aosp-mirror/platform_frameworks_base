@@ -18,18 +18,79 @@ package com.android.providers.settings;
 
 import static junit.framework.Assert.assertEquals;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.media.AudioManager;
+import android.net.Uri;
 import android.os.LocaleList;
+import android.telephony.TelephonyManager;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Tests for the SettingsHelperTest
  */
 @RunWith(AndroidJUnit4.class)
 public class SettingsHelperTest {
+    private static final String SETTING_KEY = "setting_key";
+    private static final String SETTING_VALUE = "setting_value";
+    private static final String SETTING_REAL_VALUE = "setting_real_value";
+
+    private SettingsHelper mSettingsHelper;
+
+    @Mock private Context mContext;
+    @Mock private ContentResolver mContentResolver;
+    @Mock private AudioManager mAudioManager;
+    @Mock private TelephonyManager mTelephonyManager;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        when(mContext.getSystemService(eq(Context.AUDIO_SERVICE))).thenReturn(mAudioManager);
+        when(mContext.getSystemService(eq(Context.TELEPHONY_SERVICE))).thenReturn(
+                mTelephonyManager);
+
+        mSettingsHelper = spy(new SettingsHelper(mContext));
+    }
+
+    @Test
+    public void testOnBackupValue_settingReplaced_returnsRealValue() {
+        when(mSettingsHelper.isReplacedSystemSetting(eq(SETTING_KEY))).thenReturn(true);
+        doReturn(SETTING_REAL_VALUE).when(mSettingsHelper).getRealValueForSystemSetting(
+                eq(SETTING_KEY));
+
+        assertEquals(SETTING_REAL_VALUE, mSettingsHelper.onBackupValue(SETTING_KEY, SETTING_VALUE));
+    }
+
+    @Test
+    public void testGetRealValue_settingNotReplaced_returnsSameValue() {
+        when(mSettingsHelper.isReplacedSystemSetting(eq(SETTING_KEY))).thenReturn(false);
+
+        assertEquals(SETTING_VALUE, mSettingsHelper.onBackupValue(SETTING_KEY, SETTING_VALUE));
+    }
+
+    @Test
+    public void testRestoreValue_settingReplaced_doesNotRestore() {
+        when(mSettingsHelper.isReplacedSystemSetting(eq(SETTING_KEY))).thenReturn(true);
+        mSettingsHelper.restoreValue(mContext, mContentResolver, new ContentValues(), Uri.EMPTY,
+                SETTING_KEY, SETTING_VALUE, /* restoredFromSdkInt */ 0);
+
+        verifyZeroInteractions(mContentResolver);
+    }
+
     @Test
     public void testResolveLocales() throws Exception {
         // Empty string from backup server

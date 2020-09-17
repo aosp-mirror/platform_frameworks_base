@@ -25,6 +25,7 @@ import android.os.SystemClock;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayCutout;
+import android.view.DisplayInfo;
 import android.view.GestureDetector;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -117,8 +118,17 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
         // GestureDetector would get a ViewConfiguration instance by context, that may also
         // create a new WindowManagerImpl for the new display, and lock WindowManagerGlobal
         // temporarily in the constructor that would make a deadlock.
-        mHandler.post(() -> mGestureDetector =
-                new GestureDetector(mContext, new FlingGestureDetector(), mHandler) {});
+        mHandler.post(() -> {
+            final int displayId = mContext.getDisplayId();
+            final DisplayInfo info = DisplayManagerGlobal.getInstance().getDisplayInfo(displayId);
+            if (info == null) {
+                // Display already removed, stop here.
+                Slog.w(TAG, "Cannot create GestureDetector, display removed:" + displayId);
+                return;
+            }
+            mGestureDetector = new GestureDetector(mContext, new FlingGestureDetector(), mHandler) {
+            };
+        });
     }
 
     @Override

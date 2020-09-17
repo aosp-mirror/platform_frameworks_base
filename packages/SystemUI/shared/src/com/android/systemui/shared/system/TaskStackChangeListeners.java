@@ -30,6 +30,7 @@ import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Log;
 
+import com.android.internal.os.SomeArgs;
 import com.android.systemui.shared.recents.model.ThumbnailData;
 
 import java.util.ArrayList;
@@ -56,7 +57,9 @@ public class TaskStackChangeListeners extends TaskStackListener {
     }
 
     public void addListener(IActivityManager am, TaskStackChangeListener listener) {
-        mTaskStackListeners.add(listener);
+        synchronized (mTaskStackListeners) {
+            mTaskStackListeners.add(listener);
+        }
         if (!mRegistered) {
             // Register mTaskStackListener to IActivityManager only once if needed.
             try {
@@ -69,8 +72,12 @@ public class TaskStackChangeListeners extends TaskStackListener {
     }
 
     public void removeListener(TaskStackChangeListener listener) {
-        mTaskStackListeners.remove(listener);
-        if (mTaskStackListeners.isEmpty() && mRegistered) {
+        boolean isEmpty;
+        synchronized (mTaskStackListeners) {
+            mTaskStackListeners.remove(listener);
+            isEmpty = mTaskStackListeners.isEmpty();
+        }
+        if (isEmpty && mRegistered) {
             // Unregister mTaskStackListener once we have no more listeners
             try {
                 ActivityTaskManager.getService().unregisterTaskStackListener(this);
@@ -83,14 +90,17 @@ public class TaskStackChangeListeners extends TaskStackListener {
 
     @Override
     public void onTaskStackChanged() throws RemoteException {
-        // Call the task changed callback for the non-ui thread listeners first
+        // Call the task changed callback for the non-ui thread listeners first. Copy to a set of
+        // temp listeners so that we don't lock on mTaskStackListeners while calling all the
+        // callbacks. This call is always on the same binder thread, so we can just synchronize
+        // on the copying of the listener list.
         synchronized (mTaskStackListeners) {
-            mTmpListeners.clear();
             mTmpListeners.addAll(mTaskStackListeners);
         }
         for (int i = mTmpListeners.size() - 1; i >= 0; i--) {
             mTmpListeners.get(i).onTaskStackChangedBackground();
         }
+        mTmpListeners.clear();
 
         mHandler.removeMessages(H.ON_TASK_STACK_CHANGED);
         mHandler.sendEmptyMessage(H.ON_TASK_STACK_CHANGED);
@@ -111,23 +121,15 @@ public class TaskStackChangeListeners extends TaskStackListener {
     }
 
     @Override
-    public void onPinnedActivityRestartAttempt(boolean clearedTask)
-            throws RemoteException {
-        mHandler.removeMessages(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT);
-        mHandler.obtainMessage(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT, clearedTask ? 1 : 0, 0)
-                .sendToTarget();
-    }
-
-    @Override
-    public void onPinnedStackAnimationStarted() throws RemoteException {
-        mHandler.removeMessages(H.ON_PINNED_STACK_ANIMATION_STARTED);
-        mHandler.sendEmptyMessage(H.ON_PINNED_STACK_ANIMATION_STARTED);
-    }
-
-    @Override
-    public void onPinnedStackAnimationEnded() throws RemoteException {
-        mHandler.removeMessages(H.ON_PINNED_STACK_ANIMATION_ENDED);
-        mHandler.sendEmptyMessage(H.ON_PINNED_STACK_ANIMATION_ENDED);
+    public void onActivityRestartAttempt(RunningTaskInfo task, boolean homeTaskVisible,
+            boolean clearedTask, boolean wasVisible) throws RemoteException {
+        final SomeArgs args = SomeArgs.obtain();
+        args.arg1 = task;
+        args.argi1 = homeTaskVisible ? 1 : 0;
+        args.argi2 = clearedTask ? 1 : 0;
+        args.argi3 = wasVisible ? 1 : 0;
+        mHandler.removeMessages(H.ON_ACTIVITY_RESTART_ATTEMPT);
+        mHandler.obtainMessage(H.ON_ACTIVITY_RESTART_ATTEMPT, args).sendToTarget();
     }
 
     @Override
@@ -219,16 +221,36 @@ public class TaskStackChangeListeners extends TaskStackListener {
         mHandler.obtainMessage(H.ON_TASK_DISPLAY_CHANGED, taskId, newDisplayId).sendToTarget();
     }
 
+    @Override
+    public void onRecentTaskListUpdated() throws RemoteException {
+        mHandler.obtainMessage(H.ON_TASK_LIST_UPDATED).sendToTarget();
+    }
+
+    @Override
+    public void onRecentTaskListFrozenChanged(boolean frozen) {
+        mHandler.obtainMessage(H.ON_TASK_LIST_FROZEN_UNFROZEN, frozen ? 1 : 0, 0 /* unused */)
+                .sendToTarget();
+    }
+
+    @Override
+    public void onTaskDescriptionChanged(RunningTaskInfo taskInfo) {
+        mHandler.obtainMessage(H.ON_TASK_DESCRIPTION_CHANGED, taskInfo).sendToTarget();
+    }
+
+    @Override
+    public void onActivityRotation(int displayId) {
+        mHandler.obtainMessage(H.ON_ACTIVITY_ROTATION, displayId, 0 /* unused */)
+                .sendToTarget();
+    }
+
     private final class H extends Handler {
         private static final int ON_TASK_STACK_CHANGED = 1;
         private static final int ON_TASK_SNAPSHOT_CHANGED = 2;
         private static final int ON_ACTIVITY_PINNED = 3;
-        private static final int ON_PINNED_ACTIVITY_RESTART_ATTEMPT = 4;
-        private static final int ON_PINNED_STACK_ANIMATION_ENDED = 5;
+        private static final int ON_ACTIVITY_RESTART_ATTEMPT = 4;
         private static final int ON_ACTIVITY_FORCED_RESIZABLE = 6;
         private static final int ON_ACTIVITY_DISMISSING_DOCKED_STACK = 7;
         private static final int ON_TASK_PROFILE_LOCKED = 8;
-        private static final int ON_PINNED_STACK_ANIMATION_STARTED = 9;
         private static final int ON_ACTIVITY_UNPINNED = 10;
         private static final int ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED = 11;
         private static final int ON_TASK_CREATED = 12;
@@ -239,8 +261,12 @@ public class TaskStackChangeListeners extends TaskStackListener {
         private static final int ON_SIZE_COMPAT_MODE_ACTIVITY_CHANGED = 17;
         private static final int ON_BACK_PRESSED_ON_TASK_ROOT = 18;
         private static final int ON_SINGLE_TASK_DISPLAY_DRAWN = 19;
-        private static final int ON_SINGLE_TASK_DISPLAY_EMPTY = 20;
-        private static final int ON_TASK_DISPLAY_CHANGED = 21;
+        private static final int ON_TASK_DISPLAY_CHANGED = 20;
+        private static final int ON_TASK_LIST_UPDATED = 21;
+        private static final int ON_SINGLE_TASK_DISPLAY_EMPTY = 22;
+        private static final int ON_TASK_LIST_FROZEN_UNFROZEN = 23;
+        private static final int ON_TASK_DESCRIPTION_CHANGED = 24;
+        private static final int ON_ACTIVITY_ROTATION = 25;
 
 
         public H(Looper looper) {
@@ -282,22 +308,15 @@ public class TaskStackChangeListeners extends TaskStackListener {
                         }
                         break;
                     }
-                    case ON_PINNED_ACTIVITY_RESTART_ATTEMPT: {
+                    case ON_ACTIVITY_RESTART_ATTEMPT: {
+                        final SomeArgs args = (SomeArgs) msg.obj;
+                        final RunningTaskInfo task = (RunningTaskInfo) args.arg1;
+                        final boolean homeTaskVisible = args.argi1 != 0;
+                        final boolean clearedTask = args.argi2 != 0;
+                        final boolean wasVisible = args.argi3 != 0;
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onPinnedActivityRestartAttempt(
-                                    msg.arg1 != 0);
-                        }
-                        break;
-                    }
-                    case ON_PINNED_STACK_ANIMATION_STARTED: {
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onPinnedStackAnimationStarted();
-                        }
-                        break;
-                    }
-                    case ON_PINNED_STACK_ANIMATION_ENDED: {
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onPinnedStackAnimationEnded();
+                            mTaskStackListeners.get(i).onActivityRestartAttempt(task,
+                                    homeTaskVisible, clearedTask, wasVisible);
                         }
                         break;
                     }
@@ -396,7 +415,35 @@ public class TaskStackChangeListeners extends TaskStackListener {
                         }
                         break;
                     }
+                    case ON_TASK_LIST_UPDATED: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onRecentTaskListUpdated();
+                        }
+                        break;
+                    }
+                    case ON_TASK_LIST_FROZEN_UNFROZEN: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onRecentTaskListFrozenChanged(msg.arg1 != 0);
+                        }
+                        break;
+                    }
+                    case ON_TASK_DESCRIPTION_CHANGED: {
+                        final RunningTaskInfo info = (RunningTaskInfo) msg.obj;
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onTaskDescriptionChanged(info);
+                        }
+                        break;
+                    }
+                    case ON_ACTIVITY_ROTATION: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onActivityRotation(msg.arg1);
+                        }
+                        break;
+                    }
                 }
+            }
+            if (msg.obj instanceof SomeArgs) {
+                ((SomeArgs) msg.obj).recycle();
             }
         }
     }

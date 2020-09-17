@@ -19,15 +19,10 @@ package com.android.server.usb;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.UserInfo;
-import android.hardware.usb.UsbAccessory;
-import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.usb.UsbSettingsManagerProto;
-import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -59,8 +54,11 @@ class UsbSettingsManager {
     private UserManager mUserManager;
     private UsbHandlerManager mUsbHandlerManager;
 
-    public UsbSettingsManager(@NonNull Context context) {
+    final UsbService mUsbService;
+
+    UsbSettingsManager(@NonNull Context context, UsbService usbService) {
         mContext = context;
+        mUsbService = usbService;
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mUsbHandlerManager = new UsbHandlerManager(context);
     }
@@ -76,8 +74,7 @@ class UsbSettingsManager {
         synchronized (mSettingsByUser) {
             UsbUserSettingsManager settings = mSettingsByUser.get(userId);
             if (settings == null) {
-                settings = new UsbUserSettingsManager(mContext, UserHandle.of(userId),
-                        new UsbPermissionManager(mContext, UserHandle.of(userId)));
+                settings = new UsbUserSettingsManager(mContext, UserHandle.of(userId));
                 mSettingsByUser.put(userId, settings);
             }
             return settings;
@@ -133,7 +130,7 @@ class UsbSettingsManager {
                 // it from all profile groups.
                 int numProfileGroups = mSettingsByProfileGroup.size();
                 for (int i = 0; i < numProfileGroups; i++) {
-                    mSettingsByProfileGroup.valueAt(i).removeAllDefaultsForUser(userToRemove);
+                    mSettingsByProfileGroup.valueAt(i).removeUser(userToRemove);
                 }
             }
         }
@@ -163,47 +160,5 @@ class UsbSettingsManager {
         }
 
         dump.end(token);
-    }
-
-    /**
-     * Remove temporary access permission and broadcast that a device was removed.
-     *
-     * @param device The device that is removed
-     */
-    void usbDeviceRemoved(@NonNull UsbDevice device) {
-        synchronized (mSettingsByUser) {
-            for (int i = 0; i < mSettingsByUser.size(); i++) {
-                // clear temporary permissions for the device
-                mSettingsByUser.valueAt(i).removeDevicePermissions(device);
-            }
-        }
-
-        Intent intent = new Intent(UsbManager.ACTION_USB_DEVICE_DETACHED);
-        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-        intent.putExtra(UsbManager.EXTRA_DEVICE, device);
-
-        if (DEBUG) {
-            Slog.d(LOG_TAG, "usbDeviceRemoved, sending " + intent);
-        }
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-    }
-
-    /**
-     * Remove temporary access permission and broadcast that a accessory was removed.
-     *
-     * @param accessory The accessory that is removed
-     */
-    void usbAccessoryRemoved(@NonNull UsbAccessory accessory) {
-        synchronized (mSettingsByUser) {
-            for (int i = 0; i < mSettingsByUser.size(); i++) {
-                // clear temporary permissions for the accessory
-                mSettingsByUser.valueAt(i).removeAccessoryPermissions(accessory);
-            }
-        }
-
-        Intent intent = new Intent(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
-        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-        intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 }

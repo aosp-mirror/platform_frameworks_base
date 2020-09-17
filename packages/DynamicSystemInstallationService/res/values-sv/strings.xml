@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_description" msgid="8582605799129954556">"Ange lösenordet och fortsätt till Dynamiska systemuppdateringar"</string>
+    <string name="notification_install_completed" msgid="6252047868415172643">"Det dynamiska systemet är klart. Om du vill använda det startar du om enheten."</string>
+    <string name="notification_install_inprogress" msgid="7383334330065065017">"Installation pågår"</string>
+    <string name="notification_install_failed" msgid="4066039210317521404">"Installationen misslyckades"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Bildvalideringen misslyckades. Avbryt installationen."</string>
+    <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Ett dynamiskt system körs. Om du vill använda den ursprungliga Android-versionen startar du om."</string>
+    <string name="notification_action_cancel" msgid="5929299408545961077">"Avbryt"</string>
+    <string name="notification_action_discard" msgid="1817481003134947493">"Ignorera"</string>
+    <string name="notification_action_reboot_to_dynsystem" msgid="4015817159115912479">"Starta om"</string>
+    <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"Starta om"</string>
+    <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"Det dynamiska systemet ignorerades"</string>
+    <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"Det gick inte att starta om eller läsa in det dynamiska systemet"</string>
+</resources>

@@ -19,10 +19,9 @@ package android.net.wifi.aware;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.net.wifi.util.HexEncoding;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import libcore.util.HexEncoding;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

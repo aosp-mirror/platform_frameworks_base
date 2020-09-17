@@ -40,6 +40,8 @@
     <string name="wifi_security_short_sae" translatable="false">WPA3</string>
     <!-- Do not translate.  Concise terminology for wifi with WPA2/WPA3 transition security -->
     <string name="wifi_security_short_psk_sae" translatable="false">WPA2/WPA3</string>
+    <!-- Do not translate.  Concise terminology for Wi-Fi with None/OWE transition mode security -->
+    <string name="wifi_security_short_none_owe" translatable="false">None/OWE</string>
     <!-- Do not translate.  Concise terminology for wifi with OWE security -->
     <string name="wifi_security_short_owe" translatable="false">OWE</string>
     <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP Suite-B-192 security -->
@@ -70,6 +72,8 @@
     <string name="wifi_security_sae" translatable="false">WPA3-Personal</string>
     <!-- Do not translate.  Terminology for wifi with WPA2/WPA3 Transition mode security -->
     <string name="wifi_security_psk_sae" translatable="false">WPA2/WPA3-Personal</string>
+    <!-- Do not translate.  Terminology for Wi-Fi with None/OWE transition mode security -->
+    <string name="wifi_security_none_owe" translatable="false">None/Enhanced Open</string>
     <!-- Do not translate.  Terminology for wifi with OWE security -->
     <string name="wifi_security_owe" translatable="false">Enhanced Open</string>
     <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP Suite-B-192 security -->
@@ -125,7 +129,7 @@
     <string name="certinstaller_package" translatable="false">com.android.certinstaller</string>
 
     <!-- Summary for Connected wifi network without internet -->
-    <string name="wifi_connected_no_internet">Connected, no internet</string>
+    <string name="wifi_connected_no_internet">No internet</string>
 
     <!-- Summary for connected network without internet due to private dns validation failed [CHAR LIMIT=NONE] -->
     <string name="private_dns_broken">Private DNS server cannot be accessed</string>
@@ -170,6 +174,9 @@
     <string name="speed_label_fast">Fast</string>
     <!-- Speed label for very fast network speed -->
     <string name="speed_label_very_fast">Very Fast</string>
+
+    <!-- Passpoint summary for an expired passpoint [CHAR LIMIT=40] -->
+    <string name="wifi_passpoint_expired">Expired</string>
 
     <!-- Summary text separator for preferences including a short description (eg. "Fast / Connected"). -->
     <string name="preference_summary_default_combination"><xliff:g id="state" example="ON">%1$s</xliff:g> / <xliff:g id="description" example="High accuracy mode">%2$s</xliff:g></string>
@@ -559,7 +566,7 @@
     <!-- [CHAR LIMIT=50] Title for adb wireless pair by QR code preference -->
     <string name="adb_pair_method_qrcode_title">Pair device with QR code</string>
     <!-- [CHAR LIMIT=NONE] Summary for adb wireless pair by QR code preference -->
-    <string name="adb_pair_method_qrcode_summary">Pair new devices using QR code Scanner</string>
+    <string name="adb_pair_method_qrcode_summary">Pair new devices using QR code scanner</string>
     <!-- [CHAR LIMIT=50] Title for adb wireless pair by pairing code preference -->
     <string name="adb_pair_method_code_title">Pair device with pairing code</string>
     <!-- [CHAR LIMIT=NONE] Summary for adb wireless pair by pairing code preference -->
@@ -597,7 +604,9 @@
     <!-- [CHAR LIMIT=NONE] Adb Wireless QR code pairing scanner title -->
     <string name="adb_wireless_qrcode_pairing_title">Scan QR code</string>
     <!-- [CHAR LIMIT=NONE] Adb Wireless QR code pairing description -->
-    <string name="adb_wireless_qrcode_pairing_description">Pair device over Wi\u2011Fi by scanning a QR Code</string>
+    <string name="adb_wireless_qrcode_pairing_description">Pair device over Wi\u2011Fi by scanning a QR code</string>
+    <!-- [CHAR LIMIT=NONE] Toast message when trying to enable Wi-Fi debugging and no Wi-Fi network connected -->
+    <string name="adb_wireless_no_network_msg">Please connect to a Wi\u2011Fi network</string>
     <!--Adb wireless search Keywords [CHAR LIMIT=NONE]-->
     <string name="keywords_adb_wireless">adb, debug, dev</string>
     <!-- [CHAR LIMIT=NONE] Setting checkbox title for Whether to include bug report item in power menu. -->
@@ -637,6 +646,8 @@
     <string name="wifi_verbose_logging">Enable Wi\u2011Fi Verbose Logging</string>
     <!-- Setting Checkbox title whether to disable WiFi Scan Throttling. [CHAR LIMIT=40] -->
     <string name="wifi_scan_throttling">Wi\u2011Fi scan throttling</string>
+    <!-- Setting Checkbox title whether to enable WiFi enhanced mac randomization. [CHAR LIMIT=40] -->
+    <string name="wifi_enhanced_mac_randomization">Wi\u2011Fi\u2011enhanced MAC randomization</string>
     <!-- Setting Checkbox title whether to always keep mobile data active. [CHAR LIMIT=80] -->
     <string name="mobile_data_always_on">Mobile data always active</string>
     <!-- Setting Checkbox title whether to enable hardware acceleration for tethering. [CHAR LIMIT=80] -->
@@ -645,6 +656,11 @@
     <string name="bluetooth_show_devices_without_names">Show Bluetooth devices without names</string>
     <!-- Setting Checkbox title for disabling Bluetooth absolute volume -->
     <string name="bluetooth_disable_absolute_volume">Disable absolute volume</string>
+    <!-- Setting Checkbox title for enabling Bluetooth Gabeldorsche. [CHAR LIMIT=40] -->
+    <string name="bluetooth_enable_gabeldorsche">Enable Gabeldorsche</string>
+
+    <!-- Setting Checkbox title for enabling Enhanced Connectivity [CHAR LIMIT=80] -->
+    <string name="enhanced_connectivity">Enhanced Connectivity</string>
 
     <!-- UI debug setting: Select Bluetooth AVRCP Version -->
     <string name="bluetooth_select_avrcp_version_string">Bluetooth AVRCP Version</string>
@@ -665,6 +681,9 @@
     <string name="bluetooth_select_a2dp_codec_sample_rate">Bluetooth Audio Sample Rate</string>
     <!-- UI debug setting: Trigger Bluetooth Audio Codec Selection: Sample Rate -->
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title">Trigger Bluetooth Audio Codec\u000ASelection: Sample Rate</string>
+    <!-- UI debug setting: Label for unsupported Bluetooth Audio Codec. [CHAR LIMIT=none] -->
+    <string name="bluetooth_select_a2dp_codec_type_help_info">Gray-out means not supported by phone
+        or headset</string>
 
     <!-- UI debug setting: Trigger Bluetooth Audio Bits Per Sample Selection -->
     <string name="bluetooth_select_a2dp_codec_bits_per_sample">Bluetooth Audio Bits Per Sample</string>
@@ -695,10 +714,12 @@
 
     <!-- setting Checkbox summary whether to show options for wireless display certification  -->
     <string name="wifi_display_certification_summary">Show options for wireless display certification</string>
-    <!-- Setting Checkbox summary whether to enable Wifi verbose Logging [CHAR LIMIT=80] -->
+    <!-- Setting Checkbox summary whether to enable Wifi verbose Logging [CHAR_LIMIT=NONE] -->
     <string name="wifi_verbose_logging_summary">Increase Wi\u2011Fi logging level, show per SSID RSSI in Wi\u2011Fi Picker</string>
     <!-- Setting Checkbox summary whether to disable Wifi scan throttling [CHAR LIMIT=NONE] -->
     <string name="wifi_scan_throttling_summary">Reduces battery drain &amp; improves network performance</string>
+    <!-- Setting Checkbox title whether to enable WiFi enhanced mac randomization. [CHAR LIMIT=NONE] -->
+    <string name="wifi_enhanced_mac_randomization_summary">When this mode is enabled, this device\u2019s MAC address may change each time it connects to a network that has MAC randomization enabled.</string>
     <!-- Label indicating network has been manually marked as metered -->
     <string name="wifi_metered_label">Metered</string>
     <!-- Label indicating network has been manually marked as unmetered -->
@@ -749,6 +770,11 @@
     <string name="bluetooth_show_devices_without_names_summary">Bluetooth devices without names (MAC addresses only) will be displayed</string>
     <!-- Summary of checkbox for disabling Bluetooth absolute volume -->
     <string name="bluetooth_disable_absolute_volume_summary">Disables the Bluetooth absolute volume feature in case of volume issues with remote devices such as unacceptably loud volume or lack of control.</string>
+    <!-- Summary of checkbox for enabling Bluetooth Gabeldorche features [CHAR LIMIT=none] -->
+    <string name="bluetooth_enable_gabeldorsche_summary">Enables the Bluetooth Gabeldorsche feature stack.</string>
+
+    <!-- Summary of checkbox for enabling Enhanced Connectivity features [CHAR LIMIT=NONE] -->
+    <string name="enhanced_connectivity_summary">Enables the Enhanced Connectivity feature.</string>
 
     <!-- Title of checkbox setting that enables the terminal app. [CHAR LIMIT=32] -->
     <string name="enable_terminal_title">Local terminal</string>
@@ -841,9 +867,9 @@
     <!-- UI debug setting: enable various types of OpenGL traces [CHAR LIMIT=25] -->
     <string name="enable_opengl_traces_title">Enable OpenGL traces</string>
 
-    <!-- UI debug setting: disable USB audio routing title [CHAR LIMIT=32] -->
+    <!-- UI debug setting: disable USB audio routing title [CHAR LIMIT=60] -->
     <string name="usb_audio_disable_routing">Disable USB audio routing</string>
-    <!-- UI debug setting: disable USB audio routing summary [CHAR LIMIT=50] -->
+    <!-- UI debug setting: disable USB audio routing summary [CHAR_LIMIT=NONE] -->
     <string name="usb_audio_disable_routing_summary">Disable automatic routing to USB audio peripherals</string>
 
     <!-- UI debug setting: show layout bounds information [CHAR LIMIT=25] -->
@@ -872,6 +898,11 @@
     <!-- UI debug setting: enable gpu debug layers summary [CHAR LIMIT=50] -->
     <string name="enable_gpu_debug_layers_summary">Allow loading GPU debug layers for debug apps</string>
 
+    <!-- UI debug setting: enable verbose vendor logging [CHAR LIMIT=60] -->
+    <string name="enable_verbose_vendor_logging">Enable verbose vendor logging</string>
+    <!-- UI debug setting: enable verbose vendor logging summary [CHAR LIMIT=NONE] -->
+    <string name="enable_verbose_vendor_logging_summary">Include additional device-specific vendor logs in bug reports, which may contain private information, use more battery, and/or use more storage.</string>
+
     <!-- UI debug setting: scaling factor for window animations [CHAR LIMIT=25] -->
     <string name="window_animation_scale_title">Window animation scale</string>
 
@@ -881,7 +912,7 @@
     <!-- UI debug setting: scaling factor for all Animator-based animations [CHAR LIMIT=25] -->
     <string name="animator_duration_scale_title">Animator duration scale</string>
 
-    <!-- UI debug setting: simulate secondary display devices using overlays [CHAR LIMIT=25] -->
+    <!-- UI debug setting: simulate secondary display devices using overlays [CHAR LIMIT=45] -->
     <string name="overlay_display_devices_title">Simulate secondary displays</string>
 
     <!-- Preference category for application debugging development settings. [CHAR LIMIT=25] -->
@@ -901,11 +932,10 @@
     <!-- UI debug setting: show all ANRs summary [CHAR LIMIT=100] -->
     <string name="show_all_anrs_summary">Display App Not Responding dialog for background apps</string>
 
-    <!-- UI debug setting: show all ANRs? [CHAR LIMIT=25] -->
+    <!-- UI debug setting: show missing channel toasts? [CHAR LIMIT=25] -->
     <string name="show_notification_channel_warnings">Show notification channel warnings</string>
-    <!-- UI debug setting: show all ANRs summary [CHAR LIMIT=50] -->
+    <!-- UI debug setting: show missing channel toasts summary [CHAR LIMIT=50] -->
     <string name="show_notification_channel_warnings_summary">Displays on-screen warning when an app posts a notification without a valid channel</string>
-
 
     <!-- UI debug setting: force allow apps on external storage [CHAR LIMIT=50] -->
     <string name="force_allow_on_external">Force allow apps on external</string>
@@ -1014,7 +1044,7 @@
     <!-- Title for the accessibility preference to configure display color space correction. [CHAR LIMIT=NONE] -->
     <string name="accessibility_display_daltonizer_preference_title">Color correction</string>
     <!-- Subtitle for the accessibility preference to configure display color space correction. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_display_daltonizer_preference_subtitle">This feature is experimental and may affect performance.</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle"><![CDATA[Color correction allows you to adjust how colors are displayed on your device]]></string>
     <!-- Summary shown for color space correction preference when its value is overridden by another preference [CHAR LIMIT=35] -->
     <string name="daltonizer_type_overridden">Overridden by <xliff:g id="title" example="Simulate color space">%1$s</xliff:g></string>
 
@@ -1041,45 +1071,47 @@
     <string name="power_discharge_by_only">Should last until about <xliff:g id="time">%1$s</xliff:g></string>
     <!-- [CHAR_LIMIT=20] Label for estimated time that phone will run out of battery -->
     <string name="power_discharge_by_only_short">Until <xliff:g id="time" example="12 PM">%1$s</xliff:g></string>
-    <!-- [CHAR_LIMIT=100] Extend the battery life past a certain time -->
-    <string name="power_suggestion_extend_battery">Extend battery life past <xliff:g id="time" example="12 PM">%1$s</xliff:g></string>
+    <!-- [CHAR_LIMIT=100] Label for estimated time that phone will run out of battery -->
+    <string name="power_suggestion_battery_run_out">Battery may run out by <xliff:g id="time" example="12 PM">%1$s</xliff:g></string>
 
     <!-- [CHAR_LIMIT=60] label for estimated remaining duration of battery when under a certain amount -->
-    <string name="power_remaining_less_than_duration_only">Less than <xliff:g id="threshold">%1$s</xliff:g> remaining</string>
+    <string name="power_remaining_less_than_duration_only">Less than <xliff:g id="threshold">%1$s</xliff:g> left</string>
     <!-- [CHAR_LIMIT=60] label for estimated remaining duration of battery when under a certain amount with the percentage -->
-    <string name="power_remaining_less_than_duration">Less than <xliff:g id="threshold">%1$s</xliff:g> remaining (<xliff:g id="level">%2$s</xliff:g>)</string>
+    <string name="power_remaining_less_than_duration">Less than <xliff:g id="threshold">%1$s</xliff:g> left (<xliff:g id="level">%2$s</xliff:g>)</string>
 
     <!-- Used to let users know that they have more than some amount of battery life remaining with percentage. ex: 75% - more than 1 day remaining [CHAR LIMIT = 80] -->
-    <string name="power_remaining_more_than_subtext">More than <xliff:g id="time_remaining">%1$s</xliff:g> remaining (<xliff:g id="level">%2$s</xliff:g>)</string>
+    <string name="power_remaining_more_than_subtext">More than <xliff:g id="time_remaining">%1$s</xliff:g> left (<xliff:g id="level">%2$s</xliff:g>)</string>
     <!-- Used to let users know that they have more than some amount of battery life remaining. ex: more than 1 day remaining [CHAR LIMIT = 40] -->
-    <string name="power_remaining_only_more_than_subtext">More than <xliff:g id="time_remaining">%1$s</xliff:g> remaining</string>
+    <string name="power_remaining_only_more_than_subtext">More than <xliff:g id="time_remaining">%1$s</xliff:g> left</string>
 
     <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default">Phone may shutdown soon</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default">Phone may shut down soon</string>
     <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet">Tablet may shutdown soon</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet">Tablet may shut down soon</string>
     <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device">Device may shutdown soon</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device">Device may shut down soon</string>
     <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
-    <string name="power_remaining_duration_shutdown_imminent" product="default">Phone may shutdown soon (<xliff:g id="level">%1$s</xliff:g>)</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default">Phone may shut down soon (<xliff:g id="level">%1$s</xliff:g>)</string>
     <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet">Tablet may shutdown soon (<xliff:g id="level">%1$s</xliff:g>)</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet">Tablet may shut down soon (<xliff:g id="level">%1$s</xliff:g>)</string>
     <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
-    <string name="power_remaining_duration_shutdown_imminent" product="device">Device may shutdown soon (<xliff:g id="level">%1$s</xliff:g>)</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device">Device may shut down soon (<xliff:g id="level">%1$s</xliff:g>)</string>
 
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging -->
     <string name="power_charging"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="state">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging -->
-    <string name="power_remaining_charging_duration_only"><xliff:g id="time">%1$s</xliff:g> left until fully charged</string>
+    <string name="power_remaining_charging_duration_only"><xliff:g id="time">%1$s</xliff:g> left until charged</string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
-    <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="time">%2$s</xliff:g> until fully charged</string>
+    <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="time">%2$s</xliff:g> until charged</string>
 
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_unknown">Unknown</string>
     <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging from an unknown source.  -->
     <string name="battery_info_status_charging">Charging</string>
-    <!-- [CHAR_LIMIT=20] Battery use screen with lower case.  Battery status shown in chart label when charging from an unknown source.  -->
-    <string name="battery_info_status_charging_lower">charging</string>
+    <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging speed is fast.  -->
+    <string name="battery_info_status_charging_fast">Charging rapidly</string>
+    <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging speed is slow.  -->
+    <string name="battery_info_status_charging_slow">Charging slowly</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_discharging">Not charging</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
@@ -1244,6 +1276,104 @@
     <!-- The notice header of Third-party licenses. not translatable -->
     <string name="notice_header" translatable="false"></string>
 
-    <!-- Name of the this device. [CHAR LIMIT=30] -->
-    <string name="media_transfer_this_device_name">This device</string>
+    <!-- Name of the phone device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_this_device_name">Phone speaker</string>
+
+    <!-- Warning message to tell user is have problem during profile connect, it need to turn off device and back on. [CHAR_LIMIT=NONE] -->
+    <string name="profile_connect_timeout_subtext">Problem connecting. Turn device off &amp; back on</string>
+
+    <!-- Name of the 3.5mm audio device. [CHAR LIMIT=40] -->
+    <string name="media_transfer_wired_device_name">Wired audio device</string>
+
+    <!-- Help button label [CHAR LIMIT=40] -->
+    <string name="help_label">Help &amp; feedback</string>
+
+    <!-- Preference category for storage development settings. [CHAR LIMIT=50] -->
+    <string name="storage_category">Storage</string>
+    <!-- Storage: view and access information about shared blobs [CHAR LIMIT=50] -->
+    <string name="shared_data_title">Shared data</string>
+    <!-- Storage: shared data summary [CHAR LIMIT=80] -->
+    <string name="shared_data_summary">View and modify shared data</string>
+    <!-- Shared data: display text when there are no shared data blobs available [CHAR LIMIT=NONE] -->
+    <string name="shared_data_no_blobs_text">There is no shared data for this user.</string>
+    <!-- Shared data: text to display when there was an error while fetching shared data for the user [CHAR LIMIT=NONE] -->
+    <string name="shared_data_query_failure_text">There was an error fetching shared data. Try again.</string>
+    <!-- Shared data: shared data id [CHAR LIMIT=50] -->
+    <string name="blob_id_text">Shared data ID: <xliff:g id="blob_id" example="100">%d</xliff:g></string>
+    <!-- Shared data: label to indicate when the shared data expires [CHAR LIMIT=80] -->
+    <string name="blob_expires_text">Expires at <xliff:g id="date" example="Mar 20, 2020 11:59:59 GMT">%s</xliff:g></string>
+    <!-- Shared data: text to display when there was an error while deleting a shared data object [CHAR LIMIT=NONE] -->
+    <string name="shared_data_delete_failure_text">There was an error deleting the shared data.</string>
+    <!-- Shared data: dialog text when there are no acquired leases for a blob [CHAR LIMIT=NONE] -->
+    <string name="shared_data_no_accessors_dialog_text">There are no leases acquired for this shared data. Would you like to delete it?</string>
+    <!-- Shared data: title for screen showing list of packages accessing some shared data [CHAR LIMIT=50] -->
+    <string name="accessor_info_title">Apps sharing data</string>
+    <!-- Shared data: text indicating that no description was provided by the app for this shared data [CHAR LIMIT=80] -->
+    <string name="accessor_no_description_text">No description provided by the app.</string>
+    <!-- Shared data: label to indicate when the lease acquired by an app expires [CHAR LIMIT=80] -->
+    <string name="accessor_expires_text">Lease expires at <xliff:g id="date" example="Mar 20, 2020 11:59:59 GMT">%s</xliff:g></string>
+    <!-- Shared data: button text for deleting some shared data [CHAR LIMIT=50] -->
+    <string name="delete_blob_text">Delete shared data</string>
+    <!-- Shared data: confirmation dialog text when attempting delete some shared data [CHAR LIMIT=NONE] -->
+    <string name="delete_blob_confirmation_text">Are you sure you want to delete this shared data?</string>
+
+    <!-- Summary for add user entry in the choice dialog [CHAR LIMIT=none] -->
+    <string name="user_add_user_item_summary">Users have their own apps and content</string>
+    <!-- Summary for add restricted profile entry in the choice dialog [CHAR LIMIT=none] -->
+    <string name="user_add_profile_item_summary">You can restrict access to apps and content from your account</string>
+    <!-- Button text for adding a regular user [CHAR LIMIT=25] -->
+    <string name="user_add_user_item_title">User</string>
+    <!-- Button text for adding a restricted profile [CHAR LIMIT=25] -->
+    <string name="user_add_profile_item_title">Restricted profile</string>
+    <!-- Title for add user confirmation dialog [CHAR LIMIT=30] -->
+    <string name="user_add_user_title">Add new user?</string>
+    <!-- Message for add user confirmation dialog - long version. [CHAR LIMIT=none] -->
+    <string name="user_add_user_message_long">You can share this device with other people by creating additional users. Each user has their own space, which they can customize with apps, wallpaper, and so on. Users can also adjust device settings like Wi\u2011Fi that affect everyone.\n\nWhen you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. Accessibility settings and services may not transfer to the new user.</string>
+    <!-- Message for add user confirmation dialog - short version. [CHAR LIMIT=none] -->
+    <string name="user_add_user_message_short">When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. </string>
+    <!-- Title of dialog to setup a new user [CHAR LIMIT=30] -->
+    <string name="user_setup_dialog_title">Set up user now?</string>
+    <!-- Message in dialog to setup a new user after creation [CHAR LIMIT=none] -->
+    <string name="user_setup_dialog_message">Make sure the person is available to take the device and set up their space</string>
+    <!-- Message in dialog to setup a new restricted profile after creation [CHAR LIMIT=none] -->
+    <string name="user_setup_profile_dialog_message">Set up profile now?</string>
+    <!-- Button text to setup the new user now [CHAR LIMIT=25] -->
+    <string name="user_setup_button_setup_now">Set up now</string>
+    <!-- Button text to setup the new user later [CHAR LIMIT=25] -->
+    <string name="user_setup_button_setup_later">Not now</string>
+    <!-- Title for add user type dialog [CHAR LIMIT=45] -->
+    <string name="user_add_user_type_title">Add</string>
+    <!-- User details new user name [CHAR LIMIT=30] -->
+    <string name="user_new_user_name">New user</string>
+    <!-- User details new restricted profile name [CHAR LIMIT=30] -->
+    <string name="user_new_profile_name">New profile</string>
+    <!-- Text shown for title of user info setting [CHAR LIMIT=20]-->
+    <string name="user_info_settings_title">User info</string>
+    <!-- Text shown for title of profile info setting [CHAR LIMIT=20]-->
+    <string name="profile_info_settings_title">Profile info</string>
+    <!-- User settings warning that restricted profile needs a screen lock [CHAR LIMIT=NONE] -->
+    <string name="user_need_lock_message">Before you can create a restricted profile, you\u2019ll need to set up a screen lock to protect your apps and personal data.</string>
+    <!-- User settings dialog button to set screen lock [CHAR LIMIT=25] -->
+    <string name="user_set_lock_button">Set lock</string>
+    <!-- Label for switching to other user in the user switcher [CHAR LIMIT=35] -->
+    <string name="user_switch_to_user">Switch to <xliff:g id="user_name" example="John Doe">%s</xliff:g></string>
+
+    <!-- Label for adding a new guest in the user switcher [CHAR LIMIT=35] -->
+    <string name="guest_new_guest">Add guest</string>
+    <!-- Label for exiting and removing the guest session in the user switcher [CHAR LIMIT=35] -->
+    <string name="guest_exit_guest">Remove guest</string>
+    <!-- Name for the guest user [CHAR LIMIT=35] -->
+    <string name="guest_nickname">Guest</string>
+
+    <!-- List entry in developer settings to choose default device/system behavior for the app freezer [CHAR LIMIT=30]-->
+    <string name="cached_apps_freezer_device_default">Device default</string>
+    <!-- List entry in developer settings to disable the app freezer in developer settings [CHAR LIMIT=30]-->
+    <string name="cached_apps_freezer_disabled">Disabled</string>
+    <!-- List entry in developer settings to enable the app freezer in developer settings [CHAR LIMIT=30]-->
+    <string name="cached_apps_freezer_enabled">Enabled</string>
+    <!-- Developer setting dialog prompting the user to reboot after changing the app freezer setting [CHAR LIMIT=NONE]-->
+    <string name="cached_apps_freezer_reboot_dialog_text">Your device must be rebooted for this change to apply. Reboot now or cancel.</string>
+
+    <!-- Name of the 3.5mm and usb audio device. [CHAR LIMIT=50] -->
+    <string name="media_transfer_wired_usb_device_name">Wired headphone</string>
 </resources>

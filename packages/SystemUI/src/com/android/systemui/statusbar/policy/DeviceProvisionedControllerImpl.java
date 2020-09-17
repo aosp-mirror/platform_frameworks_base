@@ -14,8 +14,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
-
 import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -26,12 +24,13 @@ import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.util.Log;
 
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.CurrentUserTracker;
 
 import java.util.ArrayList;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
@@ -40,8 +39,8 @@ import javax.inject.Singleton;
 public class DeviceProvisionedControllerImpl extends CurrentUserTracker implements
         DeviceProvisionedController {
 
-    private static final String TAG = DeviceProvisionedControllerImpl.class.getSimpleName();
-    private final ArrayList<DeviceProvisionedListener> mListeners = new ArrayList<>();
+    protected static final String TAG = DeviceProvisionedControllerImpl.class.getSimpleName();
+    protected final ArrayList<DeviceProvisionedListener> mListeners = new ArrayList<>();
     private final ContentResolver mContentResolver;
     private final Context mContext;
     private final Uri mDeviceProvisionedUri;
@@ -51,16 +50,16 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
     /**
      */
     @Inject
-    public DeviceProvisionedControllerImpl(Context context,
-            @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
-        super(context);
+    public DeviceProvisionedControllerImpl(Context context, @Main Handler mainHandler,
+            BroadcastDispatcher broadcastDispatcher) {
+        super(broadcastDispatcher);
         mContext = context;
         mContentResolver = context.getContentResolver();
         mDeviceProvisionedUri = Global.getUriFor(Global.DEVICE_PROVISIONED);
         mUserSetupUri = Secure.getUriFor(Secure.USER_SETUP_COMPLETE);
         mSettingsObserver = new ContentObserver(mainHandler) {
             @Override
-            public void onChange(boolean selfChange, Uri uri, int userId) {
+            public void onChange(boolean selfChange, Uri uri, int flags) {
                 Log.d(TAG, "Setting change: " + uri);
                 if (mUserSetupUri.equals(uri)) {
                     notifySetupChanged();
@@ -105,7 +104,7 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
         }
     }
 
-    private void startListening(int user) {
+    protected void startListening(int user) {
         mContentResolver.registerContentObserver(mDeviceProvisionedUri, true,
                 mSettingsObserver, 0);
         mContentResolver.registerContentObserver(mUserSetupUri, true,
@@ -113,7 +112,7 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
         startTracking();
     }
 
-    private void stopListening() {
+    protected void stopListening() {
         stopTracking();
         mContentResolver.unregisterContentObserver(mSettingsObserver);
     }

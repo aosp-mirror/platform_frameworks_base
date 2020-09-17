@@ -26,7 +26,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * CachedBluetoothDeviceManager manages the set of remote Bluetooth devices.
@@ -97,14 +96,17 @@ public class CachedBluetoothDeviceManager {
      * @return the newly created CachedBluetoothDevice object
      */
     public CachedBluetoothDevice addDevice(BluetoothDevice device) {
-        LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
-        CachedBluetoothDevice newDevice = new CachedBluetoothDevice(mContext, profileManager,
-                device);
-        mHearingAidDeviceManager.initHearingAidDeviceIfNeeded(newDevice);
+        CachedBluetoothDevice newDevice;
+        final LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
         synchronized (this) {
-            if (!mHearingAidDeviceManager.setSubDeviceIfNeeded(newDevice)) {
-                mCachedDevices.add(newDevice);
-                mBtManager.getEventManager().dispatchDeviceAdded(newDevice);
+            newDevice = findDevice(device);
+            if (newDevice == null) {
+                newDevice = new CachedBluetoothDevice(mContext, profileManager, device);
+                mHearingAidDeviceManager.initHearingAidDeviceIfNeeded(newDevice);
+                if (!mHearingAidDeviceManager.setSubDeviceIfNeeded(newDevice)) {
+                    mCachedDevices.add(newDevice);
+                    mBtManager.getEventManager().dispatchDeviceAdded(newDevice);
+                }
             }
         }
 
@@ -226,14 +228,6 @@ public class CachedBluetoothDeviceManager {
         }
     }
 
-    public synchronized void onActiveDeviceChanged(CachedBluetoothDevice activeDevice,
-            int bluetoothProfile) {
-        for (CachedBluetoothDevice cachedDevice : mCachedDevices) {
-            boolean isActive = Objects.equals(cachedDevice, activeDevice);
-            cachedDevice.onActiveDeviceChanged(isActive, bluetoothProfile);
-        }
-    }
-
     public synchronized boolean onProfileConnectionStateChangedIfProcessed(CachedBluetoothDevice
             cachedDevice, int state) {
         return mHearingAidDeviceManager.onProfileConnectionStateChangedIfProcessed(cachedDevice,
@@ -251,12 +245,6 @@ public class CachedBluetoothDeviceManager {
             // Sub device unpaired, to unpair main device
             mainDevice.unpair();
             mainDevice.setSubDevice(null);
-        }
-    }
-
-    public synchronized void dispatchAudioModeChanged() {
-        for (CachedBluetoothDevice cachedDevice : mCachedDevices) {
-            cachedDevice.onAudioModeChanged();
         }
     }
 

@@ -17,7 +17,6 @@
 package com.android.systemui.recents;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.systemui.Prefs.Key.DISMISSED_RECENTS_SWIPE_UP_ONBOARDING_COUNT;
@@ -27,8 +26,7 @@ import static com.android.systemui.Prefs.Key.HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDIN
 import static com.android.systemui.Prefs.Key.OVERVIEW_OPENED_COUNT;
 import static com.android.systemui.Prefs.Key.OVERVIEW_OPENED_FROM_HOME_COUNT;
 import static com.android.systemui.shared.system.LauncherEventUtil.DISMISS;
-import static com.android.systemui.shared.system.LauncherEventUtil
-        .RECENTS_QUICK_SCRUB_ONBOARDING_TIP;
+import static com.android.systemui.shared.system.LauncherEventUtil.RECENTS_QUICK_SCRUB_ONBOARDING_TIP;
 import static com.android.systemui.shared.system.LauncherEventUtil.RECENTS_SWIPE_UP_ONBOARDING_TIP;
 import static com.android.systemui.shared.system.LauncherEventUtil.VISIBLE;
 
@@ -61,8 +59,10 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -137,7 +137,7 @@ public class RecentsOnboarding {
 
         private void onAppLaunch() {
             ActivityManager.RunningTaskInfo info = ActivityManagerWrapper.getInstance()
-                    .getRunningTask(ACTIVITY_TYPE_UNDEFINED /* ignoreActivityType */);
+                    .getRunningTask();
             if (info == null) {
                 return;
             }
@@ -245,10 +245,15 @@ public class RecentsOnboarding {
 
     private final View.OnAttachStateChangeListener mOnAttachStateChangeListener
             = new View.OnAttachStateChangeListener() {
+
+        private final BroadcastDispatcher mBroadcastDispatcher = Dependency.get(
+                BroadcastDispatcher.class);
+
         @Override
         public void onViewAttachedToWindow(View view) {
             if (view == mLayout) {
-                mContext.registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+                mBroadcastDispatcher.registerReceiver(mReceiver,
+                        new IntentFilter(Intent.ACTION_SCREEN_OFF));
                 mLayoutAttachedToWindow = true;
                 if (view.getTag().equals(R.string.recents_swipe_up_onboarding)) {
                     mHasDismissedSwipeUpTip = false;
@@ -273,7 +278,7 @@ public class RecentsOnboarding {
                     }
                     mOverviewOpenedCountSinceQuickScrubTipDismiss = 0;
                 }
-                mContext.unregisterReceiver(mReceiver);
+                mBroadcastDispatcher.unregisterReceiver(mReceiver);
             }
         }
     };
@@ -335,10 +340,11 @@ public class RecentsOnboarding {
     private void notifyOnTip(int action, int target) {
         try {
             IOverviewProxy overviewProxy = mOverviewProxyService.getProxy();
-            if(overviewProxy != null) {
+            if (overviewProxy != null) {
                 overviewProxy.onTip(action, target);
             }
-        } catch (RemoteException e) {}
+        } catch (RemoteException e) {
+        }
     }
 
     public void onNavigationModeChanged(int mode) {
@@ -489,7 +495,7 @@ public class RecentsOnboarding {
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 flags,
                 PixelFormat.TRANSLUCENT);
-        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         lp.setTitle("RecentsOnboarding");
         lp.gravity = gravity;
         return lp;

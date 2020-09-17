@@ -25,6 +25,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
+import static com.android.server.job.JobSchedulerService.RARE_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import static org.junit.Assert.assertEquals;
@@ -37,6 +39,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
 import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
@@ -48,12 +51,15 @@ import android.net.NetworkPolicyManager;
 import android.os.BatteryManagerInternal;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 
 import com.android.server.AppStateTracker;
-import com.android.server.DeviceIdleController;
+import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
+import com.android.server.SystemServiceManager;
 import com.android.server.job.controllers.JobStatus;
+import com.android.server.usage.AppStandbyInternal;
 
 import org.junit.After;
 import org.junit.Before;
@@ -78,6 +84,7 @@ public class JobSchedulerServiceTest {
     private class TestJobSchedulerService extends JobSchedulerService {
         TestJobSchedulerService(Context context) {
             super(context);
+            mAppStateTracker = mock(AppStateTracker.class);
         }
 
         @Override
@@ -92,14 +99,18 @@ public class JobSchedulerServiceTest {
                 .initMocks(this)
                 .strictness(Strictness.LENIENT)
                 .mockStatic(LocalServices.class)
+                .mockStatic(ServiceManager.class)
                 .startMocking();
 
         // Called in JobSchedulerService constructor.
         when(mContext.getMainLooper()).thenReturn(Looper.getMainLooper());
         doReturn(mActivityMangerInternal)
                 .when(() -> LocalServices.getService(ActivityManagerInternal.class));
+        doReturn(mock(AppStandbyInternal.class))
+                .when(() -> LocalServices.getService(AppStandbyInternal.class));
         doReturn(mock(UsageStatsManagerInternal.class))
                 .when(() -> LocalServices.getService(UsageStatsManagerInternal.class));
+        when(mContext.getString(anyInt())).thenReturn("some_test_string");
         // Called in BackgroundJobsController constructor.
         doReturn(mock(AppStateTracker.class))
                 .when(() -> LocalServices.getService(AppStateTracker.class));
@@ -112,8 +123,8 @@ public class JobSchedulerServiceTest {
         when(mContext.getSystemService(NetworkPolicyManager.class))
                 .thenReturn(mock(NetworkPolicyManager.class));
         // Called in DeviceIdleJobsController constructor.
-        doReturn(mock(DeviceIdleController.LocalService.class))
-                .when(() -> LocalServices.getService(DeviceIdleController.LocalService.class));
+        doReturn(mock(DeviceIdleInternal.class))
+                .when(() -> LocalServices.getService(DeviceIdleInternal.class));
         // Used in JobStatus.
         doReturn(mock(PackageManagerInternal.class))
                 .when(() -> LocalServices.getService(PackageManagerInternal.class));
@@ -128,6 +139,9 @@ public class JobSchedulerServiceTest {
         } catch (RemoteException e) {
             fail("registerUidObserver threw exception: " + e.getMessage());
         }
+        // Called by QuotaTracker
+        doReturn(mock(SystemServiceManager.class))
+                .when(() -> LocalServices.getService(SystemServiceManager.class));
 
         JobSchedulerService.sSystemClock = Clock.fixed(Clock.systemUTC().instant(), ZoneOffset.UTC);
         JobSchedulerService.sElapsedRealtimeClock =
@@ -661,5 +675,171 @@ public class JobSchedulerServiceTest {
         rescheduledJob = mService.getRescheduleJobForPeriodic(failedJob);
         assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
         assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+    }
+
+    /** Tests that rare job batching works as expected. */
+    @Test
+    public void testRareJobBatching() {
+        spyOn(mService);
+        doNothing().when(mService).evaluateControllerStatesLocked(any());
+        doNothing().when(mService).noteJobsPending(any());
+        doReturn(true).when(mService).isReadyToBeExecutedLocked(any());
+        advanceElapsedClock(24 * HOUR_IN_MILLIS);
+
+        JobSchedulerService.MaybeReadyJobQueueFunctor maybeQueueFunctor =
+                mService.new MaybeReadyJobQueueFunctor();
+        mService.mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT = 5;
+        mService.mConstants.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = HOUR_IN_MILLIS;
+
+        JobStatus job = createJobStatus(
+                "testRareJobBatching",
+                createJobInfo().setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
+        job.setStandbyBucket(RARE_INDEX);
+
+        // Not enough RARE jobs to run.
+        mService.mPendingJobs.clear();
+        maybeQueueFunctor.reset();
+        for (int i = 0; i < mService.mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT / 2; ++i) {
+            maybeQueueFunctor.accept(job);
+            assertEquals(i + 1, maybeQueueFunctor.forceBatchedCount);
+            assertEquals(i + 1, maybeQueueFunctor.runnableJobs.size());
+            assertEquals(sElapsedRealtimeClock.millis(), job.getFirstForceBatchedTimeElapsed());
+        }
+        maybeQueueFunctor.postProcess();
+        assertEquals(0, mService.mPendingJobs.size());
+
+        // Enough RARE jobs to run.
+        mService.mPendingJobs.clear();
+        maybeQueueFunctor.reset();
+        for (int i = 0; i < mService.mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT; ++i) {
+            maybeQueueFunctor.accept(job);
+            assertEquals(i + 1, maybeQueueFunctor.forceBatchedCount);
+            assertEquals(i + 1, maybeQueueFunctor.runnableJobs.size());
+            assertEquals(sElapsedRealtimeClock.millis(), job.getFirstForceBatchedTimeElapsed());
+        }
+        maybeQueueFunctor.postProcess();
+        assertEquals(5, mService.mPendingJobs.size());
+
+        // Not enough RARE jobs to run, but a non-batched job saves the day.
+        mService.mPendingJobs.clear();
+        maybeQueueFunctor.reset();
+        JobStatus activeJob = createJobStatus(
+                "testRareJobBatching",
+                createJobInfo().setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
+        activeJob.setStandbyBucket(ACTIVE_INDEX);
+        for (int i = 0; i < mService.mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT / 2; ++i) {
+            maybeQueueFunctor.accept(job);
+            assertEquals(i + 1, maybeQueueFunctor.forceBatchedCount);
+            assertEquals(i + 1, maybeQueueFunctor.runnableJobs.size());
+            assertEquals(sElapsedRealtimeClock.millis(), job.getFirstForceBatchedTimeElapsed());
+        }
+        maybeQueueFunctor.accept(activeJob);
+        maybeQueueFunctor.postProcess();
+        assertEquals(3, mService.mPendingJobs.size());
+
+        // Not enough RARE jobs to run, but an old RARE job saves the day.
+        mService.mPendingJobs.clear();
+        maybeQueueFunctor.reset();
+        JobStatus oldRareJob = createJobStatus("testRareJobBatching", createJobInfo());
+        oldRareJob.setStandbyBucket(RARE_INDEX);
+        final long oldBatchTime = sElapsedRealtimeClock.millis()
+                - 2 * mService.mConstants.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS;
+        oldRareJob.setFirstForceBatchedTimeElapsed(oldBatchTime);
+        for (int i = 0; i < mService.mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT / 2; ++i) {
+            maybeQueueFunctor.accept(job);
+            assertEquals(i + 1, maybeQueueFunctor.forceBatchedCount);
+            assertEquals(i + 1, maybeQueueFunctor.runnableJobs.size());
+            assertEquals(sElapsedRealtimeClock.millis(), job.getFirstForceBatchedTimeElapsed());
+        }
+        maybeQueueFunctor.accept(oldRareJob);
+        assertEquals(oldBatchTime, oldRareJob.getFirstForceBatchedTimeElapsed());
+        maybeQueueFunctor.postProcess();
+        assertEquals(3, mService.mPendingJobs.size());
+    }
+
+    /** Tests that jobs scheduled by the app itself are counted towards scheduling limits. */
+    @Test
+    public void testScheduleLimiting_RegularSchedule_Blocked() {
+        mService.mConstants.ENABLE_API_QUOTAS = true;
+        mService.mConstants.API_QUOTA_SCHEDULE_COUNT = 300;
+        mService.mConstants.API_QUOTA_SCHEDULE_WINDOW_MS = 300000;
+        mService.mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION = false;
+        mService.mConstants.API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = true;
+        mService.updateQuotaTracker();
+
+        final JobInfo job = createJobInfo().setPersisted(true).build();
+        for (int i = 0; i < 500; ++i) {
+            final int expected =
+                    i < 300 ? JobScheduler.RESULT_SUCCESS : JobScheduler.RESULT_FAILURE;
+            assertEquals("Got unexpected result for schedule #" + (i + 1),
+                    expected,
+                    mService.scheduleAsPackage(job, null, 10123, null, 0, ""));
+        }
+    }
+
+    /**
+     * Tests that jobs scheduled by the app itself succeed even if the app is above the scheduling
+     * limit.
+     */
+    @Test
+    public void testScheduleLimiting_RegularSchedule_Allowed() {
+        mService.mConstants.ENABLE_API_QUOTAS = true;
+        mService.mConstants.API_QUOTA_SCHEDULE_COUNT = 300;
+        mService.mConstants.API_QUOTA_SCHEDULE_WINDOW_MS = 300000;
+        mService.mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION = false;
+        mService.mConstants.API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = false;
+        mService.updateQuotaTracker();
+
+        final JobInfo job = createJobInfo().setPersisted(true).build();
+        for (int i = 0; i < 500; ++i) {
+            assertEquals("Got unexpected result for schedule #" + (i + 1),
+                    JobScheduler.RESULT_SUCCESS,
+                    mService.scheduleAsPackage(job, null, 10123, null, 0, ""));
+        }
+    }
+
+    /**
+     * Tests that jobs scheduled through a proxy (eg. system server) don't count towards scheduling
+     * limits.
+     */
+    @Test
+    public void testScheduleLimiting_Proxy() {
+        mService.mConstants.ENABLE_API_QUOTAS = true;
+        mService.mConstants.API_QUOTA_SCHEDULE_COUNT = 300;
+        mService.mConstants.API_QUOTA_SCHEDULE_WINDOW_MS = 300000;
+        mService.mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION = false;
+        mService.mConstants.API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = true;
+        mService.updateQuotaTracker();
+
+        final JobInfo job = createJobInfo().setPersisted(true).build();
+        for (int i = 0; i < 500; ++i) {
+            assertEquals("Got unexpected result for schedule #" + (i + 1),
+                    JobScheduler.RESULT_SUCCESS,
+                    mService.scheduleAsPackage(job, null, 10123, "proxied.package", 0, ""));
+        }
+    }
+
+    /**
+     * Tests that jobs scheduled by an app for itself as if through a proxy are counted towards
+     * scheduling limits.
+     */
+    @Test
+    public void testScheduleLimiting_SelfProxy() {
+        mService.mConstants.ENABLE_API_QUOTAS = true;
+        mService.mConstants.API_QUOTA_SCHEDULE_COUNT = 300;
+        mService.mConstants.API_QUOTA_SCHEDULE_WINDOW_MS = 300000;
+        mService.mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION = false;
+        mService.mConstants.API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = true;
+        mService.updateQuotaTracker();
+
+        final JobInfo job = createJobInfo().setPersisted(true).build();
+        for (int i = 0; i < 500; ++i) {
+            final int expected =
+                    i < 300 ? JobScheduler.RESULT_SUCCESS : JobScheduler.RESULT_FAILURE;
+            assertEquals("Got unexpected result for schedule #" + (i + 1),
+                    expected,
+                    mService.scheduleAsPackage(job, null, 10123, job.getService().getPackageName(),
+                            0, ""));
+        }
     }
 }

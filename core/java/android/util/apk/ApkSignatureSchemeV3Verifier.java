@@ -17,22 +17,14 @@
 package android.util.apk;
 
 import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_VERITY_CHUNKED_SHA256;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_DSA_WITH_SHA256;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_ECDSA_WITH_SHA256;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_ECDSA_WITH_SHA512;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA256;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA512;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_RSA_PSS_WITH_SHA256;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_RSA_PSS_WITH_SHA512;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_VERITY_DSA_WITH_SHA256;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_VERITY_ECDSA_WITH_SHA256;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_VERITY_RSA_PKCS1_V1_5_WITH_SHA256;
 import static android.util.apk.ApkSigningBlockUtils.compareSignatureAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.getContentDigestAlgorithmJcaDigestAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.getLengthPrefixedSlice;
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmContentDigestAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmJcaKeyAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmJcaSignatureAlgorithm;
+import static android.util.apk.ApkSigningBlockUtils.isSupportedSignatureAlgorithm;
+import static android.util.apk.ApkSigningBlockUtils.pickBestDigestForV4;
 import static android.util.apk.ApkSigningBlockUtils.readLengthPrefixedByteArray;
 
 import android.os.Build;
@@ -219,6 +211,8 @@ public class ApkSignatureSchemeV3Verifier {
             result.verityRootHash = ApkSigningBlockUtils.parseVerityDigestAndVerifySourceLength(
                     verityDigest, apk.length(), signatureInfo);
         }
+
+        result.digest = pickBestDigestForV4(contentDigests);
 
         return result;
     }
@@ -552,24 +546,6 @@ public class ApkSignatureSchemeV3Verifier {
         }
     }
 
-    private static boolean isSupportedSignatureAlgorithm(int sigAlgorithm) {
-        switch (sigAlgorithm) {
-            case SIGNATURE_RSA_PSS_WITH_SHA256:
-            case SIGNATURE_RSA_PSS_WITH_SHA512:
-            case SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA256:
-            case SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA512:
-            case SIGNATURE_ECDSA_WITH_SHA256:
-            case SIGNATURE_ECDSA_WITH_SHA512:
-            case SIGNATURE_DSA_WITH_SHA256:
-            case SIGNATURE_VERITY_RSA_PKCS1_V1_5_WITH_SHA256:
-            case SIGNATURE_VERITY_ECDSA_WITH_SHA256:
-            case SIGNATURE_VERITY_DSA_WITH_SHA256:
-                return true;
-            default:
-                return false;
-        }
-    }
-
     /**
      * Verified processed proof of rotation.
      *
@@ -595,6 +571,7 @@ public class ApkSignatureSchemeV3Verifier {
         public final VerifiedProofOfRotation por;
 
         public byte[] verityRootHash;
+        public byte[] digest;
 
         public VerifiedSigner(X509Certificate[] certs, VerifiedProofOfRotation por) {
             this.certs = certs;

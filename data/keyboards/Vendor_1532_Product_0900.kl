@@ -20,12 +20,18 @@ key 307 BUTTON_X
 key 308 BUTTON_Y
 key 310 BUTTON_L1
 key 311 BUTTON_R1
-key 316 BUTTON_MODE
 key 317 BUTTON_THUMBL
 key 318 BUTTON_THUMBR
 
 key 158 BACK
 key 172 HOME
+
+# Left arrow to the left of the "power" key
+key 0x13a BUTTON_SELECT
+# Right arrow to the right of the "power" key
+key 0x13b BUTTON_START
+# Power key
+key 0x13c BUTTON_MODE
 
 axis 0x00 X
 axis 0x01 Y

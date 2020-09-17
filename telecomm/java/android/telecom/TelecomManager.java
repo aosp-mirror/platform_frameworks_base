@@ -49,6 +49,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -321,6 +322,7 @@ public class TelecomManager {
      * the remote handle of the new call.
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_UNKNOWN_CALL_HANDLE =
             "android.telecom.extra.UNKNOWN_CALL_HANDLE";
 
@@ -391,6 +393,7 @@ public class TelecomManager {
      * </ul>
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_CALL_TECHNOLOGY_TYPE =
             "android.telecom.extra.CALL_TECHNOLOGY_TYPE";
 
@@ -727,17 +730,57 @@ public class TelecomManager {
     public static final int TTY_MODE_VCO = 3;
 
     /**
-     * Broadcast intent action indicating that the current TTY mode has changed. An intent extra
-     * provides this state as an int.
+     * Broadcast intent action indicating that the current TTY mode has changed.
      *
-     * @see #EXTRA_CURRENT_TTY_MODE
+     * This intent will contain {@link #EXTRA_CURRENT_TTY_MODE} as an intent extra, giving the new
+     * TTY mode.
      * @hide
      */
+    @TestApi
+    @SystemApi
     public static final String ACTION_CURRENT_TTY_MODE_CHANGED =
             "android.telecom.action.CURRENT_TTY_MODE_CHANGED";
 
     /**
-     * The lookup key for an int that indicates the current TTY mode.
+     * Integer extra key that indicates the current TTY mode.
+     *
+     * Used with {@link #ACTION_CURRENT_TTY_MODE_CHANGED}.
+     *
+     * Valid modes are:
+     * <ul>
+     *     <li>{@link #TTY_MODE_OFF}</li>
+     *     <li>{@link #TTY_MODE_FULL}</li>
+     *     <li>{@link #TTY_MODE_HCO}</li>
+     *     <li>{@link #TTY_MODE_VCO}</li>
+     * </ul>
+     *
+     * This TTY mode is distinct from the one sent via {@link #ACTION_TTY_PREFERRED_MODE_CHANGED},
+     * since the current TTY mode will always be {@link #TTY_MODE_OFF}unless a TTY terminal is
+     * plugged into the device.
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final String EXTRA_CURRENT_TTY_MODE =
+            "android.telecom.extra.CURRENT_TTY_MODE";
+
+    /**
+     * Broadcast intent action indicating that the TTY preferred operating mode has changed.
+     *
+     * This intent will contain {@link #EXTRA_TTY_PREFERRED_MODE} as an intent extra, giving the new
+     * preferred TTY mode.
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final String ACTION_TTY_PREFERRED_MODE_CHANGED =
+            "android.telecom.action.TTY_PREFERRED_MODE_CHANGED";
+
+    /**
+     * Integer extra key that indicates the preferred TTY mode.
+     *
+     * Used with {@link #ACTION_TTY_PREFERRED_MODE_CHANGED}.
+     *
      * Valid modes are:
      * <ul>
      *     <li>{@link #TTY_MODE_OFF}</li>
@@ -747,26 +790,8 @@ public class TelecomManager {
      * </ul>
      * @hide
      */
-    public static final String EXTRA_CURRENT_TTY_MODE =
-            "android.telecom.extra.CURRENT_TTY_MODE";
-
-    /**
-     * Broadcast intent action indicating that the TTY preferred operating mode has changed. An
-     * intent extra provides the new mode as an int.
-     *
-     * @see #EXTRA_TTY_PREFERRED_MODE
-     * @hide
-     */
-    public static final String ACTION_TTY_PREFERRED_MODE_CHANGED =
-            "android.telecom.action.TTY_PREFERRED_MODE_CHANGED";
-
-    /**
-     * The lookup key for an int that indicates preferred TTY mode. Valid modes are: -
-     * {@link #TTY_MODE_OFF} - {@link #TTY_MODE_FULL} - {@link #TTY_MODE_HCO} -
-     * {@link #TTY_MODE_VCO}
-     *
-     * @hide
-     */
+    @TestApi
+    @SystemApi
     public static final String EXTRA_TTY_PREFERRED_MODE =
             "android.telecom.extra.TTY_PREFERRED_MODE";
 
@@ -842,8 +867,10 @@ public class TelecomManager {
      * {@link TelecomManager#CALL_SOURCE_EMERGENCY_DIALPAD},
      * {@link TelecomManager#CALL_SOURCE_EMERGENCY_SHORTCUT}.
      *
+     * Intended for use with the platform emergency dialer only.
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_CALL_SOURCE = "android.telecom.extra.CALL_SOURCE";
 
     /**
@@ -851,6 +878,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int CALL_SOURCE_EMERGENCY_SHORTCUT = 2;
 
     /**
@@ -858,6 +886,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int CALL_SOURCE_EMERGENCY_DIALPAD = 1;
 
     /**
@@ -865,6 +894,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int CALL_SOURCE_UNSPECIFIED = 0;
 
     /**
@@ -937,7 +967,8 @@ public class TelecomManager {
      */
     public TelecomManager(Context context, ITelecomService telecomServiceImpl) {
         Context appContext = context.getApplicationContext();
-        if (appContext != null) {
+        if (appContext != null && Objects.equals(context.getAttributionTag(),
+                appContext.getAttributionTag())) {
             mContext = appContext;
         } else {
             mContext = context;
@@ -971,7 +1002,7 @@ public class TelecomManager {
         try {
             if (isServiceConnected()) {
                 return getTelecomService().getDefaultOutgoingPhoneAccount(uriScheme,
-                        mContext.getOpPackageName());
+                        mContext.getOpPackageName(), mContext.getAttributionTag());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#getDefaultOutgoingPhoneAccount", e);
@@ -1168,7 +1199,8 @@ public class TelecomManager {
     public List<PhoneAccountHandle> getSelfManagedPhoneAccounts() {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().getSelfManagedPhoneAccounts(mContext.getOpPackageName());
+                return getTelecomService().getSelfManagedPhoneAccounts(mContext.getOpPackageName(),
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#getSelfManagedPhoneAccounts()", e);
@@ -1193,8 +1225,8 @@ public class TelecomManager {
             boolean includeDisabledAccounts) {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().getCallCapablePhoneAccounts(
-                        includeDisabledAccounts, mContext.getOpPackageName());
+                return getTelecomService().getCallCapablePhoneAccounts(includeDisabledAccounts,
+                        mContext.getOpPackageName(), mContext.getAttributionTag());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#getCallCapablePhoneAccounts(" +
@@ -1498,7 +1530,7 @@ public class TelecomManager {
         try {
             if (isServiceConnected()) {
                 return getTelecomService().isVoiceMailNumber(accountHandle, number,
-                        mContext.getOpPackageName());
+                        mContext.getOpPackageName(), mContext.getAttributionTag());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling ITelecomService#isVoiceMailNumber.", e);
@@ -1520,7 +1552,7 @@ public class TelecomManager {
         try {
             if (isServiceConnected()) {
                 return getTelecomService().getVoiceMailNumber(accountHandle,
-                        mContext.getOpPackageName());
+                        mContext.getOpPackageName(), mContext.getAttributionTag());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling ITelecomService#hasVoiceMailNumber.", e);
@@ -1531,17 +1563,27 @@ public class TelecomManager {
     /**
      * Return the line 1 phone number for given phone account.
      *
-     * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
+     * <p>Requires Permission:
+     *     {@link android.Manifest.permission#READ_SMS READ_SMS},
+     *     {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS},
+     *     or that the caller is the default SMS app for any API level.
+     *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *     for apps targeting SDK API level 29 and below.
      *
      * @param accountHandle The handle for the account retrieve a number for.
      * @return A string representation of the line 1 phone number.
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges or default SMS app
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_SMS,
+            android.Manifest.permission.READ_PHONE_NUMBERS
+            }, conditional = true)
     public String getLine1Number(PhoneAccountHandle accountHandle) {
         try {
             if (isServiceConnected()) {
                 return getTelecomService().getLine1Number(accountHandle,
-                        mContext.getOpPackageName());
+                        mContext.getOpPackageName(), mContext.getAttributionTag());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling ITelecomService#getLine1Number.", e);
@@ -1562,7 +1604,8 @@ public class TelecomManager {
     public boolean isInCall() {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().isInCall(mContext.getOpPackageName());
+                return getTelecomService().isInCall(mContext.getOpPackageName(),
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling isInCall().", e);
@@ -1587,7 +1630,8 @@ public class TelecomManager {
     public boolean isInManagedCall() {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().isInManagedCall(mContext.getOpPackageName());
+                return getTelecomService().isInManagedCall(mContext.getOpPackageName(),
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling isInManagedCall().", e);
@@ -1768,7 +1812,8 @@ public class TelecomManager {
     public boolean isTtySupported() {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().isTtySupported(mContext.getOpPackageName());
+                return getTelecomService().isTtySupported(mContext.getOpPackageName(),
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException attempting to get TTY supported state.", e);
@@ -1792,7 +1837,8 @@ public class TelecomManager {
     public @TtyMode int getCurrentTtyMode() {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().getCurrentTtyMode(mContext.getOpPackageName());
+                return getTelecomService().getCurrentTtyMode(mContext.getOpPackageName(),
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException attempting to get the current TTY mode.", e);
@@ -2023,7 +2069,8 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                service.showInCallScreen(showDialpad, mContext.getOpPackageName());
+                service.showInCallScreen(showDialpad, mContext.getOpPackageName(),
+                        mContext.getAttributionTag());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#showCallScreen", e);
             }
@@ -2086,7 +2133,7 @@ public class TelecomManager {
             }
             try {
                 service.placeCall(address, extras == null ? new Bundle() : extras,
-                        mContext.getOpPackageName());
+                        mContext.getOpPackageName(), mContext.getAttributionTag());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#placeCall", e);
             }
@@ -2199,6 +2246,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     @NonNull
     public Intent createLaunchEmergencyDialerIntent(@Nullable String number) {
         ITelecomService service = getTelecomService();

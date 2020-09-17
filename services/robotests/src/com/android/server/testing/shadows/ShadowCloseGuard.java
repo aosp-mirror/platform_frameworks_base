@@ -44,5 +44,10 @@ public class ShadowCloseGuard {
         public void report(String message, Throwable allocationSite) {
             mReports += 1;
         }
+
+        @Override
+        public void report(String message) {
+            mReports += 1;
+        }
     }
 }

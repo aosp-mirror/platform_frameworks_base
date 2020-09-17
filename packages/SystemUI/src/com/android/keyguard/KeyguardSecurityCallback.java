@@ -25,6 +25,15 @@ public interface KeyguardSecurityCallback {
     void dismiss(boolean securityVerified, int targetUserId);
 
     /**
+     * Dismiss the given security screen.
+     * @param securityVerified true if the user correctly entered credentials for the given screen.
+     * @param targetUserId a user that needs to be the foreground user at the dismissal completion.
+     * @param bypassSecondaryLockScreen true if the user can bypass the secondary lock screen,
+     *                                  if any, during this dismissal.
+     */
+    void dismiss(boolean securityVerified, int targetUserId, boolean bypassSecondaryLockScreen);
+
+    /**
      * Manually report user activity to keep the device awake.
      */
     void userActivity();

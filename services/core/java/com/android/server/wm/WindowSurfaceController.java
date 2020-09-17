@@ -21,10 +21,10 @@ import static android.view.Surface.SCALING_MODE_SCALE_TO_WINDOW;
 import static android.view.SurfaceControl.METADATA_OWNER_UID;
 import static android.view.SurfaceControl.METADATA_WINDOW_TYPE;
 
+import static com.android.server.wm.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
+import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowSurfaceControllerProto.LAYER;
@@ -33,13 +33,14 @@ import static com.android.server.wm.WindowSurfaceControllerProto.SHOWN;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Debug;
-import android.os.IBinder;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.WindowContentFrameStats;
+import android.view.WindowManager;
+
+import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
 
@@ -49,6 +50,11 @@ class WindowSurfaceController {
     final WindowStateAnimator mAnimator;
 
     SurfaceControl mSurfaceControl;
+
+    /**
+     * WM only uses for deferred transactions.
+     */
+    SurfaceControl mBLASTSurfaceControl;
 
     // Should only be set from within setShown().
     private boolean mSurfaceShown = false;
@@ -82,9 +88,12 @@ class WindowSurfaceController {
     private final int mWindowType;
     private final Session mWindowSession;
 
-    private final SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
+    private final SurfaceControl.Transaction mTmpTransaction;
 
-    public WindowSurfaceController(SurfaceSession s, String name, int w, int h, int format,
+    // Used to track whether we have called detach children on the way to invisibility.
+    boolean mChildrenDetached;
+
+    WindowSurfaceController(String name, int w, int h, int format,
             int flags, WindowStateAnimator animator, int windowType, int ownerUid) {
         mAnimator = animator;
 
@@ -97,6 +106,7 @@ class WindowSurfaceController {
         final WindowState win = animator.mWin;
         mWindowType = windowType;
         mWindowSession = win.mSession;
+        mTmpTransaction = mService.mTransactionFactory.get();
 
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "new SurfaceControl");
         final SurfaceControl.Builder b = win.makeSurface()
@@ -106,36 +116,47 @@ class WindowSurfaceController {
                 .setFormat(format)
                 .setFlags(flags)
                 .setMetadata(METADATA_WINDOW_TYPE, windowType)
-                .setMetadata(METADATA_OWNER_UID, ownerUid);
+                .setMetadata(METADATA_OWNER_UID, ownerUid)
+                .setCallsite("WindowSurfaceController");
+
+        final boolean useBLAST = mService.mUseBLAST && ((win.getAttrs().privateFlags &
+                WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST) != 0);
+        if (useBLAST) {
+            b.setContainerLayer();
+        }
+
         mSurfaceControl = b.build();
+
+        if (useBLAST) {
+            mBLASTSurfaceControl = win.makeSurface()
+                .setParent(mSurfaceControl)
+                .setName(name + "(BLAST)")
+                .setHidden(false)
+                .setBLASTLayer()
+                .setCallsite("WindowSurfaceController")
+                .build();
+        }
+
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
-    private void logSurface(String msg, RuntimeException where) {
-        String str = "  SURFACE " + msg + ": " + title;
-        if (where != null) {
-            Slog.i(TAG, str, where);
-        } else {
-            Slog.i(TAG, str);
-        }
-    }
-
     void reparentChildrenInTransaction(WindowSurfaceController other) {
-        if (SHOW_TRANSACTIONS) Slog.i(TAG, "REPARENT from: " + this + " to: " + other);
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "REPARENT from: %s to: %s", this, other);
         if ((mSurfaceControl != null) && (other.mSurfaceControl != null)) {
-            mSurfaceControl.reparentChildren(other.getHandle());
+            mSurfaceControl.reparentChildren(other.mSurfaceControl);
         }
     }
 
     void detachChildren() {
-        if (SHOW_TRANSACTIONS) Slog.i(TAG, "SEVER CHILDREN");
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SEVER CHILDREN");
+        mChildrenDetached = true;
         if (mSurfaceControl != null) {
             mSurfaceControl.detachChildren();
         }
     }
 
     void hide(SurfaceControl.Transaction transaction, String reason) {
-        if (SHOW_TRANSACTIONS) logSurface("HIDE ( " + reason + " )", null);
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE HIDE ( %s ): %s", reason, title);
         mHiddenForOtherReasons = true;
 
         mAnimator.destroyPreservedSurfaceLocked();
@@ -157,9 +178,8 @@ class WindowSurfaceController {
     }
 
     void destroyNotInTransaction() {
-        if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-            Slog.i(TAG, "Destroying surface " + this + " called by " + Debug.getCallers(8));
-        }
+        ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
+                    "Destroying surface %s called by %s", this, Debug.getCallers(8));
         try {
             if (mSurfaceControl != null) {
                 mTmpTransaction.remove(mSurfaceControl).apply();
@@ -169,12 +189,14 @@ class WindowSurfaceController {
         } finally {
             setShown(false);
             mSurfaceControl = null;
+            if (mBLASTSurfaceControl != null) {
+                mBLASTSurfaceControl.release();
+            }
         }
     }
 
     void setCropInTransaction(Rect clipRect, boolean recoveringMemory) {
-        if (SHOW_TRANSACTIONS) logSurface(
-                "CROP " + clipRect.toShortString(), null);
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE CROP %s: %s", clipRect.toShortString(), title);
         try {
             if (clipRect.width() > 0 && clipRect.height() > 0) {
                 if (!clipRect.equals(mSurfaceCrop)) {
@@ -198,8 +220,7 @@ class WindowSurfaceController {
     }
 
     void clearCropInTransaction(boolean recoveringMemory) {
-        if (SHOW_TRANSACTIONS) logSurface(
-                "CLEAR CROP", null);
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE CLEAR CROP: %s", title);
         try {
             Rect clipRect = new Rect(0, 0, -1, -1);
             if (mSurfaceCrop.equals(clipRect)) {
@@ -227,8 +248,8 @@ class WindowSurfaceController {
             mSurfaceY = top;
 
             try {
-                if (SHOW_TRANSACTIONS) logSurface(
-                        "POS (setPositionInTransaction) @ (" + left + "," + top + ")", null);
+                ProtoLog.i(WM_SHOW_TRANSACTIONS,
+                        "SURFACE POS (setPositionInTransaction) @ (%f,%f): %s", left, top, title);
 
                 if (t == null) {
                     mSurfaceControl.setPosition(left, top);
@@ -243,10 +264,6 @@ class WindowSurfaceController {
                 }
             }
         }
-    }
-
-    void setGeometryAppliesWithResizeInTransaction(boolean recoveringMemory) {
-        mSurfaceControl.setGeometryAppliesWithResize();
     }
 
     void setMatrixInTransaction(float dsdx, float dtdx, float dtdy, float dsdy,
@@ -268,8 +285,8 @@ class WindowSurfaceController {
         mLastDsdy = dsdy;
 
         try {
-            if (SHOW_TRANSACTIONS) logSurface(
-                    "MATRIX [" + dsdx + "," + dtdx + "," + dtdy + "," + dsdy + "]", null);
+            ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE MATRIX [%f,%f,%f,%f]: %s",
+                    dsdx, dtdx, dtdy, dsdy, title);
             if (t == null) {
                 mSurfaceControl.setMatrix(dsdx, dtdx, dtdy, dsdy);
             } else {
@@ -294,8 +311,7 @@ class WindowSurfaceController {
             mSurfaceH = height;
 
             try {
-                if (SHOW_TRANSACTIONS) logSurface(
-                        "SIZE " + width + "x" + height, null);
+                ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE SIZE %dx%d: %s", width, height, title);
                 mSurfaceControl.setBufferSize(width, height);
             } catch (RuntimeException e) {
                 // If something goes wrong with the surface (such
@@ -354,8 +370,7 @@ class WindowSurfaceController {
     }
 
     void setOpaque(boolean isOpaque) {
-        if (SHOW_TRANSACTIONS) logSurface("isOpaque=" + isOpaque,
-                null);
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE isOpaque=%b: %s", isOpaque, title);
 
         if (mSurfaceControl == null) {
             return;
@@ -371,8 +386,7 @@ class WindowSurfaceController {
     }
 
     void setSecure(boolean isSecure) {
-        if (SHOW_TRANSACTIONS) logSurface("isSecure=" + isSecure,
-                null);
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE isSecure=%b: %s", isSecure, title);
 
         if (mSurfaceControl == null) {
             return;
@@ -388,9 +402,7 @@ class WindowSurfaceController {
     }
 
     void setColorSpaceAgnostic(boolean agnostic) {
-        if (SHOW_TRANSACTIONS) {
-            logSurface("isColorSpaceAgnostic=" + agnostic, null);
-        }
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE isColorSpaceAgnostic=%b: %s", agnostic, title);
 
         if (mSurfaceControl == null) {
             return;
@@ -414,8 +426,7 @@ class WindowSurfaceController {
     }
 
     boolean showRobustlyInTransaction() {
-        if (SHOW_TRANSACTIONS) logSurface(
-                "SHOW (performLayout)", null);
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE SHOW (performLayout): %s", title);
         if (DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + this
                 + " during relayout");
         mHiddenForOtherReasons = false;
@@ -452,9 +463,9 @@ class WindowSurfaceController {
         return false;
     }
 
-    void deferTransactionUntil(IBinder handle, long frame) {
+    void deferTransactionUntil(SurfaceControl barrier, long frame) {
         // TODO: Logging
-        mSurfaceControl.deferTransactionUntil(handle, frame);
+        mSurfaceControl.deferTransactionUntil(barrier, frame);
     }
 
     void forceScaleableInTransaction(boolean force) {
@@ -483,15 +494,14 @@ class WindowSurfaceController {
         return mSurfaceControl != null;
     }
 
-    IBinder getHandle() {
-        if (mSurfaceControl == null) {
-            return null;
-        }
-        return mSurfaceControl.getHandle();
+    void getSurfaceControl(SurfaceControl outSurfaceControl) {
+        outSurfaceControl.copyFrom(mSurfaceControl, "WindowSurfaceController.getSurfaceControl");
     }
 
-    void getSurfaceControl(SurfaceControl outSurfaceControl) {
-        outSurfaceControl.copyFrom(mSurfaceControl);
+    void getBLASTSurfaceControl(SurfaceControl outSurfaceControl) {
+        if (mBLASTSurfaceControl != null) {
+            outSurfaceControl.copyFrom(mBLASTSurfaceControl, "WindowSurfaceController.getBLASTSurfaceControl");
+        }
     }
 
     int getLayer() {
@@ -530,7 +540,22 @@ class WindowSurfaceController {
         return mSurfaceH;
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    /**
+     * Returns the Surface which the client-framework ViewRootImpl will be using.
+     * This is either the WSA SurfaceControl or it's BLAST child surface.
+     * This has too main uses:
+     * 1. This is the Surface the client will add children to, we use this to make
+     *    sure we don't reparent the BLAST surface itself when calling reparentChildren
+     * 2. We use this as the barrier Surface for some deferTransaction operations.
+     */
+    SurfaceControl getClientViewRootSurface() {
+        if (mBLASTSurfaceControl != null) {
+            return mBLASTSurfaceControl;
+        }
+        return mSurfaceControl;
+    }
+
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(SHOWN, mSurfaceShown);
         proto.write(LAYER, mSurfaceLayer);

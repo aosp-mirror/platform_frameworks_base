@@ -20,46 +20,37 @@
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
-#include "android_os_Parcel.h"
-#include "android/graphics/GraphicBuffer.h"
-#include "android/graphics/GraphicsJNI.h"
-
 #include "core_jni_helpers.h"
-#include <android_runtime/android_view_Surface.h>
-#include <android_runtime/android_graphics_SurfaceTexture.h>
-#include <android_runtime/Log.h>
 
+#include <android/graphics/canvas.h>
+#include <android_runtime/android_graphics_GraphicBuffer.h>
+#include <android_runtime/android_graphics_SurfaceTexture.h>
+#include <android_runtime/android_view_Surface.h>
+#include <android_runtime/Log.h>
+#include <private/android/AHardwareBufferHelpers.h>
+
+#include "android_os_Parcel.h"
 #include <binder/Parcel.h>
 
 #include <gui/Surface.h>
 #include <gui/view/Surface.h>
 #include <gui/SurfaceControl.h>
-#include <gui/GLConsumer.h>
 
+#include <ui/GraphicBuffer.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
-
-#include <SkCanvas.h>
-#include <SkBitmap.h>
-#include <SkImage.h>
-#include <SkRegion.h>
 
 #include <utils/misc.h>
 #include <utils/Log.h>
 
 #include <nativehelper/ScopedUtfChars.h>
 
-#include <AnimationContext.h>
-#include <FrameInfo.h>
-#include <RenderNode.h>
-#include <renderthread/RenderProxy.h>
-
 // ----------------------------------------------------------------------------
 
 namespace android {
 
-static const char* const OutOfResourcesException =
-    "android/view/Surface$OutOfResourcesException";
+static const char* const IllegalArgumentException = "java/lang/IllegalArgumentException";
+static const char* const OutOfResourcesException = "android/view/Surface$OutOfResourcesException";
 
 static struct {
     jclass clazz;
@@ -144,19 +135,6 @@ jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
     return android_view_Surface_createFromSurface(env, surface);
 }
 
-int android_view_Surface_mapPublicFormatToHalFormat(PublicFormat f) {
-    return mapPublicFormatToHalFormat(f);
-}
-
-android_dataspace android_view_Surface_mapPublicFormatToHalDataspace(
-        PublicFormat f) {
-    return mapPublicFormatToHalDataspace(f);
-}
-
-PublicFormat android_view_Surface_mapHalFormatDataspaceToPublicFormat(
-        int format, android_dataspace dataSpace) {
-    return mapHalFormatDataspaceToPublicFormat(format, dataSpace);
-}
 // ----------------------------------------------------------------------------
 
 static inline bool isSurfaceValid(const sp<Surface>& sur) {
@@ -169,7 +147,7 @@ static jlong nativeCreateFromSurfaceTexture(JNIEnv* env, jclass clazz,
         jobject surfaceTextureObj) {
     sp<IGraphicBufferProducer> producer(SurfaceTexture_getProducer(env, surfaceTextureObj));
     if (producer == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException",
+        jniThrowException(env, IllegalArgumentException,
                 "SurfaceTexture has already been released");
         return 0;
     }
@@ -197,7 +175,7 @@ static jboolean nativeIsValid(JNIEnv* env, jclass clazz, jlong nativeObject) {
 static jboolean nativeIsConsumerRunningBehind(JNIEnv* env, jclass clazz, jlong nativeObject) {
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
     if (!isSurfaceValid(sur)) {
-        doThrowIAE(env);
+        jniThrowException(env, IllegalArgumentException, NULL);
         return JNI_FALSE;
     }
     int value = 0;
@@ -206,31 +184,16 @@ static jboolean nativeIsConsumerRunningBehind(JNIEnv* env, jclass clazz, jlong n
     return value;
 }
 
-static inline SkColorType convertPixelFormat(PixelFormat format) {
-    /* note: if PIXEL_FORMAT_RGBX_8888 means that all alpha bytes are 0xFF, then
-        we can map to kN32_SkColorType, and optionally call
-        bitmap.setAlphaType(kOpaque_SkAlphaType) on the resulting SkBitmap
-        (as an accelerator)
-    */
-    switch (format) {
-    case PIXEL_FORMAT_RGBX_8888:    return kN32_SkColorType;
-    case PIXEL_FORMAT_RGBA_8888:    return kN32_SkColorType;
-    case PIXEL_FORMAT_RGBA_FP16:    return kRGBA_F16_SkColorType;
-    case PIXEL_FORMAT_RGB_565:      return kRGB_565_SkColorType;
-    default:                        return kUnknown_SkColorType;
-    }
-}
-
 static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         jlong nativeObject, jobject canvasObj, jobject dirtyRectObj) {
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
 
     if (!isSurfaceValid(surface)) {
-        doThrowIAE(env);
+        jniThrowException(env, IllegalArgumentException, NULL);
         return 0;
     }
 
-    if (convertPixelFormat(ANativeWindow_getFormat(surface.get())) == kUnknown_SkColorType) {
+    if (!ACanvas_isSupportedPixelFormat(ANativeWindow_getFormat(surface.get()))) {
         native_window_set_buffers_format(surface.get(), PIXEL_FORMAT_RGBA_8888);
     }
 
@@ -245,37 +208,20 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         dirtyRectPtr = &dirtyRect;
     }
 
-    ANativeWindow_Buffer outBuffer;
-    status_t err = surface->lock(&outBuffer, dirtyRectPtr);
+    ANativeWindow_Buffer buffer;
+    status_t err = surface->lock(&buffer, dirtyRectPtr);
     if (err < 0) {
         const char* const exception = (err == NO_MEMORY) ?
-                OutOfResourcesException :
-                "java/lang/IllegalArgumentException";
+                OutOfResourcesException : IllegalArgumentException;
         jniThrowException(env, exception, NULL);
         return 0;
     }
 
-    SkImageInfo info = SkImageInfo::Make(outBuffer.width, outBuffer.height,
-                                         convertPixelFormat(outBuffer.format),
-                                         outBuffer.format == PIXEL_FORMAT_RGBX_8888
-                                                 ? kOpaque_SkAlphaType : kPremul_SkAlphaType);
-
-    SkBitmap bitmap;
-    ssize_t bpr = outBuffer.stride * bytesPerPixel(outBuffer.format);
-    bitmap.setInfo(info, bpr);
-    if (outBuffer.width > 0 && outBuffer.height > 0) {
-        bitmap.setPixels(outBuffer.bits);
-    } else {
-        // be safe with an empty bitmap.
-        bitmap.setPixels(NULL);
-    }
-
-    Canvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvasObj);
-    nativeCanvas->setBitmap(bitmap);
+    graphics::Canvas canvas(env, canvasObj);
+    canvas.setBuffer(&buffer, static_cast<int32_t>(surface->getBuffersDataSpace()));
 
     if (dirtyRectPtr) {
-        nativeCanvas->clipRect(dirtyRect.left, dirtyRect.top,
-                dirtyRect.right, dirtyRect.bottom, SkClipOp::kIntersect);
+        canvas.clipRect({dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom});
     }
 
     if (dirtyRectObj) {
@@ -301,13 +247,13 @@ static void nativeUnlockCanvasAndPost(JNIEnv* env, jclass clazz,
     }
 
     // detach the canvas from the surface
-    Canvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvasObj);
-    nativeCanvas->setBitmap(SkBitmap());
+    graphics::Canvas canvas(env, canvasObj);
+    canvas.setBuffer(nullptr, ADATASPACE_UNKNOWN);
 
     // unlock surface
     status_t err = surface->unlockAndPost();
     if (err < 0) {
-        doThrowIAE(env);
+        jniThrowException(env, IllegalArgumentException, NULL);
     }
 }
 
@@ -358,7 +304,7 @@ static jlong nativeReadFromParcel(JNIEnv* env, jclass clazz,
         jlong nativeObject, jobject parcelObj) {
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
     if (parcel == NULL) {
-        doThrowNPE(env);
+        jniThrowNullPointerException(env, NULL);
         return 0;
     }
 
@@ -399,7 +345,7 @@ static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
         jlong nativeObject, jobject parcelObj) {
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
     if (parcel == NULL) {
-        doThrowNPE(env);
+        jniThrowNullPointerException(env, NULL);
         return;
     }
     sp<Surface> self(reinterpret_cast<Surface *>(nativeObject));
@@ -446,8 +392,9 @@ static jint nativeForceScopedDisconnect(JNIEnv *env, jclass clazz, jlong nativeO
 static jint nativeAttachAndQueueBufferWithColorSpace(JNIEnv *env, jclass clazz, jlong nativeObject,
         jobject graphicBuffer, jint colorSpaceId) {
     Surface* surface = reinterpret_cast<Surface*>(nativeObject);
-    sp<GraphicBuffer> bp = graphicBufferForJavaObject(env, graphicBuffer);
-    int err = Surface::attachAndQueueBufferWithDataspace(surface, bp,
+    sp<GraphicBuffer> gb(android_graphics_GraphicBuffer_getNativeGraphicsBuffer(env,
+                                                                                graphicBuffer));
+    int err = Surface::attachAndQueueBufferWithDataspace(surface, gb,
             fromNamedColorSpaceValueToDataspace(colorSpaceId));
     return err;
 }
@@ -466,61 +413,18 @@ static jint nativeSetAutoRefreshEnabled(JNIEnv* env, jclass clazz, jlong nativeO
     return anw->perform(surface, NATIVE_WINDOW_SET_AUTO_REFRESH, int(enabled));
 }
 
-namespace uirenderer {
-
-using namespace android::uirenderer::renderthread;
-
-class ContextFactory : public IContextFactory {
-public:
-    virtual AnimationContext* createAnimationContext(renderthread::TimeLord& clock) {
-        return new AnimationContext(clock);
-    }
-};
-
-static jlong create(JNIEnv* env, jclass clazz, jlong rootNodePtr, jlong surfacePtr,
-        jboolean isWideColorGamut) {
-    RenderNode* rootNode = reinterpret_cast<RenderNode*>(rootNodePtr);
-    sp<Surface> surface(reinterpret_cast<Surface*>(surfacePtr));
-    ContextFactory factory;
-    RenderProxy* proxy = new RenderProxy(false, rootNode, &factory);
-    proxy->loadSystemProperties();
-    if (isWideColorGamut) {
-        proxy->setWideGamut(true);
-    }
-    proxy->setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
-    proxy->setSurface(surface, false);
-    // Shadows can't be used via this interface, so just set the light source
-    // to all 0s.
-    proxy->setLightAlpha(0, 0);
-    proxy->setLightGeometry((Vector3){0, 0, 0}, 0);
-    return (jlong) proxy;
+static jint nativeSetFrameRate(JNIEnv* env, jclass clazz, jlong nativeObject, jfloat frameRate,
+                               jint compatibility) {
+    Surface* surface = reinterpret_cast<Surface*>(nativeObject);
+    ANativeWindow* anw = static_cast<ANativeWindow*>(surface);
+    // Our compatibility is a Surface.FRAME_RATE_COMPATIBILITY_* value, and
+    // NATIVE_WINDOW_SET_FRAME_RATE takes an
+    // ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_* value. The values are identical
+    // though, so no need to explicitly convert.
+    return anw->perform(surface, NATIVE_WINDOW_SET_FRAME_RATE, float(frameRate), compatibility);
 }
-
-static void setSurface(JNIEnv* env, jclass clazz, jlong rendererPtr, jlong surfacePtr) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(rendererPtr);
-    sp<Surface> surface(reinterpret_cast<Surface*>(surfacePtr));
-    proxy->setSurface(surface);
-}
-
-static void draw(JNIEnv* env, jclass clazz, jlong rendererPtr) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(rendererPtr);
-    nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
-    UiFrameInfoBuilder(proxy->frameInfo())
-            .setVsync(vsync, vsync)
-            .addFlag(FrameInfoFlags::SurfaceCanvas);
-    proxy->syncAndDrawFrame();
-}
-
-static void destroy(JNIEnv* env, jclass clazz, jlong rendererPtr) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(rendererPtr);
-    delete proxy;
-}
-
-} // uirenderer
 
 // ----------------------------------------------------------------------------
-
-namespace hwui = android::uirenderer;
 
 static const JNINativeMethod gSurfaceMethods[] = {
     {"nativeCreateFromSurfaceTexture", "(Landroid/graphics/SurfaceTexture;)J",
@@ -554,12 +458,7 @@ static const JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeAttachAndQueueBufferWithColorSpace},
     {"nativeSetSharedBufferModeEnabled", "(JZ)I", (void*)nativeSetSharedBufferModeEnabled},
     {"nativeSetAutoRefreshEnabled", "(JZ)I", (void*)nativeSetAutoRefreshEnabled},
-
-    // HWUI context
-    {"nHwuiCreate", "(JJZ)J", (void*) hwui::create },
-    {"nHwuiSetSurface", "(JJ)V", (void*) hwui::setSurface },
-    {"nHwuiDraw", "(J)V", (void*) hwui::draw },
-    {"nHwuiDestroy", "(J)V", (void*) hwui::destroy },
+    {"nativeSetFrameRate", "(JFI)I", (void*)nativeSetFrameRate},
 };
 
 int register_android_view_Surface(JNIEnv* env)

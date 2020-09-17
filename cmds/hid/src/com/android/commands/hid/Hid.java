@@ -16,22 +16,17 @@
 
 package com.android.commands.hid;
 
-import android.util.JsonReader;
-import android.util.JsonToken;
 import android.util.Log;
 import android.util.SparseArray;
 
 import libcore.io.IoUtils;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 
 public class Hid {
     private static final String TAG = "HID";
@@ -118,8 +113,8 @@ public class Hid {
                     "Tried to send command \"" + e.getCommand() + "\" to an unregistered device!");
         }
         int id = e.getId();
-        Device d = new Device(id, e.getName(), e.getVendorId(), e.getProductId(),
-                e.getDescriptor(), e.getReport(), e.getFeatureReports());
+        Device d = new Device(id, e.getName(), e.getVendorId(), e.getProductId(), e.getBus(),
+                e.getDescriptor(), e.getReport(), e.getFeatureReports(), e.getOutputs());
         mDevices.append(id, d);
     }
 

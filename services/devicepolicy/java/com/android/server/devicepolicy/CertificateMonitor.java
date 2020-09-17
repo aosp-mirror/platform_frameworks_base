@@ -17,7 +17,6 @@
 package com.android.server.devicepolicy;
 
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,12 +25,9 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.security.Credentials;
@@ -39,9 +35,9 @@ import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
 import android.util.Log;
 
+import com.android.internal.R;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
-import com.android.internal.R;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -49,7 +45,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.Set;
 
 public class CertificateMonitor {
     protected static final String LOG_TAG = DevicePolicyManagerService.LOG_TAG;
@@ -111,13 +106,13 @@ public class CertificateMonitor {
         }
     }
 
-    public List<String> getInstalledCaCertificates(UserHandle userHandle)
+    private List<String> getInstalledCaCertificates(UserHandle userHandle)
             throws RemoteException, RuntimeException {
         try (KeyChainConnection conn = mInjector.keyChainBindAsUser(userHandle)) {
             return conn.getService().getUserCaAliases().getList();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            return null;
+            throw new RuntimeException(e);
         } catch (AssertionError e) {
             throw new RuntimeException(e);
         }

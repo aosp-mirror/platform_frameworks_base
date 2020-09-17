@@ -16,6 +16,8 @@
 
 package com.android.server.pm.permission;
 
+import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -23,14 +25,15 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
-import com.android.internal.annotations.GuardedBy;
 
 /**
  * This class encapsulates the permissions for a package or a shared user.
@@ -70,6 +73,9 @@ public final class PermissionsState {
 
     private int[] mGlobalGids = NO_GIDS;
 
+    @Nullable
+    private SparseBooleanArray mMissing;
+
     private SparseBooleanArray mPermissionReviewRequired;
 
     public PermissionsState() {
@@ -89,6 +95,10 @@ public final class PermissionsState {
         if (!ArrayUtils.isEmpty(globalGids)) {
             mGlobalGids = Arrays.copyOf(globalGids, globalGids.length);
         }
+    }
+
+    private static void invalidateCache() {
+        PackageManager.invalidatePackageInfoCache();
     }
 
     /**
@@ -126,6 +136,23 @@ public final class PermissionsState {
         if (other.mGlobalGids != NO_GIDS) {
             mGlobalGids = Arrays.copyOf(other.mGlobalGids,
                     other.mGlobalGids.length);
+        }
+
+        if (mMissing != null) {
+            if (other.mMissing == null) {
+                mMissing = null;
+            } else {
+                mMissing.clear();
+            }
+        }
+        if (other.mMissing != null) {
+            if (mMissing == null) {
+                mMissing = new SparseBooleanArray();
+            }
+            final int missingSize = other.mMissing.size();
+            for (int i = 0; i < missingSize; i++) {
+                mMissing.put(other.mMissing.keyAt(i), other.mMissing.valueAt(i));
+            }
         }
 
         if (mPermissionReviewRequired != null) {
@@ -171,6 +198,10 @@ public final class PermissionsState {
             }
         }
 
+        if (!Objects.equals(mMissing, other.mMissing)) {
+            return false;
+        }
+
         if (mPermissionReviewRequired == null) {
             if (other.mPermissionReviewRequired != null) {
                 return false;
@@ -179,6 +210,35 @@ public final class PermissionsState {
             return false;
         }
         return Arrays.equals(mGlobalGids, other.mGlobalGids);
+    }
+
+    /**
+     * Check whether the permissions state is missing for a user. This can happen if permission
+     * state is rolled back and we'll need to generate a reasonable default state to keep the app
+     * usable.
+     */
+    public boolean isMissing(@UserIdInt int userId) {
+        return mMissing != null && mMissing.get(userId);
+    }
+
+    /**
+     * Set whether the permissions state is missing for a user. This can happen if permission state
+     * is rolled back and we'll need to generate a reasonable default state to keep the app usable.
+     */
+    public void setMissing(boolean missing, @UserIdInt int userId) {
+        if (missing) {
+            if (mMissing == null) {
+                mMissing = new SparseBooleanArray();
+            }
+            mMissing.put(userId, true);
+        } else {
+            if (mMissing != null) {
+                mMissing.delete(userId);
+                if (mMissing.size() == 0) {
+                    mMissing = null;
+                }
+            }
+        }
     }
 
     public boolean isPermissionReviewRequired(int userId) {
@@ -562,8 +622,10 @@ public final class PermissionsState {
 
         synchronized (mLock) {
             mPermissions = null;
+            invalidateCache();
         }
 
+        mMissing = null;
         mPermissionReviewRequired = null;
     }
 
@@ -708,7 +770,11 @@ public final class PermissionsState {
     }
 
     private static final class PermissionData {
+
+        private final Object mLock = new Object();
+
         private final BasePermission mPerm;
+        @GuardedBy("mLock")
         private SparseArray<PermissionState> mUserStates = new SparseArray<>();
 
         public PermissionData(BasePermission perm) {
@@ -717,11 +783,14 @@ public final class PermissionsState {
 
         public PermissionData(PermissionData other) {
             this(other.mPerm);
-            final int otherStateCount = other.mUserStates.size();
-            for (int i = 0; i < otherStateCount; i++) {
-                final int otherUserId = other.mUserStates.keyAt(i);
-                PermissionState otherState = other.mUserStates.valueAt(i);
-                mUserStates.put(otherUserId, new PermissionState(otherState));
+
+            synchronized (mLock) {
+                final int otherStateCount = other.mUserStates.size();
+                for (int i = 0; i < otherStateCount; i++) {
+                    final int otherUserId = other.mUserStates.keyAt(i);
+                    PermissionState otherState = other.mUserStates.valueAt(i);
+                    mUserStates.put(otherUserId, new PermissionState(otherState));
+                }
             }
         }
 
@@ -730,71 +799,85 @@ public final class PermissionsState {
         }
 
         public boolean isGranted(int userId) {
-            if (isInstallPermission()) {
-                userId = UserHandle.USER_ALL;
-            }
+            synchronized (mLock) {
+                if (isInstallPermission()) {
+                    userId = UserHandle.USER_ALL;
+                }
 
-            PermissionState userState = mUserStates.get(userId);
-            if (userState == null) {
-                return false;
-            }
+                PermissionState userState = mUserStates.get(userId);
+                if (userState == null) {
+                    return false;
+                }
 
-            return userState.mGranted;
+                return userState.mGranted;
+            }
         }
 
         public boolean grant(int userId) {
-            if (!isCompatibleUserId(userId)) {
-                return false;
+            synchronized (mLock) {
+                if (!isCompatibleUserId(userId)) {
+                    return false;
+                }
+
+                if (isGranted(userId)) {
+                    return false;
+                }
+
+                PermissionState userState = mUserStates.get(userId);
+                if (userState == null) {
+                    userState = new PermissionState(mPerm.getName());
+                    mUserStates.put(userId, userState);
+                }
+
+                userState.mGranted = true;
+
+                invalidateCache();
+                return true;
             }
-
-            if (isGranted(userId)) {
-                return false;
-            }
-
-            PermissionState userState = mUserStates.get(userId);
-            if (userState == null) {
-                userState = new PermissionState(mPerm.getName());
-                mUserStates.put(userId, userState);
-            }
-
-            userState.mGranted = true;
-
-            return true;
         }
 
         public boolean revoke(int userId) {
-            if (!isCompatibleUserId(userId)) {
-                return false;
+            synchronized (mLock) {
+                if (!isCompatibleUserId(userId)) {
+                    return false;
+                }
+
+                if (!isGranted(userId)) {
+                    return false;
+                }
+
+                PermissionState userState = mUserStates.get(userId);
+                userState.mGranted = false;
+
+                if (userState.isDefault()) {
+                    mUserStates.remove(userId);
+                }
+
+                invalidateCache();
+                return true;
             }
-
-            if (!isGranted(userId)) {
-                return false;
-            }
-
-            PermissionState userState = mUserStates.get(userId);
-            userState.mGranted = false;
-
-            if (userState.isDefault()) {
-                mUserStates.remove(userId);
-            }
-
-            return true;
         }
 
         public PermissionState getPermissionState(int userId) {
-            return mUserStates.get(userId);
+            synchronized (mLock) {
+                return mUserStates.get(userId);
+            }
         }
 
         public int getFlags(int userId) {
-            PermissionState userState = mUserStates.get(userId);
-            if (userState != null) {
-                return userState.mFlags;
+            synchronized (mLock) {
+                PermissionState userState = mUserStates.get(userId);
+                if (userState != null) {
+                    return userState.mFlags;
+                }
+                return 0;
             }
-            return 0;
         }
 
         public boolean isDefault() {
-            return mUserStates.size() <= 0;
+            synchronized (mLock) {
+                return mUserStates.size() <= 0;
+            }
         }
 
         public static boolean isInstallPermissionKey(int userId) {
@@ -802,32 +885,37 @@ public final class PermissionsState {
         }
 
         public boolean updateFlags(int userId, int flagMask, int flagValues) {
-            if (isInstallPermission()) {
-                userId = UserHandle.USER_ALL;
-            }
+            synchronized (mLock) {
+                if (isInstallPermission()) {
+                    userId = UserHandle.USER_ALL;
+                }
 
-            if (!isCompatibleUserId(userId)) {
+                if (!isCompatibleUserId(userId)) {
+                    return false;
+                }
+
+                final int newFlags = flagValues & flagMask;
+
+                // Okay to do before the modification because we hold the lock.
+                invalidateCache();
+
+                PermissionState userState = mUserStates.get(userId);
+                if (userState != null) {
+                    final int oldFlags = userState.mFlags;
+                    userState.mFlags = (userState.mFlags & ~flagMask) | newFlags;
+                    if (userState.isDefault()) {
+                        mUserStates.remove(userId);
+                    }
+                    return userState.mFlags != oldFlags;
+                } else if (newFlags != 0) {
+                    userState = new PermissionState(mPerm.getName());
+                    userState.mFlags = newFlags;
+                    mUserStates.put(userId, userState);
+                    return true;
+                }
+
                 return false;
             }
-
-            final int newFlags = flagValues & flagMask;
-
-            PermissionState userState = mUserStates.get(userId);
-            if (userState != null) {
-                final int oldFlags = userState.mFlags;
-                userState.mFlags = (userState.mFlags & ~flagMask) | newFlags;
-                if (userState.isDefault()) {
-                    mUserStates.remove(userId);
-                }
-                return userState.mFlags != oldFlags;
-            } else if (newFlags != 0) {
-                userState = new PermissionState(mPerm.getName());
-                userState.mFlags = newFlags;
-                mUserStates.put(userId, userState);
-                return true;
-            }
-
-            return false;
         }
 
         private boolean isCompatibleUserId(int userId) {

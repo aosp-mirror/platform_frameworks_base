@@ -113,6 +113,10 @@ public class FalsingDataProvider {
         this.mInteractionType = interactionType;
     }
 
+    public boolean isDirty() {
+        return mDirty;
+    }
+
     final int getInteractionType() {
         return mInteractionType;
     }

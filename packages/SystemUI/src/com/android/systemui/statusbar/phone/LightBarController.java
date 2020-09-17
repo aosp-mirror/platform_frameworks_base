@@ -16,18 +16,24 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
+
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Rect;
-import android.view.View;
+import android.view.InsetsFlags;
+import android.view.ViewDebug;
+import android.view.WindowInsetsController.Appearance;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
+import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import java.io.FileDescriptor;
@@ -49,13 +55,11 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private BiometricUnlockController mBiometricUnlockController;
 
     private LightBarTransitionsController mNavigationBarController;
-    private int mSystemUiVisibility;
-    private int mFullscreenStackVisibility;
-    private int mDockedStackVisibility;
-    private boolean mFullscreenLight;
-    private boolean mDockedLight;
-    private int mLastStatusBarMode;
-    private int mLastNavigationBarMode;
+    private @Appearance int mAppearance;
+    private AppearanceRegion[] mAppearanceRegions = new AppearanceRegion[0];
+    private int mStatusBarMode;
+    private int mNavigationBarMode;
+    private int mNavigationMode;
     private final Color mDarkModeColor;
 
     /**
@@ -75,8 +79,6 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
      */
     private boolean mForceDarkForScrim;
 
-    private final Rect mLastFullscreenBounds = new Rect();
-    private final Rect mLastDockedBounds = new Rect();
     private boolean mQsCustomizing;
 
     private boolean mDirectReplying;
@@ -84,11 +86,14 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     @Inject
     public LightBarController(Context ctx, DarkIconDispatcher darkIconDispatcher,
-            BatteryController batteryController) {
+            BatteryController batteryController, NavigationModeController navModeController) {
         mDarkModeColor = Color.valueOf(ctx.getColor(R.color.dark_mode_icon_color_single_tone));
         mStatusBarIconController = (SysuiDarkIconDispatcher) darkIconDispatcher;
         mBatteryController = batteryController;
         mBatteryController.addCallback(this);
+        mNavigationMode = navModeController.addListener((mode) -> {
+            mNavigationMode = mode;
+        });
     }
 
     public void setNavigationBar(LightBarTransitionsController navigationBar) {
@@ -101,45 +106,32 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         mBiometricUnlockController = biometricUnlockController;
     }
 
-    public void onSystemUiVisibilityChanged(int fullscreenStackVis, int dockedStackVis,
-            int mask, Rect fullscreenStackBounds, Rect dockedStackBounds, boolean sbModeChanged,
+    void onStatusBarAppearanceChanged(AppearanceRegion[] appearanceRegions, boolean sbModeChanged,
             int statusBarMode, boolean navbarColorManagedByIme) {
-        int oldFullscreen = mFullscreenStackVisibility;
-        int newFullscreen = (oldFullscreen & ~mask) | (fullscreenStackVis & mask);
-        int diffFullscreen = newFullscreen ^ oldFullscreen;
-        int oldDocked = mDockedStackVisibility;
-        int newDocked = (oldDocked & ~mask) | (dockedStackVis & mask);
-        int diffDocked = newDocked ^ oldDocked;
-        if ((diffFullscreen & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR) != 0
-                || (diffDocked & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR) != 0
-                || sbModeChanged
-                || !mLastFullscreenBounds.equals(fullscreenStackBounds)
-                || !mLastDockedBounds.equals(dockedStackBounds)) {
-
-            mFullscreenLight = isLight(newFullscreen, statusBarMode,
-                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-            mDockedLight = isLight(newDocked, statusBarMode, View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-            updateStatus(fullscreenStackBounds, dockedStackBounds);
+        final int numStacks = appearanceRegions.length;
+        boolean stackAppearancesChanged = mAppearanceRegions.length != numStacks;
+        for (int i = 0; i < numStacks && !stackAppearancesChanged; i++) {
+            stackAppearancesChanged |= !appearanceRegions[i].equals(mAppearanceRegions[i]);
         }
-
-        mFullscreenStackVisibility = newFullscreen;
-        mDockedStackVisibility = newDocked;
-        mLastStatusBarMode = statusBarMode;
+        if (stackAppearancesChanged || sbModeChanged) {
+            mAppearanceRegions = appearanceRegions;
+            onStatusBarModeChanged(statusBarMode);
+        }
         mNavbarColorManagedByIme = navbarColorManagedByIme;
-        mLastFullscreenBounds.set(fullscreenStackBounds);
-        mLastDockedBounds.set(dockedStackBounds);
     }
 
-    public void onNavigationVisibilityChanged(int vis, int mask, boolean nbModeChanged,
+    void onStatusBarModeChanged(int newBarMode) {
+        mStatusBarMode = newBarMode;
+        updateStatus();
+    }
+
+    void onNavigationBarAppearanceChanged(@Appearance int appearance, boolean nbModeChanged,
             int navigationBarMode, boolean navbarColorManagedByIme) {
-        int oldVis = mSystemUiVisibility;
-        int newVis = (oldVis & ~mask) | (vis & mask);
-        int diffVis = newVis ^ oldVis;
-        if ((diffVis & View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR) != 0
-                || nbModeChanged) {
-            boolean last = mNavigationLight;
-            mHasLightNavigationBar = isLight(vis, navigationBarMode,
-                    View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        int diff = appearance ^ mAppearance;
+        if ((diff & APPEARANCE_LIGHT_NAVIGATION_BARS) != 0 || nbModeChanged) {
+            final boolean last = mNavigationLight;
+            mHasLightNavigationBar = isLight(appearance, navigationBarMode,
+                    APPEARANCE_LIGHT_NAVIGATION_BARS);
             mNavigationLight = mHasLightNavigationBar
                     && (mDirectReplying && mNavbarColorManagedByIme || !mForceDarkForScrim)
                     && !mQsCustomizing;
@@ -147,17 +139,20 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
                 updateNavigation();
             }
         }
-        mSystemUiVisibility = newVis;
-        mLastNavigationBarMode = navigationBarMode;
+        mAppearance = appearance;
+        mNavigationBarMode = navigationBarMode;
         mNavbarColorManagedByIme = navbarColorManagedByIme;
     }
 
+    void onNavigationBarModeChanged(int newBarMode) {
+        mHasLightNavigationBar = isLight(mAppearance, newBarMode, APPEARANCE_LIGHT_NAVIGATION_BARS);
+    }
+
     private void reevaluate() {
-        onSystemUiVisibilityChanged(mFullscreenStackVisibility,
-                mDockedStackVisibility, 0 /* mask */, mLastFullscreenBounds, mLastDockedBounds,
-                true /* sbModeChange*/, mLastStatusBarMode, mNavbarColorManagedByIme);
-        onNavigationVisibilityChanged(mSystemUiVisibility, 0 /* mask */, true /* nbModeChanged */,
-                mLastNavigationBarMode, mNavbarColorManagedByIme);
+        onStatusBarAppearanceChanged(mAppearanceRegions, true /* sbModeChange */, mStatusBarMode,
+                mNavbarColorManagedByIme);
+        onNavigationBarAppearanceChanged(mAppearance, true /* nbModeChanged */,
+                mNavigationBarMode, mNavbarColorManagedByIme);
     }
 
     public void setQsCustomizing(boolean customizing) {
@@ -191,10 +186,10 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         }
     }
 
-    private boolean isLight(int vis, int barMode, int flag) {
-        boolean isTransparentBar = (barMode == MODE_TRANSPARENT
+    private static boolean isLight(int appearance, int barMode, int flag) {
+        final boolean isTransparentBar = (barMode == MODE_TRANSPARENT
                 || barMode == MODE_LIGHTS_OUT_TRANSPARENT);
-        boolean light = (vis & flag) != 0;
+        final boolean light = (appearance & flag) != 0;
         return isTransparentBar && light;
     }
 
@@ -207,46 +202,47 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
                 && unlockMode != BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
     }
 
-    private void updateStatus(Rect fullscreenStackBounds, Rect dockedStackBounds) {
-        boolean hasDockedStack = !dockedStackBounds.isEmpty();
+    private void updateStatus() {
+        final int numStacks = mAppearanceRegions.length;
+        int numLightStacks = 0;
 
-        // If both are light or fullscreen is light and there is no docked stack, all icons get
-        // dark.
-        if ((mFullscreenLight && mDockedLight) || (mFullscreenLight && !hasDockedStack)) {
+        // We can only have maximum one light stack.
+        int indexLightStack = -1;
+
+        for (int i = 0; i < numStacks; i++) {
+            if (isLight(mAppearanceRegions[i].getAppearance(), mStatusBarMode,
+                    APPEARANCE_LIGHT_STATUS_BARS)) {
+                numLightStacks++;
+                indexLightStack = i;
+            }
+        }
+
+        // If all stacks are light, all icons get dark.
+        if (numLightStacks == numStacks) {
             mStatusBarIconController.setIconsDarkArea(null);
             mStatusBarIconController.getTransitionsController().setIconsDark(true, animateChange());
 
         }
 
-        // If no one is light or the fullscreen is not light and there is no docked stack,
-        // all icons become white.
-        else if ((!mFullscreenLight && !mDockedLight) || (!mFullscreenLight && !hasDockedStack)) {
+        // If no one is light, all icons become white.
+        else if (numLightStacks == 0) {
             mStatusBarIconController.getTransitionsController().setIconsDark(
                     false, animateChange());
         }
 
         // Not the same for every stack, magic!
         else {
-            Rect bounds = mFullscreenLight ? fullscreenStackBounds : dockedStackBounds;
-            if (bounds.isEmpty()) {
-                mStatusBarIconController.setIconsDarkArea(null);
-            } else {
-                mStatusBarIconController.setIconsDarkArea(bounds);
-            }
+            mStatusBarIconController.setIconsDarkArea(
+                    mAppearanceRegions[indexLightStack].getBounds());
             mStatusBarIconController.getTransitionsController().setIconsDark(true, animateChange());
         }
     }
 
     private void updateNavigation() {
-        if (mNavigationBarController != null) {
-            mNavigationBarController.setIconsDark(
-                    mNavigationLight, animateChange());
+        if (mNavigationBarController != null
+                && !QuickStepContract.isGesturalMode(mNavigationMode)) {
+            mNavigationBarController.setIconsDark(mNavigationLight, animateChange());
         }
-    }
-
-    @Override
-    public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-
     }
 
     @Override
@@ -257,24 +253,21 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("LightBarController: ");
-        pw.print(" mSystemUiVisibility=0x"); pw.print(
-                Integer.toHexString(mSystemUiVisibility));
-        pw.print(" mFullscreenStackVisibility=0x"); pw.print(
-                Integer.toHexString(mFullscreenStackVisibility));
-        pw.print(" mDockedStackVisibility=0x"); pw.println(
-                Integer.toHexString(mDockedStackVisibility));
-
-        pw.print(" mFullscreenLight="); pw.print(mFullscreenLight);
-        pw.print(" mDockedLight="); pw.println(mDockedLight);
-
-        pw.print(" mLastFullscreenBounds="); pw.print(mLastFullscreenBounds);
-        pw.print(" mLastDockedBounds="); pw.println(mLastDockedBounds);
+        pw.print(" mAppearance="); pw.println(ViewDebug.flagsToString(
+                InsetsFlags.class, "appearance", mAppearance));
+        final int numStacks = mAppearanceRegions.length;
+        for (int i = 0; i < numStacks; i++) {
+            final boolean isLight = isLight(mAppearanceRegions[i].getAppearance(), mStatusBarMode,
+                    APPEARANCE_LIGHT_STATUS_BARS);
+            pw.print(" stack #"); pw.print(i); pw.print(": ");
+            pw.print(mAppearanceRegions[i].toString()); pw.print(" isLight="); pw.println(isLight);
+        }
 
         pw.print(" mNavigationLight="); pw.print(mNavigationLight);
         pw.print(" mHasLightNavigationBar="); pw.println(mHasLightNavigationBar);
 
-        pw.print(" mLastStatusBarMode="); pw.print(mLastStatusBarMode);
-        pw.print(" mLastNavigationBarMode="); pw.println(mLastNavigationBarMode);
+        pw.print(" mStatusBarMode="); pw.print(mStatusBarMode);
+        pw.print(" mNavigationBarMode="); pw.println(mNavigationBarMode);
 
         pw.print(" mForceDarkForScrim="); pw.print(mForceDarkForScrim);
         pw.print(" mQsCustomizing="); pw.print(mQsCustomizing);

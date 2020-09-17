@@ -162,4 +162,24 @@ public class LongArrayQueue {
         final int index = (mTail == 0) ? mValues.length - 1 : mTail - 1;
         return mValues[index];
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        if (mSize <= 0) {
+            return "{}";
+        }
+
+        final StringBuilder buffer = new StringBuilder(mSize * 64);
+        buffer.append('{');
+        buffer.append(get(0));
+        for (int i = 1; i < mSize; i++) {
+            buffer.append(", ");
+            buffer.append(get(i));
+        }
+        buffer.append('}');
+        return buffer.toString();
+    }
 }

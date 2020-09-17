@@ -216,7 +216,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 break;
             }
             case DO_START_RECORDING: {
-                mTvInputRecordingSessionImpl.startRecording((Uri) msg.obj);
+                SomeArgs args = (SomeArgs) msg.obj;
+                mTvInputRecordingSessionImpl.startRecording((Uri) args.arg1, (Bundle) args.arg2);
                 break;
             }
             case DO_STOP_RECORDING: {
@@ -352,8 +353,9 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
-    public void startRecording(@Nullable Uri programUri) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_START_RECORDING, programUri));
+    public void startRecording(@Nullable Uri programUri, @Nullable Bundle params) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_START_RECORDING, programUri,
+                params));
     }
 
     @Override

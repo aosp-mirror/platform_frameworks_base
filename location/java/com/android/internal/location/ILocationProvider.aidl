@@ -37,10 +37,4 @@ interface ILocationProvider {
 
     @UnsupportedAppUsage
     oneway void sendExtraCommand(String command, in Bundle extras);
-
-    // --- deprecated and will be removed the future ---
-    @UnsupportedAppUsage
-    int getStatus(out Bundle extras);
-    @UnsupportedAppUsage
-    long getStatusUpdateTime();
 }

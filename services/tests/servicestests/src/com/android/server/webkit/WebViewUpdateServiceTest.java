@@ -1275,24 +1275,7 @@ public class WebViewUpdateServiceTest {
                     true /* valid */, true /* installed */));
 
         runWebViewBootPreparationOnMainSync();
-
         checkPreparationPhasesForPackage(primaryPackage, 1 /* first preparation phase */);
-
-        mWebViewUpdateServiceImpl.packageStateChanged(primaryPackage,
-                WebViewUpdateService.PACKAGE_ADDED_REPLACED, 0 /* userId */);
-        mWebViewUpdateServiceImpl.packageStateChanged(primaryPackage,
-                WebViewUpdateService.PACKAGE_ADDED_REPLACED, 1 /* userId */);
-        mWebViewUpdateServiceImpl.packageStateChanged(primaryPackage,
-                WebViewUpdateService.PACKAGE_ADDED_REPLACED, 2 /* userId */);
-        // package still has the same update-time so we shouldn't run preparation here
-        Mockito.verify(mTestSystemImpl, Mockito.times(1)).onWebViewProviderChanged(
-                Mockito.argThat(new IsPackageInfoWithName(primaryPackage)));
-
-        // Ensure we can still load the package
-        WebViewProviderResponse response = mWebViewUpdateServiceImpl.waitForAndGetProvider();
-        assertEquals(WebViewFactory.LIBLOAD_SUCCESS, response.status);
-        assertEquals(primaryPackage, response.packageInfo.packageName);
-
 
         mTestSystemImpl.setPackageInfo(createPackageInfo(primaryPackage, true /* enabled */,
                     true /* valid */, true /* installed */, null /* signatures */,

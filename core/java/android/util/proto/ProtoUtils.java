@@ -32,12 +32,22 @@ public class ProtoUtils {
      * Dump AggStats to ProtoOutputStream
      */
     public static void toAggStatsProto(ProtoOutputStream proto, long fieldId,
-            long min, long average, long max) {
+            long min, long average, long max, int meanKb, int maxKb) {
         final long aggStatsToken = proto.start(fieldId);
         proto.write(AggStats.MIN, min);
         proto.write(AggStats.AVERAGE, average);
         proto.write(AggStats.MAX, max);
+        proto.write(AggStats.MEAN_KB, meanKb);
+        proto.write(AggStats.MAX_KB, maxKb);
         proto.end(aggStatsToken);
+    }
+
+    /**
+     * Dump AggStats to ProtoOutputStream
+     */
+    public static void toAggStatsProto(ProtoOutputStream proto, long fieldId,
+            long min, long average, long max) {
+        toAggStatsProto(proto, fieldId, min, average, max, 0, 0);
     }
 
     /**

@@ -15,8 +15,5 @@
   ~ limitations under the License
   -->
 <resources>
-    <!-- Whether QuickSettings is in a phone landscape -->
-    <bool name="quick_settings_wide">false</bool>
-
     <integer name="quick_settings_num_columns">3</integer>
 </resources>

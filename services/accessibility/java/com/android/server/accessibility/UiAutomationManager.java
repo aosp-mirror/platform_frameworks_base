@@ -25,8 +25,10 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.view.Display;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.util.DumpUtils;
@@ -65,6 +67,7 @@ class UiAutomationManager {
                     mUiAutomationServiceOwner.unlinkToDeath(this, 0);
                     mUiAutomationServiceOwner = null;
                     destroyUiAutomationService();
+                    Slog.v(LOG_TAG, "UiAutomation service owner died");
                 }
             };
 
@@ -82,10 +85,11 @@ class UiAutomationManager {
             IAccessibilityServiceClient serviceClient,
             Context context, AccessibilityServiceInfo accessibilityServiceInfo,
             int id, Handler mainHandler,
-            AccessibilityManagerService.SecurityPolicy securityPolicy,
+            AccessibilitySecurityPolicy securityPolicy,
             AbstractAccessibilityServiceConnection.SystemSupport systemSupport,
             WindowManagerInternal windowManagerInternal,
-            GlobalActionPerformer globalActionPerfomer, int flags) {
+            SystemActionPerformer systemActionPerfomer,
+            AccessibilityWindowManager awm, int flags) {
         synchronized (mLock) {
             accessibilityServiceInfo.setComponentName(COMPONENT_NAME);
 
@@ -105,7 +109,7 @@ class UiAutomationManager {
             mSystemSupport = systemSupport;
             mUiAutomationService = new UiAutomationService(context, accessibilityServiceInfo, id,
                     mainHandler, mLock, securityPolicy, systemSupport, windowManagerInternal,
-                    globalActionPerfomer);
+                    systemActionPerfomer, awm);
             mUiAutomationServiceOwner = owner;
             mUiAutomationFlags = flags;
             mUiAutomationServiceInfo = accessibilityServiceInfo;
@@ -221,11 +225,12 @@ class UiAutomationManager {
 
         UiAutomationService(Context context, AccessibilityServiceInfo accessibilityServiceInfo,
                 int id, Handler mainHandler, Object lock,
-                AccessibilityManagerService.SecurityPolicy securityPolicy,
+                AccessibilitySecurityPolicy securityPolicy,
                 SystemSupport systemSupport, WindowManagerInternal windowManagerInternal,
-                GlobalActionPerformer globalActionPerfomer) {
+                SystemActionPerformer systemActionPerfomer, AccessibilityWindowManager awm) {
             super(context, COMPONENT_NAME, accessibilityServiceInfo, id, mainHandler, lock,
-                    securityPolicy, systemSupport, windowManagerInternal, globalActionPerfomer);
+                    securityPolicy, systemSupport, windowManagerInternal, systemActionPerfomer,
+                    awm);
             mMainHandler = mainHandler;
         }
 
@@ -244,7 +249,8 @@ class UiAutomationManager {
                     // another thread.
                     if (serviceInterface != null) {
                         service.linkToDeath(this, 0);
-                        serviceInterface.init(this, mId, mOverlayWindowToken);
+                        serviceInterface.init(this, mId,
+                                mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
                     }
                 } catch (RemoteException re) {
                     Slog.w(LOG_TAG, "Error initialized connection", re);
@@ -259,7 +265,7 @@ class UiAutomationManager {
         }
 
         @Override
-        protected boolean isCalledForCurrentUserLocked() {
+        protected boolean hasRightsToCurrentUserLocked() {
             // Allow UiAutomation to work for any user
             return true;
         }
@@ -292,6 +298,11 @@ class UiAutomationManager {
         }
 
         @Override
+        public boolean switchToInputMethod(String imeId) {
+            return false;
+        }
+
+        @Override
         public boolean isAccessibilityButtonAvailable() {
             return false;
         }
@@ -315,5 +326,8 @@ class UiAutomationManager {
 
         @Override
         public void onFingerprintGesture(int gesture) {}
+
+        @Override
+        public void takeScreenshot(int displayId, RemoteCallback callback) {}
     }
 }

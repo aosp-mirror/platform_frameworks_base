@@ -17,7 +17,7 @@
 #include "ReorderBarrierDrawables.h"
 #include "RenderNode.h"
 #include "SkiaDisplayList.h"
-#include "SkiaPipeline.h"
+#include "LightingInfo.h"
 
 #include <SkPathOps.h>
 #include <SkShadowUtils.h>
@@ -27,7 +27,7 @@ namespace uirenderer {
 namespace skiapipeline {
 
 StartReorderBarrierDrawable::StartReorderBarrierDrawable(SkiaDisplayList* data)
-        : mEndChildIndex(0), mBeginChildIndex(data->mChildNodes.size()), mDisplayList(data) {}
+        : mEndChildIndex(-1), mBeginChildIndex(data->mChildNodes.size()), mDisplayList(data) {}
 
 void StartReorderBarrierDrawable::onDraw(SkCanvas* canvas) {
     if (mChildren.empty()) {
@@ -139,8 +139,8 @@ void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable*
         return;
     }
 
-    float ambientAlpha = (SkiaPipeline::getAmbientShadowAlpha() / 255.f) * casterAlpha;
-    float spotAlpha = (SkiaPipeline::getSpotShadowAlpha() / 255.f) * casterAlpha;
+    float ambientAlpha = (LightingInfo::getAmbientShadowAlpha() / 255.f) * casterAlpha;
+    float spotAlpha = (LightingInfo::getSpotShadowAlpha() / 255.f) * casterAlpha;
 
     const RevealClip& revealClip = casterProperties.getRevealClip();
     const SkPath* revealClipPath = revealClip.getPath();
@@ -192,7 +192,7 @@ void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable*
         casterPath = &tmpPath;
     }
 
-    const Vector3 lightPos = SkiaPipeline::getLightCenter();
+    const Vector3 lightPos = LightingInfo::getLightCenter();
     SkPoint3 skiaLightPos = SkPoint3::Make(lightPos.x, lightPos.y, lightPos.z);
     SkPoint3 zParams;
     if (shadowMatrix.hasPerspective()) {
@@ -206,7 +206,7 @@ void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable*
     SkColor ambientColor = multiplyAlpha(casterProperties.getAmbientShadowColor(), ambientAlpha);
     SkColor spotColor = multiplyAlpha(casterProperties.getSpotShadowColor(), spotAlpha);
     SkShadowUtils::DrawShadow(
-            canvas, *casterPath, zParams, skiaLightPos, SkiaPipeline::getLightRadius(),
+            canvas, *casterPath, zParams, skiaLightPos, LightingInfo::getLightRadius(),
             ambientColor, spotColor,
             casterAlpha < 1.0f ? SkShadowFlags::kTransparentOccluder_ShadowFlag : 0);
 }

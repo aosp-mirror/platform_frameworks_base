@@ -46,6 +46,10 @@ enum SectionType {
 
     // incidentd calls tombstoned for annotated field
     SECTION_TOMBSTONE = 6;
+
+    // incidentd calls legacy text dumpsys for annotated field. The section will only be generated
+    // on userdebug and eng builds.
+    SECTION_TEXT_DUMPSYS = 7;
 }
 
 message SectionFlags {

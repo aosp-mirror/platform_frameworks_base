@@ -17,10 +17,11 @@
 
 package android.hardware.camera2.params;
 
+import static com.android.internal.util.Preconditions.*;
+
 import android.annotation.CallbackExecutor;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
@@ -32,14 +33,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.concurrent.Executor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
-import static com.android.internal.util.Preconditions.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * A helper class that aggregates all supported arguments for capture session initialization.
@@ -61,6 +60,12 @@ public final class SessionConfiguration implements Parcelable {
      * A high speed session type that can only contain instances of {@link OutputConfiguration}.
      * The outputs can run using high speed FPS ranges. Calls to {@link #setInputConfiguration}
      * are not supported.
+     * <p>
+     * When using this type, the CameraCaptureSession returned by
+     * {@link android.hardware.camera2.CameraCaptureSession.StateCallback} can be cast to a
+     * {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession} to access the extra
+     * methods for constrained high speed recording.
+     * </p>
      *
      * @see CameraDevice#createConstrainedHighSpeedCaptureSession
      */

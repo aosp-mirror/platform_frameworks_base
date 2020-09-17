@@ -48,6 +48,9 @@ public class SysuiLifecycle {
 
         ViewLifecycle(View v) {
             v.addOnAttachStateChangeListener(this);
+            if (v.isAttachedToWindow()) {
+                mLifecycle.markState(RESUMED);
+            }
         }
 
         @NonNull

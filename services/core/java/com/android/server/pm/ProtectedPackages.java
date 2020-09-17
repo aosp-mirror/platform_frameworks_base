@@ -24,6 +24,10 @@ import android.util.SparseArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Manages package names that need special protection.
@@ -49,6 +53,10 @@ public class ProtectedPackages {
     @GuardedBy("this")
     private final String mDeviceProvisioningPackage;
 
+    @Nullable
+    @GuardedBy("this")
+    private List<String> mDeviceOwnerProtectedPackages;
+
     private final Context mContext;
 
     public ProtectedPackages(Context context) {
@@ -68,6 +76,10 @@ public class ProtectedPackages {
                 (deviceOwnerUserId == UserHandle.USER_NULL) ? null : deviceOwnerPackage;
         mProfileOwnerPackages = (profileOwnerPackages == null) ? null
                 : profileOwnerPackages.clone();
+    }
+
+    public synchronized void setDeviceOwnerProtectedPackages(List<String> packageNames) {
+        mDeviceOwnerProtectedPackages = new ArrayList<String>(packageNames);
     }
 
     private synchronized boolean hasDeviceOwnerOrProfileOwner(int userId, String packageName) {
@@ -105,7 +117,8 @@ public class ProtectedPackages {
      * can modify its data or package state.
      */
     private synchronized boolean isProtectedPackage(String packageName) {
-        return packageName != null && packageName.equals(mDeviceProvisioningPackage);
+        return packageName != null && (packageName.equals(mDeviceProvisioningPackage)
+                || ArrayUtils.contains(mDeviceOwnerProtectedPackages, packageName));
     }
 
     /**

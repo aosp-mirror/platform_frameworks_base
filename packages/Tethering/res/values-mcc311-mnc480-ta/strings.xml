@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2020 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"இணைப்பு முறைக்கு இணைய இணைப்பு இல்லை"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"சாதனங்களால் இணைய முடியவில்லை"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"இணைப்பு முறையை ஆஃப் செய்"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"ஹாட்ஸ்பாட் அல்லது இணைப்பு முறை ஆன் செய்யப்பட்டுள்ளது"</string>
+    <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"ரோமிங்கின்போது கூடுதல் கட்டணங்கள் விதிக்கப்படக்கூடும்"</string>
+</resources>

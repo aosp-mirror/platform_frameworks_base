@@ -22,7 +22,6 @@ import static junit.framework.Assert.assertTrue;
 
 import android.app.RemoteInput;
 import android.os.Handler;
-import android.os.Looper;
 import android.provider.DeviceConfig;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -32,8 +31,8 @@ import android.testing.TestableResources;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.DeviceConfigProxyFake;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,14 +41,13 @@ import org.junit.runner.RunWith;
 @TestableLooper.RunWithLooper
 @SmallTest
 public class SmartReplyConstantsTest extends SysuiTestCase {
-
-    private static final int CONTENT_OBSERVER_TIMEOUT_SECONDS = 10;
-
     private SmartReplyConstants mConstants;
+    private DeviceConfigProxyFake mDeviceConfig;
+    private TestableLooper mTestableLooper;
 
     @Before
     public void setUp() {
-        resetAllDeviceConfigFlags();
+        mDeviceConfig = new DeviceConfigProxyFake();
         TestableResources resources = mContext.getOrCreateTestableResources();
         resources.addOverride(R.bool.config_smart_replies_in_notifications_enabled, true);
         resources.addOverride(
@@ -62,12 +60,12 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
                 2);
         resources.addOverride(
                 R.integer.config_smart_replies_in_notifications_max_num_actions, -1);
-        mConstants = new SmartReplyConstants(Handler.createAsync(Looper.myLooper()), mContext);
-    }
-
-    @After
-    public void tearDown() {
-        resetAllDeviceConfigFlags();
+        mTestableLooper = TestableLooper.get(this);
+        mConstants = new SmartReplyConstants(
+                new Handler(mTestableLooper.getLooper()),
+                mContext,
+                mDeviceConfig
+        );
     }
 
     @Test
@@ -78,25 +76,21 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
     @Test
     public void testIsEnabledWithInvalidConfig() {
         overrideSetting(SystemUiDeviceConfigFlags.SSIN_ENABLED, "invalid config");
-        triggerConstantsOnChange();
         assertTrue(mConstants.isEnabled());
     }
 
     @Test
     public void testIsEnabledWithValidConfig() {
         overrideSetting(SystemUiDeviceConfigFlags.SSIN_ENABLED, "false");
-        triggerConstantsOnChange();
         assertFalse(mConstants.isEnabled());
     }
 
     @Test
     public void testRequiresTargetingPConfig() {
         overrideSetting(SystemUiDeviceConfigFlags.SSIN_REQUIRES_TARGETING_P, "false");
-        triggerConstantsOnChange();
         assertEquals(false, mConstants.requiresTargetingP());
 
         overrideSetting(SystemUiDeviceConfigFlags.SSIN_REQUIRES_TARGETING_P, null);
-        triggerConstantsOnChange();
         assertEquals(true, mConstants.requiresTargetingP());
     }
 
@@ -110,20 +104,17 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
     public void testGetMaxSqueezeRemeasureAttemptsWithInvalidConfig() {
         overrideSetting(SystemUiDeviceConfigFlags.SSIN_MAX_SQUEEZE_REMEASURE_ATTEMPTS,
                 "invalid config");
-        triggerConstantsOnChange();
         assertEquals(7, mConstants.getMaxSqueezeRemeasureAttempts());
     }
 
     @Test
     public void testGetMaxSqueezeRemeasureAttemptsWithValidConfig() {
         overrideSetting(SystemUiDeviceConfigFlags.SSIN_MAX_SQUEEZE_REMEASURE_ATTEMPTS, "5");
-        triggerConstantsOnChange();
         assertEquals(5, mConstants.getMaxSqueezeRemeasureAttempts());
     }
 
     @Test
     public void testGetEffectiveEditChoicesBeforeSendingWithNoConfig() {
-        triggerConstantsOnChange();
         assertFalse(
                 mConstants.getEffectiveEditChoicesBeforeSending(
                         RemoteInput.EDIT_CHOICES_BEFORE_SENDING_AUTO));
@@ -138,7 +129,6 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
     @Test
     public void testGetEffectiveEditChoicesBeforeSendingWithEnabledConfig() {
         overrideSetting(SystemUiDeviceConfigFlags.SSIN_EDIT_CHOICES_BEFORE_SENDING, "true");
-        triggerConstantsOnChange();
         assertTrue(
                 mConstants.getEffectiveEditChoicesBeforeSending(
                         RemoteInput.EDIT_CHOICES_BEFORE_SENDING_AUTO));
@@ -153,7 +143,6 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
     @Test
     public void testGetEffectiveEditChoicesBeforeSendingWithDisabledConfig() {
         overrideSetting(SystemUiDeviceConfigFlags.SSIN_EDIT_CHOICES_BEFORE_SENDING, "false");
-        triggerConstantsOnChange();
         assertFalse(
                 mConstants.getEffectiveEditChoicesBeforeSending(
                         RemoteInput.EDIT_CHOICES_BEFORE_SENDING_AUTO));
@@ -174,14 +163,12 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
     @Test
     public void testShowInHeadsUpEnabled() {
         overrideSetting(SystemUiDeviceConfigFlags.SSIN_SHOW_IN_HEADS_UP, "true");
-        triggerConstantsOnChange();
         assertTrue(mConstants.getShowInHeadsUp());
     }
 
     @Test
     public void testShowInHeadsUpDisabled() {
         overrideSetting(SystemUiDeviceConfigFlags.SSIN_SHOW_IN_HEADS_UP, "false");
-        triggerConstantsOnChange();
         assertFalse(mConstants.getShowInHeadsUp());
     }
 
@@ -194,7 +181,6 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
     @Test
     public void testGetMinNumSystemGeneratedRepliesWithValidConfig() {
         overrideSetting(SystemUiDeviceConfigFlags.SSIN_MIN_NUM_SYSTEM_GENERATED_REPLIES, "5");
-        triggerConstantsOnChange();
         assertEquals(5, mConstants.getMinNumSystemGeneratedReplies());
     }
 
@@ -207,7 +193,6 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
     @Test
     public void testMaxNumActionsSet() {
         overrideSetting(SystemUiDeviceConfigFlags.SSIN_MAX_NUM_ACTIONS, "10");
-        triggerConstantsOnChange();
         assertEquals(10, mConstants.getMaxNumActions());
     }
 
@@ -219,38 +204,12 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
     @Test
     public void testOnClickInitDelaySet() {
         overrideSetting(SystemUiDeviceConfigFlags.SSIN_ONCLICK_INIT_DELAY, "50");
-        triggerConstantsOnChange();
         assertEquals(50, mConstants.getOnClickInitDelay());
     }
 
     private void overrideSetting(String propertyName, String value) {
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+        mDeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 propertyName, value, false /* makeDefault */);
-    }
-
-    private void triggerConstantsOnChange() {
-        mConstants.onDeviceConfigPropertiesChanged(DeviceConfig.NAMESPACE_SYSTEMUI);
-    }
-
-    private void resetAllDeviceConfigFlags() {
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SSIN_ENABLED, null, false /* makeDefault */);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SSIN_REQUIRES_TARGETING_P, null, false /* makeDefault */);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SSIN_MAX_SQUEEZE_REMEASURE_ATTEMPTS, null,
-                false /* makeDefault */);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SSIN_EDIT_CHOICES_BEFORE_SENDING, null,
-                false /* makeDefault */);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SSIN_SHOW_IN_HEADS_UP, null, false /* makeDefault */);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SSIN_MIN_NUM_SYSTEM_GENERATED_REPLIES, null,
-                false /* makeDefault */);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SSIN_MAX_NUM_ACTIONS, null, false /* makeDefault */);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SSIN_ONCLICK_INIT_DELAY, null, false /* makeDefault */);
+        mTestableLooper.processAllMessages();
     }
 }

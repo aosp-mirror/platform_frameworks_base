@@ -15,17 +15,13 @@
  */
 package com.android.settingslib;
 
-import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
-
 import static com.android.settingslib.Utils.STORAGE_MANAGER_ENABLED_PROPERTY;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
@@ -35,6 +31,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.location.LocationManager;
 import android.media.AudioManager;
+import android.os.BatteryManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -47,7 +44,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -89,15 +85,11 @@ public class UtilsTest {
     }
 
     @Test
-    public void testUpdateLocationEnabled_sendBroadcast() {
+    public void testUpdateLocationEnabled() {
         int currentUserId = ActivityManager.getCurrentUser();
         Utils.updateLocationEnabled(mContext, true, currentUserId,
                 Settings.Secure.LOCATION_CHANGER_QUICK_SETTINGS);
 
-        verify(mContext).sendBroadcastAsUser(
-            argThat(actionMatches(LocationManager.MODE_CHANGING_ACTION)),
-            ArgumentMatchers.eq(UserHandle.of(currentUserId)),
-            ArgumentMatchers.eq(WRITE_SECURE_SETTINGS));
         assertThat(Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.LOCATION_CHANGER, Settings.Secure.LOCATION_CHANGER_UNKNOWN))
                 .isEqualTo(Settings.Secure.LOCATION_CHANGER_QUICK_SETTINGS);
@@ -131,12 +123,12 @@ public class UtilsTest {
     public void testGetDefaultStorageManagerDaysToRetain_storageManagerDaysToRetainUsesResources() {
         Resources resources = mock(Resources.class);
         when(resources.getInteger(
-                        eq(
-                                com.android
-                                        .internal
-                                        .R
-                                        .integer
-                                        .config_storageManagerDaystoRetainDefault)))
+                eq(
+                        com.android
+                                .internal
+                                .R
+                                .integer
+                                .config_storageManagerDaystoRetainDefault)))
                 .thenReturn(60);
         assertThat(Utils.getDefaultStorageManagerDaysToRetain(resources)).isEqualTo(60);
     }
@@ -156,7 +148,8 @@ public class UtilsTest {
         private static Map<String, Integer> map = new HashMap<>();
 
         @Implementation
-        public static boolean putIntForUser(ContentResolver cr, String name, int value, int userHandle) {
+        public static boolean putIntForUser(ContentResolver cr, String name, int value,
+                int userHandle) {
             map.put(name, value);
             return true;
         }
@@ -320,5 +313,34 @@ public class UtilsTest {
 
         assertThat(Utils.getCombinedServiceState(mServiceState)).isEqualTo(
                 ServiceState.STATE_OUT_OF_SERVICE);
+    }
+
+    @Test
+    public void getBatteryStatus_statusIsFull_returnFullString() {
+        final Intent intent = new Intent().putExtra(BatteryManager.EXTRA_LEVEL, 100);
+        final Resources resources = mContext.getResources();
+
+        assertThat(Utils.getBatteryStatus(mContext, intent)).isEqualTo(
+                resources.getString(R.string.battery_info_status_full));
+    }
+
+    @Test
+    public void getBatteryStatus_batteryLevelIs100_returnFullString() {
+        final Intent intent = new Intent().putExtra(BatteryManager.EXTRA_STATUS,
+                BatteryManager.BATTERY_STATUS_FULL);
+        final Resources resources = mContext.getResources();
+
+        assertThat(Utils.getBatteryStatus(mContext, intent)).isEqualTo(
+                resources.getString(R.string.battery_info_status_full));
+    }
+
+    @Test
+    public void getBatteryStatus_batteryLevel99_returnChargingString() {
+        final Intent intent = new Intent().putExtra(BatteryManager.EXTRA_STATUS,
+                BatteryManager.BATTERY_STATUS_CHARGING);
+        final Resources resources = mContext.getResources();
+
+        assertThat(Utils.getBatteryStatus(mContext, intent)).isEqualTo(
+                resources.getString(R.string.battery_info_status_charging));
     }
 }

@@ -36,6 +36,9 @@
   ],
   "postsubmit": [
     {
+      "name": "CtsAccessibilityServiceSdk29TestCases"
+    },
+    {
       "name": "CtsAccessibilityServiceTestCases"
     },
     {

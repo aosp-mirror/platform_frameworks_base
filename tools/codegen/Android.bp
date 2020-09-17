@@ -1,0 +1,18 @@
+java_binary_host {
+    name: "codegen_cli",
+    manifest: "manifest.txt",
+    srcs: [
+        "src/**/*.kt",
+    ],
+    static_libs: [
+        "javaparser",
+    ],
+}
+
+java_library_host {
+    name: "codegen-version-info",
+
+    srcs: [
+        "src/**/SharedConstants.kt",
+    ],
+}

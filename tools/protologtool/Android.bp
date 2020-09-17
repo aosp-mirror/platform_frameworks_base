@@ -1,0 +1,33 @@
+java_library_host {
+    name: "protologtool-lib",
+    srcs: [
+        "src/com/android/protolog/tool/**/*.kt",
+    ],
+    static_libs: [
+        "protolog-common",
+        "javaparser",
+        "platformprotos",
+        "jsonlib",
+    ],
+}
+
+java_binary_host {
+    name: "protologtool",
+    manifest: "manifest.txt",
+    static_libs: [
+        "protologtool-lib",
+    ],
+}
+
+java_test_host {
+    name: "protologtool-tests",
+    test_suites: ["general-tests"],
+    srcs: [
+        "tests/**/*.kt",
+    ],
+    static_libs: [
+        "protologtool-lib",
+        "junit",
+        "mockito",
+    ],
+}

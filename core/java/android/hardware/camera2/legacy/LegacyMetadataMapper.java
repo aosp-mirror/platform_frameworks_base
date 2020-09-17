@@ -771,6 +771,7 @@ public class LegacyMetadataMapper {
                     CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES                     ,
                     CameraCharacteristics.CONTROL_AWB_LOCK_AVAILABLE                      ,
                     CameraCharacteristics.CONTROL_MAX_REGIONS                             ,
+                    CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE                        ,
                     CameraCharacteristics.FLASH_INFO_AVAILABLE                            ,
                     CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL                   ,
                     CameraCharacteristics.JPEG_AVAILABLE_THUMBNAIL_SIZES                  ,
@@ -828,6 +829,7 @@ public class LegacyMetadataMapper {
                     CaptureRequest.CONTROL_MODE,
                     CaptureRequest.CONTROL_SCENE_MODE,
                     CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE,
+                    CaptureRequest.CONTROL_ZOOM_RATIO,
                     CaptureRequest.FLASH_MODE,
                     CaptureRequest.JPEG_GPS_COORDINATES,
                     CaptureRequest.JPEG_GPS_PROCESSING_METHOD,
@@ -872,6 +874,7 @@ public class LegacyMetadataMapper {
                     CaptureResult.CONTROL_AWB_MODE                                 ,
                     CaptureResult.CONTROL_AWB_LOCK                                 ,
                     CaptureResult.CONTROL_MODE                                     ,
+                    CaptureResult.CONTROL_ZOOM_RATIO                               ,
                     CaptureResult.FLASH_MODE                                       ,
                     CaptureResult.JPEG_GPS_COORDINATES                             ,
                     CaptureResult.JPEG_GPS_PROCESSING_METHOD                       ,
@@ -934,6 +937,12 @@ public class LegacyMetadataMapper {
     }
 
     private static void mapScaler(CameraMetadataNative m, Parameters p) {
+        /*
+         * control.zoomRatioRange
+         */
+        Range<Float> zoomRatioRange = new Range<Float>(1.0f, ParameterUtils.getMaxZoomRatio(p));
+        m.set(CONTROL_ZOOM_RATIO_RANGE, zoomRatioRange);
+
         /*
          * scaler.availableMaxDigitalZoom
          */
@@ -1382,6 +1391,9 @@ public class LegacyMetadataMapper {
 
         // control.sceneMode -- DISABLED is always available
         m.set(CaptureRequest.CONTROL_SCENE_MODE, CONTROL_SCENE_MODE_DISABLED);
+
+        // control.zoomRatio -- 1.0
+        m.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1.0f);
 
         /*
          * statistics.*

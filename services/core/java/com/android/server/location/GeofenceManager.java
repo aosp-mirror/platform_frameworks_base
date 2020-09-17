@@ -16,17 +16,10 @@
 
 package com.android.server.location;
 
-import java.io.PrintWriter;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.database.ContentObserver;
 import android.location.Geofence;
 import android.location.Location;
 import android.location.LocationListener;
@@ -34,19 +27,24 @@ import android.location.LocationManager;
 import android.location.LocationRequest;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.os.UserHandle;
-import android.provider.Settings;
+import android.util.Log;
 import android.util.Slog;
 
-import com.android.server.LocationManagerService;
+import com.android.server.FgThread;
 import com.android.server.PendingIntentUtils;
+
+import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 public class GeofenceManager implements LocationListener, PendingIntent.OnFinished {
     private static final String TAG = "GeofenceManager";
-    private static final boolean D = LocationManagerService.D;
+    private static final boolean D = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final int MSG_UPDATE_FENCES = 1;
 
@@ -62,10 +60,6 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
      */
     private static final long MAX_AGE_NANOS = 5 * 60 * 1000000000L; // five minutes
 
-    /**
-     * The default value of most frequent update interval allowed.
-     */
-    private static final long DEFAULT_MIN_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
 
     /**
      * Least frequent update interval allowed.
@@ -73,19 +67,21 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
     private static final long MAX_INTERVAL_MS = 2 * 60 * 60 * 1000; // two hours
 
     private final Context mContext;
+    private final GeofenceHandler mHandler;
+
     private final LocationManager mLocationManager;
     private final AppOpsManager mAppOps;
     private final PowerManager.WakeLock mWakeLock;
-    private final GeofenceHandler mHandler;
-    private final LocationBlacklist mBlacklist;
 
-    private Object mLock = new Object();
+    private final SettingsHelper mSettingsStore;
+
+    private final Object mLock = new Object();
 
     // access to members below is synchronized on mLock
     /**
      * A list containing all registered geofences.
      */
-    private List<GeofenceState> mFences = new LinkedList<GeofenceState>();
+    private List<GeofenceState> mFences = new LinkedList<>();
 
     /**
      * This is set true when we have an active request for {@link Location} updates via
@@ -111,54 +107,24 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
      */
     private boolean mPendingUpdate;
 
-    /**
-     * The actual value of most frequent update interval allowed.
-     */
-    private long mEffectiveMinIntervalMs;
-    private ContentResolver mResolver;
-
-    public GeofenceManager(Context context, LocationBlacklist blacklist) {
+    public GeofenceManager(Context context, SettingsHelper settingsStore) {
         mContext = context;
-        mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-        mAppOps = (AppOpsManager)mContext.getSystemService(Context.APP_OPS_SERVICE);
-        PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-        mHandler = new GeofenceHandler();
-        mBlacklist = blacklist;
-        mResolver = mContext.getContentResolver();
-        updateMinInterval();
-        mResolver.registerContentObserver(
-            Settings.Global.getUriFor(
-                    Settings.Global.LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS),
-            true,
-            new ContentObserver(mHandler) {
-                @Override
-                public void onChange(boolean selfChange) {
-                    synchronized (mLock) {
-                        updateMinInterval();
-                    }
-                }
-            }, UserHandle.USER_ALL);
-    }
+        mHandler = new GeofenceHandler(FgThread.getHandler().getLooper());
 
-    /**
-     * Updates the minimal location request frequency.
-     */
-    private void updateMinInterval() {
-        mEffectiveMinIntervalMs = Settings.Global.getLong(mResolver,
-                Settings.Global.LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS,
-                DEFAULT_MIN_INTERVAL_MS);
+        mLocationManager = mContext.getSystemService(LocationManager.class);
+        mAppOps = mContext.getSystemService(AppOpsManager.class);
+
+        mWakeLock = mContext.getSystemService(PowerManager.class).newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK, TAG);
+
+        mSettingsStore = settingsStore;
     }
 
     public void addFence(LocationRequest request, Geofence geofence, PendingIntent intent,
-            int allowedResolutionLevel, int uid, String packageName) {
-        if (D) {
-            Slog.d(TAG, "addFence: request=" + request + ", geofence=" + geofence
-                    + ", intent=" + intent + ", uid=" + uid + ", packageName=" + packageName);
-        }
-
+            CallerIdentity identity) {
         GeofenceState state = new GeofenceState(geofence,
-                request.getExpireAt(), allowedResolutionLevel, uid, packageName, intent);
+                request.getExpirationRealtimeMs(SystemClock.elapsedRealtime()),
+                identity, intent);
         synchronized (mLock) {
             // first make sure it doesn't already exist
             for (int i = mFences.size() - 1; i >= 0; i--) {
@@ -206,26 +172,14 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
         }
 
         synchronized (mLock) {
-            Iterator<GeofenceState> iter = mFences.iterator();
-            while (iter.hasNext()) {
-                GeofenceState state = iter.next();
-                if (state.mPackageName.equals(packageName)) {
-                    iter.remove();
-                }
-            }
+            mFences.removeIf(state -> state.mIdentity.packageName.equals(packageName));
             scheduleUpdateFencesLocked();
         }
     }
 
     private void removeExpiredFencesLocked() {
         long time = SystemClock.elapsedRealtime();
-        Iterator<GeofenceState> iter = mFences.iterator();
-        while (iter.hasNext()) {
-            GeofenceState state = iter.next();
-            if (state.mExpireAt < time) {
-                iter.remove();
-            }
-        }
+        mFences.removeIf(state -> state.mExpireAt < time);
     }
 
     private void scheduleUpdateFencesLocked() {
@@ -272,8 +226,8 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
      */
     // Runs on the handler.
     private void updateFences() {
-        List<PendingIntent> enterIntents = new LinkedList<PendingIntent>();
-        List<PendingIntent> exitIntents = new LinkedList<PendingIntent>();
+        List<PendingIntent> enterIntents = new LinkedList<>();
+        List<PendingIntent> exitIntents = new LinkedList<>();
 
         synchronized (mLock) {
             mPendingUpdate = false;
@@ -290,22 +244,17 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
             double minFenceDistance = Double.MAX_VALUE;
             boolean needUpdates = false;
             for (GeofenceState state : mFences) {
-                if (mBlacklist.isBlacklisted(state.mPackageName)) {
-                    if (D) {
-                        Slog.d(TAG, "skipping geofence processing for blacklisted app: "
-                                + state.mPackageName);
-                    }
+                CallerIdentity identity = state.mIdentity;
+                if (mSettingsStore.isLocationPackageBlacklisted(identity.userId,
+                        identity.packageName)) {
                     continue;
                 }
 
-                int op = LocationManagerService.resolutionLevelToOp(state.mAllowedResolutionLevel);
+                int op = CallerIdentity.asAppOp(identity.permissionLevel);
                 if (op >= 0) {
-                    if (mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, state.mUid,
-                            state.mPackageName) != AppOpsManager.MODE_ALLOWED) {
-                        if (D) {
-                            Slog.d(TAG, "skipping geofence processing for no op app: "
-                                    + state.mPackageName);
-                        }
+                    if (mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, identity.uid,
+                            identity.packageName, identity.featureId, identity.listenerId)
+                            != AppOpsManager.MODE_ALLOWED) {
                         continue;
                     }
                 }
@@ -335,10 +284,11 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
                 // Compute a location update interval based on the distance to the nearest fence.
                 long intervalMs;
                 if (location != null && Double.compare(minFenceDistance, Double.MAX_VALUE) != 0) {
-                    intervalMs = (long)Math.min(MAX_INTERVAL_MS, Math.max(mEffectiveMinIntervalMs,
+                    intervalMs = (long) Math.min(MAX_INTERVAL_MS, Math.max(
+                            mSettingsStore.getBackgroundThrottleProximityAlertIntervalMs(),
                             minFenceDistance * 1000 / MAX_SPEED_M_S));
                 } else {
-                    intervalMs = mEffectiveMinIntervalMs;
+                    intervalMs = mSettingsStore.getBackgroundThrottleProximityAlertIntervalMs();
                 }
                 if (!mReceivingLocationUpdates || mLocationUpdateInterval != intervalMs) {
                     mReceivingLocationUpdates = true;
@@ -431,13 +381,16 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
     }
 
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) { }
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
 
     @Override
-    public void onProviderEnabled(String provider) { }
+    public void onProviderEnabled(String provider) {
+    }
 
     @Override
-    public void onProviderDisabled(String provider) { }
+    public void onProviderDisabled(String provider) {
+    }
 
     @Override
     public void onSendFinished(PendingIntent pendingIntent, Intent intent, int resultCode,
@@ -446,29 +399,20 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
     }
 
     public void dump(PrintWriter pw) {
-        pw.println("  Geofences:");
-
         for (GeofenceState state : mFences) {
-            pw.append("    ");
-            pw.append(state.mPackageName);
-            pw.append(" ");
-            pw.append(state.mFence.toString());
-            pw.append("\n");
+            pw.println(state.mIdentity + " " + state.mFence);
         }
     }
 
     private final class GeofenceHandler extends Handler {
-        public GeofenceHandler() {
-            super(true /*async*/);
+        private GeofenceHandler(Looper looper) {
+            super(looper);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_UPDATE_FENCES: {
-                    updateFences();
-                    break;
-                }
+            if (msg.what == MSG_UPDATE_FENCES) {
+                updateFences();
             }
         }
     }

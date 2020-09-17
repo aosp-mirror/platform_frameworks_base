@@ -45,6 +45,12 @@ cc_library {
     defaults: ["libprotoutil_defaults"],
 
     export_include_dirs: ["include"],
+
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.os.statsd",
+        "test_com.android.os.statsd",
+    ],
 }
 
 cc_test {

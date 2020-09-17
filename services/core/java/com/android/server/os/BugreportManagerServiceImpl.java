@@ -16,6 +16,7 @@
 
 package com.android.server.os;
 
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
@@ -25,7 +26,6 @@ import android.os.Binder;
 import android.os.BugreportParams;
 import android.os.IDumpstate;
 import android.os.IDumpstateListener;
-import android.os.IDumpstateToken;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -35,10 +35,10 @@ import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 import com.android.server.SystemConfig;
 
 import java.io.FileDescriptor;
+import java.util.Objects;
 
 /**
  * Implementation of the service that provides a privileged API to capture and consume bugreports.
@@ -64,20 +64,13 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
     @Override
     @RequiresPermission(android.Manifest.permission.DUMP)
-    public IDumpstateToken setListener(String name, IDumpstateListener listener,
-            boolean getSectionDetails) {
-        throw new UnsupportedOperationException("setListener is not allowed on this service");
-    }
-
-    @Override
-    @RequiresPermission(android.Manifest.permission.DUMP)
     public void startBugreport(int callingUidUnused, String callingPackage,
             FileDescriptor bugreportFd, FileDescriptor screenshotFd,
-            int bugreportMode, IDumpstateListener listener) {
+            int bugreportMode, IDumpstateListener listener, boolean isScreenshotRequested) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, "startBugreport");
-        Preconditions.checkNotNull(callingPackage);
-        Preconditions.checkNotNull(bugreportFd);
-        Preconditions.checkNotNull(listener);
+        Objects.requireNonNull(callingPackage);
+        Objects.requireNonNull(bugreportFd);
+        Objects.requireNonNull(listener);
         validateBugreportMode(bugreportMode);
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -95,18 +88,29 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         }
         synchronized (mLock) {
             startBugreportLocked(callingUid, callingPackage, bugreportFd, screenshotFd,
-                    bugreportMode, listener);
+                    bugreportMode, listener, isScreenshotRequested);
         }
     }
 
     @Override
     @RequiresPermission(android.Manifest.permission.DUMP)
     public void cancelBugreport() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, "startBugreport");
-        // This tells init to cancel bugreportd service. Note that this is achieved through setting
-        // a system property which is not thread-safe. So the lock here offers thread-safety only
-        // among callers of the API.
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP,
+                "cancelBugreport");
         synchronized (mLock) {
+            IDumpstate ds = getDumpstateBinderServiceLocked();
+            if (ds == null) {
+                Slog.w(TAG, "cancelBugreport: Could not find native dumpstate service");
+                return;
+            }
+            try {
+                ds.cancelBugreport();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "RemoteException in cancelBugreport", e);
+            }
+            // This tells init to cancel bugreportd service. Note that this is achieved through
+            // setting a system property which is not thread-safe. So the lock here offers
+            // thread-safety only among callers of the API.
             SystemProperties.set("ctl.stop", BUGREPORT_SERVICE);
         }
     }
@@ -152,7 +156,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     @GuardedBy("mLock")
     private void startBugreportLocked(int callingUid, String callingPackage,
             FileDescriptor bugreportFd, FileDescriptor screenshotFd,
-            int bugreportMode, IDumpstateListener listener) {
+            int bugreportMode, IDumpstateListener listener, boolean isScreenshotRequested) {
         if (isDumpstateBinderServiceRunningLocked()) {
             Slog.w(TAG, "'dumpstate' is already running. Cannot start a new bugreport"
                     + " while another one is currently in progress.");
@@ -172,7 +176,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         IDumpstateListener myListener = new DumpstateListener(listener, ds);
         try {
             ds.startBugreport(callingUid, callingPackage,
-                    bugreportFd, screenshotFd, bugreportMode, myListener);
+                    bugreportFd, screenshotFd, bugreportMode, myListener, isScreenshotRequested);
         } catch (RemoteException e) {
             // bugreportd service is already started now. We need to kill it to manage the
             // lifecycle correctly. If we don't subsequent callers will get
@@ -184,8 +188,14 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
     @GuardedBy("mLock")
     private boolean isDumpstateBinderServiceRunningLocked() {
-        IDumpstate ds = IDumpstate.Stub.asInterface(ServiceManager.getService("dumpstate"));
-        return ds != null;
+        return getDumpstateBinderServiceLocked() != null;
+    }
+
+    @GuardedBy("mLock")
+    @Nullable
+    private IDumpstate getDumpstateBinderServiceLocked() {
+        // Note that the binder service on the native side is "dumpstate".
+        return IDumpstate.Stub.asInterface(ServiceManager.getService("dumpstate"));
     }
 
     /*
@@ -209,8 +219,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         int totalTimeWaitedMillis = 0;
         int seedWaitTimeMillis = 500;
         while (!timedOut) {
-            // Note that the binder service on the native side is "dumpstate".
-            ds = IDumpstate.Stub.asInterface(ServiceManager.getService("dumpstate"));
+            ds = getDumpstateBinderServiceLocked();
             if (ds != null) {
                 Slog.i(TAG, "Got bugreport service handle.");
                 break;
@@ -280,6 +289,17 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
                 mDone = true;
             }
             mListener.onFinished();
+        }
+
+        @Override
+        public void onScreenshotTaken(boolean success) throws RemoteException {
+            mListener.onScreenshotTaken(success);
+        }
+
+        @Override
+        public void onUiIntensiveBugreportDumpsFinished(String callingPackage)
+                throws RemoteException {
+            mListener.onUiIntensiveBugreportDumpsFinished(callingPackage);
         }
 
         @Override

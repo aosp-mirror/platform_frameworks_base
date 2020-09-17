@@ -16,6 +16,7 @@
 
 package android.telecom.Logging;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -180,7 +181,7 @@ public class SessionManager {
         Log.d(LOGGING_TAG, Session.START_EXTERNAL_SESSION);
         Session externalSession = new Session(Session.EXTERNAL_INDICATOR + sessionInfo.sessionId,
                 sessionInfo.methodPath, System.currentTimeMillis(),
-                false /*isStartedFromActiveSession*/, null);
+                false /*isStartedFromActiveSession*/, sessionInfo.ownerInfo);
         externalSession.setIsExternal(true);
         // Mark the external session as already completed, since we have no way of knowing when
         // the external session actually has completed.
@@ -224,7 +225,7 @@ public class SessionManager {
         // Start execution time of the session will be overwritten in continueSession(...).
         Session newSubsession = new Session(threadSession.getNextChildId(),
                 threadSession.getShortMethodName(), System.currentTimeMillis(),
-                isStartedFromActiveSession, null);
+                isStartedFromActiveSession, threadSession.getOwnerInfo());
         threadSession.addChild(newSubsession);
         newSubsession.setParentSession(threadSession);
 
@@ -238,12 +239,18 @@ public class SessionManager {
         return newSubsession;
     }
 
+    public synchronized Session.Info getExternalSession() {
+        return getExternalSession(null /* ownerInfo */);
+    }
+
     /**
      * Retrieve the information of the currently active Session. This information is parcelable and
      * is used to create an external Session ({@link #startExternalSession(Session.Info, String)}).
      * If there is no Session active, this method will return null.
+     * @param ownerInfo Owner information for the session.
+     * @return The session information
      */
-    public synchronized Session.Info getExternalSession() {
+    public synchronized Session.Info getExternalSession(@Nullable String ownerInfo) {
         int threadId = getCallingThreadId();
         Session threadSession = mSessionMapper.get(threadId);
         if (threadSession == null) {
@@ -251,8 +258,7 @@ public class SessionManager {
                     "active.");
             return null;
         }
-
-        return threadSession.getInfo();
+        return threadSession.getExternalInfo(ownerInfo);
     }
 
     /**

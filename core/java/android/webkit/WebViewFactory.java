@@ -47,7 +47,7 @@ public final class WebViewFactory {
     // visible for WebViewZygoteInit to look up the class by reflection and call preloadInZygote.
     /** @hide */
     private static final String CHROMIUM_WEBVIEW_FACTORY =
-            "com.android.webview.chromium.WebViewChromiumFactoryProviderForQ";
+            "com.android.webview.chromium.WebViewChromiumFactoryProviderForR";
 
     private static final String CHROMIUM_WEBVIEW_FACTORY_METHOD = "create";
 

@@ -16,6 +16,7 @@
 #pragma once
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "annotations.h"
 
 namespace android {
 namespace os {
@@ -26,7 +27,6 @@ struct Matcher;
 struct Field;
 struct FieldValue;
 
-const int32_t kAttributionField = 1;
 const int32_t kMaxLogDepth = 2;
 const int32_t kLastBitMask = 0x80;
 const int32_t kClearLastBitDeco = 0x7f;
@@ -180,6 +180,7 @@ public:
 
         return false;
     }
+
     bool matches(const Matcher& that) const;
 };
 
@@ -259,6 +260,11 @@ struct Matcher {
 
 inline Matcher getSimpleMatcher(int32_t tag, size_t field) {
     return Matcher(Field(tag, getSimpleField(field)), 0xff7f0000);
+}
+
+inline Matcher getFirstUidMatcher(int32_t atomId) {
+    int32_t pos[] = {1, 1, 1};
+    return Matcher(Field(atomId, pos, 2), 0xff7f7f7f);
 }
 
 /**
@@ -352,6 +358,56 @@ struct Value {
     Value& operator=(const Value& that);
 };
 
+class Annotations {
+public:
+    Annotations() {
+        setNested(true);  // Nested = true by default
+    }
+
+    // This enum stores where particular annotations can be found in the
+    // bitmask. Note that these pos do not correspond to annotation ids.
+    enum {
+        NESTED_POS = 0x0,
+        PRIMARY_POS = 0x1,
+        EXCLUSIVE_POS = 0x2,
+        UID_POS = 0x3
+    };
+
+    inline void setNested(bool nested) { setBitmaskAtPos(NESTED_POS, nested); }
+
+    inline void setPrimaryField(bool primary) { setBitmaskAtPos(PRIMARY_POS, primary); }
+
+    inline void setExclusiveState(bool exclusive) { setBitmaskAtPos(EXCLUSIVE_POS, exclusive); }
+
+    inline void setUidField(bool isUid) { setBitmaskAtPos(UID_POS, isUid); }
+
+    // Default value = false
+    inline bool isNested() const { return getValueFromBitmask(NESTED_POS); }
+
+    // Default value = false
+    inline bool isPrimaryField() const { return getValueFromBitmask(PRIMARY_POS); }
+
+    // Default value = false
+    inline bool isExclusiveState() const { return getValueFromBitmask(EXCLUSIVE_POS); }
+
+    // Default value = false
+    inline bool isUidField() const { return getValueFromBitmask(UID_POS); }
+
+private:
+    inline void setBitmaskAtPos(int pos, bool value) {
+        mBooleanBitmask &= ~(1 << pos); // clear
+        mBooleanBitmask |= (value << pos); // set
+    }
+
+    inline bool getValueFromBitmask(int pos) const {
+        return (mBooleanBitmask >> pos) & 0x1;
+    }
+
+    // This is a bitmask over all annotations stored in boolean form. Because
+    // there are only 4 booleans, just one byte is required.
+    uint8_t mBooleanBitmask = 0;
+};
+
 /**
  * Represents a log item, or a dimension item (They are essentially the same).
  */
@@ -379,6 +435,7 @@ struct FieldValue {
 
     Field mField;
     Value mValue;
+    Annotations mAnnotations;
 };
 
 bool HasPositionANY(const FieldMatcher& matcher);
@@ -392,9 +449,14 @@ int getUidIfExists(const FieldValue& value);
 void translateFieldMatcher(const FieldMatcher& matcher, std::vector<Matcher>* output);
 
 bool isAttributionUidField(const Field& field, const Value& value);
+bool isUidField(const FieldValue& fieldValue);
 
 bool equalDimensions(const std::vector<Matcher>& dimension_a,
                      const std::vector<Matcher>& dimension_b);
+
+// Returns true if dimension_a is a subset of dimension_b.
+bool subsetDimensions(const std::vector<Matcher>& dimension_a,
+                      const std::vector<Matcher>& dimension_b);
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

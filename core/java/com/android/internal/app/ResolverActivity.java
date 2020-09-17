@@ -16,7 +16,9 @@
 
 package com.android.internal.app;
 
+import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.PermissionChecker.PID_UNKNOWN;
 
 import android.annotation.Nullable;
 import android.annotation.StringRes;
@@ -28,42 +30,41 @@ import android.app.ActivityThread;
 import android.app.VoiceInteractor.PickOptionRequest;
 import android.app.VoiceInteractor.PickOptionRequest.Option;
 import android.app.VoiceInteractor.Prompt;
+import android.app.admin.DevicePolicyEventLogger;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.PermissionChecker;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.LabeledIntent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
+import android.content.res.TypedArray;
 import android.graphics.Insets;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PatternMatcher;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,20 +72,27 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.WindowInsets;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Space;
+import android.widget.TabHost;
+import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.AbstractMultiProfilePagerAdapter.Profile;
+import com.android.internal.app.chooser.ChooserTargetInfo;
+import com.android.internal.app.chooser.DisplayResolveInfo;
+import com.android.internal.app.chooser.TargetInfo;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.widget.ResolverDrawerLayout;
+import com.android.internal.widget.ViewPager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,42 +101,38 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+
 /**
  * This activity is displayed when the system attempts to start an Intent for
  * which there is more than one matching activity, allowing the user to decide
  * which to go to.  It is not normally used directly by application developers.
  */
 @UiThread
-public class ResolverActivity extends Activity {
+public class ResolverActivity extends Activity implements
+        ResolverListAdapter.ResolverListCommunicator {
 
     @UnsupportedAppUsage
     public ResolverActivity() {
     }
 
-    // Temporary flag for new chooser delegate behavior.
-    boolean mEnableChooserDelegate = true;
-
-    @UnsupportedAppUsage
-    protected ResolveListAdapter mAdapter;
     private boolean mSafeForwardingMode;
-    protected AbsListView mAdapterView;
     private Button mAlwaysButton;
     private Button mOnceButton;
     protected View mProfileView;
-    private int mIconDpi;
     private int mLastSelected = AbsListView.INVALID_POSITION;
     private boolean mResolvingHome = false;
     private int mProfileSwitchMessageId = -1;
     private int mLayoutId;
-    private final ArrayList<Intent> mIntents = new ArrayList<>();
+    @VisibleForTesting
+    protected final ArrayList<Intent> mIntents = new ArrayList<>();
     private PickTargetOptionRequest mPickOptionRequest;
     private String mReferrerPackage;
     private CharSequence mTitle;
     private int mDefaultTitleResId;
-    private boolean mUseLayoutForBrowsables;
 
     // Whether or not this activity supports choosing a default handler for the intent.
-    private boolean mSupportsAlwaysUseOption;
+    @VisibleForTesting
+    protected boolean mSupportsAlwaysUseOption;
     protected ResolverDrawerLayout mResolverDrawerLayout;
     @UnsupportedAppUsage
     protected PackageManager mPm;
@@ -136,11 +140,9 @@ public class ResolverActivity extends Activity {
 
     private static final String TAG = "ResolverActivity";
     private static final boolean DEBUG = false;
-    private Runnable mPostListReadyRunnable;
+    private static final String LAST_SHOWN_TAB_KEY = "last_shown_tab_key";
 
     private boolean mRegistered;
-
-    private ColorMatrixColorFilter mSuspendedMatrixColorFilter;
 
     protected Insets mSystemWindowInsets = null;
     private Space mFooterSpacer = null;
@@ -151,8 +153,53 @@ public class ResolverActivity extends Activity {
     private static final String EXTRA_SHOW_FRAGMENT_ARGS = ":settings:show_fragment_args";
     private static final String EXTRA_FRAGMENT_ARG_KEY = ":settings:fragment_args_key";
     private static final String OPEN_LINKS_COMPONENT_KEY = "app_link_state";
+    protected static final String METRICS_CATEGORY_RESOLVER = "intent_resolver";
+    protected static final String METRICS_CATEGORY_CHOOSER = "intent_chooser";
 
-    private final PackageMonitor mPackageMonitor = createPackageMonitor();
+    /** Tracks if we should ignore future broadcasts telling us the work profile is enabled */
+    private boolean mWorkProfileHasBeenEnabled = false;
+
+    @VisibleForTesting
+    public static boolean ENABLE_TABBED_VIEW = true;
+    private static final String TAB_TAG_PERSONAL = "personal";
+    private static final String TAB_TAG_WORK = "work";
+
+    private PackageMonitor mPersonalPackageMonitor;
+    private PackageMonitor mWorkPackageMonitor;
+
+    @VisibleForTesting
+    protected AbstractMultiProfilePagerAdapter mMultiProfilePagerAdapter;
+
+    // Intent extra for connected audio devices
+    public static final String EXTRA_IS_AUDIO_CAPTURE_DEVICE = "is_audio_capture_device";
+
+    /**
+     * Integer extra to indicate which profile should be automatically selected.
+     * <p>Can only be used if there is a work profile.
+     * <p>Possible values can be either {@link #PROFILE_PERSONAL} or {@link #PROFILE_WORK}.
+     */
+    static final String EXTRA_SELECTED_PROFILE =
+            "com.android.internal.app.ResolverActivity.EXTRA_SELECTED_PROFILE";
+
+    /**
+     * {@link UserHandle} extra to indicate the user of the user that the starting intent
+     * originated from.
+     * <p>This is not necessarily the same as {@link #getUserId()} or {@link UserHandle#myUserId()},
+     * as there are edge cases when the intent resolver is launched in the other profile.
+     * For example, when we have 0 resolved apps in current profile and multiple resolved
+     * apps in the other profile, opening a link from the current profile launches the intent
+     * resolver in the other one. b/148536209 for more info.
+     */
+    static final String EXTRA_CALLING_USER =
+            "com.android.internal.app.ResolverActivity.EXTRA_CALLING_USER";
+
+    static final int PROFILE_PERSONAL = AbstractMultiProfilePagerAdapter.PROFILE_PERSONAL;
+    static final int PROFILE_WORK = AbstractMultiProfilePagerAdapter.PROFILE_WORK;
+
+    private BroadcastReceiver mWorkProfileStateReceiver;
+    private UserHandle mHeaderCreatorUser;
+
+    private UserHandle mWorkProfileUserHandle;
 
     /**
      * Get the string resource to be used as a label for the link to the resolver activity for an
@@ -232,12 +279,12 @@ public class ResolverActivity extends Activity {
         }
     }
 
-    protected PackageMonitor createPackageMonitor() {
+    protected PackageMonitor createPackageMonitor(ResolverListAdapter listAdapter) {
         return new PackageMonitor() {
             @Override
             public void onSomePackagesChanged() {
-                mAdapter.handlePackagesChanged();
-                bindProfileView();
+                listAdapter.handlePackagesChanged();
+                updateProfileViewButton();
             }
 
             @Override
@@ -294,7 +341,7 @@ public class ResolverActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState, Intent intent,
             CharSequence title, int defaultTitleRes, Intent[] initialIntents,
             List<ResolveInfo> rList, boolean supportsAlwaysUseOption) {
-        setTheme(R.style.Theme_DeviceDefault_Resolver);
+        setTheme(appliedThemeResId());
         super.onCreate(savedInstanceState);
 
         // Determine whether we should show that intent is forwarded
@@ -316,27 +363,39 @@ public class ResolverActivity extends Activity {
 
         mPm = getPackageManager();
 
-        mPackageMonitor.register(this, getMainLooper(), false);
-        mRegistered = true;
         mReferrerPackage = getReferrerPackageName();
-
-        final ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-        mIconDpi = am.getLauncherLargeIconDensity();
 
         // Add our initial intent as the first item, regardless of what else has already been added.
         mIntents.add(0, new Intent(intent));
         mTitle = title;
         mDefaultTitleResId = defaultTitleRes;
 
-        mUseLayoutForBrowsables = getTargetIntent() == null
-                ? false
-                : isHttpSchemeAndViewAction(getTargetIntent());
-
         mSupportsAlwaysUseOption = supportsAlwaysUseOption;
+        mWorkProfileUserHandle = fetchWorkProfileUserProfile();
 
-        if (configureContentView(mIntents, initialIntents, rList)) {
+        // The last argument of createResolverListAdapter is whether to do special handling
+        // of the last used choice to highlight it in the list.  We need to always
+        // turn this off when running under voice interaction, since it results in
+        // a more complicated UI that the current voice interaction flow is not able
+        // to handle. We also turn it off when the work tab is shown to simplify the UX.
+        boolean filterLastUsed = mSupportsAlwaysUseOption && !isVoiceInteraction()
+                && !shouldShowTabs();
+        mMultiProfilePagerAdapter = createMultiProfilePagerAdapter(initialIntents, rList, filterLastUsed);
+        if (configureContentView()) {
             return;
         }
+
+        mPersonalPackageMonitor = createPackageMonitor(
+                mMultiProfilePagerAdapter.getPersonalListAdapter());
+        mPersonalPackageMonitor.register(
+                this, getMainLooper(), getPersonalProfileUserHandle(), false);
+        if (shouldShowTabs()) {
+            mWorkPackageMonitor = createPackageMonitor(
+                    mMultiProfilePagerAdapter.getWorkListAdapter());
+            mWorkPackageMonitor.register(this, getMainLooper(), getWorkProfileUserHandle(), false);
+        }
+
+        mRegistered = true;
 
         final ResolverDrawerLayout rdl = findViewById(R.id.contentPanel);
         if (rdl != null) {
@@ -346,7 +405,11 @@ public class ResolverActivity extends Activity {
                     finish();
                 }
             });
-            if (isVoiceInteraction()) {
+
+            boolean hasTouchScreen = getPackageManager()
+                    .hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN);
+
+            if (isVoiceInteraction() || !hasTouchScreen) {
                 rdl.setCollapsed(false);
             }
 
@@ -360,21 +423,163 @@ public class ResolverActivity extends Activity {
         mProfileView = findViewById(R.id.profile_button);
         if (mProfileView != null) {
             mProfileView.setOnClickListener(this::onProfileClick);
-            bindProfileView();
+            updateProfileViewButton();
         }
 
-        initSuspendedColorMatrix();
-
         final Set<String> categories = intent.getCategories();
-        MetricsLogger.action(this, mAdapter.hasFilteredItem()
+        MetricsLogger.action(this, mMultiProfilePagerAdapter.getActiveListAdapter().hasFilteredItem()
                 ? MetricsProto.MetricsEvent.ACTION_SHOW_APP_DISAMBIG_APP_FEATURED
                 : MetricsProto.MetricsEvent.ACTION_SHOW_APP_DISAMBIG_NONE_FEATURED,
                 intent.getAction() + ":" + intent.getType() + ":"
                         + (categories != null ? Arrays.toString(categories.toArray()) : ""));
     }
 
+    private boolean isIntentPicker() {
+        return getClass().equals(ResolverActivity.class);
+    }
+
+    protected AbstractMultiProfilePagerAdapter createMultiProfilePagerAdapter(
+            Intent[] initialIntents,
+            List<ResolveInfo> rList,
+            boolean filterLastUsed) {
+        AbstractMultiProfilePagerAdapter resolverMultiProfilePagerAdapter = null;
+        if (shouldShowTabs()) {
+            resolverMultiProfilePagerAdapter =
+                    createResolverMultiProfilePagerAdapterForTwoProfiles(
+                            initialIntents, rList, filterLastUsed);
+        } else {
+            resolverMultiProfilePagerAdapter = createResolverMultiProfilePagerAdapterForOneProfile(
+                    initialIntents, rList, filterLastUsed);
+        }
+        return resolverMultiProfilePagerAdapter;
+    }
+
+    private ResolverMultiProfilePagerAdapter createResolverMultiProfilePagerAdapterForOneProfile(
+            Intent[] initialIntents,
+            List<ResolveInfo> rList, boolean filterLastUsed) {
+        ResolverListAdapter adapter = createResolverListAdapter(
+                /* context */ this,
+                /* payloadIntents */ mIntents,
+                initialIntents,
+                rList,
+                filterLastUsed,
+                /* userHandle */ UserHandle.of(UserHandle.myUserId()));
+        return new ResolverMultiProfilePagerAdapter(
+                /* context */ this,
+                adapter,
+                getPersonalProfileUserHandle(),
+                /* workProfileUserHandle= */ null);
+    }
+
+    private ResolverMultiProfilePagerAdapter createResolverMultiProfilePagerAdapterForTwoProfiles(
+            Intent[] initialIntents,
+            List<ResolveInfo> rList,
+            boolean filterLastUsed) {
+        // In the edge case when we have 0 apps in the current profile and >1 apps in the other,
+        // the intent resolver is started in the other profile. Since this is the only case when
+        // this happens, we check for it here and set the current profile's tab.
+        int selectedProfile = getCurrentProfile();
+        UserHandle intentUser = getIntent().hasExtra(EXTRA_CALLING_USER)
+                ? getIntent().getParcelableExtra(EXTRA_CALLING_USER)
+                : getUser();
+        if (!getUser().equals(intentUser)) {
+            if (getPersonalProfileUserHandle().equals(intentUser)) {
+                selectedProfile = PROFILE_PERSONAL;
+            } else if (getWorkProfileUserHandle().equals(intentUser)) {
+                selectedProfile = PROFILE_WORK;
+            }
+        } else {
+            int selectedProfileExtra = getSelectedProfileExtra();
+            if (selectedProfileExtra != -1) {
+                selectedProfile = selectedProfileExtra;
+            }
+        }
+        // We only show the default app for the profile of the current user. The filterLastUsed
+        // flag determines whether to show a default app and that app is not shown in the
+        // resolver list. So filterLastUsed should be false for the other profile.
+        ResolverListAdapter personalAdapter = createResolverListAdapter(
+                /* context */ this,
+                /* payloadIntents */ mIntents,
+                selectedProfile == PROFILE_PERSONAL ? initialIntents : null,
+                rList,
+                (filterLastUsed && UserHandle.myUserId()
+                        == getPersonalProfileUserHandle().getIdentifier()),
+                /* userHandle */ getPersonalProfileUserHandle());
+        UserHandle workProfileUserHandle = getWorkProfileUserHandle();
+        ResolverListAdapter workAdapter = createResolverListAdapter(
+                /* context */ this,
+                /* payloadIntents */ mIntents,
+                selectedProfile == PROFILE_WORK ? initialIntents : null,
+                rList,
+                (filterLastUsed && UserHandle.myUserId()
+                        == workProfileUserHandle.getIdentifier()),
+                /* userHandle */ workProfileUserHandle);
+        return new ResolverMultiProfilePagerAdapter(
+                /* context */ this,
+                personalAdapter,
+                workAdapter,
+                selectedProfile,
+                getPersonalProfileUserHandle(),
+                getWorkProfileUserHandle(),
+                /* shouldShowNoCrossProfileIntentsEmptyState= */ getUser().equals(intentUser));
+    }
+
+    protected int appliedThemeResId() {
+        return R.style.Theme_DeviceDefault_Resolver;
+    }
+
+    /**
+     * Returns {@link #PROFILE_PERSONAL} or {@link #PROFILE_WORK} if the {@link
+     * #EXTRA_SELECTED_PROFILE} extra was supplied, or {@code -1} if no extra was supplied.
+     * @throws IllegalArgumentException if the value passed to the {@link #EXTRA_SELECTED_PROFILE}
+     * extra is not {@link #PROFILE_PERSONAL} or {@link #PROFILE_WORK}
+     */
+    int getSelectedProfileExtra() {
+        int selectedProfile = -1;
+        if (getIntent().hasExtra(EXTRA_SELECTED_PROFILE)) {
+            selectedProfile = getIntent().getIntExtra(EXTRA_SELECTED_PROFILE, /* defValue = */ -1);
+            if (selectedProfile != PROFILE_PERSONAL && selectedProfile != PROFILE_WORK) {
+                throw new IllegalArgumentException(EXTRA_SELECTED_PROFILE + " has invalid value "
+                        + selectedProfile + ". Must be either ResolverActivity.PROFILE_PERSONAL or "
+                        + "ResolverActivity.PROFILE_WORK.");
+            }
+        }
+        return selectedProfile;
+    }
+
+    protected @Profile int getCurrentProfile() {
+        return (UserHandle.myUserId() == UserHandle.USER_SYSTEM ? PROFILE_PERSONAL : PROFILE_WORK);
+    }
+
+    protected UserHandle getPersonalProfileUserHandle() {
+        return UserHandle.of(ActivityManager.getCurrentUser());
+    }
+    protected @Nullable UserHandle getWorkProfileUserHandle() {
+        return mWorkProfileUserHandle;
+    }
+
+    protected @Nullable UserHandle fetchWorkProfileUserProfile() {
+        mWorkProfileUserHandle = null;
+        UserManager userManager = getSystemService(UserManager.class);
+        for (final UserInfo userInfo : userManager.getProfiles(ActivityManager.getCurrentUser())) {
+            if (userInfo.isManagedProfile()) {
+                mWorkProfileUserHandle = userInfo.getUserHandle();
+            }
+        }
+        return mWorkProfileUserHandle;
+    }
+
+    private boolean hasWorkProfile() {
+        return getWorkProfileUserHandle() != null;
+    }
+
+    protected boolean shouldShowTabs() {
+        return hasWorkProfile() && ENABLE_TABBED_VIEW;
+    }
+
     protected void onProfileClick(View v) {
-        final DisplayResolveInfo dri = mAdapter.getOtherProfile();
+        final DisplayResolveInfo dri =
+                mMultiProfilePagerAdapter.getActiveListAdapter().getOtherProfile();
         if (dri == null) {
             return;
         }
@@ -400,6 +605,19 @@ public class ResolverActivity extends Activity {
         return false;
     }
 
+    protected void applyFooterView(int height) {
+        if (mFooterSpacer == null) {
+            mFooterSpacer = new Space(getApplicationContext());
+        } else {
+            ((ResolverMultiProfilePagerAdapter) mMultiProfilePagerAdapter)
+                .getActiveAdapterView().removeFooterView(mFooterSpacer);
+        }
+        mFooterSpacer.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT,
+                                                                   mSystemWindowInsets.bottom));
+        ((ResolverMultiProfilePagerAdapter) mMultiProfilePagerAdapter)
+            .getActiveAdapterView().addFooterView(mFooterSpacer);
+    }
+
     protected WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
         mSystemWindowInsets = insets.getSystemWindowInsets();
 
@@ -410,21 +628,7 @@ public class ResolverActivity extends Activity {
 
         // Need extra padding so the list can fully scroll up
         if (shouldAddFooterView()) {
-            if (mFooterSpacer == null) {
-                mFooterSpacer = new Space(getApplicationContext());
-            } else {
-                ((ListView) mAdapterView).removeFooterView(mFooterSpacer);
-            }
-            mFooterSpacer.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT,
-                                                                       mSystemWindowInsets.bottom));
-            ((ListView) mAdapterView).addFooterView(mFooterSpacer);
-        }
-
-        View emptyView = findViewById(R.id.empty);
-        if (emptyView != null) {
-            emptyView.setPadding(0, 0, 0, mSystemWindowInsets.bottom
-                                 + getResources().getDimensionPixelSize(
-                                         R.dimen.chooser_edge_margin_normal) * 2);
+            applyFooterView(mSystemWindowInsets.bottom);
         }
 
         return insets.consumeSystemWindowInsets();
@@ -433,7 +637,10 @@ public class ResolverActivity extends Activity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mAdapter.handlePackagesChanged();
+        mMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
+        if (isIntentPicker() && shouldShowTabs() && !useLayoutWithDefault()) {
+            updateIntentPickerPaddings();
+        }
 
         if (mSystemWindowInsets != null) {
             mResolverDrawerLayout.setPadding(mSystemWindowInsets.left, mSystemWindowInsets.top,
@@ -441,34 +648,33 @@ public class ResolverActivity extends Activity {
         }
     }
 
-    private void initSuspendedColorMatrix() {
-        int grayValue = 127;
-        float scale = 0.5f; // half bright
-
-        ColorMatrix tempBrightnessMatrix = new ColorMatrix();
-        float[] mat = tempBrightnessMatrix.getArray();
-        mat[0] = scale;
-        mat[6] = scale;
-        mat[12] = scale;
-        mat[4] = grayValue;
-        mat[9] = grayValue;
-        mat[14] = grayValue;
-
-        ColorMatrix matrix = new ColorMatrix();
-        matrix.setSaturation(0.0f);
-        matrix.preConcat(tempBrightnessMatrix);
-        mSuspendedMatrixColorFilter = new ColorMatrixColorFilter(matrix);
+    private void updateIntentPickerPaddings() {
+        View titleCont = findViewById(R.id.title_container);
+        titleCont.setPadding(
+                titleCont.getPaddingLeft(),
+                titleCont.getPaddingTop(),
+                titleCont.getPaddingRight(),
+                getResources().getDimensionPixelSize(R.dimen.resolver_title_padding_bottom));
+        View buttonBar = findViewById(R.id.button_bar);
+        buttonBar.setPadding(
+                buttonBar.getPaddingLeft(),
+                getResources().getDimensionPixelSize(R.dimen.resolver_button_bar_spacing),
+                buttonBar.getPaddingRight(),
+                getResources().getDimensionPixelSize(R.dimen.resolver_button_bar_spacing));
+        mMultiProfilePagerAdapter.updateAfterConfigChange();
     }
 
+    @Override // ResolverListCommunicator
     public void sendVoiceChoicesIfNeeded() {
         if (!isVoiceInteraction()) {
             // Clearly not needed.
             return;
         }
 
-        final Option[] options = new Option[mAdapter.getCount()];
+        int count = mMultiProfilePagerAdapter.getActiveListAdapter().getCount();
+        final Option[] options = new Option[count];
         for (int i = 0, N = options.length; i < N; i++) {
-            TargetInfo target = mAdapter.getItem(i);
+            TargetInfo target = mMultiProfilePagerAdapter.getActiveListAdapter().getItem(i);
             if (target == null) {
                 // If this occurs, a new set of targets is being loaded. Let that complete,
                 // and have the next call to send voice choices proceed instead.
@@ -494,6 +700,7 @@ public class ResolverActivity extends Activity {
         }
     }
 
+    @Override // SelectableTargetInfoCommunicator ResolverListCommunicator
     public Intent getTargetIntent() {
         return mIntents.isEmpty() ? null : mIntents.get(0);
     }
@@ -510,13 +717,15 @@ public class ResolverActivity extends Activity {
         return R.layout.resolver_list;
     }
 
-    protected void bindProfileView() {
+    @Override // ResolverListCommunicator
+    public void updateProfileViewButton() {
         if (mProfileView == null) {
             return;
         }
 
-        final DisplayResolveInfo dri = mAdapter.getOtherProfile();
-        if (dri != null) {
+        final DisplayResolveInfo dri =
+                mMultiProfilePagerAdapter.getActiveListAdapter().getOtherProfile();
+        if (dri != null && !shouldShowTabs()) {
             mProfileView.setVisibility(View.VISIBLE);
             View text = mProfileView.findViewById(R.id.profile_button);
             if (!(text instanceof TextView)) {
@@ -567,30 +776,14 @@ public class ResolverActivity extends Activity {
 
         // While there may already be a filtered item, we can only use it in the title if the list
         // is already sorted and all information relevant to it is already in the list.
-        final boolean named = mAdapter.getFilteredPosition() >= 0;
+        final boolean named =
+                mMultiProfilePagerAdapter.getActiveListAdapter().getFilteredPosition() >= 0;
         if (title == ActionTitle.DEFAULT && defaultTitleRes != 0) {
             return getString(defaultTitleRes);
-        } else if (isHttpSchemeAndViewAction(intent)) {
-            // If the Intent's scheme is http(s) then we need to warn the user that
-            // they're giving access for the activity to open URLs from this specific host
-            String dialogTitle = null;
-            if (named && !mUseLayoutForBrowsables) {
-                dialogTitle = getString(ActionTitle.BROWSABLE_APP_TITLE_RES,
-                        mAdapter.getFilteredItem().getDisplayLabel());
-            } else if (named && mUseLayoutForBrowsables) {
-                dialogTitle = getString(ActionTitle.BROWSABLE_HOST_APP_TITLE_RES,
-                        intent.getData().getHost(),
-                        mAdapter.getFilteredItem().getDisplayLabel());
-            } else if (mAdapter.areAllTargetsBrowsers()) {
-                dialogTitle = getString(ActionTitle.BROWSABLE_TITLE_RES);
-            } else {
-                dialogTitle = getString(ActionTitle.BROWSABLE_HOST_TITLE_RES,
-                        intent.getData().getHost());
-            }
-            return dialogTitle;
         } else {
             return named
-                    ? getString(title.namedTitleRes, mAdapter.getFilteredItem().getDisplayLabel())
+                    ? getString(title.namedTitleRes, mMultiProfilePagerAdapter
+                            .getActiveListAdapter().getFilteredItem().getDisplayLabel())
                     : getString(title.titleRes);
         }
     }
@@ -601,203 +794,66 @@ public class ResolverActivity extends Activity {
         }
     }
 
-
-    /**
-     * Loads the icon and label for the provided ApplicationInfo. Defaults to using the application
-     * icon and label over any IntentFilter or Activity icon to increase user understanding, with an
-     * exception for applications that hold the right permission. Always attempts to use available
-     * resources over PackageManager loading mechanisms so badging can be done by iconloader. Uses
-     * Strings to strip creative formatting.
-     */
-    private abstract static class TargetPresentationGetter {
-        @Nullable abstract Drawable getIconSubstituteInternal();
-        @Nullable abstract String getAppSubLabelInternal();
-
-        private Context mCtx;
-        private final int mIconDpi;
-        private final boolean mHasSubstitutePermission;
-        private final ApplicationInfo mAi;
-
-        protected PackageManager mPm;
-
-        TargetPresentationGetter(Context ctx, int iconDpi, ApplicationInfo ai) {
-            mCtx = ctx;
-            mPm = ctx.getPackageManager();
-            mAi = ai;
-            mIconDpi = iconDpi;
-            mHasSubstitutePermission = PackageManager.PERMISSION_GRANTED == mPm.checkPermission(
-                    android.Manifest.permission.SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON,
-                    mAi.packageName);
-        }
-
-        public Drawable getIcon(UserHandle userHandle) {
-            return new BitmapDrawable(mCtx.getResources(), getIconBitmap(userHandle));
-        }
-
-        public Bitmap getIconBitmap(UserHandle userHandle) {
-            Drawable dr = null;
-            if (mHasSubstitutePermission) {
-                dr = getIconSubstituteInternal();
-            }
-
-            if (dr == null) {
-                try {
-                    if (mAi.icon != 0) {
-                        dr = loadIconFromResource(mPm.getResourcesForApplication(mAi), mAi.icon);
-                    }
-                } catch (NameNotFoundException ignore) {
-                }
-            }
-
-            // Fall back to ApplicationInfo#loadIcon if nothing has been loaded
-            if (dr == null) {
-                dr = mAi.loadIcon(mPm);
-            }
-
-            SimpleIconFactory sif = SimpleIconFactory.obtain(mCtx);
-            Bitmap icon = sif.createUserBadgedIconBitmap(dr, userHandle);
-            sif.recycle();
-
-            return icon;
-        }
-
-        public String getLabel() {
-            String label = null;
-            // Apps with the substitute permission will always show the sublabel as their label
-            if (mHasSubstitutePermission) {
-                label = getAppSubLabelInternal();
-            }
-
-            if (label == null) {
-                label = (String) mAi.loadLabel(mPm);
-            }
-
-            return label;
-        }
-
-        public String getSubLabel() {
-            // Apps with the substitute permission will never have a sublabel
-            if (mHasSubstitutePermission) return null;
-            return getAppSubLabelInternal();
-        }
-
-        protected String loadLabelFromResource(Resources res, int resId) {
-            return res.getString(resId);
-        }
-
-        @Nullable
-        protected Drawable loadIconFromResource(Resources res, int resId) {
-            return res.getDrawableForDensity(resId, mIconDpi);
-        }
-
-    }
-
-    /**
-     * Loads the icon and label for the provided ResolveInfo.
-     */
-    @VisibleForTesting
-    public static class ResolveInfoPresentationGetter extends ActivityInfoPresentationGetter {
-        private final ResolveInfo mRi;
-        public ResolveInfoPresentationGetter(Context ctx, int iconDpi, ResolveInfo ri) {
-            super(ctx, iconDpi, ri.activityInfo);
-            mRi = ri;
-        }
-
-        @Override
-        Drawable getIconSubstituteInternal() {
-            Drawable dr = null;
-            try {
-                // Do not use ResolveInfo#getIconResource() as it defaults to the app
-                if (mRi.resolvePackageName != null && mRi.icon != 0) {
-                    dr = loadIconFromResource(
-                            mPm.getResourcesForApplication(mRi.resolvePackageName), mRi.icon);
-                }
-            } catch (NameNotFoundException e) {
-                Log.e(TAG, "SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON permission granted but "
-                        + "couldn't find resources for package", e);
-            }
-
-            // Fall back to ActivityInfo if no icon is found via ResolveInfo
-            if (dr == null) dr = super.getIconSubstituteInternal();
-
-            return dr;
-        }
-
-        @Override
-        String getAppSubLabelInternal() {
-            // Will default to app name if no intent filter or activity label set, make sure to
-            // check if subLabel matches label before final display
-            return (String) mRi.loadLabel(mPm);
-        }
-    }
-
-    ResolveInfoPresentationGetter makePresentationGetter(ResolveInfo ri) {
-        return new ResolveInfoPresentationGetter(this, mIconDpi, ri);
-    }
-
-    /**
-     * Loads the icon and label for the provided ActivityInfo.
-     */
-    @VisibleForTesting
-    public static class ActivityInfoPresentationGetter extends TargetPresentationGetter {
-        private final ActivityInfo mActivityInfo;
-        public ActivityInfoPresentationGetter(Context ctx, int iconDpi,
-                ActivityInfo activityInfo) {
-            super(ctx, iconDpi, activityInfo.applicationInfo);
-            mActivityInfo = activityInfo;
-        }
-
-        @Override
-        Drawable getIconSubstituteInternal() {
-            Drawable dr = null;
-            try {
-                // Do not use ActivityInfo#getIconResource() as it defaults to the app
-                if (mActivityInfo.icon != 0) {
-                    dr = loadIconFromResource(
-                            mPm.getResourcesForApplication(mActivityInfo.applicationInfo),
-                            mActivityInfo.icon);
-                }
-            } catch (NameNotFoundException e) {
-                Log.e(TAG, "SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON permission granted but "
-                        + "couldn't find resources for package", e);
-            }
-
-            return dr;
-        }
-
-        @Override
-        String getAppSubLabelInternal() {
-            // Will default to app name if no activity label set, make sure to check if subLabel
-            // matches label before final display
-            return (String) mActivityInfo.loadLabel(mPm);
-        }
-    }
-
-    protected ActivityInfoPresentationGetter makePresentationGetter(ActivityInfo ai) {
-        return new ActivityInfoPresentationGetter(this, mIconDpi, ai);
-    }
-
-    Drawable loadIconForResolveInfo(ResolveInfo ri) {
-        // Load icons based on the current process. If in work profile icons should be badged.
-        return makePresentationGetter(ri).getIcon(Process.myUserHandle());
-    }
-
     @Override
     protected void onRestart() {
         super.onRestart();
         if (!mRegistered) {
-            mPackageMonitor.register(this, getMainLooper(), false);
+            mPersonalPackageMonitor.register(this, getMainLooper(),
+                    getPersonalProfileUserHandle(), false);
+            if (shouldShowTabs()) {
+                if (mWorkPackageMonitor == null) {
+                    mWorkPackageMonitor = createPackageMonitor(
+                            mMultiProfilePagerAdapter.getWorkListAdapter());
+                }
+                mWorkPackageMonitor.register(this, getMainLooper(),
+                        getWorkProfileUserHandle(), false);
+            }
             mRegistered = true;
         }
-        mAdapter.handlePackagesChanged();
-        bindProfileView();
+        if (shouldShowTabs() && mMultiProfilePagerAdapter.isWaitingToEnableWorkProfile()) {
+            if (mMultiProfilePagerAdapter.isQuietModeEnabled(getWorkProfileUserHandle())) {
+                mMultiProfilePagerAdapter.markWorkProfileEnabledBroadcastReceived();
+            }
+        }
+        mMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
+        updateProfileViewButton();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (shouldShowTabs()) {
+            mWorkProfileStateReceiver = createWorkProfileStateReceiver();
+            registerWorkProfileStateReceiver();
+
+            mWorkProfileHasBeenEnabled = isWorkProfileEnabled();
+        }
+    }
+
+    private boolean isWorkProfileEnabled() {
+        UserHandle workUserHandle = getWorkProfileUserHandle();
+        UserManager userManager = getSystemService(UserManager.class);
+
+        return !userManager.isQuietModeEnabled(workUserHandle)
+                && userManager.isUserUnlocked(workUserHandle);
+    }
+
+    private void registerWorkProfileStateReceiver() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_USER_UNLOCKED);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
+        registerReceiverAsUser(mWorkProfileStateReceiver, UserHandle.ALL, filter, null, null);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         if (mRegistered) {
-            mPackageMonitor.unregister();
+            mPersonalPackageMonitor.unregister();
+            if (mWorkPackageMonitor != null) {
+                mWorkPackageMonitor.unregister();
+            }
             mRegistered = false;
         }
         final Intent intent = getIntent();
@@ -814,6 +870,10 @@ public class ResolverActivity extends Activity {
                 finish();
             }
         }
+        if (mWorkPackageMonitor != null) {
+            unregisterReceiver(mWorkProfileStateReceiver);
+            mWorkPackageMonitor = null;
+        }
     }
 
     @Override
@@ -822,25 +882,25 @@ public class ResolverActivity extends Activity {
         if (!isChangingConfigurations() && mPickOptionRequest != null) {
             mPickOptionRequest.cancel();
         }
-        if (mPostListReadyRunnable != null) {
-            getMainThreadHandler().removeCallbacks(mPostListReadyRunnable);
-            mPostListReadyRunnable = null;
+        if (mMultiProfilePagerAdapter.getActiveListAdapter() != null) {
+            mMultiProfilePagerAdapter.getActiveListAdapter().onDestroy();
         }
-        if (mAdapter != null && mAdapter.mResolverListController != null) {
-            mAdapter.mResolverListController.destroy();
-        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        ViewPager viewPager = findViewById(R.id.profile_pager);
+        outState.putInt(LAST_SHOWN_TAB_KEY, viewPager.getCurrentItem());
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         resetButtonBar();
-    }
-
-    private boolean isHttpSchemeAndViewAction(Intent intent) {
-        return (IntentFilter.SCHEME_HTTP.equals(intent.getScheme())
-                || IntentFilter.SCHEME_HTTPS.equals(intent.getScheme()))
-                && Intent.ACTION_VIEW.equals(intent.getAction());
+        ViewPager viewPager = findViewById(R.id.profile_pager);
+        viewPager.setCurrentItem(savedInstanceState.getInt(LAST_SHOWN_TAB_KEY));
+        mMultiProfilePagerAdapter.clearInactiveProfileCache();
     }
 
     private boolean hasManagedProfile() {
@@ -874,9 +934,16 @@ public class ResolverActivity extends Activity {
 
     private void setAlwaysButtonEnabled(boolean hasValidSelection, int checkedPos,
             boolean filtered) {
+        if (!mMultiProfilePagerAdapter.getCurrentUserHandle().equals(getUser())) {
+            // Never allow the inactive profile to always open an app.
+            mAlwaysButton.setEnabled(false);
+            return;
+        }
         boolean enabled = false;
+        ResolveInfo ri = null;
         if (hasValidSelection) {
-            ResolveInfo ri = mAdapter.resolveInfoForPosition(checkedPos, filtered);
+            ri = mMultiProfilePagerAdapter.getActiveListAdapter()
+                    .resolveInfoForPosition(checkedPos, filtered);
             if (ri == null) {
                 Log.e(TAG, "Invalid position supplied to setAlwaysButtonEnabled");
                 return;
@@ -886,12 +953,25 @@ public class ResolverActivity extends Activity {
             } else {
                 enabled = true;
             }
-            if (mUseLayoutForBrowsables && !ri.handleAllWebDataURI) {
-                mAlwaysButton.setText(getResources()
-                        .getString(R.string.activity_resolver_set_always));
-            } else {
-                mAlwaysButton.setText(getResources()
-                        .getString(R.string.activity_resolver_use_always));
+
+            mAlwaysButton.setText(getResources()
+                    .getString(R.string.activity_resolver_use_always));
+        }
+
+        if (ri != null) {
+            ActivityInfo activityInfo = ri.activityInfo;
+
+            boolean hasRecordPermission =
+                    mPm.checkPermission(android.Manifest.permission.RECORD_AUDIO,
+                            activityInfo.packageName)
+                            == android.content.pm.PackageManager.PERMISSION_GRANTED;
+
+            if (!hasRecordPermission) {
+                // OK, we know the record permission, is this a capture device
+                boolean hasAudioCapture =
+                        getIntent().getBooleanExtra(
+                                ResolverActivity.EXTRA_IS_AUDIO_CAPTURE_DEVICE, false);
+                enabled = !hasAudioCapture;
             }
         }
         mAlwaysButton.setEnabled(enabled);
@@ -899,42 +979,21 @@ public class ResolverActivity extends Activity {
 
     public void onButtonClick(View v) {
         final int id = v.getId();
-        int which = mAdapter.hasFilteredItem()
-                ? mAdapter.getFilteredPosition()
-                : mAdapterView.getCheckedItemPosition();
-        boolean hasIndexBeenFiltered = !mAdapter.hasFilteredItem();
-        ResolveInfo ri = mAdapter.resolveInfoForPosition(which, hasIndexBeenFiltered);
-        if (mUseLayoutForBrowsables
-                && !ri.handleAllWebDataURI && id == R.id.button_always) {
-            showSettingsForSelected(ri);
-        } else {
-            startSelected(which, id == R.id.button_always, hasIndexBeenFiltered);
-        }
-    }
-
-    private void showSettingsForSelected(ResolveInfo ri) {
-        Intent intent = new Intent();
-
-        final String packageName = ri.activityInfo.packageName;
-        Bundle showFragmentArgs = new Bundle();
-        showFragmentArgs.putString(EXTRA_FRAGMENT_ARG_KEY, OPEN_LINKS_COMPONENT_KEY);
-        showFragmentArgs.putString("package", packageName);
-
-        // For regular apps, we open the Open by Default page
-        intent.setAction(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS)
-                .setData(Uri.fromParts("package", packageName, null))
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
-                .putExtra(EXTRA_FRAGMENT_ARG_KEY, OPEN_LINKS_COMPONENT_KEY)
-                .putExtra(EXTRA_SHOW_FRAGMENT_ARGS, showFragmentArgs);
-
-        startActivity(intent);
+        ListView listView = (ListView) mMultiProfilePagerAdapter.getActiveAdapterView();
+        ResolverListAdapter currentListAdapter = mMultiProfilePagerAdapter.getActiveListAdapter();
+        int which = currentListAdapter.hasFilteredItem()
+                ? currentListAdapter.getFilteredPosition()
+                : listView.getCheckedItemPosition();
+        boolean hasIndexBeenFiltered = !currentListAdapter.hasFilteredItem();
+        startSelected(which, id == R.id.button_always, hasIndexBeenFiltered);
     }
 
     public void startSelected(int which, boolean always, boolean hasIndexBeenFiltered) {
         if (isFinishing()) {
             return;
         }
-        ResolveInfo ri = mAdapter.resolveInfoForPosition(which, hasIndexBeenFiltered);
+        ResolveInfo ri = mMultiProfilePagerAdapter.getActiveListAdapter()
+                .resolveInfoForPosition(which, hasIndexBeenFiltered);
         if (mResolvingHome && hasManagedProfile() && !supportsManagedProfiles(ri)) {
             Toast.makeText(this, String.format(getResources().getString(
                     com.android.internal.R.string.activity_resolver_work_profiles_support),
@@ -943,7 +1002,8 @@ public class ResolverActivity extends Activity {
             return;
         }
 
-        TargetInfo target = mAdapter.targetInfoForPosition(which, hasIndexBeenFiltered);
+        TargetInfo target = mMultiProfilePagerAdapter.getActiveListAdapter()
+                .targetInfoForPosition(which, hasIndexBeenFiltered);
         if (target == null) {
             return;
         }
@@ -958,7 +1018,8 @@ public class ResolverActivity extends Activity {
                 MetricsLogger.action(
                         this, MetricsProto.MetricsEvent.ACTION_APP_DISAMBIG_TAP);
             }
-            MetricsLogger.action(this, mAdapter.hasFilteredItem()
+            MetricsLogger.action(this,
+                    mMultiProfilePagerAdapter.getActiveListAdapter().hasFilteredItem()
                             ? MetricsProto.MetricsEvent.ACTION_HIDE_APP_DISAMBIG_APP_FEATURED
                             : MetricsProto.MetricsEvent.ACTION_HIDE_APP_DISAMBIG_NONE_FEATURED);
             finish();
@@ -968,16 +1029,59 @@ public class ResolverActivity extends Activity {
     /**
      * Replace me in subclasses!
      */
+    @Override // ResolverListCommunicator
     public Intent getReplacementIntent(ActivityInfo aInfo, Intent defIntent) {
         return defIntent;
+    }
+
+    @Override // ResolverListCommunicator
+    public final void onPostListReady(ResolverListAdapter listAdapter, boolean doPostProcessing,
+            boolean rebuildCompleted) {
+        if (isAutolaunching()) {
+            return;
+        }
+        if (isIntentPicker()) {
+            ((ResolverMultiProfilePagerAdapter) mMultiProfilePagerAdapter)
+                    .setUseLayoutWithDefault(useLayoutWithDefault());
+        }
+        if (mMultiProfilePagerAdapter.shouldShowEmptyStateScreen(listAdapter)) {
+            mMultiProfilePagerAdapter.showEmptyResolverListEmptyState(listAdapter);
+        } else {
+            mMultiProfilePagerAdapter.showListView(listAdapter);
+        }
+        // showEmptyResolverListEmptyState can mark the tab as loaded,
+        // which is a precondition for auto launching
+        if (rebuildCompleted && maybeAutolaunchActivity()) {
+            return;
+        }
+        if (doPostProcessing) {
+            maybeCreateHeader(listAdapter);
+            resetButtonBar();
+            onListRebuilt(listAdapter);
+        }
+    }
+
+    protected void onListRebuilt(ResolverListAdapter listAdapter) {
+        final ItemClickListener listener = new ItemClickListener();
+        setupAdapterListView((ListView) mMultiProfilePagerAdapter.getActiveAdapterView(), listener);
+        if (shouldShowTabs() && isIntentPicker()) {
+            final ResolverDrawerLayout rdl = findViewById(R.id.contentPanel);
+            if (rdl != null) {
+                rdl.setMaxCollapsedHeight(getResources()
+                        .getDimensionPixelSize(useLayoutWithDefault()
+                                ? R.dimen.resolver_max_collapsed_height_with_default_with_tabs
+                                : R.dimen.resolver_max_collapsed_height_with_tabs));
+            }
+        }
     }
 
     protected boolean onTargetSelected(TargetInfo target, boolean alwaysCheck) {
         final ResolveInfo ri = target.getResolveInfo();
         final Intent intent = target != null ? target.getResolvedIntent() : null;
 
-        if (intent != null && (mSupportsAlwaysUseOption || mAdapter.hasFilteredItem())
-                && mAdapter.mUnfilteredResolveList != null) {
+        if (intent != null && (mSupportsAlwaysUseOption
+                || mMultiProfilePagerAdapter.getActiveListAdapter().hasFilteredItem())
+                && mMultiProfilePagerAdapter.getActiveListAdapter().getUnfilteredResolveList() != null) {
             // Build a reasonable intent filter, based on what matched.
             IntentFilter filter = new IntentFilter();
             Intent filterIntent;
@@ -1062,13 +1166,14 @@ public class ResolverActivity extends Activity {
             }
 
             if (filter != null) {
-                final int N = mAdapter.mUnfilteredResolveList.size();
+                final int N = mMultiProfilePagerAdapter.getActiveListAdapter()
+                        .getUnfilteredResolveList().size();
                 ComponentName[] set;
                 // If we don't add back in the component for forwarding the intent to a managed
                 // profile, the preferred activity may not be updated correctly (as the set of
                 // components we tell it we knew about will have changed).
-                final boolean needToAddBackProfileForwardingComponent
-                        = mAdapter.mOtherProfile != null;
+                final boolean needToAddBackProfileForwardingComponent =
+                        mMultiProfilePagerAdapter.getActiveListAdapter().getOtherProfile() != null;
                 if (!needToAddBackProfileForwardingComponent) {
                     set = new ComponentName[N];
                 } else {
@@ -1077,15 +1182,18 @@ public class ResolverActivity extends Activity {
 
                 int bestMatch = 0;
                 for (int i=0; i<N; i++) {
-                    ResolveInfo r = mAdapter.mUnfilteredResolveList.get(i).getResolveInfoAt(0);
+                    ResolveInfo r = mMultiProfilePagerAdapter.getActiveListAdapter()
+                            .getUnfilteredResolveList().get(i).getResolveInfoAt(0);
                     set[i] = new ComponentName(r.activityInfo.packageName,
                             r.activityInfo.name);
                     if (r.match > bestMatch) bestMatch = r.match;
                 }
 
                 if (needToAddBackProfileForwardingComponent) {
-                    set[N] = mAdapter.mOtherProfile.getResolvedComponentName();
-                    final int otherProfileMatch = mAdapter.mOtherProfile.getResolveInfo().match;
+                    set[N] = mMultiProfilePagerAdapter.getActiveListAdapter()
+                            .getOtherProfile().getResolvedComponentName();
+                    final int otherProfileMatch = mMultiProfilePagerAdapter.getActiveListAdapter()
+                            .getOtherProfile().getResolveInfo().match;
                     if (otherProfileMatch > bestMatch) bestMatch = otherProfileMatch;
                 }
 
@@ -1124,7 +1232,8 @@ public class ResolverActivity extends Activity {
                     }
                 } else {
                     try {
-                        mAdapter.mResolverListController.setLastChosen(intent, filter, bestMatch);
+                        mMultiProfilePagerAdapter.getActiveListAdapter()
+                                .mResolverListController.setLastChosen(intent, filter, bestMatch);
                     } catch (RemoteException re) {
                         Log.d(TAG, "Error calling setLastChosenActivity\n" + re);
                     }
@@ -1133,6 +1242,9 @@ public class ResolverActivity extends Activity {
         }
 
         if (target != null) {
+            if (intent != null && isLaunchingTargetInOtherProfile()) {
+                prepareIntentForCrossProfileLaunch(intent);
+            }
             safelyStartActivity(target);
 
             // Rely on the ActivityManager to pop up a dialog regarding app suspension
@@ -1145,6 +1257,16 @@ public class ResolverActivity extends Activity {
         return true;
     }
 
+    private void prepareIntentForCrossProfileLaunch(Intent intent) {
+        intent.fixUris(UserHandle.myUserId());
+    }
+
+    private boolean isLaunchingTargetInOtherProfile() {
+        return mMultiProfilePagerAdapter.getCurrentUserHandle().getIdentifier()
+                != UserHandle.myUserId();
+    }
+
+    @VisibleForTesting
     public void safelyStartActivity(TargetInfo cti) {
         // We're dispatching intents that might be coming from legacy apps, so
         // don't kill ourselves.
@@ -1157,20 +1279,34 @@ public class ResolverActivity extends Activity {
     }
 
     private void safelyStartActivityInternal(TargetInfo cti) {
+        // If the target is suspended, the activity will not be successfully launched.
+        // Do not unregister from package manager updates in this case
+        if (!cti.isSuspended()) {
+            if (mPersonalPackageMonitor != null) {
+                mPersonalPackageMonitor.unregister();
+            }
+            if (mWorkPackageMonitor != null) {
+                mWorkPackageMonitor.unregister();
+            }
+            mRegistered = false;
+        }
         // If needed, show that intent is forwarded
         // from managed profile to owner or other way around.
         if (mProfileSwitchMessageId != -1) {
             Toast.makeText(this, getString(mProfileSwitchMessageId), Toast.LENGTH_LONG).show();
         }
+        UserHandle currentUserHandle = mMultiProfilePagerAdapter.getCurrentUserHandle();
         if (!mSafeForwardingMode) {
-            if (cti.start(this, null)) {
+            if (cti.startAsUser(this, null, currentUserHandle)) {
                 onActivityStarted(cti);
+                maybeLogCrossProfileTargetLaunch(cti, currentUserHandle);
             }
             return;
         }
         try {
-            if (cti.startAsCaller(this, null, UserHandle.USER_NULL)) {
+            if (cti.startAsCaller(this, null, currentUserHandle.getIdentifier())) {
                 onActivityStarted(cti);
+                maybeLogCrossProfileTargetLaunch(cti, currentUserHandle);
             }
         } catch (RuntimeException e) {
             String launchedFromPackage;
@@ -1186,8 +1322,20 @@ public class ResolverActivity extends Activity {
         }
     }
 
+    private void maybeLogCrossProfileTargetLaunch(TargetInfo cti, UserHandle currentUserHandle) {
+        if (!hasWorkProfile() || currentUserHandle.equals(getUser())) {
+            return;
+        }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.RESOLVER_CROSS_PROFILE_TARGET_OPENED)
+                .setBoolean(currentUserHandle.equals(getPersonalProfileUserHandle()))
+                .setStrings(getMetricsCategory(),
+                        cti instanceof ChooserTargetInfo ? "direct_share" : "other_target")
+                .write();
+    }
 
-    boolean startAsCallerImpl(Intent intent, Bundle options, boolean ignoreTargetSecurity,
+
+    public boolean startAsCallerImpl(Intent intent, Bundle options, boolean ignoreTargetSecurity,
             int userId) {
         // Pass intent to delegate chooser activity with permission token.
         // TODO: This should move to a trampoline Activity in the system when the ChooserActivity
@@ -1223,6 +1371,7 @@ public class ResolverActivity extends Activity {
         // Do nothing
     }
 
+    @Override // ResolverListCommunicator
     public boolean shouldGetActivityMetadata() {
         return false;
     }
@@ -1231,43 +1380,54 @@ public class ResolverActivity extends Activity {
         return !target.isSuspended();
     }
 
-    public void showTargetDetails(ResolveInfo ri) {
+    void showTargetDetails(ResolveInfo ri) {
         Intent in = new Intent().setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                 .setData(Uri.fromParts("package", ri.activityInfo.packageName, null))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-        startActivity(in);
-    }
-
-    public ResolveListAdapter createAdapter(Context context, List<Intent> payloadIntents,
-            Intent[] initialIntents, List<ResolveInfo> rList, int launchedFromUid,
-            boolean filterLastUsed) {
-        return new ResolveListAdapter(context, payloadIntents, initialIntents, rList,
-                launchedFromUid, filterLastUsed, createListController());
+        startActivityAsUser(in, mMultiProfilePagerAdapter.getCurrentUserHandle());
     }
 
     @VisibleForTesting
-    protected ResolverListController createListController() {
+    protected ResolverListAdapter createResolverListAdapter(Context context,
+            List<Intent> payloadIntents, Intent[] initialIntents, List<ResolveInfo> rList,
+            boolean filterLastUsed, UserHandle userHandle) {
+        Intent startIntent = getIntent();
+        boolean isAudioCaptureDevice =
+                startIntent.getBooleanExtra(EXTRA_IS_AUDIO_CAPTURE_DEVICE, false);
+        return new ResolverListAdapter(context, payloadIntents, initialIntents, rList,
+                filterLastUsed, createListController(userHandle), this,
+                isAudioCaptureDevice);
+    }
+
+    @VisibleForTesting
+    protected ResolverListController createListController(UserHandle userHandle) {
         return new ResolverListController(
                 this,
                 mPm,
                 getTargetIntent(),
                 getReferrerPackageName(),
-                mLaunchedFromUid);
+                mLaunchedFromUid,
+                userHandle);
     }
 
     /**
-     * Returns true if the activity is finishing and creation should halt
+     * Sets up the content view.
+     * @return <code>true</code> if the activity is finishing and creation should halt.
      */
-    public boolean configureContentView(List<Intent> payloadIntents, Intent[] initialIntents,
-            List<ResolveInfo> rList) {
-        // The last argument of createAdapter is whether to do special handling
-        // of the last used choice to highlight it in the list.  We need to always
-        // turn this off when running under voice interaction, since it results in
-        // a more complicated UI that the current voice interaction flow is not able
-        // to handle.
-        mAdapter = createAdapter(this, payloadIntents, initialIntents, rList,
-                mLaunchedFromUid, mSupportsAlwaysUseOption && !isVoiceInteraction());
-        boolean rebuildCompleted = mAdapter.rebuildList();
+    private boolean configureContentView() {
+        if (mMultiProfilePagerAdapter.getActiveListAdapter() == null) {
+            throw new IllegalStateException("mMultiProfilePagerAdapter.getCurrentListAdapter() "
+                    + "cannot be null.");
+        }
+        // We partially rebuild the inactive adapter to determine if we should auto launch
+        // isTabLoaded will be true here if the empty state screen is shown instead of the list.
+        boolean rebuildCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true)
+                || mMultiProfilePagerAdapter.getActiveListAdapter().isTabLoaded();
+        if (shouldShowTabs()) {
+            boolean rebuildInactiveCompleted = mMultiProfilePagerAdapter.rebuildInactiveTab(false)
+                    || mMultiProfilePagerAdapter.getInactiveListAdapter().isTabLoaded();
+            rebuildCompleted = rebuildCompleted && rebuildInactiveCompleted;
+        }
 
         if (useLayoutWithDefault()) {
             mLayoutId = R.layout.resolver_list_with_default;
@@ -1275,67 +1435,365 @@ public class ResolverActivity extends Activity {
             mLayoutId = getLayoutResource();
         }
         setContentView(mLayoutId);
+        mMultiProfilePagerAdapter.setupViewPager(findViewById(R.id.profile_pager));
+        return postRebuildList(rebuildCompleted);
+    }
 
-        int count = mAdapter.getUnfilteredCount();
+    /**
+     * Finishing procedures to be performed after the list has been rebuilt.
+     * </p>Subclasses must call postRebuildListInternal at the end of postRebuildList.
+     * @param rebuildCompleted
+     * @return <code>true</code> if the activity is finishing and creation should halt.
+     */
+    protected boolean postRebuildList(boolean rebuildCompleted) {
+        return postRebuildListInternal(rebuildCompleted);
+    }
+
+    /**
+     * Finishing procedures to be performed after the list has been rebuilt.
+     * @param rebuildCompleted
+     * @return <code>true</code> if the activity is finishing and creation should halt.
+     */
+    final boolean postRebuildListInternal(boolean rebuildCompleted) {
+        int count = mMultiProfilePagerAdapter.getActiveListAdapter().getUnfilteredCount();
 
         // We only rebuild asynchronously when we have multiple elements to sort. In the case where
         // we're already done, we can check if we should auto-launch immediately.
-        if (rebuildCompleted) {
-            if (count == 1 && mAdapter.getOtherProfile() == null) {
-                // Only one target, so we're a candidate to auto-launch!
-                final TargetInfo target = mAdapter.targetInfoForPosition(0, false);
-                if (shouldAutoLaunchSingleChoice(target)) {
-                    safelyStartActivity(target);
-                    mPackageMonitor.unregister();
-                    mRegistered = false;
-                    finish();
-                    return true;
-                }
-            }
+        if (rebuildCompleted && maybeAutolaunchActivity()) {
+            return true;
         }
 
+        setupViewVisibilities();
 
-        mAdapterView = findViewById(R.id.resolver_list);
+        if (shouldShowTabs()) {
+            setupProfileTabs();
+        }
 
-        if (count == 0 && mAdapter.mPlaceholderCount == 0) {
-            final TextView emptyView = findViewById(R.id.empty);
-            emptyView.setVisibility(View.VISIBLE);
-            mAdapterView.setVisibility(View.GONE);
-        } else {
-            mAdapterView.setVisibility(View.VISIBLE);
-            onPrepareAdapterView(mAdapterView, mAdapter);
+        return false;
+    }
+
+    private int isPermissionGranted(String permission, int uid) {
+        return ActivityManager.checkComponentPermission(permission, uid,
+                /* owningUid= */-1, /* exported= */ true);
+    }
+
+    /**
+     * @return {@code true} if a resolved target is autolaunched, otherwise {@code false}
+     */
+    private boolean maybeAutolaunchActivity() {
+        int numberOfProfiles = mMultiProfilePagerAdapter.getItemCount();
+        if (numberOfProfiles == 1 && maybeAutolaunchIfSingleTarget()) {
+            return true;
+        } else if (numberOfProfiles == 2
+                && mMultiProfilePagerAdapter.getActiveListAdapter().isTabLoaded()
+                && mMultiProfilePagerAdapter.getInactiveListAdapter().isTabLoaded()
+                && (maybeAutolaunchIfNoAppsOnInactiveTab()
+                        || maybeAutolaunchIfCrossProfileSupported())) {
+            return true;
         }
         return false;
     }
 
-    public void onPrepareAdapterView(AbsListView adapterView, ResolveListAdapter adapter) {
-        final boolean useHeader = adapter.hasFilteredItem();
-        final ListView listView = adapterView instanceof ListView ? (ListView) adapterView : null;
-
-        adapterView.setAdapter(mAdapter);
-
-        final ItemClickListener listener = new ItemClickListener();
-        adapterView.setOnItemClickListener(listener);
-        adapterView.setOnItemLongClickListener(listener);
-
-        if (mSupportsAlwaysUseOption || mUseLayoutForBrowsables) {
-            listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+    private boolean maybeAutolaunchIfSingleTarget() {
+        int count = mMultiProfilePagerAdapter.getActiveListAdapter().getUnfilteredCount();
+        if (count != 1) {
+            return false;
         }
 
-        // In case this method is called again (due to activity recreation), avoid adding a new
-        // header if one is already present.
-        if (useHeader && listView != null && listView.getHeaderViewsCount() == 0) {
-            listView.setHeaderDividersEnabled(true);
-            listView.addHeaderView(LayoutInflater.from(this).inflate(
-                    R.layout.resolver_different_item_header, listView, false));
+        if (mMultiProfilePagerAdapter.getActiveListAdapter().getOtherProfile() != null) {
+            return false;
+        }
+
+        // Only one target, so we're a candidate to auto-launch!
+        final TargetInfo target = mMultiProfilePagerAdapter.getActiveListAdapter()
+                .targetInfoForPosition(0, false);
+        if (shouldAutoLaunchSingleChoice(target)) {
+            safelyStartActivity(target);
+            finish();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean maybeAutolaunchIfNoAppsOnInactiveTab() {
+        int count = mMultiProfilePagerAdapter.getActiveListAdapter().getUnfilteredCount();
+        if (count != 1) {
+            return false;
+        }
+        ResolverListAdapter inactiveListAdapter =
+                mMultiProfilePagerAdapter.getInactiveListAdapter();
+        if (inactiveListAdapter.getUnfilteredCount() != 0) {
+            return false;
+        }
+        TargetInfo target = mMultiProfilePagerAdapter.getActiveListAdapter()
+                .targetInfoForPosition(0, false);
+        safelyStartActivity(target);
+        finish();
+        return true;
+    }
+
+    /**
+     * When we have a personal and a work profile, we auto launch in the following scenario:
+     * - There is 1 resolved target on each profile
+     * - That target is the same app on both profiles
+     * - The target app has permission to communicate cross profiles
+     * - The target app has declared it supports cross-profile communication via manifest metadata
+     */
+    private boolean maybeAutolaunchIfCrossProfileSupported() {
+        ResolverListAdapter activeListAdapter = mMultiProfilePagerAdapter.getActiveListAdapter();
+        int count = activeListAdapter.getUnfilteredCount();
+        if (count != 1) {
+            return false;
+        }
+        ResolverListAdapter inactiveListAdapter =
+                mMultiProfilePagerAdapter.getInactiveListAdapter();
+        if (inactiveListAdapter.getUnfilteredCount() != 1) {
+            return false;
+        }
+        TargetInfo activeProfileTarget = activeListAdapter
+                .targetInfoForPosition(0, false);
+        TargetInfo inactiveProfileTarget = inactiveListAdapter.targetInfoForPosition(0, false);
+        if (!Objects.equals(activeProfileTarget.getResolvedComponentName(),
+                inactiveProfileTarget.getResolvedComponentName())) {
+            return false;
+        }
+        if (!shouldAutoLaunchSingleChoice(activeProfileTarget)) {
+            return false;
+        }
+        String packageName = activeProfileTarget.getResolvedComponentName().getPackageName();
+        if (!canAppInteractCrossProfiles(packageName)) {
+            return false;
+        }
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.RESOLVER_AUTOLAUNCH_CROSS_PROFILE_TARGET)
+                .setBoolean(activeListAdapter.getUserHandle()
+                        .equals(getPersonalProfileUserHandle()))
+                .setStrings(getMetricsCategory())
+                .write();
+        safelyStartActivity(activeProfileTarget);
+        finish();
+        return true;
+    }
+
+    /**
+     * Returns whether the package has the necessary permissions to interact across profiles on
+     * behalf of a given user.
+     *
+     * <p>This means meeting the following condition:
+     * <ul>
+     *     <li>The app's {@link ApplicationInfo#crossProfile} flag must be true, and at least
+     *     one of the following conditions must be fulfilled</li>
+     *     <li>{@code Manifest.permission.INTERACT_ACROSS_USERS_FULL} granted.</li>
+     *     <li>{@code Manifest.permission.INTERACT_ACROSS_USERS} granted.</li>
+     *     <li>{@code Manifest.permission.INTERACT_ACROSS_PROFILES} granted, or the corresponding
+     *     AppOps {@code android:interact_across_profiles} is set to "allow".</li>
+     * </ul>
+     *
+     */
+    private boolean canAppInteractCrossProfiles(String packageName) {
+        ApplicationInfo applicationInfo;
+        try {
+            applicationInfo = getPackageManager().getApplicationInfo(packageName, 0);
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "Package " + packageName + " does not exist on current user.");
+            return false;
+        }
+        if (!applicationInfo.crossProfile) {
+            return false;
+        }
+
+        int packageUid = applicationInfo.uid;
+
+        if (isPermissionGranted(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                packageUid) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        if (isPermissionGranted(android.Manifest.permission.INTERACT_ACROSS_USERS, packageUid)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        if (PermissionChecker.checkPermissionForPreflight(this, INTERACT_ACROSS_PROFILES,
+                PID_UNKNOWN, packageUid, packageName) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isAutolaunching() {
+        return !mRegistered && isFinishing();
+    }
+
+    private void setupProfileTabs() {
+        maybeHideDivider();
+        TabHost tabHost = findViewById(R.id.profile_tabhost);
+        tabHost.setup();
+        ViewPager viewPager = findViewById(R.id.profile_pager);
+        viewPager.setSaveEnabled(false);
+        TabHost.TabSpec tabSpec = tabHost.newTabSpec(TAB_TAG_PERSONAL)
+                .setContent(R.id.profile_pager)
+                .setIndicator(getString(R.string.resolver_personal_tab));
+        tabHost.addTab(tabSpec);
+
+        tabSpec = tabHost.newTabSpec(TAB_TAG_WORK)
+                .setContent(R.id.profile_pager)
+                .setIndicator(getString(R.string.resolver_work_tab));
+        tabHost.addTab(tabSpec);
+
+        TabWidget tabWidget = tabHost.getTabWidget();
+        tabWidget.setVisibility(View.VISIBLE);
+        resetTabsHeaderStyle(tabWidget);
+        updateActiveTabStyle(tabHost);
+
+        tabHost.setOnTabChangedListener(tabId -> {
+            resetTabsHeaderStyle(tabWidget);
+            updateActiveTabStyle(tabHost);
+            if (TAB_TAG_PERSONAL.equals(tabId)) {
+                viewPager.setCurrentItem(0);
+            } else {
+                viewPager.setCurrentItem(1);
+            }
+            setupViewVisibilities();
+            maybeLogProfileChange();
+            onProfileTabSelected();
+            DevicePolicyEventLogger
+                    .createEvent(DevicePolicyEnums.RESOLVER_SWITCH_TABS)
+                    .setInt(viewPager.getCurrentItem())
+                    .setStrings(getMetricsCategory())
+                    .write();
+        });
+
+        viewPager.setVisibility(View.VISIBLE);
+        tabHost.setCurrentTab(mMultiProfilePagerAdapter.getCurrentPage());
+        mMultiProfilePagerAdapter.setOnProfileSelectedListener(
+                new AbstractMultiProfilePagerAdapter.OnProfileSelectedListener() {
+                    @Override
+                    public void onProfileSelected(int index) {
+                        tabHost.setCurrentTab(index);
+                        resetButtonBar();
+                        resetCheckedItem();
+                    }
+
+                    @Override
+                    public void onProfilePageStateChanged(int state) {
+                        onHorizontalSwipeStateChanged(state);
+                    }
+                });
+        mMultiProfilePagerAdapter.setOnSwitchOnWorkSelectedListener(
+                () -> {
+                    final View workTab = tabHost.getTabWidget().getChildAt(1);
+                    workTab.setFocusable(true);
+                    workTab.setFocusableInTouchMode(true);
+                    workTab.requestFocus();
+                });
+        findViewById(R.id.resolver_tab_divider).setVisibility(View.VISIBLE);
+    }
+
+    void onHorizontalSwipeStateChanged(int state) {}
+
+    private void maybeHideDivider() {
+        if (!isIntentPicker()) {
+            return;
+        }
+        final View divider = findViewById(R.id.divider);
+        if (divider == null) {
+            return;
+        }
+        divider.setVisibility(View.GONE);
+    }
+
+    /**
+     * Callback called when user changes the profile tab.
+     * <p>This method is intended to be overridden by subclasses.
+     */
+    protected void onProfileTabSelected() { }
+
+    private void resetCheckedItem() {
+        if (!isIntentPicker()) {
+            return;
+        }
+        mLastSelected = ListView.INVALID_POSITION;
+        ListView inactiveListView = (ListView) mMultiProfilePagerAdapter.getInactiveAdapterView();
+        if (inactiveListView.getCheckedItemCount() > 0) {
+            inactiveListView.setItemChecked(inactiveListView.getCheckedItemPosition(), false);
+        }
+    }
+
+    private void resetTabsHeaderStyle(TabWidget tabWidget) {
+        String workContentDescription = getString(R.string.resolver_work_tab_accessibility);
+        String personalContentDescription = getString(R.string.resolver_personal_tab_accessibility);
+        for (int i = 0; i < tabWidget.getChildCount(); i++) {
+            View tabView = tabWidget.getChildAt(i);
+            TextView title = tabView.findViewById(android.R.id.title);
+            title.setTextAppearance(android.R.style.TextAppearance_DeviceDefault_DialogWindowTitle);
+            title.setTextColor(getAttrColor(this, android.R.attr.textColorTertiary));
+            title.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    getResources().getDimension(R.dimen.resolver_tab_text_size));
+            if (title.getText().equals(getString(R.string.resolver_personal_tab))) {
+                tabView.setContentDescription(personalContentDescription);
+            } else if (title.getText().equals(getString(R.string.resolver_work_tab))) {
+                tabView.setContentDescription(workContentDescription);
+            }
+        }
+    }
+
+    private static int getAttrColor(Context context, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        int colorAccent = ta.getColor(0, 0);
+        ta.recycle();
+        return colorAccent;
+    }
+
+    private void updateActiveTabStyle(TabHost tabHost) {
+        TextView title = tabHost.getTabWidget().getChildAt(tabHost.getCurrentTab())
+                .findViewById(android.R.id.title);
+        title.setTextColor(getAttrColor(this, android.R.attr.colorAccent));
+    }
+
+    private void setupViewVisibilities() {
+        ResolverListAdapter activeListAdapter = mMultiProfilePagerAdapter.getActiveListAdapter();
+        if (!mMultiProfilePagerAdapter.shouldShowEmptyStateScreen(activeListAdapter)) {
+            addUseDifferentAppLabelIfNecessary(activeListAdapter);
+        }
+    }
+
+    /**
+     * Add a label to signify that the user can pick a different app.
+     * @param adapter The adapter used to provide data to item views.
+     */
+    public void addUseDifferentAppLabelIfNecessary(ResolverListAdapter adapter) {
+        final boolean useHeader = adapter.hasFilteredItem();
+        if (useHeader) {
+            FrameLayout stub = findViewById(R.id.stub);
+            stub.setVisibility(View.VISIBLE);
+            TextView textView = (TextView) LayoutInflater.from(this).inflate(
+                    R.layout.resolver_different_item_header, null, false);
+            if (shouldShowTabs()) {
+                textView.setGravity(Gravity.CENTER);
+            }
+            stub.addView(textView);
+        }
+    }
+
+    private void setupAdapterListView(ListView listView, ItemClickListener listener) {
+        listView.setOnItemClickListener(listener);
+        listView.setOnItemLongClickListener(listener);
+
+        if (mSupportsAlwaysUseOption) {
+            listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         }
     }
 
     /**
      * Configure the area above the app selection list (title, content preview, etc).
      */
-    public void setHeader() {
-        if (mAdapter.getCount() == 0 && mAdapter.mPlaceholderCount == 0) {
+    private void maybeCreateHeader(ResolverListAdapter listAdapter) {
+        if (mHeaderCreatorUser != null
+                && !listAdapter.getUserHandle().equals(mHeaderCreatorUser)) {
+            return;
+        }
+        if (!shouldShowTabs()
+                && listAdapter.getCount() == 0 && listAdapter.getPlaceholderCount() == 0) {
             final TextView titleView = findViewById(R.id.title);
             if (titleView != null) {
                 titleView.setVisibility(View.GONE);
@@ -1355,53 +1813,105 @@ public class ResolverActivity extends Activity {
         }
 
         final ImageView iconView = findViewById(R.id.icon);
-        final DisplayResolveInfo iconInfo = mAdapter.getFilteredItem();
-        if (iconView != null && iconInfo != null) {
-            new LoadIconTask(iconInfo, iconView).execute();
+        if (iconView != null) {
+            listAdapter.loadFilteredItemIconTaskAsync(iconView);
         }
+        mHeaderCreatorUser = listAdapter.getUserHandle();
     }
 
-    private void resetButtonBar() {
-        if (!mSupportsAlwaysUseOption && !mUseLayoutForBrowsables) {
+    protected void resetButtonBar() {
+        if (!mSupportsAlwaysUseOption) {
             return;
         }
         final ViewGroup buttonLayout = findViewById(R.id.button_bar);
-        if (buttonLayout != null) {
-            buttonLayout.setVisibility(View.VISIBLE);
-
-            if (!useLayoutWithDefault()) {
-                int inset = mSystemWindowInsets != null ? mSystemWindowInsets.bottom : 0;
-                buttonLayout.setPadding(buttonLayout.getPaddingLeft(), buttonLayout.getPaddingTop(),
-                        buttonLayout.getPaddingRight(), getResources().getDimensionPixelSize(
-                                R.dimen.resolver_button_bar_spacing) + inset);
-            }
-            mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
-            mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
-
-            resetAlwaysOrOnceButtonBar();
-        } else {
+        if (buttonLayout == null) {
             Log.e(TAG, "Layout unexpectedly does not have a button bar");
+            return;
+        }
+        ResolverListAdapter activeListAdapter =
+                mMultiProfilePagerAdapter.getActiveListAdapter();
+        View buttonBarDivider = findViewById(R.id.resolver_button_bar_divider);
+        if (!useLayoutWithDefault()) {
+            int inset = mSystemWindowInsets != null ? mSystemWindowInsets.bottom : 0;
+            buttonLayout.setPadding(buttonLayout.getPaddingLeft(), buttonLayout.getPaddingTop(),
+                    buttonLayout.getPaddingRight(), getResources().getDimensionPixelSize(
+                            R.dimen.resolver_button_bar_spacing) + inset);
+        }
+        if (activeListAdapter.isTabLoaded()
+                && mMultiProfilePagerAdapter.shouldShowEmptyStateScreen(activeListAdapter)
+                && !useLayoutWithDefault()) {
+            buttonLayout.setVisibility(View.INVISIBLE);
+            if (buttonBarDivider != null) {
+                buttonBarDivider.setVisibility(View.INVISIBLE);
+            }
+            setButtonBarIgnoreOffset(/* ignoreOffset */ false);
+            return;
+        }
+        if (buttonBarDivider != null) {
+            buttonBarDivider.setVisibility(View.VISIBLE);
+        }
+        buttonLayout.setVisibility(View.VISIBLE);
+        setButtonBarIgnoreOffset(/* ignoreOffset */ true);
+
+        mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
+        mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
+
+        resetAlwaysOrOnceButtonBar();
+    }
+
+    /**
+     * Updates the button bar container {@code ignoreOffset} layout param.
+     * <p>Setting this to {@code true} means that the button bar will be glued to the bottom of
+     * the screen.
+     */
+    private void setButtonBarIgnoreOffset(boolean ignoreOffset) {
+        View buttonBarContainer = findViewById(R.id.button_bar_container);
+        if (buttonBarContainer != null) {
+            ResolverDrawerLayout.LayoutParams layoutParams =
+                    (ResolverDrawerLayout.LayoutParams) buttonBarContainer.getLayoutParams();
+            layoutParams.ignoreOffset = ignoreOffset;
+            buttonBarContainer.setLayoutParams(layoutParams);
         }
     }
 
     private void resetAlwaysOrOnceButtonBar() {
-        if (useLayoutWithDefault()
-                && mAdapter.getFilteredPosition() != ListView.INVALID_POSITION) {
-            setAlwaysButtonEnabled(true, mAdapter.getFilteredPosition(), false);
+        // Disable both buttons initially
+        setAlwaysButtonEnabled(false, ListView.INVALID_POSITION, false);
+        mOnceButton.setEnabled(false);
+
+        int filteredPosition = mMultiProfilePagerAdapter.getActiveListAdapter()
+                .getFilteredPosition();
+        if (useLayoutWithDefault() && filteredPosition != ListView.INVALID_POSITION) {
+            setAlwaysButtonEnabled(true, filteredPosition, false);
             mOnceButton.setEnabled(true);
+            // Focus the button if we already have the default option
+            mOnceButton.requestFocus();
             return;
         }
 
         // When the items load in, if an item was already selected, enable the buttons
-        if (mAdapterView != null
-                && mAdapterView.getCheckedItemPosition() != ListView.INVALID_POSITION) {
-            setAlwaysButtonEnabled(true, mAdapterView.getCheckedItemPosition(), true);
+        ListView currentAdapterView = (ListView) mMultiProfilePagerAdapter.getActiveAdapterView();
+        if (currentAdapterView != null
+                && currentAdapterView.getCheckedItemPosition() != ListView.INVALID_POSITION) {
+            setAlwaysButtonEnabled(true, currentAdapterView.getCheckedItemPosition(), true);
             mOnceButton.setEnabled(true);
         }
     }
 
-    private boolean useLayoutWithDefault() {
-        return mSupportsAlwaysUseOption && mAdapter.hasFilteredItem();
+    @Override // ResolverListCommunicator
+    public boolean useLayoutWithDefault() {
+        // We only use the default app layout when the profile of the active user has a
+        // filtered item. We always show the same default app even in the inactive user profile.
+        boolean currentUserAdapterHasFilteredItem;
+        if (mMultiProfilePagerAdapter.getCurrentUserHandle().getIdentifier()
+                == UserHandle.myUserId()) {
+            currentUserAdapterHasFilteredItem =
+                    mMultiProfilePagerAdapter.getActiveListAdapter().hasFilteredItem();
+        } else {
+            currentUserAdapterHasFilteredItem =
+                    mMultiProfilePagerAdapter.getInactiveListAdapter().hasFilteredItem();
+        }
+        return mSupportsAlwaysUseOption && currentUserAdapterHasFilteredItem;
     }
 
     /**
@@ -1415,712 +1925,89 @@ public class ResolverActivity extends Activity {
     /**
      * Check a simple match for the component of two ResolveInfos.
      */
-    static boolean resolveInfoMatch(ResolveInfo lhs, ResolveInfo rhs) {
+    @Override // ResolverListCommunicator
+    public boolean resolveInfoMatch(ResolveInfo lhs, ResolveInfo rhs) {
         return lhs == null ? rhs == null
                 : lhs.activityInfo == null ? rhs.activityInfo == null
                 : Objects.equals(lhs.activityInfo.name, rhs.activityInfo.name)
                 && Objects.equals(lhs.activityInfo.packageName, rhs.activityInfo.packageName);
     }
 
-    public final class DisplayResolveInfo implements TargetInfo {
-        private final ResolveInfo mResolveInfo;
-        private final CharSequence mDisplayLabel;
-        private Drawable mDisplayIcon;
-        private Drawable mBadge;
-        private final CharSequence mExtendedInfo;
-        private final Intent mResolvedIntent;
-        private final List<Intent> mSourceIntents = new ArrayList<>();
-        private boolean mIsSuspended;
-        private boolean mPinned = false;
-
-        public DisplayResolveInfo(Intent originalIntent, ResolveInfo pri, CharSequence pLabel,
-                CharSequence pInfo, Intent pOrigIntent) {
-            mSourceIntents.add(originalIntent);
-            mResolveInfo = pri;
-            mDisplayLabel = pLabel;
-            mExtendedInfo = pInfo;
-
-            final Intent intent = new Intent(pOrigIntent != null ? pOrigIntent :
-                    getReplacementIntent(pri.activityInfo, getTargetIntent()));
-            intent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT
-                    | Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
-            final ActivityInfo ai = mResolveInfo.activityInfo;
-            intent.setComponent(new ComponentName(ai.applicationInfo.packageName, ai.name));
-
-            mIsSuspended = (ai.applicationInfo.flags & ApplicationInfo.FLAG_SUSPENDED) != 0;
-
-            mResolvedIntent = intent;
-        }
-
-        private DisplayResolveInfo(DisplayResolveInfo other, Intent fillInIntent, int flags) {
-            mSourceIntents.addAll(other.getAllSourceIntents());
-            mResolveInfo = other.mResolveInfo;
-            mDisplayLabel = other.mDisplayLabel;
-            mDisplayIcon = other.mDisplayIcon;
-            mExtendedInfo = other.mExtendedInfo;
-            mResolvedIntent = new Intent(other.mResolvedIntent);
-            mResolvedIntent.fillIn(fillInIntent, flags);
-        }
-
-        public ResolveInfo getResolveInfo() {
-            return mResolveInfo;
-        }
-
-        public CharSequence getDisplayLabel() {
-            return mDisplayLabel;
-        }
-
-        public Drawable getDisplayIcon() {
-            return mDisplayIcon;
-        }
-
-        @Override
-        public TargetInfo cloneFilledIn(Intent fillInIntent, int flags) {
-            return new DisplayResolveInfo(this, fillInIntent, flags);
-        }
-
-        @Override
-        public List<Intent> getAllSourceIntents() {
-            return mSourceIntents;
-        }
-
-        public void addAlternateSourceIntent(Intent alt) {
-            mSourceIntents.add(alt);
-        }
-
-        public void setDisplayIcon(Drawable icon) {
-            mDisplayIcon = icon;
-        }
-
-        public boolean hasDisplayIcon() {
-            return mDisplayIcon != null;
-        }
-
-        public CharSequence getExtendedInfo() {
-            return mExtendedInfo;
-        }
-
-        public Intent getResolvedIntent() {
-            return mResolvedIntent;
-        }
-
-        @Override
-        public ComponentName getResolvedComponentName() {
-            return new ComponentName(mResolveInfo.activityInfo.packageName,
-                    mResolveInfo.activityInfo.name);
-        }
-
-        @Override
-        public boolean start(Activity activity, Bundle options) {
-            activity.startActivity(mResolvedIntent, options);
-            return true;
-        }
-
-        @Override
-        public boolean startAsCaller(ResolverActivity activity, Bundle options, int userId) {
-            if (mEnableChooserDelegate) {
-                return activity.startAsCallerImpl(mResolvedIntent, options, false, userId);
-            } else {
-                activity.startActivityAsCaller(mResolvedIntent, options, null, false, userId);
-                return true;
-            }
-        }
-
-        @Override
-        public boolean startAsUser(Activity activity, Bundle options, UserHandle user) {
-            activity.startActivityAsUser(mResolvedIntent, options, user);
-            return false;
-        }
-
-        public boolean isSuspended() {
-            return mIsSuspended;
-        }
-
-        @Override
-        public boolean isPinned() {
-            return mPinned;
-        }
-
-        public void setPinned(boolean pinned) {
-            mPinned = pinned;
-        }
+    protected String getMetricsCategory() {
+        return METRICS_CATEGORY_RESOLVER;
     }
 
-    List<DisplayResolveInfo> getDisplayList() {
-        return mAdapter.mDisplayList;
-    }
-
-    /**
-     * A single target as represented in the chooser.
-     */
-    public interface TargetInfo {
-        /**
-         * Get the resolved intent that represents this target. Note that this may not be the
-         * intent that will be launched by calling one of the <code>start</code> methods provided;
-         * this is the intent that will be credited with the launch.
-         *
-         * @return the resolved intent for this target
-         */
-        Intent getResolvedIntent();
-
-        /**
-         * Get the resolved component name that represents this target. Note that this may not
-         * be the component that will be directly launched by calling one of the <code>start</code>
-         * methods provided; this is the component that will be credited with the launch.
-         *
-         * @return the resolved ComponentName for this target
-         */
-        ComponentName getResolvedComponentName();
-
-        /**
-         * Start the activity referenced by this target.
-         *
-         * @param activity calling Activity performing the launch
-         * @param options ActivityOptions bundle
-         * @return true if the start completed successfully
-         */
-        boolean start(Activity activity, Bundle options);
-
-        /**
-         * Start the activity referenced by this target as if the ResolverActivity's caller
-         * was performing the start operation.
-         *
-         * @param activity calling Activity (actually) performing the launch
-         * @param options ActivityOptions bundle
-         * @param userId userId to start as or {@link UserHandle#USER_NULL} for activity's caller
-         * @return true if the start completed successfully
-         */
-        boolean startAsCaller(ResolverActivity activity, Bundle options, int userId);
-
-        /**
-         * Start the activity referenced by this target as a given user.
-         *
-         * @param activity calling activity performing the launch
-         * @param options ActivityOptions bundle
-         * @param user handle for the user to start the activity as
-         * @return true if the start completed successfully
-         */
-        boolean startAsUser(Activity activity, Bundle options, UserHandle user);
-
-        /**
-         * Return the ResolveInfo about how and why this target matched the original query
-         * for available targets.
-         *
-         * @return ResolveInfo representing this target's match
-         */
-        ResolveInfo getResolveInfo();
-
-        /**
-         * Return the human-readable text label for this target.
-         *
-         * @return user-visible target label
-         */
-        CharSequence getDisplayLabel();
-
-        /**
-         * Return any extended info for this target. This may be used to disambiguate
-         * otherwise identical targets.
-         *
-         * @return human-readable disambig string or null if none present
-         */
-        CharSequence getExtendedInfo();
-
-        /**
-         * @return The drawable that should be used to represent this target including badge
-         */
-        Drawable getDisplayIcon();
-
-        /**
-         * Clone this target with the given fill-in information.
-         */
-        TargetInfo cloneFilledIn(Intent fillInIntent, int flags);
-
-        /**
-         * @return the list of supported source intents deduped against this single target
-         */
-        List<Intent> getAllSourceIntents();
-
-        /**
-          * @return true if this target can be selected by the user
-          */
-        boolean isSuspended();
-
-        /**
-         * @return true if this target should be pinned to the front by the request of the user
-         */
-        boolean isPinned();
-    }
-
-    public class ResolveListAdapter extends BaseAdapter {
-        private final List<Intent> mIntents;
-        private final Intent[] mInitialIntents;
-        private final List<ResolveInfo> mBaseResolveList;
-        protected ResolveInfo mLastChosen;
-        private DisplayResolveInfo mOtherProfile;
-        private ResolverListController mResolverListController;
-        private int mPlaceholderCount;
-        private boolean mAllTargetsAreBrowsers = false;
-
-        protected final LayoutInflater mInflater;
-
-        // This one is the list that the Adapter will actually present.
-        List<DisplayResolveInfo> mDisplayList;
-        List<ResolvedComponentInfo> mUnfilteredResolveList;
-
-        private int mLastChosenPosition = -1;
-        private boolean mFilterLastUsed;
-
-        public ResolveListAdapter(Context context, List<Intent> payloadIntents,
-                Intent[] initialIntents, List<ResolveInfo> rList, int launchedFromUid,
-                boolean filterLastUsed,
-                ResolverListController resolverListController) {
-            mIntents = payloadIntents;
-            mInitialIntents = initialIntents;
-            mBaseResolveList = rList;
-            mLaunchedFromUid = launchedFromUid;
-            mInflater = LayoutInflater.from(context);
-            mDisplayList = new ArrayList<>();
-            mFilterLastUsed = filterLastUsed;
-            mResolverListController = resolverListController;
-        }
-
-        public void handlePackagesChanged() {
-            rebuildList();
-            if (getCount() == 0) {
-                // We no longer have any items...  just finish the activity.
-                finish();
+    @Override // ResolverListCommunicator
+    public void onHandlePackagesChanged(ResolverListAdapter listAdapter) {
+        if (listAdapter == mMultiProfilePagerAdapter.getActiveListAdapter()) {
+            if (listAdapter.getUserHandle().equals(getWorkProfileUserHandle())
+                    && mMultiProfilePagerAdapter.isWaitingToEnableWorkProfile()) {
+                // We have just turned on the work profile and entered the pass code to start it,
+                // now we are waiting to receive the ACTION_USER_UNLOCKED broadcast. There is no
+                // point in reloading the list now, since the work profile user is still
+                // turning on.
+                return;
             }
-        }
-
-        public void setPlaceholderCount(int count) {
-            mPlaceholderCount = count;
-        }
-
-        public int getPlaceholderCount() { return mPlaceholderCount; }
-
-        @Nullable
-        public DisplayResolveInfo getFilteredItem() {
-            if (mFilterLastUsed && mLastChosenPosition >= 0) {
-                // Not using getItem since it offsets to dodge this position for the list
-                return mDisplayList.get(mLastChosenPosition);
-            }
-            return null;
-        }
-
-        public DisplayResolveInfo getOtherProfile() {
-            return mOtherProfile;
-        }
-
-        public int getFilteredPosition() {
-            if (mFilterLastUsed && mLastChosenPosition >= 0) {
-                return mLastChosenPosition;
-            }
-            return AbsListView.INVALID_POSITION;
-        }
-
-        public boolean hasFilteredItem() {
-            return mFilterLastUsed && mLastChosen != null;
-        }
-
-        public float getScore(DisplayResolveInfo target) {
-            return mResolverListController.getScore(target);
-        }
-
-        public void updateModel(ComponentName componentName) {
-            mResolverListController.updateModel(componentName);
-        }
-
-        public void updateChooserCounts(String packageName, int userId, String action) {
-            mResolverListController.updateChooserCounts(packageName, userId, action);
-        }
-
-        /**
-          * @return true if all items in the display list are defined as browsers by
-          *         ResolveInfo.handleAllWebDataURI
-          */
-        public boolean areAllTargetsBrowsers() {
-            return mAllTargetsAreBrowsers;
-        }
-
-        /**
-         * Rebuild the list of resolvers. In some cases some parts will need some asynchronous work
-         * to complete.
-         *
-         * @return Whether or not the list building is completed.
-         */
-        protected boolean rebuildList() {
-            List<ResolvedComponentInfo> currentResolveList = null;
-            // Clear the value of mOtherProfile from previous call.
-            mOtherProfile = null;
-            mLastChosen = null;
-            mLastChosenPosition = -1;
-            mAllTargetsAreBrowsers = false;
-            mDisplayList.clear();
-            if (mBaseResolveList != null) {
-                currentResolveList = mUnfilteredResolveList = new ArrayList<>();
-                mResolverListController.addResolveListDedupe(currentResolveList,
-                        getTargetIntent(),
-                        mBaseResolveList);
-            } else {
-                currentResolveList = mUnfilteredResolveList =
-                        mResolverListController.getResolversForIntent(shouldGetResolvedFilter(),
-                                shouldGetActivityMetadata(),
-                                mIntents);
-                if (currentResolveList == null) {
-                    processSortedList(currentResolveList);
-                    return true;
-                }
-                List<ResolvedComponentInfo> originalList =
-                        mResolverListController.filterIneligibleActivities(currentResolveList,
-                                true);
-                if (originalList != null) {
-                    mUnfilteredResolveList = originalList;
-                }
-            }
-
-            // So far we only support a single other profile at a time.
-            // The first one we see gets special treatment.
-            for (ResolvedComponentInfo info : currentResolveList) {
-                if (info.getResolveInfoAt(0).targetUserId != UserHandle.USER_CURRENT) {
-                    mOtherProfile = new DisplayResolveInfo(info.getIntentAt(0),
-                            info.getResolveInfoAt(0),
-                            info.getResolveInfoAt(0).loadLabel(mPm),
-                            info.getResolveInfoAt(0).loadLabel(mPm),
-                            getReplacementIntent(info.getResolveInfoAt(0).activityInfo,
-                                    info.getIntentAt(0)));
-                    currentResolveList.remove(info);
-                    break;
-                }
-            }
-
-            if (mOtherProfile == null) {
-                try {
-                    mLastChosen = mResolverListController.getLastChosen();
-                } catch (RemoteException re) {
-                    Log.d(TAG, "Error calling getLastChosenActivity\n" + re);
-                }
-            }
-
-            int N;
-            if ((currentResolveList != null) && ((N = currentResolveList.size()) > 0)) {
-                // We only care about fixing the unfilteredList if the current resolve list and
-                // current resolve list are currently the same.
-                List<ResolvedComponentInfo> originalList =
-                        mResolverListController.filterLowPriority(currentResolveList,
-                                mUnfilteredResolveList == currentResolveList);
-                if (originalList != null) {
-                    mUnfilteredResolveList = originalList;
-                }
-
-                if (currentResolveList.size() > 1) {
-                    int placeholderCount = currentResolveList.size();
-                    if (useLayoutWithDefault()) {
-                        --placeholderCount;
-                    }
-                    setPlaceholderCount(placeholderCount);
-                    AsyncTask<List<ResolvedComponentInfo>,
-                            Void,
-                            List<ResolvedComponentInfo>> sortingTask =
-                            new AsyncTask<List<ResolvedComponentInfo>,
-                                    Void,
-                                    List<ResolvedComponentInfo>>() {
-                        @Override
-                        protected List<ResolvedComponentInfo> doInBackground(
-                                List<ResolvedComponentInfo>... params) {
-                            mResolverListController.sort(params[0]);
-                            return params[0];
-                        }
-
-                        @Override
-                        protected void onPostExecute(List<ResolvedComponentInfo> sortedComponents) {
-                            processSortedList(sortedComponents);
-                            bindProfileView();
-                            notifyDataSetChanged();
-                        }
-                    };
-                    sortingTask.execute(currentResolveList);
-                    postListReadyRunnable();
-                    return false;
-                } else {
-                    processSortedList(currentResolveList);
-                    return true;
-                }
-            } else {
-                processSortedList(currentResolveList);
-                return true;
-            }
-        }
-
-
-        private void processSortedList(List<ResolvedComponentInfo> sortedComponents) {
-            int N;
-            if (sortedComponents != null && (N = sortedComponents.size()) != 0) {
-                mAllTargetsAreBrowsers = mUseLayoutForBrowsables;
-
-                // First put the initial items at the top.
-                if (mInitialIntents != null) {
-                    for (int i = 0; i < mInitialIntents.length; i++) {
-                        Intent ii = mInitialIntents[i];
-                        if (ii == null) {
-                            continue;
-                        }
-                        ActivityInfo ai = ii.resolveActivityInfo(
-                                getPackageManager(), 0);
-                        if (ai == null) {
-                            Log.w(TAG, "No activity found for " + ii);
-                            continue;
-                        }
-                        ResolveInfo ri = new ResolveInfo();
-                        ri.activityInfo = ai;
-                        UserManager userManager =
-                                (UserManager) getSystemService(Context.USER_SERVICE);
-                        if (ii instanceof LabeledIntent) {
-                            LabeledIntent li = (LabeledIntent) ii;
-                            ri.resolvePackageName = li.getSourcePackage();
-                            ri.labelRes = li.getLabelResource();
-                            ri.nonLocalizedLabel = li.getNonLocalizedLabel();
-                            ri.icon = li.getIconResource();
-                            ri.iconResourceId = ri.icon;
-                        }
-                        if (userManager.isManagedProfile()) {
-                            ri.noResourceId = true;
-                            ri.icon = 0;
-                        }
-                        mAllTargetsAreBrowsers &= ri.handleAllWebDataURI;
-
-                        addResolveInfo(new DisplayResolveInfo(ii, ri,
-                                ri.loadLabel(getPackageManager()), null, ii));
-                    }
-                }
-
-
-                for (ResolvedComponentInfo rci : sortedComponents) {
-                    final ResolveInfo ri = rci.getResolveInfoAt(0);
-                    if (ri != null) {
-                        mAllTargetsAreBrowsers &= ri.handleAllWebDataURI;
-
-                        ResolveInfoPresentationGetter pg = makePresentationGetter(ri);
-                        addResolveInfoWithAlternates(rci, pg.getSubLabel(), pg.getLabel());
-                    }
-                }
-            }
-
-            sendVoiceChoicesIfNeeded();
-            postListReadyRunnable();
-        }
-
-
-
-        /**
-         * Some necessary methods for creating the list are initiated in onCreate and will also
-         * determine the layout known. We therefore can't update the UI inline and post to the
-         * handler thread to update after the current task is finished.
-         */
-        private void postListReadyRunnable() {
-            if (mPostListReadyRunnable == null) {
-                mPostListReadyRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        setHeader();
-                        resetButtonBar();
-                        onListRebuilt();
-                        mPostListReadyRunnable = null;
-                    }
-                };
-                getMainThreadHandler().post(mPostListReadyRunnable);
-            }
-        }
-
-        public void onListRebuilt() {
-            int count = getUnfilteredCount();
-            if (count == 1 && getOtherProfile() == null) {
-                // Only one target, so we're a candidate to auto-launch!
-                final TargetInfo target = targetInfoForPosition(0, false);
-                if (shouldAutoLaunchSingleChoice(target)) {
-                    safelyStartActivity(target);
+            boolean listRebuilt = mMultiProfilePagerAdapter.rebuildActiveTab(true);
+            if (listRebuilt) {
+                ResolverListAdapter activeListAdapter =
+                        mMultiProfilePagerAdapter.getActiveListAdapter();
+                activeListAdapter.notifyDataSetChanged();
+                if (activeListAdapter.getCount() == 0 && !inactiveListAdapterHasItems()) {
+                    // We no longer have any items...  just finish the activity.
                     finish();
                 }
             }
-        }
-
-        public boolean shouldGetResolvedFilter() {
-            return mFilterLastUsed;
-        }
-
-        private void addResolveInfoWithAlternates(ResolvedComponentInfo rci,
-                CharSequence extraInfo, CharSequence roLabel) {
-            final int count = rci.getCount();
-            final Intent intent = rci.getIntentAt(0);
-            final ResolveInfo add = rci.getResolveInfoAt(0);
-            final Intent replaceIntent = getReplacementIntent(add.activityInfo, intent);
-            final DisplayResolveInfo dri = new DisplayResolveInfo(intent, add, roLabel,
-                    extraInfo, replaceIntent);
-            dri.setPinned(rci.isPinned());
-            if (rci.isPinned()) {
-                Log.i(TAG, "Pinned item: " + rci.name);
-            }
-            addResolveInfo(dri);
-            if (replaceIntent == intent) {
-                // Only add alternates if we didn't get a specific replacement from
-                // the caller. If we have one it trumps potential alternates.
-                for (int i = 1, N = count; i < N; i++) {
-                    final Intent altIntent = rci.getIntentAt(i);
-                    dri.addAlternateSourceIntent(altIntent);
-                }
-            }
-            updateLastChosenPosition(add);
-        }
-
-        private void updateLastChosenPosition(ResolveInfo info) {
-            // If another profile is present, ignore the last chosen entry.
-            if (mOtherProfile != null) {
-                mLastChosenPosition = -1;
-                return;
-            }
-            if (mLastChosen != null
-                    && mLastChosen.activityInfo.packageName.equals(info.activityInfo.packageName)
-                    && mLastChosen.activityInfo.name.equals(info.activityInfo.name)) {
-                mLastChosenPosition = mDisplayList.size() - 1;
-            }
-        }
-
-        // We assume that at this point we've already filtered out the only intent for a different
-        // targetUserId which we're going to use.
-        private void addResolveInfo(DisplayResolveInfo dri) {
-            if (dri != null && dri.mResolveInfo != null
-                    && dri.mResolveInfo.targetUserId == UserHandle.USER_CURRENT) {
-                // Checks if this info is already listed in display.
-                for (DisplayResolveInfo existingInfo : mDisplayList) {
-                    if (resolveInfoMatch(dri.mResolveInfo, existingInfo.mResolveInfo)) {
-                        return;
-                    }
-                }
-                mDisplayList.add(dri);
-            }
-        }
-
-        @Nullable
-        public ResolveInfo resolveInfoForPosition(int position, boolean filtered) {
-            TargetInfo target = targetInfoForPosition(position, filtered);
-            if (target != null) {
-                return target.getResolveInfo();
-             }
-             return null;
-        }
-
-        @Nullable
-        public TargetInfo targetInfoForPosition(int position, boolean filtered) {
-            if (filtered) {
-                return getItem(position);
-            }
-            if (mDisplayList.size() > position) {
-                return mDisplayList.get(position);
-            }
-            return null;
-        }
-
-        public int getCount() {
-            int totalSize = mDisplayList == null || mDisplayList.isEmpty() ? mPlaceholderCount :
-                    mDisplayList.size();
-            if (mFilterLastUsed && mLastChosenPosition >= 0) {
-                totalSize--;
-            }
-            return totalSize;
-        }
-
-        public int getUnfilteredCount() {
-            return mDisplayList.size();
-        }
-
-        @Nullable
-        public TargetInfo getItem(int position) {
-            if (mFilterLastUsed && mLastChosenPosition >= 0 && position >= mLastChosenPosition) {
-                position++;
-            }
-            if (mDisplayList.size() > position) {
-                return mDisplayList.get(position);
-            } else {
-                return null;
-            }
-        }
-
-        public long getItemId(int position) {
-            return position;
-        }
-
-        public int getDisplayResolveInfoCount() {
-            return mDisplayList.size();
-        }
-
-        public DisplayResolveInfo getDisplayResolveInfo(int index) {
-            // Used to query services. We only query services for primary targets, not alternates.
-            return mDisplayList.get(index);
-        }
-
-        public final View getView(int position, View convertView, ViewGroup parent) {
-            View view = convertView;
-            if (view == null) {
-                view = createView(parent);
-            }
-            onBindView(view, getItem(position));
-            return view;
-        }
-
-        public final View createView(ViewGroup parent) {
-            final View view = onCreateView(parent);
-            final ViewHolder holder = new ViewHolder(view);
-            view.setTag(holder);
-            return view;
-        }
-
-        public View onCreateView(ViewGroup parent) {
-            return mInflater.inflate(
-                    com.android.internal.R.layout.resolve_list_item, parent, false);
-        }
-
-        public final void bindView(int position, View view) {
-            onBindView(view, getItem(position));
-        }
-
-        protected void onBindView(View view, TargetInfo info) {
-            final ViewHolder holder = (ViewHolder) view.getTag();
-            if (info == null) {
-                holder.icon.setImageDrawable(
-                        getDrawable(R.drawable.resolver_icon_placeholder));
-                return;
-            }
-
-            final CharSequence label = info.getDisplayLabel();
-            if (!TextUtils.equals(holder.text.getText(), label)) {
-                holder.text.setText(info.getDisplayLabel());
-            }
-
-            // Always show a subLabel for visual consistency across list items. Show an empty
-            // subLabel if the subLabel is the same as the label
-            CharSequence subLabel = info.getExtendedInfo();
-            if (TextUtils.equals(label, subLabel)) subLabel = null;
-
-            if (!TextUtils.equals(holder.text2.getText(), subLabel)
-                    && !TextUtils.isEmpty(subLabel)) {
-                holder.text2.setVisibility(View.VISIBLE);
-                holder.text2.setText(subLabel);
-            }
-
-            if (info.isSuspended()) {
-                holder.icon.setColorFilter(mSuspendedMatrixColorFilter);
-            } else {
-                holder.icon.setColorFilter(null);
-            }
-
-            if (info instanceof DisplayResolveInfo
-                    && !((DisplayResolveInfo) info).hasDisplayIcon()) {
-                new LoadIconTask((DisplayResolveInfo) info, holder.icon).execute();
-            } else {
-                holder.icon.setImageDrawable(info.getDisplayIcon());
-            }
+        } else {
+            mMultiProfilePagerAdapter.clearInactiveProfileCache();
         }
     }
 
+    private boolean inactiveListAdapterHasItems() {
+        if (!shouldShowTabs()) {
+            return false;
+        }
+        return mMultiProfilePagerAdapter.getInactiveListAdapter().getCount() > 0;
+    }
+
+    private BroadcastReceiver createWorkProfileStateReceiver() {
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (!TextUtils.equals(action, Intent.ACTION_USER_UNLOCKED)
+                        && !TextUtils.equals(action, Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
+                        && !TextUtils.equals(action, Intent.ACTION_MANAGED_PROFILE_AVAILABLE)) {
+                    return;
+                }
+
+                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+
+                if (userId != getWorkProfileUserHandle().getIdentifier()) {
+                    return;
+                }
+
+                if (isWorkProfileEnabled()) {
+                    if (mWorkProfileHasBeenEnabled) {
+                        return;
+                    }
+
+                    mWorkProfileHasBeenEnabled = true;
+                    mMultiProfilePagerAdapter.markWorkProfileEnabledBroadcastReceived();
+                } else {
+                    // Must be an UNAVAILABLE broadcast, so we watch for the next availability
+                    mWorkProfileHasBeenEnabled = false;
+                }
+
+                if (mMultiProfilePagerAdapter.getCurrentUserHandle()
+                        .equals(getWorkProfileUserHandle())) {
+                    mMultiProfilePagerAdapter.rebuildActiveTab(true);
+                } else {
+                    mMultiProfilePagerAdapter.clearInactiveProfileCache();
+                }
+            }
+        };
+    }
 
     @VisibleForTesting
     public static final class ResolvedComponentInfo {
@@ -2176,24 +2063,6 @@ public class ResolverActivity extends Activity {
         public void setPinned(boolean pinned) {
             mPinned = pinned;
         }
-
-    }
-
-    static class ViewHolder {
-        public View itemView;
-        public Drawable defaultItemViewBackground;
-
-        public TextView text;
-        public TextView text2;
-        public ImageView icon;
-
-        public ViewHolder(View view) {
-            itemView = view;
-            defaultItemViewBackground = view.getBackground();
-            text = (TextView) view.findViewById(com.android.internal.R.id.text1);
-            text2 = (TextView) view.findViewById(com.android.internal.R.id.text2);
-            icon = (ImageView) view.findViewById(R.id.icon);
-        }
     }
 
     class ItemClickListener implements AdapterView.OnItemClickListener,
@@ -2209,11 +2078,13 @@ public class ResolverActivity extends Activity {
                 return;
             }
             // If we're still loading, we can't yet enable the buttons.
-            if (mAdapter.resolveInfoForPosition(position, true) == null) {
+            if (mMultiProfilePagerAdapter.getActiveListAdapter()
+                    .resolveInfoForPosition(position, true) == null) {
                 return;
             }
-
-            final int checkedPos = mAdapterView.getCheckedItemPosition();
+            ListView currentAdapterView =
+                    (ListView) mMultiProfilePagerAdapter.getActiveAdapterView();
+            final int checkedPos = currentAdapterView.getCheckedItemPosition();
             final boolean hasValidSelection = checkedPos != ListView.INVALID_POSITION;
             if (!useLayoutWithDefault()
                     && (!hasValidSelection || mLastSelected != checkedPos)
@@ -2221,7 +2092,8 @@ public class ResolverActivity extends Activity {
                 setAlwaysButtonEnabled(hasValidSelection, checkedPos, true);
                 mOnceButton.setEnabled(hasValidSelection);
                 if (hasValidSelection) {
-                    mAdapterView.smoothScrollToPosition(checkedPos);
+                    currentAdapterView.smoothScrollToPosition(checkedPos);
+                    mOnceButton.requestFocus();
                 }
                 mLastSelected = checkedPos;
             } else {
@@ -2239,38 +2111,12 @@ public class ResolverActivity extends Activity {
                 // Header views don't count.
                 return false;
             }
-            ResolveInfo ri = mAdapter.resolveInfoForPosition(position, true);
+            ResolveInfo ri = mMultiProfilePagerAdapter.getActiveListAdapter()
+                    .resolveInfoForPosition(position, true);
             showTargetDetails(ri);
             return true;
         }
 
-    }
-
-    class LoadIconTask extends AsyncTask<Void, Void, Drawable> {
-        protected final DisplayResolveInfo mDisplayResolveInfo;
-        private final ResolveInfo mResolveInfo;
-        private final ImageView mTargetView;
-
-        LoadIconTask(DisplayResolveInfo dri, ImageView target) {
-            mDisplayResolveInfo = dri;
-            mResolveInfo = dri.getResolveInfo();
-            mTargetView = target;
-        }
-
-        @Override
-        protected Drawable doInBackground(Void... params) {
-            return loadIconForResolveInfo(mResolveInfo);
-        }
-
-        @Override
-        protected void onPostExecute(Drawable d) {
-            if (mAdapter.getOtherProfile() == mDisplayResolveInfo) {
-                bindProfileView();
-            } else {
-                mDisplayResolveInfo.setDisplayIcon(d);
-                mTargetView.setImageDrawable(d);
-            }
-        }
     }
 
     static final boolean isSpecificUriMatch(int match) {
@@ -2306,7 +2152,8 @@ public class ResolverActivity extends Activity {
 
             final ResolverActivity ra = (ResolverActivity) getActivity();
             if (ra != null) {
-                final TargetInfo ti = ra.mAdapter.getItem(selections[0].getIndex());
+                final TargetInfo ti = ra.mMultiProfilePagerAdapter.getActiveListAdapter()
+                        .getItem(selections[0].getIndex());
                 if (ra.onTargetSelected(ti, false)) {
                     ra.mPickOptionRequest = null;
                     ra.finish();
@@ -2314,4 +2161,6 @@ public class ResolverActivity extends Activity {
             }
         }
     }
+
+    protected void maybeLogProfileChange() {}
 }

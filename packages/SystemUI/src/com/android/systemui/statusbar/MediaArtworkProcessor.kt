@@ -54,7 +54,8 @@ class MediaArtworkProcessor @Inject constructor() {
         var output: Allocation? = null
         var inBitmap: Bitmap? = null
         try {
-            context.display.getSize(mTmpSize)
+            @Suppress("DEPRECATION")
+            context.display?.getSize(mTmpSize)
             val rect = Rect(0, 0, artwork.width, artwork.height)
             MathUtils.fitRect(rect, Math.max(mTmpSize.x / DOWNSAMPLE, mTmpSize.y / DOWNSAMPLE))
             inBitmap = Bitmap.createScaledBitmap(artwork, rect.width(), rect.height(),

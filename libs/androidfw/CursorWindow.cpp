@@ -69,7 +69,7 @@ status_t CursorWindow::create(const String8& name, size_t size, CursorWindow** o
                     result = window->clear();
                     if (!result) {
                         LOG_WINDOW("Created new CursorWindow: freeOffset=%d, "
-                                "numRows=%d, numColumns=%d, mSize=%d, mData=%p",
+                                "numRows=%d, numColumns=%d, mSize=%zu, mData=%p",
                                 window->mHeader->freeOffset,
                                 window->mHeader->numRows,
                                 window->mHeader->numColumns,
@@ -124,7 +124,7 @@ status_t CursorWindow::createFromParcel(Parcel* parcel, CursorWindow** outCursor
                     CursorWindow* window = new CursorWindow(name, dupAshmemFd,
                             data, size, true /*readOnly*/);
                     LOG_WINDOW("Created CursorWindow from parcel: freeOffset=%d, "
-                            "numRows=%d, numColumns=%d, mSize=%d, mData=%p",
+                            "numRows=%d, numColumns=%d, mSize=%zu, mData=%p",
                             window->mHeader->freeOffset,
                             window->mHeader->numRows,
                             window->mHeader->numColumns,
@@ -200,7 +200,7 @@ status_t CursorWindow::allocRow() {
     FieldSlot* fieldDir = static_cast<FieldSlot*>(offsetToPtr(fieldDirOffset));
     memset(fieldDir, 0, fieldDirSize);
 
-    LOG_WINDOW("Allocated row %u, rowSlot is at offset %u, fieldDir is %d bytes at offset %u\n",
+    LOG_WINDOW("Allocated row %u, rowSlot is at offset %u, fieldDir is %zu bytes at offset %u\n",
             mHeader->numRows - 1, offsetFromPtr(rowSlot), fieldDirSize, fieldDirOffset);
     rowSlot->offset = fieldDirOffset;
     return OK;

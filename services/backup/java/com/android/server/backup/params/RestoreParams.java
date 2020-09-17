@@ -24,6 +24,9 @@ import android.content.pm.PackageInfo;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.transport.TransportClient;
 
+import java.util.Map;
+import java.util.Set;
+
 public class RestoreParams {
     public final TransportClient transportClient;
     public final IRestoreObserver observer;

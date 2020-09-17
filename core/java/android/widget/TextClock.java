@@ -172,7 +172,7 @@ public class TextClock extends TextView {
                 return; // Test disabled the clock ticks
             }
             if (mTimeZone == null && Intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
-                final String timeZone = intent.getStringExtra("time-zone");
+                final String timeZone = intent.getStringExtra(Intent.EXTRA_TIMEZONE);
                 createTime(timeZone);
             } else if (!mShouldRunTicker && (Intent.ACTION_TIME_TICK.equals(intent.getAction())
                     || Intent.ACTION_TIME_CHANGED.equals(intent.getAction()))) {
@@ -192,7 +192,10 @@ public class TextClock extends TextView {
             long now = SystemClock.uptimeMillis();
             long next = now + (1000 - now % 1000);
 
-            getHandler().postAtTime(mTicker, next);
+            Handler handler = getHandler();
+            if (handler != null) {
+                handler.postAtTime(mTicker, next);
+            }
         }
     };
 
@@ -414,9 +417,8 @@ public class TextClock extends TextView {
 
     /**
      * Update the displayed time if necessary and invalidate the view.
-     * @hide
      */
-    public void refresh() {
+    public void refreshTime() {
         onTimeChanged();
         invalidate();
     }

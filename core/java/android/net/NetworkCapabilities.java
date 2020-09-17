@@ -1843,7 +1843,7 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(@NonNull ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(@NonNull ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
 
         for (int transport : getTransportTypes()) {
@@ -2137,7 +2137,7 @@ public final class NetworkCapabilities implements Parcelable {
      */
     @SystemApi
     @TestApi
-    public static class Builder {
+    public static final class Builder {
         private final NetworkCapabilities mCaps;
 
         /**

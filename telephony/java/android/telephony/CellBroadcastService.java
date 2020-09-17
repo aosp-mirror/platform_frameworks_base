@@ -119,7 +119,6 @@ public abstract class CellBroadcastService extends Service {
      */
     @Override
     @CallSuper
-    @NonNull
     public IBinder onBind(@Nullable Intent intent) {
         return mStubWrapper;
     }

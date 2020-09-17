@@ -16,11 +16,9 @@
 
 #include "SpriteIcon.h"
 
-#include <SkBitmap.h>
-#include <SkCanvas.h>
-#include <SkColor.h>
-#include <SkPaint.h>
-
+#include <android/graphics/bitmap.h>
+#include <android/graphics/canvas.h>
+#include <android/graphics/paint.h>
 #include <android/native_window.h>
 #include <log/log.h>
 
@@ -34,25 +32,22 @@ bool SpriteIcon::draw(sp<Surface> surface) const {
         return false;
     }
 
-    SkBitmap surfaceBitmap;
-    ssize_t bpr = outBuffer.stride * bytesPerPixel(outBuffer.format);
-    surfaceBitmap.installPixels(SkImageInfo::MakeN32Premul(outBuffer.width, outBuffer.height),
-                                outBuffer.bits, bpr);
+    graphics::Paint paint;
+    paint.setBlendMode(ABLEND_MODE_SRC);
 
-    SkCanvas surfaceCanvas(surfaceBitmap);
+    graphics::Canvas canvas(outBuffer, (int32_t)surface->getBuffersDataSpace());
+    canvas.drawBitmap(bitmap, 0, 0, &paint);
 
-    SkPaint paint;
-    paint.setBlendMode(SkBlendMode::kSrc);
-    surfaceCanvas.drawBitmap(bitmap, 0, 0, &paint);
+    const int iconWidth = width();
+    const int iconHeight = height();
 
-    if (outBuffer.width > width()) {
-        paint.setColor(0); // transparent fill color
-        surfaceCanvas.drawRect(SkRect::MakeLTRB(width(), 0, outBuffer.width, height()), paint);
+    if (outBuffer.width > iconWidth) {
+        paint.setBlendMode(ABLEND_MODE_CLEAR); // clear to transparent
+        canvas.drawRect({iconWidth, 0, outBuffer.width, iconHeight}, paint);
     }
-    if (outBuffer.height > height()) {
-        paint.setColor(0); // transparent fill color
-        surfaceCanvas.drawRect(SkRect::MakeLTRB(0, height(), outBuffer.width, outBuffer.height),
-                               paint);
+    if (outBuffer.height > iconHeight) {
+        paint.setBlendMode(ABLEND_MODE_CLEAR); // clear to transparent
+        canvas.drawRect({0, iconHeight, outBuffer.width, outBuffer.height}, paint);
     }
 
     status = surface->unlockAndPost();

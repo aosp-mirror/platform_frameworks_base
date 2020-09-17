@@ -16,19 +16,9 @@
 java_sdk_library {
     name: "framework-tethering",
     defaults: ["framework-module-defaults"],
+    impl_library_visibility: ["//frameworks/base/packages/Tethering:__subpackages__"],
 
-    // Allow access to the stubs from anywhere.
-    visibility: ["//visibility:public"],
-
-    // Restrict access to implementation library.
-    impl_library_visibility: [
-        "//visibility:override", // Ignore the visibility property.
-        "//frameworks/base/packages/Tethering:__subpackages__",
-    ],
-
-    srcs: [
-        ":framework-tethering-srcs",
-    ],
+    srcs: [":framework-tethering-srcs"],
 
     jarjar_rules: "jarjar-rules.txt",
     installable: true,

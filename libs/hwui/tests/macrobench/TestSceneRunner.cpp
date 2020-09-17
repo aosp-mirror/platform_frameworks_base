@@ -109,16 +109,14 @@ void outputBenchmarkReport(const TestScene::Info& info, const TestScene::Options
 
 void run(const TestScene::Info& info, const TestScene::Options& opts,
          benchmark::BenchmarkReporter* reporter) {
-    // Switch to the real display
-    gDisplay = getInternalDisplay();
-
     Properties::forceDrawFrame = true;
     TestContext testContext;
     testContext.setRenderOffscreen(opts.renderOffscreen);
 
     // create the native surface
-    const int width = gDisplay.w;
-    const int height = gDisplay.h;
+    const ui::Size& resolution = getActiveDisplayResolution();
+    const int width = resolution.getWidth();
+    const int height = resolution.getHeight();
     sp<Surface> surface = testContext.surface();
 
     std::unique_ptr<TestScene> scene(info.createScene(opts));
@@ -133,7 +131,7 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
     ContextFactory factory;
     std::unique_ptr<RenderProxy> proxy(new RenderProxy(false, rootNode.get(), &factory));
     proxy->loadSystemProperties();
-    proxy->setSurface(surface);
+    proxy->setSurface(surface.get());
     float lightX = width / 2.0;
     proxy->setLightAlpha(255 * 0.075, 255 * 0.15);
     proxy->setLightGeometry((Vector3){lightX, dp(-200.0f), dp(800.0f)}, dp(800.0f));
@@ -146,7 +144,7 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
     }
     for (int i = 0; i < warmupFrameCount; i++) {
         testContext.waitForVsync();
-        nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
+        nsecs_t vsync = systemTime(SYSTEM_TIME_MONOTONIC);
         UiFrameInfoBuilder(proxy->frameInfo()).setVsync(vsync, vsync);
         proxy->syncAndDrawFrame();
     }
@@ -161,10 +159,10 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
 
     ModifiedMovingAverage<double> avgMs(opts.reportFrametimeWeight);
 
-    nsecs_t start = systemTime(CLOCK_MONOTONIC);
+    nsecs_t start = systemTime(SYSTEM_TIME_MONOTONIC);
     for (int i = 0; i < opts.count; i++) {
         testContext.waitForVsync();
-        nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
+        nsecs_t vsync = systemTime(SYSTEM_TIME_MONOTONIC);
         {
             ATRACE_NAME("UI-Draw Frame");
             UiFrameInfoBuilder(proxy->frameInfo()).setVsync(vsync, vsync);
@@ -173,7 +171,7 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
         }
         if (opts.reportFrametimeWeight) {
             proxy->fence();
-            nsecs_t done = systemTime(CLOCK_MONOTONIC);
+            nsecs_t done = systemTime(SYSTEM_TIME_MONOTONIC);
             avgMs.add((done - vsync) / 1000000.0);
             if (i % 10 == 9) {
                 printf("Average frametime %.3fms\n", avgMs.average());
@@ -181,7 +179,7 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
         }
     }
     proxy->fence();
-    nsecs_t end = systemTime(CLOCK_MONOTONIC);
+    nsecs_t end = systemTime(SYSTEM_TIME_MONOTONIC);
 
     if (reporter) {
         outputBenchmarkReport(info, opts, reporter, proxy.get(), (end - start) / (double)s2ns(1));

@@ -21,12 +21,9 @@
 #include <linux/capability.h>
 #include <stdio.h>
 #include <sys/stat.h>
-#include <sys/system_properties.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-
-#include <private/android_filesystem_config.h> // for AID_SYSTEM
 
 #include <sstream>
 #include <string>
@@ -77,12 +74,6 @@ static struct typedvalue_offsets_t {
   jfieldID mDensity;
 } gTypedValueOffsets;
 
-static struct assetfiledescriptor_offsets_t {
-  jfieldID mFd;
-  jfieldID mStartOffset;
-  jfieldID mLength;
-} gAssetFileDescriptorOffsets;
-
 // This is also used by asset_manager.cpp.
 assetmanager_offsets_t gAssetManagerOffsets;
 
@@ -110,7 +101,7 @@ static struct arraymap_offsets_t {
   jmethodID put;
 } gArrayMapOffsets;
 
-jclass g_stringClass = nullptr;
+static jclass g_stringClass = nullptr;
 
 // ----------------------------------------------------------------------------
 
@@ -121,107 +112,6 @@ constexpr inline static jint ApkAssetsCookieToJavaCookie(ApkAssetsCookie cookie)
 
 constexpr inline static ApkAssetsCookie JavaCookieToApkAssetsCookie(jint cookie) {
   return cookie > 0 ? static_cast<ApkAssetsCookie>(cookie - 1) : kInvalidCookie;
-}
-
-// This is called by zygote (running as user root) as part of preloadResources.
-static void NativeVerifySystemIdmaps(JNIEnv* /*env*/, jclass /*clazz*/) {
-  switch (pid_t pid = fork()) {
-    case -1:
-      PLOG(ERROR) << "failed to fork for idmap";
-      break;
-
-    // child
-    case 0: {
-      struct __user_cap_header_struct capheader;
-      struct __user_cap_data_struct capdata;
-
-      memset(&capheader, 0, sizeof(capheader));
-      memset(&capdata, 0, sizeof(capdata));
-
-      capheader.version = _LINUX_CAPABILITY_VERSION;
-      capheader.pid = 0;
-
-      if (capget(&capheader, &capdata) != 0) {
-        PLOG(ERROR) << "capget";
-        exit(1);
-      }
-
-      capdata.effective = capdata.permitted;
-      if (capset(&capheader, &capdata) != 0) {
-        PLOG(ERROR) << "capset";
-        exit(1);
-      }
-
-      if (setgid(AID_SYSTEM) != 0) {
-        PLOG(ERROR) << "setgid";
-        exit(1);
-      }
-
-      if (setuid(AID_SYSTEM) != 0) {
-        PLOG(ERROR) << "setuid";
-        exit(1);
-      }
-
-      // Generic idmap parameters
-      const char* argv[11];
-      int argc = 0;
-      struct stat st;
-
-      memset(argv, 0, sizeof(argv));
-      argv[argc++] = AssetManager::IDMAP_BIN;
-      argv[argc++] = "--scan";
-      argv[argc++] = AssetManager::TARGET_PACKAGE_NAME;
-      argv[argc++] = AssetManager::TARGET_APK_PATH;
-      argv[argc++] = AssetManager::IDMAP_DIR;
-
-      // Directories to scan for overlays: if OVERLAY_THEME_DIR_PROPERTY is defined,
-      // use VENDOR_OVERLAY_DIR/<value of OVERLAY_THEME_DIR_PROPERTY> in
-      // addition to VENDOR_OVERLAY_DIR.
-      std::string overlay_theme_path = base::GetProperty(AssetManager::OVERLAY_THEME_DIR_PROPERTY,
-                                                         "");
-      if (!overlay_theme_path.empty()) {
-        overlay_theme_path =
-          std::string(AssetManager::VENDOR_OVERLAY_DIR) + "/" + overlay_theme_path;
-        if (stat(overlay_theme_path.c_str(), &st) == 0) {
-          argv[argc++] = overlay_theme_path.c_str();
-        }
-      }
-
-      if (stat(AssetManager::VENDOR_OVERLAY_DIR, &st) == 0) {
-        argv[argc++] = AssetManager::VENDOR_OVERLAY_DIR;
-      }
-
-      if (stat(AssetManager::PRODUCT_OVERLAY_DIR, &st) == 0) {
-        argv[argc++] = AssetManager::PRODUCT_OVERLAY_DIR;
-      }
-
-      if (stat(AssetManager::SYSTEM_EXT_OVERLAY_DIR, &st) == 0) {
-        argv[argc++] = AssetManager::SYSTEM_EXT_OVERLAY_DIR;
-      }
-
-      if (stat(AssetManager::ODM_OVERLAY_DIR, &st) == 0) {
-        argv[argc++] = AssetManager::ODM_OVERLAY_DIR;
-      }
-
-      if (stat(AssetManager::OEM_OVERLAY_DIR, &st) == 0) {
-        argv[argc++] = AssetManager::OEM_OVERLAY_DIR;
-      }
-
-      // Finally, invoke idmap (if any overlay directory exists)
-      if (argc > 5) {
-        execv(AssetManager::IDMAP_BIN, (char* const*)argv);
-        PLOG(ERROR) << "failed to execv for idmap";
-        exit(1); // should never get here
-      } else {
-        exit(0);
-      }
-  } break;
-
-  // parent
-  default:
-    waitpid(pid, nullptr, 0);
-    break;
-  }
 }
 
 static jobjectArray NativeCreateIdmapsForStaticOverlaysTargetingAndroid(JNIEnv* env,
@@ -354,7 +244,7 @@ static Guarded<AssetManager2>& AssetManagerFromLong(jlong ptr) {
 }
 
 static jobject NativeGetOverlayableMap(JNIEnv* env, jclass /*clazz*/, jlong ptr,
-                                        jstring package_name) {
+                                       jstring package_name) {
   ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
   const ScopedUtfChars package_name_utf8(env, package_name);
   CHECK(package_name_utf8.c_str() != nullptr);
@@ -399,6 +289,22 @@ static jobject NativeGetOverlayableMap(JNIEnv* env, jclass /*clazz*/, jlong ptr,
   return array_map;
 }
 
+static jstring NativeGetOverlayablesToString(JNIEnv* env, jclass /*clazz*/, jlong ptr,
+                                             jstring package_name) {
+  ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  const ScopedUtfChars package_name_utf8(env, package_name);
+  CHECK(package_name_utf8.c_str() != nullptr);
+  const std::string std_package_name(package_name_utf8.c_str());
+
+  std::string result;
+  if (!assetmanager->GetOverlayablesToString(std_package_name, &result)) {
+    return nullptr;
+  }
+
+  return env->NewStringUTF(result.c_str());
+}
+
+#ifdef __ANDROID__ // Layoutlib does not support parcel
 static jobject ReturnParcelFileDescriptor(JNIEnv* env, std::unique_ptr<Asset> asset,
                                           jlongArray out_offsets) {
   off64_t start_offset, length;
@@ -430,6 +336,15 @@ static jobject ReturnParcelFileDescriptor(JNIEnv* env, std::unique_ptr<Asset> as
   }
   return newParcelFileDescriptor(env, file_desc);
 }
+#else
+static jobject ReturnParcelFileDescriptor(JNIEnv* env, std::unique_ptr<Asset> asset,
+                                          jlongArray out_offsets) {
+  jniThrowException(env, "java/lang/UnsupportedOperationException",
+                    "Implement me");
+  // never reached
+  return nullptr;
+}
+#endif
 
 static jint NativeGetGlobalAssetCount(JNIEnv* /*env*/, jobject /*clazz*/) {
   return Asset::getGlobalCount();
@@ -533,7 +448,9 @@ static void NativeSetConfiguration(JNIEnv* env, jclass /*clazz*/, jlong ptr, jin
   assetmanager->SetConfiguration(configuration);
 }
 
-static jobject NativeGetAssignedPackageIdentifiers(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
+static jobject NativeGetAssignedPackageIdentifiers(JNIEnv* env, jclass /*clazz*/, jlong ptr,
+                                                   jboolean includeOverlays,
+                                                   jboolean includeLoaders) {
   ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
 
   jobject sparse_array =
@@ -543,6 +460,10 @@ static jobject NativeGetAssignedPackageIdentifiers(JNIEnv* env, jclass /*clazz*/
     // An exception is pending.
     return nullptr;
   }
+
+  // Optionally exclude overlays and loaders.
+  uint64_t exclusion_flags = ((includeOverlays) ? 0U : PROPERTY_OVERLAY)
+      | ((includeLoaders) ? 0U : PROPERTY_LOADER);
 
   assetmanager->ForEachPackage([&](const std::string& package_name, uint8_t package_id) -> bool {
     jstring jpackage_name = env->NewStringUTF(package_name.c_str());
@@ -554,8 +475,14 @@ static jobject NativeGetAssignedPackageIdentifiers(JNIEnv* env, jclass /*clazz*/
     env->CallVoidMethod(sparse_array, gSparseArrayOffsets.put, static_cast<jint>(package_id),
                         jpackage_name);
     return true;
-  });
+  }, exclusion_flags);
+
   return sparse_array;
+}
+
+static jboolean ContainsAllocatedTable(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
+  ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  return assetmanager->ContainsAllocatedTable();
 }
 
 static jobjectArray NativeList(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring path) {
@@ -727,9 +654,48 @@ static jlong NativeOpenXmlAsset(JNIEnv* env, jobject /*clazz*/, jlong ptr, jint 
   }
 
   // May be nullptr.
-  const DynamicRefTable* dynamic_ref_table = assetmanager->GetDynamicRefTableForCookie(cookie);
+  std::shared_ptr<const DynamicRefTable> dynamic_ref_table =
+      assetmanager->GetDynamicRefTableForCookie(cookie);
 
-  std::unique_ptr<ResXMLTree> xml_tree = util::make_unique<ResXMLTree>(dynamic_ref_table);
+  std::unique_ptr<ResXMLTree> xml_tree = util::make_unique<ResXMLTree>(
+      std::move(dynamic_ref_table));
+  status_t err = xml_tree->setTo(asset->getBuffer(true), asset->getLength(), true);
+  asset.reset();
+
+  if (err != NO_ERROR) {
+    jniThrowException(env, "java/io/FileNotFoundException", "Corrupt XML binary file");
+    return 0;
+  }
+  return reinterpret_cast<jlong>(xml_tree.release());
+}
+
+static jlong NativeOpenXmlAssetFd(JNIEnv* env, jobject /*clazz*/, jlong ptr, int jcookie,
+                                  jobject file_descriptor) {
+  int fd = jniGetFDFromFileDescriptor(env, file_descriptor);
+  ATRACE_NAME(base::StringPrintf("AssetManager::OpenXmlAssetFd(%d)", fd).c_str());
+  if (fd < 0) {
+    jniThrowException(env, "java/lang/IllegalArgumentException", "Bad FileDescriptor");
+    return 0;
+  }
+
+  base::unique_fd dup_fd(::fcntl(fd, F_DUPFD_CLOEXEC, 0));
+  if (dup_fd < 0) {
+    jniThrowIOException(env, errno);
+    return 0;
+  }
+
+  std::unique_ptr<Asset>
+      asset(Asset::createFromFd(dup_fd.release(), nullptr, Asset::AccessMode::ACCESS_BUFFER));
+
+  ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  ApkAssetsCookie cookie = JavaCookieToApkAssetsCookie(jcookie);
+
+  // May be nullptr.
+   std::shared_ptr<const DynamicRefTable> dynamic_ref_table =
+       assetmanager->GetDynamicRefTableForCookie(cookie);
+
+  std::unique_ptr<ResXMLTree> xml_tree = util::make_unique<ResXMLTree>(
+      std::move(dynamic_ref_table));
   status_t err = xml_tree->setTo(asset->getBuffer(true), asset->getLength(), true);
   asset.reset();
 
@@ -1529,10 +1495,11 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     {"nativeSetApkAssets", "(J[Landroid/content/res/ApkAssets;Z)V", (void*)NativeSetApkAssets},
     {"nativeSetConfiguration", "(JIILjava/lang/String;IIIIIIIIIIIIIII)V",
      (void*)NativeSetConfiguration},
-    {"nativeGetAssignedPackageIdentifiers", "(J)Landroid/util/SparseArray;",
+    {"nativeGetAssignedPackageIdentifiers", "(JZZ)Landroid/util/SparseArray;",
      (void*)NativeGetAssignedPackageIdentifiers},
 
     // AssetManager file methods.
+    {"nativeContainsAllocatedTable", "(J)Z", (void*)ContainsAllocatedTable},
     {"nativeList", "(JLjava/lang/String;)[Ljava/lang/String;", (void*)NativeList},
     {"nativeOpenAsset", "(JLjava/lang/String;I)J", (void*)NativeOpenAsset},
     {"nativeOpenAssetFd", "(JLjava/lang/String;[J)Landroid/os/ParcelFileDescriptor;",
@@ -1541,6 +1508,7 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     {"nativeOpenNonAssetFd", "(JILjava/lang/String;[J)Landroid/os/ParcelFileDescriptor;",
      (void*)NativeOpenNonAssetFd},
     {"nativeOpenXmlAsset", "(JILjava/lang/String;)J", (void*)NativeOpenXmlAsset},
+    {"nativeOpenXmlAssetFd", "(JILjava/io/FileDescriptor;)J", (void*)NativeOpenXmlAssetFd},
 
     // AssetManager resource methods.
     {"nativeGetResourceValue", "(JISLandroid/util/TypedValue;Z)I", (void*)NativeGetResourceValue},
@@ -1595,11 +1563,12 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     {"nativeAssetGetRemainingLength", "(J)J", (void*)NativeAssetGetRemainingLength},
 
     // System/idmap related methods.
-    {"nativeVerifySystemIdmaps", "()V", (void*)NativeVerifySystemIdmaps},
     {"nativeCreateIdmapsForStaticOverlaysTargetingAndroid", "()[Ljava/lang/String;",
      (void*)NativeCreateIdmapsForStaticOverlaysTargetingAndroid},
     {"nativeGetOverlayableMap", "(JLjava/lang/String;)Ljava/util/Map;",
      (void*)NativeGetOverlayableMap},
+    {"nativeGetOverlayablesToString", "(JLjava/lang/String;)Ljava/lang/String;",
+     (void*)NativeGetOverlayablesToString},
 
     // Global management/debug methods.
     {"getGlobalAssetCount", "()I", (void*)NativeGetGlobalAssetCount},
@@ -1621,12 +1590,6 @@ int register_android_content_AssetManager(JNIEnv* env) {
   gTypedValueOffsets.mChangingConfigurations =
       GetFieldIDOrDie(env, typedValue, "changingConfigurations", "I");
   gTypedValueOffsets.mDensity = GetFieldIDOrDie(env, typedValue, "density", "I");
-
-  jclass assetFd = FindClassOrDie(env, "android/content/res/AssetFileDescriptor");
-  gAssetFileDescriptorOffsets.mFd =
-      GetFieldIDOrDie(env, assetFd, "mFd", "Landroid/os/ParcelFileDescriptor;");
-  gAssetFileDescriptorOffsets.mStartOffset = GetFieldIDOrDie(env, assetFd, "mStartOffset", "J");
-  gAssetFileDescriptorOffsets.mLength = GetFieldIDOrDie(env, assetFd, "mLength", "J");
 
   jclass assetManager = FindClassOrDie(env, "android/content/res/AssetManager");
   gAssetManagerOffsets.mObject = GetFieldIDOrDie(env, assetManager, "mObject", "J");

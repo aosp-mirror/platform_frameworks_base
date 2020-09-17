@@ -30,30 +30,36 @@ import java.io.PrintWriter;
  */
 public interface UriGrantsManagerInternal {
     void onSystemReady();
-    void onActivityManagerInternalAdded();
     void removeUriPermissionIfNeeded(UriPermission perm);
-    void grantUriPermission(int callingUid, String targetPkg, GrantUri grantUri,
-            final int modeFlags, UriPermissionOwner owner, int targetUserId);
+
     void revokeUriPermission(String targetPackage, int callingUid,
             GrantUri grantUri, final int modeFlags);
+
     boolean checkUriPermission(GrantUri grantUri, int uid, final int modeFlags);
-    int checkGrantUriPermission(int callingUid, String targetPkg, GrantUri grantUri,
-            final int modeFlags, int lastTargetUid);
     int checkGrantUriPermission(
             int callingUid, String targetPkg, Uri uri, int modeFlags, int userId);
-    NeededUriGrants checkGrantUriPermissionFromIntent(int callingUid,
-            String targetPkg, Intent intent, int mode, NeededUriGrants needed, int targetUserId);
+
     /**
-     * Grant Uri permissions from one app to another. This method only extends
-     * permission grants if {@code callingUid} has permission to them.
+     * Calculate the set of permission grants that would be needed to extend
+     * access for the given {@link Intent} to the given target package.
+     *
+     * @throws SecurityException if the caller doesn't have permission to the
+     *             {@link Intent} data, or if the underlying provider doesn't
+     *             allow permissions to be granted.
      */
-    void grantUriPermissionFromIntent(int callingUid,
-            String targetPkg, Intent intent, int targetUserId);
-    void grantUriPermissionFromIntent(int callingUid,
-            String targetPkg, Intent intent, UriPermissionOwner owner, int targetUserId);
+    NeededUriGrants checkGrantUriPermissionFromIntent(Intent intent, int callingUid,
+            String targetPkg, int targetUserId);
+
+    /**
+     * Extend a previously calculated set of permissions grants to the given
+     * owner. All security checks will have already been performed as part of
+     * calculating {@link NeededUriGrants}.
+     */
     void grantUriPermissionUncheckedFromIntent(
             NeededUriGrants needed, UriPermissionOwner owner);
+
     IBinder newUriPermissionOwner(String name);
+
     /**
      * Remove any {@link UriPermission} granted <em>from</em> or <em>to</em> the
      * given package.

@@ -19,7 +19,6 @@ import static androidx.lifecycle.Lifecycle.Event.ON_START;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -96,7 +95,6 @@ public class LifecycleTest {
             OnOptionsItemSelected {
 
         boolean mOnAttachObserved;
-        boolean mOnAttachHasContext;
         boolean mOnStartObserved;
         boolean mOnResumeObserved;
         boolean mOnPauseObserved;
@@ -107,9 +105,8 @@ public class LifecycleTest {
         boolean mOnOptionsItemSelectedObserved;
 
         @Override
-        public void onAttach(Context context) {
+        public void onAttach() {
             mOnAttachObserved = true;
-            mOnAttachHasContext = context != null;
         }
 
         @Override
@@ -194,7 +191,6 @@ public class LifecycleTest {
         assertThat(fragment.mFragObserver.mOnOptionsItemSelectedObserved).isTrue();
 
         assertThat(fragment.mFragObserver.mOnAttachObserved).isTrue();
-        assertThat(fragment.mFragObserver.mOnAttachHasContext).isTrue();
         assertThat(fragment.mFragObserver.mOnStartObserved).isTrue();
         assertThat(fragment.mFragObserver.mOnResumeObserved).isTrue();
         fragment.onPause();
@@ -218,7 +214,6 @@ public class LifecycleTest {
         assertThat(fragment.mFragObserver.mOnOptionsItemSelectedObserved).isTrue();
 
         assertThat(fragment.mFragObserver.mOnAttachObserved).isTrue();
-        assertThat(fragment.mFragObserver.mOnAttachHasContext).isTrue();
         assertThat(fragment.mFragObserver.mOnStartObserved).isTrue();
         assertThat(fragment.mFragObserver.mOnResumeObserved).isTrue();
         fragment.onPause();

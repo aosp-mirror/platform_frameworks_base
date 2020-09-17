@@ -20,9 +20,13 @@
 #include "Debug.h"
 #include "TreeInfo.h"
 #include "VectorDrawable.h"
-#include "renderstate/RenderState.h"
+#include "private/hwui/WebViewFunctor.h"
+#ifdef __ANDROID__
 #include "renderthread/CanvasContext.h"
-#include "utils/FatVector.h"
+#else
+#include "DamageAccumulator.h"
+#include "pipeline/skia/SkiaDisplayList.h"
+#endif
 #include "utils/MathUtils.h"
 #include "utils/StringUtils.h"
 #include "utils/TraceUtils.h"
@@ -32,6 +36,7 @@
 #include <atomic>
 #include <sstream>
 #include <string>
+#include <ui/FatVector.h>
 
 namespace android {
 namespace uirenderer {
@@ -103,7 +108,7 @@ void RenderNode::output(std::ostream& output, uint32_t level) {
     output << std::endl;
 }
 
-int RenderNode::getDebugSize() {
+int RenderNode::getUsageSize() {
     int size = sizeof(RenderNode);
     if (mStagingDisplayList) {
         size += mStagingDisplayList->getUsedSize();
@@ -113,6 +118,18 @@ int RenderNode::getDebugSize() {
     }
     return size;
 }
+
+int RenderNode::getAllocatedSize() {
+    int size = sizeof(RenderNode);
+    if (mStagingDisplayList) {
+        size += mStagingDisplayList->getAllocatedSize();
+    }
+    if (mDisplayList && mDisplayList != mStagingDisplayList) {
+        size += mDisplayList->getAllocatedSize();
+    }
+    return size;
+}
+
 
 void RenderNode::prepareTree(TreeInfo& info) {
     ATRACE_CALL();
@@ -161,6 +178,7 @@ void RenderNode::prepareLayer(TreeInfo& info, uint32_t dirtyMask) {
 }
 
 void RenderNode::pushLayerUpdate(TreeInfo& info) {
+#ifdef __ANDROID__ // Layoutlib does not support CanvasContext and Layers
     LayerType layerType = properties().effectiveLayerType();
     // If we are not a layer OR we cannot be rendered (eg, view was detached)
     // we need to destroy any Layers we may have had previously
@@ -189,6 +207,7 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     // That might be us, so tell CanvasContext that this layer is in the
     // tree and should not be destroyed.
     info.canvasContext.markLayerInUse(this);
+#endif
 }
 
 /**

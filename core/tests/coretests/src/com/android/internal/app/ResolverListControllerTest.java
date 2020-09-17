@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import static junit.framework.Assert.assertEquals;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
@@ -40,6 +42,8 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -111,12 +115,40 @@ public class ResolverListControllerTest {
         mUsm = new UsageStatsManager(mMockContext, mMockService);
         when(mMockContext.getSystemService(Context.USAGE_STATS_SERVICE)).thenReturn(mUsm);
         mController = new ResolverListController(mMockContext, mMockPackageManager, sendIntent,
-                refererPackage, UserHandle.USER_CURRENT);
-        mController.sort(new ArrayList<ResolverActivity.ResolvedComponentInfo>());
+                refererPackage, UserHandle.USER_CURRENT, /* userHandle */ UserHandle.SYSTEM);
+        mController.sort(new ArrayList<ResolvedComponentInfo>());
         long beforeReport = getCount(mUsm, packageName, action, annotation);
         mController.updateChooserCounts(packageName, UserHandle.USER_CURRENT, action);
         long afterReport = getCount(mUsm, packageName, action, annotation);
         assertThat(afterReport, is(beforeReport + 1l));
+    }
+
+    @Test
+    public void topKEqualsToSort() {
+        String annotation = "test_annotation";
+        Intent sendIntent = createSendImageIntent(annotation);
+        String refererPackage = "test_referer_package";
+        List<ResolvedComponentInfo> resolvedComponents = createResolvedComponentsForTest(10);
+        mUsm = new UsageStatsManager(mMockContext, mMockService);
+        when(mMockContext.getSystemService(Context.USAGE_STATS_SERVICE)).thenReturn(mUsm);
+        mController = new ResolverListController(mMockContext, mMockPackageManager, sendIntent,
+                refererPackage, UserHandle.USER_CURRENT, /* userHandle */ UserHandle.SYSTEM);
+        List<ResolvedComponentInfo> topKList = new ArrayList<>(resolvedComponents);
+        mController.topK(topKList, 5);
+        List<ResolvedComponentInfo> sortList = new ArrayList<>(topKList);
+        mController.sort(sortList);
+        assertEquals("Top k elements should be sorted when input size greater than k.",
+                sortList.subList(0, 5), topKList.subList(0, 5));
+        mController.topK(topKList, 10);
+        sortList = new ArrayList<>(topKList);
+        mController.sort(sortList);
+        assertEquals("All elements should be sorted when input size equals k.",
+                sortList, topKList);
+        mController.topK(topKList, 15);
+        sortList = new ArrayList<>(topKList);
+        mController.sort(sortList);
+        assertEquals("All elements should be sorted when input size less than k.",
+                sortList, topKList);
     }
 
     private UsageStats initStats(String packageName, String action,
@@ -155,5 +187,13 @@ public class ResolverListControllerTest {
             return 0;
         }
         return packageStats.mChooserCounts.get(action).getOrDefault(annotation, 0);
+    }
+
+    private List<ResolvedComponentInfo> createResolvedComponentsForTest(int numberOfResults) {
+        List<ResolvedComponentInfo> infoList = new ArrayList<>(numberOfResults);
+        for (int i = 0; i < numberOfResults; i++) {
+            infoList.add(ResolverDataProvider.createResolvedComponentInfo(i));
+        }
+        return infoList;
     }
 }

@@ -128,6 +128,10 @@
 
         <!-- Toolbar attributes -->
         <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
+
+        <!-- Icon sizes -->
+        <item name="iconfactoryIconSize">@dimen/resolver_icon_size</item>
+        <item name="iconfactoryBadgeSize">@dimen/resolver_badge_size</item>
       </style>
 
     <!-- @hide Special theme for the default system Activity-based Alert dialogs. -->

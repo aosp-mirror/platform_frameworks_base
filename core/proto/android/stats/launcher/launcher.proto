@@ -32,10 +32,12 @@ enum LauncherAction {
 }
 
 enum LauncherState {
-    BACKGROUND = 0;
-    HOME = 1;
-    OVERVIEW = 2;
-    ALLAPPS = 3;
+    LAUNCHER_STATE_UNSPECIFIED = 0;
+    BACKGROUND = 1;
+    HOME = 2;
+    OVERVIEW = 3;
+    ALLAPPS = 4;
+    UNCHANGED = 5;
 }
 
 message LauncherTarget {

@@ -50,7 +50,6 @@
         <permission name="android.permission.USE_RESERVED_DISK"/>
         <permission name="android.permission.USER_ACTIVITY"/>
         <permission name="android.permission.WRITE_APN_SETTINGS"/>
-        <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
         <permission name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS" />
     </privapp-permissions>

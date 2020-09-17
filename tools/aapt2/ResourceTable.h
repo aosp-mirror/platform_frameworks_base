@@ -36,6 +36,8 @@
 #include <unordered_map>
 #include <vector>
 
+using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
+
 namespace aapt {
 
 // The Public status of a resource.
@@ -75,36 +77,8 @@ struct Overlayable {
 struct OverlayableItem {
   explicit OverlayableItem(const std::shared_ptr<Overlayable>& overlayable)
       : overlayable(overlayable) {}
-
-  // Represents the types overlays that are allowed to overlay the resource.
-  typedef uint32_t PolicyFlags;
-  enum Policy : uint32_t {
-    kNone = 0x00000000,
-
-    // The resource can be overlaid by any overlay.
-    kPublic = 0x00000001,
-
-    // The resource can be overlaid by any overlay on the system partition.
-    kSystem = 0x00000002,
-
-    // The resource can be overlaid by any overlay on the vendor partition.
-    kVendor = 0x00000004,
-
-    // The resource can be overlaid by any overlay on the product partition.
-    kProduct = 0x00000008,
-
-    // The resource can be overlaid by any overlay signed with the same signature as its actor.
-    kSignature = 0x00000010,
-
-    // The resource can be overlaid by any overlay on the odm partition.
-    kOdm = 0x00000020,
-
-    // The resource can be overlaid by any overlay on the oem partition.
-    kOem = 0x00000040,
-  };
-
   std::shared_ptr<Overlayable> overlayable;
-  PolicyFlags policies = Policy::kNone;
+  PolicyFlags policies = PolicyFlags::NONE;
   std::string comment;
   Source source;
 };
@@ -228,13 +202,13 @@ class ResourceTable {
 
   enum class CollisionResult { kKeepBoth, kKeepOriginal, kConflict, kTakeNew };
 
-  using CollisionResolverFunc = std::function<CollisionResult(Value*, Value*, bool)>;
+  using CollisionResolverFunc = std::function<CollisionResult(Value*, Value*)>;
 
   // When a collision of resources occurs, this method decides which value to keep.
-  static CollisionResult ResolveValueCollision(Value* existing, Value* incoming, bool overlay);
+  static CollisionResult ResolveValueCollision(Value* existing, Value* incoming);
 
   // When a collision of resources occurs, this method keeps both values
-  static CollisionResult IgnoreCollision(Value* existing, Value* incoming, bool overlay);
+  static CollisionResult IgnoreCollision(Value* existing, Value* incoming);
 
   bool AddResource(const ResourceNameRef& name, const android::ConfigDescription& config,
                    const android::StringPiece& product, std::unique_ptr<Value> value,

@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2016 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="long_text">text text text text text text text text text text text text
+        text text text text text text text text text text text text text text text text
+        text text text text text text text text text text text text text text text text
+        text text text text text text text text text text text text text text text text
+        text text text text text text text text text text text text text text text text
+        text text text text text text text text text text text text text text text text
+        text text text text text text text typo text text text text text text text text
+        text text text text text text text text text text text text text text text text
+        text text text text text text text text text text text text text text text text
+        text text text text text text text text text text text text text text text text
+        text text text text text text text text text text text text text text text text
+        text text text text text text text text text text text text </string>
+
+    <plurals name="plurals_text">
+        <item quantity="one">1 text</item>
+        <item quantity="other"><xliff:g id="count" example="3">%d</xliff:g> texts</item>
+    </plurals>
+
+    <string-array name="strings">
+        <item>Run</item>
+        <item>the</item>
+        <item>performance</item>
+        <item>tests!</item>
+        <item>Run</item>
+        <item>the</item>
+        <item>performance</item>
+        <item>tests!</item>
+        <item>Run</item>
+        <item>the</item>
+        <item>performance</item>
+        <item>tests!</item>
+        <item>Run</item>
+        <item>the</item>
+        <item>performance</item>
+        <item>tests!</item>
+        <item>Run</item>
+        <item>the</item>
+        <item>performance</item>
+        <item>tests!</item>
+        <item>Run</item>
+        <item>the</item>
+        <item>performance</item>
+        <item>tests!</item>
+        <item>Run</item>
+        <item>the</item>
+        <item>performance</item>
+        <item>tests!</item>
+        <item>Run</item>
+        <item>the</item>
+        <item>performance</item>
+        <item>tests!</item>
+    </string-array>
+
+    <integer-array name="ints">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </integer-array>
+
+    <color name="white">#ffffff</color>
+
+    <integer name="forty_two">42</integer>
+
+    <string name="short_text">text text</string>
+    <string name="short_text000">B</string>
+    <string name="short_text001">B</string>
+    <string name="short_text002">B</string>
+    <string name="short_text003">B</string>
+    <string name="short_text004">B</string>
+    <string name="short_text005">B</string>
+    <string name="short_text006">B</string>
+    <string name="short_text007">B</string>
+    <string name="short_text008">B</string>
+    <string name="short_text009">B</string>
+    <string name="short_text010">B</string>
+    <string name="short_text011">B</string>
+    <string name="short_text012">B</string>
+    <string name="short_text013">B</string>
+    <string name="short_text014">B</string>
+    <string name="short_text015">B</string>
+    <string name="short_text016">B</string>
+    <string name="short_text017">B</string>
+    <string name="short_text018">B</string>
+    <string name="short_text019">B</string>
+    <string name="short_text020">B</string>
+    <string name="short_text021">B</string>
+    <string name="short_text022">B</string>
+    <string name="short_text023">B</string>
+    <string name="short_text024">B</string>
+    <string name="short_text025">B</string>
+    <string name="short_text026">B</string>
+    <string name="short_text027">B</string>
+    <string name="short_text028">B</string>
+    <string name="short_text029">B</string>
+    <string name="short_text030">B</string>
+    <string name="short_text031">B</string>
+    <string name="short_text032">B</string>
+    <string name="short_text033">B</string>
+    <string name="short_text034">B</string>
+    <string name="short_text035">B</string>
+    <string name="short_text036">B</string>
+    <string name="short_text037">B</string>
+    <string name="short_text038">B</string>
+    <string name="short_text039">B</string>
+    <string name="short_text040">B</string>
+    <string name="short_text041">B</string>
+    <string name="short_text042">B</string>
+    <string name="short_text043">B</string>
+    <string name="short_text044">B</string>
+    <string name="short_text045">B</string>
+    <string name="short_text046">B</string>
+    <string name="short_text047">B</string>
+    <string name="short_text048">B</string>
+    <string name="short_text049">B</string>
+    <string name="short_text050">B</string>
+    <string name="short_text051">B</string>
+    <string name="short_text052">B</string>
+    <string name="short_text053">B</string>
+    <string name="short_text054">B</string>
+    <string name="short_text055">B</string>
+    <string name="short_text056">B</string>
+    <string name="short_text057">B</string>
+    <string name="short_text058">B</string>
+    <string name="short_text059">B</string>
+    <string name="short_text060">B</string>
+    <string name="short_text061">B</string>
+    <string name="short_text062">B</string>
+    <string name="short_text063">B</string>
+    <string name="short_text064">B</string>
+    <string name="short_text065">B</string>
+    <string name="short_text066">B</string>
+    <string name="short_text067">B</string>
+    <string name="short_text068">B</string>
+    <string name="short_text069">B</string>
+    <string name="short_text070">B</string>
+    <string name="short_text071">B</string>
+    <string name="short_text072">B</string>
+    <string name="short_text073">B</string>
+    <string name="short_text074">B</string>
+    <string name="short_text075">B</string>
+    <string name="short_text076">B</string>
+    <string name="short_text077">B</string>
+    <string name="short_text078">B</string>
+    <string name="short_text079">B</string>
+    <string name="short_text080">B</string>
+    <string name="short_text081">B</string>
+    <string name="short_text082">B</string>
+    <string name="short_text083">B</string>
+    <string name="short_text084">B</string>
+    <string name="short_text085">B</string>
+    <string name="short_text086">B</string>
+    <string name="short_text087">B</string>
+    <string name="short_text088">B</string>
+    <string name="short_text089">B</string>
+    <string name="short_text090">B</string>
+    <string name="short_text091">B</string>
+    <string name="short_text092">B</string>
+    <string name="short_text093">B</string>
+    <string name="short_text094">B</string>
+    <string name="short_text095">B</string>
+    <string name="short_text096">B</string>
+    <string name="short_text097">B</string>
+    <string name="short_text098">B</string>
+    <string name="short_text099">B</string>
+    <string name="short_text100">B</string>
+    <string name="short_text101">B</string>
+    <string name="short_text102">B</string>
+    <string name="short_text103">B</string>
+    <string name="short_text104">B</string>
+    <string name="short_text105">B</string>
+    <string name="short_text106">B</string>
+    <string name="short_text107">B</string>
+    <string name="short_text108">B</string>
+    <string name="short_text109">B</string>
+    <string name="short_text110">B</string>
+    <string name="short_text111">B</string>
+    <string name="short_text112">B</string>
+    <string name="short_text113">B</string>
+    <string name="short_text114">B</string>
+    <string name="short_text115">B</string>
+    <string name="short_text116">B</string>
+    <string name="short_text117">B</string>
+    <string name="short_text118">B</string>
+    <string name="short_text119">B</string>
+    <string name="short_text120">B</string>
+    <string name="short_text121">B</string>
+    <string name="short_text122">B</string>
+    <string name="short_text123">B</string>
+    <string name="short_text124">B</string>
+    <string name="short_text125">B</string>
+    <string name="short_text126">B</string>
+    <string name="short_text127">B</string>
+    <string name="short_text128">B</string>
+    <string name="short_text129">B</string>
+    <string name="short_text130">B</string>
+    <string name="short_text131">B</string>
+    <string name="short_text132">B</string>
+    <string name="short_text133">B</string>
+    <string name="short_text134">B</string>
+    <string name="short_text135">B</string>
+    <string name="short_text136">B</string>
+    <string name="short_text137">B</string>
+    <string name="short_text138">B</string>
+    <string name="short_text139">B</string>
+    <string name="short_text140">B</string>
+    <string name="short_text141">B</string>
+    <string name="short_text142">B</string>
+    <string name="short_text143">B</string>
+    <string name="short_text144">B</string>
+    <string name="short_text145">B</string>
+    <string name="short_text146">B</string>
+    <string name="short_text147">B</string>
+    <string name="short_text148">B</string>
+    <string name="short_text149">B</string>
+    <string name="short_text150">B</string>
+    <string name="short_text151">B</string>
+    <string name="short_text152">B</string>
+    <string name="short_text153">B</string>
+    <string name="short_text154">B</string>
+    <string name="short_text155">B</string>
+    <string name="short_text156">B</string>
+    <string name="short_text157">B</string>
+    <string name="short_text158">B</string>
+    <string name="short_text159">B</string>
+    <string name="short_text160">B</string>
+    <string name="short_text161">B</string>
+    <string name="short_text162">B</string>
+    <string name="short_text163">B</string>
+    <string name="short_text164">B</string>
+    <string name="short_text165">B</string>
+    <string name="short_text166">B</string>
+    <string name="short_text167">B</string>
+    <string name="short_text168">B</string>
+    <string name="short_text169">B</string>
+    <string name="short_text170">B</string>
+    <string name="short_text171">B</string>
+    <string name="short_text172">B</string>
+    <string name="short_text173">B</string>
+    <string name="short_text174">B</string>
+    <string name="short_text175">B</string>
+    <string name="short_text176">B</string>
+    <string name="short_text177">B</string>
+    <string name="short_text178">B</string>
+    <string name="short_text179">B</string>
+    <string name="short_text180">B</string>
+    <string name="short_text181">B</string>
+    <string name="short_text182">B</string>
+    <string name="short_text183">B</string>
+    <string name="short_text184">B</string>
+    <string name="short_text185">B</string>
+    <string name="short_text186">B</string>
+    <string name="short_text187">B</string>
+    <string name="short_text188">B</string>
+    <string name="short_text189">B</string>
+    <string name="short_text190">B</string>
+    <string name="short_text191">B</string>
+    <string name="short_text192">B</string>
+    <string name="short_text193">B</string>
+    <string name="short_text194">B</string>
+    <string name="short_text195">B</string>
+    <string name="short_text196">B</string>
+    <string name="short_text197">B</string>
+    <string name="short_text198">B</string>
+    <string name="short_text199">B</string>
+    <string name="short_text200">B</string>
+    <string name="short_text201">B</string>
+    <string name="short_text202">B</string>
+    <string name="short_text203">B</string>
+    <string name="short_text204">B</string>
+    <string name="short_text205">B</string>
+    <string name="short_text206">B</string>
+    <string name="short_text207">B</string>
+    <string name="short_text208">B</string>
+    <string name="short_text209">B</string>
+    <string name="short_text210">B</string>
+    <string name="short_text211">B</string>
+    <string name="short_text212">B</string>
+    <string name="short_text213">B</string>
+    <string name="short_text214">B</string>
+    <string name="short_text215">B</string>
+    <string name="short_text216">B</string>
+    <string name="short_text217">B</string>
+    <string name="short_text218">B</string>
+    <string name="short_text219">B</string>
+    <string name="short_text220">B</string>
+    <string name="short_text221">B</string>
+    <string name="short_text222">B</string>
+    <string name="short_text223">B</string>
+    <string name="short_text224">B</string>
+    <string name="short_text225">B</string>
+    <string name="short_text226">B</string>
+    <string name="short_text227">B</string>
+    <string name="short_text228">B</string>
+    <string name="short_text229">B</string>
+    <string name="short_text230">B</string>
+    <string name="short_text231">B</string>
+    <string name="short_text232">B</string>
+    <string name="short_text233">B</string>
+    <string name="short_text234">B</string>
+    <string name="short_text235">B</string>
+    <string name="short_text236">B</string>
+    <string name="short_text237">B</string>
+    <string name="short_text238">B</string>
+    <string name="short_text239">B</string>
+    <string name="short_text240">B</string>
+    <string name="short_text241">B</string>
+    <string name="short_text242">B</string>
+    <string name="short_text243">B</string>
+    <string name="short_text244">B</string>
+    <string name="short_text245">B</string>
+    <string name="short_text246">B</string>
+    <string name="short_text247">B</string>
+    <string name="short_text248">B</string>
+    <string name="short_text249">B</string>
+    <string name="short_text250">B</string>
+    <string name="short_text251">B</string>
+    <string name="short_text252">B</string>
+    <string name="short_text253">B</string>
+    <string name="short_text254">B</string>
+    <string name="short_text255">B</string>
+</resources>

@@ -17,6 +17,7 @@
 package android.hardware.display;
 
 import android.annotation.Nullable;
+import android.graphics.Point;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -24,7 +25,6 @@ import android.util.IntArray;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
@@ -65,12 +65,23 @@ public abstract class DisplayManagerInternal {
     public abstract boolean isProximitySensorAvailable();
 
     /**
-     * Take a screenshot of the specified display and return a buffer.
+     * Screenshot for internal system-only use such as rotation, etc.  This method includes
+     * secure layers and the result should never be exposed to non-system applications.
+     * This method does not apply any rotation and provides the output in natural orientation.
      *
      * @param displayId The display id to take the screenshot of.
      * @return The buffer or null if we have failed.
      */
-    public abstract SurfaceControl.ScreenshotGraphicBuffer screenshot(int displayId);
+    public abstract SurfaceControl.ScreenshotGraphicBuffer systemScreenshot(int displayId);
+
+    /**
+     * General screenshot functionality that excludes secure layers and applies appropriate
+     * rotation that the device is currently in.
+     *
+     * @param displayId The display id to take the screenshot of.
+     * @return The buffer or null if we have failed.
+     */
+    public abstract SurfaceControl.ScreenshotGraphicBuffer userScreenshot(int displayId);
 
     /**
      * Returns information about the specified logical display.
@@ -80,6 +91,16 @@ public abstract class DisplayManagerInternal {
      * returned object must be treated as immutable.
      */
     public abstract DisplayInfo getDisplayInfo(int displayId);
+
+    /**
+     * Returns the position of the display's projection.
+     *
+     * @param displayId The logical display id.
+     * @return The x, y coordinates of the display, or null if the display does not exist. The
+     * return object must be treated as immutable.
+     */
+    @Nullable
+    public abstract Point getDisplayPosition(int displayId);
 
     /**
      * Registers a display transaction listener to provide the client a chance to
@@ -151,11 +172,15 @@ public abstract class DisplayManagerInternal {
      * has a preference.
      * @param requestedModeId The preferred mode id for the top-most visible window that has a
      * preference.
+     * @param requestedMinimalPostProcessing The preferred minimal post processing setting for the
+     * display. This is true when there is at least one visible window that wants minimal post
+     * processng on.
      * @param inTraversal True if called from WindowManagerService during a window traversal
      * prior to call to performTraversalInTransactionFromWindowManager.
      */
     public abstract void setDisplayProperties(int displayId, boolean hasContent,
-            float requestedRefreshRate, int requestedModeId, boolean inTraversal);
+            float requestedRefreshRate, int requestedModeId, boolean requestedMinimalPostProcessing,
+            boolean inTraversal);
 
     /**
      * Applies an offset to the contents of a display, for example to avoid burn-in.
@@ -265,8 +290,9 @@ public abstract class DisplayManagerInternal {
         // nearby, turning it off temporarily until the object is moved away.
         public boolean useProximitySensor;
 
-        // An override of the screen brightness. Set to -1 is used if there's no override.
-        public int screenBrightnessOverride;
+        // An override of the screen brightness.
+        // Set to PowerManager.BRIGHTNESS_INVALID if there's no override.
+        public float screenBrightnessOverride;
 
         // An override of the screen auto-brightness adjustment factor in the range -1 (dimmer) to
         // 1 (brighter). Set to Float.NaN if there's no override.
@@ -297,18 +323,18 @@ public abstract class DisplayManagerInternal {
         public boolean blockScreenOn;
 
         // Overrides the policy for adjusting screen brightness and state while dozing.
-        public int dozeScreenBrightness;
         public int dozeScreenState;
+        public float dozeScreenBrightness;
 
         public DisplayPowerRequest() {
             policy = POLICY_BRIGHT;
             useProximitySensor = false;
-            screenBrightnessOverride = -1;
+            screenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             useAutoBrightness = false;
             screenAutoBrightnessAdjustmentOverride = Float.NaN;
             screenLowPowerBrightnessFactor = 0.5f;
             blockScreenOn = false;
-            dozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+            dozeScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             dozeScreenState = Display.STATE_UNKNOWN;
         }
 
@@ -348,7 +374,8 @@ public abstract class DisplayManagerInternal {
             return other != null
                     && policy == other.policy
                     && useProximitySensor == other.useProximitySensor
-                    && screenBrightnessOverride == other.screenBrightnessOverride
+                    && floatEquals(screenBrightnessOverride,
+                            other.screenBrightnessOverride)
                     && useAutoBrightness == other.useAutoBrightness
                     && floatEquals(screenAutoBrightnessAdjustmentOverride,
                             other.screenAutoBrightnessAdjustmentOverride)
@@ -357,7 +384,7 @@ public abstract class DisplayManagerInternal {
                     && blockScreenOn == other.blockScreenOn
                     && lowPowerMode == other.lowPowerMode
                     && boostScreenBrightness == other.boostScreenBrightness
-                    && dozeScreenBrightness == other.dozeScreenBrightness
+                    && floatEquals(dozeScreenBrightness, other.dozeScreenBrightness)
                     && dozeScreenState == other.dozeScreenState;
         }
 
