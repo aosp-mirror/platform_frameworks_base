@@ -2800,7 +2800,11 @@ public class TelephonyManager {
     /** Current network is LTE_CA {@hide} */
     @UnsupportedAppUsage
     public static final int NETWORK_TYPE_LTE_CA = TelephonyProtoEnums.NETWORK_TYPE_LTE_CA; // = 19.
-    /** Current network is NR(New Radio) 5G. */
+    /**
+     * Current network is NR (New Radio) 5G.
+     * This will only be returned for 5G SA.
+     * For 5G NSA, the network type will be {@link #NETWORK_TYPE_LTE}.
+     */
     public static final int NETWORK_TYPE_NR = TelephonyProtoEnums.NETWORK_TYPE_NR; // 20.
 
     private static final @NetworkType int[] NETWORK_TYPES = {
