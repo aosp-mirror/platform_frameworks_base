@@ -22,7 +22,7 @@ import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
-import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
@@ -1694,7 +1694,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testGetLockTaskLaunchMode() {
         final ActivityOptions options = ActivityOptions.makeBasic().setLockTaskEnabled(true);
         mActivity.info.lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_DEFAULT;
-        assertEquals(LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED,
+        assertEquals(LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED,
                 ActivityRecord.getLockTaskLaunchMode(mActivity.info, options));
 
         mActivity.info.lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_ALWAYS;

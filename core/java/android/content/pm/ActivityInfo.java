@@ -963,7 +963,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     /** @hide */
     public static final int LOCK_TASK_LAUNCH_MODE_ALWAYS = 2;
     /** @hide */
-    public static final int LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED = 3;
+    public static final int LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED = 3;
 
     /** @hide */
     public static final String lockTaskLaunchModeToString(int lockTaskLaunchMode) {
@@ -974,8 +974,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
                 return "LOCK_TASK_LAUNCH_MODE_NEVER";
             case LOCK_TASK_LAUNCH_MODE_ALWAYS:
                 return "LOCK_TASK_LAUNCH_MODE_ALWAYS";
-            case LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED:
-                return "LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED";
+            case LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED:
+                return "LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED";
             default:
                 return "unknown=" + lockTaskLaunchMode;
         }
