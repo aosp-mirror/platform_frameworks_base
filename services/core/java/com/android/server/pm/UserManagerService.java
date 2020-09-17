@@ -5176,8 +5176,14 @@ public class UserManagerService extends IUserManager.Stub {
 
         @Override
         public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
-            return UserManagerService.this.getUsersInternal(/*excludePartial= */ true,
-                    excludeDying, /* excludePreCreated= */ true);
+            return getUsers(/*excludePartial= */ true, excludeDying, /* excludePreCreated= */ true);
+        }
+
+        @Override
+        public @NonNull List<UserInfo> getUsers(boolean excludePartial, boolean excludeDying,
+                boolean excludePreCreated) {
+            return UserManagerService.this.getUsersInternal(excludePartial, excludeDying,
+                    excludePreCreated);
         }
 
         @Override
