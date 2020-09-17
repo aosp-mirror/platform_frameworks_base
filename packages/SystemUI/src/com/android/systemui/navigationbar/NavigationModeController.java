@@ -17,15 +17,12 @@
 package com.android.systemui.navigationbar;
 
 import static android.content.Intent.ACTION_OVERLAY_CHANGED;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.om.IOverlayManager;
-import android.content.om.OverlayInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ApkAssets;
 import android.os.PatternMatcher;
@@ -131,9 +128,6 @@ public class NavigationModeController implements Dumpable {
     public void updateCurrentInteractionMode(boolean notify) {
         mCurrentUserContext = getCurrentUserContext();
         int mode = getCurrentInteractionMode(mCurrentUserContext);
-        if (mode == NAV_BAR_MODE_GESTURAL) {
-            switchToDefaultGestureNavOverlayIfNecessary();
-        }
         mUiBgExecutor.execute(() ->
             Settings.Secure.putString(mCurrentUserContext.getContentResolver(),
                     Secure.NAVIGATION_MODE, String.valueOf(mode)));
@@ -184,35 +178,6 @@ public class NavigationModeController implements Dumpable {
             // Never happens for the sysui package
             Log.e(TAG, "Failed to create package context", e);
             return null;
-        }
-    }
-
-    private void switchToDefaultGestureNavOverlayIfNecessary() {
-        final int userId = mCurrentUserContext.getUserId();
-        try {
-            final IOverlayManager om = IOverlayManager.Stub.asInterface(
-                    ServiceManager.getService(Context.OVERLAY_SERVICE));
-            final OverlayInfo info = om.getOverlayInfo(NAV_BAR_MODE_GESTURAL_OVERLAY, userId);
-            if (info != null && !info.isEnabled()) {
-                // Enable the default gesture nav overlay, and move the back gesture inset scale to
-                // Settings.Secure for left and right sensitivity.
-                final int curInset = mCurrentUserContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.config_backGestureInset);
-                om.setEnabledExclusiveInCategory(NAV_BAR_MODE_GESTURAL_OVERLAY, userId);
-                final int defInset = mCurrentUserContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.config_backGestureInset);
-
-                final float scale = defInset == 0 ? 1.0f : ((float) curInset) / defInset;
-                Settings.Secure.putFloat(mCurrentUserContext.getContentResolver(),
-                        Secure.BACK_GESTURE_INSET_SCALE_LEFT, scale);
-                Settings.Secure.putFloat(mCurrentUserContext.getContentResolver(),
-                        Secure.BACK_GESTURE_INSET_SCALE_RIGHT, scale);
-                if (DEBUG) {
-                    Log.v(TAG, "Moved back sensitivity for user " + userId + " to scale " + scale);
-                }
-            }
-        } catch (SecurityException | IllegalStateException | RemoteException e) {
-            Log.e(TAG, "Failed to switch to default gesture nav overlay for user " + userId);
         }
     }
 
