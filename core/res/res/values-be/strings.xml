@@ -717,10 +717,10 @@
     <item msgid="6216981255272016212">"Асаблівы"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="7786349763648997741">"Хатні"</item>
-    <item msgid="435564470865989199">"Працоўны"</item>
-    <item msgid="4199433197875490373">"Іншы"</item>
-    <item msgid="3233938986670468328">"Карыстальніцкі"</item>
+    <item msgid="7786349763648997741">"Асабістая"</item>
+    <item msgid="435564470865989199">"Працоўная"</item>
+    <item msgid="4199433197875490373">"Іншая"</item>
+    <item msgid="3233938986670468328">"Карыстальніцкая"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="3861463339764243038">"На Галоўную старонку"</item>
@@ -770,14 +770,14 @@
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"Працоўны пэйджар"</string>
     <string name="phoneTypeAssistant" msgid="757550783842231039">"Асістэнт"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
-    <string name="eventTypeCustom" msgid="3257367158986466481">"Карыстальніцкі"</string>
+    <string name="eventTypeCustom" msgid="3257367158986466481">"Карыстальніцкае"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"Дзень нараджэння"</string>
     <string name="eventTypeAnniversary" msgid="4684702412407916888">"Гадавіна"</string>
     <string name="eventTypeOther" msgid="530671238533887997">"Іншае"</string>
-    <string name="emailTypeCustom" msgid="1809435350482181786">"Карыстальніцкі"</string>
+    <string name="emailTypeCustom" msgid="1809435350482181786">"Карыстальніцкая"</string>
     <string name="emailTypeHome" msgid="1597116303154775999">"Хатні"</string>
-    <string name="emailTypeWork" msgid="2020095414401882111">"Працоўны"</string>
-    <string name="emailTypeOther" msgid="5131130857030897465">"Іншы"</string>
+    <string name="emailTypeWork" msgid="2020095414401882111">"Працоўная"</string>
+    <string name="emailTypeOther" msgid="5131130857030897465">"Іншая"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"Мабільны"</string>
     <string name="postalTypeCustom" msgid="5645590470242939129">"Карыстальніцкі"</string>
     <string name="postalTypeHome" msgid="7562272480949727912">"Хатні"</string>
@@ -800,19 +800,19 @@
     <string name="orgTypeWork" msgid="8684458700669564172">"Працоўная"</string>
     <string name="orgTypeOther" msgid="5450675258408005553">"Іншая"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"Карыстальніцкі"</string>
-    <string name="relationTypeCustom" msgid="282938315217441351">"Карыстальніцкі"</string>
+    <string name="relationTypeCustom" msgid="282938315217441351">"Карыстальніцкае"</string>
     <string name="relationTypeAssistant" msgid="4057605157116589315">"Памочнік"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"Брат"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"Дзіця"</string>
-    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"Унутраны Партнёр"</string>
+    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"Сужыцель/сужыцелька"</string>
     <string name="relationTypeFather" msgid="3856225062864790596">"Бацька"</string>
     <string name="relationTypeFriend" msgid="3192092625893980574">"Сябар/сяброўка"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"Кіраўнік"</string>
     <string name="relationTypeMother" msgid="2331762740982699460">"Маці"</string>
-    <string name="relationTypeParent" msgid="4177920938333039882">"Бацька"</string>
+    <string name="relationTypeParent" msgid="4177920938333039882">"Бацька/маці"</string>
     <string name="relationTypePartner" msgid="4018017075116766194">"Партнёр"</string>
-    <string name="relationTypeReferredBy" msgid="5285082289602849400">"Запрошаны"</string>
-    <string name="relationTypeRelative" msgid="3396498519818009134">"Адносны"</string>
+    <string name="relationTypeReferredBy" msgid="5285082289602849400">"Рэкамендацыя"</string>
+    <string name="relationTypeRelative" msgid="3396498519818009134">"Радня"</string>
     <string name="relationTypeSister" msgid="3721676005094140671">"Сястра"</string>
     <string name="relationTypeSpouse" msgid="6916682664436031703">"Муж/жонка"</string>
     <string name="sipAddressTypeCustom" msgid="6283889809842649336">"Карыстальніцкі"</string>

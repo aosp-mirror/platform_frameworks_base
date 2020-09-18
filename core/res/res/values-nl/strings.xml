@@ -711,7 +711,7 @@
     <item msgid="6216981255272016212">"Aangepast"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="7786349763648997741">"Thuis"</item>
+    <item msgid="7786349763648997741">"Privé"</item>
     <item msgid="435564470865989199">"Werk"</item>
     <item msgid="4199433197875490373">"Overig"</item>
     <item msgid="3233938986670468328">"Aangepast"</item>
@@ -769,7 +769,7 @@
     <string name="eventTypeAnniversary" msgid="4684702412407916888">"Jubileum"</string>
     <string name="eventTypeOther" msgid="530671238533887997">"Overig"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"Aangepast"</string>
-    <string name="emailTypeHome" msgid="1597116303154775999">"Thuis"</string>
+    <string name="emailTypeHome" msgid="1597116303154775999">"Privé"</string>
     <string name="emailTypeWork" msgid="2020095414401882111">"Werk"</string>
     <string name="emailTypeOther" msgid="5131130857030897465">"Overig"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"Mobiel"</string>
@@ -931,9 +931,9 @@
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nWeet u zeker dat u deze pagina wilt verlaten?"</string>
     <string name="save_password_label" msgid="9161712335355510035">"Bevestigen"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"Tip: dubbeltik om in en uit te zoomen."</string>
-    <string name="autofill_this_form" msgid="3187132440451621492">"Autom. aanvullen"</string>
-    <string name="setup_autofill" msgid="5431369130866618567">"Autom. aanvullen instellen"</string>
-    <string name="autofill_window_title" msgid="4379134104008111961">"Automatisch aanvullen met <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
+    <string name="autofill_this_form" msgid="3187132440451621492">"Autom. invullen"</string>
+    <string name="setup_autofill" msgid="5431369130866618567">"Autom. invullen instellen"</string>
+    <string name="autofill_window_title" msgid="4379134104008111961">"Automatisch invullen met <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="8190155636149596125">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3402882515222673691">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="760522655085707045">", "</string>
@@ -1101,7 +1101,7 @@
     <string name="selectTextMode" msgid="3225108910999318778">"Tekst selecteren"</string>
     <string name="undo" msgid="3175318090002654673">"Ongedaan maken"</string>
     <string name="redo" msgid="7231448494008532233">"Opnieuw"</string>
-    <string name="autofill" msgid="511224882647795296">"Automatisch aanvullen"</string>
+    <string name="autofill" msgid="511224882647795296">"Automatisch invullen"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Tekstselectie"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"Toevoegen aan woordenboek"</string>
     <string name="deleteText" msgid="4200807474529938112">"Verwijderen"</string>
@@ -1928,13 +1928,13 @@
     <string name="time_picker_prompt_label" msgid="303588544656363889">"Typ een tijd"</string>
     <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"Schakel naar de tekstinvoermodus om de tijd in te voeren."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"Schakel naar de klokmodus om de tijd in te voeren."</string>
-    <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Opties voor automatisch aanvullen"</string>
-    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Opslaan voor Automatisch aanvullen"</string>
+    <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Opties voor automatisch invullen"</string>
+    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Opslaan voor Automatisch invullen"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Content kan niet automatisch worden aangevuld"</string>
-    <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Geen suggesties van Automatisch aanvullen"</string>
+    <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Geen suggesties van Automatisch invullen"</string>
     <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> suggesties van Automatisch aanvullen</item>
-      <item quantity="one">Eén suggestie van Automatisch aanvullen</item>
+      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> suggesties van Automatisch invullen</item>
+      <item quantity="one">Eén suggestie van Automatisch invullen</item>
     </plurals>
     <string name="autofill_save_title" msgid="7719802414283739775">"Opslaan in "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"<xliff:g id="TYPE">%1$s</xliff:g> opslaan in "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>

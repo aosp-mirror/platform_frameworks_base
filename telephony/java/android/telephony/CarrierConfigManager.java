@@ -32,6 +32,7 @@ import android.os.RemoteException;
 import android.service.carrier.CarrierService;
 import android.telecom.TelecomManager;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.ImsSsData;
 
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
@@ -65,6 +66,20 @@ public class CarrierConfigManager {
      */
     public static final String EXTRA_SUBSCRIPTION_INDEX =
             SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX;
+
+    /**
+     * Service class flag if not specify a service class.
+     * Reference: 3GPP TS 27.007 Section 7.4 Facility lock +CLCK
+     * @hide
+     */
+    public static final int SERVICE_CLASS_NONE = ImsSsData.SERVICE_CLASS_NONE;
+
+    /**
+     * Service class flag for voice telephony.
+     * Reference: 3GPP TS 27.007 Section 7.4 Facility lock +CLCK
+     * @hide
+     */
+    public static final int SERVICE_CLASS_VOICE = ImsSsData.SERVICE_CLASS_VOICE;
 
     private final Context mContext;
 
@@ -210,6 +225,19 @@ public class CarrierConfigManager {
      */
     public static final String KEY_CALL_BARRING_SUPPORTS_DEACTIVATE_ALL_BOOL =
             "call_barring_supports_deactivate_all_bool";
+
+    /**
+     * Specifies the service class for call barring service. Default value is
+     * {@link #SERVICE_CLASS_VOICE}.
+     * The value set as below:
+     * <ul>
+     * <li>0: {@link #SERVICE_CLASS_NONE}</li>
+     * <li>1: {@link #SERVICE_CLASS_VOICE}</li>
+     * </ul>
+     * @hide
+     */
+    public static final String KEY_CALL_BARRING_DEFAULT_SERVICE_CLASS_INT =
+            "call_barring_default_service_class_int";
 
     /**
      * Flag indicating whether the Phone app should ignore EVENT_SIM_NETWORK_LOCKED
@@ -3926,6 +3954,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CALL_BARRING_VISIBILITY_BOOL, false);
         sDefaults.putBoolean(KEY_CALL_BARRING_SUPPORTS_PASSWORD_CHANGE_BOOL, true);
         sDefaults.putBoolean(KEY_CALL_BARRING_SUPPORTS_DEACTIVATE_ALL_BOOL, true);
+        sDefaults.putInt(KEY_CALL_BARRING_DEFAULT_SERVICE_CLASS_INT, SERVICE_CLASS_VOICE);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_WHEN_UNREACHABLE_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_WHEN_UNANSWERED_SUPPORTED_BOOL, true);
