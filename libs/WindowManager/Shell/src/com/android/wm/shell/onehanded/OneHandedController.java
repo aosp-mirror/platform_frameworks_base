@@ -194,32 +194,33 @@ public class OneHandedController implements OneHanded {
             mGestureHandler = null;
             mTimeoutHandler = null;
             mOverlayManager = null;
-            return;
+        } else {
+            mContext = context;
+            mDisplayAreaOrganizer = displayAreaOrganizer;
+            mDisplayController = displayController;
+            mTouchHandler = touchHandler;
+            mTutorialHandler = tutorialHandler;
+            mGestureHandler = gestureHandler;
+
+            mOverlayManager = IOverlayManager.Stub.asInterface(
+                    ServiceManager.getService(Context.OVERLAY_SERVICE));
+            mOffSetFraction = SystemProperties.getInt(ONE_HANDED_MODE_OFFSET_PERCENTAGE, 50)
+                    / 100.0f;
+            mIsOneHandedEnabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
+                    context.getContentResolver());
+            mIsSwipeToNotificationEnabled =
+                    OneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
+                            context.getContentResolver());
+            mTimeoutHandler = OneHandedTimeoutHandler.get();
+
+            mDisplayController.addDisplayChangingController(mRotationController);
+
+            setupCallback();
+            setupSettingObservers();
+            setupTimeoutListener();
+            setupGesturalOverlay();
+            updateSettings();
         }
-
-        mContext = context;
-        mDisplayAreaOrganizer = displayAreaOrganizer;
-        mDisplayController = displayController;
-        mTouchHandler = touchHandler;
-        mTutorialHandler = tutorialHandler;
-        mGestureHandler = gestureHandler;
-
-        mOverlayManager = IOverlayManager.Stub.asInterface(
-                ServiceManager.getService(Context.OVERLAY_SERVICE));
-        mOffSetFraction = SystemProperties.getInt(ONE_HANDED_MODE_OFFSET_PERCENTAGE, 50) / 100.0f;
-        mIsOneHandedEnabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
-                context.getContentResolver());
-        mIsSwipeToNotificationEnabled = OneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
-                context.getContentResolver());
-        mTimeoutHandler = OneHandedTimeoutHandler.get();
-
-        mDisplayController.addDisplayChangingController(mRotationController);
-
-        setupCallback();
-        setupSettingObservers();
-        setupTimeoutListener();
-        setupGesturalOverlay();
-        updateSettings();
     }
 
     /**
