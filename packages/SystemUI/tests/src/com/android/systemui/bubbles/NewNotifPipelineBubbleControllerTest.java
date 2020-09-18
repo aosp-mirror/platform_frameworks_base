@@ -92,7 +92,6 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.util.InjectionInflationController;
-import com.android.systemui.wmshell.WindowManagerShellWrapper;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -186,8 +185,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     private IStatusBarService mStatusBarService;
     @Mock
     private LauncherApps mLauncherApps;
-    @Mock
-    private WindowManagerShellWrapper mWindowManagerShellWrapper;
 
     private BubbleData mBubbleData;
 
@@ -274,7 +271,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                 mock(INotificationManager.class),
                 mStatusBarService,
                 mWindowManager,
-                mWindowManagerShellWrapper,
                 mLauncherApps);
         mBubbleController.addNotifCallback(mNotifCallback);
         mBubbleController.setExpandListener(mBubbleExpandListener);

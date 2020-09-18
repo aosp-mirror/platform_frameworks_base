@@ -336,4 +336,17 @@ interface IWindowSession {
      */
     void updateInputChannel(in IBinder channelToken, int displayId, in SurfaceControl surface,
             int flags, int privateFlags, in Region region);
+
+    /**
+     * Transfer window focus to an embedded window if the calling window has focus.
+     *
+     * @param window - calling window owned by the caller. Window can be null if there
+     *                 is no host window but the caller must have permissions to create an embedded
+     *                 window without a host window.
+     * @param inputToken - token identifying the embedded window that should gain focus.
+     * @param grantFocus - true if focus should be granted to the embedded window, false if focus
+     *                     should be transferred back to the host window. If there is no host
+     *                     window, the system will try to find a new focus target.
+     */
+    void grantEmbeddedWindowFocus(IWindow window, in IBinder inputToken, boolean grantFocus);
 }

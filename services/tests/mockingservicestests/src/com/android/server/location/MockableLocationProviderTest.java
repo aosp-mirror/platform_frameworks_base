@@ -95,7 +95,7 @@ public class MockableLocationProviderTest {
         assertThat(mProvider.getCurrentRequest()).isEqualTo(EMPTY_REQUEST);
         verify(mRealProvider, times(1)).onSetRequest(EMPTY_REQUEST);
 
-        ProviderRequest request = new ProviderRequest.Builder().setInterval(1).build();
+        ProviderRequest request = new ProviderRequest.Builder().setIntervalMillis(1).build();
         mProvider.setRequest(request);
 
         assertThat(mProvider.getCurrentRequest()).isEqualTo(request);

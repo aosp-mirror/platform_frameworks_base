@@ -296,13 +296,14 @@ public final class QuotaController extends StateController {
     }
 
     /** List of all tracked jobs keyed by source package-userId combo. */
-    private final SparseArrayMap<ArraySet<JobStatus>> mTrackedJobs = new SparseArrayMap<>();
+    private final SparseArrayMap<String, ArraySet<JobStatus>> mTrackedJobs = new SparseArrayMap<>();
 
     /** Timer for each package-userId combo. */
-    private final SparseArrayMap<Timer> mPkgTimers = new SparseArrayMap<>();
+    private final SparseArrayMap<String, Timer> mPkgTimers = new SparseArrayMap<>();
 
     /** List of all timing sessions for a package-userId combo, in chronological order. */
-    private final SparseArrayMap<List<TimingSession>> mTimingSessions = new SparseArrayMap<>();
+    private final SparseArrayMap<String, List<TimingSession>> mTimingSessions =
+            new SparseArrayMap<>();
 
     /**
      * Listener to track and manage when each package comes back within quota.
@@ -311,7 +312,8 @@ public final class QuotaController extends StateController {
     private final InQuotaAlarmListener mInQuotaAlarmListener = new InQuotaAlarmListener();
 
     /** Cached calculation results for each app, with the standby buckets as the array indices. */
-    private final SparseArrayMap<ExecutionStats[]> mExecutionStatsCache = new SparseArrayMap<>();
+    private final SparseArrayMap<String, ExecutionStats[]> mExecutionStatsCache =
+            new SparseArrayMap<>();
 
     /** List of UIDs currently in the foreground. */
     private final SparseBooleanArray mForegroundUids = new SparseBooleanArray();
@@ -1225,7 +1227,8 @@ public final class QuotaController extends StateController {
     }
 
     private class UidConstraintUpdater implements Consumer<JobStatus> {
-        private final SparseArrayMap<Integer> mToScheduleStartAlarms = new SparseArrayMap<>();
+        private final SparseArrayMap<String, Integer> mToScheduleStartAlarms =
+                new SparseArrayMap<>();
         public boolean wasJobChanged;
 
         @Override

@@ -157,7 +157,8 @@ public final class CarrierAppUtils {
 
         List<String> enabledCarrierPackages = new ArrayList<>();
         int carrierAppsHandledSdk =
-                Settings.Secure.getInt(contentResolver, Settings.Secure.CARRIER_APPS_HANDLED, 0);
+                Settings.Secure.getIntForUser(contentResolver, Settings.Secure.CARRIER_APPS_HANDLED,
+                        0, contentResolver.getUserId());
         if (DEBUG) {
             Log.i(TAG, "Last execution SDK: " + carrierAppsHandledSdk);
         }
@@ -309,8 +310,8 @@ public final class CarrierAppUtils {
 
             // Mark the execution so we do not disable apps again on this SDK version.
             if (!hasRunEver || !hasRunForSdk) {
-                Settings.Secure.putInt(contentResolver, Settings.Secure.CARRIER_APPS_HANDLED,
-                        Build.VERSION.SDK_INT);
+                Settings.Secure.putIntForUser(contentResolver, Settings.Secure.CARRIER_APPS_HANDLED,
+                        Build.VERSION.SDK_INT, contentResolver.getUserId());
             }
 
             if (!enabledCarrierPackages.isEmpty()) {

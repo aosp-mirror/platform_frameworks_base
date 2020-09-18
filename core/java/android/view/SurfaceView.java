@@ -1846,6 +1846,23 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
     }
 
+    @Override
+    protected void onFocusChanged(boolean gainFocus, @FocusDirection int direction,
+                                  @Nullable Rect previouslyFocusedRect) {
+        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
+        final ViewRootImpl viewRoot = getViewRootImpl();
+        if (mSurfacePackage == null || viewRoot == null) {
+            return;
+        }
+        try {
+            viewRoot.mWindowSession.grantEmbeddedWindowFocus(viewRoot.mWindow,
+                    mSurfacePackage.getInputToken(), gainFocus);
+        } catch (Exception e) {
+            Log.e(TAG, System.identityHashCode(this)
+                    + "Exception requesting focus on embedded window", e);
+        }
+    }
+
     /**
      * Wrapper of accessibility embedded connection for embedded view hierarchy.
      */

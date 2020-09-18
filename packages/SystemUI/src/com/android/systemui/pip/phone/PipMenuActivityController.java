@@ -34,6 +34,7 @@ import android.view.WindowManager;
 
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.pip.phone.PipMediaController.ActionListener;
+import com.android.systemui.shared.system.InputConsumerController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -85,6 +86,7 @@ public class PipMenuActivityController {
     private Context mContext;
     private PipTaskOrganizer mPipTaskOrganizer;
     private PipMediaController mMediaController;
+    private InputConsumerController mInputConsumerController;
 
     private ArrayList<Listener> mListeners = new ArrayList<>();
     private ParceledListSlice<RemoteAction> mAppActions;
@@ -102,9 +104,12 @@ public class PipMenuActivityController {
     };
 
     public PipMenuActivityController(Context context,
-            PipMediaController mediaController, PipTaskOrganizer pipTaskOrganizer) {
+            PipMediaController mediaController, InputConsumerController inputConsumerController,
+            PipTaskOrganizer pipTaskOrganizer
+    ) {
         mContext = context;
         mMediaController = mediaController;
+        mInputConsumerController = inputConsumerController;
         mPipTaskOrganizer = pipTaskOrganizer;
     }
 
@@ -114,10 +119,12 @@ public class PipMenuActivityController {
 
     public void onActivityPinned() {
         attachPipMenuView();
+        mInputConsumerController.registerInputConsumer(true /* withSfVsync */);
     }
 
     public void onActivityUnpinned() {
         hideMenu();
+        mInputConsumerController.unregisterInputConsumer();
         mPipTaskOrganizer.detachPipMenuViewHost();
         mPipMenuView = null;
     }

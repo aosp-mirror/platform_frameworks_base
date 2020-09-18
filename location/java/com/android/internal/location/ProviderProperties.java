@@ -43,86 +43,96 @@ public final class ProviderProperties implements Parcelable {
     @IntDef({Criteria.ACCURACY_FINE, Criteria.ACCURACY_COARSE})
     public @interface Accuracy {}
 
-    /**
-     * True if provider requires access to a
-     * data network (e.g., the Internet), false otherwise.
-     */
-    public final boolean mRequiresNetwork;
+    private final boolean mHasNetworkRequirement;
+    private final boolean mHasSatelliteRequirement;
+    private final boolean mHasCellRequirement;
+    private final boolean mHasMonetaryCost;
+    private final boolean mHasAltitudeSupport;
+    private final boolean mHasSpeedSupport;
+    private final boolean mHasBearingSupport;
+    private final @PowerRequirement int mPowerRequirement;
+    private final @Accuracy int mAccuracy;
+
+    public ProviderProperties(boolean hasNetworkRequirement, boolean hasSatelliteRequirement,
+            boolean hasCellRequirement, boolean hasMonetaryCost, boolean hasAltitudeSupport,
+            boolean hasSpeedSupport, boolean hasBearingSupport,
+            @PowerRequirement int powerRequirement, @Accuracy int accuracy) {
+        mHasNetworkRequirement = hasNetworkRequirement;
+        mHasSatelliteRequirement = hasSatelliteRequirement;
+        mHasCellRequirement = hasCellRequirement;
+        mHasMonetaryCost = hasMonetaryCost;
+        mHasAltitudeSupport = hasAltitudeSupport;
+        mHasSpeedSupport = hasSpeedSupport;
+        mHasBearingSupport = hasBearingSupport;
+        mPowerRequirement = Preconditions.checkArgumentInRange(powerRequirement, Criteria.POWER_LOW,
+                Criteria.POWER_HIGH, "powerRequirement");
+        mAccuracy = Preconditions.checkArgumentInRange(accuracy, Criteria.ACCURACY_FINE,
+                Criteria.ACCURACY_COARSE, "accuracy");
+    }
 
     /**
-     * True if the provider requires access to a
-     * satellite-based positioning system (e.g., GPS), false
-     * otherwise.
+     * True if provider requires access to a data network (e.g., the Internet).
      */
-    public final boolean mRequiresSatellite;
+    public boolean hasNetworkRequirement() {
+        return mHasNetworkRequirement;
+    }
 
     /**
-     * True if the provider requires access to an appropriate
-     * cellular network (e.g., to make use of cell tower IDs), false
-     * otherwise.
+     * True if the provider requires access to a satellite-based positioning system (e.g., GPS).
      */
-    public final boolean mRequiresCell;
+    public boolean hasSatelliteRequirement() {
+        return mHasSatelliteRequirement;
+    }
 
     /**
-     * True if the use of this provider may result in a
-     * monetary charge to the user, false if use is free.  It is up to
-     * each provider to give accurate information. Cell (network) usage
-     * is not considered monetary cost.
+     * True if the provider requires access to a cellular network (e.g., for cell tower IDs).
      */
-    public final boolean mHasMonetaryCost;
+    public boolean hasCellRequirement() {
+        return mHasCellRequirement;
+    }
 
     /**
-     * True if the provider is able to provide altitude
-     * information, false otherwise.  A provider that reports altitude
-     * under most circumstances but may occasionally not report it
-     * should return true.
+     * True if this provider may result in a monetary charge to the user. Network usage is not
+     * considered a monetary cost.
      */
-    public final boolean mSupportsAltitude;
+    public boolean hasMonetaryCost() {
+        return mHasMonetaryCost;
+    }
 
     /**
-     * True if the provider is able to provide speed
-     * information, false otherwise.  A provider that reports speed
-     * under most circumstances but may occasionally not report it
-     * should return true.
+     * True if the provider is able to provide altitude under at least some conditions.
      */
-    public final boolean mSupportsSpeed;
+    public boolean hasAltitudeSupport() {
+        return mHasAltitudeSupport;
+    }
 
     /**
-     * True if the provider is able to provide bearing
-     * information, false otherwise.  A provider that reports bearing
-     * under most circumstances but may occasionally not report it
-     * should return true.
+     * True if the provider is able to provide speed under at least some conditions.
      */
-    public final boolean mSupportsBearing;
+    public boolean hasSpeedSupport() {
+        return mHasSpeedSupport;
+    }
+
+    /**
+     * True if the provider is able to provide bearing under at least some conditions.
+     */
+    public boolean hasBearingSupport() {
+        return mHasBearingSupport;
+    }
 
     /**
      * Power requirement for this provider.
      */
-    @PowerRequirement
-    public final int mPowerRequirement;
+    public @PowerRequirement int getPowerRequirement() {
+        return mPowerRequirement;
+    }
 
     /**
      * Constant describing the horizontal accuracy returned
      * by this provider.
      */
-    @Accuracy
-    public final int mAccuracy;
-
-    public ProviderProperties(boolean requiresNetwork, boolean requiresSatellite,
-            boolean requiresCell, boolean hasMonetaryCost, boolean supportsAltitude,
-            boolean supportsSpeed, boolean supportsBearing, @PowerRequirement int powerRequirement,
-            @Accuracy int accuracy) {
-        mRequiresNetwork = requiresNetwork;
-        mRequiresSatellite = requiresSatellite;
-        mRequiresCell = requiresCell;
-        mHasMonetaryCost = hasMonetaryCost;
-        mSupportsAltitude = supportsAltitude;
-        mSupportsSpeed = supportsSpeed;
-        mSupportsBearing = supportsBearing;
-        mPowerRequirement = Preconditions.checkArgumentInRange(powerRequirement, Criteria.POWER_LOW,
-                Criteria.POWER_HIGH, "powerRequirement");
-        mAccuracy = Preconditions.checkArgumentInRange(accuracy, Criteria.ACCURACY_FINE,
-                Criteria.ACCURACY_COARSE, "accuracy");
+    public @Accuracy int getAccuracy() {
+        return mAccuracy;
     }
 
     public static final Parcelable.Creator<ProviderProperties> CREATOR =
@@ -130,13 +140,13 @@ public final class ProviderProperties implements Parcelable {
                 @Override
                 public ProviderProperties createFromParcel(Parcel in) {
                     return new ProviderProperties(
-                            /* requiresNetwork= */ in.readBoolean(),
-                            /* requiresSatellite= */ in.readBoolean(),
-                            /* requiresCell= */ in.readBoolean(),
+                            /* hasNetworkRequirement= */ in.readBoolean(),
+                            /* hasSatelliteRequirement= */ in.readBoolean(),
+                            /* hasCellRequirement= */ in.readBoolean(),
                             /* hasMonetaryCost= */ in.readBoolean(),
-                            /* supportsAltitude= */ in.readBoolean(),
-                            /* supportsSpeed= */ in.readBoolean(),
-                            /* supportsBearing= */ in.readBoolean(),
+                            /* hasAltitudeSupport= */ in.readBoolean(),
+                            /* hasSpeedSupport= */ in.readBoolean(),
+                            /* hasBearingSupport= */ in.readBoolean(),
                             /* powerRequirement= */ in.readInt(),
                             /* accuracy= */ in.readInt());
                 }
@@ -154,13 +164,13 @@ public final class ProviderProperties implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeBoolean(mRequiresNetwork);
-        parcel.writeBoolean(mRequiresSatellite);
-        parcel.writeBoolean(mRequiresCell);
+        parcel.writeBoolean(mHasNetworkRequirement);
+        parcel.writeBoolean(mHasSatelliteRequirement);
+        parcel.writeBoolean(mHasCellRequirement);
         parcel.writeBoolean(mHasMonetaryCost);
-        parcel.writeBoolean(mSupportsAltitude);
-        parcel.writeBoolean(mSupportsSpeed);
-        parcel.writeBoolean(mSupportsBearing);
+        parcel.writeBoolean(mHasAltitudeSupport);
+        parcel.writeBoolean(mHasSpeedSupport);
+        parcel.writeBoolean(mHasBearingSupport);
         parcel.writeInt(mPowerRequirement);
         parcel.writeInt(mAccuracy);
     }
@@ -174,21 +184,22 @@ public final class ProviderProperties implements Parcelable {
             return false;
         }
         ProviderProperties that = (ProviderProperties) o;
-        return mRequiresNetwork == that.mRequiresNetwork
-                && mRequiresSatellite == that.mRequiresSatellite
-                && mRequiresCell == that.mRequiresCell
+        return mHasNetworkRequirement == that.mHasNetworkRequirement
+                && mHasSatelliteRequirement == that.mHasSatelliteRequirement
+                && mHasCellRequirement == that.mHasCellRequirement
                 && mHasMonetaryCost == that.mHasMonetaryCost
-                && mSupportsAltitude == that.mSupportsAltitude
-                && mSupportsSpeed == that.mSupportsSpeed
-                && mSupportsBearing == that.mSupportsBearing
+                && mHasAltitudeSupport == that.mHasAltitudeSupport
+                && mHasSpeedSupport == that.mHasSpeedSupport
+                && mHasBearingSupport == that.mHasBearingSupport
                 && mPowerRequirement == that.mPowerRequirement
                 && mAccuracy == that.mAccuracy;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mRequiresNetwork, mRequiresSatellite, mRequiresCell, mHasMonetaryCost,
-                mSupportsAltitude, mSupportsSpeed, mSupportsBearing, mPowerRequirement, mAccuracy);
+        return Objects.hash(mHasNetworkRequirement, mHasSatelliteRequirement, mHasCellRequirement,
+                mHasMonetaryCost, mHasAltitudeSupport, mHasSpeedSupport, mHasBearingSupport,
+                mPowerRequirement, mAccuracy);
     }
 
     @Override
@@ -196,15 +207,15 @@ public final class ProviderProperties implements Parcelable {
         StringBuilder b = new StringBuilder("ProviderProperties[");
         b.append("power=").append(powerToString(mPowerRequirement)).append(", ");
         b.append("accuracy=").append(accuracyToString(mAccuracy));
-        if (mRequiresNetwork || mRequiresSatellite || mRequiresCell) {
+        if (mHasNetworkRequirement || mHasSatelliteRequirement || mHasCellRequirement) {
             b.append(", requires=");
-            if (mRequiresNetwork) {
+            if (mHasNetworkRequirement) {
                 b.append("network,");
             }
-            if (mRequiresSatellite) {
+            if (mHasSatelliteRequirement) {
                 b.append("satellite,");
             }
-            if (mRequiresCell) {
+            if (mHasCellRequirement) {
                 b.append("cell,");
             }
             b.setLength(b.length() - 1);
@@ -212,15 +223,15 @@ public final class ProviderProperties implements Parcelable {
         if (mHasMonetaryCost) {
             b.append(", hasMonetaryCost");
         }
-        if (mSupportsBearing || mSupportsSpeed || mSupportsAltitude) {
+        if (mHasBearingSupport || mHasSpeedSupport || mHasAltitudeSupport) {
             b.append(", supports=[");
-            if (mSupportsBearing) {
+            if (mHasBearingSupport) {
                 b.append("bearing, ");
             }
-            if (mSupportsSpeed) {
+            if (mHasSpeedSupport) {
                 b.append("speed, ");
             }
-            if (mSupportsAltitude) {
+            if (mHasAltitudeSupport) {
                 b.append("altitude, ");
             }
             b.setLength(b.length() - 2);

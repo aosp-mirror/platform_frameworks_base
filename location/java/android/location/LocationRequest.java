@@ -47,6 +47,8 @@ public final class LocationRequest implements Parcelable {
     /**
      * Represents a passive only request. Such a request will not trigger any active locations or
      * power usage itself, but may receive locations generated in response to other requests.
+     *
+     * @see LocationRequest#getIntervalMillis()
      */
     public static final long PASSIVE_INTERVAL = Long.MAX_VALUE;
 
@@ -345,7 +347,7 @@ public final class LocationRequest implements Parcelable {
      *
      * @return the desired interval of location updates
      */
-    public long getIntervalMillis() {
+    public @IntRange(from = 0) long getIntervalMillis() {
         return mInterval;
     }
 
@@ -419,7 +421,7 @@ public final class LocationRequest implements Parcelable {
      *
      * @return the duration for which location will be provided
      */
-    public long getDurationMillis() {
+    public @IntRange(from = 1) long getDurationMillis() {
         return mDurationMillis;
     }
 
@@ -467,7 +469,7 @@ public final class LocationRequest implements Parcelable {
      * automatically removed. A max updates value of <code>Integer.MAX_VALUE</code> represents an
      * unlimited number of updates.
      */
-    public int getMaxUpdates() {
+    public @IntRange(from = 1, to = Integer.MAX_VALUE) int getMaxUpdates() {
         return mMaxUpdates;
     }
 
@@ -482,7 +484,7 @@ public final class LocationRequest implements Parcelable {
      *
      * @return the minimum update interval
      */
-    public long getMinUpdateIntervalMillis() {
+    public @IntRange(from = 0) long getMinUpdateIntervalMillis() {
         if (mMinUpdateIntervalMillis == IMPLICIT_MIN_UPDATE_INTERVAL) {
             return mInterval;
         } else {
@@ -522,7 +524,7 @@ public final class LocationRequest implements Parcelable {
      *
      * @return the minimum distance between location updates
      */
-    public float getMinUpdateDistanceMeters() {
+    public @FloatRange(from = 0, to = Float.MAX_VALUE) float getMinUpdateDistanceMeters() {
         return mMinUpdateDistanceMeters;
     }
 
@@ -970,7 +972,7 @@ public final class LocationRequest implements Parcelable {
 
         /**
          * Clears an explicitly set minimum update interval and reverts to an implicit minimum
-         * update interval which is the same as the interval.
+         * update interval (ie, the minimum update interval is same value as the interval).
          */
         public @NonNull Builder clearMinUpdateIntervalMillis() {
             mMinUpdateIntervalMillis = IMPLICIT_MIN_UPDATE_INTERVAL;
