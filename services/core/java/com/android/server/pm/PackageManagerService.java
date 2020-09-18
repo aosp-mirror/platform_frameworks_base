@@ -10503,7 +10503,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private void clearAppDataLIF(AndroidPackage pkg, int userId, int flags) {
         if (pkg == null) {
-            Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
         }
         clearAppDataLeafLIF(pkg, userId, flags);
