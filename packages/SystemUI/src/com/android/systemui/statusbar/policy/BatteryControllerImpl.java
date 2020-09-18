@@ -58,7 +58,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final EnhancedEstimates mEstimates;
-    private final BroadcastDispatcher mBroadcastDispatcher;
+    protected final BroadcastDispatcher mBroadcastDispatcher;
     protected final ArrayList<BatteryController.BatteryStateChangeCallback>
             mChangeCallbacks = new ArrayList<>();
     private final ArrayList<EstimateFetchCompletion> mFetchCallbacks = new ArrayList<>();
