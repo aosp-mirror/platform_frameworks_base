@@ -41,7 +41,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.SmartReplyController;
-import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 
 import org.junit.After;
 import org.junit.Before;
@@ -110,7 +109,6 @@ public abstract class SysuiTestCase {
         // KeyguardUpdateMonitor to be created (injected).
         // TODO(b/1531701009) Clean up NotificationContentView creation to prevent this
         mDependency.injectMockDependency(SmartReplyController.class);
-        mDependency.injectMockDependency(NotificationBlockingHelperManager.class);
     }
 
     @After
