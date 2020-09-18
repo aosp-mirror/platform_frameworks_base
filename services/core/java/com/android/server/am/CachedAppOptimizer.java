@@ -22,6 +22,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 
 import android.app.ActivityManager;
 import android.app.ActivityThread;
+import android.app.ApplicationExitInfo;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Message;
@@ -132,10 +133,14 @@ public final class CachedAppOptimizer {
     static final int REPORT_UNFREEZE_MSG = 4;
 
     //TODO:change this static definition into a configurable flag.
-    static final int FREEZE_TIMEOUT_MS = 500;
+    static final int FREEZE_TIMEOUT_MS = 10000;
 
     static final int DO_FREEZE = 1;
     static final int REPORT_UNFREEZE = 2;
+
+    // Bitfield values for sync/async transactions reveived by frozen processes
+    static final int SYNC_RECEIVED_WHILE_FROZEN = 1;
+    static final int ASYNC_RECEIVED_WHILE_FROZEN = 2;
 
     /**
      * This thread must be moved to the system background cpuset.
@@ -494,6 +499,15 @@ public final class CachedAppOptimizer {
     private static native void freezeBinder(int pid, boolean freeze);
 
     /**
+     * Retrieves binder freeze info about a process.
+     * @param pid the pid for which binder freeze info is to be retrieved.
+     *
+     * @throws RuntimeException if the operation could not complete successfully.
+     * @return a bit field reporting the binder freeze info for the process.
+     */
+    private static native int getBinderFreezeInfo(int pid);
+
+    /**
      * Determines whether the freezer is supported by this system
      */
     public static boolean isFreezerSupported() {
@@ -729,6 +743,37 @@ public final class CachedAppOptimizer {
             return;
         }
 
+        boolean processKilled = false;
+
+        try {
+            int freezeInfo = getBinderFreezeInfo(app.pid);
+
+            if ((freezeInfo & SYNC_RECEIVED_WHILE_FROZEN) != 0) {
+                Slog.d(TAG_AM, "pid " + app.pid + " " + app.processName + " "
+                        + " received sync transactions while frozen, killing");
+                app.kill("Sync transaction while in frozen state",
+                        ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
+                processKilled = true;
+            }
+
+            if ((freezeInfo & ASYNC_RECEIVED_WHILE_FROZEN) != 0) {
+                Slog.d(TAG_AM, "pid " + app.pid + " " + app.processName + " "
+                        + " received async transactions while frozen");
+            }
+        } catch (Exception e) {
+            Slog.d(TAG_AM, "Unable to query binder frozen info for pid " + app.pid + " "
+                    + app.processName + ". Killing it. Exception: " + e);
+            app.kill("Unable to query binder frozen stats",
+                    ApplicationExitInfo.REASON_OTHER,
+                    ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
+            processKilled = true;
+        }
+
+        if (processKilled) {
+            return;
+        }
+
         long freezeTime = app.freezeUnfreezeTime;
 
         try {
@@ -745,8 +790,12 @@ public final class CachedAppOptimizer {
             try {
                 freezeBinder(app.pid, false);
             } catch (RuntimeException e) {
-                // TODO: it might be preferable to kill the target pid in this case
-                Slog.e(TAG_AM, "Unable to unfreeze binder for " + app.pid + " " + app.processName);
+                Slog.e(TAG_AM, "Unable to unfreeze binder for " + app.pid + " " + app.processName
+                        + ". Killing it");
+                app.kill("Unable to unfreeze",
+                        ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
+                return;
             }
 
             if (DEBUG_FREEZER) {
