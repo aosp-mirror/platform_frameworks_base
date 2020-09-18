@@ -99,6 +99,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private SurfaceView mMirrorSurfaceView;
     private int mMirrorSurfaceMargin;
     private int mBorderDragSize;
+    private int mDragViewSize;
     private int mOuterBorderSize;
     // The boundary of magnification frame.
     private final Rect mMagnificationFrameBoundary = new Rect();
@@ -170,6 +171,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 R.dimen.magnification_mirror_surface_margin);
         mBorderDragSize = mResources.getDimensionPixelSize(
                 R.dimen.magnification_border_drag_size);
+        mDragViewSize = mResources.getDimensionPixelSize(
+                R.dimen.magnification_drag_view_size);
         mOuterBorderSize = mResources.getDimensionPixelSize(
                 R.dimen.magnification_outer_border_margin);
     }
@@ -312,6 +315,10 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         Region regionInsideDragBorder = new Region(mBorderDragSize, mBorderDragSize,
                 mMirrorView.getWidth() - mBorderDragSize,
                 mMirrorView.getHeight() - mBorderDragSize);
+        Rect dragArea = new Rect(mMirrorView.getWidth() - mDragViewSize - mBorderDragSize,
+                mMirrorView.getHeight() - mDragViewSize - mBorderDragSize,
+                mMirrorView.getWidth(), mMirrorView.getHeight());
+        regionInsideDragBorder.op(dragArea, Region.Op.DIFFERENCE);
         return regionInsideDragBorder;
     }
 
