@@ -34,6 +34,7 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
 import com.android.server.location.listeners.ListenerMultiplexer.UpdateServiceLock;
 
 import org.junit.Before;
@@ -318,7 +319,8 @@ public class ListenerMultiplexerTest {
     }
 
     private static class TestListenerRegistration extends
-            ListenerRegistration<Integer, Consumer<TestListenerRegistration>> {
+            RequestListenerRegistration<Integer, Consumer<TestListenerRegistration>,
+                    ListenerOperation<Consumer<TestListenerRegistration>>> {
 
         boolean mActive = true;
 
@@ -329,8 +331,10 @@ public class ListenerMultiplexerTest {
     }
 
     private static class TestMultiplexer extends
-            ListenerMultiplexer<Consumer<TestListenerRegistration>, Integer,
-                    Consumer<TestListenerRegistration>, TestListenerRegistration, Integer> {
+            ListenerMultiplexer<Consumer<TestListenerRegistration>,
+                    Consumer<TestListenerRegistration>,
+                    ListenerOperation<Consumer<TestListenerRegistration>>, TestListenerRegistration,
+                    Integer> {
 
         boolean mRegistered;
         int mMergedRequest;
@@ -339,6 +343,11 @@ public class ListenerMultiplexerTest {
 
         TestMultiplexer(Callbacks callbacks) {
             mCallbacks = callbacks;
+        }
+
+        @Override
+        public String getTag() {
+            return "TestMultiplexer";
         }
 
         public void addListener(Integer request, Consumer<TestListenerRegistration> consumer) {
@@ -369,7 +378,8 @@ public class ListenerMultiplexerTest {
         }
 
         @Override
-        protected boolean registerWithService(Integer mergedRequest) {
+        protected boolean registerWithService(Integer mergedRequest,
+                Collection<TestListenerRegistration> registrations) {
             mRegistered = true;
             mMergedRequest = mergedRequest;
             return true;
@@ -418,7 +428,8 @@ public class ListenerMultiplexerTest {
         }
 
         @Override
-        protected Integer mergeRequests(Collection<TestListenerRegistration> testRegistrations) {
+        protected Integer mergeRegistrations(
+                Collection<TestListenerRegistration> testRegistrations) {
             int max = Integer.MIN_VALUE;
             for (TestListenerRegistration registration : testRegistrations) {
                 if (registration.getRequest() > max) {

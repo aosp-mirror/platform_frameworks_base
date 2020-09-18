@@ -30,6 +30,8 @@ import com.android.internal.util.Preconditions;
 import com.android.server.location.util.AppOpsHelper;
 import com.android.server.location.util.Injector;
 
+import java.util.Collection;
+
 /**
  * An base implementation for GPS navigation messages provider.
  * It abstracts out the responsibility of handling listeners, while still allowing technology
@@ -61,7 +63,8 @@ public class GnssNavigationMessageProvider extends
     }
 
     @Override
-    protected boolean registerWithService(Void ignored) {
+    protected boolean registerWithService(Void ignored,
+            Collection<GnssListenerRegistration> registrations) {
         Preconditions.checkState(mNative.isNavigationMessageSupported());
 
         if (mNative.startNavigationMessageCollection()) {
