@@ -27,6 +27,7 @@ import android.app.job.JobInfo;
 import android.app.job.JobWorkItem;
 import android.content.ClipData;
 import android.content.ComponentName;
+import android.content.pm.ServiceInfo;
 import android.net.Network;
 import android.net.Uri;
 import android.os.RemoteException;
@@ -296,6 +297,7 @@ public final class JobStatus {
     public ArraySet<Uri> changedUris;
     public ArraySet<String> changedAuthorities;
     public Network network;
+    public ServiceInfo serviceInfo;
 
     public int lastEvaluatedPriority;
 
@@ -1284,8 +1286,8 @@ public final class JobStatus {
         // run if its constraints are satisfied).
         // DeviceNotDozing implicit constraint must be satisfied
         // NotRestrictedInBackground implicit constraint must be satisfied
-        return mReadyNotDozing && mReadyNotRestrictedInBg && (mReadyDeadlineSatisfied
-                || isConstraintsSatisfied(satisfiedConstraints));
+        return mReadyNotDozing && mReadyNotRestrictedInBg && (serviceInfo != null)
+                && (mReadyDeadlineSatisfied || isConstraintsSatisfied(satisfiedConstraints));
     }
 
     /** All constraints besides implicit and deadline. */
@@ -1767,6 +1769,9 @@ public final class JobStatus {
         pw.print(prefix);
         pw.print("  readyDynamicSatisfied: ");
         pw.println(mReadyDynamicSatisfied);
+        pw.print(prefix);
+        pw.print("  readyComponentEnabled: ");
+        pw.println(serviceInfo != null);
 
         if (changedAuthorities != null) {
             pw.print(prefix); pw.println("Changed authorities:");
