@@ -16,8 +16,12 @@
 
 package com.android.server.wm;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
+
 import android.util.ArrayMap;
 import android.util.ArraySet;
+
+import com.android.internal.protolog.common.ProtoLog;
 
 import java.util.Set;
 
@@ -63,25 +67,38 @@ class BLASTSyncEngine {
 
         private void tryFinish() {
             if (mRemainingTransactions == 0 && mReady) {
+                ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncSet{%x:%d} Finished. Reporting %d "
+                        + "containers to %s", BLASTSyncEngine.this.hashCode(), mSyncId,
+                        mWindowContainersReady.size(), mListener);
                 mListener.onTransactionReady(mSyncId, mWindowContainersReady);
                 mPendingSyncs.remove(mSyncId);
             }
         }
 
-        public void onTransactionReady(int mSyncId, Set<WindowContainer> windowContainersReady) {
+        public void onTransactionReady(int syncId, Set<WindowContainer> windowContainersReady) {
             mRemainingTransactions--;
+            ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncSet{%x:%d} Child ready, now ready=%b"
+                    + " and waiting on %d transactions", BLASTSyncEngine.this.hashCode(), mSyncId,
+                    mReady, mRemainingTransactions);
             mWindowContainersReady.addAll(windowContainersReady);
             tryFinish();
         }
 
         void setReady() {
+            ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncSet{%x:%d} Set ready",
+                    BLASTSyncEngine.this.hashCode(), mSyncId);
             mReady = true;
             tryFinish();
         }
 
         boolean addToSync(WindowContainer wc) {
+            ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncSet{%x:%d} Trying to add %s",
+                    BLASTSyncEngine.this.hashCode(), mSyncId, wc);
             if (wc.prepareForSync(this, mSyncId)) {
                 mRemainingTransactions++;
+                ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncSet{%x:%d} Added %s. now waiting "
+                        + "on %d transactions", BLASTSyncEngine.this.hashCode(), mSyncId, wc,
+                        mRemainingTransactions);
                 return true;
             }
             return false;
@@ -105,6 +122,7 @@ class BLASTSyncEngine {
         final int id = mNextSyncId++;
         final SyncState s = new SyncState(listener, id);
         mPendingSyncs.put(id, s);
+        ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncSet{%x:%d} Start for %s", hashCode(), id, listener);
         return id;
     }
 
