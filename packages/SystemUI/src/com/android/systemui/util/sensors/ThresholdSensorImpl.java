@@ -199,7 +199,7 @@ class ThresholdSensorImpl implements ThresholdSensor {
 
     @Override
     public String toString() {
-        return String.format("{registered=%s, paused=%s, threshold=%s, sensor=%s}",
+        return String.format("{isLoaded=%s, registered=%s, paused=%s, threshold=%s, sensor=%s}",
                 isLoaded(), mRegistered, mPaused, mThreshold, mSensor);
     }
 

@@ -35,6 +35,7 @@ import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.doze.dagger.WrappedService;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 
+import java.io.PrintWriter;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -220,5 +221,10 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     public void onReceive(Context context, Intent intent) {
         mDebugBrightnessBucket = intent.getIntExtra(BRIGHTNESS_BUCKET, -1);
         updateBrightnessAndReady(false /* force */);
+    }
+
+    /** Dump current state */
+    public void dump(PrintWriter pw) {
+        pw.println("DozeScreenBrightnessSensorRegistered=" + mRegistered);
     }
 }
