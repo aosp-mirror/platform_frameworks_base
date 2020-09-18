@@ -192,7 +192,6 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.View;
-import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
@@ -3744,7 +3743,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     void statusBarVisibilityChanged(int visibility) {
         mLastStatusBarVisibility = visibility;
-        visibility = getDisplayPolicy().adjustSystemUiVisibilityLw(visibility);
         updateStatusBarVisibilityLocked(visibility);
     }
 
@@ -3769,30 +3767,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     void updateSystemUiVisibility(int visibility, int globalDiff) {
         forAllWindows(w -> {
-            try {
-                final int curValue = w.mSystemUiVisibility;
-                final int diff = (curValue ^ visibility) & globalDiff;
-                final int newValue = (curValue & ~diff) | (visibility & diff);
-                if (newValue != curValue) {
-                    w.mSeq++;
-                    w.mSystemUiVisibility = newValue;
-                }
-                if ((newValue != curValue || w.mAttrs.hasSystemUiListeners)
-                        && ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL) {
-                    w.mClient.dispatchSystemUiVisibilityChanged(w.mSeq,
-                            visibility, newValue, diff);
-                }
-            } catch (RemoteException e) {
-                // so sorry
+            final int curValue = w.mSystemUiVisibility;
+            final int diff = (curValue ^ visibility) & globalDiff;
+            final int newValue = (curValue & ~diff) | (visibility & diff);
+            if (newValue != curValue) {
+                w.mSeq++;
+                w.mSystemUiVisibility = newValue;
             }
         }, true /* traverseTopToBottom */);
-    }
-
-    void reevaluateStatusBarVisibility() {
-        int visibility = getDisplayPolicy().adjustSystemUiVisibilityLw(mLastStatusBarVisibility);
-        if (updateStatusBarVisibilityLocked(visibility)) {
-            mWmService.mWindowPlacerLocked.requestTraversal();
-        }
     }
 
     void onWindowFreezeTimeout() {
