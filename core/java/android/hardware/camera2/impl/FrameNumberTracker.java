@@ -70,30 +70,29 @@ public class FrameNumberTracker {
             int requestType = (int) pair.getValue();
             Boolean removeError = false;
             if (errorFrameNumber == mCompletedFrameNumber[requestType] + 1) {
-                mCompletedFrameNumber[requestType] = errorFrameNumber;
                 removeError = true;
+            }
+            // The error frame number could have also either been in the pending list or one of the
+            // 'other' pending lists.
+            if (!mPendingFrameNumbers[requestType].isEmpty()) {
+                if (errorFrameNumber == mPendingFrameNumbers[requestType].element()) {
+                    mPendingFrameNumbers[requestType].remove();
+                    removeError = true;
+                }
             } else {
-                if (!mPendingFrameNumbers[requestType].isEmpty()) {
-                    if (errorFrameNumber == mPendingFrameNumbers[requestType].element()) {
-                        mCompletedFrameNumber[requestType] = errorFrameNumber;
-                        mPendingFrameNumbers[requestType].remove();
+                for (int i = 1; i < CaptureRequest.REQUEST_TYPE_COUNT; i++) {
+                    int otherType = (requestType + i) % CaptureRequest.REQUEST_TYPE_COUNT;
+                    if (!mPendingFrameNumbersWithOtherType[otherType].isEmpty() && errorFrameNumber
+                            == mPendingFrameNumbersWithOtherType[otherType].element()) {
+                        mPendingFrameNumbersWithOtherType[otherType].remove();
                         removeError = true;
-                    }
-                } else {
-                    for (int i = 1; i < CaptureRequest.REQUEST_TYPE_COUNT; i++) {
-                        int otherType = (requestType + i) % CaptureRequest.REQUEST_TYPE_COUNT;
-                        if (!mPendingFrameNumbersWithOtherType[otherType].isEmpty()
-                                && errorFrameNumber
-                                == mPendingFrameNumbersWithOtherType[otherType].element()) {
-                            mCompletedFrameNumber[requestType] = errorFrameNumber;
-                            mPendingFrameNumbersWithOtherType[otherType].remove();
-                            removeError = true;
-                            break;
-                        }
+                        break;
                     }
                 }
             }
             if (removeError) {
+                mCompletedFrameNumber[requestType] = errorFrameNumber;
+                mPartialResults.remove(errorFrameNumber);
                 iter.remove();
             }
         }
