@@ -96,7 +96,6 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.ForegroundServiceDungeonView;
-import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
@@ -156,7 +155,6 @@ public class NotificationStackScrollLayoutController {
     private final LayoutInflater mLayoutInflater;
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final VisualStabilityManager mVisualStabilityManager;
-    private final NotificationBlockingHelperManager mNotificationBlockingHelperManager;
     private final ShadeController mShadeController;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
@@ -394,8 +392,6 @@ public class NotificationStackScrollLayoutController {
                         return;
                     }
 
-                    boolean isBlockingHelperShown = false;
-
                     mView.removeDraggedView(view);
                     mView.updateContinuousShadowDrawing();
 
@@ -405,13 +401,10 @@ public class NotificationStackScrollLayoutController {
                             mHeadsUpManager.addSwipedOutNotification(
                                     row.getEntry().getSbn().getKey());
                         }
-                        isBlockingHelperShown =
-                                row.performDismissWithBlockingHelper(false /* fromAccessibility */);
+                        row.performDismiss(false /* fromAccessibility */);
                     }
 
-                    if (!isBlockingHelperShown) {
-                        mView.addSwipedOutView(view);
-                    }
+                    mView.addSwipedOutView(view);
                     mFalsingManager.onNotificationDismissed();
                     if (mFalsingManager.shouldEnforceBouncer()) {
                         mStatusBar.executeRunnableDismissingKeyguard(
@@ -582,7 +575,6 @@ public class NotificationStackScrollLayoutController {
             LayoutInflater layoutInflater,
             NotificationRemoteInputManager remoteInputManager,
             VisualStabilityManager visualStabilityManager,
-            NotificationBlockingHelperManager notificationBlockingHelperManager,
             ShadeController shadeController) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
@@ -628,7 +620,6 @@ public class NotificationStackScrollLayoutController {
         mLayoutInflater = layoutInflater;
         mRemoteInputManager = remoteInputManager;
         mVisualStabilityManager = visualStabilityManager;
-        mNotificationBlockingHelperManager = notificationBlockingHelperManager;
         mShadeController = shadeController;
     }
 
@@ -691,10 +682,6 @@ public class NotificationStackScrollLayoutController {
         mView.addOnExpandedHeightChangedListener(mNotificationRoundnessManager::setExpanded);
 
         mVisualStabilityManager.setVisibilityLocationProvider(this::isInVisibleLocation);
-        // Blocking helper manager wants to know the expanded state, update as well.
-        mView.addOnExpandedHeightChangedListener((height, unused) ->
-                mNotificationBlockingHelperManager.setNotificationShadeExpanded(height)
-        );
 
         mTunerService.addTunable(
                 (key, newValue) -> {

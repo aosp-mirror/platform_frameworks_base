@@ -58,10 +58,8 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.FooterView;
-import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.KeyguardBypassEnabledProvider;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -91,7 +89,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
     @Mock private StatusBar mBar;
     @Mock private SysuiStatusBarStateController mBarState;
-    @Mock private NotificationBlockingHelperManager mBlockingHelperManager;
     @Mock private NotificationGroupManagerLegacy mGroupMembershipManger;
     @Mock private NotificationGroupManagerLegacy mGroupExpansionManager;
     @Mock private ExpandHelper mExpandHelper;
@@ -120,9 +117,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 1, UserHandle.USER_CURRENT);
 
         // Inject dependencies before initializing the layout
-        mDependency.injectTestDependency(
-                NotificationBlockingHelperManager.class,
-                mBlockingHelperManager);
         mDependency.injectTestDependency(SysuiStatusBarStateController.class, mBarState);
         mDependency.injectMockDependency(ShadeController.class);
 
