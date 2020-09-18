@@ -484,6 +484,14 @@ void CanvasContext::draw() {
 
     waitOnFences();
 
+    if (mNativeSurface) {
+        // TODO(b/165985262): measure performance impact
+        if (const auto vsyncId = mCurrentFrameInfo->get(FrameInfoIndex::FrameTimelineVsyncId);
+                vsyncId != UiFrameInfoBuilder::INVALID_VSYNC_ID) {
+            native_window_set_frame_timeline_vsync(mNativeSurface->getNativeWindow(), vsyncId);
+        }
+    }
+
     bool requireSwap = false;
     int error = OK;
     bool didSwap =
@@ -617,8 +625,11 @@ void CanvasContext::prepareAndDraw(RenderNode* node) {
     ATRACE_CALL();
 
     nsecs_t vsync = mRenderThread.timeLord().computeFrameTimeNanos();
+    int64_t vsyncId = mRenderThread.timeLord().lastVsyncId();
     int64_t frameInfo[UI_THREAD_FRAME_INFO_SIZE];
-    UiFrameInfoBuilder(frameInfo).addFlag(FrameInfoFlags::RTAnimation).setVsync(vsync, vsync);
+    UiFrameInfoBuilder(frameInfo)
+        .addFlag(FrameInfoFlags::RTAnimation)
+        .setVsync(vsync, vsync, vsyncId);
 
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *this);
     prepareTree(info, frameInfo, systemTime(SYSTEM_TIME_MONOTONIC), node);

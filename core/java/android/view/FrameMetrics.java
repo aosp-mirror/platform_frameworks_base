@@ -189,6 +189,7 @@ public final class FrameMetrics {
      */
     @IntDef ({
             Index.FLAGS,
+            Index.FRAME_TIMELINE_VSYNC_ID,
             Index.INTENDED_VSYNC,
             Index.VSYNC,
             Index.OLDEST_INPUT_EVENT,
@@ -206,21 +207,22 @@ public final class FrameMetrics {
     @Retention(RetentionPolicy.SOURCE)
     private @interface Index {
         int FLAGS = 0;
-        int INTENDED_VSYNC = 1;
-        int VSYNC = 2;
-        int OLDEST_INPUT_EVENT = 3;
-        int NEWEST_INPUT_EVENT = 4;
-        int HANDLE_INPUT_START = 5;
-        int ANIMATION_START = 6;
-        int PERFORM_TRAVERSALS_START = 7;
-        int DRAW_START = 8;
-        int SYNC_QUEUED = 9;
-        int SYNC_START = 10;
-        int ISSUE_DRAW_COMMANDS_START = 11;
-        int SWAP_BUFFERS = 12;
-        int FRAME_COMPLETED = 13;
+        int FRAME_TIMELINE_VSYNC_ID = 1;
+        int INTENDED_VSYNC = 2;
+        int VSYNC = 3;
+        int OLDEST_INPUT_EVENT = 4;
+        int NEWEST_INPUT_EVENT = 5;
+        int HANDLE_INPUT_START = 6;
+        int ANIMATION_START = 7;
+        int PERFORM_TRAVERSALS_START = 8;
+        int DRAW_START = 9;
+        int SYNC_QUEUED = 10;
+        int SYNC_START = 11;
+        int ISSUE_DRAW_COMMANDS_START = 12;
+        int SWAP_BUFFERS = 13;
+        int FRAME_COMPLETED = 14;
 
-        int FRAME_STATS_COUNT = 17; // must always be last
+        int FRAME_STATS_COUNT = 18; // must always be last
     }
 
     /*

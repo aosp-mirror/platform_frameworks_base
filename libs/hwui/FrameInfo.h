@@ -27,10 +27,11 @@
 namespace android {
 namespace uirenderer {
 
-#define UI_THREAD_FRAME_INFO_SIZE 9
+#define UI_THREAD_FRAME_INFO_SIZE 10
 
 enum class FrameInfoIndex {
     Flags = 0,
+    FrameTimelineVsyncId,
     IntendedVsync,
     Vsync,
     OldestInputEvent,
@@ -71,11 +72,15 @@ enum {
 
 class UiFrameInfoBuilder {
 public:
+    static constexpr int64_t INVALID_VSYNC_ID = -1;
+
     explicit UiFrameInfoBuilder(int64_t* buffer) : mBuffer(buffer) {
         memset(mBuffer, 0, UI_THREAD_FRAME_INFO_SIZE * sizeof(int64_t));
+        set(FrameInfoIndex::FrameTimelineVsyncId) = INVALID_VSYNC_ID;
     }
 
-    UiFrameInfoBuilder& setVsync(nsecs_t vsyncTime, nsecs_t intendedVsync) {
+    UiFrameInfoBuilder& setVsync(nsecs_t vsyncTime, nsecs_t intendedVsync, int64_t vsyncId) {
+        set(FrameInfoIndex::FrameTimelineVsyncId) = vsyncId;
         set(FrameInfoIndex::Vsync) = vsyncTime;
         set(FrameInfoIndex::IntendedVsync) = intendedVsync;
         // Pretend the other fields are all at vsync, too, so that naive
