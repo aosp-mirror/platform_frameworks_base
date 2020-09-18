@@ -22,7 +22,9 @@ import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED_STANDBY;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -33,6 +35,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -51,6 +54,7 @@ import android.media.tv.ITvInputService;
 import android.media.tv.ITvInputServiceCallback;
 import android.media.tv.ITvInputSession;
 import android.media.tv.ITvInputSessionCallback;
+import android.media.tv.TvChannelInfo;
 import android.media.tv.TvContentRating;
 import android.media.tv.TvContentRatingSystemInfo;
 import android.media.tv.TvContract;
@@ -78,6 +82,7 @@ import android.util.SparseArray;
 import android.view.InputChannel;
 import android.view.Surface;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
@@ -108,6 +113,9 @@ public final class TvInputManagerService extends SystemService {
     private static final boolean DEBUG = false;
     private static final String TAG = "TvInputManagerService";
     private static final String DVB_DIRECTORY = "/dev/dvb";
+    private static final int APP_TAG_SELF = TvChannelInfo.APP_TAG_SELF;
+    private static final String PERMISSION_ACCESS_WATCHED_PROGRAMS =
+            "com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS";
 
     // There are two different formats of DVB frontend devices. One is /dev/dvb%d.frontend%d,
     // another one is /dev/dvb/adapter%d/frontend%d. Followings are the patterns for selecting the
@@ -136,6 +144,8 @@ public final class TvInputManagerService extends SystemService {
 
     private final WatchLogHandler mWatchLogHandler;
 
+    private final ActivityManager mActivityManager;
+
     public TvInputManagerService(Context context) {
         super(context);
 
@@ -143,6 +153,9 @@ public final class TvInputManagerService extends SystemService {
         mWatchLogHandler = new WatchLogHandler(mContext.getContentResolver(),
                 IoThread.get().getLooper());
         mTvInputHardwareManager = new TvInputHardwareManager(context, new HardwareListener());
+
+        mActivityManager =
+                (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE);
 
         synchronized (mLock) {
             getOrCreateUserStateLocked(mCurrentUserId);
@@ -694,6 +707,8 @@ public final class TvInputManagerService extends SystemService {
                 sessionState.session.asBinder().unlinkToDeath(sessionState, 0);
                 sessionState.session.release();
             }
+            sessionState.isCurrent = false;
+            sessionState.currentChannel = null;
         } catch (RemoteException | SessionNotFoundException e) {
             Slog.e(TAG, "error in releaseSession", e);
         } finally {
@@ -1394,13 +1409,17 @@ public final class TvInputManagerService extends SystemService {
                     try {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId).tune(
                                 channelUri, params);
+                        UserState userState = getOrCreateUserStateLocked(resolvedUserId);
+                        SessionState sessionState = userState.sessionStateMap.get(sessionToken);
+                        if (sessionState != null) {
+                            sessionState.isCurrent = true;
+                            sessionState.currentChannel = channelUri;
+                        }
                         if (TvContract.isChannelUriForPassthroughInput(channelUri)) {
                             // Do not log the watch history for passthrough inputs.
                             return;
                         }
 
-                        UserState userState = getOrCreateUserStateLocked(resolvedUserId);
-                        SessionState sessionState = userState.sessionStateMap.get(sessionToken);
                         if (sessionState.isRecordingSession) {
                             return;
                         }
@@ -2049,6 +2068,80 @@ public final class TvInputManagerService extends SystemService {
             return clientPid;
         }
 
+        @Override
+        public List<TvChannelInfo> getTvCurrentChannelInfos(@UserIdInt int userId) {
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "getTvCurrentChannelInfos");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
+                    List<TvChannelInfo> channelInfos = new ArrayList<>();
+                    boolean watchedProgramsAccess = hasAccessWatchedProgramsPermission();
+                    for (SessionState state : userState.sessionStateMap.values()) {
+                        if (state.isCurrent) {
+                            Integer appTag;
+                            int appType;
+                            if (state.callingUid == Binder.getCallingUid()) {
+                                appTag = APP_TAG_SELF;
+                                appType = TvChannelInfo.APP_TYPE_SELF;
+                            } else {
+                                appTag = userState.mAppTagMap.get(state.callingUid);
+                                if (appTag == null) {
+                                    appTag = userState.mNextAppTag++;
+                                    userState.mAppTagMap.put(state.callingUid, appTag);
+                                }
+                                appType = isSystemApp(state.componentName.getPackageName())
+                                        ? TvChannelInfo.APP_TYPE_SYSTEM
+                                        : TvChannelInfo.APP_TYPE_NON_SYSTEM;
+                            }
+                            channelInfos.add(new TvChannelInfo(
+                                    state.inputId,
+                                    watchedProgramsAccess ? state.currentChannel : null,
+                                    state.isRecordingSession,
+                                    isForeground(state.callingPid),
+                                    appType,
+                                    appTag));
+                        }
+                    }
+                    return channelInfos;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        protected boolean isForeground(int pid) {
+            if (mActivityManager == null) {
+                return false;
+            }
+            List<RunningAppProcessInfo> appProcesses = mActivityManager.getRunningAppProcesses();
+            if (appProcesses == null) {
+                return false;
+            }
+            for (RunningAppProcessInfo appProcess : appProcesses) {
+                if (appProcess.pid == pid
+                        && appProcess.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean hasAccessWatchedProgramsPermission() {
+            return mContext.checkCallingPermission(PERMISSION_ACCESS_WATCHED_PROGRAMS)
+                    == PackageManager.PERMISSION_GRANTED;
+        }
+
+        private boolean isSystemApp(String pkg) {
+            try {
+                return (mContext.getPackageManager().getApplicationInfo(pkg, 0).flags
+                        & ApplicationInfo.FLAG_SYSTEM) != 0;
+            } catch (NameNotFoundException e) {
+                return false;
+            }
+        }
+
         /**
          * Add a hardware device in the TvInputHardwareManager for CTS testing
          * purpose.
@@ -2250,6 +2343,11 @@ public final class TvInputManagerService extends SystemService {
         // service.
         private final PersistentDataStore persistentDataStore;
 
+        @GuardedBy("mLock")
+        private final Map<Integer, Integer> mAppTagMap = new HashMap<>();
+        @GuardedBy("mLock")
+        private int mNextAppTag = 1;
+
         private UserState(Context context, int userId) {
             persistentDataStore = new PersistentDataStore(context, userId);
         }
@@ -2335,6 +2433,9 @@ public final class TvInputManagerService extends SystemService {
         private Uri logUri;
         // Not null if this session represents an external device connected to a hardware TV input.
         private IBinder hardwareSessionToken;
+
+        private boolean isCurrent = false;
+        private Uri currentChannel = null;
 
         private SessionState(IBinder sessionToken, String inputId, ComponentName componentName,
                 boolean isRecordingSession, ITvInputClient client, int seq, int callingUid,
