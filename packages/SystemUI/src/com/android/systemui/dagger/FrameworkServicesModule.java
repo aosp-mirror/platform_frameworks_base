@@ -62,6 +62,7 @@ import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
+import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.statusbar.IStatusBarService;
@@ -179,6 +180,12 @@ public class FrameworkServicesModule {
     @Nullable
     static FingerprintManager providesFingerprintManager(Context context) {
         return context.getSystemService(FingerprintManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static InputMethodManager provideInputMethodManager(Context context) {
+        return context.getSystemService(InputMethodManager.class);
     }
 
     @Provides
