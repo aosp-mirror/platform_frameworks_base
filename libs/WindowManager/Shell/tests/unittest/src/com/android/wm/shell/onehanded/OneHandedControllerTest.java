@@ -18,13 +18,13 @@ package com.android.wm.shell.onehanded;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.om.IOverlayManager;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -62,6 +62,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     OneHandedGestureHandler mMockGestureHandler;
     @Mock
     OneHandedTimeoutHandler mMockTimeoutHandler;
+    @Mock
+    IOverlayManager mMockOverlayManager;
 
     @Before
     public void setUp() throws Exception {
@@ -73,7 +75,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 mMockDisplayAreaOrganizer,
                 mMockTouchHandler,
                 mMockTutorialHandler,
-                mMockGestureHandler);
+                mMockGestureHandler,
+                mMockOverlayManager);
         mOneHandedController = Mockito.spy(oneHandedController);
         mTimeoutHandler = Mockito.spy(OneHandedTimeoutHandler.get());
 
