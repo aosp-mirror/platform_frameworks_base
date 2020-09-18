@@ -90,19 +90,11 @@ public abstract class SystemUIDefaultModule {
 
     @Provides
     @Singleton
-    static BatteryController provideBatteryController(Context context,
-            EnhancedEstimates enhancedEstimates, PowerManager powerManager,
-            BroadcastDispatcher broadcastDispatcher, @Main Handler mainHandler,
-            @Background Handler bgHandler) {
-        BatteryController bC = new BatteryControllerImpl(context, enhancedEstimates, powerManager,
-                broadcastDispatcher, mainHandler, bgHandler);
-        bC.init();
-        return bC;
-    }
+    public abstract BatteryController bindBatteryController(BatteryControllerImpl controllerImpl);
 
     @Binds
     @Singleton
-    public abstract QSFactory provideQSFactory(QSFactoryImpl qsFactoryImpl);
+    public abstract QSFactory bindQSFactory(QSFactoryImpl qsFactoryImpl);
 
     @Binds
     abstract DockManager bindDockManager(DockManagerImpl dockManager);
