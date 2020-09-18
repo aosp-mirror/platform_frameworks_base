@@ -57,8 +57,12 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
     private static final String TAG = "TimeZoneDetectorService";
 
-    /** A compile time switch for enabling / disabling geolocation-based time zone detection. */
-    private static final boolean GEOLOCATION_TIME_ZONE_DETECTION_ENABLED = false;
+    /**
+     * A compile time constant "feature switch" for enabling / disabling location-based time zone
+     * detection on Android. If this is {@code false}, there should be few / little changes in
+     * behavior with previous releases and little overhead associated with geolocation components.
+     */
+    public static final boolean GEOLOCATION_TIME_ZONE_DETECTION_ENABLED = false;
 
     /**
      * Handles the service lifecycle for {@link TimeZoneDetectorService} and
