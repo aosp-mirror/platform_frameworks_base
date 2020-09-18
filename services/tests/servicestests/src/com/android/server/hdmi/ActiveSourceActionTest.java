@@ -110,7 +110,7 @@ public class ActiveSourceActionTest {
         mHdmiControlService.setIoLooper(looper);
         mNativeWrapper = new FakeNativeWrapper();
         HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
-                this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
+                this.mHdmiControlService, mNativeWrapper);
         mHdmiControlService.setCecController(hdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
