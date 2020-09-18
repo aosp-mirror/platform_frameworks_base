@@ -263,6 +263,7 @@ internal class ControlHolder(
         val context = itemView.context
         val fg = context.getResources().getColorStateList(ri.foreground, context.getTheme())
 
+        icon.imageTintList = null
         ci.customIcon?.let {
             icon.setImageIcon(it)
         } ?: run {
