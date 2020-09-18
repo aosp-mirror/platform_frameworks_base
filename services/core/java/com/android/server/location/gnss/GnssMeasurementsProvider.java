@@ -76,7 +76,8 @@ public class GnssMeasurementsProvider extends
     }
 
     @Override
-    protected boolean registerWithService(Boolean fullTrackingRequest) {
+    protected boolean registerWithService(Boolean fullTrackingRequest,
+            Collection<GnssListenerRegistration> registrations) {
         Preconditions.checkState(mNative.isMeasurementSupported());
 
         if (mNative.startMeasurementCollection(fullTrackingRequest)) {
@@ -121,7 +122,7 @@ public class GnssMeasurementsProvider extends
     }
 
     @Override
-    protected Boolean mergeRequests(Collection<GnssListenerRegistration> registrations) {
+    protected Boolean mergeRegistrations(Collection<GnssListenerRegistration> registrations) {
         if (mSettingsHelper.isGnssMeasurementsFullTrackingEnabled()) {
             return true;
         }
