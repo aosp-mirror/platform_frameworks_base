@@ -400,6 +400,7 @@ public class StatusBarManager {
      * @hide
      */
     @TestApi
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.STATUS_BAR)
     public void setDisabledForSimNetworkLock(boolean disabled) {
         try {
