@@ -77,6 +77,9 @@ public class ComponentController extends StateController {
         }
     };
 
+    private final SparseArrayMap<ComponentName, ServiceInfo> mServiceInfoCache =
+            new SparseArrayMap<>();
+
     private final ComponentStateUpdateFunctor mComponentStateUpdateFunctor =
             new ComponentStateUpdateFunctor();
 
@@ -98,40 +101,33 @@ public class ComponentController extends StateController {
 
     @Override
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
-        updateComponentEnabledStateLocked(jobStatus, null);
+        updateComponentEnabledStateLocked(jobStatus);
     }
 
     @Override
     public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
             boolean forUpdate) {
-
     }
 
     @Nullable
-    private ServiceInfo getServiceInfo(JobStatus jobStatus,
-            @Nullable SparseArrayMap<ComponentName, ServiceInfo> cache) {
-        final ComponentName cn = jobStatus.getServiceComponent();
-        ServiceInfo si = null;
-        if (cache != null) {
-            si = cache.get(jobStatus.getUserId(), cn);
-        }
+    private ServiceInfo getServiceInfo(JobStatus jobStatus) {
+        final ComponentName service = jobStatus.getServiceComponent();
+        final int userId = jobStatus.getUserId();
+        ServiceInfo si = mServiceInfoCache.get(userId, service);
         if (si == null) {
             try {
                 si = AppGlobals.getPackageManager().getServiceInfo(
-                        cn, PackageManager.MATCH_DIRECT_BOOT_AUTO, jobStatus.getUserId());
+                        service, PackageManager.MATCH_DIRECT_BOOT_AUTO, userId);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
-            if (cache != null) {
-                cache.add(jobStatus.getUserId(), cn, si);
-            }
+            mServiceInfoCache.add(userId, service, si);
         }
         return si;
     }
 
-    private boolean updateComponentEnabledStateLocked(JobStatus jobStatus,
-            @Nullable SparseArrayMap<ComponentName, ServiceInfo> cache) {
-        final ServiceInfo service = getServiceInfo(jobStatus, cache);
+    private boolean updateComponentEnabledStateLocked(JobStatus jobStatus) {
+        final ServiceInfo service = getServiceInfo(jobStatus);
 
         if (DEBUG && service == null) {
             Slog.v(TAG, jobStatus.toShortString() + " component not present");
@@ -142,40 +138,51 @@ public class ComponentController extends StateController {
     }
 
     private void updateComponentStateForPackage(final String pkg) {
-        updateComponentStates(
-                jobStatus -> jobStatus.getServiceComponent().getPackageName().equals(pkg));
+        synchronized (mLock) {
+            for (int u = mServiceInfoCache.numMaps() - 1; u >= 0; --u) {
+                final int userId = mServiceInfoCache.keyAt(u);
+
+                for (int c = mServiceInfoCache.numElementsForKey(userId) - 1; c >= 0; --c) {
+                    final ComponentName cn = mServiceInfoCache.keyAt(u, c);
+                    if (cn.getPackageName().equals(pkg)) {
+                        mServiceInfoCache.delete(userId, cn);
+                    }
+                }
+            }
+            updateComponentStatesLocked(
+                    jobStatus -> jobStatus.getServiceComponent().getPackageName().equals(pkg));
+        }
     }
 
     private void updateComponentStateForUser(final int userId) {
-        updateComponentStates(jobStatus -> {
-            // Using user ID instead of source user ID because the service will run under the
-            // user ID, not source user ID.
-            return jobStatus.getUserId() == userId;
-        });
+        synchronized (mLock) {
+            mServiceInfoCache.delete(userId);
+            updateComponentStatesLocked(jobStatus -> {
+                // Using user ID instead of source user ID because the service will run under the
+                // user ID, not source user ID.
+                return jobStatus.getUserId() == userId;
+            });
+        }
     }
 
-    private void updateComponentStates(@NonNull Predicate<JobStatus> filter) {
-        synchronized (mLock) {
-            mComponentStateUpdateFunctor.reset();
-            mService.getJobStore().forEachJob(filter, mComponentStateUpdateFunctor);
-            if (mComponentStateUpdateFunctor.mChanged) {
-                mStateChangedListener.onControllerStateChanged();
-            }
+    private void updateComponentStatesLocked(@NonNull Predicate<JobStatus> filter) {
+        mComponentStateUpdateFunctor.reset();
+        mService.getJobStore().forEachJob(filter, mComponentStateUpdateFunctor);
+        if (mComponentStateUpdateFunctor.mChanged) {
+            mStateChangedListener.onControllerStateChanged();
         }
     }
 
     final class ComponentStateUpdateFunctor implements Consumer<JobStatus> {
         boolean mChanged;
-        final SparseArrayMap<ComponentName, ServiceInfo> mTempCache = new SparseArrayMap<>();
 
         @Override
         public void accept(JobStatus jobStatus) {
-            mChanged |= updateComponentEnabledStateLocked(jobStatus, mTempCache);
+            mChanged |= updateComponentEnabledStateLocked(jobStatus);
         }
 
         private void reset() {
             mChanged = false;
-            mTempCache.clear();
         }
     }
 
