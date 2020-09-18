@@ -3954,14 +3954,21 @@ public final class Telephony {
         public static final String APN_SET_ID = "apn_set_id";
 
         /**
-         * Possible value for the {@link #APN_SET_ID} field. By default APNs will not belong to a
-         * set. If the user manually selects an APN without apn set id, there is no need to
-         * prioritize any specific APN set ids.
+         * Possible value for the {@link #APN_SET_ID} field. By default APNs are added to set 0.
          * <p>Type: INTEGER</p>
          * @hide
          */
         @SystemApi
         public static final int NO_APN_SET_ID = 0;
+
+        /**
+         * Possible value for the {@link #APN_SET_ID} field.
+         * APNs with MATCH_ALL_APN_SET_ID will be used regardless of any set ids of
+         * the selected APN.
+         * <p>Type: INTEGER</p>
+         * @hide
+         */
+        public static final int MATCH_ALL_APN_SET_ID = -1;
 
         /**
          * A unique carrier id associated with this APN
