@@ -714,7 +714,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"ଫୋନ୍ ସେଟିଂସ୍ ଆଧାରରେ ରିଙ୍ଗ କିମ୍ବା ଭାଇବ୍ରେଟ୍ ହୋଇପାରେ"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ଫୋନ୍ ସେଟିଂସ୍ ଆଧାରରେ ରିଙ୍ଗ କିମ୍ବା ଭାଇବ୍ରେଟ୍ ହୋଇପାରେ। <xliff:g id="APP_NAME">%1$s</xliff:g>ରୁ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ଡିଫଲ୍ଟ ଭାବରେ ବବଲ୍ ହୁଏ।"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ଏହି ବିଷୟବସ୍ତୁ ପାଇଁ ଏକ ଭାସମାନ ସର୍ଟକଟ୍ ସହ ଆପଣଙ୍କର ଧ୍ୟାନ ଦିଅନ୍ତୁ।"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"ବାର୍ତ୍ତାଳାପ ବିଭାଗର ଶୀର୍ଷରେ ଦେଖାଏ, ଭାସମାନ ବବଲ୍ ଭାବେ ଦେଖାଯାଏ, ଲକ୍ ସ୍କ୍ରିନରେ ପ୍ରୋଫାଇଲ୍ ଛବି ଡିସପ୍ଲେ କରେ"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"ବାର୍ତ୍ତାଳାପ ବିଭାଗର ଶୀର୍ଷରେ ଦେଖାଏ, ଫ୍ଲୋଟିଂ ବବଲ୍ ଭାବେ ଦେଖାଯାଏ, ଲକ୍ ସ୍କ୍ରିନରେ ପ୍ରୋଫାଇଲ୍ ଛବି ଡିସପ୍ଲେ କରେ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ସେଟିଂସ୍"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ପ୍ରାଥମିକତା"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବାର୍ତ୍ତାଳାପ ଫିଚରଗୁଡ଼ିକୁ ସମର୍ଥନ କରେ ନାହିଁ"</string>

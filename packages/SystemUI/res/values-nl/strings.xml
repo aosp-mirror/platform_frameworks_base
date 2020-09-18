@@ -710,11 +710,11 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Standaard"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bubbel"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Geen geluid of trilling"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Geen geluid of trilling en wordt op een lagere positie in het gedeelte met gesprekken weergegeven"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Geen geluid of trilling en wordt lager in het gedeelte met gesprekken weergegeven"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Kan overgaan of trillen op basis van de telefooninstellingen"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kan overgaan of trillen op basis van de telefooninstellingen. Gesprekken uit <xliff:g id="APP_NAME">%1$s</xliff:g> worden standaard als bubbels weergegeven."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Trekt de aandacht met een zwevende snelkoppeling naar deze content."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wordt bovenaan het gedeelte met gesprekken weergegeven, verschijnt als zwevende bubbel, geeft de profielfoto weer op het vergrendelscherm"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wordt bovenaan het gespreksgedeelte weergegeven, verschijnt als zwevende bubbel, geeft profielfoto weer op vergrendelscherm"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Instellingen"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteit"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ondersteunt geen gespreksfuncties"</string>

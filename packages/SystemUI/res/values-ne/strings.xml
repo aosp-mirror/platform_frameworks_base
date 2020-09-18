@@ -43,7 +43,7 @@
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"म्युट गर्नुहोस्"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"स्वतः"</string>
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"सूचनाहरू"</string>
-    <string name="bluetooth_tethered" msgid="4171071193052799041">"ब्लुटुथ टेथर भयो"</string>
+    <string name="bluetooth_tethered" msgid="4171071193052799041">"ब्लुटुथ टेदर भयो"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="2972273031043777851">"इनपुट विधिहरू सेटअप गर्नुहोस्"</string>
     <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"वास्तविक किबोर्ड"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_DEVICE">%2$s</xliff:g> माथि पहुँच राख्ने अनुमति दिने हो?"</string>
