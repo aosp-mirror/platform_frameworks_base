@@ -1555,6 +1555,19 @@ package android.service.autofill {
     method @Nullable public android.util.SparseArray<android.service.autofill.InternalOnClickAction> getActions();
   }
 
+  public final class Dataset implements android.os.Parcelable {
+    method @Nullable public android.content.IntentSender getAuthentication();
+    method @Nullable public android.content.ClipData getFieldContent();
+    method @Nullable public java.util.ArrayList<android.view.autofill.AutofillId> getFieldIds();
+    method @Nullable public java.util.ArrayList<android.view.autofill.AutofillValue> getFieldValues();
+    method @Nullable public String getId();
+    method public boolean isEmpty();
+  }
+
+  public static final class Dataset.Builder {
+    method @NonNull public android.service.autofill.Dataset.Builder setContent(@NonNull android.view.autofill.AutofillId, @Nullable android.content.ClipData);
+  }
+
   public final class DateTransformation extends android.service.autofill.InternalTransformation implements android.os.Parcelable android.service.autofill.Transformation {
     method public void apply(@NonNull android.service.autofill.ValueFinder, @NonNull android.widget.RemoteViews, int) throws java.lang.Exception;
   }
