@@ -36,6 +36,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.inject.Inject;
+
 /**
  * Controller for {@link PipControlsView}.
  */
@@ -108,7 +110,7 @@ public class PipControlsViewController {
                 }
             };
 
-
+    @Inject
     public PipControlsViewController(PipControlsView view, Optional<Pip> pipOptional,
             LayoutInflater layoutInflater, @Main Handler handler) {
         super();
