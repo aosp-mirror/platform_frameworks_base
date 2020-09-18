@@ -232,21 +232,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
 
         @Override
-        public void onSplitScreenInvoked() {
-            if (!verifyCaller("onSplitScreenInvoked")) {
-                return;
-            }
-            long token = Binder.clearCallingIdentity();
-            try {
-                mSplitScreenOptional.ifPresent(splitScreen -> {
-                    splitScreen.onDockedFirstAnimationFrame();
-                });
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        @Override
         public void onOverviewShown(boolean fromHome) {
             if (!verifyCaller("onOverviewShown")) {
                 return;

@@ -426,13 +426,6 @@ public class SplitScreenController implements SplitScreen,
         }
     }
 
-    /** Called when the first docked animation frame rendered. */
-    public void onDockedFirstAnimationFrame() {
-        if (mView != null) {
-            mView.onDockedFirstAnimationFrame();
-        }
-    }
-
     /** Called when top task docked. */
     public void onDockedTopTask() {
         if (mView != null) {
@@ -502,6 +495,9 @@ public class SplitScreenController implements SplitScreen,
         mWindowManagerProxy.applyDismissSplit(mSplits, mSplitLayout, true /* dismissOrMaximize */);
         updateVisibility(false /* visible */);
         mMinimized = false;
+        // Resets divider bar position to undefined, so new divider bar will apply default position
+        // next time entering split mode.
+        mDividerState.mRatioPositionBeforeMinimized = 0;
         removeDivider();
         mImePositionProcessor.reset();
     }

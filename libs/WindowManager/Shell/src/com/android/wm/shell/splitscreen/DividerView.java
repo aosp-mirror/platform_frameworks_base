@@ -1319,10 +1319,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 mBackground.getRight(), mBackground.getBottom(), Op.UNION);
     }
 
-    void onDockedFirstAnimationFrame() {
-        saveSnapTargetBeforeMinimized(mSplitLayout.getSnapAlgorithm().getMiddleTarget());
-    }
-
     void onDockedTopTask() {
         mState.animateAfterRecentsDrawn = true;
         startDragging(false /* animate */, false /* touching */);
