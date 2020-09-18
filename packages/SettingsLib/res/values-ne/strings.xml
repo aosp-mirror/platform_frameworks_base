@@ -143,9 +143,9 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"हटाइएका एपहरू"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"एपहरू र प्रयोगकर्ताहरू हटाइयो।"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"प्रणालीसम्बन्धी अद्यावधिकहरू"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB टेथर गर्दै"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB टेदर गर्दै"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"पोर्टेबल हटस्पट"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"ब्लुटुथ टेथर गर्दै"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"ब्लुटुथ टेदर गर्दै"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"टेदर गर्दै"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"टेदर गर्ने र पोर्टेबल हटस्पट"</string>
     <string name="managed_user_title" msgid="449081789742645723">"कार्य प्रोफाइलका सबै एपहरू"</string>
