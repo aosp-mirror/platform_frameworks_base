@@ -29,11 +29,14 @@ import static org.mockito.Mockito.when;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.View;
+import android.view.WindowManager;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -63,15 +66,28 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     WindowMagnifierCallback mWindowMagnifierCallback;
     @Mock
     SurfaceControl.Transaction mTransaction;
-    private Context mContext;
+    @Mock
+    private WindowManager mWindowManager;
+    private Resources mResources;
     private WindowMagnificationController mWindowMagnificationController;
     private Instrumentation mInstrumentation;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mContext  = Mockito.spy(getContext());
+        mContext = Mockito.spy(getContext());
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
+        WindowManager wm = mContext.getSystemService(WindowManager.class);
+        doAnswer(invocation ->
+                wm.getMaximumWindowMetrics()
+        ).when(mWindowManager).getMaximumWindowMetrics();
+        mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
+        doAnswer(invocation -> {
+            View view = invocation.getArgument(0);
+            WindowManager.LayoutParams lp = invocation.getArgument(1);
+            view.setLayoutParams(lp);
+            return null;
+        }).when(mWindowManager).addView(any(View.class), any(WindowManager.LayoutParams.class));
         doAnswer(invocation -> {
             FrameCallback callback = invocation.getArgument(0);
             callback.doFrame(0);
@@ -81,6 +97,8 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         when(mTransaction.remove(any())).thenReturn(mTransaction);
         when(mTransaction.setGeometry(any(), any(), any(),
                 anyInt())).thenReturn(mTransaction);
+        mResources = Mockito.spy(mContext.getResources());
+        when(mContext.getResources()).thenReturn(mResources);
         mWindowMagnificationController = new WindowMagnificationController(mContext,
                 mHandler, mSfVsyncFrameProvider,
                 mMirrorWindowControl, mTransaction, mWindowMagnifierCallback);
@@ -149,5 +167,64 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
             mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_DENSITY);
             mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_ORIENTATION);
         });
+    }
+
+    @Test
+    public void onOrientationChanged_enabled_updateDisplayRotationAndLayout() {
+        final Display display = Mockito.spy(mContext.getDisplay());
+        when(display.getRotation()).thenReturn(Surface.ROTATION_90);
+        when(mContext.getDisplay()).thenReturn(display);
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                    Float.NaN);
+            Mockito.reset(mWindowManager);
+        });
+
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_ORIENTATION);
+        });
+
+        assertEquals(Surface.ROTATION_90, mWindowMagnificationController.mRotation);
+        verify(mWindowManager).updateViewLayout(any(), any());
+    }
+
+    @Test
+    public void onOrientationChanged_disabled_updateDisplayRotation() {
+        final Display display = Mockito.spy(mContext.getDisplay());
+        when(display.getRotation()).thenReturn(Surface.ROTATION_90);
+        when(mContext.getDisplay()).thenReturn(display);
+
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_ORIENTATION);
+        });
+
+        assertEquals(Surface.ROTATION_90, mWindowMagnificationController.mRotation);
+    }
+
+
+    @Test
+    public void onDensityChanged_enabled_updateDimensionsAndLayout() {
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                    Float.NaN);
+            Mockito.reset(mWindowManager);
+        });
+
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_DENSITY);
+        });
+
+        verify(mResources, atLeastOnce()).getDimensionPixelSize(anyInt());
+        verify(mWindowManager).removeView(any());
+        verify(mWindowManager).addView(any(), any());
+    }
+
+    @Test
+    public void onDensityChanged_disabled_updateDimensions() {
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_DENSITY);
+        });
+
+        verify(mResources, atLeastOnce()).getDimensionPixelSize(anyInt());
     }
 }
