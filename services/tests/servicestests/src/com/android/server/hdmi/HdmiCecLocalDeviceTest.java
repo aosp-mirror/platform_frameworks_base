@@ -117,8 +117,9 @@ public class HdmiCecLocalDeviceTest {
                     }
                 };
         mHdmiControlService.setIoLooper(mTestLooper.getLooper());
-        mHdmiCecController = HdmiCecController.createWithNativeWrapper(
-                mHdmiControlService, new FakeNativeWrapper(), mHdmiControlService.getAtomWriter());
+        mHdmiCecController =
+                HdmiCecController.createWithNativeWrapper(
+                        mHdmiControlService, new FakeNativeWrapper());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiLocalDevice = new MyHdmiCecLocalDevice(mHdmiControlService, DEVICE_TV);
         mMessageValidator =
