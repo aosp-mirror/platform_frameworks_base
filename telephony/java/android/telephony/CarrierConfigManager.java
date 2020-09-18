@@ -3914,10 +3914,23 @@ public class CarrierConfigManager {
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
      *
+     * This config is only available when using Preset APN(not user edited) as Preferred APN.
+     *
      * @hide
      */
-    public static final String KEY_DISABLE_DUN_APN_WHILE_ROAMING =
-            "disable_dun_apn_while_roaming";
+    public static final String KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL =
+            "disable_dun_apn_while_roaming_with_preset_apn_bool";
+
+    /**
+     * Where there is no preferred APN, specifies the carrier's default preferred APN.
+     * Specifies the {@link android.provider.Telephony.Carriers.APN} of the default preferred apn.
+     *
+     * This config is only available with Preset APN(not user edited).
+     *
+     * @hide
+     */
+    public static final String KEY_DEFAULT_PREFERRED_APN_NAME_STRING =
+            "default_preferred_apn_name_string";
 
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
@@ -4458,7 +4471,8 @@ public class CarrierConfigManager {
                 "ims:2", "cbs:2", "ia:2", "emergency:2", "mcx:3", "xcap:3"
         });
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
-        sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING, false);
+        sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
+        sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
     }
 
     /**
