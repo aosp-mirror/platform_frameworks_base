@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.ime
 
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.NonRotationTestBase
@@ -40,6 +41,7 @@ import org.junit.runners.Parameterized
  * Test IME window closing to home transitions.
  * To run this test: `atest FlickerTests:CloseImeWindowToHomeTest`
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
