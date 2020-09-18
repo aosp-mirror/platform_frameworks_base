@@ -69,7 +69,7 @@ class NotificationShadeDepthController @Inject constructor(
         private const val VELOCITY_SCALE = 100f
         private const val MAX_VELOCITY = 3000f
         private const val MIN_VELOCITY = -MAX_VELOCITY
-        private const val INTERACTION_BLUR_FRACTION = 0.4f
+        private const val INTERACTION_BLUR_FRACTION = 0.9f
         private const val ANIMATION_BLUR_FRACTION = 1f - INTERACTION_BLUR_FRACTION
         private const val TAG = "DepthController"
     }
