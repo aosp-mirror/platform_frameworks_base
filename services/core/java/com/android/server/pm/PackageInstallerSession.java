@@ -2357,6 +2357,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         "Invalid filename: " + targetName);
             }
 
+            // Yell loudly if installers drop attribute installLocation when apps explicitly set.
+            if (apk.installLocation != PackageInfo.INSTALL_LOCATION_UNSPECIFIED) {
+                final String installerPackageName = getInstallerPackageName();
+                if (installerPackageName != null
+                        && (params.installLocation != apk.installLocation)) {
+                    Slog.wtf(TAG, installerPackageName
+                            + " drops manifest attribute android:installLocation in " + targetName
+                            + " for " + mPackageName);
+                }
+            }
+
             final File targetFile = new File(stageDir, targetName);
             resolveAndStageFileLocked(addedFile, targetFile, apk.splitName);
 
