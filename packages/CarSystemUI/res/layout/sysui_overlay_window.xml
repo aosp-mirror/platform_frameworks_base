@@ -25,7 +25,8 @@
     <ViewStub android:id="@+id/notification_panel_stub"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:layout="@layout/notification_panel_container"/>
+              android:layout="@layout/notification_panel_container"
+              android:layout_marginBottom="@dimen/car_bottom_navigation_bar_height"/>
 
     <ViewStub android:id="@+id/keyguard_stub"
               android:layout_width="match_parent"

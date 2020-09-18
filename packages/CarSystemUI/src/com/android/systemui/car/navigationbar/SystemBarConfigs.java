@@ -170,7 +170,7 @@ public class SystemBarConfigs {
                     new SystemBarConfigBuilder()
                             .setSide(TOP)
                             .setGirth(mResources.getDimensionPixelSize(
-                                    com.android.internal.R.dimen.status_bar_height))
+                                    R.dimen.car_top_navigation_bar_height))
                             .setBarType(mResources.getInteger(R.integer.config_topSystemBarType))
                             .setZOrder(mResources.getInteger(R.integer.config_topSystemBarZOrder))
                             .setHideForKeyboard(mResources.getBoolean(
@@ -184,7 +184,7 @@ public class SystemBarConfigs {
                     new SystemBarConfigBuilder()
                             .setSide(BOTTOM)
                             .setGirth(mResources.getDimensionPixelSize(
-                                    com.android.internal.R.dimen.navigation_bar_height))
+                                    R.dimen.car_bottom_navigation_bar_height))
                             .setBarType(mResources.getInteger(R.integer.config_bottomSystemBarType))
                             .setZOrder(
                                     mResources.getInteger(R.integer.config_bottomSystemBarZOrder))
