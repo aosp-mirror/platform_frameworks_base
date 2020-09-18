@@ -397,6 +397,10 @@ public class HdmiControlService extends SystemService {
     // Set to true if the logical address allocation is completed.
     private boolean mAddressAllocated = false;
 
+    // Object that handles logging statsd atoms.
+    // Use getAtomWriter() instead of accessing directly, to allow dependency injection for testing.
+    private HdmiCecAtomWriter mAtomWriter = new HdmiCecAtomWriter();
+
     // Buffer for processing the incoming cec messages while allocating logical addresses.
     private final class CecMessageBuffer {
         private List<HdmiCecMessage> mBuffer = new ArrayList<>();
@@ -509,7 +513,7 @@ public class HdmiControlService extends SystemService {
         mMhlInputChangeEnabled = readBooleanSetting(Global.MHL_INPUT_SWITCHING_ENABLED, true);
 
         if (mCecController == null) {
-            mCecController = HdmiCecController.create(this);
+            mCecController = HdmiCecController.create(this, getAtomWriter());
         }
         if (mCecController != null) {
             if (mHdmiControlEnabled) {
@@ -3233,6 +3237,10 @@ public class HdmiControlService extends SystemService {
             mActiveSource.logicalAddress = logicalAddress;
             mActiveSource.physicalAddress = physicalAddress;
         }
+
+        getAtomWriter().activeSourceChanged(logicalAddress, physicalAddress,
+                HdmiUtils.pathRelationship(getPhysicalAddress(), physicalAddress));
+
         // If the current device is a source device, check if the current Active Source matches
         // the local device info. Set mIsActiveSource of the local device accordingly.
         for (HdmiCecLocalDevice device : getAllLocalDevices()) {
@@ -3361,6 +3369,11 @@ public class HdmiControlService extends SystemService {
         synchronized (mLock) {
             mMhlInputChangeEnabled = enabled;
         }
+    }
+
+    @VisibleForTesting
+    HdmiCecAtomWriter getAtomWriter() {
+        return mAtomWriter;
     }
 
     boolean isMhlInputChangeEnabled() {
