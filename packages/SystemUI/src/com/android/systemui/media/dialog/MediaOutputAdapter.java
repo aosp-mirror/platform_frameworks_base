@@ -42,7 +42,7 @@ import java.util.List;
 public class MediaOutputAdapter extends MediaOutputBaseAdapter {
 
     private static final String TAG = "MediaOutputAdapter";
-    private static final int PAIR_NEW = 1;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     public MediaOutputAdapter(MediaOutputController controller) {
         super(controller);
@@ -58,11 +58,14 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
 
     @Override
     public void onBindViewHolder(@NonNull MediaDeviceBaseViewHolder viewHolder, int position) {
-        if (mController.isZeroMode() && position == (mController.getMediaDevices().size())) {
-            viewHolder.onBind(PAIR_NEW);
-        } else if (position < (mController.getMediaDevices().size())) {
-            viewHolder.onBind(((List<MediaDevice>) (mController.getMediaDevices())).get(position));
-        } else {
+        final int size = mController.getMediaDevices().size();
+        if (mController.isZeroMode() && position == size) {
+            viewHolder.onBind(CUSTOMIZED_ITEM_PAIR_NEW, false /* topMargin */,
+                    true /* bottomMargin */);
+        } else if (position < size) {
+            viewHolder.onBind(((List<MediaDevice>) (mController.getMediaDevices())).get(position),
+                    position == 0 /* topMargin */, position == (size - 1) /* bottomMargin */);
+        } else if (DEBUG) {
             Log.d(TAG, "Incorrect position: " + position);
         }
     }
@@ -83,7 +86,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     }
 
     void onItemClick(int customizedItem) {
-        if (customizedItem == PAIR_NEW) {
+        if (customizedItem == CUSTOMIZED_ITEM_PAIR_NEW) {
             mController.launchBluetoothPairing();
         }
     }
@@ -112,51 +115,49 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         }
 
         @Override
-        void onBind(MediaDevice device) {
-            super.onBind(device);
+        void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin) {
+            super.onBind(device, topMargin, bottomMargin);
             if (mController.isTransferring()) {
                 if (device.getState() == MediaDeviceState.STATE_CONNECTING
                         && !mController.hasAdjustVolumeUserRestriction()) {
-                    setTwoLineLayout(device, true);
-                    mProgressBar.setVisibility(View.VISIBLE);
-                    mSeekBar.setVisibility(View.GONE);
-                    mSubTitleText.setVisibility(View.GONE);
+                    setTwoLineLayout(device, null /* title */, true /* bFocused */,
+                            false /* showSeekBar*/, true /* showProgressBar */,
+                            false /* showSubtitle */);
                 } else {
-                    setSingleLineLayout(getItemTitle(device), false);
+                    setSingleLineLayout(getItemTitle(device), false /* bFocused */);
                 }
             } else {
                 // Set different layout for each device
                 if (device.getState() == MediaDeviceState.STATE_CONNECTING_FAILED) {
-                    setTwoLineLayout(device, false);
-                    mSubTitleText.setVisibility(View.VISIBLE);
-                    mSeekBar.setVisibility(View.GONE);
-                    mProgressBar.setVisibility(View.GONE);
+                    setTwoLineLayout(device, null /* title */, false /* bFocused */,
+                            false /* showSeekBar*/, false /* showProgressBar */,
+                            true /* showSubtitle */);
                     mSubTitleText.setText(R.string.media_output_dialog_connect_failed);
                     mFrameLayout.setOnClickListener(v -> onItemClick(device));
                 } else if (!mController.hasAdjustVolumeUserRestriction()
                         && isCurrentConnected(device)) {
-                    setTwoLineLayout(device, true);
-                    mSeekBar.setVisibility(View.VISIBLE);
-                    mProgressBar.setVisibility(View.GONE);
-                    mSubTitleText.setVisibility(View.GONE);
+                    setTwoLineLayout(device, null /* title */, true /* bFocused */,
+                            true /* showSeekBar*/, false /* showProgressBar */,
+                            false /* showSubtitle */);
                     initSeekbar(device);
                 } else {
-                    setSingleLineLayout(getItemTitle(device), false);
+                    setSingleLineLayout(getItemTitle(device), false /* bFocused */);
                     mFrameLayout.setOnClickListener(v -> onItemClick(device));
                 }
             }
         }
 
         @Override
-        void onBind(int customizedItem) {
-            if (customizedItem == PAIR_NEW) {
+        void onBind(int customizedItem, boolean topMargin, boolean bottomMargin) {
+            super.onBind(customizedItem, topMargin, bottomMargin);
+            if (customizedItem == CUSTOMIZED_ITEM_PAIR_NEW) {
                 setSingleLineLayout(mContext.getText(R.string.media_output_dialog_pairing_new),
-                        false);
+                        false /* bFocused */);
                 final Drawable d = mContext.getDrawable(R.drawable.ic_add);
                 d.setColorFilter(new PorterDuffColorFilter(
                         Utils.getColorAccentDefaultColor(mContext), PorterDuff.Mode.SRC_IN));
                 mTitleIcon.setImageDrawable(d);
-                mFrameLayout.setOnClickListener(v -> onItemClick(PAIR_NEW));
+                mFrameLayout.setOnClickListener(v -> onItemClick(CUSTOMIZED_ITEM_PAIR_NEW));
             }
         }
     }
