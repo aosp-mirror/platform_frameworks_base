@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import com.android.keyguard.KeyguardHostView;
 import com.android.keyguard.KeyguardMessageArea;
 import com.android.keyguard.KeyguardSecurityContainer;
+import com.android.keyguard.KeyguardSecurityViewFlipper;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 
@@ -58,7 +59,15 @@ public interface KeyguardBouncerModule {
     /** */
     @Provides
     @KeyguardBouncerScope
-    static KeyguardSecurityContainer preovidesKeyguardSecurityContainer(KeyguardHostView hostView) {
+    static KeyguardSecurityContainer providesKeyguardSecurityContainer(KeyguardHostView hostView) {
         return hostView.findViewById(R.id.keyguard_security_container);
+    }
+
+    /** */
+    @Provides
+    @KeyguardBouncerScope
+    static KeyguardSecurityViewFlipper providesKeyguardSecurityViewFlipper(
+            KeyguardSecurityContainer containerView) {
+        return containerView.findViewById(R.id.view_flipper);
     }
 }

@@ -16,8 +16,6 @@
 
 package com.android.keyguard;
 
-import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
-
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -31,20 +29,14 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.lang.ref.WeakReference;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 /***
  * Manages a number of views inside of the given layout. See below for a list of widgets.
  */
-public class KeyguardMessageArea extends TextView implements SecurityMessageDisplay,
-        ConfigurationController.ConfigurationListener {
+public class KeyguardMessageArea extends TextView implements SecurityMessageDisplay {
     /** Handler token posted with accessibility announcement runnables. */
     private static final Object ANNOUNCE_TOKEN = new Object();
 
@@ -56,62 +48,18 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
     private static final int DEFAULT_COLOR = -1;
 
     private final Handler mHandler;
-    private final ConfigurationController mConfigurationController;
 
     private ColorStateList mDefaultColorState;
     private CharSequence mMessage;
     private ColorStateList mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR);
     private boolean mBouncerVisible;
 
-    private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
-        public void onFinishedGoingToSleep(int why) {
-            setSelected(false);
-        }
-
-        public void onStartedWakingUp() {
-            setSelected(true);
-        }
-
-        @Override
-        public void onKeyguardBouncerChanged(boolean bouncer) {
-            mBouncerVisible = bouncer;
-            update();
-        }
-    };
-
-    public KeyguardMessageArea(Context context) {
-        super(context, null);
-        throw new IllegalStateException("This constructor should never be invoked");
-    }
-
-    @Inject
-    public KeyguardMessageArea(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            ConfigurationController configurationController) {
-        this(context, attrs, Dependency.get(KeyguardUpdateMonitor.class), configurationController);
-    }
-
-    public KeyguardMessageArea(Context context, AttributeSet attrs, KeyguardUpdateMonitor monitor,
-            ConfigurationController configurationController) {
+    public KeyguardMessageArea(Context context, AttributeSet attrs) {
         super(context, attrs);
         setLayerType(LAYER_TYPE_HARDWARE, null); // work around nested unclipped SaveLayer bug
 
-        monitor.registerCallback(mInfoCallback);
         mHandler = new Handler(Looper.myLooper());
-        mConfigurationController = configurationController;
         onThemeChanged();
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        mConfigurationController.addCallback(this);
-        onThemeChanged();
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        mConfigurationController.removeCallback(this);
     }
 
     @Override
@@ -119,8 +67,7 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
         mNextMessageColorState = colorState;
     }
 
-    @Override
-    public void onThemeChanged() {
+    void onThemeChanged() {
         TypedArray array = mContext.obtainStyledAttributes(new int[] {
                 R.attr.wallpaperTextColor
         });
@@ -130,8 +77,7 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
         update();
     }
 
-    @Override
-    public void onDensityOrFontScaleChanged() {
+    void onDensityOrFontScaleChanged() {
         TypedArray array = mContext.obtainStyledAttributes(R.style.Keyguard_TextView, new int[] {
                 android.R.attr.textSize
         });
@@ -177,12 +123,6 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
         return messageArea;
     }
 
-    @Override
-    protected void onFinishInflate() {
-        boolean shouldMarquee = Dependency.get(KeyguardUpdateMonitor.class).isDeviceInteractive();
-        setSelected(shouldMarquee); // This is required to ensure marquee works
-    }
-
     private void securityMessageChanged(CharSequence message) {
         mMessage = message;
         update();
@@ -196,7 +136,7 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
         update();
     }
 
-    private void update() {
+    void update() {
         CharSequence status = mMessage;
         setVisibility(TextUtils.isEmpty(status) || !mBouncerVisible ? INVISIBLE : VISIBLE);
         setText(status);
@@ -208,6 +148,9 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
         setTextColor(colorState);
     }
 
+    public void setBouncerVisible(boolean bouncerVisible) {
+        mBouncerVisible = bouncerVisible;
+    }
 
     /**
      * Runnable used to delay accessibility announcements.
