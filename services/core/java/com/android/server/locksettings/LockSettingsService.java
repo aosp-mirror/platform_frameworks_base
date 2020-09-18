@@ -3501,6 +3501,9 @@ public class LockSettingsService extends ILockSettings.Stub {
             SyntheticPasswordManager.AuthenticationToken
                     authToken = new SyntheticPasswordManager.AuthenticationToken(spVersion);
             authToken.recreateDirectly(syntheticPassword);
+            synchronized (mSpManager) {
+                mSpManager.verifyChallenge(getGateKeeperService(), authToken, 0L, userId);
+            }
             onCredentialVerified(authToken, loadPasswordMetrics(authToken, userId), userId);
         }
     }
