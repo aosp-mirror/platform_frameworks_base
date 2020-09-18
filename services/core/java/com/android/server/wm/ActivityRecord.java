@@ -116,6 +116,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SWITCH;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
@@ -150,10 +151,7 @@ import static com.android.server.wm.ActivityRecordProto.WINDOW_TOKEN;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_APP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SAVED_STATE;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STATES;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TRANSITION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_USER_LEAVING;
@@ -1133,16 +1131,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     boolean scheduleTopResumedActivityChanged(boolean onTop) {
         if (!attachedToProcess()) {
-            if (DEBUG_STATES) {
-                Slog.w(TAG, "Can't report activity position update - client not running"
-                                + ", activityRecord=" + this);
-            }
+            ProtoLog.w(WM_DEBUG_STATES,
+                    "Can't report activity position update - client not running, "
+                            + "activityRecord=%s", this);
             return false;
         }
         try {
-            if (DEBUG_STATES) {
-                Slog.v(TAG, "Sending position change to " + this + ", onTop: " + onTop);
-            }
+            ProtoLog.v(WM_DEBUG_STATES, "Sending position change to %s, onTop: %b",
+                    this, onTop);
 
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     TopResumedActivityChangeItem.obtain(onTop));
@@ -2518,10 +2514,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     @FinishRequest int finishIfPossible(int resultCode, Intent resultData,
             NeededUriGrants resultGrants, String reason, boolean oomAdj) {
-        if (DEBUG_RESULTS || DEBUG_STATES) {
-            Slog.v(TAG_STATES, "Finishing activity r=" + this + ", result=" + resultCode
-                    + ", data=" + resultData + ", reason=" + reason);
-        }
+        ProtoLog.v(WM_DEBUG_STATES, "Finishing activity r=%s, result=%d, data=%s, "
+                + "reason=%s", this, resultCode, resultData, reason);
 
         if (finishing) {
             Slog.w(TAG, "Duplicate finish request for r=" + this);
@@ -2603,7 +2597,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 setVisibility(false);
 
                 if (stack.mPausingActivity == null) {
-                    if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Finish needs to pause: " + this);
+                    ProtoLog.v(WM_DEBUG_STATES, "Finish needs to pause: %s", this);
                     if (DEBUG_USER_LEAVING) {
                         Slog.v(TAG_USER_LEAVING, "finish() => pause with userLeaving=false");
                     }
@@ -2650,7 +2644,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 }
                 return removedActivity ? FINISH_RESULT_REMOVED : FINISH_RESULT_REQUESTED;
             } else {
-                if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Finish waiting for pause of: " + this);
+                ProtoLog.v(WM_DEBUG_STATES, "Finish waiting for pause of: %s", this);
             }
 
             return FINISH_RESULT_REQUESTED;
@@ -2807,7 +2801,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     @VisibleForTesting
     boolean addToFinishingAndWaitForIdle() {
-        if (DEBUG_STATES) Slog.v(TAG, "Enqueueing pending finish: " + this);
+        ProtoLog.v(WM_DEBUG_STATES, "Enqueueing pending finish: %s", this);
         setState(FINISHING, "addToFinishingAndWaitForIdle");
         if (!mStackSupervisor.mFinishingActivities.contains(this)) {
             mStackSupervisor.mFinishingActivities.add(this);
@@ -2835,10 +2829,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (isState(DESTROYING, DESTROYED)) {
-            if (DEBUG_STATES) {
-                Slog.v(TAG_STATES, "activity " + this + " already destroying."
-                        + "skipping request with reason:" + reason);
-            }
+            ProtoLog.v(WM_DEBUG_STATES, "activity %s already destroying, skipping "
+                    + "request with reason:%s", this, reason);
             return false;
         }
 
@@ -2879,16 +2871,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // the list yet.  Otherwise, we can just immediately put it in the destroyed state since
             // we are not removing it from the list.
             if (finishing && !skipDestroy) {
-                if (DEBUG_STATES) {
-                    Slog.v(TAG_STATES, "Moving to DESTROYING: " + this + " (destroy requested)");
-                }
+                ProtoLog.v(WM_DEBUG_STATES, "Moving to DESTROYING: %s (destroy requested)", this);
                 setState(DESTROYING,
                         "destroyActivityLocked. finishing and not skipping destroy");
                 mAtmService.mH.postDelayed(mDestroyTimeoutRunnable, DESTROY_TIMEOUT);
             } else {
-                if (DEBUG_STATES) {
-                    Slog.v(TAG_STATES, "Moving to DESTROYED: " + this + " (destroy skipped)");
-                }
+                ProtoLog.v(WM_DEBUG_STATES, "Moving to DESTROYED: %s "
+                        + "(destroy skipped)", this);
                 setState(DESTROYED,
                         "destroyActivityLocked. not finishing or skipping destroy");
                 if (DEBUG_APP) Slog.v(TAG_APP, "Clearing app during destroy for activity " + this);
@@ -2900,7 +2889,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 removeFromHistory(reason + " hadNoApp");
                 removedFromHistory = true;
             } else {
-                if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to DESTROYED: " + this + " (no app)");
+                ProtoLog.v(WM_DEBUG_STATES, "Moving to DESTROYED: %s (no app)", this);
                 setState(DESTROYED, "destroyActivityLocked. not finishing and had no app");
             }
         }
@@ -2935,9 +2924,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         takeFromHistory();
         removeTimeouts();
-        if (DEBUG_STATES) {
-            Slog.v(TAG_STATES, "Moving to DESTROYED: " + this + " (removed from history)");
-        }
+        ProtoLog.v(WM_DEBUG_STATES, "Moving to DESTROYED: %s (removed from history)",
+                this);
         setState(DESTROYED, "removeFromHistory");
         if (DEBUG_APP) Slog.v(TAG_APP, "Clearing app during remove for activity " + this);
         detachFromProcess();
@@ -4455,12 +4443,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void setState(ActivityState state, String reason) {
-        if (DEBUG_STATES) Slog.v(TAG_STATES, "State movement: " + this + " from:" + getState()
-                        + " to:" + state + " reason:" + reason);
+        ProtoLog.v(WM_DEBUG_STATES, "State movement: %s from:%s to:%s reason:%s",
+                this, getState(), state, reason);
 
         if (state == mState) {
             // No need to do anything if state doesn't change.
-            if (DEBUG_STATES) Slog.v(TAG_STATES, "State unchanged from:" + state);
+            ProtoLog.v(WM_DEBUG_STATES, "State unchanged from:%s", state);
             return;
         }
 
@@ -4943,7 +4931,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     static void activityResumedLocked(IBinder token) {
         final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-        if (DEBUG_SAVED_STATE) Slog.i(TAG_STATES, "Resumed activity; dropping state of: " + r);
+        ProtoLog.i(WM_DEBUG_STATES, "Resumed activity; dropping state of: %s", r);
         if (r == null) {
             // If an app reports resumed after a long delay, the record on server side might have
             // been removed (e.g. destroy timeout), so the token could be null.
@@ -5014,8 +5002,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void activityPaused(boolean timeout) {
-        if (DEBUG_PAUSE) Slog.v(TAG_PAUSE,
-                "Activity paused: token=" + appToken + ", timeout=" + timeout);
+        ProtoLog.v(WM_DEBUG_STATES, "Activity paused: token=%s, timeout=%b", appToken,
+                timeout);
 
         final Task stack = getStack();
 
@@ -5023,8 +5011,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             removePauseTimeout();
 
             if (stack.mPausingActivity == this) {
-                if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to PAUSED: " + this
-                        + (timeout ? " (due to timeout)" : " (pause complete)"));
+                ProtoLog.v(WM_DEBUG_STATES, "Moving to PAUSED: %s %s", this,
+                        (timeout ? "(due to timeout)" : " (pause complete)"));
                 mAtmService.deferWindowLayout();
                 try {
                     stack.completePauseLocked(true /* resumeNext */, null /* resumingActivity */);
@@ -5039,8 +5027,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 if (isState(PAUSING)) {
                     setState(PAUSED, "activityPausedLocked");
                     if (finishing) {
-                        if (DEBUG_PAUSE) Slog.v(TAG,
-                                "Executing finish of failed to pause activity: " + this);
+                        ProtoLog.v(WM_DEBUG_STATES,
+                                "Executing finish of failed to pause activity: %s", this);
                         completeFinishing("activityPausedLocked");
                     }
                 }
@@ -5057,7 +5045,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void schedulePauseTimeout() {
         pauseTime = SystemClock.uptimeMillis();
         mAtmService.mH.postDelayed(mPauseTimeoutRunnable, PAUSE_TIMEOUT);
-        if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Waiting for pause to complete...");
+        ProtoLog.v(WM_DEBUG_STATES, "Waiting for pause to complete...");
     }
 
     private void removePauseTimeout() {
@@ -5086,17 +5074,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (isNoHistory()) {
             if (!finishing) {
                 if (!stack.shouldSleepActivities()) {
-                    if (DEBUG_STATES) Slog.d(TAG_STATES, "no-history finish of " + this);
+                    ProtoLog.d(WM_DEBUG_STATES, "no-history finish of %s", this);
                     if (finishIfPossible("stop-no-history", false /* oomAdj */)
                             != FINISH_RESULT_CANCELLED) {
                         resumeKeyDispatchingLocked();
                         return;
                     }
                 } else {
-                    if (DEBUG_STATES) {
-                        Slog.d(TAG_STATES, "Not finishing noHistory " + this
-                                + " on stop because we're just sleeping");
-                    }
+                    ProtoLog.d(WM_DEBUG_STATES, "Not finishing noHistory %s on stop "
+                            + "because we're just sleeping", this);
                 }
             }
         }
@@ -5107,9 +5093,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         resumeKeyDispatchingLocked();
         try {
             stopped = false;
-            if (DEBUG_STATES) {
-                Slog.v(TAG_STATES, "Moving to STOPPING: " + this + " (stop requested)");
-            }
+            ProtoLog.v(WM_DEBUG_STATES, "Moving to STOPPING: %s (stop requested)", this);
+
             setState(STOPPING, "stopIfPossible");
             if (DEBUG_VISIBILITY) {
                 Slog.v(TAG_VISIBILITY, "Stopping:" + this);
@@ -5129,7 +5114,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             Slog.w(TAG, "Exception thrown during pause", e);
             // Just in case, assume it to be stopped.
             stopped = true;
-            if (DEBUG_STATES) Slog.v(TAG_STATES, "Stop failed; moving to STOPPED: " + this);
+            ProtoLog.v(WM_DEBUG_STATES, "Stop failed; moving to STOPPED: %s", this);
             setState(STOPPED, "stopIfPossible");
             if (deferRelaunchUntilPaused) {
                 destroyImmediately("stop-except");
@@ -5158,9 +5143,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             launchCount = 0;
             updateTaskDescription(description);
         }
-        if (DEBUG_SAVED_STATE) Slog.i(TAG_SAVED_STATE, "Saving icicle of " + this + ": " + mIcicle);
+        ProtoLog.i(WM_DEBUG_STATES, "Saving icicle of %s: %s", this, mIcicle);
         if (!stopped) {
-            if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to STOPPED: " + this + " (stop complete)");
+            ProtoLog.v(WM_DEBUG_STATES, "Moving to STOPPED: %s (stop complete)", this);
             removeStopTimeout();
             stopped = true;
             if (isStopping) {
@@ -5196,10 +5181,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         boolean forceIdle = mStackSupervisor.mStoppingActivities.size() > MAX_STOPPING_TO_FORCE
                 || (isRootOfTask() && stack.getChildCount() <= 1);
         if (scheduleIdle || forceIdle) {
-            if (DEBUG_PAUSE) {
-                Slog.v(TAG_PAUSE, "Scheduling idle now: forceIdle=" + forceIdle
-                        + "immediate=" + !idleDelayed);
-            }
+            ProtoLog.v(WM_DEBUG_STATES,
+                    "Scheduling idle now: forceIdle=%b immediate=%b", forceIdle, !idleDelayed);
+
             if (!idleDelayed) {
                 mStackSupervisor.scheduleIdle();
             } else {
@@ -7126,9 +7110,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else {
                 ProtoLog.v(WM_DEBUG_CONFIGURATION, "Config is relaunching %s",
                         this);
-                if (DEBUG_STATES && !mVisibleRequested) {
-                    Slog.v(TAG_STATES, "Config is relaunching invisible activity " + this
-                            + " called by " + Debug.getCallers(4));
+                if (!mVisibleRequested) {
+                    ProtoLog.v(WM_DEBUG_STATES, "Config is relaunching invisible "
+                            + "activity %s called by %s", this, Debug.getCallers(4));
                 }
                 relaunchActivityLocked(preserveWindow);
             }
@@ -7261,9 +7245,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         startFreezingScreenLocked(0);
 
         try {
-            if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG_SWITCH,
-                    "Moving to " + (andResume ? "RESUMED" : "PAUSED") + " Relaunching " + this
-                            + " callers=" + Debug.getCallers(6));
+            ProtoLog.i(WM_DEBUG_STATES, "Moving to %s Relaunching %s callers=%s" ,
+                    (andResume ? "RESUMED" : "PAUSED"), this, Debug.getCallers(6));
             forceNewConfig = false;
             startRelaunching();
             final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(pendingResults,
@@ -7286,13 +7269,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // request resume if this activity is currently resumed, which implies we aren't
             // sleeping.
         } catch (RemoteException e) {
-            if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG_SWITCH, "Relaunch failed", e);
+            ProtoLog.i(WM_DEBUG_STATES, "Relaunch failed %s", e);
         }
 
         if (andResume) {
-            if (DEBUG_STATES) {
-                Slog.d(TAG_STATES, "Resumed after relaunch " + this);
-            }
+            ProtoLog.d(WM_DEBUG_STATES, "Resumed after relaunch %s", this);
             results = null;
             newIntents = null;
             mAtmService.getAppWarningsLocked().onResumeActivity(this);
