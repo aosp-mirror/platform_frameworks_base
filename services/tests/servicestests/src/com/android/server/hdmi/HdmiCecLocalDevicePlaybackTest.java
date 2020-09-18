@@ -119,8 +119,8 @@ public class HdmiCecLocalDevicePlaybackTest {
         mHdmiCecLocalDevicePlayback.init();
         mHdmiControlService.setIoLooper(mMyLooper);
         mNativeWrapper = new FakeNativeWrapper();
-        mHdmiCecController = HdmiCecController.createWithNativeWrapper(
-                mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
+        mHdmiCecController =
+            HdmiCecController.createWithNativeWrapper(mHdmiControlService, mNativeWrapper);
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));

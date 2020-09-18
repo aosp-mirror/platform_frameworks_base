@@ -28,11 +28,9 @@ import android.os.Handler;
 import android.os.IHwBinder;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.stats.hdmi.HdmiStatsEnums;
 import android.util.Slog;
 import android.util.SparseArray;
 
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.HdmiAnnotations.IoThreadOnly;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
@@ -125,14 +123,10 @@ final class HdmiCecController {
 
     private final NativeWrapper mNativeWrapperImpl;
 
-    private final HdmiCecAtomWriter mHdmiCecAtomWriter;
-
     // Private constructor.  Use HdmiCecController.create().
-    private HdmiCecController(
-            HdmiControlService service, NativeWrapper nativeWrapper, HdmiCecAtomWriter atomWriter) {
+    private HdmiCecController(HdmiControlService service, NativeWrapper nativeWrapper) {
         mService = service;
         mNativeWrapperImpl = nativeWrapper;
-        mHdmiCecAtomWriter = atomWriter;
     }
 
     /**
@@ -140,22 +134,21 @@ final class HdmiCecController {
      * inner device or has no device it will return {@code null}.
      *
      * <p>Declared as package-private, accessed by {@link HdmiControlService} only.
-     * @param service    {@link HdmiControlService} instance used to create internal handler
-     *                   and to pass callback for incoming message or event.
-     * @param atomWriter {@link HdmiCecAtomWriter} instance for writing atoms for metrics.
+     * @param service {@link HdmiControlService} instance used to create internal handler
+     *                and to pass callback for incoming message or event.
      * @return {@link HdmiCecController} if device is initialized successfully. Otherwise,
      *         returns {@code null}.
      */
-    static HdmiCecController create(HdmiControlService service, HdmiCecAtomWriter atomWriter) {
-        return createWithNativeWrapper(service, new NativeWrapperImpl(), atomWriter);
+    static HdmiCecController create(HdmiControlService service) {
+        return createWithNativeWrapper(service, new NativeWrapperImpl());
     }
 
     /**
      * A factory method with injection of native methods for testing.
      */
     static HdmiCecController createWithNativeWrapper(
-            HdmiControlService service, NativeWrapper nativeWrapper, HdmiCecAtomWriter atomWriter) {
-        HdmiCecController controller = new HdmiCecController(service, nativeWrapper, atomWriter);
+            HdmiControlService service, NativeWrapper nativeWrapper) {
+        HdmiCecController controller = new HdmiCecController(service, nativeWrapper);
         String nativePtr = nativeWrapper.nativeInit();
         if (nativePtr == null) {
             HdmiLogger.warning("Couldn't get tv.cec service.");
@@ -626,7 +619,7 @@ final class HdmiCecController {
             public void run() {
                 HdmiLogger.debug("[S]:" + cecMessage);
                 byte[] body = buildBody(cecMessage.getOpcode(), cecMessage.getParams());
-                int retransmissionCount = 0;
+                int i = 0;
                 int errorCode = SendMessageResult.SUCCESS;
                 do {
                     errorCode = mNativeWrapperImpl.nativeSendCecCommand(
@@ -634,25 +627,20 @@ final class HdmiCecController {
                     if (errorCode == SendMessageResult.SUCCESS) {
                         break;
                     }
-                } while (retransmissionCount++ < HdmiConfig.RETRANSMISSION_COUNT);
+                } while (i++ < HdmiConfig.RETRANSMISSION_COUNT);
 
                 final int finalError = errorCode;
                 if (finalError != SendMessageResult.SUCCESS) {
                     Slog.w(TAG, "Failed to send " + cecMessage + " with errorCode=" + finalError);
                 }
-                runOnServiceThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mHdmiCecAtomWriter.messageReported(
-                                cecMessage,
-                                FrameworkStatsLog.HDMI_CEC_MESSAGE_REPORTED__DIRECTION__OUTGOING,
-                                finalError
-                        );
-                        if (callback != null) {
+                if (callback != null) {
+                    runOnServiceThread(new Runnable() {
+                        @Override
+                        public void run() {
                             callback.onSendCompleted(finalError);
                         }
-                    }
-                });
+                    });
+                }
             }
         });
     }
@@ -666,36 +654,7 @@ final class HdmiCecController {
         HdmiCecMessage command = HdmiCecMessageBuilder.of(srcAddress, dstAddress, body);
         HdmiLogger.debug("[R]:" + command);
         addCecMessageToHistory(true /* isReceived */, command);
-
-        mHdmiCecAtomWriter.messageReported(command,
-                incomingMessageDirection(srcAddress, dstAddress));
-
         onReceiveCommand(command);
-    }
-
-    /**
-     * Computes the direction of an incoming message, as implied by the source and
-     * destination addresses. This will usually return INCOMING; if not, it can indicate a bug.
-     */
-    private int incomingMessageDirection(int srcAddress, int dstAddress) {
-        boolean sourceIsLocal = false;
-        boolean destinationIsLocal = false;
-        for (HdmiCecLocalDevice localDevice : getLocalDeviceList()) {
-            int logicalAddress = localDevice.getDeviceInfo().getLogicalAddress();
-            if (logicalAddress == srcAddress) {
-                sourceIsLocal = true;
-            }
-            if (logicalAddress == dstAddress) {
-                destinationIsLocal = true;
-            }
-        }
-
-        if (!sourceIsLocal && destinationIsLocal) {
-            return HdmiStatsEnums.INCOMING;
-        } else if (sourceIsLocal && destinationIsLocal) {
-            return HdmiStatsEnums.TO_SELF;
-        }
-        return HdmiStatsEnums.MESSAGE_DIRECTION_OTHER;
     }
 
     /**

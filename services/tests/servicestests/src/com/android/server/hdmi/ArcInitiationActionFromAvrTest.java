@@ -120,8 +120,8 @@ public class ArcInitiationActionFromAvrTest {
         Looper looper = mTestLooper.getLooper();
         mHdmiControlService.setIoLooper(looper);
         mNativeWrapper = new FakeNativeWrapper();
-        mHdmiCecController = HdmiCecController.createWithNativeWrapper(
-                this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
+        mHdmiCecController =
+                HdmiCecController.createWithNativeWrapper(this.mHdmiControlService, mNativeWrapper);
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
