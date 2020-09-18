@@ -40,7 +40,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 public final class FrameInfo {
 
-    public long[] frameInfo = new long[9];
+    public long[] frameInfo = new long[10];
 
     // Various flags set to provide extra metadata about the current frame
     private static final int FLAGS = 0;
@@ -51,38 +51,44 @@ public final class FrameInfo {
     // A renderer associated with just a Surface, not with a ViewRootImpl instance.
     public static final long FLAG_SURFACE_CANVAS = 1 << 2;
 
+    // An invalid vsync id to be used when FRAME_TIMELINE_VSYNC_ID is unknown
+    public static final long INVALID_VSYNC_ID = -1;
+
     @LongDef(flag = true, value = {
             FLAG_WINDOW_LAYOUT_CHANGED, FLAG_SURFACE_CANVAS })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrameInfoFlags {}
 
+    private static final int FRAME_TIMELINE_VSYNC_ID = 1;
+
     // The intended vsync time, unadjusted by jitter
-    private static final int INTENDED_VSYNC = 1;
+    private static final int INTENDED_VSYNC = 2;
 
     // Jitter-adjusted vsync time, this is what was used as input into the
     // animation & drawing system
-    private static final int VSYNC = 2;
+    private static final int VSYNC = 3;
 
     // The time of the oldest input event
-    private static final int OLDEST_INPUT_EVENT = 3;
+    private static final int OLDEST_INPUT_EVENT = 4;
 
     // The time of the newest input event
-    private static final int NEWEST_INPUT_EVENT = 4;
+    private static final int NEWEST_INPUT_EVENT = 5;
 
     // When input event handling started
-    private static final int HANDLE_INPUT_START = 5;
+    private static final int HANDLE_INPUT_START = 6;
 
     // When animation evaluations started
-    private static final int ANIMATION_START = 6;
+    private static final int ANIMATION_START = 7;
 
     // When ViewRootImpl#performTraversals() started
-    private static final int PERFORM_TRAVERSALS_START = 7;
+    private static final int PERFORM_TRAVERSALS_START = 8;
 
     // When View:draw() started
-    private static final int DRAW_START = 8;
+    private static final int DRAW_START = 9;
 
     /** checkstyle */
-    public void setVsync(long intendedVsync, long usedVsync) {
+    public void setVsync(long intendedVsync, long usedVsync, long frameTimelineVsyncId) {
+        frameInfo[FRAME_TIMELINE_VSYNC_ID] = frameTimelineVsyncId;
         frameInfo[INTENDED_VSYNC] = intendedVsync;
         frameInfo[VSYNC] = usedVsync;
         frameInfo[OLDEST_INPUT_EVENT] = Long.MAX_VALUE;
