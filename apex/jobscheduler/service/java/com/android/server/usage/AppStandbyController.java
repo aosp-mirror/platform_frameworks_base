@@ -1159,6 +1159,10 @@ public class AppStandbyController implements AppStandbyInternal {
             if (isDeviceProvisioningPackage(packageName)) {
                 return STANDBY_BUCKET_EXEMPTED;
             }
+
+            if (mInjector.isWellbeingPackage(packageName)) {
+                return STANDBY_BUCKET_WORKING_SET;
+            }
         }
 
         // Check this last, as it can be the most expensive check
@@ -1966,6 +1970,7 @@ public class AppStandbyController implements AppStandbyInternal {
          */
         @GuardedBy("mPowerWhitelistedApps")
         private final ArraySet<String> mPowerWhitelistedApps = new ArraySet<>();
+        private String mWellbeingApp = null;
 
         Injector(Context context, Looper looper) {
             mContext = context;
@@ -1999,6 +2004,9 @@ public class AppStandbyController implements AppStandbyInternal {
                 if (activityManager.isLowRamDevice() || ActivityManager.isSmallBatteryDevice()) {
                     mAutoRestrictedBucketDelayMs = 12 * ONE_HOUR;
                 }
+
+                final PackageManager packageManager = mContext.getPackageManager();
+                mWellbeingApp = packageManager.getWellbeingPackageName();
             }
             mBootPhase = phase;
         }
@@ -2041,6 +2049,14 @@ public class AppStandbyController implements AppStandbyInternal {
             synchronized (mPowerWhitelistedApps) {
                 return mPowerWhitelistedApps.contains(packageName);
             }
+        }
+
+        /**
+         * Returns {@code true} if the supplied package is the wellbeing app. Otherwise,
+         * returns {@code false}.
+         */
+        boolean isWellbeingPackage(String packageName) {
+            return mWellbeingApp != null && mWellbeingApp.equals(packageName);
         }
 
         void updatePowerWhitelistCache() {
