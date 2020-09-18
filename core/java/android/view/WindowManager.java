@@ -410,6 +410,13 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_APP_CRASHED = 0x10;
 
     /**
+     * Transition flag: A window in a new task is being opened behind an existing one in another
+     * activity's task.
+     * @hide
+     */
+    int TRANSIT_FLAG_OPEN_BEHIND = 0x20;
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
@@ -417,7 +424,8 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION,
-            TRANSIT_FLAG_APP_CRASHED
+            TRANSIT_FLAG_APP_CRASHED,
+            TRANSIT_FLAG_OPEN_BEHIND
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}

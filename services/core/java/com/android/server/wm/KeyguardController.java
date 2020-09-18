@@ -35,9 +35,9 @@ import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
 
-import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.KeyguardControllerProto.AOD_SHOWING;
 import static com.android.server.wm.KeyguardControllerProto.KEYGUARD_OCCLUDED_STATES;
 import static com.android.server.wm.KeyguardControllerProto.KEYGUARD_SHOWING;
@@ -397,10 +397,10 @@ class KeyguardController {
         // we immediately dismiss the Keyguard so the activity gets shown without a flicker.
         final DisplayContent dc = mRootWindowContainer.getDefaultDisplay();
         if (mKeyguardShowing && canDismissKeyguard()
-                && dc.mAppTransition.getAppTransitionOld() == TRANSIT_OLD_KEYGUARD_UNOCCLUDE) {
+                && (dc.mAppTransition.getAppTransitionOld() == TRANSIT_OLD_KEYGUARD_UNOCCLUDE
+                || dc.mAppTransition.containsTransitRequest(TRANSIT_KEYGUARD_UNOCCLUDE))) {
             dc.prepareAppTransitionOld(mBeforeUnoccludeTransit, false /* alwaysKeepCurrent */,
                     0 /* flags */, true /* forceOverride */);
-            dc.prepareAppTransition(TRANSIT_KEYGUARD_UNOCCLUDE);
             mWindowManager.executeAppTransition();
         }
     }

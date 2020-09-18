@@ -73,6 +73,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_FRONT;
+import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
@@ -4535,6 +4537,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void prepareAppTransitionOld(@WindowManager.TransitionOldType int transit,
             boolean alwaysKeepCurrent, @WindowManager.TransitionFlags int flags,
             boolean forceOverride) {
+        if (WindowManagerService.sUseNewAppTransit) {
+            return;
+        }
+
         final boolean prepared = mAppTransition.prepareAppTransitionOld(
                 transit, alwaysKeepCurrent, flags, forceOverride);
         if (prepared && okToAnimate()) {
@@ -4620,6 +4626,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** Check if pending app transition is for activity / task launch. */
     boolean isNextTransitionForward() {
+        if (WindowManagerService.sUseNewAppTransit) {
+            return mAppTransition.containsTransitRequest(TRANSIT_OPEN)
+                    || mAppTransition.containsTransitRequest(TRANSIT_TO_FRONT);
+        }
         final int transit = mAppTransition.getAppTransitionOld();
         return transit == TRANSIT_OLD_ACTIVITY_OPEN
                 || transit == TRANSIT_OLD_TASK_OPEN
@@ -5586,7 +5596,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         @Override
-        public void onAppTransitionCancelledLocked(int transit) {
+        public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {
             continueUpdateOrientationForDiffOrienLaunchingApp();
         }
 

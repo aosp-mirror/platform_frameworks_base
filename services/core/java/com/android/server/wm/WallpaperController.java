@@ -148,7 +148,7 @@ class WallpaperController {
                 ? w.mActivityRecord.getAnimatingContainer() : null;
         final boolean keyguardGoingAwayWithWallpaper = (animatingContainer != null
                 && animatingContainer.isAnimating(TRANSITION | PARENTS)
-                && AppTransition.isKeyguardGoingAwayTransit(animatingContainer.mTransit)
+                && AppTransition.isKeyguardGoingAwayTransitOld(animatingContainer.mTransit)
                 && (animatingContainer.mTransitFlags
                 & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0);
 

@@ -1111,7 +1111,7 @@ public class WindowManagerService extends IWindowManager.Stub
             = new WindowManagerInternal.AppTransitionListener() {
 
         @Override
-        public void onAppTransitionCancelledLocked(int transit) {
+        public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {
         }
 
         @Override

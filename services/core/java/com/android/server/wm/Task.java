@@ -62,6 +62,7 @@ import static android.view.SurfaceControl.METADATA_TASK_ID;
 import static android.view.WindowManager.TRANSIT_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
+import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
@@ -85,12 +86,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMA
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
 import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_SHOWN;
-import static com.android.server.wm.ActivityTaskSupervisor.DEFER_RESUME;
-import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
-import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
-import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
-import static com.android.server.wm.ActivityTaskSupervisor.dumpHistoryList;
-import static com.android.server.wm.ActivityTaskSupervisor.printThisActivity;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -113,6 +108,12 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_VISIB
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.H.FIRST_ACTIVITY_STACK_MSG;
+import static com.android.server.wm.ActivityTaskSupervisor.DEFER_RESUME;
+import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
+import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
+import static com.android.server.wm.ActivityTaskSupervisor.dumpHistoryList;
+import static com.android.server.wm.ActivityTaskSupervisor.printThisActivity;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
@@ -2436,14 +2437,21 @@ class Task extends WindowContainer<WindowContainer> {
 
     @VisibleForTesting
     boolean isInChangeTransition() {
-        return mSurfaceFreezer.hasLeash() || AppTransition.isChangeTransit(mTransit);
+        return mSurfaceFreezer.hasLeash() || AppTransition.isChangeTransitOld(mTransit);
     }
 
     @Override
     public SurfaceControl getFreezeSnapshotTarget() {
-        final int transit = mDisplayContent.mAppTransition.getAppTransitionOld();
-        if (!AppTransition.isChangeTransit(transit)) {
-            return null;
+        if (WindowManagerService.sUseNewAppTransit) {
+            if (!mDisplayContent.mAppTransition.containsTransitRequest(
+                    TRANSIT_CHANGE_WINDOWING_MODE)) {
+                return null;
+            }
+        } else {
+            if (!AppTransition.isChangeTransitOld(
+                    mDisplayContent.mAppTransition.getAppTransitionOld())) {
+                return null;
+            }
         }
         // Skip creating snapshot if this transition is controlled by a remote animator which
         // doesn't need it.
@@ -2451,7 +2459,7 @@ class Task extends WindowContainer<WindowContainer> {
         activityTypes.add(getActivityType());
         final RemoteAnimationAdapter adapter =
                 mDisplayContent.mAppTransitionController.getRemoteAnimationOverride(
-                        this, transit, activityTypes);
+                        this, TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE, activityTypes);
         if (adapter != null && !adapter.getChangeNeedsSnapshot()) {
             return null;
         }
@@ -6168,7 +6176,8 @@ class Task extends WindowContainer<WindowContainer> {
                             prev.getTask() == next.getTask() ? TRANSIT_OLD_ACTIVITY_OPEN
                                     : next.mLaunchTaskBehind ? TRANSIT_OLD_TASK_OPEN_BEHIND
                                     : TRANSIT_OLD_TASK_OPEN, /* alwaysKeepCurrent */false);
-                    dc.prepareAppTransition(TRANSIT_OPEN);
+                    dc.prepareAppTransition(TRANSIT_OPEN,
+                            next.mLaunchTaskBehind ? TRANSIT_FLAG_OPEN_BEHIND : 0);
                 }
             }
         } else {
@@ -6830,8 +6839,8 @@ class Task extends WindowContainer<WindowContainer> {
         forAllActivities(ActivityRecord::removeLaunchTickRunnable);
     }
 
-    private void updateTransitLocked(@WindowManager.TransitionOldType int transit,
-            @WindowManager.TransitionType int transit2, ActivityOptions options,
+    private void updateTransitLocked(@WindowManager.TransitionOldType int transitOld,
+            @WindowManager.TransitionType int transit, ActivityOptions options,
             boolean forceOverride) {
         if (options != null) {
             ActivityRecord r = topRunningActivity();
@@ -6841,9 +6850,9 @@ class Task extends WindowContainer<WindowContainer> {
                 ActivityOptions.abort(options);
             }
         }
-        mDisplayContent.prepareAppTransitionOld(transit, false,
+        mDisplayContent.prepareAppTransitionOld(transitOld, false,
                 0 /* flags */, forceOverride);
-        mDisplayContent.prepareAppTransition(transit2);
+        mDisplayContent.prepareAppTransition(transit);
     }
 
     final void moveTaskToFront(Task tr, boolean noAnimation, ActivityOptions options,

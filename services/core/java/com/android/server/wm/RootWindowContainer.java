@@ -42,6 +42,7 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_KEEP_SCREEN_ON;
@@ -53,11 +54,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.policy.PhoneWindowManager.SYSTEM_DIALOG_REASON_ASSIST;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static com.android.server.wm.ActivityTaskSupervisor.DEFER_RESUME;
-import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
-import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
-import static com.android.server.wm.ActivityTaskSupervisor.dumpHistoryList;
-import static com.android.server.wm.ActivityTaskSupervisor.printThisActivity;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ROOT_TASK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -66,6 +62,11 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_STATE
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TASKS;
 import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.wm.ActivityTaskManagerService.TAG_SWITCH;
+import static com.android.server.wm.ActivityTaskSupervisor.DEFER_RESUME;
+import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
+import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.ActivityTaskSupervisor.dumpHistoryList;
+import static com.android.server.wm.ActivityTaskSupervisor.printThisActivity;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RootWindowContainerProto.IS_HOME_RECENTS_COMPONENT;
 import static com.android.server.wm.RootWindowContainerProto.KEYGUARD_CONTROLLER;
@@ -2213,8 +2214,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // to the list of apps being closed, and request its transition to be ran.
                 final ActivityRecord oldTopActivity = task.getTopMostActivity();
                 if (oldTopActivity != null && oldTopActivity.isState(STOPPED)
-                        && task.getDisplayContent().mAppTransition.getAppTransitionOld()
-                        == TRANSIT_OLD_TASK_TO_BACK) {
+                        && (task.getDisplayContent().mAppTransition.getAppTransitionOld()
+                        == TRANSIT_OLD_TASK_TO_BACK
+                        || task.getDisplayContent().mAppTransition.containsTransitRequest(
+                                TRANSIT_TO_BACK))) {
                     task.getDisplayContent().mClosingApps.add(oldTopActivity);
                     oldTopActivity.mRequestForceTransition = true;
                 }

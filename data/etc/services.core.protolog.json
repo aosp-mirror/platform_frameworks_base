@@ -241,12 +241,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/Task.java"
     },
-    "-1847087163": {
-      "message": "TRANSIT_TASK_OPEN_BEHIND,  adding %s to mOpeningApps",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "-1844540996": {
       "message": "  Initial targets: %s",
       "level": "VERBOSE",
@@ -1194,6 +1188,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
+    },
+    "-701167286": {
+      "message": "applyAnimation: transit=%s, enter=%b, wc=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
+      "at": "com\/android\/server\/wm\/WindowContainer.java"
     },
     "-694710814": {
       "message": "Pausing rotation during drag",
@@ -3289,6 +3289,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "1810019902": {
+      "message": "TRANSIT_FLAG_OPEN_BEHIND,  adding %s to mOpeningApps",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "1822843721": {
       "message": "Aborted starting %s: startingData=%s",
       "level": "VERBOSE",
@@ -3330,6 +3336,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/Task.java"
+    },
+    "1838928243": {
+      "message": "handleAppTransitionReady: appTransition=%s openingApps=[%s] closingApps=[%s] transit=%s transitCompat=%s (%b)",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
     "1853793312": {
       "message": "Notify removed startingWindow %s",

@@ -2415,6 +2415,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WC#applyAnimation");
             if (okToAnimate()) {
+                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
+                        "applyAnimation: transit=%s, enter=%b, wc=%s",
+                        AppTransition.appTransitionToString(transit), enter, this);
                 applyAnimationUnchecked(lp, enter, transit, isVoiceInteraction, sources);
             } else {
                 cancelAnimation();
@@ -2449,7 +2452,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         final RemoteAnimationController controller =
                 getDisplayContent().mAppTransition.getRemoteAnimationController();
-        final boolean isChanging = AppTransition.isChangeTransit(transit) && enter
+        final boolean isChanging = AppTransition.isChangeTransitOld(transit) && enter
                 && isChangingAppTransition();
 
         // Delaying animation start isn't compatible with remote animations at all.
@@ -2497,7 +2500,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
                 resultAdapters = new Pair<>(adapter, null);
                 mNeedsZBoost = a.getZAdjustment() == Animation.ZORDER_TOP
-                        || AppTransition.isClosingTransit(transit);
+                        || AppTransition.isClosingTransitOld(transit);
                 mTransit = transit;
                 mTransitFlags = getDisplayContent().mAppTransition.getTransitFlags();
             } else {

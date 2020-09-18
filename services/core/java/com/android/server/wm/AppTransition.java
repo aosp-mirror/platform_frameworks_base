@@ -24,6 +24,7 @@ import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANI
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
@@ -115,7 +116,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -340,7 +340,7 @@ public class AppTransition implements Dump {
 
     boolean isUnoccluding() {
         return WindowManagerService.sUseNewAppTransit
-                ? mNextAppTransitionRequests.contains(TRANSIT_OLD_KEYGUARD_UNOCCLUDE)
+                ? mNextAppTransitionRequests.contains(TRANSIT_KEYGUARD_UNOCCLUDE)
                 : mNextAppTransitionOld == TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
     }
 
@@ -460,7 +460,7 @@ public class AppTransition implements Dump {
      * @return bit-map of WindowManagerPolicy#FINISH_LAYOUT_REDO_* to indicate whether another
      *         layout pass needs to be done
      */
-    int goodToGo(int transit, ActivityRecord topOpeningApp, ArraySet<ActivityRecord> openingApps) {
+    int goodToGo(@TransitionOldType int transit, ActivityRecord topOpeningApp) {
         mNextAppTransitionOld = TRANSIT_OLD_UNSET;
         mNextAppTransitionFlags = 0;
         mNextAppTransitionRequests.clear();
@@ -469,7 +469,8 @@ public class AppTransition implements Dump {
                 topOpeningApp != null ? topOpeningApp.getAnimatingContainer() : null;
         final AnimationAdapter topOpeningAnim = wc != null ? wc.getAnimation() : null;
 
-        int redoLayout = notifyAppTransitionStartingLocked(transit,
+        int redoLayout = notifyAppTransitionStartingLocked(
+                AppTransition.isKeyguardGoingAwayTransitOld(transit),
                 topOpeningAnim != null ? topOpeningAnim.getDurationHint() : 0,
                 topOpeningAnim != null
                         ? topOpeningAnim.getStatusBarTransitionsStartTime()
@@ -494,7 +495,10 @@ public class AppTransition implements Dump {
     }
 
     void freeze() {
-        final int transit = mNextAppTransitionOld;
+        final boolean keyguardGoingAway = WindowManagerService.sUseNewAppTransit
+                ? mNextAppTransitionRequests.contains(TRANSIT_KEYGUARD_GOING_AWAY)
+                : isKeyguardGoingAwayTransitOld(mNextAppTransitionOld);
+
         // The RemoteAnimationControl didn't register AppTransitionListener and
         // only initialized the finish and timeout callback when goodToGo().
         // So cancel the remote animation here to prevent the animation can't do
@@ -503,9 +507,10 @@ public class AppTransition implements Dump {
             mRemoteAnimationController.cancelAnimation("freeze");
         }
         setAppTransitionOld(TRANSIT_OLD_UNSET, 0 /* flags */);
+        mNextAppTransitionRequests.clear();
         clear();
         setReady();
-        notifyAppTransitionCancelledLocked(transit);
+        notifyAppTransitionCancelledLocked(keyguardGoingAway);
     }
 
     private void setAppTransitionState(int state) {
@@ -525,6 +530,7 @@ public class AppTransition implements Dump {
     private boolean needsBoosting() {
         final boolean recentsAnimRunning = mService.getRecentsAnimationController() != null;
         return mNextAppTransitionOld != TRANSIT_OLD_UNSET
+                || !mNextAppTransitionRequests.isEmpty()
                 || mAppTransitionState == APP_STATE_READY
                 || mAppTransitionState == APP_STATE_RUNNING
                 || recentsAnimRunning;
@@ -550,9 +556,9 @@ public class AppTransition implements Dump {
         }
     }
 
-    private void notifyAppTransitionCancelledLocked(int transit) {
+    private void notifyAppTransitionCancelledLocked(boolean keyguardGoingAway) {
         for (int i = 0; i < mListeners.size(); i++) {
-            mListeners.get(i).onAppTransitionCancelledLocked(transit);
+            mListeners.get(i).onAppTransitionCancelledLocked(keyguardGoingAway);
         }
     }
 
@@ -562,12 +568,12 @@ public class AppTransition implements Dump {
         }
     }
 
-    private int notifyAppTransitionStartingLocked(int transit, long duration,
+    private int notifyAppTransitionStartingLocked(boolean keyguardGoingAway, long duration,
             long statusBarAnimationStartTime, long statusBarAnimationDuration) {
         int redoLayout = 0;
         for (int i = 0; i < mListeners.size(); i++) {
-            redoLayout |= mListeners.get(i).onAppTransitionStartingLocked(transit, duration,
-                    statusBarAnimationStartTime, statusBarAnimationDuration);
+            redoLayout |= mListeners.get(i).onAppTransitionStartingLocked(keyguardGoingAway,
+                    duration, statusBarAnimationStartTime, statusBarAnimationDuration);
         }
         return redoLayout;
     }
@@ -1578,7 +1584,8 @@ public class AppTransition implements Dump {
                 && !mNextAppTransitionOverrideRequested
                 && mNextAppTransitionType != NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE
                 && mNextAppTransitionType != NEXT_TRANSIT_TYPE_CLIP_REVEAL
-                && mNextAppTransitionOld != TRANSIT_OLD_KEYGUARD_GOING_AWAY;
+                && mNextAppTransitionOld != TRANSIT_OLD_KEYGUARD_GOING_AWAY
+                && !mNextAppTransitionRequests.contains(TRANSIT_KEYGUARD_GOING_AWAY);
     }
 
     RemoteAnimationController getRemoteAnimationController() {
@@ -1616,7 +1623,7 @@ public class AppTransition implements Dump {
         }
 
         Animation a;
-        if (isKeyguardGoingAwayTransit(transit) && enter) {
+        if (isKeyguardGoingAwayTransitOld(transit) && enter) {
             a = loadKeyguardExitAnimation(transit);
         } else if (transit == TRANSIT_OLD_KEYGUARD_OCCLUDE) {
             a = null;
@@ -1807,6 +1814,7 @@ public class AppTransition implements Dump {
                 : STACK_CLIP_AFTER_ANIM;
     }
 
+    @TransitionFlags
     public int getTransitFlags() {
         return mNextAppTransitionFlags;
     }
@@ -2194,6 +2202,8 @@ public class AppTransition implements Dump {
                 "TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION"));
         sFlagToString.add(new Pair<>(TRANSIT_FLAG_APP_CRASHED,
                 "TRANSIT_FLAG_APP_CRASHED"));
+        sFlagToString.add(new Pair<>(TRANSIT_FLAG_OPEN_BEHIND,
+                "TRANSIT_FLAG_OPEN_BEHIND"));
     }
 
     /**
@@ -2305,16 +2315,16 @@ public class AppTransition implements Dump {
                         + "Callers=%s",
                 appTransitionOldToString(transit), this, alwaysKeepCurrent,
                 mDisplayContent.getDisplayId(), Debug.getCallers(5));
-        final boolean allowSetCrashing = !isKeyguardTransit(mNextAppTransitionOld)
+        final boolean allowSetCrashing = !isKeyguardTransitOld(mNextAppTransitionOld)
                 && transit == TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
-        if (forceOverride || isKeyguardTransit(transit) || !isTransitionSet()
+        if (forceOverride || isKeyguardTransitOld(transit) || !isTransitionSet()
                 || mNextAppTransitionOld == TRANSIT_OLD_NONE || allowSetCrashing) {
             setAppTransitionOld(transit, flags);
         }
         // We never want to change from a Keyguard transit to a non-Keyguard transit, as our logic
         // relies on the fact that we always execute a Keyguard transition after preparing one. We
         // also don't want to change away from a crashing transition.
-        else if (!alwaysKeepCurrent && !isKeyguardTransit(mNextAppTransitionOld)
+        else if (!alwaysKeepCurrent && !isKeyguardTransitOld(mNextAppTransitionOld)
                 && mNextAppTransitionOld != TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE) {
             if (transit == TRANSIT_OLD_TASK_OPEN && isTransitionOldEqual(TRANSIT_OLD_TASK_CLOSE)) {
                 // Opening a new task always supersedes a close for the anim.
@@ -2323,7 +2333,7 @@ public class AppTransition implements Dump {
                     && isTransitionOldEqual(TRANSIT_OLD_ACTIVITY_CLOSE)) {
                 // Opening a new activity always supersedes a close for the anim.
                 setAppTransitionOld(transit, flags);
-            } else if (isTaskTransit(transit) && isActivityTransit(mNextAppTransitionOld)) {
+            } else if (isTaskTransitOld(transit) && isActivityTransitOld(mNextAppTransitionOld)) {
                 // Task animations always supersede activity animations, because if we have both, it
                 // usually means that activity transition were just trampoline activities.
                 setAppTransitionOld(transit, flags);
@@ -2349,45 +2359,90 @@ public class AppTransition implements Dump {
      * @return true if {@param transit} is representing a transition in which Keyguard is going
      *         away, false otherwise
      */
-    public static boolean isKeyguardGoingAwayTransit(int transit) {
+    public static boolean isKeyguardGoingAwayTransitOld(int transit) {
         return transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
                 || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
     }
 
-    static boolean isKeyguardTransit(@TransitionOldType int transit) {
-        return isKeyguardGoingAwayTransit(transit) || transit == TRANSIT_OLD_KEYGUARD_OCCLUDE
+    static boolean isKeyguardTransitOld(@TransitionOldType int transit) {
+        return isKeyguardGoingAwayTransitOld(transit) || transit == TRANSIT_OLD_KEYGUARD_OCCLUDE
                 || transit == TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
     }
 
-    static boolean isTaskTransit(@TransitionOldType int transit) {
-        return isTaskOpenTransit(transit)
+    static boolean isTaskTransitOld(@TransitionOldType int transit) {
+        return isTaskOpenTransitOld(transit)
                 || transit == TRANSIT_OLD_TASK_CLOSE
                 || transit == TRANSIT_OLD_TASK_TO_BACK;
     }
 
-    private static  boolean isTaskOpenTransit(@TransitionOldType int transit) {
+    private static  boolean isTaskOpenTransitOld(@TransitionOldType int transit) {
         return transit == TRANSIT_OLD_TASK_OPEN
                 || transit == TRANSIT_OLD_TASK_OPEN_BEHIND
                 || transit == TRANSIT_OLD_TASK_TO_FRONT;
     }
 
-    static boolean isActivityTransit(@TransitionOldType int transit) {
+    static boolean isActivityTransitOld(@TransitionOldType int transit) {
         return transit == TRANSIT_OLD_ACTIVITY_OPEN
                 || transit == TRANSIT_OLD_ACTIVITY_CLOSE
                 || transit == TRANSIT_OLD_ACTIVITY_RELAUNCH;
     }
 
-    static boolean isChangeTransit(@TransitionOldType int transit) {
+    static boolean isChangeTransitOld(@TransitionOldType int transit) {
         return transit == TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
     }
 
-    static boolean isClosingTransit(@TransitionOldType int transit) {
+    static boolean isClosingTransitOld(@TransitionOldType int transit) {
         return transit == TRANSIT_OLD_ACTIVITY_CLOSE
                 || transit == TRANSIT_OLD_TASK_CLOSE
                 || transit == TRANSIT_OLD_WALLPAPER_CLOSE
                 || transit == TRANSIT_OLD_WALLPAPER_INTRA_CLOSE
                 || transit == TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE
                 || transit == TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
+    }
+
+    static boolean isNormalTransit(@TransitionType int transit) {
+        return transit == TRANSIT_OPEN
+                || transit == TRANSIT_CLOSE
+                || transit == TRANSIT_TO_FRONT
+                || transit == TRANSIT_TO_BACK;
+    }
+
+    static boolean isKeyguardTransit(@TransitionType int transit) {
+        return transit == TRANSIT_KEYGUARD_GOING_AWAY
+                || transit == TRANSIT_KEYGUARD_OCCLUDE
+                || transit == TRANSIT_KEYGUARD_UNOCCLUDE;
+    }
+
+    @TransitionType int getKeyguardTransition() {
+        // In case we unocclude Keyguard and occlude it again, meaning that we never actually
+        // unoccclude/occlude Keyguard, but just run a normal transition.
+        final int occludeIndex = mNextAppTransitionRequests.indexOf(TRANSIT_KEYGUARD_UNOCCLUDE);
+        if (occludeIndex != -1
+                && occludeIndex < mNextAppTransitionRequests.indexOf(TRANSIT_KEYGUARD_OCCLUDE)) {
+            return TRANSIT_NONE;
+        }
+
+        for (int i = 0; i < mNextAppTransitionRequests.size(); ++i) {
+            final @TransitionType int transit = mNextAppTransitionRequests.get(i);
+            if (isKeyguardTransit(transit)) {
+                return transit;
+            }
+        }
+        return TRANSIT_NONE;
+    }
+
+    @TransitionType int getFirstAppTransition() {
+        for (int i = 0; i < mNextAppTransitionRequests.size(); ++i) {
+            final @TransitionType int transit = mNextAppTransitionRequests.get(i);
+            if (transit != TRANSIT_NONE && !isKeyguardTransit(transit)) {
+                return transit;
+            }
+        }
+        return TRANSIT_NONE;
+    }
+
+    boolean containsTransitRequest(@TransitionType int transit) {
+        return mNextAppTransitionRequests.contains(transit);
     }
 
     /**

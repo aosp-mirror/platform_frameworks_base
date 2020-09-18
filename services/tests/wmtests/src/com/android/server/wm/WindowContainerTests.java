@@ -943,8 +943,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
         // Make sure animation finish callback will be received and reset animating state after
         // animation finish.
-        wc.getDisplayContent().mAppTransition.goodToGo(TRANSIT_OLD_TASK_OPEN, act,
-                mDisplayContent.mOpeningApps);
+        wc.getDisplayContent().mAppTransition.goodToGo(TRANSIT_OLD_TASK_OPEN, act);
         verify(wc).onAnimationFinished(eq(ANIMATION_TYPE_APP_TRANSITION), any());
         assertFalse(wc.isAnimating());
         assertFalse(act.isAnimating(PARENTS));
