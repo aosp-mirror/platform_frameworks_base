@@ -164,17 +164,6 @@ public class StagingManager {
         }
     }
 
-    private void updateStoredSession(@NonNull PackageInstallerSession sessionInfo) {
-        synchronized (mStagedSessions) {
-            PackageInstallerSession storedSession = mStagedSessions.get(sessionInfo.sessionId);
-            // storedSession might be null if a call to abortSession was made before the session
-            // is updated.
-            if (storedSession != null) {
-                mStagedSessions.put(sessionInfo.sessionId, sessionInfo);
-            }
-        }
-    }
-
     private void markBootCompleted() {
         mApexManager.markBootCompleted();
     }
@@ -865,7 +854,6 @@ public class StagingManager {
     }
 
     void commitSession(@NonNull PackageInstallerSession session) {
-        updateStoredSession(session);
         mPreRebootVerificationHandler.startPreRebootVerification(session);
     }
 
