@@ -511,7 +511,7 @@
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Նոր"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Անձայն"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Ծանուցումներ"</string>
-    <string name="notification_section_header_conversations" msgid="821834744538345661">"Խոսակցություններ"</string>
+    <string name="notification_section_header_conversations" msgid="821834744538345661">"Զրույցներ"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Ջնջել բոլոր անձայն ծանուցումները"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Ծանուցումները չեն ցուցադրվի «Չանհանգստացնել» ռեժիմում"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Սկսել հիմա"</string>
