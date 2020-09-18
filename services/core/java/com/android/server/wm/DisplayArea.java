@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOW_TOKENS;
@@ -467,8 +466,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 // Consider unoccluding only when all unknown visibilities have been
                 // resolved, as otherwise we just may be starting another occluding activity.
                 final boolean isUnoccluding =
-                        mDisplayContent.mAppTransition.getAppTransition()
-                                == TRANSIT_KEYGUARD_UNOCCLUDE
+                        mDisplayContent.mAppTransition.isUnoccluding()
                                 && mDisplayContent.mUnknownAppVisibilityController.allResolved();
                 // If keyguard is showing, or we're unoccluding, force the keyguard's orientation,
                 // even if SystemUI hasn't updated the attrs yet.

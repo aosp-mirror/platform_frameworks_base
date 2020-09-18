@@ -16,13 +16,13 @@
 
 package com.android.server.wm;
 
-import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
-import static android.view.WindowManager.TRANSIT_TASK_OPEN;
-import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
-import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
-import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
+import static android.view.WindowManager.TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN_BEHIND;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_BACK;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_FRONT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -44,9 +44,9 @@ import java.util.Arrays;
 class TransitionController {
     private static final String TAG = "TransitionController";
 
-    private static final int[] SUPPORTED_LEGACY_TRANSIT_TYPES = {TRANSIT_TASK_OPEN,
-            TRANSIT_TASK_CLOSE, TRANSIT_TASK_TO_FRONT, TRANSIT_TASK_TO_BACK,
-            TRANSIT_TASK_OPEN_BEHIND, TRANSIT_KEYGUARD_GOING_AWAY};
+    private static final int[] SUPPORTED_LEGACY_TRANSIT_TYPES = {TRANSIT_OLD_TASK_OPEN,
+            TRANSIT_OLD_TASK_CLOSE, TRANSIT_OLD_TASK_TO_FRONT, TRANSIT_OLD_TASK_TO_BACK,
+            TRANSIT_OLD_TASK_OPEN_BEHIND, TRANSIT_OLD_KEYGUARD_GOING_AWAY};
     static {
         Arrays.sort(SUPPORTED_LEGACY_TRANSIT_TYPES);
     }
@@ -79,7 +79,7 @@ class TransitionController {
      * Creates a transition. It can immediately collect participants.
      */
     @NonNull
-    Transition createTransition(@WindowManager.TransitionType int type,
+    Transition createTransition(@WindowManager.TransitionOldType int type,
             @WindowManager.TransitionFlags int flags) {
         if (mCollectingTransition != null) {
             throw new IllegalStateException("Simultaneous transitions not supported yet.");
@@ -137,13 +137,13 @@ class TransitionController {
      * @return the created transition. Collection can start immediately.
      */
     @NonNull
-    Transition requestTransition(@WindowManager.TransitionType int type) {
+    Transition requestTransition(@WindowManager.TransitionOldType int type) {
         return requestTransition(type, 0 /* flags */);
     }
 
     /** @see #requestTransition */
     @NonNull
-    Transition requestTransition(@WindowManager.TransitionType int type,
+    Transition requestTransition(@WindowManager.TransitionOldType int type,
             @WindowManager.TransitionFlags int flags) {
         if (mTransitionPlayer == null) {
             throw new IllegalStateException("Shell Transitions not enabled");
@@ -169,7 +169,7 @@ class TransitionController {
      *
      * @return {@code true} if the transition is handled.
      */
-    boolean adaptLegacyPrepare(@WindowManager.TransitionType int transit,
+    boolean adaptLegacyPrepare(@WindowManager.TransitionOldType int transit,
             @WindowManager.TransitionFlags int flags, boolean forceOverride) {
         if (!isShellTransitionsEnabled()
                 || Arrays.binarySearch(SUPPORTED_LEGACY_TRANSIT_TYPES, transit) < 0) {
@@ -180,7 +180,7 @@ class TransitionController {
                 // TODO(shell-transitions): add to flags
             } else if (forceOverride) {
                 // TODO(shell-transitions): sort out these flags
-            } else if (transit == TRANSIT_CRASHING_ACTIVITY_CLOSE) {
+            } else if (transit == TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE) {
                 // TODO(shell-transitions): record crashing
             }
         } else {

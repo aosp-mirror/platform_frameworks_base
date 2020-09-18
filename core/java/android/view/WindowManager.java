@@ -135,168 +135,207 @@ public interface WindowManager extends ViewManager {
      * Not set up for a transition.
      * @hide
      */
-    int TRANSIT_UNSET = -1;
+    int TRANSIT_OLD_UNSET = -1;
 
     /**
      * No animation for transition.
      * @hide
      */
-    int TRANSIT_NONE = 0;
+    int TRANSIT_OLD_NONE = 0;
 
     /**
      * A window in a new activity is being opened on top of an existing one in the same task.
      * @hide
      */
-    int TRANSIT_ACTIVITY_OPEN = 6;
+    int TRANSIT_OLD_ACTIVITY_OPEN = 6;
 
     /**
      * The window in the top-most activity is being closed to reveal the previous activity in the
      * same task.
      * @hide
      */
-    int TRANSIT_ACTIVITY_CLOSE = 7;
+    int TRANSIT_OLD_ACTIVITY_CLOSE = 7;
 
     /**
      * A window in a new task is being opened on top of an existing one in another activity's task.
      * @hide
      */
-    int TRANSIT_TASK_OPEN = 8;
+    int TRANSIT_OLD_TASK_OPEN = 8;
 
     /**
      * A window in the top-most activity is being closed to reveal the previous activity in a
      * different task.
      * @hide
      */
-    int TRANSIT_TASK_CLOSE = 9;
+    int TRANSIT_OLD_TASK_CLOSE = 9;
 
     /**
      * A window in an existing task is being displayed on top of an existing one in another
      * activity's task.
      * @hide
      */
-    int TRANSIT_TASK_TO_FRONT = 10;
+    int TRANSIT_OLD_TASK_TO_FRONT = 10;
 
     /**
      * A window in an existing task is being put below all other tasks.
      * @hide
      */
-    int TRANSIT_TASK_TO_BACK = 11;
+    int TRANSIT_OLD_TASK_TO_BACK = 11;
 
     /**
      * A window in a new activity that doesn't have a wallpaper is being opened on top of one that
      * does, effectively closing the wallpaper.
      * @hide
      */
-    int TRANSIT_WALLPAPER_CLOSE = 12;
+    int TRANSIT_OLD_WALLPAPER_CLOSE = 12;
 
     /**
      * A window in a new activity that does have a wallpaper is being opened on one that didn't,
      * effectively opening the wallpaper.
      * @hide
      */
-    int TRANSIT_WALLPAPER_OPEN = 13;
+    int TRANSIT_OLD_WALLPAPER_OPEN = 13;
 
     /**
      * A window in a new activity is being opened on top of an existing one, and both are on top
      * of the wallpaper.
      * @hide
      */
-    int TRANSIT_WALLPAPER_INTRA_OPEN = 14;
+    int TRANSIT_OLD_WALLPAPER_INTRA_OPEN = 14;
 
     /**
      * The window in the top-most activity is being closed to reveal the previous activity, and
      * both are on top of the wallpaper.
      * @hide
      */
-    int TRANSIT_WALLPAPER_INTRA_CLOSE = 15;
+    int TRANSIT_OLD_WALLPAPER_INTRA_CLOSE = 15;
 
     /**
      * A window in a new task is being opened behind an existing one in another activity's task.
      * The new window will show briefly and then be gone.
      * @hide
      */
-    int TRANSIT_TASK_OPEN_BEHIND = 16;
+    int TRANSIT_OLD_TASK_OPEN_BEHIND = 16;
 
     /**
      * An activity is being relaunched (e.g. due to configuration change).
      * @hide
      */
-    int TRANSIT_ACTIVITY_RELAUNCH = 18;
+    int TRANSIT_OLD_ACTIVITY_RELAUNCH = 18;
 
     /**
      * Keyguard is going away.
      * @hide
      */
-    int TRANSIT_KEYGUARD_GOING_AWAY = 20;
+    int TRANSIT_OLD_KEYGUARD_GOING_AWAY = 20;
 
     /**
      * Keyguard is going away with showing an activity behind that requests wallpaper.
      * @hide
      */
-    int TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER = 21;
+    int TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER = 21;
 
     /**
      * Keyguard is being occluded.
      * @hide
      */
-    int TRANSIT_KEYGUARD_OCCLUDE = 22;
+    int TRANSIT_OLD_KEYGUARD_OCCLUDE = 22;
 
     /**
      * Keyguard is being unoccluded.
      * @hide
      */
-    int TRANSIT_KEYGUARD_UNOCCLUDE = 23;
+    int TRANSIT_OLD_KEYGUARD_UNOCCLUDE = 23;
 
     /**
      * A translucent activity is being opened.
      * @hide
      */
-    int TRANSIT_TRANSLUCENT_ACTIVITY_OPEN = 24;
+    int TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN = 24;
 
     /**
      * A translucent activity is being closed.
      * @hide
      */
-    int TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE = 25;
+    int TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE = 25;
 
     /**
      * A crashing activity is being closed.
      * @hide
      */
-    int TRANSIT_CRASHING_ACTIVITY_CLOSE = 26;
+    int TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE = 26;
 
     /**
      * A task is changing windowing modes
      * @hide
      */
-    int TRANSIT_TASK_CHANGE_WINDOWING_MODE = 27;
+    int TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE = 27;
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "TRANSIT_OLD_" }, value = {
+            TRANSIT_OLD_UNSET,
+            TRANSIT_OLD_NONE,
+            TRANSIT_OLD_ACTIVITY_OPEN,
+            TRANSIT_OLD_ACTIVITY_CLOSE,
+            TRANSIT_OLD_TASK_OPEN,
+            TRANSIT_OLD_TASK_CLOSE,
+            TRANSIT_OLD_TASK_TO_FRONT,
+            TRANSIT_OLD_TASK_TO_BACK,
+            TRANSIT_OLD_WALLPAPER_CLOSE,
+            TRANSIT_OLD_WALLPAPER_OPEN,
+            TRANSIT_OLD_WALLPAPER_INTRA_OPEN,
+            TRANSIT_OLD_WALLPAPER_INTRA_CLOSE,
+            TRANSIT_OLD_TASK_OPEN_BEHIND,
+            TRANSIT_OLD_ACTIVITY_RELAUNCH,
+            TRANSIT_OLD_KEYGUARD_GOING_AWAY,
+            TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
+            TRANSIT_OLD_KEYGUARD_OCCLUDE,
+            TRANSIT_OLD_KEYGUARD_UNOCCLUDE,
+            TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN,
+            TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE,
+            TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE,
+            TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface TransitionOldType {}
+
+    /** @hide */
+    int TRANSIT_NONE = 0;
+    /** @hide */
+    int TRANSIT_OPEN = 1;
+    /** @hide */
+    int TRANSIT_CLOSE = 2;
+    /** @hide */
+    int TRANSIT_TO_FRONT = 3;
+    /** @hide */
+    int TRANSIT_TO_BACK = 4;
+    /** @hide */
+    int TRANSIT_RELAUNCH = 5;
+    /** @hide */
+    int TRANSIT_CHANGE_WINDOWING_MODE = 6;
+    /** @hide */
+    int TRANSIT_KEYGUARD_GOING_AWAY = 7;
+    /** @hide */
+    int TRANSIT_KEYGUARD_OCCLUDE = 8;
+    /** @hide */
+    int TRANSIT_KEYGUARD_UNOCCLUDE = 9;
 
     /**
      * @hide
      */
     @IntDef(prefix = { "TRANSIT_" }, value = {
-            TRANSIT_UNSET,
             TRANSIT_NONE,
-            TRANSIT_ACTIVITY_OPEN,
-            TRANSIT_ACTIVITY_CLOSE,
-            TRANSIT_TASK_OPEN,
-            TRANSIT_TASK_CLOSE,
-            TRANSIT_TASK_TO_FRONT,
-            TRANSIT_TASK_TO_BACK,
-            TRANSIT_WALLPAPER_CLOSE,
-            TRANSIT_WALLPAPER_OPEN,
-            TRANSIT_WALLPAPER_INTRA_OPEN,
-            TRANSIT_WALLPAPER_INTRA_CLOSE,
-            TRANSIT_TASK_OPEN_BEHIND,
-            TRANSIT_ACTIVITY_RELAUNCH,
+            TRANSIT_OPEN,
+            TRANSIT_CLOSE,
+            TRANSIT_TO_FRONT,
+            TRANSIT_TO_BACK,
+            TRANSIT_RELAUNCH,
+            TRANSIT_CHANGE_WINDOWING_MODE,
             TRANSIT_KEYGUARD_GOING_AWAY,
-            TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
             TRANSIT_KEYGUARD_OCCLUDE,
             TRANSIT_KEYGUARD_UNOCCLUDE,
-            TRANSIT_TRANSLUCENT_ACTIVITY_OPEN,
-            TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE,
-            TRANSIT_CRASHING_ACTIVITY_CLOSE,
-            TRANSIT_TASK_CHANGE_WINDOWING_MODE
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionType {}
@@ -326,13 +365,20 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION = 0x8;
 
     /**
+     * Transition flag: App is crashed.
+     * @hide
+     */
+    int TRANSIT_FLAG_APP_CRASHED = 0x10;
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER,
-            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION,
+            TRANSIT_FLAG_APP_CRASHED
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}

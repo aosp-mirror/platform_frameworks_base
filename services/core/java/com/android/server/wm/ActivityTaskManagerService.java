@@ -65,6 +65,7 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_OLD_NONE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
@@ -6183,10 +6184,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (dc == null) {
                     return;
                 }
-                final boolean wasTransitionSet =
-                        dc.mAppTransition.getAppTransition() != TRANSIT_NONE;
+                final boolean wasTransitionSet = dc.mAppTransition.isTransitionSet();
                 if (!wasTransitionSet) {
-                    dc.prepareAppTransition(TRANSIT_NONE, false /* alwaysKeepCurrent */);
+                    dc.prepareAppTransitionOld(TRANSIT_OLD_NONE, false /* alwaysKeepCurrent */);
+                    dc.prepareAppTransition(TRANSIT_NONE);
                 }
                 mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
 

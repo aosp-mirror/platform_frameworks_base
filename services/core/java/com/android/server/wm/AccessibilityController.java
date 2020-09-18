@@ -489,18 +489,18 @@ final class AccessibilityController {
         public void onAppWindowTransitionLocked(int displayId, int transition) {
             if (DEBUG_WINDOW_TRANSITIONS) {
                 Slog.i(LOG_TAG, "Window transition: "
-                        + AppTransition.appTransitionToString(transition)
+                        + AppTransition.appTransitionOldToString(transition)
                         + " displayId: " + displayId);
             }
             final boolean magnifying = mMagnifedViewport.isMagnifyingLocked();
             if (magnifying) {
                 switch (transition) {
-                    case WindowManager.TRANSIT_ACTIVITY_OPEN:
-                    case WindowManager.TRANSIT_TASK_OPEN:
-                    case WindowManager.TRANSIT_TASK_TO_FRONT:
-                    case WindowManager.TRANSIT_WALLPAPER_OPEN:
-                    case WindowManager.TRANSIT_WALLPAPER_CLOSE:
-                    case WindowManager.TRANSIT_WALLPAPER_INTRA_OPEN: {
+                    case WindowManager.TRANSIT_OLD_ACTIVITY_OPEN:
+                    case WindowManager.TRANSIT_OLD_TASK_OPEN:
+                    case WindowManager.TRANSIT_OLD_TASK_TO_FRONT:
+                    case WindowManager.TRANSIT_OLD_WALLPAPER_OPEN:
+                    case WindowManager.TRANSIT_OLD_WALLPAPER_CLOSE:
+                    case WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN: {
                         mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_USER_CONTEXT_CHANGED);
                     }
                 }
@@ -510,7 +510,7 @@ final class AccessibilityController {
         public void onWindowTransitionLocked(WindowState windowState, int transition) {
             if (DEBUG_WINDOW_TRANSITIONS) {
                 Slog.i(LOG_TAG, "Window transition: "
-                        + AppTransition.appTransitionToString(transition)
+                        + AppTransition.appTransitionOldToString(transition)
                         + " displayId: " + windowState.getDisplayId());
             }
             final boolean magnifying = mMagnifedViewport.isMagnifyingLocked();
