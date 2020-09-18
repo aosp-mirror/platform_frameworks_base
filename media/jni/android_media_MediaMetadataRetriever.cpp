@@ -704,7 +704,7 @@ static const JNINativeMethod nativeMethods[] = {
             (void *)android_media_MediaMetadataRetriever_setDataSourceAndHeaders
         },
 
-        {"setDataSource",   "(Ljava/io/FileDescriptor;JJ)V",
+        {"_setDataSource",   "(Ljava/io/FileDescriptor;JJ)V",
                 (void *)android_media_MediaMetadataRetriever_setDataSourceFD},
         {"_setDataSource",   "(Landroid/media/MediaDataSource;)V",
                 (void *)android_media_MediaMetadataRetriever_setDataSourceCallback},
