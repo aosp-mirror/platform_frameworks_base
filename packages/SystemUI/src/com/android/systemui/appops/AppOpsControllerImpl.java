@@ -16,8 +16,13 @@
 
 package com.android.systemui.appops;
 
+import static android.media.AudioManager.ACTION_MICROPHONE_MUTE_CHANGED;
+
 import android.app.AppOpsManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.media.AudioManager;
@@ -34,6 +39,7 @@ import androidx.annotation.WorkerThread;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
@@ -54,7 +60,7 @@ import javax.inject.Inject;
  * NotificationPresenter to be displayed to the user.
  */
 @SysUISingleton
-public class AppOpsControllerImpl implements AppOpsController,
+public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsController,
         AppOpsManager.OnOpActiveChangedInternalListener,
         AppOpsManager.OnOpNotedListener, Dumpable {
 
@@ -65,6 +71,7 @@ public class AppOpsControllerImpl implements AppOpsController,
     private static final String TAG = "AppOpsControllerImpl";
     private static final boolean DEBUG = false;
 
+    private final BroadcastDispatcher mDispatcher;
     private final AppOpsManager mAppOps;
     private final AudioManager mAudioManager;
     private final LocationManager mLocationManager;
@@ -79,6 +86,7 @@ public class AppOpsControllerImpl implements AppOpsController,
     private final SparseArray<Set<Callback>> mCallbacksByCode = new SparseArray<>();
     private final PermissionFlagsCache mFlagsCache;
     private boolean mListening;
+    private boolean mMicMuted;
 
     @GuardedBy("mActiveItems")
     private final List<AppOpItem> mActiveItems = new ArrayList<>();
@@ -105,8 +113,10 @@ public class AppOpsControllerImpl implements AppOpsController,
             @Background Looper bgLooper,
             DumpManager dumpManager,
             PermissionFlagsCache cache,
-            AudioManager audioManager
+            AudioManager audioManager,
+            BroadcastDispatcher dispatcher
     ) {
+        mDispatcher = dispatcher;
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mFlagsCache = cache;
         mBGHandler = new H(bgLooper);
@@ -115,6 +125,7 @@ public class AppOpsControllerImpl implements AppOpsController,
             mCallbacksByCode.put(OPS[i], new ArraySet<>());
         }
         mAudioManager = audioManager;
+        mMicMuted = audioManager.isMicrophoneMute();
         mLocationManager = context.getSystemService(LocationManager.class);
         dumpManager.registerDumpable(TAG, this);
     }
@@ -133,6 +144,8 @@ public class AppOpsControllerImpl implements AppOpsController,
             mAudioManager.registerAudioRecordingCallback(mAudioRecordingCallback, mBGHandler);
             mBGHandler.post(() -> mAudioRecordingCallback.onRecordingConfigChanged(
                     mAudioManager.getActiveRecordingConfigurations()));
+            mDispatcher.registerReceiverWithHandler(this,
+                    new IntentFilter(ACTION_MICROPHONE_MUTE_CHANGED), mBGHandler);
 
         } else {
             mAppOps.stopWatchingActive(this);
@@ -140,6 +153,7 @@ public class AppOpsControllerImpl implements AppOpsController,
             mAudioManager.unregisterAudioRecordingCallback(mAudioRecordingCallback);
 
             mBGHandler.removeCallbacksAndMessages(null); // null removes all
+            mDispatcher.unregisterReceiver(this);
             synchronized (mActiveItems) {
                 mActiveItems.clear();
                 mRecordingsByUid.clear();
@@ -468,6 +482,9 @@ public class AppOpsControllerImpl implements AppOpsController,
     }
 
     private boolean isAnyRecordingPausedLocked(int uid) {
+        if (mMicMuted) {
+            return true;
+        }
         List<AudioRecordingConfiguration> configs = mRecordingsByUid.get(uid);
         if (configs == null) return false;
         int configsNum = configs.size();
@@ -521,6 +538,12 @@ public class AppOpsControllerImpl implements AppOpsController,
             updateRecordingPausedStatus();
         }
     };
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        mMicMuted = mAudioManager.isMicrophoneMute();
+        updateRecordingPausedStatus();
+    }
 
     protected class H extends Handler {
         H(Looper looper) {

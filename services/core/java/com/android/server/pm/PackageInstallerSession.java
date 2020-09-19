@@ -745,7 +745,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.mode = params.mode;
             info.installReason = params.installReason;
             info.sizeBytes = params.sizeBytes;
-            info.appPackageName = params.appPackageName;
+            info.appPackageName = mPackageName != null ? mPackageName : params.appPackageName;
             if (includeIcon) {
                 info.appIcon = params.appIcon;
             }
@@ -2355,6 +2355,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (!FileUtils.isValidExtFilename(targetName)) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Invalid filename: " + targetName);
+            }
+
+            // Yell loudly if installers drop attribute installLocation when apps explicitly set.
+            if (apk.installLocation != PackageInfo.INSTALL_LOCATION_UNSPECIFIED) {
+                final String installerPackageName = getInstallerPackageName();
+                if (installerPackageName != null
+                        && (params.installLocation != apk.installLocation)) {
+                    Slog.wtf(TAG, installerPackageName
+                            + " drops manifest attribute android:installLocation in " + targetName
+                            + " for " + mPackageName);
+                }
             }
 
             final File targetFile = new File(stageDir, targetName);

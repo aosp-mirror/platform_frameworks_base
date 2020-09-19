@@ -29,7 +29,8 @@ android_test {
         "flickerlib",
         "truth-prebuilt",
         "launcher-helper-lib",
-        "launcher-aosp-tapl"
+        "launcher-aosp-tapl",
+        "platform-test-annotations",
     ],
 }
 
@@ -50,6 +51,7 @@ android_test {
         "truth-prebuilt",
         "app-helpers-core",
         "launcher-helper-lib",
-        "launcher-aosp-tapl"
+        "launcher-aosp-tapl",
+        "platform-test-annotations",
     ],
 }

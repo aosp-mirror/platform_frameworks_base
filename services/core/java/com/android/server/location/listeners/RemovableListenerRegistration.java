@@ -17,7 +17,8 @@
 package com.android.server.location.listeners;
 
 import android.annotation.Nullable;
-import android.util.Log;
+
+import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -26,20 +27,19 @@ import java.util.concurrent.Executor;
  * A listener registration that stores its own key, and thus can remove itself. By default it will
  * remove itself if any checked exception occurs on listener execution.
  *
- * @param <TRequest>  request type
- * @param <TListener> listener type
+ * @param <TRequest>           request type
+ * @param <TListener>          listener type
+ * @param <TListenerOperation> listener operation type
  */
-public abstract class RemovableListenerRegistration<TRequest, TListener> extends
-        ListenerRegistration<TRequest, TListener> {
-
-    protected final String mTag;
+public abstract class RemovableListenerRegistration<TRequest, TListener,
+        TListenerOperation extends ListenerOperation<TListener>> extends
+        RequestListenerRegistration<TRequest, TListener, TListenerOperation> {
 
     private volatile @Nullable Object mKey;
 
-    protected RemovableListenerRegistration(String tag, Executor executor,
-            @Nullable TRequest request, TListener listener) {
+    protected RemovableListenerRegistration(Executor executor, @Nullable TRequest request,
+            TListener listener) {
         super(executor, request, listener);
-        mTag = Objects.requireNonNull(tag);
     }
 
     /**
@@ -47,7 +47,8 @@ public abstract class RemovableListenerRegistration<TRequest, TListener> extends
      * with. Often this is easiest to accomplish by defining registration subclasses as non-static
      * inner classes of the multiplexer they are to be used with.
      */
-    protected abstract ListenerMultiplexer<?, ? super TRequest, ? super TListener, ?, ?> getOwner();
+    protected abstract ListenerMultiplexer<?, ? super TListener, ?
+            super TListenerOperation, ?, ?> getOwner();
 
     /**
      * Returns the key associated with this registration. May not be invoked before
@@ -66,12 +67,6 @@ public abstract class RemovableListenerRegistration<TRequest, TListener> extends
         if (key != null) {
             getOwner().removeRegistration(key, this);
         }
-    }
-
-    @Override
-    public <Listener> void onOperationFailure(ListenerOperation<Listener> operation, Exception e) {
-        Log.w(mTag, "registration " + this + " removed due to unexpected exception", e);
-        remove();
     }
 
     @Override

@@ -70,7 +70,7 @@
             "name": "CtsAutoFillServiceTestCases",
             "options": [
                 {
-                    "include-filter": "android.autofillservice.cts.PreSimpleSaveActivityTest"
+                    "include-filter": "android.autofillservice.cts.saveui.PreSimpleSaveActivityTest"
                 },
                 {
                     "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -82,7 +82,7 @@
             "name": "CtsAutoFillServiceTestCases",
             "options": [
                 {
-                    "include-filter": "android.autofillservice.cts.SimpleSaveActivityTest"
+                    "include-filter": "android.autofillservice.cts.saveui.SimpleSaveActivityTest"
                 },
                 {
                     "exclude-annotation": "androidx.test.filters.FlakyTest"

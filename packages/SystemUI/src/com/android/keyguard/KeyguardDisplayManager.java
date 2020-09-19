@@ -39,7 +39,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
-import com.android.systemui.util.InjectionInflationController;
 
 import javax.inject.Inject;
 
@@ -49,7 +48,6 @@ public class KeyguardDisplayManager {
 
     private final MediaRouter mMediaRouter;
     private final DisplayManager mDisplayService;
-    private final InjectionInflationController mInjectableInflater;
     private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
     private final Context mContext;
 
@@ -92,10 +90,8 @@ public class KeyguardDisplayManager {
 
     @Inject
     public KeyguardDisplayManager(Context context,
-            InjectionInflationController injectableInflater,
             KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory) {
         mContext = context;
-        mInjectableInflater = injectableInflater;
         mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
         mMediaRouter = mContext.getSystemService(MediaRouter.class);
         mDisplayService = mContext.getSystemService(DisplayManager.class);
@@ -131,8 +127,7 @@ public class KeyguardDisplayManager {
         Presentation presentation = mPresentations.get(displayId);
         if (presentation == null) {
             final Presentation newPresentation = new KeyguardPresentation(mContext, display,
-                    mKeyguardStatusViewComponentFactory,
-                    mInjectableInflater.injectable(LayoutInflater.from(mContext)));
+                    mKeyguardStatusViewComponentFactory, LayoutInflater.from(mContext));
             newPresentation.setOnDismissListener(dialog -> {
                 if (newPresentation.equals(mPresentations.get(displayId))) {
                     mPresentations.remove(displayId);
@@ -250,7 +245,7 @@ public class KeyguardDisplayManager {
         private static final int VIDEO_SAFE_REGION = 80; // Percentage of display width & height
         private static final int MOVE_CLOCK_TIMEOUT = 10000; // 10s
         private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
-        private final LayoutInflater mInjectableLayoutInflater;
+        private final LayoutInflater mLayoutInflater;
         private KeyguardClockSwitchController mKeyguardClockSwitchController;
         private View mClock;
         private int mUsableWidth;
@@ -270,10 +265,10 @@ public class KeyguardDisplayManager {
 
         KeyguardPresentation(Context context, Display display,
                 KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
-                LayoutInflater injectionLayoutInflater) {
+                LayoutInflater layoutInflater) {
             super(context, display, R.style.Theme_SystemUI_KeyguardPresentation);
             mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
-            mInjectableLayoutInflater = injectionLayoutInflater;
+            mLayoutInflater = layoutInflater;
             getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
             setCancelable(false);
         }
@@ -299,7 +294,7 @@ public class KeyguardDisplayManager {
             mMarginLeft = (100 - VIDEO_SAFE_REGION) * p.x / 200;
             mMarginTop = (100 - VIDEO_SAFE_REGION) * p.y / 200;
 
-            setContentView(mInjectableLayoutInflater.inflate(R.layout.keyguard_presentation, null));
+            setContentView(mLayoutInflater.inflate(R.layout.keyguard_presentation, null));
 
             // Logic to make the lock screen fullscreen
             getWindow().getDecorView().setSystemUiVisibility(

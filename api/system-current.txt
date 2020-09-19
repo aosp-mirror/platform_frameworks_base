@@ -1592,12 +1592,16 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void setBluetoothTethering(boolean);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
     field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED";
+    field public static final String ACTION_TETHERING_STATE_CHANGED = "android.bluetooth.action.TETHERING_STATE_CHANGED";
     field public static final String EXTRA_LOCAL_ROLE = "android.bluetooth.pan.extra.LOCAL_ROLE";
+    field public static final String EXTRA_TETHERING_STATE = "android.bluetooth.extra.TETHERING_STATE";
     field public static final int LOCAL_NAP_ROLE = 1; // 0x1
     field public static final int LOCAL_PANU_ROLE = 2; // 0x2
     field public static final int PAN_ROLE_NONE = 0; // 0x0
     field public static final int REMOTE_NAP_ROLE = 1; // 0x1
     field public static final int REMOTE_PANU_ROLE = 2; // 0x2
+    field public static final int TETHERING_STATE_OFF = 1; // 0x1
+    field public static final int TETHERING_STATE_ON = 2; // 0x2
   }
 
   public class BluetoothPbap implements android.bluetooth.BluetoothProfile {
@@ -7204,6 +7208,7 @@ package android.net.wifi {
     method public int getBandwidth();
     method @Nullable public android.net.MacAddress getBssid();
     method public int getFrequency();
+    method public int getWifiStandard();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int CHANNEL_WIDTH_160MHZ = 6; // 0x6
     field public static final int CHANNEL_WIDTH_20MHZ = 2; // 0x2
@@ -9373,6 +9378,7 @@ package android.provider {
     field public static final String APN_SET_ID = "apn_set_id";
     field public static final int CARRIER_EDITED = 4; // 0x4
     field public static final String EDITED_STATUS = "edited";
+    field public static final int MATCH_ALL_APN_SET_ID = -1; // 0xffffffff
     field public static final String MAX_CONNECTIONS = "max_conns";
     field public static final String MODEM_PERSIST = "modem_cognitive";
     field public static final String MTU = "mtu";

@@ -306,6 +306,8 @@ public class TelephonyManager {
     private static boolean sServiceHandleCacheEnabled = true;
 
     @GuardedBy("sCacheLock")
+    private static ITelephony sITelephony;
+    @GuardedBy("sCacheLock")
     private static IPhoneSubInfo sIPhoneSubInfo;
     @GuardedBy("sCacheLock")
     private static ISub sISub;
@@ -4180,7 +4182,7 @@ public class TelephonyManager {
         }
     }
 
-   /**
+    /**
      * @param keyAvailability bitmask that defines the availabilty of keys for a type.
      * @param keyType the key type which is being checked. (WLAN, EPDG)
      * @return true if the digit at position keyType is 1, else false.
@@ -5499,13 +5501,39 @@ public class TelephonyManager {
         }
     }
 
-   /**
-    * @hide
-    */
+    /**
+     * @hide
+     */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private ITelephony getITelephony() {
-        return ITelephony.Stub.asInterface(TelephonyFrameworkInitializer
-                .getTelephonyServiceManager().getTelephonyServiceRegisterer().get());
+        // Keeps cache disabled until test fixes are checked into AOSP.
+        if (!sServiceHandleCacheEnabled) {
+            return ITelephony.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getTelephonyServiceRegisterer()
+                            .get());
+        }
+
+        if (sITelephony == null) {
+            ITelephony temp = ITelephony.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getTelephonyServiceRegisterer()
+                            .get());
+            synchronized (sCacheLock) {
+                if (sITelephony == null && temp != null) {
+                    try {
+                        sITelephony = temp;
+                        sITelephony.asBinder().linkToDeath(sServiceDeath, 0);
+                    } catch (Exception e) {
+                        // something has gone horribly wrong
+                        sITelephony = null;
+                    }
+                }
+            }
+        }
+        return sITelephony;
     }
 
     private IOns getIOns() {
@@ -13401,6 +13429,10 @@ public class TelephonyManager {
     */
     private static void resetServiceCache() {
         synchronized (sCacheLock) {
+            if (sITelephony != null) {
+                sITelephony.asBinder().unlinkToDeath(sServiceDeath, 0);
+                sITelephony = null;
+            }
             if (sISub != null) {
                 sISub.asBinder().unlinkToDeath(sServiceDeath, 0);
                 sISub = null;
@@ -13417,9 +13449,9 @@ public class TelephonyManager {
         }
     }
 
-   /**
-    * @hide
-    */
+    /**
+     * @hide
+     */
     static IPhoneSubInfo getSubscriberInfoService() {
         // Keeps cache disabled until test fixes are checked into AOSP.
         if (!sServiceHandleCacheEnabled) {

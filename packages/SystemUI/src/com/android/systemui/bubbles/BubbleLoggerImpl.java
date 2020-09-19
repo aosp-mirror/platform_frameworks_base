@@ -33,7 +33,7 @@ public class BubbleLoggerImpl extends UiEventLoggerImpl implements BubbleLogger 
      * @param e UI event
      */
     public void log(Bubble b, UiEventEnum e) {
-        super.log(e, b.getUser().getIdentifier(), b.getPackageName());
+        logWithInstanceId(e, b.getAppUid(), b.getPackageName(), b.getInstanceId());
     }
 
     /**

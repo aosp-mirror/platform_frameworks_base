@@ -23,7 +23,20 @@ import android.view.View.OnAttachStateChangeListener;
  * Utility class that handles view lifecycle events for View Controllers.
  *
  * Implementations should handle setup and teardown related activities inside of
- * {@link #onViewAttached()} and {@link  #onViewDetached()}.
+ * {@link #onViewAttached()} and {@link  #onViewDetached()}. Be sure to call {@link #init()} on
+ * any child controllers that this uses. This can be done in {@link init()} if the controllers
+ * are injected, or right after creation time of the child controller.
+ *
+ * Tip: View "attachment" happens top down - parents are notified that they are attached before
+ * any children. That means that if you call a method on a child controller in
+ * {@link #onViewAttached()}, the child controller may not have had its onViewAttach method
+ * called, so it may not be fully set up.
+ *
+ * As such, make sure that methods on your controller are safe to call _before_ its {@link #init()}
+ * and {@link #onViewAttached()} methods are called. Specifically, if your controller must call
+ * {@link View#findViewById(int)} on its root view to setup member variables, do so in its
+ * constructor. Save {@link #onViewAttached()} for things that can happen post-construction - adding
+ * listeners, dynamically changing content, or other runtime decisions.
  *
  * @param <T> View class that this ViewController is for.
  */
@@ -54,10 +67,12 @@ public abstract class ViewController<T extends View> {
         }
         mInited = true;
 
-        if (mView.isAttachedToWindow()) {
-            mOnAttachStateListener.onViewAttachedToWindow(mView);
+        if (mView != null) {
+            if (mView.isAttachedToWindow()) {
+                mOnAttachStateListener.onViewAttachedToWindow(mView);
+            }
+            mView.addOnAttachStateChangeListener(mOnAttachStateListener);
         }
-        mView.addOnAttachStateChangeListener(mOnAttachStateListener);
     }
 
     /**

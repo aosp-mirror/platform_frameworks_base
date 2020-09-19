@@ -566,7 +566,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(new Rect(mActivity.getBounds().left, 0, dh - mActivity.getBounds().right, 0),
                 mActivity.getLetterboxInsets());
 
-        final StatusBarController statusBarController =
+        final BarController statusBarController =
                 mActivity.mDisplayContent.getDisplayPolicy().getStatusBarController();
         // The activity doesn't fill the display, so the letterbox of the rotated activity is
         // overlapped with the rotated content frame of status bar. Hence the status bar shouldn't

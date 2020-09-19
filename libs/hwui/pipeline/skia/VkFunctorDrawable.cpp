@@ -96,7 +96,7 @@ void VkFunctorDrawable::onDraw(SkCanvas* canvas) {
     // "VkFunctorDrawable::onDraw" is not invoked for the most common case, when drawing in a GPU
     // canvas.
 
-    if (canvas->getGrContext() == nullptr) {
+    if (canvas->recordingContext() == nullptr) {
         // We're dumping a picture, render a light-blue rectangle instead
         SkPaint paint;
         paint.setColor(0xFF81D4FA);

@@ -41,6 +41,7 @@ import android.stats.location.LocationStatsEnums;
 import android.util.ArraySet;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
 import com.android.server.PendingIntentUtils;
 import com.android.server.location.LocationPermissions;
 import com.android.server.location.listeners.ListenerMultiplexer;
@@ -59,7 +60,7 @@ import java.util.Objects;
  * Manages all geofences.
  */
 public class GeofenceManager extends
-        ListenerMultiplexer<GeofenceKey, Geofence, PendingIntent,
+        ListenerMultiplexer<GeofenceKey, PendingIntent, ListenerOperation<PendingIntent>,
                         GeofenceManager.GeofenceRegistration, LocationRequest> implements
         LocationListener {
 
@@ -94,7 +95,7 @@ public class GeofenceManager extends
 
         protected GeofenceRegistration(Geofence geofence, CallerIdentity identity,
                 PendingIntent pendingIntent) {
-            super(TAG, geofence, identity, pendingIntent);
+            super(geofence, identity, pendingIntent);
 
             mCenter = new Location("");
             mCenter.setLatitude(geofence.getLatitude());
@@ -273,6 +274,11 @@ public class GeofenceManager extends
         mLocationUsageLogger = injector.getLocationUsageLogger();
     }
 
+    @Override
+    public String getTag() {
+        return TAG;
+    }
+
     private LocationManager getLocationManager() {
         synchronized (mLock) {
             if (mLocationManager == null) {
@@ -372,7 +378,8 @@ public class GeofenceManager extends
     }
 
     @Override
-    protected boolean registerWithService(LocationRequest locationRequest) {
+    protected boolean registerWithService(LocationRequest locationRequest,
+            Collection<GeofenceRegistration> registrations) {
         getLocationManager().requestLocationUpdates(FUSED_PROVIDER, locationRequest,
                 DIRECT_EXECUTOR, this);
         return true;
@@ -387,7 +394,7 @@ public class GeofenceManager extends
     }
 
     @Override
-    protected LocationRequest mergeRequests(Collection<GeofenceRegistration> registrations) {
+    protected LocationRequest mergeRegistrations(Collection<GeofenceRegistration> registrations) {
         Location location = getLastLocation();
 
         long realtimeMs = SystemClock.elapsedRealtime();

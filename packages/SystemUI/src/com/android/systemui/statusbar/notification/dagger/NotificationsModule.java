@@ -23,7 +23,6 @@ import android.content.pm.ShortcutManager;
 import android.os.Handler;
 import android.view.accessibility.AccessibilityManager;
 
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
@@ -68,7 +67,6 @@ import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerImpl;
 import com.android.systemui.statusbar.notification.row.ChannelEditorDialogController;
-import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.notification.row.PriorityOnboardingDialogController;
@@ -196,20 +194,6 @@ public interface NotificationsModule {
     @Provides
     static NotificationPanelLogger provideNotificationPanelLogger() {
         return new NotificationPanelLoggerImpl();
-    }
-
-    /** Provides an instance of {@link NotificationBlockingHelperManager} */
-    @SysUISingleton
-    @Provides
-    static NotificationBlockingHelperManager provideNotificationBlockingHelperManager(
-            Context context,
-            NotificationGutsManager notificationGutsManager,
-            NotificationEntryManager notificationEntryManager,
-            MetricsLogger metricsLogger,
-            GroupMembershipManager groupMembershipManager) {
-        return new NotificationBlockingHelperManager(
-                context, notificationGutsManager, notificationEntryManager, metricsLogger,
-                groupMembershipManager);
     }
 
     /** Provides an instance of {@link GroupMembershipManager} */

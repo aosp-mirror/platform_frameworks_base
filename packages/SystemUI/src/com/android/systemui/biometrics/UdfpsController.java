@@ -16,17 +16,16 @@
 
 package com.android.systemui.biometrics;
 
-import android.annotation.NonNull;
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.annotation.SuppressLint;
-import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IUdfpsOverlayController;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -38,10 +37,16 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.android.internal.BrightnessSynchronizer;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.settings.SystemSettings;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -60,8 +65,8 @@ class UdfpsController implements DozeReceiver {
 
     private final FingerprintManager mFingerprintManager;
     private final WindowManager mWindowManager;
-    private final ContentResolver mContentResolver;
-    private final Handler mHandler;
+    private final SystemSettings mSystemSettings;
+    private final DelayableExecutor mFgExecutor;
     private final WindowManager.LayoutParams mLayoutParams;
     private final UdfpsView mView;
     // Debugfs path to control the high-brightness mode.
@@ -88,7 +93,7 @@ class UdfpsController implements DozeReceiver {
     // interrupt is being tracked and a timeout is used as a last resort to turn off high brightness
     // mode.
     private boolean mIsAodInterruptActive;
-    private final Runnable mAodInterruptTimeoutAction = this::onCancelAodInterrupt;
+    @Nullable private Runnable mCancelAodTimeoutAction;
 
     public class UdfpsOverlayController extends IUdfpsOverlayController.Stub {
         @Override
@@ -138,18 +143,27 @@ class UdfpsController implements DozeReceiver {
 
     @Inject
     UdfpsController(@NonNull Context context,
-            @NonNull StatusBarStateController statusBarStateController) {
-        mFingerprintManager = context.getSystemService(FingerprintManager.class);
-        mWindowManager = context.getSystemService(WindowManager.class);
-        mContentResolver = context.getContentResolver();
-        mHandler = new Handler(Looper.getMainLooper());
+            @Main Resources resources,
+            LayoutInflater inflater,
+            @Nullable FingerprintManager fingerprintManager,
+            PowerManager powerManager,
+            WindowManager windowManager,
+            SystemSettings systemSettings,
+            @NonNull StatusBarStateController statusBarStateController,
+            @Main DelayableExecutor fgExecutor) {
+        // The fingerprint manager is queried for UDFPS before this class is constructed, so the
+        // fingerprint manager should never be null.
+        mFingerprintManager = checkNotNull(fingerprintManager);
+        mWindowManager = windowManager;
+        mSystemSettings = systemSettings;
+        mFgExecutor = fgExecutor;
         mLayoutParams = createLayoutParams(context);
 
-        mView = (UdfpsView) LayoutInflater.from(context).inflate(R.layout.udfps_view, null, false);
+        mView = (UdfpsView) inflater.inflate(R.layout.udfps_view, null, false);
 
-        mHbmPath = context.getResources().getString(R.string.udfps_hbm_sysfs_path);
-        mHbmEnableCommand = context.getResources().getString(R.string.udfps_hbm_enable_command);
-        mHbmDisableCommand = context.getResources().getString(R.string.udfps_hbm_disable_command);
+        mHbmPath = resources.getString(R.string.udfps_hbm_sysfs_path);
+        mHbmEnableCommand = resources.getString(R.string.udfps_hbm_enable_command);
+        mHbmDisableCommand = resources.getString(R.string.udfps_hbm_disable_command);
 
         mHbmSupported = !TextUtils.isEmpty(mHbmPath);
         mView.setHbmSupported(mHbmSupported);
@@ -157,11 +171,11 @@ class UdfpsController implements DozeReceiver {
 
         // This range only consists of the minimum and maximum values, which only cover
         // non-high-brightness mode.
-        float[] nitsRange = toFloatArray(context.getResources().obtainTypedArray(
+        float[] nitsRange = toFloatArray(resources.obtainTypedArray(
                 com.android.internal.R.array.config_screenBrightnessNits));
 
         // The last value of this range corresponds to the high-brightness mode.
-        float[] nitsAutoBrightnessValues = toFloatArray(context.getResources().obtainTypedArray(
+        float[] nitsAutoBrightnessValues = toFloatArray(resources.obtainTypedArray(
                 com.android.internal.R.array.config_autoBrightnessDisplayValuesNits));
 
         mHbmNits = nitsAutoBrightnessValues[nitsAutoBrightnessValues.length - 1];
@@ -170,12 +184,12 @@ class UdfpsController implements DozeReceiver {
         // This range only consists of the minimum and maximum backlight values, which only apply
         // in non-high-brightness mode.
         float[] normalizedBacklightRange = normalizeBacklightRange(
-                context.getResources().getIntArray(
+                resources.getIntArray(
                         com.android.internal.R.array.config_screenBrightnessBacklight));
 
         mBacklightToNitsSpline = Spline.createSpline(normalizedBacklightRange, nitsRange);
         mNitsToHbmBacklightSpline = Spline.createSpline(hbmNitsRange, normalizedBacklightRange);
-        mDefaultBrightness = obtainDefaultBrightness(context);
+        mDefaultBrightness = obtainDefaultBrightness(powerManager);
 
         // TODO(b/160025856): move to the "dump" method.
         Log.v(TAG, String.format("ctor | mNitsRange: [%f, %f]", nitsRange[0], nitsRange[1]));
@@ -194,7 +208,7 @@ class UdfpsController implements DozeReceiver {
     }
 
     private void showUdfpsOverlay() {
-        mHandler.post(() -> {
+        mFgExecutor.execute(() -> {
             if (!mIsOverlayShowing) {
                 try {
                     Log.v(TAG, "showUdfpsOverlay | adding window");
@@ -211,7 +225,7 @@ class UdfpsController implements DozeReceiver {
     }
 
     private void hideUdfpsOverlay() {
-        mHandler.post(() -> {
+        mFgExecutor.execute(() -> {
             if (mIsOverlayShowing) {
                 Log.v(TAG, "hideUdfpsOverlay | removing window");
                 mView.setOnTouchListener(null);
@@ -228,7 +242,7 @@ class UdfpsController implements DozeReceiver {
     // Returns a value in the range of [0, 255].
     private int computeScrimOpacity() {
         // Backlight setting can be NaN, -1.0f, and [0.0f, 1.0f].
-        float backlightSetting = Settings.System.getFloatForUser(mContentResolver,
+        float backlightSetting = mSystemSettings.getFloatForUser(
                 Settings.System.SCREEN_BRIGHTNESS_FLOAT, mDefaultBrightness,
                 UserHandle.USER_CURRENT);
 
@@ -265,7 +279,8 @@ class UdfpsController implements DozeReceiver {
         // Since the sensor that triggers the AOD interrupt doesn't provide ACTION_UP/ACTION_CANCEL,
         // we need to be careful about not letting the screen accidentally remain in high brightness
         // mode. As a mitigation, queue a call to cancel the fingerprint scan.
-        mHandler.postDelayed(mAodInterruptTimeoutAction, AOD_INTERRUPT_TIMEOUT_MILLIS);
+        mCancelAodTimeoutAction = mFgExecutor.executeDelayed(this::onCancelAodInterrupt,
+                AOD_INTERRUPT_TIMEOUT_MILLIS);
         // using a hard-coded value for major and minor until it is available from the sensor
         onFingerDown(screenX, screenY, 13.0f, 13.0f);
     }
@@ -280,7 +295,10 @@ class UdfpsController implements DozeReceiver {
         if (!mIsAodInterruptActive) {
             return;
         }
-        mHandler.removeCallbacks(mAodInterruptTimeoutAction);
+        if (mCancelAodTimeoutAction != null) {
+            mCancelAodTimeoutAction.run();
+            mCancelAodTimeoutAction = null;
+        }
         mIsAodInterruptActive = false;
         onFingerUp();
     }
@@ -338,8 +356,7 @@ class UdfpsController implements DozeReceiver {
         return lp;
     }
 
-    private static float obtainDefaultBrightness(Context context) {
-        PowerManager powerManager = context.getSystemService(PowerManager.class);
+    private static float obtainDefaultBrightness(PowerManager powerManager) {
         if (powerManager == null) {
             Log.e(TAG, "PowerManager is unavailable. Can't obtain default brightness.");
             return 0f;

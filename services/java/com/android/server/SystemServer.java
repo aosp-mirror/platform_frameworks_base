@@ -293,6 +293,8 @@ public final class SystemServer {
             "com.android.server.timedetector.TimeDetectorService$Lifecycle";
     private static final String TIME_ZONE_DETECTOR_SERVICE_CLASS =
             "com.android.server.timezonedetector.TimeZoneDetectorService$Lifecycle";
+    private static final String LOCATION_TIME_ZONE_MANAGER_SERVICE_CLASS =
+            "com.android.server.location.timezone.LocationTimeZoneManagerService$Lifecycle";
     private static final String ACCESSIBILITY_MANAGER_SERVICE_CLASS =
             "com.android.server.accessibility.AccessibilityManagerService$Lifecycle";
     private static final String ADB_SERVICE_CLASS =
@@ -1621,7 +1623,7 @@ public final class SystemServer {
             try {
                 mSystemServiceManager.startService(TIME_DETECTOR_SERVICE_CLASS);
             } catch (Throwable e) {
-                reportWtf("starting StartTimeDetectorService service", e);
+                reportWtf("starting TimeDetectorService service", e);
             }
             t.traceEnd();
 
@@ -1629,7 +1631,15 @@ public final class SystemServer {
             try {
                 mSystemServiceManager.startService(TIME_ZONE_DETECTOR_SERVICE_CLASS);
             } catch (Throwable e) {
-                reportWtf("starting StartTimeZoneDetectorService service", e);
+                reportWtf("starting TimeZoneDetectorService service", e);
+            }
+            t.traceEnd();
+
+            t.traceBegin("StartLocationTimeZoneManagerService");
+            try {
+                mSystemServiceManager.startService(LOCATION_TIME_ZONE_MANAGER_SERVICE_CLASS);
+            } catch (Throwable e) {
+                reportWtf("starting LocationTimeZoneManagerService service", e);
             }
             t.traceEnd();
 

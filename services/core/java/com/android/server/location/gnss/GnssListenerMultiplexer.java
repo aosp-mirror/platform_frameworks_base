@@ -26,11 +26,13 @@ import android.location.LocationManagerInternal;
 import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Process;
 import android.util.ArraySet;
 
+import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.location.listeners.BinderListenerRegistration;
@@ -43,6 +45,7 @@ import com.android.server.location.util.UserInfoHelper;
 import com.android.server.location.util.UserInfoHelper.UserListener;
 
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -52,14 +55,15 @@ import java.util.Objects;
  * Listeners must be registered with the associated IBinder as the key, if the IBinder dies, the
  * registration will automatically be removed.
  *
- * @param <TRequest>       request type
- * @param <TListener>      listener type
- * @param <TMergedRequest> merged request type
+ * @param <TRequest>            request type
+ * @param <TListener>           listener type
+ * @param <TMergedRegistration> merged registration type
  */
 public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInterface,
-        TMergedRequest> extends
-        ListenerMultiplexer<IBinder, TRequest, TListener, GnssListenerMultiplexer<TRequest,
-                        TListener, TMergedRequest>.GnssListenerRegistration, TMergedRequest> {
+        TMergedRegistration> extends
+        ListenerMultiplexer<IBinder, TListener, ListenerOperation<TListener>,
+                GnssListenerMultiplexer<TRequest, TListener, TMergedRegistration>
+                        .GnssListenerRegistration, TMergedRegistration> {
 
     /**
      * Registration object for GNSS listeners.
@@ -74,11 +78,11 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
 
         protected GnssListenerRegistration(@Nullable TRequest request,
                 CallerIdentity callerIdentity, TListener listener) {
-            super(TAG, request, callerIdentity, listener);
+            super(request, callerIdentity, listener);
         }
 
         @Override
-        protected GnssListenerMultiplexer<TRequest, TListener, TMergedRequest> getOwner() {
+        protected GnssListenerMultiplexer<TRequest, TListener, TMergedRegistration> getOwner() {
             return GnssListenerMultiplexer.this;
         }
 
@@ -199,6 +203,11 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
                 LocalServices.getService(LocationManagerInternal.class));
     }
 
+    @Override
+    public String getTag() {
+        return TAG;
+    }
+
     /**
      * May be overridden by subclasses to return whether the service is supported or not. This value
      * should never change for the lifetime of the multiplexer. If the service is unsupported, all
@@ -269,6 +278,21 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         }
 
         return mLocationManagerInternal.isProvider(null, identity);
+    }
+
+    // this provides a default implementation for all further subclasses which assumes that there is
+    // never an associated request object, and thus nothing interesting to merge. the majority of
+    // gnss listener multiplexers do not current have associated requests, and the ones that do can
+    // override this implementation.
+    protected TMergedRegistration mergeRegistrations(
+            Collection<GnssListenerRegistration> gnssListenerRegistrations) {
+        if (Build.IS_DEBUGGABLE) {
+            for (GnssListenerRegistration registration : gnssListenerRegistrations) {
+                Preconditions.checkState(registration.getRequest() == null);
+            }
+        }
+
+        return null;
     }
 
     @Override

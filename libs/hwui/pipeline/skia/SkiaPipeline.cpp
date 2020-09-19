@@ -86,7 +86,7 @@ void SkiaPipeline::renderLayers(const LightGeometry& lightGeometry,
 }
 
 void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque) {
-    sk_sp<GrContext> cachedContext;
+    sk_sp<GrDirectContext> cachedContext;
 
     // Render all layers that need to be updated, in order.
     for (size_t i = 0; i < layers.entries().size(); i++) {
@@ -142,7 +142,8 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
 
         // cache the current context so that we can defer flushing it until
         // either all the layers have been rendered or the context changes
-        GrContext* currentContext = layerNode->getLayerSurface()->getCanvas()->getGrContext();
+        GrDirectContext* currentContext =
+            GrAsDirectContext(layerNode->getLayerSurface()->getCanvas()->recordingContext());
         if (cachedContext.get() != currentContext) {
             if (cachedContext.get()) {
                 ATRACE_NAME("flush layers (context changed)");
@@ -201,7 +202,7 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
 }
 
 void SkiaPipeline::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
-    GrContext* context = thread.getGrContext();
+    GrDirectContext* context = thread.getGrContext();
     if (context) {
         ATRACE_FORMAT("Bitmap#prepareToDraw %dx%d", bitmap->width(), bitmap->height());
         auto image = bitmap->makeImage();
