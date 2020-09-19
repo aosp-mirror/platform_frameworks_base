@@ -66,43 +66,45 @@
                 android:id="@+id/home"
                 style="@style/NavigationBarButton"
                 systemui:componentNames="com.android.car.carlauncher/.CarLauncher"
+                systemui:highlightWhenSelected="true"
                 systemui:icon="@drawable/car_ic_home"
-                systemui:intent="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.HOME;launchFlags=0x14000000;end"
-                systemui:selectedIcon="@drawable/car_ic_home_selected"/>
+                systemui:intent="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.HOME;launchFlags=0x14000000;end"/>
 
             <com.android.systemui.car.navigationbar.CarNavigationButton
                 android:id="@+id/phone_nav"
                 style="@style/NavigationBarButton"
+                systemui:highlightWhenSelected="true"
                 systemui:icon="@drawable/car_ic_phone"
                 systemui:intent="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.android.car.dialer;launchFlags=0x10000000;end"
-                systemui:packages="com.android.car.dialer"
-                systemui:selectedIcon="@drawable/car_ic_phone_selected"/>
+                systemui:packages="com.android.car.dialer"/>
 
             <com.android.systemui.car.navigationbar.CarNavigationButton
                 android:id="@+id/grid_nav"
                 style="@style/NavigationBarButton"
                 systemui:componentNames="com.android.car.carlauncher/.AppGridActivity"
+                systemui:highlightWhenSelected="true"
                 systemui:icon="@drawable/car_ic_apps"
-                systemui:intent="intent:#Intent;component=com.android.car.carlauncher/.AppGridActivity;launchFlags=0x24000000;end"
-                systemui:selectedIcon="@drawable/car_ic_apps_selected"/>
+                systemui:intent="intent:#Intent;component=com.android.car.carlauncher/.AppGridActivity;launchFlags=0x24000000;end"/>
 
             <com.android.systemui.car.navigationbar.CarNavigationButton
                 android:id="@+id/hvac"
                 style="@style/NavigationBarButton"
+                systemui:highlightWhenSelected="true"
                 systemui:icon="@drawable/car_ic_hvac"
                 systemui:intent="intent:#Intent;action=android.car.intent.action.TOGGLE_HVAC_CONTROLS;end"
-                systemui:selectedIcon="@drawable/car_ic_hvac_selected"
                 systemui:broadcast="true"/>
 
             <com.android.systemui.car.navigationbar.CarNavigationButton
                 android:id="@+id/notifications"
                 style="@style/NavigationBarButton"
+                systemui:highlightWhenSelected="true"
                 systemui:icon="@drawable/car_ic_notification"
                 systemui:longIntent="intent:#Intent;component=com.android.car.bugreport/.BugReportActivity;end"/>
 
             <com.android.systemui.car.navigationbar.AssitantButton
                 android:id="@+id/assist"
                 style="@style/NavigationBarButton"
+                systemui:highlightWhenSelected="true"
                 systemui:icon="@drawable/ic_mic_white"
                 systemui:useDefaultAppIconForRole="true"/>
 
