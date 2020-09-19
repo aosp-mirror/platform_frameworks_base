@@ -19,7 +19,6 @@ package android.view;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
@@ -30,7 +29,6 @@ import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
@@ -275,19 +273,10 @@ public final class WindowManagerImpl implements WindowManager {
             final Configuration config = mContext.getResources().getConfiguration();
             final boolean isScreenRound = config.isScreenRound();
             final int windowingMode = config.windowConfiguration.getWindowingMode();
-            if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL) {
-                return insetsState.calculateInsets(bounds, null /* ignoringVisibilityState*/,
-                        isScreenRound, alwaysConsumeSystemBars, displayCutout.get(),
-                        SOFT_INPUT_ADJUST_NOTHING, attrs.flags, SYSTEM_UI_FLAG_VISIBLE, attrs.type,
-                        windowingMode, null /* typeSideMap */);
-            } else {
-                return new WindowInsets.Builder()
-                        .setAlwaysConsumeSystemBars(alwaysConsumeSystemBars)
-                        .setRound(isScreenRound)
-                        .setSystemWindowInsets(Insets.of(systemWindowInsets))
-                        .setStableInsets(Insets.of(stableInsets))
-                        .setDisplayCutout(displayCutout.get()).build();
-            }
+            return insetsState.calculateInsets(bounds, null /* ignoringVisibilityState*/,
+                    isScreenRound, alwaysConsumeSystemBars, displayCutout.get(),
+                    SOFT_INPUT_ADJUST_NOTHING, attrs.flags, SYSTEM_UI_FLAG_VISIBLE, attrs.type,
+                    windowingMode, null /* typeSideMap */);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

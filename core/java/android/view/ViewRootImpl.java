@@ -221,45 +221,6 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean MT_RENDERER_AVAILABLE = true;
 
     /**
-     * If set to 2, the view system will switch from using rectangles retrieved from window to
-     * dispatch to the view hierarchy to using {@link InsetsController}, that derives the insets
-     * directly from the full configuration, enabling richer information about the insets state, as
-     * well as new APIs to control it frame-by-frame, and synchronize animations with it.
-     * <p>
-     * Only set this to 2 once the new insets system is productionized and the old APIs are
-     * fully migrated over.
-     * <p>
-     * If set to 1, this will switch to a mode where we only use the new approach for IME, but not
-     * for the status/navigation bar.
-     */
-    private static final String USE_NEW_INSETS_PROPERTY = "persist.debug.new_insets";
-
-    /**
-     * @see #USE_NEW_INSETS_PROPERTY
-     * @hide
-     */
-    public static final int NEW_INSETS_MODE_NONE = 0;
-
-    /**
-     * @see #USE_NEW_INSETS_PROPERTY
-     * @hide
-     */
-    public static final int NEW_INSETS_MODE_IME = 1;
-
-    /**
-     * @see #USE_NEW_INSETS_PROPERTY
-     * @hide
-     */
-    public static final int NEW_INSETS_MODE_FULL = 2;
-
-    /**
-     * @see #USE_NEW_INSETS_PROPERTY
-     * @hide
-     */
-    public static int sNewInsetsMode =
-            SystemProperties.getInt(USE_NEW_INSETS_PROPERTY, NEW_INSETS_MODE_FULL);
-
-    /**
      * Set this system property to true to force the view hierarchy to render
      * at 60 Hz. This can be used to measure the potential framerate.
      */
@@ -454,8 +415,8 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage
     final View.AttachInfo mAttachInfo;
     final SystemUiVisibilityInfo mCompatibleVisibilityInfo;
-    int mDispatchedSystemUiVisibility =
-            ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL ? 0 : -1;
+    int mDispatchedSystemUiVisibility;
+    int mDispatchedSystemBarAppearance;
     InputQueue.Callback mInputQueueCallback;
     InputQueue mInputQueue;
     @UnsupportedAppUsage
@@ -1409,6 +1370,10 @@ public final class ViewRootImpl implements ViewParent,
             attrs.systemUiVisibility = mWindowAttributes.systemUiVisibility;
             attrs.subtreeSystemUiVisibility = mWindowAttributes.subtreeSystemUiVisibility;
 
+            // Transfer over appearance and behavior values as they carry current state.
+            attrs.insetsFlags.appearance = mWindowAttributes.insetsFlags.appearance;
+            attrs.insetsFlags.behavior = mWindowAttributes.insetsFlags.behavior;
+
             final int changes = mWindowAttributes.copyFrom(attrs);
             if ((changes & WindowManager.LayoutParams.TRANSLUCENT_FLAGS_CHANGED) != 0) {
                 // Recompute system ui visibility.
@@ -1627,9 +1592,6 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void notifyInsetsChanged() {
-        if (sNewInsetsMode == NEW_INSETS_MODE_NONE) {
-            return;
-        }
         mApplyInsetsRequested = true;
         requestLayout();
 
@@ -2063,8 +2025,7 @@ public final class ViewRootImpl implements ViewParent,
      */
     void updateCompatSysUiVisibility(@InternalInsetsType int type, boolean visible,
             boolean hasControl) {
-        if ((type != ITYPE_STATUS_BAR && type != ITYPE_NAVIGATION_BAR)
-                || ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL) {
+        if (type != ITYPE_STATUS_BAR && type != ITYPE_NAVIGATION_BAR) {
             return;
         }
         final SystemUiVisibilityInfo info = mCompatibleVisibilityInfo;
@@ -2089,14 +2050,6 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void handleDispatchSystemUiVisibilityChanged(SystemUiVisibilityInfo args) {
-        if (mSeq != args.seq && sNewInsetsMode != NEW_INSETS_MODE_FULL) {
-            // The sequence has changed, so we need to update our value and make
-            // sure to do a traversal afterward so the window manager is given our
-            // most recent data.
-            mSeq = args.seq;
-            mAttachInfo.mForceReportNewAttributes = true;
-            scheduleTraversals();
-        }
         if (mView == null) return;
         if (args.localChanges != 0) {
             mView.updateLocalSystemUiVisibility(args.localValue, args.localChanges);
@@ -2112,9 +2065,6 @@ public final class ViewRootImpl implements ViewParent,
 
     @VisibleForTesting
     public static void adjustLayoutParamsForCompatibility(WindowManager.LayoutParams inOutParams) {
-        if (sNewInsetsMode != NEW_INSETS_MODE_FULL) {
-            return;
-        }
         final int sysUiVis = inOutParams.systemUiVisibility | inOutParams.subtreeSystemUiVisibility;
         final int flags = inOutParams.flags;
         final int type = inOutParams.type;
@@ -2179,9 +2129,6 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void controlInsetsForCompatibility(WindowManager.LayoutParams params) {
-        if (sNewInsetsMode != NEW_INSETS_MODE_FULL) {
-            return;
-        }
         final int sysUiVis = params.systemUiVisibility | params.subtreeSystemUiVisibility;
         final int flags = params.flags;
         final boolean matchParent = params.width == MATCH_PARENT && params.height == MATCH_PARENT;
@@ -2629,6 +2576,10 @@ public final class ViewRootImpl implements ViewParent,
             }
             adjustLayoutParamsForCompatibility(params);
             controlInsetsForCompatibility(params);
+            if (mDispatchedSystemBarAppearance != params.insetsFlags.appearance) {
+                mDispatchedSystemBarAppearance = params.insetsFlags.appearance;
+                mView.onSystemBarAppearanceChanged(mDispatchedSystemBarAppearance);
+            }
         }
 
         if (mFirst || windowShouldResize || viewVisibilityChanged || cutoutChanged || params != null
@@ -3239,14 +3190,12 @@ public final class ViewRootImpl implements ViewParent,
             hasWindowFocus = mUpcomingWindowFocus;
             inTouchMode = mUpcomingInTouchMode;
         }
-        if (sNewInsetsMode != NEW_INSETS_MODE_NONE) {
-            // TODO (b/131181940): Make sure this doesn't leak Activity with mActivityConfigCallback
-            // config changes.
-            if (hasWindowFocus) {
-                mInsetsController.onWindowFocusGained();
-            } else {
-                mInsetsController.onWindowFocusLost();
-            }
+        // TODO (b/131181940): Make sure this doesn't leak Activity with mActivityConfigCallback
+        // config changes.
+        if (hasWindowFocus) {
+            mInsetsController.onWindowFocusGained();
+        } else {
+            mInsetsController.onWindowFocusLost();
         }
 
         if (mAdded) {
