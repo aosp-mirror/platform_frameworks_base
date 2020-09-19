@@ -1301,7 +1301,7 @@
     <string name="volume_ringtone" msgid="134784084629229029">"مستوى صوت الرنين"</string>
     <string name="volume_music" msgid="7727274216734955095">"مستوى صوت الوسائط"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"تشغيل من خلال البلوتوث"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"تم تعيين نغمة الرنين الصامتة"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"تم ضبط نغمة الرنين الصامتة"</string>
     <string name="volume_call" msgid="7625321655265747433">"مستوى صوت المكالمات الواردة"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"مستوى صوت المكالمة الواردة بالبلوتوث"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"مستوى صوت المنبّه"</string>
