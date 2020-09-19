@@ -101,8 +101,8 @@ class ProximityClassifier extends FalsingClassifier {
 
     @Override
     public void onProximityEvent(
-            ProximitySensor.ProximityEvent proximityEvent) {
-        boolean near = proximityEvent.getNear();
+            ProximitySensor.ThresholdSensorEvent proximityEvent) {
+        boolean near = proximityEvent.getBelow();
         long timestampNs = proximityEvent.getTimestampNs();
         logDebug("Sensor is: " + near + " at time " + timestampNs);
         update(near, timestampNs);
