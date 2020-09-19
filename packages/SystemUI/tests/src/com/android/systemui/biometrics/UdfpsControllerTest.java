@@ -19,6 +19,7 @@ package com.android.systemui.biometrics;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -148,6 +149,41 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mOverlayController.hideUdfpsOverlay();
         mFgExecutor.runAllReady();
         verify(mWindowManager).removeView(eq(mUdfpsView));
+    }
+
+    @Test
+    public void showUdfpsOverlay_bouncerShowing() throws RemoteException {
+        // GIVEN that the bouncer is showing
+        mUdfpsController.setBouncerVisibility(/* isShowing */ true);
+        // WHEN a request to show the overlay is received
+        mOverlayController.showUdfpsOverlay();
+        mFgExecutor.runAllReady();
+        // THEN the overlay is not attached
+        verify(mWindowManager, never()).addView(eq(mUdfpsView), any());
+    }
+
+    @Test
+    public void setBouncerVisibility_overlayDetached() throws RemoteException {
+        // GIVEN that the overlay has been requested
+        mOverlayController.showUdfpsOverlay();
+        // WHEN the bouncer becomes visible
+        mUdfpsController.setBouncerVisibility(/* isShowing */ true);
+        mFgExecutor.runAllReady();
+        // THEN the overlay is detached
+        verify(mWindowManager).removeView(eq(mUdfpsView));
+    }
+
+    @Test
+    public void setBouncerVisibility_overlayAttached() throws RemoteException {
+        // GIVEN that the bouncer is visible
+        mUdfpsController.setBouncerVisibility(/* isShowing */ true);
+        // AND the overlay has been requested
+        mOverlayController.showUdfpsOverlay();
+        // WHEN the bouncer is closed
+        mUdfpsController.setBouncerVisibility(/* isShowing */ false);
+        mFgExecutor.runAllReady();
+        // THEN the overlay is attached
+        verify(mWindowManager).addView(eq(mUdfpsView), any());
     }
 
     @Test
