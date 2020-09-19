@@ -40,12 +40,15 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.keyguard.dagger.RootView;
 import com.android.systemui.DejankUtils;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -66,7 +69,8 @@ public class KeyguardBouncer {
     private final FalsingManager mFalsingManager;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
     private final Handler mHandler;
-    private final BouncerExpansionCallback mExpansionCallback;
+    private final List<BouncerExpansionCallback> mExpansionCallbacks = new ArrayList<>();
+    private final AuthController mAuthController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardSecurityModel mKeyguardSecurityModel;
@@ -100,6 +104,7 @@ public class KeyguardBouncer {
             ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry, FalsingManager falsingManager,
             BouncerExpansionCallback expansionCallback,
+            AuthController authController,
             KeyguardStateController keyguardStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             KeyguardBypassController keyguardBypassController, Handler handler,
@@ -111,13 +116,15 @@ public class KeyguardBouncer {
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mFalsingManager = falsingManager;
         mDismissCallbackRegistry = dismissCallbackRegistry;
-        mExpansionCallback = expansionCallback;
         mHandler = handler;
         mKeyguardStateController = keyguardStateController;
         mKeyguardSecurityModel = keyguardSecurityModel;
         mKeyguardBouncerComponentFactory = keyguardBouncerComponentFactory;
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
         mKeyguardBypassController = keyguardBypassController;
+        mExpansionCallbacks.add(expansionCallback);
+        mExpansionCallbacks.add(authController);
+        mAuthController = authController;
     }
 
     public void show(boolean resetSecuritySelection) {
@@ -188,7 +195,7 @@ public class KeyguardBouncer {
         }
 
         mCallback.onBouncerVisiblityChanged(true /* shown */);
-        mExpansionCallback.onStartingToShow();
+        dispatchStartingToShow();
     }
 
     public boolean isScrimmed() {
@@ -290,6 +297,11 @@ public class KeyguardBouncer {
         mIsScrimmed = false;
         mFalsingManager.onBouncerHidden();
         mCallback.onBouncerVisiblityChanged(false /* shown */);
+        // TODO(b/165257355): `mAuthController.onFullyHidden` should be `dispatchFullyHidden()`
+        // But, it is causing the UDFPS icon to disappear after SystemUI restarts. I guess the
+        // ExpansionCallback from StatusBarKeyguardViewManager can't handle the call to
+        // onFullyHidden after a restart.
+        mAuthController.onFullyHidden();
         cancelShowRunnable();
         if (mKeyguardViewController != null) {
             mKeyguardViewController.cancelDismissAction();
@@ -382,12 +394,12 @@ public class KeyguardBouncer {
 
         if (fraction == EXPANSION_VISIBLE && oldExpansion != EXPANSION_VISIBLE) {
             onFullyShown();
-            mExpansionCallback.onFullyShown();
+            dispatchFullyShown();
         } else if (fraction == EXPANSION_HIDDEN && oldExpansion != EXPANSION_HIDDEN) {
             onFullyHidden();
-            mExpansionCallback.onFullyHidden();
+            dispatchFullyHidden();
         } else if (fraction != EXPANSION_VISIBLE && oldExpansion == EXPANSION_VISIBLE) {
-            mExpansionCallback.onStartingToHide();
+            dispatchStartingToHide();
             if (mKeyguardViewController != null) {
                 mKeyguardViewController.onStartingToHide();
             }
@@ -492,6 +504,30 @@ public class KeyguardBouncer {
         mKeyguardViewController.finish(strongAuth, KeyguardUpdateMonitor.getCurrentUser());
     }
 
+    private void dispatchFullyShown() {
+        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+            callback.onFullyShown();
+        }
+    }
+
+    private void dispatchStartingToHide() {
+        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+            callback.onStartingToHide();
+        }
+    }
+
+    private void dispatchStartingToShow() {
+        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+            callback.onStartingToShow();
+        }
+    }
+
+    private void dispatchFullyHidden() {
+        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+            callback.onFullyHidden();
+        }
+    }
+
     public void dump(PrintWriter pw) {
         pw.println("KeyguardBouncer");
         pw.println("  isShowing(): " + isShowing());
@@ -516,6 +552,7 @@ public class KeyguardBouncer {
         private final ViewMediatorCallback mCallback;
         private final DismissCallbackRegistry mDismissCallbackRegistry;
         private final FalsingManager mFalsingManager;
+        private final AuthController mAuthController;
         private final KeyguardStateController mKeyguardStateController;
         private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
         private final KeyguardBypassController mKeyguardBypassController;
@@ -526,6 +563,7 @@ public class KeyguardBouncer {
         @Inject
         public Factory(Context context, ViewMediatorCallback callback,
                 DismissCallbackRegistry dismissCallbackRegistry, FalsingManager falsingManager,
+                AuthController authController,
                 KeyguardStateController keyguardStateController,
                 KeyguardUpdateMonitor keyguardUpdateMonitor,
                 KeyguardBypassController keyguardBypassController, Handler handler,
@@ -535,6 +573,7 @@ public class KeyguardBouncer {
             mCallback = callback;
             mDismissCallbackRegistry = dismissCallbackRegistry;
             mFalsingManager = falsingManager;
+            mAuthController = authController;
             mKeyguardStateController = keyguardStateController;
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
             mKeyguardBypassController = keyguardBypassController;
@@ -547,8 +586,9 @@ public class KeyguardBouncer {
                 BouncerExpansionCallback expansionCallback) {
             return new KeyguardBouncer(mContext, mCallback, container,
                     mDismissCallbackRegistry, mFalsingManager, expansionCallback,
-                    mKeyguardStateController, mKeyguardUpdateMonitor, mKeyguardBypassController,
-                    mHandler, mKeyguardSecurityModel, mKeyguardBouncerComponentFactory);
+                    mAuthController, mKeyguardStateController, mKeyguardUpdateMonitor,
+                    mKeyguardBypassController, mHandler, mKeyguardSecurityModel,
+                    mKeyguardBouncerComponentFactory);
         }
     }
 }

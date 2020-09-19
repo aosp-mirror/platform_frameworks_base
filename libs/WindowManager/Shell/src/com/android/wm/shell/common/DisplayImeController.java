@@ -178,7 +178,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
     }
 
-    class PerDisplay extends IDisplayWindowInsetsController.Stub {
+    /** An implementation of {@link IDisplayWindowInsetsController} for a given display id. */
+    public class PerDisplay extends IDisplayWindowInsetsController.Stub {
         final int mDisplayId;
         final InsetsState mInsetsState = new InsetsState();
         InsetsSourceControl mImeSourceControl = null;
@@ -189,7 +190,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         final Rect mImeFrame = new Rect();
         boolean mAnimateAlpha = true;
 
-        PerDisplay(int displayId, int initialRotation) {
+        public PerDisplay(int displayId, int initialRotation) {
             mDisplayId = displayId;
             mRotation = initialRotation;
         }

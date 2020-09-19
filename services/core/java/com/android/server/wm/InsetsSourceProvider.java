@@ -19,10 +19,6 @@ package com.android.server.wm;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
-import static android.view.ViewRootImpl.sNewInsetsMode;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_INSETS_CONTROL;
@@ -93,13 +89,14 @@ class InsetsSourceProvider {
         mFakeControl = new InsetsSourceControl(source.getType(), null /* leash */,
                 new Point());
 
-        final int type = source.getType();
-        if (type == ITYPE_STATUS_BAR || type == ITYPE_NAVIGATION_BAR) {
-            mControllable = sNewInsetsMode == NEW_INSETS_MODE_FULL;
-        } else if (type == ITYPE_IME) {
-            mControllable = sNewInsetsMode >= NEW_INSETS_MODE_IME;
-        } else {
-            mControllable = false;
+        switch (source.getType()) {
+            case ITYPE_STATUS_BAR:
+            case ITYPE_NAVIGATION_BAR:
+            case ITYPE_IME:
+                mControllable = true;
+                break;
+            default:
+                mControllable = false;
         }
     }
 
@@ -395,7 +392,7 @@ class InsetsSourceProvider {
     }
 
     boolean isClientVisible() {
-        return sNewInsetsMode == NEW_INSETS_MODE_NONE || mClientVisible;
+        return mClientVisible;
     }
 
     /**

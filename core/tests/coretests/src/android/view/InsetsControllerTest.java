@@ -26,7 +26,6 @@ import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
@@ -63,7 +62,6 @@ import android.view.WindowInsetsController.OnControllableInsetsChangedListener;
 import android.view.WindowManager.BadTokenException;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.LinearInterpolator;
-import android.view.test.InsetsModeSession;
 import android.widget.TextView;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -72,9 +70,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.server.testutils.OffsettableClock;
 import com.android.server.testutils.TestHandler;
 
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -102,17 +98,6 @@ public class InsetsControllerTest {
     private TestHost mTestHost;
     private TestHandler mTestHandler;
     private OffsettableClock mTestClock;
-    private static InsetsModeSession sInsetsModeSession;
-
-    @BeforeClass
-    public static void setupOnce() {
-        sInsetsModeSession = new InsetsModeSession(NEW_INSETS_MODE_FULL);
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
-        sInsetsModeSession.close();
-    }
 
     @Before
     public void setup() {

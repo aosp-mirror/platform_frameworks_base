@@ -18,7 +18,6 @@ package android.inputmethodservice;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
@@ -2201,20 +2200,13 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
-     * Apply the IME visibility in {@link android.view.ImeInsetsSourceConsumer} when
-     * {@link ViewRootImpl.sNewInsetsMode} is enabled.
+     * Applies the IME visibility in {@link android.view.ImeInsetsSourceConsumer}.
+     *
      * @param setVisible {@code true} to make it visible, false to hide it.
      */
     private void applyVisibilityInInsetsConsumerIfNecessary(boolean setVisible) {
-        if (!isVisibilityAppliedUsingInsetsConsumer()) {
-            return;
-        }
         mPrivOps.applyImeVisibility(setVisible
                 ? mCurShowInputToken : mCurHideInputToken, setVisible);
-    }
-
-    private boolean isVisibilityAppliedUsingInsetsConsumer() {
-        return ViewRootImpl.sNewInsetsMode > NEW_INSETS_MODE_NONE;
     }
 
     private void finishViews(boolean finishingInput) {
@@ -2241,14 +2233,9 @@ public class InputMethodService extends AbstractInputMethodService {
         mWindowVisible = false;
         finishViews(false /* finishingInput */);
         if (mDecorViewVisible) {
-            // When insets API is enabled, it is responsible for client and server side
-            // visibility of IME window.
-            if (isVisibilityAppliedUsingInsetsConsumer()) {
-                if (mInputView != null) {
-                    mInputView.dispatchWindowVisibilityChanged(View.GONE);
-                }
-            } else {
-                mWindow.hide();
+            // It is responsible for client and server side visibility of IME window.
+            if (mInputView != null) {
+                mInputView.dispatchWindowVisibilityChanged(View.GONE);
             }
             mDecorViewVisible = false;
             onWindowHidden();

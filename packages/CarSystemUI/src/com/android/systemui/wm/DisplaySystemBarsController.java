@@ -36,6 +36,8 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.TransactionPool;
 
+import java.util.Objects;
+
 /**
  * Controller that maps between displays and {@link IDisplayWindowInsetsController} in order to
  * give system bar control to SystemUI.
@@ -47,6 +49,7 @@ public class DisplaySystemBarsController extends DisplayImeController {
     private static final String TAG = "DisplaySystemBarsController";
 
     private final Context mContext;
+    private final DisplayController mDisplayController;
     private SparseArray<PerDisplay> mPerDisplaySparseArray;
 
     public DisplaySystemBarsController(
@@ -57,6 +60,7 @@ public class DisplaySystemBarsController extends DisplayImeController {
             TransactionPool transactionPool) {
         super(wmService, displayController, mainHandler, transactionPool);
         mContext = context;
+        mDisplayController = displayController;
     }
 
     @Override
@@ -92,7 +96,7 @@ public class DisplaySystemBarsController extends DisplayImeController {
     }
 
     @VisibleForTesting
-    class PerDisplay extends IDisplayWindowInsetsController.Stub {
+    class PerDisplay extends DisplayImeController.PerDisplay {
 
         int mDisplayId;
         InsetsController mInsetsController;
@@ -100,6 +104,7 @@ public class DisplaySystemBarsController extends DisplayImeController {
         String mPackageName;
 
         PerDisplay(int displayId) {
+            super(displayId, mDisplayController.getDisplayLayout(displayId).rotation());
             mDisplayId = displayId;
             mInsetsController = new InsetsController(
                     new DisplaySystemBarsInsetsControllerHost(mHandler, this));
@@ -107,6 +112,7 @@ public class DisplaySystemBarsController extends DisplayImeController {
 
         @Override
         public void insetsChanged(InsetsState insetsState) {
+            super.insetsChanged(insetsState);
             if (mInsetsState.equals(insetsState)) {
                 return;
             }
@@ -120,24 +126,33 @@ public class DisplaySystemBarsController extends DisplayImeController {
         @Override
         public void insetsControlChanged(InsetsState insetsState,
                 InsetsSourceControl[] activeControls) {
+            super.insetsControlChanged(insetsState, activeControls);
             mInsetsController.onControlsChanged(activeControls);
         }
 
         @Override
         public void hideInsets(@WindowInsets.Type.InsetsType int types, boolean fromIme) {
-            mInsetsController.hide(types);
+            if ((types & WindowInsets.Type.ime()) == 0) {
+                mInsetsController.hide(types);
+            } else {
+                super.hideInsets(types, fromIme);
+            }
+
         }
 
         @Override
         public void showInsets(@WindowInsets.Type.InsetsType int types, boolean fromIme) {
-            mInsetsController.show(types);
+            if ((types & WindowInsets.Type.ime()) == 0) {
+                mInsetsController.show(types);
+            } else {
+                super.showInsets(types, fromIme);
+            }
+
         }
 
         @Override
         public void topFocusedWindowChanged(String packageName) {
-            // If both package names are null or both package names are equal, return.
-            if (mPackageName == packageName
-                    || (mPackageName != null && mPackageName.equals(packageName))) {
+            if (Objects.equals(mPackageName, packageName)) {
                 return;
             }
             mPackageName = packageName;

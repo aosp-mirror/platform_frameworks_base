@@ -86,7 +86,13 @@ class UdfpsController implements DozeReceiver {
     // Default non-HBM backlight value normalized to the range [0, 1.0]. Used as a fallback when the
     // actual brightness value cannot be retrieved.
     private final float mDefaultBrightness;
+    // Indicates whether the overlay is currently showing. Even if it has been requested, it might
+    // not be showing.
     private boolean mIsOverlayShowing;
+    // Indicates whether the overlay has been requested.
+    private boolean mIsOverlayRequested;
+    // Indicates whether the bouncer is showing. When it is showing, the overlay needs to be hidden.
+    private boolean mIsBouncerShowing;
 
     // The fingerprint AOD trigger doesn't provide an ACTION_UP/ACTION_CANCEL event to tell us when
     // to turn off high brightness mode. To get around this limitation, the state of the AOD
@@ -98,12 +104,12 @@ class UdfpsController implements DozeReceiver {
     public class UdfpsOverlayController extends IUdfpsOverlayController.Stub {
         @Override
         public void showUdfpsOverlay() {
-            UdfpsController.this.showUdfpsOverlay();
+            UdfpsController.this.setShowOverlay(true);
         }
 
         @Override
         public void hideUdfpsOverlay() {
-            UdfpsController.this.hideUdfpsOverlay();
+            UdfpsController.this.setShowOverlay(false);
         }
 
         @Override
@@ -205,6 +211,35 @@ class UdfpsController implements DozeReceiver {
     @Override
     public void dozeTimeTick() {
         mView.dozeTimeTick();
+    }
+
+    private void setShowOverlay(boolean show) {
+        if (show == mIsOverlayRequested) {
+            return;
+        }
+        mIsOverlayRequested = show;
+        updateOverlay();
+    }
+
+    /**
+     * Call when the visibility of the bouncer changes.
+     *
+     * @param isShowing Whether or not the bouncer is showing
+     */
+    void setBouncerVisibility(boolean isShowing) {
+        if (isShowing == mIsBouncerShowing) {
+            return;
+        }
+        mIsBouncerShowing = isShowing;
+        updateOverlay();
+    }
+
+    private void updateOverlay() {
+        if (mIsOverlayRequested && !mIsBouncerShowing) {
+            showUdfpsOverlay();
+        } else {
+            hideUdfpsOverlay();
+        }
     }
 
     private void showUdfpsOverlay() {

@@ -41,7 +41,6 @@ import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
-import android.view.ViewRootImpl;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowInsetsAnimationControlListener;
@@ -139,9 +138,6 @@ class InsetsPolicy {
                 getFakeControlTarget(focusedWin, statusControlTarget),
                 navControlTarget,
                 getFakeControlTarget(focusedWin, navControlTarget));
-        if (ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL) {
-            return;
-        }
         mStatusBar.updateVisibility(statusControlTarget, ITYPE_STATUS_BAR);
         mNavBar.updateVisibility(navControlTarget, ITYPE_NAVIGATION_BAR);
         mPolicy.updateHideNavInputEventReceiver();
