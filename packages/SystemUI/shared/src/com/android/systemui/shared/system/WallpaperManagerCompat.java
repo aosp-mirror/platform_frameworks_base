@@ -36,4 +36,12 @@ public class WallpaperManagerCompat {
     public void setWallpaperZoomOut(IBinder windowToken, float zoom) {
         mWallpaperManager.setWallpaperZoomOut(windowToken, zoom);
     }
+
+    /**
+     * @return the max scale for the wallpaper when it's fully zoomed out
+     */
+    public static float getWallpaperZoomOutMaxScale(Context context) {
+        return context.getResources()
+                .getFloat(com.android.internal.R.dimen.config_wallpaperMaxScale);
+    }
 }
