@@ -83,13 +83,13 @@ import java.util.concurrent.Executors;
 
  <pre class=prettyprint>
  TranscodingRequest request =
-     new TranscodingRequest.Builder()
-         .setSourceUri(srcUri)
-         .setDestinationUri(dstUri)
-         .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
-         .setPriority(REALTIME)
-         .setVideoTrackFormat(videoFormat)
-         .build();
+    new TranscodingRequest.Builder()
+        .setSourceUri(srcUri)
+        .setDestinationUri(dstUri)
+        .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
+        .setPriority(REALTIME)
+        .setVideoTrackFormat(videoFormat)
+        .build();
  }</pre>
 
  TODO(hkuang): Add architecture diagram showing the transcoding service and api.
@@ -490,6 +490,20 @@ public final class MediaTranscodeManager {
         /** Uri of the destination media file. */
         private @NonNull Uri mDestinationUri;
 
+        /**
+         *  The UID of the client that the TranscodingRequest is for. Only privileged caller could
+         *  set this Uid as only they could do the transcoding on behalf of the client.
+         *  -1 means not available.
+         */
+        private int mClientUid = -1;
+
+        /**
+         *  The Pid of the client that the TranscodingRequest is for. Only privileged caller could
+         *  set this Uid as only they could do the transcoding on behalf of the client.
+         *  -1 means not available.
+         */
+        private int mClientPid = -1;
+
         /** Type of the transcoding. */
         private @TranscodingType int mType = TRANSCODING_TYPE_UNKNOWN;
 
@@ -526,6 +540,8 @@ public final class MediaTranscodeManager {
         private TranscodingRequest(Builder b) {
             mSourceUri = b.mSourceUri;
             mDestinationUri = b.mDestinationUri;
+            mClientUid = b.mClientUid;
+            mClientPid = b.mClientPid;
             mPriority = b.mPriority;
             mType = b.mType;
             mVideoTrackFormat = b.mVideoTrackFormat;
@@ -544,6 +560,16 @@ public final class MediaTranscodeManager {
         @NonNull
         public Uri getSourceUri() {
             return mSourceUri;
+        }
+
+        /** Return the UID of the client that this request is for. -1 means not available. */
+        public int getClientUid() {
+            return mClientUid;
+        }
+
+        /** Return the PID of the client that this request is for. -1 means not available. */
+        public int getClientPid() {
+            return mClientPid;
         }
 
         /** Return destination uri of the transcoding. */
@@ -584,6 +610,8 @@ public final class MediaTranscodeManager {
             parcel.transcodingType = mType;
             parcel.sourceFilePath = mSourceUri.toString();
             parcel.destinationFilePath = mDestinationUri.toString();
+            parcel.clientUid = mClientUid;
+            parcel.clientPid = mClientPid;
             parcel.requestedVideoTrackFormat = convertToVideoTrackFormat(mVideoTrackFormat);
             if (mTestConfig != null) {
                 parcel.isForTesting = true;
@@ -659,6 +687,8 @@ public final class MediaTranscodeManager {
         public static final class Builder {
             private @NonNull Uri mSourceUri;
             private @NonNull Uri mDestinationUri;
+            private int mClientUid = -1;
+            private int mClientPid = -1;
             private @TranscodingType int mType = TRANSCODING_TYPE_UNKNOWN;
             private @TranscodingPriority int mPriority = PRIORITY_UNKNOWN;
             private @Nullable MediaFormat mVideoTrackFormat;
@@ -698,6 +728,38 @@ public final class MediaTranscodeManager {
                             "You must specify a non-empty destination Uri.");
                 }
                 mDestinationUri = destinationUri;
+                return this;
+            }
+
+            /**
+             * Specify the UID of the client that this request is for.
+             * @param uid client Uid.
+             * @return The same builder instance.
+             * @throws IllegalArgumentException if uid is invalid.
+             * TODO(hkuang): Check the permission if it is allowed.
+             */
+            @NonNull
+            public Builder setClientUid(int uid) {
+                if (uid <= 0) {
+                    throw new IllegalArgumentException("Invalid Uid");
+                }
+                mClientUid = uid;
+                return this;
+            }
+
+            /**
+             * Specify the PID of the client that this request is for.
+             * @param pid client Pid.
+             * @return The same builder instance.
+             * @throws IllegalArgumentException if pid is invalid.
+             * TODO(hkuang): Check the permission if it is allowed.
+             */
+            @NonNull
+            public Builder setClientPid(int pid) {
+                if (pid <= 0) {
+                    throw new IllegalArgumentException("Invalid pid");
+                }
+                mClientPid = pid;
                 return this;
             }
 
@@ -1199,6 +1261,8 @@ public final class MediaTranscodeManager {
 
         // Converts the request to TranscodingRequestParcel.
         TranscodingRequestParcel requestParcel = transcodingRequest.writeToParcel();
+
+        Log.i(TAG, "Getting transcoding request " + transcodingRequest.getSourceUri());
 
         // Submits the request to MediaTranscoding service.
         try {
