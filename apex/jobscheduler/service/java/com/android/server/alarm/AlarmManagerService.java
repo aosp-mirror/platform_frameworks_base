@@ -252,7 +252,7 @@ public class AlarmManagerService extends SystemService {
     final ArrayList<IdleDispatchEntry> mAllowWhileIdleDispatches = new ArrayList();
 
     interface Stats {
-        int REORDER_ALARMS_FOR_STANDBY = 1;
+        int REORDER_ALARMS_FOR_STANDBY = 0;
     }
 
     private final StatLogger mStatLogger = new StatLogger("Alarm manager stats", new String[]{
