@@ -32,6 +32,8 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.Window.DECOR_CAPTION_SHADE_DARK;
 import static android.view.Window.DECOR_CAPTION_SHADE_LIGHT;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
@@ -97,6 +99,7 @@ import android.view.Window;
 import android.view.WindowCallbacks;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
+import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -137,19 +140,16 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private static final int SCRIM_LIGHT = 0xe6ffffff; // 90% white
 
     public static final ColorViewAttributes STATUS_BAR_COLOR_VIEW_ATTRIBUTES =
-            new ColorViewAttributes(SYSTEM_UI_FLAG_FULLSCREEN, FLAG_TRANSLUCENT_STATUS,
+            new ColorViewAttributes(FLAG_TRANSLUCENT_STATUS,
                     Gravity.TOP, Gravity.LEFT, Gravity.RIGHT,
                     Window.STATUS_BAR_BACKGROUND_TRANSITION_NAME,
-                    com.android.internal.R.id.statusBarBackground,
-                    FLAG_FULLSCREEN, ITYPE_STATUS_BAR);
+                    com.android.internal.R.id.statusBarBackground, ITYPE_STATUS_BAR);
 
     public static final ColorViewAttributes NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES =
-            new ColorViewAttributes(
-                    SYSTEM_UI_FLAG_HIDE_NAVIGATION, FLAG_TRANSLUCENT_NAVIGATION,
+            new ColorViewAttributes(FLAG_TRANSLUCENT_NAVIGATION,
                     Gravity.BOTTOM, Gravity.RIGHT, Gravity.LEFT,
                     Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME,
-                    com.android.internal.R.id.navigationBarBackground,
-                    0 /* hideWindowFlag */, ITYPE_NAVIGATION_BAR);
+                    com.android.internal.R.id.navigationBarBackground, ITYPE_NAVIGATION_BAR);
 
     // This is used to workaround an issue where the PiP shadow can be transparent if the window
     // background is transparent
@@ -1016,6 +1016,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     }
 
     @Override
+    public void onSystemBarAppearanceChanged(@WindowInsetsController.Appearance int appearance) {
+        updateColorViews(null /* insets */, true /* animate */);
+    }
+
+    @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         final WindowManager.LayoutParams attrs = mWindow.getAttributes();
         mFloatingInsets.setEmpty();
@@ -1094,6 +1099,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
             mLastWindowFlags = attrs.flags;
 
+            final ViewRootImpl viewRoot = getViewRootImpl();
+            final @Appearance int appearance = viewRoot != null
+                    ? viewRoot.mWindowAttributes.insetsFlags.appearance
+                    : controller.getSystemBarsAppearance();
+
             if (insets != null) {
                 final Insets systemBarInsets = insets.getInsets(WindowInsets.Type.systemBars());
                 final Insets stableBarInsets = insets.getInsetsIgnoringVisibility(
@@ -1130,8 +1140,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             boolean navBarToRightEdge = isNavBarToRightEdge(mLastBottomInset, mLastRightInset);
             boolean navBarToLeftEdge = isNavBarToLeftEdge(mLastBottomInset, mLastLeftInset);
             int navBarSize = getNavBarSize(mLastBottomInset, mLastRightInset, mLastLeftInset);
-            updateColorViewInt(mNavigationColorViewState, sysUiVisibility,
-                    calculateNavigationBarColor(), mWindow.mNavigationBarDividerColor, navBarSize,
+            updateColorViewInt(mNavigationColorViewState, calculateNavigationBarColor(appearance),
+                    mWindow.mNavigationBarDividerColor, navBarSize,
                     navBarToRightEdge || navBarToLeftEdge, navBarToLeftEdge,
                     0 /* sideInset */, animate && !disallowAnimate,
                     mForceWindowDrawsBarBackgrounds, controller);
@@ -1139,9 +1149,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mDrawLegacyNavigationBarBackground = mNavigationColorViewState.visible
                     && (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0;
             if (oldDrawLegacy != mDrawLegacyNavigationBarBackground) {
-                ViewRootImpl vri = getViewRootImpl();
-                if (vri != null) {
-                    vri.requestInvalidateRootRenderNode();
+                if (viewRoot != null) {
+                    viewRoot.requestInvalidateRootRenderNode();
                 }
             }
 
@@ -1151,15 +1160,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     && mNavigationColorViewState.present;
             int statusBarSideInset = statusBarNeedsRightInset ? mLastRightInset
                     : statusBarNeedsLeftInset ? mLastLeftInset : 0;
-            updateColorViewInt(mStatusColorViewState, sysUiVisibility,
-                    calculateStatusBarColor(), 0, mLastTopInset,
-                    false /* matchVertical */, statusBarNeedsLeftInset, statusBarSideInset,
-                    animate && !disallowAnimate,
+            int statusBarColor = calculateStatusBarColor(appearance);
+            updateColorViewInt(mStatusColorViewState, statusBarColor, 0,
+                    mLastTopInset, false /* matchVertical */, statusBarNeedsLeftInset,
+                    statusBarSideInset, animate && !disallowAnimate,
                     mForceWindowDrawsBarBackgrounds, controller);
 
             if (mHasCaption) {
-                final int captionColor = calculateStatusBarColor();
-                mDecorCaptionView.getCaption().setBackgroundColor(captionColor);
+                mDecorCaptionView.getCaption().setBackgroundColor(statusBarColor);
                 updateDecorCaptionShade();
             }
         }
@@ -1286,29 +1294,30 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         return mOriginalBackgroundDrawable;
     }
 
-    private int calculateStatusBarColor() {
+    private int calculateStatusBarColor(@Appearance int appearance) {
         return calculateBarColor(mWindow.getAttributes().flags, FLAG_TRANSLUCENT_STATUS,
                 mSemiTransparentBarColor, mWindow.mStatusBarColor,
-                getWindowSystemUiVisibility(), SYSTEM_UI_FLAG_LIGHT_STATUS_BAR,
+                appearance, APPEARANCE_LIGHT_STATUS_BARS,
                 mWindow.mEnsureStatusBarContrastWhenTransparent);
     }
 
-    private int calculateNavigationBarColor() {
+    private int calculateNavigationBarColor(@Appearance int appearance) {
         return calculateBarColor(mWindow.getAttributes().flags, FLAG_TRANSLUCENT_NAVIGATION,
                 mSemiTransparentBarColor, mWindow.mNavigationBarColor,
-                getWindowSystemUiVisibility(), SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
+                appearance, APPEARANCE_LIGHT_NAVIGATION_BARS,
                 mWindow.mEnsureNavigationBarContrastWhenTransparent
                         && getContext().getResources().getBoolean(R.bool.config_navBarNeedsScrim));
     }
 
     public static int calculateBarColor(int flags, int translucentFlag, int semiTransparentBarColor,
-            int barColor, int sysuiVis, int lightSysuiFlag, boolean scrimTransparent) {
+            int barColor, @Appearance int appearance, @Appearance int lightAppearanceFlag,
+            boolean scrimTransparent) {
         if ((flags & translucentFlag) != 0) {
             return semiTransparentBarColor;
         } else if ((flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0) {
             return Color.BLACK;
         } else if (scrimTransparent && Color.alpha(barColor) == 0) {
-            boolean light = (sysuiVis & lightSysuiFlag) != 0;
+            boolean light = (appearance & lightAppearanceFlag) != 0;
             return light ? SCRIM_LIGHT : semiTransparentBarColor;
         } else {
             return barColor;
@@ -1327,7 +1336,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
      * Update a color view
      *
      * @param state the color view to update.
-     * @param sysUiVis the current systemUiVisibility to apply.
      * @param color the current color to apply.
      * @param dividerColor the current divider color to apply.
      * @param size the current size in the non-parent-matching dimension.
@@ -1336,12 +1344,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
      * @param sideMargin sideMargin for the color view.
      * @param animate if true, the change will be animated.
      */
-    private void updateColorViewInt(final ColorViewState state, int sysUiVis, int color,
-            int dividerColor, int size, boolean verticalBar, boolean seascape, int sideMargin,
-            boolean animate, boolean force, WindowInsetsController controller) {
-        state.present = ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL
-                ? state.attributes.isPresent(sysUiVis, mWindow.getAttributes().flags, force)
-                : state.attributes.isPresent(
+    private void updateColorViewInt(final ColorViewState state, int color, int dividerColor,
+            int size, boolean verticalBar, boolean seascape, int sideMargin, boolean animate,
+            boolean force, WindowInsetsController controller) {
+        state.present = state.attributes.isPresent(
                         controller.isRequestedVisible(state.attributes.insetsType),
                         mWindow.getAttributes().flags, force);
         boolean show = state.attributes.isVisible(state.present, color,
@@ -2583,35 +2589,23 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     public static class ColorViewAttributes {
 
         final int id;
-        final int systemUiHideFlag;
         final int translucentFlag;
         final int verticalGravity;
         final int horizontalGravity;
         final int seascapeGravity;
         final String transitionName;
-        final int hideWindowFlag;
         final @InternalInsetsType int insetsType;
 
-        private ColorViewAttributes(int systemUiHideFlag, int translucentFlag, int verticalGravity,
-                int horizontalGravity, int seascapeGravity, String transitionName, int id,
-                int hideWindowFlag, @InternalInsetsType int insetsType) {
+        private ColorViewAttributes(int translucentFlag, int verticalGravity, int horizontalGravity,
+                int seascapeGravity, String transitionName, int id,
+                @InternalInsetsType int insetsType) {
             this.id = id;
-            this.systemUiHideFlag = systemUiHideFlag;
             this.translucentFlag = translucentFlag;
             this.verticalGravity = verticalGravity;
             this.horizontalGravity = horizontalGravity;
             this.seascapeGravity = seascapeGravity;
             this.transitionName = transitionName;
-            this.hideWindowFlag = hideWindowFlag;
             this.insetsType = insetsType;
-        }
-
-        // TODO(b/118118435): remove after migration
-        public boolean isPresent(int sysUiVis, int windowFlags, boolean force) {
-            return (sysUiVis & systemUiHideFlag) == 0
-                    && (windowFlags & hideWindowFlag) == 0
-                    && ((windowFlags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
-                    || force);
         }
 
         public boolean isPresent(boolean requestedVisible, int windowFlags, boolean force) {
@@ -2623,12 +2617,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             return present
                     && (color & Color.BLACK) != 0
                     && ((windowFlags & translucentFlag) == 0  || force);
-        }
-
-        // TODO(b/118118435): remove after migration
-        public boolean isVisible(int sysUiVis, int color, int windowFlags, boolean force) {
-            final boolean present = isPresent(sysUiVis, windowFlags, force);
-            return isVisible(present, color, windowFlags, force);
         }
 
         public boolean isVisible(InsetsState state, int color, int windowFlags, boolean force) {
