@@ -361,7 +361,9 @@
          package manager. As such, its use is strongly discouraged and may be
          removed in a future version of Android. Instead, apps should use proper
          communication mechanisms, such as services and content providers,
-         to facilitate interoperability between shared components. -->
+         to facilitate interoperability between shared components. Note that
+         existing apps cannot remove this value, as migrating off a
+         shared user ID is not supported. -->
     <attr name="sharedUserId" format="string" />
 
     <!-- Specify a label for the shared user UID of this package.  This is
