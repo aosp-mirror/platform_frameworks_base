@@ -92,7 +92,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"กำลังประมวลผลการอัดหน้าจอ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการบันทึกหน้าจอ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"เริ่มบันทึกเลยไหม"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"ขณะบันทึก ระบบ Android อาจบันทึกข้อมูลที่ละเอียดอ่อนที่ปรากฏบนหน้าจอหรือเล่นในอุปกรณ์ได้ ซึ่งรวมถึงรหัสผ่าน ข้อมูลการชำระเงิน รูปภาพ ข้อความ และเสียง"</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"ขณะบันทึก ระบบ Android อาจบันทึกข้อมูลที่ละเอียดอ่อนซึ่งปรากฏบนหน้าจอหรือเล่นในอุปกรณ์ได้ ซึ่งรวมถึงรหัสผ่าน ข้อมูลการชำระเงิน รูปภาพ ข้อความ และเสียง"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"บันทึกเสียง"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"เสียงจากอุปกรณ์"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"เสียงจากอุปกรณ์ เช่น เพลง การโทร และเสียงเรียกเข้า"</string>
@@ -854,7 +854,7 @@
     <string name="left_icon" msgid="5036278531966897006">"ไอคอนทางซ้าย"</string>
     <string name="right_icon" msgid="1103955040645237425">"ไอคอนทางขวา"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"กดค้างแล้วลากเพื่อเพิ่มการ์ด"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"กดการ์ดค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"กดค้างแล้วลากเพื่อจัดเรียงการ์ดใหม่"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"ลากมาที่นี่เพื่อนำออก"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"คุณต้องมีการ์ดอย่างน้อย <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> รายการ"</string>
     <string name="qs_edit" msgid="5583565172803472437">"แก้ไข"</string>

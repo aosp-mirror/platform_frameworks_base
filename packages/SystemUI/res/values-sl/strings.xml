@@ -95,7 +95,7 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"Med snemanjem lahko sistem Android zajame morebitne občutljive podatke, ki so prikazani na zaslonu ali se predvajajo v napravi. To vključuje gesla, podatke za plačilo, fotografije, sporočila in zvok."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snemanje zvoka"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvok v napravi"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvok v napravi, kot so glasba, klici in toni zvonjenja"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvoki v napravi, kot so glasba, klici in toni zvonjenja"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Zvok v napravi in mikrofon"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Začni"</string>
