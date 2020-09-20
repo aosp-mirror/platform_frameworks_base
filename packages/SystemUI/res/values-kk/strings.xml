@@ -28,7 +28,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> қалды"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"Пайдалану барысына байланысты <xliff:g id="PERCENTAGE">%1$s</xliff:g> заряд, шамамен <xliff:g id="TIME">%2$s</xliff:g> қалды"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> заряд, шамамен <xliff:g id="TIME">%2$s</xliff:g> қалды"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> қалды. Battery Saver қосулы."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> қалды. Батареяны үнемдеу режимі қосулы."</string>
     <string name="invalid_charger" msgid="4370074072117767416">"USB арқылы зарядтау мүмкін емес. Құрылғымен бірге берілген зарядтау құралын пайдаланыңыз."</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB арқылы зарядтау мүмкін емес"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Құрылғымен бірге берілген зарядтау құралын пайдаланыңыз"</string>
@@ -419,7 +419,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Қосылу уақыты: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> дейін"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Қараңғы тақырып"</string>
-    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Battery Saver"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Батареяны үнемдеу режимі"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Күн батқанда қосу"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Күн шыққанға дейін"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Қосылу уақыты: <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -711,14 +711,14 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Көпіршік"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Автоматты"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Дыбыс не діріл қолданылмайды"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Дыбыс не діріл қолданылмайды, төменде әңгімелер бөлімінде шығады"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Дыбыс не діріл қолданылмайды, әңгімелер бөлімінің төмен жағында шығады"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Телефон параметрлеріне байланысты шылдырлауы не дірілдеуі мүмкін"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Телефон параметрлеріне байланысты шылдырлауы не дірілдеуі мүмкін. <xliff:g id="APP_NAME">%1$s</xliff:g> чаттары әдепкісінше қалқымалы етіп көрсетіледі."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Осы мазмұнға бекітілген қалқымалы таңбашамен назарыңызды өзіне тартады."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Хабарландыру дыбысының немесе дірілдің қосылуын жүйе анықтайтын болады"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Әңгімелер бөлімінің жоғарғы жағында тұрады, қалқыма хабар түрінде шығады, құлыптаулы экранда профиль суретін көрсетеді"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Параметрлер"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Маңыздылығы"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Маңызды"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> әңгімелесу функцияларын қолдамайды."</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Жақындағы қалқыма хабарлар жоқ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Соңғы және жабылған қалқыма хабарлар осы жерде көрсетіледі."</string>
@@ -774,7 +774,7 @@
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Батареяны пайдалану"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Зарядтау кезінде Батарея үнемдегіш қол жетімді емес"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Battery Saver"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Батареяны үнемдеу режимі"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Өнімділікті және фондық деректерді азайтады"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> түймесі"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
@@ -879,12 +879,20 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Маңызды емес хабарландыру белгішелерін көрсету"</string>
     <string name="other" msgid="429768510980739978">"Басқа"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"<xliff:g id="POSITION">%1$d</xliff:g> орны, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Өңдеу үшін екі рет түртіңіз."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Қосу үшін екі рет түртіңіз."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> жылжыту"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> жою"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"<xliff:g id="TILE_NAME">%1$s</xliff:g> бөлшегін <xliff:g id="POSITION">%2$d</xliff:g>-позицияға енгізу"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g> бөлшегін <xliff:g id="POSITION">%2$d</xliff:g>-позицияға жылжыту"</string>
+    <!-- no translation found for accessibility_qs_edit_remove_tile_action (775511891457193480) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (5051211910345301833) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_move (2009373939914517817) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (7560798153975555772) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_move_to_position (5198161544045930556) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_to_position (9029163095148274690) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_position (4509277359815711830) -->
+    <skip />
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Жылдам параметрлер өңдегіші."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> хабарландыруы: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Параметрлерді ашу."</string>
@@ -1067,4 +1075,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Жаңа басқару элементтерін көру үшін \"Қуат\" түймесін басып тұрыңыз."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Басқару элементтерін енгізу"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Басқару элементтерін өзгерту"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Шығыс сигналдарды қосу"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Топ"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 құрылғы таңдалды."</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> құрылғы таңдалды."</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (ажыратылған)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Қосылмады. Қайта қосылып көріңіз."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Жаңа құрылғыны жұптау"</string>
 </resources>

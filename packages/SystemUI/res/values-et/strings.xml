@@ -879,12 +879,20 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Kuva madala prioriteediga märguande ikoonid"</string>
     <string name="other" msgid="429768510980739978">"Muu"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Asend <xliff:g id="POSITION">%1$d</xliff:g>, paan <xliff:g id="TILE_NAME">%2$s</xliff:g>. Topeltpuudutage muutmiseks."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Topeltpuudutage lisamiseks."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Paani <xliff:g id="TILE_NAME">%1$s</xliff:g> teisaldamine"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Paani <xliff:g id="TILE_NAME">%1$s</xliff:g> eemaldamine"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Lisage <xliff:g id="TILE_NAME">%1$s</xliff:g> asendisse <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Teisaldage <xliff:g id="TILE_NAME">%1$s</xliff:g> asendisse <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <!-- no translation found for accessibility_qs_edit_remove_tile_action (775511891457193480) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (5051211910345301833) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_move (2009373939914517817) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (7560798153975555772) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_move_to_position (5198161544045930556) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_to_position (9029163095148274690) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_position (4509277359815711830) -->
+    <skip />
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Kiirseadete redigeerija."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Teenuse <xliff:g id="ID_1">%1$s</xliff:g> märguanne: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Ava seaded."</string>
@@ -1067,4 +1075,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Uute juhtelementide vaatamiseks hoidke all toitenuppu"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Lisa juhtelemente"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Muuda juhtelemente"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Väljundite lisamine"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Grupp"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 seade on valitud"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> seadet on valitud"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (pole ühendatud)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Ühenduse loomine ebaõnnestus. Proovige uuesti."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Uue seadme sidumine"</string>
 </resources>

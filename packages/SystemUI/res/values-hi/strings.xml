@@ -512,7 +512,7 @@
     <string name="manage_notifications_history_text" msgid="57055985396576230">"इतिहास"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"नई सूचनाएं"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"बिना आवाज़ किए मिलने वाली सूचनाएं"</string>
-    <string name="notification_section_header_alerting" msgid="5581175033680477651">"वाइब्रेशन या आवाज़ के साथ मिलने वाली सूचनाएं"</string>
+    <string name="notification_section_header_alerting" msgid="5581175033680477651">"सूचनाएं"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"बातचीत"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"बिना आवाज़ की सभी सूचनाएं हटाएं"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'परेशान न करें\' सुविधा के ज़रिए कुछ समय के लिए सूचनाएं दिखाना रोक दिया गया है"</string>
@@ -713,12 +713,12 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"बबल"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"अपने-आप"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"किसी तरह की आवाज़ या वाइब्रेशन न हो"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"इससे किसी तरह की आवाज़ या वाइब्रेशन नहीं होता और \'बातचीत\', सेक्शन में सबसे नीचे दिखती है"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"इससे किसी तरह की आवाज़ या वाइब्रेशन नहीं होता और बातचीत, सेक्शन में सबसे नीचे दिखती है"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"फ़ोन की सेटिंग के आधार पर, सूचना आने पर घंटी बज सकती है या वाइब्रेशन हो सकता है"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"फ़ोन की सेटिंग के आधार पर, सूचना आने पर घंटी बज सकती है या वाइब्रेशन हो सकता है. <xliff:g id="APP_NAME">%1$s</xliff:g> में होने वाली बातचीत, डिफ़ॉल्ट रूप से बबल के तौर पर दिखती है."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"फ़्लोट करने वाले शॉर्टकट की मदद से इस सामग्री पर आपका ध्यान बना रहता है."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"सिस्टम को यह तय करने की अनुमति दें कि इस सूचना के मिलने पर आवाज़ हो या वाइब्रेशन हो"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"इससे बातचीत की सुविधा, सेक्शन में सबसे ऊपर और फ़्लोटिंग बबल के तौर पर दिखती है. साथ ही, लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो दिखती है"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"इससे बातचीत, सेक्शन में सबसे ऊपर और फ़्लोटिंग बबल के तौर पर दिखती है. साथ ही, लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो दिखती है"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिंग"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर बातचीत की सुविधाएं काम नहीं करतीं"</string>
@@ -881,12 +881,20 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"कम प्राथमिकता वाली सूचना के आइकॉन दिखाएं"</string>
     <string name="other" msgid="429768510980739978">"अन्य"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"स्थिति <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. में बदलाव करने के लिए दो बार छूएं."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. जोड़ने के लिए दो बार छूएं."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> को ले जाएं"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> निकालें"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"<xliff:g id="TILE_NAME">%1$s</xliff:g> काे क्रम संख्या <xliff:g id="POSITION">%2$d</xliff:g> पर जाेड़ें"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g> काे क्रम संख्या <xliff:g id="POSITION">%2$d</xliff:g> पर ले जाएं"</string>
+    <!-- no translation found for accessibility_qs_edit_remove_tile_action (775511891457193480) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (5051211910345301833) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_move (2009373939914517817) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (7560798153975555772) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_move_to_position (5198161544045930556) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_to_position (9029163095148274690) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_position (4509277359815711830) -->
+    <skip />
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"त्वरित सेटिंग संपादक."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> सूचना: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"सेटिंग खोलें."</string>
@@ -1069,4 +1077,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"नए कंट्रोल देखने के लिए पावर बटन दबाकर रखें"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"कंट्राेल जोड़ें"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"कंट्रोल मेन्यू में बदलाव करें"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"आउटपुट जोड़ें"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"ग्रुप"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"एक डिवाइस चुना गया"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> डिवाइस चुने गए"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (डिसकनेक्ट किया गया)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"कनेक्ट नहीं किया जा सका. फिर से कोशिश करें."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"नया डिवाइस जोड़ें"</string>
 </resources>
