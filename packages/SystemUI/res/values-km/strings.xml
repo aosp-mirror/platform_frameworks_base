@@ -419,7 +419,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"បើក​នៅម៉ោង <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"រហូតដល់​ម៉ោង <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"រចនាប័ទ្ម​ងងឹត"</string>
-    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"កម្មវិធីសន្សំថ្ម"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"មុខងារ​សន្សំ​ថ្ម"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"បើក​នៅពេល​ថ្ងៃលិច"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"រហូត​ដល់​ពេល​ថ្ងៃរះ"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"បើកនៅម៉ោង <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -774,7 +774,7 @@
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"ការប្រើប្រាស់ថ្ម"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"កម្មវិធីសន្សំថ្មមិនអាចប្រើបានអំឡុងពេលសាកថ្មទេ"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"កម្មវិធីសន្សំថ្ម"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"មុខងារ​សន្សំ​ថ្ម"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"កាត់បន្ថយប្រតិបត្តិការ និងទិន្នន័យផ្ទៃខាងក្រោយ"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"ប៊ូតុង <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
@@ -879,12 +879,20 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"បង្ហាញ​រូប​ការជូនដំណឹង​ដែលមានអាទិភាពទាប"</string>
     <string name="other" msgid="429768510980739978">"ផ្សេងៗ"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"ទីតាំង <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>, ប៉ះពីរដងដើម្បីកែ"</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>, ប៉ះពីរដងដើម្បីបន្ថែម"</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"ផ្លាស់ទី <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"យក <xliff:g id="TILE_NAME">%1$s</xliff:g> ចេញ"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"បញ្ចូល <xliff:g id="TILE_NAME">%1$s</xliff:g> ទៅទីតាំង <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"ផ្លាស់ទី <xliff:g id="TILE_NAME">%1$s</xliff:g> ទៅទីតាំង <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <!-- no translation found for accessibility_qs_edit_remove_tile_action (775511891457193480) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (5051211910345301833) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_move (2009373939914517817) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (7560798153975555772) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_move_to_position (5198161544045930556) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_to_position (9029163095148274690) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_position (4509277359815711830) -->
+    <skip />
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"កម្មវិធីកែការកំណត់រហ័ស"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> ការជូនដំណឹង៖ <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"បើកការកំណត់"</string>
@@ -1067,4 +1075,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"សង្កត់​ប៊ូតុង​ថាមពល ដើម្បី​មើលឃើញ​ការគ្រប់គ្រង​ថ្មីៗ"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"បញ្ចូល​ផ្ទាំងគ្រប់គ្រង"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"កែ​ផ្ទាំងគ្រប់គ្រង"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"បញ្ចូល​ឧបករណ៍​មេឌៀ"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"ក្រុម"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"បានជ្រើសរើស​ឧបករណ៍ 1"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"បានជ្រើសរើស​ឧបករណ៍ <xliff:g id="COUNT">%1$d</xliff:g>"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (បាន​ផ្ដាច់)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"មិន​អាច​ភ្ជាប់​បាន​ទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ផ្គូផ្គង​ឧបករណ៍ថ្មី"</string>
 </resources>

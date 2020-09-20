@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Pode tocar ou vibrar com base nas definições do telemóvel. As conversas da app <xliff:g id="APP_NAME">%1$s</xliff:g> aparecem como um balão por predefinição."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantém a sua atenção com um atalho flutuante para este conteúdo."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Faça com que o sistema determine se esta notificação deve emitir um som ou uma vibração"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Aparece na parte superior da secção de conversas, surge como um balão flutuante e apresenta a imagem do perfil no ecrã de bloqueio."</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Aparece no topo da secção de conversas, surge como balão flutuante e apresenta a imagem do perfil no ecrã de bloqueio."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Definições"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridade"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"A app <xliff:g id="APP_NAME">%1$s</xliff:g> não suporta funcionalidades de conversa."</string>
@@ -879,12 +879,20 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Mostrar ícones de notificações de prioridade baixa"</string>
     <string name="other" msgid="429768510980739978">"Outro"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Posição <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Toque duas vezes para editar."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Toque duas vezes para adicionar."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Mover <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Remover <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Adicionar <xliff:g id="TILE_NAME">%1$s</xliff:g> à posição <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Mover <xliff:g id="TILE_NAME">%1$s</xliff:g> para a posição <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <!-- no translation found for accessibility_qs_edit_remove_tile_action (775511891457193480) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (5051211910345301833) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_move (2009373939914517817) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (7560798153975555772) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_move_to_position (5198161544045930556) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_to_position (9029163095148274690) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_position (4509277359815711830) -->
+    <skip />
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Editor de definições rápidas."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Notificação do <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Abrir as definições."</string>
@@ -1067,4 +1075,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Mantenha premido o botão ligar/desligar para ver os novos controlos."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Adicionar controlos"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Editar controlos"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Adicione saídas"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Grupo"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 dispositivo selecionado"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> dispositivos selecionados"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (desligado)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Não foi possível ligar. Tente novamente."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Sincronize o novo dispositivo"</string>
 </resources>

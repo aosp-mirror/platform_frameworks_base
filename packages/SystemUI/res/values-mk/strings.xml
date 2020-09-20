@@ -711,14 +711,14 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Балонче"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Автоматски"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звук или вибрации"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звук или вибрации и се појавува под делот за разговор"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звук или вибрации и се појавува подолу во делот со разговори"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Може да ѕвони или вибрира во зависност од поставките на телефонот"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може да ѕвони или вибрира во зависност од поставките на телефонот Стандардно, разговорите од <xliff:g id="APP_NAME">%1$s</xliff:g> се во балончиња."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Ви го задржува вниманието со лебдечка кратенка на содржинава."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Дозволете системот да определи дали известувањево треба да испушти звук или да вибрира"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Се појавува на горниот дел од секцијата на разговорот во вид на лебдечко меурче, покажувајќи ја профилната слика на заклучениот екран"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Поставки"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Приоритетно"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не поддржува функции за разговор"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Нема неодамнешни балончиња"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Неодамнешните и отфрлените балончиња ќе се појавуваат тука"</string>
@@ -879,12 +879,20 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Прикажувај икони за известувања со низок приоритет"</string>
     <string name="other" msgid="429768510980739978">"Друго"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Место <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Допрете двапати за уредување."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Допрете двапати за додавање."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Преместете <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Отстранете <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Додајте <xliff:g id="TILE_NAME">%1$s</xliff:g> на позицијата <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Преместете <xliff:g id="TILE_NAME">%1$s</xliff:g> на позицијата <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <!-- no translation found for accessibility_qs_edit_remove_tile_action (775511891457193480) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (5051211910345301833) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_move (2009373939914517817) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (7560798153975555772) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_move_to_position (5198161544045930556) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_to_position (9029163095148274690) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_position (4509277359815711830) -->
+    <skip />
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Уредник за брзи поставки."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Известување од <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Отворете ги поставките."</string>
@@ -1067,4 +1075,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Задржете го копчето за вклучување за да ги видите новите контроли"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Додајте контроли"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Изменете ги контролите"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Додајте излези"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Група"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Избран е 1 уред"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Избрани се <xliff:g id="COUNT">%1$d</xliff:g> уреди"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (исклучен)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Не можеше да се поврзе. Обидете се повторно."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Спарете нов уред"</string>
 </resources>
