@@ -19,6 +19,8 @@
     <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"ಸ್ವಿಸ್ ಜರ್ಮನ್"</string>
     <string name="keyboard_layout_belgian" msgid="2011984572838651558">"ಬೆಲ್ಜಿಯನ್"</string>
     <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"ಬಲ್ಗೇರಿಯನ್‌"</string>
+    <!-- no translation found for keyboard_layout_bulgarian_phonetic (7568914730360106653) -->
+    <skip />
     <string name="keyboard_layout_italian" msgid="6497079660449781213">"ಇಟಾಲಿಯನ್"</string>
     <string name="keyboard_layout_danish" msgid="8036432066627127851">"ಡ್ಯಾನಿಶ್"</string>
     <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"ನಾರ್ವೇಜಿಯನ್"</string>
@@ -26,8 +28,7 @@
     <string name="keyboard_layout_finnish" msgid="5585659438924315466">"ಫಿನ್ನಿಷ್"</string>
     <string name="keyboard_layout_croatian" msgid="4172229471079281138">"ಕ್ರೊಯೇಶಿಯನ್"</string>
     <string name="keyboard_layout_czech" msgid="1349256901452975343">"ಜೆಕ್"</string>
-    <!-- no translation found for keyboard_layout_czech_qwerty (3331402534128515501) -->
-    <skip />
+    <string name="keyboard_layout_czech_qwerty" msgid="3331402534128515501">"ಝೆಕ್ QWERTY ಶೈಲಿ"</string>
     <string name="keyboard_layout_estonian" msgid="8775830985185665274">"ಎಸ್ಟೋನಿಯನ್"</string>
     <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"ಹಂಗೇರಿಯನ್"</string>
     <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"ಐಸ್‌ಲ್ಯಾಂಡಿಕ್"</string>
