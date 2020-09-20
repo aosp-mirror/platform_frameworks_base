@@ -47,9 +47,9 @@ extra_font_files := \
     DroidSans-Bold.ttf
 
 ################################
-# Use DroidSansMono to hang extra_font_files on
+# Use AndroidClock to hang extra_font_files on
 include $(CLEAR_VARS)
-LOCAL_MODULE := DroidSansMono.ttf
+LOCAL_MODULE := AndroidClock.ttf
 LOCAL_SRC_FILES := $(LOCAL_MODULE)
 LOCAL_MODULE_CLASS := ETC
 LOCAL_MODULE_TAGS := optional
@@ -73,8 +73,7 @@ $(eval LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts)\
 $(eval include $(BUILD_PREBUILT))
 endef
 
-font_src_files := \
-    AndroidClock.ttf
+font_src_files :=
 
 $(foreach f, $(font_src_files), $(call build-one-font-module, $(f)))
 
