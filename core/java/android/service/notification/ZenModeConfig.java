@@ -1326,7 +1326,8 @@ public class ZenModeConfig implements Parcelable {
             line2 = res.getString(R.string.zen_mode_until, formattedTime);
         } else {
             // display as day/time
-            summary = line1 = line2 = res.getString(R.string.zen_mode_until, formattedTime);
+            summary = line1 = line2 = res.getString(R.string.zen_mode_until_next_day,
+                    formattedTime);
         }
         final Uri id = toCountdownConditionId(time, false);
         return new Condition(id, summary, line1, line2, 0, Condition.STATE_TRUE,

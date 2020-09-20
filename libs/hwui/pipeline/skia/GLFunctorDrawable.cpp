@@ -56,7 +56,8 @@ static void GetFboDetails(SkCanvas* canvas, GLuint* outFboID, SkISize* outFboSiz
 }
 
 void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
-    if (canvas->getGrContext() == nullptr) {
+    GrDirectContext* directContext = GrAsDirectContext(canvas->recordingContext());
+    if (directContext == nullptr) {
         // We're dumping a picture, render a light-blue rectangle instead
         // TODO: Draw the WebView text on top? Seemingly complicated as SkPaint doesn't
         // seem to have a default typeface that works. We only ever use drawGlyphs, which
@@ -87,7 +88,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         SkImageInfo surfaceInfo =
                 canvas->imageInfo().makeWH(clipBounds.width(), clipBounds.height());
         tmpSurface =
-                SkSurface::MakeRenderTarget(canvas->getGrContext(), SkBudgeted::kYes, surfaceInfo);
+                SkSurface::MakeRenderTarget(directContext, SkBudgeted::kYes, surfaceInfo);
         tmpSurface->getCanvas()->clear(SK_ColorTRANSPARENT);
 
         GrGLFramebufferInfo fboInfo;
@@ -141,7 +142,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
 
         // notify Skia that we just updated the FBO and stencil
         const uint32_t grState = kStencil_GrGLBackendState | kRenderTarget_GrGLBackendState;
-        canvas->getGrContext()->resetContext(grState);
+        directContext->resetContext(grState);
 
         SkCanvas* tmpCanvas = canvas;
         if (tmpSurface) {
@@ -188,7 +189,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         glClear(GL_STENCIL_BUFFER_BIT);
     }
 
-    canvas->getGrContext()->resetContext();
+    directContext->resetContext();
 
     // if there were unclipped save layers involved we draw our offscreen surface to the canvas
     if (tmpSurface) {

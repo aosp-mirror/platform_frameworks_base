@@ -86,6 +86,10 @@ public interface QSTile {
      */
     InstanceId getInstanceId();
 
+    default boolean isTileReady() {
+        return false;
+    }
+
     @ProvidesInterface(version = Callback.VERSION)
     public interface Callback {
         public static final int VERSION = 1;

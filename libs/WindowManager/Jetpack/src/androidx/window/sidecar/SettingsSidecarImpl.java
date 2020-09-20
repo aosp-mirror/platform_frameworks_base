@@ -37,6 +37,8 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.R;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -151,12 +153,17 @@ class SettingsSidecarImpl extends StubSidecar {
             return features;
         }
 
-        ContentResolver resolver = mContext.getContentResolver();
-        final String displayFeaturesString = Settings.Global.getString(resolver, DISPLAY_FEATURES);
         if (isInMultiWindow(windowToken)) {
             // It is recommended not to report any display features in multi-window mode, since it
             // won't be possible to synchronize the display feature positions with window movement.
             return features;
+        }
+
+        ContentResolver resolver = mContext.getContentResolver();
+        String displayFeaturesString = Settings.Global.getString(resolver, DISPLAY_FEATURES);
+        if (TextUtils.isEmpty(displayFeaturesString)) {
+            displayFeaturesString = mContext.getResources().getString(
+                    R.string.config_display_features);
         }
         if (TextUtils.isEmpty(displayFeaturesString)) {
             return features;

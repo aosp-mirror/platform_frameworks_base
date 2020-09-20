@@ -46,6 +46,7 @@ import android.app.job.JobInfo;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.SystemClock;
 import android.provider.MediaStore;
@@ -685,6 +686,8 @@ public class JobStatusTest {
     }
 
     private static JobStatus createJobStatus(JobInfo job) {
-        return JobStatus.createFromJobInfo(job, 0, null, -1, "JobStatusTest");
+        JobStatus jobStatus = JobStatus.createFromJobInfo(job, 0, null, -1, "JobStatusTest");
+        jobStatus.serviceInfo = mock(ServiceInfo.class);
+        return jobStatus;
     }
 }

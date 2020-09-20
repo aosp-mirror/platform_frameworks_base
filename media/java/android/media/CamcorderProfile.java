@@ -19,6 +19,8 @@ package android.media;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
+import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CameraMetadata;
 import android.os.Build;
 
 /**
@@ -418,7 +420,11 @@ public class CamcorderProfile
      * resolution and higher audio sampling rate, etc, than those with lower quality
      * level.
      *
-     * @param cameraId the id for the camera
+     * @param cameraId the id for the camera. Integer camera ids parsed from the list received by
+     *                 invoking {@link CameraManager#getCameraIdList} can be used as long as they
+     *                 are {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE}
+     *                 and not
+     *                 {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_EXTERNAL EXTERNAL}.
      * @param quality the target quality level for the camcorder profile.
      * @see #QUALITY_LOW
      * @see #QUALITY_HIGH
@@ -512,7 +518,11 @@ public class CamcorderProfile
      * @see android.hardware.camera2.CameraManager
      * @see android.hardware.camera2.CameraCharacteristics
      *
-     * @param cameraId the id for the camera
+     * @param cameraId the id for the camera. Integer camera ids parsed from the list received by
+     *                 invoking {@link CameraManager#getCameraIdList} can be used as long as they
+     *                 are {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE}
+     *                 and not
+     *                 {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_EXTERNAL EXTERNAL}.
      * @param quality the target quality level for the camcorder profile
      */
     public static boolean hasProfile(int cameraId, int quality) {

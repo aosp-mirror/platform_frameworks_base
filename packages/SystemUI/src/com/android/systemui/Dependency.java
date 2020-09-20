@@ -80,7 +80,6 @@ import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -280,7 +279,6 @@ public class Dependency {
     @Inject Lazy<VisualStabilityManager> mVisualStabilityManager;
     @Inject Lazy<NotificationGutsManager> mNotificationGutsManager;
     @Inject Lazy<NotificationMediaManager> mNotificationMediaManager;
-    @Inject Lazy<NotificationBlockingHelperManager> mNotificationBlockingHelperManager;
     @Inject Lazy<NotificationRemoteInputManager> mNotificationRemoteInputManager;
     @Inject Lazy<SmartReplyConstants> mSmartReplyConstants;
     @Inject Lazy<NotificationListener> mNotificationListener;
@@ -473,8 +471,6 @@ public class Dependency {
                 mNotificationGroupAlertTransferHelper::get);
         mProviders.put(NotificationMediaManager.class, mNotificationMediaManager::get);
         mProviders.put(NotificationGutsManager.class, mNotificationGutsManager::get);
-        mProviders.put(NotificationBlockingHelperManager.class,
-                mNotificationBlockingHelperManager::get);
         mProviders.put(NotificationRemoteInputManager.class,
                 mNotificationRemoteInputManager::get);
         mProviders.put(SmartReplyConstants.class, mSmartReplyConstants::get);

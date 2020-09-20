@@ -500,10 +500,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * or is in a whitelist).
      */
     public boolean getIsNonblockable() {
-        boolean isNonblockable = Dependency.get(NotificationBlockingHelperManager.class)
-                .isNonblockable(mEntry.getSbn().getPackageName(),
-                        mEntry.getChannel().getId());
-
         // If the SystemNotifAsyncTask hasn't finished running or retrieved a value, we'll try once
         // again, but in-place on the main thread this time. This should rarely ever get called.
         if (mEntry != null && mEntry.mIsSystemNotification == null) {
@@ -514,13 +510,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mEntry.mIsSystemNotification = isSystemNotification(mContext, mEntry.getSbn());
         }
 
-        isNonblockable |= mEntry.getChannel().isImportanceLockedByOEM();
-        isNonblockable |= mEntry.getChannel().isImportanceLockedByCriticalDeviceFunction();
+        boolean isNonblockable = mEntry.getChannel().isImportanceLockedByOEM()
+                || mEntry.getChannel().isImportanceLockedByCriticalDeviceFunction();
 
         if (!isNonblockable && mEntry != null && mEntry.mIsSystemNotification != null) {
             if (mEntry.mIsSystemNotification) {
-                if (mEntry.getChannel() != null
-                        && !mEntry.getChannel().isBlockable()) {
+                if (mEntry.getChannel() != null && !mEntry.getChannel().isBlockable()) {
                     isNonblockable = true;
                 }
             }
@@ -1398,26 +1393,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     /**
-     * Dismisses the notification with the option of showing the blocking helper in-place if we have
-     * a negative user sentiment.
+     * Dismisses the notification.
      *
      * @param fromAccessibility whether this dismiss is coming from an accessibility action
-     * @return whether a blocking helper is shown in this row
      */
-    public boolean performDismissWithBlockingHelper(boolean fromAccessibility) {
-        NotificationBlockingHelperManager manager =
-                Dependency.get(NotificationBlockingHelperManager.class);
-        boolean isBlockingHelperShown = manager.perhapsShowBlockingHelper(this, mMenuRow);
-
-        Dependency.get(MetricsLogger.class).count(NotificationCounters.NOTIFICATION_DISMISSED, 1);
-
-        // Continue with dismiss since we don't want the blocking helper to be directly associated
-        // with a certain notification.
-        performDismiss(fromAccessibility);
-        return isBlockingHelperShown;
-    }
-
     public void performDismiss(boolean fromAccessibility) {
+        Dependency.get(MetricsLogger.class).count(NotificationCounters.NOTIFICATION_DISMISSED, 1);
         dismiss(fromAccessibility);
         if (mEntry.isClearable()) {
             if (mOnUserInteractionCallback != null) {
@@ -2983,7 +2964,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_DISMISS:
-                performDismissWithBlockingHelper(true /* fromAccessibility */);
+                performDismiss(true /* fromAccessibility */);
                 return true;
             case AccessibilityNodeInfo.ACTION_COLLAPSE:
             case AccessibilityNodeInfo.ACTION_EXPAND:

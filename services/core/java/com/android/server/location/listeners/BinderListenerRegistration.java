@@ -23,6 +23,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
+
 /**
  * A registration that works with IBinder keys, and registers a DeathListener to automatically
  * remove the registration if the binder dies. The key for this registration must either be an
@@ -32,7 +34,8 @@ import android.util.Log;
  * @param <TListener> listener type
  */
 public abstract class BinderListenerRegistration<TRequest, TListener> extends
-        RemoteListenerRegistration<TRequest, TListener> implements Binder.DeathRecipient {
+        RemoteListenerRegistration<TRequest, TListener, ListenerOperation<TListener>> implements
+        Binder.DeathRecipient {
 
     /**
      * Interface to allow binder retrieval when keys are not themselves IBinders.
@@ -44,9 +47,9 @@ public abstract class BinderListenerRegistration<TRequest, TListener> extends
         IBinder getBinder();
     }
 
-    protected BinderListenerRegistration(String tag, @Nullable TRequest request,
-            CallerIdentity callerIdentity, TListener listener) {
-        super(tag, request, callerIdentity, listener);
+    protected BinderListenerRegistration(@Nullable TRequest request, CallerIdentity callerIdentity,
+            TListener listener) {
+        super(request, callerIdentity, listener);
     }
 
     @Override
@@ -78,10 +81,20 @@ public abstract class BinderListenerRegistration<TRequest, TListener> extends
     protected void onBinderListenerUnregister() {}
 
     @Override
+    public void onOperationFailure(ListenerOperation<TListener> operation, Exception e) {
+        if (e instanceof RemoteException) {
+            Log.w(getOwner().getTag(), "registration " + this + " removed", e);
+            remove();
+        } else {
+            super.onOperationFailure(operation, e);
+        }
+    }
+
+    @Override
     public void binderDied() {
         try {
-            if (Log.isLoggable(mTag, Log.DEBUG)) {
-                Log.d(mTag, "binder registration " + getIdentity() + " died");
+            if (Log.isLoggable(getOwner().getTag(), Log.DEBUG)) {
+                Log.d(getOwner().getTag(), "binder registration " + getIdentity() + " died");
             }
             remove();
         } catch (RuntimeException e) {

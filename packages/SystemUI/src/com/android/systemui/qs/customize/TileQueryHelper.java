@@ -80,8 +80,6 @@ public class TileQueryHelper {
         mFinished = false;
         // Enqueue jobs to fetch every system tile and then ever package tile.
         addCurrentAndStockTiles(host);
-
-        addPackageTiles(host);
     }
 
     public boolean isFinished() {
@@ -122,23 +120,86 @@ public class TileQueryHelper {
                 tile.destroy();
                 continue;
             }
-            tile.setListening(this, true);
-            tile.refreshState();
-            tile.setListening(this, false);
             tile.setTileSpec(spec);
             tilesToAdd.add(tile);
         }
 
-        mBgExecutor.execute(() -> {
-            for (QSTile tile : tilesToAdd) {
-                final QSTile.State state = tile.getState().copy();
-                // Ignore the current state and get the generic label instead.
-                state.label = tile.getTileLabel();
-                tile.destroy();
-                addTile(tile.getTileSpec(), null, state, true);
+        new TileCollector(tilesToAdd, host).startListening();
+    }
+
+    private static class TilePair {
+        QSTile mTile;
+        boolean mReady = false;
+    }
+
+    private class TileCollector implements QSTile.Callback {
+
+        private final List<TilePair> mQSTileList = new ArrayList<>();
+        private final QSTileHost mQSTileHost;
+
+        TileCollector(List<QSTile> tilesToAdd, QSTileHost host) {
+            for (QSTile tile: tilesToAdd) {
+                TilePair pair = new TilePair();
+                pair.mTile = tile;
+                mQSTileList.add(pair);
             }
+            mQSTileHost = host;
+            if (tilesToAdd.isEmpty()) {
+                mBgExecutor.execute(this::finished);
+            }
+        }
+
+        private void finished() {
             notifyTilesChanged(false);
-        });
+            addPackageTiles(mQSTileHost);
+        }
+
+        private void startListening() {
+            for (TilePair pair: mQSTileList) {
+                pair.mTile.addCallback(this);
+                pair.mTile.setListening(this, true);
+                // Make sure that at least one refresh state happens
+                pair.mTile.refreshState();
+            }
+        }
+
+        // This is called in the Bg thread
+        @Override
+        public void onStateChanged(State s) {
+            boolean allReady = true;
+            for (TilePair pair: mQSTileList) {
+                if (!pair.mReady && pair.mTile.isTileReady()) {
+                    pair.mTile.removeCallback(this);
+                    pair.mTile.setListening(this, false);
+                    pair.mReady = true;
+                } else if (!pair.mReady) {
+                    allReady = false;
+                }
+            }
+            if (allReady) {
+                for (TilePair pair : mQSTileList) {
+                    QSTile tile = pair.mTile;
+                    final QSTile.State state = tile.getState().copy();
+                    // Ignore the current state and get the generic label instead.
+                    state.label = tile.getTileLabel();
+                    tile.destroy();
+                    addTile(tile.getTileSpec(), null, state, true);
+                }
+                finished();
+            }
+        }
+
+        @Override
+        public void onShowDetail(boolean show) {}
+
+        @Override
+        public void onToggleStateChanged(boolean state) {}
+
+        @Override
+        public void onScanStateChanged(boolean state) {}
+
+        @Override
+        public void onAnnouncementRequested(CharSequence announcement) {}
     }
 
     private void addPackageTiles(final QSTileHost host) {

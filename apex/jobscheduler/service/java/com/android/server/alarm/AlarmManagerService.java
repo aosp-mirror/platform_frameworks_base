@@ -252,7 +252,7 @@ public class AlarmManagerService extends SystemService {
     final ArrayList<IdleDispatchEntry> mAllowWhileIdleDispatches = new ArrayList();
 
     interface Stats {
-        int REORDER_ALARMS_FOR_STANDBY = 1;
+        int REORDER_ALARMS_FOR_STANDBY = 0;
     }
 
     private final StatLogger mStatLogger = new StatLogger("Alarm manager stats", new String[]{
@@ -2720,6 +2720,14 @@ public class AlarmManagerService extends SystemService {
             }
             if (alarmsForUid.size() == 0) {
                 mPendingBackgroundAlarms.removeAt(i);
+            }
+        }
+        for (int i = mPendingNonWakeupAlarms.size() - 1; i >= 0; i--) {
+            final Alarm a = mPendingNonWakeupAlarms.get(i);
+            if (a.matches(operation, directReceiver)) {
+                // Don't set didRemove, since this doesn't impact the scheduled alarms.
+                mPendingNonWakeupAlarms.remove(i);
+                decrementAlarmCount(a.uid, 1);
             }
         }
         if (didRemove) {

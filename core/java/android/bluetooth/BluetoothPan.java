@@ -89,6 +89,33 @@ public final class BluetoothPan implements BluetoothProfile {
     @SuppressLint("ActionValue")
     public static final String EXTRA_LOCAL_ROLE = "android.bluetooth.pan.extra.LOCAL_ROLE";
 
+    /**
+     * Intent used to broadcast the change in tethering state of the Pan
+     * Profile
+     *
+     * <p>This intent will have 1 extra:
+     * <ul>
+     * <li> {@link #EXTRA_TETHERING_STATE} - The current state of Bluetooth
+     * tethering. </li>
+     * </ul>
+     *
+     * <p> {@link #EXTRA_TETHERING_STATE} can be any of {@link #TETHERING_STATE_OFF} or
+     * {@link #TETHERING_STATE_ON}
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
+     * receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_TETHERING_STATE_CHANGED =
+            "android.bluetooth.action.TETHERING_STATE_CHANGED";
+
+    /**
+     * Extra for {@link #ACTION_TETHERING_STATE_CHANGED} intent
+     * The tethering state of the PAN profile.
+     * It can be one of {@link #TETHERING_STATE_OFF} or {@link #TETHERING_STATE_ON}.
+     */
+    public static final String EXTRA_TETHERING_STATE =
+            "android.bluetooth.extra.TETHERING_STATE";
+
     /** @hide */
     @IntDef({PAN_ROLE_NONE, LOCAL_NAP_ROLE, LOCAL_PANU_ROLE})
     @Retention(RetentionPolicy.SOURCE)
@@ -114,6 +141,14 @@ public final class BluetoothPan implements BluetoothProfile {
 
     public static final int REMOTE_PANU_ROLE = 2;
 
+    /** @hide **/
+    @IntDef({TETHERING_STATE_OFF, TETHERING_STATE_ON})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TetheringState{}
+
+    public static final int TETHERING_STATE_OFF = 1;
+
+    public static final int TETHERING_STATE_ON = 2;
     /**
      * Return codes for the connect and disconnect Bluez / Dbus calls.
      *

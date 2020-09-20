@@ -3008,14 +3008,36 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return false;
         }
 
-        InlineFillUi inlineFillUi = InlineFillUi.forAutofill(
-                inlineSuggestionsRequest.get(), response, focusedId, filterText,
-                /*uiCallback*/this, /*onErrorCallback*/ () -> {
-                    synchronized (mLock) {
-                        mInlineSessionController.setInlineFillUiLocked(
-                                InlineFillUi.emptyUi(focusedId));
+        final InlineFillUi.InlineFillUiInfo inlineFillUiInfo =
+                new InlineFillUi.InlineFillUiInfo(inlineSuggestionsRequest.get(), focusedId,
+                        filterText, remoteRenderService, userId, id);
+        InlineFillUi inlineFillUi = InlineFillUi.forAutofill(inlineFillUiInfo, response,
+                new InlineFillUi.InlineSuggestionUiCallback() {
+                    @Override
+                    public void autofill(@NonNull Dataset dataset, int datasetIndex) {
+                        fill(response.getRequestId(), datasetIndex, dataset);
                     }
-                }, remoteRenderService, userId, id);
+
+                    @Override
+                    public void authenticate(int requestId, int datasetIndex) {
+                        Session.this.authenticate(response.getRequestId(), datasetIndex,
+                                response.getAuthentication(), response.getClientState(),
+                                /* authenticateInline= */ true);
+                    }
+
+                    @Override
+                    public void startIntentSender(@NonNull IntentSender intentSender) {
+                        Session.this.startIntentSender(intentSender, new Intent());
+                    }
+
+                    @Override
+                    public void onError() {
+                        synchronized (mLock) {
+                            mInlineSessionController.setInlineFillUiLocked(
+                                    InlineFillUi.emptyUi(focusedId));
+                        }
+                    }
+                });
         return mInlineSessionController.setInlineFillUiLocked(inlineFillUi);
     }
 

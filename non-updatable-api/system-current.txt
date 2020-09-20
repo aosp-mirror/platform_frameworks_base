@@ -1532,12 +1532,16 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void setBluetoothTethering(boolean);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
     field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED";
+    field public static final String ACTION_TETHERING_STATE_CHANGED = "android.bluetooth.action.TETHERING_STATE_CHANGED";
     field public static final String EXTRA_LOCAL_ROLE = "android.bluetooth.pan.extra.LOCAL_ROLE";
+    field public static final String EXTRA_TETHERING_STATE = "android.bluetooth.extra.TETHERING_STATE";
     field public static final int LOCAL_NAP_ROLE = 1; // 0x1
     field public static final int LOCAL_PANU_ROLE = 2; // 0x2
     field public static final int PAN_ROLE_NONE = 0; // 0x0
     field public static final int REMOTE_NAP_ROLE = 1; // 0x1
     field public static final int REMOTE_PANU_ROLE = 2; // 0x2
+    field public static final int TETHERING_STATE_OFF = 1; // 0x1
+    field public static final int TETHERING_STATE_ON = 2; // 0x2
   }
 
   public class BluetoothPbap implements android.bluetooth.BluetoothProfile {
@@ -4303,7 +4307,7 @@ package android.media {
   }
 
   public final class MediaTranscodeManager {
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingJob enqueueRequest(@NonNull android.media.MediaTranscodeManager.TranscodingRequest, @NonNull java.util.concurrent.Executor, @NonNull android.media.MediaTranscodeManager.OnTranscodingFinishedListener) throws java.io.FileNotFoundException;
+    method @NonNull public android.media.MediaTranscodeManager.TranscodingJob enqueueRequest(@NonNull android.media.MediaTranscodeManager.TranscodingRequest, @NonNull java.util.concurrent.Executor, @NonNull android.media.MediaTranscodeManager.OnTranscodingFinishedListener) throws java.io.FileNotFoundException, android.media.MediaTranscodingException.ServiceNotAvailableException;
     field public static final int PRIORITY_REALTIME = 1; // 0x1
     field public static final int TRANSCODING_TYPE_VIDEO = 1; // 0x1
   }
@@ -4318,7 +4322,6 @@ package android.media {
     method @IntRange(from=0, to=100) public int getProgress();
     method public int getResult();
     method public int getStatus();
-    method public boolean retry();
     method public void setOnProgressUpdateListener(@NonNull java.util.concurrent.Executor, @Nullable android.media.MediaTranscodeManager.TranscodingJob.OnProgressUpdateListener);
     method public void setOnProgressUpdateListener(int, @NonNull java.util.concurrent.Executor, @Nullable android.media.MediaTranscodeManager.TranscodingJob.OnProgressUpdateListener);
     field public static final int RESULT_CANCELED = 4; // 0x4
@@ -8238,6 +8241,7 @@ package android.provider {
     field public static final String APN_SET_ID = "apn_set_id";
     field public static final int CARRIER_EDITED = 4; // 0x4
     field public static final String EDITED_STATUS = "edited";
+    field public static final int MATCH_ALL_APN_SET_ID = -1; // 0xffffffff
     field public static final String MAX_CONNECTIONS = "max_conns";
     field public static final String MODEM_PERSIST = "modem_cognitive";
     field public static final String MTU = "mtu";
@@ -9795,7 +9799,8 @@ package android.telephony {
     method public void onCallAttributesChanged(@NonNull android.telephony.CallAttributes);
     method @Deprecated public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber);
     method public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber, int);
-    method public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber);
+    method @Deprecated public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber);
+    method public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber, int);
     method public void onPhysicalChannelConfigurationChanged(@NonNull java.util.List<android.telephony.PhysicalChannelConfig>);
     method @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public void onPreciseCallStateChanged(@NonNull android.telephony.PreciseCallState);
     method public void onRadioPowerStateChanged(int);

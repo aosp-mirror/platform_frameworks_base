@@ -280,10 +280,25 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
 
         PackageManager pm = context.getPackageManager();
         boolean supportsPip = pm.hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
-        if (!supportsPip) {
+        if (supportsPip) {
+            initController(context, broadcastDispatcher, configController, deviceConfig,
+                    displayController, floatingContentCoordinator, sysUiState, pipBoundsHandler,
+                    pipSurfaceTransactionHelper, pipTaskOrganizer, pipUiEventLogger);
+        } else {
             Log.w(TAG, "Device not support PIP feature");
-            return;
         }
+    }
+
+    private void initController(Context context, BroadcastDispatcher broadcastDispatcher,
+            ConfigurationController configController,
+            DeviceConfigProxy deviceConfig,
+            DisplayController displayController,
+            FloatingContentCoordinator floatingContentCoordinator,
+            SysUiState sysUiState,
+            PipBoundsHandler pipBoundsHandler,
+            PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
+            PipTaskOrganizer pipTaskOrganizer,
+            PipUiEventLogger pipUiEventLogger) {
 
         // Ensure that we are the primary user's SystemUI.
         final int processUser = UserManager.get(context).getUserHandle();

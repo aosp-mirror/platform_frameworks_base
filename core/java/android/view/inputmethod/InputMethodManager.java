@@ -457,9 +457,7 @@ public final class InputMethodManager {
     private int mRequestUpdateCursorAnchorInfoMonitorMode = REQUEST_UPDATE_CURSOR_ANCHOR_INFO_NONE;
 
     /**
-     * When {@link ViewRootImpl#sNewInsetsMode} is set to
-     * >= {@link ViewRootImpl#NEW_INSETS_MODE_IME}, {@link ImeInsetsSourceConsumer} applies the
-     * IME visibility and listens for other state changes.
+     * Applies the IME visibility and listens for other state changes.
      */
     private ImeInsetsSourceConsumer mImeInsetsConsumer;
 

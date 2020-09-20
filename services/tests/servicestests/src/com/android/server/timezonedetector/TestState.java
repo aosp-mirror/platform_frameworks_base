@@ -76,7 +76,7 @@ public class TestState<T> {
 
     /** Asserts the number of times {@link #set} has been called. */
     public void assertChangeCount(int expectedCount) {
-        assertEquals(expectedCount, mValues.size());
+        assertEquals(expectedCount, getChangeCount());
     }
 
     /**
@@ -88,5 +88,26 @@ public class TestState<T> {
             return mValues.get(mValues.size() - 1);
         }
         return mInitialValue;
+    }
+
+    /** Returns the number of times {@link #set} has been called. */
+    public int getChangeCount() {
+        return mValues.size();
+    }
+
+    /**
+     * Returns an historic value of the state. Values for {@code age} can be from {@code 0}, the
+     * latest value, through {@code getChangeCount() - 1}, which returns the oldest change, to
+     * {@code getChangeCount()}, which returns the initial value. Values outside of this range will
+     * cause {@link IndexOutOfBoundsException} to be thrown.
+     */
+    public T getPrevious(int age) {
+        int size = mValues.size();
+        if (age < size) {
+            return mValues.get(size - 1 - age);
+        } else if (age == size) {
+            return mInitialValue;
+        }
+        throw new IndexOutOfBoundsException("age=" + age + " is too big.");
     }
 }

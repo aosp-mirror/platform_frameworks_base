@@ -27,7 +27,6 @@ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -65,7 +64,6 @@ import com.android.systemui.statusbar.notification.collection.legacy.VisualStabi
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ForegroundServiceDungeonView;
-import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
@@ -86,8 +84,6 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.function.BiConsumer;
 
 /**
  * Tests for {@link NotificationStackScrollLayoutController}.
@@ -132,7 +128,6 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private RemoteInputController mRemoteInputController;
     @Mock private VisualStabilityManager mVisualStabilityManager;
-    @Mock private NotificationBlockingHelperManager mNotificationBlockingHelperManager;
     @Mock private ShadeController mShadeController;
 
     @Captor
@@ -184,7 +179,6 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mLayoutInflater,
                 mRemoteInputManager,
                 mVisualStabilityManager,
-                mNotificationBlockingHelperManager,
                 mShadeController
         );
 
@@ -376,25 +370,6 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
         mController.attach(mNotificationStackScrollLayout);
         verify(mNotificationStackScrollLayout, never()).initializeForegroundServiceSection(
                 any(ForegroundServiceDungeonView.class));
-    }
-
-    @Test
-    public void testSetExpandedHeight_blockingHelperManagerReceivedCallbacks() {
-
-        ArgumentCaptor<BiConsumer<Float, Float>>
-                onExpandedHeightChangeListenerCaptor = ArgumentCaptor.forClass(
-                BiConsumer.class);
-
-        mController.attach(mNotificationStackScrollLayout);
-
-        verify(mNotificationStackScrollLayout, times(2)).addOnExpandedHeightChangedListener(
-                onExpandedHeightChangeListenerCaptor.capture());
-
-        for (BiConsumer<Float, Float> listener :
-                onExpandedHeightChangeListenerCaptor.getAllValues()) {
-            listener.accept(1f, 2f);
-        }
-        verify(mNotificationBlockingHelperManager).setNotificationShadeExpanded(1f);
     }
 
     private LogMaker logMatcher(int category, int type) {

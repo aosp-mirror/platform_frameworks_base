@@ -86,8 +86,6 @@ public final class SoftApInfo implements Parcelable {
      */
     public static final int CHANNEL_WIDTH_160MHZ = 6;
 
-
-
     /** The frequency which AP resides on.  */
     private int mFrequency = 0;
 
@@ -97,6 +95,11 @@ public final class SoftApInfo implements Parcelable {
     /** The MAC Address which AP resides on. */
     @Nullable
     private MacAddress mBssid;
+
+    /**
+     * The operational mode of the AP.
+     */
+    private @WifiAnnotations.WifiStandard int mWifiStandard = ScanResult.WIFI_STANDARD_UNKNOWN;
 
     /**
      * Get the frequency which AP resides on.
@@ -163,6 +166,27 @@ public final class SoftApInfo implements Parcelable {
     }
 
     /**
+     * Set the operational mode of the AP.
+     *
+     * @param wifiStandard values from {@link ScanResult}'s {@code WIFI_STANDARD_}
+     * @hide
+     */
+    public void setWifiStandard(@WifiAnnotations.WifiStandard int wifiStandard) {
+        mWifiStandard = wifiStandard;
+    }
+
+    /**
+     * Get the operational mode of the AP.
+     * @return valid values from {@link ScanResult}'s {@code WIFI_STANDARD_}
+     */
+    public @WifiAnnotations.WifiStandard int getWifiStandard() {
+        if (!SdkLevelUtil.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        return mWifiStandard;
+    }
+
+    /**
      * @hide
      */
     public SoftApInfo(@Nullable SoftApInfo source) {
@@ -170,6 +194,7 @@ public final class SoftApInfo implements Parcelable {
             mFrequency = source.mFrequency;
             mBandwidth = source.mBandwidth;
             mBssid = source.mBssid;
+            mWifiStandard = source.mWifiStandard;
         }
     }
 
@@ -191,6 +216,7 @@ public final class SoftApInfo implements Parcelable {
         dest.writeInt(mFrequency);
         dest.writeInt(mBandwidth);
         dest.writeParcelable(mBssid, flags);
+        dest.writeInt(mWifiStandard);
     }
 
     @NonNull
@@ -201,6 +227,7 @@ public final class SoftApInfo implements Parcelable {
             info.mFrequency = in.readInt();
             info.mBandwidth = in.readInt();
             info.mBssid = in.readParcelable(MacAddress.class.getClassLoader());
+            info.mWifiStandard = in.readInt();
             return info;
         }
 
@@ -215,8 +242,9 @@ public final class SoftApInfo implements Parcelable {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("SoftApInfo{");
         sbuf.append("bandwidth= ").append(mBandwidth);
-        sbuf.append(",frequency= ").append(mFrequency);
+        sbuf.append(", frequency= ").append(mFrequency);
         if (mBssid != null) sbuf.append(",bssid=").append(mBssid.toString());
+        sbuf.append(", wifiStandard= ").append(mWifiStandard);
         sbuf.append("}");
         return sbuf.toString();
     }
@@ -228,11 +256,12 @@ public final class SoftApInfo implements Parcelable {
         SoftApInfo softApInfo = (SoftApInfo) o;
         return mFrequency == softApInfo.mFrequency
                 && mBandwidth == softApInfo.mBandwidth
-                && Objects.equals(mBssid, softApInfo.mBssid);
+                && Objects.equals(mBssid, softApInfo.mBssid)
+                && mWifiStandard == softApInfo.mWifiStandard;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mFrequency, mBandwidth, mBssid);
+        return Objects.hash(mFrequency, mBandwidth, mBssid, mWifiStandard);
     }
 }

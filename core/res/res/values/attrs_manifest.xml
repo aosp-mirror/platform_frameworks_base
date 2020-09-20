@@ -239,7 +239,9 @@
         <!-- Old synonym for "privileged". Deprecated in API level 23. -->
         <flag name="system" value="0x10" />
         <!-- Additional flag from base permission type: this permission can also
-             (optionally) be granted to development applications. -->
+             (optionally) be granted to development applications. Although undocumented, the
+              permission state used to be shared by all users (including future users), but it is
+              managed per-user since API level 31. -->
         <flag name="development" value="0x20" />
         <!-- Additional flag from base permission type: this permission is closely
              associated with an app op for controlling access. -->
@@ -359,7 +361,9 @@
          package manager. As such, its use is strongly discouraged and may be
          removed in a future version of Android. Instead, apps should use proper
          communication mechanisms, such as services and content providers,
-         to facilitate interoperability between shared components. -->
+         to facilitate interoperability between shared components. Note that
+         existing apps cannot remove this value, as migrating off a
+         shared user ID is not supported. -->
     <attr name="sharedUserId" format="string" />
 
     <!-- Specify a label for the shared user UID of this package.  This is

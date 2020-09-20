@@ -225,6 +225,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         if (mService != null) {
             mService.asBinder().unlinkToDeath(this, 0);
         }
+        mBinding = false;
         mService = null;
         mServiceDied = true;
         cancelScheduledUnbind();

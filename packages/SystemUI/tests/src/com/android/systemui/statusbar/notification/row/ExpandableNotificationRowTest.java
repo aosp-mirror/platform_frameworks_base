@@ -54,7 +54,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -71,7 +70,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     boolean mHeadsUpAnimatingAway = false;
 
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
-    @Mock private NotificationBlockingHelperManager mBlockingHelperManager;
 
     @Before
     public void setUp() throws Exception {
@@ -83,9 +81,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         mGroupRow = mNotificationTestHelper.createGroup();
         mGroupRow.setHeadsUpAnimatingAwayListener(
                 animatingAway -> mHeadsUpAnimatingAway = animatingAway);
-        mDependency.injectTestDependency(
-                NotificationBlockingHelperManager.class,
-                mBlockingHelperManager);
     }
 
     @Test
@@ -254,30 +249,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         Assert.assertEquals(true, mHeadsUpAnimatingAway);
         mGroupRow.setHeadsUpAnimatingAway(false);
         Assert.assertEquals(false, mHeadsUpAnimatingAway);
-    }
-
-    @Test
-    public void testPerformDismissWithBlockingHelper_falseWhenBlockingHelperIsntShown() {
-        when(mBlockingHelperManager.perhapsShowBlockingHelper(
-                eq(mGroupRow), any(NotificationMenuRowPlugin.class))).thenReturn(false);
-
-        assertFalse(
-                mGroupRow.performDismissWithBlockingHelper(false /* fromAccessibility */));
-    }
-
-    @Test
-    public void testPerformDismissWithBlockingHelper_doesntPerformOnGroupSummary() {
-        ExpandableNotificationRow childRow = mGroupRow.getChildrenContainer().getViewAtPosition(0);
-        when(mBlockingHelperManager.perhapsShowBlockingHelper(eq(childRow), any(NotificationMenuRowPlugin.class)))
-                .thenReturn(true);
-
-        assertTrue(
-                childRow.performDismissWithBlockingHelper(false /* fromAccessibility */));
-
-        verify(mBlockingHelperManager, times(1))
-                .perhapsShowBlockingHelper(eq(childRow), any(NotificationMenuRowPlugin.class));
-        verify(mBlockingHelperManager, times(0))
-                .perhapsShowBlockingHelper(eq(mGroupRow), any(NotificationMenuRowPlugin.class));
     }
 
     @Test

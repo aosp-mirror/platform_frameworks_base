@@ -101,10 +101,15 @@ public abstract class JobScheduler {
      * version {@link android.os.Build.VERSION_CODES#Q}. As such, the system may throttle calls to
      * this API if calls are made too frequently in a short amount of time.
      *
+     * <p>Note: The JobService component needs to be enabled in order to successfully schedule a
+     * job.
+     *
      * @param job The job you wish scheduled. See
      * {@link android.app.job.JobInfo.Builder JobInfo.Builder} for more detail on the sorts of jobs
      * you can schedule.
      * @return the result of the schedule request.
+     * @throws IllegalArgumentException if the specified {@link JobService} doesn't exist or is
+     * disabled.
      */
     public abstract @Result int schedule(@NonNull JobInfo job);
 
@@ -137,11 +142,21 @@ public abstract class JobScheduler {
      * work you are enqueue, since currently this will always be treated as a different JobInfo,
      * even if the ClipData contents are exactly the same.</p>
      *
+     * <p class="caution"><strong>Note:</strong> Scheduling a job can have a high cost, even if it's
+     * rescheduling the same job and the job didn't execute, especially on platform versions before
+     * version {@link android.os.Build.VERSION_CODES#Q}. As such, the system may throttle calls to
+     * this API if calls are made too frequently in a short amount of time.
+     *
+     * <p>Note: The JobService component needs to be enabled in order to successfully schedule a
+     * job.
+     *
      * @param job The job you wish to enqueue work for. See
      * {@link android.app.job.JobInfo.Builder JobInfo.Builder} for more detail on the sorts of jobs
      * you can schedule.
      * @param work New work to enqueue.  This will be available later when the job starts running.
      * @return the result of the enqueue request.
+     * @throws IllegalArgumentException if the specified {@link JobService} doesn't exist or is
+     * disabled.
      */
     public abstract @Result int enqueue(@NonNull JobInfo job, @NonNull JobWorkItem work);
 

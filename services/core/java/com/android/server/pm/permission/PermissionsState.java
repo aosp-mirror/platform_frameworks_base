@@ -86,6 +86,10 @@ public final class PermissionsState {
         copyFrom(prototype);
     }
 
+    public int[] getGlobalGids() {
+        return mGlobalGids;
+    }
+
     /**
      * Sets the global gids, applicable to all users.
      *
@@ -825,7 +829,7 @@ public final class PermissionsState {
 
                 PermissionState userState = mUserStates.get(userId);
                 if (userState == null) {
-                    userState = new PermissionState(mPerm.getName());
+                    userState = new PermissionState(mPerm);
                     mUserStates.put(userId, userState);
                 }
 
@@ -908,7 +912,7 @@ public final class PermissionsState {
                     }
                     return userState.mFlags != oldFlags;
                 } else if (newFlags != 0) {
-                    userState = new PermissionState(mPerm.getName());
+                    userState = new PermissionState(mPerm);
                     userState.mFlags = newFlags;
                     mUserStates.put(userId, userState);
                     return true;
@@ -929,16 +933,16 @@ public final class PermissionsState {
     }
 
     public static final class PermissionState {
-        private final String mName;
+        private final BasePermission mPermission;
         private boolean mGranted;
         private int mFlags;
 
-        public PermissionState(String name) {
-            mName = name;
+        public PermissionState(BasePermission permission) {
+            mPermission = permission;
         }
 
         public PermissionState(PermissionState other) {
-            mName = other.mName;
+            mPermission = other.mPermission;
             mGranted = other.mGranted;
             mFlags = other.mFlags;
         }
@@ -947,8 +951,12 @@ public final class PermissionsState {
             return !mGranted && mFlags == 0;
         }
 
+        public BasePermission getPermission() {
+            return mPermission;
+        }
+
         public String getName() {
-            return mName;
+            return mPermission.getName();
         }
 
         public boolean isGranted() {

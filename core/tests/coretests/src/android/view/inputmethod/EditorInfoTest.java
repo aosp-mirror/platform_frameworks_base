@@ -274,13 +274,10 @@ public class EditorInfoTest {
         editorInfo.inputType = EditorInfo.TYPE_CLASS_TEXT;
 
         editorInfo.setInitialSurroundingText(sb);
-        sb.setLength(0);
-        editorInfo.writeToParcel(parcel, 0);
+        sb.setLength(/* newLength= */ 0);
+        editorInfo.writeToParcel(parcel, /* flags= */ 0);
 
-        try {
-            editorInfo.getInitialTextBeforeCursor(60, 1);
-            fail("Test shouldn't have exception");
-        } catch (AssertionError e) { }
+        editorInfo.getInitialTextBeforeCursor(/* length= */ 60, /* flags= */ 1);
     }
 
     private static void assertExpectedTextLength(EditorInfo editorInfo,

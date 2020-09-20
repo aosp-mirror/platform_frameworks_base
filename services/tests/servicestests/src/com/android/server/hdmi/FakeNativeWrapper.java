@@ -24,6 +24,7 @@ import com.android.server.hdmi.HdmiCecController.NativeWrapper;
 import com.google.common.collect.Iterables;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /** Fake {@link NativeWrapper} useful for testing. */
@@ -48,6 +49,7 @@ final class FakeNativeWrapper implements NativeWrapper {
             };
 
     private final List<HdmiCecMessage> mResultMessages = new ArrayList<>();
+    private final HashMap<Integer, Integer> mMessageSendResult = new HashMap<>();
     private int mMyPhysicalAddress = 0;
     private HdmiPortInfo[] mHdmiPortInfo = null;
 
@@ -65,9 +67,10 @@ final class FakeNativeWrapper implements NativeWrapper {
         if (body.length == 0) {
             return mPollAddressResponse[dstAddress];
         } else {
-            mResultMessages.add(HdmiCecMessageBuilder.of(srcAddress, dstAddress, body));
+            HdmiCecMessage message = HdmiCecMessageBuilder.of(srcAddress, dstAddress, body);
+            mResultMessages.add(message);
+            return mMessageSendResult.getOrDefault(message.getOpcode(), SendMessageResult.SUCCESS);
         }
-        return SendMessageResult.SUCCESS;
     }
 
     @Override
@@ -130,6 +133,10 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     public void setPollAddressResponse(int logicalAddress, int response) {
         mPollAddressResponse[logicalAddress] = response;
+    }
+
+    public void setMessageSendResult(int opcode, int result) {
+        mMessageSendResult.put(opcode, result);
     }
 
     @VisibleForTesting

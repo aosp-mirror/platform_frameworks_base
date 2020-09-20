@@ -46,7 +46,7 @@ public class BatchingAlarmStore implements AlarmStore {
     private AlarmClockRemovalListener mAlarmClockRemovalListener;
 
     interface Stats {
-        int REBATCH_ALL_ALARMS = 1;
+        int REBATCH_ALL_ALARMS = 0;
     }
 
     final StatLogger mStatLogger = new StatLogger("Alarm store stats", new String[]{

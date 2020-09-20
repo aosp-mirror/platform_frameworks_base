@@ -19,9 +19,17 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-TimeLord::TimeLord() : mFrameIntervalNanos(milliseconds_to_nanoseconds(16)), mFrameTimeNanos(0) {}
+TimeLord::TimeLord() : mFrameIntervalNanos(milliseconds_to_nanoseconds(16)),
+                       mFrameTimeNanos(0),
+                       mFrameIntendedTimeNanos(0),
+                       mFrameVsyncId(-1) {}
 
-bool TimeLord::vsyncReceived(nsecs_t vsync) {
+bool TimeLord::vsyncReceived(nsecs_t vsync, nsecs_t intendedVsync, int64_t vsyncId) {
+    if (intendedVsync > mFrameIntendedTimeNanos) {
+        mFrameIntendedTimeNanos = intendedVsync;
+        mFrameVsyncId = vsyncId;
+    }
+
     if (vsync > mFrameTimeNanos) {
         mFrameTimeNanos = vsync;
         return true;
@@ -36,6 +44,8 @@ nsecs_t TimeLord::computeFrameTimeNanos() {
     if (jitterNanos >= mFrameIntervalNanos) {
         nsecs_t lastFrameOffset = jitterNanos % mFrameIntervalNanos;
         mFrameTimeNanos = now - lastFrameOffset;
+        // mFrameVsyncId is not adjusted here as we still want to send
+        // the vsync id that started this frame to the Surface Composer
     }
     return mFrameTimeNanos;
 }

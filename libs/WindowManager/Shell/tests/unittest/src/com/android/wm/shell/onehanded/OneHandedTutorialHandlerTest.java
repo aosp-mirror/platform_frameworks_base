@@ -18,6 +18,7 @@ package com.android.wm.shell.onehanded;
 
 import static org.mockito.Mockito.verify;
 
+import android.content.om.IOverlayManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -44,6 +45,8 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
     DisplayController mMockDisplayController;
     @Mock
     OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
+    @Mock
+    IOverlayManager mMockOverlayManager;
 
     @Before
     public void setUp() {
@@ -56,11 +59,12 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
                 mMockDisplayAreaOrganizer,
                 mTouchHandler,
                 mTutorialHandler,
-                mGestureHandler);
+                mGestureHandler,
+                mMockOverlayManager);
     }
 
     @Test
-    public void testOneHandedManager_registerForDisplayAreaOrganizer() {
+    public void testRegisterForDisplayAreaOrganizer() {
         verify(mMockDisplayAreaOrganizer).registerTransitionCallback(mTutorialHandler);
     }
 }

@@ -171,6 +171,12 @@ static int IP_V6_LENGTH = 16;
 
 void DestroyCallback(const C2Buffer * /* buf */, void *arg) {
     android::sp<android::MediaEvent> event = (android::MediaEvent *)arg;
+    if (event->mLinearBlockObj != NULL) {
+        JNIEnv *env = android::AndroidRuntime::getJNIEnv();
+        env->DeleteWeakGlobalRef(event->mLinearBlockObj);
+        event->mLinearBlockObj = NULL;
+    }
+
     event->mAvHandleRefCnt--;
     event->finalize();
 }
@@ -180,6 +186,12 @@ namespace android {
 LnbCallback::LnbCallback(jobject lnbObj, LnbId id) : mId(id) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     mLnb = env->NewWeakGlobalRef(lnbObj);
+}
+
+LnbCallback::~LnbCallback() {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    env->DeleteWeakGlobalRef(mLnb);
+    mLnb = NULL;
 }
 
 Return<void> LnbCallback::onEvent(LnbEventType lnbEventType) {
@@ -305,6 +317,7 @@ MediaEvent::MediaEvent(sp<IFilter> iFilter, hidl_handle avHandle,
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     mMediaEventObj = env->NewWeakGlobalRef(obj);
     mAvHandle = native_handle_clone(avHandle.getNativeHandle());
+    mLinearBlockObj = NULL;
 }
 
 MediaEvent::~MediaEvent() {
@@ -367,7 +380,7 @@ jobject MediaEvent::getLinearBlock() {
                 true);
         mLinearBlockObj = env->NewWeakGlobalRef(linearBlock);
         mAvHandleRefCnt++;
-        return mLinearBlockObj;
+        return linearBlock;
     } else {
         native_handle_close(const_cast<native_handle_t*>(
                     reinterpret_cast<const native_handle_t*>(mIonHandle)));

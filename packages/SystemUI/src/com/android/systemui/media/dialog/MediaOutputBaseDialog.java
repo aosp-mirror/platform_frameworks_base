@@ -43,7 +43,7 @@ import androidx.core.graphics.drawable.IconCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.settingslib.R;
+import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 /**

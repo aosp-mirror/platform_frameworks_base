@@ -17,6 +17,7 @@
 package com.android.systemui;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.util.Log;
@@ -26,6 +27,7 @@ import com.android.systemui.dagger.DaggerGlobalRootComponent;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
+import com.android.systemui.navigationbar.gestural.BackGestureTfClassifierProvider;
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
 
 import java.util.concurrent.ExecutionException;
@@ -110,12 +112,16 @@ public class SystemUIFactory {
         return mSysUIComponent;
     }
 
-    /** Returns the list of system UI components that should be started. */
+    /**
+     * Returns the list of system UI components that should be started.
+     */
     public String[] getSystemUIServiceComponents(Resources resources) {
         return resources.getStringArray(R.array.config_systemUIServiceComponents);
     }
 
-    /** Returns the list of system UI components that should be started per user. */
+    /**
+     * Returns the list of system UI components that should be started per user.
+     */
     public String[] getSystemUIServiceComponentsPerUser(Resources resources) {
         return resources.getStringArray(R.array.config_systemUIServiceComponentsPerUser);
     }
@@ -125,9 +131,17 @@ public class SystemUIFactory {
      * This method is overridden in vendor specific implementation of Sys UI.
      */
     public ScreenshotNotificationSmartActionsProvider
-            createScreenshotNotificationSmartActionsProvider(Context context,
-            Executor executor,
-            Handler uiHandler) {
+                createScreenshotNotificationSmartActionsProvider(
+                        Context context, Executor executor, Handler uiHandler) {
         return new ScreenshotNotificationSmartActionsProvider();
+    }
+
+    /**
+     * Creates an instance of BackGestureTfClassifierProvider.
+     * This method is overridden in vendor specific implementation of Sys UI.
+     */
+    public BackGestureTfClassifierProvider createBackGestureTfClassifierProvider(
+            AssetManager am) {
+        return new BackGestureTfClassifierProvider();
     }
 }

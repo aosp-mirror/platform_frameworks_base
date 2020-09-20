@@ -37,11 +37,19 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * A base class to multiplex client listener registrations within system server. Registrations are
- * divided into two categories, active registrations and inactive registrations, as defined by
- * {@link #isActive(ListenerRegistration)}. If a registration's active state changes,
+ * A base class to multiplex client listener registrations within system server. Every listener is
+ * represented by a registration object which stores all required state for a listener. Keys are
+ * used to uniquely identify every registration. Listener operations may be executed on
+ * registrations in order to invoke the represented listener.
+ *
+ * Registrations are divided into two categories, active registrations and inactive registrations,
+ * as defined by {@link #isActive(ListenerRegistration)}. If a registration's active state changes,
  * {@link #updateRegistrations(Predicate)} must be invoked and return true for any registration
  * whose active state may have changed. Listeners will only be invoked for active registrations.
+ *
+ * The set of active registrations is combined into a single merged registration, which is submitted
+ * to the backing service when necessary in order to register the service. The merged registration
+ * is updated whenever the set of active registration changes.
  *
  * Callbacks invoked for various changes will always be ordered according to this lifecycle list:
  *
@@ -63,14 +71,16 @@ import java.util.function.Predicate;
  * {@link #removeRegistration(Object, ListenerRegistration)}, not via any other removal method. This
  * ensures re-entrant removal does not accidentally remove the incorrect registration.
  *
- * @param <TKey>           key type
- * @param <TRequest>       request type
- * @param <TListener>      listener type
- * @param <TRegistration>  registration type
- * @param <TMergedRequest> merged request type
+ * @param <TKey>                key type
+ * @param <TListener>           listener type
+ * @param <TListenerOperation>  listener operation type
+ * @param <TRegistration>       registration type
+ * @param <TMergedRegistration> merged registration type
  */
-public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
-        TRegistration extends ListenerRegistration<TRequest, TListener>, TMergedRequest> {
+public abstract class ListenerMultiplexer<TKey, TListener,
+        TListenerOperation extends ListenerOperation<TListener>,
+        TRegistration extends ListenerRegistration<TListener, TListenerOperation>,
+        TMergedRegistration> {
 
     @GuardedBy("mRegistrations")
     private final ArrayMap<TKey, TRegistration> mRegistrations = new ArrayMap<>();
@@ -88,25 +98,42 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
     private boolean mServiceRegistered = false;
 
     @GuardedBy("mRegistrations")
-    @Nullable private TMergedRequest mCurrentRequest;
+    @Nullable private TMergedRegistration mMerged;
 
     /**
-     * Should be implemented to register with the backing service with the given merged request, and
-     * should return true if a matching call to {@link #unregisterWithService()} is required to
-     * unregister (ie, if registration succeeds).
+     * Should be implemented to return a unique identifying tag that may be used for logging, etc...
+     */
+    public abstract @NonNull String getTag();
+
+    /**
+     * Should be implemented to register with the backing service with the given merged
+     * registration, and should return true if a matching call to {@link #unregisterWithService()}
+     * is required to unregister (ie, if registration succeeds). The set of registrations passed in
+     * is the same set passed into {@link #mergeRegistrations(Collection)} to generate the merged
+     * registration.
      *
-     * @see #reregisterWithService(Object, Object)
+     * <p class="note">It may seem redundant to pass in the set of active registrations when they
+     * have already been used to generate the merged request, and indeed, for many implementations
+     * this parameter can likely simply be ignored. However, some implementations may require access
+     * to the set of registrations used to generate the merged requestion for further logic even
+     * after the merged registration has been generated.
+     *
+     * @see #mergeRegistrations(Collection)
+     * @see #reregisterWithService(Object, Object, Collection)
      */
-    protected abstract boolean registerWithService(TMergedRequest newRequest);
+    protected abstract boolean registerWithService(TMergedRegistration merged,
+            @NonNull Collection<TRegistration> registrations);
 
     /**
-     * Invoked when the service already has a request, and it is being replaced with a new request.
-     * The default implementation unregisters first, then registers with the new merged request, but
-     * this may be overridden by subclasses in order to reregister more efficiently.
+     * Invoked when the service has already been registered with some merged registration, and is
+     * now being registered with a different merged registration. The default implementation simply
+     * invokes {@link #registerWithService(Object, Collection)}.
+     *
+     * @see #registerWithService(Object, Collection)
      */
-    protected boolean reregisterWithService(TMergedRequest oldRequest, TMergedRequest newRequest) {
-        unregisterWithService();
-        return registerWithService(newRequest);
+    protected boolean reregisterWithService(TMergedRegistration oldMerged,
+            TMergedRegistration newMerged, @NonNull Collection<TRegistration> registrations) {
+        return registerWithService(newMerged, registrations);
     }
 
     /**
@@ -116,28 +143,23 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
 
     /**
      * Defines whether a registration is currently active or not. Only active registrations will be
-     * considered within {@link #mergeRequests(Collection)} to calculate the merged request, and
-     * listener invocations will only be delivered to active requests. If a registration's active
-     * state changes, {@link #updateRegistrations(Predicate)} must be invoked with a function that
-     * returns true for any registrations that may have changed their active state.
+     * forwarded to {@link #registerWithService(Object, Collection)}, and listener invocations will
+     * only be delivered to active requests. If a registration's active state changes,
+     * {@link #updateRegistrations(Predicate)} must be invoked with a function that returns true for
+     * any registrations that may have changed their active state.
      */
     protected abstract boolean isActive(@NonNull TRegistration registration);
 
     /**
-     * Called in order to generate a merged request from the given registrations. The list of
-     * registrations will never be empty.
+     * Called in order to generate a merged registration from the given set of active registrations.
+     * The list of registrations will never be empty. If the resulting merged registration is equal
+     * to the currently registered merged registration, nothing further will happen. If the merged
+     * registration differs, {@link #registerWithService(Object, Collection)} or
+     * {@link #reregisterWithService(Object, Object, Collection)} will be invoked with the new
+     * merged registration so that the backing service can be updated.
      */
-    protected @Nullable TMergedRequest mergeRequests(
-            @NonNull Collection<TRegistration> registrations) {
-        if (Build.IS_DEBUGGABLE) {
-            for (TRegistration registration : registrations) {
-                // if using non-null requests then implementations must override this method
-                Preconditions.checkState(registration.getRequest() == null);
-            }
-        }
-
-        return null;
-    }
+    protected abstract @Nullable TMergedRegistration mergeRegistrations(
+            @NonNull Collection<TRegistration> registrations);
 
     /**
      * Invoked when the multiplexer goes from having no registrations to having some registrations.
@@ -348,41 +370,42 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
             }
 
             if (actives.isEmpty()) {
-                mCurrentRequest = null;
                 if (mServiceRegistered) {
+                    mMerged = null;
                     mServiceRegistered = false;
-                    mCurrentRequest = null;
                     unregisterWithService();
                 }
                 return;
             }
 
-            TMergedRequest merged = mergeRequests(actives);
-            if (!mServiceRegistered || !Objects.equals(merged, mCurrentRequest)) {
+            TMergedRegistration merged = mergeRegistrations(actives);
+            if (!mServiceRegistered || !Objects.equals(merged, mMerged)) {
                 if (mServiceRegistered) {
-                    mServiceRegistered = reregisterWithService(mCurrentRequest, merged);
+                    mServiceRegistered = reregisterWithService(mMerged, merged, actives);
                 } else {
-                    mServiceRegistered = registerWithService(merged);
+                    mServiceRegistered = registerWithService(merged, actives);
                 }
-                if (mServiceRegistered) {
-                    mCurrentRequest = merged;
-                } else {
-                    mCurrentRequest = null;
-                }
+                mMerged = mServiceRegistered ? merged : null;
             }
         }
     }
 
     /**
-     * Clears currently stored service state, and invokes {@link #updateService()} to force a new
-     * call to {@link #registerWithService(Object)} if necessary. This is useful, for instance, if
-     * the backing service has crashed or otherwise lost state, and needs to be re-initialized.
+     * If the service is currently registered, unregisters it and then calls
+     * {@link #updateService()} so that {@link #registerWithService(Object, Collection)} will be
+     * re-invoked. This is useful, for instance, if the backing service has crashed or otherwise
+     * lost state, and needs to be re-initialized. Because this unregisters first, this is safe to
+     * use even if there is a possibility the backing server has not crashed, or has already been
+     * reinitialized.
      */
     protected final void resetService() {
         synchronized (mRegistrations) {
-            mServiceRegistered = false;
-            mCurrentRequest = null;
-            updateService();
+            if (mServiceRegistered) {
+                mMerged = null;
+                mServiceRegistered = false;
+                unregisterWithService();
+                updateService();
+            }
         }
     }
 
@@ -435,12 +458,12 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
                 if (++mActiveRegistrationsCount == 1) {
                     onActive();
                 }
-                ListenerOperation<TListener> operation = registration.onActive();
+                TListenerOperation operation = registration.onActive();
                 if (operation != null) {
                     execute(registration, operation);
                 }
             } else {
-                ListenerOperation<TListener> operation = registration.onInactive();
+                TListenerOperation operation = registration.onInactive();
                 if (operation != null) {
                     execute(registration, operation);
                 }
@@ -459,14 +482,14 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
      * change the active state of the registration.
      */
     protected final void deliverToListeners(
-            @NonNull Function<TRegistration, ListenerOperation<TListener>> function) {
+            @NonNull Function<TRegistration, TListenerOperation> function) {
         synchronized (mRegistrations) {
             try (ReentrancyGuard ignored = mReentrancyGuard.acquire()) {
                 final int size = mRegistrations.size();
                 for (int i = 0; i < size; i++) {
                     TRegistration registration = mRegistrations.valueAt(i);
                     if (registration.isActive()) {
-                        ListenerOperation<TListener> operation = function.apply(registration);
+                        TListenerOperation operation = function.apply(registration);
                         if (operation != null) {
                             execute(registration, operation);
                         }
@@ -483,7 +506,7 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
      * deliverToListeners(registration -> operation);
      * </pre>
      */
-    protected final void deliverToListeners(@NonNull ListenerOperation<TListener> operation) {
+    protected final void deliverToListeners(@NonNull TListenerOperation operation) {
         synchronized (mRegistrations) {
             try (ReentrancyGuard ignored = mReentrancyGuard.acquire()) {
                 final int size = mRegistrations.size();
@@ -502,7 +525,7 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
         onRegistrationActiveChanged(registration);
     }
 
-    private void execute(TRegistration registration, ListenerOperation<TListener> operation) {
+    private void execute(TRegistration registration, TListenerOperation operation) {
         registration.executeInternal(operation);
     }
 
@@ -539,10 +562,11 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
      */
     protected void dumpServiceState(PrintWriter pw) {
         if (mServiceRegistered) {
-            if (mCurrentRequest == null) {
-                pw.print("registered");
-            } else {
-                pw.print("registered with " + mCurrentRequest);
+            pw.print("registered");
+            if (mMerged != null) {
+                pw.print(" [");
+                pw.print(mMerged);
+                pw.print("]");
             }
         } else {
             pw.print("unregistered");

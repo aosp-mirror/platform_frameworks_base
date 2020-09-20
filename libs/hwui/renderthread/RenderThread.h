@@ -19,8 +19,8 @@
 
 #include <GrDirectContext.h>
 #include <SkBitmap.h>
-#include <apex/choreographer.h>
 #include <cutils/compiler.h>
+#include <private/android/choreographer.h>
 #include <thread/ThreadBase.h>
 #include <utils/Looper.h>
 #include <utils/Thread.h>

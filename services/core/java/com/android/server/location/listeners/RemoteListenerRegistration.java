@@ -24,6 +24,7 @@ import android.location.util.identity.CallerIdentity;
 import android.os.Process;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
 import com.android.server.FgThread;
 
 import java.util.Objects;
@@ -35,11 +36,13 @@ import java.util.concurrent.Executor;
  * invocation should already be asynchronous. Listeners from the same process will be run on a
  * normal executor, since in-process listener invocation may be synchronous.
  *
- * @param <TRequest>  request type
- * @param <TListener> listener type
+ * @param <TRequest>           request type
+ * @param <TListener>          listener type
+ * @param <TListenerOperation> listener operation type
  */
-public abstract class RemoteListenerRegistration<TRequest, TListener> extends
-        RemovableListenerRegistration<TRequest, TListener> {
+public abstract class RemoteListenerRegistration<TRequest, TListener,
+        TListenerOperation extends ListenerOperation<TListener>> extends
+        RemovableListenerRegistration<TRequest, TListener, TListenerOperation> {
 
     @VisibleForTesting
     public static final Executor IN_PROCESS_EXECUTOR = FgThread.getExecutor();
@@ -59,9 +62,9 @@ public abstract class RemoteListenerRegistration<TRequest, TListener> extends
 
     private final CallerIdentity mIdentity;
 
-    protected RemoteListenerRegistration(String tag, @Nullable TRequest request,
-            CallerIdentity identity, TListener listener) {
-        super(tag, chooseExecutor(identity), request, listener);
+    protected RemoteListenerRegistration(@Nullable TRequest request, CallerIdentity identity,
+            TListener listener) {
+        super(chooseExecutor(identity), request, listener);
         mIdentity = Objects.requireNonNull(identity);
     }
 

@@ -274,7 +274,7 @@ public final class MediaTranscodeManager {
 
     private static IMediaTranscodingService getService(boolean retry) {
         int retryCount = !retry ? 1 :  CONNECT_SERVICE_RETRY_COUNT;
-        Log.i(TAG, "get service with rety " + retryCount);
+        Log.i(TAG, "get service with retry " + retryCount);
         for (int count = 1;  count <= retryCount; count++) {
             Log.d(TAG, "Trying to connect to service. Try count: " + count);
             IMediaTranscodingService service = IMediaTranscodingService.Stub.asInterface(
@@ -356,7 +356,15 @@ public final class MediaTranscodeManager {
             for (TranscodingJob job : retryJobs) {
                 // Notify the job failure if we fails to connect to the service or fail
                 // to retry the job.
-                if (!haveTranscodingClient || !job.retry()) {
+                if (!haveTranscodingClient) {
+                    // TODO(hkuang): Return correct error code to the client.
+                    handleTranscodingFailed(job.getJobId(), 0 /*unused */);
+                }
+
+                try {
+                    // Do not set hasRetried for retry initiated by MediaTranscodeManager.
+                    job.retryInternal(false /*setHasRetried*/);
+                } catch (Exception re) {
                     // TODO(hkuang): Return correct error code to the client.
                     handleTranscodingFailed(job.getJobId(), 0 /*unused */);
                 }
@@ -1010,9 +1018,9 @@ public final class MediaTranscodeManager {
                     @IntRange(from = 0, to = 100) int progress);
         }
 
-        private final ITranscodingClient mJobOwner;
-        private final Executor mListenerExecutor;
-        private final OnTranscodingFinishedListener mListener;
+        private final MediaTranscodeManager mManager;
+        private Executor mListenerExecutor;
+        private OnTranscodingFinishedListener mListener;
         private int mJobId = -1;
         // Lock for internal state.
         private final Object mLock = new Object();
@@ -1028,20 +1036,26 @@ public final class MediaTranscodeManager {
         private @Status int mStatus = STATUS_PENDING;
         @GuardedBy("mLock")
         private @Result int mResult = RESULT_NONE;
+        @GuardedBy("mLock")
+        private boolean mHasRetried = false;
+        // The original request that associated with this job.
+        private final TranscodingRequest mRequest;
 
         private TranscodingJob(
-                @NonNull ITranscodingClient jobOwner,
+                @NonNull MediaTranscodeManager manager,
+                @NonNull TranscodingRequest request,
                 @NonNull TranscodingJobParcel parcel,
                 @NonNull @CallbackExecutor Executor executor,
                 @NonNull OnTranscodingFinishedListener listener) {
-            Objects.requireNonNull(jobOwner, "JobOwner must not be null");
-            Objects.requireNonNull(parcel, "TranscodingJobParcel must not be null");
+            Objects.requireNonNull(manager, "manager must not be null");
+            Objects.requireNonNull(parcel, "parcel must not be null");
             Objects.requireNonNull(executor, "listenerExecutor must not be null");
             Objects.requireNonNull(listener, "listener must not be null");
-            mJobOwner = jobOwner;
+            mManager = manager;
             mJobId = parcel.jobId;
             mListenerExecutor = executor;
             mListener = listener;
+            mRequest = request;
         }
 
         /**
@@ -1085,14 +1099,61 @@ public final class MediaTranscodeManager {
 
         /**
          * Resubmit the transcoding job to the service.
+         * Note that only the job that fails or gets cancelled could be retried and each job could
+         * be retried only once. After that, Client need to enqueue a new request if they want to
+         * try again.
          *
-         * @return true if successfully resubmit the job to the service. False otherwise.
+         * @throws MediaTranscodingException.ServiceNotAvailableException if the service
+         *         is temporarily unavailable due to internal service rebooting. Client could retry
+         *         again after receiving this exception.
+         * @throws UnsupportedOperationException if the retry could not be fulfilled.
+         * @hide
          */
-        public boolean retry() {
+        public void retry() throws MediaTranscodingException.ServiceNotAvailableException {
+            retryInternal(true /*setHasRetried*/);
+        }
+
+        // TODO(hkuang): Add more test for it.
+        private void retryInternal(boolean setHasRetried)
+                throws MediaTranscodingException.ServiceNotAvailableException {
             synchronized (mLock) {
-                // TODO(hkuang): Implement this.
+                if (mStatus == STATUS_PENDING || mStatus == STATUS_RUNNING) {
+                    throw new UnsupportedOperationException(
+                            "Failed to retry as job is in processing");
+                }
+
+                if (mHasRetried) {
+                    throw new UnsupportedOperationException("Job has been retried already");
+                }
+
+                // Get the client interface.
+                ITranscodingClient client = mManager.getTranscodingClient();
+                if (client == null) {
+                    throw new MediaTranscodingException.ServiceNotAvailableException(
+                            "Service rebooting. Try again later");
+                }
+
+                synchronized (mManager.mPendingTranscodingJobs) {
+                    try {
+                        // Submits the request to MediaTranscoding service.
+                        TranscodingJobParcel jobParcel = new TranscodingJobParcel();
+                        if (!client.submitRequest(mRequest.writeToParcel(), jobParcel)) {
+                            mHasRetried = true;
+                            throw new UnsupportedOperationException("Failed to enqueue request");
+                        }
+
+                        // Replace the old job id wit the new one.
+                        mJobId = jobParcel.jobId;
+                        // Adds the new job back into pending jobs.
+                        mManager.mPendingTranscodingJobs.put(mJobId, this);
+                    } catch (RemoteException re) {
+                        throw new MediaTranscodingException.ServiceNotAvailableException(
+                                "Failed to resubmit request to Transcoding service");
+                    }
+                    mStatus = STATUS_PENDING;
+                    mHasRetried = setHasRetried ? true : false;
+                }
             }
-            return true;
         }
 
         /**
@@ -1105,7 +1166,11 @@ public final class MediaTranscodeManager {
                 // Check if the job is finished already.
                 if (mStatus != STATUS_FINISHED) {
                     try {
-                        mJobOwner.cancelJob(mJobId);
+                        ITranscodingClient client = mManager.getTranscodingClient();
+                        // The client may be gone.
+                        if (client != null) {
+                            client.cancelJob(mJobId);
+                        }
                     } catch (RemoteException re) {
                         //TODO(hkuang): Find out what to do if failing to cancel the job.
                         Log.e(TAG, "Failed to cancel the job due to exception:  " + re);
@@ -1173,6 +1238,12 @@ public final class MediaTranscodeManager {
         }
     }
 
+    private ITranscodingClient getTranscodingClient() {
+        synchronized (mLock) {
+            return mTranscodingClient;
+        }
+    }
+
     /**
      * Enqueues a TranscodingRequest for execution.
      * <p> Upon successfully accepting the request, MediaTranscodeManager will return a
@@ -1185,13 +1256,17 @@ public final class MediaTranscodeManager {
      * @return A TranscodingJob for this operation.
      * @throws FileNotFoundException if the source Uri or destination Uri could not be opened.
      * @throws UnsupportedOperationException if the request could not be fulfilled.
+     * @throws MediaTranscodingException.ServiceNotAvailableException if the service
+     *         is temporarily unavailable due to internal service rebooting. Client could retry
+     *         again after receiving this exception.
      */
     @NonNull
     public TranscodingJob enqueueRequest(
             @NonNull TranscodingRequest transcodingRequest,
             @NonNull @CallbackExecutor Executor listenerExecutor,
             @NonNull OnTranscodingFinishedListener listener)
-            throws FileNotFoundException {
+            throws FileNotFoundException,
+            MediaTranscodingException.ServiceNotAvailableException {
         Log.i(TAG, "enqueueRequest called.");
         Objects.requireNonNull(transcodingRequest, "transcodingRequest must not be null");
         Objects.requireNonNull(listenerExecutor, "listenerExecutor must not be null");
@@ -1208,7 +1283,14 @@ public final class MediaTranscodeManager {
             synchronized (mPendingTranscodingJobs) {
                 synchronized (mLock) {
                     if (mTranscodingClient == null) {
-                        // TODO(hkuang): Handle the case if client is temporarily unavailable.
+                        // Try to register with the service again.
+                        IMediaTranscodingService service = getService(false /*retry*/);
+                        mTranscodingClient = registerClient(service);
+                        // If still fails, throws an exception to tell client to try later.
+                        if (mTranscodingClient == null) {
+                            throw new MediaTranscodingException.ServiceNotAvailableException(
+                                    "Service rebooting. Try again later");
+                        }
                     }
 
                     if (!mTranscodingClient.submitRequest(requestParcel, jobParcel)) {
@@ -1218,7 +1300,8 @@ public final class MediaTranscodeManager {
 
                 // Wraps the TranscodingJobParcel into a TranscodingJob and returns it to client for
                 // tracking.
-                TranscodingJob job = new TranscodingJob(mTranscodingClient, jobParcel,
+                TranscodingJob job = new TranscodingJob(this, transcodingRequest,
+                        jobParcel,
                         listenerExecutor,
                         listener);
 

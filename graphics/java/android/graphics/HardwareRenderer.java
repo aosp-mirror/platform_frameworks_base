@@ -354,7 +354,8 @@ public class HardwareRenderer {
          * @return this instance
          */
         public @NonNull FrameRenderRequest setVsyncTime(long vsyncTime) {
-            mFrameInfo.setVsync(vsyncTime, vsyncTime);
+            // TODO(b/168552873): populate vsync Id once available to Choreographer public API
+            mFrameInfo.setVsync(vsyncTime, vsyncTime, FrameInfo.INVALID_VSYNC_ID);
             mFrameInfo.addFlags(FrameInfo.FLAG_SURFACE_CANVAS);
             return this;
         }

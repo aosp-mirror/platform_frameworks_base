@@ -475,7 +475,7 @@ public final class LocationRequest implements Parcelable {
 
     /**
      * Returns the minimum update interval. If location updates are available faster than the
-     * request interval then locations will only be delivered if the minimum update interval has
+     * request interval then locations will only be updated if the minimum update interval has
      * expired since the last location update.
      *
      * <p class=note><strong>Note:</strong> Some allowance for jitter is already built into the
@@ -951,9 +951,9 @@ public final class LocationRequest implements Parcelable {
 
         /**
          * Sets an explicit minimum update interval. If location updates are available faster than
-         * the request interval then locations will only be delivered if the minimum update interval
-         * has expired since the last location update. Defaults to no explicit minimum update
-         * interval set, which means the minimum update interval is the same as the interval.
+         * the request interval then an update will only occur if the minimum update interval has
+         * expired since the last location update. Defaults to no explicit minimum update interval
+         * set, which means the minimum update interval is the same as the interval.
          *
          * <p class=note><strong>Note:</strong> Some allowance for jitter is already built into the
          * minimum update interval, so you need not worry about updates blocked simply because they
@@ -972,7 +972,7 @@ public final class LocationRequest implements Parcelable {
 
         /**
          * Clears an explicitly set minimum update interval and reverts to an implicit minimum
-         * update interval (ie, the minimum update interval is same value as the interval).
+         * update interval (ie, the minimum update interval is the same value as the interval).
          */
         public @NonNull Builder clearMinUpdateIntervalMillis() {
             mMinUpdateIntervalMillis = IMPLICIT_MIN_UPDATE_INTERVAL;
@@ -980,8 +980,8 @@ public final class LocationRequest implements Parcelable {
         }
 
         /**
-         * Sets the minimum update distance between delivered locations. If a potential location
-         * update is closer to the last delivered location than the minimum update distance, then
+         * Sets the minimum update distance between location updates. If a potential location
+         * update is closer to the last location update than the minimum update distance, then
          * the potential location update will not occur. Defaults to 0, which represents no minimum
          * update distance.
          */

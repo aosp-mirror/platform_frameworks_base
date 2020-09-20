@@ -28,6 +28,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.server.location.util.Injector;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -59,7 +60,8 @@ public class GnssAntennaInfoProvider extends
     }
 
     @Override
-    protected boolean registerWithService(Void ignored) {
+    protected boolean registerWithService(Void ignored,
+            Collection<GnssListenerRegistration> registrations) {
         Preconditions.checkState(mNative.isAntennaInfoSupported());
 
         if (mNative.startAntennaInfoListening()) {

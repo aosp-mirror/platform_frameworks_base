@@ -22,6 +22,7 @@ import android.media.MediaFormat;
 import android.media.MediaTranscodeManager;
 import android.media.MediaTranscodeManager.TranscodingJob;
 import android.media.MediaTranscodeManager.TranscodingRequest;
+import android.media.MediaTranscodingException;
 import android.net.Uri;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
@@ -101,7 +102,8 @@ public class MediaTranscodingBenchmark
      * Transcode the sourceFileName to destinationFileName with LOOP_COUNT.
      */
     private void transcode(final String sourceFileName, final String destinationFileName)
-            throws IOException, InterruptedException {
+            throws IOException, InterruptedException,
+            MediaTranscodingException.ServiceNotAvailableException {
         AtomicLong totalTimeMs = new AtomicLong();
         AtomicLong transcodingTime = new AtomicLong();
         Uri srcUri = getUri(sourceFileName);

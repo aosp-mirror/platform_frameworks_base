@@ -38,71 +38,86 @@ public interface ListenerExecutor {
         void operate(TListener listener) throws Exception;
 
         /**
-         * Called before this operation is to be run. Some operations may be canceled before they
-         * are run, in which case this method may not be called. {@link #onPostExecute(boolean)}
-         * will only be run if this method was run. This callback is invoked on the calling thread.
+         * Called before this operation is to be run. An operation may be canceled before it is run,
+         * in which case this method may not be invoked. {@link #onPostExecute(boolean)} will only
+         * be invoked if this method was previously invoked. This callback is invoked on the
+         * calling thread.
          */
         default void onPreExecute() {}
 
         /**
          * Called if the operation fails while running. Will not be invoked in the event of a
-         * RuntimeException, which will propagate normally. Implementations of
-         * {@link ListenerExecutor} have the option to override
-         * {@link ListenerExecutor#onOperationFailure(ListenerOperation, Exception)} instead to
-         * intercept failures at the class level. This callback is invoked on the executor thread.
+         * unchecked exception, which will propagate normally. This callback is invoked on the
+         * executor thread.
          */
-        default void onFailure(Exception e) {
-            // implementations should handle any exceptions that may be thrown
-            throw new AssertionError(e);
-        }
+        default void onFailure(Exception e) {}
 
         /**
-         * Called after the operation is run. This method will always be called if
-         * {@link #onPreExecute()} is called. Success implies that the operation was run to
-         * completion with no failures. This callback may be invoked on the calling thread or
-         * executor thread.
+         * Called after the operation may have been run. Will always be invoked for every operation
+         * which has previously had {@link #onPreExecute()} invoked. Success implies that the
+         * operation was run to completion with no failures. If {@code success} is true, this
+         * callback will always be invoked on the executor thread. If {@code success} is false, this
+         * callback may be invoked on the calling thread or executor thread.
          */
         default void onPostExecute(boolean success) {}
 
         /**
-         * Called after this operation is complete (which does not imply that it was necessarily
-         * run). Will always be called once per operation, no matter if the operation was run or
-         * not. Success implies that the operation was run to completion with no failures. This
-         * callback may be invoked on the calling thread or executor thread.
+         * Will always be called once for every operation submitted to
+         * {@link #executeSafely(Executor, Supplier, ListenerOperation)}, no matter if the operation
+         * was run or not. This method is always invoked last, after every other callback. Success
+         * implies that the operation was run to completion with no failures. If {@code success}
+         * is true, this callback will always be invoked on the executor thread. If {@code success}
+         * is false, this callback may be invoked on the calling thread or executor thread.
          */
         default void onComplete(boolean success) {}
     }
 
     /**
-     * May be override to handle operation failures at a class level. Will not be invoked in the
-     * event of a RuntimeException, which will propagate normally. This callback is invoked on the
-     * executor thread.
+     * An callback for listener operation failure.
+     *
+     * @param <TListenerOperation> listener operation type
      */
-    default <TListener> void onOperationFailure(ListenerOperation<TListener> operation,
-            Exception exception) {
-        operation.onFailure(exception);
+    interface FailureCallback<TListenerOperation extends ListenerOperation<?>> {
+
+        /**
+         * Called if a listener operation fails while running with a checked exception. This
+         * callback is invoked on the executor thread.
+         */
+        void onFailure(TListenerOperation operation, Exception exception);
+    }
+
+    /**
+     * See {@link #executeSafely(Executor, Supplier, ListenerOperation, FailureCallback)}.
+     */
+    default <TListener> void executeSafely(Executor executor, Supplier<TListener> listenerSupplier,
+            @Nullable ListenerOperation<TListener> operation) {
+        executeSafely(executor, listenerSupplier, operation, null);
     }
 
     /**
      * Executes the given listener operation on the given executor, using the provided listener
      * supplier. If the supplier returns a null value, or a value during the operation that does not
      * match the value prior to the operation, then the operation is considered canceled. If a null
-     * operation is supplied, nothing happens.
+     * operation is supplied, nothing happens. If a failure callback is supplied, this will be
+     * invoked on the executor thread in the event a checked exception is thrown from the listener
+     * operation.
      */
-    default <TListener> void executeSafely(Executor executor, Supplier<TListener> listenerSupplier,
-            @Nullable ListenerOperation<TListener> operation) {
+    default <TListener, TListenerOperation extends ListenerOperation<TListener>> void executeSafely(
+            Executor executor, Supplier<TListener> listenerSupplier,
+            @Nullable TListenerOperation operation,
+            @Nullable FailureCallback<TListenerOperation> failureCallback) {
         if (operation == null) {
+            return;
+        }
+
+        TListener listener = listenerSupplier.get();
+        if (listener == null) {
             return;
         }
 
         boolean executing = false;
         boolean preexecute = false;
         try {
-            TListener listener = listenerSupplier.get();
-            if (listener == null) {
-                return;
-            }
-
             operation.onPreExecute();
             preexecute = true;
             executor.execute(() -> {
@@ -116,7 +131,10 @@ public interface ListenerExecutor {
                     if (e instanceof RuntimeException) {
                         throw (RuntimeException) e;
                     } else {
-                        onOperationFailure(operation, e);
+                        operation.onFailure(e);
+                        if (failureCallback != null) {
+                            failureCallback.onFailure(operation, e);
+                        }
                     }
                 } finally {
                     operation.onPostExecute(success);

@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import com.android.internal.listeners.ListenerExecutor;
+import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -29,35 +30,27 @@ import java.util.concurrent.Executor;
  * A listener registration object which holds data associated with the listener, such as an optional
  * request, and an executor responsible for listener invocations.
  *
- * @param <TRequest>  request type
- * @param <TListener> listener type
+ * @param <TListener>          listener type
+ * @param <TListenerOperation> listener operation type
  */
-public class ListenerRegistration<TRequest, TListener> implements ListenerExecutor {
+public class ListenerRegistration<TListener,
+        TListenerOperation extends ListenerOperation<TListener>> implements
+        ListenerExecutor {
 
     private final Executor mExecutor;
-    private final @Nullable TRequest mRequest;
 
     private boolean mActive;
 
     private volatile @Nullable TListener mListener;
 
-    protected ListenerRegistration(Executor executor, @Nullable TRequest request,
-            TListener listener) {
+    protected ListenerRegistration(Executor executor, TListener listener) {
         mExecutor = Objects.requireNonNull(executor);
-        mRequest = request;
         mActive = false;
         mListener = Objects.requireNonNull(listener);
     }
 
     protected final Executor getExecutor() {
         return mExecutor;
-    }
-
-    /**
-     * Returns the request associated with this listener, or null if one wasn't supplied.
-     */
-    public @Nullable TRequest getRequest() {
-        return mRequest;
     }
 
     /**
@@ -77,7 +70,7 @@ public class ListenerRegistration<TRequest, TListener> implements ListenerExecut
      * returns a non-null operation, that operation will be invoked for the listener. Invoked
      * while holding the owning multiplexer's internal lock.
      */
-    protected @Nullable ListenerOperation<TListener> onActive() {
+    protected @Nullable TListenerOperation onActive() {
         return null;
     }
 
@@ -86,7 +79,7 @@ public class ListenerRegistration<TRequest, TListener> implements ListenerExecut
      * a non-null operation, that operation will be invoked for the listener. Invoked while holding
      * the owning multiplexer's internal lock.
      */
-    protected @Nullable ListenerOperation<TListener> onInactive() {
+    protected @Nullable TListenerOperation onInactive() {
         return null;
     }
 
@@ -115,21 +108,38 @@ public class ListenerRegistration<TRequest, TListener> implements ListenerExecut
     /**
      * May be overridden by subclasses, however should rarely be needed. Invoked when the listener
      * associated with this registration is unregistered, which may occur before the registration
-     * itself is unregistered. This immediately prevents the listener from being further invoked.
+     * itself is unregistered. This immediately prevents the listener from being further invoked
+     * until the registration itself can be finalized and unregistered completely.
      */
-    protected void onListenerUnregister() {};
+    protected void onListenerUnregister() {}
 
-    final void executeInternal(@NonNull ListenerOperation<TListener> operation) {
-        executeSafely(mExecutor, () -> mListener, operation);
+    /**
+     * May be overridden by subclasses, however should rarely be needed. Invoked whenever a listener
+     * operation is submitted for execution, and allows the registration a chance to replace the
+     * listener operation or perform related bookkeeping. There is no guarantee a listener operation
+     * submitted or returned here will ever be invoked. Will always be invoked on the calling
+     * thread.
+     */
+    protected TListenerOperation onExecuteOperation(@NonNull TListenerOperation operation) {
+        return operation;
+    }
+
+    /**
+     * May be overridden by subclasses to handle listener operation failures. The default behavior
+     * is to further propagate any exceptions. Will always be invoked on the executor thread.
+     */
+    protected void onOperationFailure(TListenerOperation operation, Exception exception) {
+        throw new AssertionError(exception);
+    }
+
+    final void executeInternal(@NonNull TListenerOperation operation) {
+        executeSafely(mExecutor, () -> mListener,
+                onExecuteOperation(Objects.requireNonNull(operation)), this::onOperationFailure);
     }
 
     @Override
     public String toString() {
-        if (mRequest == null) {
-            return "[]";
-        } else {
-            return mRequest.toString();
-        }
+        return "[]";
     }
 
     @Override

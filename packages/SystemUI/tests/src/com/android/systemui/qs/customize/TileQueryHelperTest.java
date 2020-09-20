@@ -34,6 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -47,8 +48,11 @@ import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.InstanceId;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.qs.DetailAdapter;
+import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -68,6 +72,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -116,11 +121,9 @@ public class TileQueryHelperTest extends SysuiTestCase {
         doAnswer(invocation -> {
                     String spec = (String) invocation.getArguments()[0];
                     if (FACTORY_TILES.contains(spec)) {
-                        QSTile m = mock(QSTile.class);
-                        when(m.isAvailable()).thenReturn(true);
-                        when(m.getTileSpec()).thenReturn(spec);
-                        when(m.getState()).thenReturn(mState);
-                        return m;
+                        FakeQSTile tile = new FakeQSTile(mBgExecutor, mMainExecutor);
+                        tile.setState(mState);
+                        return tile;
                     } else {
                         return null;
                     }
@@ -291,5 +294,133 @@ public class TileQueryHelperTest extends SysuiTestCase {
         InOrder verifier = inOrder(t);
         verifier.verify(t).setTileSpec("hotspot");
         verifier.verify(t).destroy();
+    }
+
+    private static class FakeQSTile implements QSTile {
+
+        private String mSpec = "";
+        private List<Callback> mCallbacks = new ArrayList<>();
+        private boolean mRefreshed;
+        private boolean mListening;
+        private State mState = new State();
+        private final Executor mBgExecutor;
+        private final Executor mMainExecutor;
+
+        FakeQSTile(Executor bgExecutor, Executor mainExecutor) {
+            mBgExecutor = bgExecutor;
+            mMainExecutor = mainExecutor;
+        }
+
+        @Override
+        public String getTileSpec() {
+            return mSpec;
+        }
+
+        @Override
+        public boolean isAvailable() {
+            return true;
+        }
+
+        @Override
+        public void setTileSpec(String tileSpec) {
+            mSpec = tileSpec;
+        }
+
+        public void setState(State state) {
+            mState = state;
+            notifyChangedState(mState);
+        }
+
+        @Override
+        public void refreshState() {
+            mBgExecutor.execute(() -> {
+                mRefreshed = true;
+                notifyChangedState(mState);
+            });
+        }
+
+        private void notifyChangedState(State state) {
+            List<Callback> callbacks = new ArrayList<>(mCallbacks);
+            callbacks.forEach(callback -> callback.onStateChanged(state));
+        }
+
+        @Override
+        public void addCallback(Callback callback) {
+            mCallbacks.add(callback);
+        }
+
+        @Override
+        public void removeCallback(Callback callback) {
+            mCallbacks.remove(callback);
+        }
+
+        @Override
+        public void removeCallbacks() {
+            mCallbacks.clear();
+        }
+
+        @Override
+        public void setListening(Object client, boolean listening) {
+            if (listening) {
+                mMainExecutor.execute(() -> {
+                    mListening = true;
+                    refreshState();
+                });
+            }
+        }
+
+        @Override
+        public CharSequence getTileLabel() {
+            return mSpec;
+        }
+
+        @Override
+        public State getState() {
+            return mState;
+        }
+
+        @Override
+        public boolean isTileReady() {
+            return mListening && mRefreshed;
+        }
+
+        @Override
+        public QSIconView createTileView(Context context) {
+            return null;
+        }
+
+        @Override
+        public void click() {}
+
+        @Override
+        public void secondaryClick() {}
+
+        @Override
+        public void longClick() {}
+
+        @Override
+        public void userSwitch(int currentUser) {}
+
+        @Override
+        public int getMetricsCategory() {
+            return 0;
+        }
+
+        @Override
+        public InstanceId getInstanceId() {
+            return null;
+        }
+
+        @Override
+        public void setDetailListening(boolean show) {}
+
+        @Override
+        public void destroy() {}
+
+
+        @Override
+        public DetailAdapter getDetailAdapter() {
+            return null;
+        }
     }
 }

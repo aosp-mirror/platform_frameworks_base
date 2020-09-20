@@ -90,6 +90,10 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     private static final long DEFAULT_STALE_TIMEOUT = 10 * DateUtils.MINUTE_IN_MILLIS;
     protected static final Object ARG_SHOW_TRANSIENT_ENABLING = new Object();
 
+    private static final int READY_STATE_NOT_READY = 0;
+    private static final int READY_STATE_READYING = 1;
+    private static final int READY_STATE_READY = 2;
+
     protected final QSHost mHost;
     protected final Context mContext;
     // @NonFinalForTesting
@@ -101,6 +105,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     protected final ActivityStarter mActivityStarter;
     private final UiEventLogger mUiEventLogger;
     private final QSLogger mQSLogger;
+    private volatile int mReadyState;
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     private final Object mStaleListener = new Object();
@@ -386,7 +391,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     protected void handleRefreshState(Object arg) {
         handleUpdateState(mTmpState, arg);
-        final boolean changed = mTmpState.copyTo(mState);
+        boolean changed = mTmpState.copyTo(mState);
+        if (mReadyState == READY_STATE_READYING) {
+            mReadyState = READY_STATE_READY;
+            changed = true;
+        }
         if (changed) {
             mQSLogger.logTileUpdated(mTileSpec, mState);
             handleStateChanged();
@@ -459,6 +468,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                     // should not refresh it anymore.
                     if (mLifecycle.getCurrentState().equals(DESTROYED)) return;
                     mLifecycle.setCurrentState(RESUMED);
+                    if (mReadyState == READY_STATE_NOT_READY) {
+                        mReadyState = READY_STATE_READYING;
+                    }
                     refreshState(); // Ensure we get at least one refresh after listening.
                 });
             }
@@ -530,6 +542,15 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      * @return default label for the tile.
      */
     public abstract CharSequence getTileLabel();
+
+    /**
+     * @return {@code true} if the tile has refreshed state at least once after having set its
+     *         lifecycle to {@link Lifecycle.State#RESUMED}.
+     */
+    @Override
+    public boolean isTileReady() {
+        return mReadyState == READY_STATE_READY;
+    }
 
     public static int getColorForState(Context context, int state) {
         switch (state) {

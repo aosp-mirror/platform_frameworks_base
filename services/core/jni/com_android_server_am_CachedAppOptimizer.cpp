@@ -36,6 +36,9 @@
 using android::base::StringPrintf;
 using android::base::WriteStringToFile;
 
+#define SYNC_RECEIVED_WHILE_FROZEN (1)
+#define ASYNC_RECEIVED_WHILE_FROZEN (2)
+
 namespace android {
 
 // This performs per-process reclaim on all processes belonging to non-app UIDs.
@@ -99,12 +102,37 @@ static void com_android_server_am_CachedAppOptimizer_freezeBinder(
     }
 }
 
+static jint com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo(JNIEnv *env,
+        jobject clazz, jint pid) {
+    bool syncReceived = false, asyncReceived = false;
+
+    int error = IPCThreadState::getProcessFreezeInfo(pid, &syncReceived, &asyncReceived);
+
+    if (error < 0) {
+        jniThrowException(env, "java/lang/RuntimeException", strerror(error));
+    }
+
+    jint retVal = 0;
+
+    if(syncReceived) {
+        retVal |= SYNC_RECEIVED_WHILE_FROZEN;;
+    }
+
+    if(asyncReceived) {
+        retVal |= ASYNC_RECEIVED_WHILE_FROZEN;
+    }
+
+    return retVal;
+}
+
 static const JNINativeMethod sMethods[] = {
     /* name, signature, funcPtr */
     {"compactSystem", "()V", (void*)com_android_server_am_CachedAppOptimizer_compactSystem},
     {"enableFreezerInternal", "(Z)V",
         (void*)com_android_server_am_CachedAppOptimizer_enableFreezerInternal},
-    {"freezeBinder", "(IZ)V", (void*)com_android_server_am_CachedAppOptimizer_freezeBinder}
+    {"freezeBinder", "(IZ)V", (void*)com_android_server_am_CachedAppOptimizer_freezeBinder},
+    {"getBinderFreezeInfo", "(I)I",
+        (void*)com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo}
 };
 
 int register_android_server_am_CachedAppOptimizer(JNIEnv* env)

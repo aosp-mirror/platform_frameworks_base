@@ -256,8 +256,8 @@ public class Vpn {
     @GuardedBy("this")
     private final Set<UidRange> mBlockedUidsAsToldToNetd = new ArraySet<>();
 
-    // Handle of the user initiating VPN.
-    private final int mUserHandle;
+    // The user id of initiating VPN.
+    private final int mUserId;
 
     interface RetryScheduler {
         void checkInterruptAndDelay(boolean sleepLonger) throws InterruptedException;
@@ -384,26 +384,26 @@ public class Vpn {
     }
 
     public Vpn(Looper looper, Context context, INetworkManagementService netService,
-            @UserIdInt int userHandle, @NonNull KeyStore keyStore) {
-        this(looper, context, new Dependencies(), netService, userHandle, keyStore,
+            @UserIdInt int userId, @NonNull KeyStore keyStore) {
+        this(looper, context, new Dependencies(), netService, userId, keyStore,
                 new SystemServices(context), new Ikev2SessionCreator());
     }
 
     @VisibleForTesting
     protected Vpn(Looper looper, Context context, Dependencies deps,
             INetworkManagementService netService,
-            int userHandle, @NonNull KeyStore keyStore, SystemServices systemServices,
+            int userId, @NonNull KeyStore keyStore, SystemServices systemServices,
             Ikev2SessionCreator ikev2SessionCreator) {
         mContext = context;
         mDeps = deps;
         mNetd = netService;
-        mUserHandle = userHandle;
+        mUserId = userId;
         mLooper = looper;
         mSystemServices = systemServices;
         mIkev2SessionCreator = ikev2SessionCreator;
 
         mPackage = VpnConfig.LEGACY_VPN;
-        mOwnerUID = getAppUid(mPackage, mUserHandle);
+        mOwnerUID = getAppUid(mPackage, mUserId);
         mIsPackageTargetingAtLeastQ = doesPackageTargetAtLeastQ(mPackage);
 
         try {
@@ -613,7 +613,7 @@ public class Vpn {
         PackageManager pm = mContext.getPackageManager();
         ApplicationInfo appInfo = null;
         try {
-            appInfo = pm.getApplicationInfoAsUser(packageName, 0 /*flags*/, mUserHandle);
+            appInfo = pm.getApplicationInfoAsUser(packageName, 0 /*flags*/, mUserId);
         } catch (NameNotFoundException unused) {
             Log.w(TAG, "Can't find \"" + packageName + "\" when checking always-on support");
         }
@@ -624,7 +624,7 @@ public class Vpn {
         final Intent intent = new Intent(VpnConfig.SERVICE_INTERFACE);
         intent.setPackage(packageName);
         List<ResolveInfo> services =
-                pm.queryIntentServicesAsUser(intent, PackageManager.GET_META_DATA, mUserHandle);
+                pm.queryIntentServicesAsUser(intent, PackageManager.GET_META_DATA, mUserId);
         if (services == null || services.size() == 0) {
             return false;
         }
@@ -769,12 +769,12 @@ public class Vpn {
         final long token = Binder.clearCallingIdentity();
         try {
             mSystemServices.settingsSecurePutStringForUser(Settings.Secure.ALWAYS_ON_VPN_APP,
-                    getAlwaysOnPackage(), mUserHandle);
+                    getAlwaysOnPackage(), mUserId);
             mSystemServices.settingsSecurePutIntForUser(Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN,
-                    (mAlwaysOn && mLockdown ? 1 : 0), mUserHandle);
+                    (mAlwaysOn && mLockdown ? 1 : 0), mUserId);
             mSystemServices.settingsSecurePutStringForUser(
                     LOCKDOWN_ALLOWLIST_SETTING_NAME,
-                    String.join(",", mLockdownAllowlist), mUserHandle);
+                    String.join(",", mLockdownAllowlist), mUserId);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -786,11 +786,11 @@ public class Vpn {
         final long token = Binder.clearCallingIdentity();
         try {
             final String alwaysOnPackage = mSystemServices.settingsSecureGetStringForUser(
-                    Settings.Secure.ALWAYS_ON_VPN_APP, mUserHandle);
+                    Settings.Secure.ALWAYS_ON_VPN_APP, mUserId);
             final boolean alwaysOnLockdown = mSystemServices.settingsSecureGetIntForUser(
-                    Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN, 0 /*default*/, mUserHandle) != 0;
+                    Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN, 0 /*default*/, mUserId) != 0;
             final String allowlistString = mSystemServices.settingsSecureGetStringForUser(
-                    LOCKDOWN_ALLOWLIST_SETTING_NAME, mUserHandle);
+                    LOCKDOWN_ALLOWLIST_SETTING_NAME, mUserId);
             final List<String> allowedPackages = TextUtils.isEmpty(allowlistString)
                     ? Collections.emptyList() : Arrays.asList(allowlistString.split(","));
             setAlwaysOnPackageInternal(
@@ -850,13 +850,13 @@ public class Vpn {
             DeviceIdleInternal idleController =
                     LocalServices.getService(DeviceIdleInternal.class);
             idleController.addPowerSaveTempWhitelistApp(Process.myUid(), alwaysOnPackage,
-                    VPN_LAUNCH_IDLE_ALLOWLIST_DURATION_MS, mUserHandle, false, "vpn");
+                    VPN_LAUNCH_IDLE_ALLOWLIST_DURATION_MS, mUserId, false, "vpn");
 
             // Start the VPN service declared in the app's manifest.
             Intent serviceIntent = new Intent(VpnConfig.SERVICE_INTERFACE);
             serviceIntent.setPackage(alwaysOnPackage);
             try {
-                return mContext.startServiceAsUser(serviceIntent, UserHandle.of(mUserHandle)) != null;
+                return mContext.startServiceAsUser(serviceIntent, UserHandle.of(mUserId)) != null;
             } catch (RuntimeException e) {
                 Log.e(TAG, "VpnService " + serviceIntent + " failed to start", e);
                 return false;
@@ -958,7 +958,7 @@ public class Vpn {
         // We can't just check that packageName matches mPackage, because if the app was uninstalled
         // and reinstalled it will no longer be prepared. Similarly if there is a shared UID, the
         // calling package may not be the same as the prepared package. Check both UID and package.
-        return getAppUid(packageName, mUserHandle) == mOwnerUID && mPackage.equals(packageName);
+        return getAppUid(packageName, mUserId) == mOwnerUID && mPackage.equals(packageName);
     }
 
     /** Prepare the VPN for the given package. Does not perform permission checks. */
@@ -998,7 +998,7 @@ public class Vpn {
 
             Log.i(TAG, "Switched from " + mPackage + " to " + newPackage);
             mPackage = newPackage;
-            mOwnerUID = getAppUid(newPackage, mUserHandle);
+            mOwnerUID = getAppUid(newPackage, mUserId);
             mIsPackageTargetingAtLeastQ = doesPackageTargetAtLeastQ(newPackage);
             try {
                 mNetd.allowProtect(mOwnerUID);
@@ -1019,7 +1019,7 @@ public class Vpn {
         // Check if the caller is authorized.
         enforceControlPermissionOrInternalCaller();
 
-        final int uid = getAppUid(packageName, mUserHandle);
+        final int uid = getAppUid(packageName, mUserId);
         if (uid == -1 || VpnConfig.LEGACY_VPN.equals(packageName)) {
             // Authorization for nonexistent packages (or fake ones) can't be updated.
             return false;
@@ -1095,14 +1095,14 @@ public class Vpn {
                 || isVpnServicePreConsented(context, packageName);
     }
 
-    private int getAppUid(final String app, final int userHandle) {
+    private int getAppUid(final String app, final int userId) {
         if (VpnConfig.LEGACY_VPN.equals(app)) {
             return Process.myUid();
         }
         PackageManager pm = mContext.getPackageManager();
         return Binder.withCleanCallingIdentity(() -> {
             try {
-                return pm.getPackageUidAsUser(app, userHandle);
+                return pm.getPackageUidAsUser(app, userId);
             } catch (NameNotFoundException e) {
                 return -1;
             }
@@ -1116,7 +1116,7 @@ public class Vpn {
         PackageManager pm = mContext.getPackageManager();
         try {
             ApplicationInfo appInfo =
-                    pm.getApplicationInfoAsUser(packageName, 0 /*flags*/, mUserHandle);
+                    pm.getApplicationInfoAsUser(packageName, 0 /*flags*/, mUserId);
             return appInfo.targetSdkVersion >= VERSION_CODES.Q;
         } catch (NameNotFoundException unused) {
             Log.w(TAG, "Can't find \"" + packageName + "\"");
@@ -1241,7 +1241,7 @@ public class Vpn {
 
         mNetworkCapabilities.setOwnerUid(mOwnerUID);
         mNetworkCapabilities.setAdministratorUids(new int[] {mOwnerUID});
-        mNetworkCapabilities.setUids(createUserAndRestrictedProfilesRanges(mUserHandle,
+        mNetworkCapabilities.setUids(createUserAndRestrictedProfilesRanges(mUserId,
                 mConfig.allowedApplications, mConfig.disallowedApplications));
         long token = Binder.clearCallingIdentity();
         try {
@@ -1315,7 +1315,7 @@ public class Vpn {
             enforceNotRestrictedUser();
 
             ResolveInfo info = AppGlobals.getPackageManager().resolveService(intent,
-                    null, 0, mUserHandle);
+                    null, 0, mUserId);
             if (info == null) {
                 throw new SecurityException("Cannot find " + config.user);
             }
@@ -1352,7 +1352,7 @@ public class Vpn {
             Connection connection = new Connection();
             if (!mContext.bindServiceAsUser(intent, connection,
                     Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
-                    new UserHandle(mUserHandle))) {
+                    new UserHandle(mUserId))) {
                 throw new IllegalStateException("Cannot bind " + config.user);
             }
 
@@ -1427,10 +1427,10 @@ public class Vpn {
     }
 
     // Note: Return type guarantees results are deduped and sorted, which callers require.
-    private SortedSet<Integer> getAppsUids(List<String> packageNames, int userHandle) {
+    private SortedSet<Integer> getAppsUids(List<String> packageNames, int userId) {
         SortedSet<Integer> uids = new TreeSet<>();
         for (String app : packageNames) {
-            int uid = getAppUid(app, userHandle);
+            int uid = getAppUid(app, userId);
             if (uid != -1) uids.add(uid);
         }
         return uids;
@@ -1444,22 +1444,22 @@ public class Vpn {
      * the UID ranges will match the app list specified there. Otherwise, all UIDs
      * in each user and profile will be included.
      *
-     * @param userHandle The userId to create UID ranges for along with any of its restricted
+     * @param userId The userId to create UID ranges for along with any of its restricted
      *                   profiles.
      * @param allowedApplications (optional) List of applications to allow.
      * @param disallowedApplications (optional) List of applications to deny.
      */
     @VisibleForTesting
-    Set<UidRange> createUserAndRestrictedProfilesRanges(@UserIdInt int userHandle,
+    Set<UidRange> createUserAndRestrictedProfilesRanges(@UserIdInt int userId,
             @Nullable List<String> allowedApplications,
             @Nullable List<String> disallowedApplications) {
         final Set<UidRange> ranges = new ArraySet<>();
 
         // Assign the top-level user to the set of ranges
-        addUserToRanges(ranges, userHandle, allowedApplications, disallowedApplications);
+        addUserToRanges(ranges, userId, allowedApplications, disallowedApplications);
 
         // If the user can have restricted profiles, assign all its restricted profiles too
-        if (canHaveRestrictedProfile(userHandle)) {
+        if (canHaveRestrictedProfile(userId)) {
             final long token = Binder.clearCallingIdentity();
             List<UserInfo> users;
             try {
@@ -1468,7 +1468,7 @@ public class Vpn {
                 Binder.restoreCallingIdentity(token);
             }
             for (UserInfo user : users) {
-                if (user.isRestricted() && (user.restrictedProfileParentId == userHandle)) {
+                if (user.isRestricted() && (user.restrictedProfileParentId == userId)) {
                     addUserToRanges(ranges, user.id, allowedApplications, disallowedApplications);
                 }
             }
@@ -1485,18 +1485,18 @@ public class Vpn {
      * in the user will be included.
      *
      * @param ranges {@link Set} of {@link UidRange}s to which to add.
-     * @param userHandle The userId to add to {@param ranges}.
+     * @param userId The userId to add to {@param ranges}.
      * @param allowedApplications (optional) allowlist of applications to include.
      * @param disallowedApplications (optional) denylist of applications to exclude.
      */
     @VisibleForTesting
-    void addUserToRanges(@NonNull Set<UidRange> ranges, @UserIdInt int userHandle,
+    void addUserToRanges(@NonNull Set<UidRange> ranges, @UserIdInt int userId,
             @Nullable List<String> allowedApplications,
             @Nullable List<String> disallowedApplications) {
         if (allowedApplications != null) {
             // Add ranges covering all UIDs for allowedApplications.
             int start = -1, stop = -1;
-            for (int uid : getAppsUids(allowedApplications, userHandle)) {
+            for (int uid : getAppsUids(allowedApplications, userId)) {
                 if (start == -1) {
                     start = uid;
                 } else if (uid != stop + 1) {
@@ -1508,9 +1508,9 @@ public class Vpn {
             if (start != -1) ranges.add(new UidRange(start, stop));
         } else if (disallowedApplications != null) {
             // Add all ranges for user skipping UIDs for disallowedApplications.
-            final UidRange userRange = UidRange.createForUser(userHandle);
+            final UidRange userRange = UidRange.createForUser(userId);
             int start = userRange.start;
-            for (int uid : getAppsUids(disallowedApplications, userHandle)) {
+            for (int uid : getAppsUids(disallowedApplications, userId)) {
                 if (uid == start) {
                     start++;
                 } else {
@@ -1521,16 +1521,16 @@ public class Vpn {
             if (start <= userRange.stop) ranges.add(new UidRange(start, userRange.stop));
         } else {
             // Add all UIDs for the user.
-            ranges.add(UidRange.createForUser(userHandle));
+            ranges.add(UidRange.createForUser(userId));
         }
     }
 
     // Returns the subset of the full list of active UID ranges the VPN applies to (mVpnUsers) that
-    // apply to userHandle.
-    static private List<UidRange> uidRangesForUser(int userHandle, Set<UidRange> existingRanges) {
+    // apply to userId.
+    private static List<UidRange> uidRangesForUser(int userId, Set<UidRange> existingRanges) {
         // UidRange#createForUser returns the entire range of UIDs available to a macro-user.
         // This is something like 0-99999 ; {@see UserHandle#PER_USER_RANGE}
-        final UidRange userRange = UidRange.createForUser(userHandle);
+        final UidRange userRange = UidRange.createForUser(userId);
         final List<UidRange> ranges = new ArrayList<>();
         for (UidRange range : existingRanges) {
             if (userRange.containsRange(range)) {
@@ -1545,15 +1545,15 @@ public class Vpn {
      *
      * <p>Should be called on primary ConnectivityService thread.
      */
-    public void onUserAdded(int userHandle) {
+    public void onUserAdded(int userId) {
         // If the user is restricted tie them to the parent user's VPN
-        UserInfo user = UserManager.get(mContext).getUserInfo(userHandle);
-        if (user.isRestricted() && user.restrictedProfileParentId == mUserHandle) {
+        UserInfo user = UserManager.get(mContext).getUserInfo(userId);
+        if (user.isRestricted() && user.restrictedProfileParentId == mUserId) {
             synchronized(Vpn.this) {
                 final Set<UidRange> existingRanges = mNetworkCapabilities.getUids();
                 if (existingRanges != null) {
                     try {
-                        addUserToRanges(existingRanges, userHandle, mConfig.allowedApplications,
+                        addUserToRanges(existingRanges, userId, mConfig.allowedApplications,
                                 mConfig.disallowedApplications);
                         // ConnectivityService will call {@link #updateCapabilities} and apply
                         // those for VPN network.
@@ -1572,16 +1572,16 @@ public class Vpn {
      *
      * <p>Should be called on primary ConnectivityService thread.
      */
-    public void onUserRemoved(int userHandle) {
+    public void onUserRemoved(int userId) {
         // clean up if restricted
-        UserInfo user = UserManager.get(mContext).getUserInfo(userHandle);
-        if (user.isRestricted() && user.restrictedProfileParentId == mUserHandle) {
+        UserInfo user = UserManager.get(mContext).getUserInfo(userId);
+        if (user.isRestricted() && user.restrictedProfileParentId == mUserId) {
             synchronized(Vpn.this) {
                 final Set<UidRange> existingRanges = mNetworkCapabilities.getUids();
                 if (existingRanges != null) {
                     try {
                         final List<UidRange> removedRanges =
-                            uidRangesForUser(userHandle, existingRanges);
+                                uidRangesForUser(userId, existingRanges);
                         existingRanges.removeAll(removedRanges);
                         // ConnectivityService will call {@link #updateCapabilities} and
                         // apply those for VPN network.
@@ -1639,7 +1639,7 @@ public class Vpn {
         final Set<UidRange> rangesToTellNetdToAdd;
         if (enforce) {
             final Set<UidRange> rangesThatShouldBeBlocked =
-                    createUserAndRestrictedProfilesRanges(mUserHandle,
+                    createUserAndRestrictedProfilesRanges(mUserId,
                             /* allowedApplications */ null,
                             /* disallowedApplications */ exemptedPackages);
 
@@ -1909,7 +1909,7 @@ public class Vpn {
     private void updateAlwaysOnNotification(DetailedState networkState) {
         final boolean visible = (mAlwaysOn && networkState != DetailedState.CONNECTED);
 
-        final UserHandle user = UserHandle.of(mUserHandle);
+        final UserHandle user = UserHandle.of(mUserId);
         final long token = Binder.clearCallingIdentity();
         try {
             final NotificationManager notificationManager = NotificationManager.from(mContext);
@@ -2019,7 +2019,7 @@ public class Vpn {
     private void enforceNotRestrictedUser() {
         Binder.withCleanCallingIdentity(() -> {
             final UserManager mgr = UserManager.get(mContext);
-            final UserInfo user = mgr.getUserInfo(mUserHandle);
+            final UserInfo user = mgr.getUserInfo(mUserId);
 
             if (user.isRestricted()) {
                 throw new SecurityException("Restricted users cannot configure VPNs");
@@ -2054,9 +2054,9 @@ public class Vpn {
     public void startLegacyVpnPrivileged(VpnProfile profile, KeyStore keyStore,
             LinkProperties egress) {
         UserManager mgr = UserManager.get(mContext);
-        UserInfo user = mgr.getUserInfo(mUserHandle);
+        UserInfo user = mgr.getUserInfo(mUserId);
         if (user.isRestricted() || mgr.hasUserRestriction(UserManager.DISALLOW_CONFIG_VPN,
-                    new UserHandle(mUserHandle))) {
+                    new UserHandle(mUserId))) {
             throw new SecurityException("Restricted users cannot establish VPNs");
         }
 
@@ -2984,14 +2984,14 @@ public class Vpn {
     }
 
     private void verifyCallingUidAndPackage(String packageName) {
-        if (getAppUid(packageName, mUserHandle) != Binder.getCallingUid()) {
+        if (getAppUid(packageName, mUserId) != Binder.getCallingUid()) {
             throw new SecurityException("Mismatched package and UID");
         }
     }
 
     @VisibleForTesting
     String getProfileNameForPackage(String packageName) {
-        return Credentials.PLATFORM_VPN + mUserHandle + "_" + packageName;
+        return Credentials.PLATFORM_VPN + mUserId + "_" + packageName;
     }
 
     @VisibleForTesting

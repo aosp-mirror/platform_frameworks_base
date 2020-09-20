@@ -154,9 +154,11 @@ public abstract class DisplayEventReceiver {
      * timebase.
      * @param physicalDisplayId Stable display ID that uniquely describes a (display, port) pair.
      * @param frame The frame number.  Increases by one for each vertical sync interval.
+     * @param frameTimelineVsyncId The frame timeline vsync id, used to correlate a frame
+     * produced by HWUI with the timeline data stored in Surface Flinger.
      */
-    @UnsupportedAppUsage
-    public void onVsync(long timestampNanos, long physicalDisplayId, int frame) {
+    public void onVsync(long timestampNanos, long physicalDisplayId, int frame,
+            long frameTimelineVsyncId) {
     }
 
     /**
@@ -198,9 +200,9 @@ public abstract class DisplayEventReceiver {
 
     // Called from native code.
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage
-    private void dispatchVsync(long timestampNanos, long physicalDisplayId, int frame) {
-        onVsync(timestampNanos, physicalDisplayId, frame);
+    private void dispatchVsync(long timestampNanos, long physicalDisplayId, int frame,
+            long frameTimelineVsyncId) {
+        onVsync(timestampNanos, physicalDisplayId, frame, frameTimelineVsyncId);
     }
 
     // Called from native code.

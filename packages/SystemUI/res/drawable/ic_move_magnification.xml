@@ -16,7 +16,7 @@
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
-        <shape android:shape="oval">
+        <shape android:shape="rectangle">
             <solid
                 android:color="@android:color/black" />
             <size

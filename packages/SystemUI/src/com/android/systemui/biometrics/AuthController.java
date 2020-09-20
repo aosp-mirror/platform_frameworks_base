@@ -52,6 +52,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.phone.KeyguardBouncer;
 
 import java.util.List;
 
@@ -64,7 +65,7 @@ import javax.inject.Provider;
  */
 @SysUISingleton
 public class AuthController extends SystemUI implements CommandQueue.Callbacks,
-        AuthDialogCallback, DozeReceiver {
+        AuthDialogCallback, DozeReceiver, KeyguardBouncer.BouncerExpansionCallback {
 
     private static final String TAG = "AuthController";
     private static final boolean DEBUG = true;
@@ -424,6 +425,35 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         // BiometricService will have already sent the callback to the client in this case.
         // This avoids a round trip to SystemUI. So, just dismiss the dialog and we're done.
         mCurrentDialog = null;
+    }
+
+    /** See {@link KeyguardBouncer.BouncerExpansionCallback#onFullyShown}. */
+    @Override
+    public void onFullyShown() {
+        if (mUdfpsController != null) {
+            mUdfpsController.setBouncerVisibility(true);
+        }
+    }
+
+    /** See {@link KeyguardBouncer.BouncerExpansionCallback#onStartingToHide}. */
+    @Override
+    public void onStartingToHide() {
+    }
+
+    /** See {@link KeyguardBouncer.BouncerExpansionCallback#onStartingToShow}. */
+    @Override
+    public void onStartingToShow() {
+        if (mUdfpsController != null) {
+            mUdfpsController.setBouncerVisibility(true);
+        }
+    }
+
+    /** See {@link KeyguardBouncer.BouncerExpansionCallback#onFullyHidden}. */
+    @Override
+    public void onFullyHidden() {
+        if (mUdfpsController != null) {
+            mUdfpsController.setBouncerVisibility(false);
+        }
     }
 
     private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState) {

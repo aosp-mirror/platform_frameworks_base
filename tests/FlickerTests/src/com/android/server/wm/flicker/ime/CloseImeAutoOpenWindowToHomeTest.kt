@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.ime
 
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.dsl.flicker
@@ -39,6 +40,7 @@ import org.junit.runners.Parameterized
  * Test IME window closing back to app window transitions.
  * To run this test: `atest FlickerTests:CloseImeWindowToAppTest`
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

@@ -1850,7 +1850,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
                     synchronized (mLock) {
                         removeMessages(WRITE_PACKAGE_LIST);
-                        mPermissionManager.writePermissionsStateToPackageSettingsTEMP();
+                        mPermissionManager.writeStateToPackageSettingsTEMP();
                         mSettings.writePackageListLPr(msg.arg1);
                     }
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
@@ -3524,7 +3524,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     + ((SystemClock.uptimeMillis()-startTime)/1000f)
                     + " seconds");
 
-            mPermissionManager.readPermissionsStateFromPackageSettingsTEMP();
+            mPermissionManager.readStateFromPackageSettingsTEMP();
             // If the platform SDK has changed since the last time we booted,
             // we need to re-grant app permission to catch any new ones that
             // appear.  This is really a hack, and means that apps can in some
@@ -5424,6 +5424,23 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         return updateFlagsForComponent(flags, userId);
+    }
+
+    @Override
+    public int getTargetSdkVersion(String packageName)  {
+        synchronized (mLock) {
+            final AndroidPackage pkg = mPackages.get(packageName);
+            if (pkg == null) {
+                return -1;
+            }
+
+            final PackageSetting ps = getPackageSetting(pkg.getPackageName());
+            if (shouldFilterApplicationLocked(ps, Binder.getCallingUid(),
+                    UserHandle.getCallingUserId())) {
+                return -1;
+            }
+            return pkg.getTargetSdkVersion();
+        }
     }
 
     @Override
@@ -10486,7 +10503,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private void clearAppDataLIF(AndroidPackage pkg, int userId, int flags) {
         if (pkg == null) {
-            Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
         }
         clearAppDataLeafLIF(pkg, userId, flags);
@@ -21838,7 +21854,7 @@ public class PackageManagerService extends IPackageManager.Stub
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
-        mPermissionManager.writePermissionsStateToPackageSettingsTEMP();
+        mPermissionManager.writeStateToPackageSettingsTEMP();
 
         DumpState dumpState = new DumpState();
         boolean fullPreferred = false;
@@ -23718,7 +23734,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mDirtyUsers.remove(userId);
             mUserNeedsBadging.delete(userId);
             mPermissionManager.onUserRemoved(userId);
-            mPermissionManager.writePermissionsStateToPackageSettingsTEMP();
+            mPermissionManager.writeStateToPackageSettingsTEMP();
             mSettings.removeUserLPw(userId);
             mPendingBroadcasts.remove(userId);
             mInstantAppRegistry.onUserRemovedLPw(userId);
@@ -23819,9 +23835,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     boolean readPermissionStateForUser(@UserIdInt int userId) {
         synchronized (mPackages) {
-            mPermissionManager.writePermissionsStateToPackageSettingsTEMP();
+            mPermissionManager.writeStateToPackageSettingsTEMP();
             mSettings.readPermissionStateForUserSyncLPr(userId);
-            mPermissionManager.readPermissionsStateFromPackageSettingsTEMP();
+            mPermissionManager.readStateFromPackageSettingsTEMP();
             return mPmInternal.isPermissionUpgradeNeeded(userId);
         }
     }
@@ -24210,15 +24226,13 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public int getTargetSdkVersionForPackage(String packageName)
-                throws RemoteException {
-            int callingUser = UserHandle.getUserId(Binder.getCallingUid());
-            ApplicationInfo info = getApplicationInfo(packageName, 0, callingUser);
-            if (info == null) {
-                throw new RemoteException(
-                        "Couldn't get ApplicationInfo for package " + packageName);
+        public int getTargetSdkVersionForPackage(String packageName) throws RemoteException {
+            int targetSdk = getTargetSdkVersion(packageName);
+            if (targetSdk != -1) {
+                return targetSdk;
             }
-            return info.targetSdkVersion;
+
+            throw new RemoteException("Couldn't get targetSdkVersion for package " + packageName);
         }
 
         @Override
@@ -25885,12 +25899,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
     /**
      * Temporary method that wraps mSettings.writeLPr() and calls
-     * mPermissionManager.writePermissionsStateToPackageSettingsTEMP() beforehand.
+     * mPermissionManager.writeStateToPackageSettingsTEMP() beforehand.
      *
      * TODO(zhanghai): This should be removed once we finish migration of permission storage.
      */
     private void writeSettingsLPrTEMP() {
-        mPermissionManager.writePermissionsStateToPackageSettingsTEMP();
+        mPermissionManager.writeStateToPackageSettingsTEMP();
         mSettings.writeLPr();
     }
 }

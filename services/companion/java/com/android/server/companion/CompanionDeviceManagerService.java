@@ -83,6 +83,7 @@ import com.android.internal.notification.NotificationAccessConfirmationActivityC
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -484,6 +485,10 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         public void dump(@NonNull FileDescriptor fd,
                 @NonNull PrintWriter fout,
                 @Nullable String[] args) {
+            if (!DumpUtils.checkDumpAndUsageStatsPermission(getContext(), LOG_TAG, fout)) {
+                return;
+            }
+
             fout.append("Companion Device Associations:").append('\n');
             synchronized (mLock) {
                 forEach(mCachedAssociations, a -> {

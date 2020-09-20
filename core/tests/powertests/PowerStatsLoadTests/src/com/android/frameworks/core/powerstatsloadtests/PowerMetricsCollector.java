@@ -16,6 +16,7 @@
 
 package com.android.frameworks.core.powerstatsloadtests;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.app.Instrumentation;
@@ -34,6 +35,7 @@ import android.util.TimeUtils;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.compatibility.common.util.SystemUtil;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.LoggingPrintStream;
 
@@ -45,6 +47,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class PowerMetricsCollector implements TestRule {
     private final String mTag;
@@ -55,6 +59,7 @@ public class PowerMetricsCollector implements TestRule {
     private final UserManager mUserManager;
     private final int mUid;
     private final BatteryStatsHelper mStatsHelper;
+    private final CountDownLatch mSuspendingBatteryInput = new CountDownLatch(1);
 
     private long mStartTime;
     private volatile float mInitialBatteryLevel;
@@ -63,12 +68,21 @@ public class PowerMetricsCollector implements TestRule {
     private PowerMetrics mInitialPowerMetrics;
     private PowerMetrics mFinalPowerMetrics;
     private List<PowerMetrics.Metric> mPowerMetricsDelta;
+    private Intent mBatteryStatus;
 
     @Override
     public Statement apply(Statement base, Description description) {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
+                BroadcastReceiver batteryBroadcastReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        handleBatteryStatus(intent);
+                    }
+                };
+                mBatteryStatus = mContext.registerReceiver(batteryBroadcastReceiver,
+                        new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
                 disableCharger();
                 try {
                     prepareBatteryLevelMonitor();
@@ -76,6 +90,7 @@ public class PowerMetricsCollector implements TestRule {
                     base.evaluate();
                     captureFinalPowerStatsData();
                 } finally {
+                    mContext.unregisterReceiver(batteryBroadcastReceiver);
                     enableCharger();
                 }
             }
@@ -95,12 +110,14 @@ public class PowerMetricsCollector implements TestRule {
         mStatsHelper.create((Bundle) null);
     }
 
-    private void disableCharger() {
-        // TODO(b/167636754): implement this method once the charger suspension API is available
+    private void disableCharger() throws InterruptedException {
+        SystemUtil.runShellCommand("dumpsys battery suspend_input");
+        final boolean success = mSuspendingBatteryInput.await(10, TimeUnit.SECONDS);
+        assertTrue("Timed out waiting for battery input to be suspended", success);
     }
 
     private void enableCharger() {
-        // TODO(b/167636754): implement this method once the charger suspension API is available
+        SystemUtil.runShellCommand("dumpsys battery reset");
     }
 
     private PowerMetrics readBatteryStatsData() {
@@ -111,19 +128,25 @@ public class PowerMetricsCollector implements TestRule {
     }
 
     protected void prepareBatteryLevelMonitor() {
-        Intent batteryStatus = mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                handleBatteryStatus(intent);
-            }
-        }, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-
-        handleBatteryStatus(batteryStatus);
+        handleBatteryStatus(mBatteryStatus);
         mInitialBatteryLevel = mCurrentBatteryLevel;
     }
 
     protected void handleBatteryStatus(Intent intent) {
-        if (intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1) != 0) {
+        if (mFinalPowerMetrics != null) {
+            return;
+        }
+
+        final boolean isCharging = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1) != 0;
+
+        if (mSuspendingBatteryInput.getCount() > 0) {
+            if (!isCharging) {
+                mSuspendingBatteryInput.countDown();
+            }
+            return;
+        }
+
+        if (isCharging) {
             fail("Device must remain disconnected from the power source "
                     + "for the duration of the test");
         }

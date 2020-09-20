@@ -22,6 +22,7 @@ import android.media.MediaFormat;
 import android.media.MediaTranscodeManager;
 import android.media.MediaTranscodeManager.TranscodingJob;
 import android.media.MediaTranscodeManager.TranscodingRequest;
+import android.media.MediaTranscodingException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.FileUtils;
@@ -250,6 +251,27 @@ public class MediaTranscodeManagerDiedTest
                 TRANSCODE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         assertTrue("Invalid job status", job.getStatus() == TranscodingJob.STATUS_FINISHED);
         assertTrue("Invalid job result", job.getResult()== TranscodingJob.RESULT_ERROR);
+
+
+        boolean retryJob = false;
+        // Wait till service is available again.
+        Log.d(TAG, "Retry the failed transcoding job");
+        while (!retryJob) {
+            try {
+                job.retry();
+                // Break out when job retry succeeds.
+                break;
+            } catch (MediaTranscodingException.ServiceNotAvailableException ex) {
+                // Sleep for 10 milliseconds to wait.
+                Thread.sleep(10);
+            }
+        }
+
+        finishedOnTime = transcodeCompleteSemaphore.tryAcquire(
+                TRANSCODE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        // Check the make sure job is successfully finished after retry.
+        assertTrue("Invalid job status", job.getStatus() == TranscodingJob.STATUS_FINISHED);
+        assertTrue("Invalid job result", job.getResult() == TranscodingJob.RESULT_SUCCESS);
     }
 }
 
