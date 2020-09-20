@@ -57,6 +57,7 @@ import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MathUtils;
+import android.view.Choreographer;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -554,13 +555,27 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
      * Takes a screenshot of the current display and shows an animation.
      */
     private void takeScreenshotInternal(Consumer<Uri> finisher, Rect crop) {
-        // copy the input Rect, since SurfaceControl.screenshot can mutate it
-        Rect screenRect = new Rect(crop);
-        int rot = mDisplay.getRotation();
-        int width = crop.width();
-        int height = crop.height();
-        saveScreenshot(SurfaceControl.screenshot(crop, width, height, rot), finisher, screenRect,
-                Insets.NONE, true);
+        // Dismiss the old screenshot first to prevent it from showing up in the new screenshot
+        dismissScreenshot("new screenshot requested", true);
+
+        // Force a new frame to be rendered now that the old screenshot has been cleared
+        mScreenshotLayout.getRootView().invalidate();
+        Choreographer.getInstance().postFrameCallback(time1 -> {
+            // Unfortunately, we need to introduce another frame of latency because this
+            // is a pre-draw callback
+            mScreenshotLayout.getRootView().invalidate();
+
+            // Finally, take the screenshot once we're sure that old screenshot view is gone
+            Choreographer.getInstance().postFrameCallback(time2 -> {
+                // copy the input Rect, since SurfaceControl.screenshot can mutate it
+                Rect screenRect = new Rect(crop);
+                int rot = mDisplay.getRotation();
+                int width = crop.width();
+                int height = crop.height();
+                saveScreenshot(SurfaceControl.screenshot(crop, width, height, rot), finisher, screenRect,
+                        Insets.NONE, true);
+            });
+        });
     }
 
     private void saveScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect,
