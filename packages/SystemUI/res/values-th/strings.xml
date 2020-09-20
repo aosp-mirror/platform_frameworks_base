@@ -92,7 +92,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"กำลังประมวลผลการอัดหน้าจอ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการบันทึกหน้าจอ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"เริ่มบันทึกเลยไหม"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"ขณะบันทึก ระบบ Android อาจบันทึกข้อมูลที่ละเอียดอ่อนที่ปรากฏบนหน้าจอหรือเล่นในอุปกรณ์ได้ ซึ่งรวมถึงรหัสผ่าน ข้อมูลการชำระเงิน รูปภาพ ข้อความ และเสียง"</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"ขณะบันทึก ระบบ Android อาจบันทึกข้อมูลที่ละเอียดอ่อนซึ่งปรากฏบนหน้าจอหรือเล่นในอุปกรณ์ได้ ซึ่งรวมถึงรหัสผ่าน ข้อมูลการชำระเงิน รูปภาพ ข้อความ และเสียง"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"บันทึกเสียง"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"เสียงจากอุปกรณ์"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"เสียงจากอุปกรณ์ เช่น เพลง การโทร และเสียงเรียกเข้า"</string>
@@ -337,7 +337,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="5785739044300729592">"ขณะนี้หน้าจอล็อกอยู่ในแนวนอน"</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="5580170829728987989">"ขณะนี้หน้าจอล็อกอยู่ในแนวตั้ง"</string>
     <string name="dessert_case" msgid="9104973640704357717">"ชั้นแสดงของหวาน"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"โปรแกรมรักษาหน้าจอ"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"โปรแกรมรักษาจอภาพ"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"อีเทอร์เน็ต"</string>
     <string name="quick_settings_header_onboarding_text" msgid="1918085351115504765">"แตะไอคอนค้างไว้เพื่อดูตัวเลือกอื่นๆ"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ห้ามรบกวน"</string>
@@ -509,7 +509,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"จัดการ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ประวัติ"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"ใหม่"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"เงียบ"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"ปิดเสียง"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"การแจ้งเตือน"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"การสนทนา"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ล้างการแจ้งเตือนแบบไม่มีเสียงทั้งหมด"</string>
@@ -706,7 +706,7 @@
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"แจ้งเตือนต่อไป"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"ปิดการแจ้งเตือน"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"แสดงการแจ้งเตือนจากแอปนี้ต่อไปไหม"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"เงียบ"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"ปิดเสียง"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"ค่าเริ่มต้น"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"บับเบิล"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"อัตโนมัติ"</string>
@@ -862,7 +862,7 @@
     <string name="left_icon" msgid="5036278531966897006">"ไอคอนทางซ้าย"</string>
     <string name="right_icon" msgid="1103955040645237425">"ไอคอนทางขวา"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"กดค้างแล้วลากเพื่อเพิ่มการ์ด"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"กดการ์ดค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"กดค้างแล้วลากเพื่อจัดเรียงการ์ดใหม่"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"ลากมาที่นี่เพื่อนำออก"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"คุณต้องมีการ์ดอย่างน้อย <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> รายการ"</string>
     <string name="qs_edit" msgid="5583565172803472437">"แก้ไข"</string>
@@ -879,12 +879,20 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"แสดงไอคอนการแจ้งเตือนลำดับความสำคัญต่ำ"</string>
     <string name="other" msgid="429768510980739978">"อื่นๆ"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"ตำแหน่ง <xliff:g id="POSITION">%1$d</xliff:g> <xliff:g id="TILE_NAME">%2$s</xliff:g> แตะ 2 ครั้งเพื่อแก้ไข"</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g> แตะ 2 ครั้งเพื่อเพิ่ม"</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"ย้าย <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"นำ <xliff:g id="TILE_NAME">%1$s</xliff:g> ออก"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"เพิ่ม <xliff:g id="TILE_NAME">%1$s</xliff:g> ไปยังตำแหน่ง <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"ย้าย <xliff:g id="TILE_NAME">%1$s</xliff:g> ไปยังตำแหน่ง <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <!-- no translation found for accessibility_qs_edit_remove_tile_action (775511891457193480) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (5051211910345301833) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_move (2009373939914517817) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (7560798153975555772) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_move_to_position (5198161544045930556) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_to_position (9029163095148274690) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_position (4509277359815711830) -->
+    <skip />
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ตัวแก้ไขการตั้งค่าด่วน"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> การแจ้งเตือน: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"เปิดการตั้งค่า"</string>
@@ -1067,4 +1075,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"กดปุ่มเปิด/ปิดค้างไว้เพื่อดูตัวควบคุมใหม่ๆ"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"เพิ่มตัวควบคุม"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"แก้ไขตัวควบคุม"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"เพิ่มเอาต์พุต"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"กลุ่ม"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"เลือกอุปกรณ์ไว้ 1 รายการ"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"เลือกอุปกรณ์ไว้ <xliff:g id="COUNT">%1$d</xliff:g> รายการ"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (ยกเลิกการเชื่อมต่อแล้ว)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"เชื่อมต่อไม่ได้ ลองใหม่"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"จับคู่อุปกรณ์ใหม่"</string>
 </resources>

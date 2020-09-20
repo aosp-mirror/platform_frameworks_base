@@ -693,7 +693,7 @@
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"ఈ నోటిఫికేషన్‌లు మిమ్మల్ని హెచ్చరిస్తాయి"</string>
     <string name="inline_blocking_helper" msgid="2891486013649543452">"మీరు సాధారణంగా ఈ నోటిఫికేషన్‌లను విస్మరిస్తారు. \nవాటి ప్రదర్శనను కొనసాగించాలా?"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"పూర్తయింది"</string>
-    <string name="inline_ok_button" msgid="603075490581280343">"అప్లై చేయి"</string>
+    <string name="inline_ok_button" msgid="603075490581280343">"అప్లయి చేయి"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"ఈ నోటిఫికేషన్‌లను చూపిస్తూ ఉండాలా?"</string>
     <string name="inline_stop_button" msgid="2453460935438696090">"నోటిఫికేషన్‌లను ఆపివేయి"</string>
     <string name="inline_deliver_silently_button" msgid="2714314213321223286">"నిశ్శబ్దంగా బట్వాడా చేయండి"</string>
@@ -879,12 +879,20 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"తక్కువ ప్రాధాన్యత నోటిఫికేషన్ చిహ్నాలను చూపించు"</string>
     <string name="other" msgid="429768510980739978">"ఇతరం"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"స్థానం <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. సవరించడానికి రెండుసార్లు నొక్కండి."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. జోడించడానికి రెండుసార్లు నొక్కండి."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g>ని తరలిస్తుంది"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g>ని తీసివేస్తుంది"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"స్థానం <xliff:g id="POSITION">%2$d</xliff:g>కి <xliff:g id="TILE_NAME">%1$s</xliff:g>ని జోడించండి"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"స్థానం <xliff:g id="POSITION">%2$d</xliff:g>కి <xliff:g id="TILE_NAME">%1$s</xliff:g>ని తరలించండి"</string>
+    <!-- no translation found for accessibility_qs_edit_remove_tile_action (775511891457193480) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (5051211910345301833) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_move (2009373939914517817) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (7560798153975555772) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_move_to_position (5198161544045930556) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_to_position (9029163095148274690) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_position (4509277359815711830) -->
+    <skip />
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"శీఘ్ర సెట్టింగ్‌ల ఎడిటర్."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> నోటిఫికేషన్: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"సెట్టింగ్‌లను తెరవండి."</string>
@@ -1067,4 +1075,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"కొత్త నియంత్రణలను చూడడానికి పవర్ బటన్‌ని నొక్కి పట్టుకోండి"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"నియంత్రణలను జోడించండి"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"నియంత్రణలను ఎడిట్ చేయండి"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"అవుట్‌పుట్‌లను జోడించండి"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"గ్రూప్"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 పరికరం ఎంచుకోబడింది"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> పరికరాలు ఎంచుకోబడ్డాయి"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (డిస్‌కనెక్ట్ అయ్యింది)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"కనెక్ట్ చేయడం సాధ్యపడలేదు. మళ్లీ ట్రై చేయండి."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"కొత్త పరికరాన్ని పెయిర్ చేయండి"</string>
 </resources>

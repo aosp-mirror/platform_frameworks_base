@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Ενδέχεται να κουδουνίζει ή να δονείται βάσει των ρυθμίσεων του τηλεφώνου. Οι συζητήσεις από την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> εμφανίζονται σε συννεφάκι από προεπιλογή."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Κρατάει την προσοχή σας με μια κινούμενη συντόμευση προς αυτό το περιεχόμενο."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Επιτρέψτε στο σύστημα να αποφασίσει αν αυτή η ειδοποίηση θα αναπαράγει έναν ήχο ή θα ενεργοποιήσει τη δόνηση της συσκευής"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Εμφανίζεται στο επάνω μέρος της ενότητας συζητήσεων, προβάλλεται ως κινούμενο συννεφάκι, εμφανίζει τη φωτογραφία προφίλ στην οθόνη κλειδώματος"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Εμφανίζεται επάνω στις συζητήσεις, προβάλλεται ως κιν. συννεφάκι, εμφανίζει τη φωτ. προφίλ στην οθ. κλειδ."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ρυθμίσεις"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Προτεραιότητα"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> δεν υποστηρίζει τις λειτουργίες συζήτησης"</string>
@@ -879,12 +879,20 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Εμφάνιση εικονιδίων ειδοποιήσεων χαμηλής προτεραιότητας"</string>
     <string name="other" msgid="429768510980739978">"Άλλο"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Θέση <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Πατήστε δύο φορές για επεξεργασία."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Πατήστε δύο φορές για προσθήκη."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Μετακίνηση <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Κατάργηση <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Προσθήκη <xliff:g id="TILE_NAME">%1$s</xliff:g> στη θέση <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Μετακίνηση <xliff:g id="TILE_NAME">%1$s</xliff:g> στη θέση <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <!-- no translation found for accessibility_qs_edit_remove_tile_action (775511891457193480) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (5051211910345301833) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_move (2009373939914517817) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (7560798153975555772) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_move_to_position (5198161544045930556) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_to_position (9029163095148274690) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_position (4509277359815711830) -->
+    <skip />
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Επεξεργασία γρήγορων ρυθμίσεων."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Ειδοποίηση <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Άνοιγμα ρυθμίσεων."</string>
@@ -1067,4 +1075,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Πατήστε το κουμπί λειτουργίας για να δείτε νέα στοιχεία ελέγχου."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Προσθήκη στοιχείων ελέγχου"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Επεξεργασία στοιχείων ελέγχου"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Προσθήκη εξόδων"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Ομάδα"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Επιλέχτηκε 1 συσκευή"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Επιλέχτηκαν <xliff:g id="COUNT">%1$d</xliff:g> συσκευές"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (αποσυνδέθηκε)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Δεν ήταν δυνατή η σύνδεση. Δοκιμάστε ξανά."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Σύζευξη νέας συσκευής"</string>
 </resources>

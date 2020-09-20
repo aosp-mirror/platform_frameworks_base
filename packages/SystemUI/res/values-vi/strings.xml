@@ -879,12 +879,20 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Hiển thị biểu tượng thông báo có mức ưu tiên thấp"</string>
     <string name="other" msgid="429768510980739978">"Khác"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Vị trí <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Nhấn đúp để chỉnh sửa."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Nhấn đúp để thêm."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Di chuyển <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Xóa <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Thêm <xliff:g id="TILE_NAME">%1$s</xliff:g> vào vị trí <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Di chuyển <xliff:g id="TILE_NAME">%1$s</xliff:g> đến vị trí <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <!-- no translation found for accessibility_qs_edit_remove_tile_action (775511891457193480) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (5051211910345301833) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_move (2009373939914517817) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (7560798153975555772) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_move_to_position (5198161544045930556) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_tile_add_to_position (9029163095148274690) -->
+    <skip />
+    <!-- no translation found for accessibility_qs_edit_position (4509277359815711830) -->
+    <skip />
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Trình chỉnh sửa cài đặt nhanh."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Thông báo của <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Mở phần cài đặt."</string>
@@ -1067,4 +1075,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Giữ nút Nguồn để xem các tùy chọn điều khiển mới"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Thêm các tùy chọn điều khiển"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Chỉnh sửa tùy chọn điều khiển"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Thêm thiết bị đầu ra"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Nhóm"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Đã chọn 1 thiết bị"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Đã chọn <xliff:g id="COUNT">%1$d</xliff:g> thiết bị"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (đã ngắt kết nối)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Không thể kết nối. Hãy thử lại."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Ghép nối thiết bị mới"</string>
 </resources>
