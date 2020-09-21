@@ -121,7 +121,7 @@ interface IWindowSession {
      * @param childrenOnly Whether to only prepare child windows for replacement
      * (for example when main windows are being reused via preservation).
      */
-    void prepareToReplaceWindows(IBinder appToken, boolean childrenOnly);
+    oneway void prepareToReplaceWindows(IBinder appToken, boolean childrenOnly);
 
     /**
      * Called by a client to report that it ran out of graphics memory.
@@ -134,7 +134,7 @@ interface IWindowSession {
      * to optimize compositing of this part of the window.
      */
     @UnsupportedAppUsage
-    void setTransparentRegion(IWindow window, in Region region);
+    oneway void setTransparentRegion(IWindow window, in Region region);
 
     /**
      * Tell the window manager about the content and visible insets of the
@@ -146,7 +146,7 @@ interface IWindowSession {
      * frame can receive pointer events, as defined by
      * {@link android.view.ViewTreeObserver.InternalInsetsInfo}.
      */
-    void setInsets(IWindow window, int touchableInsets, in Rect contentInsets,
+    oneway void setInsets(IWindow window, int touchableInsets, in Rect contentInsets,
             in Rect visibleInsets, in Region touchableRegion);
 
     /**
@@ -157,10 +157,10 @@ interface IWindowSession {
      * is null if there is no sync required.
      */
     @UnsupportedAppUsage
-    void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction);
+    oneway void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction);
 
     @UnsupportedAppUsage
-    void setInTouchMode(boolean showFocus);
+    oneway void setInTouchMode(boolean showFocus);
     @UnsupportedAppUsage
     boolean getInTouchMode();
 
@@ -192,24 +192,24 @@ interface IWindowSession {
      * consumed is 'true' when the drop was accepted by a valid recipient,
      * 'false' otherwise.
      */
-    void reportDropResult(IWindow window, boolean consumed);
+    oneway void reportDropResult(IWindow window, boolean consumed);
 
     /**
      * Cancel the current drag operation.
      * skipAnimation is 'true' when it should skip the drag cancel animation which brings the drag
      * shadow image back to the drag start position.
      */
-    void cancelDragAndDrop(IBinder dragToken, boolean skipAnimation);
+    oneway void cancelDragAndDrop(IBinder dragToken, boolean skipAnimation);
 
     /**
      * Tell the OS that we've just dragged into a View that is willing to accept the drop
      */
-    void dragRecipientEntered(IWindow window);
+    oneway void dragRecipientEntered(IWindow window);
 
     /**
      * Tell the OS that we've just dragged *off* of a View that was willing to accept the drop
      */
-    void dragRecipientExited(IWindow window);
+    oneway void dragRecipientExited(IWindow window);
 
     /**
      * For windows with the wallpaper behind them, and the wallpaper is
@@ -230,26 +230,26 @@ interface IWindowSession {
      * scaled when setWallpaperZoomOut is called. If set to false, the WallpaperService will
      * receive the zoom out value but the surface won't be scaled.
      */
-    void setShouldZoomOutWallpaper(IBinder windowToken, boolean shouldZoom);
+    oneway void setShouldZoomOutWallpaper(IBinder windowToken, boolean shouldZoom);
 
     @UnsupportedAppUsage
-    void wallpaperOffsetsComplete(IBinder window);
+    oneway void wallpaperOffsetsComplete(IBinder window);
 
     /**
      * Apply a raw offset to the wallpaper service when shown behind this window.
      */
-    void setWallpaperDisplayOffset(IBinder windowToken, int x, int y);
+    oneway void setWallpaperDisplayOffset(IBinder windowToken, int x, int y);
 
     Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
             int z, in Bundle extras, boolean sync);
 
     @UnsupportedAppUsage
-    void wallpaperCommandComplete(IBinder window, in Bundle result);
+    oneway void wallpaperCommandComplete(IBinder window, in Bundle result);
 
     /**
      * Notifies that a rectangle on the screen has been requested.
      */
-    void onRectangleOnScreenRequested(IBinder token, in Rect rectangle);
+    oneway void onRectangleOnScreenRequested(IBinder token, in Rect rectangle);
 
     IWindowId getWindowId(IBinder window);
 
@@ -276,9 +276,9 @@ interface IWindowSession {
      */
     boolean startMovingTask(IWindow window, float startX, float startY);
 
-    void finishMovingTask(IWindow window);
+    oneway void finishMovingTask(IWindow window);
 
-    void updatePointerIcon(IWindow window);
+    oneway void updatePointerIcon(IWindow window);
 
     /**
      * Reparent the top layers for a display to the requested SurfaceControl. The display that is
@@ -292,7 +292,7 @@ interface IWindowSession {
      *           to.
      * @param displayId The id of the display to be re-parented.
      */
-    void reparentDisplayContent(IWindow window, in SurfaceControl sc, int displayId);
+    oneway void reparentDisplayContent(IWindow window, in SurfaceControl sc, int displayId);
 
     /**
      * Update the location of a child display in its parent window. This enables windows in the
@@ -303,14 +303,14 @@ interface IWindowSession {
      * @param y The y coordinate in the parent window.
      * @param displayId The id of the display to be notified.
      */
-    void updateDisplayContentLocation(IWindow window, int x, int y, int displayId);
+    oneway void updateDisplayContentLocation(IWindow window, int x, int y, int displayId);
 
     /**
      * Update a tap exclude region identified by provided id in the window. Touches on this region
      * will neither be dispatched to this window nor change the focus to this window. Passing an
      * invalid region will remove the area from the exclude region of this window.
      */
-    void updateTapExcludeRegion(IWindow window, in Region region);
+    oneway void updateTapExcludeRegion(IWindow window, in Region region);
 
     /**
      * Called when the client has changed the local insets state, and now the server should reflect
@@ -334,8 +334,8 @@ interface IWindowSession {
     /**
      * Update the flags on an input channel associated with a particular surface.
      */
-    void updateInputChannel(in IBinder channelToken, int displayId, in SurfaceControl surface,
-            int flags, int privateFlags, in Region region);
+    oneway void updateInputChannel(in IBinder channelToken, int displayId,
+            in SurfaceControl surface, int flags, int privateFlags, in Region region);
 
     /**
      * Transfer window focus to an embedded window if the calling window has focus.
