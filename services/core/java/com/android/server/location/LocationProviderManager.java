@@ -1424,9 +1424,9 @@ class LocationProviderManager extends
         }
     }
 
-    public void getCurrentLocation(LocationRequest request, CallerIdentity callerIdentity,
-            int permissionLevel, ICancellationSignal cancellationTransport,
-            ILocationCallback callback) {
+    @Nullable
+    public ICancellationSignal getCurrentLocation(LocationRequest request,
+            CallerIdentity callerIdentity, int permissionLevel, ILocationCallback callback) {
         if (request.getDurationMillis() > GET_CURRENT_LOCATION_MAX_TIMEOUT_MS) {
             request = new LocationRequest.Builder(request)
                     .setDurationMillis(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS)
@@ -1444,15 +1444,15 @@ class LocationProviderManager extends
             if (mSettingsHelper.isLocationPackageBlacklisted(callerIdentity.getUserId(),
                     callerIdentity.getPackageName())) {
                 registration.deliverLocation(null);
-                return;
+                return null;
             }
             if (!mUserInfoHelper.isCurrentUserId(callerIdentity.getUserId())) {
                 registration.deliverLocation(null);
-                return;
+                return null;
             }
             if (!request.isLocationSettingsIgnored() && !isEnabled(callerIdentity.getUserId())) {
                 registration.deliverLocation(null);
-                return;
+                return null;
             }
 
             Location lastLocation = getLastLocationUnsafe(callerIdentity.getUserId(),
@@ -1463,13 +1463,13 @@ class LocationProviderManager extends
                                 - lastLocation.getElapsedRealtimeNanos());
                 if (locationAgeMs < MAX_CURRENT_LOCATION_AGE_MS) {
                     registration.deliverLocation(lastLocation);
-                    return;
+                    return null;
                 }
 
                 if (!mAppForegroundHelper.isAppForeground(Binder.getCallingUid())
                         && locationAgeMs < mSettingsHelper.getBackgroundThrottleIntervalMs()) {
                     registration.deliverLocation(null);
-                    return;
+                    return null;
                 }
             }
 
@@ -1482,16 +1482,15 @@ class LocationProviderManager extends
             }
         }
 
-        CancellationSignal cancellationSignal = CancellationSignal.fromTransport(
-                cancellationTransport);
-        if (cancellationSignal != null) {
-            cancellationSignal.setOnCancelListener(SingleUseCallback.wrap(
-                    () -> {
-                        synchronized (mLock) {
-                            removeRegistration(callback.asBinder(), registration);
-                        }
-                    }));
-        }
+        ICancellationSignal cancelTransport = CancellationSignal.createTransport();
+        CancellationSignal cancellationSignal = CancellationSignal.fromTransport(cancelTransport);
+        cancellationSignal.setOnCancelListener(SingleUseCallback.wrap(
+                () -> {
+                    synchronized (mLock) {
+                        removeRegistration(callback.asBinder(), registration);
+                    }
+                }));
+        return cancelTransport;
     }
 
     public void sendExtraCommand(int uid, int pid, String command, Bundle extras) {

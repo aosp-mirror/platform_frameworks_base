@@ -701,10 +701,11 @@ public class LocationManagerService extends ILocationManager.Stub {
         return location;
     }
 
+    @Nullable
     @Override
-    public void getCurrentLocation(String provider, LocationRequest request,
-            ICancellationSignal cancellationTransport, ILocationCallback consumer,
-            String packageName, String attributionTag, String listenerId) {
+    public ICancellationSignal getCurrentLocation(String provider, LocationRequest request,
+            ILocationCallback consumer, String packageName, String attributionTag,
+            String listenerId) {
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
                 listenerId);
         int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),
@@ -721,8 +722,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         Preconditions.checkArgument(manager != null,
                 "provider \"" + provider + "\" does not exist");
 
-        manager.getCurrentLocation(request, identity, permissionLevel, cancellationTransport,
-                consumer);
+        return manager.getCurrentLocation(request, identity, permissionLevel, consumer);
     }
 
     @Override
