@@ -143,6 +143,22 @@ class DozeLogger @Inject constructor(
         })
     }
 
+    fun logStateChangedSent(state: DozeMachine.State) {
+        buffer.log(TAG, INFO, {
+            str1 = state.name
+        }, {
+            "Doze state sent to all DozeMachineParts stateSent=$str1"
+        })
+    }
+
+    fun logDisplayStateChanged(displayState: Int) {
+        buffer.log(TAG, INFO, {
+            int1 = displayState
+        }, {
+            "Display state changed to $int1"
+        })
+    }
+
     fun logWakeDisplay(isAwake: Boolean) {
         buffer.log(TAG, DEBUG, {
             bool1 = isAwake
