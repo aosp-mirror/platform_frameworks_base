@@ -205,6 +205,7 @@ public class DozeMachine {
     }
 
     void onScreenState(int state) {
+        mDozeLog.traceDisplayState(state);
         for (Part part : mParts) {
             part.onScreenState(state);
         }
@@ -308,6 +309,7 @@ public class DozeMachine {
         for (Part p : mParts) {
             p.transitionTo(oldState, newState);
         }
+        mDozeLog.traceDozeStateSendComplete(newState);
 
         switch (newState) {
             case FINISH:
