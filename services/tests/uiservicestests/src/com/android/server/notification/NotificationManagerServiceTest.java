@@ -69,6 +69,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -102,10 +103,12 @@ import android.app.StatsManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.UsageStatsManagerInternal;
 import android.companion.ICompanionDeviceManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
@@ -282,6 +285,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     NotificationHistoryManager mHistoryManager;
     @Mock
     StatsManager mStatsManager;
+    BroadcastReceiver mPackageIntentReceiver;
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
     private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
             1 << 30);
@@ -480,6 +484,28 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mShortcutHelper.setLauncherApps(mLauncherApps);
         mShortcutHelper.setShortcutServiceInternal(mShortcutServiceInternal);
 
+        // Capture PackageIntentReceiver
+        ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
+        ArgumentCaptor<IntentFilter> intentFilterCaptor =
+                ArgumentCaptor.forClass(IntentFilter.class);
+
+        verify(mContext, atLeastOnce()).registerReceiverAsUser(broadcastReceiverCaptor.capture(),
+                any(), intentFilterCaptor.capture(), any(), any());
+        List<BroadcastReceiver> broadcastReceivers = broadcastReceiverCaptor.getAllValues();
+        List<IntentFilter> intentFilters = intentFilterCaptor.getAllValues();
+
+        for (int i = 0; i < intentFilters.size(); i++) {
+            final IntentFilter filter = intentFilters.get(i);
+            if (filter.hasAction(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED)
+                    && filter.hasAction(Intent.ACTION_PACKAGES_UNSUSPENDED)
+                    && filter.hasAction(Intent.ACTION_PACKAGES_SUSPENDED)) {
+                mPackageIntentReceiver = broadcastReceivers.get(i);
+                break;
+            }
+        }
+        assertNotNull("package intent receiver should exist", mPackageIntentReceiver);
+
         // Pretend the shortcut exists
         List<ShortcutInfo> shortcutInfos = new ArrayList<>();
         ShortcutInfo info = mock(ShortcutInfo.class);
@@ -526,7 +552,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void tearDown() throws Exception {
         if (mFile != null) mFile.delete();
         clearDeviceConfig();
-        mService.unregisterDeviceConfigChange();
+
+        try {
+            mService.onDestroy();
+        } catch (IllegalStateException e) {
+            // can throw if a broadcast receiver was never registered
+        }
+
         InstrumentationRegistry.getInstrumentation()
                 .getUiAutomation().dropShellPermissionIdentity();
     }
@@ -2533,10 +2565,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testHasCompanionDevice_noService() {
-        mService = new TestableNotificationManagerService(mContext,  mNotificationRecordLogger,
+        NotificationManagerService noManService =
+                new TestableNotificationManagerService(mContext, mNotificationRecordLogger,
                 mNotificationInstanceIdSequence);
 
-        assertFalse(mService.hasCompanionDevice(mListener));
+        assertFalse(noManService.hasCompanionDevice(mListener));
     }
 
     @Test
@@ -4347,13 +4380,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(notif2);
 
         // on broadcast, hide the 2 notifications
-        mService.simulatePackageSuspendBroadcast(true, PKG);
+        simulatePackageSuspendBroadcast(true, PKG, notif1.getUid());
         ArgumentCaptor<List> captorHide = ArgumentCaptor.forClass(List.class);
         verify(mListeners, times(1)).notifyHiddenLocked(captorHide.capture());
         assertEquals(2, captorHide.getValue().size());
 
         // on broadcast, unhide the 2 notifications
-        mService.simulatePackageSuspendBroadcast(false, PKG);
+        simulatePackageSuspendBroadcast(false, PKG, notif1.getUid());
         ArgumentCaptor<List> captorUnhide = ArgumentCaptor.forClass(List.class);
         verify(mListeners, times(1)).notifyUnhiddenLocked(captorUnhide.capture());
         assertEquals(2, captorUnhide.getValue().size());
@@ -4370,7 +4403,24 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(notif2);
 
         // on broadcast, nothing is hidden since no notifications are of package "test_package"
-        mService.simulatePackageSuspendBroadcast(true, "test_package");
+        simulatePackageSuspendBroadcast(true, "test_package", notif1.getUid());
+        ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
+        verify(mListeners, times(1)).notifyHiddenLocked(captor.capture());
+        assertEquals(0, captor.getValue().size());
+    }
+
+    @Test
+    public void testNotificationFromDifferentUserHidden() {
+        // post 2 notification from this package
+        final NotificationRecord notif1 = generateNotificationRecord(
+                mTestNotificationChannel, 1, null, true);
+        final NotificationRecord notif2 = generateNotificationRecord(
+                mTestNotificationChannel, 2, null, false);
+        mService.addNotification(notif1);
+        mService.addNotification(notif2);
+
+        // on broadcast, nothing is hidden since no notifications are of user 10 with package PKG
+        simulatePackageSuspendBroadcast(true, PKG, 10);
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         verify(mListeners, times(1)).notifyHiddenLocked(captor.capture());
         assertEquals(0, captor.getValue().size());
@@ -4387,16 +4437,18 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(pkgB);
 
         // on broadcast, hide one of the packages
-        mService.simulatePackageDistractionBroadcast(
-                PackageManager.RESTRICTION_HIDE_NOTIFICATIONS, new String[] {"a"});
+        simulatePackageDistractionBroadcast(
+                PackageManager.RESTRICTION_HIDE_NOTIFICATIONS, new String[] {"a"},
+                new int[] {1000});
         ArgumentCaptor<List<NotificationRecord>> captorHide = ArgumentCaptor.forClass(List.class);
         verify(mListeners, times(1)).notifyHiddenLocked(captorHide.capture());
         assertEquals(1, captorHide.getValue().size());
         assertEquals("a", captorHide.getValue().get(0).getSbn().getPackageName());
 
         // on broadcast, unhide the package
-        mService.simulatePackageDistractionBroadcast(
-                PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS, new String[] {"a"});
+        simulatePackageDistractionBroadcast(
+                PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS, new String[] {"a"},
+                new int[] {1000});
         ArgumentCaptor<List<NotificationRecord>> captorUnhide = ArgumentCaptor.forClass(List.class);
         verify(mListeners, times(1)).notifyUnhiddenLocked(captorUnhide.capture());
         assertEquals(1, captorUnhide.getValue().size());
@@ -4414,8 +4466,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(pkgB);
 
         // on broadcast, hide one of the packages
-        mService.simulatePackageDistractionBroadcast(
-                PackageManager.RESTRICTION_HIDE_NOTIFICATIONS, new String[] {"a", "b"});
+        simulatePackageDistractionBroadcast(
+                PackageManager.RESTRICTION_HIDE_NOTIFICATIONS, new String[] {"a", "b"},
+                new int[] {1000, 1001});
         ArgumentCaptor<List<NotificationRecord>> captorHide = ArgumentCaptor.forClass(List.class);
 
         // should be called only once.
@@ -4425,8 +4478,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals("b", captorHide.getValue().get(1).getSbn().getPackageName());
 
         // on broadcast, unhide the package
-        mService.simulatePackageDistractionBroadcast(
-                PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS, new String[] {"a", "b"});
+        simulatePackageDistractionBroadcast(
+                PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS, new String[] {"a", "b"},
+                new int[] {1000, 1001});
         ArgumentCaptor<List<NotificationRecord>> captorUnhide = ArgumentCaptor.forClass(List.class);
 
         // should be called only once.
@@ -4444,8 +4498,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(notif1);
 
         // on broadcast, nothing is hidden since no notifications are of package "test_package"
-        mService.simulatePackageDistractionBroadcast(
-                PackageManager.RESTRICTION_HIDE_NOTIFICATIONS, new String[] {"test_package"});
+        simulatePackageDistractionBroadcast(
+                PackageManager.RESTRICTION_HIDE_NOTIFICATIONS, new String[] {"test_package"},
+                new int[]{notif1.getUid()});
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         verify(mListeners, times(1)).notifyHiddenLocked(captor.capture());
         assertEquals(0, captor.getValue().size());
@@ -7011,4 +7066,34 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertTrue(mService.isVisibleToListener(sbn, info));
     }
 
+    private void simulatePackageSuspendBroadcast(boolean suspend, String pkg,
+            int uid) {
+        // mimics receive broadcast that package is (un)suspended
+        // but does not actually (un)suspend the package
+        final Bundle extras = new Bundle();
+        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST,
+                new String[]{pkg});
+        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, new int[]{uid});
+
+        final String action = suspend ? Intent.ACTION_PACKAGES_SUSPENDED
+                : Intent.ACTION_PACKAGES_UNSUSPENDED;
+        final Intent intent = new Intent(action);
+        intent.putExtras(extras);
+
+        mPackageIntentReceiver.onReceive(getContext(), intent);
+    }
+
+    private void simulatePackageDistractionBroadcast(int flag, String[] pkgs, int[] uids) {
+        // mimics receive broadcast that package is (un)distracting
+        // but does not actually register that info with packagemanager
+        final Bundle extras = new Bundle();
+        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgs);
+        extras.putInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS, flag);
+        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uids);
+
+        final Intent intent = new Intent(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED);
+        intent.putExtras(extras);
+
+        mPackageIntentReceiver.onReceive(getContext(), intent);
+    }
 }
