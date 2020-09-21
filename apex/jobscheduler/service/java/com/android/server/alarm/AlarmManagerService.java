@@ -26,6 +26,7 @@ import static android.app.AlarmManager.RTC_WAKEUP;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.os.UserHandle.USER_SYSTEM;
 
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManagerInternal;
@@ -39,12 +40,10 @@ import android.app.PendingIntent;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManagerInternal;
-import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Binder;
@@ -68,6 +67,7 @@ import android.os.ThreadLocalWorkSource;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.system.Os;
 import android.text.TextUtils;
@@ -76,7 +76,6 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
-import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.LongArrayQueue;
 import android.util.MutableBoolean;
@@ -102,6 +101,7 @@ import com.android.server.AppStateTrackerImpl;
 import com.android.server.AppStateTrackerImpl.Listener;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.EventLogTags;
+import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
@@ -374,7 +374,7 @@ public class AlarmManagerService extends SystemService {
      * holding the AlarmManagerService.mLock lock.
      */
     @VisibleForTesting
-    final class Constants extends ContentObserver {
+    final class Constants implements DeviceConfig.OnPropertiesChangedListener {
         // Key names stored in the settings value.
         @VisibleForTesting
         static final String KEY_MIN_FUTURITY = "min_futurity";
@@ -394,17 +394,19 @@ public class AlarmManagerService extends SystemService {
         @VisibleForTesting
         static final String KEY_MAX_ALARMS_PER_UID = "max_alarms_per_uid";
         private static final String KEY_APP_STANDBY_WINDOW = "app_standby_window";
+        private static final String KEY_PREFIX_STANDBY_QUOTA = "standby_quota_";
         @VisibleForTesting
         final String[] KEYS_APP_STANDBY_QUOTAS = {
-                "standby_active_quota",
-                "standby_working_quota",
-                "standby_frequent_quota",
-                "standby_rare_quota",
-                "standby_never_quota",
+                KEY_PREFIX_STANDBY_QUOTA + "active",
+                KEY_PREFIX_STANDBY_QUOTA + "working",
+                KEY_PREFIX_STANDBY_QUOTA + "frequent",
+                KEY_PREFIX_STANDBY_QUOTA + "rare",
+                KEY_PREFIX_STANDBY_QUOTA + "never",
         };
         // Not putting this in the KEYS_APP_STANDBY_QUOTAS array because this uses a different
         // window size.
-        private static final String KEY_APP_STANDBY_RESTRICTED_QUOTA = "standby_restricted_quota";
+        private static final String KEY_APP_STANDBY_RESTRICTED_QUOTA =
+                KEY_PREFIX_STANDBY_QUOTA + "restricted";
         private static final String KEY_APP_STANDBY_RESTRICTED_WINDOW =
                 "app_standby_restricted_window";
 
@@ -458,20 +460,18 @@ public class AlarmManagerService extends SystemService {
         public int APP_STANDBY_RESTRICTED_QUOTA = DEFAULT_APP_STANDBY_RESTRICTED_QUOTA;
         public long APP_STANDBY_RESTRICTED_WINDOW = DEFAULT_APP_STANDBY_RESTRICTED_WINDOW;
 
-        private ContentResolver mResolver;
-        private final KeyValueListParser mParser = new KeyValueListParser(',');
         private long mLastAllowWhileIdleWhitelistDuration = -1;
 
-        public Constants(Handler handler) {
-            super(handler);
+        Constants() {
             updateAllowWhileIdleWhitelistDurationLocked();
+            for (int i = 0; i < APP_STANDBY_QUOTAS.length; i++) {
+                APP_STANDBY_QUOTAS[i] = DEFAULT_APP_STANDBY_QUOTAS[i];
+            }
         }
 
-        public void start(ContentResolver resolver) {
-            mResolver = resolver;
-            mResolver.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.ALARM_MANAGER_CONSTANTS), false, this);
-            updateConstants();
+        public void start() {
+            mInjector.registerDeviceConfigListener(this);
+            onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_ALARM_MANAGER));
         }
 
         public void updateAllowWhileIdleWhitelistDurationLocked() {
@@ -484,71 +484,115 @@ public class AlarmManagerService extends SystemService {
         }
 
         @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            updateConstants();
+        public void onPropertiesChanged(@NonNull DeviceConfig.Properties properties) {
+            boolean standbyQuotaUpdated = false;
+            synchronized (mLock) {
+                for (String name : properties.getKeyset()) {
+                    if (name == null) {
+                        continue;
+                    }
+
+                    switch (name) {
+                        case KEY_MIN_FUTURITY:
+                            MIN_FUTURITY = properties.getLong(
+                                    KEY_MIN_FUTURITY, DEFAULT_MIN_FUTURITY);
+                            break;
+                        case KEY_MIN_INTERVAL:
+                            MIN_INTERVAL = properties.getLong(
+                                    KEY_MIN_INTERVAL, DEFAULT_MIN_INTERVAL);
+                            break;
+                        case KEY_MAX_INTERVAL:
+                            MAX_INTERVAL = properties.getLong(
+                                    KEY_MAX_INTERVAL, DEFAULT_MAX_INTERVAL);
+                            break;
+                        case KEY_ALLOW_WHILE_IDLE_SHORT_TIME:
+                            ALLOW_WHILE_IDLE_SHORT_TIME = properties.getLong(
+                                    KEY_ALLOW_WHILE_IDLE_SHORT_TIME,
+                                    DEFAULT_ALLOW_WHILE_IDLE_SHORT_TIME);
+                            break;
+                        case KEY_ALLOW_WHILE_IDLE_LONG_TIME:
+                            ALLOW_WHILE_IDLE_LONG_TIME = properties.getLong(
+                                    KEY_ALLOW_WHILE_IDLE_LONG_TIME,
+                                    DEFAULT_ALLOW_WHILE_IDLE_LONG_TIME);
+                            break;
+                        case KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION:
+                            ALLOW_WHILE_IDLE_WHITELIST_DURATION = properties.getLong(
+                                    KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION,
+                                    DEFAULT_ALLOW_WHILE_IDLE_WHITELIST_DURATION);
+                            updateAllowWhileIdleWhitelistDurationLocked();
+                            break;
+                        case KEY_LISTENER_TIMEOUT:
+                            LISTENER_TIMEOUT = properties.getLong(
+                                    KEY_LISTENER_TIMEOUT, DEFAULT_LISTENER_TIMEOUT);
+                            break;
+                        case KEY_MAX_ALARMS_PER_UID:
+                            MAX_ALARMS_PER_UID = properties.getInt(
+                                    KEY_MAX_ALARMS_PER_UID, DEFAULT_MAX_ALARMS_PER_UID);
+                            if (MAX_ALARMS_PER_UID < DEFAULT_MAX_ALARMS_PER_UID) {
+                                Slog.w(TAG, "Cannot set " + KEY_MAX_ALARMS_PER_UID + " lower than "
+                                        + DEFAULT_MAX_ALARMS_PER_UID);
+                                MAX_ALARMS_PER_UID = DEFAULT_MAX_ALARMS_PER_UID;
+                            }
+                            break;
+                        case KEY_APP_STANDBY_WINDOW:
+                        case KEY_APP_STANDBY_RESTRICTED_WINDOW:
+                            updateStandbyWindowsLocked();
+                            break;
+                        default:
+                            if (name.startsWith(KEY_PREFIX_STANDBY_QUOTA) && !standbyQuotaUpdated) {
+                                // The quotas need to be updated in order, so we can't just rely
+                                // on the property iteration order.
+                                updateStandbyQuotasLocked();
+                                standbyQuotaUpdated = true;
+                            }
+                            break;
+                    }
+                }
+            }
         }
 
-        private void updateConstants() {
-            synchronized (mLock) {
-                try {
-                    mParser.setString(Settings.Global.getString(mResolver,
-                            Settings.Global.ALARM_MANAGER_CONSTANTS));
-                } catch (IllegalArgumentException e) {
-                    // Failed to parse the settings string, log this and move on
-                    // with defaults.
-                    Slog.e(TAG, "Bad alarm manager settings", e);
-                }
+        private void updateStandbyQuotasLocked() {
+            // The bucket quotas need to be read as an atomic unit but the properties passed to
+            // onPropertiesChanged may only have one key populated at a time.
+            final DeviceConfig.Properties properties = DeviceConfig.getProperties(
+                    DeviceConfig.NAMESPACE_ALARM_MANAGER, KEYS_APP_STANDBY_QUOTAS);
 
-                MIN_FUTURITY = mParser.getLong(KEY_MIN_FUTURITY, DEFAULT_MIN_FUTURITY);
-                MIN_INTERVAL = mParser.getLong(KEY_MIN_INTERVAL, DEFAULT_MIN_INTERVAL);
-                MAX_INTERVAL = mParser.getLong(KEY_MAX_INTERVAL, DEFAULT_MAX_INTERVAL);
-                ALLOW_WHILE_IDLE_SHORT_TIME = mParser.getLong(KEY_ALLOW_WHILE_IDLE_SHORT_TIME,
-                        DEFAULT_ALLOW_WHILE_IDLE_SHORT_TIME);
-                ALLOW_WHILE_IDLE_LONG_TIME = mParser.getLong(KEY_ALLOW_WHILE_IDLE_LONG_TIME,
-                        DEFAULT_ALLOW_WHILE_IDLE_LONG_TIME);
-                ALLOW_WHILE_IDLE_WHITELIST_DURATION = mParser.getLong(
-                        KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION,
-                        DEFAULT_ALLOW_WHILE_IDLE_WHITELIST_DURATION);
-                LISTENER_TIMEOUT = mParser.getLong(KEY_LISTENER_TIMEOUT,
-                        DEFAULT_LISTENER_TIMEOUT);
-
-                APP_STANDBY_WINDOW = mParser.getLong(KEY_APP_STANDBY_WINDOW,
-                        DEFAULT_APP_STANDBY_WINDOW);
-                if (APP_STANDBY_WINDOW > DEFAULT_APP_STANDBY_WINDOW) {
-                    Slog.w(TAG, "Cannot exceed the app_standby_window size of "
-                            + DEFAULT_APP_STANDBY_WINDOW);
-                    APP_STANDBY_WINDOW = DEFAULT_APP_STANDBY_WINDOW;
-                } else if (APP_STANDBY_WINDOW < DEFAULT_APP_STANDBY_WINDOW) {
-                    // Not recommended outside of testing.
-                    Slog.w(TAG, "Using a non-default app_standby_window of " + APP_STANDBY_WINDOW);
-                }
-
-                APP_STANDBY_QUOTAS[ACTIVE_INDEX] = mParser.getInt(
-                        KEYS_APP_STANDBY_QUOTAS[ACTIVE_INDEX],
-                        DEFAULT_APP_STANDBY_QUOTAS[ACTIVE_INDEX]);
-                for (int i = WORKING_INDEX; i < KEYS_APP_STANDBY_QUOTAS.length; i++) {
-                    APP_STANDBY_QUOTAS[i] = mParser.getInt(KEYS_APP_STANDBY_QUOTAS[i],
-                            Math.min(APP_STANDBY_QUOTAS[i - 1], DEFAULT_APP_STANDBY_QUOTAS[i]));
-                }
-
-                APP_STANDBY_RESTRICTED_QUOTA = Math.max(1,
-                        mParser.getInt(KEY_APP_STANDBY_RESTRICTED_QUOTA,
-                                DEFAULT_APP_STANDBY_RESTRICTED_QUOTA));
-
-                APP_STANDBY_RESTRICTED_WINDOW = Math.max(APP_STANDBY_WINDOW,
-                        mParser.getLong(KEY_APP_STANDBY_RESTRICTED_WINDOW,
-                                DEFAULT_APP_STANDBY_RESTRICTED_WINDOW));
-
-                MAX_ALARMS_PER_UID = mParser.getInt(KEY_MAX_ALARMS_PER_UID,
-                        DEFAULT_MAX_ALARMS_PER_UID);
-                if (MAX_ALARMS_PER_UID < DEFAULT_MAX_ALARMS_PER_UID) {
-                    Slog.w(TAG, "Cannot set " + KEY_MAX_ALARMS_PER_UID + " lower than "
-                            + DEFAULT_MAX_ALARMS_PER_UID);
-                    MAX_ALARMS_PER_UID = DEFAULT_MAX_ALARMS_PER_UID;
-                }
-
-                updateAllowWhileIdleWhitelistDurationLocked();
+            APP_STANDBY_QUOTAS[ACTIVE_INDEX] = properties.getInt(
+                    KEYS_APP_STANDBY_QUOTAS[ACTIVE_INDEX],
+                    DEFAULT_APP_STANDBY_QUOTAS[ACTIVE_INDEX]);
+            for (int i = WORKING_INDEX; i < KEYS_APP_STANDBY_QUOTAS.length; i++) {
+                APP_STANDBY_QUOTAS[i] = properties.getInt(
+                        KEYS_APP_STANDBY_QUOTAS[i],
+                        Math.min(APP_STANDBY_QUOTAS[i - 1], DEFAULT_APP_STANDBY_QUOTAS[i]));
             }
+
+            APP_STANDBY_RESTRICTED_QUOTA = Math.max(1,
+                    DeviceConfig.getInt(DeviceConfig.NAMESPACE_ALARM_MANAGER,
+                            KEY_APP_STANDBY_RESTRICTED_QUOTA,
+                            DEFAULT_APP_STANDBY_RESTRICTED_QUOTA));
+        }
+
+        private void updateStandbyWindowsLocked() {
+            // The bucket windows need to be read as an atomic unit but the properties passed to
+            // onPropertiesChanged may only have one key populated at a time.
+            final DeviceConfig.Properties properties = DeviceConfig.getProperties(
+                    DeviceConfig.NAMESPACE_ALARM_MANAGER,
+                    KEY_APP_STANDBY_WINDOW, KEY_APP_STANDBY_RESTRICTED_WINDOW);
+            APP_STANDBY_WINDOW = properties.getLong(
+                    KEY_APP_STANDBY_WINDOW, DEFAULT_APP_STANDBY_WINDOW);
+            if (APP_STANDBY_WINDOW > DEFAULT_APP_STANDBY_WINDOW) {
+                Slog.w(TAG, "Cannot exceed the app_standby_window size of "
+                        + DEFAULT_APP_STANDBY_WINDOW);
+                APP_STANDBY_WINDOW = DEFAULT_APP_STANDBY_WINDOW;
+            } else if (APP_STANDBY_WINDOW < DEFAULT_APP_STANDBY_WINDOW) {
+                // Not recommended outside of testing.
+                Slog.w(TAG, "Using a non-default app_standby_window of " + APP_STANDBY_WINDOW);
+            }
+
+            APP_STANDBY_RESTRICTED_WINDOW = Math.max(APP_STANDBY_WINDOW,
+                    properties.getLong(
+                            KEY_APP_STANDBY_RESTRICTED_WINDOW,
+                            DEFAULT_APP_STANDBY_RESTRICTED_WINDOW));
         }
 
         void dump(PrintWriter pw, String prefix) {
@@ -1199,7 +1243,7 @@ public class AlarmManagerService extends SystemService {
 
         synchronized (mLock) {
             mHandler = new AlarmHandler();
-            mConstants = new Constants(mHandler);
+            mConstants = new Constants();
             mAppWakeupHistory = new AppWakeupHistory(Constants.DEFAULT_APP_STANDBY_WINDOW);
 
             mNextWakeup = mNextNonWakeup = 0;
@@ -1284,7 +1328,7 @@ public class AlarmManagerService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             synchronized (mLock) {
-                mConstants.start(getContext().getContentResolver());
+                mConstants.start();
                 mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
                 mLocalDeviceIdleController =
                         LocalServices.getService(DeviceIdleInternal.class);
@@ -3381,6 +3425,11 @@ public class AlarmManagerService extends SystemService {
 
         ClockReceiver getClockReceiver(AlarmManagerService service) {
             return service.new ClockReceiver();
+        }
+
+        void registerDeviceConfigListener(DeviceConfig.OnPropertiesChangedListener listener) {
+            DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ALARM_MANAGER,
+                    JobSchedulerBackgroundThread.getExecutor(), listener);
         }
     }
 
