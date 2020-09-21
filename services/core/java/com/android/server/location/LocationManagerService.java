@@ -83,8 +83,6 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.location.LocationRequestStatistics.PackageProviderKey;
-import com.android.server.location.LocationRequestStatistics.PackageStatistics;
 import com.android.server.location.geofence.GeofenceManager;
 import com.android.server.location.geofence.GeofenceProxy;
 import com.android.server.location.gnss.GnssManagerService;
@@ -93,6 +91,7 @@ import com.android.server.location.util.AppForegroundHelper;
 import com.android.server.location.util.AppOpsHelper;
 import com.android.server.location.util.Injector;
 import com.android.server.location.util.LocationAttributionHelper;
+import com.android.server.location.util.LocationEventLog;
 import com.android.server.location.util.LocationPermissionsHelper;
 import com.android.server.location.util.LocationPowerSaveModeHelper;
 import com.android.server.location.util.LocationUsageLogger;
@@ -114,9 +113,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -418,6 +415,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (D) {
             Log.d(TAG, "[u" + userId + "] location enabled = " + enabled);
         }
+
+        mInjector.getLocationEventLog().logLocationEnabled(userId, enabled);
 
         Intent intent = new Intent(LocationManager.MODE_CHANGED_ACTION)
                 .putExtra(LocationManager.EXTRA_LOCATION_ENABLED, enabled)
@@ -1131,18 +1130,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         mInjector.getSettingsHelper().dump(fd, ipw, args);
         ipw.decreaseIndent();
 
-        ipw.println("Historical Records by Provider:");
-        ipw.increaseIndent();
-        TreeMap<PackageProviderKey, PackageStatistics> sorted = new TreeMap<>(
-                mInjector.getLocationRequestStatistics().statistics);
-        for (Map.Entry<PackageProviderKey, PackageStatistics> entry
-                : sorted.entrySet()) {
-            ipw.println(entry.getKey() + ": " + entry.getValue());
-        }
-        ipw.decreaseIndent();
-
-        mInjector.getLocationRequestStatistics().history.dump(ipw);
-
         synchronized (mLock) {
             if (mExtraLocationControllerPackage != null) {
                 ipw.println(
@@ -1169,6 +1156,13 @@ public class LocationManagerService extends ILocationManager.Stub {
         ipw.println("Geofence Manager:");
         ipw.increaseIndent();
         mGeofenceManager.dump(fd, ipw, args);
+        ipw.decreaseIndent();
+
+        ipw.println("Event Log:");
+        ipw.increaseIndent();
+        for (String log : mInjector.getLocationEventLog()) {
+            ipw.println(log);
+        }
         ipw.decreaseIndent();
     }
 
@@ -1231,6 +1225,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private static class SystemInjector implements Injector {
 
+        private final LocationEventLog mLocationEventLog;
         private final UserInfoHelper mUserInfoHelper;
         private final AlarmHelper mAlarmHelper;
         private final SystemAppOpsHelper mAppOpsHelper;
@@ -1241,9 +1236,9 @@ public class LocationManagerService extends ILocationManager.Stub {
         private final SystemScreenInteractiveHelper mScreenInteractiveHelper;
         private final LocationAttributionHelper mLocationAttributionHelper;
         private final LocationUsageLogger mLocationUsageLogger;
-        private final LocationRequestStatistics mLocationRequestStatistics;
 
         SystemInjector(Context context, UserInfoHelper userInfoHelper) {
+            mLocationEventLog = new LocationEventLog();
             mUserInfoHelper = userInfoHelper;
             mAlarmHelper = new SystemAlarmHelper(context);
             mAppOpsHelper = new SystemAppOpsHelper(context);
@@ -1251,11 +1246,11 @@ public class LocationManagerService extends ILocationManager.Stub {
                     mAppOpsHelper);
             mSettingsHelper = new SystemSettingsHelper(context);
             mAppForegroundHelper = new SystemAppForegroundHelper(context);
-            mLocationPowerSaveModeHelper = new SystemLocationPowerSaveModeHelper(context);
+            mLocationPowerSaveModeHelper = new SystemLocationPowerSaveModeHelper(context,
+                    mLocationEventLog);
             mScreenInteractiveHelper = new SystemScreenInteractiveHelper(context);
             mLocationAttributionHelper = new LocationAttributionHelper(mAppOpsHelper);
             mLocationUsageLogger = new LocationUsageLogger();
-            mLocationRequestStatistics = new LocationRequestStatistics();
         }
 
         void onSystemReady() {
@@ -1318,8 +1313,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         @Override
-        public LocationRequestStatistics getLocationRequestStatistics() {
-            return mLocationRequestStatistics;
+        public LocationEventLog getLocationEventLog() {
+            return mLocationEventLog;
         }
     }
 }

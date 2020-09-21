@@ -750,7 +750,7 @@ public final class LocationRequest implements Parcelable {
             s.append(qualityToString(mQuality)).append(" ");
         }
         if (mInterval != PASSIVE_INTERVAL) {
-            s.append("interval=");
+            s.append("@");
             TimeUtils.formatDuration(mInterval, s);
         } else {
             s.append("PASSIVE");
@@ -765,7 +765,8 @@ public final class LocationRequest implements Parcelable {
         if (mMaxUpdates != Integer.MAX_VALUE) {
             s.append(" maxUpdates=").append(mMaxUpdates);
         }
-        if (mMinUpdateIntervalMillis < mInterval) {
+        if (mMinUpdateIntervalMillis != IMPLICIT_MIN_UPDATE_INTERVAL
+                && mMinUpdateIntervalMillis < mInterval) {
             s.append(" minUpdateInterval=");
             TimeUtils.formatDuration(mMinUpdateIntervalMillis, s);
         }

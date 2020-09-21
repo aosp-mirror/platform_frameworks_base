@@ -41,7 +41,8 @@ public class SystemLocationPowerSaveModeHelper extends LocationPowerSaveModeHelp
     @LocationPowerSaveMode
     private volatile int mLocationPowerSaveMode;
 
-    public SystemLocationPowerSaveModeHelper(Context context) {
+    public SystemLocationPowerSaveModeHelper(Context context, LocationEventLog locationEventLog) {
+        super(locationEventLog);
         mContext = context;
     }
 

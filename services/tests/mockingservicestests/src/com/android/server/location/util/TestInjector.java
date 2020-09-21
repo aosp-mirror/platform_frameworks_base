@@ -16,10 +16,9 @@
 
 package com.android.server.location.util;
 
-import com.android.server.location.LocationRequestStatistics;
-
 public class TestInjector implements Injector {
 
+    private final LocationEventLog mLocationEventLog;
     private final FakeUserInfoHelper mUserInfoHelper;
     private final FakeAlarmHelper mAlarmHelper;
     private final FakeAppOpsHelper mAppOpsHelper;
@@ -30,20 +29,19 @@ public class TestInjector implements Injector {
     private final FakeScreenInteractiveHelper mScreenInteractiveHelper;
     private final LocationAttributionHelper mLocationAttributionHelper;
     private final LocationUsageLogger mLocationUsageLogger;
-    private final LocationRequestStatistics mLocationRequestStatistics;
 
     public TestInjector() {
+        mLocationEventLog = new LocationEventLog();
         mUserInfoHelper = new FakeUserInfoHelper();
         mAlarmHelper = new FakeAlarmHelper();
         mAppOpsHelper = new FakeAppOpsHelper();
         mLocationPermissionsHelper = new FakeLocationPermissionsHelper(mAppOpsHelper);
         mSettingsHelper = new FakeSettingsHelper();
         mAppForegroundHelper = new FakeAppForegroundHelper();
-        mLocationPowerSaveModeHelper = new FakeLocationPowerSaveModeHelper();
+        mLocationPowerSaveModeHelper = new FakeLocationPowerSaveModeHelper(mLocationEventLog);
         mScreenInteractiveHelper = new FakeScreenInteractiveHelper();
         mLocationAttributionHelper = new LocationAttributionHelper(mAppOpsHelper);
         mLocationUsageLogger = new LocationUsageLogger();
-        mLocationRequestStatistics = new LocationRequestStatistics();
     }
 
     @Override
@@ -97,7 +95,7 @@ public class TestInjector implements Injector {
     }
 
     @Override
-    public LocationRequestStatistics getLocationRequestStatistics() {
-        return mLocationRequestStatistics;
+    public LocationEventLog getLocationEventLog() {
+        return mLocationEventLog;
     }
 }
