@@ -3436,7 +3436,7 @@
     <string name="config_emergency_call_number" translatable="false">112</string>
 
     <!-- Package name that provides Emergency Dialer -->
-    <string name="config_emergency_dialer_package">com.android.phone</string>
+    <string name="config_emergency_dialer_package" translatable="false">com.android.phone</string>
 
     <!-- Do not translate. Mcc codes whose existence trigger the presence of emergency
          affordances-->
