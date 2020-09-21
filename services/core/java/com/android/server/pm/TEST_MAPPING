@@ -33,16 +33,13 @@
       "name": "CtsContentTestCases",
       "options": [
         {
-          "include-filter": "android.content.pm.cts.ChecksumsTest"
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
         },
         {
-          "include-filter": "android.content.pm.cts.PackageManagerShellCommandTest"
+          "exclude-annotation": "org.junit.Ignore"
         },
         {
-          "include-filter": "android.content.pm.cts.PackageManagerShellCommandIncrementalTest"
-        },
-        {
-          "include-filter": "android.content.pm.cts.PackageManagerTest"
+          "include-filter": "android.content.pm.cts"
         }
       ]
     },
