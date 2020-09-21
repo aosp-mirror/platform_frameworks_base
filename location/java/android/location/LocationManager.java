@@ -20,6 +20,8 @@ import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.LOCATION_HARDWARE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
+import static android.location.LocationRequest.createFromDeprecatedCriteria;
+import static android.location.LocationRequest.createFromDeprecatedProvider;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
@@ -1024,9 +1026,7 @@ public class LocationManager {
 
         requestLocationUpdates(
                 provider,
-                new LocationRequest.Builder(minTimeMs)
-                        .setMinUpdateDistanceMeters(minDistanceM)
-                        .build(),
+                createFromDeprecatedProvider(provider, minTimeMs, minDistanceM, false),
                 executor,
                 listener);
     }
@@ -1085,10 +1085,7 @@ public class LocationManager {
 
         requestLocationUpdates(
                 FUSED_PROVIDER,
-                new LocationRequest.Builder(minTimeMs)
-                        .setQuality(criteria)
-                        .setMinUpdateDistanceMeters(minDistanceM)
-                        .build(),
+                createFromDeprecatedCriteria(criteria, minTimeMs, minDistanceM, false),
                 executor,
                 listener);
     }
@@ -1116,9 +1113,7 @@ public class LocationManager {
 
         requestLocationUpdates(
                 provider,
-                new LocationRequest.Builder(minTimeMs)
-                        .setMinUpdateDistanceMeters(minDistanceM)
-                        .build(),
+                createFromDeprecatedProvider(provider, minTimeMs, minDistanceM, false),
                 pendingIntent);
     }
 
@@ -1144,10 +1139,7 @@ public class LocationManager {
         Preconditions.checkArgument(criteria != null, "invalid null criteria");
         requestLocationUpdates(
                 FUSED_PROVIDER,
-                new LocationRequest.Builder(minTimeMs)
-                        .setQuality(criteria)
-                        .setMinUpdateDistanceMeters(minDistanceM)
-                        .build(),
+                createFromDeprecatedCriteria(criteria, minTimeMs, minDistanceM, false),
                 pendingIntent);
     }
 
