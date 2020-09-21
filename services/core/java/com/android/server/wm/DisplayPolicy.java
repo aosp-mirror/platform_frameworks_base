@@ -2965,10 +2965,6 @@ public class DisplayPolicy {
 
         mDisplayContent.getInsetsPolicy().updateBarControlTarget(win);
 
-        final int fullscreenAppearance = updateLightStatusBarLw(0 /* appearance */,
-                mTopFullscreenOpaqueWindowState, mTopFullscreenOpaqueOrDimmingWindowState);
-        final int dockedAppearance = updateLightStatusBarLw(0 /* appearance */,
-                mTopDockedOpaqueWindowState, mTopDockedOpaqueOrDimmingWindowState);
         final boolean inSplitScreen =
                 mService.mRoot.getDefaultTaskDisplayArea().isSplitScreenModeActivated();
         if (inSplitScreen) {
@@ -2980,6 +2976,12 @@ public class DisplayPolicy {
         mService.getStackBounds(inSplitScreen ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                         : WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_UNDEFINED, mNonDockedStackBounds);
+        final int fullscreenAppearance = updateLightStatusBarLw(0 /* appearance */,
+                mTopFullscreenOpaqueWindowState, mTopFullscreenOpaqueOrDimmingWindowState,
+                mNonDockedStackBounds);
+        final int dockedAppearance = updateLightStatusBarLw(0 /* appearance */,
+                mTopDockedOpaqueWindowState, mTopDockedOpaqueOrDimmingWindowState,
+                mDockedStackBounds);
         final int disableFlags = win.getSystemUiVisibility() & StatusBarManager.DISABLE_MASK;
         final int opaqueAppearance = updateSystemBarsLw(win, disableFlags);
         final WindowState navColorWin = chooseNavigationColorWindowLw(
@@ -3045,10 +3047,14 @@ public class DisplayPolicy {
     }
 
     private int updateLightStatusBarLw(@Appearance int appearance, WindowState opaque,
-            WindowState opaqueOrDimming) {
+            WindowState opaqueOrDimming, Rect stackBounds) {
+        final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
+        final int statusBarHeight = mStatusBarHeightForRotation[displayRotation.getRotation()];
+        final boolean stackBoundsContainStatusBar =
+                stackBounds.isEmpty() ? false : stackBounds.top < statusBarHeight;
         final boolean onKeyguard = isKeyguardShowing() && !isKeyguardOccluded();
         final WindowState statusColorWin = onKeyguard ? mNotificationShade : opaqueOrDimming;
-        if (statusColorWin != null) {
+        if (stackBoundsContainStatusBar && statusColorWin != null) {
             if (statusColorWin == opaque || onKeyguard) {
                 // If the top fullscreen-or-dimming window is also the top fullscreen, respect
                 // its light flag.

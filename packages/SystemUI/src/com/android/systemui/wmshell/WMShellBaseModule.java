@@ -28,7 +28,6 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.dagger.WMSingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.shared.system.InputConsumerController;
 import com.android.wm.shell.ShellDump;
 import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -46,6 +45,8 @@ import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.draganddrop.DragAndDropController;
+import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
+import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
@@ -90,9 +91,10 @@ public abstract class WMShellBaseModule {
     static Optional<ShellDump> provideShellDump(ShellTaskOrganizer shellTaskOrganizer,
             Optional<SplitScreen> splitScreenOptional,
             Optional<Pip> pipOptional,
-            Optional<OneHanded> oneHandedOptional) {
+            Optional<OneHanded> oneHandedOptional,
+            Optional<HideDisplayCutout> hideDisplayCutout) {
         return Optional.of(new ShellDump(shellTaskOrganizer, splitScreenOptional, pipOptional,
-                oneHandedOptional));
+                oneHandedOptional, hideDisplayCutout));
     }
 
     @WMSingleton
@@ -215,4 +217,10 @@ public abstract class WMShellBaseModule {
         return new HandlerExecutor(handler);
     }
 
+    @WMSingleton
+    @Provides
+    static Optional<HideDisplayCutout> provideHideDisplayCutoutController(Context context,
+            DisplayController displayController) {
+        return Optional.ofNullable(HideDisplayCutoutController.create(context, displayController));
+    }
 }
