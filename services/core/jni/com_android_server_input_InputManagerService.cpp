@@ -206,12 +206,10 @@ public:
 
     void setDisplayViewports(JNIEnv* env, jobjectArray viewportObjArray);
 
-    base::Result<std::unique_ptr<InputChannel>> createInputChannel(JNIEnv* env,
-                                                                   const std::string& name);
-    base::Result<std::unique_ptr<InputChannel>> createInputMonitor(JNIEnv* env, int32_t displayId,
-                                                                   bool isGestureMonitor,
-                                                                   const std::string& name);
-    status_t removeInputChannel(JNIEnv* env, const sp<IBinder>& connectionToken);
+    status_t registerInputChannel(JNIEnv* env, const std::shared_ptr<InputChannel>& inputChannel);
+    status_t registerInputMonitor(JNIEnv* env, const std::shared_ptr<InputChannel>& inputChannel,
+                                  int32_t displayId, bool isGestureMonitor);
+    status_t unregisterInputChannel(JNIEnv* env, const sp<IBinder>& connectionToken);
     status_t pilferPointers(const sp<IBinder>& token);
 
     void displayRemoved(JNIEnv* env, int32_t displayId);
@@ -434,22 +432,24 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
             InputReaderConfiguration::CHANGE_DISPLAY_INFO);
 }
 
-base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputChannel(
-        JNIEnv* /* env */, const std::string& name) {
+status_t NativeInputManager::registerInputChannel(
+        JNIEnv* /* env */, const std::shared_ptr<InputChannel>& inputChannel) {
     ATRACE_CALL();
-    return mInputManager->getDispatcher()->createInputChannel(name);
+    return mInputManager->getDispatcher()->registerInputChannel(inputChannel);
 }
 
-base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputMonitor(
-        JNIEnv* /* env */, int32_t displayId, bool isGestureMonitor, const std::string& name) {
+status_t NativeInputManager::registerInputMonitor(JNIEnv* /* env */,
+                                                  const std::shared_ptr<InputChannel>& inputChannel,
+                                                  int32_t displayId, bool isGestureMonitor) {
     ATRACE_CALL();
-    return mInputManager->getDispatcher()->createInputMonitor(displayId, isGestureMonitor, name);
+    return mInputManager->getDispatcher()->registerInputMonitor(
+            inputChannel, displayId, isGestureMonitor);
 }
 
-status_t NativeInputManager::removeInputChannel(JNIEnv* /* env */,
-                                                const sp<IBinder>& connectionToken) {
+status_t NativeInputManager::unregisterInputChannel(JNIEnv* /* env */,
+                                                    const sp<IBinder>& connectionToken) {
     ATRACE_CALL();
-    return mInputManager->getDispatcher()->removeInputChannel(connectionToken);
+    return mInputManager->getDispatcher()->unregisterInputChannel(connectionToken);
 }
 
 status_t NativeInputManager::pilferPointers(const sp<IBinder>& token) {
@@ -1352,86 +1352,80 @@ static jboolean nativeHasKeys(JNIEnv* env, jclass /* clazz */,
     return result;
 }
 
+static void throwInputChannelNotInitialized(JNIEnv* env) {
+    jniThrowException(env, "java/lang/IllegalStateException",
+             "inputChannel is not initialized");
+}
+
 static void handleInputChannelDisposed(JNIEnv* env, jobject /* inputChannelObj */,
                                        const std::shared_ptr<InputChannel>& inputChannel,
                                        void* data) {
     NativeInputManager* im = static_cast<NativeInputManager*>(data);
 
-    ALOGW("Input channel object '%s' was disposed without first being removed with "
-          "the input manager!",
-          inputChannel->getName().c_str());
-    im->removeInputChannel(env, inputChannel->getConnectionToken());
+    ALOGW("Input channel object '%s' was disposed without first being unregistered with "
+            "the input manager!", inputChannel->getName().c_str());
+    im->unregisterInputChannel(env, inputChannel->getConnectionToken());
 }
 
-static jobject nativeCreateInputChannel(JNIEnv* env, jclass /* clazz */, jlong ptr,
-                                        jstring nameObj) {
+static void nativeRegisterInputChannel(JNIEnv* env, jclass /* clazz */,
+        jlong ptr, jobject inputChannelObj) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    ScopedUtfChars nameChars(env, nameObj);
-    std::string name = nameChars.c_str();
-
-    base::Result<std::unique_ptr<InputChannel>> inputChannel = im->createInputChannel(env, name);
-
-    if (!inputChannel) {
-        std::string message = inputChannel.error().message();
-        message += StringPrintf(" Status=%d", inputChannel.error().code());
-        jniThrowRuntimeException(env, message.c_str());
-        return nullptr;
+    std::shared_ptr<InputChannel> inputChannel =
+            android_view_InputChannel_getInputChannel(env, inputChannelObj);
+    if (inputChannel == nullptr) {
+        throwInputChannelNotInitialized(env);
+        return;
     }
 
-    jobject inputChannelObj =
-            android_view_InputChannel_createJavaObject(env, std::move(*inputChannel));
-    if (!inputChannelObj) {
-        return nullptr;
+    status_t status = im->registerInputChannel(env, inputChannel);
+
+    if (status) {
+        std::string message;
+        message += StringPrintf("Failed to register input channel.  status=%d", status);
+        jniThrowRuntimeException(env, message.c_str());
+        return;
     }
 
     android_view_InputChannel_setDisposeCallback(env, inputChannelObj,
             handleInputChannelDisposed, im);
-    return inputChannelObj;
 }
 
-static jobject nativeCreateInputMonitor(JNIEnv* env, jclass /* clazz */, jlong ptr, jint displayId,
-                                        jboolean isGestureMonitor, jstring nameObj) {
+static void nativeRegisterInputMonitor(JNIEnv* env, jclass /* clazz */,
+        jlong ptr, jobject inputChannelObj, jint displayId, jboolean isGestureMonitor) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    std::shared_ptr<InputChannel> inputChannel =
+            android_view_InputChannel_getInputChannel(env, inputChannelObj);
+    if (inputChannel == nullptr) {
+        throwInputChannelNotInitialized(env);
+        return;
+    }
 
     if (displayId == ADISPLAY_ID_NONE) {
         std::string message = "InputChannel used as a monitor must be associated with a display";
         jniThrowRuntimeException(env, message.c_str());
-        return nullptr;
+        return;
     }
 
-    ScopedUtfChars nameChars(env, nameObj);
-    std::string name = nameChars.c_str();
+    status_t status = im->registerInputMonitor(env, inputChannel, displayId, isGestureMonitor);
 
-    base::Result<std::unique_ptr<InputChannel>> inputChannel =
-            im->createInputMonitor(env, displayId, isGestureMonitor, name);
-
-    if (!inputChannel) {
-        std::string message = inputChannel.error().message();
-        message += StringPrintf(" Status=%d", inputChannel.error().code());
+    if (status) {
+        std::string message = StringPrintf("Failed to register input channel.  status=%d", status);
         jniThrowRuntimeException(env, message.c_str());
-        return nullptr;
+        return;
     }
-
-    jobject inputChannelObj =
-            android_view_InputChannel_createJavaObject(env, std::move(*inputChannel));
-    if (!inputChannelObj) {
-        return nullptr;
-    }
-
-    android_view_InputChannel_setDisposeCallback(env, inputChannelObj, handleInputChannelDisposed,
-                                                 im);
-    return inputChannelObj;
 }
 
-static void nativeRemoveInputChannel(JNIEnv* env, jclass /* clazz */, jlong ptr, jobject tokenObj) {
+static void nativeUnregisterInputChannel(JNIEnv* env, jclass /* clazz */, jlong ptr,
+                                         jobject tokenObj) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
     sp<IBinder> token = ibinderForJavaObject(env, tokenObj);
 
-    status_t status = im->removeInputChannel(env, token);
-    if (status && status != BAD_VALUE) { // ignore already removed channel
+    status_t status = im->unregisterInputChannel(env, token);
+    if (status && status != BAD_VALUE) { // ignore already unregistered channel
         std::string message;
-        message += StringPrintf("Failed to remove input channel.  status=%d", status);
+        message += StringPrintf("Failed to unregister input channel.  status=%d", status);
         jniThrowRuntimeException(env, message.c_str());
     }
 }
@@ -1786,11 +1780,12 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"nativeGetKeyCodeState", "(JIII)I", (void*)nativeGetKeyCodeState},
         {"nativeGetSwitchState", "(JIII)I", (void*)nativeGetSwitchState},
         {"nativeHasKeys", "(JII[I[Z)Z", (void*)nativeHasKeys},
-        {"nativeCreateInputChannel", "(JLjava/lang/String;)Landroid/view/InputChannel;",
-         (void*)nativeCreateInputChannel},
-        {"nativeCreateInputMonitor", "(JIZLjava/lang/String;)Landroid/view/InputChannel;",
-         (void*)nativeCreateInputMonitor},
-        {"nativeRemoveInputChannel", "(JLandroid/os/IBinder;)V", (void*)nativeRemoveInputChannel},
+        {"nativeRegisterInputChannel", "(JLandroid/view/InputChannel;)V",
+         (void*)nativeRegisterInputChannel},
+        {"nativeRegisterInputMonitor", "(JLandroid/view/InputChannel;IZ)V",
+         (void*)nativeRegisterInputMonitor},
+        {"nativeUnregisterInputChannel", "(JLandroid/os/IBinder;)V",
+         (void*)nativeUnregisterInputChannel},
         {"nativePilferPointers", "(JLandroid/os/IBinder;)V", (void*)nativePilferPointers},
         {"nativeSetInputFilterEnabled", "(JZ)V", (void*)nativeSetInputFilterEnabled},
         {"nativeSetInTouchMode", "(JZ)V", (void*)nativeSetInTouchMode},

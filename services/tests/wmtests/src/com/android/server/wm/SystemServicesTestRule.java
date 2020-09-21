@@ -236,7 +236,6 @@ public class SystemServicesTestRule implements TestRule {
         inputChannels[0].dispose();
         mInputChannel = inputChannels[1];
         doReturn(mInputChannel).when(mImService).monitorInput(anyString(), anyInt());
-        doReturn(mInputChannel).when(mImService).createInputChannel(anyString());
 
         // StatusBarManagerInternal
         final StatusBarManagerInternal sbmi = mock(StatusBarManagerInternal.class);
