@@ -276,15 +276,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     private void awaitCompletion() {
-        synchronized (mLock) {
-            final CountDownLatch latch = new CountDownLatch(1);
-            mHandler.post(() -> {
-                latch.countDown();
-            });
-            try {
-                latch.await();
-            } catch (InterruptedException e) {
-            }
+        final CountDownLatch latch = new CountDownLatch(1);
+        mHandler.post(() -> {
+            latch.countDown();
+        });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
         }
     }
 
