@@ -16,7 +16,12 @@
 
 package android.media;
 
+import android.system.ErrnoException;
+import android.system.Os;
+import android.util.Log;
+
 import java.io.Closeable;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,6 +30,8 @@ import java.io.OutputStream;
  * Package private utility class for ExifInterface.
  */
 class ExifInterfaceUtils {
+    private static final String TAG = "ExifInterface";
+
     /**
      * Copies all of the bytes from {@code in} to {@code out}. Neither stream is closed.
      * Returns the total number of bytes transferred.
@@ -112,6 +119,17 @@ class ExifInterfaceUtils {
                 throw rethrown;
             } catch (Exception ignored) {
             }
+        }
+    }
+
+    /**
+     * Closes a file descriptor that has been duplicated.
+     */
+    public static void closeFileDescriptor(FileDescriptor fd) {
+        try {
+            Os.close(fd);
+        } catch (ErrnoException ex) {
+            Log.e(TAG, "Error closing fd.", ex);
         }
     }
 }

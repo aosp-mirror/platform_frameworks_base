@@ -17,6 +17,7 @@
 package android.media;
 
 import static android.media.ExifInterfaceUtils.byteArrayToHexString;
+import static android.media.ExifInterfaceUtils.closeFileDescriptor;
 import static android.media.ExifInterfaceUtils.closeQuietly;
 import static android.media.ExifInterfaceUtils.convertToLongArray;
 import static android.media.ExifInterfaceUtils.copy;
@@ -1529,9 +1530,8 @@ public class ExifInterface {
 
         mAssetInputStream = null;
         mFilename = null;
-        // When FileDescriptor is duplicated and set to FileInputStream, ownership needs to be
-        // clarified in order for garbage collection to take place.
-        boolean isFdOwner = false;
+
+        boolean isFdDuped = false;
         if (isSeekableFD(fileDescriptor)) {
             mSeekableFileDescriptor = fileDescriptor;
             // Keep the original file descriptor in order to save attributes when it's seekable.
@@ -1539,7 +1539,7 @@ public class ExifInterface {
             // feature won't be working.
             try {
                 fileDescriptor = Os.dup(fileDescriptor);
-                isFdOwner = true;
+                isFdDuped = true;
             } catch (ErrnoException e) {
                 throw e.rethrowAsIOException();
             }
@@ -1549,10 +1549,13 @@ public class ExifInterface {
         mIsInputStream = false;
         FileInputStream in = null;
         try {
-            in = new FileInputStream(fileDescriptor, isFdOwner);
+            in = new FileInputStream(fileDescriptor);
             loadAttributes(in);
         } finally {
             closeQuietly(in);
+            if (isFdDuped) {
+                closeFileDescriptor(fileDescriptor);
+            }
         }
     }
 
@@ -2199,6 +2202,7 @@ public class ExifInterface {
 
         // Read the thumbnail.
         InputStream in = null;
+        FileDescriptor newFileDescriptor = null;
         try {
             if (mAssetInputStream != null) {
                 in = mAssetInputStream;
@@ -2211,9 +2215,9 @@ public class ExifInterface {
             } else if (mFilename != null) {
                 in = new FileInputStream(mFilename);
             } else if (mSeekableFileDescriptor != null) {
-                FileDescriptor fileDescriptor = Os.dup(mSeekableFileDescriptor);
-                Os.lseek(fileDescriptor, 0, OsConstants.SEEK_SET);
-                in = new FileInputStream(fileDescriptor, true);
+                newFileDescriptor = Os.dup(mSeekableFileDescriptor);
+                Os.lseek(newFileDescriptor, 0, OsConstants.SEEK_SET);
+                in = new FileInputStream(newFileDescriptor);
             }
             if (in == null) {
                 // Should not be reached this.
@@ -2234,6 +2238,9 @@ public class ExifInterface {
             Log.d(TAG, "Encountered exception while getting thumbnail", e);
         } finally {
             closeQuietly(in);
+            if (newFileDescriptor != null) {
+                closeFileDescriptor(newFileDescriptor);
+            }
         }
         return null;
     }
