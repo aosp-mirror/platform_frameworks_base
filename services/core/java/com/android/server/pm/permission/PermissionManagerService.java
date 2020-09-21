@@ -2603,13 +2603,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             final int N = pkg.getRequestedPermissions().size();
             for (int i = 0; i < N; i++) {
                 final String permName = pkg.getRequestedPermissions().get(i);
+                final String friendlyName = pkg.getPackageName() + "(" + pkg.getUid() + ")";
                 final BasePermission bp = mSettings.getPermissionLocked(permName);
                 final boolean appSupportsRuntimePermissions =
                         pkg.getTargetSdkVersion() >= Build.VERSION_CODES.M;
                 String upgradedActivityRecognitionPermission = null;
-
                 if (DEBUG_INSTALL && bp != null) {
-                    Log.i(TAG, "Package " + pkg.getPackageName()
+                    Log.i(TAG, "Package " + friendlyName
                             + " checking " + permName + ": " + bp);
                 }
 
@@ -2618,7 +2618,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                             pkg.getPackageName())) {
                         if (DEBUG_PERMISSIONS) {
                             Slog.i(TAG, "Unknown permission " + permName
-                                    + " in package " + pkg.getPackageName());
+                                    + " in package " + friendlyName);
                         }
                     }
                     continue;
@@ -2634,7 +2634,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         newImplicitPermissions.add(permName);
 
                         if (DEBUG_PERMISSIONS) {
-                            Slog.i(TAG, permName + " is newly added for " + pkg.getPackageName());
+                            Slog.i(TAG, permName + " is newly added for " + friendlyName);
                         }
                     } else {
                         // Special case for Activity Recognition permission. Even if AR permission
@@ -2656,8 +2656,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 newImplicitPermissions.add(permName);
 
                                 if (DEBUG_PERMISSIONS) {
-                                    Slog.i(TAG, permName + " is newly added for "
-                                            + pkg.getPackageName());
+                                    Slog.i(TAG, permName + " is newly added for " + friendlyName);
                                 }
                                 break;
                             }
@@ -2671,7 +2670,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 //                if (/*pkg.isInstantApp()*/ false && !bp.isInstant()) {
 //                    if (DEBUG_PERMISSIONS) {
 //                        Log.i(TAG, "Denying non-ephemeral permission " + bp.getName()
-//                                + " for package " + pkg.getPackageName());
+//                                + " for package " + friendlyName);
 //                    }
 //                    continue;
 //                }
@@ -2679,7 +2678,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 if (bp.isRuntimeOnly() && !appSupportsRuntimePermissions) {
                     if (DEBUG_PERMISSIONS) {
                         Log.i(TAG, "Denying runtime-only permission " + bp.getName()
-                                + " for package " + pkg.getPackageName());
+                                + " for package " + friendlyName);
                     }
                     continue;
                 }
@@ -2716,7 +2715,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                 if (DEBUG_PERMISSIONS) {
                     Slog.i(TAG, "Considering granting permission " + perm + " to package "
-                            + pkg.getPackageName());
+                            + friendlyName);
                 }
 
                 if (grant != GRANT_DENIED) {
@@ -3005,7 +3004,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                     || packageOfInterest.equals(pkg.getPackageName())) {
                                 if (DEBUG_PERMISSIONS) {
                                     Slog.i(TAG, "Not granting permission " + perm
-                                            + " to package " + pkg.getPackageName()
+                                            + " to package " + friendlyName
                                             + " because it was previously installed without");
                                 }
                             }
@@ -3020,7 +3019,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         changedInstallPermission = true;
                         if (DEBUG_PERMISSIONS) {
                             Slog.i(TAG, "Un-granting permission " + perm
-                                    + " from package " + pkg.getPackageName()
+                                    + " from package " + friendlyName
                                     + " (protectionLevel=" + bp.getProtectionLevel()
                                     + " flags=0x"
                                     + Integer.toHexString(PackageInfoUtils.appInfoFlags(pkg, ps))
@@ -3033,7 +3032,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 && (packageOfInterest == null
                                         || packageOfInterest.equals(pkg.getPackageName()))) {
                             Slog.i(TAG, "Not granting permission " + perm
-                                    + " to package " + pkg.getPackageName()
+                                    + " to package " + friendlyName
                                     + " (protectionLevel=" + bp.getProtectionLevel()
                                     + " flags=0x"
                                     + Integer.toHexString(PackageInfoUtils.appInfoFlags(pkg, ps))

@@ -241,7 +241,7 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"Искључи"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Напајање"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Рестартуј"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"Хитни позив"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"Хитан позив"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Извештај о грешци"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Заврши сесију"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Снимак екрана"</string>
@@ -832,7 +832,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Притисните „Мени“ да бисте откључали телефон или упутите хитан позив."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Притисните „Мени“ за откључавање."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Унесите шаблон за откључавање"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Хитни позив"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Хитан позив"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Назад на позив"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Тачно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Пробајте поново"</string>
