@@ -44,7 +44,7 @@ android_test {
     ],
 
     test_suites: [
-        "device-tests",
+        "general-tests",
         "mts",
     ],
 }
