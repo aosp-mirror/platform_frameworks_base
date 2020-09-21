@@ -453,16 +453,16 @@ public final class ActiveServices {
     }
 
     ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
-            int callingPid, int callingUid, boolean fgRequired, boolean hideFgNotification,
-            String callingPackage, @Nullable String callingFeatureId, final int userId)
+            int callingPid, int callingUid, boolean fgRequired, String callingPackage,
+            @Nullable String callingFeatureId, final int userId)
             throws TransactionTooLargeException {
         return startServiceLocked(caller, service, resolvedType, callingPid, callingUid, fgRequired,
-                hideFgNotification, callingPackage, callingFeatureId, userId, false);
+                callingPackage, callingFeatureId, userId, false);
     }
 
     ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
-            int callingPid, int callingUid, boolean fgRequired, boolean hideFgNotification,
-            String callingPackage, @Nullable String callingFeatureId, final int userId,
+            int callingPid, int callingUid, boolean fgRequired, String callingPackage,
+            @Nullable String callingFeatureId, final int userId,
             boolean allowBackgroundActivityStarts) throws TransactionTooLargeException {
         if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "startService: " + service
                 + " type=" + resolvedType + " args=" + service.getExtras());
@@ -609,7 +609,6 @@ public final class ActiveServices {
         r.startRequested = true;
         r.delayedStop = false;
         r.fgRequired = fgRequired;
-        r.hideFgNotification = hideFgNotification;
         r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
                 service, neededGrants, callingUid));
 
