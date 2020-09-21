@@ -1736,15 +1736,14 @@ public class PackageManagerService extends IPackageManager.Stub
                         int i = 0;  // filling out the above arrays
 
                         for (int n = 0; n < mPendingBroadcasts.userIdCount(); n++) {
-                            int packageUserId = mPendingBroadcasts.userIdAt(n);
-                            Iterator<Map.Entry<String, ArrayList<String>>> it
-                                    = mPendingBroadcasts.packagesForUserId(packageUserId)
-                                            .entrySet().iterator();
-                            while (it.hasNext() && i < size) {
-                                Map.Entry<String, ArrayList<String>> ent = it.next();
-                                packages[i] = ent.getKey();
-                                components[i] = ent.getValue();
-                                PackageSetting ps = mSettings.mPackages.get(ent.getKey());
+                            final int packageUserId = mPendingBroadcasts.userIdAt(n);
+                            final ArrayMap<String, ArrayList<String>> componentsToBroadcast =
+                                    mPendingBroadcasts.packagesForUserId(packageUserId);
+                            final int numComponents = componentsToBroadcast.size();
+                            for (int index = 0; i < size && index < numComponents; index++) {
+                                packages[i] = componentsToBroadcast.keyAt(index);
+                                components[i] = componentsToBroadcast.valueAt(index);
+                                final PackageSetting ps = mSettings.mPackages.get(packages[i]);
                                 uids[i] = (ps != null)
                                         ? UserHandle.getUid(packageUserId, ps.appId)
                                         : -1;
@@ -3235,17 +3234,18 @@ public class PackageManagerService extends IPackageManager.Stub
             final List<String> stubSystemApps = new ArrayList<>();
             if (!mOnlyCore) {
                 // do this first before mucking with mPackages for the "expecting better" case
-                final Iterator<AndroidPackage> pkgIterator = mPackages.values().iterator();
-                while (pkgIterator.hasNext()) {
-                    final AndroidPackage pkg = pkgIterator.next();
+                final int numPackages = mPackages.size();
+                for (int index = 0; index < numPackages; index++) {
+                    final AndroidPackage pkg = mPackages.valueAt(index);
                     if (pkg.isStub()) {
                         stubSystemApps.add(pkg.getPackageName());
                     }
                 }
 
-                final Iterator<PackageSetting> psit = mSettings.mPackages.values().iterator();
-                while (psit.hasNext()) {
-                    PackageSetting ps = psit.next();
+                // Iterates PackageSettings in reversed order because the item could be removed
+                // during the iteration.
+                for (int index = mSettings.mPackages.size() - 1; index >= 0; index--) {
+                    final PackageSetting ps = mSettings.mPackages.valueAt(index);
 
                     /*
                      * If this is not a system app, it can't be a
@@ -3282,7 +3282,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
 
                     if (!mSettings.isDisabledSystemPackageLPr(ps.name)) {
-                        psit.remove();
+                        mSettings.mPackages.removeAt(index);
                         logCriticalInfo(Log.WARN, "System package " + ps.name
                                 + " no longer exists; it's data will be wiped");
 
@@ -6349,10 +6349,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 final SharedUserSetting sus = (SharedUserSetting) obj;
                 final int N = sus.packages.size();
                 String[] res = new String[N];
-                final Iterator<PackageSetting> it = sus.packages.iterator();
                 int i = 0;
-                while (it.hasNext()) {
-                    PackageSetting ps = it.next();
+                for (int index = 0; index < N; index++) {
+                    final PackageSetting ps = sus.packages.valueAt(index);
                     if (ps.getInstalled(userId)) {
                         res[i++] = ps.name;
                     }
@@ -6508,9 +6507,10 @@ public class PackageManagerService extends IPackageManager.Stub
             final Object obj = mSettings.getSettingLPr(appId);
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
-                final Iterator<PackageSetting> it = sus.packages.iterator();
-                while (it.hasNext()) {
-                    if (it.next().isPrivileged()) {
+                final int numPackages = sus.packages.size();
+                for (int index = 0; index < numPackages; index++) {
+                    final PackageSetting ps = sus.packages.valueAt(index);
+                    if (ps.isPrivileged()) {
                         return true;
                     }
                 }
@@ -9009,10 +9009,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // reader
         synchronized (mLock) {
-            final Iterator<AndroidPackage> i = mPackages.values().iterator();
+            final int numPackages = mPackages.size();
             final int userId = UserHandle.getCallingUserId();
-            while (i.hasNext()) {
-                final AndroidPackage p = i.next();
+            for (int index = 0; index < numPackages; index++) {
+                final AndroidPackage p = mPackages.valueAt(index);
 
                 final boolean matchesUnaware = ((flags & MATCH_DIRECT_BOOT_UNAWARE) != 0)
                         && !p.isDirectBootAware();
@@ -9170,9 +9170,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // reader
         synchronized (mLock) {
-            final Iterator<ParsedInstrumentation> i = mInstrumentation.values().iterator();
-            while (i.hasNext()) {
-                final ParsedInstrumentation p = i.next();
+            final int numInstrumentations = mInstrumentation.size();
+            for (int index = 0; index < numInstrumentations; index++) {
+                final ParsedInstrumentation p = mInstrumentation.valueAt(index);
                 if (targetPackage == null
                         || targetPackage.equals(p.getTargetPackage())) {
                     String packageName = p.getPackageName();
@@ -19822,9 +19822,9 @@ public class PackageManagerService extends IPackageManager.Stub
         if (obj instanceof SharedUserSetting) {
             final SharedUserSetting sus = (SharedUserSetting) obj;
             int vers = Build.VERSION_CODES.CUR_DEVELOPMENT;
-            final Iterator<PackageSetting> it = sus.packages.iterator();
-            while (it.hasNext()) {
-                final PackageSetting ps = it.next();
+            final int numPackages = sus.packages.size();
+            for (int index = 0; index < numPackages; index++) {
+                final PackageSetting ps = sus.packages.valueAt(index);
                 if (ps.pkg != null) {
                     int v = ps.pkg.getTargetSdkVersion();
                     if (v < vers) vers = v;
@@ -22120,9 +22120,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (dumpState.isDumping(DumpState.DUMP_LIBS) && packageName == null) {
                 boolean printedHeader = false;
-                final Iterator<String> it = mSharedLibraries.keySet().iterator();
-                while (it.hasNext()) {
-                    String libName = it.next();
+                final int numSharedLibraries = mSharedLibraries.size();
+                for (int index = 0; index < numSharedLibraries; index++) {
+                    final String libName = mSharedLibraries.keyAt(index);
                     LongSparseArray<SharedLibraryInfo> versionedLib
                             = mSharedLibraries.get(libName);
                     if (versionedLib == null) {
@@ -23751,9 +23751,9 @@ public class PackageManagerService extends IPackageManager.Stub
     private void removeUnusedPackagesLPw(UserManagerService userManager, final int userId) {
         final boolean DEBUG_CLEAN_APKS = false;
         int [] users = userManager.getUserIds();
-        Iterator<PackageSetting> psit = mSettings.mPackages.values().iterator();
-        while (psit.hasNext()) {
-            PackageSetting ps = psit.next();
+        final int numPackages = mSettings.mPackages.size();
+        for (int index = 0; index < numPackages; index++) {
+            final PackageSetting ps = mSettings.mPackages.valueAt(index);
             if (ps.pkg == null) {
                 continue;
             }
@@ -25456,11 +25456,11 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         ArraySet<PackageSetting> packages = packageSetting.sharedUser.packages;
-        String[] res = new String[packages.size()];
-        final Iterator<PackageSetting> it = packages.iterator();
+        final int numPackages = packages.size();
+        String[] res = new String[numPackages];
         int i = 0;
-        while (it.hasNext()) {
-            PackageSetting ps = it.next();
+        for (int index = 0; index < numPackages; index++) {
+            final PackageSetting ps = packages.valueAt(index);
             if (ps.getInstalled(userId)) {
                 res[i++] = ps.name;
             }
