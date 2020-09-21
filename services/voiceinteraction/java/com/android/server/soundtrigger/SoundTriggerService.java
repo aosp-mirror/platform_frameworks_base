@@ -17,6 +17,7 @@
 package com.android.server.soundtrigger;
 
 import static android.Manifest.permission.BIND_SOUND_TRIGGER_DETECTION_SERVICE;
+import static android.Manifest.permission.SOUNDTRIGGER_DELEGATE_IDENTITY;
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
 import static android.content.Context.BIND_INCLUDE_CAPABILITIES;
@@ -25,7 +26,6 @@ import static android.content.pm.PackageManager.GET_SERVICES;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.hardware.soundtrigger.SoundTrigger.STATUS_BAD_VALUE;
 import static android.hardware.soundtrigger.SoundTrigger.STATUS_ERROR;
-import static android.hardware.soundtrigger.SoundTrigger.STATUS_NO_INIT;
 import static android.hardware.soundtrigger.SoundTrigger.STATUS_OK;
 import static android.provider.Settings.Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY;
 import static android.provider.Settings.Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT;
@@ -35,6 +35,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -54,6 +55,10 @@ import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.media.permission.Identity;
+import android.media.permission.IdentityContext;
+import android.media.permission.PermissionUtil;
+import android.media.permission.SafeCloseable;
 import android.media.soundtrigger.ISoundTriggerDetectionService;
 import android.media.soundtrigger.ISoundTriggerDetectionServiceClient;
 import android.media.soundtrigger.SoundTriggerDetectionService;
@@ -75,6 +80,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.ISoundTriggerService;
+import com.android.internal.app.ISoundTriggerSession;
 import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
@@ -104,10 +110,6 @@ public class SoundTriggerService extends SystemService {
     private final SoundTriggerServiceStub mServiceStub;
     private final LocalSoundTriggerService mLocalSoundTriggerService;
     private SoundTriggerDbHelper mDbHelper;
-    private SoundTriggerHelper mSoundTriggerHelper;
-    private final TreeMap<UUID, SoundModel> mLoadedModels;
-    private Object mCallbacksLock;
-    private final TreeMap<UUID, IRecognitionStatusCallback> mCallbacks;
 
     class SoundModelStatTracker {
         private class SoundModelStat {
@@ -192,9 +194,6 @@ public class SoundTriggerService extends SystemService {
         mContext = context;
         mServiceStub = new SoundTriggerServiceStub();
         mLocalSoundTriggerService = new LocalSoundTriggerService(context);
-        mLoadedModels = new TreeMap<UUID, SoundModel>();
-        mCallbacksLock = new Object();
-        mCallbacks = new TreeMap<>();
         mLock = new Object();
         mSoundModelStatTracker = new SoundModelStatTracker();
     }
@@ -208,34 +207,54 @@ public class SoundTriggerService extends SystemService {
     @Override
     public void onBootPhase(int phase) {
         Slog.d(TAG, "onBootPhase: " + phase + " : " + isSafeMode());
-        if (PHASE_DEVICE_SPECIFIC_SERVICES_READY == phase) {
-            if (isSafeMode()) {
-                Slog.w(TAG, "not enabling SoundTriggerService in safe mode");
-                return;
-            }
-
-            initSoundTriggerHelper();
-            mLocalSoundTriggerService.setSoundTriggerHelper(mSoundTriggerHelper);
-        } else if (PHASE_THIRD_PARTY_APPS_CAN_START == phase) {
+        if (PHASE_THIRD_PARTY_APPS_CAN_START == phase) {
             mDbHelper = new SoundTriggerDbHelper(mContext);
         }
     }
 
-    private synchronized void initSoundTriggerHelper() {
-        if (mSoundTriggerHelper == null) {
-            mSoundTriggerHelper = new SoundTriggerHelper(mContext);
-        }
-    }
+    private SoundTriggerHelper newSoundTriggerHelper() {
+        Identity middlemanIdentity = new Identity();
+        middlemanIdentity.packageName = ActivityThread.currentOpPackageName();
 
-    private synchronized boolean isInitialized() {
-        if (mSoundTriggerHelper == null ) {
-            Slog.e(TAG, "SoundTriggerHelper not initialized.");
-            return false;
-        }
-        return true;
+        Identity originatorIdentity = IdentityContext.getNonNull();
+
+        return new SoundTriggerHelper(mContext,
+                (moduleId, listener) -> SoundTrigger.attachModuleAsMiddleman(moduleId, listener,
+                        null,
+                        middlemanIdentity, originatorIdentity));
     }
 
     class SoundTriggerServiceStub extends ISoundTriggerService.Stub {
+        @Override
+        public ISoundTriggerSession attachAsOriginator(Identity originatorIdentity) {
+            try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
+                    originatorIdentity)) {
+                return new SoundTriggerSessionStub(newSoundTriggerHelper());
+            }
+        }
+
+        @Override
+        public ISoundTriggerSession attachAsMiddleman(Identity originatorIdentity,
+                Identity middlemanIdentity) {
+            try (SafeCloseable ignored = PermissionUtil.establishIdentityIndirect(mContext,
+                    SOUNDTRIGGER_DELEGATE_IDENTITY, middlemanIdentity,
+                    originatorIdentity)) {
+                return new SoundTriggerSessionStub(newSoundTriggerHelper());
+            }
+        }
+    }
+
+    class SoundTriggerSessionStub extends ISoundTriggerSession.Stub {
+        private final SoundTriggerHelper mSoundTriggerHelper;
+        private final TreeMap<UUID, SoundModel> mLoadedModels = new TreeMap<>();
+        private final Object mCallbacksLock = new Object();
+        private final TreeMap<UUID, IRecognitionStatusCallback> mCallbacks = new TreeMap<>();
+
+        SoundTriggerSessionStub(
+                SoundTriggerHelper soundTriggerHelper) {
+            mSoundTriggerHelper = soundTriggerHelper;
+        }
+
         @Override
         public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
                 throws RemoteException {
@@ -255,7 +274,6 @@ public class SoundTriggerService extends SystemService {
         public int startRecognition(ParcelUuid parcelUuid, IRecognitionStatusCallback callback,
                 RecognitionConfig config) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (!isInitialized()) return STATUS_ERROR;
             if (DEBUG) {
                 Slog.i(TAG, "startRecognition(): Uuid : " + parcelUuid);
             }
@@ -290,8 +308,6 @@ public class SoundTriggerService extends SystemService {
 
             sEventLogger.log(new SoundTriggerLogger.StringEvent("stopRecognition(): Uuid : "
                     + parcelUuid));
-
-            if (!isInitialized()) return STATUS_ERROR;
 
             int ret = mSoundTriggerHelper.stopGenericRecognition(parcelUuid.getUuid(), callback);
             if (ret == STATUS_OK) {
@@ -338,13 +354,11 @@ public class SoundTriggerService extends SystemService {
             sEventLogger.log(new SoundTriggerLogger.StringEvent("deleteSoundModel(): id = "
                     + soundModelId));
 
-            if (isInitialized()) {
-                // Unload the model if it is loaded.
-                mSoundTriggerHelper.unloadGenericSoundModel(soundModelId.getUuid());
+            // Unload the model if it is loaded.
+            mSoundTriggerHelper.unloadGenericSoundModel(soundModelId.getUuid());
 
-                // Stop tracking recognition if it is started.
-                mSoundModelStatTracker.onStop(soundModelId.getUuid());
-            }
+            // Stop tracking recognition if it is started.
+            mSoundModelStatTracker.onStop(soundModelId.getUuid());
 
             mDbHelper.deleteGenericSoundModel(soundModelId.getUuid());
         }
@@ -352,7 +366,6 @@ public class SoundTriggerService extends SystemService {
         @Override
         public int loadGenericSoundModel(GenericSoundModel soundModel) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (!isInitialized()) return STATUS_ERROR;
             if (soundModel == null || soundModel.getUuid() == null) {
                 Slog.e(TAG, "Invalid sound model");
 
@@ -387,7 +400,6 @@ public class SoundTriggerService extends SystemService {
         @Override
         public int loadKeyphraseSoundModel(KeyphraseSoundModel soundModel) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (!isInitialized()) return STATUS_ERROR;
             if (soundModel == null || soundModel.getUuid() == null) {
                 Slog.e(TAG, "Invalid sound model");
 
@@ -440,7 +452,6 @@ public class SoundTriggerService extends SystemService {
 
             enforceDetectionPermissions(detectionService);
 
-            if (!isInitialized()) return STATUS_ERROR;
             if (DEBUG) {
                 Slog.i(TAG, "startRecognition(): id = " + soundModelId);
             }
@@ -510,7 +521,6 @@ public class SoundTriggerService extends SystemService {
         @Override
         public int stopRecognitionForService(ParcelUuid soundModelId) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (!isInitialized()) return STATUS_ERROR;
             if (DEBUG) {
                 Slog.i(TAG, "stopRecognition(): id = " + soundModelId);
             }
@@ -577,7 +587,6 @@ public class SoundTriggerService extends SystemService {
         @Override
         public int unloadSoundModel(ParcelUuid soundModelId) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (!isInitialized()) return STATUS_ERROR;
             if (DEBUG) {
                 Slog.i(TAG, "unloadSoundModel(): id = " + soundModelId);
             }
@@ -628,7 +637,6 @@ public class SoundTriggerService extends SystemService {
         @Override
         public boolean isRecognitionActive(ParcelUuid parcelUuid) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (!isInitialized()) return false;
             synchronized (mCallbacksLock) {
                 IRecognitionStatusCallback callback = mCallbacks.get(parcelUuid.getUuid());
                 if (callback == null) {
@@ -642,7 +650,6 @@ public class SoundTriggerService extends SystemService {
         public int getModelState(ParcelUuid soundModelId) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
             int ret = STATUS_ERROR;
-            if (!isInitialized()) return ret;
             if (DEBUG) {
                 Slog.i(TAG, "getModelState(): id = " + soundModelId);
             }
@@ -681,7 +688,6 @@ public class SoundTriggerService extends SystemService {
         @Nullable
         public ModuleProperties getModuleProperties() {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (!isInitialized()) return null;
             if (DEBUG) {
                 Slog.i(TAG, "getModuleProperties()");
             }
@@ -698,7 +704,6 @@ public class SoundTriggerService extends SystemService {
         public int setParameter(ParcelUuid soundModelId,
                 @ModelParams int modelParam, int value) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (!isInitialized()) return STATUS_NO_INIT;
             if (DEBUG) {
                 Slog.d(TAG, "setParameter(): id=" + soundModelId
                         + ", param=" + modelParam
@@ -731,9 +736,6 @@ public class SoundTriggerService extends SystemService {
                 @ModelParams int modelParam)
                 throws UnsupportedOperationException, IllegalArgumentException {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (!isInitialized()) {
-                throw new UnsupportedOperationException("SoundTriggerHelper not initialized");
-            }
             if (DEBUG) {
                 Slog.d(TAG, "getParameter(): id=" + soundModelId
                         + ", param=" + modelParam);
@@ -763,7 +765,6 @@ public class SoundTriggerService extends SystemService {
         public ModelParamRange queryParameter(@NonNull ParcelUuid soundModelId,
                 @ModelParams int modelParam) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (!isInitialized()) return null;
             if (DEBUG) {
                 Slog.d(TAG, "queryParameter(): id=" + soundModelId
                         + ", param=" + modelParam);
@@ -786,6 +787,558 @@ public class SoundTriggerService extends SystemService {
                 }
 
                 return mSoundTriggerHelper.queryParameter(soundModel.getUuid(), modelParam);
+            }
+        }
+
+        /**
+         * Local end for a {@link SoundTriggerDetectionService}. Operations are queued up and
+         * executed when the service connects.
+         *
+         * <p>If operations take too long they are forcefully aborted.
+         *
+         * <p>This also limits the amount of operations in 24 hours.
+         */
+        private class RemoteSoundTriggerDetectionService
+                extends IRecognitionStatusCallback.Stub implements ServiceConnection {
+            private static final int MSG_STOP_ALL_PENDING_OPERATIONS = 1;
+
+            private final Object mRemoteServiceLock = new Object();
+
+            /** UUID of the model the service is started for */
+            private final @NonNull
+            ParcelUuid mPuuid;
+            /** Params passed into the start method for the service */
+            private final @Nullable
+            Bundle mParams;
+            /** Component name passed when starting the service */
+            private final @NonNull
+            ComponentName mServiceName;
+            /** User that started the service */
+            private final @NonNull
+            UserHandle mUser;
+            /** Configuration of the recognition the service is handling */
+            private final @NonNull
+            RecognitionConfig mRecognitionConfig;
+            /** Wake lock keeping the remote service alive */
+            private final @NonNull
+            PowerManager.WakeLock mRemoteServiceWakeLock;
+
+            private final @NonNull
+            Handler mHandler;
+
+            /** Callbacks that are called by the service */
+            private final @NonNull
+            ISoundTriggerDetectionServiceClient mClient;
+
+            /** Operations that are pending because the service is not yet connected */
+            @GuardedBy("mRemoteServiceLock")
+            private final ArrayList<Operation> mPendingOps = new ArrayList<>();
+            /** Operations that have been send to the service but have no yet finished */
+            @GuardedBy("mRemoteServiceLock")
+            private final ArraySet<Integer> mRunningOpIds = new ArraySet<>();
+            /** The number of operations executed in each of the last 24 hours */
+            private final NumOps mNumOps;
+
+            /** The service binder if connected */
+            @GuardedBy("mRemoteServiceLock")
+            private @Nullable
+            ISoundTriggerDetectionService mService;
+            /** Whether the service has been bound */
+            @GuardedBy("mRemoteServiceLock")
+            private boolean mIsBound;
+            /** Whether the service has been destroyed */
+            @GuardedBy("mRemoteServiceLock")
+            private boolean mIsDestroyed;
+            /**
+             * Set once a final op is scheduled. No further ops can be added and the service is
+             * destroyed once the op finishes.
+             */
+            @GuardedBy("mRemoteServiceLock")
+            private boolean mDestroyOnceRunningOpsDone;
+
+            /** Total number of operations performed by this service */
+            @GuardedBy("mRemoteServiceLock")
+            private int mNumTotalOpsPerformed;
+
+            /**
+             * Create a new remote sound trigger detection service. This only binds to the service
+             * when operations are in flight. Each operation has a certain time it can run. Once no
+             * operations are allowed to run anymore, {@link #stopAllPendingOperations() all
+             * operations are aborted and stopped} and the service is disconnected.
+             *
+             * @param modelUuid   The UUID of the model the recognition is for
+             * @param params      The params passed to each method of the service
+             * @param serviceName The component name of the service
+             * @param user        The user of the service
+             * @param config      The configuration of the recognition
+             */
+            public RemoteSoundTriggerDetectionService(@NonNull UUID modelUuid,
+                    @Nullable Bundle params, @NonNull ComponentName serviceName,
+                    @NonNull UserHandle user, @NonNull RecognitionConfig config) {
+                mPuuid = new ParcelUuid(modelUuid);
+                mParams = params;
+                mServiceName = serviceName;
+                mUser = user;
+                mRecognitionConfig = config;
+                mHandler = new Handler(Looper.getMainLooper());
+
+                PowerManager pm = ((PowerManager) mContext.getSystemService(Context.POWER_SERVICE));
+                mRemoteServiceWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                        "RemoteSoundTriggerDetectionService " + mServiceName.getPackageName() + ":"
+                                + mServiceName.getClassName());
+
+                synchronized (mLock) {
+                    NumOps numOps = mNumOpsPerPackage.get(mServiceName.getPackageName());
+                    if (numOps == null) {
+                        numOps = new NumOps();
+                        mNumOpsPerPackage.put(mServiceName.getPackageName(), numOps);
+                    }
+                    mNumOps = numOps;
+                }
+
+                mClient = new ISoundTriggerDetectionServiceClient.Stub() {
+                    @Override
+                    public void onOpFinished(int opId) {
+                        long token = Binder.clearCallingIdentity();
+                        try {
+                            synchronized (mRemoteServiceLock) {
+                                mRunningOpIds.remove(opId);
+
+                                if (mRunningOpIds.isEmpty() && mPendingOps.isEmpty()) {
+                                    if (mDestroyOnceRunningOpsDone) {
+                                        destroy();
+                                    } else {
+                                        disconnectLocked();
+                                    }
+                                }
+                            }
+                        } finally {
+                            Binder.restoreCallingIdentity(token);
+                        }
+                    }
+                };
+            }
+
+            @Override
+            public boolean pingBinder() {
+                return !(mIsDestroyed || mDestroyOnceRunningOpsDone);
+            }
+
+            /**
+             * Disconnect from the service, but allow to re-connect when new operations are
+             * triggered.
+             */
+            @GuardedBy("mRemoteServiceLock")
+            private void disconnectLocked() {
+                if (mService != null) {
+                    try {
+                        mService.removeClient(mPuuid);
+                    } catch (Exception e) {
+                        Slog.e(TAG, mPuuid + ": Cannot remove client", e);
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                                + ": Cannot remove client"));
+
+                    }
+
+                    mService = null;
+                }
+
+                if (mIsBound) {
+                    mContext.unbindService(RemoteSoundTriggerDetectionService.this);
+                    mIsBound = false;
+
+                    synchronized (mCallbacksLock) {
+                        mRemoteServiceWakeLock.release();
+                    }
+                }
+            }
+
+            /**
+             * Disconnect, do not allow to reconnect to the service. All further operations will be
+             * dropped.
+             */
+            private void destroy() {
+                if (DEBUG) Slog.v(TAG, mPuuid + ": destroy");
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid + ": destroy"));
+
+                synchronized (mRemoteServiceLock) {
+                    disconnectLocked();
+
+                    mIsDestroyed = true;
+                }
+
+                // The callback is removed before the flag is set
+                if (!mDestroyOnceRunningOpsDone) {
+                    synchronized (mCallbacksLock) {
+                        mCallbacks.remove(mPuuid.getUuid());
+                    }
+                }
+            }
+
+            /**
+             * Stop all pending operations and then disconnect for the service.
+             */
+            private void stopAllPendingOperations() {
+                synchronized (mRemoteServiceLock) {
+                    if (mIsDestroyed) {
+                        return;
+                    }
+
+                    if (mService != null) {
+                        int numOps = mRunningOpIds.size();
+                        for (int i = 0; i < numOps; i++) {
+                            try {
+                                mService.onStopOperation(mPuuid, mRunningOpIds.valueAt(i));
+                            } catch (Exception e) {
+                                Slog.e(TAG, mPuuid + ": Could not stop operation "
+                                        + mRunningOpIds.valueAt(i), e);
+
+                                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                                        + ": Could not stop operation " + mRunningOpIds.valueAt(
+                                        i)));
+
+                            }
+                        }
+
+                        mRunningOpIds.clear();
+                    }
+
+                    disconnectLocked();
+                }
+            }
+
+            /**
+             * Verify that the service has the expected properties and then bind to the service
+             */
+            private void bind() {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    Intent i = new Intent();
+                    i.setComponent(mServiceName);
+
+                    ResolveInfo ri = mContext.getPackageManager().resolveServiceAsUser(i,
+                            GET_SERVICES | GET_META_DATA | MATCH_DEBUG_TRIAGED_MISSING,
+                            mUser.getIdentifier());
+
+                    if (ri == null) {
+                        Slog.w(TAG, mPuuid + ": " + mServiceName + " not found");
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                                + ": " + mServiceName + " not found"));
+
+                        return;
+                    }
+
+                    if (!BIND_SOUND_TRIGGER_DETECTION_SERVICE
+                            .equals(ri.serviceInfo.permission)) {
+                        Slog.w(TAG, mPuuid + ": " + mServiceName + " does not require "
+                                + BIND_SOUND_TRIGGER_DETECTION_SERVICE);
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                                + ": " + mServiceName + " does not require "
+                                + BIND_SOUND_TRIGGER_DETECTION_SERVICE));
+
+                        return;
+                    }
+
+                    mIsBound = mContext.bindServiceAsUser(i, this,
+                            BIND_AUTO_CREATE | BIND_FOREGROUND_SERVICE | BIND_INCLUDE_CAPABILITIES,
+                            mUser);
+
+                    if (mIsBound) {
+                        mRemoteServiceWakeLock.acquire();
+                    } else {
+                        Slog.w(TAG, mPuuid + ": Could not bind to " + mServiceName);
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                                + ": Could not bind to " + mServiceName));
+
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+
+            /**
+             * Run an operation (i.e. send it do the service). If the service is not connected, this
+             * binds the service and then runs the operation once connected.
+             *
+             * @param op The operation to run
+             */
+            private void runOrAddOperation(Operation op) {
+                synchronized (mRemoteServiceLock) {
+                    if (mIsDestroyed || mDestroyOnceRunningOpsDone) {
+                        Slog.w(TAG,
+                                mPuuid + ": Dropped operation as already destroyed or marked for "
+                                        + "destruction");
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                                + ":Dropped operation as already destroyed or marked for "
+                                + "destruction"));
+
+                        op.drop();
+                        return;
+                    }
+
+                    if (mService == null) {
+                        mPendingOps.add(op);
+
+                        if (!mIsBound) {
+                            bind();
+                        }
+                    } else {
+                        long currentTime = System.nanoTime();
+                        mNumOps.clearOldOps(currentTime);
+
+                        // Drop operation if too many were executed in the last 24 hours.
+                        int opsAllowed = Settings.Global.getInt(mContext.getContentResolver(),
+                                MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY,
+                                Integer.MAX_VALUE);
+
+                        // As we currently cannot dropping an op safely, disable throttling
+                        int opsAdded = mNumOps.getOpsAdded();
+                        if (false && mNumOps.getOpsAdded() >= opsAllowed) {
+                            try {
+                                if (DEBUG || opsAllowed + 10 > opsAdded) {
+                                    Slog.w(TAG,
+                                            mPuuid + ": Dropped operation as too many operations "
+                                                    + "were run in last 24 hours");
+
+                                    sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                                            + ": Dropped operation as too many operations "
+                                            + "were run in last 24 hours"));
+
+                                }
+
+                                op.drop();
+                            } catch (Exception e) {
+                                Slog.e(TAG, mPuuid + ": Could not drop operation", e);
+
+                                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                                        + ": Could not drop operation"));
+
+                            }
+                        } else {
+                            mNumOps.addOp(currentTime);
+
+                            // Find a free opID
+                            int opId = mNumTotalOpsPerformed;
+                            do {
+                                mNumTotalOpsPerformed++;
+                            } while (mRunningOpIds.contains(opId));
+
+                            // Run OP
+                            try {
+                                if (DEBUG) Slog.v(TAG, mPuuid + ": runOp " + opId);
+
+                                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                                        + ": runOp " + opId));
+
+                                op.run(opId, mService);
+                                mRunningOpIds.add(opId);
+                            } catch (Exception e) {
+                                Slog.e(TAG, mPuuid + ": Could not run operation " + opId, e);
+
+                                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                                        + ": Could not run operation " + opId));
+
+                            }
+                        }
+
+                        // Unbind from service if no operations are left (i.e. if the operation
+                        // failed)
+                        if (mPendingOps.isEmpty() && mRunningOpIds.isEmpty()) {
+                            if (mDestroyOnceRunningOpsDone) {
+                                destroy();
+                            } else {
+                                disconnectLocked();
+                            }
+                        } else {
+                            mHandler.removeMessages(MSG_STOP_ALL_PENDING_OPERATIONS);
+                            mHandler.sendMessageDelayed(obtainMessage(
+                                    RemoteSoundTriggerDetectionService::stopAllPendingOperations,
+                                    this)
+                                            .setWhat(MSG_STOP_ALL_PENDING_OPERATIONS),
+                                    Settings.Global.getLong(mContext.getContentResolver(),
+                                            SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT,
+                                            Long.MAX_VALUE));
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onKeyphraseDetected(SoundTrigger.KeyphraseRecognitionEvent event) {
+                Slog.w(TAG, mPuuid + "->" + mServiceName + ": IGNORED onKeyphraseDetected(" + event
+                        + ")");
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid + "->" + mServiceName
+                        + ": IGNORED onKeyphraseDetected(" + event + ")"));
+            }
+
+            /**
+             * Create an AudioRecord enough for starting and releasing the data buffered for the event.
+             *
+             * @param event The event that was received
+             * @return The initialized AudioRecord
+             */
+            private @NonNull AudioRecord createAudioRecordForEvent(
+                    @NonNull SoundTrigger.GenericRecognitionEvent event)
+                    throws IllegalArgumentException, UnsupportedOperationException {
+                AudioAttributes.Builder attributesBuilder = new AudioAttributes.Builder();
+                attributesBuilder.setInternalCapturePreset(MediaRecorder.AudioSource.HOTWORD);
+                AudioAttributes attributes = attributesBuilder.build();
+
+                    AudioFormat originalFormat = event.getCaptureFormat();
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent("createAudioRecordForEvent"));
+
+                return (new AudioRecord.Builder())
+                            .setAudioAttributes(attributes)
+                            .setAudioFormat((new AudioFormat.Builder())
+                                .setChannelMask(originalFormat.getChannelMask())
+                                .setEncoding(originalFormat.getEncoding())
+                                .setSampleRate(originalFormat.getSampleRate())
+                                .build())
+                            .setSessionId(event.getCaptureSession())
+                            .build();
+            }
+
+            @Override
+            public void onGenericSoundTriggerDetected(SoundTrigger.GenericRecognitionEvent event) {
+                if (DEBUG) Slog.v(TAG, mPuuid + ": Generic sound trigger event: " + event);
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                        + ": Generic sound trigger event: " + event));
+
+                runOrAddOperation(new Operation(
+                        // always execute:
+                        () -> {
+                            if (!mRecognitionConfig.allowMultipleTriggers) {
+                                // Unregister this remoteService once op is done
+                                synchronized (mCallbacksLock) {
+                                    mCallbacks.remove(mPuuid.getUuid());
+                                }
+                                mDestroyOnceRunningOpsDone = true;
+                            }
+                        },
+                        // execute if not throttled:
+                        (opId, service) -> service.onGenericRecognitionEvent(mPuuid, opId, event),
+                        // execute if throttled:
+                        () -> {
+                            if (event.isCaptureAvailable()) {
+                                try {
+                                    AudioRecord capturedData = createAudioRecordForEvent(event);
+                                    capturedData.startRecording();
+                                    capturedData.release();
+                                } catch (IllegalArgumentException | UnsupportedOperationException e) {
+                                    Slog.w(TAG, mPuuid + ": createAudioRecordForEvent(" + event
+                                            + "), failed to create AudioRecord");
+                                }
+                            }
+                        }));
+            }
+
+            @Override
+            public void onError(int status) {
+                if (DEBUG) Slog.v(TAG, mPuuid + ": onError: " + status);
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                        + ": onError: " + status));
+
+                runOrAddOperation(
+                        new Operation(
+                                // always execute:
+                                () -> {
+                                    // Unregister this remoteService once op is done
+                                    synchronized (mCallbacksLock) {
+                                        mCallbacks.remove(mPuuid.getUuid());
+                                    }
+                                    mDestroyOnceRunningOpsDone = true;
+                                },
+                                // execute if not throttled:
+                                (opId, service) -> service.onError(mPuuid, opId, status),
+                                // nothing to do if throttled
+                                null));
+            }
+
+            @Override
+            public void onRecognitionPaused() {
+                Slog.i(TAG, mPuuid + "->" + mServiceName + ": IGNORED onRecognitionPaused");
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                        + "->" + mServiceName + ": IGNORED onRecognitionPaused"));
+
+            }
+
+            @Override
+            public void onRecognitionResumed() {
+                Slog.i(TAG, mPuuid + "->" + mServiceName + ": IGNORED onRecognitionResumed");
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                        + "->" + mServiceName + ": IGNORED onRecognitionResumed"));
+
+            }
+
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                if (DEBUG) Slog.v(TAG, mPuuid + ": onServiceConnected(" + service + ")");
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                        + ": onServiceConnected(" + service + ")"));
+
+                synchronized (mRemoteServiceLock) {
+                    mService = ISoundTriggerDetectionService.Stub.asInterface(service);
+
+                    try {
+                        mService.setClient(mPuuid, mParams, mClient);
+                    } catch (Exception e) {
+                        Slog.e(TAG, mPuuid + ": Could not init " + mServiceName, e);
+                        return;
+                    }
+
+                    while (!mPendingOps.isEmpty()) {
+                        runOrAddOperation(mPendingOps.remove(0));
+                    }
+                }
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                if (DEBUG) Slog.v(TAG, mPuuid + ": onServiceDisconnected");
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                        + ": onServiceDisconnected"));
+
+                synchronized (mRemoteServiceLock) {
+                    mService = null;
+                }
+            }
+
+            @Override
+            public void onBindingDied(ComponentName name) {
+                if (DEBUG) Slog.v(TAG, mPuuid + ": onBindingDied");
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                        + ": onBindingDied"));
+
+                synchronized (mRemoteServiceLock) {
+                    destroy();
+                }
+            }
+
+            @Override
+            public void onNullBinding(ComponentName name) {
+                Slog.w(TAG, name + " for model " + mPuuid + " returned a null binding");
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(name + " for model "
+                        + mPuuid + " returned a null binding"));
+
+                synchronized (mRemoteServiceLock) {
+                    disconnectLocked();
+                }
             }
         }
     }
@@ -896,604 +1449,85 @@ public class SoundTriggerService extends SystemService {
         }
     }
 
-    /**
-     * Local end for a {@link SoundTriggerDetectionService}. Operations are queued up and executed
-     * when the service connects.
-     *
-     * <p>If operations take too long they are forcefully aborted.
-     *
-     * <p>This also limits the amount of operations in 24 hours.
-     */
-    private class RemoteSoundTriggerDetectionService
-        extends IRecognitionStatusCallback.Stub implements ServiceConnection {
-        private static final int MSG_STOP_ALL_PENDING_OPERATIONS = 1;
-
-        private final Object mRemoteServiceLock = new Object();
-
-        /** UUID of the model the service is started for */
-        private final @NonNull ParcelUuid mPuuid;
-        /** Params passed into the start method for the service */
-        private final @Nullable Bundle mParams;
-        /** Component name passed when starting the service */
-        private final @NonNull ComponentName mServiceName;
-        /** User that started the service */
-        private final @NonNull UserHandle mUser;
-        /** Configuration of the recognition the service is handling */
-        private final @NonNull RecognitionConfig mRecognitionConfig;
-        /** Wake lock keeping the remote service alive */
-        private final @NonNull PowerManager.WakeLock mRemoteServiceWakeLock;
-
-        private final @NonNull Handler mHandler;
-
-        /** Callbacks that are called by the service */
-        private final @NonNull ISoundTriggerDetectionServiceClient mClient;
-
-        /** Operations that are pending because the service is not yet connected */
-        @GuardedBy("mRemoteServiceLock")
-        private final ArrayList<Operation> mPendingOps = new ArrayList<>();
-        /** Operations that have been send to the service but have no yet finished */
-        @GuardedBy("mRemoteServiceLock")
-        private final ArraySet<Integer> mRunningOpIds = new ArraySet<>();
-        /** The number of operations executed in each of the last 24 hours */
-        private final NumOps mNumOps;
-
-        /** The service binder if connected */
-        @GuardedBy("mRemoteServiceLock")
-        private @Nullable ISoundTriggerDetectionService mService;
-        /** Whether the service has been bound */
-        @GuardedBy("mRemoteServiceLock")
-        private boolean mIsBound;
-        /** Whether the service has been destroyed */
-        @GuardedBy("mRemoteServiceLock")
-        private boolean mIsDestroyed;
-        /**
-         * Set once a final op is scheduled. No further ops can be added and the service is
-         * destroyed once the op finishes.
-         */
-        @GuardedBy("mRemoteServiceLock")
-        private boolean mDestroyOnceRunningOpsDone;
-
-        /** Total number of operations performed by this service */
-        @GuardedBy("mRemoteServiceLock")
-        private int mNumTotalOpsPerformed;
-
-        /**
-         * Create a new remote sound trigger detection service. This only binds to the service when
-         * operations are in flight. Each operation has a certain time it can run. Once no
-         * operations are allowed to run anymore, {@link #stopAllPendingOperations() all operations
-         * are aborted and stopped} and the service is disconnected.
-         *
-         * @param modelUuid The UUID of the model the recognition is for
-         * @param params The params passed to each method of the service
-         * @param serviceName The component name of the service
-         * @param user The user of the service
-         * @param config The configuration of the recognition
-         */
-        public RemoteSoundTriggerDetectionService(@NonNull UUID modelUuid,
-            @Nullable Bundle params, @NonNull ComponentName serviceName, @NonNull UserHandle user,
-            @NonNull RecognitionConfig config) {
-            mPuuid = new ParcelUuid(modelUuid);
-            mParams = params;
-            mServiceName = serviceName;
-            mUser = user;
-            mRecognitionConfig = config;
-            mHandler = new Handler(Looper.getMainLooper());
-
-            PowerManager pm = ((PowerManager) mContext.getSystemService(Context.POWER_SERVICE));
-            mRemoteServiceWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                    "RemoteSoundTriggerDetectionService " + mServiceName.getPackageName() + ":"
-                            + mServiceName.getClassName());
-
-            synchronized (mLock) {
-                NumOps numOps = mNumOpsPerPackage.get(mServiceName.getPackageName());
-                if (numOps == null) {
-                    numOps = new NumOps();
-                    mNumOpsPerPackage.put(mServiceName.getPackageName(), numOps);
-                }
-                mNumOps = numOps;
-            }
-
-            mClient = new ISoundTriggerDetectionServiceClient.Stub() {
-                @Override
-                public void onOpFinished(int opId) {
-                    long token = Binder.clearCallingIdentity();
-                    try {
-                        synchronized (mRemoteServiceLock) {
-                            mRunningOpIds.remove(opId);
-
-                            if (mRunningOpIds.isEmpty() && mPendingOps.isEmpty()) {
-                                if (mDestroyOnceRunningOpsDone) {
-                                    destroy();
-                                } else {
-                                    disconnectLocked();
-                                }
-                            }
-                        }
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                    }
-                }
-            };
-        }
-
-        @Override
-        public boolean pingBinder() {
-            return !(mIsDestroyed || mDestroyOnceRunningOpsDone);
-        }
-
-        /**
-         * Disconnect from the service, but allow to re-connect when new operations are triggered.
-         */
-        @GuardedBy("mRemoteServiceLock")
-        private void disconnectLocked() {
-            if (mService != null) {
-                try {
-                    mService.removeClient(mPuuid);
-                } catch (Exception e) {
-                    Slog.e(TAG, mPuuid + ": Cannot remove client", e);
-
-                    sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
-                            + ": Cannot remove client"));
-
-                }
-
-                mService = null;
-            }
-
-            if (mIsBound) {
-                mContext.unbindService(RemoteSoundTriggerDetectionService.this);
-                mIsBound = false;
-
-                synchronized (mCallbacksLock) {
-                    mRemoteServiceWakeLock.release();
-                }
-            }
-        }
-
-        /**
-         * Disconnect, do not allow to reconnect to the service. All further operations will be
-         * dropped.
-         */
-        private void destroy() {
-            if (DEBUG) Slog.v(TAG, mPuuid + ": destroy");
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid + ": destroy"));
-
-            synchronized (mRemoteServiceLock) {
-                disconnectLocked();
-
-                mIsDestroyed = true;
-            }
-
-            // The callback is removed before the flag is set
-            if (!mDestroyOnceRunningOpsDone) {
-                synchronized (mCallbacksLock) {
-                    mCallbacks.remove(mPuuid.getUuid());
-                }
-            }
-        }
-
-        /**
-         * Stop all pending operations and then disconnect for the service.
-         */
-        private void stopAllPendingOperations() {
-            synchronized (mRemoteServiceLock) {
-                if (mIsDestroyed) {
-                    return;
-                }
-
-                if (mService != null) {
-                    int numOps = mRunningOpIds.size();
-                    for (int i = 0; i < numOps; i++) {
-                        try {
-                            mService.onStopOperation(mPuuid, mRunningOpIds.valueAt(i));
-                        } catch (Exception e) {
-                            Slog.e(TAG, mPuuid + ": Could not stop operation "
-                                    + mRunningOpIds.valueAt(i), e);
-
-                            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
-                                    + ": Could not stop operation " + mRunningOpIds.valueAt(i)));
-
-                        }
-                    }
-
-                    mRunningOpIds.clear();
-                }
-
-                disconnectLocked();
-            }
-        }
-
-        /**
-         * Verify that the service has the expected properties and then bind to the service
-         */
-        private void bind() {
-            long token = Binder.clearCallingIdentity();
-            try {
-                Intent i = new Intent();
-                i.setComponent(mServiceName);
-
-                ResolveInfo ri = mContext.getPackageManager().resolveServiceAsUser(i,
-                        GET_SERVICES | GET_META_DATA | MATCH_DEBUG_TRIAGED_MISSING,
-                        mUser.getIdentifier());
-
-                if (ri == null) {
-                    Slog.w(TAG, mPuuid + ": " + mServiceName + " not found");
-
-                    sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
-                            + ": " + mServiceName + " not found"));
-
-                    return;
-                }
-
-                if (!BIND_SOUND_TRIGGER_DETECTION_SERVICE
-                        .equals(ri.serviceInfo.permission)) {
-                    Slog.w(TAG, mPuuid + ": " + mServiceName + " does not require "
-                            + BIND_SOUND_TRIGGER_DETECTION_SERVICE);
-
-                    sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
-                            + ": " + mServiceName + " does not require "
-                            + BIND_SOUND_TRIGGER_DETECTION_SERVICE));
-
-                    return;
-                }
-
-                mIsBound = mContext.bindServiceAsUser(i, this,
-                        BIND_AUTO_CREATE | BIND_FOREGROUND_SERVICE | BIND_INCLUDE_CAPABILITIES,
-                        mUser);
-
-                if (mIsBound) {
-                    mRemoteServiceWakeLock.acquire();
-                } else {
-                    Slog.w(TAG, mPuuid + ": Could not bind to " + mServiceName);
-
-                    sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
-                            + ": Could not bind to " + mServiceName));
-
-                }
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        /**
-         * Run an operation (i.e. send it do the service). If the service is not connected, this
-         * binds the service and then runs the operation once connected.
-         *
-         * @param op The operation to run
-         */
-        private void runOrAddOperation(Operation op) {
-            synchronized (mRemoteServiceLock) {
-                if (mIsDestroyed || mDestroyOnceRunningOpsDone) {
-                    Slog.w(TAG, mPuuid + ": Dropped operation as already destroyed or marked for "
-                            + "destruction");
-
-                    sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
-                            + ":Dropped operation as already destroyed or marked for destruction"));
-
-                    op.drop();
-                    return;
-                }
-
-                if (mService == null) {
-                    mPendingOps.add(op);
-
-                    if (!mIsBound) {
-                        bind();
-                    }
-                } else {
-                    long currentTime = System.nanoTime();
-                    mNumOps.clearOldOps(currentTime);
-
-                    // Drop operation if too many were executed in the last 24 hours.
-                    int opsAllowed = Settings.Global.getInt(mContext.getContentResolver(),
-                            MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY,
-                            Integer.MAX_VALUE);
-
-                    // As we currently cannot dropping an op safely, disable throttling
-                    int opsAdded = mNumOps.getOpsAdded();
-                    if (false && mNumOps.getOpsAdded() >= opsAllowed) {
-                        try {
-                            if (DEBUG || opsAllowed + 10 > opsAdded) {
-                                Slog.w(TAG, mPuuid + ": Dropped operation as too many operations "
-                                        + "were run in last 24 hours");
-
-                                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
-                                        + ": Dropped operation as too many operations "
-                                        + "were run in last 24 hours"));
-
-                            }
-
-                            op.drop();
-                        } catch (Exception e) {
-                            Slog.e(TAG, mPuuid + ": Could not drop operation", e);
-
-                            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
-                                        + ": Could not drop operation"));
-
-                        }
-                    } else {
-                        mNumOps.addOp(currentTime);
-
-                        // Find a free opID
-                        int opId = mNumTotalOpsPerformed;
-                        do {
-                            mNumTotalOpsPerformed++;
-                        } while (mRunningOpIds.contains(opId));
-
-                        // Run OP
-                        try {
-                            if (DEBUG) Slog.v(TAG, mPuuid + ": runOp " + opId);
-
-                            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
-                                        + ": runOp " + opId));
-
-                            op.run(opId, mService);
-                            mRunningOpIds.add(opId);
-                        } catch (Exception e) {
-                            Slog.e(TAG, mPuuid + ": Could not run operation " + opId, e);
-
-                            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
-                                        + ": Could not run operation " + opId));
-
-                        }
-                    }
-
-                    // Unbind from service if no operations are left (i.e. if the operation failed)
-                    if (mPendingOps.isEmpty() && mRunningOpIds.isEmpty()) {
-                        if (mDestroyOnceRunningOpsDone) {
-                            destroy();
-                        } else {
-                            disconnectLocked();
-                        }
-                    } else {
-                        mHandler.removeMessages(MSG_STOP_ALL_PENDING_OPERATIONS);
-                        mHandler.sendMessageDelayed(obtainMessage(
-                                RemoteSoundTriggerDetectionService::stopAllPendingOperations, this)
-                                        .setWhat(MSG_STOP_ALL_PENDING_OPERATIONS),
-                                Settings.Global.getLong(mContext.getContentResolver(),
-                                        SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT,
-                                        Long.MAX_VALUE));
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void onKeyphraseDetected(SoundTrigger.KeyphraseRecognitionEvent event) {
-            Slog.w(TAG, mPuuid + "->" + mServiceName + ": IGNORED onKeyphraseDetected(" + event
-                    + ")");
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid + "->" + mServiceName
-                    + ": IGNORED onKeyphraseDetected(" + event + ")"));
-
-        }
-
-        /**
-         * Create an AudioRecord enough for starting and releasing the data buffered for the event.
-         *
-         * @param event The event that was received
-         * @return The initialized AudioRecord
-         */
-        private @NonNull AudioRecord createAudioRecordForEvent(
-                @NonNull SoundTrigger.GenericRecognitionEvent event)
-                throws IllegalArgumentException, UnsupportedOperationException {
-            AudioAttributes.Builder attributesBuilder = new AudioAttributes.Builder();
-            attributesBuilder.setInternalCapturePreset(MediaRecorder.AudioSource.HOTWORD);
-            AudioAttributes attributes = attributesBuilder.build();
-
-            AudioFormat originalFormat = event.getCaptureFormat();
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent("createAudioRecordForEvent"));
-
-            return (new AudioRecord.Builder())
-                        .setAudioAttributes(attributes)
-                        .setAudioFormat((new AudioFormat.Builder())
-                            .setChannelMask(originalFormat.getChannelMask())
-                            .setEncoding(originalFormat.getEncoding())
-                            .setSampleRate(originalFormat.getSampleRate())
-                            .build())
-                        .setSessionId(event.getCaptureSession())
-                        .build();
-        }
-
-        @Override
-        public void onGenericSoundTriggerDetected(SoundTrigger.GenericRecognitionEvent event) {
-            if (DEBUG) Slog.v(TAG, mPuuid + ": Generic sound trigger event: " + event);
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
-                    + ": Generic sound trigger event: " + event));
-
-            runOrAddOperation(new Operation(
-                    // always execute:
-                    () -> {
-                        if (!mRecognitionConfig.allowMultipleTriggers) {
-                            // Unregister this remoteService once op is done
-                            synchronized (mCallbacksLock) {
-                                mCallbacks.remove(mPuuid.getUuid());
-                            }
-                            mDestroyOnceRunningOpsDone = true;
-                        }
-                    },
-                    // execute if not throttled:
-                    (opId, service) -> service.onGenericRecognitionEvent(mPuuid, opId, event),
-                    // execute if throttled:
-                    () -> {
-                        if (event.isCaptureAvailable()) {
-                            try {
-                                AudioRecord capturedData = createAudioRecordForEvent(event);
-                                capturedData.startRecording();
-                                capturedData.release();
-                            } catch (IllegalArgumentException | UnsupportedOperationException e) {
-                                Slog.w(TAG, mPuuid + ": createAudioRecordForEvent(" + event
-                                        + "), failed to create AudioRecord");
-                            }
-                        }
-                    }));
-        }
-
-        @Override
-        public void onError(int status) {
-            if (DEBUG) Slog.v(TAG, mPuuid + ": onError: " + status);
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
-                    + ": onError: " + status));
-
-            runOrAddOperation(
-                    new Operation(
-                            // always execute:
-                            () -> {
-                                // Unregister this remoteService once op is done
-                                synchronized (mCallbacksLock) {
-                                    mCallbacks.remove(mPuuid.getUuid());
-                                }
-                                mDestroyOnceRunningOpsDone = true;
-                            },
-                            // execute if not throttled:
-                            (opId, service) -> service.onError(mPuuid, opId, status),
-                            // nothing to do if throttled
-                            null));
-        }
-
-        @Override
-        public void onRecognitionPaused() {
-            Slog.i(TAG, mPuuid + "->" + mServiceName + ": IGNORED onRecognitionPaused");
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
-                    + "->" + mServiceName + ": IGNORED onRecognitionPaused"));
-
-        }
-
-        @Override
-        public void onRecognitionResumed() {
-            Slog.i(TAG, mPuuid + "->" + mServiceName + ": IGNORED onRecognitionResumed");
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
-                    + "->" + mServiceName + ": IGNORED onRecognitionResumed"));
-
-        }
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            if (DEBUG) Slog.v(TAG, mPuuid + ": onServiceConnected(" + service + ")");
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
-                    + ": onServiceConnected(" + service + ")"));
-
-            synchronized (mRemoteServiceLock) {
-                mService = ISoundTriggerDetectionService.Stub.asInterface(service);
-
-                try {
-                    mService.setClient(mPuuid, mParams, mClient);
-                } catch (Exception e) {
-                    Slog.e(TAG, mPuuid + ": Could not init " + mServiceName, e);
-                    return;
-                }
-
-                while (!mPendingOps.isEmpty()) {
-                    runOrAddOperation(mPendingOps.remove(0));
-                }
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            if (DEBUG) Slog.v(TAG, mPuuid + ": onServiceDisconnected");
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
-                    + ": onServiceDisconnected"));
-
-            synchronized (mRemoteServiceLock) {
-                mService = null;
-            }
-        }
-
-        @Override
-        public void onBindingDied(ComponentName name) {
-            if (DEBUG) Slog.v(TAG, mPuuid + ": onBindingDied");
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
-                    + ": onBindingDied"));
-
-            synchronized (mRemoteServiceLock) {
-                destroy();
-            }
-        }
-
-        @Override
-        public void onNullBinding(ComponentName name) {
-            Slog.w(TAG, name + " for model " + mPuuid + " returned a null binding");
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent(name + " for model "
-                    + mPuuid + " returned a null binding"));
-
-            synchronized (mRemoteServiceLock) {
-                disconnectLocked();
-            }
-        }
-    }
-
-    public final class LocalSoundTriggerService extends SoundTriggerInternal {
+    public final class LocalSoundTriggerService implements SoundTriggerInternal {
         private final Context mContext;
-        private SoundTriggerHelper mSoundTriggerHelper;
-
         LocalSoundTriggerService(Context context) {
             mContext = context;
         }
 
-        synchronized void setSoundTriggerHelper(SoundTriggerHelper helper) {
-            mSoundTriggerHelper = helper;
+        private class SessionImpl implements Session {
+            private final @NonNull SoundTriggerHelper mSoundTriggerHelper;
+
+            private SessionImpl(
+                    @NonNull SoundTriggerHelper soundTriggerHelper) {
+                mSoundTriggerHelper = soundTriggerHelper;
+            }
+
+            @Override
+            public int startRecognition(int keyphraseId, KeyphraseSoundModel soundModel,
+                    IRecognitionStatusCallback listener, RecognitionConfig recognitionConfig) {
+                return mSoundTriggerHelper.startKeyphraseRecognition(keyphraseId, soundModel,
+                        listener,
+                        recognitionConfig);
+            }
+
+            @Override
+            public synchronized int stopRecognition(int keyphraseId,
+                    IRecognitionStatusCallback listener) {
+                return mSoundTriggerHelper.stopKeyphraseRecognition(keyphraseId, listener);
+            }
+
+            @Override
+            public ModuleProperties getModuleProperties() {
+                return mSoundTriggerHelper.getModuleProperties();
+            }
+
+            @Override
+            public int setParameter(int keyphraseId, @ModelParams int modelParam, int value) {
+                return mSoundTriggerHelper.setKeyphraseParameter(keyphraseId, modelParam, value);
+            }
+
+            @Override
+            public int getParameter(int keyphraseId, @ModelParams int modelParam) {
+                return mSoundTriggerHelper.getKeyphraseParameter(keyphraseId, modelParam);
+            }
+
+            @Override
+            @Nullable
+            public ModelParamRange queryParameter(int keyphraseId, @ModelParams int modelParam) {
+                return mSoundTriggerHelper.queryKeyphraseParameter(keyphraseId, modelParam);
+            }
+
+            @Override
+            public int unloadKeyphraseModel(int keyphraseId) {
+                return mSoundTriggerHelper.unloadKeyphraseSoundModel(keyphraseId);
+            }
+
+            @Override
+            public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+                mSoundTriggerHelper.dump(fd, pw, args);
+            }
         }
 
         @Override
-        public int startRecognition(int keyphraseId, KeyphraseSoundModel soundModel,
-                IRecognitionStatusCallback listener, RecognitionConfig recognitionConfig) {
-            if (!isInitialized()) throw new UnsupportedOperationException();
-            return mSoundTriggerHelper.startKeyphraseRecognition(keyphraseId, soundModel, listener,
-                    recognitionConfig);
+        public Session attachAsOriginator(@NonNull Identity originatorIdentity) {
+            try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
+                    originatorIdentity)) {
+                return new SessionImpl(newSoundTriggerHelper());
+            }
         }
 
         @Override
-        public synchronized int stopRecognition(int keyphraseId, IRecognitionStatusCallback listener) {
-            if (!isInitialized()) throw new UnsupportedOperationException();
-            return mSoundTriggerHelper.stopKeyphraseRecognition(keyphraseId, listener);
-        }
-
-        @Override
-        public ModuleProperties getModuleProperties() {
-            if (!isInitialized()) throw new UnsupportedOperationException();
-            return mSoundTriggerHelper.getModuleProperties();
-        }
-
-        @Override
-        public int setParameter(int keyphraseId, @ModelParams int modelParam, int value) {
-            if (!isInitialized()) throw new UnsupportedOperationException();
-            return mSoundTriggerHelper.setKeyphraseParameter(keyphraseId, modelParam, value);
-        }
-
-        @Override
-        public int getParameter(int keyphraseId, @ModelParams int modelParam) {
-            if (!isInitialized()) throw new UnsupportedOperationException();
-            return mSoundTriggerHelper.getKeyphraseParameter(keyphraseId, modelParam);
-        }
-
-        @Override
-        @Nullable
-        public ModelParamRange queryParameter(int keyphraseId, @ModelParams int modelParam) {
-            if (!isInitialized()) throw new UnsupportedOperationException();
-            return mSoundTriggerHelper.queryKeyphraseParameter(keyphraseId, modelParam);
-        }
-
-        @Override
-        public int unloadKeyphraseModel(int keyphraseId) {
-            if (!isInitialized()) throw new UnsupportedOperationException();
-            return mSoundTriggerHelper.unloadKeyphraseSoundModel(keyphraseId);
+        public Session attachAsMiddleman(@NonNull Identity middlemanIdentity,
+                @NonNull Identity originatorIdentity) {
+            try (SafeCloseable ignored = PermissionUtil.establishIdentityIndirect(mContext,
+                    SOUNDTRIGGER_DELEGATE_IDENTITY, middlemanIdentity, originatorIdentity)) {
+                return new SessionImpl(newSoundTriggerHelper());
+            }
         }
 
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (!isInitialized()) return;
-            mSoundTriggerHelper.dump(fd, pw, args);
             // log
             sEventLogger.dump(pw);
 
@@ -1502,18 +1536,6 @@ public class SoundTriggerService extends SystemService {
 
             // stats
             mSoundModelStatTracker.dump(pw);
-        }
-
-        private synchronized boolean isInitialized() {
-            if (mSoundTriggerHelper == null ) {
-                Slog.e(TAG, "SoundTriggerHelper not initialized.");
-
-                sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                        "SoundTriggerHelper not initialized."));
-
-                return false;
-            }
-            return true;
         }
     }
 

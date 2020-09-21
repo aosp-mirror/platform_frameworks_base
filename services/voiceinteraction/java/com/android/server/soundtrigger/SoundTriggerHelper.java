@@ -58,7 +58,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.function.BiFunction;
 
 /**
  * Helper for {@link SoundTrigger} APIs. Supports two types of models:
@@ -116,6 +118,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     private PowerSaveModeListener mPowerSaveModeListener;
 
+    private final BiFunction<Integer, SoundTrigger.StatusListener, SoundTriggerModule>
+            mModuleProvider;
+
     // Handler to process call state changes will delay to allow time for the audio
     // and sound trigger HALs to process the end of call notifications
     // before we re enable pending recognition requests.
@@ -123,15 +128,17 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     private static final int MSG_CALL_STATE_CHANGED = 0;
     private static final int CALL_INACTIVE_MSG_DELAY_MS = 1000;
 
-    SoundTriggerHelper(Context context) {
+    SoundTriggerHelper(Context context,
+            @NonNull BiFunction<Integer, SoundTrigger.StatusListener,
+                    SoundTriggerModule> moduleProvider) {
         ArrayList <ModuleProperties> modules = new ArrayList<>();
+        mModuleProvider = moduleProvider;
         int status = SoundTrigger.listModules(modules);
         mContext = context;
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mModelDataMap = new HashMap<UUID, ModelData>();
         mKeyphraseUuidMap = new HashMap<Integer, UUID>();
-        mPhoneStateListener = new MyCallStateListener();
         if (status != SoundTrigger.STATUS_OK || modules.size() == 0) {
             Slog.w(TAG, "listModules status=" + status + ", # of modules=" + modules.size());
             mModuleProperties = null;
@@ -145,6 +152,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         if (looper == null) {
             looper = Looper.getMainLooper();
         }
+        mPhoneStateListener = new MyCallStateListener(looper);
         if (looper != null) {
             mHandler = new Handler(looper) {
                 @Override
@@ -264,7 +272,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     private int prepareForRecognition(ModelData modelData) {
         if (mModule == null) {
-            mModule = SoundTrigger.attachModule(mModuleProperties.getId(), this, null);
+            mModule = mModuleProvider.apply(mModuleProperties.getId(), this);
             if (mModule == null) {
                 Slog.w(TAG, "prepareForRecognition: cannot attach to sound trigger module");
                 return STATUS_ERROR;
@@ -1042,6 +1050,10 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     }
 
     class MyCallStateListener extends PhoneStateListener {
+        MyCallStateListener(@NonNull Looper looper) {
+            super(Objects.requireNonNull(looper));
+        }
+
         @Override
         public void onCallStateChanged(int state, String arg1) {
             if (DBG) Slog.d(TAG, "onCallStateChanged: " + state);
