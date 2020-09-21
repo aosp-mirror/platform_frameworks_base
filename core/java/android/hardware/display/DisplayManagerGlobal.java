@@ -699,6 +699,32 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    /**
+     * When enabled the app requested display resolution and refresh rate is always selected
+     * in DisplayModeDirector regardless of user settings and policies for low brightness, low
+     * battery etc.
+     */
+    public void setShouldAlwaysRespectAppRequestedMode(boolean enabled) {
+        try {
+            mDm.setShouldAlwaysRespectAppRequestedMode(enabled);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether DisplayModeDirector is running in a mode which always selects the app
+     * requested display mode and ignores user settings and policies for low brightness, low
+     * battery etc.
+     */
+    public boolean shouldAlwaysRespectAppRequestedMode() {
+        try {
+            return mDm.shouldAlwaysRespectAppRequestedMode();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
     private final class DisplayManagerCallback extends IDisplayManagerCallback.Stub {
         @Override
         public void onDisplayEvent(int displayId, int event) {
