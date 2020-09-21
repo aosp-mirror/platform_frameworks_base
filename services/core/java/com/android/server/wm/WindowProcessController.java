@@ -768,7 +768,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 final Task stack = mPreQTopResumedActivity.getRootTask();
                 if (stack != null) {
                     stack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
-                            activity);
+                            activity, "top-resumed-changed");
                 }
             }
             mPreQTopResumedActivity = activity;

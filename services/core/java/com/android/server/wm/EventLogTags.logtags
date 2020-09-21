@@ -26,7 +26,7 @@ option java_package com.android.server.wm
 # The Activity Manager failed to pause the given activity.
 30012 wm_failed_to_pause (User|1|5),(Token|1|5),(Wanting to pause|3),(Currently pausing|3)
 # Attempting to pause the current activity
-30013 wm_pause_activity (User|1|5),(Token|1|5),(Component Name|3),(User Leaving|3)
+30013 wm_pause_activity (User|1|5),(Token|1|5),(Component Name|3),(User Leaving|3),(Reason|3)
 # Application process has been started
 
 # An activity is being destroyed:

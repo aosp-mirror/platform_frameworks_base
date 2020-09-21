@@ -1102,7 +1102,7 @@ class Task extends WindowContainer<WindowContainer> {
                 && toStack.topRunningActivity() != null) {
             // Pause the resumed activity on the target stack while re-parenting task on top of it.
             toStack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
-                    null /* resuming */);
+                    null /* resuming */, "reparent");
         }
 
         final int toStackWindowingMode = toStack.getWindowingMode();
@@ -5340,7 +5340,8 @@ class Task extends WindowContainer<WindowContainer> {
             if (DEBUG_USER_LEAVING) Slog.v(TAG_USER_LEAVING,
                     "Sleep => pause with userLeaving=false");
 
-            startPausingLocked(false /* userLeaving */, true /* uiSleeping */, null /* resuming */);
+            startPausingLocked(false /* userLeaving */, true /* uiSleeping */, null /* resuming */,
+                    "sleep");
             shouldSleep = false ;
         } else if (mPausingActivity != null) {
             // Still waiting for something to pause; can't sleep yet.
@@ -5400,11 +5401,12 @@ class Task extends WindowContainer<WindowContainer> {
      * @param resuming The activity we are currently trying to resume or null if this is not being
      *                 called as part of resuming the top activity, so we shouldn't try to instigate
      *                 a resume here if not null.
+     * @param reason The reason of pausing the activity.
      * @return Returns true if an activity now is in the PAUSING state, and we are waiting for
      * it to tell us when it is done.
      */
     final boolean startPausingLocked(boolean userLeaving, boolean uiSleeping,
-            ActivityRecord resuming) {
+            ActivityRecord resuming, String reason) {
         if (mPausingActivity != null) {
             Slog.wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity
                     + " state=" + mPausingActivity.getState());
@@ -5471,7 +5473,7 @@ class Task extends WindowContainer<WindowContainer> {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Enqueueing pending pause: " + prev);
                 try {
                     EventLogTags.writeWmPauseActivity(prev.mUserId, System.identityHashCode(prev),
-                            prev.shortComponentName, "userLeaving=" + userLeaving);
+                            prev.shortComponentName, "userLeaving=" + userLeaving, reason);
 
                     mAtmService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
                             prev.appToken, PauseActivityItem.obtain(prev.finishing, userLeaving,
@@ -5995,7 +5997,8 @@ class Task extends WindowContainer<WindowContainer> {
         if (mResumedActivity != null) {
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "resumeTopActivityLocked: Pausing " + mResumedActivity);
-            pausing |= startPausingLocked(userLeaving, false /* uiSleeping */, next);
+            pausing |= startPausingLocked(userLeaving, false /* uiSleeping */, next,
+                "resumeTopActivityInnerLocked");
         }
         if (pausing) {
             if (DEBUG_SWITCH || DEBUG_STATES) Slog.v(TAG_STATES,
