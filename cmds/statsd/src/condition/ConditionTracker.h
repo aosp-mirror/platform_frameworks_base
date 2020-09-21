@@ -68,9 +68,9 @@ public:
     // index: the new index of this tracker in allConditionProtos and allConditionTrackers.
     // allConditionTrackers: the list of all ConditionTrackers (this is needed because we may also
     //                       need to call onConfigUpdated() on child conditions)
-    // [atomMatchingTrackerMap]: map of atom matcher id to index after the config update
-    // [conditionTrackerMap]: map of condition tracker id to index after the config update.
-    // returns whether or not the update is successful
+    // atomMatchingTrackerMap: map of atom matcher id to index after the config update.
+    // conditionTrackerMap: map of condition tracker id to index after the config update.
+    // returns whether or not the update is successful.
     virtual bool onConfigUpdated(const std::vector<Predicate>& allConditionProtos, const int index,
                                  const std::vector<sp<ConditionTracker>>& allConditionTrackers,
                                  const std::unordered_map<int64_t, int>& atomMatchingTrackerMap,
