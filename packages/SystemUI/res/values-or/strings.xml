@@ -853,7 +853,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"ଡାହାଣ କୀ\'କୋଡ୍‍"</string>
     <string name="left_icon" msgid="5036278531966897006">"ବାମ ଆଇକନ୍‍"</string>
     <string name="right_icon" msgid="1103955040645237425">"ଡାହାଣ ଆଇକନ୍"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"ଟାଇଲ୍ ଯୋଡ଼ିବା ପାଇଁ ଦାବିଧରି ଟାଣନ୍ତୁ"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"ଟାଇଲ୍ ଯୋଗ କରିବା ପାଇଁ ଦାବିଧରି ଟାଣନ୍ତୁ"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"ଟାଇଲ୍‍ ପୁଣି ସଜାଇବାକୁ ଦାବିଧରି ଟାଣନ୍ତୁ"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"ବାହାର କରିବାକୁ ଏଠାକୁ ଡ୍ରାଗ୍‍ କରନ୍ତୁ"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"ଆପଣଙ୍କର ଅତିକମ୍‌ରେ <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>ଟି ଟାଇଲ୍ ଆବଶ୍ୟକ"</string>
