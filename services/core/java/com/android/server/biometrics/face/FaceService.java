@@ -33,7 +33,6 @@ import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
-import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
@@ -605,8 +604,6 @@ public class FaceService extends BiometricServiceBase {
                 return false;
             }
 
-            getFeature(userId, BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION,
-                    null /* receiver */, opPackageName);
             return FaceService.this.hasEnrolledBiometrics(userId);
         }
 
@@ -695,20 +692,7 @@ public class FaceService extends BiometricServiceBase {
                 if (mDaemon != null) {
                     try {
                         OptionalBool result = mDaemon.getFeature(feature, faceId);
-                        if (receiver != null) {
-                            receiver.onFeatureGet(result.status == Status.OK,
-                                    feature, result.value);
-                        }
-
-                        if (result.status == Status.OK
-                                && feature == BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION) {
-                            final int settingsValue = result.value ? 1 : 0;
-                            Slog.d(TAG, "Updating attention value for user: " + mCurrentUserId
-                                    + " to value: " + settingsValue);
-                            Settings.Secure.putIntForUser(getContext().getContentResolver(),
-                                    Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED,
-                                    settingsValue, mCurrentUserId);
-                        }
+                        receiver.onFeatureGet(result.status == Status.OK, feature, result.value);
                     } catch (RemoteException e) {
                         Slog.e(getTag(), "Unable to getRequireAttention", e);
                     }
