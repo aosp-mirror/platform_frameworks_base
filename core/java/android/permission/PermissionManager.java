@@ -34,7 +34,6 @@ import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
-import android.os.Binder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -544,15 +543,10 @@ public final class PermissionManager {
                     + permission);
             return PackageManager.PERMISSION_DENIED;
         }
-        // Clear Binder.callingUid in case this is called inside the system server. See
-        // more extensive comment in checkPackageNamePermissionUncached
-        long token = Binder.clearCallingIdentity();
         try {
             return am.checkPermission(permission, pid, uid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        } finally {
-            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -685,20 +679,11 @@ public final class PermissionManager {
     /* @hide */
     private static int checkPackageNamePermissionUncached(
             String permName, String pkgName, @UserIdInt int userId) {
-        // Makeing the binder call "checkPermission" usually sets Binder.callingUid to the calling
-        // processes UID. Hence clearing the calling UID is superflous.
-        // If the call is inside the system server though "checkPermission" is not a binder all, it
-        // is only a method call. Hence Binder.callingUid might still be set to the app that called
-        // the system server. This can lead to problems as not every app can check the same
-        // permissions the system server can check.
-        long token = Binder.clearCallingIdentity();
         try {
             return ActivityThread.getPermissionManager().checkPermission(
                     permName, pkgName, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        } finally {
-            Binder.restoreCallingIdentity(token);
         }
     }
 
