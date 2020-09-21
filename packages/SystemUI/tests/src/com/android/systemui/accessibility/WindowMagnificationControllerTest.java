@@ -17,10 +17,17 @@
 package com.android.systemui.accessibility;
 
 import static android.view.Choreographer.FrameCallback;
+import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
@@ -37,17 +44,20 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -71,6 +81,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     private Resources mResources;
     private WindowMagnificationController mWindowMagnificationController;
     private Instrumentation mInstrumentation;
+    private View mMirrorView;
 
     @Before
     public void setUp() {
@@ -83,11 +94,15 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         ).when(mWindowManager).getMaximumWindowMetrics();
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
         doAnswer(invocation -> {
-            View view = invocation.getArgument(0);
+            mMirrorView = invocation.getArgument(0);
             WindowManager.LayoutParams lp = invocation.getArgument(1);
-            view.setLayoutParams(lp);
+            mMirrorView.setLayoutParams(lp);
             return null;
         }).when(mWindowManager).addView(any(View.class), any(WindowManager.LayoutParams.class));
+        doAnswer(invocation -> {
+            mMirrorView = null;
+            return null;
+        }).when(mWindowManager).removeView(any(View.class));
         doAnswer(invocation -> {
             FrameCallback callback = invocation.getArgument(0);
             callback.doFrame(0);
@@ -147,14 +162,18 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void setScale_enabled_expectedValue() {
+    public void setScale_enabled_expectedValueAndUpdateStateDescription() {
         mInstrumentation.runOnMainSync(
-                () -> mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                () -> mWindowMagnificationController.enableWindowMagnification(2.0f, Float.NaN,
                         Float.NaN));
 
         mInstrumentation.runOnMainSync(() -> mWindowMagnificationController.setScale(3.0f));
 
         assertEquals(3.0f, mWindowMagnificationController.getScale(), 0);
+        ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mHandler).postDelayed(runnableArgumentCaptor.capture(), anyLong());
+        runnableArgumentCaptor.getValue().run();
+        assertThat(mMirrorView.getStateDescription().toString(), containsString("300"));
     }
 
     @Test
@@ -226,5 +245,53 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         });
 
         verify(mResources, atLeastOnce()).getDimensionPixelSize(anyInt());
+    }
+
+    @Test
+    public void initializeA11yNode_enabled_expectedValues() {
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(2.5f, Float.NaN,
+                    Float.NaN);
+        });
+        assertNotNull(mMirrorView);
+        final AccessibilityNodeInfo nodeInfo = new AccessibilityNodeInfo();
+
+        mMirrorView.onInitializeAccessibilityNodeInfo(nodeInfo);
+
+        assertNotNull(nodeInfo.getContentDescription());
+        assertThat(nodeInfo.getStateDescription().toString(), containsString("250"));
+        assertThat(nodeInfo.getActionList(),
+                hasItems(new AccessibilityAction(R.id.accessibility_action_zoom_in, null),
+                        new AccessibilityAction(R.id.accessibility_action_zoom_out, null),
+                        new AccessibilityAction(R.id.accessibility_action_move_right, null),
+                        new AccessibilityAction(R.id.accessibility_action_move_left, null),
+                        new AccessibilityAction(R.id.accessibility_action_move_down, null),
+                        new AccessibilityAction(R.id.accessibility_action_move_up, null)));
+    }
+
+    @Test
+    public void performA11yActions_visible_expectedResults() {
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(2.5f, Float.NaN,
+                    Float.NaN);
+        });
+        assertNotNull(mMirrorView);
+
+        assertTrue(
+                mMirrorView.performAccessibilityAction(R.id.accessibility_action_zoom_out, null));
+        // Minimum scale is 2.0.
+        assertEquals(2.0f, mWindowMagnificationController.getScale(), 0f);
+
+        assertTrue(mMirrorView.performAccessibilityAction(R.id.accessibility_action_zoom_in, null));
+        assertEquals(3.0f, mWindowMagnificationController.getScale(), 0f);
+
+        // TODO: Verify the final state when the mirror surface is visible.
+        assertTrue(mMirrorView.performAccessibilityAction(R.id.accessibility_action_move_up, null));
+        assertTrue(
+                mMirrorView.performAccessibilityAction(R.id.accessibility_action_move_down, null));
+        assertTrue(
+                mMirrorView.performAccessibilityAction(R.id.accessibility_action_move_right, null));
+        assertTrue(
+                mMirrorView.performAccessibilityAction(R.id.accessibility_action_move_left, null));
     }
 }

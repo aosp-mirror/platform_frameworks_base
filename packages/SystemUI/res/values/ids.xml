@@ -175,5 +175,13 @@
 
     <!-- Accessibility actions for PIP -->
     <item type="id" name="action_pip_resize" />
+
+    <!-- Accessibility actions for window magnification. -->
+    <item type="id" name="accessibility_action_zoom_in"/>
+    <item type="id" name="accessibility_action_zoom_out"/>
+    <item type="id" name="accessibility_action_move_left"/>
+    <item type="id" name="accessibility_action_move_right"/>
+    <item type="id" name="accessibility_action_move_up"/>
+    <item type="id" name="accessibility_action_move_down"/>
 </resources>
 
