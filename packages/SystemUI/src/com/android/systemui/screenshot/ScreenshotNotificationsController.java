@@ -205,7 +205,8 @@ public class ScreenshotNotificationsController {
         mPublicNotificationBuilder
                 .setContentTitle(mResources.getString(R.string.screenshot_saved_title))
                 .setContentText(mResources.getString(R.string.screenshot_saved_text))
-                .setContentIntent(PendingIntent.getActivity(mContext, 0, launchIntent, 0))
+                .setContentIntent(PendingIntent
+                        .getActivity(mContext, 0, launchIntent, PendingIntent.FLAG_IMMUTABLE))
                 .setWhen(now)
                 .setAutoCancel(true)
                 .setColor(mContext.getColor(
@@ -213,7 +214,8 @@ public class ScreenshotNotificationsController {
         mNotificationBuilder
                 .setContentTitle(mResources.getString(R.string.screenshot_saved_title))
                 .setContentText(mResources.getString(R.string.screenshot_saved_text))
-                .setContentIntent(PendingIntent.getActivity(mContext, 0, launchIntent, 0))
+                .setContentIntent(PendingIntent
+                        .getActivity(mContext, 0, launchIntent, PendingIntent.FLAG_IMMUTABLE))
                 .setWhen(now)
                 .setAutoCancel(true)
                 .setColor(mContext.getColor(
