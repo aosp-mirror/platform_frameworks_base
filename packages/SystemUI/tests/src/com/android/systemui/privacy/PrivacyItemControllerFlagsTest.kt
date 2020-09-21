@@ -96,24 +96,22 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     }
 
     @Test
-    fun testNotListeningAllByDefault() {
+    fun testNotListeningByDefault() {
         assertFalse(privacyItemController.allIndicatorsAvailable)
-    }
+        assertFalse(privacyItemController.micCameraAvailable)
 
-    @Test
-    fun testMicCameraListeningByDefault() {
-        assertTrue(privacyItemController.micCameraAvailable)
+        verify(appOpsController, never()).addCallback(any(), any())
     }
 
     @Test
     fun testMicCameraChanged() {
-        changeMicCamera(false) // default is true
+        changeMicCamera(true)
         executor.runAllReady()
 
-        verify(callback).onFlagMicCameraChanged(false)
+        verify(callback).onFlagMicCameraChanged(true)
         verify(callback, never()).onFlagAllChanged(anyBoolean())
 
-        assertFalse(privacyItemController.micCameraAvailable)
+        assertTrue(privacyItemController.micCameraAvailable)
         assertFalse(privacyItemController.allIndicatorsAvailable)
     }
 
@@ -126,19 +124,20 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
         verify(callback, never()).onFlagMicCameraChanged(anyBoolean())
 
         assertTrue(privacyItemController.allIndicatorsAvailable)
+        assertFalse(privacyItemController.micCameraAvailable)
     }
 
     @Test
     fun testBothChanged() {
         changeAll(true)
-        changeMicCamera(false)
+        changeMicCamera(true)
         executor.runAllReady()
 
         verify(callback, atLeastOnce()).onFlagAllChanged(true)
-        verify(callback, atLeastOnce()).onFlagMicCameraChanged(false)
+        verify(callback, atLeastOnce()).onFlagMicCameraChanged(true)
 
         assertTrue(privacyItemController.allIndicatorsAvailable)
-        assertFalse(privacyItemController.micCameraAvailable)
+        assertTrue(privacyItemController.micCameraAvailable)
     }
 
     @Test
@@ -158,11 +157,18 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     }
 
     @Test
+    fun testAll_listening() {
+        changeAll(true)
+        executor.runAllReady()
+
+        verify(appOpsController).addCallback(eq(PrivacyItemController.OPS), any())
+    }
+
+    @Test
     fun testAllFalse_notListening() {
         changeAll(true)
         executor.runAllReady()
         changeAll(false)
-        changeMicCamera(false)
         executor.runAllReady()
 
         verify(appOpsController).removeCallback(any(), any())
@@ -170,8 +176,8 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
 
     @Test
     fun testSomeListening_stillListening() {
-        // Mic and camera are true by default
         changeAll(true)
+        changeMicCamera(true)
         executor.runAllReady()
         changeAll(false)
         executor.runAllReady()
@@ -180,8 +186,7 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     }
 
     @Test
-    fun testAllDeleted_micCameraFalse_stopListening() {
-        changeMicCamera(false)
+    fun testAllDeleted_stopListening() {
         changeAll(true)
         executor.runAllReady()
         changeAll(null)
@@ -191,13 +196,13 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     }
 
     @Test
-    fun testMicDeleted_stillListening() {
+    fun testMicDeleted_stopListening() {
         changeMicCamera(true)
         executor.runAllReady()
         changeMicCamera(null)
         executor.runAllReady()
 
-        verify(appOpsController, never()).removeCallback(any(), any())
+        verify(appOpsController).removeCallback(any(), any())
     }
 
     private fun changeMicCamera(value: Boolean?) = changeProperty(MIC_CAMERA, value)
