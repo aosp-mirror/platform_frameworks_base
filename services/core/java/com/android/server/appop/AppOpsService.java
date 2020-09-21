@@ -19,7 +19,6 @@ package com.android.server.appop;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
-import static android.app.ActivityManagerInternal.ALLOW_ACROSS_PROFILES_IN_PROFILE_OR_NON_FULL;
 import static android.app.AppOpsManager.CALL_BACK_ON_SWITCHED_OP;
 import static android.app.AppOpsManager.FILTER_BY_ATTRIBUTION_TAG;
 import static android.app.AppOpsManager.FILTER_BY_OP_NAMES;
@@ -130,7 +129,6 @@ import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
-import android.util.EventLog;
 import android.util.KeyValueListParser;
 import android.util.LongSparseArray;
 import android.util.Pair;
@@ -164,7 +162,6 @@ import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemServiceManager;
-import com.android.server.am.ActivityManagerService;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
@@ -2202,11 +2199,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     + " by uid " + Binder.getCallingUid());
         }
 
-        int userId = UserHandle.getUserId(uid);
-
         enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), uid);
         verifyIncomingOp(code);
-        verifyIncomingUser(userId);
         code = AppOpsManager.opToSwitch(code);
 
         if (permissionPolicyCallback == null) {
@@ -2456,12 +2450,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     private void setMode(int code, int uid, @NonNull String packageName, int mode,
             @Nullable IAppOpsCallback permissionPolicyCallback) {
         enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), uid);
-
-        int userId = UserHandle.getUserId(uid);
-
         verifyIncomingOp(code);
-        verifyIncomingUser(userId);
-        verifyIncomingPackage(packageName, userId);
+        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
 
         ArraySet<ModeCallback> repCbs = null;
         code = AppOpsManager.opToSwitch(code);
@@ -2881,11 +2871,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private int checkOperationImpl(int code, int uid, String packageName,
                 boolean raw) {
-        int userId = UserHandle.getUserId(uid);
-
         verifyIncomingOp(code);
-        verifyIncomingUser(userId);
-        verifyIncomingPackage(packageName, userId);
+        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
 
         String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
@@ -3004,15 +2991,10 @@ public class AppOpsService extends IAppOpsService.Stub {
             String proxiedAttributionTag, int proxyUid, String proxyPackageName,
             String proxyAttributionTag, boolean shouldCollectAsyncNotedOp, String message,
             boolean shouldCollectMessage) {
-        int proxiedUserId = UserHandle.getUserId(proxiedUid);
-        int proxyUserId = UserHandle.getUserId(proxyUid);
-
         verifyIncomingUid(proxyUid);
         verifyIncomingOp(code);
-        verifyIncomingUser(proxiedUserId);
-        verifyIncomingUser(proxyUserId);
-        verifyIncomingPackage(proxiedPackageName, proxiedUserId);
-        verifyIncomingPackage(proxyPackageName, proxyUserId);
+        verifyIncomingPackage(proxiedPackageName, UserHandle.getUserId(proxiedUid));
+        verifyIncomingPackage(proxyPackageName, UserHandle.getUserId(proxyUid));
 
         String resolveProxyPackageName = resolvePackageName(proxyUid, proxyPackageName);
         if (resolveProxyPackageName == null) {
@@ -3062,12 +3044,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     private int noteOperationImpl(int code, int uid, @Nullable String packageName,
             @Nullable String attributionTag, boolean shouldCollectAsyncNotedOp,
             @Nullable String message, boolean shouldCollectMessage) {
-        int userId = UserHandle.getUserId(uid);
-
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
-        verifyIncomingUser(userId);
-        verifyIncomingPackage(packageName, userId);
+        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
 
         String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
@@ -3444,12 +3423,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     public int startOperation(IBinder clientId, int code, int uid, String packageName,
             String attributionTag, boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
             String message, boolean shouldCollectMessage) {
-        int userId = UserHandle.getUserId(uid);
-
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
-        verifyIncomingUser(userId);
-        verifyIncomingPackage(packageName, userId);
+        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
 
         String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
@@ -3541,12 +3517,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void finishOperation(IBinder clientId, int code, int uid, String packageName,
             String attributionTag) {
-        int userId = UserHandle.getUserId(uid);
-
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
-        verifyIncomingUser(userId);
-        verifyIncomingPackage(packageName, userId);
+        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
 
         String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
@@ -3772,33 +3745,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                 Binder.getCallingUid(), userId)) {
             throw new IllegalArgumentException(
                     packageName + " not found from " + Binder.getCallingUid());
-        }
-    }
-
-    private void verifyIncomingUser(@UserIdInt int userId) {
-        int callingUid = Binder.getCallingUid();
-        int callingUserId = UserHandle.getUserId(callingUid);
-        int callingPid = Binder.getCallingPid();
-
-        if (callingUserId != userId) {
-            // Prevent endless loop between when checking appops inside of handleIncomingUser
-            if (Binder.getCallingPid() == ActivityManagerService.MY_PID) {
-                return;
-            }
-            long token = Binder.clearCallingIdentity();
-            try {
-                try {
-                    LocalServices.getService(ActivityManagerInternal.class).handleIncomingUser(
-                            callingPid, callingUid, userId, /* allowAll */ false,
-                            ALLOW_ACROSS_PROFILES_IN_PROFILE_OR_NON_FULL, "appop operation", null);
-                } catch (Exception e) {
-                    EventLog.writeEvent(0x534e4554, "153996875", "appop", userId);
-
-                    throw e;
-                }
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
         }
     }
 
@@ -5881,11 +5827,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return false;
             }
         }
-        int userId = UserHandle.getUserId(uid);
-
         verifyIncomingOp(code);
-        verifyIncomingUser(userId);
-        verifyIncomingPackage(packageName, userId);
+        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
 
         final String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
