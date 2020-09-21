@@ -1219,7 +1219,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
                             + " mResumedActivity=" + resumedActivity);
                 }
                 someActivityPaused |= stack.startPausingLocked(userLeaving, false /* uiSleeping*/,
-                        resuming);
+                        resuming, "pauseBackStacks");
             }
         }
         return someActivityPaused;
