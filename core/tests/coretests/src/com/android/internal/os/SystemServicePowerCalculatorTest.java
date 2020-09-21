@@ -87,7 +87,7 @@ public class SystemServicePowerCalculatorTest {
         stat1.cpuTimeMicros = 1000000;
         callStats.add(stat1);
 
-        mMockBatteryStats.noteBinderCallStats(workSourceUid1, 100, callStats, null);
+        mMockBatteryStats.noteBinderCallStats(workSourceUid1, 100, callStats);
 
         callStats.clear();
         BinderCallsStats.CallStat stat2 = new BinderCallsStats.CallStat(workSourceUid2,
@@ -97,7 +97,7 @@ public class SystemServicePowerCalculatorTest {
         stat2.cpuTimeMicros = 9000000;
         callStats.add(stat2);
 
-        mMockBatteryStats.noteBinderCallStats(workSourceUid2, 100, callStats, null);
+        mMockBatteryStats.noteBinderCallStats(workSourceUid2, 100, callStats);
 
         mMockBatteryStats.updateSystemServiceCallStats();
         mMockBatteryStats.updateSystemServerThreadStats();

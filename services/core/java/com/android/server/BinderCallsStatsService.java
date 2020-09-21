@@ -49,6 +49,7 @@ import com.android.internal.util.DumpUtils;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class BinderCallsStatsService extends Binder {
@@ -273,7 +274,19 @@ public class BinderCallsStatsService extends Binder {
 
                 BatteryStatsInternal batteryStatsInternal = getLocalService(
                         BatteryStatsInternal.class);
-                mBinderCallsStats.setCallStatsObserver(batteryStatsInternal::noteBinderCallStats);
+                mBinderCallsStats.setCallStatsObserver(new BinderInternal.CallStatsObserver() {
+                    @Override
+                    public void noteCallStats(int workSourceUid, long incrementalCallCount,
+                            Collection<BinderCallsStats.CallStat> callStats) {
+                        batteryStatsInternal.noteBinderCallStats(workSourceUid,
+                                incrementalCallCount, callStats);
+                    }
+
+                    @Override
+                    public void noteBinderThreadNativeIds(int[] binderThreadNativeTids) {
+                        batteryStatsInternal.noteBinderThreadNativeIds(binderThreadNativeTids);
+                    }
+                });
 
                 // It needs to be called before mService.systemReady to make sure the observer is
                 // initialized before installing it.
