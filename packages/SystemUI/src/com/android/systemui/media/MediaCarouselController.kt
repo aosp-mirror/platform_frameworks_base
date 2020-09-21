@@ -274,7 +274,7 @@ class MediaCarouselController @Inject constructor(
         }
     }
 
-    private fun removePlayer(key: String) {
+    private fun removePlayer(key: String, dismissMediaData: Boolean = true) {
         val removed = MediaPlayerData.removeMediaPlayer(key)
         removed?.apply {
             mediaCarouselScrollHandler.onPrePlayerRemoved(removed)
@@ -283,13 +283,16 @@ class MediaCarouselController @Inject constructor(
             mediaCarouselScrollHandler.onPlayersChanged()
             updatePageIndicator()
 
-            // Inform the media manager of a potentially late dismissal
-            mediaManager.dismissMediaData(key, 0L)
+            if (dismissMediaData) {
+                // Inform the media manager of a potentially late dismissal
+                mediaManager.dismissMediaData(key, 0L)
+            }
         }
     }
 
     private fun recreatePlayers() {
         MediaPlayerData.mediaData().forEach { (key, data) ->
+            removePlayer(key, dismissMediaData = false)
             addOrUpdatePlayer(key = key, oldKey = null, data = data)
         }
     }
