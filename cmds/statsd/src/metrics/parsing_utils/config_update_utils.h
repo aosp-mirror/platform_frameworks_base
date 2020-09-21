@@ -22,6 +22,7 @@
 #include "condition/ConditionTracker.h"
 #include "external/StatsPullerManager.h"
 #include "matchers/AtomMatchingTracker.h"
+#include "metrics/MetricProducer.h"
 
 namespace android {
 namespace os {
@@ -112,7 +113,7 @@ bool determineConditionUpdateStatus(const StatsdConfig& config, const int condit
 // [trackerToConditionMap]: contains the mapping from the index of an atom matcher
 //                          to indices of condition trackers that use the matcher
 // [conditionCache]: stores the current conditions for each ConditionTracker
-// [replacedConditions]: set of matcher ids that have changed and have been replaced
+// [replacedConditions]: set of condition ids that have changed and have been replaced
 bool updateConditions(const ConfigKey& key, const StatsdConfig& config,
                       const std::unordered_map<int64_t, int>& atomMatchingTrackerMap,
                       const std::set<int64_t>& replacedMatchers,
@@ -123,6 +124,68 @@ bool updateConditions(const ConfigKey& key, const StatsdConfig& config,
                       std::unordered_map<int, std::vector<int>>& trackerToConditionMap,
                       std::vector<ConditionState>& conditionCache,
                       std::set<int64_t>& replacedConditions);
+
+// Function to determine if an event metric needs to be updated. Populates updateStatus.
+// [config]: the input StatsdConfig
+// [metric]: the current metric to be updated
+// [oldMetricProducerMap]: metric id to index mapping in the existing MetricsManager
+// [oldMetricProducers]: stores the existing MetricProducers
+// [metricToActivationMap]:  map from metric id to metric activation index.
+// [replacedMatchers]: set of replaced matcher ids. conditions using these matchers must be replaced
+// output:
+// [updateStatus]: update status for the metric. Will be changed from UPDATE_UNKNOWN after this call
+// Returns whether the function was successful or not.
+bool determineEventMetricUpdateStatus(const StatsdConfig& config, const EventMetric& metric,
+                                      const unordered_map<int64_t, int>& oldMetricProducerMap,
+                                      const vector<sp<MetricProducer>>& oldMetricProducers,
+                                      const unordered_map<int64_t, int>& metricToActivationMap,
+                                      const set<int64_t>& replacedMatchers,
+                                      const set<int64_t>& replacedConditions,
+                                      UpdateStatus& updateStatus);
+
+// Update MetricProducers.
+// input:
+// [key]: the config key that this config belongs to
+// [config]: the input config
+// [timeBaseNs]: start time base for all metrics
+// [currentTimeNs]: time of the config update
+// [atomMatchingTrackerMap]: AtomMatchingTracker name to index mapping from previous step.
+// [replacedMatchers]: ids of replaced matchers. Metrics depending on these must also be replaced
+// [allAtomMatchingTrackers]: stores the sp of the atom matchers.
+// [conditionTrackerMap]: condition name to index mapping
+// [replacedConditions]: set of condition ids that have changed and have been replaced
+// [stateAtomIdMap]: contains the mapping from state ids to atom ids
+// [allStateGroupMaps]: contains the mapping from atom ids and state values to
+//                      state group ids for all states
+// output:
+// [allMetricProducers]: contains the list of sp to the MetricProducers created.
+// [conditionToMetricMap]: contains the mapping from condition tracker index to
+//                          the list of MetricProducer index
+// [trackerToMetricMap]: contains the mapping from log tracker to MetricProducer index.
+bool updateMetrics(
+        const ConfigKey& key, const StatsdConfig& config, const int64_t timeBaseNs,
+        const int64_t currentTimeNs, const sp<StatsPullerManager>& pullerManager,
+        const std::unordered_map<int64_t, int>& oldAtomMatchingTrackerMap,
+        const std::unordered_map<int64_t, int>& newAtomMatchingTrackerMap,
+        const std::set<int64_t>& replacedMatchers,
+        const std::vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
+        const std::unordered_map<int64_t, int>& conditionTrackerMap,
+        const std::set<int64_t>& replacedConditions,
+        std::vector<sp<ConditionTracker>>& allConditionTrackers,
+        const std::vector<ConditionState>& initialConditionCache,
+        const std::unordered_map<int64_t, int>& stateAtomIdMap,
+        const std::unordered_map<int64_t, std::unordered_map<int, int64_t>>& allStateGroupMaps,
+        const std::set<int64_t>& replacedStates,
+        const std::unordered_map<int64_t, int>& oldMetricProducerMap,
+        const std::vector<sp<MetricProducer>>& oldMetricProducers,
+        std::unordered_map<int64_t, int>& newMetricProducerMap,
+        std::vector<sp<MetricProducer>>& newMetricProducers,
+        std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
+        std::unordered_map<int, std::vector<int>>& trackerToMetricMap,
+        std::set<int64_t>& noReportMetricIds,
+        std::unordered_map<int, std::vector<int>>& activationAtomTrackerToMetricMap,
+        std::unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
+        std::vector<int>& metricsWithActivation);
 
 // Updates the existing MetricsManager from a new StatsdConfig.
 // Parameters are the members of MetricsManager. See MetricsManager for declaration.
@@ -135,12 +198,24 @@ bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const 
                         const std::unordered_map<int64_t, int>& oldAtomMatchingTrackerMap,
                         const std::vector<sp<ConditionTracker>>& oldConditionTrackers,
                         const std::unordered_map<int64_t, int>& oldConditionTrackerMap,
+                        const std::vector<sp<MetricProducer>>& oldMetricProducers,
+                        const std::unordered_map<int64_t, int>& oldMetricProducerMap,
+                        const std::map<int64_t, uint64_t>& oldStateProtoHashes,
                         std::set<int>& allTagIds,
                         std::vector<sp<AtomMatchingTracker>>& newAtomMatchingTrackers,
                         std::unordered_map<int64_t, int>& newAtomMatchingTrackerMap,
                         std::vector<sp<ConditionTracker>>& newConditionTrackers,
                         std::unordered_map<int64_t, int>& newConditionTrackerMap,
-                        std::unordered_map<int, std::vector<int>>& trackerToConditionMap);
+                        std::vector<sp<MetricProducer>>& newMetricProducers,
+                        std::unordered_map<int64_t, int>& newMetricProducerMap,
+                        std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
+                        std::unordered_map<int, std::vector<int>>& trackerToMetricMap,
+                        std::unordered_map<int, std::vector<int>>& trackerToConditionMap,
+                        std::unordered_map<int, std::vector<int>>& activationTrackerToMetricMap,
+                        std::unordered_map<int, std::vector<int>>& deactivationTrackerToMetricMap,
+                        std::vector<int>& metricsWithActivation,
+                        std::map<int64_t, uint64_t>& newStateProtoHashes,
+                        std::set<int64_t>& noReportMetricIds);
 
 }  // namespace statsd
 }  // namespace os
