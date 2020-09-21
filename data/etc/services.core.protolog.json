@@ -259,6 +259,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
+    "-1741065110": {
+      "message": "No app is requesting an orientation, return %d for display id=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-1730156332": {
       "message": "Display id=%d rotation changed to %d from %d, lastOrientation=%d",
       "level": "VERBOSE",
@@ -1909,6 +1915,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowToken.java"
     },
+    "845234215": {
+      "message": "App is requesting an orientation, return %d for display id=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "853091290": {
       "message": "Moved stack=%s behind stack=%s",
       "level": "DEBUG",
@@ -2179,12 +2191,6 @@
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
     },
-    "1381227466": {
-      "message": "App is requesting an orientation, return %d for display id=%d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
-    },
     "1401295262": {
       "message": "Mode default, asking user",
       "level": "WARN",
@@ -2370,12 +2376,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_RESIZE",
       "at": "com\/android\/server\/wm\/WindowState.java"
-    },
-    "1640436199": {
-      "message": "No app is requesting an orientation, return %d for display id=%d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
     },
     "1653210583": {
       "message": "Removing app %s delayed=%b animation=%s animating=%b",
