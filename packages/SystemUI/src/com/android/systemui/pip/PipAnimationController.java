@@ -217,7 +217,7 @@ public class PipAnimationController {
         public void onAnimationEnd(Animator animation) {
             mCurrentValue = mEndValue;
             final SurfaceControl.Transaction tx = newSurfaceControlTransaction();
-            onEndTransaction(mLeash, tx);
+            onEndTransaction(mLeash, tx, mTransitionDirection);
             if (mPipAnimationCallback != null) {
                 mPipAnimationCallback.onPipAnimationEnd(tx, this);
             }
@@ -316,7 +316,8 @@ public class PipAnimationController {
 
         void onStartTransaction(SurfaceControl leash, SurfaceControl.Transaction tx) {}
 
-        void onEndTransaction(SurfaceControl leash, SurfaceControl.Transaction tx) {}
+        void onEndTransaction(SurfaceControl leash, SurfaceControl.Transaction tx,
+                @TransitionDirection int transitionDirection) {}
 
         abstract void applySurfaceControlTransaction(SurfaceControl leash,
                 SurfaceControl.Transaction tx, float fraction);
@@ -411,13 +412,20 @@ public class PipAnimationController {
                 }
 
                 @Override
-                void onEndTransaction(SurfaceControl leash, SurfaceControl.Transaction tx) {
+                void onEndTransaction(SurfaceControl leash, SurfaceControl.Transaction tx,
+                        int transitionDirection) {
                     // NOTE: intentionally does not apply the transaction here.
                     // this end transaction should get executed synchronously with the final
                     // WindowContainerTransaction in task organizer
-                    getSurfaceTransactionHelper()
-                            .resetScale(tx, leash, getDestinationBounds())
-                            .crop(tx, leash, getDestinationBounds());
+                    final Rect destBounds = getDestinationBounds();
+                    getSurfaceTransactionHelper().resetScale(tx, leash, destBounds);
+                    if (transitionDirection == TRANSITION_DIRECTION_LEAVE_PIP) {
+                        // Leaving to fullscreen, reset crop to null.
+                        tx.setPosition(leash, destBounds.left, destBounds.top);
+                        tx.setWindowCrop(leash, 0, 0);
+                    } else {
+                        getSurfaceTransactionHelper().crop(tx, leash, destBounds);
+                    }
                 }
 
                 @Override
