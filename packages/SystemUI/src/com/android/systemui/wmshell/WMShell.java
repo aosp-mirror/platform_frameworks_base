@@ -40,6 +40,7 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.pip.Pip;
+import com.android.systemui.pip.phone.PipUtils;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.tracing.ProtoTraceable;
@@ -57,7 +58,6 @@ import com.android.wm.shell.protolog.ShellProtoLogImpl;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Optional;
@@ -103,7 +103,6 @@ public final class WMShell extends SystemUI
             ProtoTracer protoTracer) {
         super(context);
         mCommandQueue = commandQueue;
-        mCommandQueue.addCallback(this);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mActivityManagerWrapper = activityManagerWrapper;
         mDisplayImeController = displayImeController;
@@ -120,6 +119,7 @@ public final class WMShell extends SystemUI
 
     @Override
     public void start() {
+        mCommandQueue.addCallback(this);
         // This is to prevent circular init problem by separating registration step out of its
         // constructor. And make sure the initialization of DisplayImeController won't depend on
         // specific feature anymore.
@@ -131,6 +131,9 @@ public final class WMShell extends SystemUI
 
     @VisibleForTesting
     void initPip(Pip pip) {
+        if (!PipUtils.hasSystemFeature(mContext)) {
+            return;
+        }
         mCommandQueue.addCallback(new CommandQueue.Callbacks() {
             @Override
             public void showPictureInPictureMenu() {

@@ -16,12 +16,17 @@
 
 package com.android.systemui.wmshell;
 
+import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
+
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.pm.PackageManager;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.TestableContext;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -68,6 +73,7 @@ public class WMShellTest extends SysuiTestCase {
     @Mock OneHanded mOneHanded;
     @Mock ShellTaskOrganizer mTaskOrganizer;
     @Mock ProtoTracer mProtoTracer;
+    @Mock PackageManager mMockPackageManager;
 
     @Before
     public void setUp() {
@@ -89,8 +95,23 @@ public class WMShellTest extends SysuiTestCase {
     public void initPip_registersCommandQueueCallback() {
         mWMShell.initPip(mPip);
 
-        // Once for the shell, once for pip
-        verify(mCommandQueue, times(2)).addCallback(any(CommandQueue.Callbacks.class));
+        verify(mCommandQueue).addCallback(any(CommandQueue.Callbacks.class));
+    }
+
+    @Test
+    public void nonPipDevice_shouldNotInitPip() {
+        TestableContext spiedContext = spy(mContext);
+        when(mMockPackageManager.hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)).thenReturn(false);
+        when(spiedContext.getPackageManager()).thenReturn(mMockPackageManager);
+
+        final WMShell nonPipWMShell = new WMShell(spiedContext, mCommandQueue,
+                mKeyguardUpdateMonitor,
+                mActivityManagerWrapper, mDisplayImeController, mNavigationModeController,
+                mScreenLifecycle, mSysUiState, Optional.of(mPip), Optional.of(mSplitScreen),
+                Optional.of(mOneHanded), mTaskOrganizer, mProtoTracer);
+        nonPipWMShell.initPip(mPip);
+
+        verify(mCommandQueue, never()).addCallback(any());
     }
 
     @Test
@@ -108,8 +129,7 @@ public class WMShellTest extends SysuiTestCase {
         mWMShell.initOneHanded(mOneHanded);
 
         verify(mKeyguardUpdateMonitor).registerCallback(any(KeyguardUpdateMonitorCallback.class));
-        // Once for the shell, once for the one handed mode
-        verify(mCommandQueue, times(2)).addCallback(any(CommandQueue.Callbacks.class));
+        verify(mCommandQueue).addCallback(any(CommandQueue.Callbacks.class));
         verify(mScreenLifecycle).addObserver(any(ScreenLifecycle.Observer.class));
         verify(mNavigationModeController).addListener(
                 any(NavigationModeController.ModeChangedListener.class));

@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents;
 
-import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
@@ -65,6 +64,7 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.annotation.NonNull;
 
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.Dumpable;
@@ -77,6 +77,7 @@ import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.pip.Pip;
 import com.android.systemui.pip.PipAnimationController;
+import com.android.systemui.pip.phone.PipUtils;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.shared.recents.IOverviewProxy;
@@ -155,7 +156,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private boolean mSupportsRoundedCornersOnWindows;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
 
-    private ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
+    @VisibleForTesting
+    public ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
 
         @Override
         public void startScreenPinning(int taskId) {
@@ -624,7 +626,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         super(broadcastDispatcher);
         mContext = context;
         mPipOptional = pipOptional;
-        mHasPipFeature = mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
+        mHasPipFeature = PipUtils.hasSystemFeature(mContext);
         mStatusBarOptionalLazy = statusBarOptionalLazy;
         mHandler = new Handler();
         mNavBarControllerLazy = navBarControllerLazy;
