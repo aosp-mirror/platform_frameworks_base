@@ -225,6 +225,16 @@ public class KeyButtonRipple extends Drawable {
     }
 
     @Override
+    public boolean setVisible(boolean visible, boolean restart) {
+        boolean changed = super.setVisible(visible, restart);
+        if (changed) {
+            // End any existing animations when the visibility changes
+            jumpToCurrentState();
+        }
+        return changed;
+    }
+
+    @Override
     public void jumpToCurrentState() {
         endAnimations("jumpToCurrentState", false /* cancel */);
     }
