@@ -136,9 +136,9 @@ public class KeyguardInputViewController extends ViewController<KeyguardInputVie
         mView.onStartingToHide();
     }
 
-    /** Finds the index of this view in the suppplied parent view. */
-    public int getIndexIn(KeyguardSecurityViewFlipper view) {
-        return view.indexOfChild(mView);
+    public void showSelf() {
+        KeyguardSecurityViewFlipper flipper = (KeyguardSecurityViewFlipper) mView.getParent();
+        flipper.setDisplayedChild(flipper.indexOfChild(mView));
     }
 
     /** Factory for a {@link KeyguardInputViewController}. */
