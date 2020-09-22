@@ -40,7 +40,10 @@ import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundModelType;
 import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
 import android.os.HidlMemoryUtil;
+import android.os.ParcelFileDescriptor;
 
+import java.io.FileDescriptor;
+import java.io.IOException;
 import java.util.regex.Matcher;
 
 /**
@@ -196,8 +199,18 @@ class ConversionUtil {
         hidlModel.header.type = aidl2hidlSoundModelType(aidlModel.type);
         hidlModel.header.uuid = aidl2hidlUuid(aidlModel.uuid);
         hidlModel.header.vendorUuid = aidl2hidlUuid(aidlModel.vendorUuid);
-        hidlModel.data = HidlMemoryUtil.fileDescriptorToHidlMemory(aidlModel.data,
-                aidlModel.dataSize);
+
+        // Extract a dup of the underlying FileDescriptor out of aidlModel.data without changing
+        // the original.
+        FileDescriptor fd = new FileDescriptor();
+        try {
+            ParcelFileDescriptor dup = aidlModel.data.dup();
+            fd.setInt$(dup.detachFd());
+            hidlModel.data = HidlMemoryUtil.fileDescriptorToHidlMemory(fd, aidlModel.dataSize);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         return hidlModel;
     }
 
