@@ -75,6 +75,9 @@
     <!-- Czech keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_czech">Czech</string>
 
+    <!-- Czech qwerty keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_czech_qwerty">Czech QWERTY style</string>
+
     <!-- Estonian keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_estonian">Estonian</string>
 
