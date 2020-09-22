@@ -556,7 +556,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // Input channel and input window handle used by the input dispatcher.
     final InputWindowHandle mInputWindowHandle;
     InputChannel mInputChannel;
-    private InputChannel mClientChannel;
 
     // Used to improve performance of toString()
     private String mStringNameCache;
@@ -2478,20 +2477,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             throw new IllegalStateException("Window already has an input channel.");
         }
         String name = getName();
-        InputChannel[] inputChannels = InputChannel.openInputChannelPair(name);
-        mInputChannel = inputChannels[0];
-        mClientChannel = inputChannels[1];
-        mWmService.mInputManager.registerInputChannel(mInputChannel);
+        mInputChannel = mWmService.mInputManager.createInputChannel(name);
         mInputWindowHandle.token = mInputChannel.getToken();
         if (outInputChannel != null) {
-            mClientChannel.transferTo(outInputChannel);
-            mClientChannel.dispose();
-            mClientChannel = null;
+            mInputChannel.copyTo(outInputChannel);
         } else {
             // If the window died visible, we setup a fake input channel, so that taps
             // can still detected by input monitor channel, and we can relaunch the app.
             // Create fake event receiver that simply reports all events as handled.
-            mDeadWindowEventReceiver = new DeadWindowEventReceiver(mClientChannel);
+            mDeadWindowEventReceiver = new DeadWindowEventReceiver(mInputChannel);
         }
         mWmService.mInputToWindowMap.put(mInputWindowHandle.token, this);
     }
@@ -2504,14 +2498,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         // unregister server channel first otherwise it complains about broken channel
         if (mInputChannel != null) {
-            mWmService.mInputManager.unregisterInputChannel(mInputChannel.getToken());
+            mWmService.mInputManager.removeInputChannel(mInputChannel.getToken());
 
             mInputChannel.dispose();
             mInputChannel = null;
-        }
-        if (mClientChannel != null) {
-            mClientChannel.dispose();
-            mClientChannel = null;
         }
         mWmService.mKeyInterceptionInfoForToken.remove(mInputWindowHandle.token);
         mWmService.mInputToWindowMap.remove(mInputWindowHandle.token);
