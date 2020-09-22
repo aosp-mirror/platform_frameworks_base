@@ -6613,19 +6613,26 @@ public class BatteryStatsImpl extends BatteryStats {
      * the power consumption to the calling app.
      */
     public void noteBinderCallStats(int workSourceUid, long incrementalCallCount,
-            Collection<BinderCallsStats.CallStat> callStats, int[] binderThreadNativeTids) {
-        noteBinderCallStats(workSourceUid, incrementalCallCount, callStats, binderThreadNativeTids,
+            Collection<BinderCallsStats.CallStat> callStats) {
+        noteBinderCallStats(workSourceUid, incrementalCallCount, callStats,
                 mClocks.elapsedRealtime(), mClocks.uptimeMillis());
     }
 
     public void noteBinderCallStats(int workSourceUid, long incrementalCallCount,
-            Collection<BinderCallsStats.CallStat> callStats, int[] binderThreadNativeTids,
+            Collection<BinderCallsStats.CallStat> callStats,
             long elapsedRealtimeMs, long uptimeMs) {
         synchronized (this) {
             getUidStatsLocked(workSourceUid, elapsedRealtimeMs, uptimeMs)
                     .noteBinderCallStatsLocked(incrementalCallCount, callStats);
-            mSystemServerCpuThreadReader.setBinderThreadNativeTids(binderThreadNativeTids);
         }
+    }
+
+    /**
+     * Takes note of native IDs of threads taking incoming binder calls. The CPU time
+     * of these threads is attributed to the apps making those binder calls.
+     */
+    public void noteBinderThreadNativeIds(int[] binderThreadNativeTids) {
+        mSystemServerCpuThreadReader.setBinderThreadNativeTids(binderThreadNativeTids);
     }
 
     /**

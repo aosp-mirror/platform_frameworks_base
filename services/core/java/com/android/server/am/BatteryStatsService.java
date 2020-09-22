@@ -240,12 +240,18 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         @Override
         public void noteBinderCallStats(int workSourceUid, long incrementatCallCount,
-                Collection<BinderCallsStats.CallStat> callStats, int[] binderThreadNativeTids) {
+                Collection<BinderCallsStats.CallStat> callStats) {
             synchronized (BatteryStatsService.this.mLock) {
                 mHandler.sendMessage(PooledLambda.obtainMessage(
-                        mStats::noteBinderCallStats, workSourceUid, incrementatCallCount,
-                        callStats, binderThreadNativeTids,
+                        mStats::noteBinderCallStats, workSourceUid, incrementatCallCount, callStats,
                         SystemClock.elapsedRealtime(), SystemClock.uptimeMillis()));
+            }
+        }
+
+        @Override
+        public void noteBinderThreadNativeIds(int[] binderThreadNativeTids) {
+            synchronized (BatteryStatsService.this.mLock) {
+                mStats.noteBinderThreadNativeIds(binderThreadNativeTids);
             }
         }
     }
