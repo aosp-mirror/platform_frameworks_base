@@ -35,7 +35,7 @@ import java.io.PrintWriter;
 
 class InputConsumerImpl implements IBinder.DeathRecipient {
     final WindowManagerService mService;
-    final InputChannel mClientChannel;
+    final InputChannel mServerChannel, mClientChannel;
     final InputApplicationHandle mApplicationHandle;
     final InputWindowHandle mWindowHandle;
 
@@ -58,10 +58,16 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         mClientPid = clientPid;
         mClientUser = clientUser;
 
-        mClientChannel = mService.mInputManager.createInputChannel(name);
+        InputChannel[] channels = InputChannel.openInputChannelPair(name);
+        mServerChannel = channels[0];
         if (inputChannel != null) {
-            mClientChannel.copyTo(inputChannel);
+            channels[1].transferTo(inputChannel);
+            channels[1].dispose();
+            mClientChannel = inputChannel;
+        } else {
+            mClientChannel = channels[1];
         }
+        mService.mInputManager.registerInputChannel(mServerChannel);
 
         mApplicationHandle = new InputApplicationHandle(new Binder());
         mApplicationHandle.name = name;
@@ -69,7 +75,7 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
 
         mWindowHandle = new InputWindowHandle(mApplicationHandle, displayId);
         mWindowHandle.name = name;
-        mWindowHandle.token = mClientChannel.getToken();
+        mWindowHandle.token = mServerChannel.getToken();
         mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
         mWindowHandle.layoutParamsFlags = 0;
         mWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
@@ -150,8 +156,9 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
     }
 
     void disposeChannelsLw(SurfaceControl.Transaction t) {
-        mService.mInputManager.removeInputChannel(mClientChannel.getToken());
+        mService.mInputManager.unregisterInputChannel(mServerChannel.getToken());
         mClientChannel.dispose();
+        mServerChannel.dispose();
         t.remove(mInputSurface);
         unlinkFromDeathRecipient();
     }
