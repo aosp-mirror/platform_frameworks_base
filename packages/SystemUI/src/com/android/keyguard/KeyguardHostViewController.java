@@ -336,7 +336,7 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     }
 
     public SecurityMode getCurrentSecurityMode() {
-        return mKeyguardSecurityContainerController.getCurrentSecuritySelection();
+        return mKeyguardSecurityContainerController.getCurrentSecurityMode();
     }
 
     public int getTop() {

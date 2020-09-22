@@ -32,6 +32,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.widget.LinearLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.LatencyTracker;
@@ -47,8 +48,8 @@ import com.android.systemui.R;
 
 import java.util.List;
 
-public class KeyguardPatternView extends KeyguardInputView
-        implements AppearAnimationCreator<LockPatternView.CellState>,
+public class KeyguardPatternView extends LinearLayout implements KeyguardSecurityView,
+        AppearAnimationCreator<LockPatternView.CellState>,
         EmergencyButton.EmergencyButtonCallback {
 
     private static final String TAG = "SecurityPatternView";
