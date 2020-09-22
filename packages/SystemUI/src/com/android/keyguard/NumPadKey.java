@@ -26,7 +26,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityManager;
 import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -91,8 +90,7 @@ public class NumPadKey extends ViewGroup {
         }
 
         setOnClickListener(mListener);
-        setOnHoverListener(new LiftToActivateListener(
-                (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE)));
+        setOnHoverListener(new LiftToActivateListener(context));
 
         mLockPatternUtils = new LockPatternUtils(context);
         mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
