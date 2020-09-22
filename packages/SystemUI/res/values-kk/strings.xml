@@ -857,7 +857,7 @@
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Элементтердің ретін өзгерту үшін оларды басып тұрып сүйреңіз"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Керексіздерін осы жерге сүйреңіз"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Кемінде <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> бөлшек қажет."</string>
-    <string name="qs_edit" msgid="5583565172803472437">"Өңдеу"</string>
+    <string name="qs_edit" msgid="5583565172803472437">"Өзгерту"</string>
     <string name="tuner_time" msgid="2450785840990529997">"Уақыт"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"Сағаттарды, минуттарды және секундтарды көрсету"</item>
