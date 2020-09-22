@@ -96,6 +96,7 @@ class TaskPositioner implements IBinder.DeathRecipient {
     boolean mDragEnded;
     IBinder mClientCallback;
 
+    InputChannel mServerChannel;
     InputChannel mClientChannel;
     InputApplicationHandle mDragApplicationHandle;
     InputWindowHandle mDragWindowHandle;
@@ -219,7 +220,10 @@ class TaskPositioner implements IBinder.DeathRecipient {
         }
 
         mDisplayContent = displayContent;
-        mClientChannel = mService.mInputManager.createInputChannel(TAG);
+        final InputChannel[] channels = InputChannel.openInputChannelPair(TAG);
+        mServerChannel = channels[0];
+        mClientChannel = channels[1];
+        mService.mInputManager.registerInputChannel(mServerChannel);
 
         mInputEventReceiver = new WindowPositionerEventReceiver(
                 mClientChannel, mService.mAnimationHandler.getLooper(),
@@ -233,7 +237,7 @@ class TaskPositioner implements IBinder.DeathRecipient {
         mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle,
                 displayContent.getDisplayId());
         mDragWindowHandle.name = TAG;
-        mDragWindowHandle.token = mClientChannel.getToken();
+        mDragWindowHandle.token = mServerChannel.getToken();
         mDragWindowHandle.layoutParamsFlags = 0;
         mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
         mDragWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
@@ -295,12 +299,14 @@ class TaskPositioner implements IBinder.DeathRecipient {
         }
 
         mService.mTaskPositioningController.hideInputSurface(mDisplayContent.getDisplayId());
-        mService.mInputManager.removeInputChannel(mClientChannel.getToken());
+        mService.mInputManager.unregisterInputChannel(mServerChannel.getToken());
 
         mInputEventReceiver.dispose();
         mInputEventReceiver = null;
         mClientChannel.dispose();
+        mServerChannel.dispose();
         mClientChannel = null;
+        mServerChannel = null;
 
         mDragWindowHandle = null;
         mDragApplicationHandle = null;

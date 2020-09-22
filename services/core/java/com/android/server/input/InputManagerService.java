@@ -219,10 +219,10 @@ public class InputManagerService extends IInputManager.Stub
             int deviceId, int sourceMask, int sw);
     private static native boolean nativeHasKeys(long ptr,
             int deviceId, int sourceMask, int[] keyCodes, boolean[] keyExists);
-    private static native InputChannel nativeCreateInputChannel(long ptr, String name);
-    private static native InputChannel nativeCreateInputMonitor(long ptr, int displayId,
-            boolean isGestureMonitor, String name);
-    private static native void nativeRemoveInputChannel(long ptr, IBinder connectionToken);
+    private static native void nativeRegisterInputChannel(long ptr, InputChannel inputChannel);
+    private static native void nativeRegisterInputMonitor(long ptr, InputChannel inputChannel,
+            int displayId, boolean isGestureMonitor);
+    private static native void nativeUnregisterInputChannel(long ptr, IBinder connectionToken);
     private static native void nativePilferPointers(long ptr, IBinder token);
     private static native void nativeSetInputFilterEnabled(long ptr, boolean enable);
     private static native void nativeSetInTouchMode(long ptr, boolean inTouchMode);
@@ -522,8 +522,10 @@ public class InputManagerService extends IInputManager.Stub
             throw new IllegalArgumentException("displayId must >= 0.");
         }
 
-        return nativeCreateInputMonitor(mPtr, displayId, false /* isGestureMonitor */,
-                inputChannelName);
+        InputChannel[] inputChannels = InputChannel.openInputChannelPair(inputChannelName);
+        nativeRegisterInputMonitor(mPtr, inputChannels[0], displayId, false /*isGestureMonitor*/);
+        inputChannels[0].dispose(); // don't need to retain the Java object reference
+        return inputChannels[1];
     }
 
     /**
@@ -550,32 +552,38 @@ public class InputManagerService extends IInputManager.Stub
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            InputChannel inputChannel = nativeCreateInputMonitor(
-                    mPtr, displayId, true /*isGestureMonitor*/, inputChannelName);
-            InputMonitorHost host = new InputMonitorHost(inputChannel);
+            InputChannel[] inputChannels = InputChannel.openInputChannelPair(inputChannelName);
+            InputMonitorHost host = new InputMonitorHost(inputChannels[0]);
+            nativeRegisterInputMonitor(
+                    mPtr, inputChannels[0], displayId, true /*isGestureMonitor*/);
             synchronized (mGestureMonitorPidsLock) {
-                mGestureMonitorPidsByToken.put(inputChannel.getToken(), pid);
+                mGestureMonitorPidsByToken.put(inputChannels[1].getToken(), pid);
             }
-            return new InputMonitor(inputChannel, host);
+            return new InputMonitor(inputChannels[1], host);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
     /**
-     * Creates an input channel to be used as an input event target.
+     * Registers an input channel so that it can be used as an input event target. The channel is
+     * registered with a generated token.
      *
-     * @param name The name of this input channel
+     * @param inputChannel The input channel to register.
      */
-    public InputChannel createInputChannel(String name) {
-        return nativeCreateInputChannel(mPtr, name);
+    public void registerInputChannel(InputChannel inputChannel) {
+        if (inputChannel == null) {
+            throw new IllegalArgumentException("inputChannel must not be null.");
+        }
+
+        nativeRegisterInputChannel(mPtr, inputChannel);
     }
 
     /**
-     * Removes an input channel.
+     * Unregisters an input channel.
      * @param connectionToken The input channel to unregister.
      */
-    public void removeInputChannel(IBinder connectionToken) {
+    public void unregisterInputChannel(IBinder connectionToken) {
         if (connectionToken == null) {
             throw new IllegalArgumentException("connectionToken must not be null.");
         }
@@ -583,7 +591,7 @@ public class InputManagerService extends IInputManager.Stub
             mGestureMonitorPidsByToken.remove(connectionToken);
         }
 
-        nativeRemoveInputChannel(mPtr, connectionToken);
+        nativeUnregisterInputChannel(mPtr, connectionToken);
     }
 
     /**
@@ -2447,7 +2455,7 @@ public class InputManagerService extends IInputManager.Stub
 
         @Override
         public void dispose() {
-            nativeRemoveInputChannel(mPtr, mInputChannel.getToken());
+            nativeUnregisterInputChannel(mPtr, mInputChannel.getToken());
             mInputChannel.dispose();
         }
     }
