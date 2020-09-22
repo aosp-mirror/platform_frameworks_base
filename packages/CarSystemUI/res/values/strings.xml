@@ -22,6 +22,8 @@
     <string name="hvac_min_text">Min</string>
     <!-- String to represent largest setting of an HVAC system [CHAR LIMIT=10]-->
     <string name="hvac_max_text">Max</string>
+    <!-- String to display when no HVAC temperature is available -->
+    <string name="hvac_null_temp_text" translatable="false">--</string>
     <!-- Text for voice recognition toast. [CHAR LIMIT=60] -->
     <string name="voice_recognition_toast">Voice recognition now handled by connected Bluetooth device</string>
     <!-- Name of Guest Profile. [CHAR LIMIT=35] -->
