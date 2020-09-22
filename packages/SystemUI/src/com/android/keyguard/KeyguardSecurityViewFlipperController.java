@@ -26,6 +26,7 @@ import com.android.keyguard.KeyguardInputViewController.Factory;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.dagger.KeyguardBouncerScope;
 import com.android.systemui.R;
+import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.ViewController;
 
 import java.util.ArrayList;
@@ -50,10 +51,11 @@ public class KeyguardSecurityViewFlipperController
     @Inject
     protected KeyguardSecurityViewFlipperController(KeyguardSecurityViewFlipper view,
             LayoutInflater layoutInflater,
+            InjectionInflationController injectionInflationController,
             KeyguardInputViewController.Factory keyguardSecurityViewControllerFactory) {
         super(view);
         mKeyguardSecurityViewControllerFactory = keyguardSecurityViewControllerFactory;
-        mLayoutInflater = layoutInflater;
+        mLayoutInflater = injectionInflationController.injectable(layoutInflater);
     }
 
     @Override
