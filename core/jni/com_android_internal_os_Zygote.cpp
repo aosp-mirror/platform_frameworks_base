@@ -326,31 +326,15 @@ static std::array<UsapTableEntry, USAP_POOL_SIZE_MAX_LIMIT> gUsapTable;
 static FileDescriptorTable* gOpenFdTable = nullptr;
 
 // Must match values in com.android.internal.os.Zygote.
-// The order of entries here must be kept in sync with ExternalStorageViews array values.
+// Note that there are gaps in the constants:
+// This is to further keep the values consistent with IVold.aidl
 enum MountExternalKind {
-  MOUNT_EXTERNAL_NONE = 0,
-  MOUNT_EXTERNAL_DEFAULT = 1,
-  MOUNT_EXTERNAL_READ = 2,
-  MOUNT_EXTERNAL_WRITE = 3,
-  MOUNT_EXTERNAL_LEGACY = 4,
-  MOUNT_EXTERNAL_INSTALLER = 5,
-  MOUNT_EXTERNAL_FULL = 6,
-  MOUNT_EXTERNAL_PASS_THROUGH = 7,
-  MOUNT_EXTERNAL_ANDROID_WRITABLE = 8,
-  MOUNT_EXTERNAL_COUNT = 9
-};
-
-// The order of entries here must be kept in sync with MountExternalKind enum values.
-static const std::array<const std::string, MOUNT_EXTERNAL_COUNT> ExternalStorageViews = {
-  "",                     // MOUNT_EXTERNAL_NONE
-  "/mnt/runtime/default", // MOUNT_EXTERNAL_DEFAULT
-  "/mnt/runtime/read",    // MOUNT_EXTERNAL_READ
-  "/mnt/runtime/write",   // MOUNT_EXTERNAL_WRITE
-  "/mnt/runtime/write",   // MOUNT_EXTERNAL_LEGACY
-  "/mnt/runtime/write",   // MOUNT_EXTERNAL_INSTALLER
-  "/mnt/runtime/full",    // MOUNT_EXTERNAL_FULL
-  "/mnt/runtime/full",    // MOUNT_EXTERNAL_PASS_THROUGH (only used w/ FUSE)
-  "/mnt/runtime/full",    // MOUNT_EXTERNAL_ANDROID_WRITABLE (only used w/ FUSE)
+    MOUNT_EXTERNAL_NONE = 0,
+    MOUNT_EXTERNAL_DEFAULT = 1,
+    MOUNT_EXTERNAL_INSTALLER = 5,
+    MOUNT_EXTERNAL_PASS_THROUGH = 7,
+    MOUNT_EXTERNAL_ANDROID_WRITABLE = 8,
+    MOUNT_EXTERNAL_COUNT = 9
 };
 
 // Must match values in com.android.internal.os.Zygote.

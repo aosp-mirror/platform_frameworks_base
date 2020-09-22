@@ -657,16 +657,8 @@ public class ZygoteProcess {
         argsForZygote.add("--runtime-flags=" + runtimeFlags);
         if (mountExternal == Zygote.MOUNT_EXTERNAL_DEFAULT) {
             argsForZygote.add("--mount-external-default");
-        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_READ) {
-            argsForZygote.add("--mount-external-read");
-        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_WRITE) {
-            argsForZygote.add("--mount-external-write");
-        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_FULL) {
-            argsForZygote.add("--mount-external-full");
         } else if (mountExternal == Zygote.MOUNT_EXTERNAL_INSTALLER) {
             argsForZygote.add("--mount-external-installer");
-        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_LEGACY) {
-            argsForZygote.add("--mount-external-legacy");
         } else if (mountExternal == Zygote.MOUNT_EXTERNAL_PASS_THROUGH) {
             argsForZygote.add("--mount-external-pass-through");
         } else if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
