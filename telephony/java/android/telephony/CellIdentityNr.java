@@ -138,7 +138,11 @@ public final class CellIdentityNr extends CellIdentity {
     @NonNull
     @Override
     public CellLocation asCellLocation() {
-        return new GsmCellLocation();
+        GsmCellLocation cl = new GsmCellLocation();
+        int tac = mTac != CellInfo.UNAVAILABLE ? mTac : -1;
+        cl.setLacAndCid(tac, -1);
+        cl.setPsc(0);
+        return cl;
     }
 
     @Override
