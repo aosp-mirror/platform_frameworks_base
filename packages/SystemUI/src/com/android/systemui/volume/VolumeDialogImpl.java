@@ -1083,7 +1083,7 @@ public class VolumeDialogImpl implements VolumeDialog,
             iconRes = isStreamMuted(ss) ? R.drawable.ic_volume_media_bt_mute
                                         : R.drawable.ic_volume_media_bt;
         } else if (isStreamMuted(ss)) {
-            iconRes = row.iconMuteRes;
+            iconRes = ss.muted ? R.drawable.ic_volume_media_off : row.iconMuteRes;
         } else {
             iconRes = mShowLowMediaVolumeIcon && ss.level * 2 < (ss.levelMax + ss.levelMin)
                       ? R.drawable.ic_volume_media_low : row.iconRes;
