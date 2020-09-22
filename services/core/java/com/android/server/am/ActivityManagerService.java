@@ -16306,7 +16306,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 try {
                     res = mServices.startServiceLocked(null, service,
                             resolvedType, -1, uid, fgRequired, false, callingPackage,
-                            callingFeatureId, userId, allowBackgroundActivityStarts);
+                            callingFeatureId, userId, allowBackgroundActivityStarts,
+                            backgroundActivityStartsToken);
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }
