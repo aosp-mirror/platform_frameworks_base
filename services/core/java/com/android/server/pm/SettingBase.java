@@ -19,23 +19,23 @@ package com.android.server.pm;
 import android.content.pm.ApplicationInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.permission.PermissionsState;
+import com.android.server.pm.permission.AppIdPermissionState;
 
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public abstract class SettingBase {
     int pkgFlags;
     int pkgPrivateFlags;
 
-    protected final PermissionsState mPermissionsState;
+    protected final AppIdPermissionState mPermissionsState;
 
     SettingBase(int pkgFlags, int pkgPrivateFlags) {
         setFlags(pkgFlags);
         setPrivateFlags(pkgPrivateFlags);
-        mPermissionsState = new PermissionsState();
+        mPermissionsState = new AppIdPermissionState();
     }
 
     SettingBase(SettingBase orig) {
-        mPermissionsState = new PermissionsState();
+        mPermissionsState = new AppIdPermissionState();
         doCopy(orig);
     }
 
@@ -49,7 +49,7 @@ public abstract class SettingBase {
         mPermissionsState.copyFrom(orig.mPermissionsState);
     }
 
-    public PermissionsState getPermissionsState() {
+    public AppIdPermissionState getPermissionsState() {
         return mPermissionsState;
     }
 

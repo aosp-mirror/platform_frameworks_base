@@ -79,6 +79,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.LogPrinter;
 import android.util.Pair;
@@ -106,10 +107,11 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.permission.AppIdPermissionState;
+import com.android.server.pm.permission.AppIdPermissionState.PermissionState;
 import com.android.server.pm.permission.BasePermission;
+import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.permission.PermissionSettings;
-import com.android.server.pm.permission.PermissionsState;
-import com.android.server.pm.permission.PermissionsState.PermissionState;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import libcore.io.IoUtils;
@@ -416,8 +418,11 @@ public final class Settings {
     private final File mSystemDir;
 
     public final KeySetManagerService mKeySetManagerService = new KeySetManagerService(mPackages);
+
     /** Settings and other information about permissions */
     final PermissionSettings mPermissions;
+
+    private final LegacyPermissionDataProvider mPermissionDataProvider;
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     public Settings(Map<String, PackageSetting> pkgSettings) {
@@ -426,6 +431,7 @@ public final class Settings {
         mSystemDir = null;
         mPermissions = null;
         mRuntimePermissionsPersistence = null;
+        mPermissionDataProvider = null;
         mSettingsFilename = null;
         mBackupSettingsFilename = null;
         mPackageListFilename = null;
@@ -434,12 +440,14 @@ public final class Settings {
         mKernelMappingFilename = null;
     }
 
-    Settings(File dataDir, PermissionSettings permission,
-            RuntimePermissionsPersistence runtimePermissionsPersistence, Object lock) {
+    Settings(File dataDir, PermissionSettings permissionSettings,
+            RuntimePermissionsPersistence runtimePermissionsPersistence,
+            LegacyPermissionDataProvider permissionDataProvider, Object lock) {
         mLock = lock;
-        mPermissions = permission;
+        mPermissions = permissionSettings;
         mRuntimePermissionsPersistence = new RuntimePermissionPersistence(
-                runtimePermissionsPersistence, mLock);
+                runtimePermissionsPersistence);
+        mPermissionDataProvider = permissionDataProvider;
 
         mSystemDir = new File(dataDir, "system");
         mSystemDir.mkdirs();
@@ -1239,7 +1247,7 @@ public final class Settings {
 
     void writeAllRuntimePermissionsLPr() {
         for (int userId : UserManagerService.getInstance().getUserIds()) {
-            mRuntimePermissionsPersistence.writePermissionsForUserAsyncLPr(userId);
+            mRuntimePermissionsPersistence.writeStateForUserAsyncLPr(userId);
         }
     }
 
@@ -2102,7 +2110,7 @@ public final class Settings {
     }
 
     void readInstallPermissionsLPr(XmlPullParser parser,
-            PermissionsState permissionsState) throws IOException, XmlPullParserException {
+            AppIdPermissionState permissionsState) throws IOException, XmlPullParserException {
         int outerDepth = parser.getDepth();
         int type;
         while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
@@ -2131,25 +2139,7 @@ public final class Settings {
                 final int flags = (flagsStr != null)
                         ? Integer.parseInt(flagsStr, 16) : 0;
 
-                if (granted) {
-                    if (permissionsState.grantInstallPermission(bp) ==
-                            PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                        Slog.w(PackageManagerService.TAG, "Permission already added: " + name);
-                        XmlUtils.skipCurrentTag(parser);
-                    } else {
-                        permissionsState.updatePermissionFlags(bp, UserHandle.USER_ALL,
-                                PackageManager.MASK_PERMISSION_FLAGS_ALL, flags);
-                    }
-                } else {
-                    if (permissionsState.revokeInstallPermission(bp) ==
-                            PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                        Slog.w(PackageManagerService.TAG, "Permission already added: " + name);
-                        XmlUtils.skipCurrentTag(parser);
-                    } else {
-                        permissionsState.updatePermissionFlags(bp, UserHandle.USER_ALL,
-                                PackageManager.MASK_PERMISSION_FLAGS_ALL, flags);
-                    }
-                }
+                permissionsState.putInstallPermissionState(new PermissionState(bp, granted, flags));
             } else {
                 Slog.w(PackageManagerService.TAG, "Unknown element under <permissions>: "
                         + parser.getName());
@@ -2158,7 +2148,7 @@ public final class Settings {
         }
     }
 
-    void writePermissionsLPr(XmlSerializer serializer, List<PermissionState> permissionStates)
+    void writePermissionsLPr(XmlSerializer serializer, Collection<PermissionState> permissionStates)
             throws IOException {
         if (permissionStates.isEmpty()) {
             return;
@@ -2641,7 +2631,11 @@ public final class Settings {
                 }
 
                 final boolean isDebug = pkg.pkg.isDebuggable();
-                final int[] gids = pkg.getPermissionsState().computeGids(userIds);
+                final IntArray gids = new IntArray();
+                for (final int userId : userIds) {
+                    gids.addAll(mPermissionDataProvider.getGidsForUid(UserHandle.getUid(userId,
+                            pkg.appId)));
+                }
 
                 // Avoid any application that has a space in its path.
                 if (dataPath.indexOf(' ') >= 0)
@@ -2673,11 +2667,12 @@ public final class Settings {
                 sb.append(" ");
                 sb.append(AndroidPackageUtils.getSeInfo(pkg.pkg, pkg));
                 sb.append(" ");
-                if (gids != null && gids.length > 0) {
-                    sb.append(gids[0]);
-                    for (int i = 1; i < gids.length; i++) {
+                final int gidsSize = gids.size();
+                if (gids != null && gids.size() > 0) {
+                    sb.append(gids.get(0));
+                    for (int i = 1; i < gidsSize; i++) {
                         sb.append(",");
-                        sb.append(gids[i]);
+                        sb.append(gids.get(i));
                     }
                 } else {
                     sb.append("none");
@@ -4482,8 +4477,9 @@ public final class Settings {
     }
 
     void dumpPackageLPr(PrintWriter pw, String prefix, String checkinTag,
-            ArraySet<String> permissionNames, PackageSetting ps, SimpleDateFormat sdf,
-            Date date, List<UserInfo> users, boolean dumpAll, boolean dumpAllComponents) {
+            ArraySet<String> permissionNames, PackageSetting ps,
+            AppIdPermissionState permissionsState, SimpleDateFormat sdf, Date date,
+            List<UserInfo> users, boolean dumpAll, boolean dumpAllComponents) {
         AndroidPackage pkg = ps.pkg;
         if (checkinTag != null) {
             pw.print(checkinTag);
@@ -4810,7 +4806,6 @@ public final class Settings {
         }
 
         if (ps.sharedUser == null || permissionNames != null || dumpAll) {
-            PermissionsState permissionsState = ps.getPermissionsState();
             dumpInstallPermissionsLPr(pw, prefix + "  ", permissionNames, permissionsState);
         }
 
@@ -4889,8 +4884,8 @@ public final class Settings {
             }
 
             if (ps.sharedUser == null) {
-                PermissionsState permissionsState = ps.getPermissionsState();
-                dumpGidsLPr(pw, prefix + "    ", permissionsState.computeGids(user.id));
+                dumpGidsLPr(pw, prefix + "    ", mPermissionDataProvider.getGidsForUid(
+                        UserHandle.getUid(user.id, ps.appId)));
                 dumpRuntimePermissionsLPr(pw, prefix + "    ", permissionNames, permissionsState
                         .getRuntimePermissionStates(user.id), dumpAll);
             }
@@ -4933,8 +4928,10 @@ public final class Settings {
                     && !packageName.equals(ps.name)) {
                 continue;
             }
+            final AppIdPermissionState permissionsState =
+                    mPermissionDataProvider.getAppIdPermissionState(ps.appId);
             if (permissionNames != null
-                    && !ps.getPermissionsState().hasRequestedPermission(permissionNames)) {
+                    && !permissionsState.hasPermissionState(permissionNames)) {
                 continue;
             }
 
@@ -4948,8 +4945,8 @@ public final class Settings {
                 pw.println("Packages:");
                 printedSomething = true;
             }
-            dumpPackageLPr(pw, "  ", checkin ? "pkg" : null, permissionNames, ps, sdf, date, users,
-                    packageName != null, dumpAllComponents);
+            dumpPackageLPr(pw, "  ", checkin ? "pkg" : null, permissionNames, ps, permissionsState,
+                    sdf, date, users, packageName != null, dumpAllComponents);
         }
 
         printedSomething = false;
@@ -4989,8 +4986,10 @@ public final class Settings {
                     pw.println("Hidden system packages:");
                     printedSomething = true;
                 }
-                dumpPackageLPr(pw, "  ", checkin ? "dis" : null, permissionNames, ps, sdf, date,
-                        users, packageName != null, dumpAllComponents);
+                final AppIdPermissionState permissionsState =
+                        mPermissionDataProvider.getAppIdPermissionState(ps.appId);
+                dumpPackageLPr(pw, "  ", checkin ? "dis" : null, permissionNames, ps,
+                        permissionsState, sdf, date, users, packageName != null, dumpAllComponents);
             }
         }
     }
@@ -5018,8 +5017,10 @@ public final class Settings {
             if (packageName != null && su != dumpState.getSharedUser()) {
                 continue;
             }
+            final AppIdPermissionState permissionsState =
+                    mPermissionDataProvider.getAppIdPermissionState(su.userId);
             if (permissionNames != null
-                    && !su.getPermissionsState().hasRequestedPermission(permissionNames)) {
+                    && !permissionsState.hasPermissionState(permissionNames)) {
                 continue;
             }
             if (!checkin) {
@@ -5054,12 +5055,12 @@ public final class Settings {
                     continue;
                 }
 
-                final PermissionsState permissionsState = su.getPermissionsState();
                 dumpInstallPermissionsLPr(pw, prefix, permissionNames, permissionsState);
 
                 for (int userId : UserManagerService.getInstance().getUserIds()) {
-                    final int[] gids = permissionsState.computeGids(userId);
-                    final List<PermissionState> permissions =
+                    final int[] gids = mPermissionDataProvider.getGidsForUid(UserHandle.getUid(
+                            userId, su.userId));
+                    final Collection<PermissionState> permissions =
                             permissionsState.getRuntimePermissionStates(userId);
                     if (!ArrayUtils.isEmpty(gids) || !permissions.isEmpty()) {
                         pw.print(prefix); pw.print("User "); pw.print(userId); pw.println(": ");
@@ -5120,7 +5121,7 @@ public final class Settings {
     }
 
     void dumpRuntimePermissionsLPr(PrintWriter pw, String prefix, ArraySet<String> permissionNames,
-            List<PermissionState> permissionStates, boolean dumpAll) {
+            Collection<PermissionState> permissionStates, boolean dumpAll) {
         if (!permissionStates.isEmpty() || dumpAll) {
             pw.print(prefix); pw.println("runtime permissions:");
             for (PermissionState permissionState : permissionStates) {
@@ -5161,8 +5162,9 @@ public final class Settings {
     }
 
     void dumpInstallPermissionsLPr(PrintWriter pw, String prefix, ArraySet<String> permissionNames,
-            PermissionsState permissionsState) {
-        List<PermissionState> permissionStates = permissionsState.getInstallPermissionStates();
+            AppIdPermissionState permissionsState) {
+        Collection<PermissionState> permissionStates =
+                permissionsState.getInstallPermissionStates();
         if (!permissionStates.isEmpty()) {
             pw.print(prefix); pw.println("install permissions:");
             for (PermissionState permissionState : permissionStates) {
@@ -5202,9 +5204,9 @@ public final class Settings {
 
     public void writeRuntimePermissionsForUserLPr(int userId, boolean sync) {
         if (sync) {
-            mRuntimePermissionsPersistence.writePermissionsForUserSyncLPr(userId);
+            mRuntimePermissionsPersistence.writeStateForUserSyncLPr(userId);
         } else {
-            mRuntimePermissionsPersistence.writePermissionsForUserAsyncLPr(userId);
+            mRuntimePermissionsPersistence.writeStateForUserAsyncLPr(userId);
         }
     }
 
@@ -5292,8 +5294,6 @@ public final class Settings {
 
         private final Handler mHandler = new MyHandler();
 
-        private final Object mPersistenceLock;
-
         @GuardedBy("mLock")
         private final SparseBooleanArray mWriteScheduled = new SparseBooleanArray();
 
@@ -5313,10 +5313,8 @@ public final class Settings {
         // The mapping keys are user ids.
         private final SparseBooleanArray mPermissionUpgradeNeeded = new SparseBooleanArray();
 
-        public RuntimePermissionPersistence(RuntimePermissionsPersistence persistence,
-                Object persistenceLock) {
+        public RuntimePermissionPersistence(RuntimePermissionsPersistence persistence) {
             mPersistence = persistence;
-            mPersistenceLock = persistenceLock;
         }
 
         @GuardedBy("Settings.this.mLock")
@@ -5327,7 +5325,7 @@ public final class Settings {
         @GuardedBy("Settings.this.mLock")
         void setVersionLPr(int version, int userId) {
             mVersions.put(userId, version);
-            writePermissionsForUserAsyncLPr(userId);
+            writeStateForUserAsyncLPr(userId);
         }
 
         @GuardedBy("Settings.this.mLock")
@@ -5342,7 +5340,7 @@ public final class Settings {
                         + "set before trying to update the fingerprint.");
             }
             mFingerprints.put(userId, mExtendedFingerprint);
-            writePermissionsForUserAsyncLPr(userId);
+            writeStateForUserAsyncLPr(userId);
         }
 
         public void setPermissionControllerVersion(long version) {
@@ -5361,13 +5359,7 @@ public final class Settings {
             return Build.FINGERPRINT + "?pc_version=" + version;
         }
 
-        public void writePermissionsForUserSyncLPr(int userId) {
-            mHandler.removeMessages(userId);
-            writePermissionsSync(userId);
-        }
-
-        @GuardedBy("Settings.this.mLock")
-        public void writePermissionsForUserAsyncLPr(int userId) {
+        public void writeStateForUserAsyncLPr(int userId) {
             final long currentTimeMillis = SystemClock.uptimeMillis();
 
             if (mWriteScheduled.get(userId)) {
@@ -5399,59 +5391,53 @@ public final class Settings {
             }
         }
 
-        private void writePermissionsSync(int userId) {
-            RuntimePermissionsState runtimePermissions;
-            synchronized (mPersistenceLock) {
-                mWriteScheduled.delete(userId);
+        public void writeStateForUserSyncLPr(int userId) {
+            mHandler.removeMessages(userId);
+            mWriteScheduled.delete(userId);
 
-                int version = mVersions.get(userId, INITIAL_VERSION);
+            int version = mVersions.get(userId, INITIAL_VERSION);
 
-                String fingerprint = mFingerprints.get(userId);
+            String fingerprint = mFingerprints.get(userId);
 
-                Map<String, List<RuntimePermissionsState.PermissionState>> packagePermissions =
-                        new ArrayMap<>();
-                int packagesSize = mPackages.size();
-                for (int i = 0; i < packagesSize; i++) {
-                    String packageName = mPackages.keyAt(i);
-                    PackageSetting packageSetting = mPackages.valueAt(i);
-                    if (packageSetting.sharedUser == null) {
-                        List<RuntimePermissionsState.PermissionState> permissions =
-                                getPermissionsFromPermissionsState(
-                                        packageSetting.getPermissionsState(), userId);
-                        packagePermissions.put(packageName, permissions);
-                    }
-                }
-
-                Map<String, List<RuntimePermissionsState.PermissionState>> sharedUserPermissions =
-                        new ArrayMap<>();
-                final int sharedUsersSize = mSharedUsers.size();
-                for (int i = 0; i < sharedUsersSize; i++) {
-                    String sharedUserName = mSharedUsers.keyAt(i);
-                    SharedUserSetting sharedUserSetting = mSharedUsers.valueAt(i);
+            Map<String, List<RuntimePermissionsState.PermissionState>> packagePermissions =
+                    new ArrayMap<>();
+            int packagesSize = mPackages.size();
+            for (int i = 0; i < packagesSize; i++) {
+                String packageName = mPackages.keyAt(i);
+                PackageSetting packageSetting = mPackages.valueAt(i);
+                if (packageSetting.sharedUser == null) {
                     List<RuntimePermissionsState.PermissionState> permissions =
                             getPermissionsFromPermissionsState(
-                                    sharedUserSetting.getPermissionsState(), userId);
-                    sharedUserPermissions.put(sharedUserName, permissions);
+                                    packageSetting.getPermissionsState(), userId);
+                    packagePermissions.put(packageName, permissions);
                 }
-
-                runtimePermissions = new RuntimePermissionsState(version, fingerprint,
-                        packagePermissions, sharedUserPermissions);
             }
+
+            Map<String, List<RuntimePermissionsState.PermissionState>> sharedUserPermissions =
+                    new ArrayMap<>();
+            final int sharedUsersSize = mSharedUsers.size();
+            for (int i = 0; i < sharedUsersSize; i++) {
+                String sharedUserName = mSharedUsers.keyAt(i);
+                SharedUserSetting sharedUserSetting = mSharedUsers.valueAt(i);
+                List<RuntimePermissionsState.PermissionState> permissions =
+                        getPermissionsFromPermissionsState(
+                                sharedUserSetting.getPermissionsState(), userId);
+                sharedUserPermissions.put(sharedUserName, permissions);
+            }
+
+            RuntimePermissionsState runtimePermissions = new RuntimePermissionsState(version,
+                    fingerprint, packagePermissions, sharedUserPermissions);
 
             mPersistence.writeForUser(runtimePermissions, UserHandle.of(userId));
         }
 
         @NonNull
         private List<RuntimePermissionsState.PermissionState> getPermissionsFromPermissionsState(
-                @NonNull PermissionsState permissionsState, @UserIdInt int userId) {
-            List<PermissionState> permissionStates = permissionsState.getRuntimePermissionStates(
-                    userId);
-            List<RuntimePermissionsState.PermissionState> permissions =
-                    new ArrayList<>();
-            int permissionStatesSize = permissionStates.size();
-            for (int i = 0; i < permissionStatesSize; i++) {
-                PermissionState permissionState = permissionStates.get(i);
-
+                @NonNull AppIdPermissionState permissionsState, @UserIdInt int userId) {
+            Collection<PermissionState> permissionStates =
+                    permissionsState.getRuntimePermissionStates(userId);
+            List<RuntimePermissionsState.PermissionState> permissions = new ArrayList<>();
+            for (PermissionState permissionState : permissionStates) {
                 RuntimePermissionsState.PermissionState permission =
                         new RuntimePermissionsState.PermissionState(permissionState.getName(),
                                 permissionState.isGranted(), permissionState.getFlags());
@@ -5480,7 +5466,7 @@ public final class Settings {
                     userId));
             if (runtimePermissions == null) {
                 readLegacyStateForUserSyncLPr(userId);
-                writePermissionsForUserAsyncLPr(userId);
+                writeStateForUserAsyncLPr(userId);
                 return;
             }
 
@@ -5536,7 +5522,7 @@ public final class Settings {
 
         private void readPermissionsStateLpr(
                 @NonNull List<RuntimePermissionsState.PermissionState> permissions,
-                @NonNull PermissionsState permissionsState, @UserIdInt int userId) {
+                @NonNull AppIdPermissionState permissionsState, @UserIdInt int userId) {
             int permissionsSize = permissions.size();
             for (int i = 0; i < permissionsSize; i++) {
                 RuntimePermissionsState.PermissionState permission = permissions.get(i);
@@ -5550,14 +5536,8 @@ public final class Settings {
                 boolean granted = permission.isGranted();
                 int flags = permission.getFlags();
 
-                if (granted) {
-                    permissionsState.grantRuntimePermission(basePermission, userId);
-                    permissionsState.updatePermissionFlags(basePermission, userId,
-                            PackageManager.MASK_PERMISSION_FLAGS_ALL, flags);
-                } else {
-                    permissionsState.updatePermissionFlags(basePermission, userId,
-                            PackageManager.MASK_PERMISSION_FLAGS_ALL, flags);
-                }
+                permissionsState.putRuntimePermissionState(new PermissionState(basePermission,
+                        granted, flags), userId);
             }
         }
 
@@ -5638,8 +5618,9 @@ public final class Settings {
             }
         }
 
-        private void parsePermissionsLPr(XmlPullParser parser, PermissionsState permissionsState,
-                int userId) throws IOException, XmlPullParserException {
+        private void parsePermissionsLPr(XmlPullParser parser,
+                AppIdPermissionState permissionsState, int userId)
+                throws IOException, XmlPullParserException {
             final int outerDepth = parser.getDepth();
             int type;
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -5666,15 +5647,8 @@ public final class Settings {
                         final int flags = (flagsStr != null)
                                 ? Integer.parseInt(flagsStr, 16) : 0;
 
-                        if (granted) {
-                            permissionsState.grantRuntimePermission(bp, userId);
-                            permissionsState.updatePermissionFlags(bp, userId,
-                                    PackageManager.MASK_PERMISSION_FLAGS_ALL, flags);
-                        } else {
-                            permissionsState.updatePermissionFlags(bp, userId,
-                                    PackageManager.MASK_PERMISSION_FLAGS_ALL, flags);
-                        }
-
+                        permissionsState.putRuntimePermissionState(new PermissionState(bp, granted,
+                                flags), userId);
                     }
                     break;
                 }
@@ -5690,7 +5664,9 @@ public final class Settings {
             public void handleMessage(Message message) {
                 final int userId = message.what;
                 Runnable callback = (Runnable) message.obj;
-                writePermissionsSync(userId);
+                synchronized (mLock) {
+                    writeStateForUserSyncLPr(userId);
+                }
                 if (callback != null) {
                     callback.run();
                 }
