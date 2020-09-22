@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package android.view.autofill;
@@ -57,13 +57,13 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
     public void testFocus_noService() throws Throwable {
         resetService();
 
-        mActivityRule.runOnUiThread(() -> {
-            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-            while (state.keepRunning()) {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mActivityRule.runOnUiThread(() -> {
                 mUsername.requestFocus();
                 mPassword.requestFocus();
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -82,13 +82,13 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
         // Then focus on password so loop start with focus away from username
         mActivityRule.runOnUiThread(() -> mPassword.requestFocus());
 
-        mActivityRule.runOnUiThread(() -> {
-            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-            while (state.keepRunning()) {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mActivityRule.runOnUiThread(() -> {
                 mUsername.requestFocus();
                 mPassword.requestFocus();
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -252,18 +252,18 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
         // outside the loop
         mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
         if (waitForService) {
+            mTestWatcher.waitServiceConnect();
             MyAutofillService.getLastFillRequest();
         }
-        mActivityRule.runOnUiThread(() -> {
-
-            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-            while (state.keepRunning()) {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mActivityRule.runOnUiThread(() -> {
                 mUsername.setText("");
                 mUsername.setText("a");
                 mPassword.setText("");
                 mPassword.setText("x");
-            }
-        });
+            });
+        }
     }
 
     // TODO(b/162216576): fix fail test and re-enable it
