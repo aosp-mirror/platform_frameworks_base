@@ -20,7 +20,13 @@ java_library {
         "framework-appsearch",
         "services.core",
     ],
-    static_libs: ["icing-java-proto-lite"],
+    static_libs: [
+        "icing-java-proto-lite",
+        "libicing-java",
+    ],
+    required: [
+        "libicing",
+    ],
     jarjar_rules: "jarjar-rules.txt",
     apex_available: ["com.android.appsearch"],
 }

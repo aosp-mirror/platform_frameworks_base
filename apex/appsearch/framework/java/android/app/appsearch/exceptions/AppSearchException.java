@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,31 +14,38 @@
  * limitations under the License.
  */
 
-package com.android.server.appsearch;
+package android.app.appsearch.exceptions;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.appsearch.AppSearchResult;
 
 /**
- * An exception thrown by {@link com.android.server.appsearch.AppSearchManagerService} or a
- * subcomponent.
+ * An exception thrown by {@code android.app.appsearch.AppSearchManager} or a subcomponent.
  *
- * <p>These exceptions can be converted into a failed {@link android.app.appsearch.AppSearchResult}
+ * <p>These exceptions can be converted into a failed {@link AppSearchResult}
  * for propagating to the client.
+ * @hide
  */
+//TODO(b/157082794): Linkify to AppSearchManager once that API is public
 public class AppSearchException extends Exception {
     private final @AppSearchResult.ResultCode int mResultCode;
 
-    /** Initializes an {@link com.android.server.appsearch.AppSearchException} with no message. */
+    /**
+     * Initializes an {@link AppSearchException} with no message.
+     * @hide
+     */
     public AppSearchException(@AppSearchResult.ResultCode int resultCode) {
         this(resultCode, /*message=*/ null);
     }
 
+    /** @hide */
     public AppSearchException(
             @AppSearchResult.ResultCode int resultCode, @Nullable String message) {
         this(resultCode, message, /*cause=*/ null);
     }
 
+    /** @hide */
     public AppSearchException(
             @AppSearchResult.ResultCode int resultCode,
             @Nullable String message,
@@ -48,9 +55,9 @@ public class AppSearchException extends Exception {
     }
 
     /**
-     * Converts this {@link java.lang.Exception} into a failed
-     * {@link android.app.appsearch.AppSearchResult}
+     * Converts this {@link java.lang.Exception} into a failed {@link AppSearchResult}
      */
+    @NonNull
     public <T> AppSearchResult<T> toAppSearchResult() {
         return AppSearchResult.newFailedResult(mResultCode, getMessage());
     }
