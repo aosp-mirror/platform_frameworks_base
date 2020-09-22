@@ -83,7 +83,7 @@ public final class InputChannel implements Parcelable {
      *
      *  @hide
      */
-    private void setNativeInputChannel(long nativeChannel) {
+    public void setNativeInputChannel(long nativeChannel) {
         if (nativeChannel == 0) {
             throw new IllegalArgumentException("Attempting to set native input channel to null.");
         }
@@ -148,11 +148,12 @@ public final class InputChannel implements Parcelable {
     }
 
     /**
-     * Creates a copy of this instance to the outParameter. This is used to pass an input channel
+     * Transfers ownership of the internal state of the input channel to another
+     * instance and invalidates this instance.  This is used to pass an input channel
      * as an out parameter in a binder call.
      * @param other The other input channel instance.
      */
-    public void copyTo(InputChannel outParameter) {
+    public void transferTo(InputChannel outParameter) {
         if (outParameter == null) {
             throw new IllegalArgumentException("outParameter must not be null");
         }
