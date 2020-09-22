@@ -309,6 +309,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 /** {@hide} */
 public class NotificationManagerService extends SystemService {
@@ -1528,10 +1529,10 @@ public class NotificationManagerService extends SystemService {
                             cancelAllNotificationsInt(MY_UID, MY_PID, pkgName, null, 0, 0,
                                     !queryRestart, changeUserId, reason, null);
                         }
-                    } else if (hideNotifications) {
-                        hideNotificationsForPackages(pkgList);
-                    } else if (unhideNotifications) {
-                        unhideNotificationsForPackages(pkgList);
+                    } else if (hideNotifications && uidList != null && (uidList.length > 0)) {
+                        hideNotificationsForPackages(pkgList, uidList);
+                    } else if (unhideNotifications && uidList != null && (uidList.length > 0)) {
+                        unhideNotificationsForPackages(pkgList, uidList);
                     }
                 }
 
@@ -2076,6 +2077,68 @@ public class NotificationManagerService extends SystemService {
         mMsgPkgsAllowedAsConvos = Set.of(getStringArrayResource(
                 com.android.internal.R.array.config_notificationMsgPkgsAllowedAsConvos));
         mStatsManager = statsManager;
+
+        // register for various Intents.
+        // If this is called within a test, make sure to unregister the intent receivers by
+        // calling onDestroy()
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
+        filter.addAction(Intent.ACTION_USER_PRESENT);
+        filter.addAction(Intent.ACTION_USER_STOPPED);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        filter.addAction(Intent.ACTION_USER_ADDED);
+        filter.addAction(Intent.ACTION_USER_REMOVED);
+        filter.addAction(Intent.ACTION_USER_UNLOCKED);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
+        getContext().registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, filter, null, null);
+
+        IntentFilter pkgFilter = new IntentFilter();
+        pkgFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        pkgFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        pkgFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        pkgFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+        pkgFilter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
+        pkgFilter.addDataScheme("package");
+        getContext().registerReceiverAsUser(mPackageIntentReceiver, UserHandle.ALL, pkgFilter, null,
+                null);
+
+        IntentFilter suspendedPkgFilter = new IntentFilter();
+        suspendedPkgFilter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
+        suspendedPkgFilter.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
+        suspendedPkgFilter.addAction(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED);
+        getContext().registerReceiverAsUser(mPackageIntentReceiver, UserHandle.ALL,
+                suspendedPkgFilter, null, null);
+
+        IntentFilter sdFilter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
+        getContext().registerReceiverAsUser(mPackageIntentReceiver, UserHandle.ALL, sdFilter, null,
+                null);
+
+        IntentFilter timeoutFilter = new IntentFilter(ACTION_NOTIFICATION_TIMEOUT);
+        timeoutFilter.addDataScheme(SCHEME_TIMEOUT);
+        getContext().registerReceiver(mNotificationTimeoutReceiver, timeoutFilter);
+
+        IntentFilter settingsRestoredFilter = new IntentFilter(Intent.ACTION_SETTING_RESTORED);
+        getContext().registerReceiver(mRestoreReceiver, settingsRestoredFilter);
+
+        IntentFilter localeChangedFilter = new IntentFilter(Intent.ACTION_LOCALE_CHANGED);
+        getContext().registerReceiver(mLocaleChangeReceiver, localeChangedFilter);
+    }
+
+    /**
+     * Cleanup broadcast receivers change listeners.
+     */
+    public void onDestroy() {
+        getContext().unregisterReceiver(mIntentReceiver);
+        getContext().unregisterReceiver(mPackageIntentReceiver);
+        getContext().unregisterReceiver(mNotificationTimeoutReceiver);
+        getContext().unregisterReceiver(mRestoreReceiver);
+        getContext().unregisterReceiver(mLocaleChangeReceiver);
+
+        if (mDeviceConfigChangedListener != null) {
+            DeviceConfig.removeOnPropertiesChangedListener(mDeviceConfigChangedListener);
+        }
     }
 
     protected String[] getStringArrayResource(int key) {
@@ -2126,51 +2189,6 @@ public class NotificationManagerService extends SystemService {
                         Context.STATS_MANAGER),
                 getContext().getSystemService(TelephonyManager.class));
 
-        // register for various Intents
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
-        filter.addAction(Intent.ACTION_USER_PRESENT);
-        filter.addAction(Intent.ACTION_USER_STOPPED);
-        filter.addAction(Intent.ACTION_USER_SWITCHED);
-        filter.addAction(Intent.ACTION_USER_ADDED);
-        filter.addAction(Intent.ACTION_USER_REMOVED);
-        filter.addAction(Intent.ACTION_USER_UNLOCKED);
-        filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
-        getContext().registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, filter, null, null);
-
-        IntentFilter pkgFilter = new IntentFilter();
-        pkgFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        pkgFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        pkgFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        pkgFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
-        pkgFilter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
-        pkgFilter.addDataScheme("package");
-        getContext().registerReceiverAsUser(mPackageIntentReceiver, UserHandle.ALL, pkgFilter, null,
-                null);
-
-        IntentFilter suspendedPkgFilter = new IntentFilter();
-        suspendedPkgFilter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
-        suspendedPkgFilter.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
-        suspendedPkgFilter.addAction(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED);
-        getContext().registerReceiverAsUser(mPackageIntentReceiver, UserHandle.ALL,
-                suspendedPkgFilter, null, null);
-
-        IntentFilter sdFilter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-        getContext().registerReceiverAsUser(mPackageIntentReceiver, UserHandle.ALL, sdFilter, null,
-                null);
-
-        IntentFilter timeoutFilter = new IntentFilter(ACTION_NOTIFICATION_TIMEOUT);
-        timeoutFilter.addDataScheme(SCHEME_TIMEOUT);
-        getContext().registerReceiver(mNotificationTimeoutReceiver, timeoutFilter);
-
-        IntentFilter settingsRestoredFilter = new IntentFilter(Intent.ACTION_SETTING_RESTORED);
-        getContext().registerReceiver(mRestoreReceiver, settingsRestoredFilter);
-
-        IntentFilter localeChangedFilter = new IntentFilter(Intent.ACTION_LOCALE_CHANGED);
-        getContext().registerReceiver(mLocaleChangeReceiver, localeChangedFilter);
-
         publishBinderService(Context.NOTIFICATION_SERVICE, mService, /* allowIsolated= */ false,
                 DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL);
         publishLocalService(NotificationManagerInternal.class, mInternalService);
@@ -2191,12 +2209,6 @@ public class NotificationManagerService extends SystemService {
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 new HandlerExecutor(mHandler),
                 mDeviceConfigChangedListener);
-    }
-
-    void unregisterDeviceConfigChange() {
-        if (mDeviceConfigChangedListener != null) {
-            DeviceConfig.removeOnPropertiesChangedListener(mDeviceConfigChangedListener);
-        }
     }
 
     private void registerNotificationPreferencesPullers() {
@@ -8339,15 +8351,16 @@ public class NotificationManagerService extends SystemService {
         return -1;
     }
 
-    @VisibleForTesting
-    protected void hideNotificationsForPackages(String[] pkgs) {
+    private void hideNotificationsForPackages(@NonNull String[] pkgs, @NonNull int[] uidList) {
         synchronized (mNotificationLock) {
+            Set<Integer> uidSet = Arrays.stream(uidList).boxed().collect(Collectors.toSet());
             List<String> pkgList = Arrays.asList(pkgs);
             List<NotificationRecord> changedNotifications = new ArrayList<>();
             int numNotifications = mNotificationList.size();
             for (int i = 0; i < numNotifications; i++) {
                 NotificationRecord rec = mNotificationList.get(i);
-                if (pkgList.contains(rec.getSbn().getPackageName())) {
+                if (pkgList.contains(rec.getSbn().getPackageName())
+                        && uidSet.contains(rec.getUid())) {
                     rec.setHidden(true);
                     changedNotifications.add(rec);
                 }
@@ -8357,15 +8370,17 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    @VisibleForTesting
-    protected void unhideNotificationsForPackages(String[] pkgs) {
+    private void unhideNotificationsForPackages(@NonNull String[] pkgs,
+            @NonNull int[] uidList) {
         synchronized (mNotificationLock) {
+            Set<Integer> uidSet = Arrays.stream(uidList).boxed().collect(Collectors.toSet());
             List<String> pkgList = Arrays.asList(pkgs);
             List<NotificationRecord> changedNotifications = new ArrayList<>();
             int numNotifications = mNotificationList.size();
             for (int i = 0; i < numNotifications; i++) {
                 NotificationRecord rec = mNotificationList.get(i);
-                if (pkgList.contains(rec.getSbn().getPackageName())) {
+                if (pkgList.contains(rec.getSbn().getPackageName())
+                        && uidSet.contains(rec.getUid())) {
                     rec.setHidden(false);
                     changedNotifications.add(rec);
                 }
@@ -9937,38 +9952,6 @@ public class NotificationManagerService extends SystemService {
         checkCallerIsSystemOrShell();
         List<ComponentName> allowedComponents = mAssistants.getAllowedComponents(userId);
         return CollectionUtils.firstOrNull(allowedComponents);
-    }
-
-    @VisibleForTesting
-    protected void simulatePackageSuspendBroadcast(boolean suspend, String pkg) {
-        checkCallerIsSystemOrShell();
-        // only use for testing: mimic receive broadcast that package is (un)suspended
-        // but does not actually (un)suspend the package
-        final Bundle extras = new Bundle();
-        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST,
-                new String[]{pkg});
-
-        final String action = suspend ? Intent.ACTION_PACKAGES_SUSPENDED
-                : Intent.ACTION_PACKAGES_UNSUSPENDED;
-        final Intent intent = new Intent(action);
-        intent.putExtras(extras);
-
-        mPackageIntentReceiver.onReceive(getContext(), intent);
-    }
-
-    @VisibleForTesting
-    protected void simulatePackageDistractionBroadcast(int flag, String[] pkgs) {
-        checkCallerIsSystemOrShell();
-        // only use for testing: mimic receive broadcast that package is (un)distracting
-        // but does not actually register that info with packagemanager
-        final Bundle extras = new Bundle();
-        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgs);
-        extras.putInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS, flag);
-
-        final Intent intent = new Intent(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED);
-        intent.putExtras(extras);
-
-        mPackageIntentReceiver.onReceive(getContext(), intent);
     }
 
     /**
