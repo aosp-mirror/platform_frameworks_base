@@ -58,4 +58,12 @@ class CallerIdentity {
     @Nullable public ComponentName getComponentName() {
         return mComponentName;
     }
+
+    public boolean hasAdminComponent() {
+        return mComponentName != null;
+    }
+
+    public boolean hasPackage() {
+        return mPackageName != null;
+    }
 }
