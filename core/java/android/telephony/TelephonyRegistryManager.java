@@ -104,6 +104,10 @@ public class TelephonyRegistryManager {
     public void addOnSubscriptionsChangedListener(
             @NonNull SubscriptionManager.OnSubscriptionsChangedListener listener,
             @NonNull Executor executor) {
+        if (mSubscriptionChangedListenerMap.get(listener) != null) {
+            Log.d(TAG, "addOnSubscriptionsChangedListener listener already present");
+            return;
+        }
         IOnSubscriptionsChangedListener callback = new IOnSubscriptionsChangedListener.Stub() {
             @Override
             public void onSubscriptionsChanged () {
@@ -153,6 +157,10 @@ public class TelephonyRegistryManager {
     public void addOnOpportunisticSubscriptionsChangedListener(
             @NonNull SubscriptionManager.OnOpportunisticSubscriptionsChangedListener listener,
             @NonNull Executor executor) {
+        if (mOpportunisticSubscriptionChangedListenerMap.get(listener) != null) {
+            Log.d(TAG, "addOnOpportunisticSubscriptionsChangedListener listener already present");
+            return;
+        }
         /**
          * The callback methods need to be called on the executor thread where
          * this object was created.  If the binder did that for us it'd be nice.
@@ -188,6 +196,9 @@ public class TelephonyRegistryManager {
      */
     public void removeOnOpportunisticSubscriptionsChangedListener(
             @NonNull SubscriptionManager.OnOpportunisticSubscriptionsChangedListener listener) {
+        if (mOpportunisticSubscriptionChangedListenerMap.get(listener) == null) {
+            return;
+        }
         try {
             sRegistry.removeOnSubscriptionsChangedListener(mContext.getOpPackageName(),
                     mOpportunisticSubscriptionChangedListenerMap.get(listener));
