@@ -316,11 +316,19 @@ public final class SurfaceControl implements Parcelable {
     public static final int HIDDEN = 0x00000004;
 
     /**
-     * Surface creation flag: The surface contains secure content, special
-     * measures will be taken to disallow the surface's content to be copied
-     * from another process. In particular, screenshots and VNC servers will
-     * be disabled, but other measures can take place, for instance the
-     * surface might not be hardware accelerated.
+     * Surface creation flag: Skip this layer and its children when taking a screenshot. This
+     * also includes mirroring and screen recording, so the layers with flag SKIP_SCREENSHOT
+     * will not be included on non primary displays.
+     * @hide
+     */
+    public static final int SKIP_SCREENSHOT = 0x00000040;
+
+    /**
+     * Surface creation flag: Special measures will be taken to disallow the surface's content to
+     * be copied. In particular, screenshots and secondary, non-secure displays will render black
+     * content instead of the surface content.
+     *
+     * @see #createDisplay(String, boolean)
      * @hide
      */
     public static final int SECURE = 0x00000080;
@@ -480,15 +488,6 @@ public final class SurfaceControl implements Parcelable {
      * @hide
      */
     public static final int POWER_MODE_ON_SUSPEND = 4;
-
-    /**
-     * A value for windowType used to indicate that the window should be omitted from screenshots
-     * and display mirroring. A temporary workaround until we express such things with
-     * the hierarchy.
-     * TODO: b/64227542
-     * @hide
-     */
-    public static final int WINDOW_TYPE_DONT_SCREENSHOT = 441731;
 
     /**
      * internal representation of how to interpret pixel value, used only to convert to ColorSpace.
@@ -3284,6 +3283,22 @@ public final class SurfaceControl implements Parcelable {
                                                 @NonNull IBinder focusedToken,
                                                 int displayId) {
             nativeSetFocusedWindow(mNativeObject, token, focusedToken, displayId);
+            return this;
+        }
+
+        /**
+         * Adds or removes the flag SKIP_SCREENSHOT of the surface.  Setting the flag is equivalent
+         * to creating the Surface with the {@link #SKIP_SCREENSHOT} flag.
+         *
+         * @hide
+         */
+        public Transaction setSkipScreenshot(SurfaceControl sc, boolean skipScrenshot) {
+            checkPreconditions(sc);
+            if (skipScrenshot) {
+                nativeSetFlags(mNativeObject, sc.mNativeObject, SKIP_SCREENSHOT, SKIP_SCREENSHOT);
+            } else {
+                nativeSetFlags(mNativeObject, sc.mNativeObject, 0, SKIP_SCREENSHOT);
+            }
             return this;
         }
 
