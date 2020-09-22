@@ -18,7 +18,6 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
@@ -26,7 +25,7 @@ import androidx.annotation.Nullable;
 /**
  * A Base class for all Keyguard password/pattern/pin related inputs.
  */
-public abstract class KeyguardInputView extends LinearLayout {
+public abstract class KeyguardInputView extends LinearLayout implements KeyguardSecurityView {
 
     public KeyguardInputView(Context context) {
         super(context);
@@ -39,17 +38,5 @@ public abstract class KeyguardInputView extends LinearLayout {
 
     public KeyguardInputView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-    }
-
-    abstract CharSequence getTitle();
-
-    boolean disallowInterceptTouch(MotionEvent event) {
-        return false;
-    }
-
-    void startAppearAnimation() {}
-
-    boolean startDisappearAnimation(Runnable finishRunnable) {
-        return false;
     }
 }

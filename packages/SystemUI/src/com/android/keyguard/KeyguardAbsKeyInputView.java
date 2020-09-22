@@ -17,11 +17,13 @@
 package com.android.keyguard;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.util.AttributeSet;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.View;
 
+import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.systemui.R;
 
@@ -29,6 +31,8 @@ import com.android.systemui.R;
  * Base class for PIN and password unlock screens.
  */
 public abstract class KeyguardAbsKeyInputView extends KeyguardInputView {
+    protected KeyguardSecurityCallback mCallback;
+    protected SecurityMessageDisplay mSecurityMessageDisplay;
     protected View mEcaView;
     protected boolean mEnableHaptics;
 
@@ -47,6 +51,19 @@ public abstract class KeyguardAbsKeyInputView extends KeyguardInputView {
 
     void setEnableHaptics(boolean enableHaptics) {
         mEnableHaptics = enableHaptics;
+    }
+
+    @Override
+    public void setKeyguardCallback(KeyguardSecurityCallback callback) {
+        mCallback = callback;
+    }
+
+    @Override
+    public void setLockPatternUtils(LockPatternUtils utils) {
+    }
+
+    @Override
+    public void reset() {
     }
 
     protected abstract int getPasswordTextViewId();
@@ -76,6 +93,29 @@ public abstract class KeyguardAbsKeyInputView extends KeyguardInputView {
         return mKeyDownListener != null && mKeyDownListener.onKeyDown(keyCode, event);
     }
 
+    @Override
+    public boolean needsInput() {
+        return false;
+    }
+
+    @Override
+    public KeyguardSecurityCallback getCallback() {
+        return mCallback;
+    }
+
+    @Override
+    public void showPromptReason(int reason) {
+
+    }
+
+    @Override
+    public void showMessage(CharSequence message, ColorStateList colorState) {
+        if (colorState != null) {
+            mSecurityMessageDisplay.setNextMessageColor(colorState);
+        }
+        mSecurityMessageDisplay.setMessage(message);
+    }
+
     protected abstract int getPromptReasonStringRes(int reason);
 
     // Cause a VIRTUAL_KEY vibration
@@ -85,6 +125,11 @@ public abstract class KeyguardAbsKeyInputView extends KeyguardInputView {
                     HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
                     | HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
         }
+    }
+
+    @Override
+    public boolean startDisappearAnimation(Runnable finishRunnable) {
+        return false;
     }
 
     public void setKeyDownListener(KeyDownListener keyDownListener) {
