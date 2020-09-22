@@ -18,6 +18,7 @@ package com.android.server.display;
 
 import android.os.Environment;
 import android.util.Slog;
+import android.view.DisplayAddress;
 
 import com.android.server.display.config.DisplayConfiguration;
 import com.android.server.display.config.NitsMap;
@@ -31,6 +32,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -45,7 +47,11 @@ public class DisplayDeviceConfig {
 
     private static final String ETC_DIR = "etc";
     private static final String DISPLAY_CONFIG_DIR = "displayconfig";
-    private static final String CONFIG_FILE_FORMAT = "display_%d.xml";
+    private static final String CONFIG_FILE_FORMAT = "display_%s.xml";
+    private static final String PORT_SUFFIX_FORMAT = "port_%d";
+    private static final String STABLE_ID_SUFFIX_FORMAT = "id_%d";
+    private static final String NO_SUFFIX_FORMAT = "%d";
+    private static final long STABLE_FLAG = 1L << 62;
 
     private float[] mNits;
     private float[] mBrightness;
@@ -55,17 +61,43 @@ public class DisplayDeviceConfig {
 
     /**
      * Creates an instance for the specified display.
-     *
+     * Tries to find a file with identifier in the following priority order:
+     * <ol>
+     *     <li>physicalDisplayId</li>
+     *     <li>physicalDisplayId without a stable flag (old system)</li>
+     *     <li>portId</li>
+     * </ol>
      * @param physicalDisplayId The display ID for which to load the configuration.
      * @return A configuration instance for the specified display.
      */
     public static DisplayDeviceConfig create(long physicalDisplayId) {
-        final DisplayDeviceConfig config = new DisplayDeviceConfig();
-        final String filename = String.format(CONFIG_FILE_FORMAT, physicalDisplayId);
+        DisplayDeviceConfig config;
 
-        config.initFromFile(Environment.buildPath(
-                Environment.getProductDirectory(), ETC_DIR, DISPLAY_CONFIG_DIR, filename));
-        return config;
+        // Create config using filename from physical ID (including "stable" bit).
+        config = getConfigFromSuffix(STABLE_ID_SUFFIX_FORMAT, physicalDisplayId);
+        if (config != null) {
+            return config;
+        }
+
+        // Create config using filename from physical ID (excluding "stable" bit).
+        final long withoutStableFlag = physicalDisplayId & ~STABLE_FLAG;
+        config = getConfigFromSuffix(NO_SUFFIX_FORMAT, withoutStableFlag);
+        if (config != null) {
+            return config;
+        }
+
+        // Create config using filename from port ID.
+        final DisplayAddress.Physical physicalAddress =
+                DisplayAddress.fromPhysicalDisplayId(physicalDisplayId);
+        int port = physicalAddress.getPort();
+        config = getConfigFromSuffix(PORT_SUFFIX_FORMAT, port);
+        if (config != null) {
+            return config;
+        }
+
+        // None of these files exist.
+        return null;
+
     }
 
     /**
@@ -84,6 +116,30 @@ public class DisplayDeviceConfig {
      */
     public float[] getBrightness() {
         return mBrightness;
+    }
+
+    @Override
+    public String toString() {
+        String str = "DisplayDeviceConfig{"
+                + "mBrightness=" + Arrays.toString(mBrightness)
+                + ", mNits=" + Arrays.toString(mNits)
+                + "}";
+        return str;
+    }
+
+    private static DisplayDeviceConfig getConfigFromSuffix(String suffixFormat, long idNumber) {
+
+        final String suffix = String.format(suffixFormat, idNumber);
+        final String filename = String.format(CONFIG_FILE_FORMAT, suffix);
+        final File filePath = Environment.buildPath(
+                Environment.getProductDirectory(), ETC_DIR, DISPLAY_CONFIG_DIR, filename);
+
+        if (filePath.exists()) {
+            final DisplayDeviceConfig config = new DisplayDeviceConfig();
+            config.initFromFile(filePath);
+            return config;
+        }
+        return null;
     }
 
     private void initFromFile(File configFile) {
@@ -121,13 +177,13 @@ public class DisplayDeviceConfig {
             if (i > 0) {
                 if (nits[i] < nits[i - 1]) {
                     Slog.e(TAG, "screenBrightnessMap must be non-decreasing, ignoring rest "
-                            + " of configuration. Nits: " +  nits[i] + " < " + nits[i - 1]);
+                            + " of configuration. Nits: " + nits[i] + " < " + nits[i - 1]);
                     return;
                 }
 
                 if (backlight[i] < backlight[i - 1]) {
                     Slog.e(TAG, "screenBrightnessMap must be non-decreasing, ignoring rest "
-                            + " of configuration. Value: " +  backlight[i] + " < "
+                            + " of configuration. Value: " + backlight[i] + " < "
                             + backlight[i - 1]);
                     return;
                 }

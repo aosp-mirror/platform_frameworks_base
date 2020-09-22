@@ -34,6 +34,8 @@ using namespace testing;
 using android::sp;
 using android::os::statsd::Predicate;
 using std::map;
+using std::nullopt;
+using std::optional;
 using std::set;
 using std::unordered_map;
 using std::vector;
@@ -61,11 +63,11 @@ vector<sp<MetricProducer>> oldMetricProducers;
 unordered_map<int64_t, int> oldMetricProducerMap;
 std::vector<sp<AnomalyTracker>> oldAnomalyTrackers;
 std::vector<sp<AlarmTracker>> oldAlarmTrackers;
-unordered_map<int, std::vector<int>> conditionToMetricMap;
-unordered_map<int, std::vector<int>> trackerToMetricMap;
-unordered_map<int, std::vector<int>> trackerToConditionMap;
-unordered_map<int, std::vector<int>> activationAtomTrackerToMetricMap;
-unordered_map<int, std::vector<int>> deactivationAtomTrackerToMetricMap;
+unordered_map<int, std::vector<int>> tmpConditionToMetricMap;
+unordered_map<int, std::vector<int>> tmpTrackerToMetricMap;
+unordered_map<int, std::vector<int>> tmpTrackerToConditionMap;
+unordered_map<int, std::vector<int>> tmpActivationAtomTrackerToMetricMap;
+unordered_map<int, std::vector<int>> tmpDeactivationAtomTrackerToMetricMap;
 unordered_map<int64_t, int> alertTrackerMap;
 vector<int> metricsWithActivation;
 map<int64_t, uint64_t> oldStateHashes;
@@ -86,11 +88,11 @@ public:
         oldMetricProducerMap.clear();
         oldAnomalyTrackers.clear();
         oldAlarmTrackers.clear();
-        conditionToMetricMap.clear();
-        trackerToMetricMap.clear();
-        trackerToConditionMap.clear();
-        activationAtomTrackerToMetricMap.clear();
-        deactivationAtomTrackerToMetricMap.clear();
+        tmpConditionToMetricMap.clear();
+        tmpTrackerToMetricMap.clear();
+        tmpTrackerToConditionMap.clear();
+        tmpActivationAtomTrackerToMetricMap.clear();
+        tmpDeactivationAtomTrackerToMetricMap.clear();
         alertTrackerMap.clear();
         metricsWithActivation.clear();
         oldStateHashes.clear();
@@ -103,10 +105,20 @@ bool initConfig(const StatsdConfig& config) {
             key, config, uidMap, pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor,
             timeBaseNs, timeBaseNs, allTagIds, oldAtomMatchingTrackers, oldAtomMatchingTrackerMap,
             oldConditionTrackers, oldConditionTrackerMap, oldMetricProducers, oldMetricProducerMap,
-            oldAnomalyTrackers, oldAlarmTrackers, conditionToMetricMap, trackerToMetricMap,
-            trackerToConditionMap, activationAtomTrackerToMetricMap,
-            deactivationAtomTrackerToMetricMap, alertTrackerMap, metricsWithActivation,
+            oldAnomalyTrackers, oldAlarmTrackers, tmpConditionToMetricMap, tmpTrackerToMetricMap,
+            tmpTrackerToConditionMap, tmpActivationAtomTrackerToMetricMap,
+            tmpDeactivationAtomTrackerToMetricMap, alertTrackerMap, metricsWithActivation,
             oldStateHashes, noReportMetricIds);
+}
+
+EventMetric createEventMetric(string name, int64_t what, optional<int64_t> condition) {
+    EventMetric metric;
+    metric.set_id(StringToId(name));
+    metric.set_what(what);
+    if (condition) {
+        metric.set_condition(condition.value());
+    }
+    return metric;
 }
 
 }  // anonymous namespace
@@ -660,7 +672,6 @@ TEST_F(ConfigUpdateTest, TestCombinationConditionDepsChange) {
 
 TEST_F(ConfigUpdateTest, TestUpdateConditions) {
     StatsdConfig config;
-
     // Add atom matchers. These are mostly needed for initStatsdConfig
     AtomMatcher matcher1 = CreateScreenTurnedOnAtomMatcher();
     int64_t matcher1Id = matcher1.id();
@@ -734,7 +745,7 @@ TEST_F(ConfigUpdateTest, TestUpdateConditions) {
     set<int64_t> replacedMatchers;
     replacedMatchers.insert(matcher6Id);
 
-    // Change the condition of simple1 to true.
+    // Change the condition of simple1 to false.
     ASSERT_EQ(oldConditionTrackers[0]->getConditionId(), simple1Id);
     LogEvent event(/*uid=*/0, /*pid=*/0);  // Empty event is fine since there are no dimensions.
     // Mark the stop matcher as matched, condition should be false.
@@ -747,7 +758,7 @@ TEST_F(ConfigUpdateTest, TestUpdateConditions) {
     EXPECT_EQ(tmpConditionCache[0], ConditionState::kFalse);
     EXPECT_EQ(conditionChangeCache[0], true);
 
-    // New combination matcher. Should have an initial condition of true since it is NOT(simple1).
+    // New combination predicate. Should have an initial condition of true since it is NOT(simple1).
     Predicate combination4;
     combination4.set_id(StringToId("COMBINATION4"));
     combination4.mutable_combination()->set_operation(LogicalOperation::NOT);
@@ -887,6 +898,562 @@ TEST_F(ConfigUpdateTest, TestUpdateConditions) {
     EXPECT_THAT(combinationTracker1->mUnSlicedChildren,
                 UnorderedElementsAre(simple1Index, simple2Index));
     EXPECT_THAT(combinationTracker1->mSlicedChildren, IsEmpty());
+}
+
+TEST_F(ConfigUpdateTest, TestEventMetricPreserve) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    Predicate predicate = CreateScreenIsOnPredicate();
+    *config.add_predicate() = predicate;
+
+    EventMetric* metric = config.add_event_metric();
+    metric->set_id(12345);
+    metric->set_what(whatMatcher.id());
+    metric->set_condition(predicate.id());
+
+    // Create an initial config.
+    EXPECT_TRUE(initConfig(config));
+
+    set<int64_t> replacedMatchers;
+    set<int64_t> replacedConditions;
+    unordered_map<int64_t, int> metricToActivationMap;
+    UpdateStatus status = UPDATE_UNKNOWN;
+    EXPECT_TRUE(determineEventMetricUpdateStatus(config, *metric, oldMetricProducerMap,
+                                                 oldMetricProducers, metricToActivationMap,
+                                                 replacedMatchers, replacedConditions, status));
+    EXPECT_EQ(status, UPDATE_PRESERVE);
+}
+
+TEST_F(ConfigUpdateTest, TestEventMetricActivationAdded) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    Predicate predicate = CreateScreenIsOnPredicate();
+    *config.add_predicate() = predicate;
+
+    EventMetric* metric = config.add_event_metric();
+    metric->set_id(12345);
+    metric->set_what(whatMatcher.id());
+    metric->set_condition(predicate.id());
+
+    // Create an initial config.
+    EXPECT_TRUE(initConfig(config));
+
+    // Add a metric activation, which should change the proto, causing replacement.
+    MetricActivation* activation = config.add_metric_activation();
+    activation->set_metric_id(12345);
+    EventActivation* eventActivation = activation->add_event_activation();
+    eventActivation->set_atom_matcher_id(startMatcher.id());
+    eventActivation->set_ttl_seconds(5);
+
+    set<int64_t> replacedMatchers;
+    set<int64_t> replacedConditions;
+    unordered_map<int64_t, int> metricToActivationMap = {{12345, 0}};
+    UpdateStatus status = UPDATE_UNKNOWN;
+    EXPECT_TRUE(determineEventMetricUpdateStatus(config, *metric, oldMetricProducerMap,
+                                                 oldMetricProducers, metricToActivationMap,
+                                                 replacedMatchers, replacedConditions, status));
+    EXPECT_EQ(status, UPDATE_REPLACE);
+}
+
+TEST_F(ConfigUpdateTest, TestEventMetricWhatChanged) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    Predicate predicate = CreateScreenIsOnPredicate();
+    *config.add_predicate() = predicate;
+
+    EventMetric* metric = config.add_event_metric();
+    metric->set_id(12345);
+    metric->set_what(whatMatcher.id());
+    metric->set_condition(predicate.id());
+
+    // Create an initial config.
+    EXPECT_TRUE(initConfig(config));
+
+    set<int64_t> replacedMatchers = {whatMatcher.id()};
+    set<int64_t> replacedConditions;
+    unordered_map<int64_t, int> metricToActivationMap;
+    UpdateStatus status = UPDATE_UNKNOWN;
+    EXPECT_TRUE(determineEventMetricUpdateStatus(config, *metric, oldMetricProducerMap,
+                                                 oldMetricProducers, metricToActivationMap,
+                                                 replacedMatchers, replacedConditions, status));
+    EXPECT_EQ(status, UPDATE_REPLACE);
+}
+
+TEST_F(ConfigUpdateTest, TestEventMetricConditionChanged) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    Predicate predicate = CreateScreenIsOnPredicate();
+    *config.add_predicate() = predicate;
+
+    EventMetric* metric = config.add_event_metric();
+    metric->set_id(12345);
+    metric->set_what(whatMatcher.id());
+    metric->set_condition(predicate.id());
+
+    // Create an initial config.
+    EXPECT_TRUE(initConfig(config));
+
+    set<int64_t> replacedMatchers;
+    set<int64_t> replacedConditions = {predicate.id()};
+    unordered_map<int64_t, int> metricToActivationMap;
+    UpdateStatus status = UPDATE_UNKNOWN;
+    EXPECT_TRUE(determineEventMetricUpdateStatus(config, *metric, oldMetricProducerMap,
+                                                 oldMetricProducers, metricToActivationMap,
+                                                 replacedMatchers, replacedConditions, status));
+    EXPECT_EQ(status, UPDATE_REPLACE);
+}
+
+TEST_F(ConfigUpdateTest, TestMetricConditionLinkDepsChanged) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    Predicate predicate = CreateScreenIsOnPredicate();
+    *config.add_predicate() = predicate;
+
+    Predicate linkPredicate = CreateScreenIsOffPredicate();
+    *config.add_predicate() = linkPredicate;
+
+    EventMetric* metric = config.add_event_metric();
+    metric->set_id(12345);
+    metric->set_what(whatMatcher.id());
+    metric->set_condition(predicate.id());
+    // Doesn't make sense as a real metric definition, but suffices as a separate predicate
+    // From the one in the condition.
+    MetricConditionLink* link = metric->add_links();
+    link->set_condition(linkPredicate.id());
+
+    // Create an initial config.
+    EXPECT_TRUE(initConfig(config));
+
+    set<int64_t> replacedMatchers;
+    set<int64_t> replacedConditions = {linkPredicate.id()};
+    unordered_map<int64_t, int> metricToActivationMap;
+    UpdateStatus status = UPDATE_UNKNOWN;
+    EXPECT_TRUE(determineEventMetricUpdateStatus(config, *metric, oldMetricProducerMap,
+                                                 oldMetricProducers, metricToActivationMap,
+                                                 replacedMatchers, replacedConditions, status));
+    EXPECT_EQ(status, UPDATE_REPLACE);
+}
+
+TEST_F(ConfigUpdateTest, TestEventMetricActivationDepsChange) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    Predicate predicate = CreateScreenIsOnPredicate();
+    *config.add_predicate() = predicate;
+
+    EventMetric* metric = config.add_event_metric();
+    metric->set_id(12345);
+    metric->set_what(whatMatcher.id());
+    metric->set_condition(predicate.id());
+
+    MetricActivation* activation = config.add_metric_activation();
+    activation->set_metric_id(12345);
+    EventActivation* eventActivation = activation->add_event_activation();
+    eventActivation->set_atom_matcher_id(startMatcher.id());
+    eventActivation->set_ttl_seconds(5);
+
+    // Create an initial config.
+    EXPECT_TRUE(initConfig(config));
+
+    set<int64_t> replacedMatchers = {startMatcher.id()};  // The activation matcher is replaced.
+    set<int64_t> replacedConditions;
+    unordered_map<int64_t, int> metricToActivationMap = {{12345, 0}};
+    UpdateStatus status = UPDATE_UNKNOWN;
+    EXPECT_TRUE(determineEventMetricUpdateStatus(config, *metric, oldMetricProducerMap,
+                                                 oldMetricProducers, metricToActivationMap,
+                                                 replacedMatchers, replacedConditions, status));
+    EXPECT_EQ(status, UPDATE_REPLACE);
+}
+
+TEST_F(ConfigUpdateTest, TestUpdateEventMetrics) {
+    StatsdConfig config;
+
+    // Add atom matchers/predicates. These are mostly needed for initStatsdConfig
+    AtomMatcher matcher1 = CreateScreenTurnedOnAtomMatcher();
+    int64_t matcher1Id = matcher1.id();
+    *config.add_atom_matcher() = matcher1;
+
+    AtomMatcher matcher2 = CreateScreenTurnedOffAtomMatcher();
+    int64_t matcher2Id = matcher2.id();
+    *config.add_atom_matcher() = matcher2;
+
+    AtomMatcher matcher3 = CreateStartScheduledJobAtomMatcher();
+    int64_t matcher3Id = matcher3.id();
+    *config.add_atom_matcher() = matcher3;
+
+    AtomMatcher matcher4 = CreateFinishScheduledJobAtomMatcher();
+    int64_t matcher4Id = matcher4.id();
+    *config.add_atom_matcher() = matcher4;
+
+    AtomMatcher matcher5 = CreateBatterySaverModeStartAtomMatcher();
+    int64_t matcher5Id = matcher5.id();
+    *config.add_atom_matcher() = matcher5;
+
+    Predicate predicate1 = CreateScreenIsOnPredicate();
+    int64_t predicate1Id = predicate1.id();
+    *config.add_predicate() = predicate1;
+
+    Predicate predicate2 = CreateScheduledJobPredicate();
+    int64_t predicate2Id = predicate2.id();
+    *config.add_predicate() = predicate2;
+
+    // Add a few event metrics.
+    // Will be preserved.
+    EventMetric event1 = createEventMetric("EVENT1", matcher1Id, predicate2Id);
+    int64_t event1Id = event1.id();
+    *config.add_event_metric() = event1;
+
+    // Will be replaced.
+    EventMetric event2 = createEventMetric("EVENT2", matcher2Id, nullopt);
+    int64_t event2Id = event2.id();
+    *config.add_event_metric() = event2;
+
+    // Will be replaced.
+    EventMetric event3 = createEventMetric("EVENT3", matcher3Id, nullopt);
+    int64_t event3Id = event3.id();
+    *config.add_event_metric() = event3;
+
+    MetricActivation event3Activation;
+    event3Activation.set_metric_id(event3Id);
+    EventActivation* eventActivation = event3Activation.add_event_activation();
+    eventActivation->set_atom_matcher_id(matcher5Id);
+    eventActivation->set_ttl_seconds(5);
+    *config.add_metric_activation() = event3Activation;
+
+    // Will be replaced.
+    EventMetric event4 = createEventMetric("EVENT4", matcher4Id, predicate1Id);
+    int64_t event4Id = event4.id();
+    *config.add_event_metric() = event4;
+
+    // Will be deleted.
+    EventMetric event5 = createEventMetric("EVENT5", matcher5Id, nullopt);
+    int64_t event5Id = event5.id();
+    *config.add_event_metric() = event5;
+
+    EXPECT_TRUE(initConfig(config));
+
+    // Used later to ensure the condition wizard is replaced. Get it before doing the update.
+    sp<ConditionWizard> oldConditionWizard = oldMetricProducers[0]->mWizard;
+    EXPECT_EQ(oldConditionWizard->getStrongCount(), oldMetricProducers.size() + 1);
+
+    // Add a condition to event2, causing it to be replaced.
+    event2.set_condition(predicate1Id);
+
+    // Mark matcher 5 as replaced. Causes event3 to be replaced.
+    set<int64_t> replacedMatchers;
+    replacedMatchers.insert(matcher5Id);
+
+    // Mark predicate 1 as replaced. Causes event4 to be replaced.
+    set<int64_t> replacedConditions;
+    replacedConditions.insert(predicate1Id);
+
+    // Fake that predicate 2 is true.
+    ASSERT_EQ(oldMetricProducers[0]->getMetricId(), event1Id);
+    oldMetricProducers[0]->onConditionChanged(true, /*timestamp=*/0);
+    EXPECT_EQ(oldMetricProducers[0]->mCondition, ConditionState::kTrue);
+
+    // New event metric. Should have an initial condition of true since it depends on predicate2.
+    EventMetric event6 = createEventMetric("EVENT6", matcher3Id, predicate2Id);
+    int64_t event6Id = event6.id();
+    MetricActivation event6Activation;
+    event6Activation.set_metric_id(event6Id);
+    eventActivation = event6Activation.add_event_activation();
+    eventActivation->set_atom_matcher_id(matcher5Id);
+    eventActivation->set_ttl_seconds(20);
+
+    // Map the matchers and predicates in reverse order to force the indices to change.
+    std::unordered_map<int64_t, int> newAtomMatchingTrackerMap;
+    const int matcher5Index = 0;
+    newAtomMatchingTrackerMap[matcher5Id] = 0;
+    const int matcher4Index = 1;
+    newAtomMatchingTrackerMap[matcher4Id] = 1;
+    const int matcher3Index = 2;
+    newAtomMatchingTrackerMap[matcher3Id] = 2;
+    const int matcher2Index = 3;
+    newAtomMatchingTrackerMap[matcher2Id] = 3;
+    const int matcher1Index = 4;
+    newAtomMatchingTrackerMap[matcher1Id] = 4;
+    // Use the existing matchers. A bit hacky, but saves code and we don't rely on them.
+    vector<sp<AtomMatchingTracker>> newAtomMatchingTrackers(5);
+    std::reverse_copy(oldAtomMatchingTrackers.begin(), oldAtomMatchingTrackers.end(),
+                      newAtomMatchingTrackers.begin());
+
+    std::unordered_map<int64_t, int> newConditionTrackerMap;
+    const int predicate2Index = 0;
+    newConditionTrackerMap[predicate2Id] = 0;
+    const int predicate1Index = 1;
+    newConditionTrackerMap[predicate1Id] = 1;
+    // Use the existing conditionTrackers. A bit hacky, but saves code and we don't rely on them.
+    vector<sp<ConditionTracker>> newConditionTrackers(2);
+    std::reverse_copy(oldConditionTrackers.begin(), oldConditionTrackers.end(),
+                      newConditionTrackers.begin());
+    // Fake that predicate2 is true.
+    vector<ConditionState> conditionCache = {ConditionState::kTrue, ConditionState::kUnknown};
+
+    StatsdConfig newConfig;
+    *newConfig.add_event_metric() = event6;
+    const int event6Index = 0;
+    *newConfig.add_event_metric() = event3;
+    const int event3Index = 1;
+    *newConfig.add_event_metric() = event1;
+    const int event1Index = 2;
+    *newConfig.add_event_metric() = event4;
+    const int event4Index = 3;
+    *newConfig.add_event_metric() = event2;
+    const int event2Index = 4;
+    *newConfig.add_metric_activation() = event3Activation;
+    *newConfig.add_metric_activation() = event6Activation;
+
+    // Output data structures to validate.
+    unordered_map<int64_t, int> newMetricProducerMap;
+    vector<sp<MetricProducer>> newMetricProducers;
+    unordered_map<int, vector<int>> conditionToMetricMap;
+    unordered_map<int, vector<int>> trackerToMetricMap;
+    set<int64_t> noReportMetricIds;
+    unordered_map<int, vector<int>> activationAtomTrackerToMetricMap;
+    unordered_map<int, vector<int>> deactivationAtomTrackerToMetricMap;
+    vector<int> metricsWithActivation;
+    EXPECT_TRUE(updateMetrics(
+            key, newConfig, /*timeBaseNs=*/123, /*currentTimeNs=*/12345, new StatsPullerManager(),
+            oldAtomMatchingTrackerMap, newAtomMatchingTrackerMap, replacedMatchers,
+            newAtomMatchingTrackers, newConditionTrackerMap, replacedConditions,
+            newConditionTrackers, conditionCache, /*stateAtomIdMap=*/{}, /*allStateGroupMaps=*/{},
+            /*replacedStates=*/{}, oldMetricProducerMap, oldMetricProducers, newMetricProducerMap,
+            newMetricProducers, conditionToMetricMap, trackerToMetricMap, noReportMetricIds,
+            activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
+            metricsWithActivation));
+
+    unordered_map<int64_t, int> expectedMetricProducerMap = {
+            {event1Id, event1Index}, {event2Id, event2Index}, {event3Id, event3Index},
+            {event4Id, event4Index}, {event6Id, event6Index},
+    };
+    EXPECT_THAT(newMetricProducerMap, ContainerEq(expectedMetricProducerMap));
+
+    // Make sure preserved metrics are the same.
+    ASSERT_EQ(newMetricProducers.size(), 5);
+    EXPECT_EQ(oldMetricProducers[oldMetricProducerMap.at(event1Id)],
+              newMetricProducers[newMetricProducerMap.at(event1Id)]);
+
+    // Make sure replaced conditions are different and included in replacedConditions.
+    EXPECT_NE(oldMetricProducers[oldMetricProducerMap.at(event2Id)],
+              newMetricProducers[newMetricProducerMap.at(event2Id)]);
+    EXPECT_NE(oldMetricProducers[oldMetricProducerMap.at(event3Id)],
+              newMetricProducers[newMetricProducerMap.at(event3Id)]);
+    EXPECT_NE(oldMetricProducers[oldMetricProducerMap.at(event4Id)],
+              newMetricProducers[newMetricProducerMap.at(event4Id)]);
+
+    // Verify the conditionToMetricMap.
+    ASSERT_EQ(conditionToMetricMap.size(), 2);
+    const vector<int>& condition1Metrics = conditionToMetricMap[predicate1Index];
+    EXPECT_THAT(condition1Metrics, UnorderedElementsAre(event2Index, event4Index));
+    const vector<int>& condition2Metrics = conditionToMetricMap[predicate2Index];
+    EXPECT_THAT(condition2Metrics, UnorderedElementsAre(event1Index, event6Index));
+
+    // Verify the trackerToMetricMap.
+    ASSERT_EQ(trackerToMetricMap.size(), 4);
+    const vector<int>& matcher1Metrics = trackerToMetricMap[matcher1Index];
+    EXPECT_THAT(matcher1Metrics, UnorderedElementsAre(event1Index));
+    const vector<int>& matcher2Metrics = trackerToMetricMap[matcher2Index];
+    EXPECT_THAT(matcher2Metrics, UnorderedElementsAre(event2Index));
+    const vector<int>& matcher3Metrics = trackerToMetricMap[matcher3Index];
+    EXPECT_THAT(matcher3Metrics, UnorderedElementsAre(event3Index, event6Index));
+    const vector<int>& matcher4Metrics = trackerToMetricMap[matcher4Index];
+    EXPECT_THAT(matcher4Metrics, UnorderedElementsAre(event4Index));
+
+    // Verify event activation/deactivation maps.
+    ASSERT_EQ(activationAtomTrackerToMetricMap.size(), 1);
+    EXPECT_THAT(activationAtomTrackerToMetricMap[matcher5Index],
+                UnorderedElementsAre(event3Index, event6Index));
+    ASSERT_EQ(deactivationAtomTrackerToMetricMap.size(), 0);
+    ASSERT_EQ(metricsWithActivation.size(), 2);
+    EXPECT_THAT(metricsWithActivation, UnorderedElementsAre(event3Index, event6Index));
+
+    // Verify tracker indices/ids/conditions are correct.
+    EXPECT_EQ(newMetricProducers[event1Index]->getMetricId(), event1Id);
+    EXPECT_EQ(newMetricProducers[event1Index]->mConditionTrackerIndex, predicate2Index);
+    EXPECT_EQ(newMetricProducers[event1Index]->mCondition, ConditionState::kTrue);
+    EXPECT_EQ(newMetricProducers[event2Index]->getMetricId(), event2Id);
+    EXPECT_EQ(newMetricProducers[event2Index]->mConditionTrackerIndex, predicate1Index);
+    EXPECT_EQ(newMetricProducers[event2Index]->mCondition, ConditionState::kUnknown);
+    EXPECT_EQ(newMetricProducers[event3Index]->getMetricId(), event3Id);
+    EXPECT_EQ(newMetricProducers[event3Index]->mConditionTrackerIndex, -1);
+    EXPECT_EQ(newMetricProducers[event3Index]->mCondition, ConditionState::kTrue);
+    EXPECT_EQ(newMetricProducers[event4Index]->getMetricId(), event4Id);
+    EXPECT_EQ(newMetricProducers[event4Index]->mConditionTrackerIndex, predicate1Index);
+    EXPECT_EQ(newMetricProducers[event4Index]->mCondition, ConditionState::kUnknown);
+    EXPECT_EQ(newMetricProducers[event6Index]->getMetricId(), event6Id);
+    EXPECT_EQ(newMetricProducers[event6Index]->mConditionTrackerIndex, predicate2Index);
+    EXPECT_EQ(newMetricProducers[event6Index]->mCondition, ConditionState::kTrue);
+
+    sp<ConditionWizard> newConditionWizard = newMetricProducers[0]->mWizard;
+    EXPECT_NE(newConditionWizard, oldConditionWizard);
+    EXPECT_EQ(newConditionWizard->getStrongCount(), newMetricProducers.size() + 1);
+    oldMetricProducers.clear();
+    // Only reference to the old wizard should be the one in the test.
+    EXPECT_EQ(oldConditionWizard->getStrongCount(), 1);
+}
+
+TEST_F(ConfigUpdateTest, TestUpdateMetricActivations) {
+    StatsdConfig config;
+    // Add atom matchers
+    AtomMatcher matcher1 = CreateScreenTurnedOnAtomMatcher();
+    int64_t matcher1Id = matcher1.id();
+    *config.add_atom_matcher() = matcher1;
+
+    AtomMatcher matcher2 = CreateScreenTurnedOffAtomMatcher();
+    int64_t matcher2Id = matcher2.id();
+    *config.add_atom_matcher() = matcher2;
+
+    AtomMatcher matcher3 = CreateStartScheduledJobAtomMatcher();
+    int64_t matcher3Id = matcher3.id();
+    *config.add_atom_matcher() = matcher3;
+
+    AtomMatcher matcher4 = CreateFinishScheduledJobAtomMatcher();
+    int64_t matcher4Id = matcher4.id();
+    *config.add_atom_matcher() = matcher4;
+
+    // Add an event metric with multiple activations.
+    EventMetric event1 = createEventMetric("EVENT1", matcher1Id, nullopt);
+    int64_t event1Id = event1.id();
+    *config.add_event_metric() = event1;
+
+    int64_t matcher2TtlSec = 2, matcher3TtlSec = 3, matcher4TtlSec = 4;
+    MetricActivation metricActivation;
+    metricActivation.set_metric_id(event1Id);
+    EventActivation* activation = metricActivation.add_event_activation();
+    activation->set_atom_matcher_id(matcher2Id);
+    activation->set_ttl_seconds(matcher2TtlSec);
+    activation->set_activation_type(ACTIVATE_IMMEDIATELY);
+    activation->set_deactivation_atom_matcher_id(matcher1Id);
+    activation = metricActivation.add_event_activation();
+    activation->set_atom_matcher_id(matcher3Id);
+    activation->set_ttl_seconds(matcher3TtlSec);
+    activation->set_activation_type(ACTIVATE_ON_BOOT);
+    activation->set_deactivation_atom_matcher_id(matcher1Id);
+    activation = metricActivation.add_event_activation();
+    activation->set_atom_matcher_id(matcher4Id);
+    activation->set_ttl_seconds(matcher4TtlSec);
+    activation->set_activation_type(ACTIVATE_IMMEDIATELY);
+    activation->set_deactivation_atom_matcher_id(matcher2Id);
+    *config.add_metric_activation() = metricActivation;
+
+    EXPECT_TRUE(initConfig(config));
+
+    // Activate some of the event activations.
+    ASSERT_EQ(oldMetricProducers[0]->getMetricId(), event1Id);
+    int64_t matcher2StartNs = 12345;
+    oldMetricProducers[0]->activate(oldAtomMatchingTrackerMap[matcher2Id], matcher2StartNs);
+    int64_t matcher3StartNs = 23456;
+    oldMetricProducers[0]->activate(oldAtomMatchingTrackerMap[matcher3Id], matcher3StartNs);
+    EXPECT_TRUE(oldMetricProducers[0]->isActive());
+
+    // Map the matchers and predicates in reverse order to force the indices to change.
+    std::unordered_map<int64_t, int> newAtomMatchingTrackerMap;
+    const int matcher4Index = 0;
+    newAtomMatchingTrackerMap[matcher4Id] = 0;
+    const int matcher3Index = 1;
+    newAtomMatchingTrackerMap[matcher3Id] = 1;
+    const int matcher2Index = 2;
+    newAtomMatchingTrackerMap[matcher2Id] = 2;
+    const int matcher1Index = 3;
+    newAtomMatchingTrackerMap[matcher1Id] = 3;
+    // Use the existing matchers. A bit hacky, but saves code and we don't rely on them.
+    vector<sp<AtomMatchingTracker>> newAtomMatchingTrackers(4);
+    std::reverse_copy(oldAtomMatchingTrackers.begin(), oldAtomMatchingTrackers.end(),
+                      newAtomMatchingTrackers.begin());
+    set<int64_t> replacedMatchers;
+
+    unordered_map<int64_t, int> newConditionTrackerMap;
+    vector<sp<ConditionTracker>> newConditionTrackers;
+    set<int64_t> replacedConditions;
+    vector<ConditionState> conditionCache;
+    unordered_map<int64_t, int> newMetricProducerMap;
+    vector<sp<MetricProducer>> newMetricProducers;
+    unordered_map<int, vector<int>> conditionToMetricMap;
+    unordered_map<int, vector<int>> trackerToMetricMap;
+    set<int64_t> noReportMetricIds;
+    unordered_map<int, vector<int>> activationAtomTrackerToMetricMap;
+    unordered_map<int, vector<int>> deactivationAtomTrackerToMetricMap;
+    vector<int> metricsWithActivation;
+    EXPECT_TRUE(updateMetrics(
+            key, config, /*timeBaseNs=*/123, /*currentTimeNs=*/12345, new StatsPullerManager(),
+            oldAtomMatchingTrackerMap, newAtomMatchingTrackerMap, replacedMatchers,
+            newAtomMatchingTrackers, newConditionTrackerMap, replacedConditions,
+            newConditionTrackers, conditionCache, /*stateAtomIdMap=*/{}, /*allStateGroupMaps=*/{},
+            /*replacedStates=*/{}, oldMetricProducerMap, oldMetricProducers, newMetricProducerMap,
+            newMetricProducers, conditionToMetricMap, trackerToMetricMap, noReportMetricIds,
+            activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
+            metricsWithActivation));
+
+    // Verify event activation/deactivation maps.
+    ASSERT_EQ(activationAtomTrackerToMetricMap.size(), 3);
+    EXPECT_THAT(activationAtomTrackerToMetricMap[matcher2Index], UnorderedElementsAre(0));
+    EXPECT_THAT(activationAtomTrackerToMetricMap[matcher3Index], UnorderedElementsAre(0));
+    EXPECT_THAT(activationAtomTrackerToMetricMap[matcher4Index], UnorderedElementsAre(0));
+    ASSERT_EQ(deactivationAtomTrackerToMetricMap.size(), 2);
+    EXPECT_THAT(deactivationAtomTrackerToMetricMap[matcher1Index], UnorderedElementsAre(0, 0));
+    EXPECT_THAT(deactivationAtomTrackerToMetricMap[matcher2Index], UnorderedElementsAre(0));
+    ASSERT_EQ(metricsWithActivation.size(), 1);
+    EXPECT_THAT(metricsWithActivation, UnorderedElementsAre(0));
+
+    // Verify mEventActivation and mEventDeactivation map of the producer.
+    sp<MetricProducer> producer = newMetricProducers[0];
+    EXPECT_TRUE(producer->isActive());
+    ASSERT_EQ(producer->mEventActivationMap.size(), 3);
+    shared_ptr<Activation> matcher2Activation = producer->mEventActivationMap[matcher2Index];
+    EXPECT_EQ(matcher2Activation->ttl_ns, matcher2TtlSec * NS_PER_SEC);
+    EXPECT_EQ(matcher2Activation->activationType, ACTIVATE_IMMEDIATELY);
+    EXPECT_EQ(matcher2Activation->state, kActive);
+    EXPECT_EQ(matcher2Activation->start_ns, matcher2StartNs);
+    shared_ptr<Activation> matcher3Activation = producer->mEventActivationMap[matcher3Index];
+    EXPECT_EQ(matcher3Activation->ttl_ns, matcher3TtlSec * NS_PER_SEC);
+    EXPECT_EQ(matcher3Activation->activationType, ACTIVATE_ON_BOOT);
+    EXPECT_EQ(matcher3Activation->state, kActiveOnBoot);
+    shared_ptr<Activation> matcher4Activation = producer->mEventActivationMap[matcher4Index];
+    EXPECT_EQ(matcher4Activation->ttl_ns, matcher4TtlSec * NS_PER_SEC);
+    EXPECT_EQ(matcher4Activation->activationType, ACTIVATE_IMMEDIATELY);
+    EXPECT_EQ(matcher4Activation->state, kNotActive);
+
+    ASSERT_EQ(producer->mEventDeactivationMap.size(), 2);
+    EXPECT_THAT(producer->mEventDeactivationMap[matcher1Index],
+                UnorderedElementsAre(matcher2Activation, matcher3Activation));
+    EXPECT_THAT(producer->mEventDeactivationMap[matcher2Index],
+                UnorderedElementsAre(matcher4Activation));
 }
 }  // namespace statsd
 }  // namespace os

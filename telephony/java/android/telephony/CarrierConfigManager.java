@@ -68,7 +68,7 @@ public class CarrierConfigManager {
             SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX;
 
     /**
-     * Service class flag if not specify a service class.
+     * Service class flag if no specific service class is specified.
      * Reference: 3GPP TS 27.007 Section 7.4 Facility lock +CLCK
      */
     public static final int SERVICE_CLASS_NONE = ImsSsData.SERVICE_CLASS_NONE;

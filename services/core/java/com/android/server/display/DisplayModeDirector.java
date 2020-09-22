@@ -56,8 +56,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * The DisplayModeDirector is responsible for determining what modes are allowed to be
- * automatically picked by the system based on system-wide and display-specific configuration.
+ * The DisplayModeDirector is responsible for determining what modes are allowed to be automatically
+ * picked by the system based on system-wide and display-specific configuration.
  */
 public class DisplayModeDirector {
     private static final String TAG = "DisplayModeDirector";
@@ -97,17 +97,20 @@ public class DisplayModeDirector {
     private final DeviceConfigDisplaySettings mDeviceConfigDisplaySettings;
     private DesiredDisplayModeSpecsListener mDesiredDisplayModeSpecsListener;
 
+    private boolean mAlwaysRespectAppRequest;
+
     public DisplayModeDirector(@NonNull Context context, @NonNull Handler handler) {
         mContext = context;
         mHandler = new DisplayModeDirectorHandler(handler.getLooper());
         mVotesByDisplay = new SparseArray<>();
         mSupportedModesByDisplay = new SparseArray<>();
-        mDefaultModeByDisplay =  new SparseArray<>();
+        mDefaultModeByDisplay = new SparseArray<>();
         mAppRequestObserver = new AppRequestObserver();
         mSettingsObserver = new SettingsObserver(context, handler);
         mDisplayObserver = new DisplayObserver(context, handler);
         mBrightnessObserver = new BrightnessObserver(context, handler);
         mDeviceConfigDisplaySettings = new DeviceConfigDisplaySettings();
+        mAlwaysRespectAppRequest = false;
     }
 
     /**
@@ -127,7 +130,6 @@ public class DisplayModeDirector {
             // notify them to pick up our newly initialized state.
             notifyDesiredDisplayModeSpecsChangedLocked();
         }
-
     }
 
     @NonNull
@@ -173,9 +175,14 @@ public class DisplayModeDirector {
     // VoteSummary is returned as an output param to cut down a bit on the number of temporary
     // objects.
     private void summarizeVotes(
-            SparseArray<Vote> votes, int lowestConsideredPriority, /*out*/ VoteSummary summary) {
+            SparseArray<Vote> votes,
+            int lowestConsideredPriority,
+            int highestConsideredPriority,
+            /*out*/ VoteSummary summary) {
         summary.reset();
-        for (int priority = Vote.MAX_PRIORITY; priority >= lowestConsideredPriority; priority--) {
+        for (int priority = highestConsideredPriority;
+                priority >= lowestConsideredPriority;
+                priority--) {
             Vote vote = votes.get(priority);
             if (vote == null) {
                 continue;
@@ -217,8 +224,16 @@ public class DisplayModeDirector {
             int[] availableModes = new int[]{defaultMode.getModeId()};
             VoteSummary primarySummary = new VoteSummary();
             int lowestConsideredPriority = Vote.MIN_PRIORITY;
-            while (lowestConsideredPriority <= Vote.MAX_PRIORITY) {
-                summarizeVotes(votes, lowestConsideredPriority, primarySummary);
+            int highestConsideredPriority = Vote.MAX_PRIORITY;
+
+            if (mAlwaysRespectAppRequest) {
+                lowestConsideredPriority = Vote.PRIORITY_APP_REQUEST_REFRESH_RATE;
+                highestConsideredPriority = Vote.PRIORITY_APP_REQUEST_SIZE;
+            }
+
+            while (lowestConsideredPriority <= highestConsideredPriority) {
+                summarizeVotes(
+                        votes, lowestConsideredPriority, highestConsideredPriority, primarySummary);
 
                 // If we don't have anything specifying the width / height of the display, just use
                 // the default width and height. We don't want these switching out from underneath
@@ -261,7 +276,10 @@ public class DisplayModeDirector {
 
             VoteSummary appRequestSummary = new VoteSummary();
             summarizeVotes(
-                    votes, Vote.APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF, appRequestSummary);
+                    votes,
+                    Vote.APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF,
+                    Vote.MAX_PRIORITY,
+                    appRequestSummary);
             appRequestSummary.minRefreshRate =
                     Math.min(appRequestSummary.minRefreshRate, primarySummary.minRefreshRate);
             appRequestSummary.maxRefreshRate =
@@ -338,13 +356,32 @@ public class DisplayModeDirector {
     }
 
     /**
-     * Sets the desiredDisplayModeSpecsListener for changes to display mode and refresh rate
-     * ranges.
+     * Sets the desiredDisplayModeSpecsListener for changes to display mode and refresh rate ranges.
      */
     public void setDesiredDisplayModeSpecsListener(
             @Nullable DesiredDisplayModeSpecsListener desiredDisplayModeSpecsListener) {
         synchronized (mLock) {
             mDesiredDisplayModeSpecsListener = desiredDisplayModeSpecsListener;
+        }
+    }
+
+    /**
+     * When enabled the app requested display mode is always selected and all
+     * other votes will be ignored. This is used for testing purposes.
+     */
+    public void setShouldAlwaysRespectAppRequestedMode(boolean enabled) {
+        synchronized (mLock) {
+            mAlwaysRespectAppRequest = enabled;
+        }
+    }
+
+    /**
+     * Returns whether we are running in a mode which always selects the app requested display mode
+     * and ignores user settings and policies for low brightness, low battery etc.
+     */
+    public boolean shouldAlwaysRespectAppRequestedMode() {
+        synchronized (mLock) {
+            return mAlwaysRespectAppRequest;
         }
     }
 
@@ -380,6 +417,7 @@ public class DisplayModeDirector {
                     pw.println("      " + Vote.priorityToString(p) + " -> " + vote);
                 }
             }
+            pw.println("  mAlwaysRespectAppRequest: " + mAlwaysRespectAppRequest);
             mSettingsObserver.dumpLocked(pw);
             mAppRequestObserver.dumpLocked(pw);
             mBrightnessObserver.dumpLocked(pw);

@@ -18,6 +18,7 @@ package com.android.systemui.pip.phone;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
 import android.app.ActivityTaskManager;
 import android.app.ActivityTaskManager.RootTaskInfo;
@@ -56,5 +57,15 @@ public class PipUtils {
             Log.w(TAG, "Unable to get pinned stack.");
         }
         return new Pair<>(null, 0);
+    }
+
+    /**
+     * The util to check if device has PIP feature
+     *
+     * @param context application context
+     * @return true if device has PIP feature, false otherwise.
+     */
+    public static boolean hasSystemFeature(Context context) {
+        return context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
     }
 }

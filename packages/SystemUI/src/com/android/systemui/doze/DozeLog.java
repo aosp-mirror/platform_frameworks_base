@@ -198,6 +198,22 @@ public class DozeLog implements Dumpable {
     }
 
     /**
+     * Appends doze state changed sent to all DozeMachine parts event to the logs
+     * @param state new DozeMachine state
+     */
+    public void traceDozeStateSendComplete(DozeMachine.State state) {
+        mLogger.logStateChangedSent(state);
+    }
+
+    /**
+     * Appends display state changed event to the logs
+     * @param displayState new DozeMachine state
+     */
+    public void traceDisplayState(int displayState) {
+        mLogger.logDisplayStateChanged(displayState);
+    }
+
+    /**
      * Appends wake-display event to the logs.
      * @param wake if we're waking up or sleeping.
      */
