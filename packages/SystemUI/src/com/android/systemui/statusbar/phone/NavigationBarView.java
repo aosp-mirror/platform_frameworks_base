@@ -113,7 +113,8 @@ public class NavigationBarView extends FrameLayout implements
     int mNavigationIconHints = 0;
     private int mNavBarMode;
 
-    private final Region mActiveRegion = new Region();
+    private final Region mTmpRegion = new Region();
+    private final int[] mTmpPosition = new int[2];
     private Rect mTmpBounds = new Rect();
 
     private KeyButtonDrawable mBackIcon;
@@ -252,24 +253,14 @@ public class NavigationBarView extends FrameLayout implements
     private final OnComputeInternalInsetsListener mOnComputeInternalInsetsListener = info -> {
         // When the nav bar is in 2-button or 3-button mode, or when IME is visible in fully
         // gestural mode, the entire nav bar should be touchable.
-        if (!mEdgeBackGestureHandler.isHandlingGestures() || mImeVisible) {
+        if (!mEdgeBackGestureHandler.isHandlingGestures()) {
             info.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_FRAME);
             return;
         }
 
         info.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
-        ButtonDispatcher imeSwitchButton = getImeSwitchButton();
-        if (imeSwitchButton.getVisibility() == VISIBLE) {
-            // If the IME is not up, but the ime switch button is visible, then make sure that
-            // button is touchable
-            int[] loc = new int[2];
-            View buttonView = imeSwitchButton.getCurrentView();
-            buttonView.getLocationInWindow(loc);
-            info.touchableRegion.set(loc[0], loc[1], loc[0] + buttonView.getWidth(),
-                    loc[1] + buttonView.getHeight());
-            return;
-        }
-        info.touchableRegion.setEmpty();
+        info.touchableRegion.set(getButtonLocations(false /* includeFloatingRotationButton */,
+                false /* inScreen */));
     };
 
     private final Consumer<Boolean> mRotationButtonListener = (visible) -> {
@@ -947,30 +938,44 @@ public class NavigationBarView extends FrameLayout implements
      * Notifies the overview service of the active touch regions.
      */
     public void notifyActiveTouchRegions() {
-        mActiveRegion.setEmpty();
-        updateButtonLocation(getBackButton());
-        updateButtonLocation(getHomeButton());
-        updateButtonLocation(getRecentsButton());
-        updateButtonLocation(getImeSwitchButton());
-        updateButtonLocation(getAccessibilityButton());
-        if (mFloatingRotationButton.isVisible()) {
-            View floatingRotationView = mFloatingRotationButton.getCurrentView();
-            floatingRotationView.getBoundsOnScreen(mTmpBounds);
-            mActiveRegion.op(mTmpBounds, Op.UNION);
-        } else {
-            updateButtonLocation(getRotateSuggestionButton());
-        }
-        mOverviewProxyService.onActiveNavBarRegionChanges(mActiveRegion);
+        mOverviewProxyService.onActiveNavBarRegionChanges(
+                getButtonLocations(true /* includeFloatingRotationButton */, true /* inScreen */));
     }
 
-    private void updateButtonLocation(ButtonDispatcher button) {
+    private Region getButtonLocations(boolean includeFloatingRotationButton,
+            boolean inScreenSpace) {
+        mTmpRegion.setEmpty();
+        updateButtonLocation(getBackButton(), inScreenSpace);
+        updateButtonLocation(getHomeButton(), inScreenSpace);
+        updateButtonLocation(getRecentsButton(), inScreenSpace);
+        updateButtonLocation(getImeSwitchButton(), inScreenSpace);
+        updateButtonLocation(getAccessibilityButton(), inScreenSpace);
+        if (includeFloatingRotationButton && mFloatingRotationButton.isVisible()) {
+            updateButtonLocation(mFloatingRotationButton.getCurrentView(), inScreenSpace);
+        } else {
+            updateButtonLocation(getRotateSuggestionButton(), inScreenSpace);
+        }
+        return mTmpRegion;
+    }
+
+    private void updateButtonLocation(ButtonDispatcher button, boolean inScreenSpace) {
         View view = button.getCurrentView();
         if (view == null || !button.isVisible()) {
             return;
         }
+        updateButtonLocation(view, inScreenSpace);
+    }
 
-        view.getBoundsOnScreen(mTmpBounds);
-        mActiveRegion.op(mTmpBounds, Op.UNION);
+    private void updateButtonLocation(View view, boolean inScreenSpace) {
+        if (inScreenSpace) {
+            view.getBoundsOnScreen(mTmpBounds);
+        } else {
+            view.getLocationInWindow(mTmpPosition);
+            mTmpBounds.set(mTmpPosition[0], mTmpPosition[1],
+                    mTmpPosition[0] + view.getWidth(),
+                    mTmpPosition[1] + view.getHeight());
+        }
+        mTmpRegion.op(mTmpBounds, Op.UNION);
     }
 
     private void updateOrientationViews() {
