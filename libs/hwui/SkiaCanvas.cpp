@@ -735,8 +735,7 @@ void SkiaCanvas::drawVectorDrawable(VectorDrawableRoot* vectorDrawable) {
 // ----------------------------------------------------------------------------
 
 void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const Paint& paint, float x,
-                            float y, float boundsLeft, float boundsTop, float boundsRight,
-                            float boundsBottom, float totalAdvance) {
+                            float y, float totalAdvance) {
     if (count <= 0 || paint.nothingToDraw()) return;
     Paint paintCopy(paint);
     if (mPaintFilter) {

@@ -84,13 +84,12 @@ static void simplifyPaint(int color, Paint* paint) {
 class DrawTextFunctor {
 public:
     DrawTextFunctor(const minikin::Layout& layout, Canvas* canvas, const Paint& paint, float x,
-                    float y, minikin::MinikinRect& bounds, float totalAdvance)
+                    float y, float totalAdvance)
             : layout(layout)
             , canvas(canvas)
             , paint(paint)
             , x(x)
             , y(y)
-            , bounds(bounds)
             , totalAdvance(totalAdvance) {}
 
     void operator()(size_t start, size_t end) {
@@ -114,19 +113,16 @@ public:
             Paint outlinePaint(paint);
             simplifyPaint(darken ? SK_ColorWHITE : SK_ColorBLACK, &outlinePaint);
             outlinePaint.setStyle(SkPaint::kStrokeAndFill_Style);
-            canvas->drawGlyphs(glyphFunc, glyphCount, outlinePaint, x, y, bounds.mLeft, bounds.mTop,
-                               bounds.mRight, bounds.mBottom, totalAdvance);
+            canvas->drawGlyphs(glyphFunc, glyphCount, outlinePaint, x, y, totalAdvance);
 
             // inner
             Paint innerPaint(paint);
             simplifyPaint(darken ? SK_ColorBLACK : SK_ColorWHITE, &innerPaint);
             innerPaint.setStyle(SkPaint::kFill_Style);
-            canvas->drawGlyphs(glyphFunc, glyphCount, innerPaint, x, y, bounds.mLeft, bounds.mTop,
-                               bounds.mRight, bounds.mBottom, totalAdvance);
+            canvas->drawGlyphs(glyphFunc, glyphCount, innerPaint, x, y, totalAdvance);
         } else {
             // standard draw path
-            canvas->drawGlyphs(glyphFunc, glyphCount, paint, x, y, bounds.mLeft, bounds.mTop,
-                               bounds.mRight, bounds.mBottom, totalAdvance);
+            canvas->drawGlyphs(glyphFunc, glyphCount, paint, x, y, totalAdvance);
         }
     }
 
@@ -136,7 +132,6 @@ private:
     const Paint& paint;
     float x;
     float y;
-    minikin::MinikinRect& bounds;
     float totalAdvance;
 };
 
@@ -156,15 +151,12 @@ void Canvas::drawText(const uint16_t* text, int textSize, int start, int count, 
 
     x += MinikinUtils::xOffsetForTextAlign(&paint, layout);
 
-    minikin::MinikinRect bounds;
-    layout.getBounds(&bounds);
-
     // Set align to left for drawing, as we don't want individual
     // glyphs centered or right-aligned; the offset above takes
     // care of all alignment.
     paint.setTextAlign(Paint::kLeft_Align);
 
-    DrawTextFunctor f(layout, this, paint, x, y, bounds, layout.getAdvance());
+    DrawTextFunctor f(layout, this, paint, x, y, layout.getAdvance());
     MinikinUtils::forFontRun(layout, &paint, f);
 }
 
