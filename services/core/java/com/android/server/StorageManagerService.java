@@ -4641,6 +4641,11 @@ class StorageManagerService extends IStorageManager.Stub
             // make sure the OBB dir for the application is setup correctly, if it exists.
             File[] packageObbDirs = userEnv.buildExternalStorageAppObbDirs(packageName);
             for (File packageObbDir : packageObbDirs) {
+                if (packageObbDir.getPath().startsWith(
+                                Environment.getDataPreloadsMediaDirectory().getPath())) {
+                    Slog.i(TAG, "Skipping app data preparation for " + packageObbDir);
+                    continue;
+                }
                 try {
                     mVold.fixupAppDir(packageObbDir.getCanonicalPath() + "/", uid);
                 } catch (IOException e) {
