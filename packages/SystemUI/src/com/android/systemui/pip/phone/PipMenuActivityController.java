@@ -254,7 +254,9 @@ public class PipMenuActivityController {
         if (isMenuVisible()) {
             // If the menu is visible in either the closed or full state, then hide the menu and
             // trigger the animation trigger afterwards
-            onStartCallback.run();
+            if (onStartCallback != null) {
+                onStartCallback.run();
+            }
             mPipMenuView.hideMenu(onEndCallback);
         }
     }
