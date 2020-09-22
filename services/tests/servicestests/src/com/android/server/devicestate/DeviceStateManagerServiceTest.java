@@ -105,6 +105,30 @@ public final class DeviceStateManagerServiceTest {
     }
 
     @Test
+    public void requestOverrideState() {
+        mService.setOverrideState(OTHER_DEVICE_STATE);
+        // Committed state changes as there is a requested override.
+        assertEquals(mService.getCommittedState(), OTHER_DEVICE_STATE);
+        assertEquals(mService.getRequestedState(), DEFAULT_DEVICE_STATE);
+        assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(), OTHER_DEVICE_STATE);
+
+        // Committed state is set back to the requested state once the override is cleared.
+        mService.clearOverrideState();
+        assertEquals(mService.getCommittedState(), DEFAULT_DEVICE_STATE);
+        assertEquals(mService.getRequestedState(), DEFAULT_DEVICE_STATE);
+        assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(), DEFAULT_DEVICE_STATE);
+    }
+
+    @Test
+    public void requestOverrideState_unsupportedState() {
+        mService.setOverrideState(UNSUPPORTED_DEVICE_STATE);
+        // Committed state remains the same as the override state is unsupported.
+        assertEquals(mService.getCommittedState(), DEFAULT_DEVICE_STATE);
+        assertEquals(mService.getRequestedState(), DEFAULT_DEVICE_STATE);
+        assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(), DEFAULT_DEVICE_STATE);
+    }
+
+    @Test
     public void supportedStatesChanged() {
         assertEquals(mService.getCommittedState(), DEFAULT_DEVICE_STATE);
         assertEquals(mService.getPendingState(), INVALID_DEVICE_STATE);
@@ -144,6 +168,23 @@ public final class DeviceStateManagerServiceTest {
         assertEquals(mService.getCommittedState(), OTHER_DEVICE_STATE);
         assertEquals(mService.getPendingState(), INVALID_DEVICE_STATE);
         assertEquals(mService.getRequestedState(), OTHER_DEVICE_STATE);
+    }
+
+    @Test
+    public void supportedStatesChanged_unsupportedOverrideState() {
+        mService.setOverrideState(OTHER_DEVICE_STATE);
+        // Committed state changes as there is a requested override.
+        assertEquals(mService.getCommittedState(), OTHER_DEVICE_STATE);
+        assertEquals(mService.getRequestedState(), DEFAULT_DEVICE_STATE);
+        assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(), OTHER_DEVICE_STATE);
+
+        mProvider.notifySupportedDeviceStates(new int []{ DEFAULT_DEVICE_STATE });
+
+        // Committed state is set back to the requested state as the override state is no longer
+        // supported.
+        assertEquals(mService.getCommittedState(), DEFAULT_DEVICE_STATE);
+        assertEquals(mService.getRequestedState(), DEFAULT_DEVICE_STATE);
+        assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(), DEFAULT_DEVICE_STATE);
     }
 
     private static final class TestDeviceStatePolicy implements DeviceStatePolicy {
