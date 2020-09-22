@@ -69,8 +69,28 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     }
 
     @Override
+    public void onPause() {
+
+    }
+
+    @Override
+    public void onResume(int reason) {
+
+    }
+
+    @Override
+    public void showUsabilityHint() {
+
+    }
+
+    @Override
     public void startAppearAnimation() {
         // noop.
+    }
+
+    @Override
+    public boolean startDisappearAnimation(Runnable finishRunnable) {
+        return false;
     }
 
     @Override

@@ -16,10 +16,12 @@
 
 package com.android.keyguard;
 
+import android.content.res.ColorStateList;
 import android.util.Log;
 import android.view.LayoutInflater;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardInputViewController.Factory;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.dagger.KeyguardBouncerScope;
@@ -36,13 +38,12 @@ import javax.inject.Inject;
  */
 @KeyguardBouncerScope
 public class KeyguardSecurityViewFlipperController
-        extends ViewController<KeyguardSecurityViewFlipper> {
+        extends ViewController<KeyguardSecurityViewFlipper> implements KeyguardSecurityView {
 
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardSecurityView";
 
-    private final List<KeyguardInputViewController<KeyguardInputView>> mChildren =
-            new ArrayList<>();
+    private final List<KeyguardInputViewController> mChildren = new ArrayList<>();
     private final LayoutInflater mLayoutInflater;
     private final Factory mKeyguardSecurityViewControllerFactory;
 
@@ -65,19 +66,80 @@ public class KeyguardSecurityViewFlipperController
 
     }
 
+    @Override
+    public void setKeyguardCallback(KeyguardSecurityCallback callback) {
+        mView.setKeyguardCallback(callback);
+    }
+
+    @Override
+    public void setLockPatternUtils(LockPatternUtils utils) {
+        mView.setLockPatternUtils(utils);
+    }
+
+    @Override
     public void reset() {
-        for (KeyguardInputViewController<KeyguardInputView> child : mChildren) {
+        for (KeyguardInputViewController child : mChildren) {
             child.reset();
         }
     }
 
+    @Override
+    public void onPause() {
+        mView.onPause();
+    }
+
+    @Override
+    public void onResume(int reason) {
+        mView.onResume(reason);
+    }
+
+    @Override
+    public boolean needsInput() {
+        return mView.needsInput();
+    }
+
+    @Override
+    public KeyguardSecurityCallback getCallback() {
+        return mView.getCallback();
+    }
+
+    @Override
+    public void showPromptReason(int reason) {
+        mView.showPromptReason(reason);
+    }
+
+    @Override
+    public void showMessage(CharSequence message, ColorStateList colorState) {
+        mView.showMessage(message, colorState);
+    }
+
+    @Override
+    public void showUsabilityHint() {
+        mView.showUsabilityHint();
+    }
+
+    @Override
+    public void startAppearAnimation() {
+        mView.startAppearAnimation();
+    }
+
+    @Override
+    public boolean startDisappearAnimation(Runnable finishRunnable) {
+        return mView.startDisappearAnimation(finishRunnable);
+    }
+
+    @Override
+    public CharSequence getTitle() {
+        return mView.getTitle();
+    }
+
     @VisibleForTesting
-    KeyguardInputViewController<KeyguardInputView> getSecurityView(SecurityMode securityMode,
+    KeyguardInputViewController getSecurityView(SecurityMode securityMode,
             KeyguardSecurityCallback keyguardSecurityCallback) {
-        KeyguardInputViewController<KeyguardInputView> childController = null;
-        for (KeyguardInputViewController<KeyguardInputView> child : mChildren) {
-            if (child.getSecurityMode() == securityMode) {
-                childController = child;
+        KeyguardInputViewController childController = null;
+        for (KeyguardInputViewController mChild : mChildren) {
+            if (mChild.getSecurityMode() == securityMode) {
+                childController = mChild;
                 break;
             }
         }
@@ -100,11 +162,6 @@ public class KeyguardSecurityViewFlipperController
             }
         }
 
-        if (childController == null) {
-            childController = new NullKeyguardInputViewController(
-                    securityMode, keyguardSecurityCallback);
-        }
-
         return childController;
     }
 
@@ -121,28 +178,10 @@ public class KeyguardSecurityViewFlipperController
     }
 
     /** Makes the supplied child visible if it is contained win this view, */
-    public void show(KeyguardInputViewController<KeyguardInputView> childController) {
+    public void show(KeyguardInputViewController childController) {
         int index = childController.getIndexIn(mView);
         if (index != -1) {
             mView.setDisplayedChild(index);
-        }
-    }
-
-    private static class NullKeyguardInputViewController
-            extends KeyguardInputViewController<KeyguardInputView> {
-        protected NullKeyguardInputViewController(SecurityMode securityMode,
-                KeyguardSecurityCallback keyguardSecurityCallback) {
-            super(null, securityMode, keyguardSecurityCallback);
-        }
-
-        @Override
-        public boolean needsInput() {
-            return false;
-        }
-
-        @Override
-        public void onStartingToHide() {
-
         }
     }
 }

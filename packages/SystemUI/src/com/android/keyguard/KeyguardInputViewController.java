@@ -19,6 +19,7 @@ package com.android.keyguard;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.telephony.TelephonyManager;
+import android.view.MotionEvent;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.util.LatencyTracker;
@@ -36,38 +37,18 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
         extends ViewController<T> implements KeyguardSecurityView {
 
     private final SecurityMode mSecurityMode;
-    private final KeyguardSecurityCallback mKeyguardSecurityCallback;
-    private boolean mPaused;
-
-
-    // The following is used to ignore callbacks from SecurityViews that are no longer current
-    // (e.g. face unlock). This avoids unwanted asynchronous events from messing with the
-    // state for the current security method.
-    private KeyguardSecurityCallback mNullCallback = new KeyguardSecurityCallback() {
-        @Override
-        public void userActivity() { }
-        @Override
-        public void reportUnlockAttempt(int userId, boolean success, int timeoutMs) { }
-        @Override
-        public boolean isVerifyUnlockOnly() {
-            return false;
-        }
-        @Override
-        public void dismiss(boolean securityVerified, int targetUserId) { }
-        @Override
-        public void dismiss(boolean authenticated, int targetId,
-                boolean bypassSecondaryLockScreen) { }
-        @Override
-        public void onUserInput() { }
-        @Override
-        public void reset() {}
-    };
 
     protected KeyguardInputViewController(T view, SecurityMode securityMode,
             KeyguardSecurityCallback keyguardSecurityCallback) {
         super(view);
         mSecurityMode = securityMode;
-        mKeyguardSecurityCallback = keyguardSecurityCallback;
+        mView.setKeyguardCallback(keyguardSecurityCallback);
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        mView.reset();
     }
 
     @Override
@@ -82,40 +63,63 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
         return mSecurityMode;
     }
 
-    protected KeyguardSecurityCallback getKeyguardSecurityCallback() {
-        if (mPaused) {
-            return mNullCallback;
-        }
 
-        return mKeyguardSecurityCallback;
+    @Override
+    public void setKeyguardCallback(KeyguardSecurityCallback callback) {
+        mView.setKeyguardCallback(callback);
+    }
+
+    @Override
+    public void setLockPatternUtils(LockPatternUtils utils) {
+        mView.setLockPatternUtils(utils);
     }
 
     @Override
     public void reset() {
+        mView.reset();
     }
 
     @Override
     public void onPause() {
-        mPaused = true;
+        mView.onPause();
     }
 
     @Override
     public void onResume(int reason) {
-        mPaused = false;
+        mView.onResume(reason);
+    }
+
+    @Override
+    public boolean needsInput() {
+        return mView.needsInput();
+    }
+
+    @Override
+    public KeyguardSecurityCallback getCallback() {
+        return mView.getCallback();
     }
 
     @Override
     public void showPromptReason(int reason) {
+        mView.showPromptReason(reason);
     }
 
     @Override
     public void showMessage(CharSequence message, ColorStateList colorState) {
+        mView.showMessage(message, colorState);
     }
 
+    @Override
+    public void showUsabilityHint() {
+        mView.showUsabilityHint();
+    }
+
+    @Override
     public void startAppearAnimation() {
         mView.startAppearAnimation();
     }
 
+    @Override
     public boolean startDisappearAnimation(Runnable finishRunnable) {
         return mView.startDisappearAnimation(finishRunnable);
     }
@@ -123,6 +127,16 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
     @Override
     public CharSequence getTitle() {
         return mView.getTitle();
+    }
+
+    @Override
+    public boolean disallowInterceptTouch(MotionEvent event) {
+        return mView.disallowInterceptTouch(event);
+    }
+
+    @Override
+    public void onStartingToHide() {
+        mView.onStartingToHide();
     }
 
     /** Finds the index of this view in the suppplied parent view. */

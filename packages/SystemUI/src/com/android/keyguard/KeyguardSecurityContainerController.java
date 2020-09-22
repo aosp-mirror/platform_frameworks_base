@@ -50,6 +50,9 @@ import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
 
 /** Controller for {@link KeyguardSecurityContainer} */
@@ -68,6 +71,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final UiEventLogger mUiEventLogger;
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardSecurityViewFlipperController mSecurityViewFlipperController;
+    private final List<KeyguardInputViewController> mChildren = new ArrayList<>();
 
     private SecurityCallback mSecurityCallback;
     private SecurityMode mCurrentSecurityMode = SecurityMode.Invalid;
@@ -133,6 +137,28 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         }
     };
 
+    // The following is used to ignore callbacks from SecurityViews that are no longer current
+    // (e.g. face unlock). This avoids unwanted asynchronous events from messing with the
+    // state for the current security method.
+    private KeyguardSecurityCallback mNullCallback = new KeyguardSecurityCallback() {
+        @Override
+        public void userActivity() { }
+        @Override
+        public void reportUnlockAttempt(int userId, boolean success, int timeoutMs) { }
+        @Override
+        public boolean isVerifyUnlockOnly() {
+            return false;
+        }
+        @Override
+        public void dismiss(boolean securityVerified, int targetUserId) { }
+        @Override
+        public void dismiss(boolean authenticated, int targetId,
+                boolean bypassSecondaryLockScreen) { }
+        @Override
+        public void onUserInput() { }
+        @Override
+        public void reset() {}
+    };
 
     private SwipeListener mSwipeListener = new SwipeListener() {
         @Override
@@ -163,6 +189,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mUiEventLogger = uiEventLogger;
         mKeyguardStateController = keyguardStateController;
         mSecurityViewFlipperController = securityViewFlipperController;
+        view.setLockPatternUtils(mLockPatternUtils);
         mAdminSecondaryLockScreenController = adminSecondaryLockScreenControllerFactory.create(
                 mKeyguardSecurityCallback);
     }
@@ -186,7 +213,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     public void onPause() {
         mAdminSecondaryLockScreenController.hide();
         if (mCurrentSecurityMode != SecurityMode.None) {
-            getCurrentSecurityController().onPause();
+            getSecurityView(mCurrentSecurityMode).onPause();
         }
         mView.onPause();
     }
@@ -210,13 +237,13 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             if (reason != PROMPT_REASON_NONE) {
                 Log.i(TAG, "Strong auth required, reason: " + reason);
             }
-            getCurrentSecurityController().showPromptReason(reason);
+            getSecurityView(mCurrentSecurityMode).showPromptReason(reason);
         }
     }
 
     public void showMessage(CharSequence message, ColorStateList colorState) {
         if (mCurrentSecurityMode != SecurityMode.None) {
-            getCurrentSecurityController().showMessage(message, colorState);
+            getSecurityView(mCurrentSecurityMode).showMessage(message, colorState);
         }
     }
 
@@ -240,7 +267,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     @Override
     public void onResume(int reason) {
         if (mCurrentSecurityMode != SecurityMode.None) {
-            getCurrentSecurityController().onResume(reason);
+            getSecurityView(mCurrentSecurityMode).onResume(reason);
         }
         mView.onResume(
                 mSecurityModel.getSecurityMode(KeyguardUpdateMonitor.getCurrentUser()),
@@ -249,7 +276,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
     public void startAppearAnimation() {
         if (mCurrentSecurityMode != SecurityMode.None) {
-            getCurrentSecurityController().startAppearAnimation();
+            getSecurityView(mCurrentSecurityMode).startAppearAnimation();
         }
     }
 
@@ -257,7 +284,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mView.startDisappearAnimation(getCurrentSecurityMode());
 
         if (mCurrentSecurityMode != SecurityMode.None) {
-            return getCurrentSecurityController().startDisappearAnimation(onFinishRunnable);
+            return getSecurityView(mCurrentSecurityMode).startDisappearAnimation(
+                    onFinishRunnable);
         }
 
         return false;
@@ -265,7 +293,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
     public void onStartingToHide() {
         if (mCurrentSecurityMode != SecurityMode.None) {
-            getCurrentSecurityController().onStartingToHide();
+            getSecurityView(mCurrentSecurityMode).onStartingToHide();
         }
     }
 
@@ -362,7 +390,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     }
 
     public boolean needsInput() {
-        return getCurrentSecurityController().needsInput();
+        return mSecurityViewFlipperController.needsInput();
     }
 
     /**
@@ -379,19 +407,21 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             return;
         }
 
-        KeyguardInputViewController<KeyguardInputView> oldView = getCurrentSecurityController();
+        KeyguardInputViewController oldView = getSecurityView(mCurrentSecurityMode);
+        KeyguardInputViewController newView = getSecurityView(securityMode);
 
         // Emulate Activity life cycle
         if (oldView != null) {
             oldView.onPause();
+            oldView.setKeyguardCallback(mNullCallback); // ignore requests from old view
         }
-
-        KeyguardInputViewController<KeyguardInputView> newView = changeSecurityMode(securityMode);
         if (newView != null) {
             newView.onResume(KeyguardSecurityView.VIEW_REVEALED);
+            newView.setKeyguardCallback(mKeyguardSecurityCallback);
             mSecurityViewFlipperController.show(newView);
         }
 
+        mCurrentSecurityMode = securityMode;
         mSecurityCallback.onSecurityModeChanged(
                 securityMode, newView != null && newView.needsInput());
     }
@@ -440,14 +470,28 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         }
     }
 
-    private KeyguardInputViewController<KeyguardInputView> getCurrentSecurityController() {
-        return mSecurityViewFlipperController
-                .getSecurityView(mCurrentSecurityMode, mKeyguardSecurityCallback);
+    @Override
+    public void setKeyguardCallback(KeyguardSecurityCallback callback) {
+        // no-op. This should never be reset.
     }
 
-    private KeyguardInputViewController<KeyguardInputView> changeSecurityMode(
-            SecurityMode securityMode) {
-        mCurrentSecurityMode = securityMode;
-        return getCurrentSecurityController();
+    @Override
+    public void setLockPatternUtils(LockPatternUtils utils) {
+        // We already have one of these.
+    }
+
+    @Override
+    public KeyguardSecurityCallback getCallback() {
+        return mView.getCallback();
+    }
+
+    @Override
+    public void showUsabilityHint() {
+        mView.showUsabilityHint();
+    }
+
+    private KeyguardInputViewController getSecurityView(SecurityMode securityMode) {
+        return mSecurityViewFlipperController
+                .getSecurityView(securityMode, mKeyguardSecurityCallback);
     }
 }

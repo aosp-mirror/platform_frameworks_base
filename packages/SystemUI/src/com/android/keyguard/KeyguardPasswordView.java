@@ -16,13 +16,6 @@
 
 package com.android.keyguard;
 
-import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN;
-import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NONE;
-import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_PREPARE_FOR_UPDATE;
-import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART;
-import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
-import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
-
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -37,7 +30,8 @@ import com.android.systemui.R;
  * Displays an alphanumeric (latin-1) key entry for the user to enter
  * an unlock password
  */
-public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
+public class KeyguardPasswordView extends KeyguardAbsKeyInputView
+        implements KeyguardSecurityView {
 
     private final int mDisappearYTranslation;
 
@@ -73,6 +67,21 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
     protected int getPasswordTextViewId() {
         return R.id.passwordEntry;
     }
+
+    @Override
+    public void onPause() {
+    }
+
+    @Override
+    public void onResume(int reason) {
+
+    }
+
+    @Override
+    public boolean needsInput() {
+        return true;
+    }
+
 
     @Override
     protected int getPromptReasonStringRes(int reason) {
@@ -127,6 +136,10 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
     @Override
     protected void setPasswordEntryInputEnabled(boolean enabled) {
         mPasswordEntryDisabler.setInputEnabled(enabled);
+    }
+
+    @Override
+    public void showUsabilityHint() {
     }
 
     @Override
