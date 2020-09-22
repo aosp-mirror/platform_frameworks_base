@@ -295,12 +295,6 @@ interface IActivityTaskManager {
     ComponentName getActivityClassForToken(in IBinder token);
     String getPackageForToken(in IBinder token);
 
-    /**
-     * Try to place task to provided position. The final position might be different depending on
-     * current user and stacks state. The task will be moved to target stack if it's currently in
-     * different stack.
-     */
-    void positionTaskInStack(int taskId, int stackId, int position);
     void reportSizeConfigurations(in IBinder token, in int[] horizontalSizeConfiguration,
             in int[] verticalSizeConfigurations, in int[] smallestWidthConfigurations);
 
