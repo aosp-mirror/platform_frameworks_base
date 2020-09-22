@@ -485,29 +485,3 @@ java_library_static {
         ":hwbinder-stubs-docs",
     ],
 }
-
-/////////////////////////////////////////////////////////////////////
-// api/*-current.txt files for use by modules in other directories
-// like the CTS test
-/////////////////////////////////////////////////////////////////////
-
-filegroup {
-    name: "frameworks-base-api-current.txt",
-    srcs: [
-        "api/current.txt",
-    ],
-}
-
-filegroup {
-    name: "frameworks-base-api-system-current.txt",
-    srcs: [
-        "api/system-current.txt",
-    ],
-}
-
-filegroup {
-    name: "frameworks-base-api-system-removed.txt",
-    srcs: [
-        "api/system-removed.txt",
-    ],
-}
