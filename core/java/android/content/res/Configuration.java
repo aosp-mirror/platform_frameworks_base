@@ -19,6 +19,7 @@ package android.content.res;
 import static android.content.ConfigurationProto.COLOR_MODE;
 import static android.content.ConfigurationProto.DENSITY_DPI;
 import static android.content.ConfigurationProto.FONT_SCALE;
+import static android.content.ConfigurationProto.FORCE_BOLD_TEXT;
 import static android.content.ConfigurationProto.HARD_KEYBOARD_HIDDEN;
 import static android.content.ConfigurationProto.KEYBOARD;
 import static android.content.ConfigurationProto.KEYBOARD_HIDDEN;
@@ -332,6 +333,26 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public int screenLayout;
 
     /**
+     * An undefined forceBoldText.
+     */
+    public static final int FORCE_BOLD_TEXT_UNDEFINED = 0;
+
+    /**
+     * Text is not bold.
+     */
+    public static final int FORCE_BOLD_TEXT_NO = 1;
+
+    /**
+     * Text is bold.
+     */
+    public static final int FORCE_BOLD_TEXT_YES = 2;
+
+    /**
+     * Current user preference for displaying all text in bold.
+     */
+    public int forceBoldText;
+
+    /**
      * Configuration relating to the windowing state of the object associated with this
      * Configuration. Contents of this field are not intended to affect resources, but need to be
      * communicated and propagated at the same time as the rest of Configuration.
@@ -466,6 +487,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
         if ((diff & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0) {
             list.add("CONFIG_WINDOW_CONFIGURATION");
+        }
+        if ((diff & ActivityInfo.CONFIG_FORCE_BOLD_TEXT) != 0) {
+            list.add("CONFIG_AUTO_BOLD_TEXT");
         }
         StringBuilder builder = new StringBuilder("{");
         for (int i = 0, n = list.size(); i < n; i++) {
@@ -957,6 +981,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         assetsSeq = o.assetsSeq;
         seq = o.seq;
         windowConfiguration.setTo(o.windowConfiguration);
+        forceBoldText = o.forceBoldText;
     }
 
     public String toString() {
@@ -1112,6 +1137,12 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (seq != 0) {
             sb.append(" s.").append(seq);
         }
+        if (forceBoldText != FORCE_BOLD_TEXT_UNDEFINED) {
+            sb.append(" boldText=");
+            sb.append(forceBoldText);
+        } else {
+            sb.append(" ?boldText");
+        }
         sb.append('}');
         return sb.toString();
     }
@@ -1152,6 +1183,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             if (!persisted && windowConfiguration != null) {
                 windowConfiguration.dumpDebug(protoOutputStream, WINDOW_CONFIGURATION);
             }
+            protoOutputStream.write(FORCE_BOLD_TEXT, forceBoldText);
         }
         protoOutputStream.write(ORIENTATION, orientation);
         protoOutputStream.write(SCREEN_WIDTH_DP, screenWidthDp);
@@ -1315,6 +1347,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                             Slog.e(TAG, "error parsing locale list in configuration.", e);
                         }
                         break;
+                    case (int) FORCE_BOLD_TEXT:
+                        forceBoldText = protoInputStream.readInt(FORCE_BOLD_TEXT);
+                        break;
                 }
             }
         } finally {
@@ -1410,6 +1445,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         assetsSeq = ASSETS_SEQ_UNDEFINED;
         seq = 0;
         windowConfiguration.setToDefaults();
+        forceBoldText = FORCE_BOLD_TEXT_UNDEFINED;
     }
 
     /**
@@ -1607,6 +1643,12 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
         }
 
+        if (delta.forceBoldText != FORCE_BOLD_TEXT_UNDEFINED
+                && delta.forceBoldText != forceBoldText) {
+            changed |= ActivityInfo.CONFIG_FORCE_BOLD_TEXT;
+            forceBoldText = delta.forceBoldText;
+        }
+
         return changed;
     }
 
@@ -1685,6 +1727,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if ((mask & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0) {
             windowConfiguration.setTo(delta.windowConfiguration, windowMask);
         }
+        if ((mask & ActivityInfo.CONFIG_FORCE_BOLD_TEXT) != 0) {
+            forceBoldText = delta.forceBoldText;
+        }
     }
 
     /**
@@ -1717,6 +1762,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * PackageManager.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE}.
      * {@link android.content.pm.ActivityInfo#CONFIG_LAYOUT_DIRECTION
      * PackageManager.ActivityInfo.CONFIG_LAYOUT_DIRECTION}.
+     * {@link android.content.pm.ActivityInfo#CONFIG_FORCE_BOLD_TEXT
+     *  PackageManager.ActivityInfo.CONFIG_FORCE_BOLD_TEXT.
      */
     public int diff(Configuration delta) {
         return diff(delta, false /* compareUndefined */, false /* publicOnly */);
@@ -1840,6 +1887,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
         }
 
+        if ((compareUndefined || delta.forceBoldText != FORCE_BOLD_TEXT_UNDEFINED)
+                && forceBoldText != delta.forceBoldText) {
+            changed |= ActivityInfo.CONFIG_FORCE_BOLD_TEXT;
+        }
         return changed;
     }
 
@@ -1933,6 +1984,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeValue(windowConfiguration);
         dest.writeInt(assetsSeq);
         dest.writeInt(seq);
+        dest.writeInt(forceBoldText);
     }
 
     public void readFromParcel(Parcel source) {
@@ -1964,6 +2016,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         windowConfiguration.setTo((WindowConfiguration) source.readValue(null));
         assetsSeq = source.readInt();
         seq = source.readInt();
+        forceBoldText = source.readInt();
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<Configuration> CREATOR
@@ -2062,6 +2115,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (n != 0) return n;
         n = windowConfiguration.compareTo(that.windowConfiguration);
         if (n != 0) return n;
+        n = this.forceBoldText - that.forceBoldText;
+        if (n != 0) return n;
 
         // if (n != 0) return n;
         return n;
@@ -2102,6 +2157,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         result = 31 * result + smallestScreenWidthDp;
         result = 31 * result + densityDpi;
         result = 31 * result + assetsSeq;
+        result = 31 * result + forceBoldText;
         return result;
     }
 
@@ -2674,6 +2730,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (!base.windowConfiguration.equals(change.windowConfiguration)) {
             delta.windowConfiguration.setTo(change.windowConfiguration);
         }
+
+        if (base.forceBoldText != change.forceBoldText) {
+            delta.forceBoldText = change.forceBoldText;
+        }
         return delta;
     }
 
@@ -2697,6 +2757,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     private static final String XML_ATTR_SMALLEST_WIDTH = "sw";
     private static final String XML_ATTR_DENSITY = "density";
     private static final String XML_ATTR_APP_BOUNDS = "app_bounds";
+    private static final String XML_ATTR_FORCE_BOLD_TEXT = "forceBoldText";
 
     /**
      * Reads the attributes corresponding to Configuration member fields from the Xml parser.
@@ -2746,6 +2807,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                         SMALLEST_SCREEN_WIDTH_DP_UNDEFINED);
         configOut.densityDpi = XmlUtils.readIntAttribute(parser, XML_ATTR_DENSITY,
                 DENSITY_DPI_UNDEFINED);
+        configOut.forceBoldText = XmlUtils.readIntAttribute(parser, XML_ATTR_FORCE_BOLD_TEXT,
+                FORCE_BOLD_TEXT_UNDEFINED);
 
         // For persistence, we don't care about assetsSeq and WindowConfiguration, so do not read it
         // out.
