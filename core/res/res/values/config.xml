@@ -4407,4 +4407,7 @@
 
     <!-- Component names of the services which will keep critical code path warm -->
     <string-array name="config_keep_warming_services" translatable="false" />
+
+    <!-- Whether to select voice/data/sms preference without user confirmation -->
+    <bool name="config_voice_data_sms_auto_fallback">false</bool>
 </resources>
