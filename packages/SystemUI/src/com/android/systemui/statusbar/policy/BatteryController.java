@@ -53,9 +53,9 @@ public interface BatteryController extends DemoMode, Dumpable,
     boolean isAodPowerSave();
 
     /**
-     * Returns {@code true} if the device is currently in wireless charging mode.
+     * Initializes the class.
      */
-    default boolean isWirelessCharging() { return false; }6
+    default void init() { }
 
     /**
      * Returns {@code true} if reverse is supported.
