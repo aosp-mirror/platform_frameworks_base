@@ -2304,18 +2304,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     /** Starts a batch of visibility updates. */
     void beginActivityVisibilityUpdate() {
+        if (mVisibilityTransactionDepth == 0) {
+            getKeyguardController().updateVisibility();
+        }
         mVisibilityTransactionDepth++;
     }
 
     /** Ends a batch of visibility updates. */
-    void endActivityVisibilityUpdate(ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean notifyClients) {
-        if (mVisibilityTransactionDepth == 1) {
-            getKeyguardController().visibilitiesUpdated();
-            // commit visibility to activities
-            mRootWindowContainer.commitActivitiesVisible(starting, configChanges, preserveWindows,
-                    notifyClients);
-        }
+    void endActivityVisibilityUpdate() {
         mVisibilityTransactionDepth--;
     }
 

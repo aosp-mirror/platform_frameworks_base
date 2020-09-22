@@ -44,7 +44,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -292,8 +291,7 @@ public class RecentTasksTest extends WindowTestsBase {
             mRecentTasks.add(mTasks.get(1));
             invocation.callRealMethod();
             return null;
-        }).when(mSupervisor).endActivityVisibilityUpdate(any(), anyInt(), anyBoolean(),
-                anyBoolean());
+        }).when(mSupervisor).endActivityVisibilityUpdate();
 
         mTaskContainer.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
                 false /* preserveWindows */, false /* notifyClients */);
