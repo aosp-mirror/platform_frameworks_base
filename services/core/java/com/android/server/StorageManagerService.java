@@ -18,9 +18,7 @@ package com.android.server;
 
 import static android.Manifest.permission.ACCESS_MTP;
 import static android.Manifest.permission.INSTALL_PACKAGES;
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static android.Manifest.permission.WRITE_MEDIA_STORAGE;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
@@ -4337,18 +4335,8 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             // Determine if caller is holding runtime permission
-            final boolean hasRead = StorageManager.checkPermissionAndCheckOp(mContext, false, 0,
-                    uid, packageName, READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE);
             final boolean hasWrite = StorageManager.checkPermissionAndCheckOp(mContext, false, 0,
                     uid, packageName, WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE);
-
-            // We're only willing to give out broad access if they also hold
-            // runtime permission; this is a firm CDD requirement
-            final boolean hasFull = mIPackageManager.checkUidPermission(WRITE_MEDIA_STORAGE,
-                    uid) == PERMISSION_GRANTED;
-            if (hasFull && hasWrite) {
-                return Zygote.MOUNT_EXTERNAL_FULL;
-            }
 
             // We're only willing to give out installer access if they also hold
             // runtime permission; this is a firm CDD requirement
@@ -4369,19 +4357,7 @@ class StorageManagerService extends IStorageManager.Stub
             if ((hasInstall || hasInstallOp) && hasWrite) {
                 return Zygote.MOUNT_EXTERNAL_INSTALLER;
             }
-
-            // Otherwise we're willing to give out sandboxed or non-sandboxed if
-            // they hold the runtime permission
-            boolean hasLegacy = mIAppOpsService.checkOperation(OP_LEGACY_STORAGE,
-                    uid, packageName) == MODE_ALLOWED;
-
-            if (hasLegacy && hasWrite) {
-                return Zygote.MOUNT_EXTERNAL_WRITE;
-            } else if (hasLegacy && hasRead) {
-                return Zygote.MOUNT_EXTERNAL_READ;
-            } else {
-                return Zygote.MOUNT_EXTERNAL_DEFAULT;
-            }
+            return Zygote.MOUNT_EXTERNAL_DEFAULT;
         } catch (RemoteException e) {
             // Should not happen
         }
