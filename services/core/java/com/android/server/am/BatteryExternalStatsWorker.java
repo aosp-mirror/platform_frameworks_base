@@ -33,7 +33,6 @@ import android.telephony.ModemActivityInfo;
 import android.telephony.TelephonyManager;
 import android.util.IntArray;
 import android.util.Slog;
-import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BatteryStatsImpl;
@@ -607,49 +606,11 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             }
             wasReset = true;
         } else {
-            final long totalActiveTimeMs = txTimeMs + rxTimeMs;
-            long maxExpectedIdleTimeMs;
-            if (totalActiveTimeMs > timePeriodMs) {
-                // Cap the max idle time at zero since the active time consumed the whole time
-                maxExpectedIdleTimeMs = 0;
-                if (totalActiveTimeMs > timePeriodMs + MAX_WIFI_STATS_SAMPLE_ERROR_MILLIS) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Total Active time ");
-                    TimeUtils.formatDuration(totalActiveTimeMs, sb);
-                    sb.append(" is longer than sample period ");
-                    TimeUtils.formatDuration(timePeriodMs, sb);
-                    sb.append(".\n");
-                    sb.append("Previous WiFi snapshot: ").append("idle=");
-                    TimeUtils.formatDuration(lastIdleMs, sb);
-                    sb.append(" rx=");
-                    TimeUtils.formatDuration(lastRxMs, sb);
-                    sb.append(" tx=");
-                    TimeUtils.formatDuration(lastTxMs, sb);
-                    sb.append(" e=").append(lastEnergy);
-                    sb.append("\n");
-                    sb.append("Current WiFi snapshot: ").append("idle=");
-                    TimeUtils.formatDuration(latest.getControllerIdleDurationMillis(), sb);
-                    sb.append(" rx=");
-                    TimeUtils.formatDuration(latest.getControllerRxDurationMillis(), sb);
-                    sb.append(" tx=");
-                    TimeUtils.formatDuration(latest.getControllerTxDurationMillis(), sb);
-                    sb.append(" e=").append(latest.getControllerEnergyUsedMicroJoules());
-                    Slog.wtf(TAG, sb.toString());
-                }
-            } else {
-                maxExpectedIdleTimeMs = timePeriodMs - totalActiveTimeMs;
-            }
             // These times seem to be the most reliable.
             deltaControllerTxDurationMillis = txTimeMs;
             deltaControllerRxDurationMillis = rxTimeMs;
             deltaControllerScanDurationMillis = scanTimeMs;
-            // WiFi calculates the idle time as a difference from the on time and the various
-            // Rx + Tx times. There seems to be some missing time there because this sometimes
-            // becomes negative. Just cap it at 0 and ensure that it is less than the expected idle
-            // time from the difference in timestamps.
-            // b/21613534
-            deltaControllerIdleDurationMillis =
-                    Math.min(maxExpectedIdleTimeMs, Math.max(0, idleTimeMs));
+            deltaControllerIdleDurationMillis = idleTimeMs;
             deltaControllerEnergyUsedMicroJoules =
                     Math.max(0, latest.getControllerEnergyUsedMicroJoules() - lastEnergy);
             wasReset = false;
