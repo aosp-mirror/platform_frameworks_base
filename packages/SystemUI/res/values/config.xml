@@ -565,4 +565,10 @@
 
     <!-- Change the volume row tint when it is inactive, i.e. when it is being dismissed -->
     <bool name="config_changeVolumeRowTintWhenInactive">true</bool>
+
+    <!-- The duraction of the show animation for the volume dialog in milliseconds -->
+    <integer name="config_dialogShowAnimationDurationMs">300</integer>
+
+    <!-- The duraction of the hide animation for the volume dialog in milliseconds -->
+    <integer name="config_dialogHideAnimationDurationMs">250</integer>
 </resources>
