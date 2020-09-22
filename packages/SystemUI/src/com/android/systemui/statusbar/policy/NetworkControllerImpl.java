@@ -445,6 +445,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     @Override
+    public boolean isMobileDataNetworkInService() {
+        MobileSignalController controller = getDataController();
+        return controller != null && controller.isInService();
+    }
+
+    @Override
     public int getNumberSubscriptions() {
         return mMobileSignalControllers.size();
     }
