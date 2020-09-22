@@ -43,7 +43,8 @@ public class PowerStatsService extends SystemService {
     private static final boolean DEBUG = false;
     private static final String DATA_STORAGE_SUBDIR = "powerstats";
     private static final int DATA_STORAGE_VERSION = 0;
-    private static final String DATA_STORAGE_FILENAME = "log.powerstats." + DATA_STORAGE_VERSION;
+    private static final String METER_FILENAME = "log.powerstats.meter." + DATA_STORAGE_VERSION;
+    private static final String MODEL_FILENAME = "log.powerstats.model." + DATA_STORAGE_VERSION;
 
     private final Injector mInjector;
 
@@ -63,8 +64,12 @@ public class PowerStatsService extends SystemService {
                 DATA_STORAGE_SUBDIR);
         }
 
-        String createDataStorageFilename() {
-            return DATA_STORAGE_FILENAME;
+        String createMeterFilename() {
+            return METER_FILENAME;
+        }
+
+        String createModelFilename() {
+            return MODEL_FILENAME;
         }
 
         IPowerStatsHALWrapper createPowerStatsHALWrapperImpl() {
@@ -72,9 +77,10 @@ public class PowerStatsService extends SystemService {
         }
 
         PowerStatsLogger createPowerStatsLogger(Context context, File dataStoragePath,
-                String dataStorageFilename, IPowerStatsHALWrapper powerStatsHALWrapper) {
-            return new PowerStatsLogger(context, dataStoragePath, dataStorageFilename,
-                powerStatsHALWrapper);
+                String meterFilename, String modelFilename,
+                IPowerStatsHALWrapper powerStatsHALWrapper) {
+            return new PowerStatsLogger(context, dataStoragePath, meterFilename,
+                modelFilename, powerStatsHALWrapper);
         }
 
         BatteryTrigger createBatteryTrigger(Context context, PowerStatsLogger powerStatsLogger) {
@@ -91,11 +97,15 @@ public class PowerStatsService extends SystemService {
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
-            if (args.length > 0 && "--proto".equals(args[0])) {
-                if (mPowerStatsLogger == null) {
-                    Log.e(TAG, "PowerStats HAL is not initialized.  No data available.");
-                } else {
-                    mPowerStatsLogger.writeToFile(fd);
+            if (mPowerStatsLogger == null) {
+                Log.e(TAG, "PowerStats HAL is not initialized.  No data available.");
+            } else {
+                if (args.length > 0 && "--proto".equals(args[0])) {
+                    if ("model".equals(args[1])) {
+                        mPowerStatsLogger.writeModelDataToFile(fd);
+                    } else if ("meter".equals(args[1])) {
+                        mPowerStatsLogger.writeMeterDataToFile(fd);
+                    }
                 }
             }
         }
@@ -121,8 +131,8 @@ public class PowerStatsService extends SystemService {
 
             // Only start logger and triggers if initialization is successful.
             mPowerStatsLogger = mInjector.createPowerStatsLogger(mContext,
-                mInjector.createDataStoragePath(), mInjector.createDataStorageFilename(),
-                mPowerStatsHALWrapper);
+                mInjector.createDataStoragePath(), mInjector.createMeterFilename(),
+                mInjector.createModelFilename(), mPowerStatsHALWrapper);
             mBatteryTrigger = mInjector.createBatteryTrigger(mContext, mPowerStatsLogger);
             mTimerTrigger = mInjector.createTimerTrigger(mContext, mPowerStatsLogger);
         } else {

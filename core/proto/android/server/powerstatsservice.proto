@@ -20,44 +20,99 @@ package com.android.server.powerstats;
 
 option java_multiple_files = true;
 
-message IncidentReportProto {
+/**
+ * IncidentReportMeterProto is used only in the parsing tool located
+ * in frameworks/base/tools which is used to parse this data out of
+ * incident reports.
+ */
+message IncidentReportMeterProto {
     /** Section number matches that in incident.proto */
-    optional PowerStatsServiceProto incident_report = 3054;
-}
-
-message PowerStatsServiceProto {
-    repeated RailInfoProto rail_info = 1;
-    repeated EnergyDataProto energy_data = 2;
+    optional PowerStatsServiceMeterProto incident_report = 3054;
 }
 
 /**
- * Rail information:
- * Reports information related to the rails being monitored.
+ * IncidentReportModelProto is used only in the parsing tool located
+ * in frameworks/base/tools which is used to parse this data out of
+ * incident reports.
  */
-message RailInfoProto {
-    /** Index corresponding to the rail */
-    optional int32 index = 1;
-
-    /** Name of the rail (opaque to the framework) */
-    optional string rail_name = 2;
-
-    /** Name of the subsystem to which this rail belongs (opaque to the framework) */
-    optional string subsys_name = 3;
-
-    /** Hardware sampling rate */
-    optional int32 sampling_rate = 4;
+message IncidentReportModelProto {
+    /** Section number matches that in incident.proto */
+    optional PowerStatsServiceModelProto incident_report = 3055;
 }
 
 /**
- * Rail level energy measurements:
- * Reports accumulated energy since boot on each rail.
+ * EnergyConsumer (model) data is exposed by the PowerStats HAL.  This data
+ * represents modeled energy consumption estimates and is provided per
+ * subsystem.  The default subsystems are defined in EnergyConsumerId.aidl.
+ * Energy model estimates will be logged to incident reports in addition to
+ * the raw energy meter data.
  */
-message EnergyDataProto {
+message PowerStatsServiceModelProto {
+    repeated EnergyConsumerIdProto energy_consumer_id = 1;
+    repeated EnergyConsumerResultProto energy_consumer_result = 2;
+}
+
+/**
+ * EnergyMeasurement (meter) data is exposed by the PowerStats HAL.  This data
+ * represents measurements taken directly from on-device energy meters.
+ * This raw energy meter data will be logged to incident reports.
+ */
+message PowerStatsServiceMeterProto {
+    repeated ChannelInfoProto channel_info = 1;
+    repeated EnergyMeasurementProto energy_measurement = 2;
+}
+
+/**
+ * Energy consumer ID:
+ * A list of default subsystems for which energy consumption estimates
+ * may be provided (hardware dependent).
+ */
+message EnergyConsumerIdProto {
+    /** Unique index identifying the energy consumer. */
+    optional int32 energy_consumer_id = 1;
+}
+
+/**
+ * Energy consumer result:
+ * An estimate of energy consumption since boot for the subsystem identified
+ * by the unique energy_consumer_id.
+ */
+message EnergyConsumerResultProto {
+    /** Unique index identifying the energy consumer. */
+    optional int32 energy_consumer_id = 1;
+
+    /** Time since device boot(CLOCK_BOOTTIME) in milli-seconds */
+    optional int64 timestamp_ms = 2;
+
+    /** Accumulated energy since device boot in microwatt-seconds (uWs) */
+    optional int64 energy_uws = 3;
+}
+
+/**
+ * Channel information:
+ * Reports information related to the energy meter channels being monitored.
+ */
+message ChannelInfoProto {
     /**
-     * Index corresponding to the rail. This index matches
-     * the index returned in RailInfo
+     * Index corresponding to the energy meter channel. This index matches
+     * the index returned in ChannelInfo.
      */
-    optional int32 index = 1;
+    optional int32 channel_id = 1;
+
+    /** Name of the energy meter channel */
+    optional string channel_name = 2;
+}
+
+/**
+ * Energy measurements:
+ * Reports accumulated energy since boot for each energy meter.
+ */
+message EnergyMeasurementProto {
+    /**
+     * Index corresponding to the energy meter channel. This index matches
+     * the index returned in ChannelInfo.
+     */
+    optional int32 channel_id = 1;
 
     /** Time since device boot(CLOCK_BOOTTIME) in milli-seconds */
     optional int64 timestamp_ms = 2;

@@ -198,19 +198,21 @@ public class PowerStatsDataStorage {
      *             array and written to on-device storage.
      */
     public void write(byte[] data) {
-        mLock.lock();
+        if (data.length > 0) {
+            mLock.lock();
 
-        long currentTimeMillis = System.currentTimeMillis();
-        try {
-            DataElement dataElement = new DataElement(data);
-            mFileRotator.rewriteActive(new DataRewriter(dataElement.toByteArray()),
-                    currentTimeMillis);
-            mFileRotator.maybeRotate(currentTimeMillis);
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to write to on-device storage: " + e);
+            long currentTimeMillis = System.currentTimeMillis();
+            try {
+                DataElement dataElement = new DataElement(data);
+                mFileRotator.rewriteActive(new DataRewriter(dataElement.toByteArray()),
+                        currentTimeMillis);
+                mFileRotator.maybeRotate(currentTimeMillis);
+            } catch (IOException e) {
+                Log.e(TAG, "Failed to write to on-device storage: " + e);
+            }
+
+            mLock.unlock();
         }
-
-        mLock.unlock();
     }
 
     /**

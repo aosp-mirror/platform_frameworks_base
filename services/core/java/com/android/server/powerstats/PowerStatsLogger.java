@@ -17,6 +17,9 @@
 package com.android.server.powerstats;
 
 import android.content.Context;
+import android.hardware.power.stats.ChannelInfo;
+import android.hardware.power.stats.EnergyConsumerResult;
+import android.hardware.power.stats.EnergyMeasurement;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -25,6 +28,10 @@ import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.server.powerstats.PowerStatsHALWrapper.IPowerStatsHALWrapper;
+import com.android.server.powerstats.ProtoStreamUtils.ChannelInfoUtils;
+import com.android.server.powerstats.ProtoStreamUtils.EnergyConsumerIdUtils;
+import com.android.server.powerstats.ProtoStreamUtils.EnergyConsumerResultUtils;
+import com.android.server.powerstats.ProtoStreamUtils.EnergyMeasurementUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -32,18 +39,19 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 
 /**
- * PowerStatsLogger is responsible for logging energy data to on-device
- * storage.  Messages are sent to its message handler to request that energy
- * data be logged, at which time it queries the PowerStats HAL and logs the
- * data to on-device storage.  The on-device storage is dumped to file by
- * calling writeToFile with a file descriptor that points to the output file.
+ * PowerStatsLogger is responsible for logging model and meter energy data to on-device storage.
+ * Messages are sent to its message handler to request that energy data be logged, at which time it
+ * queries the PowerStats HAL and logs the data to on-device storage.  The on-device storage is
+ * dumped to file by calling writeModelDataToFile or writeMeterDataToFile with a file descriptor
+ * that points to the output file.
  */
 public final class PowerStatsLogger extends Handler {
     private static final String TAG = PowerStatsLogger.class.getSimpleName();
     private static final boolean DEBUG = false;
     protected static final int MSG_LOG_TO_DATA_STORAGE = 0;
 
-    private final PowerStatsDataStorage mPowerStatsDataStorage;
+    private final PowerStatsDataStorage mPowerStatsMeterStorage;
+    private final PowerStatsDataStorage mPowerStatsModelStorage;
     private final IPowerStatsHALWrapper mPowerStatsHALWrapper;
 
     @Override
@@ -51,31 +59,40 @@ public final class PowerStatsLogger extends Handler {
         switch (msg.what) {
             case MSG_LOG_TO_DATA_STORAGE:
                 if (DEBUG) Log.d(TAG, "Logging to data storage");
-                PowerStatsData energyData =
-                        new PowerStatsData(mPowerStatsHALWrapper.readEnergyData());
-                mPowerStatsDataStorage.write(energyData.getProtoBytes());
+
+                // Log power meter data.
+                EnergyMeasurement[] energyMeasurements = mPowerStatsHALWrapper.readEnergyMeters();
+                mPowerStatsMeterStorage.write(
+                        EnergyMeasurementUtils.getProtoBytes(energyMeasurements));
+                if (DEBUG) EnergyMeasurementUtils.print(energyMeasurements);
+
+                // Log power model data.
+                EnergyConsumerResult[] energyConsumerResults =
+                    mPowerStatsHALWrapper.getEnergyConsumed();
+                mPowerStatsModelStorage.write(
+                        EnergyConsumerResultUtils.getProtoBytes(energyConsumerResults));
+                if (DEBUG) EnergyConsumerResultUtils.print(energyConsumerResults);
                 break;
         }
     }
 
     /**
-     * Writes data stored in PowerStatsDataStorage to a file descriptor.
+     * Writes meter data stored in PowerStatsDataStorage to a file descriptor.
      *
-     * @param fd FileDescriptor where data stored in PowerStatsDataStorage is
-     *           written.  Data is written in protobuf format as defined by
-     *           powerstatsservice.proto.
+     * @param fd FileDescriptor where meter data stored in PowerStatsDataStorage is written.  Data
+     *           is written in protobuf format as defined by powerstatsservice.proto.
      */
-    public void writeToFile(FileDescriptor fd) {
-        if (DEBUG) Log.d(TAG, "Writing to file");
+    public void writeMeterDataToFile(FileDescriptor fd) {
+        if (DEBUG) Log.d(TAG, "Writing meter data to file");
 
         final ProtoOutputStream pos = new ProtoOutputStream(fd);
 
         try {
-            PowerStatsData railInfo = new PowerStatsData(mPowerStatsHALWrapper.readRailInfo());
-            railInfo.toProto(pos);
-            if (DEBUG) railInfo.print();
+            ChannelInfo[] channelInfo = mPowerStatsHALWrapper.getEnergyMeterInfo();
+            ChannelInfoUtils.packProtoMessage(channelInfo, pos);
+            if (DEBUG) ChannelInfoUtils.print(channelInfo);
 
-            mPowerStatsDataStorage.read(new PowerStatsDataStorage.DataElementReadCallback() {
+            mPowerStatsMeterStorage.read(new PowerStatsDataStorage.DataElementReadCallback() {
                 @Override
                 public void onReadDataElement(byte[] data) {
                     try {
@@ -84,26 +101,70 @@ public final class PowerStatsLogger extends Handler {
                         // TODO(b/166535853): ProtoOutputStream doesn't provide a method to write
                         // a byte array that already contains a serialized proto, so I have to
                         // deserialize, then re-serialize.  This is computationally inefficient.
-                        final PowerStatsData energyData = new PowerStatsData(pis);
-                        energyData.toProto(pos);
-                        if (DEBUG) energyData.print();
+                        EnergyMeasurement[] energyMeasurement =
+                            EnergyMeasurementUtils.unpackProtoMessage(data);
+                        EnergyMeasurementUtils.packProtoMessage(energyMeasurement, pos);
+                        if (DEBUG) EnergyMeasurementUtils.print(energyMeasurement);
                     } catch (IOException e) {
-                        Log.e(TAG, "Failed to write energy data to incident report.");
+                        Log.e(TAG, "Failed to write energy meter data to incident report.");
                     }
                 }
             });
         } catch (IOException e) {
-            Log.e(TAG, "Failed to write rail info to incident report.");
+            Log.e(TAG, "Failed to write energy meter info to incident report.");
         }
 
         pos.flush();
     }
 
-    public PowerStatsLogger(Context context, File dataStoragePath, String dataStorageFilename,
-            IPowerStatsHALWrapper powerStatsHALWrapper) {
+    /**
+     * Writes model data stored in PowerStatsDataStorage to a file descriptor.
+     *
+     * @param fd FileDescriptor where model data stored in PowerStatsDataStorage is written.  Data
+     *           is written in protobuf format as defined by powerstatsservice.proto.
+     */
+    public void writeModelDataToFile(FileDescriptor fd) {
+        if (DEBUG) Log.d(TAG, "Writing model data to file");
+
+        final ProtoOutputStream pos = new ProtoOutputStream(fd);
+
+        try {
+            int[] energyConsumerId = mPowerStatsHALWrapper.getEnergyConsumerInfo();
+            EnergyConsumerIdUtils.packProtoMessage(energyConsumerId, pos);
+            if (DEBUG) EnergyConsumerIdUtils.print(energyConsumerId);
+
+            mPowerStatsModelStorage.read(new PowerStatsDataStorage.DataElementReadCallback() {
+                @Override
+                public void onReadDataElement(byte[] data) {
+                    try {
+                        final ProtoInputStream pis =
+                                new ProtoInputStream(new ByteArrayInputStream(data));
+                        // TODO(b/166535853): ProtoOutputStream doesn't provide a method to write
+                        // a byte array that already contains a serialized proto, so I have to
+                        // deserialize, then re-serialize.  This is computationally inefficient.
+                        EnergyConsumerResult[] energyConsumerResult =
+                            EnergyConsumerResultUtils.unpackProtoMessage(data);
+                        EnergyConsumerResultUtils.packProtoMessage(energyConsumerResult, pos);
+                        if (DEBUG) EnergyConsumerResultUtils.print(energyConsumerResult);
+                    } catch (IOException e) {
+                        Log.e(TAG, "Failed to write energy model data to incident report.");
+                    }
+                }
+            });
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to write energy model info to incident report.");
+        }
+
+        pos.flush();
+    }
+
+    public PowerStatsLogger(Context context, File dataStoragePath, String meterFilename,
+            String modelFilename, IPowerStatsHALWrapper powerStatsHALWrapper) {
         super(Looper.getMainLooper());
         mPowerStatsHALWrapper = powerStatsHALWrapper;
-        mPowerStatsDataStorage = new PowerStatsDataStorage(context, dataStoragePath,
-            dataStorageFilename);
+        mPowerStatsMeterStorage = new PowerStatsDataStorage(context, dataStoragePath,
+            meterFilename);
+        mPowerStatsModelStorage = new PowerStatsDataStorage(context, dataStoragePath,
+            modelFilename);
     }
 }
