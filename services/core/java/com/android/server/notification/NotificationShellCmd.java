@@ -66,8 +66,6 @@ public class NotificationShellCmd extends ShellCommand {
             + "  set_dnd [on|none (same as on)|priority|alarms|all|off (same as all)]"
             + "  allow_dnd PACKAGE [user_id (current user if not specified)]\n"
             + "  disallow_dnd PACKAGE [user_id (current user if not specified)]\n"
-            + "  suspend_package PACKAGE\n"
-            + "  unsuspend_package PACKAGE\n"
             + "  reset_assistant_user_set [user_id (current user if not specified)]\n"
             + "  get_approved_assistant [user_id (current user if not specified)]\n"
             + "  post [--help | flags] TAG TEXT\n"
@@ -258,25 +256,6 @@ public class NotificationShellCmd extends ShellCommand {
                     mBinderService.setNotificationAssistantAccessGrantedForUser(cn, userId, false);
                 }
                 break;
-                case "suspend_package": {
-                    // only use for testing
-                    mDirectService.simulatePackageSuspendBroadcast(true, getNextArgRequired());
-                }
-                break;
-                case "unsuspend_package": {
-                    // only use for testing
-                    mDirectService.simulatePackageSuspendBroadcast(false, getNextArgRequired());
-                }
-                break;
-                case "distract_package": {
-                    // only use for testing
-                    // Flag values are in
-                    // {@link android.content.pm.PackageManager.DistractionRestriction}.
-                    mDirectService.simulatePackageDistractionBroadcast(
-                            Integer.parseInt(getNextArgRequired()),
-                            getNextArgRequired().split(","));
-                    break;
-                }
                 case "reset_assistant_user_set": {
                     int userId = ActivityManager.getCurrentUser();
                     if (peekNextArg() != null) {
