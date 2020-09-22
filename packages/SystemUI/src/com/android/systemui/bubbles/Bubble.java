@@ -286,6 +286,15 @@ class Bubble implements BubbleViewProvider {
     }
 
     /**
+     * Sets whether this bubble is considered visually interruptive. Normally pulled from the
+     * {@link NotificationEntry}, this method is purely for testing.
+     */
+    @VisibleForTesting
+    void setVisuallyInterruptiveForTest(boolean visuallyInterruptive) {
+        mIsVisuallyInterruptive = visuallyInterruptive;
+    }
+
+    /**
      * Starts a task to inflate & load any necessary information to display a bubble.
      *
      * @param callback the callback to notify one the bubble is ready to be displayed.
@@ -411,6 +420,7 @@ class Bubble implements BubbleViewProvider {
             } else if (mIntent != null && entry.getBubbleMetadata().getIntent() == null) {
                 // Was an intent bubble now it's a shortcut bubble... still unregister the listener
                 mIntent.unregisterCancelListener(mIntentCancelListener);
+                mIntentActive = false;
                 mIntent = null;
             }
             mDeleteIntent = entry.getBubbleMetadata().getDeleteIntent();
