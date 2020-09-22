@@ -31,7 +31,7 @@ import java.util.Arrays;
  */
 public class SystemServerCpuThreadReader {
     private KernelCpuThreadReader mKernelCpuThreadReader;
-    private int[] mBinderThreadNativeTids;
+    private int[] mBinderThreadNativeTids = new int[0];  // Sorted
 
     private int[] mThreadCpuTimesUs;
     private int[] mBinderThreadCpuTimesUs;
@@ -75,7 +75,8 @@ public class SystemServerCpuThreadReader {
     }
 
     public void setBinderThreadNativeTids(int[] nativeTids) {
-        mBinderThreadNativeTids = nativeTids;
+        mBinderThreadNativeTids = nativeTids.clone();
+        Arrays.sort(mBinderThreadNativeTids);
     }
 
     /**
@@ -107,7 +108,8 @@ public class SystemServerCpuThreadReader {
                 int threadCpuUsagesSize = threadCpuUsages.size();
                 for (int j = 0; j < threadCpuUsagesSize; j++) {
                     KernelCpuThreadReader.ThreadCpuUsage tcu = threadCpuUsages.get(j);
-                    boolean isBinderThread = isBinderThread(tcu.threadId);
+                    boolean isBinderThread =
+                            Arrays.binarySearch(mBinderThreadNativeTids, tcu.threadId) >= 0;
 
                     final int len = Math.min(tcu.usageTimesMillis.length, mThreadCpuTimesUs.length);
                     for (int k = 0; k < len; k++) {
@@ -138,14 +140,4 @@ public class SystemServerCpuThreadReader {
         return mDeltaCpuThreadTimes;
     }
 
-    private boolean isBinderThread(int threadId) {
-        if (mBinderThreadNativeTids != null) {
-            for (int i = 0; i < mBinderThreadNativeTids.length; i++) {
-                if (threadId == mBinderThreadNativeTids[i]) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 }

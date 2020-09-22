@@ -119,8 +119,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
                     if (uidEntry != null) {
                         ArrayMap<CallStatKey, CallStat> callStats = uidEntry.mCallStats;
                         mCallStatsObserver.noteCallStats(uidEntry.workSourceUid,
-                                uidEntry.incrementalCallCount, callStats.values(),
-                                mNativeTids.toArray());
+                                uidEntry.incrementalCallCount, callStats.values()
+                        );
                         uidEntry.incrementalCallCount = 0;
                         for (int j = callStats.size() - 1; j >= 0; j--) {
                             callStats.valueAt(j).incrementalCallCount = 0;
@@ -168,6 +168,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     public void setCallStatsObserver(
             BinderInternal.CallStatsObserver callStatsObserver) {
         mCallStatsObserver = callStatsObserver;
+        noteBinderThreadNativeIds();
         noteCallsStatsDelayed();
     }
 
@@ -182,12 +183,12 @@ public class BinderCallsStats implements BinderInternal.Observer {
     @Override
     @Nullable
     public CallSession callStarted(Binder binder, int code, int workSourceUid) {
+        noteNativeThreadId();
+
         if (!mRecordingAllTransactionsForUid
                 && (mDeviceState == null || mDeviceState.isCharging())) {
             return null;
         }
-
-        noteNativeThreadId();
 
         final CallSession s = obtainCallSession();
         s.binderClass = binder.getClass();
@@ -359,6 +360,16 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 mNativeTids = copyOnWriteArray;
             }
         }
+
+        noteBinderThreadNativeIds();
+    }
+
+    private void noteBinderThreadNativeIds() {
+        if (mCallStatsObserver == null) {
+            return;
+        }
+
+        mCallStatsObserver.noteBinderThreadNativeIds(getNativeTids());
     }
 
     /**

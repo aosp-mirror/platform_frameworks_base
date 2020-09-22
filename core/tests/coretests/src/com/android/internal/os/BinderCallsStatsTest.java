@@ -47,8 +47,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -770,13 +772,27 @@ public class BinderCallsStatsTest {
         bcs.setSamplingInterval(1);
         bcs.setTrackScreenInteractive(false);
 
+
         final ArrayList<BinderCallsStats.CallStat> callStatsList = new ArrayList<>();
-        bcs.setCallStatsObserver(
-                (workSourceUid, incrementalCallCount, callStats, binderThreadIds) ->
-                        callStatsList.addAll(callStats));
+        final Set<Integer> nativeTids = new HashSet<>();
+        bcs.setCallStatsObserver(new BinderInternal.CallStatsObserver() {
+            @Override
+            public void noteCallStats(int workSourceUid, long incrementalCallCount,
+                    Collection<BinderCallsStats.CallStat> callStats) {
+                callStatsList.addAll(callStats);
+            }
+
+            @Override
+            public void noteBinderThreadNativeIds(int[] binderThreadNativeTids) {
+                for (int tid : binderThreadNativeTids) {
+                    nativeTids.add(tid);
+                }
+            }
+        });
 
         Binder binder = new Binder();
 
+        bcs.nativeTid = 1000;
         CallSession callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
         bcs.time += 10;
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
@@ -785,6 +801,7 @@ public class BinderCallsStatsTest {
         bcs.time += 20;
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
 
+        bcs.nativeTid = 2000;
         callSession = bcs.callStarted(binder, 2, WORKSOURCE_UID);
         bcs.time += 30;
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
@@ -809,6 +826,10 @@ public class BinderCallsStatsTest {
                 assertEquals(30, callStats.maxCpuTimeMicros);
             }
         }
+
+        assertEquals(2, nativeTids.size());
+        assertTrue(nativeTids.contains(1000));
+        assertTrue(nativeTids.contains(2000));
     }
 
     @Test

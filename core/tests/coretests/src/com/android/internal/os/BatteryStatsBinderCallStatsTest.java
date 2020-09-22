@@ -60,7 +60,7 @@ public class BatteryStatsBinderCallStatsTest extends TestCase {
         stat1.cpuTimeMicros = 1000;
         callStats.add(stat1);
 
-        bi.noteBinderCallStats(workSourceUid, 42, callStats, null);
+        bi.noteBinderCallStats(workSourceUid, 42, callStats);
 
         callStats.clear();
         BinderCallsStats.CallStat stat2 = new BinderCallsStats.CallStat(callingUid,
@@ -70,7 +70,7 @@ public class BatteryStatsBinderCallStatsTest extends TestCase {
         stat2.cpuTimeMicros = 500;
         callStats.add(stat2);
 
-        bi.noteBinderCallStats(workSourceUid, 8, callStats, null);
+        bi.noteBinderCallStats(workSourceUid, 8, callStats);
 
         BatteryStatsImpl.Uid uid = bi.getUidStatsLocked(workSourceUid);
         assertEquals(42 + 8, uid.getBinderCallCount());
@@ -112,7 +112,7 @@ public class BatteryStatsBinderCallStatsTest extends TestCase {
         stat1b.cpuTimeMicros = 1500;
         callStats.add(stat1b);
 
-        bi.noteBinderCallStats(workSourceUid1, 65, callStats, null);
+        bi.noteBinderCallStats(workSourceUid1, 65, callStats);
 
         // No recorded stats for some methods. Must use the global average.
         callStats.clear();
@@ -121,11 +121,11 @@ public class BatteryStatsBinderCallStatsTest extends TestCase {
         stat2.incrementalCallCount = 10;
         callStats.add(stat2);
 
-        bi.noteBinderCallStats(workSourceUid2, 40, callStats, null);
+        bi.noteBinderCallStats(workSourceUid2, 40, callStats);
 
         // No stats for any calls. Must use the global average
         callStats.clear();
-        bi.noteBinderCallStats(workSourceUid3, 50, callStats, null);
+        bi.noteBinderCallStats(workSourceUid3, 50, callStats);
 
         bi.updateSystemServiceCallStats();
 
