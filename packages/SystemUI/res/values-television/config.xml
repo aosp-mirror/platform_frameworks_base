@@ -45,4 +45,7 @@
 
     <!-- Show a separate icon for low and high volume on the volume dialog -->
     <bool name="config_showLowMediaVolumeIcon">true</bool>
+
+    <!-- Change the volume row tint when it is inactive, i.e. when it is being dismissed -->
+    <bool name="config_changeVolumeRowTintWhenInactive">false</bool>
 </resources>
