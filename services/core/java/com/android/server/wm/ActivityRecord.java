@@ -2606,7 +2606,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         Slog.v(TAG_USER_LEAVING, "finish() => pause with userLeaving=false");
                     }
                     stack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
-                            null /* resuming */);
+                            null /* resuming */, "finish");
                 }
 
                 if (endTask) {
@@ -4770,14 +4770,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     supportsEnterPipOnTaskSwitch = false;
                     break;
                 case RESUMED:
-                    // If the app is capable of entering PIP, we should try pausing it now
-                    // so it can PIP correctly.
-                    if (deferHidingClient) {
-                        getRootTask().startPausingLocked(
-                                mStackSupervisor.mUserLeaving /* userLeaving */,
-                                false /* uiSleeping */, null /* resuming */);
+                    // Do nothing if currently in the process of resuming the activity. Otherwise,
+                    // starting to pause it since it is not visible.
+                    if (!mSetToSleep) {
                         break;
                     }
+                    getRootTask().startPausingLocked(mStackSupervisor.mUserLeaving,
+                            false /* uiSleeping */, null /* resuming */, "makeInvisible");
+                    // fall through
                 case INITIALIZING:
                 case PAUSING:
                 case PAUSED:

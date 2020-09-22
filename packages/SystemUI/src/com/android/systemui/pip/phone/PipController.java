@@ -18,7 +18,6 @@ package com.android.systemui.pip.phone;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
 import static com.android.systemui.pip.PipAnimationController.isOutPipDirection;
 
@@ -30,7 +29,6 @@ import android.app.IActivityManager;
 import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -278,9 +276,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mContext = context;
         mActivityManager = ActivityManager.getService();
 
-        PackageManager pm = context.getPackageManager();
-        boolean supportsPip = pm.hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
-        if (supportsPip) {
+        if (PipUtils.hasSystemFeature(mContext)) {
             initController(context, broadcastDispatcher, configController, deviceConfig,
                     displayController, floatingContentCoordinator, sysUiState, pipBoundsHandler,
                     pipSurfaceTransactionHelper, pipTaskOrganizer, pipUiEventLogger);

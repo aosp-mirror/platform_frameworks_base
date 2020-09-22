@@ -62,6 +62,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.pip.phone.PipMenuActivityController;
 import com.android.systemui.pip.phone.PipUpdateThread;
+import com.android.systemui.pip.phone.PipUtils;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -260,6 +261,11 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
         mSplitScreenOptional = splitScreenOptional;
         mTaskOrganizer = shellTaskOrganizer;
+
+        if (!PipUtils.hasSystemFeature(context)) {
+            Log.w(TAG, "Device not support PIP feature");
+            return;
+        }
         mTaskOrganizer.addListener(this, WINDOWING_MODE_PINNED);
         displayController.addDisplayWindowListener(this);
     }

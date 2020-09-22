@@ -15,27 +15,27 @@
  */
 package com.android.server.hdmi;
 
-import static android.os.SystemClock.sleep;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
+
 import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.Looper;
-import android.os.SystemProperties;
 import android.os.test.TestLooper;
-import android.util.Slog;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
-import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.util.ArrayList;
 
 /**
  * Tests for {@link HdmiControlServiceBinderAPITest} class.
@@ -158,8 +158,8 @@ public class HdmiControlServiceBinderAPITest {
         mHdmiControlService.setIoLooper(mMyLooper);
 
         mNativeWrapper = new FakeNativeWrapper();
-        mHdmiCecController =
-            HdmiCecController.createWithNativeWrapper(mHdmiControlService, mNativeWrapper);
+        mHdmiCecController = HdmiCecController.createWithNativeWrapper(
+                mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));

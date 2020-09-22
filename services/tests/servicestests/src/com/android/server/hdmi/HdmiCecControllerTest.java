@@ -89,8 +89,8 @@ public class HdmiCecControllerTest {
         mMyLooper = mTestLooper.getLooper();
         mHdmiControlService = new MyHdmiControlService(InstrumentationRegistry.getTargetContext());
         mNativeWrapper = new FakeNativeWrapper();
-        mHdmiCecController =
-                HdmiCecController.createWithNativeWrapper(mHdmiControlService, mNativeWrapper);
+        mHdmiCecController = HdmiCecController.createWithNativeWrapper(
+                mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
     }
 
     /** Tests for {@link HdmiCecController#allocateLogicalAddress} */
