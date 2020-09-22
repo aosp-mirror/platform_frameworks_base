@@ -16,8 +16,6 @@
 
 package com.android.keyguard;
 
-import android.content.res.ColorStateList;
-
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.ViewController;
 
@@ -39,25 +37,17 @@ public class KeyguardMessageAreaController extends ViewController<KeyguardMessag
 
     @Override
     protected void onViewAttached() {
+        //mConfigurationController.addCallback();
+        //mKeyguardUpdateMonitor.registerCallback();
     }
 
     @Override
     protected void onViewDetached() {
+        //mConfigurationController.removeCallback();
+        //mKeyguardUpdateMonitor.removeCallback();
     }
 
-    public void setMessage(CharSequence s) {
-        mView.setMessage(s);
-    }
-
-    public void setMessage(int resId) {
-        mView.setMessage(resId);
-    }
-
-    public void setNextMessageColor(ColorStateList colorState) {
-        mView.setNextMessageColor(colorState);
-    }
-
-    /** Factory for creating {@link com.android.keyguard.KeyguardMessageAreaController}. */
+    /** Factory for createing {@link com.android.keyguard.KeyguardMessageAreaController}. */
     public static class Factory {
         private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
         private final ConfigurationController mConfigurationController;

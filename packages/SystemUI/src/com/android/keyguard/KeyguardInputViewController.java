@@ -19,7 +19,6 @@ package com.android.keyguard;
 import android.content.res.ColorStateList;
 import android.view.MotionEvent;
 
-import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.util.ViewController;
@@ -28,21 +27,18 @@ import javax.inject.Inject;
 
 
 /** Controller for a {@link KeyguardSecurityView}. */
-public class KeyguardInputViewController<T extends KeyguardInputView> extends ViewController<T>
+public class KeyguardInputViewController extends ViewController<KeyguardInputView>
         implements KeyguardSecurityView {
 
     private final SecurityMode mSecurityMode;
     private final LockPatternUtils mLockPatternUtils;
-    private final KeyguardSecurityCallback mKeyguardSecurityCallback;
-    private KeyguardMessageAreaController mMessageAreaController;
 
-    protected KeyguardInputViewController(T view, SecurityMode securityMode,
+    private KeyguardInputViewController(KeyguardInputView view, SecurityMode securityMode,
             LockPatternUtils lockPatternUtils,
             KeyguardSecurityCallback keyguardSecurityCallback) {
         super(view);
         mSecurityMode = securityMode;
         mLockPatternUtils = lockPatternUtils;
-        mKeyguardSecurityCallback = keyguardSecurityCallback;
         mView.setKeyguardCallback(keyguardSecurityCallback);
     }
 
@@ -147,31 +143,17 @@ public class KeyguardInputViewController<T extends KeyguardInputView> extends Vi
 
     /** Factory for a {@link KeyguardInputViewController}. */
     public static class Factory {
-        private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
         private final LockPatternUtils mLockPatternUtils;
-        private final LatencyTracker mLatencyTracker;
-        private final KeyguardMessageAreaController.Factory mMessageAreaControllerFactory;
 
         @Inject
-        public Factory(KeyguardUpdateMonitor keyguardUpdateMonitor,
-                LockPatternUtils lockPatternUtils,
-                LatencyTracker latencyTracker,
-                KeyguardMessageAreaController.Factory messageAreaControllerFactory) {
-            mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        public Factory(LockPatternUtils lockPatternUtils) {
             mLockPatternUtils = lockPatternUtils;
-            mLatencyTracker = latencyTracker;
-            mMessageAreaControllerFactory = messageAreaControllerFactory;
         }
 
         /** Create a new {@link KeyguardInputViewController}. */
         public KeyguardInputViewController create(KeyguardInputView keyguardInputView,
                 SecurityMode securityMode, KeyguardSecurityCallback keyguardSecurityCallback) {
-            if (keyguardInputView instanceof KeyguardPatternView) {
-                return new KeyguardPatternViewController((KeyguardPatternView) keyguardInputView,
-                        mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
-                        keyguardSecurityCallback, mLatencyTracker, mMessageAreaControllerFactory);
-            }
-            return new KeyguardInputViewController<>(keyguardInputView, securityMode,
+            return new KeyguardInputViewController(keyguardInputView, securityMode,
                     mLockPatternUtils, keyguardSecurityCallback);
         }
     }

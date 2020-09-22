@@ -256,7 +256,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
     public void reset() {
         mView.reset();
-        mSecurityViewFlipperController.reset();
     }
 
     public CharSequence getTitle() {
