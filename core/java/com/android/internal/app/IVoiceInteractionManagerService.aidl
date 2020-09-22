@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.media.permission.Identity;
 import android.os.Bundle;
 import android.os.RemoteCallback;
 
@@ -25,9 +26,8 @@ import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.IVoiceInteractionSessionListener;
-import android.hardware.soundtrigger.IRecognitionStatusCallback;
+import com.android.internal.app.IVoiceInteractionSoundTriggerSession;
 import android.hardware.soundtrigger.KeyphraseMetadata;
-import android.hardware.soundtrigger.ModelParams;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
@@ -86,13 +86,6 @@ interface IVoiceInteractionManagerService {
      * @RequiresPermission Manifest.permission.MANAGE_VOICE_KEYPHRASES
      */
     int deleteKeyphraseSoundModel(int keyphraseId, in String bcp47Locale);
-
-    /**
-     * Gets the properties of the DSP hardware on this device, null if not present.
-     * Caller must be the active voice interaction service via
-     * {@link Settings.Secure.VOICE_INTERACTION_SERVICE}.
-     */
-    SoundTrigger.ModuleProperties getDspModuleProperties();
     /**
      * Indicates if there's a keyphrase sound model available for the given keyphrase ID and the
      * user ID of the caller.
@@ -115,65 +108,6 @@ interface IVoiceInteractionManagerService {
      *         no matching voice model exists.
      */
     KeyphraseMetadata getEnrolledKeyphraseMetadata(String keyphrase, String bcp47Locale);
-    /**
-     * Starts a recognition for the given keyphrase.
-     * Caller must be the active voice interaction service via
-     * {@link Settings.Secure.VOICE_INTERACTION_SERVICE}.
-     */
-    int startRecognition(int keyphraseId, in String bcp47Locale,
-            in IRecognitionStatusCallback callback,
-            in SoundTrigger.RecognitionConfig recognitionConfig);
-    /**
-     * Stops a recognition for the given keyphrase.
-     * Caller must be the active voice interaction service via
-     * {@link Settings.Secure.VOICE_INTERACTION_SERVICE}.
-     */
-    int stopRecognition(int keyphraseId, in IRecognitionStatusCallback callback);
-    /**
-     * Set a model specific ModelParams with the given value. This
-     * parameter will keep its value for the duration the model is loaded regardless of starting and
-     * stopping recognition. Once the model is unloaded, the value will be lost.
-     * queryParameter should be checked first before calling this method.
-     * Caller must be the active voice interaction service via
-     * {@link Settings.Secure.VOICE_INTERACTION_SERVICE}.
-     *
-     * @param keyphraseId The unique identifier for the keyphrase.
-     * @param modelParam   ModelParams
-     * @param value        Value to set
-     * @return - {@link SoundTrigger#STATUS_OK} in case of success
-     *         - {@link SoundTrigger#STATUS_NO_INIT} if the native service cannot be reached
-     *         - {@link SoundTrigger#STATUS_BAD_VALUE} invalid input parameter
-     *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence or
-     *           if API is not supported by HAL
-     */
-    int setParameter(int keyphraseId, in ModelParams modelParam, int value);
-    /**
-     * Get a model specific ModelParams. This parameter will keep its value
-     * for the duration the model is loaded regardless of starting and stopping recognition.
-     * Once the model is unloaded, the value will be lost. If the value is not set, a default
-     * value is returned. See ModelParams for parameter default values.
-     * queryParameter should be checked first before calling this method.
-     * Caller must be the active voice interaction service via
-     * {@link Settings.Secure.VOICE_INTERACTION_SERVICE}.
-     *
-     * @param keyphraseId The unique identifier for the keyphrase.
-     * @param modelParam   ModelParams
-     * @return value of parameter
-     */
-    int getParameter(int keyphraseId, in ModelParams modelParam);
-    /**
-     * Determine if parameter control is supported for the given model handle.
-     * This method should be checked prior to calling setParameter or getParameter.
-     * Caller must be the active voice interaction service via
-     * {@link Settings.Secure.VOICE_INTERACTION_SERVICE}.
-     *
-     * @param keyphraseId The unique identifier for the keyphrase.
-     * @param modelParam ModelParams
-     * @return supported range of parameter, null if not supported
-     */
-    @nullable SoundTrigger.ModelParamRange queryParameter(int keyphraseId,
-            in ModelParams modelParam);
-
     /**
      * @return the component name for the currently active voice interaction service
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
@@ -277,4 +211,12 @@ interface IVoiceInteractionManagerService {
      */
     void setDisabled(boolean disabled);
 
+    /**
+     * Creates a session, allowing controlling running sound models on detection hardware.
+     * Caller must provide an identity, used for permission tracking purposes.
+     * The uid/pid elements of the identity will be ignored by the server and replaced with the ones
+     * provided by binder.
+     */
+    IVoiceInteractionSoundTriggerSession createSoundTriggerSessionAsOriginator(
+            in Identity originatorIdentity);
 }

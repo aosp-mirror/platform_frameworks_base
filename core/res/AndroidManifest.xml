@@ -3984,6 +3984,15 @@
     <permission android:name="android.permission.CAPTURE_AUDIO_HOTWORD"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Puts an application in the chain of trust for sound trigger
+         operations. Being in the chain of trust allows an application to
+         delegate an identity of a separate entity to the sound trigger system
+         and vouch for the authenticity of this identity.
+         <p>Not for use by third-party applications.</p>
+         @hide -->
+    <permission android:name="android.permission.SOUNDTRIGGER_DELEGATE_IDENTITY"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows an application to modify audio routing and override policy decisions.
          <p>Not for use by third-party applications.</p>
          @hide -->
