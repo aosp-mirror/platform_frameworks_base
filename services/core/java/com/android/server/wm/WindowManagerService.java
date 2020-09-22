@@ -7997,8 +7997,7 @@ public class WindowManagerService extends IWindowManager.Stub
         updateInputChannel(clientChannel.getToken(), callingUid, callingPid, displayId, surface,
                 name, applicationHandle, flags, privateFlags, type, null /* region */);
 
-        clientChannel.transferTo(outInputChannel);
-        clientChannel.dispose();
+        clientChannel.copyTo(outInputChannel);
     }
 
     private void updateInputChannel(IBinder channelToken, int callingUid, int callingPid,
