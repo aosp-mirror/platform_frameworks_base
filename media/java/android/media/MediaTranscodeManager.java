@@ -1225,6 +1225,50 @@ public final class MediaTranscodeManager {
             }
         }
 
+        @Override
+        public String toString() {
+            String result;
+            String status;
+
+            switch (mResult) {
+                case RESULT_NONE:
+                    result = "RESULT_NONE";
+                    break;
+                case RESULT_SUCCESS:
+                    result = "RESULT_SUCCESS";
+                    break;
+                case RESULT_ERROR:
+                    result = "RESULT_ERROR";
+                    break;
+                case RESULT_CANCELED:
+                    result = "RESULT_CANCELED";
+                    break;
+                default:
+                    result = String.valueOf(mResult);
+                    break;
+            }
+
+            switch (mStatus) {
+                case STATUS_PENDING:
+                    status = "STATUS_PENDING";
+                    break;
+                case STATUS_PAUSED:
+                    status = "STATUS_PAUSED";
+                    break;
+                case STATUS_RUNNING:
+                    status = "STATUS_RUNNING";
+                    break;
+                case STATUS_FINISHED:
+                    status = "STATUS_FINISHED";
+                    break;
+                default:
+                    status = String.valueOf(mStatus);
+                    break;
+            }
+            return String.format(" Job: {id: %d, status: %s, result: %s, progress: %d}",
+                    mJobId, status, result, mProgress);
+        }
+
         private void updateProgress(int newProgress) {
             synchronized (mLock) {
                 mProgress = newProgress;
