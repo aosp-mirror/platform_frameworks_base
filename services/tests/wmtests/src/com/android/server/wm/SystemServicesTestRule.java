@@ -318,6 +318,9 @@ public class SystemServicesTestRule implements TestRule {
         display.setDisplayWindowingMode(WINDOWING_MODE_FULLSCREEN);
         spyOn(display);
         final TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
+
+        // Set the default focused TDA.
+        display.setLastFocusedTaskDisplayArea(taskDisplayArea);
         spyOn(taskDisplayArea);
         final Task homeStack = taskDisplayArea.getStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);

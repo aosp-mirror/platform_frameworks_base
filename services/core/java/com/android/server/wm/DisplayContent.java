@@ -28,6 +28,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
@@ -463,6 +465,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * new task the user wants to interact with.
      */
     ActivityRecord mFocusedApp = null;
+
+    /** The last focused {@link TaskDisplayArea} on this display. */
+    private TaskDisplayArea mLastFocusedTaskDisplayArea = null;
 
     /**
      * The launching activity which is using fixed rotation transformation.
@@ -2327,7 +2332,21 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 return getLastOrientation();
             }
         }
-        return super.getOrientation();
+
+        final int orientation = super.getOrientation();
+        if (orientation != SCREEN_ORIENTATION_UNSET && orientation != SCREEN_ORIENTATION_BEHIND) {
+            ProtoLog.v(WM_DEBUG_ORIENTATION,
+                    "App is requesting an orientation, return %d for display id=%d",
+                    orientation, mDisplayId);
+            return orientation;
+        }
+
+        ProtoLog.v(WM_DEBUG_ORIENTATION,
+                "No app is requesting an orientation, return %d for display id=%d",
+                getLastOrientation(), mDisplayId);
+        // The next app has not been requested to be visible, so we keep the current orientation
+        // to prevent freezing/unfreezing the display too early.
+        return getLastOrientation();
     }
 
     void updateDisplayInfo() {
@@ -3202,6 +3221,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 throw new IllegalStateException(newFocus + " is not on " + getName()
                         + " but " + ((appDisplay != null) ? appDisplay.getName() : "none"));
             }
+
+            // Called even if the focused app is not changed in case the app is moved to a different
+            // TaskDisplayArea.
+            setLastFocusedTaskDisplayArea(newFocus.getDisplayArea());
         }
         if (mFocusedApp == newFocus) {
             return false;
@@ -3212,6 +3235,19 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         getInputMonitor().setFocusedAppLw(newFocus);
         updateTouchExcludeRegion();
         return true;
+    }
+
+    /** Called when the focused {@link TaskDisplayArea} on this display may have changed. */
+    @VisibleForTesting
+    void setLastFocusedTaskDisplayArea(@Nullable TaskDisplayArea taskDisplayArea) {
+        if (taskDisplayArea != null) {
+            mLastFocusedTaskDisplayArea = taskDisplayArea;
+        }
+    }
+
+    /** Gets the last focused {@link TaskDisplayArea} on this display. */
+    TaskDisplayArea getLastFocusedTaskDisplayArea() {
+        return mLastFocusedTaskDisplayArea;
     }
 
     /** Updates the layer assignment of windows on this display. */

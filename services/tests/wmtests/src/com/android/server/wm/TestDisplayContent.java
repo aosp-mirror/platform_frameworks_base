@@ -156,6 +156,10 @@ class TestDisplayContent extends DisplayContent {
             // threads immediately after adding it to hierarchy. Calling doAnswer() type of stubbing
             // reduces chance of races, but still doesn't eliminate race conditions.
             mService.mRootWindowContainer.addChild(newDisplay, mPosition);
+
+            // Set the default focused TDA.
+            newDisplay.setLastFocusedTaskDisplayArea(newDisplay.getDefaultTaskDisplayArea());
+
             return newDisplay;
         }
     }

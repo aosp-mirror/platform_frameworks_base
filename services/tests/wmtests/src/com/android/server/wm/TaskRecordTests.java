@@ -33,6 +33,7 @@ import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_ENABLED;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_90;
+import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -1001,7 +1002,7 @@ public class TaskRecordTests extends WindowTestsBase {
     public void testNotSpecifyOrientationByFloatingTask() {
         final Task task = getTestTask();
         final ActivityRecord activity = task.getTopMostActivity();
-        final WindowContainer<?> taskDisplayArea = task.getParent();
+        final TaskDisplayArea taskDisplayArea = task.getDisplayArea();
         activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, taskDisplayArea.getOrientation());
@@ -1009,6 +1010,42 @@ public class TaskRecordTests extends WindowTestsBase {
         task.setWindowingMode(WINDOWING_MODE_PINNED);
 
         assertEquals(SCREEN_ORIENTATION_UNSET, taskDisplayArea.getOrientation());
+    }
+
+    @Test
+    public void testNotSpecifyOrientation_taskDisplayAreaNotFocused() {
+        final TaskDisplayArea firstTaskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
+        final TaskDisplayArea secondTaskDisplayArea = createTaskDisplayArea(
+                mDisplayContent, mRootWindowContainer.mWmService, "TestTaskDisplayArea",
+                FEATURE_VENDOR_FIRST);
+        final Task firstStack = firstTaskDisplayArea.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        final Task secondStack = secondTaskDisplayArea.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        final ActivityRecord firstActivity = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setStack(firstStack).build();
+        final ActivityRecord secondActivity = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setStack(secondStack).build();
+        firstActivity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        secondActivity.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
+
+        // Activity on TDA1 is focused
+        mDisplayContent.setFocusedApp(firstActivity);
+
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, firstTaskDisplayArea.getOrientation());
+        assertEquals(SCREEN_ORIENTATION_UNSET, secondTaskDisplayArea.getOrientation());
+
+        // No focused app, TDA1 is still recorded as last focused.
+        mDisplayContent.setFocusedApp(null);
+
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, firstTaskDisplayArea.getOrientation());
+        assertEquals(SCREEN_ORIENTATION_UNSET, secondTaskDisplayArea.getOrientation());
+
+        // Activity on TDA2 is focused
+        mDisplayContent.setFocusedApp(secondActivity);
+
+        assertEquals(SCREEN_ORIENTATION_UNSET, firstTaskDisplayArea.getOrientation());
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, secondTaskDisplayArea.getOrientation());
     }
 
     @Test
