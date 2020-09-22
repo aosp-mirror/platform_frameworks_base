@@ -37,8 +37,8 @@ import java.util.function.Consumer;
  *
  * TODO: Should be merged into PermissionManagerInternal, but currently uses internal classes.
  */
-public abstract class PermissionManagerServiceInternal extends PermissionManagerInternal {
-
+public abstract class PermissionManagerServiceInternal extends PermissionManagerInternal
+        implements LegacyPermissionDataProvider {
     /**
      * Provider for package names.
      */
@@ -288,13 +288,13 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract void onUserRemoved(@UserIdInt int userId);
 
     /**
-     * Remove the {@code PermissionsState} associated with an app ID, called the same time as the
+     * Remove the permission state associated with an app ID, called the same time as the
      * removal of a {@code PackageSetitng}.
      *
      * TODO(zhanghai): This is a temporary method before we figure out a way to get notified of app
      * ID removal via API.
      */
-    public abstract void removePermissionsStateTEMP(int appId);
+    public abstract void removeAppIdStateTEMP(@AppIdInt int appId);
 
     /**
      * Update the shared user setting when a package with a shared user id is removed. The gids
@@ -323,12 +323,6 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      */
     @Nullable
     public abstract int[] getPermissionGids(@NonNull String permissionName, @UserIdInt int userId);
-
-    /**
-     * Get the GIDs computed from the permission state of a package.
-     */
-    @Nullable
-    public abstract int[] getPackageGids(@NonNull String packageName, @UserIdInt int userId);
 
     /** Retrieve the packages that have requested the given app op permission */
     public abstract @Nullable String[] getAppOpPermissionPackages(

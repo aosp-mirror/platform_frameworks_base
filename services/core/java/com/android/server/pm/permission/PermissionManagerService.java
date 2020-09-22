@@ -58,6 +58,7 @@ import static com.android.server.pm.permission.UidPermissionState.PERMISSION_OPE
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import android.Manifest;
+import android.annotation.AppIdInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -2514,20 +2515,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return permission.computeGids(userId);
     }
 
-    @Nullable
-    private int[] getPackageGids(@NonNull String packageName, @UserIdInt int userId) {
-        final PackageSetting ps = mPackageManagerInt.getPackageSetting(packageName);
-        if (ps == null) {
-            return null;
-        }
-        final UidPermissionState uidState = getUidState(ps, userId);
-        if (uidState == null) {
-            Slog.e(TAG, "Missing permissions state for " + packageName + " and user " + userId);
-            return null;
-        }
-        return uidState.computeGids(userId);
-    }
-
     /**
      * Restore the permission state for a package.
      *
@@ -4766,7 +4753,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
-    private void removeAppState(int appId) {
+    private void removeAppIdState(@AppIdInt int appId) {
         synchronized (mLock) {
             final int[] userIds = mState.getUserIds();
             for (final int userId : userIds) {
@@ -4780,7 +4767,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final int[] userIds = getAllUserIds();
         mPackageManagerInt.forEachPackageSetting(ps -> {
             final int appId = ps.getAppId();
-            final PermissionsState permissionsState = ps.getPermissionsState();
+            final AppIdPermissionState appIdState = ps.getPermissionsState();
 
             synchronized (mLock) {
                 for (final int userId : userIds) {
@@ -4789,25 +4776,22 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     userState.setInstallPermissionsFixed(ps.name, ps.areInstallPermissionsFixed());
                     final UidPermissionState uidState = userState.getOrCreateUidState(appId);
                     uidState.reset();
-                    uidState.setGlobalGids(permissionsState.getGlobalGids());
-                    uidState.setMissing(permissionsState.isMissing(userId));
+                    uidState.setMissing(appIdState.isMissing(userId));
                     readStateFromPermissionStates(uidState,
-                            permissionsState.getInstallPermissionStates(), false);
+                            appIdState.getInstallPermissionStates(), false);
                     readStateFromPermissionStates(uidState,
-                            permissionsState.getRuntimePermissionStates(userId), true);
+                            appIdState.getRuntimePermissionStates(userId), true);
                 }
             }
         });
     }
 
     private void readStateFromPermissionStates(@NonNull UidPermissionState uidState,
-            @NonNull List<PermissionsState.PermissionState> permissionStates, boolean isRuntime) {
-        final int permissionStatesSize = permissionStates.size();
-        for (int i = 0; i < permissionStatesSize; i++) {
-            final PermissionsState.PermissionState permissionState = permissionStates.get(i);
-            final BasePermission permission = permissionState.getPermission();
-            uidState.putPermissionState(permission, isRuntime, permissionState.isGranted(),
-                    permissionState.getFlags());
+            @NonNull Collection<AppIdPermissionState.PermissionState> permissionStates,
+            boolean isRuntime) {
+        for (final AppIdPermissionState.PermissionState permissionState : permissionStates) {
+            uidState.putPermissionState(permissionState.getPermission(), isRuntime,
+                    permissionState.isGranted(), permissionState.getFlags());
         }
     }
 
@@ -4815,8 +4799,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final int[] userIds = mState.getUserIds();
         mPackageManagerInt.forEachPackageSetting(ps -> {
             ps.setInstallPermissionsFixed(false);
-            final PermissionsState permissionsState = ps.getPermissionsState();
-            permissionsState.reset();
+            final AppIdPermissionState appIdState = ps.getPermissionsState();
+            appIdState.reset();
             final int appId = ps.getAppId();
 
             synchronized (mLock) {
@@ -4838,32 +4822,68 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         continue;
                     }
 
-                    permissionsState.setGlobalGids(uidState.getGlobalGids());
-                    permissionsState.setMissing(uidState.isMissing(), userId);
+                    appIdState.setMissing(uidState.isMissing(), userId);
                     final List<PermissionState> permissionStates = uidState.getPermissionStates();
                     final int permissionStatesSize = permissionStates.size();
                     for (int i = 0; i < permissionStatesSize; i++) {
                         final PermissionState permissionState = permissionStates.get(i);
 
-                        final BasePermission permission = permissionState.getPermission();
-                        if (permissionState.isGranted()) {
-                            if (permissionState.isRuntime()) {
-                                permissionsState.grantRuntimePermission(permission, userId);
-                            } else {
-                                permissionsState.grantInstallPermission(permission);
-                            }
-                        }
-                        final int flags = permissionState.getFlags();
-                        if (flags != 0) {
-                            final int flagsUserId = permissionState.isRuntime() ? userId
-                                    : UserHandle.USER_ALL;
-                            permissionsState.updatePermissionFlags(permission, flagsUserId, flags,
-                                    flags);
+                        final AppIdPermissionState.PermissionState legacyPermissionState =
+                                new AppIdPermissionState.PermissionState(
+                                        permissionState.getPermission(),
+                                        permissionState.isGranted(), permissionState.getFlags());
+                        if (permissionState.isRuntime()) {
+                            appIdState.putRuntimePermissionState(legacyPermissionState,
+                                    userId);
+                        } else {
+                            appIdState.putInstallPermissionState(legacyPermissionState);
                         }
                     }
                 }
             }
         });
+    }
+
+    @NonNull
+    private AppIdPermissionState getAppIdPermissionState(@AppIdInt int appId) {
+        final AppIdPermissionState appIdState = new AppIdPermissionState();
+        final int[] userIds = mState.getUserIds();
+        for (final int userId : userIds) {
+            final UidPermissionState uidState = getUidState(appId, userId);
+            if (uidState == null) {
+                Slog.e(TAG, "Missing permissions state for app ID " + appId + " and user ID "
+                        + userId);
+                continue;
+            }
+
+            final List<PermissionState> permissionStates = uidState.getPermissionStates();
+            final int permissionStatesSize = permissionStates.size();
+            for (int i = 0; i < permissionStatesSize; i++) {
+                final PermissionState permissionState = permissionStates.get(i);
+
+                final AppIdPermissionState.PermissionState legacyPermissionState =
+                        new AppIdPermissionState.PermissionState(permissionState.getPermission(),
+                                permissionState.isGranted(), permissionState.getFlags());
+                if (permissionState.isRuntime()) {
+                    appIdState.putRuntimePermissionState(legacyPermissionState, userId);
+                } else if (userId == UserHandle.USER_SYSTEM) {
+                    appIdState.putInstallPermissionState(legacyPermissionState);
+                }
+            }
+        }
+        return appIdState;
+    }
+
+    @NonNull
+    private int[] getGidsForUid(int uid) {
+        final int appId = UserHandle.getAppId(uid);
+        final int userId = UserHandle.getUserId(uid);
+        final UidPermissionState uidState = getUidState(appId, userId);
+        if (uidState == null) {
+            Slog.e(TAG, "Missing permissions state for app ID " + appId + " and user ID " + userId);
+            return EMPTY_INT_ARRAY;
+        }
+        return uidState.computeGids(userId);
     }
 
     private class PermissionManagerServiceInternalImpl extends PermissionManagerServiceInternal {
@@ -4910,8 +4930,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             PermissionManagerService.this.onUserRemoved(userId);
         }
         @Override
-        public void removePermissionsStateTEMP(int appId) {
-            PermissionManagerService.this.removeAppState(appId);
+        public void removeAppIdStateTEMP(@AppIdInt int appId) {
+            PermissionManagerService.this.removeAppIdState(appId);
         }
         @Override
         @UserIdInt
@@ -4930,11 +4950,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @Override
         public int[] getPermissionGids(@NonNull String permissionName, @UserIdInt int userId) {
             return PermissionManagerService.this.getPermissionGids(permissionName, userId);
-        }
-        @Nullable
-        @Override
-        public int[] getPackageGids(@NonNull String packageName, @UserIdInt int userId) {
-            return PermissionManagerService.this.getPackageGids(packageName, userId);
         }
         @Override
         public void grantRequestedRuntimePermissions(AndroidPackage pkg, int[] userIds,
@@ -5262,6 +5277,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     }
                 }
             }
+        }
+
+        @NonNull
+        public AppIdPermissionState getAppIdPermissionState(@AppIdInt int appId) {
+            return PermissionManagerService.this.getAppIdPermissionState(appId);
+        }
+
+        @NonNull
+        public int[] getGidsForUid(int uid) {
+            return PermissionManagerService.this.getGidsForUid(uid);
         }
     }
 
