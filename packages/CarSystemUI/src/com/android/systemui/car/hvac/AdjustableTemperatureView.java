@@ -40,6 +40,9 @@ public class AdjustableTemperatureView extends LinearLayout implements Temperatu
     private float mMinTempC;
     private float mMaxTempC;
     private String mTempFormat;
+    private String mNullTempText;
+    private String mMinTempText;
+    private String mMaxTempText;
     private boolean mDisplayInFahrenheit = false;
 
     private HvacController mHvacController;
@@ -59,6 +62,9 @@ public class AdjustableTemperatureView extends LinearLayout implements Temperatu
         mTempFormat = getResources().getString(R.string.hvac_temperature_format);
         mMinTempC = getResources().getFloat(R.dimen.hvac_min_value_celsius);
         mMaxTempC = getResources().getFloat(R.dimen.hvac_max_value_celsius);
+        mNullTempText = getResources().getString(R.string.hvac_null_temp_text);
+        mMinTempText = getResources().getString(R.string.hvac_min_text);
+        mMaxTempText = getResources().getString(R.string.hvac_max_text);
         initializeButtons();
     }
 
@@ -69,11 +75,22 @@ public class AdjustableTemperatureView extends LinearLayout implements Temperatu
 
     @Override
     public void setTemp(float tempC) {
-        if (tempC > mMaxTempC || tempC < mMinTempC) {
-            return;
-        }
         if (mTempTextView == null) {
             mTempTextView = findViewById(R.id.hvac_temperature_text);
+        }
+        if (Float.isNaN(tempC)) {
+            mTempTextView.setText(mNullTempText);
+            return;
+        }
+        if (tempC <= mMinTempC) {
+            mTempTextView.setText(mMinTempText);
+            mCurrentTempC = mMinTempC;
+            return;
+        }
+        if (tempC >= mMaxTempC) {
+            mTempTextView.setText(mMaxTempText);
+            mCurrentTempC = mMaxTempC;
+            return;
         }
         mTempTextView.setText(String.format(mTempFormat,
                 mDisplayInFahrenheit ? convertToFahrenheit(tempC) : tempC));
