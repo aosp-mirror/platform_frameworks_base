@@ -1434,7 +1434,8 @@ static jlong nativeReadFromParcel(JNIEnv* env, jclass clazz, jobject parcelObj) 
         doThrowNPE(env);
         return 0;
     }
-    sp<SurfaceControl> surface = SurfaceControl::readFromParcel(parcel);
+    sp<SurfaceControl> surface;
+    SurfaceControl::readFromParcel(*parcel, &surface);
     if (surface == nullptr) {
         return 0;
     }
@@ -1462,7 +1463,7 @@ static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
     }
     SurfaceControl* const self = reinterpret_cast<SurfaceControl *>(nativeObject);
     if (self != nullptr) {
-        self->writeToParcel(parcel);
+        self->writeToParcel(*parcel);
     }
 }
 
