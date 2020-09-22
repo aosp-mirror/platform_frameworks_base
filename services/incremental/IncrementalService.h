@@ -127,7 +127,7 @@ public:
     int setStorageParams(StorageId storage, bool enableReadLogs);
 
     int makeFile(StorageId storage, std::string_view path, int mode, FileId id,
-                 incfs::NewFileParams params);
+                 incfs::NewFileParams params, std::span<const uint8_t> data);
     int makeDir(StorageId storage, std::string_view path, int mode = 0755);
     int makeDirs(StorageId storage, std::string_view path, int mode = 0755);
 
@@ -349,13 +349,16 @@ private:
     int isFileFullyLoadedFromPath(const IncFsMount& ifs, std::string_view filePath) const;
     float getLoadingProgressFromPath(const IncFsMount& ifs, std::string_view path) const;
 
+    int setFileContent(const IfsMountPtr& ifs, const incfs::FileId& fileId,
+                       std::string_view debugFilePath, std::span<const uint8_t> data) const;
+
     void registerAppOpsCallback(const std::string& packageName);
     bool unregisterAppOpsCallback(const std::string& packageName);
     void onAppOpChanged(const std::string& packageName);
 
     void runJobProcessing();
     void extractZipFile(const IfsMountPtr& ifs, ZipArchiveHandle zipFile, ZipEntry& entry,
-                        const incfs::FileId& libFileId, std::string_view targetLibPath,
+                        const incfs::FileId& libFileId, std::string_view debugLibPath,
                         Clock::time_point scheduledTs);
 
     void runCmdLooper();
