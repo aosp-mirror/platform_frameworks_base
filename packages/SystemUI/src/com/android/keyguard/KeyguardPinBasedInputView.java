@@ -20,6 +20,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.android.internal.widget.LockscreenCredential;
@@ -28,12 +29,22 @@ import com.android.systemui.R;
 /**
  * A Pin based Keyguard input view
  */
-public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView {
+public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
+        implements View.OnKeyListener, View.OnTouchListener {
 
     protected PasswordTextView mPasswordEntry;
     private View mOkButton;
     private View mDeleteButton;
-    private View[] mButtons = new View[10];
+    private View mButton0;
+    private View mButton1;
+    private View mButton2;
+    private View mButton3;
+    private View mButton4;
+    private View mButton5;
+    private View mButton6;
+    private View mButton7;
+    private View mButton8;
+    private View mButton9;
 
     public KeyguardPinBasedInputView(Context context) {
         this(context, null);
@@ -51,6 +62,7 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView 
 
     @Override
     protected void resetState() {
+        setPasswordEntryEnabled(true);
     }
 
     @Override
@@ -74,10 +86,10 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (KeyEvent.isConfirmKey(keyCode)) {
-            mOkButton.performClick();
+            performClick(mOkButton);
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_DEL) {
-            mDeleteButton.performClick();
+            performClick(mDeleteButton);
             return true;
         }
         if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9) {
@@ -113,9 +125,42 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView 
         }
     }
 
+    private void performClick(View view) {
+        view.performClick();
+    }
+
     private void performNumberClick(int number) {
-        if (number >= 0 && number <= 9) {
-            mButtons[number].performClick();
+        switch (number) {
+            case 0:
+                performClick(mButton0);
+                break;
+            case 1:
+                performClick(mButton1);
+                break;
+            case 2:
+                performClick(mButton2);
+                break;
+            case 3:
+                performClick(mButton3);
+                break;
+            case 4:
+                performClick(mButton4);
+                break;
+            case 5:
+                performClick(mButton5);
+                break;
+            case 6:
+                performClick(mButton6);
+                break;
+            case 7:
+                performClick(mButton7);
+                break;
+            case 8:
+                performClick(mButton8);
+                break;
+            case 9:
+                performClick(mButton9);
+                break;
         }
     }
 
@@ -132,28 +177,91 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView 
     @Override
     protected void onFinishInflate() {
         mPasswordEntry = findViewById(getPasswordTextViewId());
+        mPasswordEntry.setOnKeyListener(this);
 
         // Set selected property on so the view can send accessibility events.
         mPasswordEntry.setSelected(true);
 
+        mPasswordEntry.setUserActivityListener(new PasswordTextView.UserActivityListener() {
+            @Override
+            public void onUserActivity() {
+                onUserInput();
+            }
+        });
+
         mOkButton = findViewById(R.id.key_enter);
+        if (mOkButton != null) {
+            mOkButton.setOnTouchListener(this);
+            mOkButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mPasswordEntry.isEnabled()) {
+                        verifyPasswordAndUnlock();
+                    }
+                }
+            });
+            mOkButton.setOnHoverListener(new LiftToActivateListener(getContext()));
+        }
 
         mDeleteButton = findViewById(R.id.delete_button);
         mDeleteButton.setVisibility(View.VISIBLE);
+        mDeleteButton.setOnTouchListener(this);
+        mDeleteButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // check for time-based lockouts
+                if (mPasswordEntry.isEnabled()) {
+                    mPasswordEntry.deleteLastChar();
+                }
+            }
+        });
+        mDeleteButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                // check for time-based lockouts
+                if (mPasswordEntry.isEnabled()) {
+                    resetPasswordText(true /* animate */, true /* announce */);
+                }
+                doHapticKeyClick();
+                return true;
+            }
+        });
 
-        mButtons[0] = findViewById(R.id.key0);
-        mButtons[1] = findViewById(R.id.key1);
-        mButtons[2] = findViewById(R.id.key2);
-        mButtons[3] = findViewById(R.id.key3);
-        mButtons[4] = findViewById(R.id.key4);
-        mButtons[5] = findViewById(R.id.key5);
-        mButtons[6] = findViewById(R.id.key6);
-        mButtons[7] = findViewById(R.id.key7);
-        mButtons[8] = findViewById(R.id.key8);
-        mButtons[9] = findViewById(R.id.key9);
+        mButton0 = findViewById(R.id.key0);
+        mButton1 = findViewById(R.id.key1);
+        mButton2 = findViewById(R.id.key2);
+        mButton3 = findViewById(R.id.key3);
+        mButton4 = findViewById(R.id.key4);
+        mButton5 = findViewById(R.id.key5);
+        mButton6 = findViewById(R.id.key6);
+        mButton7 = findViewById(R.id.key7);
+        mButton8 = findViewById(R.id.key8);
+        mButton9 = findViewById(R.id.key9);
 
         mPasswordEntry.requestFocus();
         super.onFinishInflate();
+    }
+
+    @Override
+    public void onResume(int reason) {
+        super.onResume(reason);
+        mPasswordEntry.requestFocus();
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            doHapticKeyClick();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onKey(View v, int keyCode, KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            return onKeyDown(keyCode, event);
+        }
+        return false;
     }
 
     @Override

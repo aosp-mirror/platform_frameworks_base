@@ -178,18 +178,18 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     /** Initialize the Controller. */
     public void init() {
         super.init();
+        mView.setViewMediatorCallback(mViewMediatorCallback);
+        // Update ViewMediator with the current input method requirements
+        mViewMediatorCallback.setNeedsInput(mKeyguardSecurityContainerController.needsInput());
         mKeyguardSecurityContainerController.init();
+        mKeyguardSecurityContainerController.setSecurityCallback(mSecurityCallback);
+        mKeyguardSecurityContainerController.showPrimarySecurityScreen(false);
     }
 
     @Override
     protected void onViewAttached() {
-        mView.setViewMediatorCallback(mViewMediatorCallback);
-        // Update ViewMediator with the current input method requirements
-        mViewMediatorCallback.setNeedsInput(mKeyguardSecurityContainerController.needsInput());
         mKeyguardUpdateMonitor.registerCallback(mUpdateCallback);
         mView.setOnKeyListener(mOnKeyListener);
-        mKeyguardSecurityContainerController.setSecurityCallback(mSecurityCallback);
-        mKeyguardSecurityContainerController.showPrimarySecurityScreen(false);
     }
 
     @Override
