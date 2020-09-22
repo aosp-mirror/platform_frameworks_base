@@ -84,6 +84,15 @@ public final class DeviceConfig {
             "activity_manager_native_boot";
 
     /**
+     * Namespace for AlarmManager configurations.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
+    public static final String NAMESPACE_ALARM_MANAGER = "alarm_manager";
+
+    /**
      * Namespace for all app compat related features.  These features will be applied
      * immediately upon change.
      *
