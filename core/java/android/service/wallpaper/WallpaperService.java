@@ -879,7 +879,7 @@ public abstract class WallpaperService extends Service {
                                 com.android.internal.R.style.Animation_Wallpaper;
                         InputChannel inputChannel = new InputChannel();
 
-                        if (mSession.addToDisplay(mWindow, mWindow.mSeq, mLayout, View.VISIBLE,
+                        if (mSession.addToDisplay(mWindow, mLayout, View.VISIBLE,
                                 mDisplay.getDisplayId(), mWinFrames.frame, mWinFrames.contentInsets,
                                 mWinFrames.stableInsets, mWinFrames.displayCutout, inputChannel,
                                 mInsetsState, mTempControls) < 0) {
@@ -903,7 +903,7 @@ public abstract class WallpaperService extends Service {
                     }
 
                     final int relayoutResult = mSession.relayout(
-                        mWindow, mWindow.mSeq, mLayout, mWidth, mHeight,
+                            mWindow, mLayout, mWidth, mHeight,
                             View.VISIBLE, 0, -1, mWinFrames, mMergedConfiguration, mSurfaceControl,
                             mInsetsState, mTempControls, mSurfaceSize, mTmpSurfaceControl);
                     if (mSurfaceControl.isValid()) {

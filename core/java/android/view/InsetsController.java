@@ -1388,7 +1388,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     @Override
-    public @Appearance int getSystemBarsBehavior() {
+    public @Behavior int getSystemBarsBehavior() {
         return mHost.getSystemBarsBehavior();
     }
 

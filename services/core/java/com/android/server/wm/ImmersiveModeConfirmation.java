@@ -28,6 +28,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Binder;
@@ -46,6 +47,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -134,11 +136,8 @@ public class ImmersiveModeConfirmation {
             boolean userSetupComplete, boolean navBarEmpty) {
         mHandler.removeMessages(H.SHOW);
         if (isImmersiveMode) {
-            final boolean disabled = PolicyControl.disableImmersiveConfirmation(pkg);
-            if (DEBUG) Slog.d(TAG, String.format("immersiveModeChanged() disabled=%s sConfirmed=%s",
-                    disabled, sConfirmed));
-            if (!disabled
-                    && (DEBUG_SHOW_EVERY_TIME || !sConfirmed)
+            if (DEBUG) Slog.d(TAG, "immersiveModeChanged() sConfirmed=" +  sConfirmed);
+            if ((DEBUG_SHOW_EVERY_TIME || !sConfirmed)
                     && userSetupComplete
                     && !mVrModeEnabled
                     && !navBarEmpty
@@ -339,6 +338,13 @@ public class ImmersiveModeConfirmation {
         public boolean onTouchEvent(MotionEvent motion) {
             return true;
         }
+
+        @Override
+        public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+            // we will be hiding the nav bar, so layout as if it's already hidden
+            return new WindowInsets.Builder(insets).setInsets(
+                    Type.systemBars(), Insets.NONE).build();
+        }
     }
 
     /**
@@ -358,10 +364,6 @@ public class ImmersiveModeConfirmation {
         if (DEBUG) Slog.d(TAG, "Showing immersive mode confirmation");
 
         mClingWindow = new ClingWindowView(mContext, mConfirm);
-
-        // we will be hiding the nav bar, so layout as if it's already hidden
-        mClingWindow.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
 
         // show the confirmation
         WindowManager.LayoutParams lp = getClingWindowLayoutParams();
