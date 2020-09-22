@@ -18,14 +18,13 @@ package com.android.keyguard;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
 import android.app.admin.DevicePolicyManager;
-import android.content.res.Resources;
+import android.content.Context;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 
 import javax.inject.Inject;
 
@@ -34,7 +33,7 @@ public class KeyguardSecurityModel {
 
     /**
      * The different types of security available.
-     * @see KeyguardSecurityContainerController#showSecurityScreen
+     * @see KeyguardSecurityContainer#showSecurityScreen
      */
     public enum SecurityMode {
         Invalid, // NULL state
@@ -46,15 +45,21 @@ public class KeyguardSecurityModel {
         SimPuk // Unlock by entering a sim puk
     }
 
+    private final Context mContext;
     private final boolean mIsPukScreenAvailable;
 
-    private final LockPatternUtils mLockPatternUtils;
+    private LockPatternUtils mLockPatternUtils;
 
     @Inject
-    KeyguardSecurityModel(@Main Resources resources, LockPatternUtils lockPatternUtils) {
-        mIsPukScreenAvailable = resources.getBoolean(
+    KeyguardSecurityModel(Context context) {
+        mContext = context;
+        mLockPatternUtils = new LockPatternUtils(context);
+        mIsPukScreenAvailable = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enable_puk_unlock_screen);
-        mLockPatternUtils = lockPatternUtils;
+    }
+
+    void setLockPatternUtils(LockPatternUtils utils) {
+        mLockPatternUtils = utils;
     }
 
     public SecurityMode getSecurityMode(int userId) {

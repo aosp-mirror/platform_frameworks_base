@@ -28,6 +28,7 @@ import android.util.AttributeSet;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternChecker;
@@ -39,8 +40,8 @@ import com.android.systemui.R;
 /**
  * Base class for PIN and password unlock screens.
  */
-public abstract class KeyguardAbsKeyInputView extends KeyguardInputView
-        implements EmergencyButton.EmergencyButtonCallback {
+public abstract class KeyguardAbsKeyInputView extends LinearLayout
+        implements KeyguardSecurityView, EmergencyButton.EmergencyButtonCallback {
     protected KeyguardSecurityCallback mCallback;
     protected LockPatternUtils mLockPatternUtils;
     protected AsyncTask<?, ?, ?> mPendingLockCheck;

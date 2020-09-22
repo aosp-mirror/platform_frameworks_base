@@ -33,12 +33,8 @@ import android.view.SurfaceView;
 import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.keyguard.dagger.KeyguardBouncerScope;
-import com.android.systemui.dagger.qualifiers.Main;
 
 import java.util.NoSuchElementException;
-
-import javax.inject.Inject;
 
 /**
  * Encapsulates all logic for secondary lockscreen state management.
@@ -146,9 +142,9 @@ public class AdminSecondaryLockScreenController {
         }
     };
 
-    private AdminSecondaryLockScreenController(Context context, KeyguardSecurityContainer parent,
+    public AdminSecondaryLockScreenController(Context context, ViewGroup parent,
             KeyguardUpdateMonitor updateMonitor, KeyguardSecurityCallback callback,
-            @Main Handler handler) {
+            Handler handler) {
         mContext = context;
         mHandler = handler;
         mParent = parent;
@@ -236,28 +232,6 @@ public class AdminSecondaryLockScreenController {
         protected void onDetachedFromWindow() {
             super.onDetachedFromWindow();
             getHolder().removeCallback(mSurfaceHolderCallback);
-        }
-    }
-
-    @KeyguardBouncerScope
-    public static class Factory {
-        private final Context mContext;
-        private final KeyguardSecurityContainer mParent;
-        private final KeyguardUpdateMonitor mUpdateMonitor;
-        private final Handler mHandler;
-
-        @Inject
-        public Factory(Context context, KeyguardSecurityContainer parent,
-                KeyguardUpdateMonitor updateMonitor, @Main Handler handler) {
-            mContext = context;
-            mParent = parent;
-            mUpdateMonitor = updateMonitor;
-            mHandler = handler;
-        }
-
-        public AdminSecondaryLockScreenController create(KeyguardSecurityCallback callback) {
-            return new AdminSecondaryLockScreenController(mContext, mParent, mUpdateMonitor,
-                    callback, mHandler);
         }
     }
 }
