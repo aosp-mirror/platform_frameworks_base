@@ -15,34 +15,53 @@
  */
 package com.android.keyguard;
 
+import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL;
+import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL_UNLOCKED;
+
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Rect;
+import android.os.AsyncTask;
+import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.LatencyTracker;
+import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
+import com.android.internal.widget.LockscreenCredential;
 import com.android.settingslib.animation.AppearAnimationCreator;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 
+import java.util.List;
+
 public class KeyguardPatternView extends KeyguardInputView
-        implements AppearAnimationCreator<LockPatternView.CellState> {
+        implements AppearAnimationCreator<LockPatternView.CellState>,
+        EmergencyButton.EmergencyButtonCallback {
 
     private static final String TAG = "SecurityPatternView";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
 
+    // how long before we clear the wrong pattern
+    private static final int PATTERN_CLEAR_TIMEOUT_MS = 2000;
 
     // how long we stay awake after each key beyond MIN_PATTERN_BEFORE_POKE_WAKELOCK
     private static final int UNLOCK_PATTERN_WAKE_INTERVAL_MS = 7000;
+
+    // how many cells the user has to cross before we poke the wakelock
+    private static final int MIN_PATTERN_BEFORE_POKE_WAKELOCK = 2;
 
     // How much we scale up the duration of the disappear animation when the current user is locked
     public static final float DISAPPEAR_MULTIPLIER_LOCKED = 1.5f;
@@ -50,6 +69,7 @@ public class KeyguardPatternView extends KeyguardInputView
     // Extra padding, in pixels, that should eat touch events.
     private static final int PATTERNS_TOUCH_AREA_EXTENSION = 40;
 
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final AppearAnimationUtils mAppearAnimationUtils;
     private final DisappearAnimationUtils mDisappearAnimationUtils;
     private final DisappearAnimationUtils mDisappearAnimationUtilsLocked;
@@ -57,6 +77,9 @@ public class KeyguardPatternView extends KeyguardInputView
     private final Rect mTempRect = new Rect();
     private final Rect mLockPatternScreenBounds = new Rect();
 
+    private CountDownTimer mCountdownTimer = null;
+    private LockPatternUtils mLockPatternUtils;
+    private AsyncTask<?, ?, ?> mPendingLockCheck;
     private LockPatternView mLockPatternView;
     private KeyguardSecurityCallback mCallback;
 
@@ -68,10 +91,26 @@ public class KeyguardPatternView extends KeyguardInputView
      */
     private long mLastPokeTime = -UNLOCK_PATTERN_WAKE_INTERVAL_MS;
 
+    /**
+     * Useful for clearing out the wrong pattern after a delay
+     */
+    private Runnable mCancelPatternRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mLockPatternView.clearPattern();
+        }
+    };
+    @VisibleForTesting
     KeyguardMessageArea mSecurityMessageDisplay;
     private View mEcaView;
     private ViewGroup mContainer;
     private int mDisappearYTranslation;
+
+    enum FooterMode {
+        Normal,
+        ForgotLockPattern,
+        VerifyUnlocked
+    }
 
     public KeyguardPatternView(Context context) {
         this(context, null);
@@ -79,6 +118,7 @@ public class KeyguardPatternView extends KeyguardInputView
 
     public KeyguardPatternView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mAppearAnimationUtils = new AppearAnimationUtils(context,
                 AppearAnimationUtils.DEFAULT_APPEAR_DURATION, 1.5f /* translationScale */,
                 2.0f /* delayScale */, AnimationUtils.loadInterpolator(
@@ -102,22 +142,50 @@ public class KeyguardPatternView extends KeyguardInputView
 
     @Override
     public void setLockPatternUtils(LockPatternUtils utils) {
+        mLockPatternUtils = utils;
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mLockPatternUtils = mLockPatternUtils == null
+                ? new LockPatternUtils(mContext) : mLockPatternUtils;
 
         mLockPatternView = findViewById(R.id.lockPatternView);
+        mLockPatternView.setSaveEnabled(false);
+        mLockPatternView.setOnPatternListener(new UnlockPatternListener());
+        mLockPatternView.setInStealthMode(!mLockPatternUtils.isVisiblePatternEnabled(
+                KeyguardUpdateMonitor.getCurrentUser()));
+
+        // vibrate mode will be the same for the life of this screen
+        mLockPatternView.setTactileFeedbackEnabled(mLockPatternUtils.isTactileFeedbackEnabled());
 
         mEcaView = findViewById(R.id.keyguard_selector_fade_container);
         mContainer = findViewById(R.id.container);
+
+        EmergencyButton button = findViewById(R.id.emergency_call_button);
+        if (button != null) {
+            button.setCallback(this);
+        }
+
+        View cancelBtn = findViewById(R.id.cancel_button);
+        if (cancelBtn != null) {
+            cancelBtn.setOnClickListener(view -> {
+                mCallback.reset();
+                mCallback.onCancelClicked();
+            });
+        }
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mSecurityMessageDisplay = KeyguardMessageArea.findSecurityMessageDisplay(this);
+    }
+
+    @Override
+    public void onEmergencyButtonClickedWhenInCall() {
+        mCallback.reset();
     }
 
     @Override
@@ -149,6 +217,31 @@ public class KeyguardPatternView extends KeyguardInputView
 
     @Override
     public void reset() {
+        // reset lock pattern
+        mLockPatternView.setInStealthMode(!mLockPatternUtils.isVisiblePatternEnabled(
+                KeyguardUpdateMonitor.getCurrentUser()));
+        mLockPatternView.enableInput();
+        mLockPatternView.setEnabled(true);
+        mLockPatternView.clearPattern();
+
+        if (mSecurityMessageDisplay == null) {
+            return;
+        }
+
+        // if the user is currently locked out, enforce it.
+        long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
+                KeyguardUpdateMonitor.getCurrentUser());
+        if (deadline != 0) {
+            handleAttemptLockout(deadline);
+        } else {
+            displayDefaultSecurityMessage();
+        }
+    }
+
+    private void displayDefaultSecurityMessage() {
+        if (mSecurityMessageDisplay != null) {
+            mSecurityMessageDisplay.setMessage("");
+        }
     }
 
     @Override
@@ -161,6 +254,148 @@ public class KeyguardPatternView extends KeyguardInputView
                 || mLockPatternScreenBounds.contains((int) event.getRawX(), (int) event.getRawY());
     }
 
+    /** TODO: hook this up */
+    public void cleanUp() {
+        if (DEBUG) Log.v(TAG, "Cleanup() called on " + this);
+        mLockPatternUtils = null;
+        mLockPatternView.setOnPatternListener(null);
+    }
+
+    private class UnlockPatternListener implements LockPatternView.OnPatternListener {
+
+        @Override
+        public void onPatternStart() {
+            mLockPatternView.removeCallbacks(mCancelPatternRunnable);
+            mSecurityMessageDisplay.setMessage("");
+        }
+
+        @Override
+        public void onPatternCleared() {
+        }
+
+        @Override
+        public void onPatternCellAdded(List<LockPatternView.Cell> pattern) {
+            mCallback.userActivity();
+            mCallback.onUserInput();
+        }
+
+        @Override
+        public void onPatternDetected(final List<LockPatternView.Cell> pattern) {
+            mKeyguardUpdateMonitor.setCredentialAttempted();
+            mLockPatternView.disableInput();
+            if (mPendingLockCheck != null) {
+                mPendingLockCheck.cancel(false);
+            }
+
+            final int userId = KeyguardUpdateMonitor.getCurrentUser();
+            if (pattern.size() < LockPatternUtils.MIN_PATTERN_REGISTER_FAIL) {
+                mLockPatternView.enableInput();
+                onPatternChecked(userId, false, 0, false /* not valid - too short */);
+                return;
+            }
+
+            if (LatencyTracker.isEnabled(mContext)) {
+                LatencyTracker.getInstance(mContext).onActionStart(ACTION_CHECK_CREDENTIAL);
+                LatencyTracker.getInstance(mContext).onActionStart(ACTION_CHECK_CREDENTIAL_UNLOCKED);
+            }
+            mPendingLockCheck = LockPatternChecker.checkCredential(
+                    mLockPatternUtils,
+                    LockscreenCredential.createPattern(pattern),
+                    userId,
+                    new LockPatternChecker.OnCheckCallback() {
+
+                        @Override
+                        public void onEarlyMatched() {
+                            if (LatencyTracker.isEnabled(mContext)) {
+                                LatencyTracker.getInstance(mContext).onActionEnd(
+                                        ACTION_CHECK_CREDENTIAL);
+                            }
+                            onPatternChecked(userId, true /* matched */, 0 /* timeoutMs */,
+                                    true /* isValidPattern */);
+                        }
+
+                        @Override
+                        public void onChecked(boolean matched, int timeoutMs) {
+                            if (LatencyTracker.isEnabled(mContext)) {
+                                LatencyTracker.getInstance(mContext).onActionEnd(
+                                        ACTION_CHECK_CREDENTIAL_UNLOCKED);
+                            }
+                            mLockPatternView.enableInput();
+                            mPendingLockCheck = null;
+                            if (!matched) {
+                                onPatternChecked(userId, false /* matched */, timeoutMs,
+                                        true /* isValidPattern */);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled() {
+                            // We already got dismissed with the early matched callback, so we
+                            // cancelled the check. However, we still need to note down the latency.
+                            if (LatencyTracker.isEnabled(mContext)) {
+                                LatencyTracker.getInstance(mContext).onActionEnd(
+                                        ACTION_CHECK_CREDENTIAL_UNLOCKED);
+                            }
+                        }
+                    });
+            if (pattern.size() > MIN_PATTERN_BEFORE_POKE_WAKELOCK) {
+                mCallback.userActivity();
+                mCallback.onUserInput();
+            }
+        }
+
+        private void onPatternChecked(int userId, boolean matched, int timeoutMs,
+                boolean isValidPattern) {
+            boolean dismissKeyguard = KeyguardUpdateMonitor.getCurrentUser() == userId;
+            if (matched) {
+                mCallback.reportUnlockAttempt(userId, true, 0);
+                if (dismissKeyguard) {
+                    mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Correct);
+                    mCallback.dismiss(true, userId);
+                }
+            } else {
+                mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Wrong);
+                if (isValidPattern) {
+                    mCallback.reportUnlockAttempt(userId, false, timeoutMs);
+                    if (timeoutMs > 0) {
+                        long deadline = mLockPatternUtils.setLockoutAttemptDeadline(
+                                userId, timeoutMs);
+                        handleAttemptLockout(deadline);
+                    }
+                }
+                if (timeoutMs == 0) {
+                    mSecurityMessageDisplay.setMessage(R.string.kg_wrong_pattern);
+                    mLockPatternView.postDelayed(mCancelPatternRunnable, PATTERN_CLEAR_TIMEOUT_MS);
+                }
+            }
+        }
+    }
+
+    private void handleAttemptLockout(long elapsedRealtimeDeadline) {
+        mLockPatternView.clearPattern();
+        mLockPatternView.setEnabled(false);
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long secondsInFuture = (long) Math.ceil(
+                (elapsedRealtimeDeadline - elapsedRealtime) / 1000.0);
+        mCountdownTimer = new CountDownTimer(secondsInFuture * 1000, 1000) {
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                final int secondsRemaining = (int) Math.round(millisUntilFinished / 1000.0);
+                mSecurityMessageDisplay.setMessage(mContext.getResources().getQuantityString(
+                                R.plurals.kg_too_many_failed_attempts_countdown,
+                                secondsRemaining, secondsRemaining));
+            }
+
+            @Override
+            public void onFinish() {
+                mLockPatternView.setEnabled(true);
+                displayDefaultSecurityMessage();
+            }
+
+        }.start();
+    }
+
     @Override
     public boolean needsInput() {
         return false;
@@ -168,6 +403,15 @@ public class KeyguardPatternView extends KeyguardInputView
 
     @Override
     public void onPause() {
+        if (mCountdownTimer != null) {
+            mCountdownTimer.cancel();
+            mCountdownTimer = null;
+        }
+        if (mPendingLockCheck != null) {
+            mPendingLockCheck.cancel(false);
+            mPendingLockCheck = null;
+        }
+        displayDefaultSecurityMessage();
     }
 
     @Override
@@ -181,10 +425,36 @@ public class KeyguardPatternView extends KeyguardInputView
 
     @Override
     public void showPromptReason(int reason) {
+        switch (reason) {
+            case PROMPT_REASON_RESTART:
+                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_restart_pattern);
+                break;
+            case PROMPT_REASON_TIMEOUT:
+                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_timeout_pattern);
+                break;
+            case PROMPT_REASON_DEVICE_ADMIN:
+                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_device_admin);
+                break;
+            case PROMPT_REASON_USER_REQUEST:
+                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_user_request);
+                break;
+            case PROMPT_REASON_PREPARE_FOR_UPDATE:
+                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_timeout_pattern);
+                break;
+            case PROMPT_REASON_NONE:
+                break;
+            default:
+                mSecurityMessageDisplay.setMessage(R.string.kg_prompt_reason_timeout_pattern);
+                break;
+        }
     }
 
     @Override
     public void showMessage(CharSequence message, ColorStateList colorState) {
+        if (colorState != null) {
+            mSecurityMessageDisplay.setNextMessageColor(colorState);
+        }
+        mSecurityMessageDisplay.setMessage(message);
     }
 
     @Override
@@ -213,18 +483,11 @@ public class KeyguardPatternView extends KeyguardInputView
         }
     }
 
-    /**
-     * @deprecated Use {@link #startDisappearAnimation(boolean, Runnable)}
-     */
     @Override
-    public boolean startDisappearAnimation(Runnable finishRunnable) {
-        // TODO(b/166448040): remove this when possible
-        return false;
-    }
-
-    public boolean startDisappearAnimation(boolean needsSlowUnlockTransition,
-            final Runnable finishRunnable) {
-        float durationMultiplier = needsSlowUnlockTransition ? DISAPPEAR_MULTIPLIER_LOCKED : 1f;
+    public boolean startDisappearAnimation(final Runnable finishRunnable) {
+        float durationMultiplier = mKeyguardUpdateMonitor.needsSlowUnlockTransition()
+                ? DISAPPEAR_MULTIPLIER_LOCKED
+                : 1f;
         mLockPatternView.clearPattern();
         enableClipping(false);
         setTranslationY(0);
@@ -233,8 +496,10 @@ public class KeyguardPatternView extends KeyguardInputView
                 -mDisappearAnimationUtils.getStartTranslation(),
                 mDisappearAnimationUtils.getInterpolator());
 
-        DisappearAnimationUtils disappearAnimationUtils = needsSlowUnlockTransition
-                        ? mDisappearAnimationUtilsLocked : mDisappearAnimationUtils;
+        DisappearAnimationUtils disappearAnimationUtils = mKeyguardUpdateMonitor
+                .needsSlowUnlockTransition()
+                        ? mDisappearAnimationUtilsLocked
+                        : mDisappearAnimationUtils;
         disappearAnimationUtils.startAnimation2d(mLockPatternView.getCellStates(),
                 () -> {
                     enableClipping(true);
@@ -283,7 +548,7 @@ public class KeyguardPatternView extends KeyguardInputView
 
     @Override
     public CharSequence getTitle() {
-        return getResources().getString(
+        return getContext().getString(
                 com.android.internal.R.string.keyguard_accessibility_pattern_unlock);
     }
 }
