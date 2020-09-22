@@ -66,7 +66,6 @@ import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.LocationRequest;
 import android.location.util.identity.CallerIdentity;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.ICancellationSignal;
 import android.os.IRemoteCallback;
@@ -616,9 +615,7 @@ public class LocationProviderManagerTest {
 
         ILocationCallback listener = createMockGetCurrentLocationListener();
         LocationRequest locationRequest = new LocationRequest.Builder(0).build();
-        ICancellationSignal cancellationSignal = CancellationSignal.createTransport();
-        mManager.getCurrentLocation(locationRequest, IDENTITY,
-                PERMISSION_FINE, cancellationSignal, listener);
+        mManager.getCurrentLocation(locationRequest, IDENTITY, PERMISSION_FINE, listener);
 
         Location loc = createLocation(NAME, mRandom);
         mProvider.setProviderLocation(loc);
@@ -632,9 +629,8 @@ public class LocationProviderManagerTest {
     public void testGetCurrentLocation_Cancel() throws Exception {
         ILocationCallback listener = createMockGetCurrentLocationListener();
         LocationRequest locationRequest = new LocationRequest.Builder(0).build();
-        ICancellationSignal cancellationSignal = CancellationSignal.createTransport();
-        mManager.getCurrentLocation(locationRequest, IDENTITY,
-                PERMISSION_FINE, cancellationSignal, listener);
+        ICancellationSignal cancellationSignal = mManager.getCurrentLocation(locationRequest,
+                IDENTITY, PERMISSION_FINE, listener);
 
         cancellationSignal.cancel();
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
@@ -646,9 +642,7 @@ public class LocationProviderManagerTest {
     public void testGetCurrentLocation_ProviderDisabled() throws Exception {
         ILocationCallback listener = createMockGetCurrentLocationListener();
         LocationRequest locationRequest = new LocationRequest.Builder(0).build();
-        ICancellationSignal cancellationSignal = CancellationSignal.createTransport();
-        mManager.getCurrentLocation(locationRequest, IDENTITY,
-                PERMISSION_FINE, cancellationSignal, listener);
+        mManager.getCurrentLocation(locationRequest, IDENTITY, PERMISSION_FINE, listener);
 
         mProvider.setProviderAllowed(false);
         mProvider.setProviderAllowed(true);
@@ -662,9 +656,7 @@ public class LocationProviderManagerTest {
 
         ILocationCallback listener = createMockGetCurrentLocationListener();
         LocationRequest locationRequest = new LocationRequest.Builder(0).build();
-        ICancellationSignal cancellationSignal = CancellationSignal.createTransport();
-        mManager.getCurrentLocation(locationRequest, IDENTITY,
-                PERMISSION_FINE, cancellationSignal, listener);
+        mManager.getCurrentLocation(locationRequest, IDENTITY, PERMISSION_FINE, listener);
 
         mProvider.setProviderAllowed(true);
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
@@ -680,9 +672,7 @@ public class LocationProviderManagerTest {
 
         ILocationCallback listener = createMockGetCurrentLocationListener();
         LocationRequest locationRequest = new LocationRequest.Builder(0).build();
-        ICancellationSignal cancellationSignal = CancellationSignal.createTransport();
-        mManager.getCurrentLocation(locationRequest, IDENTITY,
-                PERMISSION_FINE, cancellationSignal, listener);
+        mManager.getCurrentLocation(locationRequest, IDENTITY, PERMISSION_FINE, listener);
 
         verify(listener, times(1)).onLocation(locationCaptor.capture());
         assertThat(locationCaptor.getValue()).isEqualTo(loc);
@@ -692,9 +682,7 @@ public class LocationProviderManagerTest {
     public void testGetCurrentLocation_Timeout() throws Exception {
         ILocationCallback listener = createMockGetCurrentLocationListener();
         LocationRequest locationRequest = new LocationRequest.Builder(0).build();
-        ICancellationSignal cancellationSignal = CancellationSignal.createTransport();
-        mManager.getCurrentLocation(locationRequest, IDENTITY,
-                PERMISSION_FINE, cancellationSignal, listener);
+        mManager.getCurrentLocation(locationRequest, IDENTITY, PERMISSION_FINE, listener);
 
         ArgumentCaptor<OnAlarmListener> listenerCapture = ArgumentCaptor.forClass(
                 OnAlarmListener.class);
