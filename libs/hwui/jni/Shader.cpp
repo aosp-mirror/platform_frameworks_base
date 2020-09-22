@@ -224,7 +224,7 @@ static jlong ComposeShader_create(JNIEnv* env, jobject o, jlong matrixPtr,
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 static jlong BlurShader_create(JNIEnv* env , jobject o, jlong matrixPtr, jfloat sigmaX,
-        jfloat sigmaY, jlong shaderHandle) {
+        jfloat sigmaY, jlong shaderHandle, jint edgeTreatment) {
     auto* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
     auto* inputShader = reinterpret_cast<Shader*>(shaderHandle);
 
@@ -232,6 +232,7 @@ static jlong BlurShader_create(JNIEnv* env , jobject o, jlong matrixPtr, jfloat 
                 sigmaX,
                 sigmaY,
                 inputShader,
+                static_cast<SkTileMode>(edgeTreatment),
                 matrix
             );
     return reinterpret_cast<jlong>(blurShader);
@@ -291,7 +292,7 @@ static const JNINativeMethod gBitmapShaderMethods[] = {
 };
 
 static const JNINativeMethod gBlurShaderMethods[] = {
-    { "nativeCreate",      "(JFFJ)J", (void*)BlurShader_create }
+    { "nativeCreate",      "(JFFJI)J", (void*)BlurShader_create }
 };
 
 static const JNINativeMethod gLinearGradientMethods[] = {
