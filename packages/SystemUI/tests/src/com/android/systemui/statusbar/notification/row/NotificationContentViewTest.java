@@ -76,6 +76,32 @@ public class NotificationContentViewTest extends SysuiTestCase {
 
     @Test
     @UiThreadTest
+    public void testShowAppOpsIcons() {
+        View mockContracted = mock(NotificationHeaderView.class);
+        when(mockContracted.findViewById(com.android.internal.R.id.mic))
+                .thenReturn(mockContracted);
+        View mockExpanded = mock(NotificationHeaderView.class);
+        when(mockExpanded.findViewById(com.android.internal.R.id.mic))
+                .thenReturn(mockExpanded);
+        View mockHeadsUp = mock(NotificationHeaderView.class);
+        when(mockHeadsUp.findViewById(com.android.internal.R.id.mic))
+                .thenReturn(mockHeadsUp);
+
+        mView.setContractedChild(mockContracted);
+        mView.setExpandedChild(mockExpanded);
+        mView.setHeadsUpChild(mockHeadsUp);
+
+        ArraySet<Integer> ops = new ArraySet<>();
+        ops.add(AppOpsManager.OP_RECORD_AUDIO);
+        mView.showAppOpsIcons(ops);
+
+        verify(mockContracted, times(1)).setVisibility(View.VISIBLE);
+        verify(mockExpanded, times(1)).setVisibility(View.VISIBLE);
+        verify(mockHeadsUp, times(1)).setVisibility(View.VISIBLE);
+    }
+
+    @Test
+    @UiThreadTest
     public void testExpandButtonFocusIsCalled() {
         View mockContractedEB = mock(NotificationExpandButton.class);
         View mockContracted = mock(NotificationHeaderView.class);

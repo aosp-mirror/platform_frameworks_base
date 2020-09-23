@@ -432,19 +432,36 @@ public class BtHelper {
         // and this must be done on behalf of system server to make sure permissions are granted.
         final long ident = Binder.clearCallingIdentity();
         if (client != null) {
-            AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(eventSource));
-            client.requestScoState(BluetoothHeadset.STATE_AUDIO_DISCONNECTED,
-                    SCO_MODE_VIRTUAL_CALL);
-            // If a disconnection is pending, the client will be removed whne clearAllScoClients()
-            // is called form receiveBtEvent()
-            if (mScoAudioState != SCO_STATE_DEACTIVATE_REQ
-                    && mScoAudioState != SCO_STATE_DEACTIVATING) {
-                client.remove(false /*stop */, true /*unregister*/);
-            }
+            stopAndRemoveClient(client, eventSource);
         }
         Binder.restoreCallingIdentity(ident);
     }
 
+    // @GuardedBy("AudioDeviceBroker.mSetModeLock")
+    @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
+    /*package*/ synchronized void stopBluetoothScoForPid(int pid) {
+        ScoClient client = getScoClientForPid(pid);
+        if (client == null) {
+            return;
+        }
+        final String eventSource = new StringBuilder("stopBluetoothScoForPid(")
+                .append(pid).append(")").toString();
+        stopAndRemoveClient(client, eventSource);
+    }
+
+    @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
+    // @GuardedBy("BtHelper.this")
+    private void stopAndRemoveClient(ScoClient client, @NonNull String eventSource) {
+        AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(eventSource));
+        client.requestScoState(BluetoothHeadset.STATE_AUDIO_DISCONNECTED,
+                SCO_MODE_VIRTUAL_CALL);
+        // If a disconnection is pending, the client will be removed when clearAllScoClients()
+        // is called form receiveBtEvent()
+        if (mScoAudioState != SCO_STATE_DEACTIVATE_REQ
+                && mScoAudioState != SCO_STATE_DEACTIVATING) {
+            client.remove(false /*stop */, true /*unregister*/);
+        }
+    }
 
     /*package*/ synchronized void setHearingAidVolume(int index, int streamType) {
         if (mHearingAid == null) {
@@ -970,6 +987,16 @@ public class BtHelper {
             newClient.registerDeathRecipient();
             mScoClients.add(newClient);
             return newClient;
+        }
+        return null;
+    }
+
+    @GuardedBy("BtHelper.this")
+    private ScoClient getScoClientForPid(int pid) {
+        for (ScoClient cl : mScoClients) {
+            if (cl.getPid() == pid) {
+                return cl;
+            }
         }
         return null;
     }

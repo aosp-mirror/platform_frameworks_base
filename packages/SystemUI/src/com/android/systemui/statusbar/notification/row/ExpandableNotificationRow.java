@@ -239,6 +239,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mShowNoBackground;
     private ExpandableNotificationRow mNotificationParent;
     private OnExpandClickListener mOnExpandClickListener;
+    private View.OnClickListener mOnAppOpsClickListener;
 
     // Listener will be called when receiving a long click event.
     // Use #setLongPressPosition to optionally assign positional data with the long press.
@@ -1142,6 +1143,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             items.add(NotificationMenuRow.createPartialConversationItem(mContext));
             items.add(NotificationMenuRow.createInfoItem(mContext));
             items.add(NotificationMenuRow.createSnoozeItem(mContext));
+            items.add(NotificationMenuRow.createAppOpsItem(mContext));
             mMenuRow.setMenuItems(items);
         }
         if (existed) {
@@ -1607,6 +1609,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             RowContentBindStage rowContentBindStage,
             OnExpandClickListener onExpandClickListener,
             NotificationMediaManager notificationMediaManager,
+            OnAppOpsClickListener onAppOpsClickListener,
             FalsingManager falsingManager,
             StatusBarStateController statusBarStateController,
             PeopleNotificationIdentifier peopleNotificationIdentifier) {
@@ -1626,6 +1629,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mRowContentBindStage = rowContentBindStage;
         mOnExpandClickListener = onExpandClickListener;
         mMediaManager = notificationMediaManager;
+        setAppOpsOnClickListener(onAppOpsClickListener);
         mFalsingManager = falsingManager;
         mStatusbarStateController = statusBarStateController;
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
@@ -1682,6 +1686,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         requestLayout();
     }
 
+    public void showAppOpsIcons(ArraySet<Integer> activeOps) {
+        if (mIsSummaryWithChildren) {
+            mChildrenContainer.showAppOpsIcons(activeOps);
+        }
+        mPrivateLayout.showAppOpsIcons(activeOps);
+        mPublicLayout.showAppOpsIcons(activeOps);
+    }
+
     /** Sets the last time the notification being displayed audibly alerted the user. */
     public void setLastAudiblyAlertedMs(long lastAudiblyAlertedMs) {
         if (NotificationUtils.useNewInterruptionModel(mContext)) {
@@ -1708,6 +1720,24 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         mPrivateLayout.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
         mPublicLayout.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
+    }
+
+    public View.OnClickListener getAppOpsOnClickListener() {
+        return mOnAppOpsClickListener;
+    }
+
+    void setAppOpsOnClickListener(ExpandableNotificationRow.OnAppOpsClickListener l) {
+        mOnAppOpsClickListener = v -> {
+            createMenu();
+            NotificationMenuRowPlugin provider = getProvider();
+            if (provider == null) {
+                return;
+            }
+            MenuItem menuItem = provider.getAppOpsMenuItem(mContext);
+            if (menuItem != null) {
+                l.onClick(this, v.getWidth() / 2, v.getHeight() / 2, menuItem);
+            }
+        };
     }
 
     @Override

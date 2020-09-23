@@ -118,7 +118,7 @@ public abstract class StorageManagerInternal {
      * affects them.
      */
     public abstract void onAppOpsChanged(int code, int uid,
-            @Nullable String packageName, int mode);
+            @Nullable String packageName, int mode, int previousMode);
 
     /**
      * Asks the StorageManager to reset all state for the provided user; this will result

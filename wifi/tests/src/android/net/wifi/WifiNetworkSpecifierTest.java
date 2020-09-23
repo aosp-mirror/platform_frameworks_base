@@ -22,8 +22,6 @@ import static android.os.PatternMatcher.PATTERN_SIMPLE_GLOB;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.net.MacAddress;
@@ -37,8 +35,6 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
-import java.security.cert.X509Certificate;
-
 /**
  * Unit tests for {@link android.net.wifi.WifiNetworkSpecifier}.
  */
@@ -49,7 +45,6 @@ public class WifiNetworkSpecifierTest {
     private static final String TEST_BSSID_OUI_MASK = "ff:ff:ff:00:00:00";
     private static final String TEST_BSSID = "12:12:12:12:12:12";
     private static final String TEST_PRESHARED_KEY = "\"Test123\"";
-    private static final String TEST_DOMAIN_SUFFIX_MATCH = "domainSuffixMatch";
 
     /**
      * Validate correctness of WifiNetworkSpecifier object created by
@@ -140,106 +135,6 @@ public class WifiNetworkSpecifierTest {
                 wifiNetworkSpecifier.wifiConfiguration.enterpriseConfig.getPhase2Method());
     }
 
-    /**
-     * Validate correctness of WifiNetworkSuggestion object created by
-     * {@link WifiNetworkSuggestion.Builder#build()} for WPA3-Enterprise network.
-     */
-    @Test
-    public void testWifiNetworkSuggestionBuilderForWpa3EapNetwork() {
-        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
-        enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
-        enterpriseConfig.setCaCertificate(FakeKeys.CA_CERT0);
-        enterpriseConfig.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
-
-        NetworkSpecifier specifier = new WifiNetworkSpecifier.Builder()
-                .setSsid(TEST_SSID)
-                .setWpa3EnterpriseConfig(enterpriseConfig)
-                .build();
-
-        assertTrue(specifier instanceof WifiNetworkSpecifier);
-        WifiNetworkSpecifier wifiNetworkSpecifier = (WifiNetworkSpecifier) specifier;
-
-        assertEquals("\"" + TEST_SSID + "\"", wifiNetworkSpecifier.wifiConfiguration.SSID);
-        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedKeyManagement
-                .get(WifiConfiguration.KeyMgmt.IEEE8021X));
-        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedKeyManagement
-                .get(WifiConfiguration.KeyMgmt.WPA_EAP));
-        assertFalse(wifiNetworkSpecifier.wifiConfiguration.allowedKeyManagement
-                .get(WifiConfiguration.KeyMgmt.SUITE_B_192));
-        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedGroupCiphers
-                .get(WifiConfiguration.GroupCipher.CCMP));
-        assertTrue(wifiNetworkSpecifier.wifiConfiguration.requirePmf);
-        assertNull(wifiNetworkSpecifier.wifiConfiguration.preSharedKey);
-        assertNotNull(wifiNetworkSpecifier.wifiConfiguration.enterpriseConfig);
-    }
-
-    /**
-     * Validate correctness of WifiNetworkSuggestion object created by
-     * {@link WifiNetworkSuggestion.Builder#build()} for WPA3-Enterprise 192-bit RSA SuiteB network.
-     */
-    @Test
-    public void testWifiNetworkSuggestionBuilderForWpa3SuiteBRsaEapNetwork() {
-        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
-        enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
-        enterpriseConfig.setCaCertificate(FakeKeys.CA_SUITE_B_RSA3072_CERT);
-        enterpriseConfig.setClientKeyEntryWithCertificateChain(FakeKeys.CLIENT_SUITE_B_RSA3072_KEY,
-                new X509Certificate[] {FakeKeys.CLIENT_SUITE_B_RSA3072_CERT});
-
-        enterpriseConfig.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
-
-        NetworkSpecifier specifier = new WifiNetworkSpecifier.Builder()
-                .setSsid(TEST_SSID)
-                .setWpa3EnterpriseConfig(enterpriseConfig)
-                .build();
-
-        assertTrue(specifier instanceof WifiNetworkSpecifier);
-        WifiNetworkSpecifier wifiNetworkSpecifier = (WifiNetworkSpecifier) specifier;
-
-        assertEquals("\"" + TEST_SSID + "\"", wifiNetworkSpecifier.wifiConfiguration.SSID);
-        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedKeyManagement
-                .get(WifiConfiguration.KeyMgmt.SUITE_B_192));
-        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedGroupCiphers
-                .get(WifiConfiguration.GroupCipher.GCMP_256));
-        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedGroupManagementCiphers
-                .get(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256));
-        assertTrue(wifiNetworkSpecifier.wifiConfiguration.requirePmf);
-        assertNull(wifiNetworkSpecifier.wifiConfiguration.preSharedKey);
-        assertNotNull(wifiNetworkSpecifier.wifiConfiguration.enterpriseConfig);
-    }
-
-    /**
-     * Validate correctness of WifiNetworkSuggestion object created by
-     * {@link WifiNetworkSuggestion.Builder#build()} for WPA3-Enterprise 192-bit ECC SuiteB network.
-     */
-    @Test
-    public void testWifiNetworkSuggestionBuilderForWpa3SuiteBEccEapNetwork() {
-        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
-        enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
-        enterpriseConfig.setCaCertificate(FakeKeys.CA_SUITE_B_ECDSA_CERT);
-        enterpriseConfig.setClientKeyEntryWithCertificateChain(FakeKeys.CLIENT_SUITE_B_ECC_KEY,
-                new X509Certificate[] {FakeKeys.CLIENT_SUITE_B_ECDSA_CERT});
-
-        enterpriseConfig.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
-
-        NetworkSpecifier specifier = new WifiNetworkSpecifier.Builder()
-                .setSsid(TEST_SSID)
-                .setWpa3EnterpriseConfig(enterpriseConfig)
-                .build();
-
-        assertTrue(specifier instanceof WifiNetworkSpecifier);
-        WifiNetworkSpecifier wifiNetworkSpecifier = (WifiNetworkSpecifier) specifier;
-
-        assertEquals("\"" + TEST_SSID + "\"", wifiNetworkSpecifier.wifiConfiguration.SSID);
-        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedKeyManagement
-                .get(WifiConfiguration.KeyMgmt.SUITE_B_192));
-        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedGroupCiphers
-                .get(WifiConfiguration.GroupCipher.GCMP_256));
-        assertTrue(wifiNetworkSpecifier.wifiConfiguration.allowedGroupManagementCiphers
-                .get(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256));
-        assertTrue(wifiNetworkSpecifier.wifiConfiguration.requirePmf);
-        assertNull(wifiNetworkSpecifier.wifiConfiguration.preSharedKey);
-        assertNotNull(wifiNetworkSpecifier.wifiConfiguration.enterpriseConfig);
-    }
 
     /**
      * Ensure {@link WifiNetworkSpecifier.Builder#setSsid(String)} throws an exception

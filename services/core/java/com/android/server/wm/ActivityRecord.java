@@ -70,7 +70,7 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
-import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.content.pm.ActivityInfo.PERSIST_ACROSS_REBOOTS;
 import static android.content.pm.ActivityInfo.PERSIST_ROOT_ONLY;
@@ -1680,7 +1680,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (options != null) {
             final boolean useLockTask = options.getLockTaskMode();
             if (useLockTask && lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_DEFAULT) {
-                lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
+                lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
             }
         }
         return lockTaskLaunchMode;

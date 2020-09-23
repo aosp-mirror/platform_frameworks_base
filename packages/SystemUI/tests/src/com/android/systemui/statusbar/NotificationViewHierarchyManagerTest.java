@@ -211,6 +211,19 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testUpdateNotificationViews_appOps() throws Exception {
+        NotificationEntry entry0 = createEntry();
+        entry0.setRow(spy(entry0.getRow()));
+        when(mEntryManager.getVisibleNotifications()).thenReturn(
+                Lists.newArrayList(entry0));
+        mListContainer.addContainerView(entry0.getRow());
+
+        mViewHierarchyManager.updateNotificationViews();
+
+        verify(entry0.getRow(), times(1)).showAppOpsIcons(any());
+    }
+
+    @Test
     public void testReentrantCallsToOnDynamicPrivacyChangedPostForLater() {
         // GIVEN a ListContainer that will make a re-entrant call to updateNotificationViews()
         mMadeReentrantCall = false;

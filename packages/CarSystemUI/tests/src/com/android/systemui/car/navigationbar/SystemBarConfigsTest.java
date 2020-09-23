@@ -17,6 +17,7 @@
 package com.android.systemui.car.navigationbar;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -31,7 +32,14 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarSystemUiTest;
+import com.android.systemui.car.notification.NotificationPanelViewController;
+import com.android.systemui.car.notification.NotificationPanelViewMediator;
+import com.android.systemui.car.notification.PowerManagerHelper;
+import com.android.systemui.car.notification.TopNotificationPanelViewMediator;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -92,6 +100,43 @@ public class SystemBarConfigsTest extends SysuiTestCase {
         mSystemBarConfigs = new SystemBarConfigs(mResources);
     }
 
+    @Test(expected = RuntimeException.class)
+    public void onInit_hideBottomSystemBarForKeyboardValueDoNotSync_throwsRuntimeException() {
+        when(mResources.getBoolean(R.bool.config_hideBottomSystemBarForKeyboard)).thenReturn(false);
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_automotiveHideNavBarForKeyboard)).thenReturn(
+                true);
+
+        mSystemBarConfigs = new SystemBarConfigs(mResources);
+    }
+
+    @Test
+    public void onInit_topNotifPanelViewMediatorUsed_topBarEnabled_doesNotThrowException() {
+        when(mResources.getBoolean(R.bool.config_enableTopNavigationBar)).thenReturn(true);
+        when(mResources.getString(R.string.config_notificationPanelViewMediator)).thenReturn(
+                TestTopNotificationPanelViewMediator.class.getName());
+
+        mSystemBarConfigs = new SystemBarConfigs(mResources);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void onInit_topNotifPanelViewMediatorUsed_topBarNotEnabled_throwsRuntimeException() {
+        when(mResources.getBoolean(R.bool.config_enableTopNavigationBar)).thenReturn(false);
+        when(mResources.getString(R.string.config_notificationPanelViewMediator)).thenReturn(
+                TestTopNotificationPanelViewMediator.class.getName());
+
+        mSystemBarConfigs = new SystemBarConfigs(mResources);
+    }
+
+    @Test
+    public void onInit_notificationPanelViewMediatorUsed_topBarNotEnabled_doesNotThrowException() {
+        when(mResources.getBoolean(R.bool.config_enableTopNavigationBar)).thenReturn(false);
+        when(mResources.getString(R.string.config_notificationPanelViewMediator)).thenReturn(
+                NotificationPanelViewMediator.class.getName());
+
+        mSystemBarConfigs = new SystemBarConfigs(mResources);
+    }
+
     @Test
     public void getTopSystemBarLayoutParams_topBarEnabled_returnsTopSystemBarLayoutParams() {
         mSystemBarConfigs = new SystemBarConfigs(mResources);
@@ -109,6 +154,26 @@ public class SystemBarConfigsTest extends SysuiTestCase {
                 SystemBarConfigs.TOP);
 
         assertNull(lp);
+    }
+
+    @Test
+    public void getTopSystemBarHideForKeyboard_hideBarForKeyboard_returnsTrue() {
+        when(mResources.getBoolean(R.bool.config_hideTopSystemBarForKeyboard)).thenReturn(true);
+        mSystemBarConfigs = new SystemBarConfigs(mResources);
+
+        boolean hideKeyboard = mSystemBarConfigs.getHideForKeyboardBySide(SystemBarConfigs.TOP);
+
+        assertTrue(hideKeyboard);
+    }
+
+    @Test
+    public void getTopSystemBarHideForKeyboard_topBarNotEnabled_returnsFalse() {
+        when(mResources.getBoolean(R.bool.config_enableTopNavigationBar)).thenReturn(false);
+        mSystemBarConfigs = new SystemBarConfigs(mResources);
+
+        boolean hideKeyboard = mSystemBarConfigs.getHideForKeyboardBySide(SystemBarConfigs.TOP);
+
+        assertFalse(hideKeyboard);
     }
 
     @Test
@@ -158,5 +223,30 @@ public class SystemBarConfigsTest extends SysuiTestCase {
         when(mResources.getInteger(R.integer.config_bottomSystemBarZOrder)).thenReturn(10);
         when(mResources.getInteger(R.integer.config_leftSystemBarZOrder)).thenReturn(2);
         when(mResources.getInteger(R.integer.config_rightSystemBarZOrder)).thenReturn(3);
+
+        when(mResources.getBoolean(R.bool.config_hideTopSystemBarForKeyboard)).thenReturn(false);
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_automotiveHideNavBarForKeyboard)).thenReturn(
+                false);
+        when(mResources.getBoolean(R.bool.config_hideLeftSystemBarForKeyboard)).thenReturn(
+                false);
+        when(mResources.getBoolean(R.bool.config_hideRightSystemBarForKeyboard)).thenReturn(
+                false);
+    }
+
+    // Intentionally using a subclass of TopNotificationPanelViewMediator for testing purposes to
+    // ensure that OEM's will be able to implement and use their own NotificationPanelViewMediator.
+    private class TestTopNotificationPanelViewMediator extends
+            TopNotificationPanelViewMediator {
+        TestTopNotificationPanelViewMediator(
+                CarNavigationBarController carNavigationBarController,
+                NotificationPanelViewController notificationPanelViewController,
+                PowerManagerHelper powerManagerHelper,
+                BroadcastDispatcher broadcastDispatcher,
+                CarDeviceProvisionedController carDeviceProvisionedController,
+                ConfigurationController configurationController) {
+            super(carNavigationBarController, notificationPanelViewController, powerManagerHelper,
+                    broadcastDispatcher, carDeviceProvisionedController, configurationController);
+        }
     }
 }

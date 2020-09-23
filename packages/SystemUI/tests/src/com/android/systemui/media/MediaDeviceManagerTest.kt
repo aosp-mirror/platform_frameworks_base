@@ -68,11 +68,11 @@ private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
 public class MediaDeviceManagerTest : SysuiTestCase() {
 
     private lateinit var manager: MediaDeviceManager
-    @Mock private lateinit var mediaDataManager: MediaDataManager
     @Mock private lateinit var lmmFactory: LocalMediaManagerFactory
     @Mock private lateinit var lmm: LocalMediaManager
     @Mock private lateinit var mr2: MediaRouter2Manager
-    private lateinit var fakeExecutor: FakeExecutor
+    private lateinit var fakeFgExecutor: FakeExecutor
+    private lateinit var fakeBgExecutor: FakeExecutor
     @Mock private lateinit var dumpster: DumpManager
     @Mock private lateinit var listener: MediaDeviceManager.Listener
     @Mock private lateinit var device: MediaDevice
@@ -87,8 +87,9 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        fakeExecutor = FakeExecutor(FakeSystemClock())
-        manager = MediaDeviceManager(context, lmmFactory, mr2, fakeExecutor, mediaDataManager,
+        fakeFgExecutor = FakeExecutor(FakeSystemClock())
+        fakeBgExecutor = FakeExecutor(FakeSystemClock())
+        manager = MediaDeviceManager(context, lmmFactory, mr2, fakeFgExecutor, fakeBgExecutor,
                 dumpster)
         manager.addListener(listener)
 
@@ -144,13 +145,15 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     fun loadAndRemoveMediaData() {
         manager.onMediaDataLoaded(KEY, null, mediaData)
         manager.onMediaDataRemoved(KEY)
+        fakeBgExecutor.runAllReady()
         verify(lmm).unregisterCallback(any())
     }
 
     @Test
     fun loadMediaDataWithNullToken() {
         manager.onMediaDataLoaded(KEY, null, mediaData.copy(token = null))
-        fakeExecutor.runAllReady()
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isTrue()
         assertThat(data.name).isEqualTo(DEVICE_NAME)
@@ -163,6 +166,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         reset(listener)
         // WHEN data is loaded with a new key
         manager.onMediaDataLoaded(KEY, KEY_OLD, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
         // THEN the listener for the old key should removed.
         verify(lmm).unregisterCallback(any())
         // AND a new device event emitted
@@ -186,6 +191,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     fun unknownOldKey() {
         val oldKey = "unknown"
         manager.onMediaDataLoaded(KEY, oldKey, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
         verify(listener).onMediaDeviceChanged(eq(KEY), eq(oldKey), any())
     }
 
@@ -193,13 +200,16 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     fun updateToSessionTokenWithNullRoute() {
         // GIVEN that media data has been loaded with a null token
         manager.onMediaDataLoaded(KEY, null, mediaData.copy(token = null))
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        reset(listener)
         // WHEN media data is loaded with a different token
         // AND that token results in a null route
-        reset(listener)
         whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(null)
         manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
         // THEN the device should be disabled
-        fakeExecutor.runAllReady()
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
         assertThat(data.name).isNull()
@@ -210,7 +220,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     fun deviceEventOnAddNotification() {
         // WHEN a notification is added
         manager.onMediaDataLoaded(KEY, null, mediaData)
-        val deviceCallback = captureCallback()
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
         // THEN the update is dispatched to the listener
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isTrue()
@@ -230,10 +241,12 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Test
     fun deviceListUpdate() {
         manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
         val deviceCallback = captureCallback()
         // WHEN the device list changes
         deviceCallback.onDeviceListUpdate(mutableListOf(device))
-        assertThat(fakeExecutor.runAllReady()).isEqualTo(1)
+        assertThat(fakeBgExecutor.runAllReady()).isEqualTo(1)
+        assertThat(fakeFgExecutor.runAllReady()).isEqualTo(1)
         // THEN the update is dispatched to the listener
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isTrue()
@@ -244,10 +257,12 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Test
     fun selectedDeviceStateChanged() {
         manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
         val deviceCallback = captureCallback()
         // WHEN the selected device changes state
         deviceCallback.onSelectedDeviceStateChanged(device, 1)
-        assertThat(fakeExecutor.runAllReady()).isEqualTo(1)
+        assertThat(fakeBgExecutor.runAllReady()).isEqualTo(1)
+        assertThat(fakeFgExecutor.runAllReady()).isEqualTo(1)
         // THEN the update is dispatched to the listener
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isTrue()
@@ -270,6 +285,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(null)
         // WHEN a notification is added
         manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
         // THEN the device is disabled
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
@@ -281,13 +298,16 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     fun deviceDisabledWhenMR2ReturnsNullRouteInfoOnDeviceChanged() {
         // GIVEN a notif is added
         manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
         reset(listener)
         // AND MR2Manager returns null for routing session
         whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(null)
         // WHEN the selected device changes state
         val deviceCallback = captureCallback()
         deviceCallback.onSelectedDeviceStateChanged(device, 1)
-        fakeExecutor.runAllReady()
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
         // THEN the device is disabled
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
@@ -299,13 +319,16 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     fun deviceDisabledWhenMR2ReturnsNullRouteInfoOnDeviceListUpdate() {
         // GIVEN a notif is added
         manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
         reset(listener)
         // GIVEN that MR2Manager returns null for routing session
         whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(null)
         // WHEN the selected device changes state
         val deviceCallback = captureCallback()
         deviceCallback.onDeviceListUpdate(mutableListOf(device))
-        fakeExecutor.runAllReady()
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
         // THEN the device is disabled
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()

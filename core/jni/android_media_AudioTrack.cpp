@@ -20,6 +20,7 @@
 #include "android_media_AudioTrack.h"
 
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "core_jni_helpers.h"
 
 #include <utils/Log.h>
@@ -251,7 +252,7 @@ static jint android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject we
                                            jint audioFormat, jint buffSizeInBytes, jint memoryMode,
                                            jintArray jSession, jlong nativeAudioTrack,
                                            jboolean offload, jint encapsulationMode,
-                                           jobject tunerConfiguration) {
+                                           jobject tunerConfiguration, jstring opPackageName) {
     ALOGV("sampleRates=%p, channel mask=%x, index mask=%x, audioFormat(Java)=%d, buffSize=%d,"
           " nativeAudioTrack=0x%" PRIX64 ", offload=%d encapsulationMode=%d tuner=%p",
           jSampleRate, channelPositionMask, channelIndexMask, audioFormat, buffSizeInBytes,
@@ -337,7 +338,8 @@ static jint android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject we
         }
 
         // create the native AudioTrack object
-        lpTrack = new AudioTrack();
+        ScopedUtfChars opPackageNameStr(env, opPackageName);
+        lpTrack = new AudioTrack(opPackageNameStr.c_str());
 
         // read the AudioAttributes values
         auto paa = JNIAudioAttributeHelper::makeUnique();
@@ -371,23 +373,24 @@ static jint android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject we
         status_t status = NO_ERROR;
         switch (memoryMode) {
         case MODE_STREAM:
-            status = lpTrack->set(
-                    AUDIO_STREAM_DEFAULT,// stream type, but more info conveyed in paa (last argument)
-                    sampleRateInHertz,
-                    format,// word length, PCM
-                    nativeChannelMask,
-                    offload ? 0 : frameCount,
-                    offload ? AUDIO_OUTPUT_FLAG_COMPRESS_OFFLOAD : AUDIO_OUTPUT_FLAG_NONE,
-                    audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user)
-                    0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack
-                    0,// shared mem
-                    true,// thread can call Java
-                    sessionId,// audio session ID
-                    offload ? AudioTrack::TRANSFER_SYNC_NOTIF_CALLBACK : AudioTrack::TRANSFER_SYNC,
-                    offload ? &offloadInfo : NULL,
-                    -1, -1,                       // default uid, pid values
-                    paa.get());
-
+            status = lpTrack->set(AUDIO_STREAM_DEFAULT, // stream type, but more info conveyed
+                                                        // in paa (last argument)
+                                  sampleRateInHertz,
+                                  format, // word length, PCM
+                                  nativeChannelMask, offload ? 0 : frameCount,
+                                  offload ? AUDIO_OUTPUT_FLAG_COMPRESS_OFFLOAD
+                                          : AUDIO_OUTPUT_FLAG_NONE,
+                                  audioCallback,
+                                  &(lpJniStorage->mCallbackData), // callback, callback data (user)
+                                  0,    // notificationFrames == 0 since not using EVENT_MORE_DATA
+                                        // to feed the AudioTrack
+                                  0,    // shared mem
+                                  true, // thread can call Java
+                                  sessionId, // audio session ID
+                                  offload ? AudioTrack::TRANSFER_SYNC_NOTIF_CALLBACK
+                                          : AudioTrack::TRANSFER_SYNC,
+                                  offload ? &offloadInfo : NULL, -1, -1, // default uid, pid values
+                                  paa.get());
             break;
 
         case MODE_STATIC:
@@ -398,22 +401,22 @@ static jint android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject we
                 goto native_init_failure;
             }
 
-            status = lpTrack->set(
-                    AUDIO_STREAM_DEFAULT,// stream type, but more info conveyed in paa (last argument)
-                    sampleRateInHertz,
-                    format,// word length, PCM
-                    nativeChannelMask,
-                    frameCount,
-                    AUDIO_OUTPUT_FLAG_NONE,
-                    audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user));
-                    0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack
-                    lpJniStorage->mMemBase,// shared mem
-                    true,// thread can call Java
-                    sessionId,// audio session ID
-                    AudioTrack::TRANSFER_SHARED,
-                    NULL,                         // default offloadInfo
-                    -1, -1,                       // default uid, pid values
-                    paa.get());
+            status = lpTrack->set(AUDIO_STREAM_DEFAULT, // stream type, but more info conveyed
+                                                        // in paa (last argument)
+                                  sampleRateInHertz,
+                                  format, // word length, PCM
+                                  nativeChannelMask, frameCount, AUDIO_OUTPUT_FLAG_NONE,
+                                  audioCallback,
+                                  &(lpJniStorage->mCallbackData), // callback, callback data (user)
+                                  0, // notificationFrames == 0 since not using EVENT_MORE_DATA
+                                     // to feed the AudioTrack
+                                  lpJniStorage->mMemBase, // shared mem
+                                  true,                   // thread can call Java
+                                  sessionId,              // audio session ID
+                                  AudioTrack::TRANSFER_SHARED,
+                                  NULL,   // default offloadInfo
+                                  -1, -1, // default uid, pid values
+                                  paa.get());
             break;
 
         default:
@@ -1428,7 +1431,8 @@ static const JNINativeMethod gMethods[] = {
         {"native_stop", "()V", (void *)android_media_AudioTrack_stop},
         {"native_pause", "()V", (void *)android_media_AudioTrack_pause},
         {"native_flush", "()V", (void *)android_media_AudioTrack_flush},
-        {"native_setup", "(Ljava/lang/Object;Ljava/lang/Object;[IIIIII[IJZILjava/lang/Object;)I",
+        {"native_setup",
+         "(Ljava/lang/Object;Ljava/lang/Object;[IIIIII[IJZILjava/lang/Object;Ljava/lang/String;)I",
          (void *)android_media_AudioTrack_setup},
         {"native_finalize", "()V", (void *)android_media_AudioTrack_finalize},
         {"native_release", "()V", (void *)android_media_AudioTrack_release},

@@ -204,10 +204,10 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Поставките за спојување не се достапни за овој корисник"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Поставките за името на пристапната точка не се достапни за овој корисник"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Отстранување грешки на USB"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"Режим на отстранување грешки кога е поврзано USB"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"Режим за отстранување грешки кога е поврзано USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Отповикај овластувања за отстранување грешки од USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Безжично отстранување грешки"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Режим на отстранување грешки кога е поврзано Wi‑Fi"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Режим за отстранување грешки кога е поврзано Wi‑Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Грешка"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Безжично отстранување грешки"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"За да ги гледате и користите достапните уреди, вклучете го безжичното отстранување грешки"</string>

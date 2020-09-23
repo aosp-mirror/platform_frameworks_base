@@ -25,7 +25,7 @@
     <string name="wifi_remembered" msgid="3266709779723179188">"تم الحفظ"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"غير متصلة"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"غير مفعّلة"</string>
-    <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"‏تعذّرت تهيئة عنوان IP"</string>
+    <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"‏تعذّر إعداد عنوان IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"الجهاز غير متصل بسبب انخفاض جودة الشبكة"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"‏تعذّر اتصال WiFi"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"حدثت مشكلة في المصادقة"</string>
@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"غير معروف"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"المستخدم: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"تم ضبط بعض الإعدادات التلقائية"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"لم يتم تعيين إعدادات تلقائية"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"لم يتم ضبط إعدادات تلقائية"</string>
     <string name="tts_settings" msgid="8130616705989351312">"إعدادات تحويل النص إلى كلام"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"تحويل النص إلى كلام"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"معدل سرعة الكلام"</string>
@@ -245,7 +245,7 @@
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"هل تريد السماح بإلغاء قفل المصنّع الأصلي للجهاز؟"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"تحذير: لن تعمل ميزات الحماية على هذا الجهاز أثناء تفعيل هذا الإعداد."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"اختيار تطبيق الموقع الزائف"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"لم يتم تعيين تطبيق موقع زائف"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"لم يتم ضبط تطبيق موقع زائف"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"تطبيق الموقع الزائف: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"الشبكات"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"شهادة عرض شاشة لاسلكي"</string>
@@ -292,8 +292,8 @@
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"عندما نتوقف عن رصد أي أخطاء باستخدام المسجِّل الدائم مرة أخرى، يتعين علينا محو بيانات المسجِّل الموجودة على جهازك."</string>
     <string name="select_logpersist_title" msgid="447071974007104196">"تخزين بيانات المسجِّل باستمرار على الجهاز"</string>
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"تحديد مخازن السجلات المؤقتة المراد تخزينها باستمرار على الجهاز"</string>
-    <string name="select_usb_configuration_title" msgid="6339801314922294586">"‏حدد تهيئة USB"</string>
-    <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"‏حدد تهيئة USB"</string>
+    <string name="select_usb_configuration_title" msgid="6339801314922294586">"‏حدد إعداد USB"</string>
+    <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"‏حدد إعداد USB"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"السماح بمواقع وهمية"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"السماح بمواقع وهمية"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"تفعيل فحص سمة العرض"</string>
@@ -318,7 +318,7 @@
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"‏تعيين سلوك التحقق من HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"تصحيح الأخطاء"</string>
     <string name="debug_app" msgid="8903350241392391766">"اختيار التطبيق لتصحيحه"</string>
-    <string name="debug_app_not_set" msgid="1934083001283807188">"لم يتم تعيين تطبيق لتصحيحه"</string>
+    <string name="debug_app_not_set" msgid="1934083001283807188">"لم يتم ضبط تطبيق لتصحيحه"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"تطبيق التصحيح: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"اختيار تطبيق"</string>
     <string name="no_application" msgid="9038334538870247690">"لا شيء"</string>
@@ -381,9 +381,9 @@
     <string name="local_backup_password_title" msgid="4631017948933578709">"كلمة مرور احتياطية للكمبيوتر"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"النُسخ الاحتياطية الكاملة لسطح المكتب غير محمية في الوقت الحالي"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"انقر لتغيير كلمة مرور النسخ الاحتياطية الكاملة لسطح المكتب أو إزالتها."</string>
-    <string name="local_backup_password_toast_success" msgid="4891666204428091604">"تم تعيين كلمة مرور احتياطية جديدة"</string>
+    <string name="local_backup_password_toast_success" msgid="4891666204428091604">"تم ضبط كلمة مرور احتياطية جديدة"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"كلمة المرور الجديدة وتأكيدها لا يتطابقان"</string>
-    <string name="local_backup_password_toast_validation_failure" msgid="714669442363647122">"تعذّر تعيين كلمة مرور احتياطية"</string>
+    <string name="local_backup_password_toast_validation_failure" msgid="714669442363647122">"تعذّر ضبط كلمة مرور احتياطية"</string>
     <string name="loading_injected_setting_summary" msgid="8394446285689070348">"جارٍ التحميل…"</string>
   <string-array name="color_mode_names">
     <item msgid="3836559907767149216">"نابض بالحياة (تلقائي)"</item>

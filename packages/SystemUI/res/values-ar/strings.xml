@@ -318,7 +318,7 @@
     <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"تم الوصول إلى حد البيانات الذي عيَّنته. لم يُعد بإمكانك استخدام بيانات الجوال.\n\nفي حالة الاستئناف، قد يتم تطبيق الرسوم لاستخدام البيانات."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"استئناف"</string>
     <string name="gps_notification_searching_text" msgid="231304732649348313">"‏جارٍ البحث عن GPS"</string>
-    <string name="gps_notification_found_text" msgid="3145873880174658526">"‏تم تعيين الموقع بواسطة GPS"</string>
+    <string name="gps_notification_found_text" msgid="3145873880174658526">"‏تم ضبط الموقع بواسطة GPS"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"طلبات الموقع نشطة"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"أجهزة الاستشعار غير مفعّلة"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"محو جميع الإشعارات."</string>
@@ -697,7 +697,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"عناصر التحكم في إشعارات التشغيل"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"تشغيل"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"إيقاف"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"باستخدام عناصر التحكم في إشعار التشغيل، يمكنك تعيين مستوى الأهمية من 0 إلى 5 لإشعارات التطبيق. \n\n"<b>"المستوى 5"</b>" \n- العرض أعلى قائمة الإشعارات \n- يسمح بمقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 4"</b>" \n- منع مقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 3"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n\n"<b>"المستوى 2"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات واهتزاز \n\n"<b>"المستوى 1"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات أو اهتزاز أبدًا \n- الإخفاء من شاشة القفل وشريط الحالة \n- العرض أسفل قائمة الإشعارات \n\n"<b>"المستوى 0"</b>" \n- حظر جميع الإشعارات من التطبيق"</string>
+    <string name="power_notification_controls_description" msgid="1334963837572708952">"باستخدام عناصر التحكم في إشعار التشغيل، يمكنك ضبط مستوى الأهمية من 0 إلى 5 لإشعارات التطبيق. \n\n"<b>"المستوى 5"</b>" \n- العرض أعلى قائمة الإشعارات \n- يسمح بمقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 4"</b>" \n- منع مقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 3"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n\n"<b>"المستوى 2"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات واهتزاز \n\n"<b>"المستوى 1"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات أو اهتزاز أبدًا \n- الإخفاء من شاشة القفل وشريط الحالة \n- العرض أسفل قائمة الإشعارات \n\n"<b>"المستوى 0"</b>" \n- حظر جميع الإشعارات من التطبيق"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"الإشعارات"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"لن تتلقى هذه الإشعارات بعد الآن."</string>
     <string name="notification_channel_minimized" msgid="6892672757877552959">"سيتم تصغير هذه الإشعارات."</string>

@@ -19,8 +19,12 @@ package com.android.systemui.media
 import android.content.Context
 import android.media.MediaRouter2Manager
 import android.media.session.MediaController
+import androidx.annotation.AnyThread
+import androidx.annotation.MainThread
+import androidx.annotation.WorkerThread
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.Dumpable
 import com.android.systemui.dump.DumpManager
@@ -28,25 +32,23 @@ import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Provides information about the route (ie. device) where playback is occurring.
  */
-@Singleton
 class MediaDeviceManager @Inject constructor(
     private val context: Context,
     private val localMediaManagerFactory: LocalMediaManagerFactory,
     private val mr2manager: MediaRouter2Manager,
     @Main private val fgExecutor: Executor,
-    private val mediaDataManager: MediaDataManager,
-    private val dumpManager: DumpManager
+    @Background private val bgExecutor: Executor,
+    dumpManager: DumpManager
 ) : MediaDataManager.Listener, Dumpable {
+
     private val listeners: MutableSet<Listener> = mutableSetOf()
-    private val entries: MutableMap<String, Token> = mutableMapOf()
+    private val entries: MutableMap<String, Entry> = mutableMapOf()
 
     init {
-        mediaDataManager.addListener(this)
         dumpManager.registerDumpable(javaClass.name, this)
     }
 
@@ -71,7 +73,7 @@ class MediaDeviceManager @Inject constructor(
             val controller = data.token?.let {
                 MediaController(context, it)
             }
-            entry = Token(key, oldKey, controller,
+            entry = Entry(key, oldKey, controller,
                     localMediaManagerFactory.create(data.packageName))
             entries[key] = entry
             entry.start()
@@ -99,6 +101,7 @@ class MediaDeviceManager @Inject constructor(
         }
     }
 
+    @MainThread
     private fun processDevice(key: String, oldKey: String?, device: MediaDevice?) {
         val enabled = device != null
         val data = MediaDeviceData(enabled, device?.iconWithoutBackground, device?.name)
@@ -114,12 +117,13 @@ class MediaDeviceManager @Inject constructor(
         fun onKeyRemoved(key: String)
     }
 
-    private inner class Token(
+    private inner class Entry(
         val key: String,
         val oldKey: String?,
         val controller: MediaController?,
         val localMediaManager: LocalMediaManager
     ) : LocalMediaManager.DeviceCallback {
+
         val token
             get() = controller?.sessionToken
         private var started = false
@@ -127,20 +131,27 @@ class MediaDeviceManager @Inject constructor(
             set(value) {
                 if (!started || value != field) {
                     field = value
-                    processDevice(key, oldKey, value)
+                    fgExecutor.execute {
+                        processDevice(key, oldKey, value)
+                    }
                 }
             }
-        fun start() {
+
+        @AnyThread
+        fun start() = bgExecutor.execute {
             localMediaManager.registerCallback(this)
             localMediaManager.startScan()
             updateCurrent()
             started = true
         }
-        fun stop() {
+
+        @AnyThread
+        fun stop() = bgExecutor.execute {
             started = false
             localMediaManager.stopScan()
             localMediaManager.unregisterCallback(this)
         }
+
         fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
             val route = controller?.let {
                 mr2manager.getRoutingSessionForMediaController(it)
@@ -152,14 +163,18 @@ class MediaDeviceManager @Inject constructor(
                 println("    route=$route")
             }
         }
-        override fun onDeviceListUpdate(devices: List<MediaDevice>?) = fgExecutor.execute {
+
+        override fun onDeviceListUpdate(devices: List<MediaDevice>?) = bgExecutor.execute {
             updateCurrent()
         }
+
         override fun onSelectedDeviceStateChanged(device: MediaDevice, state: Int) {
-            fgExecutor.execute {
+            bgExecutor.execute {
                 updateCurrent()
             }
         }
+
+        @WorkerThread
         private fun updateCurrent() {
             val device = localMediaManager.getCurrentConnectedDevice()
             controller?.let {

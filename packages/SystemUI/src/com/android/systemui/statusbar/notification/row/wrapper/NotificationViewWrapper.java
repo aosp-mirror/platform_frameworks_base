@@ -96,6 +96,14 @@ public abstract class NotificationViewWrapper implements TransformableView {
     public void onContentUpdated(ExpandableNotificationRow row) {
     }
 
+    /**
+     * Show a set of app opp icons in the layout.
+     *
+     * @param appOps which app ops to show
+     */
+    public void showAppOpsIcons(ArraySet<Integer> appOps) {
+    }
+
     public void onReinflated() {
         if (shouldClearBackgroundOnReapply()) {
             mBackgroundColor = 0;

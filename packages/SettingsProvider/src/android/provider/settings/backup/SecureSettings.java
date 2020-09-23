@@ -165,7 +165,6 @@ public class SecureSettings {
         Settings.Secure.AWARE_TAP_PAUSE_TOUCH_COUNT,
         Settings.Secure.PEOPLE_STRIP,
         Settings.Secure.MEDIA_CONTROLS_RESUME,
-        Settings.Secure.MEDIA_CONTROLS_RESUME_BLOCKED,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
         Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
         Settings.Secure.ADAPTIVE_CONNECTIVITY_ENABLED

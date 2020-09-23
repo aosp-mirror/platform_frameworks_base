@@ -251,6 +251,28 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testSetTopWindowVisibility_setTrue_isVisible() {
+        mTestableResources.addOverride(R.bool.config_enableTopNavigationBar, true);
+        mCarNavigationBar = createNavigationBarController();
+
+        ViewGroup window = mCarNavigationBar.getTopWindow();
+        mCarNavigationBar.setTopWindowVisibility(View.VISIBLE);
+
+        assertThat(window.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void testSetTopWindowVisibility_setFalse_isGone() {
+        mTestableResources.addOverride(R.bool.config_enableTopNavigationBar, true);
+        mCarNavigationBar = createNavigationBarController();
+
+        ViewGroup window = mCarNavigationBar.getTopWindow();
+        mCarNavigationBar.setTopWindowVisibility(View.GONE);
+
+        assertThat(window.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
     public void testSetBottomWindowVisibility_setTrue_isVisible() {
         mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
         mCarNavigationBar = createNavigationBarController();

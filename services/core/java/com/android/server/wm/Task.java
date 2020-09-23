@@ -40,7 +40,7 @@ import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
-import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
@@ -264,7 +264,7 @@ class Task extends WindowContainer<WindowContainer> {
     /** Starts in LOCK_TASK_MODE_LOCKED automatically. Can start over existing lockTask task. */
     final static int LOCK_TASK_AUTH_LAUNCHABLE = 2;
     /** Can enter lockTask without user approval. Can start over existing lockTask task. */
-    final static int LOCK_TASK_AUTH_WHITELISTED = 3;
+    final static int LOCK_TASK_AUTH_ALLOWLISTED = 3;
     /** Priv-app that starts in LOCK_TASK_MODE_LOCKED automatically. Can start over existing
      * lockTask task. */
     final static int LOCK_TASK_AUTH_LAUNCHABLE_PRIV = 4;
@@ -1377,7 +1377,7 @@ class Task extends WindowContainer<WindowContainer> {
             getDisplayArea().addStackReferenceIfNeeded((ActivityStack) child);
         }
 
-        // Make sure the list of display UID whitelists is updated
+        // Make sure the list of display UID allowlists is updated
         // now that this record is in a new task.
         mRootWindowContainer.updateUIDsPresentOnDisplay();
 
@@ -1605,7 +1605,7 @@ class Task extends WindowContainer<WindowContainer> {
             case LOCK_TASK_AUTH_DONT_LOCK: return "LOCK_TASK_AUTH_DONT_LOCK";
             case LOCK_TASK_AUTH_PINNABLE: return "LOCK_TASK_AUTH_PINNABLE";
             case LOCK_TASK_AUTH_LAUNCHABLE: return "LOCK_TASK_AUTH_LAUNCHABLE";
-            case LOCK_TASK_AUTH_WHITELISTED: return "LOCK_TASK_AUTH_WHITELISTED";
+            case LOCK_TASK_AUTH_ALLOWLISTED: return "LOCK_TASK_AUTH_ALLOWLISTED";
             case LOCK_TASK_AUTH_LAUNCHABLE_PRIV: return "LOCK_TASK_AUTH_LAUNCHABLE_PRIV";
             default: return "unknown=" + mLockTaskAuth;
         }
@@ -1625,8 +1625,8 @@ class Task extends WindowContainer<WindowContainer> {
         final LockTaskController lockTaskController = mAtmService.getLockTaskController();
         switch (r.lockTaskLaunchMode) {
             case LOCK_TASK_LAUNCH_MODE_DEFAULT:
-                mLockTaskAuth = lockTaskController.isPackageWhitelisted(mUserId, pkg)
-                        ? LOCK_TASK_AUTH_WHITELISTED : LOCK_TASK_AUTH_PINNABLE;
+                mLockTaskAuth = lockTaskController.isPackageAllowlisted(mUserId, pkg)
+                        ? LOCK_TASK_AUTH_ALLOWLISTED : LOCK_TASK_AUTH_PINNABLE;
                 break;
 
             case LOCK_TASK_LAUNCH_MODE_NEVER:
@@ -1637,8 +1637,8 @@ class Task extends WindowContainer<WindowContainer> {
                 mLockTaskAuth = LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
                 break;
 
-            case LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED:
-                mLockTaskAuth = lockTaskController.isPackageWhitelisted(mUserId, pkg)
+            case LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED:
+                mLockTaskAuth = lockTaskController.isPackageAllowlisted(mUserId, pkg)
                         ? LOCK_TASK_AUTH_LAUNCHABLE : LOCK_TASK_AUTH_PINNABLE;
                 break;
         }

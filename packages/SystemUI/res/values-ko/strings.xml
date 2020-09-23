@@ -714,7 +714,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"휴대전화 설정에 따라 벨소리나 진동이 울릴 수 있음"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"휴대전화 설정에 따라 벨소리나 진동이 울릴 수 있습니다. 기본적으로 <xliff:g id="APP_NAME">%1$s</xliff:g>의 대화는 대화창으로 표시됩니다."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"이 콘텐츠로 연결되는 플로팅 바로가기로 사용자의 주의를 끕니다."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"대화 섹션 상단에 표시, 플로팅 대화창으로 표시, 그리고 잠금 화면에 프로필 사진이 표시됩니다."</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"대화 섹션 상단에 표시, 플로팅 대화창으로 표시, 그리고 잠금 화면에 프로필 사진이 표시됨"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"설정"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"우선순위"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱은 대화 기능을 지원하지 않습니다."</string>

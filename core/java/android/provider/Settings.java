@@ -8929,14 +8929,6 @@ public final class Settings {
         public static final String MEDIA_CONTROLS_RESUME = "qs_media_resumption";
 
         /**
-         * Controls which packages are blocked from persisting in media controls when resumption is
-         * enabled. The list of packages is set by the user in the Settings app.
-         * @see Settings.Secure#MEDIA_CONTROLS_RESUME
-         * @hide
-         */
-        public static final String MEDIA_CONTROLS_RESUME_BLOCKED = "qs_media_resumption_blocked";
-
-        /**
          * Controls if window magnification is enabled.
          * @hide
          */

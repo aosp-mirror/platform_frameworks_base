@@ -91,7 +91,11 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     private ActivityManagerWrapper mActivityManagerWrapper;
 
     // If the nav bar should be hidden when the soft keyboard is visible.
-    private boolean mHideNavBarForKeyboard;
+    private boolean mHideTopBarForKeyboard;
+    private boolean mHideLeftBarForKeyboard;
+    private boolean mHideRightBarForKeyboard;
+    private boolean mHideBottomBarForKeyboard;
+
     private boolean mBottomNavBarVisible;
 
     // Nav bar views.
@@ -160,8 +164,13 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     @Override
     public void start() {
         // Set initial state.
-        mHideNavBarForKeyboard = mResources.getBoolean(
-                com.android.internal.R.bool.config_automotiveHideNavBarForKeyboard);
+        mHideTopBarForKeyboard = mSystemBarConfigs.getHideForKeyboardBySide(SystemBarConfigs.TOP);
+        mHideBottomBarForKeyboard = mSystemBarConfigs.getHideForKeyboardBySide(
+                SystemBarConfigs.BOTTOM);
+        mHideLeftBarForKeyboard = mSystemBarConfigs.getHideForKeyboardBySide(SystemBarConfigs.LEFT);
+        mHideRightBarForKeyboard = mSystemBarConfigs.getHideForKeyboardBySide(
+                SystemBarConfigs.RIGHT);
+
         mBottomNavBarVisible = false;
 
         // Connect into the status bar manager service
@@ -407,17 +416,30 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     @Override
     public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher) {
-        if (!mHideNavBarForKeyboard) {
-            return;
-        }
-
         if (mContext.getDisplayId() != displayId) {
             return;
         }
 
         boolean isKeyboardVisible = (vis & InputMethodService.IME_VISIBLE) != 0;
-        mCarNavigationBarController.setBottomWindowVisibility(
-                isKeyboardVisible ? View.GONE : View.VISIBLE);
+
+        if (mHideTopBarForKeyboard) {
+            mCarNavigationBarController.setTopWindowVisibility(
+                    isKeyboardVisible ? View.GONE : View.VISIBLE);
+        }
+
+        if (mHideBottomBarForKeyboard) {
+            mCarNavigationBarController.setBottomWindowVisibility(
+                    isKeyboardVisible ? View.GONE : View.VISIBLE);
+        }
+
+        if (mHideLeftBarForKeyboard) {
+            mCarNavigationBarController.setLeftWindowVisibility(
+                    isKeyboardVisible ? View.GONE : View.VISIBLE);
+        }
+        if (mHideRightBarForKeyboard) {
+            mCarNavigationBarController.setRightWindowVisibility(
+                    isKeyboardVisible ? View.GONE : View.VISIBLE);
+        }
     }
 
     @Override

@@ -593,10 +593,10 @@ public class CredentialTest {
     }
 
     /**
-     * Verify that unique identifiers are different for a credential with different username
+     * Verify that unique identifiers are different for a credential with different values
      */
     @Test
-    public void testUniqueIdDifferentForUserCredentialsWithDifferentUsername() throws Exception {
+    public void testUniqueIdDifferentForUserCredentialsWithDifferentValues() throws Exception {
         Credential userCred1 = createCredentialWithUserCredential();
         Credential userCred2 = createCredentialWithUserCredential();
         userCred2.getUserCredential().setUsername("anotheruser");
@@ -605,24 +605,7 @@ public class CredentialTest {
     }
 
     /**
-     * Verify that unique identifiers are different for a credential with different password and
-     * other values other than username
-     */
-    @Test
-    public void testUniqueIdSameForUserCredentialsWithDifferentPassword() throws Exception {
-        Credential userCred1 = createCredentialWithUserCredential();
-        Credential userCred2 = createCredentialWithUserCredential();
-        userCred2.getUserCredential().setPassword("someotherpassword!");
-        userCred2.getUserCredential().setMachineManaged(false);
-        userCred2.getUserCredential().setAbleToShare(false);
-        userCred2.getUserCredential().setSoftTokenApp("TestApp2");
-        userCred2.getUserCredential().setNonEapInnerMethod("PAP");
-
-        assertEquals(userCred1.getUniqueId(), userCred2.getUniqueId());
-    }
-
-    /**
-     * Verify that unique identifiers are different for a cert credential with different values
+     * Verify that unique identifiers are different for a credential with different values
      */
     @Test
     public void testUniqueIdDifferentForCertCredentialsWithDifferentValues() throws Exception {

@@ -102,9 +102,10 @@ public class ScanResultTest {
             5845, WifiScanner.WIFI_BAND_5_GHZ, 169,
             5865, WifiScanner.WIFI_BAND_5_GHZ, 173,
             /* Now some 6GHz channels */
-            5945, WifiScanner.WIFI_BAND_6_GHZ, 1,
-            5960, WifiScanner.WIFI_BAND_6_GHZ, 4,
-            6100, WifiScanner.WIFI_BAND_6_GHZ, 32
+            5955, WifiScanner.WIFI_BAND_6_GHZ, 1,
+            5935, WifiScanner.WIFI_BAND_6_GHZ, 2,
+            5970, WifiScanner.WIFI_BAND_6_GHZ, 4,
+            6110, WifiScanner.WIFI_BAND_6_GHZ, 32
     };
 
     /**
