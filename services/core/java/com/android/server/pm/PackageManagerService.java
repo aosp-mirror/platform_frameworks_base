@@ -2470,9 +2470,9 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public void getChecksums(@NonNull String packageName, boolean includeSplits,
-            @Checksum.Kind int optional,
-            @Checksum.Kind int required, @Nullable List trustedInstallers,
+    public void requestChecksums(@NonNull String packageName, boolean includeSplits,
+            @Checksum.Type int optional,
+            @Checksum.Type int required, @Nullable List trustedInstallers,
             @NonNull IntentSender statusReceiver, int userId) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(statusReceiver);

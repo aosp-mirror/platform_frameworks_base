@@ -4055,7 +4055,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     CertifiedChecksum checksum = checksums.get(j);
                     out.startTag(null, TAG_SESSION_CHECKSUM);
                     writeStringAttribute(out, ATTR_NAME, fileName);
-                    writeIntAttribute(out, ATTR_CHECKSUM_KIND, checksum.getChecksum().getKind());
+                    writeIntAttribute(out, ATTR_CHECKSUM_KIND, checksum.getChecksum().getType());
                     writeByteArrayAttribute(out, ATTR_CHECKSUM_VALUE,
                             checksum.getChecksum().getValue());
                     writeStringAttribute(out, ATTR_CHECKSUM_PACKAGE, checksum.getPackageName());
