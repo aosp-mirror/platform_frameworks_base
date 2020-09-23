@@ -29,12 +29,10 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ActivityStackSupervisor.TAG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STATES;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
@@ -645,6 +643,12 @@ final class TaskDisplayArea extends DisplayArea<Task> {
 
     @Override
     int getOrientation(int candidate) {
+        // Only allow to specify orientation if this TDA has the focus.
+        // TODO(b/155431879) Add option to never allow a TDA to specify orientation.
+        if (!isLastFocused()) {
+            return SCREEN_ORIENTATION_UNSET;
+        }
+
         if (isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)) {
             // Apps and their containers are not allowed to specify an orientation while using
             // root tasks...except for the home stack if it is not resizable and currently
@@ -671,21 +675,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
             return SCREEN_ORIENTATION_UNSPECIFIED;
         }
 
-        final int orientation = super.getOrientation(candidate);
-        if (orientation != SCREEN_ORIENTATION_UNSET
-                && orientation != SCREEN_ORIENTATION_BEHIND) {
-            ProtoLog.v(WM_DEBUG_ORIENTATION,
-                    "App is requesting an orientation, return %d for display id=%d",
-                    orientation, mDisplayContent.mDisplayId);
-            return orientation;
-        }
-
-        ProtoLog.v(WM_DEBUG_ORIENTATION,
-                "No app is requesting an orientation, return %d for display id=%d",
-                mDisplayContent.getLastOrientation(), mDisplayContent.mDisplayId);
-        // The next app has not been requested to be visible, so we keep the current orientation
-        // to prevent freezing/unfreezing the display too early.
-        return mDisplayContent.getLastOrientation();
+        return super.getOrientation(candidate);
     }
 
     @Override
@@ -1878,6 +1868,12 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         mRemoved = true;
 
         return lastReparentedStack;
+    }
+
+    /** Whether this task display area is the last focused one on this logical display. */
+    @VisibleForTesting
+    boolean isLastFocused() {
+        return mDisplayContent.getLastFocusedTaskDisplayArea() == this;
     }
 
     @Override

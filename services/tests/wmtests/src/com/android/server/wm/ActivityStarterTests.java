@@ -670,7 +670,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         doReturn(callerIsRecents).when(recentTasks).isCallerRecents(callingUid);
         // caller is temp allowed
         if (callerIsTempAllowed) {
-            callerApp.addAllowBackgroundActivityStartsToken(new Binder(), null);
+            callerApp.addOrUpdateAllowBackgroundActivityStartsToken(new Binder(), null);
         }
         // caller is instrumenting with background activity starts privileges
         callerApp.setInstrumenting(callerIsInstrumentingWithBackgroundActivityStartPrivileges,

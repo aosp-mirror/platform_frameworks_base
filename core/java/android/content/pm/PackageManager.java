@@ -7873,6 +7873,9 @@ public abstract class PackageManager {
      * - enforced by installer.
      * If caller needs a specific checksum kind, they can specify it as required.
      *
+     * <b>Caution: Android can not verify installer-provided checksums. Make sure you specify
+     * trusted installers.</b>
+     *
      * @param packageName whose checksums to return.
      * @param includeSplits whether to include checksums for non-base splits.
      * @param required explicitly request the checksum kinds. Will incur significant

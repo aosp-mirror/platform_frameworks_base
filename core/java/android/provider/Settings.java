@@ -7954,6 +7954,12 @@ public final class Settings {
         public static final String UI_NIGHT_MODE_OVERRIDE_ON = "ui_night_mode_override_on";
 
         /**
+         * The last computed night mode bool the last time the phone was on
+         * @hide
+         */
+        public static final String UI_NIGHT_MODE_LAST_COMPUTED = "ui_night_mode_last_computed";
+
+        /**
          * The current night mode that has been overridden to turn off by the system.  Owned
          * and controlled by UiModeManagerService.  Constants are as per
          * UiModeManager.
@@ -11806,29 +11812,6 @@ public final class Settings {
          * @see com.android.server.power.PowerManagerConstants
          */
         public static final String POWER_MANAGER_CONSTANTS = "power_manager_constants";
-
-        /**
-         * Alarm manager specific settings.
-         * This is encoded as a key=value list, separated by commas. Ex:
-         *
-         * "min_futurity=5000,allow_while_idle_short_time=4500"
-         *
-         * The following keys are supported:
-         *
-         * <pre>
-         * min_futurity                         (long)
-         * min_interval                         (long)
-         * allow_while_idle_short_time          (long)
-         * allow_while_idle_long_time           (long)
-         * allow_while_idle_whitelist_duration  (long)
-         * </pre>
-         *
-         * <p>
-         * Type: string
-         * @hide
-         * @see com.android.server.AlarmManagerService.Constants
-         */
-        public static final String ALARM_MANAGER_CONSTANTS = "alarm_manager_constants";
 
         /**
          * Job scheduler QuotaController specific settings.

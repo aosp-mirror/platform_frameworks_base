@@ -18,16 +18,15 @@ package com.android.server.job.controllers;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.AppGlobals;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
@@ -116,10 +115,15 @@ public class ComponentController extends StateController {
         ServiceInfo si = mServiceInfoCache.get(userId, service);
         if (si == null) {
             try {
-                si = AppGlobals.getPackageManager().getServiceInfo(
-                        service, PackageManager.MATCH_DIRECT_BOOT_AUTO, userId);
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                // createContextAsUser may potentially be expensive
+                // TODO: cache user context or improve ContextImpl implementation if this becomes
+                // a problem
+                si = mContext.createContextAsUser(UserHandle.of(userId), 0)
+                        .getPackageManager()
+                        .getServiceInfo(service, PackageManager.MATCH_DIRECT_BOOT_AUTO);
+            } catch (NameNotFoundException e) {
+                Slog.e(TAG, "Job exists for non-existent package: " + service.getPackageName());
+                return null;
             }
             mServiceInfoCache.add(userId, service, si);
         }

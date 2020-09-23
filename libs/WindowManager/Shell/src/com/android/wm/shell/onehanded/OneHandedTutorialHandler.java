@@ -29,6 +29,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
@@ -50,12 +52,16 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
     private static final int MAX_TUTORIAL_SHOW_COUNT = 2;
     private final Rect mLastUpdatedBounds = new Rect();
     private final WindowManager mWindowManager;
+    private final AccessibilityManager mAccessibilityManager;
+    private final String mPackageName;
 
     private View mTutorialView;
     private Point mDisplaySize = new Point();
     private Handler mUpdateHandler;
     private ContentResolver mContentResolver;
     private boolean mCanShowTutorial;
+    private String mStartOneHandedDescription;
+    private String mStopOneHandedDescription;
 
     /**
      * Container of the tutorial panel showing at outside region when one handed starting
@@ -72,9 +78,12 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
 
     public OneHandedTutorialHandler(Context context) {
         context.getDisplay().getRealSize(mDisplaySize);
+        mPackageName = context.getPackageName();
         mContentResolver = context.getContentResolver();
         mUpdateHandler = new Handler();
         mWindowManager = context.getSystemService(WindowManager.class);
+        mAccessibilityManager = (AccessibilityManager)
+                context.getSystemService(Context.ACCESSIBILITY_SERVICE);
         mTargetViewContainer = new FrameLayout(context);
         mTargetViewContainer.setClipChildren(false);
         mTutorialAreaHeight = Math.round(mDisplaySize.y
@@ -84,6 +93,10 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
         mCanShowTutorial = (Settings.Secure.getInt(mContentResolver,
                 Settings.Secure.ONE_HANDED_TUTORIAL_SHOW_COUNT, 0) >= MAX_TUTORIAL_SHOW_COUNT)
                 ? false : true;
+        mStartOneHandedDescription = context.getResources().getString(
+                R.string.accessibility_action_start_one_handed);
+        mStopOneHandedDescription = context.getResources().getString(
+                R.string.accessibility_action_stop_one_handed);
         if (mCanShowTutorial) {
             createOrUpdateTutorialTarget();
         }
@@ -94,13 +107,16 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
         mUpdateHandler.post(() -> {
             updateFinished(View.VISIBLE, 0f);
             updateTutorialCount();
+            announcementForScreenReader(true);
         });
     }
 
     @Override
     public void onStopFinished(Rect bounds) {
-        mUpdateHandler.post(() -> updateFinished(
-                View.INVISIBLE, -mTargetViewContainer.getHeight()));
+        mUpdateHandler.post(() -> {
+            updateFinished(View.INVISIBLE, -mTargetViewContainer.getHeight());
+            announcementForScreenReader(false);
+        });
     }
 
     private void updateFinished(int visible, float finalPosition) {
@@ -119,6 +135,17 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
         mCanShowTutorial = showCount < MAX_TUTORIAL_SHOW_COUNT;
         Settings.Secure.putInt(mContentResolver,
                 Settings.Secure.ONE_HANDED_TUTORIAL_SHOW_COUNT, showCount);
+    }
+
+    private void announcementForScreenReader(boolean isStartOneHanded) {
+        if (mAccessibilityManager.isTouchExplorationEnabled()) {
+            final AccessibilityEvent event = AccessibilityEvent.obtain();
+            event.setPackageName(mPackageName);
+            event.setEventType(AccessibilityEvent.TYPE_ANNOUNCEMENT);
+            event.getText().add(isStartOneHanded
+                    ? mStartOneHandedDescription : mStopOneHandedDescription);
+            mAccessibilityManager.sendAccessibilityEvent(event);
+        }
     }
 
     /**

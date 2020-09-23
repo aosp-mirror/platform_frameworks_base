@@ -1418,9 +1418,6 @@ static jobject nativeCreateInputMonitor(JNIEnv* env, jclass /* clazz */, jlong p
     if (!inputChannelObj) {
         return nullptr;
     }
-
-    android_view_InputChannel_setDisposeCallback(env, inputChannelObj, handleInputChannelDisposed,
-                                                 im);
     return inputChannelObj;
 }
 

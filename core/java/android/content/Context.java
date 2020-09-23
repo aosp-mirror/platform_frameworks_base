@@ -351,6 +351,13 @@ public abstract class Context {
      * due to its foreground state such as an activity or foreground service, then this flag will
      * allow the bound app to get the same capabilities, as long as it has the required permissions
      * as well.
+     *
+     * If binding from a top app and its target SDK version is at or above
+     * {@link android.os.Build.VERSION_CODES#R}, the app needs to
+     * explicitly use BIND_INCLUDE_CAPABILITIES flag to pass all capabilities to the service so the
+     * other app can have while-use-use access such as location, camera, microphone from background.
+     * If binding from a top app and its target SDK version is below
+     * {@link android.os.Build.VERSION_CODES#R}, BIND_INCLUDE_CAPABILITIES is implicit.
      */
     public static final int BIND_INCLUDE_CAPABILITIES = 0x000001000;
 
@@ -3179,8 +3186,8 @@ public abstract class Context {
      *          {@link #BIND_AUTO_CREATE}, {@link #BIND_DEBUG_UNBIND},
      *          {@link #BIND_NOT_FOREGROUND}, {@link #BIND_ABOVE_CLIENT},
      *          {@link #BIND_ALLOW_OOM_MANAGEMENT}, {@link #BIND_WAIVE_PRIORITY}.
-     *          {@link #BIND_IMPORTANT}, or
-     *          {@link #BIND_ADJUST_WITH_ACTIVITY}.
+     *          {@link #BIND_IMPORTANT}, {@link #BIND_ADJUST_WITH_ACTIVITY},
+     *          {@link #BIND_NOT_PERCEPTIBLE}, or {@link #BIND_INCLUDE_CAPABILITIES}.
      * @return {@code true} if the system is in the process of bringing up a
      *         service that your client has permission to bind to; {@code false}
      *         if the system couldn't find the service or if your client doesn't
@@ -3201,6 +3208,8 @@ public abstract class Context {
      * @see #BIND_WAIVE_PRIORITY
      * @see #BIND_IMPORTANT
      * @see #BIND_ADJUST_WITH_ACTIVITY
+     * @see #BIND_NOT_PERCEPTIBLE
+     * @see #BIND_INCLUDE_CAPABILITIES
      */
     public abstract boolean bindService(@RequiresPermission Intent service,
             @NonNull ServiceConnection conn, @BindServiceFlags int flags);

@@ -85,7 +85,7 @@ import java.util.concurrent.TimeUnit;
 @MediumTest
 @Presubmit
 public class ActivityThreadClientTest {
-    private static final long WAIT_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5);
+    private static final long WAIT_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(10);
 
     @Test
     @UiThreadTest

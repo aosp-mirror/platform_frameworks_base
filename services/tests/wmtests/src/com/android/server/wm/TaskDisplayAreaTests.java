@@ -29,6 +29,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -240,6 +241,40 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         assertFalse(rootHomeTask.isVisible());
 
         assertEquals(rootWindowContainer.getOrientation(), rootHomeTask.getOrientation());
+    }
+
+    @Test
+    public void testIsLastFocused() {
+        final TaskDisplayArea firstTaskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
+        final TaskDisplayArea secondTaskDisplayArea = createTaskDisplayArea(
+                mDisplayContent, mRootWindowContainer.mWmService, "TestTaskDisplayArea",
+                FEATURE_VENDOR_FIRST);
+        final Task firstStack = firstTaskDisplayArea.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        final Task secondStack = secondTaskDisplayArea.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        final ActivityRecord firstActivity = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setStack(firstStack).build();
+        final ActivityRecord secondActivity = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setStack(secondStack).build();
+
+        // Activity on TDA1 is focused
+        mDisplayContent.setFocusedApp(firstActivity);
+
+        assertThat(firstTaskDisplayArea.isLastFocused()).isTrue();
+        assertThat(secondTaskDisplayArea.isLastFocused()).isFalse();
+
+        // No focused app, TDA1 is still recorded as last focused.
+        mDisplayContent.setFocusedApp(null);
+
+        assertThat(firstTaskDisplayArea.isLastFocused()).isTrue();
+        assertThat(secondTaskDisplayArea.isLastFocused()).isFalse();
+
+        // Activity on TDA2 is focused
+        mDisplayContent.setFocusedApp(secondActivity);
+
+        assertThat(firstTaskDisplayArea.isLastFocused()).isFalse();
+        assertThat(secondTaskDisplayArea.isLastFocused()).isTrue();
     }
 
     private void assertGetOrCreateStack(int windowingMode, int activityType, Task candidateTask,

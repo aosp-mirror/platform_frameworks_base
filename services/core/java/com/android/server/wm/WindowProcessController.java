@@ -41,7 +41,6 @@ import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.Task.ActivityState.STARTED;
 import static com.android.server.wm.Task.ActivityState.STOPPING;
 
-
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -465,8 +464,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      * Allows background activity starts using token {@code entity}. Optionally, you can provide
      * {@code originatingToken} if you have one such originating token, this is useful for tracing
      * back the grant in the case of the notification token.
+     *
+     * If {@code entity} is already added, this method will update its {@code originatingToken}.
      */
-    public void addAllowBackgroundActivityStartsToken(Binder entity,
+    public void addOrUpdateAllowBackgroundActivityStartsToken(Binder entity,
             @Nullable IBinder originatingToken) {
         synchronized (mAtm.mGlobalLock) {
             mBackgroundActivityStartTokens.put(entity, originatingToken);
@@ -475,7 +476,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     /**
      * Removes token {@code entity} that allowed background activity starts added via {@link
-     * #addAllowBackgroundActivityStartsToken(Binder, IBinder)}.
+     * #addOrUpdateAllowBackgroundActivityStartsToken(Binder, IBinder)}.
      */
     public void removeAllowBackgroundActivityStartsToken(Binder entity) {
         synchronized (mAtm.mGlobalLock) {
@@ -485,7 +486,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     /**
      * Returns true if background activity starts are allowed by any token added via {@link
-     * #addAllowBackgroundActivityStartsToken(Binder, IBinder)}.
+     * #addOrUpdateAllowBackgroundActivityStartsToken(Binder, IBinder)}.
      */
     public boolean areBackgroundActivityStartsAllowedByToken() {
         synchronized (mAtm.mGlobalLock) {
@@ -1575,10 +1576,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 pw.print(prefix); pw.print("mVrThreadTid="); pw.println(mVrThreadTid);
             }
             if (mBackgroundActivityStartTokens.size() > 0) {
-                pw.print(prefix); pw.println("Background activity start tokens:");
+                pw.print(prefix);
+                pw.println("Background activity start tokens (token: originating token):");
                 for (int i = 0; i < mBackgroundActivityStartTokens.size(); i++) {
                     pw.print(prefix); pw.print("  - ");
-                    pw.println(mBackgroundActivityStartTokens.keyAt(i));
+                    pw.print(mBackgroundActivityStartTokens.keyAt(i));
+                    pw.print(": ");
+                    pw.println(mBackgroundActivityStartTokens.valueAt(i));
+
                 }
             }
         }
