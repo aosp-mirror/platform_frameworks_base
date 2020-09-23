@@ -700,11 +700,15 @@ class ActivityStarter {
                     mService.updateConfigurationLocked(mRequest.globalConfig, null, false);
                 }
 
+                // The original options may have additional info about metrics. The mOptions is not
+                // used here because it may be cleared in setTargetStackIfNeeded.
+                final ActivityOptions originalOptions = mRequest.activityOptions != null
+                        ? mRequest.activityOptions.getOriginalOptions() : null;
                 // Notify ActivityMetricsLogger that the activity has launched.
                 // ActivityMetricsLogger will then wait for the windows to be drawn and populate
                 // WaitResult.
                 mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState, res,
-                        mLastStartActivityRecord, mOptions);
+                        mLastStartActivityRecord, originalOptions);
                 return getExternalResult(mRequest.waitResult == null ? res
                         : waitForResult(res, mLastStartActivityRecord));
             }

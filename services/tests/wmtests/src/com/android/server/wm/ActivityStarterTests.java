@@ -63,6 +63,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.notNull;
 
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
@@ -800,6 +801,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         final Task topTask = new TaskBuilder(mSupervisor).setParentTask(topStack).build();
         new ActivityBuilder(mAtm).setTask(topTask).build();
 
+        doReturn(mActivityMetricsLogger).when(mSupervisor).getActivityMetricsLogger();
         // Start activity with the same intent as {@code singleTaskActivity} on secondary display.
         final ActivityOptions options = ActivityOptions.makeBasic()
                 .setLaunchDisplayId(secondaryDisplay.mDisplayId);
@@ -813,6 +815,9 @@ public class ActivityStarterTests extends WindowTestsBase {
 
         // Ensure secondary display only creates two stacks.
         verify(secondaryTaskContainer, times(2)).createStack(anyInt(), anyInt(), anyBoolean());
+        // The metrics logger should receive the same result and non-null options.
+        verify(mActivityMetricsLogger).notifyActivityLaunched(any() /* launchingState */,
+                eq(result), eq(singleTaskActivity), notNull() /* options */);
     }
 
     @Test

@@ -150,6 +150,14 @@ public class SafeActivityOptions {
     }
 
     /**
+     * Gets the original options passed in. It should only be used for logging. DO NOT use it as a
+     * condition in the logic of activity launch.
+     */
+    ActivityOptions getOriginalOptions() {
+        return mOriginalOptions;
+    }
+
+    /**
      * @see ActivityOptions#popAppVerificationBundle
      */
     Bundle popAppVerificationBundle() {
