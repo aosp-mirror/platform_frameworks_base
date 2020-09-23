@@ -2678,6 +2678,14 @@
     <string name="accessibility_control_move_left">Move left</string>
     <!-- Action in accessibility menu to move the magnification window right. [CHAR LIMIT=30] -->
     <string name="accessibility_control_move_right">Move right</string>
+    <!-- Content description for magnification mode switch. [CHAR LIMIT=NONE] -->
+    <string name="magnification_mode_switch_description">Magnification switch</string>
+    <!-- A11y state description for magnification mode switch that device is in full-screen mode. [CHAR LIMIT=NONE] -->
+    <string name="magnification_mode_switch_state_full_screen">Magnify entire screen</string>
+    <!-- A11y state description for magnification mode switch that device is in window mode. [CHAR LIMIT=NONE] -->
+    <string name="magnification_mode_switch_state_window">Magnify part of screen</string>
+    <!-- Click action label for magnification switch. [CHAR LIMIT=NONE] -->
+    <string name="magnification_mode_switch_click_label">Switch</string>
 
     <!-- Device Controls strings -->
     <!-- Device Controls empty state, title [CHAR LIMIT=30] -->
