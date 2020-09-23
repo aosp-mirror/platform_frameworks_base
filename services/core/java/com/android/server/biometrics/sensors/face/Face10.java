@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
+import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
@@ -279,6 +280,7 @@ class Face10 implements IHwBinder.DeathRecipient {
     };
 
     Face10(@NonNull Context context, int sensorId,
+            @BiometricManager.Authenticators.Types int strength,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         final boolean supportsSelfIllumination = context.getResources()
                 .getBoolean(R.bool.config_faceAuthSupportsSelfIllumination);
