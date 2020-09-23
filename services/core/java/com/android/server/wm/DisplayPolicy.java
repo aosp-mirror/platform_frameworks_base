@@ -3400,9 +3400,12 @@ public class DisplayPolicy {
                             ? Type.navigationBars() : 0)
                     | (requestedState.getSourceOrDefaultVisibility(ITYPE_STATUS_BAR)
                             ? Type.statusBars() : 0)
-                    | (requestedState.getSourceOrDefaultVisibility(ITYPE_EXTRA_NAVIGATION_BAR)
+                    | (mExtraNavBarAlt != null
+                            && requestedState.getSourceOrDefaultVisibility(
+                                    ITYPE_EXTRA_NAVIGATION_BAR)
                             ? Type.navigationBars() : 0)
-                    | (requestedState.getSourceOrDefaultVisibility(ITYPE_CLIMATE_BAR)
+                    | (mClimateBarAlt != null
+                            && requestedState.getSourceOrDefaultVisibility(ITYPE_CLIMATE_BAR)
                             ? Type.statusBars() : 0);
 
             if (swipeTarget == mNavigationBar
