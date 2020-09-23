@@ -36,39 +36,6 @@
         <font weight="700" style="italic">Roboto-BoldItalic.ttf</font>
     </family>
 
-    <!-- Pixel 2020 -->
-    <family name="lustria">
-        <font weight="400" style="normal">Lustria-Regular.ttf</font>
-    </family>
-    <alias name="lustria" to="lustria" weight="400"/>
-
-    <family name="karla">
-        <font weight="400" style="normal">Karla-Regular.ttf</font>
-    </family>
-    <alias name="karla" to="karla" weight="400"/>
-
-    <family name="fraunces">
-        <font weight="400" style="normal">Fraunces-Regular.ttf</font>
-        <font weight="600" style="normal">Fraunces-SemiBold.ttf</font>
-    </family>
-    <alias name="fraunces" to="fraunces" weight="400"/>
-    <alias name="fraunces-semi-bold" to="fraunces" weight="600"/>
-
-    <family name="big-shoulders-text">
-        <font weight="700" style="normal">BigShouldersText-Bold.ttf</font>
-        <font weight="800" style="normal">BigShouldersText-ExtraBold.ttf</font>
-    </family>
-    <alias name="big-shoulders-text-bold" to="big-shoulders-text" weight="700"/>
-    <alias name="big-shoulders-text-extra-bold" to="big-shoulders-text" weight="800"/>
-
-    <family name="barlow">
-        <font weight="700" style="normal">Barlow-Bold.ttf</font>
-        <font weight="500" style="normal">Barlow-Medium.ttf</font>
-    </family>
-    <alias name="barlow-bold" to="barlow" weight="700"/>
-    <alias name="barlow-medium" to="barlow" weight="500"/>
-    <!-- End Pixel 2020 -->
-
     <!-- Note that aliases must come after the fonts they reference. -->
     <alias name="sans-serif-thin" to="sans-serif" weight="100" />
     <alias name="sans-serif-light" to="sans-serif" weight="300" />
