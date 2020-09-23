@@ -508,7 +508,7 @@ package android.net.wifi {
     field public static final int EASY_CONNECT_NETWORK_ROLE_AP = 1; // 0x1
     field public static final int EASY_CONNECT_NETWORK_ROLE_STA = 0; // 0x0
     field public static final String EXTRA_CHANGE_REASON = "changeReason";
-    field public static final String EXTRA_LINK_PROPERTIES = "android.net.wifi.extra.LINK_PROPERTIES";
+    field @Deprecated public static final String EXTRA_LINK_PROPERTIES = "android.net.wifi.extra.LINK_PROPERTIES";
     field public static final String EXTRA_MULTIPLE_NETWORKS_CHANGED = "multipleChanges";
     field public static final String EXTRA_OSU_NETWORK = "android.net.wifi.extra.OSU_NETWORK";
     field public static final String EXTRA_PREVIOUS_WIFI_AP_STATE = "previous_wifi_state";
