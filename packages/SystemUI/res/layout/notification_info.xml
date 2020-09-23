@@ -30,10 +30,11 @@
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/notification_guts_conversation_header_height"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:clipChildren="false"
-        android:clipToPadding="false">
+        android:paddingTop="@dimen/notification_guts_header_top_padding"
+        android:clipToPadding="true">
         <ImageView
             android:id="@+id/pkg_icon"
             android:layout_width="@dimen/notification_guts_conversation_icon_size"
