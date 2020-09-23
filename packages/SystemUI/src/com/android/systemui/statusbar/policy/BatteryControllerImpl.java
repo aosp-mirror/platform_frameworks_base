@@ -104,16 +104,6 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     @Override
     public void init() {
         registerReceiver();
-        if (!mHasReceivedBattery) {
-            // Get initial state. Relying on Sticky behavior until API for getting info.
-            Intent intent = mContext.registerReceiver(
-                    null,
-                    new IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-            );
-            if (intent != null && !mHasReceivedBattery) {
-                onReceive(mContext, intent);
-            }
-        }
         updatePowerSave();
         updateEstimate();
     }

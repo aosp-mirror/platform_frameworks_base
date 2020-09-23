@@ -90,7 +90,15 @@ public abstract class SystemUIDefaultModule {
 
     @Provides
     @Singleton
-    public abstract BatteryController bindBatteryController(BatteryControllerImpl controllerImpl);
+    static BatteryController provideBatteryController(Context context,
+            EnhancedEstimates enhancedEstimates, PowerManager powerManager,
+            BroadcastDispatcher broadcastDispatcher, @Main Handler mainHandler,
+            @Background Handler bgHandler) {
+        BatteryController bC = new BatteryControllerImpl(context, enhancedEstimates, powerManager,
+                broadcastDispatcher, mainHandler, bgHandler);
+        bC.init();
+        return bC;
+    }
 
     @Binds
     @Singleton
