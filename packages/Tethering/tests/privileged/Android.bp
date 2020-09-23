@@ -14,8 +14,22 @@
 // limitations under the License.
 //
 
+java_defaults {
+    name: "TetheringPrivilegedTestsJniDefaults",
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+        "libtetherutilsjni",
+    ],
+    jni_uses_sdk_apis: true,
+    visibility: ["//visibility:private"],
+}
+
 android_test {
     name: "TetheringPrivilegedTests",
+    defaults: [
+        "TetheringPrivilegedTestsJniDefaults",
+    ],
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
@@ -23,8 +37,13 @@ android_test {
     certificate: "networkstack",
     platform_apis: true,
     test_suites: [
-        "general-tests",
+        "device-tests",
         "mts",
+    ],
+    static_libs: [
+        "androidx.test.rules",
+        "net-tests-utils",
+        "TetheringApiCurrentLib",
     ],
     compile_multilib: "both",
 }
