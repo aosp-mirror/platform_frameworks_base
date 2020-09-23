@@ -13738,10 +13738,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             long kernelUsed = memInfo.getKernelUsedSizeKb();
             final long ionHeap = Debug.getIonHeapsSizeKb();
-            if (ionHeap > 0) {
+            final long ionPool = Debug.getIonPoolsSizeKb();
+            if (ionHeap >= 0 && ionPool >= 0) {
                 final long ionMapped = Debug.getIonMappedSizeKb();
                 final long ionUnmapped = ionHeap - ionMapped;
-                final long ionPool = Debug.getIonPoolsSizeKb();
                 pw.print("      ION: ");
                         pw.print(stringifyKBSize(ionHeap + ionPool));
                         pw.print(" (");
@@ -14552,10 +14552,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         memInfoBuilder.append("\n");
         long kernelUsed = memInfo.getKernelUsedSizeKb();
         final long ionHeap = Debug.getIonHeapsSizeKb();
-        if (ionHeap > 0) {
+        final long ionPool = Debug.getIonPoolsSizeKb();
+        if (ionHeap >= 0 && ionPool >= 0) {
             final long ionMapped = Debug.getIonMappedSizeKb();
             final long ionUnmapped = ionHeap - ionMapped;
-            final long ionPool = Debug.getIonPoolsSizeKb();
             memInfoBuilder.append("       ION: ");
             memInfoBuilder.append(stringifyKBSize(ionHeap + ionPool));
             memInfoBuilder.append("\n");
