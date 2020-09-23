@@ -80,7 +80,9 @@ public class KeyguardSecurityViewFlipperController
 
     @Override
     public void reset() {
-        mView.reset();
+        for (KeyguardInputViewController child : mChildren) {
+            child.reset();
+        }
     }
 
     @Override
@@ -156,6 +158,7 @@ public class KeyguardSecurityViewFlipperController
                 mView.addView(view);
                 childController = mKeyguardSecurityViewControllerFactory.create(
                         view, securityMode, keyguardSecurityCallback);
+                childController.init();
 
                 mChildren.add(childController);
             }
