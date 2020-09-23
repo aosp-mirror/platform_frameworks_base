@@ -979,7 +979,7 @@
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- می‌تواند در <xliff:g id="APP">%1$s</xliff:g> اقدام انجام دهد"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"به <xliff:g id="APP">%1$s</xliff:g> اجازه داده شود تکه‌هایی از برنامه‌ها نشان دهد"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"مجاز"</string>
-    <string name="slice_permission_deny" msgid="6870256451658176895">"رد کردن"</string>
+    <string name="slice_permission_deny" msgid="6870256451658176895">"مجاز نبودن"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"برای زمان‌بندی «بهینه‌سازی باتری» ضربه بزنید"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"وقتی باتری روبه‌اتمام است، بهینه‌سازی باتری را روشن کنید"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"نه متشکرم"</string>
