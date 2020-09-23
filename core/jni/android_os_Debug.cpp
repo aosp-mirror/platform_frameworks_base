@@ -792,7 +792,7 @@ static jlong android_os_Debug_getFreeZramKb(JNIEnv* env, jobject clazz) {
 }
 
 static jlong android_os_Debug_getIonHeapsSizeKb(JNIEnv* env, jobject clazz) {
-    jlong heapsSizeKb = 0;
+    jlong heapsSizeKb = -1;
     uint64_t size;
 
     if (meminfo::ReadIonHeapsSizeKb(&size)) {
@@ -803,7 +803,7 @@ static jlong android_os_Debug_getIonHeapsSizeKb(JNIEnv* env, jobject clazz) {
 }
 
 static jlong android_os_Debug_getIonPoolsSizeKb(JNIEnv* env, jobject clazz) {
-    jlong poolsSizeKb = 0;
+    jlong poolsSizeKb = -1;
     uint64_t size;
 
     if (meminfo::ReadIonPoolsSizeKb(&size)) {
