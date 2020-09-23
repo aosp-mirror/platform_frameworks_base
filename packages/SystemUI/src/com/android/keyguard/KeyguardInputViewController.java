@@ -17,32 +17,31 @@
 package com.android.keyguard;
 
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
+import android.telephony.TelephonyManager;
 import android.view.MotionEvent;
+import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.ViewController;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import javax.inject.Inject;
 
 
 /** Controller for a {@link KeyguardSecurityView}. */
-public class KeyguardInputViewController<T extends KeyguardInputView> extends ViewController<T>
-        implements KeyguardSecurityView {
+public abstract class KeyguardInputViewController<T extends KeyguardInputView>
+        extends ViewController<T> implements KeyguardSecurityView {
 
     private final SecurityMode mSecurityMode;
-    private final LockPatternUtils mLockPatternUtils;
-    private final KeyguardSecurityCallback mKeyguardSecurityCallback;
-    private KeyguardMessageAreaController mMessageAreaController;
 
     protected KeyguardInputViewController(T view, SecurityMode securityMode,
-            LockPatternUtils lockPatternUtils,
             KeyguardSecurityCallback keyguardSecurityCallback) {
         super(view);
         mSecurityMode = securityMode;
-        mLockPatternUtils = lockPatternUtils;
-        mKeyguardSecurityCallback = keyguardSecurityCallback;
         mView.setKeyguardCallback(keyguardSecurityCallback);
     }
 
@@ -151,16 +150,29 @@ public class KeyguardInputViewController<T extends KeyguardInputView> extends Vi
         private final LockPatternUtils mLockPatternUtils;
         private final LatencyTracker mLatencyTracker;
         private final KeyguardMessageAreaController.Factory mMessageAreaControllerFactory;
+        private final InputMethodManager mInputMethodManager;
+        private final DelayableExecutor mMainExecutor;
+        private final Resources mResources;
+        private LiftToActivateListener mLiftToActivateListener;
+        private TelephonyManager mTelephonyManager;
 
         @Inject
         public Factory(KeyguardUpdateMonitor keyguardUpdateMonitor,
                 LockPatternUtils lockPatternUtils,
                 LatencyTracker latencyTracker,
-                KeyguardMessageAreaController.Factory messageAreaControllerFactory) {
+                KeyguardMessageAreaController.Factory messageAreaControllerFactory,
+                InputMethodManager inputMethodManager, @Main DelayableExecutor mainExecutor,
+                @Main Resources resources, LiftToActivateListener liftToActivateListener,
+                TelephonyManager telephonyManager) {
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
             mLockPatternUtils = lockPatternUtils;
             mLatencyTracker = latencyTracker;
             mMessageAreaControllerFactory = messageAreaControllerFactory;
+            mInputMethodManager = inputMethodManager;
+            mMainExecutor = mainExecutor;
+            mResources = resources;
+            mLiftToActivateListener = liftToActivateListener;
+            mTelephonyManager = telephonyManager;
         }
 
         /** Create a new {@link KeyguardInputViewController}. */
@@ -170,9 +182,29 @@ public class KeyguardInputViewController<T extends KeyguardInputView> extends Vi
                 return new KeyguardPatternViewController((KeyguardPatternView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mLatencyTracker, mMessageAreaControllerFactory);
+            } else if (keyguardInputView instanceof KeyguardPasswordView) {
+                return new KeyguardPasswordViewController((KeyguardPasswordView) keyguardInputView,
+                        mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
+                        keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
+                        mInputMethodManager, mMainExecutor, mResources);
+            } else if (keyguardInputView instanceof KeyguardPINView) {
+                return new KeyguardPinViewController((KeyguardPINView) keyguardInputView,
+                        mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
+                        keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
+                        mLiftToActivateListener);
+            } else if (keyguardInputView instanceof KeyguardSimPinView) {
+                return new KeyguardSimPinViewController((KeyguardSimPinView) keyguardInputView,
+                        mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
+                        keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
+                        mLiftToActivateListener, mTelephonyManager);
+            } else if (keyguardInputView instanceof KeyguardSimPukView) {
+                return new KeyguardSimPukViewController((KeyguardSimPukView) keyguardInputView,
+                        mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
+                        keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
+                        mLiftToActivateListener, mTelephonyManager);
             }
-            return new KeyguardInputViewController<>(keyguardInputView, securityMode,
-                    mLockPatternUtils, keyguardSecurityCallback);
+
+            throw new RuntimeException("Unable to find controller for " + keyguardInputView);
         }
     }
 }
