@@ -16,13 +16,12 @@
 
 package com.android.systemui.media
 
-import android.app.Notification
 import android.graphics.drawable.Drawable
-import android.media.MediaMetadata
 import android.media.MediaRouter2Manager
 import android.media.RoutingSessionInfo
+import android.media.session.MediaController
+import android.media.session.MediaController.PlaybackInfo
 import android.media.session.MediaSession
-import android.media.session.PlaybackState
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
@@ -55,7 +54,6 @@ private const val KEY = "TEST_KEY"
 private const val KEY_OLD = "TEST_KEY_OLD"
 private const val PACKAGE = "PKG"
 private const val SESSION_KEY = "SESSION_KEY"
-private const val SESSION_ARTIST = "SESSION_ARTIST"
 private const val SESSION_TITLE = "SESSION_TITLE"
 private const val DEVICE_NAME = "DEVICE_NAME"
 private const val USER_ID = 0
@@ -68,6 +66,7 @@ private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
 public class MediaDeviceManagerTest : SysuiTestCase() {
 
     private lateinit var manager: MediaDeviceManager
+    @Mock private lateinit var controllerFactory: MediaControllerFactory
     @Mock private lateinit var lmmFactory: LocalMediaManagerFactory
     @Mock private lateinit var lmm: LocalMediaManager
     @Mock private lateinit var mr2: MediaRouter2Manager
@@ -78,10 +77,9 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Mock private lateinit var device: MediaDevice
     @Mock private lateinit var icon: Drawable
     @Mock private lateinit var route: RoutingSessionInfo
+    @Mock private lateinit var controller: MediaController
+    @Mock private lateinit var playbackInfo: PlaybackInfo
     private lateinit var session: MediaSession
-    private lateinit var metadataBuilder: MediaMetadata.Builder
-    private lateinit var playbackBuilder: PlaybackState.Builder
-    private lateinit var notifBuilder: Notification.Builder
     private lateinit var mediaData: MediaData
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -89,8 +87,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     fun setUp() {
         fakeFgExecutor = FakeExecutor(FakeSystemClock())
         fakeBgExecutor = FakeExecutor(FakeSystemClock())
-        manager = MediaDeviceManager(context, lmmFactory, mr2, fakeFgExecutor, fakeBgExecutor,
-                dumpster)
+        manager = MediaDeviceManager(controllerFactory, lmmFactory, mr2, fakeFgExecutor,
+                fakeBgExecutor, dumpster)
         manager.addListener(listener)
 
         // Configure mocks.
@@ -101,28 +99,13 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(route)
 
         // Create a media sesssion and notification for testing.
-        metadataBuilder = MediaMetadata.Builder().apply {
-            putString(MediaMetadata.METADATA_KEY_ARTIST, SESSION_ARTIST)
-            putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_TITLE)
-        }
-        playbackBuilder = PlaybackState.Builder().apply {
-            setState(PlaybackState.STATE_PAUSED, 6000L, 1f)
-            setActions(PlaybackState.ACTION_PLAY)
-        }
-        session = MediaSession(context, SESSION_KEY).apply {
-            setMetadata(metadataBuilder.build())
-            setPlaybackState(playbackBuilder.build())
-        }
-        session.setActive(true)
-        notifBuilder = Notification.Builder(context, "NONE").apply {
-            setContentTitle(SESSION_TITLE)
-            setContentText(SESSION_ARTIST)
-            setSmallIcon(android.R.drawable.ic_media_pause)
-            setStyle(Notification.MediaStyle().setMediaSession(session.getSessionToken()))
-        }
+        session = MediaSession(context, SESSION_KEY)
+
         mediaData = MediaData(USER_ID, true, 0, PACKAGE, null, null, SESSION_TITLE, null,
             emptyList(), emptyList(), PACKAGE, session.sessionToken, clickIntent = null,
             device = null, active = true, resumeAction = null)
+        whenever(controllerFactory.create(session.sessionToken))
+                .thenReturn(controller)
     }
 
     @After
@@ -334,6 +317,41 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         assertThat(data.enabled).isFalse()
         assertThat(data.name).isNull()
         assertThat(data.icon).isNull()
+    }
+
+    @Test
+    fun audioInfoChanged() {
+        whenever(playbackInfo.getPlaybackType()).thenReturn(PlaybackInfo.PLAYBACK_TYPE_LOCAL)
+        whenever(controller.getPlaybackInfo()).thenReturn(playbackInfo)
+        // GIVEN a controller with local playback type
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        reset(mr2)
+        // WHEN onAudioInfoChanged fires with remote playback type
+        whenever(playbackInfo.getPlaybackType()).thenReturn(PlaybackInfo.PLAYBACK_TYPE_REMOTE)
+        val captor = ArgumentCaptor.forClass(MediaController.Callback::class.java)
+        verify(controller).registerCallback(captor.capture())
+        captor.value.onAudioInfoChanged(playbackInfo)
+        // THEN the route is checked
+        verify(mr2).getRoutingSessionForMediaController(eq(controller))
+    }
+
+    @Test
+    fun audioInfoHasntChanged() {
+        whenever(playbackInfo.getPlaybackType()).thenReturn(PlaybackInfo.PLAYBACK_TYPE_REMOTE)
+        whenever(controller.getPlaybackInfo()).thenReturn(playbackInfo)
+        // GIVEN a controller with remote playback type
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        reset(mr2)
+        // WHEN onAudioInfoChanged fires with remote playback type
+        val captor = ArgumentCaptor.forClass(MediaController.Callback::class.java)
+        verify(controller).registerCallback(captor.capture())
+        captor.value.onAudioInfoChanged(playbackInfo)
+        // THEN the route is not checked
+        verify(mr2, never()).getRoutingSessionForMediaController(eq(controller))
     }
 
     fun captureCallback(): LocalMediaManager.DeviceCallback {
