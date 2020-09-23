@@ -35,11 +35,11 @@ TEST(ConditionTimerTest, TestTimer_Inital_False) {
     EXPECT_EQ(0, timer.mTimerNs);
 
     timer.onConditionChanged(true, ct_start_time + 5);
-    EXPECT_EQ(ct_start_time + 5, timer.mLastConditionTrueTimestampNs);
+    EXPECT_EQ(ct_start_time + 5, timer.mLastConditionChangeTimestampNs);
     EXPECT_EQ(true, timer.mCondition);
 
     EXPECT_EQ(95, timer.newBucketStart(ct_start_time + 100));
-    EXPECT_EQ(ct_start_time + 100, timer.mLastConditionTrueTimestampNs);
+    EXPECT_EQ(ct_start_time + 100, timer.mLastConditionChangeTimestampNs);
     EXPECT_EQ(true, timer.mCondition);
 }
 
@@ -51,7 +51,7 @@ TEST(ConditionTimerTest, TestTimer_Inital_True) {
     EXPECT_EQ(ct_start_time - time_base, timer.newBucketStart(ct_start_time));
     EXPECT_EQ(true, timer.mCondition);
     EXPECT_EQ(0, timer.mTimerNs);
-    EXPECT_EQ(ct_start_time, timer.mLastConditionTrueTimestampNs);
+    EXPECT_EQ(ct_start_time, timer.mLastConditionChangeTimestampNs);
 
     timer.onConditionChanged(false, ct_start_time + 5);
     EXPECT_EQ(5, timer.mTimerNs);

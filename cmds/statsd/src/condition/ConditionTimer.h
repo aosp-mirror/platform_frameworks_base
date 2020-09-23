@@ -36,7 +36,7 @@ class ConditionTimer {
 public:
     explicit ConditionTimer(bool initCondition, int64_t bucketStartNs) : mCondition(initCondition) {
         if (initCondition) {
-            mLastConditionTrueTimestampNs = bucketStartNs;
+            mLastConditionChangeTimestampNs = bucketStartNs;
         }
     };
 
@@ -44,21 +44,46 @@ public:
     // When a new bucket is created, this value will be reset to 0.
     int64_t mTimerNs = 0;
 
-    // Last elapsed real timestamp when condition turned to true
-    // When a new bucket is created and the condition is true, then the timestamp is set
-    // to be the bucket start timestamp.
-    int64_t mLastConditionTrueTimestampNs = 0;
+    // Last elapsed real timestamp when condition changed.
+    int64_t mLastConditionChangeTimestampNs = 0;
 
     bool mCondition = false;
 
     int64_t newBucketStart(int64_t nextBucketStartNs) {
         if (mCondition) {
-            mTimerNs += (nextBucketStartNs - mLastConditionTrueTimestampNs);
-            mLastConditionTrueTimestampNs = nextBucketStartNs;
+            // Normally, the next bucket happens after the last condition
+            // change. In this case, add the time between the condition becoming
+            // true to the next bucket start time.
+            // Otherwise, the next bucket start time is before the last
+            // condition change time, this means that the condition was false at
+            // the bucket boundary before the condition became true, so the
+            // timer should not get updated and the last condition change time
+            // remains as is.
+            if (nextBucketStartNs >= mLastConditionChangeTimestampNs) {
+                mTimerNs += (nextBucketStartNs - mLastConditionChangeTimestampNs);
+                mLastConditionChangeTimestampNs = nextBucketStartNs;
+            }
+        } else if (mLastConditionChangeTimestampNs > nextBucketStartNs) {
+            // The next bucket start time is before the last condition change
+            // time, this means that the condition was true at the bucket
+            // boundary before the condition became false, so adjust the timer
+            // to match how long the condition was true to the bucket boundary.
+            // This means remove the amount the condition stayed true in the
+            // next bucket from the current bucket.
+            mTimerNs -= (mLastConditionChangeTimestampNs - nextBucketStartNs);
         }
 
         int64_t temp = mTimerNs;
         mTimerNs = 0;
+
+        if (!mCondition && (mLastConditionChangeTimestampNs > nextBucketStartNs)) {
+            // The next bucket start time is before the last condition change
+            // time, this means that the condition was true at the bucket
+            // boundary and remained true in the next bucket up to the condition
+            // change to false, so adjust the timer to match how long the
+            // condition stayed true in the next bucket (now the current bucket).
+            mTimerNs = mLastConditionChangeTimestampNs - nextBucketStartNs;
+        }
         return temp;
     }
 
@@ -67,11 +92,10 @@ public:
             return;
         }
         mCondition = newCondition;
-        if (newCondition) {
-            mLastConditionTrueTimestampNs = timestampNs;
-        } else {
-            mTimerNs += (timestampNs - mLastConditionTrueTimestampNs);
+        if (newCondition == false) {
+            mTimerNs += (timestampNs - mLastConditionChangeTimestampNs);
         }
+        mLastConditionChangeTimestampNs = timestampNs;
     }
 
     FRIEND_TEST(ConditionTimerTest, TestTimer_Inital_False);
