@@ -293,22 +293,15 @@ public class ProximitySensor implements ThresholdSensor {
         private final ProximitySensor mSensor;
         private final Handler mHandler;
         private List<Consumer<Boolean>> mCallbacks = new ArrayList<>();
+        private final ThresholdSensor.Listener mListener;
+        private final AtomicBoolean mRegistered = new AtomicBoolean();
 
         @Inject
         public ProximityCheck(ProximitySensor sensor, Handler handler) {
             mSensor = sensor;
             mSensor.setTag("prox_check");
-            mHandler = handler;
-            mSensor.pause();
-            ThresholdSensor.Listener listener = proximityEvent -> {
-                mCallbacks.forEach(
-                        booleanConsumer ->
-                                booleanConsumer.accept(
-                                        proximityEvent == null ? null : proximityEvent.getBelow()));
-                mCallbacks.clear();
-                mSensor.pause();
-            };
-            mSensor.register(listener);
+            mDelayableExecutor = delayableExecutor;
+            mListener = this::onProximityEvent;
         }
 
         /** Set a descriptive tag for the sensors registration. */
@@ -318,7 +311,7 @@ public class ProximitySensor implements ThresholdSensor {
 
         @Override
         public void run() {
-            mSensor.pause();
+            unregister();
             mSensor.alertListeners();
         }
 
@@ -330,10 +323,25 @@ public class ProximitySensor implements ThresholdSensor {
                 callback.accept(null);
             }
             mCallbacks.add(callback);
-            if (!mSensor.isRegistered()) {
-                mSensor.resume();
-                mHandler.postDelayed(this, timeoutMs);
+            if (!mRegistered.getAndSet(true)) {
+                mSensor.register(mListener);
+                mDelayableExecutor.executeDelayed(this, timeoutMs);
             }
+        }
+
+        private void unregister() {
+            mSensor.unregister(mListener);
+            mRegistered.set(false);
+        }
+
+        private void onProximityEvent(ThresholdSensorEvent proximityEvent) {
+            mCallbacks.forEach(
+                    booleanConsumer ->
+                            booleanConsumer.accept(
+                                    proximityEvent == null ? null : proximityEvent.getBelow()));
+            mCallbacks.clear();
+            unregister();
+            mRegistered.set(false);
         }
     }
 

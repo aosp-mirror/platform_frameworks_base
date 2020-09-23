@@ -85,7 +85,7 @@ public class ProximityCheckTest extends SysuiTestCase {
     public void testProxDoesntCancelOthers() {
         assertFalse(mFakeProximitySensor.isRegistered());
         // We don't need our "other" listener to do anything. Just ensure our sensor is registered.
-        ProximitySensor.ProximitySensorListener emptyListener = event -> { };
+        ThresholdSensor.Listener emptyListener = event -> { };
         mFakeProximitySensor.register(emptyListener);
         assertTrue(mFakeProximitySensor.isRegistered());
 
@@ -94,7 +94,8 @@ public class ProximityCheckTest extends SysuiTestCase {
 
         assertNull(mTestableCallback.mLastResult);
 
-        mFakeProximitySensor.setLastEvent(new ProximitySensor.ProximityEvent(true, 0));
+        mFakeProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(true, 0));
+
         mFakeProximitySensor.alertListeners();
 
         assertTrue(mTestableCallback.mLastResult);
