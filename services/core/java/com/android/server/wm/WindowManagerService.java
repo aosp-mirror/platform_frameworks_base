@@ -1005,7 +1005,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final Configuration mTempConfiguration = new Configuration();
 
-    final HighRefreshRateBlacklist mHighRefreshRateBlacklist;
+    final HighRefreshRateDenylist mHighRefreshRateDenylist;
 
     // If true, only the core apps and services are being launched because the device
     // is in a special boot mode, such as being encrypted or waiting for a decryption password.
@@ -1302,7 +1302,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 this, mInputManager, mActivityTaskManager, mH.getLooper());
         mDragDropController = new DragDropController(this, mH.getLooper());
 
-        mHighRefreshRateBlacklist = HighRefreshRateBlacklist.create(context.getResources());
+        mHighRefreshRateDenylist = HighRefreshRateDenylist.create(context.getResources());
 
         mConstants = new WindowManagerConstants(this, DeviceConfigInterface.REAL);
         mConstants.start(new HandlerExecutor(mH));
@@ -5939,7 +5939,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void dumpHighRefreshRateBlacklist(PrintWriter pw) {
         pw.println("WINDOW MANAGER HIGH REFRESH RATE BLACKLIST (dumpsys window refresh)");
-        mHighRefreshRateBlacklist.dump(pw);
+        mHighRefreshRateDenylist.dump(pw);
     }
 
     private void dumpTraceStatus(PrintWriter pw) {

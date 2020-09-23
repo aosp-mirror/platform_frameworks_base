@@ -34,62 +34,62 @@ import java.io.PrintWriter;
 /**
  * A Denylist for packages that should force the display out of high refresh rate.
  */
-class HighRefreshRateBlacklist {
+class HighRefreshRateDenylist {
 
-    private final ArraySet<String> mBlacklistedPackages = new ArraySet<>();
+    private final ArraySet<String> mDenylistedPackages = new ArraySet<>();
     @NonNull
-    private final String[] mDefaultBlacklist;
+    private final String[] mDefaultDenylist;
     private final Object mLock = new Object();
 
     private DeviceConfigInterface mDeviceConfig;
     private OnPropertiesChangedListener mListener = new OnPropertiesChangedListener();
 
-    static HighRefreshRateBlacklist create(@NonNull Resources r) {
-        return new HighRefreshRateBlacklist(r, DeviceConfigInterface.REAL);
+    static HighRefreshRateDenylist create(@NonNull Resources r) {
+        return new HighRefreshRateDenylist(r, DeviceConfigInterface.REAL);
     }
 
     @VisibleForTesting
-    HighRefreshRateBlacklist(Resources r, DeviceConfigInterface deviceConfig) {
-        mDefaultBlacklist = r.getStringArray(R.array.config_highRefreshRateBlacklist);
+    HighRefreshRateDenylist(Resources r, DeviceConfigInterface deviceConfig) {
+        mDefaultDenylist = r.getStringArray(R.array.config_highRefreshRateBlacklist);
         mDeviceConfig = deviceConfig;
         mDeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
                 BackgroundThread.getExecutor(), mListener);
         final String property = mDeviceConfig.getProperty(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
                 KEY_HIGH_REFRESH_RATE_BLACKLIST);
-        updateBlacklist(property);
+        updateDenylist(property);
     }
 
-    private void updateBlacklist(@Nullable String property) {
+    private void updateDenylist(@Nullable String property) {
         synchronized (mLock) {
-            mBlacklistedPackages.clear();
+            mDenylistedPackages.clear();
             if (property != null) {
                 String[] packages = property.split(",");
                 for (String pkg : packages) {
                     String pkgName = pkg.trim();
                     if (!pkgName.isEmpty()) {
-                        mBlacklistedPackages.add(pkgName);
+                        mDenylistedPackages.add(pkgName);
                     }
                 }
             } else {
                 // If there's no config, or the config has been deleted, fallback to the device's
                 // default denylist
-                for (String pkg : mDefaultBlacklist) {
-                    mBlacklistedPackages.add(pkg);
+                for (String pkg : mDefaultDenylist) {
+                    mDenylistedPackages.add(pkg);
                 }
             }
         }
     }
 
-    boolean isBlacklisted(String packageName) {
+    boolean isDenylisted(String packageName) {
         synchronized (mLock) {
-            return mBlacklistedPackages.contains(packageName);
+            return mDenylistedPackages.contains(packageName);
         }
     }
     void dump(PrintWriter pw) {
-        pw.println("High Refresh Rate Blacklist");
+        pw.println("High Refresh Rate Denylist");
         pw.println("  Packages:");
         synchronized (mLock) {
-            for (String pkg : mBlacklistedPackages) {
+            for (String pkg : mDenylistedPackages) {
                 pw.println("    " + pkg);
             }
         }
@@ -100,13 +100,13 @@ class HighRefreshRateBlacklist {
     void dispose() {
         mDeviceConfig.removeOnPropertiesChangedListener(mListener);
         mDeviceConfig = null;
-        mBlacklistedPackages.clear();
+        mDenylistedPackages.clear();
     }
 
     private class OnPropertiesChangedListener implements DeviceConfig.OnPropertiesChangedListener {
         public void onPropertiesChanged(@NonNull DeviceConfig.Properties properties) {
             if (properties.getKeyset().contains(KEY_HIGH_REFRESH_RATE_BLACKLIST)) {
-                updateBlacklist(
+                updateDenylist(
                         properties.getString(KEY_HIGH_REFRESH_RATE_BLACKLIST, null /*default*/));
             }
         }
