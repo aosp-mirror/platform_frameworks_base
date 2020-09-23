@@ -167,7 +167,7 @@ class ThresholdSensorImpl implements ThresholdSensor {
 
     private void onSensorEvent(boolean below, long timestampNs) {
         Assert.isMainThread();
-        if (mLastBelow != null && mLastBelow == below) {
+        if (!mRegistered || mLastBelow != null && mLastBelow == below) {
             return;
         }
         mLastBelow = below;
