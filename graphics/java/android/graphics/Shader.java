@@ -95,7 +95,11 @@ public class Shader {
          * repeat the shader's image horizontally and vertically, alternating
          * mirror images so that adjacent images always seam
          */
-        MIRROR  (2);
+        MIRROR(2),
+        /**
+         * Only draw within the original domain, return transparent-black everywhere else
+         */
+        DECAL(3);
 
         TileMode(int nativeInt) {
             this.nativeInt = nativeInt;
