@@ -51,6 +51,7 @@ import android.net.util.InterfaceParams;
 import android.net.util.InterfaceSet;
 import android.net.util.PrefixUtils;
 import android.net.util.SharedLog;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -160,6 +161,15 @@ public class IpServer extends StateMachine {
 
     /** Capture IpServer dependencies, for injection. */
     public abstract static class Dependencies {
+        /**
+         * Create a DadProxy instance to be used by IpServer.
+         * To support multiple tethered interfaces concurrently DAD Proxy
+         * needs to be supported per IpServer instead of per upstream.
+         */
+        public DadProxy getDadProxy(Handler handler, InterfaceParams ifParams) {
+            return new DadProxy(handler, ifParams);
+        }
+
         /** Create an IpNeighborMonitor to be used by this IpServer */
         public IpNeighborMonitor getIpNeighborMonitor(Handler handler, SharedLog log,
                 IpNeighborMonitor.NeighborEventConsumer consumer) {
@@ -256,6 +266,7 @@ public class IpServer extends StateMachine {
     // Advertisements (otherwise, we do not add them to mLinkProperties at all).
     private LinkProperties mLastIPv6LinkProperties;
     private RouterAdvertisementDaemon mRaDaemon;
+    private DadProxy mDadProxy;
 
     // To be accessed only on the handler thread
     private int mDhcpServerStartIndex = 0;
@@ -674,6 +685,13 @@ public class IpServer extends StateMachine {
             return false;
         }
 
+        // TODO: use ShimUtils instead of explicitly checking the version here.
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R || "S".equals(Build.VERSION.CODENAME)
+                    || "T".equals(Build.VERSION.CODENAME)) {
+            // DAD Proxy starts forwarding packets after IPv6 upstream is present.
+            mDadProxy = mDeps.getDadProxy(getHandler(), mInterfaceParams);
+        }
+
         return true;
     }
 
@@ -684,6 +702,11 @@ public class IpServer extends StateMachine {
         if (mRaDaemon != null) {
             mRaDaemon.stop();
             mRaDaemon = null;
+        }
+
+        if (mDadProxy != null) {
+            mDadProxy.stop();
+            mDadProxy = null;
         }
     }
 
@@ -702,11 +725,16 @@ public class IpServer extends StateMachine {
         }
 
         RaParams params = null;
-        int upstreamIfindex = 0;
+        String upstreamIface = null;
+        InterfaceParams upstreamIfaceParams = null;
+        int upstreamIfIndex = 0;
 
         if (v6only != null) {
-            final String upstreamIface = v6only.getInterfaceName();
-
+            upstreamIface = v6only.getInterfaceName();
+            upstreamIfaceParams = mDeps.getInterfaceParams(upstreamIface);
+            if (upstreamIfaceParams != null) {
+                upstreamIfIndex = upstreamIfaceParams.index;
+            }
             params = new RaParams();
             params.mtu = v6only.getMtu();
             params.hasDefaultRoute = v6only.hasIpv6DefaultRoute();
@@ -726,15 +754,13 @@ public class IpServer extends StateMachine {
                 }
             }
 
-            upstreamIfindex = mDeps.getIfindex(upstreamIface);
-
             // Add upstream index to name mapping for the tether stats usage in the coordinator.
             // Although this mapping could be added by both class Tethering and IpServer, adding
             // mapping from IpServer guarantees that the mapping is added before the adding
             // forwarding rules. That is because there are different state machines in both
             // classes. It is hard to guarantee the link property update order between multiple
             // state machines.
-            mBpfCoordinator.addUpstreamNameToLookupTable(upstreamIfindex, upstreamIface);
+            mBpfCoordinator.addUpstreamNameToLookupTable(upstreamIfIndex, upstreamIface);
         }
 
         // If v6only is null, we pass in null to setRaParams(), which handles
@@ -743,8 +769,11 @@ public class IpServer extends StateMachine {
         setRaParams(params);
         mLastIPv6LinkProperties = v6only;
 
-        updateIpv6ForwardingRules(mLastIPv6UpstreamIfindex, upstreamIfindex, null);
-        mLastIPv6UpstreamIfindex = upstreamIfindex;
+        updateIpv6ForwardingRules(mLastIPv6UpstreamIfindex, upstreamIfIndex, null);
+        mLastIPv6UpstreamIfindex = upstreamIfIndex;
+        if (mDadProxy != null) {
+            mDadProxy.setUpstreamIface(upstreamIfaceParams);
+        }
     }
 
     private void removeRoutesFromLocalNetwork(@NonNull final List<RouteInfo> toBeRemoved) {
