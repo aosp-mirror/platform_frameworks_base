@@ -160,7 +160,7 @@ public class ActiveSourceActionTest {
         assertThat(playbackDevice.getActiveSource().logicalAddress).isEqualTo(
                 playbackDevice.mAddress);
         assertThat(playbackDevice.getActiveSource().physicalAddress).isEqualTo(mPhysicalAddress);
-        assertThat(playbackDevice.mIsActiveSource).isTrue();
+        assertThat(playbackDevice.isActiveSource()).isTrue();
     }
 
     @Test

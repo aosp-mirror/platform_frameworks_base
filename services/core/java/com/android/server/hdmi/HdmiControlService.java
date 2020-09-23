@@ -1596,7 +1596,7 @@ public class HdmiControlService extends SystemService {
                 if (isPlaybackDevice()) {
                     // if playback device itself is the active source,
                     // return its own device info.
-                    if (playback() != null && playback().mIsActiveSource) {
+                    if (playback() != null && playback().isActiveSource()) {
                         return playback().getDeviceInfo();
                     }
                     // Otherwise get the active source and look for it from the device list
@@ -3234,20 +3234,12 @@ public class HdmiControlService extends SystemService {
             mActiveSource.physicalAddress = physicalAddress;
         }
         // If the current device is a source device, check if the current Active Source matches
-        // the local device info. Set mIsActiveSource of the local device accordingly.
+        // the local device info.
         for (HdmiCecLocalDevice device : getAllLocalDevices()) {
-            // mIsActiveSource only exists in source device, ignore this setting if the current
-            // device is not an HdmiCecLocalDeviceSource.
-            if (!(device instanceof HdmiCecLocalDeviceSource)) {
-                device.addActiveSourceHistoryItem(new ActiveSource(logicalAddress, physicalAddress),
-                        false, caller);
-                continue;
-            }
             boolean deviceIsActiveSource =
                     logicalAddress == device.getDeviceInfo().getLogicalAddress()
                             && physicalAddress == getPhysicalAddress();
 
-            ((HdmiCecLocalDeviceSource) device).setIsActiveSource(deviceIsActiveSource);
             device.addActiveSourceHistoryItem(new ActiveSource(logicalAddress, physicalAddress),
                     deviceIsActiveSource, caller);
         }
@@ -3263,17 +3255,18 @@ public class HdmiControlService extends SystemService {
         // playback will claim active source. Otherwise audio system will.
         if (deviceType == HdmiDeviceInfo.DEVICE_PLAYBACK) {
             HdmiCecLocalDevicePlayback playback = playback();
-            playback.setIsActiveSource(true);
+            playback.setActiveSource(playback.getDeviceInfo().getLogicalAddress(), physicalAddress,
+                    "HdmiControlService#setAndBroadcastActiveSource");
             playback.wakeUpIfActiveSource();
             playback.maySendActiveSource(source);
         }
 
         if (deviceType == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
             HdmiCecLocalDeviceAudioSystem audioSystem = audioSystem();
-            if (playback() != null) {
-                audioSystem.setIsActiveSource(false);
-            } else {
-                audioSystem.setIsActiveSource(true);
+            if (playback() == null) {
+                audioSystem.setActiveSource(audioSystem.getDeviceInfo().getLogicalAddress(),
+                        physicalAddress,
+                        "HdmiControlService#setAndBroadcastActiveSource");
                 audioSystem.wakeUpIfActiveSource();
                 audioSystem.maySendActiveSource(source);
             }
@@ -3292,18 +3285,16 @@ public class HdmiControlService extends SystemService {
         HdmiCecLocalDevicePlayback playback = playback();
         HdmiCecLocalDeviceAudioSystem audioSystem = audioSystem();
         if (playback != null) {
-            playback.setIsActiveSource(true);
+            playback.setActiveSource(playback.getDeviceInfo().getLogicalAddress(), physicalAddress,
+                    "HdmiControlService#setAndBroadcastActiveSource");
             playback.wakeUpIfActiveSource();
             playback.maySendActiveSource(sourceAddress);
-            if (audioSystem != null) {
-                audioSystem.setIsActiveSource(false);
-            }
-        } else {
-            if (audioSystem != null) {
-                audioSystem.setIsActiveSource(true);
-                audioSystem.wakeUpIfActiveSource();
-                audioSystem.maySendActiveSource(sourceAddress);
-            }
+        } else if (audioSystem != null) {
+            audioSystem.setActiveSource(audioSystem.getDeviceInfo().getLogicalAddress(),
+                    physicalAddress,
+                    "HdmiControlService#setAndBroadcastActiveSource");
+            audioSystem.wakeUpIfActiveSource();
+            audioSystem.maySendActiveSource(sourceAddress);
         }
     }
 

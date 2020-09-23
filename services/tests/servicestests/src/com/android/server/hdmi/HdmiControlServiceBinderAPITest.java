@@ -15,27 +15,27 @@
  */
 package com.android.server.hdmi;
 
-import static android.os.SystemClock.sleep;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
+
 import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.Looper;
-import android.os.SystemProperties;
 import android.os.test.TestLooper;
-import android.util.Slog;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
-import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.util.ArrayList;
 
 /**
  * Tests for {@link HdmiControlServiceBinderAPITest} class.
@@ -138,11 +138,6 @@ public class HdmiControlServiceBinderAPITest {
 
         mPlaybackDevice = new HdmiCecLocalDevicePlayback(mHdmiControlService) {
             @Override
-            void setIsActiveSource(boolean on) {
-                mIsActiveSource = on;
-            }
-
-            @Override
             protected void wakeUpIfActiveSource() {}
 
             @Override
@@ -186,13 +181,13 @@ public class HdmiControlServiceBinderAPITest {
             }
         });
         assertEquals(mResult, -1);
-        assertThat(mPlaybackDevice.mIsActiveSource).isFalse();
+        assertThat(mPlaybackDevice.isActiveSource()).isFalse();
 
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
         assertThat(mHdmiControlService.isAddressAllocated()).isTrue();
         assertEquals(mResult, HdmiControlManager.RESULT_SUCCESS);
-        assertThat(mPlaybackDevice.mIsActiveSource).isTrue();
+        assertThat(mPlaybackDevice.isActiveSource()).isTrue();
     }
 
     @Test
@@ -207,6 +202,6 @@ public class HdmiControlServiceBinderAPITest {
             }
         });
         assertEquals(mResult, HdmiControlManager.RESULT_SUCCESS);
-        assertThat(mPlaybackDevice.mIsActiveSource).isTrue();
+        assertThat(mPlaybackDevice.isActiveSource()).isTrue();
     }
 }

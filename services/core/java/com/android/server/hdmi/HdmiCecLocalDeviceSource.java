@@ -16,6 +16,7 @@
 
 package com.android.server.hdmi;
 
+import android.annotation.CallSuper;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
@@ -35,10 +36,6 @@ import java.util.List;
 abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
 
     private static final String TAG = "HdmiCecLocalDeviceSource";
-
-    // Indicate if current device is Active Source or not
-    @VisibleForTesting
-    protected boolean mIsActiveSource = false;
 
     // Device has cec switch functionality or not.
     // Default is false.
@@ -78,7 +75,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         if (mService.getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT) {
             mCecMessageCache.flushAll();
         }
-        // We'll not clear mIsActiveSource on the hotplug event to pass CETC 11.2.2-2 ~ 3.
+        // We'll not invalidate the active source on the hotplug event to pass CETC 11.2.2-2 ~ 3.
         if (connected) {
             mService.wakeUp();
         }
@@ -118,10 +115,21 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         // Nothing to do.
     }
 
+    @Override
+    @CallSuper
+    @ServiceThreadOnly
+    void setActiveSource(int logicalAddress, int physicalAddress, String caller) {
+        boolean wasActiveSource = isActiveSource();
+        super.setActiveSource(logicalAddress, physicalAddress, caller);
+        if (wasActiveSource && !isActiveSource()) {
+            onActiveSourceLost();
+        }
+    }
+
     @ServiceThreadOnly
     protected void setActiveSource(int physicalAddress, String caller) {
         assertRunOnServiceThread();
-        // Invalidate the internal active source record. This will also update mIsActiveSource.
+        // Invalidate the internal active source record.
         ActiveSource activeSource = ActiveSource.of(Constants.ADDR_INVALID, physicalAddress);
         setActiveSource(activeSource, caller);
     }
@@ -135,7 +143,6 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         if (!getActiveSource().equals(activeSource)) {
             setActiveSource(activeSource, "HdmiCecLocalDeviceSource#handleActiveSource()");
         }
-        setIsActiveSource(physicalAddress == mService.getPhysicalAddress());
         updateDevicePowerStatus(logicalAddress, HdmiControlManager.POWER_STATUS_ON);
         if (isRoutingControlFeatureEnabled()) {
             switchInputOnReceivingNewActivePath(physicalAddress);
@@ -241,18 +248,15 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
                 physicalAddress, getDeviceInfo().getDeviceType(), message.getSource());
     }
 
+    // Indicates if current device is the active source or not
     @ServiceThreadOnly
-    void setIsActiveSource(boolean on) {
-        assertRunOnServiceThread();
-        boolean wasActiveSource = mIsActiveSource;
-        mIsActiveSource = on;
-        if (wasActiveSource && !mIsActiveSource) {
-            onActiveSourceLost();
-        }
+    protected boolean isActiveSource() {
+        return getActiveSource().equals(getDeviceInfo().getLogicalAddress(),
+                getDeviceInfo().getPhysicalAddress());
     }
 
     protected void wakeUpIfActiveSource() {
-        if (!mIsActiveSource) {
+        if (!isActiveSource()) {
             return;
         }
         // Wake up the device
@@ -261,7 +265,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     }
 
     protected void maySendActiveSource(int dest) {
-        if (!mIsActiveSource) {
+        if (!isActiveSource()) {
             return;
         }
         addAndStartAction(new ActiveSourceAction(this, dest));
