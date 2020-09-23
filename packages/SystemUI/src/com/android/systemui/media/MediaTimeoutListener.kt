@@ -126,6 +126,7 @@ class MediaTimeoutListener @Inject constructor(
 
         fun destroy() {
             mediaController?.unregisterCallback(this)
+            cancellation?.run()
         }
 
         override fun onPlaybackStateChanged(state: PlaybackState?) {
