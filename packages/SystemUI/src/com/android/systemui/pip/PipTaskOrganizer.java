@@ -303,15 +303,20 @@ public class PipTaskOrganizer extends TaskOrganizer implements
      * @param animationDurationMs duration in millisecond for the exiting PiP transition
      */
     public void exitPip(int animationDurationMs) {
-        if (!mState.isInPip() || mState == State.EXITING_PIP || mToken == null) {
+        if (!mState.isInPip() || mToken == null) {
             Log.wtf(TAG, "Not allowed to exitPip in current state"
                     + " mState=" + mState + " mToken=" + mToken);
             return;
         }
 
+        final PipWindowConfigurationCompact config = mCompactState.remove(mToken.asBinder());
+        if (config == null) {
+            Log.wtf(TAG, "Token not in record, this should not happen mToken=" + mToken);
+            return;
+        }
+
         mPipUiEventLoggerLogger.log(
                 PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_EXPAND_TO_FULLSCREEN);
-        final PipWindowConfigurationCompact config = mCompactState.remove(mToken.asBinder());
         config.syncWithScreenOrientation(mRequestedOrientation,
                 mPipBoundsHandler.getDisplayRotation());
         final boolean orientationDiffers = config.getRotation()
