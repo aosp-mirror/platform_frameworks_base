@@ -29,6 +29,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -68,6 +69,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
      * --ei brightness_bucket 1}
      */
     private int mDebugBrightnessBucket = -1;
+    private DozeMachine.State mState;
 
     @VisibleForTesting
     public DozeScreenBrightness(Context context, DozeMachine.Service service,
@@ -107,17 +109,10 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
 
     @Override
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
+        mState = newState;
         switch (newState) {
             case INITIALIZED:
-                resetBrightnessToDefault();
-                break;
-            case DOZE_AOD:
-            case DOZE_REQUEST_PULSE:
-            case DOZE_AOD_DOCKED:
-                setLightSensorEnabled(true);
-                break;
             case DOZE:
-                setLightSensorEnabled(false);
                 resetBrightnessToDefault();
                 break;
             case FINISH:
@@ -127,6 +122,16 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
         if (newState != DozeMachine.State.FINISH) {
             setScreenOff(newState == DozeMachine.State.DOZE);
             setPaused(newState == DozeMachine.State.DOZE_AOD_PAUSED);
+        }
+    }
+
+    @Override
+    public void onScreenState(int state) {
+        if (mState == DozeMachine.State.FINISH && !mScreenOff
+                && (state == Display.STATE_DOZE || state == Display.STATE_DOZE_SUSPEND)) {
+            setLightSensorEnabled(true);
+        } else {
+            setLightSensorEnabled(false);
         }
     }
 
