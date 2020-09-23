@@ -43,3 +43,55 @@ genrule {
     cmd: "$(location metalava) --no-banner -convert2xmlnostrip $(in) $(out)",
     visibility: ["//visibility:public"],
 }
+
+genrule {
+    name: "frameworks-base-api-current-merged.txt",
+    srcs: [
+        ":conscrypt.module.public.api{.public.api.txt}",
+        ":framework-media{.public.api.txt}",
+        ":framework-mediaprovider{.public.api.txt}",
+        ":framework-permission{.public.api.txt}",
+        ":framework-sdkextensions{.public.api.txt}",
+        ":framework-statsd{.public.api.txt}",
+        ":framework-tethering{.public.api.txt}",
+        ":framework-wifi{.public.api.txt}",
+        ":non-updatable-current.txt",
+    ],
+    out: ["current.txt"],
+    tools: ["metalava"],
+    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+}
+
+genrule {
+    name: "frameworks-base-api-system-current-merged.txt",
+    srcs: [
+        ":framework-media{.system.api.txt}",
+        ":framework-mediaprovider{.system.api.txt}",
+        ":framework-permission{.system.api.txt}",
+        ":framework-sdkextensions{.system.api.txt}",
+        ":framework-statsd{.system.api.txt}",
+        ":framework-tethering{.system.api.txt}",
+        ":framework-wifi{.system.api.txt}",
+        ":non-updatable-system-current.txt",
+    ],
+    out: ["system-current.txt"],
+    tools: ["metalava"],
+    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+}
+
+genrule {
+    name: "frameworks-base-api-module-lib-current-merged.txt",
+    srcs: [
+        ":framework-media{.module-lib.api.txt}",
+        ":framework-mediaprovider{.module-lib.api.txt}",
+        ":framework-permission{.module-lib.api.txt}",
+        ":framework-sdkextensions{.module-lib.api.txt}",
+        ":framework-statsd{.module-lib.api.txt}",
+        ":framework-tethering{.module-lib.api.txt}",
+        ":framework-wifi{.module-lib.api.txt}",
+        ":non-updatable-module-lib-current.txt",
+    ],
+    out: ["module-lib-current.txt"],
+    tools: ["metalava"],
+    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+}
