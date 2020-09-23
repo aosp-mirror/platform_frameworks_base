@@ -305,15 +305,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             if (mQsPanel.getSecurityFooter() != null) {
                 builder.addFloat(mQsPanel.getSecurityFooter().getView(), "alpha", 0, 1);
             }
-            if (mQsPanel.getDivider() != null) {
-                builder.addFloat(mQsPanel.getDivider(), "alpha", 0, 1);
-            }
             mAllPagesDelayedAnimator = builder.build();
             if (mQsPanel.getSecurityFooter() != null) {
                 mAllViews.add(mQsPanel.getSecurityFooter().getView());
-            }
-            if (mQsPanel.getDivider() != null) {
-                mAllViews.add(mQsPanel.getDivider());
             }
 
             float px = 0;
