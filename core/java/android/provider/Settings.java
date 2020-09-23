@@ -7663,6 +7663,8 @@ public final class Settings {
          * @hide
          */
         @UnsupportedAppUsage
+        @TestApi
+        @SuppressLint("NoSettingsProvider")
         public static final String SELECTED_SPELL_CHECKER = "selected_spell_checker";
 
         /**
@@ -7673,6 +7675,8 @@ public final class Settings {
          * @hide
          */
         @UnsupportedAppUsage
+        @TestApi
+        @SuppressLint("NoSettingsProvider")
         public static final String SELECTED_SPELL_CHECKER_SUBTYPE =
                 "selected_spell_checker_subtype";
 

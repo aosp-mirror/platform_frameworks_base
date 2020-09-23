@@ -18,6 +18,7 @@ package android.view.textservice;
 
 import android.annotation.NonNull;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -259,6 +260,7 @@ public final class TextServicesManager {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public boolean isSpellCheckerEnabled() {
         try {
             return mService.isSpellCheckerEnabled(mUserId);
