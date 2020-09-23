@@ -16,19 +16,23 @@
 
 package android.view.autofill;
 
+import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
+
 import static org.junit.Assert.assertTrue;
 
 import android.os.Looper;
 import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.PerfTestActivity;
-import android.perftests.utils.SettingsHelper;
 import android.perftests.utils.SettingsStateKeeperRule;
 import android.provider.Settings;
+import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.rules.RuleChain;
@@ -37,6 +41,8 @@ import org.junit.rules.RuleChain;
  * Base class for all autofill tests.
  */
 public abstract class AbstractAutofillPerfTestCase {
+
+    private static final String TAG = "AbstractAutofillPerfTestCase";
 
     @ClassRule
     public static final SettingsStateKeeperRule mServiceSettingsKeeper =
@@ -60,6 +66,27 @@ public abstract class AbstractAutofillPerfTestCase {
         mLayoutId = layoutId;
     }
 
+    @BeforeClass
+    public static void disableDefaultAugmentedService() {
+        Log.v(TAG, "@BeforeClass: disableDefaultAugmentedService()");
+        setDefaultAugmentedAutofillServiceEnabled(false);
+    }
+
+    @AfterClass
+    public static void enableDefaultAugmentedService() {
+        Log.v(TAG, "@AfterClass: enableDefaultAugmentedService()");
+        setDefaultAugmentedAutofillServiceEnabled(true);
+    }
+
+    /**
+     * Enables / disables the default augmented autofill service.
+     */
+    private static void setDefaultAugmentedAutofillServiceEnabled(boolean enabled) {
+        Log.d(TAG, "setDefaultAugmentedAutofillServiceEnabled(): " + enabled);
+        runShellCommand("cmd autofill set default-augmented-service-enabled 0 %s",
+                Boolean.toString(enabled));
+    }
+
     /**
      * Prepares the activity so that by the time the test is run it has reference to its fields.
      */
@@ -80,23 +107,4 @@ public abstract class AbstractAutofillPerfTestCase {
      * Initializes the {@link PerfTestActivity} after it was launched.
      */
     protected abstract void onCreate(PerfTestActivity activity);
-
-    /**
-     * Uses the {@code settings} binary to set the autofill service.
-     */
-    protected void setService() {
-        SettingsHelper.syncSet(InstrumentationRegistry.getTargetContext(),
-                SettingsHelper.NAMESPACE_SECURE,
-                Settings.Secure.AUTOFILL_SERVICE,
-                MyAutofillService.COMPONENT_NAME);
-    }
-
-    /**
-     * Uses the {@code settings} binary to reset the autofill service.
-     */
-    protected void resetService() {
-        SettingsHelper.syncDelete(InstrumentationRegistry.getTargetContext(),
-                SettingsHelper.NAMESPACE_SECURE,
-                Settings.Secure.AUTOFILL_SERVICE);
-    }
 }

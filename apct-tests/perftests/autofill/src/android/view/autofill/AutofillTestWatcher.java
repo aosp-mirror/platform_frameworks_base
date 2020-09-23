@@ -18,10 +18,13 @@ package android.view.autofill;
 
 import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
 
+import android.perftests.utils.SettingsHelper;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -44,19 +47,26 @@ final class AutofillTestWatcher extends TestWatcher {
     @Override
     protected void starting(Description description) {
         super.starting(description);
+        final String testName = description.getDisplayName();
+        Log.i(TAG, "Starting " + testName);
 
         enableVerboseLog();
-        MyAutofillService.resetStaticState();
-        MyAutofillService.setEnabled(true);
+        // Prepare the service before each test.
+        // Disable the current AutofillService.
+        resetAutofillService();
+        // Set MyAutofillService status enable, it can start to accept the calls.
+        enableMyAutofillService();
         setServiceWatcher();
     }
 
     @Override
     protected void finished(Description description) {
         super.finished(description);
-
+        final String testName = description.getDisplayName();
+        Log.i(TAG, "Finished " + testName);
         restoreLogLevel();
-        disableService();
+        // Set MyAutofillService status disable, so the calls are ignored.
+        disableMyAutofillService();
         clearServiceWatcher();
     }
 
@@ -67,12 +77,31 @@ final class AutofillTestWatcher extends TestWatcher {
         }
     }
 
-    private void enableService() {
+    /**
+     * Uses the {@code settings} binary to set the autofill service.
+     */
+    void setAutofillService() {
+        SettingsHelper.syncSet(InstrumentationRegistry.getTargetContext(),
+                SettingsHelper.NAMESPACE_SECURE,
+                Settings.Secure.AUTOFILL_SERVICE,
+                MyAutofillService.COMPONENT_NAME);
+    }
+
+    /**
+     * Uses the {@code settings} binary to reset the autofill service.
+     */
+    void resetAutofillService() {
+        SettingsHelper.syncDelete(InstrumentationRegistry.getTargetContext(),
+                SettingsHelper.NAMESPACE_SECURE,
+                Settings.Secure.AUTOFILL_SERVICE);
+    }
+
+    private void enableMyAutofillService() {
         MyAutofillService.resetStaticState();
         MyAutofillService.setEnabled(true);
     }
 
-    private void disableService() {
+    private void disableMyAutofillService() {
         // Must disable service so calls are ignored in case of errors during the test case;
         // otherwise, other tests will fail because these calls are made in the UI thread (as both
         // the service, the tests, and the app run in the same process).
@@ -88,7 +117,7 @@ final class AutofillTestWatcher extends TestWatcher {
     }
 
     private void restoreLogLevel() {
-        Log.w(TAG, "restoreLogLevel to " + mOriginalLogLevel);
+        Log.d(TAG, "restoreLogLevel to " + mOriginalLogLevel);
         if (!mOriginalLogLevel.equals("verbose")) {
             runShellCommand("cmd autofill set log_level %s", mOriginalLogLevel);
         }
