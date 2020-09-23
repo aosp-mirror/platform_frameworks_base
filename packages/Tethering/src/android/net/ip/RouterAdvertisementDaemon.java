@@ -18,6 +18,7 @@ package android.net.ip;
 
 import static android.net.util.NetworkConstants.IPV6_MIN_MTU;
 import static android.net.util.NetworkConstants.RFC7421_PREFIX_LENGTH;
+import static android.net.util.TetheringUtils.getAllNodesForScopeId;
 import static android.system.OsConstants.AF_INET6;
 import static android.system.OsConstants.IPPROTO_ICMPV6;
 import static android.system.OsConstants.SOCK_RAW;
@@ -44,7 +45,6 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -91,10 +91,6 @@ public class RouterAdvertisementDaemon {
     private static final int  MAX_URGENT_RTR_ADVERTISEMENTS = 5;
 
     private static final int DAY_IN_SECONDS = 86_400;
-
-    private static final byte[] ALL_NODES = new byte[] {
-            (byte) 0xff, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
-    };
 
     private final InterfaceParams mInterface;
     private final InetSocketAddress mAllNodes;
@@ -240,7 +236,6 @@ public class RouterAdvertisementDaemon {
         }
     }
 
-
     public RouterAdvertisementDaemon(InterfaceParams ifParams) {
         mInterface = ifParams;
         mAllNodes = new InetSocketAddress(getAllNodesForScopeId(mInterface.index), 0);
@@ -360,15 +355,6 @@ public class RouterAdvertisementDaemon {
         final MulticastTransmitter m = mMulticastTransmitter;
         if (m != null) {
             m.hup();
-        }
-    }
-
-    private static Inet6Address getAllNodesForScopeId(int scopeId) {
-        try {
-            return Inet6Address.getByAddress("ff02::1", ALL_NODES, scopeId);
-        } catch (UnknownHostException uhe) {
-            Log.wtf(TAG, "Failed to construct ff02::1 InetAddress: " + uhe);
-            return null;
         }
     }
 
