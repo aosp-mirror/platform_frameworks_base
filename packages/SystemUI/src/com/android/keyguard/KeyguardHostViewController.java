@@ -336,7 +336,7 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     }
 
     public SecurityMode getCurrentSecurityMode() {
-        return mKeyguardSecurityContainerController.getCurrentSecuritySelection();
+        return mKeyguardSecurityContainerController.getCurrentSecurityMode();
     }
 
     public int getTop() {
@@ -350,7 +350,7 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     }
 
     public boolean handleBackKey() {
-        if (mKeyguardSecurityContainerController.getCurrentSecuritySelection()
+        if (mKeyguardSecurityContainerController.getCurrentSecurityMode()
                 != SecurityMode.None) {
             mKeyguardSecurityContainerController.dismiss(
                     false, KeyguardUpdateMonitor.getCurrentUser());

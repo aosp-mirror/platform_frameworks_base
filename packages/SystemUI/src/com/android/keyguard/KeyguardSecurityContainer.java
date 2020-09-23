@@ -146,10 +146,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 }
             };
 
-    KeyguardSecurityViewFlipper getSecurityViewFlipper() {
-        return mSecurityViewFlipper;
-    }
-
     // Used to notify the container when something interesting happens.
     public interface SecurityCallback {
         boolean dismiss(boolean authenticated, int targetUserId, boolean bypassSecondaryLockScreen);
@@ -499,10 +495,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 break;
         }
         showDialog(null, message);
-    }
-
-    public boolean needsInput() {
-        return mSecurityViewFlipper.needsInput();
     }
 
     public void reset() {
