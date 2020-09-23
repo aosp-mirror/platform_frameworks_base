@@ -37,10 +37,11 @@ import java.util.Objects;
  */
 class SimulatedLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
 
-    @GuardedBy("mProxyLock")
+    @GuardedBy("mSharedLock")
     @NonNull private LocationTimeZoneProviderRequest mRequest;
 
-    @NonNull private ReferenceWithHistory<String> mLastEvent = new ReferenceWithHistory<>(50);
+    @GuardedBy("mSharedLock")
+    @NonNull private final ReferenceWithHistory<String> mLastEvent = new ReferenceWithHistory<>(50);
 
     SimulatedLocationTimeZoneProviderProxy(
             @NonNull Context context, @NonNull ThreadingDomain threadingDomain) {
@@ -49,29 +50,36 @@ class SimulatedLocationTimeZoneProviderProxy extends LocationTimeZoneProviderPro
     }
 
     void simulate(@NonNull SimulatedBinderProviderEvent event) {
-        switch (event.getEventType()) {
-            case INJECTED_EVENT_TYPE_ON_BIND: {
-                mLastEvent.set("Simulating onProviderBound(), event=" + event);
-                mThreadingDomain.post(this::onBindOnHandlerThread);
-                break;
-            }
-            case INJECTED_EVENT_TYPE_ON_UNBIND: {
-                mLastEvent.set("Simulating onProviderUnbound(), event=" + event);
-                mThreadingDomain.post(this::onUnbindOnHandlerThread);
-                break;
-            }
-            case INJECTED_EVENT_TYPE_LOCATION_TIME_ZONE_EVENT: {
-                if (!mRequest.getReportLocationTimeZone()) {
-                    mLastEvent.set("Test event=" + event + " is testing an invalid case:"
-                            + " reporting is off. mRequest=" + mRequest);
+        mThreadingDomain.assertCurrentThread();
+
+        Objects.requireNonNull(event);
+
+        synchronized (mSharedLock) {
+            switch (event.getEventType()) {
+                case INJECTED_EVENT_TYPE_ON_BIND: {
+                    mLastEvent.set("Simulating onProviderBound(), event=" + event);
+                    mThreadingDomain.post(this::onBindOnHandlerThread);
+                    break;
                 }
-                mLastEvent.set("Simulating LocationTimeZoneEvent, event=" + event);
-                handleLocationTimeZoneEvent(event.getLocationTimeZoneEvent());
-                break;
-            }
-            default: {
-                mLastEvent.set("Unknown simulated event type. event=" + event);
-                throw new IllegalArgumentException("Unknown simulated event type. event=" + event);
+                case INJECTED_EVENT_TYPE_ON_UNBIND: {
+                    mLastEvent.set("Simulating onProviderUnbound(), event=" + event);
+                    mThreadingDomain.post(this::onUnbindOnHandlerThread);
+                    break;
+                }
+                case INJECTED_EVENT_TYPE_LOCATION_TIME_ZONE_EVENT: {
+                    if (!mRequest.getReportLocationTimeZone()) {
+                        mLastEvent.set("Test event=" + event + " is testing an invalid case:"
+                                + " reporting is off. mRequest=" + mRequest);
+                    }
+                    mLastEvent.set("Simulating LocationTimeZoneEvent, event=" + event);
+                    handleLocationTimeZoneEvent(event.getLocationTimeZoneEvent());
+                    break;
+                }
+                default: {
+                    mLastEvent.set("Unknown simulated event type. event=" + event);
+                    throw new IllegalArgumentException(
+                            "Unknown simulated event type. event=" + event);
+                }
             }
         }
     }

@@ -211,6 +211,8 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
      * {@link SimulatedLocationTimeZoneProviderProxy}. If not, the event is logged but discarded.
      */
     void simulateBinderProviderEvent(SimulatedBinderProviderEvent event) {
+        mThreadingDomain.assertCurrentThread();
+
         if (!(mProxy instanceof SimulatedLocationTimeZoneProviderProxy)) {
             Slog.w(TAG, mProxy + " is not a " + SimulatedLocationTimeZoneProviderProxy.class
                     + ", event=" + event);
