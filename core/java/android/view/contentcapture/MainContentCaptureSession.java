@@ -643,54 +643,58 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     // change should also get get rid of the "internalNotifyXXXX" methods above
     void notifyChildSessionStarted(int parentSessionId, int childSessionId,
             @NonNull ContentCaptureContext clientContext) {
-        sendEvent(new ContentCaptureEvent(childSessionId, TYPE_SESSION_STARTED)
+        mHandler.post(() -> sendEvent(new ContentCaptureEvent(childSessionId, TYPE_SESSION_STARTED)
                 .setParentSessionId(parentSessionId).setClientContext(clientContext),
-                FORCE_FLUSH);
+                FORCE_FLUSH));
     }
 
     void notifyChildSessionFinished(int parentSessionId, int childSessionId) {
-        sendEvent(new ContentCaptureEvent(childSessionId, TYPE_SESSION_FINISHED)
-                .setParentSessionId(parentSessionId), FORCE_FLUSH);
+        mHandler.post(() -> sendEvent(new ContentCaptureEvent(childSessionId, TYPE_SESSION_FINISHED)
+                .setParentSessionId(parentSessionId), FORCE_FLUSH));
     }
 
     void notifyViewAppeared(int sessionId, @NonNull ViewStructureImpl node) {
-        sendEvent(new ContentCaptureEvent(sessionId, TYPE_VIEW_APPEARED)
-                .setViewNode(node.mNode));
+        mHandler.post(() -> sendEvent(new ContentCaptureEvent(sessionId, TYPE_VIEW_APPEARED)
+                .setViewNode(node.mNode)));
     }
 
     /** Public because is also used by ViewRootImpl */
     public void notifyViewDisappeared(int sessionId, @NonNull AutofillId id) {
-        sendEvent(new ContentCaptureEvent(sessionId, TYPE_VIEW_DISAPPEARED).setAutofillId(id));
+        mHandler.post(() -> sendEvent(
+                new ContentCaptureEvent(sessionId, TYPE_VIEW_DISAPPEARED).setAutofillId(id)));
     }
 
     void notifyViewTextChanged(int sessionId, @NonNull AutofillId id, @Nullable CharSequence text) {
-        sendEvent(new ContentCaptureEvent(sessionId, TYPE_VIEW_TEXT_CHANGED).setAutofillId(id)
-                .setText(text));
+        mHandler.post(() -> sendEvent(
+                new ContentCaptureEvent(sessionId, TYPE_VIEW_TEXT_CHANGED)
+                        .setAutofillId(id).setText(text)));
     }
 
     /** Public because is also used by ViewRootImpl */
     public void notifyViewInsetsChanged(int sessionId, @NonNull Insets viewInsets) {
-        sendEvent(new ContentCaptureEvent(sessionId, TYPE_VIEW_INSETS_CHANGED)
-                .setInsets(viewInsets));
+        mHandler.post(() -> sendEvent(new ContentCaptureEvent(sessionId, TYPE_VIEW_INSETS_CHANGED)
+                .setInsets(viewInsets)));
     }
 
     /** Public because is also used by ViewRootImpl */
     public void notifyViewTreeEvent(int sessionId, boolean started) {
         final int type = started ? TYPE_VIEW_TREE_APPEARING : TYPE_VIEW_TREE_APPEARED;
-        sendEvent(new ContentCaptureEvent(sessionId, type), FORCE_FLUSH);
+        mHandler.post(() -> sendEvent(new ContentCaptureEvent(sessionId, type), FORCE_FLUSH));
     }
 
     void notifySessionResumed(int sessionId) {
-        sendEvent(new ContentCaptureEvent(sessionId, TYPE_SESSION_RESUMED), FORCE_FLUSH);
+        mHandler.post(() -> sendEvent(
+                new ContentCaptureEvent(sessionId, TYPE_SESSION_RESUMED), FORCE_FLUSH));
     }
 
     void notifySessionPaused(int sessionId) {
-        sendEvent(new ContentCaptureEvent(sessionId, TYPE_SESSION_PAUSED), FORCE_FLUSH);
+        mHandler.post(() -> sendEvent(
+                new ContentCaptureEvent(sessionId, TYPE_SESSION_PAUSED), FORCE_FLUSH));
     }
 
     void notifyContextUpdated(int sessionId, @Nullable ContentCaptureContext context) {
-        sendEvent(new ContentCaptureEvent(sessionId, TYPE_CONTEXT_UPDATED)
-                .setClientContext(context));
+        mHandler.post(() -> sendEvent(new ContentCaptureEvent(sessionId, TYPE_CONTEXT_UPDATED)
+                .setClientContext(context)));
     }
 
     @Override
