@@ -1891,6 +1891,7 @@
       <item quantity="other">%d godz.</item>
       <item quantity="one">1 godz.</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (następny alarm)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Dopóki nie wyłączysz"</string>

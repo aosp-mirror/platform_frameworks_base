@@ -1829,6 +1829,7 @@
       <item quantity="other">%d saat</item>
       <item quantity="one">1 saat</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Şu saate kadar: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Şu saate kadar: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (sonraki alarma) saatine kadar"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Siz kapatana kadar"</string>

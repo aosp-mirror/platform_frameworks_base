@@ -1224,7 +1224,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"S\'ha establert el so de silenci"</string>
     <string name="volume_call" msgid="7625321655265747433">"Volum en trucada"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Volum en trucada per Bluetooth"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Volum de l\'alarma"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Volum d\'alarma"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Volum de notificacions"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Volum"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Volum del Bluetooth"</string>
@@ -1829,6 +1829,7 @@
       <item quantity="other">Durant %d h</item>
       <item quantity="one">Durant 1 h</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Finalitza: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (propera alarma)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Fins que no el desactivis"</string>

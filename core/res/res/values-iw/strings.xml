@@ -1891,6 +1891,7 @@
       <item quantity="other">‏למשך %d שעות</item>
       <item quantity="one">למשך שעה אחת</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"עד <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"עד <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"עד <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ההתראה הבאה)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"עד הכיבוי"</string>

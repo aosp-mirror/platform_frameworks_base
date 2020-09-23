@@ -1829,6 +1829,8 @@
       <item quantity="other">Für %d h</item>
       <item quantity="one">Für 1 h</item>
     </plurals>
+    <!-- no translation found for zen_mode_until_next_day (1403042784161725038) -->
+    <skip />
     <string name="zen_mode_until" msgid="2250286190237669079">"Bis <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Bis <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (nächste Weckzeit)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Bis zur Deaktivierung"</string>

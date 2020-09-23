@@ -1829,6 +1829,8 @@
       <item quantity="other">%d तासासाठी</item>
       <item quantity="one">1 तासासाठी</item>
     </plurals>
+    <!-- no translation found for zen_mode_until_next_day (1403042784161725038) -->
+    <skip />
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> पर्यंत"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> पर्यंत (पुढील अलार्म)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"तुम्ही बंद करेपर्यंत"</string>

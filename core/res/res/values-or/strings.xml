@@ -1829,6 +1829,7 @@
       <item quantity="other">%d ଘଣ୍ଟା ପାଇଁ</item>
       <item quantity="one">1 ଘଣ୍ଟା ପାଇଁ</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ପରବର୍ତ୍ତୀ ଆଲାର୍ମ) ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"ବନ୍ଦ ନକରିବା ପର୍ଯ୍ୟନ୍ତ"</string>

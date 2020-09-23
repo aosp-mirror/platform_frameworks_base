@@ -1860,6 +1860,7 @@
       <item quantity="one">%d h</item>
       <item quantity="other">%d h</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Līdz: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Līdz <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Līdz plkst. <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (nākamais signāls)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Līdz brīdim, kad izslēgsiet"</string>

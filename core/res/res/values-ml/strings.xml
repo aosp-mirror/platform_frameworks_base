@@ -1829,6 +1829,7 @@
       <item quantity="other">%d മണിക്കൂറത്തേക്ക്</item>
       <item quantity="one">ഒരു മണിക്കൂറത്തേക്ക്</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> വരെ"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> വരെ"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> വരെ (അടുത്ത അലാറം)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"നിങ്ങൾ ഓഫാക്കുന്നത് വരെ"</string>
