@@ -62,6 +62,7 @@ import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.LocalServices;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.permission.PermissionSettings;
 
 import com.google.common.truth.Truth;
@@ -94,6 +95,8 @@ public class PackageManagerSettingsTests {
     PermissionSettings mPermissionSettings;
     @Mock
     RuntimePermissionsPersistence mRuntimePermissionsPersistence;
+    @Mock
+    LegacyPermissionDataProvider mPermissionDataProvider;
 
     @Before
     public void initializeMocks() {
@@ -115,7 +118,7 @@ public class PackageManagerSettingsTests {
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
         Settings settings = new Settings(context.getFilesDir(), mPermissionSettings,
-                mRuntimePermissionsPersistence, lock);
+                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
         assertThat(settings.readLPw(createFakeUsers()), is(true));
         verifyKeySetMetaData(settings);
     }
@@ -129,7 +132,7 @@ public class PackageManagerSettingsTests {
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
         Settings settings = new Settings(context.getFilesDir(), mPermissionSettings,
-                mRuntimePermissionsPersistence, lock);
+                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
         assertThat(settings.readLPw(createFakeUsers()), is(true));
 
         // write out, read back in and verify the same
@@ -145,7 +148,7 @@ public class PackageManagerSettingsTests {
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
         Settings settings = new Settings(context.getFilesDir(), mPermissionSettings,
-                mRuntimePermissionsPersistence, lock);
+                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
         assertThat(settings.readLPw(createFakeUsers()), is(true));
         assertThat(settings.getPackageLPr(PACKAGE_NAME_3), is(notNullValue()));
         assertThat(settings.getPackageLPr(PACKAGE_NAME_1), is(notNullValue()));
@@ -167,13 +170,13 @@ public class PackageManagerSettingsTests {
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
         Settings settings = new Settings(context.getFilesDir(), mPermissionSettings,
-                mRuntimePermissionsPersistence, lock);
+                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
         assertThat(settings.readLPw(createFakeUsers()), is(true));
         settings.writeLPr();
 
         // Create Settings again to make it read from the new files
         settings = new Settings(context.getFilesDir(), mPermissionSettings,
-                mRuntimePermissionsPersistence, lock);
+                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
         assertThat(settings.readLPw(createFakeUsers()), is(true));
 
         PackageSetting ps = settings.getPackageLPr(PACKAGE_NAME_2);
@@ -196,7 +199,8 @@ public class PackageManagerSettingsTests {
         writePackageRestrictions_noSuspendingPackageXml(0);
         final Object lock = new Object();
         final Context context = InstrumentationRegistry.getTargetContext();
-        final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, null, lock);
+        final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, null, null,
+                lock);
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, createPackageSetting(PACKAGE_NAME_1));
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, createPackageSetting(PACKAGE_NAME_2));
         settingsUnderTest.readPackageRestrictionsLPr(0);
@@ -219,7 +223,8 @@ public class PackageManagerSettingsTests {
         writePackageRestrictions_noSuspendParamsMapXml(0);
         final Object lock = new Object();
         final Context context = InstrumentationRegistry.getTargetContext();
-        final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, null, lock);
+        final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, null, null,
+                lock);
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, createPackageSetting(PACKAGE_NAME_1));
         settingsUnderTest.readPackageRestrictionsLPr(0);
 
@@ -246,7 +251,7 @@ public class PackageManagerSettingsTests {
     @Test
     public void testReadWritePackageRestrictions_suspendInfo() {
         final Context context = InstrumentationRegistry.getTargetContext();
-        final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, null,
+        final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, null, null,
                 new Object());
         final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
         final PackageSetting ps2 = createPackageSetting(PACKAGE_NAME_2);
@@ -344,7 +349,7 @@ public class PackageManagerSettingsTests {
     @Test
     public void testReadWritePackageRestrictions_distractionFlags() {
         final Context context = InstrumentationRegistry.getTargetContext();
-        final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, null,
+        final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, null, null,
                 new Object());
         final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
         final PackageSetting ps2 = createPackageSetting(PACKAGE_NAME_2);
@@ -389,7 +394,7 @@ public class PackageManagerSettingsTests {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Object lock = new Object();
         final Settings settingsUnderTest = new Settings(context.getFilesDir(), mPermissionSettings,
-                mRuntimePermissionsPersistence, lock);
+                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
         final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
         ps1.appId = Process.FIRST_APPLICATION_UID;
         ps1.pkg = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed())
@@ -465,7 +470,7 @@ public class PackageManagerSettingsTests {
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
         Settings settings = new Settings(context.getFilesDir(), mPermissionSettings,
-                mRuntimePermissionsPersistence, lock);
+                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
         assertThat(settings.readLPw(createFakeUsers()), is(true));
 
         // Enable/Disable a package
@@ -638,7 +643,7 @@ public class PackageManagerSettingsTests {
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
         final Settings testSettings01 = new Settings(context.getFilesDir(), mPermissionSettings,
-                mRuntimePermissionsPersistence, lock);
+                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
         final SharedUserSetting testUserSetting01 = createSharedUserSetting(
                 testSettings01, "TestUser", 10064, 0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/);
         final PackageSetting testPkgSetting01 =
@@ -748,7 +753,7 @@ public class PackageManagerSettingsTests {
         final Context context = InstrumentationRegistry.getContext();
         final Object lock = new Object();
         final Settings testSettings01 = new Settings(context.getFilesDir(), mPermissionSettings,
-                mRuntimePermissionsPersistence, lock);
+                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
         final SharedUserSetting testUserSetting01 = createSharedUserSetting(
                 testSettings01, "TestUser", 10064, 0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/);
         final PackageSetting testPkgSetting01 = Settings.createNewSetting(

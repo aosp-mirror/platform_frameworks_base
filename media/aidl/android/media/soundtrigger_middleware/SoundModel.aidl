@@ -16,6 +16,7 @@
 package android.media.soundtrigger_middleware;
 
 import android.media.soundtrigger_middleware.SoundModelType;
+import android.os.ParcelFileDescriptor;
 
 /**
  * Base sound model descriptor. This struct can be extended for various specific types by way of
@@ -32,7 +33,7 @@ parcelable SoundModel {
      * was build for */
     String vendorUuid;
     /** Opaque data transparent to Android framework */
-    FileDescriptor data;
+    ParcelFileDescriptor data;
     /** Size of the above data, in bytes. */
     int dataSize;
 }

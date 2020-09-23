@@ -513,13 +513,6 @@ interface IActivityManager {
     // descriptor.
     @UnsupportedAppUsage
     boolean stopBinderTrackingAndDump(in ParcelFileDescriptor fd);
-    /**
-     * Try to place task to provided position. The final position might be different depending on
-     * current user and stacks state. The task will be moved to target stack if it's currently in
-     * different stack.
-     */
-    @UnsupportedAppUsage
-    void positionTaskInStack(int taskId, int stackId, int position);
     @UnsupportedAppUsage
     void suppressResizeConfigChanges(boolean suppress);
     @UnsupportedAppUsage

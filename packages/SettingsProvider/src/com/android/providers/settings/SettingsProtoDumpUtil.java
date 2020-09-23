@@ -48,6 +48,8 @@ class SettingsProtoDumpUtil {
                 ConfigSettingsProto.ACTIVITY_MANAGER_SETTINGS);
         namespaceToFieldMap.put(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                 ConfigSettingsProto.ACTIVITY_MANAGER_NATIVE_BOOT_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_ALARM_MANAGER,
+                ConfigSettingsProto.ALARM_MANAGER_SETTINGS);
         namespaceToFieldMap.put(DeviceConfig.NAMESPACE_APP_COMPAT,
                 ConfigSettingsProto.APP_COMPAT_SETTINGS);
         namespaceToFieldMap.put(DeviceConfig.NAMESPACE_AUTOFILL,
@@ -182,9 +184,6 @@ class SettingsProtoDumpUtil {
                 GlobalSettingsProto.AirplaneMode.TOGGLEABLE_RADIOS);
         p.end(airplaneModeToken);
 
-        dumpSetting(s, p,
-                Settings.Global.ALARM_MANAGER_CONSTANTS,
-                GlobalSettingsProto.ALARM_MANAGER_CONSTANTS);
         dumpSetting(s, p,
                 Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED,
                 GlobalSettingsProto.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED);
@@ -2284,6 +2283,18 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.Notification.IN_CALL_NOTIFICATION_ENABLED);
         p.end(notificationToken);
 
+        final long oneHandedToken = p.start(SecureSettingsProto.ONEHANDED);
+        dumpSetting(s, p,
+                Settings.Secure.ONE_HANDED_MODE_ENABLED,
+                SecureSettingsProto.OneHanded.ONE_HANDED_MODE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ONE_HANDED_MODE_TIMEOUT,
+                SecureSettingsProto.OneHanded.ONE_HANDED_MODE_TIMEOUT);
+        dumpSetting(s, p,
+                Settings.Secure.TAPS_APP_TO_EXIT,
+                SecureSettingsProto.OneHanded.TAPS_APP_TO_EXIT);
+        p.end(oneHandedToken);
+
         final long parentalControlToken = p.start(SecureSettingsProto.PARENTAL_CONTROL);
         dumpSetting(s, p,
                 Settings.Secure.PARENTAL_CONTROL_ENABLED,
@@ -2452,6 +2463,9 @@ class SettingsProtoDumpUtil {
         p.end(soundsToken);
 
         dumpSetting(s, p,
+                Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED,
+                SecureSettingsProto.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED);
+        dumpSetting(s, p,
                 Settings.Secure.SYNC_PARENT_SOUNDS,
                 SecureSettingsProto.SYNC_PARENT_SOUNDS);
         dumpSetting(s, p,
@@ -2571,22 +2585,6 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ZEN_SETTINGS_SUGGESTION_VIEWED,
                 SecureSettingsProto.Zen.SETTINGS_SUGGESTION_VIEWED);
         p.end(zenToken);
-
-        dumpSetting(s, p,
-                Settings.Secure.ONE_HANDED_MODE_ENABLED,
-                SecureSettingsProto.OneHanded.ONE_HANDED_MODE_ENABLED);
-
-        dumpSetting(s, p,
-                Settings.Secure.ONE_HANDED_MODE_TIMEOUT,
-                SecureSettingsProto.OneHanded.ONE_HANDED_MODE_TIMEOUT);
-
-        dumpSetting(s, p,
-                Settings.Secure.TAPS_APP_TO_EXIT,
-                SecureSettingsProto.OneHanded.TAPS_APP_TO_EXIT);
-
-        dumpSetting(s, p,
-                Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED,
-                SecureSettingsProto.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED);
 
         // Please insert new settings using the same order as in SecureSettingsProto.
         p.end(token);

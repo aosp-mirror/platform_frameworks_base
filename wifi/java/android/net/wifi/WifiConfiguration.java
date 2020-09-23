@@ -1206,10 +1206,16 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
-     * The wall clock time of when |mRandomizedMacAddress| should be re-randomized in aggressive
-     * randomization mode.
+     * The wall clock time of when |mRandomizedMacAddress| should be re-randomized in enhanced
+     * MAC randomization mode.
      */
     public long randomizedMacExpirationTimeMs = 0;
+
+    /**
+     * The wall clock time of when |mRandomizedMacAddress| is last modified.
+     * @hide
+     */
+    public long randomizedMacLastModifiedTimeMs = 0;
 
     /**
      * @hide
@@ -2060,7 +2066,8 @@ public class WifiConfiguration implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "RECENT_FAILURE_", value = {
             RECENT_FAILURE_NONE,
-            RECENT_FAILURE_AP_UNABLE_TO_HANDLE_NEW_STA})
+            RECENT_FAILURE_AP_UNABLE_TO_HANDLE_NEW_STA,
+            RECENT_FAILURE_MBO_OCE_DISCONNECT})
     public @interface RecentFailureReason {}
 
     /**
@@ -2076,6 +2083,13 @@ public class WifiConfiguration implements Parcelable {
      */
     @SystemApi
     public static final int RECENT_FAILURE_AP_UNABLE_TO_HANDLE_NEW_STA = 17;
+
+    /**
+     * This network recently disconnected as a result of MBO/OCE.
+     * @hide
+     */
+    @SystemApi
+    public static final int RECENT_FAILURE_MBO_OCE_DISCONNECT = 1001;
 
     /**
      * Get the failure reason for the most recent connection attempt, or
@@ -2281,6 +2295,9 @@ public class WifiConfiguration implements Parcelable {
         sbuf.append(" randomizedMacExpirationTimeMs: ")
                 .append(randomizedMacExpirationTimeMs == 0 ? "<none>"
                         : logTimeOfDay(randomizedMacExpirationTimeMs)).append("\n");
+        sbuf.append(" randomizedMacLastModifiedTimeMs: ")
+                .append(randomizedMacLastModifiedTimeMs == 0 ? "<none>"
+                        : logTimeOfDay(randomizedMacLastModifiedTimeMs)).append("\n");
         sbuf.append(" KeyMgmt:");
         for (int k = 0; k < this.allowedKeyManagement.size(); k++) {
             if (this.allowedKeyManagement.get(k)) {
@@ -2837,6 +2854,7 @@ public class WifiConfiguration implements Parcelable {
             mRandomizedMacAddress = source.mRandomizedMacAddress;
             macRandomizationSetting = source.macRandomizationSetting;
             randomizedMacExpirationTimeMs = source.randomizedMacExpirationTimeMs;
+            randomizedMacLastModifiedTimeMs = source.randomizedMacLastModifiedTimeMs;
             requirePmf = source.requirePmf;
             updateIdentifier = source.updateIdentifier;
             carrierId = source.carrierId;
@@ -2911,6 +2929,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(macRandomizationSetting);
         dest.writeInt(osu ? 1 : 0);
         dest.writeLong(randomizedMacExpirationTimeMs);
+        dest.writeLong(randomizedMacLastModifiedTimeMs);
         dest.writeInt(carrierId);
         dest.writeString(mPasspointUniqueId);
     }
@@ -2985,6 +3004,7 @@ public class WifiConfiguration implements Parcelable {
                 config.macRandomizationSetting = in.readInt();
                 config.osu = in.readInt() != 0;
                 config.randomizedMacExpirationTimeMs = in.readLong();
+                config.randomizedMacLastModifiedTimeMs = in.readLong();
                 config.carrierId = in.readInt();
                 config.mPasspointUniqueId = in.readString();
                 return config;

@@ -316,7 +316,7 @@ public class PipMenuView extends FrameLayout {
     }
 
     void hideMenu(Runnable animationEndCallback) {
-        hideMenu(animationEndCallback, true /* notifyMenuVisibility */, false);
+        hideMenu(animationEndCallback, true /* notifyMenuVisibility */, true /* animate */);
     }
 
     private void hideMenu(final Runnable animationFinishedRunnable, boolean notifyMenuVisibility,

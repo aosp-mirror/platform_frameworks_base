@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 package android.view.autofill;
 
@@ -28,12 +28,9 @@ import android.util.Pair;
 import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.android.perftests.autofill.R;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 public class MyAutofillService extends AutofillService {
 
     private static final String TAG = "MyAutofillService";
-    private static final int TIMEOUT_MS = 5000;
+    private static final int TIMEOUT_MS = 5_000;
 
     private static final String PACKAGE_NAME = "com.android.perftests.autofill";
     static final String COMPONENT_NAME = PACKAGE_NAME + "/android.view.autofill.MyAutofillService";
@@ -54,6 +51,14 @@ public class MyAutofillService extends AutofillService {
             new LinkedBlockingQueue<>();
 
     private static boolean sEnabled;
+
+    /**
+     * Returns the TestWatcher that was used for the testing.
+     */
+    @NonNull
+    public static AutofillTestWatcher getTestWatcher() {
+        return new AutofillTestWatcher();
+    }
 
     /**
      * Resets the static state associated with the service.
@@ -90,6 +95,11 @@ public class MyAutofillService extends AutofillService {
             throw new IllegalStateException("onFillRequest() not called in " + TIMEOUT_MS + "ms");
         }
         return request;
+    }
+
+    @Override
+    public void onConnected() {
+        AutofillTestWatcher.ServiceWatcher.onConnected();
     }
 
     @Override

@@ -86,6 +86,7 @@ public final class WMShell extends SystemUI
     private final ProtoTracer mProtoTracer;
 
     private KeyguardUpdateMonitorCallback mSplitScreenKeyguardCallback;
+    private KeyguardUpdateMonitorCallback mPipKeyguardCallback;
     private KeyguardUpdateMonitorCallback mOneHandedKeyguardCallback;
 
     @Inject
@@ -140,6 +141,15 @@ public final class WMShell extends SystemUI
                 pip.showPictureInPictureMenu();
             }
         });
+        mPipKeyguardCallback = new KeyguardUpdateMonitorCallback() {
+            @Override
+            public void onKeyguardVisibilityChanged(boolean showing) {
+                if (showing) {
+                    pip.hidePipMenu(null, null);
+                }
+            }
+        };
+        mKeyguardUpdateMonitor.registerCallback(mPipKeyguardCallback);
     }
 
     @VisibleForTesting

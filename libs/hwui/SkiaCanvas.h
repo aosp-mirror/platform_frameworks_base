@@ -161,8 +161,7 @@ protected:
     void drawDrawable(SkDrawable* drawable) { mCanvas->drawDrawable(drawable); }
 
     virtual void drawGlyphs(ReadGlyphFunc glyphFunc, int count, const Paint& paint, float x,
-                            float y, float boundsLeft, float boundsTop, float boundsRight,
-                            float boundsBottom, float totalAdvance) override;
+                            float y, float totalAdvance) override;
     virtual void drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
                                   const Paint& paint, const SkPath& path, size_t start,
                                   size_t end) override;

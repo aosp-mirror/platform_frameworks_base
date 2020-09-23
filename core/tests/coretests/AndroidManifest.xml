@@ -228,15 +228,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.focus.ListOfButtons"
-            android:label="ListOfButtons"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
-            </intent-filter>
-        </activity>
-
         <activity android:name="android.widget.focus.LinearLayoutGrid"
             android:label="LinearLayoutGrid"
             android:exported="true">

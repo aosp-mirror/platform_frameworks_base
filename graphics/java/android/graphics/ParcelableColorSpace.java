@@ -25,8 +25,6 @@ import android.os.Parcelable;
  * A {@link Parcelable} {@link ColorSpace}. In order to enable parceling, the ColorSpace
  * must be either a {@link ColorSpace.Named Named} ColorSpace or a {@link ColorSpace.Rgb} instance
  * that has an ICC parametric transfer function as returned by {@link Rgb#getTransferParameters()}.
- * TODO: Make public
- * @hide
  */
 public final class ParcelableColorSpace extends ColorSpace implements Parcelable {
     private final ColorSpace mColorSpace;

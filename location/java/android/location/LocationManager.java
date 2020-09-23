@@ -20,6 +20,8 @@ import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.LOCATION_HARDWARE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
+import static android.location.LocationRequest.createFromDeprecatedCriteria;
+import static android.location.LocationRequest.createFromDeprecatedProvider;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
@@ -783,21 +785,24 @@ public class LocationManager {
         Preconditions.checkArgument(provider != null, "invalid null provider");
         Preconditions.checkArgument(locationRequest != null, "invalid null location request");
 
-        ICancellationSignal remoteCancellationSignal = CancellationSignal.createTransport();
-        GetCurrentLocationTransport transport = new GetCurrentLocationTransport(executor, consumer,
-                remoteCancellationSignal);
-
         if (cancellationSignal != null) {
             cancellationSignal.throwIfCanceled();
-            cancellationSignal.setOnCancelListener(transport::cancel);
         }
 
+        GetCurrentLocationTransport transport = new GetCurrentLocationTransport(executor, consumer,
+                cancellationSignal);
+
+        ICancellationSignal cancelRemote;
         try {
-            mService.getCurrentLocation(provider, locationRequest, remoteCancellationSignal,
-                    transport, mContext.getPackageName(), mContext.getAttributionTag(),
-                    AppOpsManager.toReceiverId(consumer));
+            cancelRemote = mService.getCurrentLocation(provider,
+                    locationRequest, transport, mContext.getPackageName(),
+                    mContext.getAttributionTag(), AppOpsManager.toReceiverId(consumer));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+
+        if (cancellationSignal != null) {
+            cancellationSignal.setRemote(cancelRemote);
         }
     }
 
@@ -1024,9 +1029,7 @@ public class LocationManager {
 
         requestLocationUpdates(
                 provider,
-                new LocationRequest.Builder(minTimeMs)
-                        .setMinUpdateDistanceMeters(minDistanceM)
-                        .build(),
+                createFromDeprecatedProvider(provider, minTimeMs, minDistanceM, false),
                 executor,
                 listener);
     }
@@ -1085,10 +1088,7 @@ public class LocationManager {
 
         requestLocationUpdates(
                 FUSED_PROVIDER,
-                new LocationRequest.Builder(minTimeMs)
-                        .setQuality(criteria)
-                        .setMinUpdateDistanceMeters(minDistanceM)
-                        .build(),
+                createFromDeprecatedCriteria(criteria, minTimeMs, minDistanceM, false),
                 executor,
                 listener);
     }
@@ -1116,9 +1116,7 @@ public class LocationManager {
 
         requestLocationUpdates(
                 provider,
-                new LocationRequest.Builder(minTimeMs)
-                        .setMinUpdateDistanceMeters(minDistanceM)
-                        .build(),
+                createFromDeprecatedProvider(provider, minTimeMs, minDistanceM, false),
                 pendingIntent);
     }
 
@@ -1144,10 +1142,7 @@ public class LocationManager {
         Preconditions.checkArgument(criteria != null, "invalid null criteria");
         requestLocationUpdates(
                 FUSED_PROVIDER,
-                new LocationRequest.Builder(minTimeMs)
-                        .setQuality(criteria)
-                        .setMinUpdateDistanceMeters(minDistanceM)
-                        .build(),
+                createFromDeprecatedCriteria(criteria, minTimeMs, minDistanceM, false),
                 pendingIntent);
     }
 
@@ -2519,7 +2514,7 @@ public class LocationManager {
     }
 
     private static class GetCurrentLocationTransport extends ILocationCallback.Stub implements
-            ListenerExecutor {
+            ListenerExecutor, CancellationSignal.OnCancelListener {
 
         private final Executor mExecutor;
 
@@ -2527,33 +2522,22 @@ public class LocationManager {
         @Nullable
         private Consumer<Location> mConsumer;
 
-        @GuardedBy("this")
-        @Nullable
-        private ICancellationSignal mRemoteCancellationSignal;
-
         GetCurrentLocationTransport(Executor executor, Consumer<Location> consumer,
-                ICancellationSignal remoteCancellationSignal) {
+                @Nullable CancellationSignal cancellationSignal) {
             Preconditions.checkArgument(executor != null, "illegal null executor");
             Preconditions.checkArgument(consumer != null, "illegal null consumer");
             mExecutor = executor;
             mConsumer = consumer;
-            mRemoteCancellationSignal = remoteCancellationSignal;
-        }
-
-        public void cancel() {
-            ICancellationSignal cancellationSignal;
-            synchronized (this) {
-                cancellationSignal = mRemoteCancellationSignal;
-                mConsumer = null;
-                mRemoteCancellationSignal = null;
-            }
 
             if (cancellationSignal != null) {
-                try {
-                    cancellationSignal.cancel();
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
+                cancellationSignal.setOnCancelListener(this);
+            }
+        }
+
+        @Override
+        public void onCancel() {
+            synchronized (this) {
+                mConsumer = null;
             }
         }
 
@@ -2563,7 +2547,6 @@ public class LocationManager {
             synchronized (this) {
                 consumer = mConsumer;
                 mConsumer = null;
-                mRemoteCancellationSignal = null;
             }
 
             executeSafely(mExecutor, () -> consumer, listener -> listener.accept(location));
