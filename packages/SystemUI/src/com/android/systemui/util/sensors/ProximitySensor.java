@@ -92,11 +92,11 @@ public class ProximitySensor implements ThresholdSensor {
             }
             logDebug("Secondary sensor event: " + event.getBelow() + ".");
 
-            onSensorEvent(event);
-
             // Check this sensor again in a moment.
             mCancelSecondaryRunnable = mDelayableExecutor.executeDelayed(
                     mSecondaryThresholdSensor::resume, SECONDARY_PING_INTERVAL_MS);
+
+            onSensorEvent(event);
         }
     };
 

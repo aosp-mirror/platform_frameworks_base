@@ -262,6 +262,37 @@ public class ProximitySensorDualTest extends SysuiTestCase {
         mProximitySensor.unregister(listener);
     }
 
+    @Test
+    public void testSecondaryCancelsSecondary() {
+        TestableListener listener = new TestableListener();
+        ThresholdSensor.Listener cancelingListener = new ThresholdSensor.Listener() {
+            @Override
+            public void onThresholdCrossed(ThresholdSensor.ThresholdSensorEvent event) {
+                mProximitySensor.pause();
+            }
+        };
+
+        mProximitySensor.register(listener);
+        mProximitySensor.register(cancelingListener);
+        assertNull(listener.mLastEvent);
+        assertEquals(0, listener.mCallCount);
+
+        mThresholdSensorPrimary.triggerEvent(true, 0);
+        assertNull(listener.mLastEvent);
+        assertEquals(0, listener.mCallCount);
+        mThresholdSensorSecondary.triggerEvent(true, 0);
+        assertTrue(listener.mLastEvent.getBelow());
+        assertEquals(1, listener.mCallCount);
+
+        // The proximity sensor should now be canceled. Advancing the clock should do nothing.
+        assertEquals(0, mFakeExecutor.numPending());
+        mThresholdSensorSecondary.triggerEvent(false, 1);
+        assertTrue(listener.mLastEvent.getBelow());
+        assertEquals(1, listener.mCallCount);
+
+        mProximitySensor.unregister(listener);
+    }
+
     private static class TestableListener implements ThresholdSensor.Listener {
         ThresholdSensor.ThresholdSensorEvent mLastEvent;
         int mCallCount = 0;
