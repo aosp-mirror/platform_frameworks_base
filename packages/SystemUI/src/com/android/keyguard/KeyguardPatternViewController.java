@@ -54,13 +54,12 @@ public class KeyguardPatternViewController
     private KeyguardMessageAreaController mMessageAreaController;
     private LockPatternView mLockPatternView;
     private CountDownTimer mCountdownTimer;
-    private KeyguardSecurityCallback mCallback;
     private AsyncTask<?, ?, ?> mPendingLockCheck;
 
     private EmergencyButtonCallback mEmergencyButtonCallback = new EmergencyButtonCallback() {
         @Override
         public void onEmergencyButtonClickedWhenInCall() {
-            mCallback.reset();
+            getKeyguardSecurityCallback().reset();
         }
     };
 
@@ -88,8 +87,8 @@ public class KeyguardPatternViewController
 
         @Override
         public void onPatternCellAdded(List<Cell> pattern) {
-            mCallback.userActivity();
-            mCallback.onUserInput();
+            getKeyguardSecurityCallback().userActivity();
+            getKeyguardSecurityCallback().onUserInput();
         }
 
         @Override
@@ -141,8 +140,8 @@ public class KeyguardPatternViewController
                         }
                     });
             if (pattern.size() > MIN_PATTERN_BEFORE_POKE_WAKELOCK) {
-                mCallback.userActivity();
-                mCallback.onUserInput();
+                getKeyguardSecurityCallback().userActivity();
+                getKeyguardSecurityCallback().onUserInput();
             }
         }
 
@@ -150,15 +149,15 @@ public class KeyguardPatternViewController
                 boolean isValidPattern) {
             boolean dismissKeyguard = KeyguardUpdateMonitor.getCurrentUser() == userId;
             if (matched) {
-                mCallback.reportUnlockAttempt(userId, true, 0);
+                getKeyguardSecurityCallback().reportUnlockAttempt(userId, true, 0);
                 if (dismissKeyguard) {
                     mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Correct);
-                    mCallback.dismiss(true, userId);
+                    getKeyguardSecurityCallback().dismiss(true, userId);
                 }
             } else {
                 mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Wrong);
                 if (isValidPattern) {
-                    mCallback.reportUnlockAttempt(userId, false, timeoutMs);
+                    getKeyguardSecurityCallback().reportUnlockAttempt(userId, false, timeoutMs);
                     if (timeoutMs > 0) {
                         long deadline = mLockPatternUtils.setLockoutAttemptDeadline(
                                 userId, timeoutMs);
@@ -213,8 +212,8 @@ public class KeyguardPatternViewController
         View cancelBtn = mView.findViewById(R.id.cancel_button);
         if (cancelBtn != null) {
             cancelBtn.setOnClickListener(view -> {
-                mCallback.reset();
-                mCallback.onCancelClicked();
+                getKeyguardSecurityCallback().reset();
+                getKeyguardSecurityCallback().onCancelClicked();
             });
         }
     }
@@ -269,8 +268,8 @@ public class KeyguardPatternViewController
     }
 
     @Override
-    public void setKeyguardCallback(KeyguardSecurityCallback callback) {
-        mCallback = callback;
+    public boolean needsInput() {
+        return false;
     }
 
     @Override

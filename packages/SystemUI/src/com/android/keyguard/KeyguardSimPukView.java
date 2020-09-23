@@ -16,7 +16,6 @@
 
 package com.android.keyguard;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -30,8 +29,6 @@ import com.android.systemui.R;
 public class KeyguardSimPukView extends KeyguardPinBasedInputView {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     public static final String TAG = "KeyguardSimPukView";
-
-    private ProgressDialog mSimUnlockProgressDialog = null;
 
     public KeyguardSimPukView(Context context) {
         this(context, null);
@@ -87,23 +84,6 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
         if (mEcaView instanceof EmergencyCarrierArea) {
             ((EmergencyCarrierArea) mEcaView).setCarrierTextVisible(true);
         }
-    }
-
-    @Override
-    public void showUsabilityHint() {
-    }
-
-    @Override
-    public void onPause() {
-        // dismiss the dialog.
-        if (mSimUnlockProgressDialog != null) {
-            mSimUnlockProgressDialog.dismiss();
-            mSimUnlockProgressDialog = null;
-        }
-    }
-
-    @Override
-    public void onResume(int reason) {
     }
 
     @Override

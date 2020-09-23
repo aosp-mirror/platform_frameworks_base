@@ -16,7 +16,6 @@
 package com.android.keyguard;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.text.TextUtils;
@@ -27,7 +26,6 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
-import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
 import com.android.settingslib.animation.AppearAnimationCreator;
 import com.android.settingslib.animation.AppearAnimationUtils;
@@ -58,7 +56,6 @@ public class KeyguardPatternView extends KeyguardInputView
     private final Rect mLockPatternScreenBounds = new Rect();
 
     private LockPatternView mLockPatternView;
-    private KeyguardSecurityCallback mCallback;
 
     /**
      * Keeps track of the last time we poked the wake lock during dispatching of the touch event.
@@ -71,7 +68,6 @@ public class KeyguardPatternView extends KeyguardInputView
     KeyguardMessageArea mSecurityMessageDisplay;
     private View mEcaView;
     private ViewGroup mContainer;
-    private int mDisappearYTranslation;
 
     public KeyguardPatternView(Context context) {
         this(context, null);
@@ -91,17 +87,6 @@ public class KeyguardPatternView extends KeyguardInputView
                 (long) (125 * DISAPPEAR_MULTIPLIER_LOCKED), 1.2f /* translationScale */,
                 0.6f /* delayScale */, AnimationUtils.loadInterpolator(
                 mContext, android.R.interpolator.fast_out_linear_in));
-        mDisappearYTranslation = getResources().getDimensionPixelSize(
-                R.dimen.disappear_y_translation);
-    }
-
-    @Override
-    public void setKeyguardCallback(KeyguardSecurityCallback callback) {
-        mCallback = callback;
-    }
-
-    @Override
-    public void setLockPatternUtils(LockPatternUtils utils) {
     }
 
     @Override
@@ -148,46 +133,11 @@ public class KeyguardPatternView extends KeyguardInputView
     }
 
     @Override
-    public void reset() {
-    }
-
-    @Override
-    public void showUsabilityHint() {
-    }
-
-    @Override
-    public boolean disallowInterceptTouch(MotionEvent event) {
+    boolean disallowInterceptTouch(MotionEvent event) {
         return !mLockPatternView.isEmpty()
                 || mLockPatternScreenBounds.contains((int) event.getRawX(), (int) event.getRawY());
     }
 
-    @Override
-    public boolean needsInput() {
-        return false;
-    }
-
-    @Override
-    public void onPause() {
-    }
-
-    @Override
-    public void onResume(int reason) {
-    }
-
-    @Override
-    public KeyguardSecurityCallback getCallback() {
-        return mCallback;
-    }
-
-    @Override
-    public void showPromptReason(int reason) {
-    }
-
-    @Override
-    public void showMessage(CharSequence message, ColorStateList colorState) {
-    }
-
-    @Override
     public void startAppearAnimation() {
         enableClipping(false);
         setAlpha(1f);
@@ -196,12 +146,7 @@ public class KeyguardPatternView extends KeyguardInputView
                 0, mAppearAnimationUtils.getInterpolator());
         mAppearAnimationUtils.startAnimation2d(
                 mLockPatternView.getCellStates(),
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        enableClipping(true);
-                    }
-                },
+                () -> enableClipping(true),
                 this);
         if (!TextUtils.isEmpty(mSecurityMessageDisplay.getText())) {
             mAppearAnimationUtils.createAnimation(mSecurityMessageDisplay, 0,
@@ -211,15 +156,6 @@ public class KeyguardPatternView extends KeyguardInputView
                     mAppearAnimationUtils.getInterpolator(),
                     null /* finishRunnable */);
         }
-    }
-
-    /**
-     * @deprecated Use {@link #startDisappearAnimation(boolean, Runnable)}
-     */
-    @Override
-    public boolean startDisappearAnimation(Runnable finishRunnable) {
-        // TODO(b/166448040): remove this when possible
-        return false;
     }
 
     public boolean startDisappearAnimation(boolean needsSlowUnlockTransition,
