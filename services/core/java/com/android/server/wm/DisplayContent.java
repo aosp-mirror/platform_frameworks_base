@@ -253,8 +253,21 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     ActivityTaskManagerService mAtmService;
 
-    /** Unique identifier of this display. */
+    /**
+     * Unique logical identifier of this display.
+     *
+     * @see DisplayInfo#displayId
+     */
     final int mDisplayId;
+
+    /**
+     * Unique physical identifier of this display. Unlike {@link #mDisplayId} this value can change
+     * at runtime if the underlying physical display changes.
+     *
+     * @see DisplayInfo#uniqueId
+     */
+    @Nullable
+    String mCurrentUniqueDisplayId;
 
     /**
      * We organize all top-level Surfaces into the following layer.
@@ -916,6 +929,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mAtmService = mWmService.mAtmService;
         mDisplay = display;
         mDisplayId = display.getDisplayId();
+        mCurrentUniqueDisplayId = display.getUniqueId();
         mOffTokenAcquirer = mRootWindowContainer.mDisplayOffTokenAcquirer;
         mWallpaperController = new WallpaperController(mWmService, this);
         display.getDisplayInfo(mDisplayInfo);
@@ -2417,13 +2431,20 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final int newHeight = rotated ? mDisplayInfo.logicalWidth : mDisplayInfo.logicalHeight;
         final int newDensity = mDisplayInfo.logicalDensityDpi;
         final DisplayCutout newCutout = mDisplayInfo.displayCutout;
+        final String newUniqueId = mDisplayInfo.uniqueId;
 
         final boolean displayMetricsChanged = mInitialDisplayWidth != newWidth
                 || mInitialDisplayHeight != newHeight
                 || mInitialDisplayDensity != mDisplayInfo.logicalDensityDpi
                 || !Objects.equals(mInitialDisplayCutout, newCutout);
+        final boolean physicalDisplayChanged = !newUniqueId.equals(mCurrentUniqueDisplayId);
 
-        if (displayMetricsChanged) {
+        if (displayMetricsChanged || physicalDisplayChanged) {
+            if (physicalDisplayChanged) {
+                // Reapply the window settings as the underlying physical display has changed.
+                mWmService.mDisplayWindowSettings.applySettingsToDisplayLocked(this);
+            }
+
             // If there is an override set for base values - use it, otherwise use new values.
             updateBaseDisplayMetrics(mIsSizeForced ? mBaseDisplayWidth : newWidth,
                     mIsSizeForced ? mBaseDisplayHeight : newHeight,
@@ -2434,6 +2455,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mInitialDisplayHeight = newHeight;
             mInitialDisplayDensity = newDensity;
             mInitialDisplayCutout = newCutout;
+            mCurrentUniqueDisplayId = newUniqueId;
             reconfigureDisplayLocked();
         }
     }
@@ -2452,6 +2474,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** Update base (override) display metrics. */
     void updateBaseDisplayMetrics(int baseWidth, int baseHeight, int baseDensity) {
+        final int originalWidth = mBaseDisplayWidth;
+        final int originalHeight = mBaseDisplayHeight;
+        final int originalDensity = mBaseDisplayDensity;
+
         mBaseDisplayWidth = baseWidth;
         mBaseDisplayHeight = baseHeight;
         mBaseDisplayDensity = baseDensity;
@@ -2466,9 +2492,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
         }
 
-        mBaseDisplayRect.set(0, 0, mBaseDisplayWidth, mBaseDisplayHeight);
-
-        updateBounds();
+        if (mBaseDisplayWidth != originalWidth || mBaseDisplayHeight != originalHeight
+                || mBaseDisplayDensity != originalDensity) {
+            mBaseDisplayRect.set(0, 0, mBaseDisplayWidth, mBaseDisplayHeight);
+            updateBounds();
+        }
     }
 
     /**
