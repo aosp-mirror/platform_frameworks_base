@@ -82,6 +82,12 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     abstract void resetState();
 
     @Override
+    public void init() {
+        super.init();
+        mMessageAreaController.init();
+    }
+
+    @Override
     protected void onViewAttached() {
         mView.setKeyDownListener(mKeyDownListener);
         mView.setEnableHaptics(mLockPatternUtils.isTactileFeedbackEnabled());

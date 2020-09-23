@@ -191,6 +191,12 @@ public class KeyguardPatternViewController
     }
 
     @Override
+    public void init() {
+        super.init();
+        mMessageAreaController.init();
+    }
+
+    @Override
     protected void onViewAttached() {
         mLockPatternView.setOnPatternListener(new UnlockPatternListener());
         mLockPatternView.setSaveEnabled(false);

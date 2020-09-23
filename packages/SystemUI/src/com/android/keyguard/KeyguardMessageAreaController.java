@@ -19,6 +19,7 @@ package com.android.keyguard;
 import android.content.res.ColorStateList;
 
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -27,6 +28,35 @@ import javax.inject.Inject;
 public class KeyguardMessageAreaController extends ViewController<KeyguardMessageArea> {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ConfigurationController mConfigurationController;
+
+
+    private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
+        public void onFinishedGoingToSleep(int why) {
+            mView.setSelected(false);
+        }
+
+        public void onStartedWakingUp() {
+            mView.setSelected(true);
+        }
+
+        @Override
+        public void onKeyguardBouncerChanged(boolean bouncer) {
+            mView.setBouncerVisible(bouncer);
+            mView.update();
+        }
+    };
+
+    private ConfigurationListener mConfigurationListener = new ConfigurationListener() {
+        @Override
+        public void onThemeChanged() {
+            mView.onThemeChanged();
+        }
+
+        @Override
+        public void onDensityOrFontScaleChanged() {
+            mView.onDensityOrFontScaleChanged();
+        }
+    };
 
     private KeyguardMessageAreaController(KeyguardMessageArea view,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -39,10 +69,16 @@ public class KeyguardMessageAreaController extends ViewController<KeyguardMessag
 
     @Override
     protected void onViewAttached() {
+        mConfigurationController.addCallback(mConfigurationListener);
+        mKeyguardUpdateMonitor.registerCallback(mInfoCallback);
+        mView.setSelected(mKeyguardUpdateMonitor.isDeviceInteractive());
+        mView.onThemeChanged();
     }
 
     @Override
     protected void onViewDetached() {
+        mConfigurationController.removeCallback(mConfigurationListener);
+        mKeyguardUpdateMonitor.removeCallback(mInfoCallback);
     }
 
     public void setMessage(CharSequence s) {
