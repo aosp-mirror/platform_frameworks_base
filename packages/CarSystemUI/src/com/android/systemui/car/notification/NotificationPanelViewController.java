@@ -192,6 +192,12 @@ public class NotificationPanelViewController extends OverlayPanelViewController
         boolean isKeyboardVisible = (vis & InputMethodService.IME_VISIBLE) != 0;
         int bottomMargin = isKeyboardVisible ? 0 : mNavBarHeight;
         ViewGroup container = (ViewGroup) getLayout();
+        if (container == null) {
+            // Notification panel hasn't been inflated before. We shouldn't try to update the layout
+            // params.
+            return;
+        }
+
         ViewGroup.MarginLayoutParams params =
                 (ViewGroup.MarginLayoutParams) container.getLayoutParams();
         params.setMargins(params.leftMargin, params.topMargin, params.rightMargin, bottomMargin);
