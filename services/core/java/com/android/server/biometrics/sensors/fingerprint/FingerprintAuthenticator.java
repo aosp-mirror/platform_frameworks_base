@@ -34,7 +34,7 @@ public final class FingerprintAuthenticator extends IBiometricAuthenticator.Stub
     public FingerprintAuthenticator(IFingerprintService fingerprintService, SensorConfig config)
             throws RemoteException {
         mFingerprintService = fingerprintService;
-        mFingerprintService.initializeConfiguration(config.id);
+        mFingerprintService.initializeConfiguration(config.id, config.strength);
     }
 
     @Override

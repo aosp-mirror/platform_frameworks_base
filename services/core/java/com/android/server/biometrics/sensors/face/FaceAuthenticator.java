@@ -34,7 +34,7 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
     public FaceAuthenticator(IFaceService faceService, SensorConfig config)
             throws RemoteException {
         mFaceService = faceService;
-        mFaceService.initializeConfiguration(config.id);
+        mFaceService.initializeConfiguration(config.id, config.strength);
     }
 
     @Override

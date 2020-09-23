@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.trust.TrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.hardware.biometrics.BiometricManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
@@ -36,6 +37,7 @@ import android.util.Slog;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.R;
+import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.ClientMonitor;
@@ -266,6 +268,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     static Fingerprint21UdfpsMock newInstance(@NonNull Context context, int sensorId,
+            @BiometricManager.Authenticators.Types int strength,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
         Slog.d(TAG, "Creating Fingerprint23Mock!");
@@ -275,7 +278,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
                 new TestableBiometricScheduler(TAG, gestureAvailabilityDispatcher);
         final MockHalResultController controller =
                 new MockHalResultController(context, handler, scheduler);
-        return new Fingerprint21UdfpsMock(context, scheduler, handler, sensorId,
+        return new Fingerprint21UdfpsMock(context, scheduler, handler, sensorId, strength,
                 lockoutResetDispatcher, controller);
     }
 
@@ -401,9 +404,10 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     private Fingerprint21UdfpsMock(@NonNull Context context,
             @NonNull TestableBiometricScheduler scheduler,
             @NonNull Handler handler, int sensorId,
+            @BiometricManager.Authenticators.Types int strength,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull MockHalResultController controller) {
-        super(context, scheduler, handler, sensorId, lockoutResetDispatcher, controller);
+        super(context, scheduler, handler, sensorId, strength, lockoutResetDispatcher, controller);
         mScheduler = scheduler;
         mScheduler.init(this);
         mHandler = handler;
@@ -412,8 +416,9 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
         final int maxTemplatesAllowed = mContext.getResources()
                 .getInteger(R.integer.config_fingerprintMaxTemplatesPerUser);
         mSensorProperties = new FingerprintSensorProperties(sensorId,
-                FingerprintSensorProperties.TYPE_UDFPS, resetLockoutRequiresHardwareAuthToken,
-                maxTemplatesAllowed);
+                Utils.authenticatorStrengthToPropertyStrength(strength), maxTemplatesAllowed,
+                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
+                resetLockoutRequiresHardwareAuthToken);
         mMockHalResultController = controller;
         mUserHasTrust = new SparseBooleanArray();
         mTrustManager = context.getSystemService(TrustManager.class);

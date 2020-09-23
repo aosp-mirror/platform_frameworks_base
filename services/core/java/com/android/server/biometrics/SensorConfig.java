@@ -16,13 +16,15 @@
 
 package com.android.server.biometrics;
 
+import android.hardware.biometrics.BiometricManager;
+
 /**
  * Parsed sensor config. See core/res/res/values/config.xml config_biometric_sensors
  */
 public class SensorConfig {
     public final int id;
     final int modality;
-    final int strength;
+    @BiometricManager.Authenticators.Types public final int strength;
 
     public SensorConfig(String config) {
         String[] elems = config.split(":");
