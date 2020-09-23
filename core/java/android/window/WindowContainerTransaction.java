@@ -238,6 +238,22 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Sets whether a container should ignore the orientation request from apps below it. It
+     * currently only applies to {@link com.android.server.wm.TaskDisplayArea}. When {@code false},
+     * it may rotate based on the orientation request; When {@code true}, it can never specify
+     * orientation, but shows the fixed-orientation apps in the letterbox.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction setIgnoreOrientationRequest(
+            @NonNull WindowContainerToken container, boolean ignoreOrientationRequest) {
+        Change chg = getOrCreateChange(container.asBinder());
+        chg.mIgnoreOrientationRequest = ignoreOrientationRequest;
+        chg.mChangeMask |= Change.CHANGE_IGNORE_ORIENTATION_REQUEST;
+        return this;
+    }
+
+    /**
      * Reparents a container into another one. The effect of a {@code null} parent can vary. For
      * example, reparenting a stack to {@code null} will reparent it to its display.
      *
@@ -341,10 +357,12 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int CHANGE_PIP_CALLBACK = 1 << 2;
         public static final int CHANGE_HIDDEN = 1 << 3;
         public static final int CHANGE_BOUNDS_TRANSACTION_RECT = 1 << 4;
+        public static final int CHANGE_IGNORE_ORIENTATION_REQUEST = 1 << 5;
 
         private final Configuration mConfiguration = new Configuration();
         private boolean mFocusable = true;
         private boolean mHidden = false;
+        private boolean mIgnoreOrientationRequest = false;
         private int mChangeMask = 0;
         private @ActivityInfo.Config int mConfigSetMask = 0;
         private @WindowConfiguration.WindowConfig int mWindowSetMask = 0;
@@ -362,6 +380,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mConfiguration.readFromParcel(in);
             mFocusable = in.readBoolean();
             mHidden = in.readBoolean();
+            mIgnoreOrientationRequest = in.readBoolean();
             mChangeMask = in.readInt();
             mConfigSetMask = in.readInt();
             mWindowSetMask = in.readInt();
@@ -404,6 +423,9 @@ public final class WindowContainerTransaction implements Parcelable {
             if ((other.mChangeMask & CHANGE_HIDDEN) != 0) {
                 mHidden = other.mHidden;
             }
+            if ((other.mChangeMask & CHANGE_IGNORE_ORIENTATION_REQUEST) != 0) {
+                mIgnoreOrientationRequest = other.mIgnoreOrientationRequest;
+            }
             mChangeMask |= other.mChangeMask;
             if (other.mActivityWindowingMode >= 0) {
                 mActivityWindowingMode = other.mActivityWindowingMode;
@@ -443,6 +465,15 @@ public final class WindowContainerTransaction implements Parcelable {
                 throw new RuntimeException("Hidden not set. check CHANGE_HIDDEN first");
             }
             return mHidden;
+        }
+
+        /** Gets the requested state of whether to ignore orientation request. */
+        public boolean getIgnoreOrientationRequest() {
+            if ((mChangeMask & CHANGE_IGNORE_ORIENTATION_REQUEST) == 0) {
+                throw new RuntimeException("IgnoreOrientationRequest not set. "
+                        + "Check CHANGE_IGNORE_ORIENTATION_REQUEST first");
+            }
+            return mIgnoreOrientationRequest;
         }
 
         public int getChangeMask() {
@@ -509,6 +540,9 @@ public final class WindowContainerTransaction implements Parcelable {
             if (mBoundsChangeTransaction != null) {
                 sb.append("hasBoundsTransaction,");
             }
+            if ((mChangeMask & CHANGE_IGNORE_ORIENTATION_REQUEST) != 0) {
+                sb.append("ignoreOrientationRequest:" + mIgnoreOrientationRequest + ",");
+            }
             sb.append("}");
             return sb.toString();
         }
@@ -518,6 +552,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mConfiguration.writeToParcel(dest, flags);
             dest.writeBoolean(mFocusable);
             dest.writeBoolean(mHidden);
+            dest.writeBoolean(mIgnoreOrientationRequest);
             dest.writeInt(mChangeMask);
             dest.writeInt(mConfigSetMask);
             dest.writeInt(mWindowSetMask);
