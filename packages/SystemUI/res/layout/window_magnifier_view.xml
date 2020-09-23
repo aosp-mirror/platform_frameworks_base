@@ -17,24 +17,26 @@
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="wrap_content"
-             android:layout_height="wrap_content">
-
+             android:layout_height="wrap_content"
+             android:screenReaderFocusable="true">
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="@dimen/magnification_outer_border_margin"
+        android:importantForAccessibility="no"
         android:background="@android:color/black"/>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="@dimen/magnification_inner_border_margin"
+        android:importantForAccessibility="no"
         android:background="@color/magnification_border_color"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:importantForAccessibility="noHideDescendants">
 
         <View
             android:id="@+id/left_handle"
@@ -76,6 +78,7 @@
         android:layout_margin="@dimen/magnification_outer_border_margin"
         android:layout_gravity="right|bottom"
         android:scaleType="center"
+        android:importantForAccessibility="no"
         android:src="@drawable/ic_move_magnification"/>
 
 </FrameLayout>
