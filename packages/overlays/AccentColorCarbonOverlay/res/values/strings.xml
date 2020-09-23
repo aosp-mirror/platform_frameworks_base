@@ -15,14 +15,7 @@
   ~ limitations under the License.
   -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Specifies the path that is used by AdaptiveIconDrawable class to crop launcher icons. -->
-    <string name="config_icon_mask" translatable="false">"M20,0 80,0 100,20 100,80 80,100 20,100 0,80 0,20 20,0 Z"</string>
-    <!-- Flag indicating whether round icons should be parsed from the application manifest. -->
-    <bool name="config_useRoundIcon">false</bool>
-    <!-- Corner radius of system dialogs -->
-    <dimen name="config_dialogCornerRadius">0dp</dimen>
-    <!-- Corner radius for bottom sheet system dialogs -->
-    <dimen name="config_bottomDialogCornerRadius">0dp</dimen>
-    <!-- Tile stroke width -->
-    <dimen name="config_qsTileStrokeWidthInactive">10dp</dimen>
+    <!-- Black accent color name application label. [CHAR LIMIT=50] -->
+    <string name="accent_color_overlay_name" translatable="false">Carbon</string>
 </resources>
+
