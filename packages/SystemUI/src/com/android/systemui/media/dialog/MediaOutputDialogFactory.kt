@@ -33,10 +33,22 @@ class MediaOutputDialogFactory @Inject constructor(
     private val shadeController: ShadeController,
     private val starter: ActivityStarter
 ) {
+    companion object {
+        var mediaOutputDialog: MediaOutputDialog? = null
+    }
+
     /** Creates a [MediaOutputDialog] for the given package. */
     fun create(packageName: String, aboveStatusBar: Boolean) {
-        MediaOutputController(context, packageName, mediaSessionManager, lbm, shadeController,
-                starter).run {
+        mediaOutputDialog?.dismiss()
+
+        mediaOutputDialog = MediaOutputController(context, packageName, mediaSessionManager, lbm,
+                shadeController, starter).run {
             MediaOutputDialog(context, aboveStatusBar, this) }
+    }
+
+    /** dismiss [MediaOutputDialog] if exist. */
+    fun dismiss() {
+        mediaOutputDialog?.dismiss()
+        mediaOutputDialog = null
     }
 }
