@@ -229,8 +229,7 @@
     <library name="android.test.base"
             file="/system/framework/android.test.base.jar" />
     <library name="android.test.mock"
-            file="/system/framework/android.test.mock.jar"
-            dependency="android.test.base" />
+            file="/system/framework/android.test.mock.jar" />
     <library name="android.test.runner"
             file="/system/framework/android.test.runner.jar"
             dependency="android.test.base:android.test.mock" />
