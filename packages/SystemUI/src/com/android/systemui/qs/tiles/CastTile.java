@@ -51,6 +51,7 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
+import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 
@@ -72,6 +73,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
     private final Callback mCallback = new Callback();
     private Dialog mDialog;
     private boolean mWifiConnected;
+    private boolean mHotspotConnected;
 
     @Inject
     public CastTile(
@@ -84,7 +86,8 @@ public class CastTile extends QSTileImpl<BooleanState> {
             QSLogger qsLogger,
             CastController castController,
             KeyguardStateController keyguardStateController,
-            NetworkController networkController
+            NetworkController networkController,
+            HotspotController hotspotController
     ) {
         super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
                 activityStarter, qsLogger);
@@ -95,6 +98,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
         mController.observe(this, mCallback);
         mKeyguard.observe(this, mCallback);
         mNetworkController.observe(this, mSignalCallback);
+        hotspotController.observe(this, mHotspotCallback);
     }
 
     @Override
@@ -222,7 +226,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
         }
         state.icon = ResourceIcon.get(state.value ? R.drawable.ic_cast_connected
                 : R.drawable.ic_cast);
-        if (mWifiConnected || state.value) {
+        if (canCastToWifi() || state.value) {
             state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
             if (!state.value) {
                 state.secondaryLabel = "";
@@ -258,6 +262,10 @@ public class CastTile extends QSTileImpl<BooleanState> {
                 : mContext.getString(R.string.quick_settings_cast_device_default_name);
     }
 
+    private boolean canCastToWifi() {
+        return mWifiConnected || mHotspotConnected;
+    }
+
     private final NetworkController.SignalCallback mSignalCallback =
             new NetworkController.SignalCallback() {
                 @Override
@@ -269,7 +277,25 @@ public class CastTile extends QSTileImpl<BooleanState> {
                     boolean enabledAndConnected = enabled && qsIcon.visible;
                     if (enabledAndConnected != mWifiConnected) {
                         mWifiConnected = enabledAndConnected;
-                        refreshState();
+                        // Hotspot is not connected, so changes here should update
+                        if (!mHotspotConnected) {
+                            refreshState();
+                        }
+                    }
+                }
+            };
+
+    private final HotspotController.Callback mHotspotCallback =
+            new HotspotController.Callback() {
+                @Override
+                public void onHotspotChanged(boolean enabled, int numDevices) {
+                    boolean enabledAndConnected = enabled && numDevices > 0;
+                    if (enabledAndConnected != mHotspotConnected) {
+                        mHotspotConnected = enabledAndConnected;
+                        // Wifi is not connected, so changes here should update
+                        if (!mWifiConnected) {
+                            refreshState();
+                        }
                     }
                 }
             };
