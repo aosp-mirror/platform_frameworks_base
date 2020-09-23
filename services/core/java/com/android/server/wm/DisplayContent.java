@@ -3554,7 +3554,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return false;
         }
         return mWmService.mDisplayWindowSettings.shouldShowImeLocked(this)
-                || mWmService.mForceDesktopModeOnExternalDisplays;
+                || forceDesktopMode();
+    }
+
+    boolean forceDesktopMode() {
+        return mWmService.mForceDesktopModeOnExternalDisplays && !isDefaultDisplay && !isPrivate();
     }
 
     private void setInputMethodTarget(WindowState target, boolean targetWaitingAnim) {
@@ -4786,7 +4790,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     boolean supportsSystemDecorations() {
         return (mWmService.mDisplayWindowSettings.shouldShowSystemDecorsLocked(this)
                 || (mDisplay.getFlags() & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0
-                || mWmService.mForceDesktopModeOnExternalDisplays)
+                || forceDesktopMode())
                 // VR virtual display will be used to run and render 2D app within a VR experience.
                 && mDisplayId != mWmService.mVr2dDisplayId
                 // Do not show system decorations on untrusted virtual display.

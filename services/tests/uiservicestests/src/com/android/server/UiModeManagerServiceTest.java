@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.Manifest;
 import android.app.AlarmManager;
 import android.app.IUiModeManager;
 import android.content.BroadcastReceiver;
@@ -24,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Handler;
@@ -66,6 +68,7 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -224,6 +227,15 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         assertTrue(isNightModeActivated());
         mService.setNightModeActivated(false);
         assertFalse(isNightModeActivated());
+    }
+
+    @Test
+    public void setNightModeActivated_permissiontoChangeOtherUsers() throws RemoteException {
+        mUiManagerService.onSwitchUser(9);
+        when(mContext.checkCallingOrSelfPermission(
+                eq(Manifest.permission.INTERACT_ACROSS_USERS)))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+        assertFalse(mService.setNightModeActivated(true));
     }
 
     @Test

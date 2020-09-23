@@ -343,7 +343,7 @@
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Թարմացվելիս ընդգծել սարքաշարի ծածկույթները կանաչ գույնով"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Վրիպազերծել GPU գերազանցումները"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Կասեցնել HW վրադրումները"</string>
-    <string name="disable_overlays_summary" msgid="1954852414363338166">"Միշտ օգտագործել GPU-ն` էկրանի կազմման համար"</string>
+    <string name="disable_overlays_summary" msgid="1954852414363338166">"Միշտ օգտագործել GPU-ն՝ էկրանի կազմման համար"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Նմանակել գունատարածքը"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Ակտիվացնել OpenGL հետքերը"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Անջատել USB աուդիո երթուղումը"</string>

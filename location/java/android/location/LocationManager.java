@@ -726,16 +726,15 @@ public class LocationManager {
             cancellationSignal.throwIfCanceled();
         }
 
-        ICancellationSignal remoteCancellationSignal = CancellationSignal.createTransport();
-
         try {
-            if (mService.getCurrentLocation(currentLocationRequest, remoteCancellationSignal,
-                    transport, mContext.getPackageName(), mContext.getAttributionTag(),
-                    transport.getListenerId())) {
+            ICancellationSignal cancelRemote = mService.getCurrentLocation(
+                    currentLocationRequest, transport, mContext.getPackageName(),
+                    mContext.getAttributionTag(), transport.getListenerId());
+            if (cancelRemote != null) {
                 transport.register(mContext.getSystemService(AlarmManager.class),
-                        remoteCancellationSignal);
+                        cancellationSignal);
                 if (cancellationSignal != null) {
-                    cancellationSignal.setOnCancelListener(transport::cancel);
+                    cancellationSignal.setRemote(cancelRemote);
                 }
             } else {
                 transport.fail();
@@ -2540,7 +2539,7 @@ public class LocationManager {
     }
 
     private static class GetCurrentLocationTransport extends ILocationListener.Stub implements
-            AlarmManager.OnAlarmListener {
+            AlarmManager.OnAlarmListener, CancellationSignal.OnCancelListener {
 
         @GuardedBy("this")
         @Nullable
@@ -2572,7 +2571,7 @@ public class LocationManager {
         }
 
         public synchronized void register(AlarmManager alarmManager,
-                ICancellationSignal remoteCancellationSignal) {
+                CancellationSignal cancellationSignal) {
             if (mConsumer == null) {
                 return;
             }
@@ -2585,16 +2584,18 @@ public class LocationManager {
                     this,
                     null);
 
-            mRemoteCancellationSignal = remoteCancellationSignal;
+            if (cancellationSignal != null) {
+                cancellationSignal.setOnCancelListener(this);
+            }
         }
 
-        public void cancel() {
+        @Override
+        public void onCancel() {
             remove();
         }
 
         private Consumer<Location> remove() {
             Consumer<Location> consumer;
-            ICancellationSignal cancellationSignal;
             synchronized (this) {
                 mExecutor = null;
                 consumer = mConsumer;
@@ -2603,18 +2604,6 @@ public class LocationManager {
                 if (mAlarmManager != null) {
                     mAlarmManager.cancel(this);
                     mAlarmManager = null;
-                }
-
-                // ensure only one cancel event will go through
-                cancellationSignal = mRemoteCancellationSignal;
-                mRemoteCancellationSignal = null;
-            }
-
-            if (cancellationSignal != null) {
-                try {
-                    cancellationSignal.cancel();
-                } catch (RemoteException e) {
-                    // ignore
                 }
             }
 
@@ -2637,11 +2626,6 @@ public class LocationManager {
 
         @Override
         public void onLocationChanged(Location location) {
-            synchronized (this) {
-                // save ourselves a pointless x-process call to cancel the location request
-                mRemoteCancellationSignal = null;
-            }
-
             deliverResult(location);
         }
 
