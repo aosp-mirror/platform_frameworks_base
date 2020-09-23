@@ -306,6 +306,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         return effects;
     }
 
+    private int applyTaskDisplayAreaChanges(TaskDisplayArea taskDisplayArea,
+            WindowContainerTransaction.Change c) {
+        int effects = applyDisplayAreaChanges(taskDisplayArea, c);
+        if ((c.getChangeMask()
+                & WindowContainerTransaction.Change.CHANGE_IGNORE_ORIENTATION_REQUEST) != 0) {
+            if (taskDisplayArea.setIgnoreOrientationRequest(c.getIgnoreOrientationRequest())) {
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
+            }
+        }
+
+        return effects;
+    }
+
     private int applyDisplayAreaChanges(WindowContainer container,
             WindowContainerTransaction.Change c) {
         final int[] effects = new int[1];
@@ -388,7 +401,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         int effects = applyChanges(wc, c);
 
-        if (wc instanceof DisplayArea) {
+        if (wc instanceof TaskDisplayArea) {
+            effects |= applyTaskDisplayAreaChanges((TaskDisplayArea) wc, c);
+        } else if (wc instanceof DisplayArea) {
             effects |= applyDisplayAreaChanges(wc, c);
         } else if (wc instanceof Task) {
             effects |= applyTaskChanges(wc.asTask(), c);
