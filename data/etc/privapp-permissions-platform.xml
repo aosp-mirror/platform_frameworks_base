@@ -164,6 +164,7 @@ applications that come with the platform
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.LOCAL_MAC_ADDRESS"/>
         <permission name="android.permission.MANAGE_USERS"/>
+        <permission name="android.permission.MANAGE_SUBSCRIPTION_PLANS" />
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.PACKAGE_USAGE_STATS"/>
         <permission name="android.permission.PERFORM_CDMA_PROVISIONING"/>
