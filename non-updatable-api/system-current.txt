@@ -4339,6 +4339,8 @@ package android.media {
   }
 
   public static final class MediaTranscodeManager.TranscodingRequest {
+    method public int getClientPid();
+    method public int getClientUid();
     method @NonNull public android.net.Uri getDestinationUri();
     method public int getPriority();
     method @NonNull public android.net.Uri getSourceUri();
@@ -4349,6 +4351,8 @@ package android.media {
   public static final class MediaTranscodeManager.TranscodingRequest.Builder {
     ctor public MediaTranscodeManager.TranscodingRequest.Builder();
     method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest build();
+    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setClientPid(int);
+    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setClientUid(int);
     method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setDestinationUri(@NonNull android.net.Uri);
     method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setPriority(int);
     method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setSourceUri(@NonNull android.net.Uri);

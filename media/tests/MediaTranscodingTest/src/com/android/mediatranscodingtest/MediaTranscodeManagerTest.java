@@ -203,6 +203,42 @@ public class MediaTranscodeManagerTest
     }
 
     /**
+     * Verify that setting invalid pid will throw exception.
+     */
+    @Test
+    public void testCreateTranscodingWithInvalidClientPid() throws Exception {
+        assertThrows(IllegalArgumentException.class, () -> {
+            TranscodingRequest request =
+                    new TranscodingRequest.Builder()
+                            .setSourceUri(mSourceHEVCVideoUri)
+                            .setDestinationUri(mDestinationUri)
+                            .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
+                            .setPriority(MediaTranscodeManager.PRIORITY_REALTIME)
+                            .setClientPid(-1)
+                            .setVideoTrackFormat(createMediaFormat())
+                            .build();
+        });
+    }
+
+    /**
+     * Verify that setting invalid uid will throw exception.
+     */
+    @Test
+    public void testCreateTranscodingWithInvalidClientUid() throws Exception {
+        assertThrows(IllegalArgumentException.class, () -> {
+            TranscodingRequest request =
+                    new TranscodingRequest.Builder()
+                            .setSourceUri(mSourceHEVCVideoUri)
+                            .setDestinationUri(mDestinationUri)
+                            .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
+                            .setPriority(MediaTranscodeManager.PRIORITY_REALTIME)
+                            .setClientUid(-1)
+                            .setVideoTrackFormat(createMediaFormat())
+                            .build();
+        });
+    }
+
+    /**
      * Verify that setting null source uri will throw exception.
      */
     @Test
@@ -425,15 +461,23 @@ public class MediaTranscodeManagerTest
         MediaFormat videoTrackFormat = resolver.resolveVideoFormat();
         assertNotNull(videoTrackFormat);
 
+        int pid = android.os.Process.myPid();
+        int uid = android.os.Process.myUid();
+
         TranscodingRequest request =
                 new TranscodingRequest.Builder()
                         .setSourceUri(mSourceHEVCVideoUri)
                         .setDestinationUri(destinationUri)
                         .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
+                        .setClientPid(pid)
+                        .setClientUid(uid)
                         .setPriority(MediaTranscodeManager.PRIORITY_REALTIME)
                         .setVideoTrackFormat(videoTrackFormat)
                         .build();
         Executor listenerExecutor = Executors.newSingleThreadExecutor();
+
+        assertEquals(pid, request.getClientPid());
+        assertEquals(uid, request.getClientUid());
 
         Log.i(TAG, "transcoding to " + videoTrackFormat);
 
