@@ -27,6 +27,9 @@ LOCAL_REQUIRED_MODULES := \
 	AccentColorPaletteOverlay \
 	AccentColorCarbonOverlay \
 	AccentColorSandOverlay \
+	AccentColorAmethystOverlay \
+	AccentColorAquamarineOverlay \
+	AccentColorTangerineOverlay \
 	DisplayCutoutEmulationCornerOverlay \
 	DisplayCutoutEmulationDoubleOverlay \
     DisplayCutoutEmulationHoleOverlay \
