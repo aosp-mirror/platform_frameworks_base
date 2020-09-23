@@ -16,8 +16,6 @@
 
 package com.android.systemui.car.notification;
 
-import static android.view.WindowInsets.Type.navigationBars;
-
 import android.app.ActivityManager;
 import android.car.Car;
 import android.car.drivingstate.CarUxRestrictionsManager;
@@ -25,6 +23,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.inputmethodservice.InputMethodService;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -82,6 +82,7 @@ public class NotificationPanelViewController extends OverlayPanelViewController
     private final StatusBarStateController mStatusBarStateController;
     private final boolean mEnableHeadsUpNotificationWhenNotificationShadeOpen;
     private final NotificationVisibilityLogger mNotificationVisibilityLogger;
+    private final int mNavBarHeight;
 
     private float mInitialBackgroundAlpha;
     private float mBackgroundAlphaDiff;
@@ -138,7 +139,10 @@ public class NotificationPanelViewController extends OverlayPanelViewController
         mStatusBarStateController = statusBarStateController;
         mNotificationVisibilityLogger = notificationVisibilityLogger;
 
+        mNavBarHeight = mResources.getDimensionPixelSize(R.dimen.car_bottom_navigation_bar_height);
+
         mCommandQueue.addCallback(this);
+
         // Notification background setup.
         mInitialBackgroundAlpha = (float) mResources.getInteger(
                 R.integer.config_initialNotificationBackgroundAlpha) / 100;
@@ -179,6 +183,21 @@ public class NotificationPanelViewController extends OverlayPanelViewController
         }
     }
 
+    @Override
+    public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
+            boolean showImeSwitcher) {
+        if (mContext.getDisplayId() != displayId) {
+            return;
+        }
+        boolean isKeyboardVisible = (vis & InputMethodService.IME_VISIBLE) != 0;
+        int bottomMargin = isKeyboardVisible ? 0 : mNavBarHeight;
+        ViewGroup container = (ViewGroup) getLayout();
+        ViewGroup.MarginLayoutParams params =
+                (ViewGroup.MarginLayoutParams) container.getLayoutParams();
+        params.setMargins(params.leftMargin, params.topMargin, params.rightMargin, bottomMargin);
+        container.setLayoutParams(params);
+    }
+
     // OverlayViewController
 
     @Override
@@ -204,7 +223,7 @@ public class NotificationPanelViewController extends OverlayPanelViewController
 
     @Override
     protected int getInsetTypesToFit() {
-        return navigationBars();
+        return 0;
     }
 
     @Override
