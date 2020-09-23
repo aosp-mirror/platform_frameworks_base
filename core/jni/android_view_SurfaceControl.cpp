@@ -1557,6 +1557,13 @@ static void nativeSetFocusedWindow(JNIEnv* env, jclass clazz, jlong transactionO
                                   displayId);
 }
 
+static void nativeSetFrameTimelineVsync(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                        jlong frameTimelineVsyncId) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    transaction->setFrameTimelineVsync(frameTimelineVsyncId);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
@@ -1741,6 +1748,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetFixedTransformHint},
     {"nativeSetFocusedWindow", "(JLandroid/os/IBinder;Landroid/os/IBinder;I)V",
             (void*)nativeSetFocusedWindow},
+    {"nativeSetFrameTimelineVsync", "(JJ)V",
+            (void*)nativeSetFrameTimelineVsync },
         // clang-format on
 };
 

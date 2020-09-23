@@ -181,6 +181,7 @@ public final class Choreographer {
     private long mFrameIntervalNanos;
     private boolean mDebugPrintNextFrameTimeDelta;
     private int mFPSDivisor = 1;
+    private long mLastVsyncId = FrameInfo.INVALID_VSYNC_ID;
 
     /**
      * Contains information about the current frame for jank-tracking,
@@ -654,6 +655,18 @@ public final class Choreographer {
         }
     }
 
+    /**
+     * Returns the vsync id of the last frame callback. Client are expected to call
+     * this function from their frame callback function to get the vsyncId and pass
+     * it together with a buffer or transaction to the Surface Composer. Calling
+     * this function from anywhere else will return an undefined value.
+     *
+     * @hide
+     */
+    public long getVsyncId() {
+        return mLastVsyncId;
+    }
+
     void setFPSDivisor(int divisor) {
         if (divisor <= 0) divisor = 1;
         mFPSDivisor = divisor;
@@ -713,6 +726,7 @@ public final class Choreographer {
             mFrameInfo.setVsync(intendedFrameTimeNanos, frameTimeNanos, frameTimelineVsyncId);
             mFrameScheduled = false;
             mLastFrameTimeNanos = frameTimeNanos;
+            mLastVsyncId = frameTimelineVsyncId;
         }
 
         try {
