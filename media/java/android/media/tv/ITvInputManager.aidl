@@ -89,7 +89,7 @@ interface ITvInputManager {
     void timeShiftSetPlaybackParams(in IBinder sessionToken, in PlaybackParams params, int userId);
     void timeShiftEnablePositionTracking(in IBinder sessionToken, boolean enable, int userId);
 
-    List<TvChannelInfo> getTvCurrentChannelInfos(int userId);
+    List<TvChannelInfo> getCurrentTvChannelInfos(int userId);
 
     // For the recording session
     void startRecording(in IBinder sessionToken, in Uri programUri, in Bundle params, int userId);
