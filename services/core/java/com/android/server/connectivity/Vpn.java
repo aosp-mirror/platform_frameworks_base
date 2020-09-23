@@ -2755,7 +2755,10 @@ public class Vpn {
                     final LinkProperties lp = cm.getLinkProperties(network);
                     if (lp != null && lp.getAllInterfaceNames().contains(mOuterInterface)) {
                         final NetworkInfo networkInfo = cm.getNetworkInfo(network);
-                        if (networkInfo != null) mOuterConnection.set(networkInfo.getType());
+                        if (networkInfo != null) {
+                            mOuterConnection.set(networkInfo.getType());
+                            break;
+                        }
                     }
                 }
             }
