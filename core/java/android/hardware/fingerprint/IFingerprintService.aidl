@@ -118,7 +118,7 @@ interface IFingerprintService {
     void removeClientActiveCallback(IFingerprintClientActiveCallback callback);
 
     // Give FingerprintService its ID. See AuthService.java
-    void initializeConfiguration(int sensorId);
+    void initializeConfiguration(int sensorId, int strength);
 
     // Notifies about a finger touching the sensor area.
     void onFingerDown(int x, int y, float minor, float major);
