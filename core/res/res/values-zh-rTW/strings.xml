@@ -1829,6 +1829,7 @@
       <item quantity="other">%d 小時</item>
       <item quantity="one">1 小時</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"結束時間：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"結束時間：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"到<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> 為止 (下一個鬧鐘)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"直到你關閉為止"</string>

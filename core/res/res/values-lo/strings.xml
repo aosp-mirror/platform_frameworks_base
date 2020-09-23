@@ -1829,6 +1829,7 @@
       <item quantity="other">ເປັນ​ເວ​ລາ %d ຊມ</item>
       <item quantity="one">ເປັນ​ເວ​ລາ 1 ຊມ</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"ຈົນຮອດ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"ຈົນ​ກ​່​ວາ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ສັນ​ຍານ​ເຕືອນ​ຕໍ່ໄປ​)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"ຈົນກວ່າທ່ານຈະປິດ"</string>
