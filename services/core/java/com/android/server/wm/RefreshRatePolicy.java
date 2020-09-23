@@ -30,7 +30,7 @@ class RefreshRatePolicy {
 
     private final int mLowRefreshRateId;
     private final ArraySet<String> mNonHighRefreshRatePackages = new ArraySet<>();
-    private final HighRefreshRateBlacklist mHighRefreshRateBlacklist;
+    private final HighRefreshRateDenylist mHighRefreshRateDenylist;
     private final WindowManagerService mWmService;
 
     /**
@@ -55,9 +55,9 @@ class RefreshRatePolicy {
     static final int LAYER_PRIORITY_NOT_FOCUSED_WITH_MODE = 2;
 
     RefreshRatePolicy(WindowManagerService wmService, DisplayInfo displayInfo,
-            HighRefreshRateBlacklist blacklist) {
+            HighRefreshRateDenylist denylist) {
         mLowRefreshRateId = findLowRefreshRateModeId(displayInfo);
-        mHighRefreshRateBlacklist = blacklist;
+        mHighRefreshRateDenylist = denylist;
         mWmService = wmService;
     }
 
@@ -108,7 +108,7 @@ class RefreshRatePolicy {
         }
 
         // If app is denylisted using higher refresh rate, return default (lower) refresh rate
-        if (mHighRefreshRateBlacklist.isBlacklisted(packageName)) {
+        if (mHighRefreshRateDenylist.isDenylisted(packageName)) {
             return mLowRefreshRateId;
         }
         return 0;

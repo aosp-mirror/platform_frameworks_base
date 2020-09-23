@@ -649,7 +649,7 @@ public class DisplayPolicy {
 
         mRefreshRatePolicy = new RefreshRatePolicy(mService,
                 mDisplayContent.getDisplayInfo(),
-                mService.mHighRefreshRateBlacklist);
+                mService.mHighRefreshRateDenylist);
 
         mGestureNavigationSettingsObserver = new GestureNavigationSettingsObserver(mHandler,
                 mContext, () -> {
