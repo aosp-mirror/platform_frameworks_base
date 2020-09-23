@@ -177,9 +177,8 @@ inline ConfigDescription& ConfigDescription::operator=(ConfigDescription&& o) no
   return *this;
 }
 
-inline bool ConfigDescription::MatchWithDensity(
-    const ConfigDescription& o) const {
-  return match(o) && (density == 0 || density == o.density);
+inline bool ConfigDescription::MatchWithDensity(const ConfigDescription& o) const {
+  return match(o) && (density == 0 || o.density != 0);
 }
 
 inline bool ConfigDescription::operator<(const ConfigDescription& o) const {

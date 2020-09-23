@@ -146,8 +146,15 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public int uiOptions = 0;
 
     /**
-     * Value for {@link #flags}: if set, this application is installed in the
-     * device's system image.
+     * Value for {@link #flags}: if set, this application is installed in the device's system image.
+     * This should not be used to make security decisions. Instead, rely on
+     * {@linkplain android.content.pm.PackageManager#checkSignatures(java.lang.String,java.lang.String)
+     * signature checks} or
+     * <a href="https://developer.android.com/training/articles/security-tips#Permissions">permissions</a>.
+     *
+     * <p><b>Warning:</b> Note that does flag not behave the same as
+     * {@link android.R.attr#protectionLevel android:protectionLevel} {@code system} or
+     * {@code signatureOrSystem}.
      */
     public static final int FLAG_SYSTEM = 1<<0;
     
