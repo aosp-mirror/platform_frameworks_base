@@ -9152,10 +9152,6 @@ package android.telecom {
     method public final void addExistingConnection(@NonNull android.telecom.PhoneAccountHandle, @NonNull android.telecom.Connection, @NonNull android.telecom.Conference);
   }
 
-  public final class DisconnectCause implements android.os.Parcelable {
-    field public static final String REASON_EMULATING_SINGLE_CALL = "EMULATING_SINGLE_CALL";
-  }
-
   public abstract class InCallService extends android.app.Service {
     method @Deprecated public android.telecom.Phone getPhone();
     method @Deprecated public void onPhoneCreated(android.telecom.Phone);
