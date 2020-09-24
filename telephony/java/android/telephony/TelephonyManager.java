@@ -5499,23 +5499,6 @@ public class TelephonyManager {
         }
     }
 
-    /**
-     * Convert data state to string
-     *
-     * @return The data state in string format.
-     * @hide
-     */
-    public static String dataStateToString(@DataState int state) {
-        switch (state) {
-            case DATA_DISCONNECTED: return "DISCONNECTED";
-            case DATA_CONNECTING: return "CONNECTING";
-            case DATA_CONNECTED: return "CONNECTED";
-            case DATA_SUSPENDED: return "SUSPENDED";
-            case DATA_DISCONNECTING: return "DISCONNECTING";
-        }
-        return "UNKNOWN(" + state + ")";
-    }
-
    /**
     * @hide
     */

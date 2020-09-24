@@ -89,6 +89,7 @@ import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.TelephonyPermissions;
+import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -1723,7 +1724,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         && (mDataConnectionState[phoneId] != state
                         || mDataConnectionNetworkType[phoneId] != networkType)) {
                     String str = "onDataConnectionStateChanged("
-                            + dataStateToString(state)
+                            + TelephonyUtils.dataStateToString(state)
                             + ", " + getNetworkTypeName(networkType)
                             + ") subId=" + subId + ", phoneId=" + phoneId;
                     log(str);
@@ -2580,7 +2581,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         // status bar takes care of that after taking into account all of the
         // required info.
         Intent intent = new Intent(ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
-        intent.putExtra(PHONE_CONSTANTS_STATE_KEY, dataStateToString(state));
+        intent.putExtra(PHONE_CONSTANTS_STATE_KEY, TelephonyUtils.dataStateToString(state));
         intent.putExtra(PHONE_CONSTANTS_DATA_APN_KEY, apn);
         intent.putExtra(PHONE_CONSTANTS_DATA_APN_TYPE_KEY,
                 ApnSetting.getApnTypesStringFromBitmask(apnType));
@@ -2935,21 +2936,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mRemoveList.add(r.binder);
             }
         }
-    }
-
-    /**
-     * Convert TelephonyManager.DATA_* to string.
-     *
-     * @return The data state in string format.
-     */
-    private static String dataStateToString(int state) {
-        switch (state) {
-            case TelephonyManager.DATA_DISCONNECTED: return "DISCONNECTED";
-            case TelephonyManager.DATA_CONNECTING: return "CONNECTING";
-            case TelephonyManager.DATA_CONNECTED: return "CONNECTED";
-            case TelephonyManager.DATA_SUSPENDED: return "SUSPENDED";
-        }
-        return "UNKNOWN(" + state + ")";
     }
 
     /**
