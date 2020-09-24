@@ -77,8 +77,10 @@ public class DisplayAdjustmentsTests {
         final int realRotation = Surface.ROTATION_0;
         final int fixedRotation = Surface.ROTATION_90;
 
-        mDisplayAdjustments.setFixedRotationAdjustments(
-                new FixedRotationAdjustments(fixedRotation, null /* cutout */));
+        final int appWidth = 1080;
+        final int appHeight = 1920;
+        mDisplayAdjustments.setFixedRotationAdjustments(new FixedRotationAdjustments(
+                fixedRotation, appWidth, appHeight, null /* cutout */));
 
         final int w = 1000;
         final int h = 2000;
@@ -95,13 +97,21 @@ public class DisplayAdjustmentsTests {
         metrics.heightPixels = metrics.noncompatHeightPixels = h;
 
         final DisplayMetrics flippedMetrics = new DisplayMetrics();
-        flippedMetrics.xdpi = flippedMetrics.noncompatXdpi = h;
+        // The physical dpi should not be adjusted.
+        flippedMetrics.xdpi = flippedMetrics.noncompatXdpi = w;
         flippedMetrics.widthPixels = flippedMetrics.noncompatWidthPixels = h;
-        flippedMetrics.ydpi = flippedMetrics.noncompatYdpi = w;
+        flippedMetrics.ydpi = flippedMetrics.noncompatYdpi = h;
         flippedMetrics.heightPixels = flippedMetrics.noncompatHeightPixels = w;
 
         mDisplayAdjustments.adjustMetrics(metrics, realRotation);
 
         assertEquals(flippedMetrics, metrics);
+
+        mDisplayAdjustments.adjustGlobalAppMetrics(metrics);
+
+        assertEquals(appWidth, metrics.widthPixels);
+        assertEquals(appWidth, metrics.noncompatWidthPixels);
+        assertEquals(appHeight, metrics.heightPixels);
+        assertEquals(appHeight, metrics.noncompatHeightPixels);
     }
 }
