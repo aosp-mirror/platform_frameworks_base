@@ -16,6 +16,7 @@ package com.android.systemui;
 
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.slice.SliceManager;
@@ -28,6 +29,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.BidiFormatter;
+import android.util.EventLog;
 import android.util.Log;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -49,10 +51,12 @@ public class SlicePermissionActivity extends Activity implements OnClickListener
 
         mUri = getIntent().getParcelableExtra(SliceProvider.EXTRA_BIND_URI);
         mCallingPkg = getIntent().getStringExtra(SliceProvider.EXTRA_PKG);
-        mProviderPkg = getIntent().getStringExtra(SliceProvider.EXTRA_PROVIDER_PKG);
 
         try {
             PackageManager pm = getPackageManager();
+            mProviderPkg = pm.resolveContentProvider(mUri.getAuthority(),
+                    PackageManager.GET_META_DATA).applicationInfo.packageName;
+            verifyCallingPkg();
             CharSequence app1 = BidiFormatter.getInstance().unicodeWrap(
                     pm.getApplicationInfo(mCallingPkg, 0).loadSafeLabel(pm).toString());
             CharSequence app2 = BidiFormatter.getInstance().unicodeWrap(
@@ -91,5 +95,30 @@ public class SlicePermissionActivity extends Activity implements OnClickListener
     @Override
     public void onDismiss(DialogInterface dialog) {
         finish();
+    }
+
+    private void verifyCallingPkg() {
+        final String providerPkg = getIntent().getStringExtra("provider_pkg");
+        if (providerPkg == null || mProviderPkg.equals(providerPkg)) return;
+        final String callingPkg = getCallingPkg();
+        EventLog.writeEvent(0x534e4554, "159145361", getUid(callingPkg), String.format(
+                "pkg %s (disguised as %s) attempted to request permission to show %s slices in %s",
+                callingPkg, providerPkg, mProviderPkg, mCallingPkg));
+    }
+
+    @Nullable
+    private String getCallingPkg() {
+        final Uri referrer = getReferrer();
+        if (referrer == null) return null;
+        return referrer.getHost();
+    }
+
+    private int getUid(@Nullable final String pkg) {
+        if (pkg == null) return -1;
+        try {
+            return getPackageManager().getApplicationInfo(pkg, 0).uid;
+        } catch (NameNotFoundException e) {
+        }
+        return -1;
     }
 }
