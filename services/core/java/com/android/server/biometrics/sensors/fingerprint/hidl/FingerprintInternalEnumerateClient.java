@@ -14,39 +14,45 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.fingerprint;
+package com.android.server.biometrics.sensors.fingerprint.hidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
+import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.sensors.RevokeChallengeClient;
+import com.android.server.biometrics.sensors.BiometricUtils;
+import com.android.server.biometrics.sensors.InternalEnumerateClient;
+
+import java.util.List;
 
 /**
- * Fingerprint-specific revokeChallenge client supporting the
+ * Fingerprint-specific internal enumerate client supporting the
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
-public class FingerprintRevokeChallengeClient
-        extends RevokeChallengeClient<IBiometricsFingerprint> {
+class FingerprintInternalEnumerateClient extends InternalEnumerateClient<IBiometricsFingerprint> {
+    private static final String TAG = "FingerprintInternalEnumerateClient";
 
-    private static final String TAG = "FingerprintRevokeChallengeClient";
-
-    FingerprintRevokeChallengeClient(@NonNull Context context,
+    FingerprintInternalEnumerateClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
-            @NonNull String owner, int sensorId) {
-        super(context, lazyDaemon, token, owner, sensorId);
+            int userId, @NonNull String owner, @NonNull List<Fingerprint> enrolledList,
+            @NonNull BiometricUtils utils, int sensorId) {
+        super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
+                BiometricsProtoEnums.MODALITY_FINGERPRINT);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().postEnroll();
+            getFreshDaemon().enumerate();
         } catch (RemoteException e) {
-            Slog.e(TAG, "revokeChallenge/postEnroll failed", e);
+            Slog.e(TAG, "Remote exception when requesting enumerate", e);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 }

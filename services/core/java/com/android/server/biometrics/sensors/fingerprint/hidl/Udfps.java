@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.fingerprint;
+package com.android.server.biometrics.sensors.fingerprint.hidl;
 
 /**
  * Interface for under-display fingerprint sensors.

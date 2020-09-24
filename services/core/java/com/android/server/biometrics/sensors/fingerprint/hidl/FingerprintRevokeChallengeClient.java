@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.fingerprint;
+package com.android.server.biometrics.sensors.fingerprint.hidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -23,31 +23,30 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.GenerateChallengeClient;
+import com.android.server.biometrics.sensors.RevokeChallengeClient;
 
 /**
- * Fingerprint-specific generateChallenge/preEnroll client supporting the
+ * Fingerprint-specific revokeChallenge client supporting the
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
-public class FingerprintGenerateChallengeClient
-        extends GenerateChallengeClient<IBiometricsFingerprint> {
+public class FingerprintRevokeChallengeClient
+        extends RevokeChallengeClient<IBiometricsFingerprint> {
 
-    private static final String TAG = "FingerprintGenerateChallengeClient";
+    private static final String TAG = "FingerprintRevokeChallengeClient";
 
-    FingerprintGenerateChallengeClient(@NonNull Context context,
+    FingerprintRevokeChallengeClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, @NonNull String owner, int sensorId) {
-        super(context, lazyDaemon, token, listener, owner, sensorId);
+            @NonNull String owner, int sensorId) {
+        super(context, lazyDaemon, token, owner, sensorId);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            mChallenge = getFreshDaemon().preEnroll();
+            getFreshDaemon().postEnroll();
         } catch (RemoteException e) {
-            Slog.e(TAG, "preEnroll failed", e);
+            Slog.e(TAG, "revokeChallenge/postEnroll failed", e);
         }
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.fingerprint;
+package com.android.server.biometrics.sensors.fingerprint.hidl;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -43,6 +43,7 @@ import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
+import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -267,7 +268,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
         }
     }
 
-    static Fingerprint21UdfpsMock newInstance(@NonNull Context context, int sensorId,
+    public static Fingerprint21UdfpsMock newInstance(@NonNull Context context, int sensorId,
             @BiometricManager.Authenticators.Types int strength,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
@@ -450,12 +451,12 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
 
     @Override
     @NonNull
-    FingerprintSensorProperties getFingerprintSensorProperties() {
+    public FingerprintSensorProperties getFingerprintSensorProperties() {
         return mSensorProperties;
     }
 
     @Override
-    void onFingerDown(int x, int y, float minor, float major) {
+    public void onFingerDown(int x, int y, float minor, float major) {
         mHandler.post(() -> {
             Slog.d(TAG, "onFingerDown");
             final AuthenticationConsumer lastAuthenticatedConsumer =
@@ -502,7 +503,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     @Override
-    void onFingerUp() {
+    public void onFingerUp() {
         mHandler.post(() -> {
             Slog.d(TAG, "onFingerUp");
 
