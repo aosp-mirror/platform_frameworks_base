@@ -82,7 +82,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
-import com.android.systemui.bubbles.animation.StackAnimationController;
 import com.android.systemui.bubbles.dagger.BubbleModule;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
@@ -407,7 +406,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             if (bubble.getBubbleIntent() == null) {
                 return;
             }
-            if (bubble.isIntentActive()) {
+            if (bubble.isIntentActive()
+                    || mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
                 bubble.setPendingIntentCanceled();
                 return;
             }
@@ -1120,8 +1120,17 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         if (notif.getImportance() >= NotificationManager.IMPORTANCE_HIGH) {
             notif.setInterruption();
         }
-        Bubble bubble = mBubbleData.getOrCreateBubble(notif, null /* persistedBubble */);
-        inflateAndAdd(bubble, suppressFlyout, showInShade);
+        if (!notif.getRanking().visuallyInterruptive()
+                && (notif.getBubbleMetadata() != null
+                    && !notif.getBubbleMetadata().getAutoExpandBubble())
+                && mBubbleData.hasOverflowBubbleWithKey(notif.getKey())) {
+            // Update the bubble but don't promote it out of overflow
+            Bubble b = mBubbleData.getOverflowBubbleWithKey(notif.getKey());
+            b.setEntry(notif);
+        } else {
+            Bubble bubble = mBubbleData.getOrCreateBubble(notif, null /* persistedBubble */);
+            inflateAndAdd(bubble, suppressFlyout, showInShade);
+        }
     }
 
     void inflateAndAdd(Bubble bubble, boolean suppressFlyout, boolean showInShade) {
