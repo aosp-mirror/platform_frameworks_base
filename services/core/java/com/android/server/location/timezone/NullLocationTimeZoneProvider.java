@@ -23,6 +23,8 @@ import android.annotation.Nullable;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
+import java.time.Duration;
+
 /**
  * A {@link LocationTimeZoneProvider} that provides minimal responses needed for the {@link
  * LocationTimeZoneProviderController} to operate correctly when there is no "real" provider
@@ -55,7 +57,7 @@ class NullLocationTimeZoneProvider extends LocationTimeZoneProvider {
     }
 
     @Override
-    void onEnable() {
+    void onEnable(@NonNull Duration initializationTimeout) {
         // Report a failure (asynchronously using the mThreadingDomain thread to avoid recursion).
         mThreadingDomain.post(()-> {
             // Enter the perm-failed state.

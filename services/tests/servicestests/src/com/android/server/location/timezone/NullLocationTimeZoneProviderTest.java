@@ -34,6 +34,8 @@ import com.android.server.timezonedetector.TestState;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.Duration;
+
 /**
  * Tests for {@link NullLocationTimeZoneProvider} and, indirectly, the class it extends
  * {@link LocationTimeZoneProvider}.
@@ -73,7 +75,8 @@ public class NullLocationTimeZoneProviderTest {
         provider.initialize(providerState -> mTestController.onProviderStateChange(providerState));
 
         ConfigurationInternal config = USER1_CONFIG_GEO_DETECTION_ENABLED;
-        provider.enable(config);
+        Duration arbitraryInitializationTimeout = Duration.ofMinutes(5);
+        provider.enable(config, arbitraryInitializationTimeout);
 
         // The StubbedProvider should enters enabled state, but immediately schedule a runnable to
         // switch to perm failure.

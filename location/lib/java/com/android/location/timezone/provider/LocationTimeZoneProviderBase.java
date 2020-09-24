@@ -18,7 +18,6 @@ package com.android.location.timezone.provider;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.location.timezone.LocationTimeZoneEvent;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -30,12 +29,34 @@ import com.android.internal.location.timezone.LocationTimeZoneProviderRequest;
 import java.util.Objects;
 
 /**
- * Base class for location time zone providers implemented as unbundled services.
+ * A base class for location time zone providers implemented as unbundled services.
  *
- * TODO(b/152744911): Provide details of the expected service actions and threading.
+ * <p>Provider implementations are enabled / disabled via a call to {@link
+ * #onSetRequest(LocationTimeZoneProviderRequestUnbundled)}.
+ *
+ * <p>Once enabled, providers are expected to detect the time zone if possible, and report the
+ * result via {@link #reportLocationTimeZoneEvent(LocationTimeZoneEventUnbundled)}  with a type of
+ * either {@link LocationTimeZoneEventUnbundled#EVENT_TYPE_UNCERTAIN} or {@link
+ * LocationTimeZoneEventUnbundled#EVENT_TYPE_SUCCESS}. Providers may also report that they have
+ * permanently failed by sending an event of type {@link
+ * LocationTimeZoneEventUnbundled#EVENT_TYPE_PERMANENT_FAILURE}. See the javadocs for each event
+ * type for details.
+ *
+ * <p>Providers are expected to issue their first event within {@link
+ * LocationTimeZoneProviderRequest#getInitializationTimeoutMillis()}.
+ *
+ * <p>Once disabled or have failed, providers are required to stop producing events.
+ *
+ * <p>Threading:
+ *
+ * <p>Calls to {@link #reportLocationTimeZoneEvent(LocationTimeZoneEventUnbundled)} can be made on
+ * on any thread, but may be processed asynchronously by the system server. Similarly, calls to
+ * {@link #onSetRequest(LocationTimeZoneProviderRequestUnbundled)} may occur on any thread.
  *
  * <p>IMPORTANT: This class is effectively a public API for unbundled applications, and must remain
  * API stable.
+ *
+ * @hide
  */
 public abstract class LocationTimeZoneProviderBase {
 
@@ -64,11 +85,11 @@ public abstract class LocationTimeZoneProviderBase {
     /**
      * Reports a new location time zone event from this provider.
      */
-    public void reportLocationTimeZoneEvent(LocationTimeZoneEvent locationTimeZoneEvent) {
+    protected void reportLocationTimeZoneEvent(LocationTimeZoneEventUnbundled event) {
         ILocationTimeZoneProviderManager manager = mManager;
         if (manager != null) {
             try {
-                manager.onLocationTimeZoneEvent(locationTimeZoneEvent);
+                manager.onLocationTimeZoneEvent(event.getInternalLocationTimeZoneEvent());
             } catch (RemoteException | RuntimeException e) {
                 Log.w(mTag, e);
             }
