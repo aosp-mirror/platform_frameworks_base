@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.FloatingContentCoordinator;
+import com.android.systemui.wmshell.WindowManagerShellWrapper;
 
 import dagger.Module;
 import dagger.Provides;
@@ -73,6 +74,7 @@ public interface BubbleModule {
             INotificationManager notifManager,
             IStatusBarService statusBarService,
             WindowManager windowManager,
+            WindowManagerShellWrapper windowManagerShellWrapper,
             LauncherApps launcherApps) {
         return new BubbleController(
                 context,
@@ -96,6 +98,7 @@ public interface BubbleModule {
                 notifManager,
                 statusBarService,
                 windowManager,
+                windowManagerShellWrapper,
                 launcherApps);
     }
 }

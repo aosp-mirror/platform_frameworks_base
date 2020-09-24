@@ -49,8 +49,6 @@ public class TvWMShellModule {
         return new DisplayImeController(wmService, displayController, mainHandler, transactionPool);
     }
 
-    @SysUISingleton
-    @Provides
     static SplitScreen provideSplitScreen(Context context,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController displayImeController, @Main Handler handler,
