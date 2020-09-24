@@ -17,9 +17,15 @@ package com.android.systemui.statusbar.policy;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+
 import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ShortcutManager;
@@ -130,8 +136,18 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
     private UserHandle getTargetInputMethodUser(UserHandle fromUser, UserHandle toUser)
             throws Exception {
+        /**
+         * RemoteInputView, Icon, and Bubble have the situation need to handle the other user.
+         * SystemUI cross multiple user but this test(com.android.systemui.tests) doesn't cross
+         * multiple user. It needs some of mocking multiple user environment to ensure the
+         * createContextAsUser without throwing IllegalStateException.
+         */
+        Context contextSpy = spy(mContext);
+        doReturn(contextSpy).when(contextSpy).createContextAsUser(any(), anyInt());
+        doReturn(toUser.getIdentifier()).when(contextSpy).getUserId();
+
         NotificationTestHelper helper = new NotificationTestHelper(
-                mContext,
+                contextSpy,
                 mDependency,
                 TestableLooper.get(this));
         ExpandableNotificationRow row = helper.createRow(
