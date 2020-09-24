@@ -33,8 +33,7 @@ namespace android {
 MinikinFontSkia::MinikinFontSkia(sk_sp<SkTypeface> typeface, const void* fontData, size_t fontSize,
                                  std::string_view filePath, int ttcIndex,
                                  const std::vector<minikin::FontVariation>& axes)
-        : minikin::MinikinFont(typeface->uniqueID())
-        , mTypeface(std::move(typeface))
+        : mTypeface(std::move(typeface))
         , mFontData(fontData)
         , mFontSize(fontSize)
         , mTtcIndex(ttcIndex)
