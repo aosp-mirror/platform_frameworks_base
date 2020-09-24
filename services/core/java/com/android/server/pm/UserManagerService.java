@@ -4709,7 +4709,7 @@ public class UserManagerService extends IUserManager.Stub {
                 final boolean running = am.isUserRunning(user.id, 0);
                 final boolean current = user.id == currentUser;
                 if (verbose) {
-                    pw.printf("%d: id=%d, name=%s, flags=%s%s%s%s%s\n", i, user.id, user.name,
+                    pw.printf("%d: id=%d, name=%s, flags=%s%s%s%s%s%s\n", i, user.id, user.name,
                             UserInfo.flagsToString(user.flags),
                             running ? " (running)" : "",
                             user.partial ? " (partial)" : "",
