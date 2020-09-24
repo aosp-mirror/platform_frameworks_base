@@ -39,7 +39,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Test Pip launch.
- * To run this test: `atest FlickerTests:PipToAppTest`
+ * To run this test: `atest WMShellFlickerTests:PipToAppTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
