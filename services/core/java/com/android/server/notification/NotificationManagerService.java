@@ -8019,7 +8019,7 @@ public class NotificationManagerService extends SystemService {
             int callingUid, int callingPid, String pkg, boolean nullPkgIndicatesUserSwitch,
             String channelId, FlagChecker flagChecker, boolean includeCurrentProfiles, int userId,
             boolean sendDelete, int reason, String listenerName, boolean wasPosted) {
-        ArrayList<NotificationRecord> canceledNotifications = null;
+        Set<String> childNotifications = null;
         for (int i = notificationList.size() - 1; i >= 0; --i) {
             NotificationRecord r = notificationList.get(i);
             if (includeCurrentProfiles) {
@@ -8042,20 +8042,30 @@ public class NotificationManagerService extends SystemService {
             if (channelId != null && !channelId.equals(r.getChannel().getId())) {
                 continue;
             }
-            if (canceledNotifications == null) {
-                canceledNotifications = new ArrayList<>();
+            if (r.getSbn().isGroup() && r.getNotification().isGroupChild()) {
+                if (childNotifications == null) {
+                    childNotifications = new HashSet<>();
+                }
+                childNotifications.add(r.getKey());
+                continue;
             }
             notificationList.remove(i);
             mNotificationsByKey.remove(r.getKey());
             r.recordDismissalSentiment(NotificationStats.DISMISS_SENTIMENT_NEUTRAL);
-            canceledNotifications.add(r);
             cancelNotificationLocked(r, sendDelete, reason, wasPosted, listenerName);
         }
-        if (canceledNotifications != null) {
-            final int M = canceledNotifications.size();
-            for (int i = 0; i < M; i++) {
-                cancelGroupChildrenLocked(canceledNotifications.get(i), callingUid, callingPid,
-                        listenerName, false /* sendDelete */, flagChecker, reason);
+        if (childNotifications != null) {
+            final int M = notificationList.size();
+            for (int i = M - 1; i >= 0; i--) {
+                NotificationRecord r = notificationList.get(i);
+                if (childNotifications.contains(r.getKey())) {
+                    // dismiss conditions were checked in the first loop and so don't need to be
+                    // checked again
+                    notificationList.remove(i);
+                    mNotificationsByKey.remove(r.getKey());
+                    r.recordDismissalSentiment(NotificationStats.DISMISS_SENTIMENT_NEUTRAL);
+                    cancelNotificationLocked(r, sendDelete, reason, wasPosted, listenerName);
+                }
             }
             updateLightsLocked();
         }
