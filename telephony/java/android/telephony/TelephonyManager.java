@@ -76,6 +76,7 @@ import android.telephony.Annotation.CarrierPrivilegeStatus;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
+import android.telephony.Annotation.ThermalMitigationResult;
 import android.telephony.Annotation.UiccAppType;
 import android.telephony.CallForwardingInfo.CallForwardingReason;
 import android.telephony.VisualVoicemailService.VisualVoicemailTask;
@@ -14042,5 +14043,107 @@ public class TelephonyManager {
         }
 
         return Collections.emptyList();
+    }
+
+    /**
+     * Indicates that the thermal mitigation request was completed successfully.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int THERMAL_MITIGATION_RESULT_SUCCESS = 0;
+
+    /**
+     * Indicates that the thermal mitigation request was not completed because of a modem error.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int THERMAL_MITIGATION_RESULT_MODEM_ERROR = 1;
+
+    /**
+     * Indicates that the thermal mitigation request was not completed because the modem is not
+     * available.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int THERMAL_MITIGATION_RESULT_MODEM_NOT_AVAILABLE = 2;
+
+    /**
+     * Indicates that the thermal mitigation request could not power off the radio due to the device
+     * either being in an active voice call, device pending an emergency call, or any other state
+     * that would dissallow powering off of radio.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int THERMAL_MITIGATION_RESULT_INVALID_STATE = 3;
+
+    /**
+     * Indicates that the thermal mitigation request resulted an unknown error.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int THERMAL_MITIGATION_RESULT_UNKNOWN_ERROR = 4;
+
+    /**
+     * Thermal mitigation request to control functionalities at modem. Thermal mitigation is done
+     * per-subscription. Caller must be sure to bind the TelephonyManager instance to subId by
+     * calling {@link #createForSubscriptionId(int)} if they want thermal mitigation on a specific
+     * subscription Id. Otherwise, TelephonyManager will use the default subscription.
+     *
+     * Calling this does not guarantee that the thermal mitigation action requested was done to
+     * completion. A thermal module should actively monitor the temperature levels and request an
+     * appropriate thermal mitigation action. Every action is assumed to be done 'on top of' the
+     * previous action, where the order of actions from least thermal mitigation to most is as
+     * follows:
+     * <ol>
+     *   <li>{@link ThermalMitigationRequest#THERMAL_MITIGATION_ACTION_DATA_THROTTLING}</li>
+     *   <ol>
+     *      <li>{@link DataThrottlingRequest#DATA_THROTTLING_ACTION_NO_DATA_THROTTLING}</li>
+     *      <li>{@link DataThrottlingRequest#DATA_THROTTLING_ACTION_THROTTLE_SECONDARY_CARRIER}</li>
+     *      <li>{@link DataThrottlingRequest#DATA_THROTTLING_ACTION_THROTTLE_PRIMARY_CARRIER}</li>
+     *   </ol>
+     *   <li>{@link ThermalMitigationRequest#THERMAL_MITIGATION_ACTION_VOICE_ONLY}</li>
+     *   <li>{@link ThermalMitigationRequest#THERMAL_MITIGATION_ACTION_RADIO_OFF}</li>
+     * </ol>
+     *
+     * So, for example, requesting {@link
+     * DataThrottlingRequest#DATA_THROTTLING_ACTION_THROTTLE_PRIMARY_CARRIER} will ensure that the
+     * data on secondary carrier has been disabled before throttling on primary carrier. {@link
+     * ThermalMitigationRequest#THERMAL_MITIGATION_ACTION_VOICE_ONLY} will ensure that data on both
+     * primary and secondary have been disabled. {@link
+     * ThermalMitigationRequest#THERMAL_MITIGATION_ACTION_RADIO_OFF} will ensure that voice is
+     * disabled and that data on both primary and secondary carriers are disabled before turning
+     * radio off. {@link DataThrottlingRequest#DATA_THROTTLING_ACTION_HOLD} is not part of the order
+     * and can be used at any time during data throttling to hold onto the current level of data
+     * throttling.
+     *
+     * @param thermalMitigationRequest Thermal mitigation request. See {@link
+     * ThermalMitigationRequest} for details.
+     *
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @throws IllegalArgumentException if the thermalMitigationRequest had invalid parameters.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @ThermalMitigationResult
+    public int sendThermalMitigationRequest(
+            @NonNull ThermalMitigationRequest thermalMitigationRequest) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.sendThermalMitigationRequest(getSubId(), thermalMitigationRequest);
+            }
+            throw new IllegalStateException("telephony service is null.");
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Telephony#thermalMitigationRequest RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+        return THERMAL_MITIGATION_RESULT_UNKNOWN_ERROR;
     }
 }

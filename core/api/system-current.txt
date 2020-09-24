@@ -9615,6 +9615,25 @@ package android.telephony {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.DataSpecificRegistrationInfo> CREATOR;
   }
 
+  public final class DataThrottlingRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getCompletionDurationMillis();
+    method public int getDataThrottlingAction();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.DataThrottlingRequest> CREATOR;
+    field public static final int DATA_THROTTLING_ACTION_HOLD = 3; // 0x3
+    field public static final int DATA_THROTTLING_ACTION_NO_DATA_THROTTLING = 0; // 0x0
+    field public static final int DATA_THROTTLING_ACTION_THROTTLE_PRIMARY_CARRIER = 2; // 0x2
+    field public static final int DATA_THROTTLING_ACTION_THROTTLE_SECONDARY_CARRIER = 1; // 0x1
+  }
+
+  public static final class DataThrottlingRequest.Builder {
+    ctor public DataThrottlingRequest.Builder();
+    method @NonNull public android.telephony.DataThrottlingRequest build();
+    method @NonNull public android.telephony.DataThrottlingRequest.Builder setCompletionDurationMillis(long);
+    method @NonNull public android.telephony.DataThrottlingRequest.Builder setDataThrottlingAction(int);
+  }
+
   public final class ImsiEncryptionInfo implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public String getKeyIdentifier();
@@ -10196,6 +10215,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void resetOtaEmergencyNumberDbFilePath();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean resetRadioConfig();
     method @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL) public void resetSettings();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int sendThermalMitigationRequest(@NonNull android.telephony.ThermalMitigationRequest);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setAllowedNetworkTypes(long);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCallForwarding(@NonNull android.telephony.CallForwardingInfo, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
@@ -10313,6 +10333,11 @@ package android.telephony {
     field public static final int SRVCC_STATE_HANDOVER_FAILED = 2; // 0x2
     field public static final int SRVCC_STATE_HANDOVER_NONE = -1; // 0xffffffff
     field public static final int SRVCC_STATE_HANDOVER_STARTED = 0; // 0x0
+    field public static final int THERMAL_MITIGATION_RESULT_INVALID_STATE = 3; // 0x3
+    field public static final int THERMAL_MITIGATION_RESULT_MODEM_ERROR = 1; // 0x1
+    field public static final int THERMAL_MITIGATION_RESULT_MODEM_NOT_AVAILABLE = 2; // 0x2
+    field public static final int THERMAL_MITIGATION_RESULT_SUCCESS = 0; // 0x0
+    field public static final int THERMAL_MITIGATION_RESULT_UNKNOWN_ERROR = 4; // 0x4
   }
 
   public static interface TelephonyManager.CallForwardingInfoCallback {
@@ -10322,6 +10347,24 @@ package android.telephony {
     field public static final int RESULT_ERROR_NOT_SUPPORTED = 3; // 0x3
     field public static final int RESULT_ERROR_UNKNOWN = 1; // 0x1
     field public static final int RESULT_SUCCESS = 0; // 0x0
+  }
+
+  public final class ThermalMitigationRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.telephony.DataThrottlingRequest getDataThrottlingRequest();
+    method public int getThermalMitigationAction();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ThermalMitigationRequest> CREATOR;
+    field public static final int THERMAL_MITIGATION_ACTION_DATA_THROTTLING = 0; // 0x0
+    field public static final int THERMAL_MITIGATION_ACTION_RADIO_OFF = 2; // 0x2
+    field public static final int THERMAL_MITIGATION_ACTION_VOICE_ONLY = 1; // 0x1
+  }
+
+  public static final class ThermalMitigationRequest.Builder {
+    ctor public ThermalMitigationRequest.Builder();
+    method @NonNull public android.telephony.ThermalMitigationRequest build();
+    method @NonNull public android.telephony.ThermalMitigationRequest.Builder setDataThrottlingRequest(@NonNull android.telephony.DataThrottlingRequest);
+    method @NonNull public android.telephony.ThermalMitigationRequest.Builder setThermalMitigationAction(int);
   }
 
   public final class UiccAccessRule implements android.os.Parcelable {
