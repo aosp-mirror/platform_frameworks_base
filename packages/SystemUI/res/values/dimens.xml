@@ -1410,4 +1410,5 @@
     <dimen name="media_output_dialog_header_back_icon_size">36dp</dimen>
     <dimen name="media_output_dialog_header_icon_padding">16dp</dimen>
     <dimen name="media_output_dialog_icon_corner_radius">16dp</dimen>
+    <dimen name="media_output_dialog_title_anim_y_delta">12.5dp</dimen>
 </resources>
