@@ -35,4 +35,9 @@
     <color name="GM2_grey_200">#E8EAED</color>
     <color name="GM2_grey_700">#5F6368</color>
     <color name="GM2_grey_800">#3C4043</color>
+
+    <!-- Splash screen -->
+    <color name="splash_screen_bg_light">#FFFFFF</color>
+    <color name="splash_screen_bg_dark">#000000</color>
+    <color name="splash_window_background_default">@color/splash_screen_bg_light</color>
 </resources>
