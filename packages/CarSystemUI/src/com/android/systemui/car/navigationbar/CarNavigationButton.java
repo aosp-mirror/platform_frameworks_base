@@ -96,11 +96,11 @@ public class CarNavigationButton extends LinearLayout {
     public void setSelected(boolean selected) {
         super.setSelected(selected);
         mSelected = selected;
+
         if (mHighlightWhenSelected) {
-            // Always apply selected alpha if the button does not toggle alpha based on selection
-            // state.
-            setAlpha(!mHighlightWhenSelected || mSelected ? mSelectedAlpha : mUnselectedAlpha);
+            setAlpha(mSelected ? mSelectedAlpha : mUnselectedAlpha);
         }
+
         if (mShowMoreWhenSelected && mMoreIcon != null) {
             mMoreIcon.setVisibility(selected ? VISIBLE : GONE);
         }
@@ -299,10 +299,10 @@ public class CarNavigationButton extends LinearLayout {
         mIsDefaultAppIconForRoleEnabled = typedArray.getBoolean(
                 R.styleable.CarNavigationButton_useDefaultAppIconForRole, false);
         mIcon = findViewById(R.id.car_nav_button_icon_image);
-        // Always apply selected alpha if the button does not toggle alpha based on selection state.
-        mIcon.setAlpha(mHighlightWhenSelected ? mUnselectedAlpha : mSelectedAlpha);
+        // Always apply un-selected alpha regardless of if the button toggles alpha based on
+        // selection state.
+        setAlpha(mHighlightWhenSelected ? mUnselectedAlpha : mSelectedAlpha);
         mMoreIcon = findViewById(R.id.car_nav_button_more_icon);
-        mMoreIcon.setAlpha(mSelectedAlpha);
         mUnseenIcon = findViewById(R.id.car_nav_button_unseen_icon);
         updateImage();
     }

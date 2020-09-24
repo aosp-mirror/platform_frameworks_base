@@ -24,10 +24,11 @@
 
     <com.android.systemui.statusbar.phone.StatusIconContainer
         android:id="@+id/statusIcons"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:paddingEnd="4dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
         android:gravity="center_vertical"
         android:orientation="horizontal"
     />
