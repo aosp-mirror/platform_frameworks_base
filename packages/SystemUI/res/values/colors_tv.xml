@@ -22,8 +22,6 @@
     <color name="recents_tv_dismiss_text_color">#7FEEEEEE</color>
     <color name="recents_tv_text_shadow_color">#7F000000</color>
 
-    <!-- Background color for audio recording indicator (G800) -->
-    <color name="tv_audio_recording_indicator_background">#FF3C4043</color>
     <color name="tv_audio_recording_indicator_icon_background">#CC000000</color>
     <color name="tv_audio_recording_indicator_stroke">#33FFFFFF</color>
 
