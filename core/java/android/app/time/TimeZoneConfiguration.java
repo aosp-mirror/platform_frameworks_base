@@ -18,6 +18,7 @@ package android.app.time;
 
 import android.annotation.NonNull;
 import android.annotation.StringDef;
+import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -41,7 +42,7 @@ import java.util.Objects;
  *
  * @hide
  */
-// @SystemApi
+@SystemApi
 public final class TimeZoneConfiguration implements Parcelable {
 
     public static final @NonNull Creator<TimeZoneConfiguration> CREATOR =
@@ -188,7 +189,7 @@ public final class TimeZoneConfiguration implements Parcelable {
      *
      * @hide
      */
-    // @SystemApi
+    @SystemApi
     public static final class Builder {
 
         private final Bundle mBundle = new Bundle();
