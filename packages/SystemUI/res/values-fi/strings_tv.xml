@@ -24,5 +24,5 @@
     <string name="pip_close" msgid="5775212044472849930">"Sulje PIP"</string>
     <string name="pip_fullscreen" msgid="3877997489869475181">"Koko näyttö"</string>
     <string name="mic_active" msgid="5766614241012047024">"Mikrofoni aktiivinen"</string>
-    <string name="app_accessed_mic" msgid="2754428675130470196">"%1$s sai pääsyn mikrofoniisi"</string>
+    <string name="app_accessed_mic" msgid="2754428675130470196">"%1$s käytti mikrofoniasi"</string>
 </resources>
