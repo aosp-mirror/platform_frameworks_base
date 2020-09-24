@@ -250,13 +250,13 @@ class MediaCarouselController @Inject constructor(
             val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT)
             newPlayer.view?.player?.setLayoutParams(lp)
-            newPlayer.bind(data)
+            newPlayer.bind(data, key)
             newPlayer.setListening(currentlyExpanded)
             MediaPlayerData.addMediaPlayer(key, data, newPlayer)
             updatePlayerToState(newPlayer, noAnimation = true)
             reorderAllPlayers()
         } else {
-            existingPlayer.bind(data)
+            existingPlayer.bind(data, key)
             MediaPlayerData.addMediaPlayer(key, data, existingPlayer)
             if (visualStabilityManager.isReorderingAllowed) {
                 reorderAllPlayers()
