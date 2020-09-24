@@ -219,41 +219,38 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             PipTaskOrganizer pipTaskOrganizer,
             WindowManagerShellWrapper windowManagerShellWrapper
     ) {
-        if (mInitialized) {
-            return;
-        }
+        if (!mInitialized) {
+            mInitialized = true;
+            mContext = context;
+            mPipNotification = new PipNotification(context, this);
+            mPipBoundsHandler = pipBoundsHandler;
+            // Ensure that we have the display info in case we get calls to update the bounds
+            // before the listener calls back
+            final DisplayInfo displayInfo = new DisplayInfo();
+            context.getDisplay().getDisplayInfo(displayInfo);
+            mPipBoundsHandler.onDisplayInfoChanged(displayInfo);
 
-        mInitialized = true;
-        mContext = context;
-        mPipNotification = new PipNotification(context, this);
-        mPipBoundsHandler = pipBoundsHandler;
-        // Ensure that we have the display info in case we get calls to update the bounds before the
-        // listener calls back
-        final DisplayInfo displayInfo = new DisplayInfo();
-        context.getDisplay().getDisplayInfo(displayInfo);
-        mPipBoundsHandler.onDisplayInfoChanged(displayInfo);
+            mResizeAnimationDuration = context.getResources()
+                    .getInteger(R.integer.config_pipResizeAnimationDuration);
+            mPipTaskOrganizer = pipTaskOrganizer;
+            mPipTaskOrganizer.registerPipTransitionCallback(this);
+            mActivityTaskManager = ActivityTaskManager.getService();
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
+            mContext.registerReceiver(mBroadcastReceiver, intentFilter, UserHandle.USER_ALL);
 
-        mResizeAnimationDuration = context.getResources()
-                .getInteger(R.integer.config_pipResizeAnimationDuration);
-        mPipTaskOrganizer = pipTaskOrganizer;
-        mPipTaskOrganizer.registerPipTransitionCallback(this);
-        mActivityTaskManager = ActivityTaskManager.getService();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
-        mContext.registerReceiver(mBroadcastReceiver, intentFilter, UserHandle.USER_ALL);
+            // Initialize the last orientation and apply the current configuration
+            Configuration initialConfig = mContext.getResources().getConfiguration();
+            mLastOrientation = initialConfig.orientation;
+            loadConfigurationsAndApply(initialConfig);
 
-        // Initialize the last orientation and apply the current configuration
-        Configuration initialConfig = mContext.getResources().getConfiguration();
-        mLastOrientation = initialConfig.orientation;
-        loadConfigurationsAndApply(initialConfig);
-
-        mMediaSessionManager =
-                (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
-        mWindowManagerShellWrapper = windowManagerShellWrapper;
-        try {
-            mWindowManagerShellWrapper.addPinnedStackListener(mPinnedStackListener);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to register pinned stack listener", e);
+            mMediaSessionManager = mContext.getSystemService(MediaSessionManager.class);
+            mWindowManagerShellWrapper = windowManagerShellWrapper;
+            try {
+                mWindowManagerShellWrapper.addPinnedStackListener(mPinnedStackListener);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to register pinned stack listener", e);
+            }
         }
     }
 
