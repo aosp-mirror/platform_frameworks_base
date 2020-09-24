@@ -390,6 +390,20 @@ public final class SystemUiDeviceConfigFlags {
     public static final String CHOOSER_TARGET_RANKING_ENABLED = "chooser_target_ranking_enabled";
 
     /**
+     * (float) Weight bonus applied on top sharing shortcuts as per native ranking provided by apps.
+     * Its range need to be 0 ~ 1.
+     */
+    public static final String TOP_NATIVE_RANKED_SHARING_SHORTCUTS_BOOSTER =
+            "top_native_ranked_sharing_shortcut_booster";
+
+    /**
+     * (float) Weight bonus applied on 2nd top sharing shortcuts as per native ranking provided by
+     * apps. Its range need to be 0 ~ 1.
+     */
+    public static final String NON_TOP_NATIVE_RANKED_SHARING_SHORTCUTS_BOOSTER =
+            "non_top_native_ranked_sharing_shortcut_booster";
+
+    /**
      * (boolean) Whether to enable user-drag resizing for PIP.
      */
     public static final String PIP_USER_RESIZE = "pip_user_resize";
