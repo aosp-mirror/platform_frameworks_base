@@ -2982,7 +2982,7 @@ package android.os {
   }
 
   public final class VibrationAttributes implements android.os.Parcelable {
-    method @Deprecated @NonNull public android.media.AudioAttributes getAudioAttributes();
+    method public int getAudioUsage();
   }
 
   public static final class VibrationAttributes.Builder {

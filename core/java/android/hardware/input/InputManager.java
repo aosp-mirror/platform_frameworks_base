@@ -25,7 +25,6 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.media.AudioAttributes;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -36,6 +35,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemClock;
+import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -1295,8 +1295,8 @@ public final class InputManager {
          * @hide
          */
         @Override
-        public void vibrate(int uid, String opPkg, VibrationEffect effect,
-                String reason, AudioAttributes attributes) {
+        public void vibrate(int uid, String opPkg, @NonNull VibrationEffect effect,
+                String reason, @NonNull VibrationAttributes attributes) {
             try {
                 mIm.vibrate(mDeviceId, effect, mToken);
             } catch (RemoteException ex) {

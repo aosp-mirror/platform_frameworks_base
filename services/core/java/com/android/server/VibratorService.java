@@ -151,7 +151,7 @@ public class VibratorService extends IVibratorService.Stub
     private SettingsObserver mSettingObserver;
 
     private final NativeWrapper mNativeWrapper;
-    private volatile VibrateThread mThread;
+    private volatile VibrateWaveformThread mThread;
 
     // mInputDeviceVibrators lock should be acquired after mLock, if both are
     // to be acquired
@@ -259,8 +259,8 @@ public class VibratorService extends IVibratorService.Stub
         private Vibration(IBinder token, VibrationEffect effect,
                 VibrationAttributes attrs, int uid, String opPkg, String reason) {
             this.token = token;
-            this.effect = effect;
             this.id = mNextVibrationId.getAndIncrement();
+            this.effect = effect;
             this.startTime = SystemClock.elapsedRealtime();
             this.startTimeDebug = System.currentTimeMillis();
             this.attrs = attrs;
@@ -962,13 +962,11 @@ public class VibratorService extends IVibratorService.Stub
             mCurrentVibration = vib;
             if (vib.effect instanceof VibrationEffect.OneShot) {
                 Trace.asyncTraceBegin(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
-                VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) vib.effect;
-                doVibratorOn(oneShot.getDuration(), oneShot.getAmplitude(), vib);
+                doVibratorOn(vib);
             } else if (vib.effect instanceof VibrationEffect.Waveform) {
                 // mThread better be null here. doCancelVibrate should always be
                 // called before startNextVibrationLocked or startVibrationLocked.
-                VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) vib.effect;
-                mThread = new VibrateThread(waveform, vib.uid, vib.attrs);
+                mThread = new VibrateWaveformThread(vib);
                 mThread.start();
             } else if (vib.effect instanceof VibrationEffect.Prebaked) {
                 Trace.asyncTraceBegin(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
@@ -1070,7 +1068,7 @@ public class VibratorService extends IVibratorService.Stub
 
     private int getAppOpMode(int uid, String packageName, VibrationAttributes attrs) {
         int mode = mAppOps.checkAudioOpNoThrow(AppOpsManager.OP_VIBRATE,
-                attrs.getAudioAttributes().getUsage(), uid, packageName);
+                attrs.getAudioUsage(), uid, packageName);
         if (mode == AppOpsManager.MODE_ALLOWED) {
             mode = mAppOps.startOpNoThrow(AppOpsManager.OP_VIBRATE, uid, packageName);
         }
@@ -1271,41 +1269,29 @@ public class VibratorService extends IVibratorService.Stub
         return mNativeWrapper.vibratorExists();
     }
 
-    /** Vibrates with native callback trigger for {@link #onVibrationComplete(long)}. */
-    private void doVibratorOn(long millis, int amplitude, Vibration vib) {
-        doVibratorOn(millis, amplitude, vib.uid, vib.attrs, vib.id);
-    }
-
-    /** Vibrates without native callback. */
-    private void doVibratorOn(long millis, int amplitude, int uid, VibrationAttributes attrs) {
-        doVibratorOn(millis, amplitude, uid, attrs, /* vibrationId= */ 0);
-    }
-
-    private void doVibratorOn(long millis, int amplitude, int uid, VibrationAttributes attrs,
-            long vibrationId) {
+    private void doVibratorOn(Vibration vib) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "doVibratorOn");
         try {
             synchronized (mInputDeviceVibrators) {
-                if (amplitude == VibrationEffect.DEFAULT_AMPLITUDE) {
-                    amplitude = mDefaultVibrationAmplitude;
-                }
+                final VibrationEffect.OneShot oneShot =
+                        (VibrationEffect.OneShot) vib.effect.resolve(mDefaultVibrationAmplitude);
                 if (DEBUG) {
-                    Slog.d(TAG, "Turning vibrator on for " + millis + " ms" +
-                            " with amplitude " + amplitude + ".");
+                    Slog.d(TAG, "Turning vibrator on for " + oneShot.getDuration() + " ms"
+                            + " with amplitude " + oneShot.getAmplitude() + ".");
                 }
-                noteVibratorOnLocked(uid, millis);
+                noteVibratorOnLocked(vib.uid, oneShot.getDuration());
                 final int vibratorCount = mInputDeviceVibrators.size();
                 if (vibratorCount != 0) {
                     for (int i = 0; i < vibratorCount; i++) {
-                        Vibrator inputDeviceVibrator = mInputDeviceVibrators.get(i);
-                        inputDeviceVibrator.vibrate(millis, attrs.getAudioAttributes());
+                        mInputDeviceVibrators.get(i).vibrate(vib.uid, vib.opPkg, oneShot,
+                                vib.reason, vib.attrs);
                     }
                 } else {
                     // Note: ordering is important here! Many haptic drivers will reset their
                     // amplitude when enabled, so we always have to enable first, then set the
                     // amplitude.
-                    mNativeWrapper.vibratorOn(millis, vibrationId);
-                    doVibratorSetAmplitude(amplitude);
+                    mNativeWrapper.vibratorOn(oneShot.getDuration(), vib.id);
+                    doVibratorSetAmplitude(oneShot.getAmplitude());
                 }
             }
         } finally {
@@ -1585,18 +1571,17 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     /** Thread that plays a single {@link VibrationEffect.Waveform}. */
-    private class VibrateThread extends Thread {
+    private class VibrateWaveformThread extends Thread {
         private final VibrationEffect.Waveform mWaveform;
-        private final int mUid;
-        private final VibrationAttributes mAttrs;
+        private final Vibration mVibration;
 
         private boolean mForceStop;
 
-        VibrateThread(VibrationEffect.Waveform waveform, int uid, VibrationAttributes attrs) {
-            mWaveform = waveform;
-            mUid = uid;
-            mAttrs = attrs;
-            mTmpWorkSource.set(uid);
+        VibrateWaveformThread(Vibration vib) {
+            mWaveform = (VibrationEffect.Waveform) vib.effect;
+            mVibration = new Vibration(vib.token, /* effect= */ null, vib.attrs, vib.uid, vib.opPkg,
+                    vib.reason);
+            mTmpWorkSource.set(vib.uid);
             mWakeLock.setWorkSource(mTmpWorkSource);
         }
 
@@ -1670,7 +1655,9 @@ public class VibratorService extends IVibratorService.Stub
                                     // appropriate intervals.
                                     onDuration = getTotalOnDuration(timings, amplitudes, index - 1,
                                             repeat);
-                                    doVibratorOn(onDuration, amplitude, mUid, mAttrs);
+                                    mVibration.effect =
+                                            VibrationEffect.createOneShot(onDuration, amplitude);
+                                    doVibratorOn(mVibration);
                                 } else {
                                     doVibratorSetAmplitude(amplitude);
                                 }
