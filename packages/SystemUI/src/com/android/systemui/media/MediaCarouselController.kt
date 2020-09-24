@@ -174,7 +174,7 @@ class MediaCarouselController @Inject constructor(
         mediaManager.addListener(object : MediaDataManager.Listener {
             override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
                 addOrUpdatePlayer(key, oldKey, data)
-                val canRemove = data.isPlaying?.let { !it } ?: data.isClearable
+                val canRemove = data.isPlaying?.let { !it } ?: data.isClearable && !data.active
                 if (canRemove && !Utils.useMediaResumption(context)) {
                     // This view isn't playing, let's remove this! This happens e.g when
                     // dismissing/timing out a view. We still have the data around because
