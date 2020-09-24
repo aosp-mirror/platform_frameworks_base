@@ -735,6 +735,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mLocalesChanged = false;
     private int mTextSizeUnit = -1;
 
+    // True if force bold text feature is enabled. This feature makes all text bolder.
+    private boolean mForceBoldTextEnabled;
+    private Typeface mOriginalTypeface;
+
     // True if setKeyListener() has been explicitly called
     private boolean mListenerChanged = false;
     // True if internationalized input should be used for numbers and date and time.
@@ -1645,6 +1649,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             attributes.mTypefaceIndex = MONOSPACE;
         }
 
+        mForceBoldTextEnabled = getContext().getResources().getConfiguration().forceBoldText
+                == Configuration.FORCE_BOLD_TEXT_YES;
         applyTextAppearance(attributes);
 
         if (isPassword) {
@@ -4267,6 +4273,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 invalidate();
             }
         }
+        if (newConfig.forceBoldText == Configuration.FORCE_BOLD_TEXT_YES) {
+            mForceBoldTextEnabled = true;
+            setTypeface(getTypeface());
+        } else  if (newConfig.forceBoldText == Configuration.FORCE_BOLD_TEXT_NO
+                || newConfig.forceBoldText == Configuration.FORCE_BOLD_TEXT_UNDEFINED) {
+            mForceBoldTextEnabled = false;
+            setTypeface(getTypeface());
+        }
     }
 
     /**
@@ -4418,6 +4432,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_textStyle
      */
     public void setTypeface(@Nullable Typeface tf) {
+        mOriginalTypeface = tf;
+        if (mForceBoldTextEnabled) {
+            int newWeight = tf != null ? tf.getWeight() + 300 : 400;
+            newWeight = Math.min(newWeight, 1000);
+            int typefaceStyle = tf != null ? tf.getStyle() : 0;
+            boolean italic = (typefaceStyle & Typeface.ITALIC) != 0;
+            tf = Typeface.create(tf, newWeight, italic);
+        }
         if (mTextPaint.getTypeface() != tf) {
             mTextPaint.setTypeface(tf);
 
@@ -4441,7 +4463,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @InspectableProperty
     public Typeface getTypeface() {
-        return mTextPaint.getTypeface();
+        return mOriginalTypeface;
     }
 
     /**
