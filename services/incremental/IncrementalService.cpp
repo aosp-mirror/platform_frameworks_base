@@ -308,6 +308,7 @@ IncrementalService::~IncrementalService() {
     }
     mJobCondition.notify_all();
     mJobProcessor.join();
+    mLooper->wake();
     mCmdLooperThread.join();
     mTimedQueue->stop();
     mProgressUpdateJobQueue->stop();
@@ -1386,7 +1387,7 @@ bool IncrementalService::mountExistingImage(std::string_view root) {
 }
 
 void IncrementalService::runCmdLooper() {
-    constexpr auto kTimeoutMsecs = 1000;
+    constexpr auto kTimeoutMsecs = -1;
     while (mRunning.load(std::memory_order_relaxed)) {
         mLooper->pollAll(kTimeoutMsecs);
     }

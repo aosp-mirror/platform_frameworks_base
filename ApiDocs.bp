@@ -83,6 +83,10 @@ stubs_defaults {
     merge_annotations_dirs: [
         "metalava-manual",
     ],
+    // TODO(b/169090544): remove below aidl includes.
+    aidl: {
+        local_include_dirs: ["media/aidl"],
+    },
 }
 
 droidstubs {
@@ -150,6 +154,10 @@ doc_defaults {
         ":current-support-api",
         ":current-androidx-api",
     ],
+    // TODO(b/169090544): remove below aidl includes.
+    aidl: {
+        local_include_dirs: ["media/aidl"],
+    },
 }
 
 doc_defaults {

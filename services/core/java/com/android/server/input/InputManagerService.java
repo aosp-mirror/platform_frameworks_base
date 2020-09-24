@@ -552,7 +552,7 @@ public class InputManagerService extends IInputManager.Stub
         try {
             InputChannel inputChannel = nativeCreateInputMonitor(
                     mPtr, displayId, true /*isGestureMonitor*/, inputChannelName);
-            InputMonitorHost host = new InputMonitorHost(inputChannel);
+            InputMonitorHost host = new InputMonitorHost(inputChannel.getToken());
             synchronized (mGestureMonitorPidsLock) {
                 mGestureMonitorPidsByToken.put(inputChannel.getToken(), pid);
             }
@@ -2434,21 +2434,20 @@ public class InputManagerService extends IInputManager.Stub
      * Interface for the system to handle request from InputMonitors.
      */
     private final class InputMonitorHost extends IInputMonitorHost.Stub {
-        private final InputChannel mInputChannel;
+        private final IBinder mToken;
 
-        InputMonitorHost(InputChannel channel) {
-            mInputChannel = channel;
+        InputMonitorHost(IBinder token) {
+            mToken = token;
         }
 
         @Override
         public void pilferPointers() {
-            nativePilferPointers(mPtr, mInputChannel.getToken());
+            nativePilferPointers(mPtr, mToken);
         }
 
         @Override
         public void dispose() {
-            nativeRemoveInputChannel(mPtr, mInputChannel.getToken());
-            mInputChannel.dispose();
+            nativeRemoveInputChannel(mPtr, mToken);
         }
     }
 

@@ -32,7 +32,7 @@
             android:id="@+id/header_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingEnd="16dp"/>
+            android:paddingEnd="@dimen/media_output_dialog_header_icon_padding"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -70,24 +70,7 @@
         android:id="@+id/device_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="start|center_vertical"
         android:orientation="vertical">
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="12dp"/>
-
-        <include
-            layout="@layout/media_output_list_item"
-            android:id="@+id/group_item_controller"
-            android:visibility="gone"/>
-
-        <View
-            android:id="@+id/group_item_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider"
-            android:visibility="gone"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list_result"
@@ -95,11 +78,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:overScrollMode="never"/>
-
-        <View
-            android:id="@+id/list_bottom_padding"
-            android:layout_width="match_parent"
-            android:layout_height="12dp"/>
     </LinearLayout>
 
     <View

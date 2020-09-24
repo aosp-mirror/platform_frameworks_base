@@ -86,7 +86,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -226,7 +225,7 @@ public class StagingManager {
         final IntArray childSessionIds = new IntArray();
         if (session.isMultiPackage()) {
             for (PackageInstallerSession s : session.getChildSessions()) {
-                if (isApexSession(s)) {
+                if (s.isApexSession()) {
                     childSessionIds.add(s.sessionId);
                 }
             }
@@ -329,31 +328,6 @@ public class StagingManager {
         }
     }
 
-    private static boolean isApexSession(@NonNull PackageInstallerSession session) {
-        return (session.params.installFlags & PackageManager.INSTALL_APEX) != 0;
-    }
-
-    private boolean sessionContains(@NonNull PackageInstallerSession session,
-                                    Predicate<PackageInstallerSession> filter) {
-        if (!session.isMultiPackage()) {
-            return filter.test(session);
-        }
-        for (PackageInstallerSession s : session.getChildSessions()) {
-            if (filter.test(s)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean sessionContainsApex(@NonNull PackageInstallerSession session) {
-        return sessionContains(session, (s) -> isApexSession(s));
-    }
-
-    private boolean sessionContainsApk(@NonNull PackageInstallerSession session) {
-        return sessionContains(session, (s) -> !isApexSession(s));
-    }
-
     // Reverts apex sessions and user data (if checkpoint is supported). Also reboots the device.
     private void abortCheckpoint(int sessionId, String errorMsg) {
         String failureReason = "Failed to install sessionId: " + sessionId + " Error: " + errorMsg;
@@ -400,7 +374,7 @@ public class StagingManager {
         List<PackageInstallerSession> apexSessions = new ArrayList<>();
         if (session.isMultiPackage()) {
             for (PackageInstallerSession s : session.getChildSessions()) {
-                if (sessionContainsApex(s)) {
+                if (s.containsApexSession()) {
                     apexSessions.add(s);
                 }
             }
@@ -521,7 +495,7 @@ public class StagingManager {
     private void resumeSession(@NonNull PackageInstallerSession session) {
         Slog.d(TAG, "Resuming session " + session.sessionId);
 
-        final boolean hasApex = sessionContainsApex(session);
+        final boolean hasApex = session.containsApexSession();
         ApexSessionInfo apexSessionInfo = null;
         if (hasApex) {
             // Check with apexservice whether the apex packages have been activated.
@@ -740,7 +714,7 @@ public class StagingManager {
     @Nullable
     private PackageInstallerSession extractApksInSession(PackageInstallerSession session)
             throws PackageManagerException {
-        if (!session.isMultiPackage() && !isApexSession(session)) {
+        if (!session.isMultiPackage() && !session.isApexSession()) {
             return createAndWriteApkSession(session);
         } else if (session.isMultiPackage()) {
             // For multi-package staged sessions containing APKs, we identify which child sessions
@@ -749,7 +723,7 @@ public class StagingManager {
             // sessions will be installed atomically.
             final List<PackageInstallerSession> childSessions = new ArrayList<>();
             for (PackageInstallerSession s : session.getChildSessions()) {
-                if (!isApexSession(s)) {
+                if (!s.isApexSession()) {
                     childSessions.add(s);
                 }
             }
@@ -798,7 +772,7 @@ public class StagingManager {
         }
         final Set<String> apkNames = new ArraySet<>();
         for (PackageInstallerSession s : session.getChildSessions()) {
-            if (!isApexSession(s)) {
+            if (!s.isApexSession()) {
                 apkNames.add(s.getPackageName());
             }
         }
@@ -1020,7 +994,7 @@ public class StagingManager {
      * @return returns true if it is ensured that there is no active apex session, otherwise false
      */
     private boolean ensureActiveApexSessionIsAborted(PackageInstallerSession session) {
-        if (!sessionContainsApex(session)) {
+        if (!session.containsApexSession()) {
             return true;
         }
         final ApexSessionInfo apexSession = mApexManager.getStagedSessionInfo(session.sessionId);
@@ -1342,7 +1316,7 @@ public class StagingManager {
          */
         private void handlePreRebootVerification_Apex(
                 @NonNull PackageInstallerSession session, int rollbackId) {
-            final boolean hasApex = sessionContainsApex(session);
+            final boolean hasApex = session.containsApexSession();
 
             // APEX checks. For single-package sessions, check if they contain an APEX. For
             // multi-package sessions, find all the child sessions that contain an APEX.
@@ -1372,7 +1346,7 @@ public class StagingManager {
          * {@link #notifyPreRebootVerification_Apk_Complete}
          */
         private void handlePreRebootVerification_Apk(@NonNull PackageInstallerSession session) {
-            if (!sessionContainsApk(session)) {
+            if (!session.containsApkSession()) {
                 notifyPreRebootVerification_Apk_Complete(session);
                 return;
             }
@@ -1421,7 +1395,7 @@ public class StagingManager {
             Slog.d(TAG, "Marking session " + session.sessionId + " as ready");
             session.setStagedSessionReady();
             if (session.isStagedSessionReady()) {
-                final boolean hasApex = sessionContainsApex(session);
+                final boolean hasApex = session.containsApexSession();
                 if (hasApex) {
                     try {
                         mApexManager.markStagedSessionReady(session.sessionId);

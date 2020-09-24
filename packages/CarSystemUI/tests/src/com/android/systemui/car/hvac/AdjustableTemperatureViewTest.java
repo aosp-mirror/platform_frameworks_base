@@ -98,6 +98,48 @@ public class AdjustableTemperatureViewTest extends SysuiTestCase {
     }
 
     @Test
+    public void setTemp_tempNaN_setsTextToNaNText() {
+        when(mCarPropertyManager.isPropertyAvailable(eq(HVAC_TEMPERATURE_SET),
+                anyInt())).thenReturn(true);
+        when(mCarPropertyManager.getFloatProperty(eq(HVAC_TEMPERATURE_SET), anyInt())).thenReturn(
+                Float.NaN);
+
+        mHvacController.addTemperatureViewToController(mAdjustableTemperatureView);
+
+        TextView tempText = mAdjustableTemperatureView.findViewById(R.id.hvac_temperature_text);
+        assertEquals(tempText.getText(),
+                getContext().getResources().getString(R.string.hvac_null_temp_text));
+    }
+
+    @Test
+    public void setTemp_tempBelowMin_setsTextToMinTempText() {
+        when(mCarPropertyManager.isPropertyAvailable(eq(HVAC_TEMPERATURE_SET),
+                anyInt())).thenReturn(true);
+        when(mCarPropertyManager.getFloatProperty(eq(HVAC_TEMPERATURE_SET), anyInt())).thenReturn(
+                getContext().getResources().getFloat(R.dimen.hvac_min_value_celsius));
+
+        mHvacController.addTemperatureViewToController(mAdjustableTemperatureView);
+
+        TextView tempText = mAdjustableTemperatureView.findViewById(R.id.hvac_temperature_text);
+        assertEquals(tempText.getText(),
+                getContext().getResources().getString(R.string.hvac_min_text));
+    }
+
+    @Test
+    public void setTemp_tempAboveMax_setsTextToMaxTempText() {
+        when(mCarPropertyManager.isPropertyAvailable(eq(HVAC_TEMPERATURE_SET),
+                anyInt())).thenReturn(true);
+        when(mCarPropertyManager.getFloatProperty(eq(HVAC_TEMPERATURE_SET), anyInt())).thenReturn(
+                getContext().getResources().getFloat(R.dimen.hvac_max_value_celsius));
+
+        mHvacController.addTemperatureViewToController(mAdjustableTemperatureView);
+
+        TextView tempText = mAdjustableTemperatureView.findViewById(R.id.hvac_temperature_text);
+        assertEquals(tempText.getText(),
+                getContext().getResources().getString(R.string.hvac_max_text));
+    }
+
+    @Test
     public void setTemperatureToFahrenheit_callsViewSetDisplayInFahrenheit() {
         when(mCarPropertyManager.isPropertyAvailable(eq(HVAC_TEMPERATURE_SET),
                 anyInt())).thenReturn(true);

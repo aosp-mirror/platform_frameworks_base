@@ -27,6 +27,7 @@ import android.app.UserSwitchObserver;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprintClientCallback;
@@ -296,6 +297,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
 
     Fingerprint21(@NonNull Context context, @NonNull BiometricScheduler scheduler,
             @NonNull Handler handler, int sensorId,
+            @BiometricManager.Authenticators.Types int strength,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull HalResultController controller) {
         mContext = context;
@@ -335,25 +337,27 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
         }
 
         final @FingerprintSensorProperties.SensorType int sensorType =
-                isUdfps ? FingerprintSensorProperties.TYPE_UDFPS
+                isUdfps ? FingerprintSensorProperties.TYPE_UDFPS_OPTICAL
                         : FingerprintSensorProperties.TYPE_REAR;
         // resetLockout is controlled by the framework, so hardwareAuthToken is not required
         final boolean resetLockoutRequiresHardwareAuthToken = false;
-        final int maxTemplatesAllowed = mContext.getResources()
+        final int maxEnrollmentsPerUser = mContext.getResources()
                 .getInteger(R.integer.config_fingerprintMaxTemplatesPerUser);
-        mSensorProperties = new FingerprintSensorProperties(sensorId, sensorType,
-                resetLockoutRequiresHardwareAuthToken, maxTemplatesAllowed);
+
+        mSensorProperties = new FingerprintSensorProperties(sensorId,
+                Utils.authenticatorStrengthToPropertyStrength(strength), maxEnrollmentsPerUser,
+                sensorType, resetLockoutRequiresHardwareAuthToken);
     }
 
-    static Fingerprint21 newInstance(@NonNull Context context, int sensorId,
+    static Fingerprint21 newInstance(@NonNull Context context, int sensorId, int strength,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
         final Handler handler = new Handler(Looper.getMainLooper());
         final BiometricScheduler scheduler =
                 new BiometricScheduler(TAG, gestureAvailabilityDispatcher);
         final HalResultController controller = new HalResultController(context, handler, scheduler);
-        return new Fingerprint21(context, scheduler, handler, sensorId, lockoutResetDispatcher,
-                controller);
+        return new Fingerprint21(context, scheduler, handler, sensorId, strength,
+                lockoutResetDispatcher, controller);
     }
 
     @Override

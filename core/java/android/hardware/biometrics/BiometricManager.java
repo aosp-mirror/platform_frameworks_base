@@ -103,6 +103,7 @@ public class BiometricManager {
         @IntDef(flag = true, value = {
                 BIOMETRIC_STRONG,
                 BIOMETRIC_WEAK,
+                BIOMETRIC_CONVENIENCE,
                 DEVICE_CREDENTIAL,
         })
         @interface Types {}

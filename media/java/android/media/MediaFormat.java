@@ -20,10 +20,12 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.AbstractSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -434,6 +436,52 @@ public final class MediaFormat {
      * </p>
      */
     public static final String KEY_CAPTURE_RATE = "capture-rate";
+
+    /**
+     * A key for retrieving the slow-motion marker information associated with a video track.
+     * <p>
+     * The associated value is a ByteBuffer in {@link ByteOrder#BIG_ENDIAN}
+     * (networking order) of the following format:
+     * </p>
+     * <pre class="prettyprint">
+     *     float(32) playbackRate;
+     *     unsigned int(32) numMarkers;
+     *     for (i = 0;i < numMarkers; i++) {
+     *         int(64) timestampUs;
+     *         float(32) speedRatio;
+     *     }</pre>
+     * The meaning of each field is as follows:
+     * <table border="1" width="90%" align="center" cellpadding="5">
+     *     <tbody>
+     *     <tr>
+     *         <td>playbackRate</td>
+     *         <td>The frame rate at which the playback should happen (or the flattened
+     *             clip should be).</td>
+     *     </tr>
+     *     <tr>
+     *         <td>numMarkers</td>
+     *         <td>The number of slow-motion markers that follows.</td>
+     *     </tr>
+     *     <tr>
+     *         <td>timestampUs</td>
+     *         <td>The starting point of a new segment.</td>
+     *     </tr>
+     *     <tr>
+     *         <td>speedRatio</td>
+     *         <td>The playback speed for that segment. The playback speed is a floating
+     *             point number, indicating how fast the time progresses relative to that
+     *             written in the container. (Eg. 4.0 means time goes 4x as fast, which
+     *             makes 30fps become 120fps.)</td>
+     *     </tr>
+     * </table>
+     * <p>
+     * The following constraints apply to the timestampUs of the markers:
+     * </p>
+     * <li>The timestampUs shall be monotonically increasing.</li>
+     * <li>The timestampUs shall fall within the time span of the video track.</li>
+     * <li>The first timestampUs should match that of the first video sample.</li>
+     */
+    public static final String KEY_SLOW_MOTION_MARKERS = "slow-motion-markers";
 
     /**
      * A key describing the frequency of key frames expressed in seconds between key frames.

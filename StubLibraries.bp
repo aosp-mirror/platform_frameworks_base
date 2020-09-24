@@ -51,9 +51,12 @@ stubs_defaults {
         ":android_icu4j_public_api_files",
         "**/package.html",
     ],
-    // TODO(b/147699819): remove below aidl includes.
+    // TODO(b/147699819, b/169090544): remove below aidl includes.
     aidl: {
-        local_include_dirs: ["telephony/java"],
+        local_include_dirs: [
+            "telephony/java",
+            "media/aidl",
+        ],
     },
     libs: ["framework-internal-utils"],
     installable: false,
@@ -486,31 +489,5 @@ java_library_static {
     sdk_version: "core_current",
     srcs: [
         ":hwbinder-stubs-docs",
-    ],
-}
-
-/////////////////////////////////////////////////////////////////////
-// api/*-current.txt files for use by modules in other directories
-// like the CTS test
-/////////////////////////////////////////////////////////////////////
-
-filegroup {
-    name: "frameworks-base-api-current.txt",
-    srcs: [
-        "api/current.txt",
-    ],
-}
-
-filegroup {
-    name: "frameworks-base-api-system-current.txt",
-    srcs: [
-        "api/system-current.txt",
-    ],
-}
-
-filegroup {
-    name: "frameworks-base-api-system-removed.txt",
-    srcs: [
-        "api/system-removed.txt",
     ],
 }

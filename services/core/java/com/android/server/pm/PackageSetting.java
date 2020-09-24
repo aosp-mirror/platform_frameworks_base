@@ -28,7 +28,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.permission.PermissionsState;
+import com.android.server.pm.permission.AppIdPermissionState;
 import com.android.server.pm.pkg.PackageStateUnserialized;
 
 import java.io.File;
@@ -215,7 +215,7 @@ public class PackageSetting extends PackageSettingBase {
     }
 
     @Override
-    public PermissionsState getPermissionsState() {
+    public AppIdPermissionState getPermissionsState() {
         return (sharedUser != null)
                 ? sharedUser.getPermissionsState()
                 : super.getPermissionsState();

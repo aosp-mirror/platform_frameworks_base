@@ -96,8 +96,8 @@ public class AudioManager {
     private Context mOriginalContext;
     private Context mApplicationContext;
     private long mVolumeKeyUpTime;
-    private final boolean mUseVolumeKeySounds;
-    private final boolean mUseFixedVolume;
+    private boolean mUseFixedVolumeInitialized;
+    private boolean mUseFixedVolume;
     private static final String TAG = "AudioManager";
     private static final boolean DEBUG = false;
     private static final AudioPortEventHandler sAudioPortEventHandler = new AudioPortEventHandler();
@@ -711,8 +711,6 @@ public class AudioManager {
      */
     @UnsupportedAppUsage
     public AudioManager() {
-        mUseVolumeKeySounds = true;
-        mUseFixedVolume = false;
     }
 
     /**
@@ -721,10 +719,6 @@ public class AudioManager {
     @UnsupportedAppUsage
     public AudioManager(Context context) {
         setContext(context);
-        mUseVolumeKeySounds = getContext().getResources().getBoolean(
-                com.android.internal.R.bool.config_useVolumeKeySounds);
-        mUseFixedVolume = getContext().getResources().getBoolean(
-                com.android.internal.R.bool.config_useFixedVolume);
     }
 
     private Context getContext() {
@@ -823,6 +817,18 @@ public class AudioManager {
      * </ul>
      */
     public boolean isVolumeFixed() {
+        synchronized (this) {
+            try {
+                if (!mUseFixedVolumeInitialized) {
+                    mUseFixedVolume = getContext().getResources().getBoolean(
+                            com.android.internal.R.bool.config_useFixedVolume);
+                }
+            } catch (Exception e) {
+            } finally {
+                // only ever try once, so always consider initialized even if query failed
+                mUseFixedVolumeInitialized = true;
+            }
+        }
         return mUseFixedVolume;
     }
 

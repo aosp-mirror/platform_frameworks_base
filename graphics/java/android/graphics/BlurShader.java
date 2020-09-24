@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 /**
@@ -28,8 +29,25 @@ public final class BlurShader extends Shader {
     private final float mRadiusX;
     private final float mRadiusY;
     private final Shader mInputShader;
+    private final TileMode mEdgeTreatment;
 
     private long mNativeInputShader = 0;
+
+    /**
+     * Create a {@link BlurShader} that blurs the contents of the optional input shader
+     * with the specified radius along the x and y axis. If no input shader is provided
+     * then all drawing commands issued with a {@link android.graphics.Paint} that this
+     * shader is installed in will be blurred.
+     *
+     * This uses a default {@link TileMode#DECAL} for edge treatment
+     *
+     * @param radiusX Radius of blur along the X axis
+     * @param radiusY Radius of blur along the Y axis
+     * @param inputShader Input shader that provides the content to be blurred
+     */
+    public BlurShader(float radiusX, float radiusY, @Nullable Shader inputShader) {
+        this(radiusX, radiusY, inputShader, TileMode.DECAL);
+    }
 
     /**
      * Create a {@link BlurShader} that blurs the contents of the optional input shader
@@ -39,18 +57,22 @@ public final class BlurShader extends Shader {
      * @param radiusX Radius of blur along the X axis
      * @param radiusY Radius of blur along the Y axis
      * @param inputShader Input shader that provides the content to be blurred
+     * @param edgeTreatment Policy for how to blur content near edges of the blur shader
      */
-    public BlurShader(float radiusX, float radiusY, @Nullable Shader inputShader) {
+    public BlurShader(float radiusX, float radiusY, @Nullable Shader inputShader,
+            @NonNull TileMode edgeTreatment) {
         mRadiusX = radiusX;
         mRadiusY = radiusY;
         mInputShader = inputShader;
+        mEdgeTreatment = edgeTreatment;
     }
 
     /** @hide **/
     @Override
     protected long createNativeInstance(long nativeMatrix) {
         mNativeInputShader = mInputShader != null ? mInputShader.getNativeInstance() : 0;
-        return nativeCreate(nativeMatrix, mRadiusX, mRadiusY, mNativeInputShader);
+        return nativeCreate(nativeMatrix, mRadiusX, mRadiusY, mNativeInputShader,
+                mEdgeTreatment.nativeInt);
     }
 
     /** @hide **/
@@ -61,5 +83,5 @@ public final class BlurShader extends Shader {
     }
 
     private static native long nativeCreate(long nativeMatrix, float radiusX, float radiusY,
-            long inputShader);
+            long inputShader, int edgeTreatment);
 }

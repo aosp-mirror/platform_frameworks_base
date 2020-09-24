@@ -110,5 +110,5 @@ interface IFaceService {
             String opPackageName);
 
     // Give FaceService its ID. See AuthService.java
-    void initializeConfiguration(int sensorId);
+    void initializeConfiguration(int sensorId, int strength);
 }

@@ -309,7 +309,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             final List<FingerprintSensorProperties> fingerprintSensorProperties =
                     mFingerprintManager.getSensorProperties();
             for (FingerprintSensorProperties props : fingerprintSensorProperties) {
-                if (props.sensorType == FingerprintSensorProperties.TYPE_UDFPS) {
+                if (props.isAnyUdfpsType()) {
                     mUdfpsController = mUdfpsControllerFactory.get();
                     break;
                 }

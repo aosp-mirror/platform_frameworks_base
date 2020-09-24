@@ -450,6 +450,7 @@ public class BtHelper {
     }
 
     @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
+    // @GuardedBy("BtHelper.this")
     private void stopAndRemoveClient(ScoClient client, @NonNull String eventSource) {
         AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(eventSource));
         client.requestScoState(BluetoothHeadset.STATE_AUDIO_DISCONNECTED,

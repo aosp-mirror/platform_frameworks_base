@@ -316,7 +316,7 @@ public class PipMenuView extends FrameLayout {
     }
 
     void hideMenu(Runnable animationEndCallback) {
-        hideMenu(animationEndCallback, true /* notifyMenuVisibility */, false);
+        hideMenu(animationEndCallback, true /* notifyMenuVisibility */, true /* animate */);
     }
 
     private void hideMenu(final Runnable animationFinishedRunnable, boolean notifyMenuVisibility,
@@ -394,8 +394,10 @@ public class PipMenuView extends FrameLayout {
 
                     // TODO: Check if the action drawable has changed before we reload it
                     action.getIcon().loadDrawableAsync(mContext, d -> {
-                        d.setTint(Color.WHITE);
-                        actionView.setImageDrawable(d);
+                        if (d != null) {
+                            d.setTint(Color.WHITE);
+                            actionView.setImageDrawable(d);
+                        }
                     }, mHandler);
                     actionView.setContentDescription(action.getContentDescription());
                     if (action.isEnabled()) {
