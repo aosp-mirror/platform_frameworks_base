@@ -75,6 +75,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
@@ -142,6 +143,9 @@ public class LauncherAppsService extends SystemService {
         private final DevicePolicyManager mDpm;
 
         private final MyPackageMonitor mPackageMonitor = new MyPackageMonitor();
+
+        @GuardedBy("mListeners")
+        private boolean mIsWatchingPackageBroadcasts = false;
 
         private final ShortcutChangeHandler mShortcutChangeHandler;
 
@@ -281,7 +285,10 @@ public class LauncherAppsService extends SystemService {
          * Register a receiver to watch for package broadcasts
          */
         private void startWatchingPackageBroadcasts() {
-            mPackageMonitor.register(mContext, UserHandle.ALL, true, mCallbackHandler);
+            if (!mIsWatchingPackageBroadcasts) {
+                mPackageMonitor.register(mContext, UserHandle.ALL, true, mCallbackHandler);
+                mIsWatchingPackageBroadcasts = true;
+            }
         }
 
         /**
@@ -291,7 +298,10 @@ public class LauncherAppsService extends SystemService {
             if (DEBUG) {
                 Log.d(TAG, "Stopped watching for packages");
             }
-            mPackageMonitor.unregister();
+            if (mIsWatchingPackageBroadcasts) {
+                mPackageMonitor.unregister();
+                mIsWatchingPackageBroadcasts = false;
+            }
         }
 
         void checkCallbackCount() {
