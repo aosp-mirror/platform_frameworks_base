@@ -1596,10 +1596,12 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         return topRunning;
     }
 
+    // TODO (b/157876447): switch to Task related name
     protected int getStackCount() {
         return mChildren.size();
     }
 
+    // TODO (b/157876447): switch to Task related name
     protected Task getStackAt(int index) {
         return mChildren.get(index);
     }
