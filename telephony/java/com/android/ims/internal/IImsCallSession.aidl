@@ -20,6 +20,8 @@ import android.os.Message;
 import android.telephony.ims.aidl.IImsCallSessionListener;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsStreamMediaProfile;
+import android.telephony.ims.RtpHeaderExtension;
+
 import com.android.ims.internal.IImsVideoCallProvider;
 
 /**
@@ -297,4 +299,10 @@ interface IImsCallSession {
      * @param rttMessage RTT message to be sent
      */
     void sendRttMessage(in String rttMessage);
+
+    /*
+     * Device sends RTP header extension(s).
+     * @param extensions the header extensions to be sent
+     */
+    void sendRtpHeaderExtensions(in List<RtpHeaderExtension> extensions);
 }
