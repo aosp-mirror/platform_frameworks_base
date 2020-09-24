@@ -85,9 +85,12 @@ public class ProximitySensor implements ThresholdSensor {
         public void onThresholdCrossed(ThresholdSensorEvent event) {
             // If we no longer have a "below" signal and the secondary sensor is not
             // considered "safe", then we need to turn it off.
-            if (!mSecondarySafe && (!mLastPrimaryEvent.getBelow() || !event.getBelow())) {
+            if (!mSecondarySafe
+                    && (mLastPrimaryEvent == null
+                    || !mLastPrimaryEvent.getBelow()
+                    || !event.getBelow())) {
                 mSecondaryThresholdSensor.pause();
-                if (!mLastPrimaryEvent.getBelow()) {
+                if (mLastPrimaryEvent == null || !mLastPrimaryEvent.getBelow()) {
                     // Only check the secondary as long as the primary thinks we're near.
                     mCancelSecondaryRunnable = null;
                     return;
@@ -99,7 +102,9 @@ public class ProximitySensor implements ThresholdSensor {
             }
             logDebug("Secondary sensor event: " + event.getBelow() + ".");
 
-            onSensorEvent(event);
+            if (!mPaused) {
+                onSensorEvent(event);
+            }
         }
     };
 
@@ -249,6 +254,12 @@ public class ProximitySensor implements ThresholdSensor {
         Assert.isMainThread();
         if (mLastEvent == null) {
             return;
+        }
+        if (mLastEvent != null) {
+            ThresholdSensorEvent lastEvent = mLastEvent;  // Listeners can null out mLastEvent.
+            List<ThresholdSensor.Listener> listeners = new ArrayList<>(mListeners);
+            listeners.forEach(proximitySensorListener ->
+                    proximitySensorListener.onThresholdCrossed(lastEvent));
         }
 
         List<ThresholdSensor.Listener> listeners = new ArrayList<>(mListeners);
