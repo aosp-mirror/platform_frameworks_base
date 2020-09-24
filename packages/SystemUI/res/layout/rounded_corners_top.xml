@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-** Copyright 2012, The Android Open Source Project
+** Copyright 2020, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 -->
 <com.android.systemui.RegionInterceptingFrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/rounded_corners_default"
+    android:id="@+id/rounded_corners_top"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <ImageView
@@ -25,12 +25,12 @@
         android:layout_height="12dp"
         android:layout_gravity="left|top"
         android:tint="#ff000000"
-        android:src="@drawable/rounded"/>
+        android:src="@drawable/rounded_corner_top"/>
     <ImageView
         android:id="@+id/right"
         android:layout_width="12dp"
         android:layout_height="12dp"
         android:tint="#ff000000"
-        android:layout_gravity="right|bottom"
-        android:src="@drawable/rounded"/>
+        android:layout_gravity="right|top"
+        android:src="@drawable/rounded_corner_top"/>
 </com.android.systemui.RegionInterceptingFrameLayout>
