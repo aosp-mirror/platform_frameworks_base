@@ -1163,6 +1163,8 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.getDisplayRotation().setRotation(ROTATION_0);
         mDisplayContent.computeScreenConfiguration(config);
         mDisplayContent.onRequestedOverrideConfigurationChanged(config);
+        assertNotEquals(config90.windowConfiguration.getMaxBounds(),
+                config.windowConfiguration.getMaxBounds());
 
         final ActivityRecord app = mAppWindow.mActivityRecord;
         app.setVisible(false);
@@ -1218,8 +1220,9 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(t, never()).setPosition(any(), eq(0), eq(0));
 
         // Launch another activity before the transition is finished.
-        final ActivityRecord app2 = new TaskBuilder(mSupervisor)
-                .setDisplay(mDisplayContent).setCreateActivity(true).build().getTopMostActivity();
+        final Task task2 = new TaskBuilder(mSupervisor).setDisplay(mDisplayContent).build();
+        final ActivityRecord app2 = new ActivityBuilder(mAtm).setStack(task2)
+                .setUseProcess(app.app).build();
         app2.setVisible(false);
         mDisplayContent.mOpeningApps.add(app2);
         app2.setRequestedOrientation(newOrientation);
@@ -1228,6 +1231,12 @@ public class DisplayContentTests extends WindowTestsBase {
         // should also be the fixed rotation launching app because it is the latest top.
         assertTrue(app.hasFixedRotationTransform(app2));
         assertTrue(mDisplayContent.isFixedRotationLaunchingApp(app2));
+
+        final Configuration expectedProcConfig = new Configuration(app2.app.getConfiguration());
+        expectedProcConfig.windowConfiguration.setActivityType(
+                WindowConfiguration.ACTIVITY_TYPE_UNDEFINED);
+        assertEquals("The process should receive rotated configuration for compatibility",
+                expectedProcConfig, app2.app.getConfiguration());
 
         // The fixed rotation transform can only be finished when all animation finished.
         doReturn(false).when(app2).isAnimating(anyInt(), anyInt());

@@ -1849,7 +1849,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
         final int dw = rotated ? mBaseDisplayHeight : mBaseDisplayWidth;
         final int dh = rotated ? mBaseDisplayWidth : mBaseDisplayHeight;
-        outConfig.windowConfiguration.getBounds().set(0, 0, dw, dh);
+        outConfig.windowConfiguration.setMaxBounds(0, 0, dw, dh);
+        outConfig.windowConfiguration.setBounds(outConfig.windowConfiguration.getMaxBounds());
 
         final int uiMode = getConfiguration().uiMode;
         final DisplayCutout displayCutout =
