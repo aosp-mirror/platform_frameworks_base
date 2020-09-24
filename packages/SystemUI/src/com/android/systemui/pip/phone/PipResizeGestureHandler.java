@@ -308,6 +308,10 @@ public class PipResizeGestureHandler {
         return mTmpRegion.contains(x, y);
     }
 
+    public boolean isUsingPinchToZoom() {
+        return mEnablePinchResize;
+    }
+
     public boolean willStartResizeGesture(MotionEvent ev) {
         if (isInValidSysUiState()) {
             switch (ev.getActionMasked()) {
