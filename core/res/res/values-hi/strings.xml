@@ -1829,6 +1829,7 @@
       <item quantity="one">%d घंटे के लिए</item>
       <item quantity="other">%d घंटे के लिए</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> तक"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> तक"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (अगले अलार्म) तक"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"जब तक आप बंद नहीं करते"</string>

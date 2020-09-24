@@ -20,13 +20,14 @@
 #include "utils/Blur.h"
 
 namespace android::uirenderer {
-BlurShader::BlurShader(float radiusX, float radiusY, Shader* inputShader, const SkMatrix* matrix)
+BlurShader::BlurShader(float radiusX, float radiusY, Shader* inputShader, SkTileMode edgeTreatment,
+        const SkMatrix* matrix)
     : Shader(matrix)
     , skImageFilter(
             SkImageFilters::Blur(
                     Blur::convertRadiusToSigma(radiusX),
                     Blur::convertRadiusToSigma(radiusY),
-                    SkTileMode::kClamp,
+                    edgeTreatment,
                     inputShader ? inputShader->asSkImageFilter() : nullptr,
                     nullptr)
             ) { }

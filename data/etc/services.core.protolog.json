@@ -151,6 +151,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1910833551": {
+      "message": "SyncSet{%x:%d} Start for %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
+    },
     "-1895337367": {
       "message": "Delete root task display=%d winMode=%d",
       "level": "VERBOSE",
@@ -463,6 +469,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1387080937": {
+      "message": "SyncSet{%x:%d} Child ready, now ready=%b and waiting on %d transactions",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
+    },
     "-1364754753": {
       "message": "Task vanished taskId=%d",
       "level": "VERBOSE",
@@ -480,6 +492,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-1340783230": {
+      "message": "SyncSet{%x:%d} Added %s. now waiting on %d transactions",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
     },
     "-1340540100": {
       "message": "Creating SnapshotStartingData",
@@ -858,6 +876,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DragState.java"
+    },
+    "-678300709": {
+      "message": "SyncSet{%x:%d} Trying to add %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
     },
     "-668956537": {
       "message": "  THUMBNAIL %s: CREATE",
@@ -1735,6 +1759,12 @@
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
     },
+    "590184240": {
+      "message": "- NOT adding to sync: visible=%b hasListener=%b",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/WindowContainer.java"
+    },
     "594260577": {
       "message": "createWallpaperAnimations()",
       "level": "DEBUG",
@@ -2004,6 +2034,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
+    },
+    "1000601037": {
+      "message": "SyncSet{%x:%d} Set ready",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
     },
     "1001904964": {
       "message": "***** BOOT TIMEOUT: forcing display enabled",
@@ -2599,6 +2635,12 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "2001924866": {
+      "message": "SyncSet{%x:%d} Finished. Reporting %d containers to %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
+    },
     "2016061474": {
       "message": "Prepare app transition: transit=%s %s alwaysKeepCurrent=%b displayId=%d Callers=%s",
       "level": "VERBOSE",
@@ -2773,6 +2815,9 @@
       "tag": "WindowManager"
     },
     "WM_DEBUG_SWITCH": {
+      "tag": "WindowManager"
+    },
+    "WM_DEBUG_SYNC_ENGINE": {
       "tag": "WindowManager"
     },
     "WM_DEBUG_WINDOW_MOVEMENT": {

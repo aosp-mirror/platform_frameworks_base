@@ -33,7 +33,6 @@ import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -69,12 +68,9 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private LinearLayout mDeviceListLayout;
     private Button mDoneButton;
     private Button mStopButton;
-    private View mListBottomPadding;
     private int mListMaxHeight;
 
     MediaOutputBaseAdapter mAdapter;
-    FrameLayout mGroupItemController;
-    View mGroupDivider;
 
     private final ViewTreeObserver.OnGlobalLayoutListener mDeviceListLayoutListener = () -> {
         // Set max height for list
@@ -114,12 +110,9 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mHeaderSubtitle = mDialogView.requireViewById(R.id.header_subtitle);
         mHeaderIcon = mDialogView.requireViewById(R.id.header_icon);
         mDevicesRecyclerView = mDialogView.requireViewById(R.id.list_result);
-        mGroupItemController = mDialogView.requireViewById(R.id.group_item_controller);
-        mGroupDivider = mDialogView.requireViewById(R.id.group_item_divider);
         mDeviceListLayout = mDialogView.requireViewById(R.id.device_list);
         mDoneButton = mDialogView.requireViewById(R.id.done);
         mStopButton = mDialogView.requireViewById(R.id.stop);
-        mListBottomPadding = mDialogView.requireViewById(R.id.list_bottom_padding);
 
         mDeviceListLayout.getViewTreeObserver().addOnGlobalLayoutListener(
                 mDeviceListLayoutListener);
@@ -162,7 +155,9 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         }
         if (mHeaderIcon.getVisibility() == View.VISIBLE) {
             final int size = getHeaderIconSize();
-            mHeaderIcon.setLayoutParams(new LinearLayout.LayoutParams(size, size));
+            final int padding = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.media_output_dialog_header_icon_padding);
+            mHeaderIcon.setLayoutParams(new LinearLayout.LayoutParams(size + padding, size));
         }
         // Update title and subtitle
         mHeaderTitle.setText(getHeaderText());
@@ -178,12 +173,8 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         if (!mAdapter.isDragging()) {
             mAdapter.notifyDataSetChanged();
         }
-        // Add extra padding when device amount is less than 6
-        if (mMediaOutputController.getMediaDevices().size() < 6) {
-            mListBottomPadding.setVisibility(View.VISIBLE);
-        } else {
-            mListBottomPadding.setVisibility(View.GONE);
-        }
+        // Show when remote media session is available
+        mStopButton.setVisibility(getStopButtonVisibility());
     }
 
     abstract int getHeaderIconRes();
@@ -195,6 +186,8 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     abstract CharSequence getHeaderText();
 
     abstract CharSequence getHeaderSubtitle();
+
+    abstract int getStopButtonVisibility();
 
     @Override
     public void onMediaChanged() {

@@ -24,6 +24,8 @@
 #include "matchers/EventMatcherWizard.h"
 #include "metrics_manager_util.h"
 
+using google::protobuf::MessageLite;
+
 namespace android {
 namespace os {
 namespace statsd {
@@ -419,16 +421,19 @@ bool metricActivationDepsChange(const StatsdConfig& config,
     return false;
 }
 
-bool determineEventMetricUpdateStatus(const StatsdConfig& config, const EventMetric& metric,
-                                      const unordered_map<int64_t, int>& oldMetricProducerMap,
-                                      const vector<sp<MetricProducer>>& oldMetricProducers,
-                                      const unordered_map<int64_t, int>& metricToActivationMap,
-                                      const set<int64_t>& replacedMatchers,
-                                      const set<int64_t>& replacedConditions,
-                                      UpdateStatus& updateStatus) {
-    int64_t id = metric.id();
+bool determineMetricUpdateStatus(
+        const StatsdConfig& config, const MessageLite& metric, const int64_t metricId,
+        const MetricType metricType, const set<int64_t>& matcherDependencies,
+        const set<int64_t>& conditionDependencies,
+        const ::google::protobuf::RepeatedField<int64_t>& stateDependencies,
+        const ::google::protobuf::RepeatedPtrField<MetricConditionLink>& conditionLinks,
+        const unordered_map<int64_t, int>& oldMetricProducerMap,
+        const vector<sp<MetricProducer>>& oldMetricProducers,
+        const unordered_map<int64_t, int>& metricToActivationMap,
+        const set<int64_t>& replacedMatchers, const set<int64_t>& replacedConditions,
+        const set<int64_t>& replacedStates, UpdateStatus& updateStatus) {
     // Check if new metric
-    const auto& oldMetricProducerIt = oldMetricProducerMap.find(id);
+    const auto& oldMetricProducerIt = oldMetricProducerMap.find(metricId);
     if (oldMetricProducerIt == oldMetricProducerMap.end()) {
         updateStatus = UPDATE_NEW;
         return true;
@@ -436,41 +441,82 @@ bool determineEventMetricUpdateStatus(const StatsdConfig& config, const EventMet
 
     // This is an existing metric, check if it has changed.
     uint64_t metricHash;
-    if (!getMetricProtoHash(config, metric, id, metricToActivationMap, metricHash)) {
+    if (!getMetricProtoHash(config, metric, metricId, metricToActivationMap, metricHash)) {
         return false;
     }
     const sp<MetricProducer> oldMetricProducer = oldMetricProducers[oldMetricProducerIt->second];
-    if (oldMetricProducer->getMetricType() != METRIC_TYPE_EVENT ||
+    if (oldMetricProducer->getMetricType() != metricType ||
         oldMetricProducer->getProtoHash() != metricHash) {
         updateStatus = UPDATE_REPLACE;
         return true;
     }
 
-    // Metric type and definition are the same. Need to check dependencies to see if they changed.
-    if (replacedMatchers.find(metric.what()) != replacedMatchers.end()) {
+    // Take intersections of the matchers/predicates/states that the metric
+    // depends on with those that have been replaced. If a metric depends on any
+    // replaced component, it too must be replaced.
+    set<int64_t> intersection;
+    set_intersection(matcherDependencies.begin(), matcherDependencies.end(),
+                     replacedMatchers.begin(), replacedMatchers.end(),
+                     inserter(intersection, intersection.begin()));
+    if (intersection.size() > 0) {
+        updateStatus = UPDATE_REPLACE;
+        return true;
+    }
+    set_intersection(conditionDependencies.begin(), conditionDependencies.end(),
+                     replacedConditions.begin(), replacedConditions.end(),
+                     inserter(intersection, intersection.begin()));
+    if (intersection.size() > 0) {
+        updateStatus = UPDATE_REPLACE;
+        return true;
+    }
+    set_intersection(stateDependencies.begin(), stateDependencies.end(), replacedStates.begin(),
+                     replacedStates.end(), inserter(intersection, intersection.begin()));
+    if (intersection.size() > 0) {
         updateStatus = UPDATE_REPLACE;
         return true;
     }
 
-    if (metric.has_condition()) {
-        if (replacedConditions.find(metric.condition()) != replacedConditions.end()) {
-            updateStatus = UPDATE_REPLACE;
-            return true;
-        }
-    }
-
-    if (metricActivationDepsChange(config, metricToActivationMap, id, replacedMatchers)) {
-        updateStatus = UPDATE_REPLACE;
-        return true;
-    }
-
-    for (const auto& metricConditionLink : metric.links()) {
+    for (const auto& metricConditionLink : conditionLinks) {
         if (replacedConditions.find(metricConditionLink.condition()) != replacedConditions.end()) {
             updateStatus = UPDATE_REPLACE;
             return true;
         }
     }
+
+    if (metricActivationDepsChange(config, metricToActivationMap, metricId, replacedMatchers)) {
+        updateStatus = UPDATE_REPLACE;
+        return true;
+    }
+
     updateStatus = UPDATE_PRESERVE;
+    return true;
+}
+
+bool determineAllMetricUpdateStatuses(const StatsdConfig& config,
+                                      const unordered_map<int64_t, int>& oldMetricProducerMap,
+                                      const vector<sp<MetricProducer>>& oldMetricProducers,
+                                      const unordered_map<int64_t, int>& metricToActivationMap,
+                                      const set<int64_t>& replacedMatchers,
+                                      const set<int64_t>& replacedConditions,
+                                      const set<int64_t>& replacedStates,
+                                      vector<UpdateStatus>& metricsToUpdate) {
+    int metricIndex = 0;
+    for (int i = 0; i < config.event_metric_size(); i++, metricIndex++) {
+        const EventMetric& metric = config.event_metric(i);
+        set<int64_t> conditionDependencies;
+        if (metric.has_condition()) {
+            conditionDependencies.insert(metric.condition());
+        }
+        if (!determineMetricUpdateStatus(
+                    config, metric, metric.id(), METRIC_TYPE_EVENT, {metric.what()},
+                    conditionDependencies, ::google::protobuf::RepeatedField<int64_t>(),
+                    metric.links(), oldMetricProducerMap, oldMetricProducers, metricToActivationMap,
+                    replacedMatchers, replacedConditions, replacedStates,
+                    metricsToUpdate[metricIndex])) {
+            return false;
+        }
+    }
+    // TODO: determine update status for count, gauge, value, duration metrics.
     return true;
 }
 
@@ -518,22 +564,16 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
     }
 
     vector<UpdateStatus> metricsToUpdate(allMetricsCount, UPDATE_UNKNOWN);
+    if (!determineAllMetricUpdateStatuses(config, oldMetricProducerMap, oldMetricProducers,
+                                          metricToActivationMap, replacedMatchers,
+                                          replacedConditions, replacedStates, metricsToUpdate)) {
+        return false;
+    }
+
+    // Now, perform the update. Must iterate the metric types in the same order
     int metricIndex = 0;
     for (int i = 0; i < config.event_metric_size(); i++, metricIndex++) {
         newMetricProducerMap[config.event_metric(i).id()] = metricIndex;
-        if (!determineEventMetricUpdateStatus(config, config.event_metric(i), oldMetricProducerMap,
-                                              oldMetricProducers, metricToActivationMap,
-                                              replacedMatchers, replacedConditions,
-                                              metricsToUpdate[metricIndex])) {
-            return false;
-        }
-    }
-
-    // TODO: determine update status for count, gauge, value, duration metrics.
-
-    // Now, perform the update. Must iterate the metric types in the same order
-    metricIndex = 0;
-    for (int i = 0; i < config.event_metric_size(); i++, metricIndex++) {
         const EventMetric& metric = config.event_metric(i);
         switch (metricsToUpdate[metricIndex]) {
             case UPDATE_PRESERVE: {

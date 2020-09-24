@@ -30,8 +30,12 @@ public:
      *
      * This will blur the contents of the provided input shader if it is non-null, otherwise
      * the source bitmap will be blurred instead.
+     *
+     * The edge treatment parameter determines how content near the edges of the source is to
+     * participate in the blur
      */
-    BlurShader(float radiusX, float radiusY, Shader* inputShader, const SkMatrix* matrix);
+    BlurShader(float radiusX, float radiusY, Shader* inputShader, SkTileMode edgeTreatment,
+            const SkMatrix* matrix);
     ~BlurShader() override;
 protected:
     sk_sp<SkImageFilter> makeSkImageFilter() override;

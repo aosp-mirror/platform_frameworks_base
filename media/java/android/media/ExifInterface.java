@@ -31,7 +31,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Build;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -599,7 +598,6 @@ public class ExifInterface {
     private static final int WEBP_CHUNK_TYPE_BYTE_LENGTH = 4;
     private static final int WEBP_CHUNK_SIZE_BYTE_LENGTH = 4;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     @GuardedBy("sFormatter")
     private static SimpleDateFormat sFormatter;
     @GuardedBy("sFormatterTz")
@@ -1446,18 +1444,17 @@ public class ExifInterface {
         sExifPointerTagMap.put(EXIF_POINTER_TAGS[5].number, IFD_TYPE_ORF_IMAGE_PROCESSING); // 8256
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private String mFilename;
     private FileDescriptor mSeekableFileDescriptor;
     private AssetManager.AssetInputStream mAssetInputStream;
     private boolean mIsInputStream;
     private int mMimeType;
     private boolean mIsExifDataOnly;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(publicAlternatives = "Use {@link #getAttribute(java.lang.String)} "
+            + "instead.")
     private final HashMap[] mAttributes = new HashMap[EXIF_TAGS.length];
     private Set<Integer> mHandledIfdOffsets = new HashSet<>(EXIF_TAGS.length);
     private ByteOrder mExifByteOrder = ByteOrder.BIG_ENDIAN;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private boolean mHasThumbnail;
     private boolean mHasThumbnailStrips;
     private boolean mAreThumbnailStripsConsecutive;
@@ -2409,11 +2406,8 @@ public class ExifInterface {
     }
 
     /**
-     * Returns parsed {@code DateTime} value, or -1 if unavailable or invalid.
-     * 
-     * @hide
+     * Returns parsed {@link #TAG_DATETIME} value, or -1 if unavailable or invalid.
      */
-    @UnsupportedAppUsage
     public @CurrentTimeMillisLong long getDateTime() {
         return parseDateTime(getAttribute(TAG_DATETIME),
                 getAttribute(TAG_SUBSEC_TIME),
@@ -2421,10 +2415,7 @@ public class ExifInterface {
     }
 
     /**
-     * Returns parsed {@code DateTimeDigitized} value, or -1 if unavailable or
-     * invalid.
-     *
-     * @hide
+     * Returns parsed {@link #TAG_DATETIME_DIGITIZED} value, or -1 if unavailable or invalid.
      */
     public @CurrentTimeMillisLong long getDateTimeDigitized() {
         return parseDateTime(getAttribute(TAG_DATETIME_DIGITIZED),
@@ -2433,12 +2424,8 @@ public class ExifInterface {
     }
 
     /**
-     * Returns parsed {@code DateTimeOriginal} value, or -1 if unavailable or
-     * invalid.
-     *
-     * @hide
+     * Returns parsed {@link #TAG_DATETIME_ORIGINAL} value, or -1 if unavailable or invalid.
      */
-    @UnsupportedAppUsage
     public @CurrentTimeMillisLong long getDateTimeOriginal() {
         return parseDateTime(getAttribute(TAG_DATETIME_ORIGINAL),
                 getAttribute(TAG_SUBSEC_TIME_ORIGINAL),
@@ -2490,9 +2477,7 @@ public class ExifInterface {
     /**
      * Returns number of milliseconds since Jan. 1, 1970, midnight UTC.
      * Returns -1 if the date time information if not available.
-     * @hide
      */
-    @UnsupportedAppUsage
     public long getGpsDateTime() {
         String date = getAttribute(TAG_GPS_DATESTAMP);
         String time = getAttribute(TAG_GPS_TIMESTAMP);
@@ -2518,7 +2503,6 @@ public class ExifInterface {
     }
 
     /** {@hide} */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static float convertRationalLatLonToFloat(String rationalString, String ref) {
         try {
             String [] parts = rationalString.split(",");

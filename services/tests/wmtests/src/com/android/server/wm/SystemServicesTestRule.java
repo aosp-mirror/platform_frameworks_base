@@ -337,7 +337,7 @@ public class SystemServicesTestRule implements TestRule {
         // HighRefreshRateBlacklist with DeviceConfig. We need to undo that here to avoid
         // leaking mWmService.
         mWmService.mConstants.dispose();
-        mWmService.mHighRefreshRateBlacklist.dispose();
+        mWmService.mHighRefreshRateDenylist.dispose();
 
         // This makes sure the posted messages without delay are processed, e.g.
         // DisplayPolicy#release, WindowManagerService#setAnimationScale.

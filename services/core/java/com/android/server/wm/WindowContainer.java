@@ -32,6 +32,7 @@ import static android.view.SurfaceControl.Transaction;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.AppTransition.MAX_APP_TRANSITION_DURATION;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
@@ -2886,6 +2887,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // If we are invisible, no need to sync, likewise if we are already engaged in a sync,
         // we can't support overlapping syncs on a single container yet.
         if (!isVisible() || mWaitingListener != null) {
+            ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "- NOT adding to sync: visible=%b "
+                            + "hasListener=%b", isVisible(), mWaitingListener != null);
             return false;
         }
         mUsingBLASTSyncTransaction = true;

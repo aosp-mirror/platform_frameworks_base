@@ -1829,6 +1829,7 @@
       <item quantity="one">Sa loob ng %d oras</item>
       <item quantity="other">Sa loob ng %d na oras</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Hanggang <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Hanggang <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Hanggang <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (susunod na alarm)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Hanggang sa i-off mo"</string>

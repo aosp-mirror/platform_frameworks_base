@@ -441,10 +441,6 @@ class WindowStateAnimator {
             return mSurfaceController;
         }
 
-        if ((mWin.mAttrs.privateFlags & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0) {
-            windowType = SurfaceControl.WINDOW_TYPE_DONT_SCREENSHOT;
-        }
-
         w.setHasSurface(false);
 
         if (DEBUG_ANIM) {
@@ -460,6 +456,10 @@ class WindowStateAnimator {
 
         if (w.isSecureLocked()) {
             flags |= SurfaceControl.SECURE;
+        }
+
+        if ((mWin.mAttrs.privateFlags & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0) {
+            flags |= SurfaceControl.SKIP_SCREENSHOT;
         }
 
         calculateSurfaceBounds(w, attrs, mTmpSize);

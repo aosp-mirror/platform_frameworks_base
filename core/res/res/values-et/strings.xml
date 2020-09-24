@@ -1829,6 +1829,7 @@
       <item quantity="other">%d h</item>
       <item quantity="one">1 h</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Kuni <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Kuni <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Kuni <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (järgmine äratus)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Kuni välja lülitate"</string>

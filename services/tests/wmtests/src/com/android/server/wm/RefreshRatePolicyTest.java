@@ -48,7 +48,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
     private static final int LOW_MODE_ID = 3;
 
     private RefreshRatePolicy mPolicy;
-    private HighRefreshRateBlacklist mBlacklist = mock(HighRefreshRateBlacklist.class);
+    private HighRefreshRateDenylist mDenylist = mock(HighRefreshRateDenylist.class);
 
     @Before
     public void setUp() {
@@ -61,7 +61,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
                         defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), 60),
         };
         di.defaultModeId = 1;
-        mPolicy = new RefreshRatePolicy(mWm, di, mBlacklist);
+        mPolicy = new RefreshRatePolicy(mWm, di, mDenylist);
     }
 
     @Test
@@ -81,7 +81,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         final WindowState blacklistedWindow = createWindow(null, TYPE_BASE_APPLICATION,
                 "blacklistedWindow");
         blacklistedWindow.mAttrs.packageName = "com.android.test";
-        when(mBlacklist.isBlacklisted("com.android.test")).thenReturn(true);
+        when(mDenylist.isDenylisted("com.android.test")).thenReturn(true);
         assertEquals(LOW_MODE_ID, mPolicy.getPreferredModeId(blacklistedWindow));
     }
 
@@ -90,7 +90,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         final WindowState overrideWindow = createWindow(null, TYPE_BASE_APPLICATION,
                 "overrideWindow");
         overrideWindow.mAttrs.preferredDisplayModeId = LOW_MODE_ID;
-        when(mBlacklist.isBlacklisted("com.android.test")).thenReturn(true);
+        when(mDenylist.isDenylisted("com.android.test")).thenReturn(true);
         assertEquals(LOW_MODE_ID, mPolicy.getPreferredModeId(overrideWindow));
     }
 

@@ -1829,6 +1829,8 @@
       <item quantity="one">%d ঘন্টার জন্য</item>
       <item quantity="other">%d ঘন্টার জন্য</item>
     </plurals>
+    <!-- no translation found for zen_mode_until_next_day (1403042784161725038) -->
+    <skip />
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> পর্যন্ত"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> পর্যন্ত (পরবর্তী অ্যালার্ম)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"যতক্ষণ না আপনি বন্ধ করছেন"</string>

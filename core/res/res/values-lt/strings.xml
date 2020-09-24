@@ -1891,6 +1891,7 @@
       <item quantity="many">%d val.</item>
       <item quantity="other">%d val.</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Iki <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Iki <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Iki <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (kitas signalas)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Kol išjungsite"</string>

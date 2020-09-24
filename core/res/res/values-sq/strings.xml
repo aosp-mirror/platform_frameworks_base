@@ -1829,6 +1829,7 @@
       <item quantity="other">Për %d orë</item>
       <item quantity="one">Për 1 orë</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Deri në <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Deri në <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Deri në <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (alarmi tjetër)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Derisa ta çaktivizosh"</string>
