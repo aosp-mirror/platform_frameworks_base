@@ -23,6 +23,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +39,7 @@ public final class LocationTimeZoneEvent implements Parcelable {
 
     @IntDef({ EVENT_TYPE_UNKNOWN, EVENT_TYPE_PERMANENT_FAILURE, EVENT_TYPE_SUCCESS,
             EVENT_TYPE_UNCERTAIN })
-    @interface EventType {}
+    public @interface EventType {}
 
     /** Uninitialized value for {@link #mEventType} - must not be used for real events. */
     private static final int EVENT_TYPE_UNKNOWN = 0;
@@ -49,8 +51,8 @@ public final class LocationTimeZoneEvent implements Parcelable {
     public static final int EVENT_TYPE_PERMANENT_FAILURE = 1;
 
     /**
-     * Indicates a successful geolocation time zone detection event. {@link #mTimeZoneIds} will be
-     * non-null but can legitimately be empty, e.g. for disputed areas, oceans.
+     * Indicates a successful geolocation time zone detection event. {@link #getTimeZoneIds()} will
+     * be non-null but can legitimately be empty, e.g. for disputed areas, oceans.
      */
     public static final int EVENT_TYPE_SUCCESS = 2;
 
@@ -81,10 +83,7 @@ public final class LocationTimeZoneEvent implements Parcelable {
         mTimeZoneIds = immutableList(timeZoneIds);
 
         boolean emptyTimeZoneIdListExpected = eventType != EVENT_TYPE_SUCCESS;
-        if (emptyTimeZoneIdListExpected && !timeZoneIds.isEmpty()) {
-            throw new IllegalStateException(
-                    "timeZoneIds must only have values when eventType is success");
-        }
+        Preconditions.checkState(!emptyTimeZoneIdListExpected || timeZoneIds.isEmpty());
 
         mElapsedRealtimeNanos = elapsedRealtimeNanos;
     }
@@ -102,9 +101,7 @@ public final class LocationTimeZoneEvent implements Parcelable {
      *
      * <p>This value can be reliably compared to {@link
      * android.os.SystemClock#elapsedRealtimeNanos}, to calculate the age of a fix and to compare
-     * {@link LocationTimeZoneEvent} fixes. This is reliable because elapsed real-time is guaranteed
-     * monotonic for each system boot and continues to increment even when the system is in deep
-     * sleep.
+     * {@link LocationTimeZoneEvent} instances.
      *
      * @return elapsed real-time of fix, in nanoseconds since system boot.
      */

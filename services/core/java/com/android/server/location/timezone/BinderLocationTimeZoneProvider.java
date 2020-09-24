@@ -29,6 +29,7 @@ import android.util.Slog;
 
 import com.android.internal.location.timezone.LocationTimeZoneProviderRequest;
 
+import java.time.Duration;
 import java.util.Objects;
 
 /**
@@ -142,14 +143,13 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
     }
 
     @Override
-    void onEnable() {
+    void onEnable(@NonNull Duration initializationTimeout) {
         // Set a request on the proxy - it will be sent immediately if the service is bound,
         // or will be sent as soon as the service becomes bound.
-        // TODO(b/152744911): Decide whether to send a timeout so the provider knows how long
-        //  it has to generate the first event before it could be bypassed.
         LocationTimeZoneProviderRequest request =
                 new LocationTimeZoneProviderRequest.Builder()
                         .setReportLocationTimeZone(true)
+                        .setInitializationTimeoutMillis(initializationTimeout.toMillis())
                         .build();
         mProxy.setRequest(request);
     }

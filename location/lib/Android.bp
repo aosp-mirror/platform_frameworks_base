@@ -20,5 +20,8 @@ java_sdk_library {
     libs: [
         "androidx.annotation_annotation",
     ],
-    api_packages: ["com.android.location.provider"],
+    api_packages: [
+        "com.android.location.provider",
+        "com.android.location.timezone.provider",
+    ],
 }
