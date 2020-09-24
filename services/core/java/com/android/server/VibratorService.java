@@ -385,15 +385,7 @@ public class VibratorService extends IVibratorService.Stub
         mNativeWrapper = injector.getNativeWrapper();
         mH = injector.createHandler(Looper.myLooper());
 
-        long nativeServicePtr = mNativeWrapper.vibratorInit(this::onVibrationComplete);
-        long finalizerPtr = mNativeWrapper.vibratorGetFinalizer();
-
-        if (finalizerPtr != 0) {
-            NativeAllocationRegistry registry =
-                    NativeAllocationRegistry.createMalloced(
-                            VibratorService.class.getClassLoader(), finalizerPtr);
-            registry.registerNativeAllocation(this, nativeServicePtr);
-        }
+        mNativeWrapper.vibratorInit(this::onVibrationComplete);
 
         // Reset the hardware to a default state, in case this is a runtime
         // restart instead of a fresh boot.
@@ -1746,18 +1738,17 @@ public class VibratorService extends IVibratorService.Stub
             return VibratorService.vibratorExists(mNativeServicePtr);
         }
 
-        /**
-         * Returns native pointer to newly created controller and initializes connection to vibrator
-         * HAL service.
-         */
-        public long vibratorInit(OnCompleteListener listener) {
+        /** Initializes connection to vibrator HAL service. */
+        public void vibratorInit(OnCompleteListener listener) {
             mNativeServicePtr = VibratorService.vibratorInit(listener);
-            return mNativeServicePtr;
-        }
+            long finalizerPtr = VibratorService.vibratorGetFinalizer();
 
-        /** Returns pointer to native finalizer function to be called by GC. */
-        public long vibratorGetFinalizer() {
-            return VibratorService.vibratorGetFinalizer();
+            if (finalizerPtr != 0) {
+                NativeAllocationRegistry registry =
+                        NativeAllocationRegistry.createMalloced(
+                                VibratorService.class.getClassLoader(), finalizerPtr);
+                registry.registerNativeAllocation(this, mNativeServicePtr);
+            }
         }
 
         /** Turns vibrator on for given time. */
