@@ -27,6 +27,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -76,6 +77,7 @@ import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
@@ -273,6 +275,7 @@ public class DeviceIdleController extends SystemService
     private ActivityManagerInternal mLocalActivityManager;
     private ActivityTaskManagerInternal mLocalActivityTaskManager;
     private DeviceIdleInternal mLocalService;
+    private PackageManagerInternal mPackageManagerInternal;
     private PowerManagerInternal mLocalPowerManager;
     private PowerManager mPowerManager;
     private INetworkPolicyManager mNetworkPolicyManager;
@@ -1736,27 +1739,33 @@ public class DeviceIdleController extends SystemService
         }
 
         public String[] getRemovedSystemPowerWhitelistApps() {
-            return getRemovedSystemPowerWhitelistAppsInternal();
+            return getRemovedSystemPowerWhitelistAppsInternal(
+                    Binder.getCallingUid(), UserHandle.getCallingUserId());
         }
 
         @Override public String[] getSystemPowerWhitelistExceptIdle() {
-            return getSystemPowerWhitelistExceptIdleInternal();
+            return getSystemPowerWhitelistExceptIdleInternal(
+                    Binder.getCallingUid(), UserHandle.getCallingUserId());
         }
 
         @Override public String[] getSystemPowerWhitelist() {
-            return getSystemPowerWhitelistInternal();
+            return getSystemPowerWhitelistInternal(
+                    Binder.getCallingUid(), UserHandle.getCallingUserId());
         }
 
         @Override public String[] getUserPowerWhitelist() {
-            return getUserPowerWhitelistInternal();
+            return getUserPowerWhitelistInternal(
+                    Binder.getCallingUid(), UserHandle.getCallingUserId());
         }
 
         @Override public String[] getFullPowerWhitelistExceptIdle() {
-            return getFullPowerWhitelistExceptIdleInternal();
+            return getFullPowerWhitelistExceptIdleInternal(
+                    Binder.getCallingUid(), UserHandle.getCallingUserId());
         }
 
         @Override public String[] getFullPowerWhitelist() {
-            return getFullPowerWhitelistInternal();
+            return getFullPowerWhitelistInternal(
+                    Binder.getCallingUid(), UserHandle.getCallingUserId());
         }
 
         @Override public int[] getAppIdWhitelistExceptIdle() {
@@ -1776,10 +1785,18 @@ public class DeviceIdleController extends SystemService
         }
 
         @Override public boolean isPowerSaveWhitelistExceptIdleApp(String name) {
+            if (mPackageManagerInternal
+                    .filterAppAccess(name, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
+                return false;
+            }
             return isPowerSaveWhitelistExceptIdleAppInternal(name);
         }
 
         @Override public boolean isPowerSaveWhitelistApp(String name) {
+            if (mPackageManagerInternal
+                    .filterAppAccess(name, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
+                return false;
+            }
             return isPowerSaveWhitelistAppInternal(name);
         }
 
@@ -2159,6 +2176,7 @@ public class DeviceIdleController extends SystemService
                 mBatteryStats = BatteryStatsService.getService();
                 mLocalActivityManager = getLocalService(ActivityManagerInternal.class);
                 mLocalActivityTaskManager = getLocalService(ActivityTaskManagerInternal.class);
+                mPackageManagerInternal = getLocalService(PackageManagerInternal.class);
                 mLocalPowerManager = getLocalService(PowerManagerInternal.class);
                 mPowerManager = mInjector.getPowerManager();
                 mActiveIdleWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -2466,54 +2484,68 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    public String[] getSystemPowerWhitelistExceptIdleInternal() {
+    private String[] getSystemPowerWhitelistExceptIdleInternal(final int callingUid,
+            final int callingUserId) {
+        final String[] apps;
         synchronized (this) {
             int size = mPowerSaveWhitelistAppsExceptIdle.size();
-            String[] apps = new String[size];
+            apps = new String[size];
             for (int i = 0; i < size; i++) {
                 apps[i] = mPowerSaveWhitelistAppsExceptIdle.keyAt(i);
             }
-            return apps;
         }
+        return ArrayUtils.filter(apps, String[]::new,
+                (pkg) -> !mPackageManagerInternal.filterAppAccess(pkg, callingUid, callingUserId));
     }
 
-    public String[] getSystemPowerWhitelistInternal() {
+    private String[] getSystemPowerWhitelistInternal(final int callingUid,
+            final int callingUserId) {
+        final String[] apps;
         synchronized (this) {
             int size = mPowerSaveWhitelistApps.size();
-            String[] apps = new String[size];
+            apps = new String[size];
             for (int i = 0; i < size; i++) {
                 apps[i] = mPowerSaveWhitelistApps.keyAt(i);
             }
-            return apps;
         }
+        return ArrayUtils.filter(apps, String[]::new,
+                (pkg) -> !mPackageManagerInternal.filterAppAccess(pkg, callingUid, callingUserId));
     }
 
-    public String[] getRemovedSystemPowerWhitelistAppsInternal() {
+    private String[] getRemovedSystemPowerWhitelistAppsInternal(final int callingUid,
+            final int callingUserId) {
+        final String[] apps;
         synchronized (this) {
             int size = mRemovedFromSystemWhitelistApps.size();
-            final String[] apps = new String[size];
+            apps = new String[size];
             for (int i = 0; i < size; i++) {
                 apps[i] = mRemovedFromSystemWhitelistApps.keyAt(i);
             }
-            return apps;
         }
+        return ArrayUtils.filter(apps, String[]::new,
+                (pkg) -> !mPackageManagerInternal.filterAppAccess(pkg, callingUid, callingUserId));
     }
 
-    public String[] getUserPowerWhitelistInternal() {
+    private String[] getUserPowerWhitelistInternal(final int callingUid, final int callingUserId) {
+        final String[] apps;
         synchronized (this) {
             int size = mPowerSaveWhitelistUserApps.size();
-            String[] apps = new String[size];
+            apps = new String[size];
             for (int i = 0; i < mPowerSaveWhitelistUserApps.size(); i++) {
                 apps[i] = mPowerSaveWhitelistUserApps.keyAt(i);
             }
-            return apps;
         }
+        return ArrayUtils.filter(apps, String[]::new,
+                (pkg) -> !mPackageManagerInternal.filterAppAccess(pkg, callingUid, callingUserId));
     }
 
-    public String[] getFullPowerWhitelistExceptIdleInternal() {
+    private String[] getFullPowerWhitelistExceptIdleInternal(final int callingUid,
+            final int callingUserId) {
+        final String[] apps;
         synchronized (this) {
-            int size = mPowerSaveWhitelistAppsExceptIdle.size() + mPowerSaveWhitelistUserApps.size();
-            String[] apps = new String[size];
+            int size =
+                    mPowerSaveWhitelistAppsExceptIdle.size() + mPowerSaveWhitelistUserApps.size();
+            apps = new String[size];
             int cur = 0;
             for (int i = 0; i < mPowerSaveWhitelistAppsExceptIdle.size(); i++) {
                 apps[cur] = mPowerSaveWhitelistAppsExceptIdle.keyAt(i);
@@ -2523,14 +2555,16 @@ public class DeviceIdleController extends SystemService
                 apps[cur] = mPowerSaveWhitelistUserApps.keyAt(i);
                 cur++;
             }
-            return apps;
         }
+        return ArrayUtils.filter(apps, String[]::new,
+                (pkg) -> !mPackageManagerInternal.filterAppAccess(pkg, callingUid, callingUserId));
     }
 
-    public String[] getFullPowerWhitelistInternal() {
+    private String[] getFullPowerWhitelistInternal(final int callingUid, final int callingUserId) {
+        final String[] apps;
         synchronized (this) {
             int size = mPowerSaveWhitelistApps.size() + mPowerSaveWhitelistUserApps.size();
-            String[] apps = new String[size];
+            apps = new String[size];
             int cur = 0;
             for (int i = 0; i < mPowerSaveWhitelistApps.size(); i++) {
                 apps[cur] = mPowerSaveWhitelistApps.keyAt(i);
@@ -2540,8 +2574,9 @@ public class DeviceIdleController extends SystemService
                 apps[cur] = mPowerSaveWhitelistUserApps.keyAt(i);
                 cur++;
             }
-            return apps;
         }
+        return ArrayUtils.filter(apps, String[]::new,
+                (pkg) -> !mPackageManagerInternal.filterAppAccess(pkg, callingUid, callingUserId));
     }
 
     public boolean isPowerSaveWhitelistExceptIdleAppInternal(String packageName) {
