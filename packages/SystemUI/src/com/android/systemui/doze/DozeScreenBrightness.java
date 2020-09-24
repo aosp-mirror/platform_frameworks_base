@@ -127,7 +127,9 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
 
     @Override
     public void onScreenState(int state) {
-        if (mState == DozeMachine.State.FINISH && !mScreenOff
+        if (!mScreenOff
+                && (mState == DozeMachine.State.DOZE_AOD
+                     || mState == DozeMachine.State.DOZE_AOD_DOCKED)
                 && (state == Display.STATE_DOZE || state == Display.STATE_DOZE_SUSPEND)) {
             setLightSensorEnabled(true);
         } else {
