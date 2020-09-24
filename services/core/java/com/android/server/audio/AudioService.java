@@ -6490,14 +6490,17 @@ public class AudioService extends IAudioService.Stub
                         if (msg.obj == null) {
                             break;
                         }
-                        // If the app corresponding to this mode death handler object is not
-                        // capturing or playing audio anymore after 3 seconds, remove it
-                        // from the stack. Otherwise, check again in 3 seconds.
+                        // If no other app is currently owning the audio mode and
+                        // the app corresponding to this mode death handler object is still in the
+                        // mode owner stack but not capturing or playing audio after 3 seconds,
+                        // remove it from the stack.
+                        // Otherwise, check again in 3 seconds.
                         SetModeDeathHandler h = (SetModeDeathHandler) msg.obj;
                         if (mSetModeDeathHandlers.indexOf(h) < 0) {
                             break;
                         }
-                        if (mRecordMonitor.isRecordingActiveForUid(h.getUid())
+                        if (getModeOwnerUid() != h.getUid()
+                                || mRecordMonitor.isRecordingActiveForUid(h.getUid())
                                 || mPlaybackMonitor.isPlaybackActiveForUid(h.getUid())) {
                             sendMsg(mAudioHandler,
                                     MSG_CHECK_MODE_FOR_UID,
