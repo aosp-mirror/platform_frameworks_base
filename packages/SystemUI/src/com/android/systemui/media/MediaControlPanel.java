@@ -82,6 +82,7 @@ public class MediaControlPanel {
 
     private Context mContext;
     private PlayerViewHolder mViewHolder;
+    private String mKey;
     private MediaViewController mMediaViewController;
     private MediaSession.Token mToken;
     private MediaController mController;
@@ -206,10 +207,11 @@ public class MediaControlPanel {
     /**
      * Bind this view based on the data given
      */
-    public void bind(@NonNull MediaData data) {
+    public void bind(@NonNull MediaData data, String key) {
         if (mViewHolder == null) {
             return;
         }
+        mKey = key;
         MediaSession.Token token = data.getToken();
         mBackgroundColor = data.getBackgroundColor();
         if (mToken == null || !mToken.equals(token)) {
@@ -359,10 +361,10 @@ public class MediaControlPanel {
 
         // Dismiss
         mViewHolder.getDismiss().setOnClickListener(v -> {
-            if (data.getNotificationKey() != null) {
+            if (mKey != null) {
                 closeGuts();
                 mKeyguardDismissUtil.executeWhenUnlocked(() -> {
-                    mMediaDataManagerLazy.get().dismissMediaData(data.getNotificationKey(),
+                    mMediaDataManagerLazy.get().dismissMediaData(mKey,
                             MediaViewController.GUTS_ANIMATION_DURATION + 100);
                     return true;
                 }, /* requiresShadeOpen */ true);
