@@ -1,41 +1,44 @@
 // Baseline format: 1.0
 AcronymName: android.net.NetworkCapabilities#setSSID(String):
-    Acronyms should not be capitalized in method names: was `setSSID`, should this be `setSsid`?
+    
 
 
 ActionValue: android.location.Location#EXTRA_NO_GPS_LOCATION:
     
+ActionValue: android.net.TetheringManager#ACTION_TETHER_STATE_CHANGED:
+    
+ActionValue: android.net.TetheringManager#EXTRA_ACTIVE_TETHER:
+    
+ActionValue: android.net.TetheringManager#EXTRA_AVAILABLE_TETHER:
+    
+ActionValue: android.net.TetheringManager#EXTRA_ERRORED_TETHER:
+    
 ActionValue: android.net.wifi.WifiManager#ACTION_LINK_CONFIGURATION_CHANGED:
     
 
-// Tethering broadcast action / extras cannot change name for backwards compatibility
-ActionValue: android.net.TetheringManager#ACTION_TETHER_STATE_CHANGED:
-    Inconsistent action value; expected `android.net.action.TETHER_STATE_CHANGED`, was `android.net.conn.TETHER_STATE_CHANGED`
-ActionValue: android.net.TetheringManager#EXTRA_ACTIVE_TETHER:
-    Inconsistent extra value; expected `android.net.extra.ACTIVE_TETHER`, was `tetherArray`
-ActionValue: android.net.TetheringManager#EXTRA_AVAILABLE_TETHER:
-    Inconsistent extra value; expected `android.net.extra.AVAILABLE_TETHER`, was `availableArray`
-ActionValue: android.net.TetheringManager#EXTRA_ERRORED_TETHER:
-    Inconsistent extra value; expected `android.net.extra.ERRORED_TETHER`, was `erroredArray`
 
 ArrayReturn: android.bluetooth.BluetoothCodecStatus#BluetoothCodecStatus(android.bluetooth.BluetoothCodecConfig, android.bluetooth.BluetoothCodecConfig[], android.bluetooth.BluetoothCodecConfig[]) parameter #1:
-    Method parameter should be Collection<BluetoothCodecConfig> (or subclass) instead of raw array; was `android.bluetooth.BluetoothCodecConfig[]`
+    
 ArrayReturn: android.bluetooth.BluetoothCodecStatus#BluetoothCodecStatus(android.bluetooth.BluetoothCodecConfig, android.bluetooth.BluetoothCodecConfig[], android.bluetooth.BluetoothCodecConfig[]) parameter #2:
-    Method parameter should be Collection<BluetoothCodecConfig> (or subclass) instead of raw array; was `android.bluetooth.BluetoothCodecConfig[]`
+    
 ArrayReturn: android.bluetooth.BluetoothCodecStatus#getCodecsLocalCapabilities():
-    Method should return Collection<BluetoothCodecConfig> (or subclass) instead of raw array; was `android.bluetooth.BluetoothCodecConfig[]`
+    
 ArrayReturn: android.bluetooth.BluetoothCodecStatus#getCodecsSelectableCapabilities():
-    Method should return Collection<BluetoothCodecConfig> (or subclass) instead of raw array; was `android.bluetooth.BluetoothCodecConfig[]`
+    
 ArrayReturn: android.bluetooth.BluetoothUuid#containsAnyUuid(android.os.ParcelUuid[], android.os.ParcelUuid[]) parameter #0:
-    Method parameter should be Collection<ParcelUuid> (or subclass) instead of raw array; was `android.os.ParcelUuid[]`
+    
 ArrayReturn: android.bluetooth.BluetoothUuid#containsAnyUuid(android.os.ParcelUuid[], android.os.ParcelUuid[]) parameter #1:
-    Method parameter should be Collection<ParcelUuid> (or subclass) instead of raw array; was `android.os.ParcelUuid[]`
+    
 ArrayReturn: android.media.tv.tuner.Tuner.FilterCallback#onFilterEvent(android.media.tv.tuner.Tuner.Filter, android.media.tv.tuner.filter.FilterEvent[]) parameter #1:
-    Method parameter should be Collection<FilterEvent> (or subclass) instead of raw array; was `android.media.tv.tuner.filter.FilterEvent[]`
+    
 ArrayReturn: android.net.NetworkScoreManager#requestScores(android.net.NetworkKey[]) parameter #0:
-    Method parameter should be Collection<NetworkKey> (or subclass) instead of raw array; was `android.net.NetworkKey[]`
+    
 ArrayReturn: android.view.contentcapture.ViewNode#getAutofillOptions():
     
+
+
+BuilderSetStyle: android.net.IpSecTransform.Builder#buildTunnelModeTransform(java.net.InetAddress, android.net.IpSecManager.SecurityParameterIndex):
+    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.net.IpSecTransform.Builder.buildTunnelModeTransform(java.net.InetAddress,android.net.IpSecManager.SecurityParameterIndex)
 
 
 ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#deletePersistentGroup(android.net.wifi.p2p.WifiP2pManager.Channel, int, android.net.wifi.p2p.WifiP2pManager.ActionListener):
@@ -65,7 +68,7 @@ GenericException: android.service.autofill.augmented.FillWindow#finalize():
 
 
 IntentBuilderName: android.content.Context#registerReceiverForAllUsers(android.content.BroadcastReceiver, android.content.IntentFilter, String, android.os.Handler):
-    Methods creating an Intent should be named `create<Foo>Intent()`, was `registerReceiverForAllUsers`
+    
 
 
 KotlinKeyword: android.app.Notification#when:
@@ -73,7 +76,19 @@ KotlinKeyword: android.app.Notification#when:
 
 
 KotlinOperator: android.telephony.CbGeoUtils.Geometry#contains(android.telephony.CbGeoUtils.LatLng):
-    Method can be invoked as a "in" operator from Kotlin: `contains` (this is usually desirable; just make sure it makes sense for this type of object)
+    
+
+
+MissingGetterMatchingBuilder: android.net.wifi.rtt.RangingRequest.Builder#addResponder(android.net.wifi.rtt.ResponderConfig):
+    android.net.wifi.rtt.RangingRequest does not declare a `getResponders()` method matching method android.net.wifi.rtt.RangingRequest.Builder.addResponder(android.net.wifi.rtt.ResponderConfig)
+MissingGetterMatchingBuilder: android.security.keystore.KeyGenParameterSpec.Builder#setUid(int):
+    android.security.keystore.KeyGenParameterSpec does not declare a `getUid()` method matching method android.security.keystore.KeyGenParameterSpec.Builder.setUid(int)
+MissingGetterMatchingBuilder: android.service.autofill.Dataset.Builder#setFieldInlinePresentation(android.view.autofill.AutofillId, android.view.autofill.AutofillValue, java.util.regex.Pattern, android.service.autofill.InlinePresentation):
+    android.service.autofill.Dataset does not declare a `getFieldInlinePresentation()` method matching method android.service.autofill.Dataset.Builder.setFieldInlinePresentation(android.view.autofill.AutofillId,android.view.autofill.AutofillValue,java.util.regex.Pattern,android.service.autofill.InlinePresentation)
+MissingGetterMatchingBuilder: android.telecom.CallScreeningService.CallResponse.Builder#setShouldScreenCallViaAudioProcessing(boolean):
+    android.telecom.CallScreeningService.CallResponse does not declare a `shouldScreenCallViaAudioProcessing()` method matching method android.telecom.CallScreeningService.CallResponse.Builder.setShouldScreenCallViaAudioProcessing(boolean)
+MissingGetterMatchingBuilder: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String):
+    android.telephony.mbms.DownloadRequest does not declare a `getServiceId()` method matching method android.telephony.mbms.DownloadRequest.Builder.setServiceId(String)
 
 
 MissingNullability: android.hardware.soundtrigger.SoundTrigger.ModuleProperties#toString():
@@ -217,28 +232,27 @@ MutableBareField: android.net.wifi.WifiScanner.ScanSettings#type:
 
 
 NoClone: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #0:
-
+    
 
 
 NoSettingsProvider: android.provider.Settings.Global#TETHER_OFFLOAD_DISABLED:
-    New setting keys are not allowed. (Field: TETHER_OFFLOAD_DISABLED)
+    
 NoSettingsProvider: android.provider.Settings.Global#TETHER_SUPPORTED:
-    New setting keys are not allowed. (Field: TETHER_SUPPORTED)
     
 
 
 NotCloseable: android.bluetooth.BluetoothA2dpSink:
-    Classes that release resources (finalize()) should implement AutoClosable and CloseGuard: class android.bluetooth.BluetoothA2dpSink
+    
 NotCloseable: android.bluetooth.BluetoothMap:
-    Classes that release resources (finalize()) should implement AutoClosable and CloseGuard: class android.bluetooth.BluetoothMap
+    
 NotCloseable: android.bluetooth.BluetoothPan:
-    Classes that release resources (finalize()) should implement AutoClosable and CloseGuard: class android.bluetooth.BluetoothPan
+    
 NotCloseable: android.bluetooth.BluetoothPbap:
-    Classes that release resources (finalize()) should implement AutoClosable and CloseGuard: class android.bluetooth.BluetoothPbap
+    
 
 
 OnNameExpected: android.content.ContentProvider#checkUriPermission(android.net.Uri, int, int):
-    If implemented by developer, should follow the on<Something> style; otherwise consider marking final
+    
 
 
 PairedRegistration: android.net.wifi.nl80211.WifiNl80211Manager#registerApCallback(String, java.util.concurrent.Executor, android.net.wifi.nl80211.WifiNl80211Manager.SoftApCallback):
@@ -300,7 +314,7 @@ SamShouldBeLast: android.app.AlarmManager#setWindow(int, long, long, String, and
 SamShouldBeLast: android.app.WallpaperInfo#dump(android.util.Printer, String):
     
 SamShouldBeLast: android.app.WallpaperManager#addOnColorsChangedListener(android.app.WallpaperManager.OnColorsChangedListener, android.os.Handler):
-    SAM-compatible parameters (such as parameter 1, "listener", in android.app.WallpaperManager.addOnColorsChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+    
 SamShouldBeLast: android.app.admin.DevicePolicyManager#installSystemUpdate(android.content.ComponentName, android.net.Uri, java.util.concurrent.Executor, android.app.admin.DevicePolicyManager.InstallSystemUpdateCallback):
     
 SamShouldBeLast: android.content.Context#bindIsolatedService(android.content.Intent, int, String, java.util.concurrent.Executor, android.content.ServiceConnection):
@@ -334,19 +348,19 @@ SamShouldBeLast: android.location.LocationManager#registerGnssNavigationMessageC
 SamShouldBeLast: android.location.LocationManager#registerGnssStatusCallback(java.util.concurrent.Executor, android.location.GnssStatus.Callback):
     
 SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 4, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+    
 SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, java.util.concurrent.Executor, android.location.LocationListener):
     
 SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(android.location.LocationRequest, java.util.concurrent.Executor, android.location.LocationListener):
     
 SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 4, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+    
 SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, java.util.concurrent.Executor, android.location.LocationListener):
     
 SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(String, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+    
 SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(android.location.Criteria, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+    
 SamShouldBeLast: android.media.AudioFocusRequest.Builder#setOnAudioFocusChangeListener(android.media.AudioManager.OnAudioFocusChangeListener, android.os.Handler):
     
 SamShouldBeLast: android.media.AudioManager#requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int):
@@ -359,6 +373,8 @@ SamShouldBeLast: android.media.AudioRecordingMonitor#registerAudioRecordingCallb
     
 SamShouldBeLast: android.media.AudioRouting#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
     
+SamShouldBeLast: android.media.AudioTrack#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioTrack.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.MediaRecorder#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
     
 SamShouldBeLast: android.media.MediaRecorder#registerAudioRecordingCallback(java.util.concurrent.Executor, android.media.AudioManager.AudioRecordingCallback):
@@ -510,8 +526,8 @@ ServiceName: android.provider.DeviceConfig#NAMESPACE_PACKAGE_MANAGER_SERVICE:
 
 
 UserHandle: android.companion.CompanionDeviceManager#isDeviceAssociated(String, android.net.MacAddress, android.os.UserHandle):
-    When a method overload is needed to target a specific UserHandle, callers should be directed to use Context.createPackageContextAsUser() and re-obtain the relevant Manager, and no new API should be added
+    
 
 
 UserHandleName: android.telephony.CellBroadcastIntents#sendOrderedBroadcastForBackgroundReceivers(android.content.Context, android.os.UserHandle, android.content.Intent, String, String, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle):
-    Method taking UserHandle should be named `doFooAsUser` or `queryFooForUser`, was `sendOrderedBroadcastForBackgroundReceivers`
+    
