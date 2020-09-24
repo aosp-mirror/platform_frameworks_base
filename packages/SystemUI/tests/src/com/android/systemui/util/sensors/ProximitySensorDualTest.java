@@ -292,6 +292,38 @@ public class ProximitySensorDualTest extends SysuiTestCase {
         mProximitySensor.unregister(listener);
     }
 
+    @Test
+    public void testSecondarySafe() {
+        mProximitySensor.setSecondarySafe(true);
+
+        TestableListener listener = new TestableListener();
+
+        mProximitySensor.register(listener);
+        assertFalse(mThresholdSensorPrimary.isPaused());
+        assertTrue(mThresholdSensorSecondary.isPaused());
+        assertNull(listener.mLastEvent);
+        assertEquals(0, listener.mCallCount);
+
+        mThresholdSensorPrimary.triggerEvent(true, 0);
+        assertNull(listener.mLastEvent);
+        assertEquals(0, listener.mCallCount);
+        mThresholdSensorSecondary.triggerEvent(true, 0);
+        assertTrue(listener.mLastEvent.getBelow());
+        assertEquals(1, listener.mCallCount);
+
+        // The secondary sensor should now remain resumed indefinitely.
+        assertFalse(mThresholdSensorSecondary.isPaused());
+        mThresholdSensorPrimary.triggerEvent(false, 1);
+        assertFalse(listener.mLastEvent.getBelow());
+        assertEquals(2, listener.mCallCount);
+
+        // The secondary is still running, and not polling with the executor.
+        assertFalse(mThresholdSensorSecondary.isPaused());
+        assertEquals(0, mFakeExecutor.numPending());
+
+        mProximitySensor.unregister(listener);
+    }
+
     private static class TestableListener implements ThresholdSensor.Listener {
         ThresholdSensor.ThresholdSensorEvent mLastEvent;
         int mCallCount = 0;
