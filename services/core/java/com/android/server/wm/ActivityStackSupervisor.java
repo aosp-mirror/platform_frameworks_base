@@ -75,9 +75,9 @@ import static com.android.server.wm.RootWindowContainer.TAG_STATES;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
+import static com.android.server.wm.Task.LOCK_TASK_AUTH_ALLOWLISTED;
 import static com.android.server.wm.Task.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.wm.Task.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
-import static com.android.server.wm.Task.LOCK_TASK_AUTH_WHITELISTED;
 import static com.android.server.wm.Task.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -788,7 +788,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             final LockTaskController lockTaskController = mService.getLockTaskController();
             if (task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE
                     || task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE_PRIV
-                    || (task.mLockTaskAuth == LOCK_TASK_AUTH_WHITELISTED
+                    || (task.mLockTaskAuth == LOCK_TASK_AUTH_ALLOWLISTED
                             && lockTaskController.getLockTaskModeState()
                                     == LOCK_TASK_MODE_LOCKED)) {
                 lockTaskController.startLockTaskMode(task, false, 0 /* blank UID */);
