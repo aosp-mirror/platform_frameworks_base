@@ -1245,6 +1245,7 @@ public final class Sensor {
                 return true;
             case TYPE_HINGE_ANGLE:
                 mStringType = STRING_TYPE_HINGE_ANGLE;
+                return true;
             default:
                 return false;
         }
