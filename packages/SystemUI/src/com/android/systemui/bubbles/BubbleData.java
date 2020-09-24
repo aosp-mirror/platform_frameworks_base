@@ -284,7 +284,8 @@ public class BubbleData {
         } else {
             // Updates an existing bubble
             bubble.setSuppressFlyout(suppressFlyout);
-            doUpdate(bubble);
+            // If there is no flyout, we probably shouldn't show the bubble at the top
+            doUpdate(bubble, !suppressFlyout /* reorder */);
         }
 
         if (bubble.shouldAutoExpand()) {
@@ -438,12 +439,12 @@ public class BubbleData {
         }
     }
 
-    private void doUpdate(Bubble bubble) {
+    private void doUpdate(Bubble bubble, boolean reorder) {
         if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "doUpdate: " + bubble);
         }
         mStateChange.updatedBubble = bubble;
-        if (!isExpanded()) {
+        if (!isExpanded() && reorder) {
             int prevPos = mBubbles.indexOf(bubble);
             mBubbles.remove(bubble);
             mBubbles.add(0, bubble);
