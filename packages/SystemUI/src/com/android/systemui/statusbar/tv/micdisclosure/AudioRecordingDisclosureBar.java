@@ -21,7 +21,6 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.IntDef;
 import android.annotation.UiThread;
@@ -36,7 +35,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.tv.TvStatusBar;
@@ -83,19 +81,14 @@ public class AudioRecordingDisclosureBar implements
     private static final int STATE_SHOWN = 2;
     private static final int STATE_DISAPPEARING = 3;
 
-    private static final int ANIMATION_DURATION = 600;
+    private static final int ANIMATION_DURATION_MS = 200;
 
     private final Context mContext;
     private boolean mIsEnabled;
 
     private View mIndicatorView;
-    private View mIconTextsContainer;
-    private View mIconContainerBg;
-    private View mIcon;
-    private View mBgEnd;
-    private View mTextsContainers;
-    private TextView mTextView;
-    private boolean mIsLtr;
+    private boolean mViewAndWindowAdded;
+    private ObjectAnimator mAnimator;
 
     @State private int mState = STATE_STOPPED;
 
@@ -190,7 +183,7 @@ public class AudioRecordingDisclosureBar implements
         }
 
         if (active) {
-            showIfNotShown();
+            showIfNeeded();
         } else {
             hideIndicatorIfNeeded();
         }
@@ -198,153 +191,132 @@ public class AudioRecordingDisclosureBar implements
 
     @UiThread
     private void hideIndicatorIfNeeded() {
-        // If not STATE_APPEARING, will check whether the indicator should be hidden when the
-        // indicator comes to the STATE_SHOWN.
-        // If STATE_DISAPPEARING or STATE_SHOWN - nothing else for us to do here.
-        if (mState != STATE_SHOWN) return;
+        // If STOPPED, NOT_SHOWN or DISAPPEARING - nothing else for us to do here.
+        if (mState != STATE_SHOWN && mState != STATE_APPEARING) return;
 
-        // If is in the STATE_SHOWN and there are no active recorders - hide.
-        if (!hasActiveRecorders()) {
-            hide();
+        if (hasActiveRecorders()) {
+            return;
+        }
+
+        if (mViewAndWindowAdded) {
+            mState = STATE_DISAPPEARING;
+            animateDisappearance();
+        } else {
+            // Appearing animation has not started yet, as we were still waiting for the View to be
+            // laid out.
+            mState = STATE_NOT_SHOWN;
+            removeIndicatorView();
         }
     }
 
     @UiThread
-    private void showIfNotShown() {
-        if (mState != STATE_NOT_SHOWN) return;
+    private void showIfNeeded() {
+        // If STOPPED, SHOWN or APPEARING - nothing else for us to do here.
+        if (mState != STATE_NOT_SHOWN && mState != STATE_DISAPPEARING) return;
+
         if (DEBUG) Log.d(TAG, "Showing indicator");
 
-        mIsLtr = mContext.getResources().getConfiguration().getLayoutDirection()
-                == View.LAYOUT_DIRECTION_LTR;
+        final int prevState = mState;
+        mState = STATE_APPEARING;
+
+        if (prevState == STATE_DISAPPEARING) {
+            animateAppearance();
+            return;
+        }
 
         // Inflate the indicator view
         mIndicatorView = LayoutInflater.from(mContext).inflate(
-                R.layout.tv_audio_recording_indicator,
-                null);
-        mIconTextsContainer = mIndicatorView.findViewById(R.id.icon_texts_container);
-        mIconContainerBg = mIconTextsContainer.findViewById(R.id.icon_container_bg);
-        mIcon = mIconTextsContainer.findViewById(R.id.icon_mic);
-        mTextsContainers = mIconTextsContainer.findViewById(R.id.texts_container);
-        mTextView = mTextsContainers.findViewById(R.id.text);
-        mBgEnd = mIndicatorView.findViewById(R.id.bg_end);
+                R.layout.tv_audio_recording_indicator, null);
 
-        mTextsContainers.setVisibility(View.GONE);
-        mIconContainerBg.setVisibility(View.GONE);
-        mTextView.setVisibility(View.GONE);
-        mBgEnd.setVisibility(View.GONE);
-        mTextsContainers = null;
-        mIconContainerBg = null;
-        mTextView = null;
-        mBgEnd = null;
-
-        // Initially change the visibility to INVISIBLE, wait until and receives the size and
-        // then animate it moving from "off" the screen correctly
-        mIndicatorView.setVisibility(View.INVISIBLE);
+        // 1. Set alpha to 0.
+        // 2. Wait until the window is shown and the view is laid out.
+        // 3. Start a "fade in" (alpha) animation.
+        mIndicatorView.setAlpha(0f);
         mIndicatorView
                 .getViewTreeObserver()
                 .addOnGlobalLayoutListener(
                         new ViewTreeObserver.OnGlobalLayoutListener() {
                             @Override
                             public void onGlobalLayout() {
-                                if (mState == STATE_STOPPED) {
-                                    return;
-                                }
+                                // State could have changed to NOT_SHOWN (if all the recorders are
+                                // already gone) to STOPPED (if the indicator was disabled)
+                                if (mState != STATE_APPEARING) return;
 
+                                mViewAndWindowAdded = true;
                                 // Remove the observer
                                 mIndicatorView.getViewTreeObserver().removeOnGlobalLayoutListener(
                                         this);
 
-                                // Now that the width of the indicator has been assigned, we can
-                                // move it in from off the screen.
-                                final int initialOffset =
-                                        (mIsLtr ? 1 : -1) * mIndicatorView.getWidth();
-                                final AnimatorSet set = new AnimatorSet();
-                                set.setDuration(ANIMATION_DURATION);
-                                set.playTogether(
-                                        ObjectAnimator.ofFloat(mIndicatorView,
-                                                View.TRANSLATION_X, initialOffset, 0),
-                                        ObjectAnimator.ofFloat(mIndicatorView, View.ALPHA, 0f,
-                                                1f));
-                                set.addListener(
-                                        new AnimatorListenerAdapter() {
-                                            @Override
-                                            public void onAnimationStart(Animator animation,
-                                                    boolean isReverse) {
-                                                if (mState == STATE_STOPPED) return;
-
-                                                // Indicator is INVISIBLE at the moment, change it.
-                                                mIndicatorView.setVisibility(View.VISIBLE);
-                                            }
-
-                                            @Override
-                                            public void onAnimationEnd(Animator animation) {
-                                                onAppeared();
-                                            }
-                                        });
-                                set.start();
+                                animateAppearance();
                             }
                         });
 
+        final boolean isLtr = mContext.getResources().getConfiguration().getLayoutDirection()
+                == View.LAYOUT_DIRECTION_LTR;
         final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
                 WRAP_CONTENT,
                 WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
-        layoutParams.gravity = Gravity.TOP | (mIsLtr ? Gravity.RIGHT : Gravity.LEFT);
+        layoutParams.gravity = Gravity.TOP | (isLtr ? Gravity.RIGHT : Gravity.LEFT);
         layoutParams.setTitle(LAYOUT_PARAMS_TITLE);
         layoutParams.packageName = mContext.getPackageName();
         final WindowManager windowManager = (WindowManager) mContext.getSystemService(
                 Context.WINDOW_SERVICE);
         windowManager.addView(mIndicatorView, layoutParams);
-
-        mState = STATE_APPEARING;
     }
 
-    @UiThread
-    private void hide() {
-        if (DEBUG) Log.d(TAG, "Hide indicator");
 
-        final int targetOffset = (mIsLtr ? 1 : -1) * (mIndicatorView.getWidth()
-                - (int) mIconTextsContainer.getTranslationX());
-        final AnimatorSet set = new AnimatorSet();
-        set.playTogether(
-                ObjectAnimator.ofFloat(mIndicatorView, View.TRANSLATION_X, targetOffset),
-                ObjectAnimator.ofFloat(mIcon, View.ALPHA, 0f));
-        set.setDuration(ANIMATION_DURATION);
-        set.addListener(
-                new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        onHidden();
+    private void animateAppearance() {
+        animateAlphaTo(1f);
+    }
+
+    private void animateDisappearance() {
+        animateAlphaTo(0f);
+    }
+
+    private void animateAlphaTo(final float endValue) {
+        if (mAnimator == null) {
+            if (DEBUG) Log.d(TAG, "set up animator");
+
+            mAnimator = new ObjectAnimator();
+            mAnimator.setTarget(mIndicatorView);
+            mAnimator.setProperty(View.ALPHA);
+            mAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation, boolean isReverse) {
+                    if (DEBUG) Log.d(TAG, "onAnimationStart");
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    if (DEBUG) Log.d(TAG, "onAnimationCancel");
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    if (DEBUG) Log.d(TAG, "onAnimationEnd");
+
+                    if (mState == STATE_APPEARING) {
+                        mState = STATE_SHOWN;
+                    } else if (mState == STATE_DISAPPEARING) {
+                        removeIndicatorView();
+                        mState = STATE_NOT_SHOWN;
                     }
-                });
-        set.start();
-
-        mState = STATE_DISAPPEARING;
-    }
-
-
-    @UiThread
-    private void onAppeared() {
-        if (mState == STATE_STOPPED) return;
-
-        mState = STATE_SHOWN;
-
-        hideIndicatorIfNeeded();
-    }
-
-    @UiThread
-    private void onHidden() {
-        if (mState == STATE_STOPPED) return;
-
-        removeIndicatorView();
-        mState = STATE_NOT_SHOWN;
-
-        if (hasActiveRecorders()) {
-            // Got new recorders, show again.
-            showIfNotShown();
+                }
+            });
+        } else if (mAnimator.isRunning()) {
+            if (DEBUG) Log.d(TAG, "cancel running animation");
+            mAnimator.cancel();
         }
+
+        final float currentValue = mIndicatorView.getAlpha();
+        if (DEBUG) Log.d(TAG, "animate alpha to " + endValue + " from " + currentValue);
+
+        mAnimator.setDuration((int) (Math.abs(currentValue - endValue) * ANIMATION_DURATION_MS));
+        mAnimator.setFloatValues(endValue);
+        mAnimator.start();
     }
 
     private boolean hasActiveRecorders() {
@@ -363,12 +335,9 @@ public class AudioRecordingDisclosureBar implements
         windowManager.removeView(mIndicatorView);
 
         mIndicatorView = null;
-        mIconTextsContainer = null;
-        mIconContainerBg = null;
-        mIcon = null;
-        mTextsContainers = null;
-        mTextView = null;
-        mBgEnd = null;
+        mAnimator = null;
+
+        mViewAndWindowAdded = false;
     }
 
     private static List<String> splitByComma(String string) {
