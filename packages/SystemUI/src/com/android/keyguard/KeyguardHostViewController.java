@@ -163,16 +163,18 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     @Inject
     public KeyguardHostViewController(KeyguardHostView view,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            KeyguardSecurityContainerController keyguardSecurityContainerController,
             AudioManager audioManager,
             TelephonyManager telephonyManager,
-            ViewMediatorCallback viewMediatorCallback) {
+            ViewMediatorCallback viewMediatorCallback,
+            KeyguardSecurityContainerController.Factory
+                    keyguardSecurityContainerControllerFactory) {
         super(view);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mKeyguardSecurityContainerController = keyguardSecurityContainerController;
         mAudioManager = audioManager;
         mTelephonyManager = telephonyManager;
         mViewMediatorCallback = viewMediatorCallback;
+        mKeyguardSecurityContainerController = keyguardSecurityContainerControllerFactory.create(
+                mSecurityCallback);
     }
 
     /** Initialize the Controller. */
@@ -188,7 +190,6 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
         mViewMediatorCallback.setNeedsInput(mKeyguardSecurityContainerController.needsInput());
         mKeyguardUpdateMonitor.registerCallback(mUpdateCallback);
         mView.setOnKeyListener(mOnKeyListener);
-        mKeyguardSecurityContainerController.setSecurityCallback(mSecurityCallback);
         mKeyguardSecurityContainerController.showPrimarySecurityScreen(false);
     }
 

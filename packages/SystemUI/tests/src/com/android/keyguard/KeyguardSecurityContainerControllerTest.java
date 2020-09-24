@@ -89,12 +89,11 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 .thenReturn(mAdminSecondaryLockScreenController);
         when(mSecurityViewFlipper.getWindowInsetsController()).thenReturn(mWindowInsetsController);
 
-        mKeyguardSecurityContainerController = new KeyguardSecurityContainerController(
+        mKeyguardSecurityContainerController = new KeyguardSecurityContainerController.Factory(
                 mView,  mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,
                 mKeyguardUpdateMonitor, mKeyguardSecurityModel, mMetricsLogger, mUiEventLogger,
-                mKeyguardStateController, mKeyguardSecurityViewFlipperController);
-
-        mKeyguardSecurityContainerController.setSecurityCallback(mSecurityCallback);
+                mKeyguardStateController, mKeyguardSecurityViewFlipperController)
+                .create(mSecurityCallback);
     }
 
     @Test

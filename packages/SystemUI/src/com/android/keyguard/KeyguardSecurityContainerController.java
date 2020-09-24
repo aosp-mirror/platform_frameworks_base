@@ -68,8 +68,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final UiEventLogger mUiEventLogger;
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardSecurityViewFlipperController mSecurityViewFlipperController;
+    private final SecurityCallback mSecurityCallback;
 
-    private SecurityCallback mSecurityCallback;
     private SecurityMode mCurrentSecurityMode = SecurityMode.Invalid;
 
     private KeyguardSecurityCallback mKeyguardSecurityCallback = new KeyguardSecurityCallback() {
@@ -145,8 +145,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         }
     };
 
-    @Inject
-    KeyguardSecurityContainerController(KeyguardSecurityContainer view,
+    private KeyguardSecurityContainerController(KeyguardSecurityContainer view,
             AdminSecondaryLockScreenController.Factory adminSecondaryLockScreenControllerFactory,
             LockPatternUtils lockPatternUtils,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -154,6 +153,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             MetricsLogger metricsLogger,
             UiEventLogger uiEventLogger,
             KeyguardStateController keyguardStateController,
+            SecurityCallback securityCallback,
             KeyguardSecurityViewFlipperController securityViewFlipperController) {
         super(view);
         mLockPatternUtils = lockPatternUtils;
@@ -162,6 +162,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mMetricsLogger = metricsLogger;
         mUiEventLogger = uiEventLogger;
         mKeyguardStateController = keyguardStateController;
+        mSecurityCallback = securityCallback;
         mSecurityViewFlipperController = securityViewFlipperController;
         mAdminSecondaryLockScreenController = adminSecondaryLockScreenControllerFactory.create(
                 mKeyguardSecurityCallback);
@@ -267,10 +268,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         if (mCurrentSecurityMode != SecurityMode.None) {
             getCurrentSecurityController().onStartingToHide();
         }
-    }
-
-    public void setSecurityCallback(SecurityCallback securityCallback) {
-        mSecurityCallback = securityCallback;
     }
 
     /**
@@ -449,5 +446,50 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             SecurityMode securityMode) {
         mCurrentSecurityMode = securityMode;
         return getCurrentSecurityController();
+    }
+
+    static class Factory {
+
+        private final KeyguardSecurityContainer mView;
+        private final AdminSecondaryLockScreenController.Factory
+                mAdminSecondaryLockScreenControllerFactory;
+        private final LockPatternUtils mLockPatternUtils;
+        private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+        private final KeyguardSecurityModel mKeyguardSecurityModel;
+        private final MetricsLogger mMetricsLogger;
+        private final UiEventLogger mUiEventLogger;
+        private final KeyguardStateController mKeyguardStateController;
+        private final KeyguardSecurityViewFlipperController mSecurityViewFlipperController;
+
+        @Inject
+        Factory(KeyguardSecurityContainer view,
+                AdminSecondaryLockScreenController.Factory
+                        adminSecondaryLockScreenControllerFactory,
+                LockPatternUtils lockPatternUtils,
+                KeyguardUpdateMonitor keyguardUpdateMonitor,
+                KeyguardSecurityModel keyguardSecurityModel,
+                MetricsLogger metricsLogger,
+                UiEventLogger uiEventLogger,
+                KeyguardStateController keyguardStateController,
+                KeyguardSecurityViewFlipperController securityViewFlipperController) {
+            mView = view;
+            mAdminSecondaryLockScreenControllerFactory = adminSecondaryLockScreenControllerFactory;
+            mLockPatternUtils = lockPatternUtils;
+            mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+            mKeyguardSecurityModel = keyguardSecurityModel;
+            mMetricsLogger = metricsLogger;
+            mUiEventLogger = uiEventLogger;
+            mKeyguardStateController = keyguardStateController;
+            mSecurityViewFlipperController = securityViewFlipperController;
+        }
+
+        public KeyguardSecurityContainerController create(
+                SecurityCallback securityCallback) {
+            return new KeyguardSecurityContainerController(mView,
+                    mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,
+                    mKeyguardUpdateMonitor, mKeyguardSecurityModel, mMetricsLogger, mUiEventLogger,
+                    mKeyguardStateController, securityCallback, mSecurityViewFlipperController);
+        }
+
     }
 }

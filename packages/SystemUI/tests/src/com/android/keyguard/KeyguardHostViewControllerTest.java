@@ -16,8 +16,10 @@
 
 package com.android.keyguard;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.media.AudioManager;
 import android.telephony.TelephonyManager;
@@ -47,13 +49,15 @@ public class KeyguardHostViewControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardHostView mKeyguardHostView;
     @Mock
-    private KeyguardSecurityContainerController mKeyguardSecurityContainerController;
-    @Mock
     private AudioManager mAudioManager;
     @Mock
     private TelephonyManager mTelephonyManager;
     @Mock
     private ViewMediatorCallback mViewMediatorCallback;
+    @Mock
+    KeyguardSecurityContainerController.Factory mKeyguardSecurityContainerControllerFactory;
+    @Mock
+    private KeyguardSecurityContainerController mKeyguardSecurityContainerController;
 
     @Rule
     public MockitoRule mMockitoRule = MockitoJUnit.rule();
@@ -62,9 +66,12 @@ public class KeyguardHostViewControllerTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        when(mKeyguardSecurityContainerControllerFactory.create(any(
+                KeyguardSecurityContainer.SecurityCallback.class)))
+                .thenReturn(mKeyguardSecurityContainerController);
         mKeyguardHostViewController = new KeyguardHostViewController(
-                mKeyguardHostView, mKeyguardUpdateMonitor, mKeyguardSecurityContainerController,
-                mAudioManager, mTelephonyManager, mViewMediatorCallback);
+                mKeyguardHostView, mKeyguardUpdateMonitor, mAudioManager, mTelephonyManager,
+                mViewMediatorCallback, mKeyguardSecurityContainerControllerFactory);
     }
 
     @Test
