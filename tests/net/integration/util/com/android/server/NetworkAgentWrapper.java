@@ -67,6 +67,9 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
     private NetworkAgent mNetworkAgent;
     private int mStartKeepaliveError = SocketKeepalive.ERROR_UNSUPPORTED;
     private int mStopKeepaliveError = SocketKeepalive.NO_KEEPALIVE;
+    // Controls how test network agent is going to wait before responding to keepalive
+    // start/stop. Useful when simulate KeepaliveTracker is waiting for response from modem.
+    private long mKeepaliveResponseDelay = 0L;
     private Integer mExpectedKeepaliveSlot = null;
 
     public NetworkAgentWrapper(int transport, LinkProperties linkProperties, Context context)
@@ -134,12 +137,17 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
             if (mWrapper.mExpectedKeepaliveSlot != null) {
                 assertEquals((int) mWrapper.mExpectedKeepaliveSlot, slot);
             }
-            onSocketKeepaliveEvent(slot, mWrapper.mStartKeepaliveError);
+            mWrapper.mHandlerThread.getThreadHandler().postDelayed(
+                    () -> onSocketKeepaliveEvent(slot, mWrapper.mStartKeepaliveError),
+                    mWrapper.mKeepaliveResponseDelay);
         }
 
         @Override
         public void stopSocketKeepalive(Message msg) {
-            onSocketKeepaliveEvent(msg.arg1, mWrapper.mStopKeepaliveError);
+            final int slot = msg.arg1;
+            mWrapper.mHandlerThread.getThreadHandler().postDelayed(
+                    () -> onSocketKeepaliveEvent(slot, mWrapper.mStopKeepaliveError),
+                    mWrapper.mKeepaliveResponseDelay);
         }
 
         @Override
@@ -246,6 +254,10 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
 
     public void setStopKeepaliveEvent(int reason) {
         mStopKeepaliveError = reason;
+    }
+
+    public void setKeepaliveResponseDelay(long delay) {
+        mKeepaliveResponseDelay = delay;
     }
 
     public void setExpectedKeepaliveSlot(Integer slot) {
