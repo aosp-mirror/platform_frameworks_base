@@ -17,7 +17,6 @@
 package com.android.server.power;
 
 import static android.provider.DeviceConfig.NAMESPACE_ATTENTION_MANAGER_SERVICE;
-import static android.provider.Settings.Secure.ADAPTIVE_SLEEP;
 
 import android.Manifest;
 import android.app.ActivityManager;
@@ -80,7 +79,7 @@ public class AttentionDetector {
      * DeviceConfig flag name, describes the limit of how long the device can remain unlocked due to
      * attention checking.
      */
-    static final String KEY_MAX_EXTENSION_MILLIS = "post_dim_check_duration_millis";
+    static final String KEY_MAX_EXTENSION_MILLIS = "max_extension_millis";
 
     private Context mContext;
 
