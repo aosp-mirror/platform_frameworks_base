@@ -372,6 +372,13 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     @Override
     public void executeShellCommand(final String command, final ParcelFileDescriptor sink,
             final ParcelFileDescriptor source) throws RemoteException {
+        executeShellCommandWithStderr(command, sink, source, null /* stderrSink */);
+    }
+
+    @Override
+    public void executeShellCommandWithStderr(final String command, final ParcelFileDescriptor sink,
+            final ParcelFileDescriptor source, final ParcelFileDescriptor stderrSink)
+            throws RemoteException {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
             throwIfShutdownLocked();
@@ -409,6 +416,18 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             writeToProcess = null;
         }
 
+        // Read from process stderr and write to pipe
+        final Thread readStderrFromProcess;
+        if (stderrSink != null) {
+            InputStream sink_in = process.getErrorStream();
+            OutputStream sink_out = new FileOutputStream(stderrSink.getFileDescriptor());
+
+            readStderrFromProcess = new Thread(new Repeater(sink_in, sink_out));
+            readStderrFromProcess.start();
+        } else {
+            readStderrFromProcess = null;
+        }
+
         Thread cleanup = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -419,14 +438,18 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                     if (readFromProcess != null) {
                         readFromProcess.join();
                     }
+                    if (readStderrFromProcess != null) {
+                        readStderrFromProcess.join();
+                    }
                 } catch (InterruptedException exc) {
                     Log.e(TAG, "At least one of the threads was interrupted");
                 }
                 IoUtils.closeQuietly(sink);
                 IoUtils.closeQuietly(source);
+                IoUtils.closeQuietly(stderrSink);
                 process.destroy();
-                }
-            });
+            }
+        });
         cleanup.start();
     }
 
