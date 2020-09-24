@@ -831,9 +831,7 @@ public class PipTouchHandler {
             // we store back to this snap fraction.  Otherwise, we'll reset the snap
             // fraction and snap to the closest edge.
             if (resize) {
-                Rect expandedBounds = new Rect(mExpandedBounds);
-                mSavedSnapFraction = mMotionHelper.animateToExpandedState(expandedBounds,
-                        mMovementBounds, mExpandedMovementBounds, callback);
+                animateToExpandedState(callback);
             }
         } else if (menuState == MENU_STATE_NONE && mMenuState == MENU_STATE_FULL) {
             // Try and restore the PiP to the closest edge, using the saved snap fraction
@@ -859,13 +857,7 @@ public class PipTouchHandler {
                 }
 
                 if (mDeferResizeToNormalBoundsUntilRotation == -1) {
-                    Rect restoreBounds = new Rect(getUserResizeBounds());
-                    Rect restoredMovementBounds = new Rect();
-                    mPipBoundsHandler.getSnapAlgorithm().getMovementBounds(restoreBounds,
-                            mInsetBounds, restoredMovementBounds, mIsImeShowing ? mImeHeight : 0);
-                    mMotionHelper.animateToUnexpandedState(restoreBounds, mSavedSnapFraction,
-                            restoredMovementBounds, mMovementBounds, false /* immediate */);
-                    mSavedSnapFraction = -1f;
+                    animateToUnexpandedState(getUserResizeBounds());
                 }
             } else {
                 mSavedSnapFraction = -1f;
@@ -881,6 +873,21 @@ public class PipTouchHandler {
         } else if (menuState == MENU_STATE_FULL) {
             mPipUiEventLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_SHOW_MENU);
         }
+    }
+
+    private void animateToExpandedState(Runnable callback) {
+        Rect expandedBounds = new Rect(mExpandedBounds);
+        mSavedSnapFraction = mMotionHelper.animateToExpandedState(expandedBounds,
+                mMovementBounds, mExpandedMovementBounds, callback);
+    }
+
+    private void animateToUnexpandedState(Rect restoreBounds) {
+        Rect restoredMovementBounds = new Rect();
+        mPipBoundsHandler.getSnapAlgorithm().getMovementBounds(restoreBounds,
+                mInsetBounds, restoredMovementBounds, mIsImeShowing ? mImeHeight : 0);
+        mMotionHelper.animateToUnexpandedState(restoreBounds, mSavedSnapFraction,
+                restoredMovementBounds, mMovementBounds, false /* immediate */);
+        mSavedSnapFraction = -1f;
     }
 
     /**
@@ -1025,10 +1032,24 @@ public class PipTouchHandler {
                             this::flingEndAction /* endAction */);
                 }
             } else if (mTouchState.isDoubleTap()) {
-                // Expand to fullscreen if this is a double tap
-                // the PiP should be frozen until the transition ends
-                setTouchEnabled(false);
-                mMotionHelper.expandLeavePip();
+                // If using pinch to zoom, double-tap functions as resizing between max/min size
+                if (mPipResizeGestureHandler.isUsingPinchToZoom()) {
+                    final boolean toExpand =
+                            mMotionHelper.getBounds().width() < mExpandedBounds.width()
+                            && mMotionHelper.getBounds().height() < mExpandedBounds.height();
+                    mPipResizeGestureHandler.setUserResizeBounds(toExpand ? mExpandedBounds
+                            : mNormalBounds);
+                    if (toExpand) {
+                        animateToExpandedState(null);
+                    } else {
+                        animateToUnexpandedState(mNormalBounds);
+                    }
+                } else {
+                    // Expand to fullscreen if this is a double tap
+                    // the PiP should be frozen until the transition ends
+                    setTouchEnabled(false);
+                    mMotionHelper.expandLeavePip();
+                }
             } else if (mMenuState != MENU_STATE_FULL) {
                 if (!mTouchState.isWaitingForDoubleTap()) {
                     // User has stalled long enough for this not to be a drag or a double tap, just
