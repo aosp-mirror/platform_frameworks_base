@@ -43,6 +43,7 @@ import android.view.animation.PathInterpolator;
 import com.android.internal.view.IInputMethodManager;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 
 /**
  * Manages IME control at the display-level. This occurs when IME comes up in multi-window mode.
@@ -62,15 +63,21 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     private static final int FLOATING_IME_BOTTOM_INSET = -80;
 
     protected final IWindowManager mWmService;
-    protected final Handler mHandler;
+    protected final Executor mExecutor;
     private final TransactionPool mTransactionPool;
     private final DisplayController mDisplayController;
     private final SparseArray<PerDisplay> mImePerDisplay = new SparseArray<>();
     private final ArrayList<ImePositionProcessor> mPositionProcessors = new ArrayList<>();
 
+    @Deprecated
     public DisplayImeController(IWindowManager wmService, DisplayController displayController,
             Handler mainHandler, TransactionPool transactionPool) {
-        mHandler = mainHandler;
+        this(wmService, displayController, mainHandler::post, transactionPool);
+    }
+
+    public DisplayImeController(IWindowManager wmService, DisplayController displayController,
+            Executor mainExecutor, TransactionPool transactionPool) {
+        mExecutor = mainExecutor;
         mWmService = wmService;
         mTransactionPool = transactionPool;
         mDisplayController = displayController;
@@ -197,7 +204,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
 
         @Override
         public void insetsChanged(InsetsState insetsState) {
-            mHandler.post(() -> {
+            mExecutor.execute(() -> {
                 if (mInsetsState.equals(insetsState)) {
                     return;
                 }
@@ -224,7 +231,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         continue;
                     }
                     if (activeControl.getType() == InsetsState.ITYPE_IME) {
-                        mHandler.post(() -> {
+                        mExecutor.execute(() -> {
                             final Point lastSurfacePosition = mImeSourceControl != null
                                     ? mImeSourceControl.getSurfacePosition() : null;
                             mImeSourceControl = activeControl;
@@ -246,7 +253,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 return;
             }
             if (DEBUG) Slog.d(TAG, "Got showInsets for ime");
-            mHandler.post(() -> startAnimation(true /* show */, false /* forceRestart */));
+            mExecutor.execute(() -> startAnimation(true /* show */, false /* forceRestart */));
         }
 
         @Override
@@ -255,7 +262,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 return;
             }
             if (DEBUG) Slog.d(TAG, "Got hideInsets for ime");
-            mHandler.post(() -> startAnimation(false /* show */, false /* forceRestart */));
+            mExecutor.execute(() -> startAnimation(false /* show */, false /* forceRestart */));
         }
 
         @Override

@@ -31,6 +31,8 @@ import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
+import java.util.concurrent.Executor;
+
 import dagger.Module;
 import dagger.Provides;
 
@@ -44,9 +46,10 @@ public class TvWMShellModule {
     @SysUISingleton
     @Provides
     static DisplayImeController provideDisplayImeController(IWindowManager wmService,
-            DisplayController displayController, @Main Handler mainHandler,
+            DisplayController displayController, @Main Executor mainExecutor,
             TransactionPool transactionPool) {
-        return new DisplayImeController(wmService, displayController, mainHandler, transactionPool);
+        return new DisplayImeController(wmService, displayController, mainExecutor,
+                transactionPool);
     }
 
     @SysUISingleton
