@@ -18,6 +18,7 @@ package android.telephony.ims;
 
 import android.annotation.LongDef;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
@@ -125,7 +126,6 @@ public class ImsService extends Service {
      * {@link #getImsServiceCapabilities()}, {@link #getSipTransport(int)} must not return null, and
      * this ImsService MUST report the ability to create both {@link ImsFeature#FEATURE_MMTEL} and
      * {@link ImsFeature#FEATURE_RCS} features.
-     * @hide
      */
     public static final long CAPABILITY_SIP_DELEGATE_CREATION = 1 << 1;
 
@@ -423,9 +423,12 @@ public class ImsService extends Service {
      * <p>
      * This should be a static configuration and should not change at runtime.
      * @return The optional static capabilities of this ImsService implementation.
-     * @hide
      */
+    // ImsService follows a different convention, since it is a stub class. The on* methods are
+    // final and call back into the framework with a state update.
+    @SuppressLint("OnNameExpected")
     public @ImsServiceCapability long getImsServiceCapabilities() {
+        // Stub implementation to be implemented by ImsService.
         return 0L;
     }
 
@@ -513,9 +516,12 @@ public class ImsService extends Service {
      * supported for this ImsService.
      * @param slotId The slot that is associated with the SipTransport implementation.
      * @return the SipTransport implementation for the specified slot.
-     * @hide Keep this hidden until there is something to expose in SipTransport.
      */
+    // ImsService follows a different convention, since it is a stub class. The on* methods are
+    // final and call back into the framework with a state update.
+    @SuppressLint("OnNameExpected")
     public @Nullable SipTransportImplBase getSipTransport(int slotId) {
+        // Stub implementation for ImsServices that do not support SipTransport.
         return null;
     }
 

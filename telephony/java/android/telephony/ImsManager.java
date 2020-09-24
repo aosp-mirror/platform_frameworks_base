@@ -19,6 +19,7 @@ package android.telephony.ims;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.telephony.SubscriptionManager;
@@ -124,5 +125,25 @@ public class ImsManager {
         }
 
         return new ImsMmTelManager(subscriptionId);
+    }
+
+    /**
+     * Create an instance of SipDelegateManager for the subscription id specified.
+     * <p>
+     * Used for RCS single registration cases, where an IMS application needs to forward SIP
+     * traffic through the device's IMS service.
+     * @param subscriptionId The ID of the subscription that this SipDelegateManager will use.
+     * @throws IllegalArgumentException if the subscription is invalid.
+     * @return a SipDelegateManager instance for the specified subscription ID.
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public SipDelegateManager getSipDelegateManager(int subscriptionId) {
+        if (!SubscriptionManager.isValidSubscriptionId(subscriptionId)) {
+            throw new IllegalArgumentException("Invalid subscription ID: " + subscriptionId);
+        }
+
+        return new SipDelegateManager(mContext, subscriptionId);
     }
 }
