@@ -55,6 +55,7 @@ public class AutoAddTrackerTest extends SysuiTestCase {
         Prefs.putBoolean(mContext, Key.QS_DATA_SAVER_ADDED, true);
         Prefs.putBoolean(mContext, Key.QS_WORK_ADDED, true);
         mAutoTracker = new AutoAddTracker(mContext, USER);
+        mAutoTracker.initialize();
 
         assertTrue(mAutoTracker.isAdded(SAVER));
         assertTrue(mAutoTracker.isAdded(WORK));
@@ -72,6 +73,7 @@ public class AutoAddTrackerTest extends SysuiTestCase {
     @Test
     public void testChangeFromBackup() {
         mAutoTracker = new AutoAddTracker(mContext, USER);
+        mAutoTracker.initialize();
 
         assertFalse(mAutoTracker.isAdded(SAVER));
 
@@ -86,6 +88,7 @@ public class AutoAddTrackerTest extends SysuiTestCase {
     @Test
     public void testSetAdded() {
         mAutoTracker = new AutoAddTracker(mContext, USER);
+        mAutoTracker.initialize();
 
         assertFalse(mAutoTracker.isAdded(SAVER));
         mAutoTracker.setTileAdded(SAVER);
@@ -98,6 +101,7 @@ public class AutoAddTrackerTest extends SysuiTestCase {
     @Test
     public void testPersist() {
         mAutoTracker = new AutoAddTracker(mContext, USER);
+        mAutoTracker.initialize();
 
         assertFalse(mAutoTracker.isAdded(SAVER));
         mAutoTracker.setTileAdded(SAVER);
@@ -113,6 +117,7 @@ public class AutoAddTrackerTest extends SysuiTestCase {
     @Test
     public void testIndependentUsers() {
         mAutoTracker = new AutoAddTracker(mContext, USER);
+        mAutoTracker.initialize();
         mAutoTracker.setTileAdded(SAVER);
 
         mAutoTracker = new AutoAddTracker(mContext, USER + 1);
@@ -122,6 +127,7 @@ public class AutoAddTrackerTest extends SysuiTestCase {
     @Test
     public void testChangeUser() {
         mAutoTracker = new AutoAddTracker(mContext, USER);
+        mAutoTracker.initialize();
         mAutoTracker.setTileAdded(SAVER);
 
         mAutoTracker = new AutoAddTracker(mContext, USER + 1);
