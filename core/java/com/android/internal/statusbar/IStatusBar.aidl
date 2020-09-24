@@ -102,6 +102,13 @@ oneway interface IStatusBar
     void onCameraLaunchGestureDetected(int source);
 
     /**
+     * Notifies the status bar that the Emergency Action launch gesture has been detected.
+     *
+     * TODO(b/169175022) Update method name and docs when feature name is locked.
+     */
+    void onEmergencyActionLaunchGestureDetected();
+
+    /**
      * Shows the picture-in-picture menu if an activity is in picture-in-picture mode.
      */
     void showPictureInPictureMenu();
