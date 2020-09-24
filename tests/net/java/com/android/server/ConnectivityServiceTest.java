@@ -4292,6 +4292,32 @@ public class ConnectivityServiceTest {
         myNet = connectKeepaliveNetwork(lp);
         mWiFiNetworkAgent.setStartKeepaliveEvent(SocketKeepalive.SUCCESS);
 
+        // Check that a stop followed by network disconnects does not result in crash.
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectStarted();
+            // Delay the response of keepalive events in networkAgent long enough to make sure
+            // the follow-up network disconnection will be processed first.
+            mWiFiNetworkAgent.setKeepaliveResponseDelay(3 * TIMEOUT_MS);
+            ka.stop();
+
+            // Make sure the stop has been processed. Wait for executor idle is needed to prevent
+            // flaky since the actual stop call to the service is delegated to executor thread.
+            waitForIdleSerialExecutor(executor, TIMEOUT_MS);
+            waitForIdle();
+
+            mWiFiNetworkAgent.disconnect();
+            mWiFiNetworkAgent.expectDisconnected();
+            callback.expectStopped();
+            callback.assertNoCallback();
+        }
+
+        // Reconnect.
+        waitForIdle();
+        myNet = connectKeepaliveNetwork(lp);
+        mWiFiNetworkAgent.setStartKeepaliveEvent(SocketKeepalive.SUCCESS);
+
         // Check that keepalive slots start from 1 and increment. The first one gets slot 1.
         mWiFiNetworkAgent.setExpectedKeepaliveSlot(1);
         int srcPort2 = 0;
