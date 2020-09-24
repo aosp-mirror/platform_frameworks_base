@@ -155,6 +155,7 @@ public class VolumeDialogImpl implements VolumeDialog,
     private boolean mShowA11yStream;
 
     private final boolean mShowLowMediaVolumeIcon;
+    private final boolean mChangeVolumeRowTintWhenInactive;
 
     private int mActiveStream;
     private int mPrevActiveStream;
@@ -183,6 +184,8 @@ public class VolumeDialogImpl implements VolumeDialog,
                 Prefs.getBoolean(context, Prefs.Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP, false);
         mShowLowMediaVolumeIcon =
             mContext.getResources().getBoolean(R.bool.config_showLowMediaVolumeIcon);
+        mChangeVolumeRowTintWhenInactive =
+            mContext.getResources().getBoolean(R.bool.config_changeVolumeRowTintWhenInactive);
     }
 
     @Override
@@ -1154,6 +1157,9 @@ public class VolumeDialogImpl implements VolumeDialog,
             row.slider.requestFocus();
         }
         boolean useActiveColoring = isActive && row.slider.isEnabled();
+        if (!useActiveColoring && !mChangeVolumeRowTintWhenInactive) {
+            return;
+        }
         final ColorStateList tint = useActiveColoring
                 ? Utils.getColorAccent(mContext)
                 : Utils.getColorAttr(mContext, android.R.attr.colorForeground);
