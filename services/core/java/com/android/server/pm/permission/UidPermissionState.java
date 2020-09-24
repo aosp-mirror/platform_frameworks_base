@@ -207,23 +207,6 @@ public final class UidPermissionState {
     }
 
     /**
-     * Gets whether the state has a given install permission.
-     *
-     * @param name The permission name.
-     * @return Whether the state has the install permission.
-     */
-    public boolean hasInstallPermission(@NonNull String name) {
-        synchronized (mLock) {
-            if (mPermissions == null) {
-                return false;
-            }
-            PermissionState permissionState = mPermissions.get(name);
-            return permissionState != null && permissionState.isGranted()
-                    && !permissionState.isRuntime();
-        }
-    }
-
-    /**
      * Returns whether the state has any known request for the given permission name,
      * whether or not it has been granted.
      *
@@ -459,11 +442,11 @@ public final class UidPermissionState {
     /**
      * Put a permission state.
      */
-    public void putPermissionState(@NonNull BasePermission permission, boolean isRuntime,
-            boolean isGranted, int flags) {
+    public void putPermissionState(@NonNull BasePermission permission, boolean isGranted,
+            int flags) {
         synchronized (mLock) {
             ensureNoPermissionState(permission.name);
-            PermissionState permissionState = ensurePermissionState(permission, isRuntime);
+            PermissionState permissionState = ensurePermissionState(permission);
             if (isGranted) {
                 permissionState.grant();
             }
@@ -540,12 +523,6 @@ public final class UidPermissionState {
 
     @NonNull
     private PermissionState ensurePermissionState(@NonNull BasePermission permission) {
-        return ensurePermissionState(permission, permission.isRuntime());
-    }
-
-    @NonNull
-    private PermissionState ensurePermissionState(@NonNull BasePermission permission,
-            boolean isRuntime) {
         final String permissionName = permission.getName();
         synchronized (mLock) {
             if (mPermissions == null) {
@@ -553,7 +530,7 @@ public final class UidPermissionState {
             }
             PermissionState permissionState = mPermissions.get(permissionName);
             if (permissionState == null) {
-                permissionState = new PermissionState(permission, isRuntime);
+                permissionState = new PermissionState(permission);
                 mPermissions.put(permissionName, permissionState);
             }
             return permissionState;
