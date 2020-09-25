@@ -6214,8 +6214,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
         synchronized (mLock) {
             final AndroidPackage p = mPackages.get(packageName);
+            if (p == null) {
+                return false;
+            }
             final PackageSetting ps = getPackageSetting(p.getPackageName());
-            if (p == null || ps == null) {
+            if (ps == null) {
                 return false;
             }
             final int callingUid = Binder.getCallingUid();
