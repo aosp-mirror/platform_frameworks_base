@@ -608,10 +608,12 @@ package android.net.wifi {
 
   public final class WifiNetworkSuggestion implements android.os.Parcelable {
     method @NonNull public android.net.wifi.WifiConfiguration getWifiConfiguration();
+    method public boolean isOemPaid();
   }
 
   public static final class WifiNetworkSuggestion.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_CARRIER_PROVISIONING) public android.net.wifi.WifiNetworkSuggestion.Builder setCarrierId(int);
+    method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setOemPaid(boolean);
   }
 
   public class WifiScanner {

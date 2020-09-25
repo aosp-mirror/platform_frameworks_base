@@ -22,10 +22,12 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 import android.net.MacAddress;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.PasspointTestUtils;
+import android.net.wifi.util.SdkLevelUtil;
 import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
@@ -185,6 +187,34 @@ public class WifiNetworkSuggestionTest {
                 .get(WifiConfiguration.KeyMgmt.OWE));
         assertNull(suggestion.wifiConfiguration.preSharedKey);
         assertTrue(suggestion.wifiConfiguration.requirePmf);
+        assertFalse(suggestion.isUserAllowedToManuallyConnect);
+        assertTrue(suggestion.isInitialAutoJoinEnabled);
+        assertNull(suggestion.getEnterpriseConfig());
+    }
+
+    /**
+     * Validate correctness of WifiNetworkSuggestion object created by
+     * {@link WifiNetworkSuggestion.Builder#build()} for OWE network.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderForOemPaidEnhancedOpenNetworkWithBssid() {
+        assumeTrue(SdkLevelUtil.isAtLeastS());
+
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setBssid(MacAddress.fromString(TEST_BSSID))
+                .setOemPaid(true)
+                .setIsEnhancedOpen(true)
+                .build();
+
+        assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
+        assertEquals(TEST_BSSID, suggestion.wifiConfiguration.BSSID);
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.OWE));
+        assertNull(suggestion.wifiConfiguration.preSharedKey);
+        assertTrue(suggestion.wifiConfiguration.requirePmf);
+        assertTrue(suggestion.wifiConfiguration.oemPaid);
+        assertTrue(suggestion.isOemPaid());
         assertFalse(suggestion.isUserAllowedToManuallyConnect);
         assertTrue(suggestion.isInitialAutoJoinEnabled);
         assertNull(suggestion.getEnterpriseConfig());
@@ -1010,6 +1040,41 @@ public class WifiNetworkSuggestionTest {
     }
 
     /**
+     * Validate {@link WifiNetworkSuggestion.Builder#setCredentialSharedWithUser(boolean)} set the
+     * correct value to the WifiConfiguration.
+     */
+    @Test
+    public void testSetIsNetworkAsOemPaid() {
+        assumeTrue(SdkLevelUtil.isAtLeastS());
+
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setWpa2Passphrase(TEST_PRESHARED_KEY)
+                .setOemPaid(true)
+                .build();
+        assertTrue(suggestion.isOemPaid());
+        assertFalse(suggestion.isUserAllowedToManuallyConnect);
+    }
+
+    /**
+     * Validate {@link WifiNetworkSuggestion.Builder#setCredentialSharedWithUser(boolean)} set the
+     * correct value to the WifiConfiguration.
+     * Also the {@link WifiNetworkSuggestion#isUserAllowedToManuallyConnect} should be false;
+     */
+    @Test
+    public void testSetIsNetworkAsOemPaidOnPasspointNetwork() {
+        assumeTrue(SdkLevelUtil.isAtLeastS());
+
+        PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setPasspointConfig(passpointConfiguration)
+                .setOemPaid(true)
+                .build();
+        assertTrue(suggestion.isOemPaid());
+        assertFalse(suggestion.isUserAllowedToManuallyConnect);
+    }
+
+    /**
      * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
      * when set {@link WifiNetworkSuggestion.Builder#setUntrusted(boolean)} to true and
      * set {@link WifiNetworkSuggestion.Builder#setCredentialSharedWithUser(boolean)} to true
@@ -1022,6 +1087,24 @@ public class WifiNetworkSuggestionTest {
                 .setWpa2Passphrase(TEST_PRESHARED_KEY)
                 .setCredentialSharedWithUser(true)
                 .setUntrusted(true)
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
+     * when set {@link WifiNetworkSuggestion.Builder#setOemPaid(boolean)} to true and
+     * set {@link WifiNetworkSuggestion.Builder#setCredentialSharedWithUser(boolean)} to true
+     * together.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testSetCredentialSharedWithUserWithSetIsNetworkAsOemPaid() {
+        assumeTrue(SdkLevelUtil.isAtLeastS());
+
+        new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setWpa2Passphrase(TEST_PRESHARED_KEY)
+                .setCredentialSharedWithUser(true)
+                .setOemPaid(true)
                 .build();
     }
 
