@@ -143,11 +143,11 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Programu zilizoondolewa"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Watumiaji na programu ziilizoondolewa"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Masasisho ya mfumo"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Shiriki intaneti kwa USB"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Sambaza mtandao kwa USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Intaneti ya kusambazwa"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Shiriki intaneti kwa Bluetooth"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Inazuia"</string>
-    <string name="tether_settings_title_all" msgid="8910259483383010470">"Kushiriki na kusambaza intaneti"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Sambaza mtandao kwa Bluetooth"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Kusambaza mtandao"</string>
+    <string name="tether_settings_title_all" msgid="8910259483383010470">"Kushiriki na kusambaza mtandao"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Programu zote za kazini"</string>
     <string name="user_guest" msgid="6939192779649870792">"Mgeni"</string>
     <string name="unknown" msgid="3544487229740637809">"Haijulikani"</string>

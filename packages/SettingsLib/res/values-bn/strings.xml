@@ -487,8 +487,8 @@
     <string name="status_unavailable" msgid="5279036186589861608">"অনুপলভ্য"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC র‍্যান্ডমাইজ করা হয়েছে"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="one">%1$dটি ডিভাইস কানেক্ট</item>
-      <item quantity="other">%1$dটি ডিভাইস কানেক্ট</item>
+      <item quantity="one">%1$dটি ডিভাইস কানেক্ট রয়েছে</item>
+      <item quantity="other">%1$dটি ডিভাইস কানেক্ট রয়েছে</item>
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"আরও বেশি।"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"আরও কম।"</string>

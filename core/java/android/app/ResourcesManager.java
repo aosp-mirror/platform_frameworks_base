@@ -40,7 +40,6 @@ import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.LruCache;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
@@ -63,7 +62,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /** @hide */
 public class ResourcesManager {
@@ -130,17 +128,30 @@ public class ResourcesManager {
         }
     }
 
-    private static final boolean ENABLE_APK_ASSETS_CACHE = false;
-
     /**
-     * The ApkAssets we are caching and intend to hold strong references to.
+     * Loads {@link ApkAssets} and caches them to prevent their garbage collection while the
+     * instance is alive and reachable.
      */
-    private final LruCache<ApkKey, ApkAssets> mLoadedApkAssets =
-            (ENABLE_APK_ASSETS_CACHE) ? new LruCache<>(3) : null;
+    private class ApkAssetsSupplier {
+        final ArrayMap<ApkKey, ApkAssets> mLocalCache = new ArrayMap<>();
+
+        /**
+         * Retrieves the {@link ApkAssets} corresponding to the specified key, caches the ApkAssets
+         * within this instance, and inserts the loaded ApkAssets into the {@link #mCachedApkAssets}
+         * cache.
+         */
+        ApkAssets load(final ApkKey apkKey) throws IOException {
+            ApkAssets apkAssets = mLocalCache.get(apkKey);
+            if (apkAssets == null) {
+                apkAssets = loadApkAssets(apkKey);
+                mLocalCache.put(apkKey, apkAssets);
+            }
+            return apkAssets;
+        }
+    }
 
     /**
-     * The ApkAssets that are being referenced in the wild that we can reuse, even if they aren't
-     * in our LRU cache. Bonus resources :)
+     * The ApkAssets that are being referenced in the wild that we can reuse.
      */
     private final ArrayMap<ApkKey, WeakReference<ApkAssets>> mCachedApkAssets = new ArrayMap<>();
 
@@ -338,46 +349,75 @@ public class ResourcesManager {
         return "/data/resource-cache/" + path.substring(1).replace('/', '@') + "@idmap";
     }
 
-    private @NonNull ApkAssets loadApkAssets(String path, boolean sharedLib, boolean overlay)
-            throws IOException {
-        final ApkKey newKey = new ApkKey(path, sharedLib, overlay);
-        ApkAssets apkAssets = null;
-        if (mLoadedApkAssets != null) {
-            apkAssets = mLoadedApkAssets.get(newKey);
-            if (apkAssets != null && apkAssets.isUpToDate()) {
-                return apkAssets;
-            }
-        }
+    private @NonNull ApkAssets loadApkAssets(@NonNull final ApkKey key) throws IOException {
+        ApkAssets apkAssets;
 
         // Optimistically check if this ApkAssets exists somewhere else.
-        final WeakReference<ApkAssets> apkAssetsRef = mCachedApkAssets.get(newKey);
-        if (apkAssetsRef != null) {
-            apkAssets = apkAssetsRef.get();
-            if (apkAssets != null && apkAssets.isUpToDate()) {
-                if (mLoadedApkAssets != null) {
-                    mLoadedApkAssets.put(newKey, apkAssets);
+        synchronized (this) {
+            final WeakReference<ApkAssets> apkAssetsRef = mCachedApkAssets.get(key);
+            if (apkAssetsRef != null) {
+                apkAssets = apkAssetsRef.get();
+                if (apkAssets != null && apkAssets.isUpToDate()) {
+                    return apkAssets;
+                } else {
+                    // Clean up the reference.
+                    mCachedApkAssets.remove(key);
                 }
-
-                return apkAssets;
-            } else {
-                // Clean up the reference.
-                mCachedApkAssets.remove(newKey);
             }
         }
 
         // We must load this from disk.
-        if (overlay) {
-            apkAssets = ApkAssets.loadOverlayFromPath(overlayPathToIdmapPath(path), 0 /*flags*/);
+        if (key.overlay) {
+            apkAssets = ApkAssets.loadOverlayFromPath(overlayPathToIdmapPath(key.path),
+                    0 /*flags*/);
         } else {
-            apkAssets = ApkAssets.loadFromPath(path, sharedLib ? ApkAssets.PROPERTY_DYNAMIC : 0);
+            apkAssets = ApkAssets.loadFromPath(key.path,
+                    key.sharedLib ? ApkAssets.PROPERTY_DYNAMIC : 0);
         }
 
-        if (mLoadedApkAssets != null) {
-            mLoadedApkAssets.put(newKey, apkAssets);
+        synchronized (this) {
+            mCachedApkAssets.put(key, new WeakReference<>(apkAssets));
         }
 
-        mCachedApkAssets.put(newKey, new WeakReference<>(apkAssets));
         return apkAssets;
+    }
+
+    /**
+     * Retrieves a list of apk keys representing the ApkAssets that should be loaded for
+     * AssetManagers mapped to the {@param key}.
+     */
+    private static @NonNull ArrayList<ApkKey> extractApkKeys(@NonNull final ResourcesKey key) {
+        final ArrayList<ApkKey> apkKeys = new ArrayList<>();
+
+        // resDir can be null if the 'android' package is creating a new Resources object.
+        // This is fine, since each AssetManager automatically loads the 'android' package
+        // already.
+        if (key.mResDir != null) {
+            apkKeys.add(new ApkKey(key.mResDir, false /*sharedLib*/, false /*overlay*/));
+        }
+
+        if (key.mSplitResDirs != null) {
+            for (final String splitResDir : key.mSplitResDirs) {
+                apkKeys.add(new ApkKey(splitResDir, false /*sharedLib*/, false /*overlay*/));
+            }
+        }
+
+        if (key.mLibDirs != null) {
+            for (final String libDir : key.mLibDirs) {
+                // Avoid opening files we know do not have resources, like code-only .jar files.
+                if (libDir.endsWith(".apk")) {
+                    apkKeys.add(new ApkKey(libDir, true /*sharedLib*/, false /*overlay*/));
+                }
+            }
+        }
+
+        if (key.mOverlayDirs != null) {
+            for (final String idmapPath : key.mOverlayDirs) {
+                apkKeys.add(new ApkKey(idmapPath, false /*sharedLib*/, true /*overlay*/));
+            }
+        }
+
+        return apkKeys;
     }
 
     /**
@@ -391,60 +431,34 @@ public class ResourcesManager {
     @VisibleForTesting
     @UnsupportedAppUsage
     protected @Nullable AssetManager createAssetManager(@NonNull final ResourcesKey key) {
+        return createAssetManager(key, /* apkSupplier */ null);
+    }
+
+    /**
+     * Variant of {@link #createAssetManager(ResourcesKey)} that attempts to load ApkAssets
+     * from an {@link ApkAssetsSupplier} if non-null; otherwise ApkAssets are loaded using
+     * {@link #loadApkAssets(ApkKey)}.
+     */
+    private @Nullable AssetManager createAssetManager(@NonNull final ResourcesKey key,
+            @Nullable ApkAssetsSupplier apkSupplier) {
         final AssetManager.Builder builder = new AssetManager.Builder();
 
-        // resDir can be null if the 'android' package is creating a new Resources object.
-        // This is fine, since each AssetManager automatically loads the 'android' package
-        // already.
-        if (key.mResDir != null) {
+        final ArrayList<ApkKey> apkKeys = extractApkKeys(key);
+        for (int i = 0, n = apkKeys.size(); i < n; i++) {
+            final ApkKey apkKey = apkKeys.get(i);
             try {
-                builder.addApkAssets(loadApkAssets(key.mResDir, false /*sharedLib*/,
-                        false /*overlay*/));
+                builder.addApkAssets(
+                        (apkSupplier != null) ? apkSupplier.load(apkKey) : loadApkAssets(apkKey));
             } catch (IOException e) {
-                Log.e(TAG, "failed to add asset path " + key.mResDir);
-                return null;
-            }
-        }
-
-        if (key.mSplitResDirs != null) {
-            for (final String splitResDir : key.mSplitResDirs) {
-                try {
-                    builder.addApkAssets(loadApkAssets(splitResDir, false /*sharedLib*/,
-                            false /*overlay*/));
-                } catch (IOException e) {
-                    Log.e(TAG, "failed to add split asset path " + splitResDir);
+                if (apkKey.overlay) {
+                    Log.w(TAG, String.format("failed to add overlay path '%s'", apkKey.path), e);
+                } else if (apkKey.sharedLib) {
+                    Log.w(TAG, String.format(
+                            "asset path '%s' does not exist or contains no resources",
+                            apkKey.path), e);
+                } else {
+                    Log.e(TAG, String.format("failed to add asset path '%s'", apkKey.path), e);
                     return null;
-                }
-            }
-        }
-
-        if (key.mLibDirs != null) {
-            for (final String libDir : key.mLibDirs) {
-                if (libDir.endsWith(".apk")) {
-                    // Avoid opening files we know do not have resources,
-                    // like code-only .jar files.
-                    try {
-                        builder.addApkAssets(loadApkAssets(libDir, true /*sharedLib*/,
-                                false /*overlay*/));
-                    } catch (IOException e) {
-                        Log.w(TAG, "Asset path '" + libDir +
-                                "' does not exist or contains no resources.");
-
-                        // continue.
-                    }
-                }
-            }
-        }
-
-        if (key.mOverlayDirs != null) {
-            for (final String idmapPath : key.mOverlayDirs) {
-                try {
-                    builder.addApkAssets(loadApkAssets(idmapPath, false /*sharedLib*/,
-                            true /*overlay*/));
-                } catch (IOException e) {
-                    Log.w(TAG, "failed to add overlay path " + idmapPath);
-
-                    // continue.
                 }
             }
         }
@@ -481,24 +495,6 @@ public class ResourcesManager {
 
             pw.println("ResourcesManager:");
             pw.increaseIndent();
-            if (mLoadedApkAssets != null) {
-                pw.print("cached apks: total=");
-                pw.print(mLoadedApkAssets.size());
-                pw.print(" created=");
-                pw.print(mLoadedApkAssets.createCount());
-                pw.print(" evicted=");
-                pw.print(mLoadedApkAssets.evictionCount());
-                pw.print(" hit=");
-                pw.print(mLoadedApkAssets.hitCount());
-                pw.print(" miss=");
-                pw.print(mLoadedApkAssets.missCount());
-                pw.print(" max=");
-                pw.print(mLoadedApkAssets.maxSize());
-            } else {
-                pw.print("cached apks: 0 [cache disabled]");
-            }
-            pw.println();
-
             pw.print("total apks: ");
             pw.println(countLiveReferences(mCachedApkAssets.values()));
 
@@ -534,11 +530,12 @@ public class ResourcesManager {
         return config;
     }
 
-    private @Nullable ResourcesImpl createResourcesImpl(@NonNull ResourcesKey key) {
+    private @Nullable ResourcesImpl createResourcesImpl(@NonNull ResourcesKey key,
+            @Nullable ApkAssetsSupplier apkSupplier) {
         final DisplayAdjustments daj = new DisplayAdjustments(key.mOverrideConfiguration);
         daj.setCompatibilityInfo(key.mCompatInfo);
 
-        final AssetManager assets = createAssetManager(key);
+        final AssetManager assets = createAssetManager(key, apkSupplier);
         if (assets == null) {
             return null;
         }
@@ -576,9 +573,18 @@ public class ResourcesManager {
      */
     private @Nullable ResourcesImpl findOrCreateResourcesImplForKeyLocked(
             @NonNull ResourcesKey key) {
+        return findOrCreateResourcesImplForKeyLocked(key, /* apkSupplier */ null);
+    }
+
+    /**
+     * Variant of {@link #findOrCreateResourcesImplForKeyLocked(ResourcesKey)} that attempts to
+     * load ApkAssets from a {@link ApkAssetsSupplier} when creating a new ResourcesImpl.
+     */
+    private @Nullable ResourcesImpl findOrCreateResourcesImplForKeyLocked(
+            @NonNull ResourcesKey key, @Nullable ApkAssetsSupplier apkSupplier) {
         ResourcesImpl impl = findResourcesImplForKeyLocked(key);
         if (impl == null) {
-            impl = createResourcesImpl(key);
+            impl = createResourcesImpl(key, apkSupplier);
             if (impl != null) {
                 mResourceImpls.put(key, new WeakReference<>(impl));
             }
@@ -767,7 +773,7 @@ public class ResourcesManager {
             }
 
             // Now request an actual Resources object.
-            return createResources(token, key, classLoader);
+            return createResources(token, key, classLoader, /* apkSupplier */ null);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
@@ -811,18 +817,45 @@ public class ResourcesManager {
     }
 
     /**
+     * Creates an {@link ApkAssetsSupplier} and loads all the ApkAssets required by the {@param key}
+     * into the supplier. This should be done while the lock is not held to prevent performing I/O
+     * while holding the lock.
+     */
+    private @NonNull ApkAssetsSupplier createApkAssetsSupplierNotLocked(@NonNull ResourcesKey key) {
+        Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
+                "ResourcesManager#createApkAssetsSupplierNotLocked");
+        try {
+            final ApkAssetsSupplier supplier = new ApkAssetsSupplier();
+            final ArrayList<ApkKey> apkKeys = extractApkKeys(key);
+            for (int i = 0, n = apkKeys.size(); i < n; i++) {
+                final ApkKey apkKey = apkKeys.get(i);
+                try {
+                    supplier.load(apkKey);
+                } catch (IOException e) {
+                    Log.w(TAG, String.format("failed to preload asset path '%s'", apkKey.path), e);
+                }
+            }
+            return supplier;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+        }
+    }
+
+    /**
      * Creates a Resources object set with a ResourcesImpl object matching the given key.
      *
      * @param activityToken The Activity this Resources object should be associated with.
      * @param key The key describing the parameters of the ResourcesImpl object.
      * @param classLoader The classloader to use for the Resources object.
      *                    If null, {@link ClassLoader#getSystemClassLoader()} is used.
+     * @param apkSupplier The apk assets supplier to use when creating a new ResourcesImpl object.
      * @return A Resources object that gets updated when
      *         {@link #applyConfigurationToResourcesLocked(Configuration, CompatibilityInfo)}
      *         is called.
      */
     private @Nullable Resources createResources(@Nullable IBinder activityToken,
-            @NonNull ResourcesKey key, @NonNull ClassLoader classLoader) {
+            @NonNull ResourcesKey key, @NonNull ClassLoader classLoader,
+            @Nullable ApkAssetsSupplier apkSupplier) {
         synchronized (this) {
             if (DEBUG) {
                 Throwable here = new Throwable();
@@ -830,7 +863,7 @@ public class ResourcesManager {
                 Slog.w(TAG, "!! Get resources for activity=" + activityToken + " key=" + key, here);
             }
 
-            ResourcesImpl resourcesImpl = findOrCreateResourcesImplForKeyLocked(key);
+            ResourcesImpl resourcesImpl = findOrCreateResourcesImplForKeyLocked(key, apkSupplier);
             if (resourcesImpl == null) {
                 return null;
             }
@@ -899,7 +932,10 @@ public class ResourcesManager {
                 rebaseKeyForActivity(activityToken, key);
             }
 
-            return createResources(activityToken, key, classLoader);
+            // Preload the ApkAssets required by the key to prevent performing heavy I/O while the
+            // ResourcesManager lock is held.
+            final ApkAssetsSupplier assetsSupplier = createApkAssetsSupplierNotLocked(key);
+            return createResources(activityToken, key, classLoader, assetsSupplier);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
@@ -970,7 +1006,13 @@ public class ResourcesManager {
                     final ResourcesKey newKey = rebaseActivityOverrideConfig(resources, oldConfig,
                             overrideConfig, displayId);
                     if (newKey != null) {
-                        updateActivityResources(resources, newKey, false);
+                        final ResourcesImpl resourcesImpl =
+                                findOrCreateResourcesImplForKeyLocked(newKey);
+                        if (resourcesImpl != null && resourcesImpl != resources.getImpl()) {
+                            // Set the ResourcesImpl, updating it for all users of this Resources
+                            // object.
+                            resources.setImpl(resourcesImpl);
+                        }
                     }
                 }
             }
@@ -1025,34 +1067,22 @@ public class ResourcesManager {
         return newKey;
     }
 
-    private void updateActivityResources(Resources resources, ResourcesKey newKey,
-            boolean hasLoader) {
-        final ResourcesImpl resourcesImpl;
-
-        if (hasLoader) {
-            // Loaders always get new Impls because they cannot be shared
-            resourcesImpl = createResourcesImpl(newKey);
-        } else {
-            resourcesImpl = findOrCreateResourcesImplForKeyLocked(newKey);
-        }
-
-        if (resourcesImpl != null && resourcesImpl != resources.getImpl()) {
-            // Set the ResourcesImpl, updating it for all users of this Resources
-            // object.
-            resources.setImpl(resourcesImpl);
-        }
-    }
-
     @TestApi
     public final boolean applyConfigurationToResources(@NonNull Configuration config,
             @Nullable CompatibilityInfo compat) {
         synchronized(this) {
-            return applyConfigurationToResourcesLocked(config, compat);
+            return applyConfigurationToResourcesLocked(config, compat, null /* adjustments */);
         }
     }
 
     public final boolean applyConfigurationToResourcesLocked(@NonNull Configuration config,
-                                                             @Nullable CompatibilityInfo compat) {
+            @Nullable CompatibilityInfo compat) {
+        return applyConfigurationToResourcesLocked(config, compat, null /* adjustments */);
+    }
+
+    /** Applies the global configuration to the managed resources. */
+    public final boolean applyConfigurationToResourcesLocked(@NonNull Configuration config,
+            @Nullable CompatibilityInfo compat, @Nullable DisplayAdjustments adjustments) {
         try {
             Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
                     "ResourcesManager#applyConfigurationToResourcesLocked");
@@ -1076,6 +1106,11 @@ public class ResourcesManager {
                         | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
             }
 
+            if (adjustments != null) {
+                // Currently the only case where the adjustment takes effect is to simulate placing
+                // an app in a rotated display.
+                adjustments.adjustGlobalAppMetrics(defaultDisplayMetrics);
+            }
             Resources.updateSystemConfiguration(config, defaultDisplayMetrics, compat);
 
             ApplicationPackageManager.configurationChanged();

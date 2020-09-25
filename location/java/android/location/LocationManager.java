@@ -732,7 +732,7 @@ public class LocationManager {
                     mContext.getAttributionTag(), transport.getListenerId());
             if (cancelRemote != null) {
                 transport.register(mContext.getSystemService(AlarmManager.class),
-                        cancellationSignal);
+                        cancellationSignal, cancelRemote);
                 if (cancellationSignal != null) {
                     cancellationSignal.setRemote(cancelRemote);
                 }
@@ -2571,7 +2571,8 @@ public class LocationManager {
         }
 
         public synchronized void register(AlarmManager alarmManager,
-                CancellationSignal cancellationSignal) {
+                CancellationSignal cancellationSignal,
+                ICancellationSignal remoteCancellationSignal) {
             if (mConsumer == null) {
                 return;
             }
@@ -2587,15 +2588,21 @@ public class LocationManager {
             if (cancellationSignal != null) {
                 cancellationSignal.setOnCancelListener(this);
             }
+
+            mRemoteCancellationSignal = remoteCancellationSignal;
         }
 
         @Override
         public void onCancel() {
+            synchronized (this) {
+                mRemoteCancellationSignal = null;
+            }
             remove();
         }
 
         private Consumer<Location> remove() {
             Consumer<Location> consumer;
+            ICancellationSignal cancellationSignal;
             synchronized (this) {
                 mExecutor = null;
                 consumer = mConsumer;
@@ -2604,6 +2611,18 @@ public class LocationManager {
                 if (mAlarmManager != null) {
                     mAlarmManager.cancel(this);
                     mAlarmManager = null;
+                }
+
+                // ensure only one cancel event will go through
+                cancellationSignal = mRemoteCancellationSignal;
+                mRemoteCancellationSignal = null;
+            }
+
+            if (cancellationSignal != null) {
+                try {
+                    cancellationSignal.cancel();
+                } catch (RemoteException e) {
+                    // ignore
                 }
             }
 

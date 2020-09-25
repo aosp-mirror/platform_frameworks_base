@@ -68,6 +68,7 @@ import com.android.compatibility.common.util.SystemUtil;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -142,6 +143,9 @@ public class ScreenDecorWindowTests {
         assertInsetGreaterOrEqual(mTestActivity, RIGHT, mDecorThickness);
     }
 
+    // Decor windows (i.e windows using PRIVATE_FLAG_IS_SCREEN_DECOR) are no longer supported.
+    // PRIVATE_FLAG_IS_SCREEN_DECOR and related code will be deprecated/removed soon.
+    @Ignore
     @Test
     public void testMultipleDecors() {
         // Test 2 decor windows on-top.
