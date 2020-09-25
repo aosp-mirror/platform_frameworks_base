@@ -57,6 +57,8 @@ import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
+import com.android.server.biometrics.sensors.fingerprint.hidl.Fingerprint21;
+import com.android.server.biometrics.sensors.fingerprint.hidl.Fingerprint21UdfpsMock;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
