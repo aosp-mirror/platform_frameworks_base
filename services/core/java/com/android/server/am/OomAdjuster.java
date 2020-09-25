@@ -2428,9 +2428,7 @@ public final class OomAdjuster {
                         && (state.getCurAdj() == ProcessList.PREVIOUS_APP_ADJ
                             || state.getCurAdj() == ProcessList.HOME_APP_ADJ)) {
                     mCachedAppOptimizer.compactAppSome(app);
-                } else if ((state.getSetAdj() < ProcessList.CACHED_APP_MIN_ADJ
-                                || state.getSetAdj() > ProcessList.CACHED_APP_MAX_ADJ)
-                        && state.getCurAdj() >= ProcessList.CACHED_APP_MIN_ADJ
+                } else if (state.getCurAdj() >= ProcessList.CACHED_APP_MIN_ADJ
                         && state.getCurAdj() <= ProcessList.CACHED_APP_MAX_ADJ) {
                     mCachedAppOptimizer.compactAppFull(app);
                 }
