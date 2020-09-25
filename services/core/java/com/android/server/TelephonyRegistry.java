@@ -1743,6 +1743,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         preciseState.getApnSetting());
                 PreciseDataConnectionState oldState = mPreciseDataConnectionStates.get(phoneId)
                         .remove(key);
+                log("Jack: oldState=" + oldState);
+                log("Jack: newState=" + preciseState);
                 if (!Objects.equals(oldState, preciseState)) {
                     for (Record r : mRecords) {
                         if (r.matchPhoneStateListenerEvent(
