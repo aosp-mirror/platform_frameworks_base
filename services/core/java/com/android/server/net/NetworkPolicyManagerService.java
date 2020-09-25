@@ -3867,7 +3867,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         // quick check: if this uid doesn't have INTERNET permission, it
                         // doesn't have network access anyway, so it is a waste to mess
                         // with it here.
-                        if (hasInternetPermissionUL(uid)) {
+                        if (hasInternetPermissionUL(uid) && !isUidForegroundOnRestrictPowerUL(uid)) {
                             uidRules.put(uid, FIREWALL_RULE_DENY);
                         }
                     }
