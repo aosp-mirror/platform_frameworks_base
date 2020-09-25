@@ -1,0 +1,11 @@
+java_binary_host {
+    name: "xmlpersistence_cli",
+    manifest: "manifest.txt",
+    srcs: [
+        "src/**/*.kt",
+    ],
+    static_libs: [
+        "javaparser-symbol-solver",
+        "javapoet",
+    ],
+}
