@@ -26,19 +26,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
-import android.media.session.MediaSessionManager.OnActiveSessionsChangedListener;
 import android.media.session.PlaybackState;
 import android.os.UserHandle;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.statusbar.policy.UserInfoController;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -101,17 +96,11 @@ public class PipMediaController {
     };
 
     private final MediaSessionManager.OnActiveSessionsChangedListener mSessionsChangedListener =
-            new OnActiveSessionsChangedListener() {
-        @Override
-        public void onActiveSessionsChanged(List<MediaController> controllers) {
-            resolveActiveMediaController(controllers);
-        }
-    };
+            controllers -> resolveActiveMediaController(controllers);
 
     private ArrayList<ActionListener> mListeners = new ArrayList<>();
 
-    public PipMediaController(Context context, IActivityManager activityManager,
-            BroadcastDispatcher broadcastDispatcher) {
+    public PipMediaController(Context context, IActivityManager activityManager) {
         mContext = context;
         mActivityManager = activityManager;
         IntentFilter mediaControlFilter = new IntentFilter();
@@ -119,16 +108,12 @@ public class PipMediaController {
         mediaControlFilter.addAction(ACTION_PAUSE);
         mediaControlFilter.addAction(ACTION_NEXT);
         mediaControlFilter.addAction(ACTION_PREV);
-        broadcastDispatcher.registerReceiver(mPlayPauseActionReceiver, mediaControlFilter);
+        mContext.registerReceiver(mPlayPauseActionReceiver, mediaControlFilter,
+                UserHandle.USER_ALL);
 
         createMediaActions();
         mMediaSessionManager =
                 (MediaSessionManager) context.getSystemService(Context.MEDIA_SESSION_SERVICE);
-
-        // The media session listener needs to be re-registered when switching users
-        UserInfoController userInfoController = Dependency.get(UserInfoController.class);
-        userInfoController.addCallback((String name, Drawable picture, String userAccount) ->
-                registerSessionListenerForCurrentUser());
     }
 
     /**
@@ -220,7 +205,7 @@ public class PipMediaController {
     /**
      * Re-registers the session listener for the current user.
      */
-    private void registerSessionListenerForCurrentUser() {
+    public void registerSessionListenerForCurrentUser() {
         mMediaSessionManager.removeOnActiveSessionsChangedListener(mSessionsChangedListener);
         mMediaSessionManager.addOnActiveSessionsChangedListener(mSessionsChangedListener, null,
                 UserHandle.USER_CURRENT, null);

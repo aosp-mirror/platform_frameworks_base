@@ -17,6 +17,7 @@
 package android.hardware.fingerprint;
 
 import android.annotation.IntDef;
+import android.hardware.biometrics.SensorProperties;
 import android.hardware.face.FaceSensorProperties;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -28,45 +29,44 @@ import java.lang.annotation.RetentionPolicy;
  * Container for fingerprint sensor properties.
  * @hide
  */
-public class FingerprintSensorProperties implements Parcelable {
+public class FingerprintSensorProperties extends SensorProperties {
 
     public static final int TYPE_UNKNOWN = 0;
     public static final int TYPE_REAR = 1;
-    public static final int TYPE_UDFPS = 2;
-    public static final int TYPE_POWER_BUTTON = 3;
+    public static final int TYPE_UDFPS_ULTRASONIC = 2;
+    public static final int TYPE_UDFPS_OPTICAL = 3;
+    public static final int TYPE_POWER_BUTTON = 4;
+    public static final int TYPE_HOME_BUTTON = 5;
 
-    @IntDef({
-            TYPE_UNKNOWN,
+    @IntDef({TYPE_UNKNOWN,
             TYPE_REAR,
-            TYPE_UDFPS,
-            TYPE_POWER_BUTTON})
+            TYPE_UDFPS_ULTRASONIC,
+            TYPE_UDFPS_OPTICAL,
+            TYPE_POWER_BUTTON,
+            TYPE_HOME_BUTTON})
     @Retention(RetentionPolicy.SOURCE)
     public @interface SensorType {}
 
-    public final int sensorId;
     public final @SensorType int sensorType;
     // IBiometricsFingerprint@2.1 does not manage timeout below the HAL, so the Gatekeeper HAT
     // cannot be checked
     public final boolean resetLockoutRequiresHardwareAuthToken;
-    // Maximum number of enrollments a user/profile can have.
-    public final int maxTemplatesAllowed;
 
     /**
      * Initializes SensorProperties with specified values
      */
-    public FingerprintSensorProperties(int sensorId, @SensorType int sensorType,
-            boolean resetLockoutRequiresHardwareAuthToken, int maxTemplatesAllowed) {
-        this.sensorId = sensorId;
+    public FingerprintSensorProperties(int sensorId, @Strength int strength,
+            int maxEnrollmentsPerUser, @SensorType int sensorType,
+            boolean resetLockoutRequiresHardwareAuthToken) {
+        super(sensorId, strength, maxEnrollmentsPerUser);
         this.sensorType = sensorType;
         this.resetLockoutRequiresHardwareAuthToken = resetLockoutRequiresHardwareAuthToken;
-        this.maxTemplatesAllowed = maxTemplatesAllowed;
     }
 
     protected FingerprintSensorProperties(Parcel in) {
-        sensorId = in.readInt();
+        super(in);
         sensorType = in.readInt();
         resetLockoutRequiresHardwareAuthToken = in.readBoolean();
-        maxTemplatesAllowed = in.readInt();
     }
 
     public static final Creator<FingerprintSensorProperties> CREATOR =
@@ -89,9 +89,18 @@ public class FingerprintSensorProperties implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(sensorId);
+        super.writeToParcel(dest, flags);
         dest.writeInt(sensorType);
         dest.writeBoolean(resetLockoutRequiresHardwareAuthToken);
-        dest.writeInt(maxTemplatesAllowed);
+    }
+
+    public boolean isAnyUdfpsType() {
+        switch (sensorType) {
+            case TYPE_UDFPS_OPTICAL:
+            case TYPE_UDFPS_ULTRASONIC:
+                return true;
+            default:
+                return false;
+        }
     }
 }

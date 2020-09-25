@@ -169,6 +169,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String TAG = "PackageInstallerSession";
@@ -689,7 +690,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 stagedSessionErrorMessage != null ? stagedSessionErrorMessage : "";
 
         if (isDataLoaderInstallation()) {
-            if (isApexInstallation()) {
+            if (isApexSession()) {
                 throw new IllegalArgumentException(
                         "DataLoader installation of APEX modules is not allowed.");
             }
@@ -1576,7 +1577,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         return false;
                     }
 
-                    if (isApexInstallation()) {
+                    if (isApexSession()) {
                         validateApexInstallLocked();
                     } else {
                         validateApkInstallLocked();
@@ -1733,7 +1734,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             try {
                 sealLocked();
 
-                if (isApexInstallation()) {
+                if (isApexSession()) {
                     // APEX installations rely on certain fields to be populated after reboot.
                     // E.g. mPackageName.
                     validateApexInstallLocked();
@@ -1809,7 +1810,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
-        if (isApexInstallation()) {
+        if (isApexSession()) {
             destroyInternal();
             dispatchSessionFinished(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
                     "APEX packages can only be installed using staged sessions.", null);
@@ -1986,7 +1987,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // TODO(b/136257624): Some logic in this if block probably belongs in
         //  makeInstallParams().
-        if (!params.isMultiPackage && !isApexInstallation()) {
+        if (!params.isMultiPackage && !isApexSession()) {
             Objects.requireNonNull(mPackageName);
             Objects.requireNonNull(mSigningDetails);
             Objects.requireNonNull(mResolvedBaseFile);
@@ -2215,8 +2216,32 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /**
      * Returns true if the session is installing an APEX package.
      */
-    private boolean isApexInstallation() {
+    boolean isApexSession() {
         return (params.installFlags & PackageManager.INSTALL_APEX) != 0;
+    }
+
+    private boolean sessionContains(Predicate<PackageInstallerSession> filter) {
+        if (!isMultiPackage()) {
+            return filter.test(this);
+        }
+        final List<PackageInstallerSession> childSessions;
+        synchronized (mLock) {
+            childSessions = getChildSessionsLocked();
+        }
+        for (PackageInstallerSession child: childSessions) {
+            if (filter.test(child)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean containsApexSession() {
+        return sessionContains((s) -> s.isApexSession());
+    }
+
+    boolean containsApkSession() {
+        return sessionContains((s) -> !s.isApexSession());
     }
 
     /**

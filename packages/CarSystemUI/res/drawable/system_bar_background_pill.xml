@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!--
-  ~ Copyright (C) 2019 The Android Open Source Project
+  ~ Copyright (C) 2020 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,11 +16,7 @@
   -->
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-
-  <corners
-      android:bottomRightRadius="8dp"
-      android:topRightRadius="8dp" />
-  <solid android:color="@color/tv_audio_recording_indicator_background" />
-
+       android:shape="rectangle">
+  <solid android:color="@color/system_bar_background_pill_color"/>
+  <corners android:radius="30dp"/>
 </shape>

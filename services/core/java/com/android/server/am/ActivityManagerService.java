@@ -1177,10 +1177,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final Injector mInjector;
 
-    /** The package verifier app. */
-    private String mPackageVerifier;
-    private int mPackageVerifierUid = UserHandle.USER_NULL;
-
     static final class ProcessChangeItem {
         static final int CHANGE_ACTIVITIES = 1<<0;
         static final int CHANGE_FOREGROUND_SERVICES = 1<<1;
@@ -1809,18 +1805,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (phase == PHASE_SYSTEM_SERVICES_READY) {
                 mService.mBatteryStatsService.systemServicesReady();
                 mService.mServices.systemServicesReady();
-                mService.mPackageVerifier = ArrayUtils.firstOrNull(
-                        LocalServices.getService(PackageManagerInternal.class).getKnownPackageNames(
-                                PackageManagerInternal.PACKAGE_VERIFIER, UserHandle.USER_SYSTEM));
-                if (mService.mPackageVerifier != null) {
-                    try {
-                        mService.mPackageVerifierUid =
-                                getContext().getPackageManager().getPackageUid(
-                                        mService.mPackageVerifier, UserHandle.USER_SYSTEM);
-                    } catch (NameNotFoundException e) {
-                        Slog.wtf(TAG, "Package manager couldn't get package verifier uid", e);
-                    }
-                }
             } else if (phase == PHASE_ACTIVITY_MANAGER_READY) {
                 mService.startBroadcastObservers();
             } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
@@ -11233,10 +11217,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             long kernelUsed = memInfo.getKernelUsedSizeKb();
             final long ionHeap = Debug.getIonHeapsSizeKb();
-            if (ionHeap > 0) {
+            final long ionPool = Debug.getIonPoolsSizeKb();
+            if (ionHeap >= 0 && ionPool >= 0) {
                 final long ionMapped = Debug.getIonMappedSizeKb();
                 final long ionUnmapped = ionHeap - ionMapped;
-                final long ionPool = Debug.getIonPoolsSizeKb();
                 pw.print("      ION: ");
                         pw.print(stringifyKBSize(ionHeap + ionPool));
                         pw.print(" (");
@@ -12033,10 +12017,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         memInfoBuilder.append("\n");
         long kernelUsed = memInfo.getKernelUsedSizeKb();
         final long ionHeap = Debug.getIonHeapsSizeKb();
-        if (ionHeap > 0) {
+        final long ionPool = Debug.getIonPoolsSizeKb();
+        if (ionHeap >= 0 && ionPool >= 0) {
             final long ionMapped = Debug.getIonMappedSizeKb();
             final long ionUnmapped = ionHeap - ionMapped;
-            final long ionPool = Debug.getIonPoolsSizeKb();
             memInfoBuilder.append("       ION: ");
             memInfoBuilder.append(stringifyKBSize(ionHeap + ionPool));
             memInfoBuilder.append("\n");
@@ -12359,8 +12343,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public ComponentName startService(IApplicationThread caller, Intent service,
-            String resolvedType, boolean requireForeground, boolean hideForegroundNotification,
-            String callingPackage, String callingFeatureId, int userId)
+            String resolvedType, boolean requireForeground, String callingPackage,
+            String callingFeatureId, int userId)
             throws TransactionTooLargeException {
         enforceNotIsolatedCaller("startService");
         // Refuse possible leaked file descriptors
@@ -12372,27 +12356,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new IllegalArgumentException("callingPackage cannot be null");
         }
 
-        final int callingUid = Binder.getCallingUid();
-        if (requireForeground && hideForegroundNotification) {
-            if (!UserHandle.isSameApp(callingUid, mPackageVerifierUid)
-                    || !callingPackage.equals(mPackageVerifier)) {
-                throw new IllegalArgumentException(
-                        "Only the package verifier can hide its foreground service notification");
-            }
-            Slog.i(TAG, "Foreground service notification hiding requested by " + callingPackage);
-        }
-
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE,
                 "*** startService: " + service + " type=" + resolvedType + " fg=" + requireForeground);
         synchronized(this) {
             final int callingPid = Binder.getCallingPid();
+            final int callingUid = Binder.getCallingUid();
             final long origId = Binder.clearCallingIdentity();
             ComponentName res;
             try {
                 res = mServices.startServiceLocked(caller, service,
                         resolvedType, callingPid, callingUid,
-                        requireForeground, hideForegroundNotification,
-                        callingPackage, callingFeatureId, userId);
+                        requireForeground, callingPackage, callingFeatureId, userId);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -16305,7 +16279,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ComponentName res;
                 try {
                     res = mServices.startServiceLocked(null, service,
-                            resolvedType, -1, uid, fgRequired, false, callingPackage,
+                            resolvedType, -1, uid, fgRequired, callingPackage,
                             callingFeatureId, userId, allowBackgroundActivityStarts,
                             backgroundActivityStartsToken);
                 } finally {

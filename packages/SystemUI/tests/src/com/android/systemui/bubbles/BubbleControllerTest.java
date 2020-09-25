@@ -92,6 +92,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.FloatingContentCoordinator;
+import com.android.systemui.wmshell.WindowManagerShellWrapper;
 
 import com.google.common.collect.ImmutableList;
 
@@ -191,6 +192,8 @@ public class BubbleControllerTest extends SysuiTestCase {
     private LauncherApps mLauncherApps;
     @Mock private LockscreenLockIconController mLockIconController;
 
+    @Mock private WindowManagerShellWrapper mWindowManagerShellWrapper;
+
     private BubbleData mBubbleData;
 
     private TestableLooper mTestableLooper;
@@ -269,6 +272,7 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mock(INotificationManager.class),
                 mStatusBarService,
                 mWindowManager,
+                mWindowManagerShellWrapper,
                 mLauncherApps);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
@@ -1005,6 +1009,29 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // THEN the summary is removed from GroupManager
         verify(mNotificationGroupManager, times(1)).onEntryRemoved(groupSummary.getEntry());
+    }
+
+
+    /**
+     * Verifies that when a non visually interruptive update occurs for a bubble in the overflow,
+     * the that bubble does not get promoted from the overflow.
+     */
+    @Test
+    public void test_notVisuallyInterruptive_updateOverflowBubble_notAdded() {
+        // Setup
+        mBubbleController.updateBubble(mRow.getEntry());
+        mBubbleController.updateBubble(mRow2.getEntry());
+        assertTrue(mBubbleController.hasBubbles());
+
+        // Overflow it
+        mBubbleData.dismissBubbleWithKey(mRow.getEntry().getKey(),
+                BubbleController.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.hasBubbleInStackWithKey(mRow.getEntry().getKey())).isFalse();
+        assertThat(mBubbleData.hasOverflowBubbleWithKey(mRow.getEntry().getKey())).isTrue();
+
+        // Test
+        mBubbleController.updateBubble(mRow.getEntry());
+        assertThat(mBubbleData.hasBubbleInStackWithKey(mRow.getEntry().getKey())).isFalse();
     }
 
     /**

@@ -282,6 +282,7 @@ import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
 import android.permission.IPermissionManager;
+import android.provider.ContactsContract;
 import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
@@ -349,6 +350,7 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.Watchdog;
+import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.Installer.InstallerException;
@@ -2126,11 +2128,21 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean update = res.removedInfo != null && res.removedInfo.removedPackage != null;
         final String packageName = res.name;
         final PackageSetting pkgSetting = succeeded ? getPackageSetting(packageName) : null;
-        if (succeeded && pkgSetting == null) {
+        final boolean removedBeforeUpdate = (pkgSetting == null)
+                || (pkgSetting.isSystem() && !pkgSetting.getPathString().equals(res.pkg.getPath()));
+        if (succeeded && removedBeforeUpdate) {
             Slog.e(TAG, packageName + " was removed before handlePackagePostInstall "
                     + "could be executed");
             res.returnCode = INSTALL_FAILED_PACKAGE_CHANGED;
             res.returnMsg = "Package was removed before install could complete.";
+
+            // Remove the update failed package's older resources safely now
+            InstallArgs args = res.removedInfo != null ? res.removedInfo.args : null;
+            if (args != null) {
+                synchronized (mInstallLock) {
+                    args.doPostDeleteLI(true);
+                }
+            }
             notifyInstallObserver(res, installObserver);
             return;
         }
@@ -2703,39 +2715,43 @@ public class PackageManagerService extends IPackageManager.Stub
         PackageManagerService m = new PackageManagerService(injector, onlyCore, factoryTest);
         t.traceEnd(); // "create package manager"
 
-        injector.getCompatibility().registerListener(SELinuxMMAC.SELINUX_LATEST_CHANGES,
-                packageName -> {
-                    synchronized (m.mInstallLock) {
-                        final AndroidPackage pkg;
-                        final PackageSetting ps;
-                        final SharedUserSetting sharedUser;
-                        final String oldSeInfo;
-                        synchronized (m.mLock) {
-                            ps = m.mSettings.getPackageLPr(packageName);
-                            if (ps == null) {
-                                Slog.e(TAG, "Failed to find package setting " + packageName);
-                                return;
-                            }
-                            pkg = ps.pkg;
-                            sharedUser = ps.getSharedUser();
-                            oldSeInfo = AndroidPackageUtils.getSeInfo(pkg, ps);
-                        }
-
-                        if (pkg == null) {
-                            Slog.e(TAG, "Failed to find package " + packageName);
-                            return;
-                        }
-                        final String newSeInfo = SELinuxMMAC.getSeInfo(pkg, sharedUser,
-                                m.mInjector.getCompatibility());
-
-                        if (!newSeInfo.equals(oldSeInfo)) {
-                            Slog.i(TAG, "Updating seInfo for package " + packageName + " from: "
-                                    + oldSeInfo + " to: " + newSeInfo);
-                            ps.getPkgState().setOverrideSeInfo(newSeInfo);
-                            m.prepareAppDataAfterInstallLIF(pkg);
-                        }
+        final CompatChange.ChangeListener selinuxChangeListener = packageName -> {
+            synchronized (m.mInstallLock) {
+                final AndroidPackage pkg;
+                final PackageSetting ps;
+                final SharedUserSetting sharedUser;
+                final String oldSeInfo;
+                synchronized (m.mLock) {
+                    ps = m.mSettings.getPackageLPr(packageName);
+                    if (ps == null) {
+                        Slog.e(TAG, "Failed to find package setting " + packageName);
+                        return;
                     }
-                });
+                    pkg = ps.pkg;
+                    sharedUser = ps.getSharedUser();
+                    oldSeInfo = AndroidPackageUtils.getSeInfo(pkg, ps);
+                }
+
+                if (pkg == null) {
+                    Slog.e(TAG, "Failed to find package " + packageName);
+                    return;
+                }
+                final String newSeInfo = SELinuxMMAC.getSeInfo(pkg, sharedUser,
+                        m.mInjector.getCompatibility());
+
+                if (!newSeInfo.equals(oldSeInfo)) {
+                    Slog.i(TAG, "Updating seInfo for package " + packageName + " from: "
+                            + oldSeInfo + " to: " + newSeInfo);
+                    ps.getPkgState().setOverrideSeInfo(newSeInfo);
+                    m.prepareAppDataAfterInstallLIF(pkg);
+                }
+            }
+        };
+
+        injector.getCompatibility().registerListener(SELinuxMMAC.SELINUX_LATEST_CHANGES,
+                selinuxChangeListener);
+        injector.getCompatibility().registerListener(SELinuxMMAC.SELINUX_R_CHANGES,
+                selinuxChangeListener);
 
         m.installWhitelistedSystemPackages();
         ServiceManager.addService("package", m);
@@ -25712,6 +25728,32 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             return mInstantAppRegistry.getInstantAppAndroidIdLPw(packageName, userId);
         }
+    }
+
+    @Override
+    public void grantImplicitAccess(int recipientUid, String visibleAuthority) {
+        // This API is exposed temporarily to only the contacts provider. (b/158688602)
+        final int callingUid = Binder.getCallingUid();
+        ProviderInfo contactsProvider = resolveContentProviderInternal(
+                        ContactsContract.AUTHORITY, 0, UserHandle.USER_SYSTEM);
+        if (contactsProvider == null || contactsProvider.applicationInfo == null
+                || !UserHandle.isSameApp(contactsProvider.applicationInfo.uid, callingUid)) {
+            throw new SecurityException(callingUid + " is not allow to call grantImplicitAccess");
+        }
+        final int userId = UserHandle.getUserId(recipientUid);
+        final long token = Binder.clearCallingIdentity();
+        final ProviderInfo providerInfo;
+        try {
+            providerInfo = resolveContentProvider(visibleAuthority, 0 /*flags*/, userId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        if (providerInfo == null) {
+            return;
+        }
+        int visibleUid = providerInfo.applicationInfo.uid;
+        mPmInternal.grantImplicitAccess(userId, null /*Intent*/, UserHandle.getAppId(recipientUid),
+                visibleUid, false);
     }
 
     boolean canHaveOatDir(String packageName) {

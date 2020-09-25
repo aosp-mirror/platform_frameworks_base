@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -39,6 +41,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Build/Install/Run:
+ *  atest WmTests:DisplayAreaOrganizerTest
+ */
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
@@ -61,11 +67,19 @@ public class DisplayAreaOrganizerTest extends WindowTestsBase {
     }
 
     private IDisplayAreaOrganizer registerMockOrganizer(int feature) {
-        final IDisplayAreaOrganizer organizer = mock(IDisplayAreaOrganizer.class);
-        when(organizer.asBinder()).thenReturn(new Binder());
+        return registerMockOrganizer(feature, new Binder());
+    }
 
+    private IDisplayAreaOrganizer registerMockOrganizer(int feature, Binder binder) {
+        final IDisplayAreaOrganizer organizer = createMockOrganizer(binder);
         mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController
                 .registerOrganizer(organizer, feature);
+        return organizer;
+    }
+
+    private IDisplayAreaOrganizer createMockOrganizer(Binder binder) {
+        final IDisplayAreaOrganizer organizer = mock(IDisplayAreaOrganizer.class);
+        when(organizer.asBinder()).thenReturn(binder);
         return organizer;
     }
 
@@ -98,5 +112,17 @@ public class DisplayAreaOrganizerTest extends WindowTestsBase {
         mDisplayContent.onRequestedOverrideConfigurationChanged(tmpConfiguration);
         // Ensure it was still only called once if the bounds didn't change
         verify(organizer).onDisplayAreaInfoChanged(any());
+    }
+
+    @Test
+    public void testUnregisterOrganizer() {
+        final Binder binder = new Binder();
+        registerMockOrganizer(FEATURE_VENDOR_FIRST, binder);
+
+        assertThat(mTestDisplayArea.mOrganizer).isNotNull();
+
+        unregisterMockOrganizer(createMockOrganizer(binder));
+
+        assertThat(mTestDisplayArea.mOrganizer).isNull();
     }
 }

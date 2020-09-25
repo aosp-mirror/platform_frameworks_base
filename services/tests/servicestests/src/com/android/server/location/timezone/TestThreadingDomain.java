@@ -105,8 +105,8 @@ class TestThreadingDomain extends ThreadingDomain {
         assertTrue(getNextQueueItemDelayMillis() == 0);
     }
 
-    void assertNextQueueItemIsDelayed(Duration expectedDelay) {
-        assertTrue(getNextQueueItemDelayMillis() == expectedDelay.toMillis());
+    private void assertNextQueueItemIsDelayed(Duration expectedDelay) {
+        assertEquals(getNextQueueItemDelayMillis(), expectedDelay.toMillis());
     }
 
     void assertQueueEmpty() {

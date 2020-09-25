@@ -259,7 +259,7 @@ final class MediaButtonReceiverHolder {
             return "";
         }
         return String.join(COMPONENT_NAME_USER_ID_DELIM,
-                mComponentName.toString(),
+                mComponentName.flattenToString(),
                 String.valueOf(mUserId),
                 String.valueOf(mComponentType));
     }

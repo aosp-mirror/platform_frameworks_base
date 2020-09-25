@@ -74,6 +74,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -185,6 +186,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
@@ -561,6 +563,37 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         InstrumentationRegistry.getInstrumentation()
                 .getUiAutomation().dropShellPermissionIdentity();
+    }
+
+    private void simulatePackageSuspendBroadcast(boolean suspend, String pkg,
+            int uid) {
+        // mimics receive broadcast that package is (un)suspended
+        // but does not actually (un)suspend the package
+        final Bundle extras = new Bundle();
+        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST,
+                new String[]{pkg});
+        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, new int[]{uid});
+
+        final String action = suspend ? Intent.ACTION_PACKAGES_SUSPENDED
+                : Intent.ACTION_PACKAGES_UNSUSPENDED;
+        final Intent intent = new Intent(action);
+        intent.putExtras(extras);
+
+        mPackageIntentReceiver.onReceive(getContext(), intent);
+    }
+
+    private void simulatePackageDistractionBroadcast(int flag, String[] pkgs, int[] uids) {
+        // mimics receive broadcast that package is (un)distracting
+        // but does not actually register that info with packagemanager
+        final Bundle extras = new Bundle();
+        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgs);
+        extras.putInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS, flag);
+        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uids);
+
+        final Intent intent = new Intent(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED);
+        intent.putExtras(extras);
+
+        mPackageIntentReceiver.onReceive(getContext(), intent);
     }
 
     private ArrayMap<Boolean, ArrayList<ComponentName>> generateResetComponentValues() {
@@ -7066,34 +7099,39 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertTrue(mService.isVisibleToListener(sbn, info));
     }
 
-    private void simulatePackageSuspendBroadcast(boolean suspend, String pkg,
-            int uid) {
-        // mimics receive broadcast that package is (un)suspended
-        // but does not actually (un)suspend the package
-        final Bundle extras = new Bundle();
-        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST,
-                new String[]{pkg});
-        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, new int[]{uid});
+    @Test
+    public void testUserInitiatedCancelAll_groupCancellationOrder_groupPostedFirst() {
+        final NotificationRecord parent = spy(generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true));
+        final NotificationRecord child = spy(generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false));
+        mService.addNotification(parent);
+        mService.addNotification(child);
 
-        final String action = suspend ? Intent.ACTION_PACKAGES_SUSPENDED
-                : Intent.ACTION_PACKAGES_UNSUSPENDED;
-        final Intent intent = new Intent(action);
-        intent.putExtras(extras);
+        InOrder inOrder = inOrder(parent, child);
 
-        mPackageIntentReceiver.onReceive(getContext(), intent);
+        mService.mNotificationDelegate.onClearAll(mUid, Binder.getCallingPid(),
+                parent.getUserId());
+        waitForIdle();
+        inOrder.verify(parent).recordDismissalSentiment(anyInt());
+        inOrder.verify(child).recordDismissalSentiment(anyInt());
     }
 
-    private void simulatePackageDistractionBroadcast(int flag, String[] pkgs, int[] uids) {
-        // mimics receive broadcast that package is (un)distracting
-        // but does not actually register that info with packagemanager
-        final Bundle extras = new Bundle();
-        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgs);
-        extras.putInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS, flag);
-        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uids);
+    @Test
+    public void testUserInitiatedCancelAll_groupCancellationOrder_groupPostedSecond() {
+        final NotificationRecord parent = spy(generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true));
+        final NotificationRecord child = spy(generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false));
+        mService.addNotification(child);
+        mService.addNotification(parent);
 
-        final Intent intent = new Intent(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED);
-        intent.putExtras(extras);
+        InOrder inOrder = inOrder(parent, child);
 
-        mPackageIntentReceiver.onReceive(getContext(), intent);
+        mService.mNotificationDelegate.onClearAll(mUid, Binder.getCallingPid(),
+                parent.getUserId());
+        waitForIdle();
+        inOrder.verify(parent).recordDismissalSentiment(anyInt());
+        inOrder.verify(child).recordDismissalSentiment(anyInt());
     }
 }

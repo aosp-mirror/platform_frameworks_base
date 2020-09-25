@@ -45,4 +45,13 @@
 
     <!-- Show a separate icon for low and high volume on the volume dialog -->
     <bool name="config_showLowMediaVolumeIcon">true</bool>
+
+    <!-- Change the volume row tint when it is inactive, i.e. when it is being dismissed -->
+    <bool name="config_changeVolumeRowTintWhenInactive">false</bool>
+
+    <!-- The duraction of the show animation for the volume dialog in milliseconds -->
+    <integer name="config_dialogShowAnimationDurationMs">600</integer>
+
+    <!-- The duraction of the hide animation for the volume dialog in milliseconds -->
+    <integer name="config_dialogHideAnimationDurationMs">400</integer>
 </resources>
