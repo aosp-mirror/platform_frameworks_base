@@ -28,8 +28,6 @@ import android.view.SurfaceControl;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-
 public class LogicalDisplayTest {
     private static final int DISPLAY_ID = 0;
     private static final int LAYER_STACK = 0;
@@ -51,9 +49,16 @@ public class LogicalDisplayTest {
         mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice);
         when(mDisplayDevice.getDisplayDeviceInfoLocked()).thenReturn(displayDeviceInfo);
 
-        ArrayList<DisplayDevice> displayDevices = new ArrayList<>();
-        displayDevices.add(mDisplayDevice);
-        mLogicalDisplay.updateLocked(displayDevices);
+        DisplayDeviceRepository repo = new DisplayDeviceRepository(
+                new DisplayManagerService.SyncRoot(), new DisplayDeviceRepository.Listener() {
+                    @Override
+                    public void onDisplayDeviceEventLocked(DisplayDevice device, int event) {}
+
+                    @Override
+                    public void onTraversalRequested() {}
+                });
+        repo.onDisplayDeviceEvent(mDisplayDevice, DisplayAdapter.DISPLAY_DEVICE_EVENT_ADDED);
+        mLogicalDisplay.updateLocked(repo);
     }
 
     @Test
