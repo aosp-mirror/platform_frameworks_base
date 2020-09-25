@@ -3346,6 +3346,7 @@ message StyleUIChanged {
     optional int32 wallpaper_id_hash = 8;
     optional int32 color_preference = 9;
     optional android.stats.style.LocationPreference location_preference = 10;
+    optional android.stats.style.DatePreference date_preference = 11;
 }
 
 /**
