@@ -688,6 +688,31 @@ public final class BluetoothGatt implements BluetoothProfile {
                         }
                     });
                 }
+
+                /**
+                 * Callback invoked when service changed event is received
+                 * @hide
+                 */
+                @Override
+                public void onServiceChanged(String address) {
+                    if (DBG) {
+                        Log.d(TAG, "onServiceChanged() - Device=" + address);
+                    }
+
+                    if (!address.equals(mDevice.getAddress())) {
+                        return;
+                    }
+
+                    runOrQueueCallback(new Runnable() {
+                        @Override
+                        public void run() {
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onServiceChanged(BluetoothGatt.this);
+                            }
+                        }
+                    });
+                }
             };
 
     /*package*/ BluetoothGatt(IBluetoothGatt iGatt, BluetoothDevice device,
