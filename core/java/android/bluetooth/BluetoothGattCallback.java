@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.annotation.NonNull;
+
 /**
  * This abstract class is used to implement {@link BluetoothGatt} callbacks.
  */
@@ -203,8 +205,7 @@ public abstract class BluetoothGattCallback {
      * called to re-discover the services.
      *
      * @param gatt GATT client involved
-     * @hide
      */
-    public void onServiceChanged(BluetoothGatt gatt) {
+    public void onServiceChanged(@NonNull BluetoothGatt gatt) {
     }
 }
