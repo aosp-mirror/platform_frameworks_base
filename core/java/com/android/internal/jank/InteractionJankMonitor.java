@@ -51,6 +51,11 @@ public class InteractionJankMonitor {
     public static final int CUJ_NOTIFICATION_SHADE_ROW_SWIPE = 0;
     public static final int CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE = 0;
     public static final int CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE = 0;
+    public static final int CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS = 0;
+    public static final int CUJ_LAUNCHER_APP_LAUNCH_FROM_ICON = 0;
+    public static final int CUJ_LAUNCHER_APP_CLOSE_TO_HOME = 0;
+    public static final int CUJ_LAUNCHER_APP_CLOSE_TO_PIP = 0;
+    public static final int CUJ_LAUNCHER_QUICK_SWITCH = 0;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -78,7 +83,12 @@ public class InteractionJankMonitor {
             CUJ_NOTIFICATION_SHADE_ROW_EXPAND,
             CUJ_NOTIFICATION_SHADE_ROW_SWIPE,
             CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE,
-            CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE
+            CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE,
+            CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS,
+            CUJ_LAUNCHER_APP_LAUNCH_FROM_ICON,
+            CUJ_LAUNCHER_APP_CLOSE_TO_HOME,
+            CUJ_LAUNCHER_APP_CLOSE_TO_PIP,
+            CUJ_LAUNCHER_QUICK_SWITCH,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {}
