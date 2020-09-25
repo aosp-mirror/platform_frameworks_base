@@ -20,6 +20,8 @@ import static android.view.Gravity.BOTTOM;
 import static android.view.Gravity.LEFT;
 import static android.view.Gravity.RIGHT;
 import static android.view.Gravity.TOP;
+import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
+import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.ITYPE_TOP_GESTURES;
@@ -218,10 +220,15 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void addingWindow_throwsException_WithMultipleInsetTypes() {
-        WindowState win = createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, "StatusBarSubPanel");
-        win.mAttrs.providesInsetsTypes = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
+        WindowState win1 = createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, "StatusBarSubPanel");
+        win1.mAttrs.providesInsetsTypes = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
 
-        expectThrows(IllegalArgumentException.class, () -> addWindow(win));
+        expectThrows(IllegalArgumentException.class, () -> addWindow(win1));
+
+        WindowState win2 = createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, "StatusBarSubPanel");
+        win2.mAttrs.providesInsetsTypes = new int[]{ITYPE_CLIMATE_BAR, ITYPE_EXTRA_NAVIGATION_BAR};
+
+        expectThrows(IllegalArgumentException.class, () -> addWindow(win2));
     }
 
     @Test
