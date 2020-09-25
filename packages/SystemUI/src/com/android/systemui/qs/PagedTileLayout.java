@@ -177,6 +177,16 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     @Override
+    public void endFakeDrag() {
+        try {
+            super.endFakeDrag();
+        } catch (NullPointerException e) {
+            // Not sure what's going on. Let's log it
+            Log.e(TAG, "endFakeDrag called without velocityTracker", e);
+        }
+    }
+
+    @Override
     public void computeScroll() {
         if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
             if (!isFakeDragging()) {
