@@ -44,6 +44,7 @@ import android.net.wifi.hotspot2.IProvisioningCallback;
 import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.ProvisioningCallback;
+import android.net.wifi.util.SdkLevelUtil;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -2480,6 +2481,18 @@ public class WifiManager {
     }
 
     /**
+     * Query whether the device supports 2 or more concurrent stations (STA) or not.
+     *
+     * @return true if this device supports multiple STA concurrency, false otherwise.
+     */
+    public boolean isMultiStaConcurrencySupported() {
+        if (!SdkLevelUtil.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        return isFeatureSupported(WIFI_FEATURE_ADDITIONAL_STA);
+    }
+
+    /**
      * @deprecated Please use {@link android.content.pm.PackageManager#hasSystemFeature(String)}
      * with {@link android.content.pm.PackageManager#FEATURE_WIFI_RTT} and
      * {@link android.content.pm.PackageManager#FEATURE_WIFI_AWARE}.
@@ -2509,14 +2522,6 @@ public class WifiManager {
      */
     public boolean isPreferredNetworkOffloadSupported() {
         return isFeatureSupported(WIFI_FEATURE_PNO);
-    }
-
-    /**
-     * @return true if this adapter supports multiple simultaneous connections
-     * @hide
-     */
-    public boolean isAdditionalStaSupported() {
-        return isFeatureSupported(WIFI_FEATURE_ADDITIONAL_STA);
     }
 
     /**
