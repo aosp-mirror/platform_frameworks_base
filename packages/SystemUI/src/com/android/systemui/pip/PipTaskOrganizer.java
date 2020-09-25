@@ -548,16 +548,17 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
 
     /**
      * Setup the ViewHost and attach the provided menu view to the ViewHost.
+     * @return The input token belonging to the PipMenuView.
      */
-    public void attachPipMenuViewHost(View menuView, WindowManager.LayoutParams lp) {
+    public IBinder attachPipMenuViewHost(View menuView, WindowManager.LayoutParams lp) {
         if (mPipMenuSurface != null) {
             Log.e(TAG, "PIP Menu View already created and attached.");
-            return;
+            return null;
         }
 
         if (mLeash == null) {
             Log.e(TAG, "PiP Leash is not yet ready.");
-            return;
+            return null;
         }
 
         if (Looper.getMainLooper() != Looper.myLooper()) {
@@ -573,6 +574,8 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
         transaction.setRelativeLayer(mPipMenuSurface, mLeash, 1);
         transaction.apply();
         mPipViewHost.setView(menuView, lp);
+
+        return mPipViewHost.getSurfacePackage().getInputToken();
     }
 
 
