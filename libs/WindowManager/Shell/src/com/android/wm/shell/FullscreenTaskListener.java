@@ -22,18 +22,18 @@ import android.util.Slog;
 import android.view.SurfaceControl;
 
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = "FullscreenTaskOrg";
 
-    private final TransactionPool mTransactionPool;
+    private final SyncTransactionQueue mSyncQueue;
 
     private final ArraySet<Integer> mTasks = new ArraySet<>();
 
-    FullscreenTaskListener(TransactionPool transactionPool) {
-        mTransactionPool = transactionPool;
+    FullscreenTaskListener(SyncTransactionQueue syncQueue) {
+        mSyncQueue = syncQueue;
     }
 
     @Override
@@ -42,18 +42,18 @@ class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
             if (mTasks.contains(taskInfo.taskId)) {
                 throw new RuntimeException("Task appeared more than once: #" + taskInfo.taskId);
             }
-            mTasks.add(taskInfo.taskId);
-            final SurfaceControl.Transaction t = mTransactionPool.acquire();
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Appeared: #%d",
                     taskInfo.taskId);
-            // Reset several properties back to fullscreen (PiP, for example, leaves all these
-            // properties in a bad state).
-            t.setPosition(leash, 0, 0);
-            t.setWindowCrop(leash, null);
-            t.setAlpha(leash, 1f);
-            t.setMatrix(leash, 1, 0, 0, 1);
-            t.show(leash);
-            t.apply();
+            mTasks.add(taskInfo.taskId);
+            mSyncQueue.runInSync(t -> {
+                // Reset several properties back to fullscreen (PiP, for example, leaves all these
+                // properties in a bad state).
+                t.setPosition(leash, 0, 0);
+                t.setWindowCrop(leash, null);
+                t.setAlpha(leash, 1f);
+                t.setMatrix(leash, 1, 0, 0, 1);
+                t.show(leash);
+            });
         }
     }
 

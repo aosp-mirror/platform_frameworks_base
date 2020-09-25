@@ -28,7 +28,7 @@ import android.window.TaskOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
@@ -59,16 +59,16 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     // require us to report to both old and new listeners)
     private final SparseArray<Pair<RunningTaskInfo, SurfaceControl>> mTasks = new SparseArray<>();
 
-    public ShellTaskOrganizer(TransactionPool transactionPool) {
+    public ShellTaskOrganizer(SyncTransactionQueue syncQueue) {
         super();
-        addListener(new FullscreenTaskListener(transactionPool), WINDOWING_MODE_FULLSCREEN);
+        addListener(new FullscreenTaskListener(syncQueue), WINDOWING_MODE_FULLSCREEN);
     }
 
     @VisibleForTesting
     ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController,
-                       TransactionPool transactionPool) {
+                       SyncTransactionQueue syncQueue) {
         super(taskOrganizerController);
-        addListener(new FullscreenTaskListener(transactionPool), WINDOWING_MODE_FULLSCREEN);
+        addListener(new FullscreenTaskListener(syncQueue), WINDOWING_MODE_FULLSCREEN);
     }
 
     /**
