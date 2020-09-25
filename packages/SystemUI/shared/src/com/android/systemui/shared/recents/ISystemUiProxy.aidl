@@ -44,11 +44,6 @@ interface ISystemUiProxy {
     void startScreenPinning(int taskId) = 1;
 
     /**
-     * Notifies SystemUI that split screen has been invoked.
-     */
-    void onSplitScreenInvoked() = 5;
-
-    /**
      * Notifies SystemUI that Overview is shown.
      */
     void onOverviewShown(boolean fromHome) = 6;

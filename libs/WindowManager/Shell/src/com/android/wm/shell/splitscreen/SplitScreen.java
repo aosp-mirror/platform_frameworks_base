@@ -68,9 +68,6 @@ public interface SplitScreen {
     /** Called when there's a task undocking. */
     void onUndockingTask();
 
-    /** Called when the first docked animation frame rendered. */
-    void onDockedFirstAnimationFrame();
-
     /** Called when top task docked. */
     void onDockedTopTask();
 
