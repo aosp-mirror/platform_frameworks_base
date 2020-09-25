@@ -34,6 +34,7 @@ import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -98,8 +99,15 @@ public abstract class WMShellBaseModule {
 
     @SysUISingleton
     @Provides
-    static ShellTaskOrganizer provideShellTaskOrganizer(TransactionPool transactionPool) {
-        ShellTaskOrganizer organizer = new ShellTaskOrganizer(transactionPool);
+    static SyncTransactionQueue provideSyncTransactionQueue(@Main Handler handler,
+            TransactionPool pool) {
+        return new SyncTransactionQueue(pool, handler);
+    }
+
+    @SysUISingleton
+    @Provides
+    static ShellTaskOrganizer provideShellTaskOrganizer(SyncTransactionQueue syncQueue) {
+        ShellTaskOrganizer organizer = new ShellTaskOrganizer(syncQueue);
         organizer.registerOrganizer();
         return organizer;
     }
