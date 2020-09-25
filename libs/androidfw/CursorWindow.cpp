@@ -30,23 +30,62 @@
 
 namespace android {
 
-CursorWindow::CursorWindow(const String8& name, int ashmemFd,
-        void* data, size_t size, bool readOnly) :
-        mName(name), mAshmemFd(ashmemFd), mData(data), mSize(size), mReadOnly(readOnly) {
+/**
+ * By default windows are lightweight inline allocations of this size;
+ * they're only inflated to ashmem regions when more space is needed.
+ */
+static constexpr const size_t kInlineSize = 16384;
+
+CursorWindow::CursorWindow(const String8& name, int ashmemFd, void* data, size_t size,
+                           size_t inflatedSize, bool readOnly) :
+        mName(name), mAshmemFd(ashmemFd), mData(data), mSize(size),
+        mInflatedSize(inflatedSize), mReadOnly(readOnly) {
     mHeader = static_cast<Header*>(mData);
 }
 
 CursorWindow::~CursorWindow() {
-    ::munmap(mData, mSize);
-    ::close(mAshmemFd);
+    if (mAshmemFd != -1) {
+        ::munmap(mData, mSize);
+        ::close(mAshmemFd);
+    } else {
+        free(mData);
+    }
 }
 
-status_t CursorWindow::create(const String8& name, size_t size, CursorWindow** outCursorWindow) {
+status_t CursorWindow::create(const String8& name, size_t inflatedSize,
+                              CursorWindow** outCursorWindow) {
+    *outCursorWindow = nullptr;
+
+    size_t size = std::min(kInlineSize, inflatedSize);
+    void* data = calloc(size, 1);
+    if (!data) return NO_MEMORY;
+
+    CursorWindow* window = new CursorWindow(name, -1, data, size,
+                                            inflatedSize, false /*readOnly*/);
+    status_t result = window->clear();
+    if (!result) {
+        LOG_WINDOW("Created new CursorWindow: freeOffset=%d, "
+                "numRows=%d, numColumns=%d, mSize=%zu, mData=%p",
+                window->mHeader->freeOffset,
+                window->mHeader->numRows,
+                window->mHeader->numColumns,
+                window->mSize, window->mData);
+        *outCursorWindow = window;
+        return OK;
+    }
+    delete window;
+    return result;
+}
+
+status_t CursorWindow::inflate() {
+    // Shortcut when we can't expand any further
+    if (mSize == mInflatedSize) return INVALID_OPERATION;
+
     String8 ashmemName("CursorWindow: ");
-    ashmemName.append(name);
+    ashmemName.append(mName);
 
     status_t result;
-    int ashmemFd = ashmem_create_region(ashmemName.string(), size);
+    int ashmemFd = ashmem_create_region(ashmemName.string(), mInflatedSize);
     if (ashmemFd < 0) {
         result = -errno;
         ALOGE("CursorWindow: ashmem_create_region() failed: errno=%d.", errno);
@@ -55,7 +94,8 @@ status_t CursorWindow::create(const String8& name, size_t size, CursorWindow** o
         if (result < 0) {
             ALOGE("CursorWindow: ashmem_set_prot_region() failed: errno=%d",errno);
         } else {
-            void* data = ::mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, ashmemFd, 0);
+            void* data = ::mmap(NULL, mInflatedSize, PROT_READ | PROT_WRITE,
+                                MAP_SHARED, ashmemFd, 0);
             if (data == MAP_FAILED) {
                 result = -errno;
                 ALOGE("CursorWindow: mmap() failed: errno=%d.", errno);
@@ -64,33 +104,49 @@ status_t CursorWindow::create(const String8& name, size_t size, CursorWindow** o
                 if (result < 0) {
                     ALOGE("CursorWindow: ashmem_set_prot_region() failed: errno=%d.", errno);
                 } else {
-                    CursorWindow* window = new CursorWindow(name, ashmemFd,
-                            data, size, false /*readOnly*/);
-                    result = window->clear();
-                    if (!result) {
-                        LOG_WINDOW("Created new CursorWindow: freeOffset=%d, "
-                                "numRows=%d, numColumns=%d, mSize=%zu, mData=%p",
-                                window->mHeader->freeOffset,
-                                window->mHeader->numRows,
-                                window->mHeader->numColumns,
-                                window->mSize, window->mData);
-                        *outCursorWindow = window;
-                        return OK;
-                    }
-                    delete window;
+                    // Move inline contents into new ashmem region
+                    memcpy(data, mData, mSize);
+                    free(mData);
+                    mAshmemFd = ashmemFd;
+                    mData = data;
+                    mHeader = static_cast<Header*>(mData);
+                    mSize = mInflatedSize;
+                    LOG_WINDOW("Inflated CursorWindow: freeOffset=%d, "
+                            "numRows=%d, numColumns=%d, mSize=%zu, mData=%p",
+                            mHeader->freeOffset,
+                            mHeader->numRows,
+                            mHeader->numColumns,
+                            mSize, mData);
+                    return OK;
                 }
             }
-            ::munmap(data, size);
+            ::munmap(data, mInflatedSize);
         }
         ::close(ashmemFd);
     }
-    *outCursorWindow = NULL;
     return result;
 }
 
 status_t CursorWindow::createFromParcel(Parcel* parcel, CursorWindow** outCursorWindow) {
-    String8 name = parcel->readString8();
+    *outCursorWindow = nullptr;
 
+    String8 name;
+    status_t result = parcel->readString8(&name);
+    if (result) return result;
+
+    bool isAshmem;
+    result = parcel->readBool(&isAshmem);
+    if (result) return result;
+
+    if (isAshmem) {
+        return createFromParcelAshmem(parcel, name, outCursorWindow);
+    } else {
+        return createFromParcelInline(parcel, name, outCursorWindow);
+    }
+}
+
+status_t CursorWindow::createFromParcelAshmem(Parcel* parcel, String8& name,
+                                              CursorWindow** outCursorWindow) {
     status_t result;
     int actualSize;
     int ashmemFd = parcel->readFileDescriptor();
@@ -122,8 +178,8 @@ status_t CursorWindow::createFromParcel(Parcel* parcel, CursorWindow** outCursor
                             actualSize, (int) size, errno);
                 } else {
                     CursorWindow* window = new CursorWindow(name, dupAshmemFd,
-                            data, size, true /*readOnly*/);
-                    LOG_WINDOW("Created CursorWindow from parcel: freeOffset=%d, "
+                            data, size, size, true /*readOnly*/);
+                    LOG_WINDOW("Created CursorWindow from ashmem parcel: freeOffset=%d, "
                             "numRows=%d, numColumns=%d, mSize=%zu, mData=%p",
                             window->mHeader->freeOffset,
                             window->mHeader->numRows,
@@ -140,12 +196,62 @@ status_t CursorWindow::createFromParcel(Parcel* parcel, CursorWindow** outCursor
     return result;
 }
 
+status_t CursorWindow::createFromParcelInline(Parcel* parcel, String8& name,
+                                              CursorWindow** outCursorWindow) {
+    uint32_t sentSize;
+    status_t result = parcel->readUint32(&sentSize);
+    if (result) return result;
+    if (sentSize > kInlineSize) return NO_MEMORY;
+
+    void* data = calloc(sentSize, 1);
+    if (!data) return NO_MEMORY;
+
+    result = parcel->read(data, sentSize);
+    if (result) return result;
+
+    CursorWindow* window = new CursorWindow(name, -1, data, sentSize,
+                                            sentSize, true /*readOnly*/);
+    LOG_WINDOW("Created CursorWindow from inline parcel: freeOffset=%d, "
+            "numRows=%d, numColumns=%d, mSize=%zu, mData=%p",
+            window->mHeader->freeOffset,
+            window->mHeader->numRows,
+            window->mHeader->numColumns,
+            window->mSize, window->mData);
+    *outCursorWindow = window;
+    return OK;
+}
+
 status_t CursorWindow::writeToParcel(Parcel* parcel) {
-    status_t status = parcel->writeString8(mName);
-    if (!status) {
-        status = parcel->writeDupFileDescriptor(mAshmemFd);
+        LOG_WINDOW("Writing CursorWindow: freeOffset=%d, "
+                "numRows=%d, numColumns=%d, mSize=%zu, mData=%p",
+                mHeader->freeOffset,
+                mHeader->numRows,
+                mHeader->numColumns,
+                mSize, mData);
+
+    status_t result = parcel->writeString8(mName);
+    if (result) return result;
+
+    if (mAshmemFd != -1) {
+        result = parcel->writeBool(true);
+        if (result) return result;
+        return writeToParcelAshmem(parcel);
+    } else {
+        result = parcel->writeBool(false);
+        if (result) return result;
+        return writeToParcelInline(parcel);
     }
-    return status;
+}
+
+status_t CursorWindow::writeToParcelAshmem(Parcel* parcel) {
+    return parcel->writeDupFileDescriptor(mAshmemFd);
+}
+
+status_t CursorWindow::writeToParcelInline(Parcel* parcel) {
+    status_t result = parcel->writeUint32(mHeader->freeOffset);
+    if (result) return result;
+
+    return parcel->write(mData, mHeader->freeOffset);
 }
 
 status_t CursorWindow::clear() {
@@ -187,6 +293,7 @@ status_t CursorWindow::allocRow() {
     if (rowSlot == NULL) {
         return NO_MEMORY;
     }
+    uint32_t rowSlotOffset = offsetFromPtr(rowSlot);
 
     // Allocate the slots for the field directory
     size_t fieldDirSize = mHeader->numColumns * sizeof(FieldSlot);
@@ -201,7 +308,8 @@ status_t CursorWindow::allocRow() {
     memset(fieldDir, 0, fieldDirSize);
 
     LOG_WINDOW("Allocated row %u, rowSlot is at offset %u, fieldDir is %zu bytes at offset %u\n",
-            mHeader->numRows - 1, offsetFromPtr(rowSlot), fieldDirSize, fieldDirOffset);
+            mHeader->numRows - 1, rowSlotOffset, fieldDirSize, fieldDirOffset);
+    rowSlot = static_cast<RowSlot*>(offsetToPtr(rowSlotOffset));
     rowSlot->offset = fieldDirOffset;
     return OK;
 }
@@ -229,10 +337,14 @@ uint32_t CursorWindow::alloc(size_t size, bool aligned) {
     uint32_t offset = mHeader->freeOffset + padding;
     uint32_t nextFreeOffset = offset + size;
     if (nextFreeOffset > mSize) {
-        ALOGW("Window is full: requested allocation %zu bytes, "
-                "free space %zu bytes, window size %zu bytes",
-                size, freeSpace(), mSize);
-        return 0;
+        // Try inflating to ashmem before finally giving up
+        inflate();
+        if (nextFreeOffset > mSize) {
+            ALOGW("Window is full: requested allocation %zu bytes, "
+                    "free space %zu bytes, window size %zu bytes",
+                    size, freeSpace(), mSize);
+            return 0;
+        }
     }
 
     mHeader->freeOffset = nextFreeOffset;
@@ -260,7 +372,10 @@ CursorWindow::RowSlot* CursorWindow::allocRowSlot() {
     }
     if (chunkPos == ROW_SLOT_CHUNK_NUM_ROWS) {
         if (!chunk->nextChunkOffset) {
-            chunk->nextChunkOffset = alloc(sizeof(RowSlotChunk), true /*aligned*/);
+            uint32_t chunkOffset = offsetFromPtr(chunk);
+            uint32_t newChunk = alloc(sizeof(RowSlotChunk), true /*aligned*/);
+            chunk = static_cast<RowSlotChunk*>(offsetToPtr(chunkOffset));
+            chunk->nextChunkOffset = newChunk;
             if (!chunk->nextChunkOffset) {
                 return NULL;
             }
@@ -308,6 +423,7 @@ status_t CursorWindow::putBlobOrString(uint32_t row, uint32_t column,
     if (!fieldSlot) {
         return BAD_VALUE;
     }
+    uint32_t fieldSlotOffset = offsetFromPtr(fieldSlot);
 
     uint32_t offset = alloc(size);
     if (!offset) {
@@ -316,6 +432,7 @@ status_t CursorWindow::putBlobOrString(uint32_t row, uint32_t column,
 
     memcpy(offsetToPtr(offset), value, size);
 
+    fieldSlot = static_cast<FieldSlot*>(offsetToPtr(fieldSlotOffset));
     fieldSlot->type = type;
     fieldSlot->data.buffer.offset = offset;
     fieldSlot->data.buffer.size = size;
