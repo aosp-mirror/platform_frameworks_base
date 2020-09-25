@@ -1071,12 +1071,18 @@ public class ResourcesManager {
     public final boolean applyConfigurationToResources(@NonNull Configuration config,
             @Nullable CompatibilityInfo compat) {
         synchronized(this) {
-            return applyConfigurationToResourcesLocked(config, compat);
+            return applyConfigurationToResourcesLocked(config, compat, null /* adjustments */);
         }
     }
 
     public final boolean applyConfigurationToResourcesLocked(@NonNull Configuration config,
-                                                             @Nullable CompatibilityInfo compat) {
+            @Nullable CompatibilityInfo compat) {
+        return applyConfigurationToResourcesLocked(config, compat, null /* adjustments */);
+    }
+
+    /** Applies the global configuration to the managed resources. */
+    public final boolean applyConfigurationToResourcesLocked(@NonNull Configuration config,
+            @Nullable CompatibilityInfo compat, @Nullable DisplayAdjustments adjustments) {
         try {
             Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
                     "ResourcesManager#applyConfigurationToResourcesLocked");
@@ -1100,6 +1106,11 @@ public class ResourcesManager {
                         | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
             }
 
+            if (adjustments != null) {
+                // Currently the only case where the adjustment takes effect is to simulate placing
+                // an app in a rotated display.
+                adjustments.adjustGlobalAppMetrics(defaultDisplayMetrics);
+            }
             Resources.updateSystemConfiguration(config, defaultDisplayMetrics, compat);
 
             ApplicationPackageManager.configurationChanged();
