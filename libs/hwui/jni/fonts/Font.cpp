@@ -18,6 +18,8 @@
 #define LOG_TAG "Minikin"
 
 #include "SkData.h"
+#include "SkFont.h"
+#include "SkFontMetrics.h"
 #include "SkFontMgr.h"
 #include "SkRefCnt.h"
 #include "SkTypeface.h"
@@ -27,6 +29,7 @@
 #include "FontUtils.h"
 
 #include <hwui/MinikinSkia.h>
+#include <hwui/Paint.h>
 #include <hwui/Typeface.h>
 #include <minikin/FontFamily.h>
 #include <ui/FatVector.h>
@@ -120,9 +123,79 @@ static jlong Font_Builder_build(JNIEnv* env, jobject clazz, jlong builderPtr, jo
     return reinterpret_cast<jlong>(new FontWrapper(std::move(font)));
 }
 
+// Fast Native
+static jlong Font_Builder_clone(JNIEnv* env, jobject clazz, jlong fontPtr, jlong builderPtr,
+                                jint weight, jboolean italic, jint ttcIndex) {
+    FontWrapper* font = reinterpret_cast<FontWrapper*>(fontPtr);
+    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->font.typeface().get());
+    std::unique_ptr<NativeFontBuilder> builder(toBuilder(builderPtr));
+
+    // Reconstruct SkTypeface with different arguments from existing SkTypeface.
+    FatVector<SkFontArguments::VariationPosition::Coordinate, 2> skVariation;
+    for (const auto& axis : builder->axes) {
+        skVariation.push_back({axis.axisTag, axis.value});
+    }
+    SkFontArguments args;
+    args.setCollectionIndex(ttcIndex);
+    args.setVariationDesignPosition({skVariation.data(), static_cast<int>(skVariation.size())});
+
+    sk_sp<SkTypeface> newTypeface = minikinSkia->GetSkTypeface()->makeClone(args);
+
+    std::shared_ptr<minikin::MinikinFont> newMinikinFont = std::make_shared<MinikinFontSkia>(
+        std::move(newTypeface),
+        minikinSkia->GetFontData(),
+        minikinSkia->GetFontSize(),
+        minikinSkia->getFilePath(),
+        minikinSkia->GetFontIndex(),
+        builder->axes);
+    minikin::Font newFont = minikin::Font::Builder(newMinikinFont).setWeight(weight)
+              .setSlant(static_cast<minikin::FontStyle::Slant>(italic)).build();
+    return reinterpret_cast<jlong>(new FontWrapper(std::move(newFont)));
+}
+
 // Critical Native
 static jlong Font_Builder_getReleaseNativeFont(CRITICAL_JNI_PARAMS) {
     return reinterpret_cast<jlong>(releaseFont);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+// Fast Native
+static jfloat Font_getGlyphBounds(JNIEnv* env, jobject, jlong fontHandle, jint glyphId,
+                                  jlong paintHandle, jobject rect) {
+    FontWrapper* font = reinterpret_cast<FontWrapper*>(fontHandle);
+    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->font.typeface().get());
+    Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+
+    SkFont* skFont = &paint->getSkFont();
+    // We don't use populateSkFont since it is designed to be used for layout result with addressing
+    // auto fake-bolding.
+    skFont->setTypeface(minikinSkia->RefSkTypeface());
+
+    uint16_t glyph16 = glyphId;
+    SkRect skBounds;
+    SkScalar skWidth;
+    skFont->getWidthsBounds(&glyph16, 1, &skWidth, &skBounds, nullptr);
+    GraphicsJNI::rect_to_jrectf(skBounds, env, rect);
+    return SkScalarToFloat(skWidth);
+}
+
+// Fast Native
+static jfloat Font_getFontMetrics(JNIEnv* env, jobject, jlong fontHandle, jlong paintHandle,
+                                  jobject metricsObj) {
+    FontWrapper* font = reinterpret_cast<FontWrapper*>(fontHandle);
+    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->font.typeface().get());
+    Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+
+    SkFont* skFont = &paint->getSkFont();
+    // We don't use populateSkFont since it is designed to be used for layout result with addressing
+    // auto fake-bolding.
+    skFont->setTypeface(minikinSkia->RefSkTypeface());
+
+    SkFontMetrics metrics;
+    SkScalar spacing = skFont->getMetrics(&metrics);
+    GraphicsJNI::set_metrics(env, metricsObj, metrics);
+    return spacing;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -131,12 +204,20 @@ static const JNINativeMethod gFontBuilderMethods[] = {
     { "nInitBuilder", "()J", (void*) Font_Builder_initBuilder },
     { "nAddAxis", "(JIF)V", (void*) Font_Builder_addAxis },
     { "nBuild", "(JLjava/nio/ByteBuffer;Ljava/lang/String;IZI)J", (void*) Font_Builder_build },
+    { "nClone", "(JJIZI)J", (void*) Font_Builder_clone },
     { "nGetReleaseNativeFont", "()J", (void*) Font_Builder_getReleaseNativeFont },
+};
+
+static const JNINativeMethod gFontMethods[] = {
+    { "nGetGlyphBounds", "(JIJLandroid/graphics/RectF;)F", (void*) Font_getGlyphBounds },
+    { "nGetFontMetrics", "(JJLandroid/graphics/Paint$FontMetrics;)F", (void*) Font_getFontMetrics },
 };
 
 int register_android_graphics_fonts_Font(JNIEnv* env) {
     return RegisterMethodsOrDie(env, "android/graphics/fonts/Font$Builder", gFontBuilderMethods,
-            NELEM(gFontBuilderMethods));
+            NELEM(gFontBuilderMethods)) +
+            RegisterMethodsOrDie(env, "android/graphics/fonts/Font", gFontMethods,
+            NELEM(gFontMethods));
 }
 
 }

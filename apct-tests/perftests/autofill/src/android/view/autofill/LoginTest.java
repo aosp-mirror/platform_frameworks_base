@@ -55,7 +55,7 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
      */
     @Test
     public void testFocus_noService() throws Throwable {
-        resetService();
+        mTestWatcher.resetAutofillService();
 
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
@@ -73,7 +73,7 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
     @Test
     public void testFocus_serviceDoesNotAutofill() throws Throwable {
         MyAutofillService.newCannedResponse().reply();
-        setService();
+        mTestWatcher.setAutofillService();
 
         // Must first focus in a field to trigger autofill and wait for service response
         // outside the loop
@@ -102,7 +102,7 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
                 .setUsername(mUsername.getAutofillId(), "user")
                 .setPassword(mPassword.getAutofillId(), "pass")
                 .reply();
-        setService();
+        mTestWatcher.setAutofillService();
 
         // Callback is used to slow down the calls made to the autofill server so the
         // app is not crashed due to binder exhaustion. But the time spent waiting for the callbacks
@@ -157,7 +157,7 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
                 .setUsername(mUsername.getAutofillId(), "user")
                 .setIgnored(mPassword.getAutofillId())
                 .reply();
-        setService();
+        mTestWatcher.setAutofillService();
 
         // Callback is used to slow down the calls made to the autofill server so the
         // app is not crashed due to binder exhaustion. But the time spent waiting for the callbacks
@@ -201,7 +201,7 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
      */
     @Test
     public void testChange_noService() throws Throwable {
-        resetService();
+        mTestWatcher.resetAutofillService();
 
         changeTest(false);
     }
@@ -213,7 +213,7 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
     @Test
     public void testChange_serviceDoesNotAutofill() throws Throwable {
         MyAutofillService.newCannedResponse().reply();
-        setService();
+        mTestWatcher.setAutofillService();
 
         changeTest(true);
     }
@@ -227,7 +227,7 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
                 .setUsername(mUsername.getAutofillId(), "user")
                 .setPassword(mPassword.getAutofillId(), "pass")
                 .reply();
-        setService();
+        mTestWatcher.setAutofillService();
 
         changeTest(true);
     }
@@ -242,7 +242,7 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
                 .setUsername(mUsername.getAutofillId(), "user")
                 .setIgnored(mPassword.getAutofillId())
                 .reply();
-        setService();
+        mTestWatcher.setAutofillService();
 
         changeTest(true);
     }
@@ -274,7 +274,7 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
                 .setUsername(mUsername.getAutofillId(), "user")
                 .setPassword(mPassword.getAutofillId(), "pass")
                 .reply();
-        setService();
+        mTestWatcher.setAutofillService();
 
         MyAutofillCallback callback = new MyAutofillCallback();
         mAfm.registerCallback(callback);

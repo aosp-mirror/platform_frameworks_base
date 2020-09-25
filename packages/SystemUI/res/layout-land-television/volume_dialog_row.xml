@@ -40,7 +40,7 @@
             android:fontFeatureSettings="tnum"
             android:background="@drawable/tv_volume_dialog_circle"
             android:textSize="@dimen/tv_volume_number_text_size"
-            android:textColor="@color/accent_tint_color_selector"/>
+            android:textColor="@color/tv_volume_dialog_accent"/>
         <TextView
             android:id="@+id/volume_row_header"
             android:layout_width="wrap_content"
@@ -61,6 +61,12 @@
                 android:layout_width="@dimen/volume_dialog_row_height"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
+                android:layoutDirection="ltr"
+                android:maxHeight="@dimen/tv_volume_seek_bar_width"
+                android:minHeight="@dimen/tv_volume_seek_bar_width"
+                android:thumb="@drawable/tv_volume_row_seek_thumb"
+                android:progressDrawable="@drawable/tv_volume_row_seek_bar"
+                android:splitTrack="false"
                 android:rotation="270" />
         </FrameLayout>
         <com.android.keyguard.AlphaOptimizedImageButton

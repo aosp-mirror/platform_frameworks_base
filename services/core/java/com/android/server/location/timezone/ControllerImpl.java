@@ -33,7 +33,6 @@ import android.location.timezone.LocationTimeZoneEvent;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.location.timezone.ThreadingDomain.SingleRunnableQueue;
 import com.android.server.timezonedetector.ConfigurationInternal;
 import com.android.server.timezonedetector.GeolocationTimeZoneSuggestion;
@@ -49,9 +48,6 @@ import java.util.Objects;
  *  Support for a secondary provider will be added in a later commit.
  */
 class ControllerImpl extends LocationTimeZoneProviderController {
-
-    @VisibleForTesting
-    static final Duration UNCERTAINTY_DELAY = Duration.ofMinutes(5);
 
     @NonNull private final LocationTimeZoneProvider mProvider;
     @NonNull private final SingleRunnableQueue mDelayedSuggestionQueue;
@@ -140,7 +136,8 @@ class ControllerImpl extends LocationTimeZoneProviderController {
             switch (providerState.stateEnum) {
                 case PROVIDER_STATE_DISABLED: {
                     debugLog("Enabling " + mProvider);
-                    mProvider.enable(configuration);
+                    mProvider.enable(
+                            configuration, mEnvironment.getProviderInitializationTimeout());
                     break;
                 }
                 case PROVIDER_STATE_ENABLED: {
@@ -183,13 +180,16 @@ class ControllerImpl extends LocationTimeZoneProviderController {
         if (isProviderEnabled) {
             if (!providerWasEnabled) {
                 // When a provider has first been enabled, we allow it some time for it to
-                // initialize.
+                // initialize before sending its first event.
+                Duration initializationTimeout = mEnvironment.getProviderInitializationTimeout()
+                        .plus(mEnvironment.getProviderInitializationTimeoutFuzz());
                 // This sets up an empty suggestion to trigger if no explicit "certain" or
-                // "uncertain" suggestion preempts it within UNCERTAINTY_DELAY. If, for some reason,
-                // the provider does provide any events then this scheduled suggestion will ensure
-                // the controller makes at least an uncertain suggestion.
-                suggestDelayed(createEmptySuggestion(
-                        "No event received in delay=" + UNCERTAINTY_DELAY), UNCERTAINTY_DELAY);
+                // "uncertain" suggestion preempts it within initializationTimeout. If, for some
+                // reason, the provider does not produce any events then this scheduled suggestion
+                // will ensure the controller makes at least an "uncertain" suggestion.
+                suggestDelayed(createEmptySuggestion("No event received from provider in"
+                                + " initializationTimeout=" + initializationTimeout),
+                        initializationTimeout);
             }
         } else {
             // Clear any queued suggestions.
@@ -199,7 +199,8 @@ class ControllerImpl extends LocationTimeZoneProviderController {
             // made, then a new "uncertain" suggestion must be made to indicate the provider no
             // longer has an opinion and will not be sending updates.
             if (mLastSuggestion != null && mLastSuggestion.getZoneIds() != null) {
-                suggestImmediate(createEmptySuggestion(""));
+                suggestImmediate(createEmptySuggestion(
+                        "Provider disabled, clearing previous suggestion"));
             }
         }
     }
@@ -309,21 +310,23 @@ class ControllerImpl extends LocationTimeZoneProviderController {
      *
      * <p>Providers are expected to report their uncertainty as soon as they become uncertain, as
      * this enables the most flexibility for the controller to enable other providers when there are
-     * multiple ones. The controller is therefore responsible for deciding when to make a
+     * multiple ones available. The controller is therefore responsible for deciding when to make a
      * "uncertain" suggestion.
      *
      * <p>This method schedules an "uncertain" suggestion (if one isn't already scheduled) to be
      * made later if nothing else preempts it. It can be preempted if the provider becomes certain
      * (or does anything else that calls {@link #suggestImmediate(GeolocationTimeZoneSuggestion)})
-     * within UNCERTAINTY_DELAY. Preemption causes the scheduled "uncertain" event to be cancelled.
-     * If the provider repeatedly sends uncertainty events within UNCERTAINTY_DELAY, those events
-     * are effectively ignored (i.e. the timer is not reset each time).
+     * within {@link Environment#getUncertaintyDelay()}. Preemption causes the scheduled
+     * "uncertain" event to be cancelled. If the provider repeatedly sends uncertainty events within
+     * the uncertainty delay period, those events are effectively ignored (i.e. the timer is not
+     * reset each time).
      */
     private void scheduleUncertainSuggestionIfNeeded(@Nullable LocationTimeZoneEvent event) {
         if (mPendingSuggestion == null || mPendingSuggestion.getZoneIds() != null) {
             GeolocationTimeZoneSuggestion suggestion = createEmptySuggestion(
                     "provider=" + mProvider + " became uncertain, event=" + event);
-            suggestDelayed(suggestion, UNCERTAINTY_DELAY);
+            // Only send the empty suggestion after the uncertainty delay.
+            suggestDelayed(suggestion, mEnvironment.getUncertaintyDelay());
         }
     }
 
@@ -334,6 +337,11 @@ class ControllerImpl extends LocationTimeZoneProviderController {
 
             ipw.increaseIndent(); // level 1
             ipw.println("mCurrentUserConfiguration=" + mCurrentUserConfiguration);
+            ipw.println("providerInitializationTimeout="
+                    + mEnvironment.getProviderInitializationTimeout());
+            ipw.println("providerInitializationTimeoutFuzz="
+                    + mEnvironment.getProviderInitializationTimeoutFuzz());
+            ipw.println("uncertaintyDelay=" + mEnvironment.getUncertaintyDelay());
             ipw.println("mPendingSuggestion=" + mPendingSuggestion);
             ipw.println("mLastSuggestion=" + mLastSuggestion);
 

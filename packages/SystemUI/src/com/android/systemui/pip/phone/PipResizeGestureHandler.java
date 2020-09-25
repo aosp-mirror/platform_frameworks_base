@@ -21,13 +21,6 @@ import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_LEFT;
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_NONE;
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_RIGHT;
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_TOP;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_GLOBAL_ACTIONS_SHOWING;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -50,11 +43,9 @@ import android.view.ScaleGestureDetector;
 import android.view.ViewConfiguration;
 
 import com.android.internal.policy.TaskResizingAlgorithm;
-import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.pip.PipUiEventLogger;
-import com.android.systemui.util.DeviceConfigProxy;
 import com.android.wm.shell.R;
 
 import java.io.PrintWriter;
@@ -71,21 +62,11 @@ public class PipResizeGestureHandler {
     private static final float PINCH_THRESHOLD = 0.05f;
     private static final float STARTING_SCALE_FACTOR = 1.0f;
 
-    private static final int INVALID_SYSUI_STATE_MASK =
-            SYSUI_STATE_GLOBAL_ACTIONS_SHOWING
-            | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
-            | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED
-            | SYSUI_STATE_BOUNCER_SHOWING
-            | SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED
-            | SYSUI_STATE_BUBBLES_EXPANDED
-            | SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
-
     private final Context mContext;
     private final PipBoundsHandler mPipBoundsHandler;
     private final PipMotionHelper mMotionHelper;
     private final int mDisplayId;
     private final Executor mMainExecutor;
-    private final SysUiState mSysUiState;
     private final ScaleGestureDetector mScaleGestureDetector;
     private final Region mTmpRegion = new Region();
 
@@ -110,6 +91,7 @@ public class PipResizeGestureHandler {
     private boolean mIsAttached;
     private boolean mIsEnabled;
     private boolean mEnablePinchResize;
+    private boolean mIsSysUiStateValid;
     private boolean mThresholdCrossed;
     private boolean mUsingPinchToZoom = false;
     private float mScaleFactor = STARTING_SCALE_FACTOR;
@@ -123,9 +105,8 @@ public class PipResizeGestureHandler {
     private int mCtrlType;
 
     public PipResizeGestureHandler(Context context, PipBoundsHandler pipBoundsHandler,
-            PipMotionHelper motionHelper, DeviceConfigProxy deviceConfig,
-            PipTaskOrganizer pipTaskOrganizer, Function<Rect, Rect> movementBoundsSupplier,
-            Runnable updateMovementBoundsRunnable, SysUiState sysUiState,
+            PipMotionHelper motionHelper, PipTaskOrganizer pipTaskOrganizer,
+            Function<Rect, Rect> movementBoundsSupplier, Runnable updateMovementBoundsRunnable,
             PipUiEventLogger pipUiEventLogger, PipMenuActivityController menuActivityController) {
         mContext = context;
         mDisplayId = context.getDisplayId();
@@ -135,7 +116,6 @@ public class PipResizeGestureHandler {
         mPipTaskOrganizer = pipTaskOrganizer;
         mMovementBoundsSupplier = movementBoundsSupplier;
         mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
-        mSysUiState = sysUiState;
         mPipMenuActivityController = menuActivityController;
         mPipUiEventLogger = pipUiEventLogger;
 
@@ -202,7 +182,7 @@ public class PipResizeGestureHandler {
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 PIP_PINCH_RESIZE,
                 /* defaultValue = */ false);
-        deviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI, mMainExecutor,
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI, mMainExecutor,
                 new DeviceConfig.OnPropertiesChangedListener() {
                     @Override
                     public void onPropertiesChanged(DeviceConfig.Properties properties) {
@@ -216,6 +196,15 @@ public class PipResizeGestureHandler {
 
     public void onConfigurationChanged() {
         reloadResources();
+    }
+
+    /**
+     * Called when SysUI state changed.
+     *
+     * @param isSysUiStateValid Is SysUI valid or not.
+     */
+    public void onSystemUiStateChanged(boolean isSysUiStateValid) {
+        mIsSysUiStateValid = isSysUiStateValid;
     }
 
     private void reloadResources() {
@@ -319,6 +308,10 @@ public class PipResizeGestureHandler {
         return mTmpRegion.contains(x, y);
     }
 
+    public boolean isUsingPinchToZoom() {
+        return mEnablePinchResize;
+    }
+
     public boolean willStartResizeGesture(MotionEvent ev) {
         if (isInValidSysUiState()) {
             switch (ev.getActionMasked()) {
@@ -401,7 +394,7 @@ public class PipResizeGestureHandler {
     }
 
     private boolean isInValidSysUiState() {
-        return (mSysUiState.getFlags() & INVALID_SYSUI_STATE_MASK) == 0;
+        return mIsSysUiStateValid;
     }
 
     private void onDragCornerResize(MotionEvent ev) {

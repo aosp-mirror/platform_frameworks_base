@@ -37,6 +37,7 @@ import com.android.server.timezonedetector.ConfigurationInternal;
 import com.android.server.timezonedetector.Dumpable;
 import com.android.server.timezonedetector.ReferenceWithHistory;
 
+import java.time.Duration;
 import java.util.Objects;
 
 /**
@@ -368,7 +369,8 @@ abstract class LocationTimeZoneProvider implements Dumpable {
      * #getCurrentState()} is at {@link ProviderState#PROVIDER_STATE_DISABLED}. This method must be
      * called using the handler thread from the {@link ThreadingDomain}.
      */
-    final void enable(@NonNull ConfigurationInternal currentUserConfiguration) {
+    final void enable(@NonNull ConfigurationInternal currentUserConfiguration,
+            @NonNull Duration initializationTimeout) {
         mThreadingDomain.assertCurrentThread();
 
         synchronized (mSharedLock) {
@@ -378,14 +380,14 @@ abstract class LocationTimeZoneProvider implements Dumpable {
             ProviderState newState = currentState.newState(
                     PROVIDER_STATE_ENABLED, null, currentUserConfiguration, "enable() called");
             setCurrentState(newState, false);
-            onEnable();
+            onEnable(initializationTimeout);
         }
     }
 
     /**
      * Implemented by subclasses to do work during {@link #enable}.
      */
-    abstract void onEnable();
+    abstract void onEnable(@NonNull Duration initializationTimeout);
 
     /**
      * Disables the provider. It is an error* to call this method except when the {@link

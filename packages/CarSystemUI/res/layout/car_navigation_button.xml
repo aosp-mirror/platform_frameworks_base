@@ -36,7 +36,7 @@
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
             android:tintMode="src_in"
-            android:tint="@color/car_nav_icon_fill_color"
+            android:tint="@color/car_nav_icon_fill_color_selected"
             android:clickable="false"
         />
 

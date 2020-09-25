@@ -22,6 +22,8 @@ import android.annotation.Nullable;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
 import android.util.TypedValue;
@@ -29,6 +31,7 @@ import android.util.TypedValue;
 import com.android.internal.util.Preconditions;
 
 import dalvik.annotation.optimization.CriticalNative;
+import dalvik.annotation.optimization.FastNative;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -63,6 +66,7 @@ public final class Font {
 
         private @Nullable ByteBuffer mBuffer;
         private @Nullable File mFile;
+        private @Nullable Font mFont;
         private @NonNull String mLocaleList = "";
         private @IntRange(from = -1, to = 1000) int mWeight = NOT_SPECIFIED;
         private @IntRange(from = -1, to = 1) int mItalic = NOT_SPECIFIED;
@@ -201,6 +205,22 @@ public final class Font {
             } catch (IOException e) {
                 mException = e;
             }
+        }
+
+        /**
+         * Constructs a builder from existing Font instance.
+         *
+         * @param font the font instance.
+         */
+        public Builder(@NonNull Font font) {
+            mFont = font;
+            // Copies all parameters as a default value.
+            mBuffer = font.getBuffer();
+            mWeight = font.getStyle().getWeight();
+            mItalic = font.getStyle().getSlant();
+            mAxes = font.getAxes();
+            mFile = font.getFile();
+            mTtcIndex = font.getTtcIndex();
         }
 
         /**
@@ -430,8 +450,13 @@ public final class Font {
             }
             final ByteBuffer readonlyBuffer = mBuffer.asReadOnlyBuffer();
             final String filePath = mFile == null ? "" : mFile.getAbsolutePath();
-            final long ptr = nBuild(builderPtr, readonlyBuffer, filePath, mWeight, italic,
-                    mTtcIndex);
+
+            long ptr;
+            if (mFont == null) {
+                ptr = nBuild(builderPtr, readonlyBuffer, filePath, mWeight, italic, mTtcIndex);
+            } else {
+                ptr = nClone(mFont.getNativePtr(), builderPtr, mWeight, italic, mTtcIndex);
+            }
             final Font font = new Font(ptr, readonlyBuffer, mFile,
                     new FontStyle(mWeight, slant), mTtcIndex, mAxes, mLocaleList);
             sFontRegistry.registerNativeAllocation(font, ptr);
@@ -449,6 +474,10 @@ public final class Font {
                 boolean italic, int ttcIndex);
         @CriticalNative
         private static native long nGetReleaseNativeFont();
+
+        @FastNative
+        private static native long nClone(long fontPtr, long builderPtr, int weight,
+                boolean italic, int ttcIndex);
     }
 
     private final long mNativePtr;  // address of the shared ptr of minikin::Font
@@ -538,6 +567,40 @@ public final class Font {
         return LocaleList.forLanguageTags(mLocaleList);
     }
 
+    /**
+     * Retrieve the glyph horizontal advance and bounding box.
+     *
+     * Note that {@link android.graphics.Typeface} in {@link android.graphics.Paint} is ignored.
+     *
+     * @param glyphId a glyph ID
+     * @param paint a paint object used for resolving glyph style
+     * @param rect a nullable destination object. If null is passed, this function just return the
+     *             horizontal advance. If non-null is passed, this function fills bounding box
+     *             information to this object.
+     * @return the amount of horizontal advance in pixels
+     */
+    public float getGlyphBounds(@IntRange(from = 0) int glyphId, @NonNull Paint paint,
+            @Nullable RectF rect) {
+        return nGetGlyphBounds(mNativePtr, glyphId, paint.getNativeInstance(), rect);
+    }
+
+    /**
+     * Retrieve the font metrics information.
+     *
+     * Note that {@link android.graphics.Typeface} in {@link android.graphics.Paint} is ignored.
+     *
+     * @param paint a paint object used for retrieving font metrics.
+     * @param metrics a nullable destination object. If null is passed, this function only retrieve
+     *                recommended interline spacing. If non-null is passed, this function fills to
+     *                font metrics to it.
+     *
+     * @see Paint#getFontMetrics()
+     * @see Paint#getFontMetricsInt()
+     */
+    public void getMetrics(@NonNull Paint paint, @Nullable Paint.FontMetrics metrics) {
+        nGetFontMetrics(mNativePtr, paint.getNativeInstance(), metrics);
+    }
+
     /** @hide */
     public long getNativePtr() {
         return mNativePtr;
@@ -573,4 +636,10 @@ public final class Font {
             + ", buffer=" + mBuffer
             + "}";
     }
+
+    @FastNative
+    private static native float nGetGlyphBounds(long font, int glyphId, long paint, RectF rect);
+
+    @FastNative
+    private static native float nGetFontMetrics(long font, long paint, Paint.FontMetrics metrics);
 }

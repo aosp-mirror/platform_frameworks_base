@@ -37,9 +37,12 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.pip.Pip;
+import com.android.systemui.pip.phone.PipTouchHandler;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayImeController;
@@ -59,9 +62,11 @@ import java.util.Optional;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class WMShellTest extends SysuiTestCase {
-
+    InputConsumerController mInputConsumerController;
     WMShell mWMShell;
+
     @Mock CommandQueue mCommandQueue;
+    @Mock ConfigurationController mConfigurationController;
     @Mock KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock ActivityManagerWrapper mActivityManagerWrapper;
     @Mock DisplayImeController mDisplayImeController;
@@ -69,6 +74,7 @@ public class WMShellTest extends SysuiTestCase {
     @Mock ScreenLifecycle mScreenLifecycle;
     @Mock SysUiState mSysUiState;
     @Mock Pip mPip;
+    @Mock PipTouchHandler mPipTouchHandler;
     @Mock SplitScreen mSplitScreen;
     @Mock OneHanded mOneHanded;
     @Mock ShellTaskOrganizer mTaskOrganizer;
@@ -78,10 +84,16 @@ public class WMShellTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mWMShell = new WMShell(mContext, mCommandQueue, mKeyguardUpdateMonitor,
-                mActivityManagerWrapper, mDisplayImeController, mNavigationModeController,
-                mScreenLifecycle, mSysUiState, Optional.of(mPip), Optional.of(mSplitScreen),
-                Optional.of(mOneHanded), mTaskOrganizer, mProtoTracer);
+        mInputConsumerController = InputConsumerController.getPipInputConsumer();
+
+        mWMShell = new WMShell(mContext, mCommandQueue, mConfigurationController,
+                mInputConsumerController, mKeyguardUpdateMonitor, mActivityManagerWrapper,
+                mDisplayImeController, mNavigationModeController, mScreenLifecycle, mSysUiState,
+                Optional.of(mPip), Optional.of(mSplitScreen), Optional.of(mOneHanded),
+                mTaskOrganizer, mProtoTracer);
+
+        when(mPip.getPipTouchHandler()).thenReturn(mPipTouchHandler);
+
     }
 
     @Test
@@ -103,9 +115,8 @@ public class WMShellTest extends SysuiTestCase {
         TestableContext spiedContext = spy(mContext);
         when(mMockPackageManager.hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)).thenReturn(false);
         when(spiedContext.getPackageManager()).thenReturn(mMockPackageManager);
-
         final WMShell nonPipWMShell = new WMShell(spiedContext, mCommandQueue,
-                mKeyguardUpdateMonitor,
+                mConfigurationController, mInputConsumerController, mKeyguardUpdateMonitor,
                 mActivityManagerWrapper, mDisplayImeController, mNavigationModeController,
                 mScreenLifecycle, mSysUiState, Optional.of(mPip), Optional.of(mSplitScreen),
                 Optional.of(mOneHanded), mTaskOrganizer, mProtoTracer);
