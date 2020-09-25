@@ -29,6 +29,8 @@ import static android.view.InsetsState.ITYPE_BOTTOM_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_BOTTOM_GESTURES;
 import static android.view.InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
+import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
+import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_LEFT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
@@ -215,7 +217,8 @@ public class DisplayPolicy {
     /** Use the transit animation in style resource (see {@link #selectAnimation}). */
     static final int ANIMATION_STYLEABLE = 0;
 
-    private static final int[] SHOW_TYPES_FOR_SWIPE = {ITYPE_NAVIGATION_BAR, ITYPE_STATUS_BAR};
+    private static final int[] SHOW_TYPES_FOR_SWIPE = {ITYPE_NAVIGATION_BAR, ITYPE_STATUS_BAR,
+            ITYPE_CLIMATE_BAR, ITYPE_EXTRA_NAVIGATION_BAR};
     private static final int[] SHOW_TYPES_FOR_PANIC = {ITYPE_NAVIGATION_BAR};
 
     private final WindowManagerService mService;
@@ -301,6 +304,16 @@ public class DisplayPolicy {
     private WindowState mNavigationBarAlt = null;
     @WindowManagerPolicy.AltBarPosition
     private int mNavigationBarAltPosition = ALT_BAR_UNKNOWN;
+    // Alternative climate bar for when flexible insets mapping is used to place a climate bar on
+    // the screen.
+    private WindowState mClimateBarAlt = null;
+    @WindowManagerPolicy.AltBarPosition
+    private int mClimateBarAltPosition = ALT_BAR_UNKNOWN;
+    // Alternative extra nav bar for when flexible insets mapping is used to place an extra nav bar
+    // on the screen.
+    private WindowState mExtraNavBarAlt = null;
+    @WindowManagerPolicy.AltBarPosition
+    private int mExtraNavBarAltPosition = ALT_BAR_UNKNOWN;
 
     /** See {@link #getNavigationBarFrameHeight} */
     private int[] mNavigationBarFrameHeightForRotationDefault = new int[4];
@@ -669,6 +682,12 @@ public class DisplayPolicy {
         if (mNavigationBarAlt != null && mNavigationBarAltPosition == pos) {
             requestTransientBars(mNavigationBarAlt);
         }
+        if (mClimateBarAlt != null && mClimateBarAltPosition == pos) {
+            requestTransientBars(mClimateBarAlt);
+        }
+        if (mExtraNavBarAlt != null && mExtraNavBarAltPosition == pos) {
+            requestTransientBars(mExtraNavBarAlt);
+        }
     }
 
     void systemReady() {
@@ -936,6 +955,12 @@ public class DisplayPolicy {
         if (mNavigationBarAlt == win) {
             mNavigationBarAltPosition = getAltBarPosition(attrs);
         }
+        if (mClimateBarAlt == win) {
+            mClimateBarAltPosition = getAltBarPosition(attrs);
+        }
+        if (mExtraNavBarAlt == win) {
+            mExtraNavBarAltPosition = getAltBarPosition(attrs);
+        }
     }
 
     /**
@@ -1030,6 +1055,16 @@ public class DisplayPolicy {
                     case ITYPE_NAVIGATION_BAR:
                         if ((mNavigationBar != null && mNavigationBar.isAlive())
                                 || (mNavigationBarAlt != null && mNavigationBarAlt.isAlive())) {
+                            return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
+                        }
+                        break;
+                    case ITYPE_CLIMATE_BAR:
+                        if (mClimateBarAlt != null && mClimateBarAlt.isAlive()) {
+                            return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
+                        }
+                        break;
+                    case ITYPE_EXTRA_NAVIGATION_BAR:
+                        if (mExtraNavBarAlt != null && mExtraNavBarAlt.isAlive()) {
                             return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                         }
                         break;
@@ -1146,6 +1181,14 @@ public class DisplayPolicy {
                                 mNavigationBarAlt = win;
                                 mNavigationBarAltPosition = getAltBarPosition(attrs);
                                 break;
+                            case ITYPE_CLIMATE_BAR:
+                                mClimateBarAlt = win;
+                                mClimateBarAltPosition = getAltBarPosition(attrs);
+                                break;
+                            case ITYPE_EXTRA_NAVIGATION_BAR:
+                                mExtraNavBarAlt = win;
+                                mExtraNavBarAltPosition = getAltBarPosition(attrs);
+                                break;
                         }
                         mDisplayContent.setInsetProvider(insetsType, win, null);
                     }
@@ -1194,6 +1237,8 @@ public class DisplayPolicy {
             switch (insetsType) {
                 case ITYPE_NAVIGATION_BAR:
                 case ITYPE_STATUS_BAR:
+                case ITYPE_CLIMATE_BAR:
+                case ITYPE_EXTRA_NAVIGATION_BAR:
                 case ITYPE_CAPTION_BAR:
                     if (++count > 1) {
                         throw new IllegalArgumentException(
@@ -1223,6 +1268,12 @@ public class DisplayPolicy {
             if (mDisplayContent.isDefaultDisplay) {
                 mService.mPolicy.setKeyguardCandidateLw(null);
             }
+        } else if (mClimateBarAlt == win) {
+            mClimateBarAlt = null;
+            mDisplayContent.setInsetProvider(ITYPE_CLIMATE_BAR, null, null);
+        } else if (mExtraNavBarAlt == win) {
+            mExtraNavBarAlt = null;
+            mDisplayContent.setInsetProvider(ITYPE_EXTRA_NAVIGATION_BAR, null, null);
         }
         if (mLastFocusedWindow == win) {
             mLastFocusedWindow = null;
@@ -1311,7 +1362,8 @@ public class DisplayPolicy {
                     return R.anim.dock_left_enter;
                 }
             }
-        } else if (win == mStatusBarAlt || win == mNavigationBarAlt) {
+        } else if (win == mStatusBarAlt || win == mNavigationBarAlt || win == mClimateBarAlt
+                || win == mExtraNavBarAlt) {
             if (win.getAttrs().windowAnimations != 0) {
                 return ANIMATION_STYLEABLE;
             }
@@ -2810,10 +2862,19 @@ public class DisplayPolicy {
         }
 
         final InsetsState requestedState = controlTarget.getRequestedInsetsState();
-        final @InsetsType int restorePositionTypes = (requestedState.getSourceOrDefaultVisibility(
-                ITYPE_NAVIGATION_BAR) ? Type.navigationBars() : 0) | (
-                requestedState.getSourceOrDefaultVisibility(ITYPE_STATUS_BAR) ? Type.statusBars()
-                        : 0);
+        final @InsetsType int restorePositionTypes =
+                (requestedState.getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR)
+                        ? Type.navigationBars() : 0)
+                | (requestedState.getSourceOrDefaultVisibility(ITYPE_STATUS_BAR)
+                        ? Type.statusBars() : 0)
+                | (mExtraNavBarAlt != null
+                        && requestedState.getSourceOrDefaultVisibility(
+                                ITYPE_EXTRA_NAVIGATION_BAR)
+                        ? Type.navigationBars() : 0)
+                | (mClimateBarAlt != null
+                        && requestedState.getSourceOrDefaultVisibility(
+                                ITYPE_CLIMATE_BAR)
+                        ? Type.statusBars() : 0);
 
         if (swipeTarget == mNavigationBar
                 && (restorePositionTypes & Type.navigationBars()) != 0) {
@@ -3325,6 +3386,16 @@ public class DisplayPolicy {
             pw.print(prefix); pw.print("mNavigationBarAlt="); pw.println(mNavigationBarAlt);
             pw.print(prefix); pw.print("mNavigationBarAltPosition=");
             pw.println(mNavigationBarAltPosition);
+        }
+        if (mClimateBarAlt != null) {
+            pw.print(prefix); pw.print("mClimateBarAlt="); pw.println(mClimateBarAlt);
+            pw.print(prefix); pw.print("mClimateBarAltPosition=");
+            pw.println(mClimateBarAltPosition);
+        }
+        if (mExtraNavBarAlt != null) {
+            pw.print(prefix); pw.print("mExtraNavBarAlt="); pw.println(mExtraNavBarAlt);
+            pw.print(prefix); pw.print("mExtraNavBarAltPosition=");
+            pw.println(mExtraNavBarAltPosition);
         }
         if (mFocusedWindow != null) {
             pw.print(prefix); pw.print("mFocusedWindow="); pw.println(mFocusedWindow);

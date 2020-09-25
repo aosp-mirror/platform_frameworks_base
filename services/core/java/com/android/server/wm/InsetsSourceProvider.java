@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
+import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
@@ -93,6 +95,8 @@ class InsetsSourceProvider {
             case ITYPE_STATUS_BAR:
             case ITYPE_NAVIGATION_BAR:
             case ITYPE_IME:
+            case ITYPE_CLIMATE_BAR:
+            case ITYPE_EXTRA_NAVIGATION_BAR:
                 mControllable = true;
                 break;
             default:

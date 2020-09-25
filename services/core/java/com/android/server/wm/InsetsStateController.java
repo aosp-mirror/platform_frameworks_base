@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
+import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
 import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_INVALID;
@@ -42,6 +43,7 @@ import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams.WindowType;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.inputmethod.InputMethodManagerInternal;
@@ -115,7 +117,7 @@ class InsetsStateController {
     }
 
     InsetsState getInsetsForWindowMetrics(@NonNull WindowManager.LayoutParams attrs) {
-        final @InternalInsetsType int type = getInsetsTypeForWindowType(attrs.type);
+        final @InternalInsetsType int type = getInsetsTypeForLayoutParams(attrs);
         final WindowToken token = mDisplayContent.getWindowToken(attrs.token);
         final @WindowingMode int windowingMode = token != null
                 ? token.getWindowingMode() : WINDOWING_MODE_UNDEFINED;
@@ -135,7 +137,9 @@ class InsetsStateController {
         return false;
     }
 
-    private static @InternalInsetsType int getInsetsTypeForWindowType(int type) {
+    private static @InternalInsetsType
+            int getInsetsTypeForLayoutParams(WindowManager.LayoutParams attrs) {
+        @WindowType int type = attrs.type;
         switch (type) {
             case TYPE_STATUS_BAR:
                 return ITYPE_STATUS_BAR;
@@ -143,9 +147,22 @@ class InsetsStateController {
                 return ITYPE_NAVIGATION_BAR;
             case TYPE_INPUT_METHOD:
                 return ITYPE_IME;
-            default:
-                return ITYPE_INVALID;
         }
+
+        // If not one of the types above, check whether an internal inset mapping is specified.
+        if (attrs.providesInsetsTypes != null) {
+            for (@InternalInsetsType int insetsType : attrs.providesInsetsTypes) {
+                switch (insetsType) {
+                    case ITYPE_STATUS_BAR:
+                    case ITYPE_NAVIGATION_BAR:
+                    case ITYPE_CLIMATE_BAR:
+                    case ITYPE_EXTRA_NAVIGATION_BAR:
+                        return insetsType;
+                }
+            }
+        }
+
+        return ITYPE_INVALID;
     }
 
     /** @see #getInsetsForDispatch */
@@ -158,14 +175,15 @@ class InsetsStateController {
             state.removeSource(type);
 
             // Navigation bar doesn't get influenced by anything else
-            if (type == ITYPE_NAVIGATION_BAR) {
+            if (type == ITYPE_NAVIGATION_BAR || type == ITYPE_EXTRA_NAVIGATION_BAR) {
                 state.removeSource(ITYPE_IME);
                 state.removeSource(ITYPE_STATUS_BAR);
+                state.removeSource(ITYPE_CLIMATE_BAR);
                 state.removeSource(ITYPE_CAPTION_BAR);
             }
 
             // Status bar doesn't get influenced by caption bar
-            if (type == ITYPE_STATUS_BAR) {
+            if (type == ITYPE_STATUS_BAR || type == ITYPE_CLIMATE_BAR) {
                 state.removeSource(ITYPE_CAPTION_BAR);
             }
 
@@ -336,8 +354,12 @@ class InsetsStateController {
             @Nullable InsetsControlTarget fakeNavControlling) {
         onControlChanged(ITYPE_STATUS_BAR, statusControlling);
         onControlChanged(ITYPE_NAVIGATION_BAR, navControlling);
+        onControlChanged(ITYPE_CLIMATE_BAR, statusControlling);
+        onControlChanged(ITYPE_EXTRA_NAVIGATION_BAR, navControlling);
         onControlFakeTargetChanged(ITYPE_STATUS_BAR, fakeStatusControlling);
         onControlFakeTargetChanged(ITYPE_NAVIGATION_BAR, fakeNavControlling);
+        onControlFakeTargetChanged(ITYPE_CLIMATE_BAR, fakeStatusControlling);
+        onControlFakeTargetChanged(ITYPE_EXTRA_NAVIGATION_BAR, fakeNavControlling);
         notifyPendingInsetsControlChanged();
     }
 
