@@ -40,15 +40,12 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.concurrent.TimeUnit;
+import java.util.Set;
 
 /**
  * Provides an interface to write and query for notification history data for a user from a Protocol
@@ -173,8 +170,8 @@ public class NotificationHistoryDatabase {
         mFileWriteHandler.post(rnr);
     }
 
-    public void deleteConversation(String pkg, String conversationId) {
-        RemoveConversationRunnable rcr = new RemoveConversationRunnable(pkg, conversationId);
+    public void deleteConversations(String pkg, Set<String> conversationIds) {
+        RemoveConversationRunnable rcr = new RemoveConversationRunnable(pkg, conversationIds);
         mFileWriteHandler.post(rcr);
     }
 
@@ -467,12 +464,12 @@ public class NotificationHistoryDatabase {
 
     final class RemoveConversationRunnable implements Runnable {
         private String mPkg;
-        private String mConversationId;
+        private Set<String> mConversationIds;
         private NotificationHistory mNotificationHistory;
 
-        public RemoveConversationRunnable(String pkg, String conversationId) {
+        public RemoveConversationRunnable(String pkg, Set<String> conversationIds) {
             mPkg = pkg;
-            mConversationId = conversationId;
+            mConversationIds = conversationIds;
         }
 
         @VisibleForTesting
@@ -482,10 +479,10 @@ public class NotificationHistoryDatabase {
 
         @Override
         public void run() {
-            if (DEBUG) Slog.d(TAG, "RemoveConversationRunnable " + mPkg + " "  + mConversationId);
+            if (DEBUG) Slog.d(TAG, "RemoveConversationRunnable " + mPkg + " "  + mConversationIds);
             synchronized (mLock) {
                 // Remove from pending history
-                mBuffer.removeConversationFromWrite(mPkg, mConversationId);
+                mBuffer.removeConversationsFromWrite(mPkg, mConversationIds);
 
                 Iterator<AtomicFile> historyFileItr = mHistoryFiles.iterator();
                 while (historyFileItr.hasNext()) {
@@ -496,7 +493,8 @@ public class NotificationHistoryDatabase {
                                 : new NotificationHistory();
                         readLocked(af, notificationHistory,
                                 new NotificationHistoryFilter.Builder().build());
-                        if(notificationHistory.removeConversationFromWrite(mPkg, mConversationId)) {
+                        if (notificationHistory.removeConversationsFromWrite(
+                                mPkg, mConversationIds)) {
                             writeLocked(af, notificationHistory);
                         }
                     } catch (Exception e) {

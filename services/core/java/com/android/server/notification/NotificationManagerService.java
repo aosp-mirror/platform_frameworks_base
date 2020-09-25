@@ -5605,8 +5605,8 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onConversationRemoved(String pkg, int uid, String conversationId) {
-            onConversationRemovedInternal(pkg, uid, conversationId);
+        public void onConversationRemoved(String pkg, int uid, Set<String> shortcuts) {
+            onConversationRemovedInternal(pkg, uid, shortcuts);
         }
 
         @GuardedBy("mNotificationLock")
@@ -5835,14 +5835,13 @@ public class NotificationManagerService extends SystemService {
         mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground));
     }
 
-    private void onConversationRemovedInternal(String pkg, int uid, String conversationId) {
+    private void onConversationRemovedInternal(String pkg, int uid, Set<String> shortcuts) {
         checkCallerIsSystem();
         Preconditions.checkStringNotEmpty(pkg);
-        Preconditions.checkStringNotEmpty(conversationId);
 
-        mHistoryManager.deleteConversation(pkg, uid, conversationId);
+        mHistoryManager.deleteConversations(pkg, uid, shortcuts);
         List<String> deletedChannelIds =
-                mPreferencesHelper.deleteConversation(pkg, uid, conversationId);
+                mPreferencesHelper.deleteConversations(pkg, uid, shortcuts);
         for (String channelId : deletedChannelIds) {
             cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0, true,
                     UserHandle.getUserId(uid), REASON_CHANNEL_BANNED,

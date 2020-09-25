@@ -74,6 +74,7 @@ import com.android.server.notification.ShortcutHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -757,14 +758,16 @@ public class DataManager {
                     Slog.e(TAG, "Package not found: " + packageName, e);
                 }
                 PackageData packageData = getPackage(packageName, user.getIdentifier());
+                Set<String> shortcutIds = new HashSet<>();
                 for (ShortcutInfo shortcutInfo : shortcuts) {
                     if (packageData != null) {
                         packageData.deleteDataForConversation(shortcutInfo.getId());
                     }
-                    if (uid != Process.INVALID_UID) {
-                        mNotificationManagerInternal.onConversationRemoved(
-                                shortcutInfo.getPackage(), uid, shortcutInfo.getId());
-                    }
+                    shortcutIds.add(shortcutInfo.getId());
+                }
+                if (uid != Process.INVALID_UID) {
+                    mNotificationManagerInternal.onConversationRemoved(
+                            packageName, uid, shortcutIds);
                 }
             });
         }
