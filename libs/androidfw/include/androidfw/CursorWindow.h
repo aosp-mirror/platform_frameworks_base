@@ -50,8 +50,8 @@ namespace android {
  * Strings are stored in UTF-8.
  */
 class CursorWindow {
-    CursorWindow(const String8& name, int ashmemFd,
-            void* data, size_t size, bool readOnly);
+    CursorWindow(const String8& name, int ashmemFd, void* data, size_t size,
+                 size_t inflatedSize, bool readOnly);
 
 public:
     /* Field types. */
@@ -165,6 +165,7 @@ private:
     int mAshmemFd;
     void* mData;
     size_t mSize;
+    size_t mInflatedSize;
     bool mReadOnly;
     Header* mHeader;
 
@@ -184,6 +185,18 @@ private:
     inline uint32_t offsetFromPtr(void* ptr) {
         return static_cast<uint8_t*>(ptr) - static_cast<uint8_t*>(mData);
     }
+
+    static status_t createFromParcelAshmem(Parcel*, String8&, CursorWindow**);
+    static status_t createFromParcelInline(Parcel*, String8&, CursorWindow**);
+
+    status_t writeToParcelAshmem(Parcel*);
+    status_t writeToParcelInline(Parcel*);
+
+    /**
+     * By default windows are lightweight inline allocations; this method
+     * inflates the window into a larger ashmem region.
+     */
+    status_t inflate();
 
     /**
      * Allocate a portion of the window. Returns the offset
