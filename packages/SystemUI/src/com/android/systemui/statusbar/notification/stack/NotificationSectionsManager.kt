@@ -167,7 +167,7 @@ class NotificationSectionsManager @Inject internal constructor(
         peopleHubSubscription = null
         peopleHeaderView = reinflateView(peopleHeaderView, layoutInflater, R.layout.people_strip)
                 .apply {
-                    setOnHeaderClickListener(View.OnClickListener { onGentleHeaderClick() })
+                    setOnHeaderClickListener(View.OnClickListener { onPeopleHeaderClick() })
                 }
         if (ENABLE_SNOOZED_CONVERSATION_HUB) {
             peopleHubSubscription = peopleHubViewAdapter.bindView(peopleHubViewBoundary)
@@ -515,6 +515,15 @@ class NotificationSectionsManager @Inject internal constructor(
 
     private fun onGentleHeaderClick() {
         val intent = Intent(Settings.ACTION_NOTIFICATION_SETTINGS)
+        activityStarter.startActivity(
+                intent,
+                true,
+                true,
+                Intent.FLAG_ACTIVITY_SINGLE_TOP)
+    }
+
+    private fun onPeopleHeaderClick() {
+        val intent = Intent(Settings.ACTION_CONVERSATION_SETTINGS)
         activityStarter.startActivity(
                 intent,
                 true,
