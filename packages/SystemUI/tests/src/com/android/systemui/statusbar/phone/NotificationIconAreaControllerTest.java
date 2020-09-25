@@ -26,7 +26,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -40,6 +40,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -66,7 +68,7 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
     StatusBarWindowController mStatusBarWindowController;
     private NotificationIconAreaController mController;
     @Mock
-    private BubbleController mBubbleController;
+    private Bubbles mBubbles;
     @Mock private DemoModeController mDemoModeController;
     @Mock
     private NotificationIconContainer mAodIcons;
@@ -83,7 +85,7 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
                 mNotificationMediaManager,
                 mListener,
                 mDozeParameters,
-                mBubbleController,
+                Optional.of(mBubbles),
                 mDemoModeController,
                 mDarkIconDispatcher,
                 mStatusBarWindowController);

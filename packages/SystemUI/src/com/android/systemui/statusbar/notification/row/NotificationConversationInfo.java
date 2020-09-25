@@ -67,7 +67,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.NotificationChannelHelper;
@@ -75,6 +75,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 import java.lang.annotation.Retention;
+import java.util.Optional;
 
 import javax.inject.Provider;
 
@@ -93,7 +94,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     private OnUserInteractionCallback mOnUserInteractionCallback;
     private Handler mMainHandler;
     private Handler mBgHandler;
-    private BubbleController mBubbleController;
+    private Optional<Bubbles> mBubblesOptional;
     private String mPackageName;
     private String mAppName;
     private int mAppUid;
@@ -222,7 +223,7 @@ public class NotificationConversationInfo extends LinearLayout implements
             @Main Handler mainHandler,
             @Background Handler bgHandler,
             OnConversationSettingsClickListener onConversationSettingsClickListener,
-            BubbleController bubbleController) {
+            Optional<Bubbles> bubblesOptional) {
         mSelectedAction = -1;
         mINotificationManager = iNotificationManager;
         mOnUserInteractionCallback = onUserInteractionCallback;
@@ -241,7 +242,7 @@ public class NotificationConversationInfo extends LinearLayout implements
         mIconFactory = conversationIconFactory;
         mUserContext = userContext;
         mBubbleMetadata = bubbleMetadata;
-        mBubbleController = bubbleController;
+        mBubblesOptional = bubblesOptional;
         mBuilderProvider = builderProvider;
         mMainHandler = mainHandler;
         mBgHandler = bgHandler;
@@ -640,9 +641,11 @@ public class NotificationConversationInfo extends LinearLayout implements
                                 mINotificationManager.setBubblesAllowed(mAppPkg, mAppUid,
                                         BUBBLE_PREFERENCE_SELECTED);
                             }
-                            post(() -> {
-                                mBubbleController.onUserChangedImportance(mEntry);
-                            });
+                            if (mBubblesOptional.isPresent()) {
+                                post(() -> {
+                                    mBubblesOptional.get().onUserChangedImportance(mEntry);
+                                });
+                            }
                         }
                         mChannelToUpdate.setImportance(Math.max(
                                 mChannelToUpdate.getOriginalImportance(), IMPORTANCE_DEFAULT));
