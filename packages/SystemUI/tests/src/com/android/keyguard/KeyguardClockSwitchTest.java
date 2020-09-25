@@ -41,11 +41,9 @@ import android.widget.FrameLayout;
 import android.widget.TextClock;
 
 import com.android.systemui.R;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -78,12 +76,7 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         when(mMockKeyguardSliceView.findViewById(R.id.keyguard_status_area))
                 .thenReturn(mMockKeyguardSliceView);
 
-        InjectionInflationController inflationController = new InjectionInflationController(
-                SystemUIFactory.getInstance()
-                        .getSysUIComponent()
-                        .createViewInstanceCreatorFactory());
-        LayoutInflater layoutInflater = inflationController
-                .injectable(LayoutInflater.from(getContext()));
+        LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         layoutInflater.setPrivateFactory(new LayoutInflater.Factory2() {
 
             @Override
