@@ -127,7 +127,7 @@ public class BubbleExpandedView extends LinearLayout {
 
     private boolean mIsOverflow;
 
-    private BubbleController mBubbleController = Dependency.get(BubbleController.class);
+    private Bubbles mBubbles = Dependency.get(Bubbles.class);
     private WindowManager mWindowManager;
     private ActivityManager mActivityManager;
 
@@ -168,7 +168,7 @@ public class BubbleExpandedView extends LinearLayout {
                                     + "bubble=" + getBubbleKey());
                         }
                         if (mActivityView == null) {
-                            mBubbleController.removeBubble(getBubbleKey(),
+                            mBubbles.removeBubble(getBubbleKey(),
                                     BubbleController.DISMISS_INVALID_INTENT);
                             return;
                         }
@@ -194,7 +194,7 @@ public class BubbleExpandedView extends LinearLayout {
                             // the bubble again so we'll just remove it.
                             Log.w(TAG, "Exception while displaying bubble: " + getBubbleKey()
                                     + ", " + e.getMessage() + "; removing bubble");
-                            mBubbleController.removeBubble(getBubbleKey(),
+                            mBubbles.removeBubble(getBubbleKey(),
                                     BubbleController.DISMISS_INVALID_INTENT);
                         }
                     });
@@ -242,7 +242,7 @@ public class BubbleExpandedView extends LinearLayout {
             }
             if (mBubble != null) {
                 // Must post because this is called from a binder thread.
-                post(() -> mBubbleController.removeBubble(mBubble.getKey(),
+                post(() -> mBubbles.removeBubble(mBubble.getKey(),
                         BubbleController.DISMISS_TASK_FINISHED));
             }
         }

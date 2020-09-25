@@ -19,7 +19,7 @@ import com.android.internal.util.ContrastColorUtil;
 import com.android.settingslib.Utils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 import javax.inject.Inject;
@@ -65,7 +66,7 @@ public class NotificationIconAreaController implements
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
     private final KeyguardBypassController mBypassController;
     private final DozeParameters mDozeParameters;
-    private final BubbleController mBubbleController;
+    private final Optional<Bubbles> mBubblesOptional;
     private final StatusBarWindowController mStatusBarWindowController;
 
     private int mIconSize;
@@ -114,7 +115,7 @@ public class NotificationIconAreaController implements
             NotificationMediaManager notificationMediaManager,
             NotificationListener notificationListener,
             DozeParameters dozeParameters,
-            BubbleController bubbleController,
+            Optional<Bubbles> bubblesOptional,
             DemoModeController demoModeController,
             DarkIconDispatcher darkIconDispatcher,
             StatusBarWindowController statusBarWindowController) {
@@ -127,7 +128,7 @@ public class NotificationIconAreaController implements
         mWakeUpCoordinator = wakeUpCoordinator;
         wakeUpCoordinator.addListener(this);
         mBypassController = keyguardBypassController;
-        mBubbleController = bubbleController;
+        mBubblesOptional = bubblesOptional;
         mDemoModeController = demoModeController;
         mDemoModeController.addCallback(this);
         mStatusBarWindowController = statusBarWindowController;
@@ -298,7 +299,7 @@ public class NotificationIconAreaController implements
                         || !entry.isPulseSuppressed())) {
             return false;
         }
-        if (mBubbleController.isBubbleExpanded(entry)) {
+        if (mBubblesOptional.isPresent() && mBubblesOptional.get().isBubbleExpanded(entry)) {
             return false;
         }
         return true;

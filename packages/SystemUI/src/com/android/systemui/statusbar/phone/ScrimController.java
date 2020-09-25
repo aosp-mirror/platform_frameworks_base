@@ -34,6 +34,8 @@ import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
@@ -139,6 +141,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
     private ScrimView mScrimInFront;
     private ScrimView mScrimBehind;
+    @Nullable
     private ScrimView mScrimForBubble;
 
     private Runnable mScrimBehindChangeRunnable;
@@ -238,7 +241,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      * Attach the controller to the supplied views.
      */
     public void attachViews(
-            ScrimView scrimBehind, ScrimView scrimInFront, ScrimView scrimForBubble) {
+            ScrimView scrimBehind, ScrimView scrimInFront, @Nullable ScrimView scrimForBubble) {
         mScrimBehind = scrimBehind;
         mScrimInFront = scrimInFront;
         mScrimForBubble = scrimForBubble;
@@ -258,7 +261,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
         mScrimBehind.setDefaultFocusHighlightEnabled(false);
         mScrimInFront.setDefaultFocusHighlightEnabled(false);
-        mScrimForBubble.setDefaultFocusHighlightEnabled(false);
+        if (mScrimForBubble != null) {
+            mScrimForBubble.setDefaultFocusHighlightEnabled(false);
+        }
         updateScrims();
         mKeyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
     }
@@ -455,7 +460,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         }
     }
 
-    private void setOrAdaptCurrentAnimation(View scrim) {
+    private void setOrAdaptCurrentAnimation(@Nullable View scrim) {
+        if (scrim == null) {
+            return;
+        }
+
         float alpha = getCurrentScrimAlpha(scrim);
         if (isAnimating(scrim)) {
             // Adapt current animation.
@@ -606,11 +615,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             // Only animate scrim color if the scrim view is actually visible
             boolean animateScrimInFront = mScrimInFront.getViewAlpha() != 0 && !mBlankScreen;
             boolean animateScrimBehind = mScrimBehind.getViewAlpha() != 0 && !mBlankScreen;
-            boolean animateScrimForBubble = mScrimForBubble.getViewAlpha() != 0 && !mBlankScreen;
 
             mScrimInFront.setColors(mColors, animateScrimInFront);
             mScrimBehind.setColors(mColors, animateScrimBehind);
-            mScrimForBubble.setColors(mColors, animateScrimForBubble);
 
             // Calculate minimum scrim opacity for white or black text.
             int textColor = mColors.supportsDarkText() ? Color.BLACK : Color.WHITE;
@@ -632,7 +639,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         }
         setScrimAlpha(mScrimInFront, mInFrontAlpha);
         setScrimAlpha(mScrimBehind, mBehindAlpha);
-        setScrimAlpha(mScrimForBubble, mBubbleAlpha);
+
+        if (mScrimForBubble != null) {
+            boolean animateScrimForBubble = mScrimForBubble.getViewAlpha() != 0 && !mBlankScreen;
+            mScrimForBubble.setColors(mColors, animateScrimForBubble);
+            setScrimAlpha(mScrimForBubble, mBubbleAlpha);
+        }
         // The animation could have all already finished, let's call onFinished just in case
         onFinished();
         dispatchScrimsVisible();
@@ -828,12 +840,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             mBubbleTint = Color.TRANSPARENT;
             updateScrimColor(mScrimInFront, mInFrontAlpha, mInFrontTint);
             updateScrimColor(mScrimBehind, mBehindAlpha, mBehindTint);
-            updateScrimColor(mScrimForBubble, mBubbleAlpha, mBubbleTint);
+            if (mScrimForBubble != null) {
+                updateScrimColor(mScrimForBubble, mBubbleAlpha, mBubbleTint);
+            }
         }
     }
 
-    private boolean isAnimating(View scrim) {
-        return scrim.getTag(TAG_KEY_ANIM) != null;
+    private boolean isAnimating(@Nullable View scrim) {
+        return scrim != null && scrim.getTag(TAG_KEY_ANIM) != null;
     }
 
     @VisibleForTesting

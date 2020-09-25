@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.init
 
 import android.service.notification.StatusBarNotification
+import com.android.systemui.bubbles.Bubbles
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption
 import com.android.systemui.statusbar.FeatureFlags
@@ -75,6 +76,7 @@ class NotificationsControllerImpl @Inject constructor(
 
     override fun initialize(
         statusBar: StatusBar,
+        bubblesOptional: Optional<Bubbles>,
         presenter: NotificationPresenter,
         listContainer: NotificationListContainer,
         notificationActivityStarter: NotificationActivityStarter,
@@ -90,7 +92,8 @@ class NotificationsControllerImpl @Inject constructor(
         listController.bind()
 
         notificationRowBinder.setNotificationClicker(
-                clickerBuilder.build(Optional.of(statusBar), notificationActivityStarter))
+                clickerBuilder.build(
+                        Optional.of(statusBar), bubblesOptional, notificationActivityStarter))
         notificationRowBinder.setUpWithPresenter(
                 presenter,
                 listContainer,

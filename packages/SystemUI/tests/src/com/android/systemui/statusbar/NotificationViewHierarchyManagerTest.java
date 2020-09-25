@@ -36,7 +36,7 @@ import android.widget.LinearLayout;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.DynamicChildBindController;
@@ -65,6 +65,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import java.util.List;
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -106,7 +107,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
                 mHandler, mLockscreenUserManager, mGroupManager, mVisualStabilityManager,
                 mock(StatusBarStateControllerImpl.class), mEntryManager,
                 mock(KeyguardBypassController.class),
-                mock(BubbleController.class),
+                Optional.of(mock(Bubbles.class)),
                 mock(DynamicPrivacyController.class),
                 mock(ForegroundServiceSectionController.class),
                 mock(DynamicChildBindController.class),

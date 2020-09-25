@@ -25,6 +25,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.bubbles.BubbleData;
 import com.android.systemui.bubbles.BubbleDataRepository;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
@@ -53,7 +54,7 @@ public interface BubbleModule {
      */
     @SysUISingleton
     @Provides
-    static BubbleController newBubbleController(
+    static Bubbles newBubbleController(
             Context context,
             NotificationShadeWindowController notificationShadeWindowController,
             StatusBarStateController statusBarStateController,
