@@ -68,7 +68,6 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
 import android.app.IActivityManager;
-import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.compat.annotation.ChangeId;
@@ -3532,9 +3531,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private static boolean isProfileOwner(int uid) {
         DevicePolicyManagerInternal dpmInternal =
                 LocalServices.getService(DevicePolicyManagerInternal.class);
+        //TODO(b/169395065) Figure out if this flow makes sense in Device Owner mode.
         if (dpmInternal != null) {
-            return dpmInternal
-                    .isActiveAdminWithPolicy(uid, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            return dpmInternal.isActiveProfileOwner(uid) || dpmInternal.isActiveDeviceOwner(uid);
         }
         return false;
     }
