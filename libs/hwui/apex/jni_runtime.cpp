@@ -43,6 +43,7 @@ extern int register_android_graphics_Movie(JNIEnv* env);
 extern int register_android_graphics_NinePatch(JNIEnv*);
 extern int register_android_graphics_PathEffect(JNIEnv* env);
 extern int register_android_graphics_Shader(JNIEnv* env);
+extern int register_android_graphics_RenderEffect(JNIEnv* env);
 extern int register_android_graphics_Typeface(JNIEnv* env);
 extern int register_android_graphics_YuvImage(JNIEnv* env);
 
@@ -123,6 +124,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_graphics_Picture),
     REG_JNI(register_android_graphics_Region),
     REG_JNI(register_android_graphics_Shader),
+    REG_JNI(register_android_graphics_RenderEffect),
     REG_JNI(register_android_graphics_TextureLayer),
     REG_JNI(register_android_graphics_Typeface),
     REG_JNI(register_android_graphics_YuvImage),

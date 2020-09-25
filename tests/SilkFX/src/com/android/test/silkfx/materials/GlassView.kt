@@ -20,13 +20,13 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.BitmapShader
 import android.graphics.BlendMode
-import android.graphics.BlurShader
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Outline
 import android.graphics.Paint
-import android.graphics.RadialGradient
 import android.graphics.Rect
+import android.graphics.RenderEffect
+import android.graphics.RenderNode
 import android.graphics.Shader
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -36,7 +36,6 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewOutlineProvider
 import android.widget.FrameLayout
-import com.android.internal.graphics.ColorUtils
 import com.android.test.silkfx.R
 import kotlin.math.sin
 import kotlin.math.sqrt
@@ -152,8 +151,17 @@ class GlassView(context: Context, attributeSet: AttributeSet) : FrameLayout(cont
     var blurRadius = 150f
     set(value) {
         field = value
-        blurPaint.shader = BlurShader(value, value, null)
+        renderNode.setRenderEffect(
+                RenderEffect.createBlurEffect(value, value, Shader.TileMode.CLAMP))
         invalidate()
+    }
+
+    private var renderNodeIsDirty = true
+    private val renderNode = RenderNode("GlassRenderNode")
+
+    override fun invalidate() {
+        renderNodeIsDirty = true
+        super.invalidate()
     }
 
     init {
@@ -164,7 +172,6 @@ class GlassView(context: Context, attributeSet: AttributeSet) : FrameLayout(cont
         scrimPaint.alpha = (scrimOpacity * 255).toInt()
         noisePaint.alpha = (noiseOpacity * 255).toInt()
         materialPaint.alpha = (materialOpacity * 255).toInt()
-        blurPaint.shader = BlurShader(blurRadius, blurRadius, null)
         outlineProvider = object : ViewOutlineProvider() {
             override fun getOutline(view: View?, outline: Outline?) {
                 outline?.setRoundRect(Rect(0, 0, width, height), 100f)
@@ -184,25 +191,40 @@ class GlassView(context: Context, attributeSet: AttributeSet) : FrameLayout(cont
     }
 
     override fun onDraw(canvas: Canvas?) {
-        src.set(-width / 2, -height / 2, width / 2, height / 2)
-        src.scale(1.0f + zoom)
-        val centerX = left + width / 2
-        val centerY = top + height / 2
-        val textureXOffset = (textureTranslationMultiplier * gyroYRotation).toInt()
-        val textureYOffset = (textureTranslationMultiplier * gyroXRotation).toInt()
-        src.set(src.left + centerX + textureXOffset, src.top + centerY + textureYOffset,
-                src.right + centerX + textureXOffset, src.bottom + centerY + textureYOffset)
-
-        dst.set(0, 0, width, height)
-        canvas?.drawBitmap(backgroundBitmap, src, dst, blurPaint)
-        canvas?.drawRect(dst, materialPaint)
-        canvas?.drawRect(dst, noisePaint)
-        canvas?.drawRect(dst, scrimPaint)
+        updateGlassRenderNode()
+        canvas?.drawRenderNode(renderNode)
     }
 
     fun resetGyroOffsets() {
         gyroXRotation = 0f
         gyroYRotation = 0f
         invalidate()
+    }
+
+    private fun updateGlassRenderNode() {
+        if (renderNodeIsDirty) {
+            renderNode.setPosition(0, 0, getWidth(), getHeight())
+
+            val canvas = renderNode.beginRecording()
+
+            src.set(-width / 2, -height / 2, width / 2, height / 2)
+            src.scale(1.0f + zoom)
+            val centerX = left + width / 2
+            val centerY = top + height / 2
+            val textureXOffset = (textureTranslationMultiplier * gyroYRotation).toInt()
+            val textureYOffset = (textureTranslationMultiplier * gyroXRotation).toInt()
+            src.set(src.left + centerX + textureXOffset, src.top + centerY + textureYOffset,
+                    src.right + centerX + textureXOffset, src.bottom + centerY + textureYOffset)
+
+            dst.set(0, 0, width, height)
+            canvas.drawBitmap(backgroundBitmap, src, dst, blurPaint)
+            canvas.drawRect(dst, materialPaint)
+            canvas.drawRect(dst, noisePaint)
+            canvas.drawRect(dst, scrimPaint)
+
+            renderNode.endRecording()
+
+            renderNodeIsDirty = false
+        }
     }
 }
