@@ -151,6 +151,12 @@ final class TaskDisplayArea extends DisplayArea<Task> {
      */
     private boolean mRemoved;
 
+    /**
+     * Whether the task display area should ignore fixed-orientation request. If {@code true}, it
+     * can never specify orientation, but show the fixed-orientation apps in the letterbox;
+     * otherwise, it rotates based on the fixed-orientation request when it has the focus.
+     */
+    private boolean mIgnoreOrientationRequest;
 
     /**
      * The id of a leaf task that most recently being moved to front.
@@ -641,11 +647,30 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         }
     }
 
+    /**
+     * Sets whether the task display area should ignore fixed-orientation request from apps.
+     * @return Whether the display orientation changed
+     */
+    boolean setIgnoreOrientationRequest(boolean ignoreOrientationRequest) {
+        if (mIgnoreOrientationRequest == ignoreOrientationRequest) {
+            return false;
+        }
+
+        mIgnoreOrientationRequest = ignoreOrientationRequest;
+        if (isLastFocused()) {
+            // Update orientation if this TDA is the last focused, otherwise it shouldn't affect
+            // the display.
+            return mDisplayContent.updateOrientation();
+        }
+
+        return false;
+    }
+
     @Override
     int getOrientation(int candidate) {
-        // Only allow to specify orientation if this TDA has the focus.
-        // TODO(b/155431879) Add option to never allow a TDA to specify orientation.
-        if (!isLastFocused()) {
+        // Only allow to specify orientation if this TDA is not set to ignore orientation request,
+        // and it has the focus.
+        if (mIgnoreOrientationRequest || !isLastFocused()) {
             return SCREEN_ORIENTATION_UNSET;
         }
 
@@ -1571,10 +1596,12 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         return topRunning;
     }
 
+    // TODO (b/157876447): switch to Task related name
     protected int getStackCount() {
         return mChildren.size();
     }
 
+    // TODO (b/157876447): switch to Task related name
     protected Task getStackAt(int index) {
         return mChildren.get(index);
     }

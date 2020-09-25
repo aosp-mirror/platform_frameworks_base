@@ -402,7 +402,7 @@ public class StatusBarManager {
     @TestApi
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.STATUS_BAR)
-    public void setDisabledForSimNetworkLock(boolean disabled) {
+    public void setExpansionDisabledForSimNetworkLock(boolean disabled) {
         try {
             final int userId = Binder.getCallingUserHandle().getIdentifier();
             final IStatusBarService svc = getService();

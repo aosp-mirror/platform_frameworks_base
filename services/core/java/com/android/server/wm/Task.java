@@ -318,6 +318,7 @@ class Task extends WindowContainer<WindowContainer> {
     // Do not move the stack as a part of reparenting
     static final int REPARENT_LEAVE_STACK_IN_PLACE = 2;
 
+    // TODO (b/157876447): switch to Task related name
     @IntDef(prefix = {"STACK_VISIBILITY"}, value = {
             STACK_VISIBILITY_VISIBLE,
             STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
@@ -4112,6 +4113,10 @@ class Task extends WindowContainer<WindowContainer> {
             return STACK_VISIBILITY_INVISIBLE;
         }
 
+        if (isTopActivityLaunchedBehind()) {
+            return STACK_VISIBILITY_VISIBLE;
+        }
+
         boolean gotSplitScreenStack = false;
         boolean gotOpaqueSplitScreenPrimary = false;
         boolean gotOpaqueSplitScreenSecondary = false;
@@ -4227,6 +4232,14 @@ class Task extends WindowContainer<WindowContainer> {
         // Lastly - check if there is a translucent fullscreen stack on top.
         return gotTranslucentFullscreen ? STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT
                 : STACK_VISIBILITY_VISIBLE;
+    }
+
+    private boolean isTopActivityLaunchedBehind() {
+        final ActivityRecord top = topRunningActivity();
+        if (top != null && top.mLaunchTaskBehind) {
+            return true;
+        }
+        return false;
     }
 
     ActivityRecord isInTask(ActivityRecord r) {
@@ -6039,8 +6052,9 @@ class Task extends WindowContainer<WindowContainer> {
         // If the most recent activity was noHistory but was only stopped rather
         // than stopped+finished because the device went to sleep, we need to make
         // sure to finish it as we're making a new activity topmost.
-        if (shouldSleepActivities() && mLastNoHistoryActivity != null &&
-                !mLastNoHistoryActivity.finishing) {
+        if (shouldSleepActivities() && mLastNoHistoryActivity != null
+                && !mLastNoHistoryActivity.finishing
+                && mLastNoHistoryActivity != next) {
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "no-history finish of " + mLastNoHistoryActivity + " on new resume");
             mLastNoHistoryActivity.finishIfPossible("resume-no-history", false /* oomAdj */);

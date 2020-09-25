@@ -22,6 +22,7 @@ import com.android.server.LocalServices;
 import com.android.server.timezonedetector.ConfigurationInternal;
 import com.android.server.timezonedetector.TimeZoneDetectorInternal;
 
+import java.time.Duration;
 import java.util.Objects;
 
 /**
@@ -29,6 +30,10 @@ import java.util.Objects;
  * {@link ControllerImpl} to interact with other server components.
  */
 class ControllerEnvironmentImpl extends LocationTimeZoneProviderController.Environment {
+
+    private static final Duration PROVIDER_INITIALIZATION_TIMEOUT = Duration.ofMinutes(5);
+    private static final Duration PROVIDER_INITIALIZATION_TIMEOUT_FUZZ = Duration.ofMinutes(1);
+    private static final Duration PROVIDER_UNCERTAINTY_DELAY = Duration.ofMinutes(5);
 
     @NonNull private final TimeZoneDetectorInternal mTimeZoneDetectorInternal;
     @NonNull private final LocationTimeZoneProviderController mController;
@@ -45,7 +50,26 @@ class ControllerEnvironmentImpl extends LocationTimeZoneProviderController.Envir
     }
 
     @Override
+    @NonNull
     ConfigurationInternal getCurrentUserConfigurationInternal() {
         return mTimeZoneDetectorInternal.getCurrentUserConfigurationInternal();
+    }
+
+    @Override
+    @NonNull
+    Duration getProviderInitializationTimeout() {
+        return PROVIDER_INITIALIZATION_TIMEOUT;
+    }
+
+    @Override
+    @NonNull
+    Duration getProviderInitializationTimeoutFuzz() {
+        return PROVIDER_INITIALIZATION_TIMEOUT_FUZZ;
+    }
+
+    @Override
+    @NonNull
+    Duration getUncertaintyDelay() {
+        return PROVIDER_UNCERTAINTY_DELAY;
     }
 }

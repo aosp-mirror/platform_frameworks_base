@@ -2551,14 +2551,16 @@ public final class Debug
     public static native long getZramFreeKb();
 
     /**
-     * Return memory size in kilobytes allocated for ION heaps.
+     * Return memory size in kilobytes allocated for ION heaps or -1 if
+     * /sys/kernel/ion/total_heaps_kb could not be read.
      *
      * @hide
      */
     public static native long getIonHeapsSizeKb();
 
     /**
-     * Return memory size in kilobytes allocated for ION pools.
+     * Return memory size in kilobytes allocated for ION pools or -1 if
+     * /sys/kernel/ion/total_pools_kb could not be read.
      *
      * @hide
      */

@@ -25,6 +25,7 @@ import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
@@ -1245,7 +1246,34 @@ public final class UiAutomation {
      * @hide
      */
     @TestApi
-    public ParcelFileDescriptor[] executeShellCommandRw(String command) {
+    public @NonNull ParcelFileDescriptor[] executeShellCommandRw(@NonNull String command) {
+        return executeShellCommandInternal(command, false /* includeStderr */);
+    }
+
+    /**
+     * Executes a shell command. This method returns three file descriptors,
+     * one that points to the standard output stream (element at index 0), one that points
+     * to the standard input stream (element at index 1), and one points to
+     * standard error stream (element at index 2). The command execution is similar
+     * to running "adb shell <command>" from a host connected to the device.
+     * <p>
+     * <strong>Note:</strong> It is your responsibility to close the returned file
+     * descriptors once you are done reading/writing.
+     * </p>
+     *
+     * @param command The command to execute.
+     * @return File descriptors (out, in, err) to the standard output/input/error streams.
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("ArrayReturn") // For consistency with other APIs
+    public @NonNull ParcelFileDescriptor[] executeShellCommandRwe(@NonNull String command) {
+        return executeShellCommandInternal(command, true /* includeStderr */);
+    }
+
+    private ParcelFileDescriptor[] executeShellCommandInternal(
+            String command, boolean includeStderr) {
         warnIfBetterCommand(command);
 
         ParcelFileDescriptor source_read = null;
@@ -1253,6 +1281,9 @@ public final class UiAutomation {
 
         ParcelFileDescriptor source_write = null;
         ParcelFileDescriptor sink_write = null;
+
+        ParcelFileDescriptor stderr_source_read = null;
+        ParcelFileDescriptor stderr_sink_read = null;
 
         try {
             ParcelFileDescriptor[] pipe_read = ParcelFileDescriptor.createPipe();
@@ -1263,8 +1294,15 @@ public final class UiAutomation {
             source_write = pipe_write[0];
             sink_write = pipe_write[1];
 
+            if (includeStderr) {
+                ParcelFileDescriptor[] stderr_read = ParcelFileDescriptor.createPipe();
+                stderr_source_read = stderr_read[0];
+                stderr_sink_read = stderr_read[1];
+            }
+
             // Calling out without a lock held.
-            mUiAutomationConnection.executeShellCommand(command, sink_read, source_write);
+            mUiAutomationConnection.executeShellCommandWithStderr(
+                    command, sink_read, source_write, stderr_sink_read);
         } catch (IOException ioe) {
             Log.e(LOG_TAG, "Error executing shell command!", ioe);
         } catch (RemoteException re) {
@@ -1272,11 +1310,15 @@ public final class UiAutomation {
         } finally {
             IoUtils.closeQuietly(sink_read);
             IoUtils.closeQuietly(source_write);
+            IoUtils.closeQuietly(stderr_sink_read);
         }
 
-        ParcelFileDescriptor[] result = new ParcelFileDescriptor[2];
+        ParcelFileDescriptor[] result = new ParcelFileDescriptor[includeStderr ? 3 : 2];
         result[0] = source_read;
         result[1] = sink_write;
+        if (includeStderr) {
+            result[2] = stderr_source_read;
+        }
         return result;
     }
 

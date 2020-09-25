@@ -1520,7 +1520,12 @@ public class SystemConfig {
         readPublicLibrariesListFile(new File("/vendor/etc/public.libraries.txt"));
         String[] dirs = {"/system/etc", "/system_ext/etc", "/product/etc"};
         for (String dir : dirs) {
-            for (File f : (new File(dir)).listFiles()) {
+            File[] files = new File(dir).listFiles();
+            if (files == null) {
+                Slog.w(TAG, "Public libraries file folder missing: " + dir);
+                continue;
+            }
+            for (File f : files) {
                 String name = f.getName();
                 if (name.startsWith("public.libraries-") && name.endsWith(".txt")) {
                     readPublicLibrariesListFile(f);

@@ -52,10 +52,7 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
         public void binderDied() {
             synchronized (mGlobalLock) {
                 mOrganizersByFeatureIds.remove(mFeature);
-                mService.mRootWindowContainer.forAllDisplayAreas((da) -> {
-                    if (da.mOrganizer != mOrganizer) return;
-                    da.setOrganizer(null);
-                });
+                removeOrganizer(mOrganizer);
             }
         }
     }
@@ -112,11 +109,7 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
                         organizer.asBinder(), uid);
                 mOrganizersByFeatureIds.entrySet().removeIf(
                         entry -> entry.getValue().asBinder() == organizer.asBinder());
-
-                mService.mRootWindowContainer.forAllDisplayAreas((da) -> {
-                    if (da.mOrganizer != organizer) return;
-                    da.setOrganizer(null);
-                });
+                removeOrganizer(organizer);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -150,5 +143,14 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
         } catch (RemoteException e) {
             // Oh well...
         }
+    }
+
+    private void removeOrganizer(IDisplayAreaOrganizer organizer) {
+        IBinder organizerBinder = organizer.asBinder();
+        mService.mRootWindowContainer.forAllDisplayAreas((da) -> {
+            if (da.mOrganizer != null && da.mOrganizer.asBinder().equals(organizerBinder)) {
+                da.setOrganizer(null);
+            }
+        });
     }
 }

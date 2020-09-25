@@ -18,6 +18,7 @@
 #include "graphics_jni_helpers.h"
 
 class SkCanvas;
+struct SkFontMetrics;
 
 namespace android {
 namespace skia {
@@ -84,6 +85,17 @@ public:
     static SkImageInfo getBitmapInfo(JNIEnv*, jobject bitmap, uint32_t* outRowBytes,
                                      bool* isHardware);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);
+
+    /**
+     * Set SkFontMetrics to Java Paint.FontMetrics.
+     * Do nothing if metrics is nullptr.
+     */
+    static void set_metrics(JNIEnv*, jobject metrics, const SkFontMetrics& skmetrics);
+    /**
+     * Set SkFontMetrics to Java Paint.FontMetricsInt and return recommended interline space.
+     * Do nothing if metrics is nullptr.
+     */
+    static int set_metrics_int(JNIEnv*, jobject metrics, const SkFontMetrics& skmetrics);
 
     /*
      *  LegacyBitmapConfig is the old enum in Skia that matched the enum int values

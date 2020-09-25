@@ -16,23 +16,20 @@
 
 package com.android.systemui.pip;
 
-import android.content.res.Configuration;
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.media.session.MediaController;
 
+import com.android.systemui.pip.phone.PipTouchHandler;
 import com.android.systemui.pip.tv.PipController;
-import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 
 import java.io.PrintWriter;
+import java.util.function.Consumer;
 
 /**
  * Interface to engage picture in picture feature.
  */
 public interface Pip {
-    /**
-     * Called when showing Pip menu.
-     */
-    void showPictureInPictureMenu();
-
     /**
      * Registers {@link com.android.systemui.pip.tv.PipController.Listener} that gets called.
      * whenever receiving notification on changes in PIP.
@@ -53,6 +50,14 @@ public interface Pip {
     }
 
     /**
+     * Dump the current state and information if need.
+     *
+     * @param pw The stream to dump information to.
+     */
+    default void dump(PrintWriter pw) {
+    }
+
+    /**
      * Expand PIP, it's possible that specific request to activate the window via Alt-tab.
      */
     default void expandPip() {
@@ -64,7 +69,11 @@ public interface Pip {
      * @return The state of defined in PipController.
      */
     default int getPlaybackState() {
-        return 0;
+        return -1;
+    }
+
+    default PipTouchHandler getPipTouchHandler() {
+        return null;
     }
 
     /**
@@ -95,9 +104,61 @@ public interface Pip {
     }
 
     /**
-     * Called when configuration change invoked.
+     * Called whenever an Activity is moved to the pinned stack from another stack.
      */
-    void onConfigurationChanged(Configuration newConfig);
+    default void onActivityPinned(String packageName) {
+    }
+
+    /**
+     * Called whenever an Activity is moved from the pinned stack to another stack
+     */
+    default void onActivityUnpinned(ComponentName topActivity) {
+    }
+
+    /**
+     * Called whenever IActivityManager.startActivity is called on an activity that is already
+     * running, but the task is either brought to the front or a new Intent is delivered to it.
+     *
+     * @param task        information about the task the activity was relaunched into
+     * @param clearedTask whether or not the launch activity also cleared the task as a part of
+     *                    starting
+     */
+    default void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
+            boolean clearedTask) {
+    }
+
+    /**
+     * Called when display size or font size of settings changed
+     */
+    default void onDensityOrFontScaleChanged() {
+    }
+
+    /**
+     * Called when overlay package change invoked.
+     */
+    default void onOverlayChanged() {
+    }
+
+    /**
+     * Registers the session listener for the current user.
+     */
+    default void registerSessionListenerForCurrentUser() {
+    }
+
+    /**
+     * Called when SysUI state changed.
+     *
+     * @param isSysUiStateValid Is SysUI state valid or not.
+     * @param flag Current SysUI state.
+     */
+    default void onSystemUiStateChanged(boolean isSysUiStateValid, int flag) {
+    }
+
+    /**
+     * Called when task stack changed.
+     */
+    default void onTaskStackChanged() {
+    }
 
     /**
      * Removes a {@link PipController.Listener} from PipController.
@@ -137,6 +198,14 @@ public interface Pip {
     }
 
     /**
+     * Registers the pinned stack animation listener.
+     *
+     * @param callback The callback of pinned stack animation.
+     */
+    default void setPinnedStackAnimationListener(Consumer<Boolean> callback) {
+    }
+
+    /**
      * Set the pinned stack with {@link PipAnimationController.AnimationType}
      *
      * @param animationType The pre-defined {@link PipAnimationController.AnimationType}
@@ -145,12 +214,9 @@ public interface Pip {
     }
 
     /**
-     * Registers the pinned stack animation listener.
-     *
-     * @param listener The listener of pinned stack animation.
+     * Called when showing Pip menu.
      */
-    default void setPinnedStackAnimationListener(IPinnedStackAnimationListener listener) {
-    }
+    void showPictureInPictureMenu();
 
     /**
      * Suspends resizing operation on the Pip until {@link #resumePipResizing} is called.
@@ -158,13 +224,5 @@ public interface Pip {
      * @param reason The reason for suspending resizing operations on the Pip.
      */
     default void suspendPipResizing(int reason) {
-    }
-
-    /**
-     * Dump the current state and information if need.
-     *
-     * @param pw The stream to dump information to.
-     */
-    default void dump(PrintWriter pw) {
     }
 }

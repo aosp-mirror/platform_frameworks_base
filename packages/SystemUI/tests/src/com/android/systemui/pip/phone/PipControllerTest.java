@@ -32,16 +32,11 @@ import android.testing.TestableContext;
 import android.testing.TestableLooper;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.PipBoundsHandler;
-import com.android.systemui.pip.PipSurfaceTransactionHelper;
 import com.android.systemui.pip.PipTaskOrganizer;
-import com.android.systemui.pip.PipUiEventLogger;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.util.DeviceConfigProxy;
-import com.android.systemui.util.FloatingContentCoordinator;
+import com.android.systemui.wmshell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
 
 import org.junit.Before;
@@ -61,17 +56,16 @@ public class PipControllerTest extends SysuiTestCase {
     private TestableContext mSpiedContext;
 
     @Mock private ActivityManagerWrapper mMockActivityManagerWrapper;
-    @Mock private BroadcastDispatcher mMockBroadcastDispatcher;
     @Mock private ConfigurationController mMockConfigurationController;
-    @Mock private DeviceConfigProxy mMockDeviceConfigProxy;
     @Mock private DisplayController mMockdDisplayController;
-    @Mock private FloatingContentCoordinator mMockFloatingContentCoordinator;
     @Mock private PackageManager mPackageManager;
+    @Mock private PipMenuActivityController mMockPipMenuActivityController;
+    @Mock private PipAppOpsListener mMockPipAppOpsListener;
     @Mock private PipBoundsHandler mMockPipBoundsHandler;
-    @Mock private PipSurfaceTransactionHelper mMockPipSurfaceTransactionHelper;
+    @Mock private PipMediaController mMockPipMediaController;
     @Mock private PipTaskOrganizer mMockPipTaskOrganizer;
-    @Mock private PipUiEventLogger mPipUiEventLogger;
-    @Mock private SysUiState mMockSysUiState;
+    @Mock private PipTouchHandler mMockPipTouchHandler;
+    @Mock private WindowManagerShellWrapper mMockWindowManagerShellWrapper;
 
     @Before
     public void setUp() throws RemoteException {
@@ -82,10 +76,10 @@ public class PipControllerTest extends SysuiTestCase {
         when(mPackageManager.hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)).thenReturn(false);
         when(mSpiedContext.getPackageManager()).thenReturn(mPackageManager);
 
-        mPipController = new PipController(mSpiedContext, mMockBroadcastDispatcher,
-                mMockConfigurationController, mMockDeviceConfigProxy, mMockdDisplayController,
-                mMockFloatingContentCoordinator, mMockSysUiState, mMockPipBoundsHandler,
-                mMockPipSurfaceTransactionHelper, mMockPipTaskOrganizer, mPipUiEventLogger);
+        mPipController = new PipController(mSpiedContext, mMockdDisplayController,
+                mMockPipAppOpsListener,
+                mMockPipBoundsHandler, mMockPipMediaController, mMockPipMenuActivityController,
+                mMockPipTaskOrganizer, mMockPipTouchHandler, mMockWindowManagerShellWrapper);
     }
 
     @Test

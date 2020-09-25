@@ -21,6 +21,7 @@ import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
@@ -308,9 +309,10 @@ public class FaceService extends SystemService {
         }
 
         @Override // Binder call
-        public void initializeConfiguration(int sensorId) {
+        public void initializeConfiguration(int sensorId,
+                @BiometricManager.Authenticators.Types int strength) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
-            mFace10 = new Face10(getContext(), sensorId, mLockoutResetDispatcher);
+            mFace10 = new Face10(getContext(), sensorId, strength, mLockoutResetDispatcher);
         }
     }
 

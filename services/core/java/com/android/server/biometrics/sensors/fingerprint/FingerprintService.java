@@ -384,7 +384,7 @@ public class FingerprintService extends SystemService {
         }
 
         @Override // Binder call
-        public void initializeConfiguration(int sensorId) {
+        public void initializeConfiguration(int sensorId, int strength) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             if ((Build.IS_USERDEBUG || Build.IS_ENG)
@@ -393,9 +393,9 @@ public class FingerprintService extends SystemService {
                     Fingerprint21UdfpsMock.CONFIG_ENABLE_TEST_UDFPS, 0 /* default */,
                     UserHandle.USER_CURRENT) != 0) {
                 mFingerprint21 = Fingerprint21UdfpsMock.newInstance(getContext(), sensorId,
-                        mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
+                        strength, mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
             } else {
-                mFingerprint21 = Fingerprint21.newInstance(getContext(), sensorId,
+                mFingerprint21 = Fingerprint21.newInstance(getContext(), sensorId, strength,
                         mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
             }
         }

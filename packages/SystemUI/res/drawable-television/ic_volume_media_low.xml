@@ -16,11 +16,13 @@
   -->
 
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
+    android:width="@dimen/tv_volume_icons_size"
+    android:height="@dimen/tv_volume_icons_size"
     android:viewportWidth="24.0"
     android:viewportHeight="24.0">
-    <path
-        android:fillColor="@color/tv_volume_dialog_accent"
-        android:pathData="M3,15V9H7L12,4V20L7,15H3ZM14,7.97C15.48,8.71 16.5,10.23 16.5,12C16.5,13.77 15.48,15.29 14,16.02V7.97Z"/>
+    <group android:translateX="-2">
+        <path
+            android:fillColor="@color/tv_volume_dialog_accent"
+            android:pathData="M16,7.97v8.05c1.48,-0.73 2.5,-2.25 2.5,-4.02 0,-1.77 -1.02,-3.29 -2.5,-4.03zM5,9v6h4l5,5L14,4L9,9L5,9zM12,8.83v6.34L9.83,13L7,13v-2h2.83L12,8.83z"/>
+    </group>
 </vector>

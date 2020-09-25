@@ -550,7 +550,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         try {
             doReturn(false).when(stack).isTranslucent(any());
-            assertFalse(mStack.shouldBeVisible(null /* starting */));
+            assertTrue(mStack.shouldBeVisible(null /* starting */));
 
             mActivity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
                     mActivity.getConfiguration()));
