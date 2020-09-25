@@ -2029,7 +2029,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> และอีก <xliff:g id="COUNT_3">%d</xliff:g> ไฟล์</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> และอีก <xliff:g id="COUNT_1">%d</xliff:g> ไฟล์</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ไม่มีบุคคลที่แนะนำให้แชร์ด้วย"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ไม่พบใครที่แนะนำให้แชร์ด้วย"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"รายชื่อแอป"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"แอปนี้ไม่ได้รับอนุญาตให้บันทึกเสียงแต่จะบันทึกเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"หน้าแรก"</string>
