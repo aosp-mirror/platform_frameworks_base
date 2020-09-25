@@ -23,7 +23,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.ConnectivityManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -70,8 +69,6 @@ public class DataConnectionStats extends BroadcastReceiver {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SIM_STATE_CHANGED);
-        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
         mContext.registerReceiver(this, filter, null /* broadcastPermission */, mListenerHandler);
     }
 
@@ -81,10 +78,7 @@ public class DataConnectionStats extends BroadcastReceiver {
         if (action.equals(Intent.ACTION_SIM_STATE_CHANGED)) {
             updateSimState(intent);
             notePhoneDataConnectionState();
-        } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION) ||
-                action.equals(ConnectivityManager.INET_CONDITION_ACTION)) {
-            notePhoneDataConnectionState();
-       }
+        }
     }
 
     private void notePhoneDataConnectionState() {
