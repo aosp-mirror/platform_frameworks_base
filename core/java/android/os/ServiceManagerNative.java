@@ -90,6 +90,10 @@ class ServiceManagerProxy implements IServiceManager {
         return mServiceManager.isDeclared(name);
     }
 
+    public String[] getDeclaredInstances(String iface) throws RemoteException {
+        return mServiceManager.getDeclaredInstances(iface);
+    }
+
     public void registerClientCallback(String name, IBinder service, IClientCallback cb)
             throws RemoteException {
         throw new RemoteException();
