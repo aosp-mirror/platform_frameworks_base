@@ -246,7 +246,7 @@ class ProcessRecord implements WindowProcessListener {
     long lastTopTime;           // The last time the process was in the TOP state or greater.
     boolean reportLowMemory;    // Set to true when waiting to report low mem
     boolean empty;              // Is this an empty background process?
-    private volatile boolean mCached;    // Is this a cached process?
+    private boolean mCached;    // Is this a cached process?
     String adjType;             // Debugging: primary thing impacting oom_adj.
     int adjTypeCode;            // Debugging: adj code to report to app.
     Object adjSource;           // Debugging: option dependent object.
@@ -794,10 +794,7 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     void setCached(boolean cached) {
-        if (mCached != cached) {
-            mCached = cached;
-            mWindowProcessController.onProcCachedStateChanged(cached);
-        }
+        mCached = cached;
     }
 
     @Override

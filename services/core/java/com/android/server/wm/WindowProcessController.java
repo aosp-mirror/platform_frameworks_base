@@ -1397,17 +1397,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
 
-        if (mListener.isCached()) {
-            // This process is in a cached state. We will delay delivering the config change to the
-            // process until the process is no longer cached.
-            mHasPendingConfigurationChange = true;
-            return;
-        }
-
-        dispatchConfigurationChange(config);
-    }
-
-    private void dispatchConfigurationChange(Configuration config) {
         if (mPauseConfigurationDispatchCount > 0) {
             mHasPendingConfigurationChange = true;
             return;
@@ -1551,22 +1540,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return true;
         }
         return false;
-    }
-
-    /**
-     * Called to notify WindowProcessController of a change in the process's cached state.
-     *
-     * @param isCached whether or not the process is cached.
-     */
-    @HotPath(caller = HotPath.OOM_ADJUSTMENT)
-    public void onProcCachedStateChanged(boolean isCached) {
-        if (!isCached) {
-            synchronized (mAtm.mGlobalLockWithoutBoost) {
-                if (mHasPendingConfigurationChange) {
-                    dispatchConfigurationChange(getConfiguration());
-                }
-            }
-        }
     }
 
     /**
