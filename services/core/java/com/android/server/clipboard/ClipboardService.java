@@ -836,7 +836,7 @@ public class ClipboardService extends SystemService {
             return;
         }
         if (Settings.Global.getInt(getContext().getContentResolver(),
-                "clipboard_access_toast_enabled", 0) == 0) {
+                "clipboard_access_toast_enabled", 1) == 0) {
             return;
         }
         // Don't notify if the app accessing the clipboard is the same as the current owner.
