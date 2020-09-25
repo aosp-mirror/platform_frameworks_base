@@ -79,6 +79,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PreferencesHelper implements RankingConfig {
@@ -1428,7 +1429,8 @@ public class PreferencesHelper implements RankingConfig {
         }
     }
 
-    public @NonNull List<String> deleteConversation(String pkg, int uid, String conversationId) {
+    public @NonNull List<String> deleteConversations(String pkg, int uid,
+            Set<String> conversationIds) {
         synchronized (mPackagePreferences) {
             List<String> deletedChannelIds = new ArrayList<>();
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
@@ -1438,7 +1440,8 @@ public class PreferencesHelper implements RankingConfig {
             int N = r.channels.size();
             for (int i = 0; i < N; i++) {
                 final NotificationChannel nc = r.channels.valueAt(i);
-                if (conversationId.equals(nc.getConversationId())) {
+                if (nc.getConversationId() != null
+                        && conversationIds.contains(nc.getConversationId())) {
                     nc.setDeleted(true);
                     LogMaker lm = getChannelLog(nc, pkg);
                     lm.setType(

@@ -44,15 +44,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.internal.matchers.Not;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 @RunWith(AndroidJUnit4.class)
 public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
@@ -309,22 +307,22 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     public void testRemoveConversationRunnable() throws Exception {
         NotificationHistory nh = mock(NotificationHistory.class);
         NotificationHistoryDatabase.RemoveConversationRunnable rcr =
-                mDataBase.new RemoveConversationRunnable("pkg", "convo");
+                mDataBase.new RemoveConversationRunnable("pkg", Set.of("convo", "another"));
         rcr.setNotificationHistory(nh);
 
         AtomicFile af = mock(AtomicFile.class);
         when(af.getBaseFile()).thenReturn(new File(mRootDir, "af"));
         mDataBase.mHistoryFiles.addLast(af);
 
-        when(nh.removeConversationFromWrite("pkg", "convo")).thenReturn(true);
+        when(nh.removeConversationsFromWrite("pkg", Set.of("convo", "another"))).thenReturn(true);
 
         mDataBase.mBuffer = mock(NotificationHistory.class);
 
         rcr.run();
 
-        verify(mDataBase.mBuffer).removeConversationFromWrite("pkg", "convo");
+        verify(mDataBase.mBuffer).removeConversationsFromWrite("pkg",Set.of("convo", "another"));
         verify(af).openRead();
-        verify(nh).removeConversationFromWrite("pkg", "convo");
+        verify(nh).removeConversationsFromWrite("pkg",Set.of("convo", "another"));
         verify(af).startWrite();
     }
 
@@ -332,22 +330,22 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     public void testRemoveConversationRunnable_noChanges() throws Exception {
         NotificationHistory nh = mock(NotificationHistory.class);
         NotificationHistoryDatabase.RemoveConversationRunnable rcr =
-                mDataBase.new RemoveConversationRunnable("pkg", "convo");
+                mDataBase.new RemoveConversationRunnable("pkg", Set.of("convo"));
         rcr.setNotificationHistory(nh);
 
         AtomicFile af = mock(AtomicFile.class);
         when(af.getBaseFile()).thenReturn(new File(mRootDir, "af"));
         mDataBase.mHistoryFiles.addLast(af);
 
-        when(nh.removeConversationFromWrite("pkg", "convo")).thenReturn(false);
+        when(nh.removeConversationsFromWrite("pkg", Set.of("convo"))).thenReturn(false);
 
         mDataBase.mBuffer = mock(NotificationHistory.class);
 
         rcr.run();
 
-        verify(mDataBase.mBuffer).removeConversationFromWrite("pkg", "convo");
+        verify(mDataBase.mBuffer).removeConversationsFromWrite("pkg", Set.of("convo"));
         verify(af).openRead();
-        verify(nh).removeConversationFromWrite("pkg", "convo");
+        verify(nh).removeConversationsFromWrite("pkg", Set.of("convo"));
         verify(af, never()).startWrite();
     }
 
