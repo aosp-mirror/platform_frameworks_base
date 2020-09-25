@@ -8253,7 +8253,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private void dumpEverything(FileDescriptor fd, PrintWriter pw, String[] args, int opti,
             boolean dumpAll, String dumpPackage, boolean dumpClient, boolean dumpNormalPriority,
-            int dumpAppId) {
+            int dumpAppId, boolean dumpProxies) {
 
         ActiveServices.ServiceDumper sdumper;
 
@@ -8312,7 +8312,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             sdumper.dumpWithClient();
         }
-        if (dumpPackage == null) {
+        if (dumpPackage == null && dumpProxies) {
             // Intentionally dropping the lock for this, because dumpBinderProxies() will make many
             // outgoing binder calls to retrieve interface descriptors; while that is system code,
             // there is nothing preventing an app from overriding this implementation by talking to
@@ -8721,13 +8721,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // dumpEverything() will take the lock when needed, and momentarily drop
                 // it for dumping client state.
                 dumpEverything(fd, pw, args, opti, dumpAll, dumpPackage, dumpClient,
-                        dumpNormalPriority, dumpAppId);
+                        dumpNormalPriority, dumpAppId, true /* dumpProxies */);
             } else {
                 // Take the lock here, so we get a consistent state for the entire dump;
-                // dumpEverything() will take the lock as well, but that is fine.
+                // dumpEverything() will take the lock as well, which is fine for everything
+                // except dumping proxies, which can take a long time; exclude them.
                 synchronized(this) {
                     dumpEverything(fd, pw, args, opti, dumpAll, dumpPackage, dumpClient,
-                            dumpNormalPriority, dumpAppId);
+                            dumpNormalPriority, dumpAppId, false /* dumpProxies */);
                 }
             }
         }
