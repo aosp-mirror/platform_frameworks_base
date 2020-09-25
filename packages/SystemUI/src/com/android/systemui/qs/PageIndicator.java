@@ -2,6 +2,7 @@ package com.android.systemui.qs;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Animatable2;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -30,9 +31,6 @@ public class PageIndicator extends ViewGroup {
     private static final boolean DEBUG = false;
 
     private static final long ANIMATION_DURATION = 250;
-
-    // The size of a single dot in relation to the whole animation.
-    private static final float SINGLE_SCALE = .4f;
 
     private static final float MINOR_ALPHA = .42f;
 
@@ -75,11 +73,10 @@ public class PageIndicator extends ViewGroup {
         }
         array.recycle();
 
-        mPageIndicatorWidth =
-                (int) mContext.getResources().getDimension(R.dimen.qs_page_indicator_width);
-        mPageIndicatorHeight =
-                (int) mContext.getResources().getDimension(R.dimen.qs_page_indicator_height);
-        mPageDotWidth = (int) (mPageIndicatorWidth * SINGLE_SCALE);
+        Resources res = context.getResources();
+        mPageIndicatorWidth = res.getDimensionPixelSize(R.dimen.qs_page_indicator_width);
+        mPageIndicatorHeight = res.getDimensionPixelSize(R.dimen.qs_page_indicator_height);
+        mPageDotWidth = res.getDimensionPixelSize(R.dimen.qs_page_indicator_dot_width);
     }
 
     public void setNumPages(int numPages) {
