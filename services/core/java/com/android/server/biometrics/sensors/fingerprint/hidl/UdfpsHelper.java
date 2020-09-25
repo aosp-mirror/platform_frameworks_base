@@ -62,23 +62,25 @@ public class UdfpsHelper {
         }
     }
 
-    static void showUdfpsOverlay(@Nullable IUdfpsOverlayController udfpsOverlayController) {
+    static void showUdfpsOverlay(int sensorId,
+            @Nullable IUdfpsOverlayController udfpsOverlayController) {
         if (udfpsOverlayController == null) {
             return;
         }
         try {
-            udfpsOverlayController.showUdfpsOverlay();
+            udfpsOverlayController.showUdfpsOverlay(sensorId);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when showing the UDFPS overlay", e);
         }
     }
 
-    static void hideUdfpsOverlay(@Nullable IUdfpsOverlayController udfpsOverlayController) {
+    static void hideUdfpsOverlay(int sensorId,
+            @Nullable IUdfpsOverlayController udfpsOverlayController) {
         if (udfpsOverlayController == null) {
             return;
         }
         try {
-            udfpsOverlayController.hideUdfpsOverlay();
+            udfpsOverlayController.hideUdfpsOverlay(sensorId);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when hiding the UDFPS overlay", e);
         }

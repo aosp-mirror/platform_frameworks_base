@@ -746,7 +746,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void setUdfpsOverlayController(IUdfpsOverlayController controller) {
+    public void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller) {
         if (mService == null) {
             Slog.w(TAG, "setUdfpsOverlayController: no fingerprint service");
             return;
@@ -763,14 +763,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void onFingerDown(int x, int y, float minor, float major) {
+    public void onFingerDown(int sensorId, int x, int y, float minor, float major) {
         if (mService == null) {
             Slog.w(TAG, "onFingerDown: no fingerprint service");
             return;
         }
 
         try {
-            mService.onFingerDown(x, y, minor, major);
+            mService.onFingerDown(sensorId, x, y, minor, major);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -780,14 +780,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void onFingerUp() {
+    public void onFingerUp(int sensorId) {
         if (mService == null) {
             Slog.w(TAG, "onFingerDown: no fingerprint service");
             return;
         }
 
         try {
-            mService.onFingerUp();
+            mService.onFingerUp(sensorId);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

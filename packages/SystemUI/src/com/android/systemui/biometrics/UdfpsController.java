@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics;
 
+import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.SuppressLint;
@@ -25,6 +26,7 @@ import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.PowerManager;
 import android.os.UserHandle;
@@ -41,6 +43,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.BrightnessSynchronizer;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
@@ -50,13 +53,22 @@ import com.android.systemui.util.settings.SystemSettings;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 import javax.inject.Inject;
 
 /**
  * Shows and hides the under-display fingerprint sensor (UDFPS) overlay, handles UDFPS touch events,
  * and coordinates triggering of the high-brightness mode (HBM).
+ *
+ * Note that the current architecture is designed so that a single {@link UdfpsController}
+ * controls/manages all UDFPS sensors. In other words, a single controller is registered with
+ * {@link com.android.server.biometrics.sensors.fingerprint.FingerprintService}, and interfaces such
+ * as {@link FingerprintManager#onFingerDown(int, int, int, float, float)} or
+ * {@link IUdfpsOverlayController#showUdfpsOverlay(int)}should all have
+ * {@code sensorId} parameters.
  */
+@SuppressWarnings("deprecation")
 class UdfpsController implements DozeReceiver {
     private static final String TAG = "UdfpsController";
     // Gamma approximation for the sRGB color space.
@@ -64,6 +76,10 @@ class UdfpsController implements DozeReceiver {
     private static final long AOD_INTERRUPT_TIMEOUT_MILLIS = 1000;
 
     private final FingerprintManager mFingerprintManager;
+    // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
+    // sensors, this, in addition to a lot of the code here, will be updated.
+    @VisibleForTesting
+    final int mUdfpsSensorId;
     private final WindowManager mWindowManager;
     private final SystemSettings mSystemSettings;
     private final DelayableExecutor mFgExecutor;
@@ -103,17 +119,17 @@ class UdfpsController implements DozeReceiver {
 
     public class UdfpsOverlayController extends IUdfpsOverlayController.Stub {
         @Override
-        public void showUdfpsOverlay() {
+        public void showUdfpsOverlay(int sensorId) {
             UdfpsController.this.setShowOverlay(true);
         }
 
         @Override
-        public void hideUdfpsOverlay() {
+        public void hideUdfpsOverlay(int sensorId) {
             UdfpsController.this.setShowOverlay(false);
         }
 
         @Override
-        public void setDebugMessage(String message) {
+        public void setDebugMessage(int sensorId, String message) {
             mView.setDebugMessage(message);
         }
     }
@@ -164,6 +180,17 @@ class UdfpsController implements DozeReceiver {
         mSystemSettings = systemSettings;
         mFgExecutor = fgExecutor;
         mLayoutParams = createLayoutParams(context);
+
+        int udfpsSensorId = -1;
+        for (FingerprintSensorProperties props : mFingerprintManager.getSensorProperties()) {
+            if (props.isAnyUdfpsType()) {
+                udfpsSensorId = props.sensorId;
+                break;
+            }
+        }
+        // At least one UDFPS sensor exists
+        checkArgument(udfpsSensorId != -1);
+        mUdfpsSensorId = udfpsSensorId;
 
         mView = (UdfpsView) inflater.inflate(R.layout.udfps_view, null, false);
 
@@ -347,7 +374,7 @@ class UdfpsController implements DozeReceiver {
                 fw.write(mHbmEnableCommand);
                 fw.close();
             }
-            mFingerprintManager.onFingerDown(x, y, minor, major);
+            mFingerprintManager.onFingerDown(mUdfpsSensorId, x, y, minor, major);
         } catch (IOException e) {
             mView.hideScrimAndDot();
             Log.e(TAG, "onFingerDown | failed to enable HBM: " + e.getMessage());
@@ -355,7 +382,7 @@ class UdfpsController implements DozeReceiver {
     }
 
     private void onFingerUp() {
-        mFingerprintManager.onFingerUp();
+        mFingerprintManager.onFingerUp(mUdfpsSensorId);
         // Hiding the scrim before disabling HBM results in less noticeable flicker.
         mView.hideScrimAndDot();
         if (mHbmSupported) {
