@@ -838,6 +838,30 @@ public final class DataManagerTest {
     }
 
     @Test
+    public void testGetLastInteraction() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+
+        NotificationListenerService listenerService =
+                mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
+        listenerService.onNotificationPosted(mStatusBarNotification);
+
+        assertEquals(mStatusBarNotification.getPostTime(),
+                mDataManager.getLastInteraction(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID));
+        assertEquals(0L,
+                mDataManager.getLastInteraction("not_test_pkg", USER_ID_PRIMARY, TEST_SHORTCUT_ID));
+        assertEquals(0L,
+                mDataManager.getLastInteraction(TEST_PKG_NAME, USER_ID_PRIMARY_MANAGED,
+                        TEST_SHORTCUT_ID));
+        assertEquals(0L,
+                mDataManager.getLastInteraction(TEST_PKG_NAME, USER_ID_SECONDARY,
+                        TEST_SHORTCUT_ID));
+    }
+
+    @Test
     public void testNonCachedShortcutNotInRecentList() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
 

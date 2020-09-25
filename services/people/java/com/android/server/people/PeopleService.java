@@ -123,6 +123,12 @@ public class PeopleService extends SystemService {
             mDataManager.removeAllRecentConversations(
                     Binder.getCallingUserHandle().getIdentifier());
         }
+
+        @Override
+        public long getLastInteraction(String packageName, int userId, String shortcutId) {
+            enforceSystemOrRoot("get last interaction");
+            return mDataManager.getLastInteraction(packageName, userId, shortcutId);
+        }
     }
 
     @VisibleForTesting
