@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.fingerprint;
+package com.android.server.biometrics.sensors.fingerprint.hidl;
 
 import android.annotation.Nullable;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;

@@ -14,44 +14,46 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.fingerprint;
+package com.android.server.biometrics.sensors.fingerprint.hidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
-import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.sensors.BiometricUtils;
-import com.android.server.biometrics.sensors.InternalEnumerateClient;
+import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
+import com.android.server.biometrics.sensors.RemovalClient;
 
-import java.util.List;
+import java.util.Map;
 
 /**
- * Fingerprint-specific internal enumerate client supporting the
+ * Fingerprint-specific removal client supporting the
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
-class FingerprintInternalEnumerateClient extends InternalEnumerateClient<IBiometricsFingerprint> {
-    private static final String TAG = "FingerprintInternalEnumerateClient";
+class FingerprintRemovalClient extends RemovalClient<IBiometricsFingerprint> {
+    private static final String TAG = "FingerprintRemovalClient";
 
-    FingerprintInternalEnumerateClient(@NonNull Context context,
+    FingerprintRemovalClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
-            int userId, @NonNull String owner, @NonNull List<Fingerprint> enrolledList,
-            @NonNull BiometricUtils utils, int sensorId) {
-        super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
-                BiometricsProtoEnums.MODALITY_FINGERPRINT);
+            @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
+            @NonNull String owner, @NonNull BiometricUtils utils, int sensorId,
+            @NonNull Map<Integer, Long> authenticatorIds) {
+        super(context, lazyDaemon, token, listener, biometricId, userId, owner, utils, sensorId,
+                authenticatorIds, BiometricsProtoEnums.MODALITY_FINGERPRINT);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().enumerate();
+            // GroupId was never used. In fact, groupId is always the same as userId.
+            getFreshDaemon().remove(getTargetUserId(), mBiometricId);
         } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception when requesting enumerate", e);
+            Slog.e(TAG, "Remote exception when requesting remove", e);
             mCallback.onClientFinished(this, false /* success */);
         }
     }

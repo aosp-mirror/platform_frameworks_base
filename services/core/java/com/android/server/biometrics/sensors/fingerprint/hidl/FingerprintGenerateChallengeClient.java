@@ -14,47 +14,40 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.fingerprint;
+package com.android.server.biometrics.sensors.fingerprint.hidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.RemovalClient;
-
-import java.util.Map;
+import com.android.server.biometrics.sensors.GenerateChallengeClient;
 
 /**
- * Fingerprint-specific removal client supporting the
+ * Fingerprint-specific generateChallenge/preEnroll client supporting the
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
-class FingerprintRemovalClient extends RemovalClient<IBiometricsFingerprint> {
-    private static final String TAG = "FingerprintRemovalClient";
+public class FingerprintGenerateChallengeClient
+        extends GenerateChallengeClient<IBiometricsFingerprint> {
 
-    FingerprintRemovalClient(@NonNull Context context,
+    private static final String TAG = "FingerprintGenerateChallengeClient";
+
+    FingerprintGenerateChallengeClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
-            @NonNull String owner, @NonNull BiometricUtils utils, int sensorId,
-            @NonNull Map<Integer, Long> authenticatorIds) {
-        super(context, lazyDaemon, token, listener, biometricId, userId, owner, utils, sensorId,
-                authenticatorIds, BiometricsProtoEnums.MODALITY_FINGERPRINT);
+            @NonNull ClientMonitorCallbackConverter listener, @NonNull String owner, int sensorId) {
+        super(context, lazyDaemon, token, listener, owner, sensorId);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            // GroupId was never used. In fact, groupId is always the same as userId.
-            getFreshDaemon().remove(getTargetUserId(), mBiometricId);
+            mChallenge = getFreshDaemon().preEnroll();
         } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception when requesting remove", e);
-            mCallback.onClientFinished(this, false /* success */);
+            Slog.e(TAG, "preEnroll failed", e);
         }
     }
 }
