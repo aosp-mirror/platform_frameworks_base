@@ -92,13 +92,5 @@
         layout="@layout/keyguard_bottom_area"
         android:visibility="gone" />
 
-    <com.android.systemui.statusbar.AlphaOptimizedView
-        android:id="@+id/qs_navbar_scrim"
-        android:layout_height="96dp"
-        android:layout_width="match_parent"
-        android:layout_gravity="bottom"
-        android:visibility="invisible"
-        android:background="@drawable/qs_navbar_scrim" />
-
     <include layout="@layout/status_bar_expanded_plugin_frame"/>
 </com.android.systemui.statusbar.phone.NotificationPanelView>
