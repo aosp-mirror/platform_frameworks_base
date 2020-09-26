@@ -993,6 +993,77 @@ Return<void> FrontendCallback::onScanMessage(FrontendScanMessageType type, const
     return Void();
 }
 
+Return<void> FrontendCallback::onScanMessageExt1_1(FrontendScanMessageTypeExt1_1 type,
+        const FrontendScanMessageExt1_1& message) {
+    ALOGD("FrontendCallback::onScanMessageExt1_1, type=%d", type);
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jclass clazz = env->FindClass("android/media/tv/tuner/Tuner");
+    switch(type) {
+        case FrontendScanMessageTypeExt1_1::MODULATION: {
+            jint modulation = -1;
+            switch (message.modulation().getDiscriminator()) {
+                case FrontendModulation::hidl_discriminator::dvbc: {
+                    modulation = (jint) message.modulation().dvbc();
+                    break;
+                }
+                case FrontendModulation::hidl_discriminator::dvbt: {
+                    modulation = (jint) message.modulation().dvbt();
+                    break;
+                }
+                case FrontendModulation::hidl_discriminator::dvbs: {
+                    modulation = (jint) message.modulation().dvbs();
+                    break;
+                }
+                case FrontendModulation::hidl_discriminator::isdbs: {
+                    modulation = (jint) message.modulation().isdbs();
+                    break;
+                }
+                case FrontendModulation::hidl_discriminator::isdbs3: {
+                    modulation = (jint) message.modulation().isdbs3();
+                    break;
+                }
+                case FrontendModulation::hidl_discriminator::isdbt: {
+                    modulation = (jint) message.modulation().isdbt();
+                    break;
+                }
+                case FrontendModulation::hidl_discriminator::atsc: {
+                    modulation = (jint) message.modulation().atsc();
+                    break;
+                }
+                case FrontendModulation::hidl_discriminator::atsc3: {
+                    modulation = (jint) message.modulation().atsc3();
+                    break;
+                }
+                case FrontendModulation::hidl_discriminator::dtmb: {
+                    modulation = (jint) message.modulation().dtmb();
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+            if (modulation > 0) {
+                env->CallVoidMethod(
+                        mObject,
+                        env->GetMethodID(clazz, "onModulationReported", "(I)V"),
+                        modulation);
+            }
+            break;
+        }
+        case FrontendScanMessageTypeExt1_1::HIGH_PRIORITY: {
+            bool isHighPriority = message.isHighPriority();
+            env->CallVoidMethod(
+                    mObject,
+                    env->GetMethodID(clazz, "onPriorityReported", "([B)V"),
+                    isHighPriority);
+            break;
+        }
+        default:
+            break;
+    }
+    return Void();
+}
+
 /////////////// Tuner ///////////////////////
 
 sp<ITuner> JTuner::mTuner;

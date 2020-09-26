@@ -20,6 +20,7 @@
 #include <android/hardware/tv/tuner/1.1/IFilter.h>
 #include <android/hardware/tv/tuner/1.1/IFilterCallback.h>
 #include <android/hardware/tv/tuner/1.1/IFrontend.h>
+#include <android/hardware/tv/tuner/1.1/IFrontendCallback.h>
 #include <android/hardware/tv/tuner/1.1/ITuner.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
 
@@ -63,7 +64,6 @@ using ::android::hardware::tv::tuner::V1_0::IDvrCallback;
 using ::android::hardware::tv::tuner::V1_0::IFilter;
 using ::android::hardware::tv::tuner::V1_1::IFilterCallback;
 using ::android::hardware::tv::tuner::V1_0::IFrontend;
-using ::android::hardware::tv::tuner::V1_0::IFrontendCallback;
 using ::android::hardware::tv::tuner::V1_0::ILnb;
 using ::android::hardware::tv::tuner::V1_0::ILnbCallback;
 using ::android::hardware::tv::tuner::V1_0::ITimeFilter;
@@ -73,6 +73,9 @@ using ::android::hardware::tv::tuner::V1_0::LnbId;
 using ::android::hardware::tv::tuner::V1_0::PlaybackStatus;
 using ::android::hardware::tv::tuner::V1_0::RecordStatus;
 using ::android::hardware::tv::tuner::V1_0::Result;
+using ::android::hardware::tv::tuner::V1_1::FrontendScanMessageExt1_1;
+using ::android::hardware::tv::tuner::V1_1::FrontendScanMessageTypeExt1_1;
+using ::android::hardware::tv::tuner::V1_1::IFrontendCallback;
 
 using MQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
 
@@ -191,6 +194,8 @@ struct FrontendCallback : public IFrontendCallback {
     virtual Return<void> onEvent(FrontendEventType frontendEventType);
     virtual Return<void> onScanMessage(
             FrontendScanMessageType type, const FrontendScanMessage& message);
+    virtual Return<void> onScanMessageExt1_1(
+            FrontendScanMessageTypeExt1_1 type, const FrontendScanMessageExt1_1& messageExt);
 
     jweak mObject;
     FrontendId mId;
