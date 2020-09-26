@@ -524,7 +524,7 @@ public final class SmsApplication {
     }
 
     private static String getDefaultSmsPackage(Context context, int userId) {
-        return context.getSystemService(RoleManager.class).getDefaultSmsPackage(userId);
+        return context.getSystemService(RoleManager.class).getSmsRoleHolder(userId);
     }
 
     /**

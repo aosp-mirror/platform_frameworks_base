@@ -636,7 +636,7 @@ public final class RoleManager {
     @Nullable
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
-    public String getDefaultSmsPackage(@UserIdInt int userId) {
+    public String getSmsRoleHolder(@UserIdInt int userId) {
         try {
             return mService.getDefaultSmsPackage(userId);
         } catch (RemoteException e) {
