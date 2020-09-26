@@ -28,7 +28,6 @@ import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -220,16 +219,16 @@ final class LogicalDisplay {
      * The logical display might become invalid if it is attached to a display device
      * that no longer exists.
      *
-     * @param devices The list of all connected display devices.
+     * @param deviceRepo Repository of active {@link DisplayDevice}s.
      */
-    public void updateLocked(List<DisplayDevice> devices) {
+    public void updateLocked(DisplayDeviceRepository deviceRepo) {
         // Nothing to update if already invalid.
         if (mPrimaryDisplayDevice == null) {
             return;
         }
 
         // Check whether logical display has become invalid.
-        if (!devices.contains(mPrimaryDisplayDevice)) {
+        if (!deviceRepo.containsLocked(mPrimaryDisplayDevice)) {
             mPrimaryDisplayDevice = null;
             return;
         }

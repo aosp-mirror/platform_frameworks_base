@@ -53,7 +53,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -86,6 +86,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -115,7 +116,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private Handler mHandler;
     @Mock
-    private BubbleController mBubbleController;
+    private Bubbles mBubbles;
     @Mock
     private ShadeControllerImpl mShadeController;
     @Mock
@@ -192,7 +193,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mStatusBarKeyguardViewManager,
                         mock(KeyguardManager.class),
                         mock(IDreamManager.class),
-                        mBubbleController,
+                        Optional.of(mBubbles),
                         () -> mAssistManager,
                         mRemoteInputManager,
                         mock(NotificationGroupManagerLegacy.class),
@@ -279,7 +280,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         mNotificationActivityStarter.onNotificationClicked(sbn, mBubbleNotificationRow);
 
         // Then
-        verify(mBubbleController).expandStackAndSelectBubble(eq(mBubbleNotificationRow.getEntry()));
+        verify(mBubbles).expandStackAndSelectBubble(eq(mBubbleNotificationRow.getEntry()));
 
         // This is called regardless, and simply short circuits when there is nothing to do.
         verify(mShadeController, atLeastOnce()).collapsePanel();
@@ -311,7 +312,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         mNotificationActivityStarter.onNotificationClicked(sbn, mBubbleNotificationRow);
 
         // Then
-        verify(mBubbleController).expandStackAndSelectBubble(mBubbleNotificationRow.getEntry());
+        verify(mBubbles).expandStackAndSelectBubble(mBubbleNotificationRow.getEntry());
 
         verify(mShadeController, atLeastOnce()).collapsePanel();
 
@@ -341,7 +342,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         mNotificationActivityStarter.onNotificationClicked(sbn, mBubbleNotificationRow);
 
         // Then
-        verify(mBubbleController).expandStackAndSelectBubble(mBubbleNotificationRow.getEntry());
+        verify(mBubbles).expandStackAndSelectBubble(mBubbleNotificationRow.getEntry());
 
         verify(mShadeController, atLeastOnce()).collapsePanel();
 

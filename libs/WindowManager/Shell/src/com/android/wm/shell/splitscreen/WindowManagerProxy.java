@@ -28,7 +28,6 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.graphics.Rect;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
@@ -41,7 +40,6 @@ import android.window.WindowOrganizer;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.common.TransactionPool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,9 +83,8 @@ class WindowManagerProxy {
 
     private final TaskOrganizer mTaskOrganizer;
 
-    WindowManagerProxy(TransactionPool transactionPool, Handler handler,
-            TaskOrganizer taskOrganizer) {
-        mSyncTransactionQueue = new SyncTransactionQueue(transactionPool, handler);
+    WindowManagerProxy(SyncTransactionQueue syncQueue, TaskOrganizer taskOrganizer) {
+        mSyncTransactionQueue = syncQueue;
         mTaskOrganizer = taskOrganizer;
     }
 

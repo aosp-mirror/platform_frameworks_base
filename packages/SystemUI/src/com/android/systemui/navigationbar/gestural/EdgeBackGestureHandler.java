@@ -57,7 +57,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -725,9 +725,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                 KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
                 InputDevice.SOURCE_KEYBOARD);
 
-        // Bubble controller will give us a valid display id if it should get the back event
-        BubbleController bubbleController = Dependency.get(BubbleController.class);
-        int bubbleDisplayId = bubbleController.getExpandedDisplayId(mContext);
+        // Bubbles will give us a valid display id if it should get the back event
+        final int bubbleDisplayId = Dependency.get(Bubbles.class).getExpandedDisplayId(mContext);
         if (bubbleDisplayId != INVALID_DISPLAY) {
             ev.setDisplayId(bubbleDisplayId);
         } else {

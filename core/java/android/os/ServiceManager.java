@@ -235,6 +235,21 @@ public final class ServiceManager {
     }
 
     /**
+     * Returns the list of declared instances for an interface.
+     *
+     * @return true if the service is declared somewhere (eg. VINTF manifest) and
+     * waitForService should always be able to return the service.
+     */
+    public static String[] getDeclaredInstances(@NonNull String iface) {
+        try {
+            return getIServiceManager().getDeclaredInstances(iface);
+        } catch (RemoteException e) {
+            Log.e(TAG, "error in getDeclaredInstances", e);
+            return null;
+        }
+    }
+
+    /**
      * Returns the specified service from the service manager.
      *
      * If the service is not running, servicemanager will attempt to start it, and this function

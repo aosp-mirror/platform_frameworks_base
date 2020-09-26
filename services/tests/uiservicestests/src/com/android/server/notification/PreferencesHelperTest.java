@@ -127,6 +127,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SmallTest
@@ -3502,8 +3503,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testDeleteConversation() {
+    public void testDeleteConversations() {
         String convoId = "convo";
+        String convoIdC = "convoC";
         NotificationChannel messages =
                 new NotificationChannel("messages", "Messages", IMPORTANCE_DEFAULT);
         mHelper.createNotificationChannel(PKG_O, UID_O, messages, true, false);
@@ -3526,10 +3528,16 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         channel2.setConversationId(calls.getId(), convoId);
         mHelper.createNotificationChannel(PKG_O, UID_O, channel2, true, false);
 
+        NotificationChannel channel3 =
+                new NotificationChannel("C person msgs", "msgs from C", IMPORTANCE_DEFAULT);
+        channel3.setConversationId(messages.getId(), convoIdC);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel3, true, false);
+
         assertEquals(channel, mHelper.getNotificationChannel(PKG_O, UID_O, channel.getId(), false));
         assertEquals(channel2,
                 mHelper.getNotificationChannel(PKG_O, UID_O, channel2.getId(), false));
-        assertEquals(2, mHelper.deleteConversation(PKG_O, UID_O, convoId).size());
+        List<String> deleted = mHelper.deleteConversations(PKG_O, UID_O, Set.of(convoId, convoIdC));
+        assertEquals(3, deleted.size());
 
         assertEquals(messages,
                 mHelper.getNotificationChannel(PKG_O, UID_O, messages.getId(), false));
@@ -3542,7 +3550,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(channel2,
                 mHelper.getNotificationChannel(PKG_O, UID_O, channel2.getId(), true));
 
-        assertEquals(7, mLogger.getCalls().size());
+        assertEquals(9, mLogger.getCalls().size());
         assertEquals(
                 NotificationChannelLogger.NotificationChannelEvent.NOTIFICATION_CHANNEL_CREATED,
                 mLogger.get(0).event);  // Channel messages
@@ -3563,12 +3571,20 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 mLogger.get(4).event);  // Channel channel2 - Conversation A person calls
         assertEquals(
                 NotificationChannelLogger.NotificationChannelEvent
-                        .NOTIFICATION_CHANNEL_CONVERSATION_DELETED,
-                mLogger.get(5).event);  // Delete Channel channel - Conversation A person msgs
+                        .NOTIFICATION_CHANNEL_CONVERSATION_CREATED,
+                mLogger.get(5).event);  // Channel channel3 - Conversation C person msgs
         assertEquals(
                 NotificationChannelLogger.NotificationChannelEvent
                         .NOTIFICATION_CHANNEL_CONVERSATION_DELETED,
-                mLogger.get(6).event);  // Delete Channel channel2 - Conversation A person calls
+                mLogger.get(6).event);  // Delete Channel channel - Conversation A person msgs
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent
+                        .NOTIFICATION_CHANNEL_CONVERSATION_DELETED,
+                mLogger.get(7).event);  // Delete Channel channel2 - Conversation A person calls
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent
+                        .NOTIFICATION_CHANNEL_CONVERSATION_DELETED,
+                mLogger.get(8).event);  // Delete Channel channel3 - Conversation C person msgs
     }
 
     @Test

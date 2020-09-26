@@ -24,7 +24,7 @@ import android.view.SurfaceControl;
  */
 public final class BLASTBufferQueue {
     // Note: This field is accessed by native code.
-    private long mNativeObject; // BLASTBufferQueue*
+    public long mNativeObject; // BLASTBufferQueue*
 
     private static native long nativeCreate(long surfaceControl, long width, long height,
             boolean tripleBufferingEnabled);
@@ -41,9 +41,13 @@ public final class BLASTBufferQueue {
 
     public void destroy() {
         nativeDestroy(mNativeObject);
+        mNativeObject = 0;
     }
 
-    public Surface getSurface() {
+    /**
+     * @return a new Surface instance from the IGraphicsBufferProducer of the adapter.
+     */
+    public Surface createSurface() {
         return nativeGetSurface(mNativeObject);
     }
 

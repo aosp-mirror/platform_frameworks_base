@@ -16,7 +16,6 @@
 
 package android.telecom;
 
-import android.annotation.SystemApi;
 import android.media.ToneGenerator;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -97,10 +96,7 @@ public final class DisconnectCause implements Parcelable {
      *
      * This reason code is only used for communication between a {@link ConnectionService} and
      * Telecom and should not be surfaced to the user.
-     *
-     * @hide
      */
-    @SystemApi
     public static final String REASON_EMULATING_SINGLE_CALL = "EMULATING_SINGLE_CALL";
 
     /**

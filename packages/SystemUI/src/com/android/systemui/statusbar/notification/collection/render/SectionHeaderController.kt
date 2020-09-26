@@ -17,11 +17,13 @@
 package com.android.systemui.statusbar.notification.collection.render
 
 import android.annotation.StringRes
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.android.systemui.R
-import com.android.systemui.statusbar.notification.dagger.HeaderClick
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.statusbar.notification.dagger.HeaderClickAction
 import com.android.systemui.statusbar.notification.dagger.HeaderText
 import com.android.systemui.statusbar.notification.dagger.NodeLabel
 import com.android.systemui.statusbar.notification.dagger.SectionHeaderScope
@@ -39,11 +41,19 @@ internal class SectionHeaderNodeControllerImpl @Inject constructor(
     @NodeLabel override val nodeLabel: String,
     private val layoutInflater: LayoutInflater,
     @HeaderText @StringRes private val headerTextResId: Int,
-    @HeaderClick private val onHeaderClickListener: View.OnClickListener
+    private val activityStarter: ActivityStarter,
+    @HeaderClickAction private val clickIntentAction: String
 ) : NodeController, SectionHeaderController {
 
     private var _view: SectionHeaderView? = null
     private var clearAllClickListener: View.OnClickListener? = null
+    private val onHeaderClickListener = View.OnClickListener {
+        activityStarter.startActivity(
+                Intent(clickIntentAction),
+                true /* onlyProvisioned */,
+                true /* dismissShade */,
+                Intent.FLAG_ACTIVITY_SINGLE_TOP)
+    }
 
     override fun reinflateView(parent: ViewGroup) {
         var oldPos = -1

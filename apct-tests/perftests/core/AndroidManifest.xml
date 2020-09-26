@@ -20,7 +20,17 @@
             <action android:name="com.android.perftests.core.PERFTEST" />
           </intent-filter>
         </activity>
-        <service android:name="android.os.SomeService" android:exported="false" android:process=":some_service" />
+
+        <service
+            android:name="android.os.SomeService"
+            android:exported="false"
+            android:process=":some_service" />
+
+        <provider
+            android:name="android.os.SomeProvider"
+            android:authorities="android.os.SomeProvider"
+            android:exported="false"
+            android:process=":some_provider" />
 
         <service
             android:name="android.view.autofill.MyAutofillService"

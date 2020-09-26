@@ -37,7 +37,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -126,6 +126,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.SystemWindows;
 
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -167,6 +168,15 @@ public class Dependency {
      * Generic handler on the main thread.
      */
     private static final String MAIN_HANDLER_NAME = "main_handler";
+    /**
+     * Generic executor on the main thread.
+     */
+    private static final String MAIN_EXECUTOR_NAME = "main_executor";
+
+    /**
+     * Generic executor on a background thread.
+     */
+    private static final String BACKGROUND_EXECUTOR_NAME = "background_executor";
 
     /**
      * An email address to send memory leak reports to by default.
@@ -197,6 +207,17 @@ public class Dependency {
      */
     public static final DependencyKey<Handler> MAIN_HANDLER =
             new DependencyKey<>(MAIN_HANDLER_NAME);
+
+    /**
+     * Generic executor on the main thread.
+     */
+    public static final DependencyKey<Executor> MAIN_EXECUTOR =
+            new DependencyKey<>(MAIN_EXECUTOR_NAME);
+    /**
+     * Generic executor on a background thread.
+     */
+    public static final DependencyKey<Executor> BACKGROUND_EXECUTOR =
+            new DependencyKey<>(BACKGROUND_EXECUTOR_NAME);
 
     /**
      * An email address to send memory leak reports to by default.
@@ -288,7 +309,7 @@ public class Dependency {
     @Inject Lazy<KeyguardDismissUtil> mKeyguardDismissUtil;
     @Inject Lazy<SmartReplyController> mSmartReplyController;
     @Inject Lazy<RemoteInputQuickSettingsDisabler> mRemoteInputQuickSettingsDisabler;
-    @Inject Lazy<BubbleController> mBubbleController;
+    @Inject Lazy<Bubbles> mBubbles;
     @Inject Lazy<NotificationEntryManager> mNotificationEntryManager;
     @Inject Lazy<SensorPrivacyManager> mSensorPrivacyManager;
     @Inject Lazy<AutoHideController> mAutoHideController;
@@ -301,6 +322,8 @@ public class Dependency {
     @Inject @Named(TIME_TICK_HANDLER_NAME) Lazy<Handler> mTimeTickHandler;
     @Nullable
     @Inject @Named(LEAK_REPORT_EMAIL_NAME) Lazy<String> mLeakReportEmail;
+    @Inject @Main Lazy<Executor> mMainExecutor;
+    @Inject @Background Lazy<Executor> mBackgroundExecutor;
     @Inject Lazy<ClockManager> mClockManager;
     @Inject Lazy<ActivityManagerWrapper> mActivityManagerWrapper;
     @Inject Lazy<DevicePolicyManagerWrapper> mDevicePolicyManagerWrapper;
@@ -336,6 +359,8 @@ public class Dependency {
         mProviders.put(BG_LOOPER, mBgLooper::get);
         mProviders.put(MAIN_LOOPER, mMainLooper::get);
         mProviders.put(MAIN_HANDLER, mMainHandler::get);
+        mProviders.put(MAIN_EXECUTOR, mMainExecutor::get);
+        mProviders.put(BACKGROUND_EXECUTOR, mBackgroundExecutor::get);
         mProviders.put(ActivityStarter.class, mActivityStarter::get);
         mProviders.put(BroadcastDispatcher.class, mBroadcastDispatcher::get);
 
@@ -483,7 +508,7 @@ public class Dependency {
         mProviders.put(SmartReplyController.class, mSmartReplyController::get);
         mProviders.put(RemoteInputQuickSettingsDisabler.class,
                 mRemoteInputQuickSettingsDisabler::get);
-        mProviders.put(BubbleController.class, mBubbleController::get);
+        mProviders.put(Bubbles.class, mBubbles::get);
         mProviders.put(NotificationEntryManager.class, mNotificationEntryManager::get);
         mProviders.put(ForegroundServiceNotificationListener.class,
                 mForegroundServiceNotificationListener::get);

@@ -462,9 +462,7 @@ public final class MediaTranscodeManager {
                 mTranscodingClient = service.registerClient(
                         mTranscodingClientCallback,
                         mPackageName,
-                        mPackageName,
-                        IMediaTranscodingService.USE_CALLING_UID,
-                        IMediaTranscodingService.USE_CALLING_PID);
+                        mPackageName);
 
                 if (mTranscodingClient != null) {
                     mTranscodingClient.asBinder().linkToDeath(() -> onClientDied(), /* flags */ 0);

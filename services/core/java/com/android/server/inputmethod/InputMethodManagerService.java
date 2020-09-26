@@ -1702,7 +1702,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         Intent intent = new Intent(ACTION_SHOW_INPUT_METHOD_PICKER)
                 .setPackage(mContext.getPackageName());
-        mImeSwitchPendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
+        mImeSwitchPendingIntent = PendingIntent.getBroadcast(mContext, 0, intent,
+                PendingIntent.FLAG_IMMUTABLE);
 
         mShowOngoingImeSwitcherForPhones = false;
 
@@ -2530,7 +2531,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mCurIntent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                 com.android.internal.R.string.input_method_binding_label);
         mCurIntent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
-                mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS), 0));
+                mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS),
+                PendingIntent.FLAG_IMMUTABLE));
 
         if (bindCurrentInputMethodServiceLocked(mCurIntent, this, IME_CONNECTION_BIND_FLAGS)) {
             mLastBindTime = SystemClock.uptimeMillis();
@@ -3463,6 +3465,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         final boolean sameWindowFocused = mCurFocusedWindow == windowToken;
         final boolean isTextEditor = (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0;
+        final boolean startInputByWinGainedFocus =
+                (startInputFlags & StartInputFlags.WINDOW_GAINED_FOCUS) != 0;
+
         if (sameWindowFocused && isTextEditor) {
             if (DEBUG) {
                 Slog.w(TAG, "Window already focused, ignoring focus gain of: " + client
@@ -3506,7 +3511,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         InputBindResult res = null;
         switch (softInputMode & LayoutParams.SOFT_INPUT_MASK_STATE) {
             case LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
-                if (!isTextEditor || !doAutoShow) {
+                if (!sameWindowFocused && (!isTextEditor || !doAutoShow)) {
                     if (LayoutParams.mayUseInputMethod(windowFlags)) {
                         // There is no focus view, and this window will
                         // be behind any soft input window, so hide the
@@ -3555,7 +3560,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 break;
             case LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN:
-                if (isImeVisible()) {
+                if (!sameWindowFocused) {
                     if (DEBUG) Slog.v(TAG, "Window asks to hide input");
                     hideCurrentInputLocked(mCurFocusedWindow, 0, null,
                             SoftInputShowHideReason.HIDE_ALWAYS_HIDDEN_STATE);
@@ -3584,7 +3589,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (DEBUG) Slog.v(TAG, "Window asks to always show input");
                 if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
                         unverifiedTargetSdkVersion, startInputFlags)) {
-                    if (!isImeVisible()) {
+                    if (!sameWindowFocused) {
                         if (attribute != null) {
                             res = startInputUncheckedLocked(cs, inputContext, missingMethods,
                                     attribute, startInputFlags, startInputReason);
@@ -3603,17 +3608,26 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         if (!didStart) {
             if (attribute != null) {
-                if (!DebugFlags.FLAG_OPTIMIZE_START_INPUT.value()
+                if (sameWindowFocused) {
+                    // On previous platforms, when Dialogs re-gained focus, the Activity behind
+                    // would briefly gain focus first, and dismiss the IME.
+                    // On R that behavior has been fixed, but unfortunately apps have come
+                    // to rely on this behavior to hide the IME when the editor no longer has focus
+                    // To maintain compatibility, we are now hiding the IME when we don't have
+                    // an editor upon refocusing a window.
+                    if (startInputByWinGainedFocus) {
+                        hideCurrentInputLocked(mCurFocusedWindow, 0, null,
+                                SoftInputShowHideReason.HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR);
+                    }
+                    res = startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
+                            startInputFlags, startInputReason);
+                } else if (!DebugFlags.FLAG_OPTIMIZE_START_INPUT.value()
                         || (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0) {
                     res = startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
                             startInputFlags, startInputReason);
                 } else {
                     res = InputBindResult.NO_EDITOR;
                 }
-            } else if (sameWindowFocused) {
-                return new InputBindResult(
-                        InputBindResult.ResultCode.SUCCESS_REPORT_WINDOW_FOCUS_ONLY,
-                        null, null, null, -1, null);
             } else {
                 res = InputBindResult.NULL_EDITOR_INFO;
             }

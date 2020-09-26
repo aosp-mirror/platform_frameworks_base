@@ -623,17 +623,19 @@ public final class DataManagerTest {
     }
 
     @Test
-    public void testShortcutDeleted() {
+    public void testShortcutsDeleted() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
 
         ShortcutInfo shortcut1 = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, "sc1",
                 buildPerson());
         ShortcutInfo shortcut2 = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, "sc2",
                 buildPerson());
+        ShortcutInfo shortcut3 = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, "sc3",
+                buildPerson());
         mShortcutChangeCallback.onShortcutsAddedOrUpdated(TEST_PKG_NAME,
-                Arrays.asList(shortcut1, shortcut2), UserHandle.of(USER_ID_PRIMARY));
+                Arrays.asList(shortcut1, shortcut2, shortcut3), UserHandle.of(USER_ID_PRIMARY));
         mShortcutChangeCallback.onShortcutsRemoved(TEST_PKG_NAME,
-                Collections.singletonList(shortcut1), UserHandle.of(USER_ID_PRIMARY));
+                List.of(shortcut1, shortcut3), UserHandle.of(USER_ID_PRIMARY));
 
         List<ConversationInfo> conversations = getConversationsInPrimary();
 
@@ -641,7 +643,7 @@ public final class DataManagerTest {
         assertEquals("sc2", conversations.get(0).getShortcutId());
 
         verify(mNotificationManagerInternal)
-                .onConversationRemoved(TEST_PKG_NAME, TEST_PKG_UID, "sc1");
+                .onConversationRemoved(TEST_PKG_NAME, TEST_PKG_UID, Set.of("sc1", "sc3"));
     }
 
     @Test

@@ -61,7 +61,6 @@ import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.RemovalConsumer;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintUpdateActiveUserClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -404,7 +403,7 @@ class Face10 implements IHwBinder.DeathRecipient {
     }
 
     /**
-     * Schedules the {@link FingerprintUpdateActiveUserClient} without posting the work onto the
+     * Schedules the {@link FaceUpdateActiveUserClient} without posting the work onto the
      * handler. Many/most APIs are user-specific. However, the HAL requires explicit "setActiveUser"
      * invocation prior to authenticate/enroll/etc. Thus, internally we usually want to schedule
      * this operation on the same lambda/runnable as those operations so that the ordering is

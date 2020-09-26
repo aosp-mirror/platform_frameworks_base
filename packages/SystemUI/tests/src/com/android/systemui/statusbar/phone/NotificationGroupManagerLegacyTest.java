@@ -30,7 +30,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
@@ -44,6 +44,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -60,14 +62,15 @@ public class NotificationGroupManagerLegacyTest extends SysuiTestCase {
 
     @Before
     public void setup() {
-        mDependency.injectMockDependency(BubbleController.class);
+        mDependency.injectMockDependency(Bubbles.class);
         initializeGroupManager();
     }
 
     private void initializeGroupManager() {
         mGroupManager = new NotificationGroupManagerLegacy(
                 mock(StatusBarStateController.class),
-                () -> mock(PeopleNotificationIdentifier.class));
+                () -> mock(PeopleNotificationIdentifier.class),
+                Optional.of(() -> mock(Bubbles.class)));
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
     }
 

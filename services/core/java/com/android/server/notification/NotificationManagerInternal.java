@@ -19,6 +19,8 @@ package com.android.server.notification;
 import android.app.Notification;
 import android.app.NotificationChannel;
 
+import java.util.Set;
+
 public interface NotificationManagerInternal {
     NotificationChannel getNotificationChannel(String pkg, int uid, String channelId);
     void enqueueNotification(String pkg, String basePkg, int callingUid, int callingPid,
@@ -28,5 +30,5 @@ public interface NotificationManagerInternal {
 
     void removeForegroundServiceFlagFromNotification(String pkg, int notificationId, int userId);
 
-    void onConversationRemoved(String pkg, int uid, String conversationId);
+    void onConversationRemoved(String pkg, int uid, Set<String> shortcuts);
 }

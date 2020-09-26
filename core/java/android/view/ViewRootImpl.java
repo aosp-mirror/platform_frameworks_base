@@ -1810,7 +1810,7 @@ public final class ViewRootImpl implements ViewParent,
                 mBlastSurfaceControl, width, height, mEnableTripleBuffering);
             // We only return the Surface the first time, as otherwise
             // it hasn't changed and there is no need to update.
-            ret = mBlastBufferQueue.getSurface();
+            ret = mBlastBufferQueue.createSurface();
         } else {
             mBlastBufferQueue.update(mBlastSurfaceControl, width, height);
         }
@@ -2666,7 +2666,7 @@ public final class ViewRootImpl implements ViewParent,
                     surfaceSizeChanged = true;
                     mLastSurfaceSize.set(mSurfaceSize.x, mSurfaceSize.y);
                 }
-                  final boolean alwaysConsumeSystemBarsChanged =
+                final boolean alwaysConsumeSystemBarsChanged =
                         mPendingAlwaysConsumeSystemBars != mAttachInfo.mAlwaysConsumeSystemBars;
                 updateColorModeIfNeeded(lp.getColorMode());
                 surfaceCreated = !hadSurface && mSurface.isValid();

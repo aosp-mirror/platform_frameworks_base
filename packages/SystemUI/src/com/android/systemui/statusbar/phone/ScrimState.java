@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.phone;
 import android.graphics.Color;
 import android.os.Trace;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
@@ -212,7 +214,9 @@ public enum ScrimState {
                 // Set all scrims black, before they fade transparent.
                 updateScrimColor(mScrimInFront, 1f /* alpha */, Color.BLACK /* tint */);
                 updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK /* tint */);
-                updateScrimColor(mScrimForBubble, 1f /* alpha */, Color.BLACK /* tint */);
+                if (mScrimForBubble != null) {
+                    updateScrimColor(mScrimForBubble, 1f /* alpha */, Color.BLACK /* tint */);
+                }
 
                 // Scrims should still be black at the end of the transition.
                 mFrontTint = Color.BLACK;
@@ -258,7 +262,7 @@ public enum ScrimState {
     float mDefaultScrimAlpha;
     ScrimView mScrimInFront;
     ScrimView mScrimBehind;
-    ScrimView mScrimForBubble;
+    @Nullable ScrimView mScrimForBubble;
 
     DozeParameters mDozeParameters;
     DockManager mDockManager;

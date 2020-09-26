@@ -17,16 +17,23 @@
 package android.view.inputmethod;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
 
 import android.annotation.Nullable;
+import android.graphics.BlurMaskFilter;
 import android.os.Parcel;
 import android.os.UserHandle;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.MaskFilterSpan;
+import android.text.style.UnderlineSpan;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -278,6 +285,55 @@ public class EditorInfoTest {
         editorInfo.writeToParcel(parcel, /* flags= */ 0);
 
         editorInfo.getInitialTextBeforeCursor(/* length= */ 60, /* flags= */ 1);
+    }
+
+    @Test
+    public void testSpanAfterSurroundingTextRetrieval() {
+        final int flags = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE;
+        final SpannableStringBuilder sb =
+                new SpannableStringBuilder("ParcelableSpan and non-ParcelableSpan test");
+        final int parcelableStart = 0;
+        final int parcelableEnd = 14;
+        final int nonParcelableStart = 19;
+        final int nonParcelableEnd = 37;
+        final UnderlineSpan parcelableSpan = new UnderlineSpan();
+        final MaskFilterSpan nonParcelableSpan =
+                new MaskFilterSpan(new BlurMaskFilter(5f, BlurMaskFilter.Blur.NORMAL));
+
+        // Set spans
+        sb.setSpan(parcelableSpan, parcelableStart, parcelableEnd, flags);
+        sb.setSpan(nonParcelableSpan, nonParcelableStart, nonParcelableEnd, flags);
+
+        Object[] spansBefore = sb.getSpans(/* queryStart= */ 0, sb.length(), Object.class);
+        Object[] parcelableSpanBefore = sb.getSpans(parcelableStart, parcelableEnd, Object.class);
+
+        // Verify the original spans length is 2, include ParcelableSpan and non-ParcelableSpan.
+        assertNotNull(spansBefore);
+        assertEquals(2, spansBefore.length);
+
+        // Set initial surrounding text then retrieve the text.
+        EditorInfo editorInfo = new EditorInfo();
+        editorInfo.initialSelStart = sb.length();
+        editorInfo.initialSelEnd = sb.length();
+        editorInfo.inputType = EditorInfo.TYPE_CLASS_TEXT;
+        editorInfo.setInitialSurroundingText(sb);
+        SpannableString textBeforeCursor =
+                (SpannableString) editorInfo.getInitialTextBeforeCursor(
+                        /* length= */ 60, /* flags= */ 1);
+
+        Object[] spansAfter =
+                textBeforeCursor.getSpans(/* queryStart= */ 0, sb.length(), Object.class);
+        Object[] parcelableSpanAfter =
+                textBeforeCursor.getSpans(parcelableStart, parcelableEnd, Object.class);
+        Object[] nonParcelableSpanAfter =
+                textBeforeCursor.getSpans(nonParcelableStart, nonParcelableEnd, Object.class);
+
+        // Verify only remain ParcelableSpan and it's different from the original Span instance.
+        assertNotNull(spansAfter);
+        assertEquals(1, spansAfter.length);
+        assertEquals(1, parcelableSpanAfter.length);
+        assertEquals(0, nonParcelableSpanAfter.length);
+        assertNotEquals(parcelableSpanBefore, parcelableSpanAfter);
     }
 
     private static void assertExpectedTextLength(EditorInfo editorInfo,

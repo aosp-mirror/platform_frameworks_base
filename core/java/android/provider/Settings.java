@@ -9708,6 +9708,14 @@ public final class Settings {
         public static final String DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR =
                 "render_shadows_in_compositor";
 
+        /**
+         * If true, submit buffers using blast in SurfaceView.
+         * (0 = false, 1 = true)
+         * @hide
+         */
+        public static final String DEVELOPMENT_USE_BLAST_ADAPTER_SV =
+                "use_blast_adapter_sv";
+
        /**
         * Whether user has enabled development settings.
         */

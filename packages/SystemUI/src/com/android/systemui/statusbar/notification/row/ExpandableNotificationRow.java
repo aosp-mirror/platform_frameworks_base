@@ -72,7 +72,7 @@ import com.android.internal.widget.CachingIconView;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -1074,7 +1074,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Dependency.get(BubbleController.class)
+                Dependency.get(Bubbles.class)
                         .onUserChangedBubble(mEntry, !mEntry.isBubble() /* createBubble */);
                 mHeadsUpManager.removeNotification(mEntry.getKey(), true /* releaseImmediately */);
             }
