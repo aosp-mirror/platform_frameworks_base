@@ -133,6 +133,7 @@ cc_defaults {
         "android.hardware.broadcastradio@1.0",
         "android.hardware.broadcastradio@1.1",
         "android.hardware.contexthub@1.0",
+        "android.hardware.gnss-cpp",
         "android.hardware.gnss@1.0",
         "android.hardware.gnss@1.1",
         "android.hardware.gnss@2.0",
