@@ -882,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"शीर्ष 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"शीर्ष 10"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"तळाशी फुल स्क्रीन"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"स्थिती <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. संपादित करण्यासाठी दोनदा टॅप करा."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g> . जोडण्यासाठी दोनदा टॅप करा."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> हलवा"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> काढा"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"<xliff:g id="TILE_NAME">%1$s</xliff:g> <xliff:g id="POSITION">%2$d</xliff:g> स्थानावर जोडा"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g> <xliff:g id="POSITION">%2$d</xliff:g> स्थानावर हलवा"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"टाइल काढून टाका"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"टाइल शेवटच्या स्थानावर जोडा"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"टाइल हलवा"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"टाइल जोडा"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> यावर हलवा"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> स्थानावर जोडा"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"स्थान <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"द्रुत सेटिंग्ज संपादक."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> सूचना: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"अ‍ॅप कदाचित विभाजित-स्क्रीनसह कार्य करू शकत नाही."</string>
