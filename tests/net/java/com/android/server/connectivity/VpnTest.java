@@ -20,6 +20,7 @@ import static android.content.pm.UserInfo.FLAG_ADMIN;
 import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 import static android.content.pm.UserInfo.FLAG_PRIMARY;
 import static android.content.pm.UserInfo.FLAG_RESTRICTED;
+import static android.net.ConnectivityManager.NetworkCallback;
 import static android.net.NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
@@ -45,7 +46,9 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -66,6 +69,7 @@ import android.net.Ikev2VpnProfile;
 import android.net.InetAddresses;
 import android.net.IpPrefix;
 import android.net.IpSecManager;
+import android.net.IpSecTunnelInterfaceResponse;
 import android.net.LinkProperties;
 import android.net.LocalSocket;
 import android.net.Network;
@@ -75,6 +79,8 @@ import android.net.RouteInfo;
 import android.net.UidRange;
 import android.net.VpnManager;
 import android.net.VpnService;
+import android.net.ipsec.ike.IkeSessionCallback;
+import android.net.ipsec.ike.exceptions.IkeProtocolException;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.ConditionVariable;
@@ -101,6 +107,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -149,6 +156,11 @@ public class VpnTest {
     private static final String TEST_VPN_SERVER = "1.2.3.4";
     private static final String TEST_VPN_IDENTITY = "identity";
     private static final byte[] TEST_VPN_PSK = "psk".getBytes();
+
+    private static final Network TEST_NETWORK = new Network(Integer.MAX_VALUE);
+    private static final String TEST_IFACE_NAME = "TEST_IFACE";
+    private static final int TEST_TUNNEL_RESOURCE_ID = 0x2345;
+    private static final long TEST_TIMEOUT_MS = 500L;
 
     /**
      * Names and UIDs for some fake packages. Important points:
@@ -227,6 +239,13 @@ public class VpnTest {
         // Deny all appops by default.
         when(mAppOps.noteOpNoThrow(anyInt(), anyInt(), anyString()))
                 .thenReturn(AppOpsManager.MODE_IGNORED);
+
+        // Setup IpSecService
+        final IpSecTunnelInterfaceResponse tunnelResp =
+                new IpSecTunnelInterfaceResponse(
+                        IpSecManager.Status.OK, TEST_TUNNEL_RESOURCE_ID, TEST_IFACE_NAME);
+        when(mIpSecService.createTunnelInterface(any(), any(), any(), any(), any()))
+                .thenReturn(tunnelResp);
     }
 
     @Test
@@ -986,6 +1005,52 @@ public class VpnTest {
                         eq(Process.myUid()),
                         eq(TEST_VPN_PKG),
                         eq(AppOpsManager.MODE_IGNORED));
+    }
+
+    private NetworkCallback triggerOnAvailableAndGetCallback() {
+        final ArgumentCaptor<NetworkCallback> networkCallbackCaptor =
+                ArgumentCaptor.forClass(NetworkCallback.class);
+        verify(mConnectivityManager, timeout(TEST_TIMEOUT_MS))
+                .requestNetwork(any(), networkCallbackCaptor.capture());
+
+        final NetworkCallback cb = networkCallbackCaptor.getValue();
+        cb.onAvailable(TEST_NETWORK);
+        return cb;
+    }
+
+    @Test
+    public void testStartPlatformVpnAuthenticationFailed() throws Exception {
+        final ArgumentCaptor<IkeSessionCallback> captor =
+                ArgumentCaptor.forClass(IkeSessionCallback.class);
+        final IkeProtocolException exception = mock(IkeProtocolException.class);
+        when(exception.getErrorType())
+                .thenReturn(IkeProtocolException.ERROR_TYPE_AUTHENTICATION_FAILED);
+
+        final Vpn vpn = startLegacyVpn(mVpnProfile);
+        final NetworkCallback cb = triggerOnAvailableAndGetCallback();
+
+        // Wait for createIkeSession() to be called before proceeding in order to ensure consistent
+        // state
+        verify(mIkev2SessionCreator, timeout(TEST_TIMEOUT_MS))
+                .createIkeSession(any(), any(), any(), any(), captor.capture(), any());
+        final IkeSessionCallback ikeCb = captor.getValue();
+        ikeCb.onClosedExceptionally(exception);
+
+        verify(mConnectivityManager, timeout(TEST_TIMEOUT_MS)).unregisterNetworkCallback(eq(cb));
+        assertEquals(DetailedState.FAILED, vpn.getNetworkInfo().getDetailedState());
+    }
+
+    @Test
+    public void testStartPlatformVpnIllegalArgumentExceptionInSetup() throws Exception {
+        when(mIkev2SessionCreator.createIkeSession(any(), any(), any(), any(), any(), any()))
+                .thenThrow(new IllegalArgumentException());
+        final Vpn vpn = startLegacyVpn(mVpnProfile);
+        final NetworkCallback cb = triggerOnAvailableAndGetCallback();
+
+        // Wait for createIkeSession() to be called before proceeding in order to ensure consistent
+        // state
+        verify(mConnectivityManager, timeout(TEST_TIMEOUT_MS)).unregisterNetworkCallback(eq(cb));
+        assertEquals(DetailedState.FAILED, vpn.getNetworkInfo().getDetailedState());
     }
 
     private void setAndVerifyAlwaysOnPackage(Vpn vpn, int uid, boolean lockdownEnabled) {
