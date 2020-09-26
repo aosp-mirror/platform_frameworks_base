@@ -425,8 +425,7 @@ public final class BasePermission {
 
     public void enforceDeclaredUsedAndRuntimeOrDevelopment(AndroidPackage pkg,
             UidPermissionState uidState) {
-        int index = pkg.getRequestedPermissions().indexOf(name);
-        if (!uidState.hasRequestedPermission(name) && index == -1) {
+        if (!uidState.hasPermissionState(name) && !pkg.getRequestedPermissions().contains(name)) {
             throw new SecurityException("Package " + pkg.getPackageName()
                     + " has not requested permission " + name);
         }
