@@ -24,14 +24,14 @@ java_library {
     static_libs: ["window-sidecar"],
     installable: true,
     sdk_version: "core_platform",
-    vendor: true,
+    system_ext_specific: true,
     libs: ["framework", "androidx.annotation_annotation",],
     required: ["androidx.window.sidecar.xml",],
 }
 
 prebuilt_etc {
     name: "androidx.window.sidecar.xml",
-    vendor: true,
+    system_ext_specific: true,
     sub_dir: "permissions",
     src: "androidx.window.sidecar.xml",
     filename_from_src: true,
