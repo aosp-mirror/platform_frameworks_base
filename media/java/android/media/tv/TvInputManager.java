@@ -1953,6 +1953,19 @@ public final class TvInputManager {
     }
 
     /**
+     * @hide
+     */
+    public List<TvChannelInfo> getTvCurrentChannelInfos() {
+        // TODO: handle retuned() cases and add a method to TvInputCallback
+        // TODO: unhide
+        try {
+            return mService.getTvCurrentChannelInfos(mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * The Session provides the per-session functionality of TV inputs.
      * @hide
      */
