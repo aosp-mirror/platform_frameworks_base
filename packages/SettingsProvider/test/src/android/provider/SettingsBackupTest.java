@@ -502,6 +502,7 @@ public class SettingsBackupTest {
                     Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_PKGS,
                     Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_VALUES,
                     Settings.Global.GLOBAL_SETTINGS_ANGLE_ALLOWLIST,
+                    Settings.Global.ANGLE_EGL_FEATURES,
                     Settings.Global.UPDATABLE_DRIVER_ALL_APPS,
                     Settings.Global.UPDATABLE_DRIVER_PRODUCTION_OPT_IN_APPS,
                     Settings.Global.UPDATABLE_DRIVER_PRERELEASE_OPT_IN_APPS,
