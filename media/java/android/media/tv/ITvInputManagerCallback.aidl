@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.media.tv.TvChannelInfo;
 import android.media.tv.TvInputInfo;
 
 /**
@@ -28,4 +29,5 @@ oneway interface ITvInputManagerCallback {
     void onInputUpdated(in String inputId);
     void onInputStateChanged(in String inputId, int state);
     void onTvInputInfoUpdated(in TvInputInfo TvInputInfo);
+    void onCurrentTvChannelInfosUpdated(in List<TvChannelInfo> currentTvChannelInfos);
 }

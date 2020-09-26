@@ -699,8 +699,8 @@ public final class TvInputManagerService extends SystemService {
         SessionState sessionState = null;
         try {
             sessionState = getSessionStateLocked(sessionToken, callingUid, userId);
+            UserState userState = getOrCreateUserStateLocked(userId);
             if (sessionState.session != null) {
-                UserState userState = getOrCreateUserStateLocked(userId);
                 if (sessionToken == userState.mainSessionToken) {
                     setMainLocked(sessionToken, false, callingUid, userId);
                 }
@@ -709,6 +709,8 @@ public final class TvInputManagerService extends SystemService {
             }
             sessionState.isCurrent = false;
             sessionState.currentChannel = null;
+            notifyCurrentChannelInfosUpdatedLocked(
+                    userState, getCurrentTvChannelInfosInternalLocked(userState));
         } catch (RemoteException | SessionNotFoundException e) {
             Slog.e(TAG, "error in releaseSession", e);
         } finally {
@@ -847,6 +849,22 @@ public final class TvInputManagerService extends SystemService {
                 Slog.e(TAG, "failed to report state change to callback", e);
             }
         }
+    }
+
+    private void notifyCurrentChannelInfosUpdatedLocked(
+            UserState userState, List<TvChannelInfo> infos) {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyCurrentChannelInfosUpdatedLocked");
+        }
+        int n = userState.mCallbacks.beginBroadcast();
+        for (int i = 0; i < n; ++i) {
+            try {
+                userState.mCallbacks.getBroadcastItem(i).onCurrentTvChannelInfosUpdated(infos);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "failed to report updated current channel infos to callback", e);
+            }
+        }
+        userState.mCallbacks.finishBroadcast();
     }
 
     private void updateTvInputInfoLocked(UserState userState, TvInputInfo inputInfo) {
@@ -1414,6 +1432,8 @@ public final class TvInputManagerService extends SystemService {
                         if (sessionState != null) {
                             sessionState.isCurrent = true;
                             sessionState.currentChannel = channelUri;
+                            notifyCurrentChannelInfosUpdatedLocked(
+                                    userState, getCurrentTvChannelInfosInternalLocked(userState));
                         }
                         if (TvContract.isChannelUriForPassthroughInput(channelUri)) {
                             // Do not log the watch history for passthrough inputs.
@@ -2069,76 +2089,17 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public List<TvChannelInfo> getTvCurrentChannelInfos(@UserIdInt int userId) {
+        public List<TvChannelInfo> getCurrentTvChannelInfos(@UserIdInt int userId) {
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
                     Binder.getCallingUid(), userId, "getTvCurrentChannelInfos");
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     UserState userState = getOrCreateUserStateLocked(resolvedUserId);
-                    List<TvChannelInfo> channelInfos = new ArrayList<>();
-                    boolean watchedProgramsAccess = hasAccessWatchedProgramsPermission();
-                    for (SessionState state : userState.sessionStateMap.values()) {
-                        if (state.isCurrent) {
-                            Integer appTag;
-                            int appType;
-                            if (state.callingUid == Binder.getCallingUid()) {
-                                appTag = APP_TAG_SELF;
-                                appType = TvChannelInfo.APP_TYPE_SELF;
-                            } else {
-                                appTag = userState.mAppTagMap.get(state.callingUid);
-                                if (appTag == null) {
-                                    appTag = userState.mNextAppTag++;
-                                    userState.mAppTagMap.put(state.callingUid, appTag);
-                                }
-                                appType = isSystemApp(state.componentName.getPackageName())
-                                        ? TvChannelInfo.APP_TYPE_SYSTEM
-                                        : TvChannelInfo.APP_TYPE_NON_SYSTEM;
-                            }
-                            channelInfos.add(new TvChannelInfo(
-                                    state.inputId,
-                                    watchedProgramsAccess ? state.currentChannel : null,
-                                    state.isRecordingSession,
-                                    isForeground(state.callingPid),
-                                    appType,
-                                    appTag));
-                        }
-                    }
-                    return channelInfos;
+                    return getCurrentTvChannelInfosInternalLocked(userState);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
-            }
-        }
-
-        protected boolean isForeground(int pid) {
-            if (mActivityManager == null) {
-                return false;
-            }
-            List<RunningAppProcessInfo> appProcesses = mActivityManager.getRunningAppProcesses();
-            if (appProcesses == null) {
-                return false;
-            }
-            for (RunningAppProcessInfo appProcess : appProcesses) {
-                if (appProcess.pid == pid
-                        && appProcess.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private boolean hasAccessWatchedProgramsPermission() {
-            return mContext.checkCallingPermission(PERMISSION_ACCESS_WATCHED_PROGRAMS)
-                    == PackageManager.PERMISSION_GRANTED;
-        }
-
-        private boolean isSystemApp(String pkg) {
-            try {
-                return (mContext.getPackageManager().getApplicationInfo(pkg, 0).flags
-                        & ApplicationInfo.FLAG_SYSTEM) != 0;
-            } catch (NameNotFoundException e) {
-                return false;
             }
         }
 
@@ -2309,6 +2270,69 @@ public final class TvInputManagerService extends SystemService {
                 }
             }
             mTvInputHardwareManager.dump(fd, writer, args);
+        }
+    }
+
+    private List<TvChannelInfo> getCurrentTvChannelInfosInternalLocked(UserState userState) {
+        List<TvChannelInfo> channelInfos = new ArrayList<>();
+        boolean watchedProgramsAccess = hasAccessWatchedProgramsPermission();
+        for (SessionState state : userState.sessionStateMap.values()) {
+            if (state.isCurrent) {
+                Integer appTag;
+                int appType;
+                if (state.callingUid == Binder.getCallingUid()) {
+                    appTag = APP_TAG_SELF;
+                    appType = TvChannelInfo.APP_TYPE_SELF;
+                } else {
+                    appTag = userState.mAppTagMap.get(state.callingUid);
+                    if (appTag == null) {
+                        appTag = userState.mNextAppTag++;
+                        userState.mAppTagMap.put(state.callingUid, appTag);
+                    }
+                    appType = isSystemApp(state.componentName.getPackageName())
+                            ? TvChannelInfo.APP_TYPE_SYSTEM
+                            : TvChannelInfo.APP_TYPE_NON_SYSTEM;
+                }
+                channelInfos.add(new TvChannelInfo(
+                        state.inputId,
+                        watchedProgramsAccess ? state.currentChannel : null,
+                        state.isRecordingSession,
+                        isForeground(state.callingPid),
+                        appType,
+                        appTag));
+            }
+        }
+        return channelInfos;
+    }
+
+    private boolean isForeground(int pid) {
+        if (mActivityManager == null) {
+            return false;
+        }
+        List<RunningAppProcessInfo> appProcesses = mActivityManager.getRunningAppProcesses();
+        if (appProcesses == null) {
+            return false;
+        }
+        for (RunningAppProcessInfo appProcess : appProcesses) {
+            if (appProcess.pid == pid
+                    && appProcess.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasAccessWatchedProgramsPermission() {
+        return mContext.checkCallingPermission(PERMISSION_ACCESS_WATCHED_PROGRAMS)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean isSystemApp(String pkg) {
+        try {
+            return (mContext.getPackageManager().getApplicationInfo(pkg, 0).flags
+                    & ApplicationInfo.FLAG_SYSTEM) != 0;
+        } catch (NameNotFoundException e) {
+            return false;
         }
     }
 
@@ -2685,6 +2709,11 @@ public final class TvInputManagerService extends SystemService {
                 if (mSessionState.session == null || mSessionState.client == null) {
                     return;
                 }
+                mSessionState.isCurrent = true;
+                mSessionState.currentChannel = channelUri;
+                UserState userState = getOrCreateUserStateLocked(mSessionState.userId);
+                notifyCurrentChannelInfosUpdatedLocked(
+                        userState, getCurrentTvChannelInfosInternalLocked(userState));
                 try {
                     // TODO: Consider adding this channel change in the watch log. When we do
                     // that, how we can protect the watch log from malicious tv inputs should
