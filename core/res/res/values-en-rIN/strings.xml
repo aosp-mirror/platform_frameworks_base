@@ -1622,10 +1622,10 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Raise volume above recommended level?\n\nListening at high volume for long periods may damage your hearing."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Use Accessibility Shortcut?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"When the shortcut is on, pressing both volume buttons for three seconds will start an accessibility feature."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Turn on accessibility features?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Turn on shortcut for accessibility features?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Holding down both volume keys for a few seconds turns on accessibility features. This may change how your device works.\n\nCurrent features:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nYou can change selected features in Settings &gt; Accessibility."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Turn on <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Turn on <xliff:g id="SERVICE">%1$s</xliff:g> shortcut?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Holding down both volume keys for a few seconds turns on <xliff:g id="SERVICE">%1$s</xliff:g>, an accessibility feature. This may change how your device works.\n\nYou can change this shortcut to another feature in Settings &gt; Accessibility."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Turn on"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Don’t turn on"</string>

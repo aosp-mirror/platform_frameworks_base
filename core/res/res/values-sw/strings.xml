@@ -1622,10 +1622,12 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ungependa kupandisha sauti zaidi ya kiwango kinachopendekezwa?\n\nKusikiliza kwa sauti ya juu kwa muda mrefu kunaweza kuharibu uwezo wako wa kusikia."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Ungependa kutumia njia ya mkato ya ufikivu?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Unapowasha kipengele cha njia ya mkato, hatua ya kubonyeza vitufe vyote viwili vya sauti kwa sekunde tatu itafungua kipengele cha ufikivu."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Ungependa kuwasha vipengele vya ufikivu?"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (3135860819356676426) -->
+    <skip />
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Hatua ya kushikilia chini vitufe vyote viwili vya sauti kwa sekunde chache huwasha vipengele vya ufikivu. Huenda hatua hii ikabadilisha jinsi kifaa chako kinavyofanya kazi.\n\nVipengele vya sasa:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nUnaweza kubadilisha vipengele ulivyochagua katika Mipangilio &gt; Ufikivu."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Ungependa kuwasha <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
+    <!-- no translation found for accessibility_shortcut_single_service_warning_title (1909518473488345266) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Hatua ya kushikilia chini vitufe vyote viwili vya sauti kwa sekunde chache huwasha <xliff:g id="SERVICE">%1$s</xliff:g>, kipengele cha ufikivu. Huenda hatua hii ikabadilisha jinsi kifaa chako kinavyofanya kazi.\n\nUnaweza kubadilisha njia hii ya mkato iwe kipengele kingine katika Mipangilio &gt; Ufikivu."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Washa"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Usiwashe"</string>

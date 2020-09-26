@@ -1622,10 +1622,12 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Lautstärke über den Schwellenwert anheben?\n\nWenn du über einen längeren Zeitraum Musik in hoher Lautstärke hörst, kann dies dein Gehör schädigen."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Verknüpfung für Bedienungshilfen verwenden?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Wenn die Verknüpfung aktiviert ist, kannst du die beiden Lautstärketasten drei Sekunden lang gedrückt halten, um eine Bedienungshilfe zu starten."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Bedienungshilfen aktivieren?"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (3135860819356676426) -->
+    <skip />
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Wenn du beide Lautstärketasten einige Sekunden lang gedrückt hältst, aktivierst du die Bedienungshilfen. Dadurch kann sich die Funktionsweise deines Geräts ändern.\n\nAktuelle Funktionen:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nDu kannst ausgewählte Funktionen unter \"Einstellungen\" &gt; \"Bedienungshilfen\" ändern."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> aktivieren?"</string>
+    <!-- no translation found for accessibility_shortcut_single_service_warning_title (1909518473488345266) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Wenn du beide Lautstärketasten einige Sekunden lang gedrückt hältst, aktivierst du die Bedienungshilfe \"<xliff:g id="SERVICE">%1$s</xliff:g>\". Dadurch kann sich die Funktionsweise deines Geräts ändern.\n\nUnter \"Einstellungen &gt; \"Bedienungshilfen\" kannst du dieser Verknüpfung eine andere Funktion zuweisen."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktivieren"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Nicht aktivieren"</string>
@@ -1792,8 +1794,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Von deinem Administrator gelöscht"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt\n\n"<annotation id="url">"Weitere Informationen"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Der Stromsparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt\n\n"<annotation id="url">"Weitere Informationen"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Der Stromsparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Der Datensparmodus verhindert zum einen, dass manche Apps im Hintergrund Daten senden oder empfangen, sodass weniger Daten verbraucht werden. Zum anderen werden die Datenzugriffe der gerade aktiven App eingeschränkt, was z. B. dazu führen kann, dass Bilder erst angetippt werden müssen, bevor sie sichtbar werden."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivieren"</string>
@@ -1829,8 +1831,7 @@
       <item quantity="other">Für %d h</item>
       <item quantity="one">Für 1 h</item>
     </plurals>
-    <!-- no translation found for zen_mode_until_next_day (1403042784161725038) -->
-    <skip />
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Bis <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Bis <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Bis <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (nächste Weckzeit)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Bis zur Deaktivierung"</string>
@@ -2002,9 +2003,9 @@
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Feedback geben"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Infomitteilung zum Ablaufmodus"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Dein Akku könnte vor der gewöhnlichen Ladezeit leer sein"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Energiesparmodus aktiviert, um die Akkulaufzeit zu verlängern"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Energiesparmodus"</string>
-    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Energiesparmodus deaktiviert"</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Stromsparmodus aktiviert, um die Akkulaufzeit zu verlängern"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Stromsparmodus"</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Stromsparmodus deaktiviert"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Das Smartphone ist ausreichend geladen. Es sind keine Funktionen mehr beschränkt."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Das Tablet ist ausreichend geladen. Es sind keine Funktionen mehr beschränkt."</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Das Gerät ist ausreichend geladen. Es sind keine Funktionen mehr beschränkt."</string>

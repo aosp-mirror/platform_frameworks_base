@@ -1622,10 +1622,12 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vill du höja volymen över den rekommenderade nivån?\n\nAtt lyssna med stark volym långa stunder åt gången kan skada hörseln."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vill du använda Aktivera tillgänglighet snabbt?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"När kortkommandot har aktiverats startar du en tillgänglighetsfunktion genom att trycka ned båda volymknapparna i tre sekunder."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Vill du aktivera tillgänglighetsfunktionerna?"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (3135860819356676426) -->
+    <skip />
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Om du trycker ned båda volymknapparna i ett par sekunder aktiveras tillgänglighetsfunktionerna. Det kan få enheten ett fungera annorlunda.\n\nAktuella funktioner:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nDu kan ändra vilka funktioner som aktiveras under Inställningar &gt; Tillgänglighet."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Vill du aktivera <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
+    <!-- no translation found for accessibility_shortcut_single_service_warning_title (1909518473488345266) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Om du trycker ned båda volymknapparna i ett par sekunder aktiveras <xliff:g id="SERVICE">%1$s</xliff:g>, en tillgänglighetsfunktion. Det kan leda till att enheten fungerar annorlunda.\n\nDu kan ändra vilken funktion som ska aktiveras med genvägen under Inställningar &gt; Tillgänglighet."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktivera"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Aktivera inte"</string>
