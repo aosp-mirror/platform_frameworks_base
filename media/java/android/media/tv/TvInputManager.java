@@ -899,6 +899,10 @@ public final class TvInputManager {
          */
         public void onTvInputInfoUpdated(TvInputInfo inputInfo) {
         }
+
+        /** @hide */
+        public void onCurrentTvChannelInfosUpdated(List<TvChannelInfo> tvChannelInfos) {
+        }
     }
 
     private static final class TvInputCallbackRecord {
@@ -955,6 +959,16 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mCallback.onTvInputInfoUpdated(inputInfo);
+                }
+            });
+        }
+
+        public void postCurrentTvChannelInfosUpdated(
+                final List<TvChannelInfo> currentTvChannelInfos) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onCurrentTvChannelInfosUpdated(currentTvChannelInfos);
                 }
             });
         }
@@ -1259,6 +1273,15 @@ public final class TvInputManager {
                 synchronized (mLock) {
                     for (TvInputCallbackRecord record : mCallbackRecords) {
                         record.postTvInputInfoUpdated(inputInfo);
+                    }
+                }
+            }
+
+            @Override
+            public void onCurrentTvChannelInfosUpdated(List<TvChannelInfo> currentTvChannelInfos) {
+                synchronized (mLock) {
+                    for (TvInputCallbackRecord record : mCallbackRecords) {
+                        record.postCurrentTvChannelInfosUpdated(currentTvChannelInfos);
                     }
                 }
             }
@@ -1955,11 +1978,9 @@ public final class TvInputManager {
     /**
      * @hide
      */
-    public List<TvChannelInfo> getTvCurrentChannelInfos() {
-        // TODO: handle retuned() cases and add a method to TvInputCallback
-        // TODO: unhide
+    public List<TvChannelInfo> getCurrentTvChannelInfos() {
         try {
-            return mService.getTvCurrentChannelInfos(mUserId);
+            return mService.getCurrentTvChannelInfos(mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
