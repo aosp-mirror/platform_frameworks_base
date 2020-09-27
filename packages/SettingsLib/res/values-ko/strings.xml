@@ -538,7 +538,7 @@
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"지금 설정"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"나중에"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"추가"</string>
-    <string name="user_new_user_name" msgid="60979820612818840">"새 사용자"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"신규 사용자"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"새 프로필"</string>
     <string name="user_info_settings_title" msgid="6351390762733279907">"사용자 정보"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"프로필 정보"</string>
