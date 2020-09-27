@@ -246,7 +246,7 @@
     <string name="accessibility_remove_notification" msgid="1641455251495815527">"Eliminar notificación"</string>
     <string name="accessibility_gps_enabled" msgid="4061313248217660858">"GPS habilitado"</string>
     <string name="accessibility_gps_acquiring" msgid="896207402196024040">"Adquisición de GPS"</string>
-    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter habilitado"</string>
+    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Teletipo habilitado"</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Timbre en vibración"</string>
     <string name="accessibility_ringer_silent" msgid="8994620163934249882">"Timbre en silencio"</string>
     <!-- no translation found for accessibility_casting (8708751252897282313) -->
@@ -879,8 +879,8 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Mostrar íconos de notificaciones con prioridad baja"</string>
     <string name="other" msgid="429768510980739978">"Otros"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"Quitar tarjeta"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"Agregar tarjeta al final"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"quitar tarjeta"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"agregar tarjeta al final"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Mover la tarjeta"</string>
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Agregar tarjeta"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Mover a <xliff:g id="POSITION">%1$d</xliff:g>"</string>

@@ -880,8 +880,8 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"顯示低優先順序通知圖示"</string>
     <string name="other" msgid="429768510980739978">"其他"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"移除圖塊"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"將圖塊加到結尾"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"移圖塊"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"將圖塊加到最尾"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"移動圖塊"</string>
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"加圖塊"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"移去 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"加去位置 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
