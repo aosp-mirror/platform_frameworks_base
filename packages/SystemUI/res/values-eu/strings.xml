@@ -881,11 +881,11 @@
     <string name="other" msgid="429768510980739978">"Beste bat"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"kendu lauza"</string>
     <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"gehitu lauza amaieran"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Aldatu tokiz lauza"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Mugitu lauza"</string>
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Gehitu lauza"</string>
-    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Eraman <xliff:g id="POSITION">%1$d</xliff:g>garren kokapenera"</string>
-    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Gehitu <xliff:g id="POSITION">%1$d</xliff:g>garren kokapenean"</string>
-    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Kokapena: <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Eraman <xliff:g id="POSITION">%1$d</xliff:g>garren lekura"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Gehitu <xliff:g id="POSITION">%1$d</xliff:g>garren lekuan"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"<xliff:g id="POSITION">%1$d</xliff:g>garren lekua"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Ezarpen bizkorren editorea."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> zerbitzuaren jakinarazpena: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Ireki ezarpenak."</string>

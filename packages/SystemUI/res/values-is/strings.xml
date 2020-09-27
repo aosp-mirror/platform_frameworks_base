@@ -879,10 +879,10 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Sýna tákn fyrir tilkynningar með litlum forgangi"</string>
     <string name="other" msgid="429768510980739978">"Annað"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"fjarlægja reit"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"bæta reit við aftast"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Færa reit"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Bæta reit við"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"fjarlægja flís"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"bæta flís við aftast"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Færa flís"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Bæta flís við"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Færa í <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Bæta við í stöðu <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Staða <xliff:g id="POSITION">%1$d</xliff:g>"</string>
