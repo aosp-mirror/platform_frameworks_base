@@ -155,11 +155,12 @@ cc_test {
         android: {
             srcs: [
                 "tests/BackupData_test.cpp",
-		"tests/BackupHelpers_test.cpp",
+                "tests/BackupHelpers_test.cpp",
+                "tests/CursorWindow_test.cpp",
                 "tests/ObbFile_test.cpp",
                 "tests/PosixUtils_test.cpp",
             ],
-            shared_libs: common_test_libs + ["libui"],
+            shared_libs: common_test_libs + ["libbinder", "liblog", "libui"],
         },
         host: {
             static_libs: common_test_libs + ["liblog", "libz"],
@@ -185,6 +186,7 @@ cc_benchmark {
         // Actual benchmarks.
         "tests/AssetManager2_bench.cpp",
         "tests/AttributeResolution_bench.cpp",
+        "tests/CursorWindow_bench.cpp",
         "tests/SparseEntry_bench.cpp",
         "tests/Theme_bench.cpp",
     ],
