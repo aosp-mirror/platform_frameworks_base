@@ -124,6 +124,22 @@ public class InsetsStateTest {
     }
 
     @Test
+    public void testCalculateInsets_extraNavRightClimateTop() throws Exception {
+        mState.getSource(ITYPE_CLIMATE_BAR).setFrame(new Rect(0, 0, 100, 100));
+        mState.getSource(ITYPE_CLIMATE_BAR).setVisible(true);
+        mState.getSource(ITYPE_EXTRA_NAVIGATION_BAR).setFrame(new Rect(80, 0, 100, 300));
+        mState.getSource(ITYPE_EXTRA_NAVIGATION_BAR).setVisible(true);
+        WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
+                false, DisplayCutout.NO_CUTOUT, 0, 0, 0, TYPE_APPLICATION,
+                WINDOWING_MODE_UNDEFINED, null);
+        // ITYPE_CLIMATE_BAR is a type of status bar and ITYPE_EXTRA_NAVIGATION_BAR is a type
+        // of navigation bar.
+        assertEquals(Insets.of(0, 100, 20, 0), insets.getSystemWindowInsets());
+        assertEquals(Insets.of(0, 100, 0, 0), insets.getInsets(Type.statusBars()));
+        assertEquals(Insets.of(0, 0, 20, 0), insets.getInsets(Type.navigationBars()));
+    }
+
+    @Test
     public void testCalculateInsets_imeIgnoredWithoutAdjustResize() {
         mState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 100, 100));
         mState.getSource(ITYPE_STATUS_BAR).setVisible(true);
@@ -336,6 +352,8 @@ public class InsetsStateTest {
     public void testGetDefaultVisibility() {
         assertTrue(InsetsState.getDefaultVisibility(ITYPE_STATUS_BAR));
         assertTrue(InsetsState.getDefaultVisibility(ITYPE_NAVIGATION_BAR));
+        assertTrue(InsetsState.getDefaultVisibility(ITYPE_CLIMATE_BAR));
+        assertTrue(InsetsState.getDefaultVisibility(ITYPE_EXTRA_NAVIGATION_BAR));
         assertTrue(InsetsState.getDefaultVisibility(ITYPE_CAPTION_BAR));
         assertFalse(InsetsState.getDefaultVisibility(ITYPE_IME));
     }

@@ -22,7 +22,7 @@
       "name": "CtsAutoFillServiceTestCases",
       "options": [
         {
-          "include-filter": "android.autofillservice.cts.LoginActivityTest"
+          "include-filter": "android.autofillservice.cts.dropdown.LoginActivityTest"
         },
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -36,7 +36,7 @@
       "name": "CtsAutoFillServiceTestCases",
       "options": [
         {
-          "include-filter": "android.autofillservice.cts.CheckoutActivityTest"
+          "include-filter": "android.autofillservice.cts.dropdown.CheckoutActivityTest"
         },
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"

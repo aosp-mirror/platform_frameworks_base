@@ -163,33 +163,34 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     @Inject
     public KeyguardHostViewController(KeyguardHostView view,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            KeyguardSecurityContainerController keyguardSecurityContainerController,
             AudioManager audioManager,
             TelephonyManager telephonyManager,
-            ViewMediatorCallback viewMediatorCallback) {
+            ViewMediatorCallback viewMediatorCallback,
+            KeyguardSecurityContainerController.Factory
+                    keyguardSecurityContainerControllerFactory) {
         super(view);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mKeyguardSecurityContainerController = keyguardSecurityContainerController;
         mAudioManager = audioManager;
         mTelephonyManager = telephonyManager;
         mViewMediatorCallback = viewMediatorCallback;
+        mKeyguardSecurityContainerController = keyguardSecurityContainerControllerFactory.create(
+                mSecurityCallback);
     }
 
     /** Initialize the Controller. */
     public void init() {
         super.init();
-        mView.setViewMediatorCallback(mViewMediatorCallback);
-        // Update ViewMediator with the current input method requirements
-        mViewMediatorCallback.setNeedsInput(mKeyguardSecurityContainerController.needsInput());
         mKeyguardSecurityContainerController.init();
-        mKeyguardSecurityContainerController.setSecurityCallback(mSecurityCallback);
-        mKeyguardSecurityContainerController.showPrimarySecurityScreen(false);
     }
 
     @Override
     protected void onViewAttached() {
+        mView.setViewMediatorCallback(mViewMediatorCallback);
+        // Update ViewMediator with the current input method requirements
+        mViewMediatorCallback.setNeedsInput(mKeyguardSecurityContainerController.needsInput());
         mKeyguardUpdateMonitor.registerCallback(mUpdateCallback);
         mView.setOnKeyListener(mOnKeyListener);
+        mKeyguardSecurityContainerController.showPrimarySecurityScreen(false);
     }
 
     @Override
@@ -350,7 +351,7 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     }
 
     public boolean handleBackKey() {
-        if (mKeyguardSecurityContainerController.getCurrentSecuritySelection()
+        if (mKeyguardSecurityContainerController.getCurrentSecurityMode()
                 != SecurityMode.None) {
             mKeyguardSecurityContainerController.dismiss(
                     false, KeyguardUpdateMonitor.getCurrentUser());

@@ -45,7 +45,7 @@ import android.widget.RemoteViews;
 
 import com.android.systemui.R;
 import com.android.systemui.TestableDependency;
-import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.bubbles.BubblesTestActivity;
 import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.plugins.FalsingManager;
@@ -73,6 +73,7 @@ import com.android.systemui.statusbar.policy.SmartReplyConstants;
 
 import org.mockito.ArgumentCaptor;
 
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -114,12 +115,12 @@ public class NotificationTestHelper {
         mContext = context;
         mTestLooper = testLooper;
         dependency.injectMockDependency(NotificationMediaManager.class);
-        dependency.injectMockDependency(BubbleController.class);
         dependency.injectMockDependency(NotificationShadeWindowController.class);
         mStatusBarStateController = mock(StatusBarStateController.class);
         mGroupMembershipManager = new NotificationGroupManagerLegacy(
                 mStatusBarStateController,
-                () -> mock(PeopleNotificationIdentifier.class));
+                () -> mock(PeopleNotificationIdentifier.class),
+                Optional.of(() -> mock(Bubbles.class)));
         mGroupExpansionManager = mGroupMembershipManager;
         mHeadsUpManager = new HeadsUpManagerPhone(mContext, mStatusBarStateController,
                 mock(KeyguardBypassController.class), mock(NotificationGroupManagerLegacy.class),

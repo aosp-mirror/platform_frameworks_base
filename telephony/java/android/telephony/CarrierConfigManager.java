@@ -3932,6 +3932,16 @@ public class CarrierConfigManager {
     public static final String KEY_DEFAULT_PREFERRED_APN_NAME_STRING =
             "default_preferred_apn_name_string";
 
+    /**
+     * For Android 11, provide a temporary solution for OEMs to use the lower of the two MTU values
+     * for IPv4 and IPv6 if both are sent.
+     * TODO: remove in later release
+     *
+     * @hide
+     */
+    public static final String KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED =
+            "use_lower_mtu_value_if_both_received";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -4473,6 +4483,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
+        sDefaults.putBoolean(KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED, false);
     }
 
     /**

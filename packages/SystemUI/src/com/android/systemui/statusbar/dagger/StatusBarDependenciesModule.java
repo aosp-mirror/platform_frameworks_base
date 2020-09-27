@@ -21,7 +21,7 @@ import android.content.Context;
 import android.os.Handler;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.MediaDataManager;
@@ -58,6 +58,8 @@ import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+
+import java.util.Optional;
 
 import dagger.Binds;
 import dagger.Lazy;
@@ -162,7 +164,7 @@ public interface StatusBarDependenciesModule {
             StatusBarStateController statusBarStateController,
             NotificationEntryManager notificationEntryManager,
             KeyguardBypassController bypassController,
-            BubbleController bubbleController,
+            Optional<Bubbles> bubblesOptional,
             DynamicPrivacyController privacyController,
             ForegroundServiceSectionController fgsSectionController,
             DynamicChildBindController dynamicChildBindController,
@@ -177,7 +179,7 @@ public interface StatusBarDependenciesModule {
                 statusBarStateController,
                 notificationEntryManager,
                 bypassController,
-                bubbleController,
+                bubblesOptional,
                 privacyController,
                 fgsSectionController,
                 dynamicChildBindController,

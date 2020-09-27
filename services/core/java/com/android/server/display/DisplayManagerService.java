@@ -131,7 +131,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * </p><p>
  * Display adapters are only weakly coupled to the display manager service.
  * Display adapters communicate changes in display device state to the display manager
- * service asynchronously via a {@link DisplayAdapter.Listener} registered
+ * service asynchronously via a {@link DisplayAdapter.Listener}, and through
+ * the {@link DisplayDeviceRepository.Listener}, which is ultimately registered
  * by the display manager service.  This separation of concerns is important for
  * two main reasons.  First, it neatly encapsulates the responsibilities of these
  * two classes: display adapters handle individual display devices whereas
@@ -180,7 +181,7 @@ public final class DisplayManagerService extends SystemService {
     private final Context mContext;
     private final DisplayManagerHandler mHandler;
     private final Handler mUiHandler;
-    private final DisplayAdapterListener mDisplayAdapterListener;
+    private final DisplayDeviceListener mDisplayDeviceListener;
     private final DisplayModeDirector mDisplayModeDirector;
     private WindowManagerInternal mWindowManagerInternal;
     private InputManagerInternal mInputManagerInternal;
@@ -215,8 +216,7 @@ public final class DisplayManagerService extends SystemService {
     // List of all currently registered display adapters.
     private final ArrayList<DisplayAdapter> mDisplayAdapters = new ArrayList<DisplayAdapter>();
 
-    // List of all currently connected display devices.
-    private final ArrayList<DisplayDevice> mDisplayDevices = new ArrayList<DisplayDevice>();
+    private final DisplayDeviceRepository mDisplayDeviceRepo;
 
     // List of all logical displays indexed by logical display id.
     // Any modification to mLogicalDisplays must invalidate the DisplayManagerGlobal cache.
@@ -331,7 +331,8 @@ public final class DisplayManagerService extends SystemService {
         mContext = context;
         mHandler = new DisplayManagerHandler(DisplayThread.get().getLooper());
         mUiHandler = UiThread.getHandler();
-        mDisplayAdapterListener = new DisplayAdapterListener();
+        mDisplayDeviceListener = new DisplayDeviceListener();
+        mDisplayDeviceRepo = new DisplayDeviceRepository(mSyncRoot, mDisplayDeviceListener);
         mDisplayModeDirector = new DisplayModeDirector(context, mHandler);
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
         Resources resources = mContext.getResources();
@@ -467,6 +468,11 @@ public final class DisplayManagerService extends SystemService {
     @VisibleForTesting
     Handler getDisplayHandler() {
         return mHandler;
+    }
+
+    @VisibleForTesting
+    DisplayDeviceRepository getDisplayDeviceRepository() {
+        return mDisplayDeviceRepo;
     }
 
     private void loadStableDisplayValuesLocked() {
@@ -818,7 +824,17 @@ public final class DisplayManagerService extends SystemService {
                 return -1;
             }
 
-            handleDisplayDeviceAddedLocked(device);
+            // DisplayDevice events are handled manually for Virtual Displays.
+            // TODO: multi-display Fix this so that generic add/remove events are not handled in a
+            // different code path for virtual displays.  Currently this happens so that we can
+            // return a valid display ID synchronously upon successful Virtual Display creation.
+            // This code can run on any binder thread, while onDisplayDeviceAdded() callbacks are
+            // called on the DisplayThread (which we don't want to wait for?).
+            // One option would be to actually wait here on the binder thread
+            // to be notified when the virtual display is created (or failed).
+            mDisplayDeviceRepo.onDisplayDeviceEvent(device,
+                    DisplayAdapter.DISPLAY_DEVICE_EVENT_ADDED);
+
             LogicalDisplay display = findLogicalDisplayForDeviceLocked(device);
             if (display != null) {
                 return display.getDisplayIdLocked();
@@ -828,7 +844,8 @@ public final class DisplayManagerService extends SystemService {
             Slog.w(TAG, "Rejecting request to create virtual display "
                     + "because the logical display was not created.");
             mVirtualDisplayAdapter.releaseVirtualDisplayLocked(callback.asBinder());
-            handleDisplayDeviceRemovedLocked(device);
+            mDisplayDeviceRepo.onDisplayDeviceEvent(device,
+                    DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED);
         }
         return -1;
     }
@@ -863,7 +880,9 @@ public final class DisplayManagerService extends SystemService {
             DisplayDevice device =
                     mVirtualDisplayAdapter.releaseVirtualDisplayLocked(appToken);
             if (device != null) {
-                handleDisplayDeviceRemovedLocked(device);
+                // TODO - handle virtual displays the same as other display adapters.
+                mDisplayDeviceRepo.onDisplayDeviceEvent(device,
+                        DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED);
             }
         }
     }
@@ -883,7 +902,7 @@ public final class DisplayManagerService extends SystemService {
         synchronized (mSyncRoot) {
             // main display adapter
             registerDisplayAdapterLocked(new LocalDisplayAdapter(
-                    mSyncRoot, mContext, mHandler, mDisplayAdapterListener));
+                    mSyncRoot, mContext, mHandler, mDisplayDeviceRepo));
 
             // Standalone VR devices rely on a virtual display as their primary display for
             // 2D UI. We register virtual display adapter along side the main display adapter
@@ -891,7 +910,7 @@ public final class DisplayManagerService extends SystemService {
             // early apps like SetupWizard/Launcher. In particular, SUW is displayed using
             // the virtual display inside VR before any VR-specific apps even run.
             mVirtualDisplayAdapter = mInjector.getVirtualDisplayAdapter(mSyncRoot, mContext,
-                    mHandler, mDisplayAdapterListener);
+                    mHandler, mDisplayDeviceRepo);
             if (mVirtualDisplayAdapter != null) {
                 registerDisplayAdapterLocked(mVirtualDisplayAdapter);
             }
@@ -909,7 +928,7 @@ public final class DisplayManagerService extends SystemService {
 
     private void registerOverlayDisplayAdapterLocked() {
         registerDisplayAdapterLocked(new OverlayDisplayAdapter(
-                mSyncRoot, mContext, mHandler, mDisplayAdapterListener, mUiHandler));
+                mSyncRoot, mContext, mHandler, mDisplayDeviceRepo, mUiHandler));
     }
 
     private void registerWifiDisplayAdapterLocked() {
@@ -917,7 +936,7 @@ public final class DisplayManagerService extends SystemService {
                 com.android.internal.R.bool.config_enableWifiDisplay)
                 || SystemProperties.getInt(FORCE_WIFI_DISPLAY_ENABLE, -1) == 1) {
             mWifiDisplayAdapter = new WifiDisplayAdapter(
-                    mSyncRoot, mContext, mHandler, mDisplayAdapterListener,
+                    mSyncRoot, mContext, mHandler, mDisplayDeviceRepo,
                     mPersistentDataStore);
             registerDisplayAdapterLocked(mWifiDisplayAdapter);
         }
@@ -946,15 +965,6 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void handleDisplayDeviceAddedLocked(DisplayDevice device) {
-        DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
-        if (mDisplayDevices.contains(device)) {
-            Slog.w(TAG, "Attempted to add already added display device: " + info);
-            return;
-        }
-        Slog.i(TAG, "Display device added: " + info);
-        device.mDebugLastLoggedDeviceInfo = info;
-
-        mDisplayDevices.add(device);
         LogicalDisplay display = addLogicalDisplayLocked(device);
         Runnable work = updateDisplayStateLocked(device);
         if (work != null) {
@@ -966,44 +976,44 @@ public final class DisplayManagerService extends SystemService {
     @VisibleForTesting
     void handleDisplayDeviceChanged(DisplayDevice device) {
         synchronized (mSyncRoot) {
-            DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
-            if (!mDisplayDevices.contains(device)) {
-                Slog.w(TAG, "Attempted to change non-existent display device: " + info);
-                return;
-            }
+            handleDisplayDeviceChangedLocked(device);
+        }
+    }
 
-            int diff = device.mDebugLastLoggedDeviceInfo.diff(info);
-            if (diff == DisplayDeviceInfo.DIFF_STATE) {
-                Slog.i(TAG, "Display device changed state: \"" + info.name
-                        + "\", " + Display.stateToString(info.state));
-                final Optional<Integer> viewportType = getViewportType(info);
-                if (viewportType.isPresent()) {
-                    for (DisplayViewport d : mViewports) {
-                        if (d.type == viewportType.get() && info.uniqueId.equals(d.uniqueId)) {
-                            // Update display view port power state
-                            d.isActive = Display.isActiveState(info.state);
-                        }
-                    }
-                    if (mInputManagerInternal != null) {
-                        mHandler.sendEmptyMessage(MSG_UPDATE_VIEWPORT);
+    private void handleDisplayDeviceChangedLocked(DisplayDevice device) {
+        DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
+
+        int diff = device.mDebugLastLoggedDeviceInfo.diff(info);
+        if (diff == DisplayDeviceInfo.DIFF_STATE) {
+            Slog.i(TAG, "Display device changed state: \"" + info.name
+                    + "\", " + Display.stateToString(info.state));
+            final Optional<Integer> viewportType = getViewportType(info);
+            if (viewportType.isPresent()) {
+                for (DisplayViewport d : mViewports) {
+                    if (d.type == viewportType.get() && info.uniqueId.equals(d.uniqueId)) {
+                        // Update display view port power state
+                        d.isActive = Display.isActiveState(info.state);
                     }
                 }
-            } else if (diff != 0) {
-                Slog.i(TAG, "Display device changed: " + info);
-            }
-            if ((diff & DisplayDeviceInfo.DIFF_COLOR_MODE) != 0) {
-                try {
-                    mPersistentDataStore.setColorMode(device, info.colorMode);
-                } finally {
-                    mPersistentDataStore.saveIfNeeded();
+                if (mInputManagerInternal != null) {
+                    mHandler.sendEmptyMessage(MSG_UPDATE_VIEWPORT);
                 }
             }
-            device.mDebugLastLoggedDeviceInfo = info;
-
-            device.applyPendingDisplayDeviceInfoChangesLocked();
-            if (updateLogicalDisplaysLocked()) {
-                scheduleTraversalLocked(false);
+        } else if (diff != 0) {
+            Slog.i(TAG, "Display device changed: " + info);
+        }
+        if ((diff & DisplayDeviceInfo.DIFF_COLOR_MODE) != 0) {
+            try {
+                mPersistentDataStore.setColorMode(device, info.colorMode);
+            } finally {
+                mPersistentDataStore.saveIfNeeded();
             }
+        }
+        device.mDebugLastLoggedDeviceInfo = info;
+
+        device.applyPendingDisplayDeviceInfoChangesLocked();
+        if (updateLogicalDisplaysLocked()) {
+            scheduleTraversalLocked(false);
         }
     }
 
@@ -1014,15 +1024,6 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void handleDisplayDeviceRemovedLocked(DisplayDevice device) {
-        DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
-        if (!mDisplayDevices.remove(device)) {
-            Slog.w(TAG, "Attempted to remove non-existent display device: " + info);
-            return;
-        }
-
-        Slog.i(TAG, "Display device removed: " + info);
-        device.mDebugLastLoggedDeviceInfo = info;
-
         updateLogicalDisplaysLocked();
         scheduleTraversalLocked(false);
     }
@@ -1043,14 +1044,12 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void applyGlobalDisplayStateLocked(List<Runnable> workQueue) {
-        final int count = mDisplayDevices.size();
-        for (int i = 0; i < count; i++) {
-            DisplayDevice device = mDisplayDevices.get(i);
+        mDisplayDeviceRepo.forEachLocked((DisplayDevice device) -> {
             Runnable runnable = updateDisplayStateLocked(device);
             if (runnable != null) {
                 workQueue.add(runnable);
             }
-        }
+        });
     }
 
     private Runnable updateDisplayStateLocked(DisplayDevice device) {
@@ -1058,6 +1057,8 @@ public final class DisplayManagerService extends SystemService {
         // by the display power controller (if known).
         DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         if ((info.flags & DisplayDeviceInfo.FLAG_NEVER_BLANK) == 0) {
+            // TODO - multi-display - The rules regarding what display state to apply to each
+            // display will depend on the configuration/mapping of logical displays.
             return device.requestDisplayStateLocked(
                     mGlobalDisplayState, mGlobalDisplayBrightness);
         }
@@ -1085,7 +1086,7 @@ public final class DisplayManagerService extends SystemService {
         final int layerStack = assignLayerStackLocked(displayId);
 
         LogicalDisplay display = new LogicalDisplay(displayId, layerStack, device);
-        display.updateLocked(mDisplayDevices);
+        display.updateLocked(mDisplayDeviceRepo);
         if (!display.isValidLocked()) {
             // This should never happen currently.
             Slog.w(TAG, "Ignoring display device because the logical display "
@@ -1248,7 +1249,7 @@ public final class DisplayManagerService extends SystemService {
 
             mTempDisplayInfo.copyFrom(display.getDisplayInfoLocked());
             display.getNonOverrideDisplayInfoLocked(mTempNonOverrideDisplayInfo);
-            display.updateLocked(mDisplayDevices);
+            display.updateLocked(mDisplayDeviceRepo);
             if (!display.isValidLocked()) {
                 mLogicalDisplays.removeAt(i);
                 handleLogicalDisplayRemoved(displayId);
@@ -1276,12 +1277,10 @@ public final class DisplayManagerService extends SystemService {
         clearViewportsLocked();
 
         // Configure each display device.
-        final int count = mDisplayDevices.size();
-        for (int i = 0; i < count; i++) {
-            DisplayDevice device = mDisplayDevices.get(i);
+        mDisplayDeviceRepo.forEachLocked((DisplayDevice device) -> {
             configureDisplayLocked(t, device);
             device.performTraversalLocked(t);
-        }
+        });
 
         // Tell the input system about these new viewports.
         if (mInputManagerInternal != null) {
@@ -1714,11 +1713,11 @@ public final class DisplayManagerService extends SystemService {
             }
 
             pw.println();
-            pw.println("Display Devices: size=" + mDisplayDevices.size());
-            for (DisplayDevice device : mDisplayDevices) {
+            pw.println("Display Devices: size=" + mDisplayDeviceRepo.sizeLocked());
+            mDisplayDeviceRepo.forEachLocked(device -> {
                 pw.println("  " + device.getDisplayDeviceInfoLocked());
                 device.dumpLocked(ipw);
-            }
+            });
 
             final int logicalDisplayCount = mLogicalDisplays.size();
             pw.println();
@@ -1864,20 +1863,20 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private final class DisplayAdapterListener implements DisplayAdapter.Listener {
+    private final class DisplayDeviceListener implements DisplayDeviceRepository.Listener {
         @Override
-        public void onDisplayDeviceEvent(DisplayDevice device, int event) {
+        public void onDisplayDeviceEventLocked(DisplayDevice device, int event) {
             switch (event) {
-                case DisplayAdapter.DISPLAY_DEVICE_EVENT_ADDED:
-                    handleDisplayDeviceAdded(device);
+                case DisplayDeviceRepository.DISPLAY_DEVICE_EVENT_ADDED:
+                    handleDisplayDeviceAddedLocked(device);
                     break;
 
-                case DisplayAdapter.DISPLAY_DEVICE_EVENT_CHANGED:
-                    handleDisplayDeviceChanged(device);
+                case DisplayDeviceRepository.DISPLAY_DEVICE_EVENT_CHANGED:
+                    handleDisplayDeviceChangedLocked(device);
                     break;
 
-                case DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED:
-                    handleDisplayDeviceRemoved(device);
+                case DisplayDeviceRepository.DISPLAY_DEVICE_EVENT_REMOVED:
+                    handleDisplayDeviceRemovedLocked(device);
                     break;
             }
         }
@@ -2573,9 +2572,10 @@ public final class DisplayManagerService extends SystemService {
                         }
                     }
                 };
+                LogicalDisplay defaultDisplay = mLogicalDisplays.get(Display.DEFAULT_DISPLAY);
+                DisplayDevice defaultDevice = defaultDisplay.getPrimaryDisplayDeviceLocked();
                 mDisplayPowerController = new DisplayPowerController(
-                        mContext, callbacks, handler, sensorManager, blanker,
-                        mDisplayDevices.get(Display.DEFAULT_DISPLAY));
+                        mContext, callbacks, handler, sensorManager, blanker, defaultDevice);
                 mSensorManager = sensorManager;
             }
 
@@ -2689,9 +2689,7 @@ public final class DisplayManagerService extends SystemService {
         @Override
         public void onOverlayChanged() {
             synchronized (mSyncRoot) {
-                for (int i = 0; i < mDisplayDevices.size(); i++) {
-                    mDisplayDevices.get(i).onOverlayChangedLocked();
-                }
+                mDisplayDeviceRepo.forEachLocked(DisplayDevice::onOverlayChangedLocked);
             }
         }
 

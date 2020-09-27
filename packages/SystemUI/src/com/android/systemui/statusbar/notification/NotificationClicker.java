@@ -22,7 +22,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.android.systemui.DejankUtils;
-import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -38,19 +38,19 @@ import javax.inject.Inject;
 public final class NotificationClicker implements View.OnClickListener {
     private static final String TAG = "NotificationClicker";
 
-    private final BubbleController mBubbleController;
     private final NotificationClickerLogger mLogger;
-    private final Optional<StatusBar> mStatusBar;
+    private final Optional<StatusBar> mStatusBarOptional;
+    private final Optional<Bubbles> mBubblesOptional;
     private final NotificationActivityStarter mNotificationActivityStarter;
 
     private NotificationClicker(
-            BubbleController bubbleController,
             NotificationClickerLogger logger,
-            Optional<StatusBar> statusBar,
+            Optional<StatusBar> statusBarOptional,
+            Optional<Bubbles> bubblesOptional,
             NotificationActivityStarter notificationActivityStarter) {
-        mBubbleController = bubbleController;
         mLogger = logger;
-        mStatusBar = statusBar;
+        mStatusBarOptional = statusBarOptional;
+        mBubblesOptional = bubblesOptional;
         mNotificationActivityStarter = notificationActivityStarter;
     }
 
@@ -61,7 +61,7 @@ public final class NotificationClicker implements View.OnClickListener {
             return;
         }
 
-        mStatusBar.ifPresent(statusBar -> statusBar.wakeUpIfDozing(
+        mStatusBarOptional.ifPresent(statusBar -> statusBar.wakeUpIfDozing(
                 SystemClock.uptimeMillis(), v, "NOTIFICATION_CLICK"));
 
         final ExpandableNotificationRow row = (ExpandableNotificationRow) v;
@@ -92,8 +92,8 @@ public final class NotificationClicker implements View.OnClickListener {
         row.setJustClicked(true);
         DejankUtils.postAfterTraversal(() -> row.setJustClicked(false));
 
-        if (!row.getEntry().isBubble()) {
-            mBubbleController.collapseStack();
+        if (!row.getEntry().isBubble() && mBubblesOptional.isPresent()) {
+            mBubblesOptional.get().collapseStack();
         }
 
         mNotificationActivityStarter.onNotificationClicked(entry.getSbn(), row);
@@ -118,26 +118,23 @@ public final class NotificationClicker implements View.OnClickListener {
 
     /** Daggerized builder for NotificationClicker. */
     public static class Builder {
-        private final BubbleController mBubbleController;
         private final NotificationClickerLogger mLogger;
 
         @Inject
-        public Builder(
-                BubbleController bubbleController,
-                NotificationClickerLogger logger) {
-            mBubbleController = bubbleController;
+        public Builder(NotificationClickerLogger logger) {
             mLogger = logger;
         }
 
         /** Builds an instance. */
         public NotificationClicker build(
-                Optional<StatusBar> statusBar,
+                Optional<StatusBar> statusBarOptional,
+                Optional<Bubbles> bubblesOptional,
                 NotificationActivityStarter notificationActivityStarter
         ) {
             return new NotificationClicker(
-                    mBubbleController,
                     mLogger,
-                    statusBar,
+                    statusBarOptional,
+                    bubblesOptional,
                     notificationActivityStarter);
         }
     }

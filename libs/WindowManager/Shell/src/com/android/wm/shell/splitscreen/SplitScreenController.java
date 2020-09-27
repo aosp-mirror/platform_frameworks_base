@@ -40,6 +40,7 @@ import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
 
@@ -99,7 +100,7 @@ public class SplitScreenController implements SplitScreen,
     public SplitScreenController(Context context,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController imeController, Handler handler, TransactionPool transactionPool,
-            ShellTaskOrganizer shellTaskOrganizer) {
+            ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue) {
         mContext = context;
         mDisplayController = displayController;
         mSystemWindows = systemWindows;
@@ -107,8 +108,7 @@ public class SplitScreenController implements SplitScreen,
         mHandler = handler;
         mForcedResizableController = new ForcedResizableInfoActivityController(context, this);
         mTransactionPool = transactionPool;
-        mWindowManagerProxy = new WindowManagerProxy(mTransactionPool, mHandler,
-                shellTaskOrganizer);
+        mWindowManagerProxy = new WindowManagerProxy(syncQueue, shellTaskOrganizer);
         mTaskOrganizer = shellTaskOrganizer;
         mSplits = new SplitScreenTaskOrganizer(this, shellTaskOrganizer);
         mImePositionProcessor = new DividerImeController(mSplits, mTransactionPool, mHandler,
@@ -426,13 +426,6 @@ public class SplitScreenController implements SplitScreen,
         }
     }
 
-    /** Called when the first docked animation frame rendered. */
-    public void onDockedFirstAnimationFrame() {
-        if (mView != null) {
-            mView.onDockedFirstAnimationFrame();
-        }
-    }
-
     /** Called when top task docked. */
     public void onDockedTopTask() {
         if (mView != null) {
@@ -502,6 +495,9 @@ public class SplitScreenController implements SplitScreen,
         mWindowManagerProxy.applyDismissSplit(mSplits, mSplitLayout, true /* dismissOrMaximize */);
         updateVisibility(false /* visible */);
         mMinimized = false;
+        // Resets divider bar position to undefined, so new divider bar will apply default position
+        // next time entering split mode.
+        mDividerState.mRatioPositionBeforeMinimized = 0;
         removeDivider();
         mImePositionProcessor.reset();
     }

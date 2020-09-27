@@ -36,6 +36,7 @@ import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -84,9 +85,10 @@ public class WMShellModule {
     static SplitScreen provideSplitScreen(Context context,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController displayImeController, @Main Handler handler,
-            TransactionPool transactionPool, ShellTaskOrganizer shellTaskOrganizer) {
+            TransactionPool transactionPool, ShellTaskOrganizer shellTaskOrganizer,
+            SyncTransactionQueue syncQueue) {
         return new SplitScreenController(context, displayController, systemWindows,
-                displayImeController, handler, transactionPool, shellTaskOrganizer);
+                displayImeController, handler, transactionPool, shellTaskOrganizer, syncQueue);
     }
 
     @SysUISingleton

@@ -17,12 +17,9 @@
 package com.android.systemui.statusbar.notification.dagger
 
 import android.annotation.StringRes
-import android.content.Intent
 import android.provider.Settings
-import android.view.View
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.notification.collection.render.NodeController
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderNodeControllerImpl
@@ -39,18 +36,6 @@ import javax.inject.Scope
 object NotificationSectionHeadersModule {
 
     @Provides
-    @HeaderClick
-    @JvmStatic fun providesOnHeaderClickListener(
-        activityStarter: ActivityStarter
-    ) = View.OnClickListener {
-        activityStarter.startActivity(
-                Intent(Settings.ACTION_NOTIFICATION_SETTINGS),
-                true /* onlyProvisioned */,
-                true /* dismissShade */,
-                Intent.FLAG_ACTIVITY_SINGLE_TOP)
-    }
-
-    @Provides
     @IncomingHeader
     @SysUISingleton
     @JvmStatic fun providesIncomingHeaderSubcomponent(
@@ -58,6 +43,7 @@ object NotificationSectionHeadersModule {
     ) = builder.get()
             .nodeLabel("incoming header")
             .headerText(R.string.notification_section_header_incoming)
+            .clickIntentAction(Settings.ACTION_NOTIFICATION_SETTINGS)
             .build()
 
     @Provides
@@ -68,6 +54,7 @@ object NotificationSectionHeadersModule {
     ) = builder.get()
             .nodeLabel("alerting header")
             .headerText(R.string.notification_section_header_alerting)
+            .clickIntentAction(Settings.ACTION_NOTIFICATION_SETTINGS)
             .build()
 
     @Provides
@@ -78,6 +65,7 @@ object NotificationSectionHeadersModule {
     ) = builder.get()
             .nodeLabel("people header")
             .headerText(R.string.notification_section_header_conversations)
+            .clickIntentAction(Settings.ACTION_CONVERSATION_SETTINGS)
             .build()
 
     @Provides
@@ -88,6 +76,7 @@ object NotificationSectionHeadersModule {
     ) = builder.get()
             .nodeLabel("silent header")
             .headerText(R.string.notification_section_header_gentle)
+            .clickIntentAction(Settings.ACTION_NOTIFICATION_SETTINGS)
             .build()
 
     @Provides
@@ -151,6 +140,7 @@ interface SectionHeaderControllerSubcomponent {
         fun build(): SectionHeaderControllerSubcomponent
         @BindsInstance fun nodeLabel(@NodeLabel nodeLabel: String): Builder
         @BindsInstance fun headerText(@HeaderText @StringRes headerText: Int): Builder
+        @BindsInstance fun clickIntentAction(@HeaderClickAction clickIntentAction: String): Builder
     }
 }
 
@@ -188,7 +178,7 @@ annotation class NodeLabel
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class HeaderClick
+annotation class HeaderClickAction
 
 @Scope
 @Retention(AnnotationRetention.BINARY)

@@ -17,13 +17,13 @@
 package com.android.server;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -83,6 +83,13 @@ public final class SystemServiceManager {
      */
     @GuardedBy("mTargetUsers")
     private final SparseArray<TargetUser> mTargetUsers = new SparseArray<>();
+
+    /**
+     * Reference to the current user, it's used to set the {@link TargetUser} on
+     * {@link #switchUser(int, int)} as the previous user might have been removed already.
+     */
+    @GuardedBy("mTargetUsers")
+    private @Nullable TargetUser mCurrentUser;
 
     SystemServiceManager(Context context) {
         mContext = context;
@@ -259,18 +266,22 @@ public final class SystemServiceManager {
         return targetUser;
     }
 
+    private @NonNull TargetUser newTargetUser(@UserIdInt int userId) {
+        final UserInfo userInfo = mUserManagerInternal.getUserInfo(userId);
+        Preconditions.checkState(userInfo != null, "No UserInfo for " + userId);
+        return new TargetUser(userInfo);
+    }
+
     /**
      * Starts the given user.
      */
     public void startUser(@NonNull TimingsTraceAndSlog t, @UserIdInt int userId) {
-        // Create cached TargetUser
-        final UserInfo userInfo = mUserManagerInternal.getUserInfo(userId);
-        Preconditions.checkState(userInfo != null, "No UserInfo for " + userId);
+        final TargetUser targetUser = newTargetUser(userId);
         synchronized (mTargetUsers) {
-            mTargetUsers.put(userId, new TargetUser(userInfo));
+            mTargetUsers.put(userId, targetUser);
         }
 
-        onUser(t, START, userId);
+        onUser(t, START, /* prevUser= */ null, targetUser);
     }
 
     /**
@@ -291,7 +302,26 @@ public final class SystemServiceManager {
      * Switches to the given user.
      */
     public void switchUser(@UserIdInt int from, @UserIdInt int to) {
-        onUser(TimingsTraceAndSlog.newAsyncLog(), SWITCH, to, from);
+        final TargetUser curUser, prevUser;
+        synchronized (mTargetUsers) {
+            if (mCurrentUser == null) {
+                if (DEBUG) {
+                    Slog.d(TAG, "First user switch: from " + from + " to " + to);
+                }
+                prevUser = newTargetUser(from);
+            } else {
+                if (from != mCurrentUser.getUserIdentifier()) {
+                    Slog.wtf(TAG, "switchUser(" + from + "," + to + "): mCurrentUser is "
+                            + mCurrentUser + ", it should be " + from);
+                }
+                prevUser = mCurrentUser;
+            }
+            curUser = mCurrentUser = getTargetUser(to);
+            if (DEBUG) {
+                Slog.d(TAG, "Set mCurrentUser to " + mCurrentUser);
+            }
+        }
+        onUser(TimingsTraceAndSlog.newAsyncLog(), SWITCH, prevUser, curUser);
     }
 
     /**
@@ -314,21 +344,16 @@ public final class SystemServiceManager {
     }
 
     private void onUser(@NonNull String onWhat, @UserIdInt int userId) {
-        onUser(TimingsTraceAndSlog.newAsyncLog(), onWhat, userId);
+        onUser(TimingsTraceAndSlog.newAsyncLog(), onWhat, /* prevUser= */ null,
+                getTargetUser(userId));
     }
 
     private void onUser(@NonNull TimingsTraceAndSlog t, @NonNull String onWhat,
-            @UserIdInt int userId) {
-        onUser(t, onWhat, userId, UserHandle.USER_NULL);
-    }
-
-    private void onUser(@NonNull TimingsTraceAndSlog t, @NonNull String onWhat,
-            @UserIdInt int curUserId, @UserIdInt int prevUserId) {
+            @Nullable TargetUser prevUser, @NonNull TargetUser curUser) {
+        final int curUserId = curUser.getUserIdentifier();
         t.traceBegin("ssm." + onWhat + "User-" + curUserId);
-        Slog.i(TAG, "Calling on" + onWhat + "User " + curUserId);
-        final TargetUser curUser = getTargetUser(curUserId);
-        final TargetUser prevUser = prevUserId == UserHandle.USER_NULL ? null
-                : getTargetUser(prevUserId);
+        Slog.i(TAG, "Calling on" + onWhat + "User " + curUserId
+                + (prevUser != null ? " (from " + prevUser + ")" : ""));
         final int serviceLen = mServices.size();
         for (int i = 0; i < serviceLen; i++) {
             final SystemService service = mServices.get(i);
@@ -466,14 +491,16 @@ public final class SystemServiceManager {
                     .append(service.getClass().getSimpleName())
                     .append("\n");
         }
-
-        builder.append("Target users: ");
-        final int targetUsersSize = mTargetUsers.size();
-        for (int i = 0; i < targetUsersSize; i++) {
-            mTargetUsers.valueAt(i).dump(builder);
-            if (i != targetUsersSize - 1) builder.append(',');
+        synchronized (mTargetUsers) {
+            builder.append("Current user: ").append(mCurrentUser).append('\n');
+            builder.append("Target users: ");
+            final int targetUsersSize = mTargetUsers.size();
+            for (int i = 0; i < targetUsersSize; i++) {
+                mTargetUsers.valueAt(i).dump(builder);
+                if (i != targetUsersSize - 1) builder.append(',');
+            }
+            builder.append('\n');
         }
-        builder.append('\n');
 
         Slog.e(TAG, builder.toString());
     }

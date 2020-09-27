@@ -80,7 +80,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.demomode.DemoModeController;
@@ -219,7 +219,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private UserSwitcherController mUserSwitcherController;
     @Mock private NetworkController mNetworkController;
     @Mock private VibratorHelper mVibratorHelper;
-    @Mock private BubbleController mBubbleController;
+    @Mock private Bubbles mBubbles;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
@@ -332,7 +332,7 @@ public class StatusBarTest extends SysuiTestCase {
         mShadeController = new ShadeControllerImpl(mCommandQueue,
                 mStatusBarStateController, mNotificationShadeWindowController,
                 mStatusBarKeyguardViewManager, mContext.getSystemService(WindowManager.class),
-                () -> mStatusBar, () -> mAssistManager, () -> mBubbleController);
+                () -> mStatusBar, () -> mAssistManager, Optional.of(() -> mBubbles));
 
         mStatusBar = new StatusBar(
                 mContext,
@@ -374,7 +374,7 @@ public class StatusBarTest extends SysuiTestCase {
                 wakefulnessLifecycle,
                 mStatusBarStateController,
                 mVibratorHelper,
-                mBubbleController,
+                Optional.of(mBubbles),
                 mVisualStabilityManager,
                 mDeviceProvisionedController,
                 mNavigationBarController,

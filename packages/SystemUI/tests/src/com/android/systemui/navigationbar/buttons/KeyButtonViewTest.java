@@ -53,8 +53,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.bubbles.BubbleController;
-import com.android.systemui.navigationbar.buttons.KeyButtonView;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.recents.OverviewProxyService;
 
 import org.junit.Before;
@@ -71,7 +70,7 @@ public class KeyButtonViewTest extends SysuiTestCase {
 
     private KeyButtonView mKeyButtonView;
     private MetricsLogger mMetricsLogger;
-    private BubbleController mBubbleController;
+    private Bubbles mBubbles;
     private UiEventLogger mUiEventLogger;
     private InputManager mInputManager = mock(InputManager.class);
     @Captor
@@ -81,7 +80,7 @@ public class KeyButtonViewTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
-        mBubbleController = mDependency.injectMockDependency(BubbleController.class);
+        mBubbles = mDependency.injectMockDependency(Bubbles.class);
         mDependency.injectMockDependency(OverviewProxyService.class);
         mUiEventLogger = mDependency.injectMockDependency(UiEventLogger.class);
 
@@ -155,7 +154,7 @@ public class KeyButtonViewTest extends SysuiTestCase {
 
     @Test
     public void testBubbleEvents_bubbleExpanded() {
-        when(mBubbleController.getExpandedDisplayId(mContext)).thenReturn(3);
+        when(mBubbles.getExpandedDisplayId(mContext)).thenReturn(3);
 
         int action = KeyEvent.ACTION_DOWN;
         int flags = 0;

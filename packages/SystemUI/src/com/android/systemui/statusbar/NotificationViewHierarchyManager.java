@@ -26,7 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
-import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.dagger.StatusBarModule;
@@ -47,6 +47,7 @@ import com.android.systemui.util.Assert;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Stack;
 
 /**
@@ -84,7 +85,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
      * possible.
      */
     private final boolean mAlwaysExpandNonGroupedNotification;
-    private final BubbleController mBubbleController;
+    private final Optional<Bubbles> mBubblesOptional;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final KeyguardBypassController mBypassController;
     private final ForegroundServiceSectionController mFgsSectionController;
@@ -112,7 +113,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             StatusBarStateController statusBarStateController,
             NotificationEntryManager notificationEntryManager,
             KeyguardBypassController bypassController,
-            BubbleController bubbleController,
+            Optional<Bubbles> bubblesOptional,
             DynamicPrivacyController privacyController,
             ForegroundServiceSectionController fgsSectionController,
             DynamicChildBindController dynamicChildBindController,
@@ -130,7 +131,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         Resources res = context.getResources();
         mAlwaysExpandNonGroupedNotification =
                 res.getBoolean(R.bool.config_alwaysExpandNonGroupedNotifications);
-        mBubbleController = bubbleController;
+        mBubblesOptional = bubblesOptional;
         mDynamicPrivacyController = privacyController;
         mDynamicChildBindController = dynamicChildBindController;
         mLowPriorityInflationHelper = lowPriorityInflationHelper;
@@ -157,8 +158,10 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         final int N = activeNotifications.size();
         for (int i = 0; i < N; i++) {
             NotificationEntry ent = activeNotifications.get(i);
+            final boolean isBubbleNotificationSuppressedFromShade = mBubblesOptional.isPresent()
+                    && mBubblesOptional.get().isBubbleNotificationSuppressedFromShade(ent);
             if (ent.isRowDismissed() || ent.isRowRemoved()
-                    || mBubbleController.isBubbleNotificationSuppressedFromShade(ent)
+                    || isBubbleNotificationSuppressedFromShade
                     || mFgsSectionController.hasEntry(ent)) {
                 // we don't want to update removed notifications because they could
                 // temporarily become children if they were isolated before.

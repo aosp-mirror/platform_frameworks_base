@@ -458,9 +458,11 @@ public class InsetsState implements Parcelable {
         final ArraySet<Integer> result = new ArraySet<>();
         if ((types & Type.STATUS_BARS) != 0) {
             result.add(ITYPE_STATUS_BAR);
+            result.add(ITYPE_CLIMATE_BAR);
         }
         if ((types & Type.NAVIGATION_BARS) != 0) {
             result.add(ITYPE_NAVIGATION_BAR);
+            result.add(ITYPE_EXTRA_NAVIGATION_BAR);
         }
         if ((types & Type.CAPTION_BAR) != 0) {
             result.add(ITYPE_CAPTION_BAR);

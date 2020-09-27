@@ -21,9 +21,8 @@ import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.Log;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
-import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
@@ -43,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -64,25 +64,20 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
             new ArraySet<>();
     private final ArraySet<OnGroupChangeListener> mGroupChangeListeners = new ArraySet<>();
     private final Lazy<PeopleNotificationIdentifier> mPeopleNotificationIdentifier;
+    private final Optional<Lazy<Bubbles>> mBubblesOptional;
     private int mBarState = -1;
     private HashMap<String, StatusBarNotification> mIsolatedEntries = new HashMap<>();
     private HeadsUpManager mHeadsUpManager;
     private boolean mIsUpdatingUnchangedGroup;
-    @Nullable private BubbleController mBubbleController = null;
 
     @Inject
     public NotificationGroupManagerLegacy(
             StatusBarStateController statusBarStateController,
-            Lazy<PeopleNotificationIdentifier> peopleNotificationIdentifier) {
+            Lazy<PeopleNotificationIdentifier> peopleNotificationIdentifier,
+            Optional<Lazy<Bubbles>> bubblesOptional) {
         statusBarStateController.addCallback(this);
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
-    }
-
-    private BubbleController getBubbleController() {
-        if (mBubbleController == null) {
-            mBubbleController = Dependency.get(BubbleController.class);
-        }
-        return mBubbleController;
+        mBubblesOptional = bubblesOptional;
     }
 
     /**
@@ -247,7 +242,8 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
         int childCount = 0;
         boolean hasBubbles = false;
         for (NotificationEntry entry : group.children.values()) {
-            if (!getBubbleController().isBubbleNotificationSuppressedFromShade(entry)) {
+            if (mBubblesOptional.isPresent() && !mBubblesOptional.get().get()
+                    .isBubbleNotificationSuppressedFromShade(entry)) {
                 childCount++;
             } else {
                 hasBubbles = true;

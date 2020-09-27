@@ -29,7 +29,6 @@ import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
@@ -95,7 +94,6 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
         when(accessibilityMgr.getRecommendedTimeoutMillis(anyInt(), anyInt()))
                 .thenReturn(TEST_AUTO_DISMISS_TIME);
         when(mVSManager.isReorderingAllowed()).thenReturn(true);
-        mDependency.injectMockDependency(BubbleController.class);
         mDependency.injectMockDependency(NotificationShadeWindowController.class);
         mDependency.injectMockDependency(ConfigurationController.class);
         mHeadsUpManager = new TestableHeadsUpManagerPhone(mContext, mGroupManager, mVSManager,

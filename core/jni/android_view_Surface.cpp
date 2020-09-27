@@ -32,9 +32,10 @@
 #include "android_os_Parcel.h"
 #include <binder/Parcel.h>
 
+#include <gui/BLASTBufferQueue.h>
 #include <gui/Surface.h>
-#include <gui/view/Surface.h>
 #include <gui/SurfaceControl.h>
+#include <gui/view/Surface.h>
 
 #include <ui/GraphicBuffer.h>
 #include <ui/Rect.h>
@@ -300,6 +301,26 @@ static jlong nativeGetFromSurfaceControl(JNIEnv* env, jclass clazz,
     return reinterpret_cast<jlong>(surface.get());
 }
 
+static jlong nativeGetFromBlastBufferQueue(JNIEnv* env, jclass clazz, jlong nativeObject,
+                                           jlong blastBufferQueueNativeObj) {
+    Surface* self(reinterpret_cast<Surface*>(nativeObject));
+    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(blastBufferQueueNativeObj);
+    const sp<IGraphicBufferProducer>& bufferProducer = queue->getIGraphicBufferProducer();
+    // If the underlying IGBP's are the same, we don't need to do anything.
+    if (self != nullptr &&
+        IInterface::asBinder(self->getIGraphicBufferProducer()) ==
+                IInterface::asBinder(bufferProducer)) {
+        return nativeObject;
+    }
+
+    sp<Surface> surface(new Surface(bufferProducer, true));
+    if (surface != NULL) {
+        surface->incStrong(&sRefBaseOwner);
+    }
+
+    return reinterpret_cast<jlong>(surface.get());
+}
+
 static jlong nativeReadFromParcel(JNIEnv* env, jclass clazz,
         jlong nativeObject, jobject parcelObj) {
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
@@ -428,38 +449,31 @@ static jint nativeSetFrameRate(JNIEnv* env, jclass clazz, jlong nativeObject, jf
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gSurfaceMethods[] = {
-    {"nativeCreateFromSurfaceTexture", "(Landroid/graphics/SurfaceTexture;)J",
-            (void*)nativeCreateFromSurfaceTexture },
-    {"nativeRelease", "(J)V",
-            (void*)nativeRelease },
-    {"nativeIsValid", "(J)Z",
-            (void*)nativeIsValid },
-    {"nativeIsConsumerRunningBehind", "(J)Z",
-            (void*)nativeIsConsumerRunningBehind },
-    {"nativeLockCanvas", "(JLandroid/graphics/Canvas;Landroid/graphics/Rect;)J",
-            (void*)nativeLockCanvas },
-    {"nativeUnlockCanvasAndPost", "(JLandroid/graphics/Canvas;)V",
-            (void*)nativeUnlockCanvasAndPost },
-    {"nativeAllocateBuffers", "(J)V",
-            (void*)nativeAllocateBuffers },
-    {"nativeCreateFromSurfaceControl", "(J)J",
-            (void*)nativeCreateFromSurfaceControl },
-    {"nativeGetFromSurfaceControl", "(JJ)J",
-            (void*)nativeGetFromSurfaceControl },
-    {"nativeReadFromParcel", "(JLandroid/os/Parcel;)J",
-            (void*)nativeReadFromParcel },
-    {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V",
-            (void*)nativeWriteToParcel },
-    {"nativeGetWidth", "(J)I", (void*)nativeGetWidth },
-    {"nativeGetHeight", "(J)I", (void*)nativeGetHeight },
-    {"nativeGetNextFrameNumber", "(J)J", (void*)nativeGetNextFrameNumber },
-    {"nativeSetScalingMode", "(JI)I", (void*)nativeSetScalingMode },
-    {"nativeForceScopedDisconnect", "(J)I", (void*)nativeForceScopedDisconnect},
-    {"nativeAttachAndQueueBufferWithColorSpace", "(JLandroid/hardware/HardwareBuffer;I)I",
-            (void*)nativeAttachAndQueueBufferWithColorSpace},
-    {"nativeSetSharedBufferModeEnabled", "(JZ)I", (void*)nativeSetSharedBufferModeEnabled},
-    {"nativeSetAutoRefreshEnabled", "(JZ)I", (void*)nativeSetAutoRefreshEnabled},
-    {"nativeSetFrameRate", "(JFI)I", (void*)nativeSetFrameRate},
+        {"nativeCreateFromSurfaceTexture", "(Landroid/graphics/SurfaceTexture;)J",
+         (void*)nativeCreateFromSurfaceTexture},
+        {"nativeRelease", "(J)V", (void*)nativeRelease},
+        {"nativeIsValid", "(J)Z", (void*)nativeIsValid},
+        {"nativeIsConsumerRunningBehind", "(J)Z", (void*)nativeIsConsumerRunningBehind},
+        {"nativeLockCanvas", "(JLandroid/graphics/Canvas;Landroid/graphics/Rect;)J",
+         (void*)nativeLockCanvas},
+        {"nativeUnlockCanvasAndPost", "(JLandroid/graphics/Canvas;)V",
+         (void*)nativeUnlockCanvasAndPost},
+        {"nativeAllocateBuffers", "(J)V", (void*)nativeAllocateBuffers},
+        {"nativeCreateFromSurfaceControl", "(J)J", (void*)nativeCreateFromSurfaceControl},
+        {"nativeGetFromSurfaceControl", "(JJ)J", (void*)nativeGetFromSurfaceControl},
+        {"nativeReadFromParcel", "(JLandroid/os/Parcel;)J", (void*)nativeReadFromParcel},
+        {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V", (void*)nativeWriteToParcel},
+        {"nativeGetWidth", "(J)I", (void*)nativeGetWidth},
+        {"nativeGetHeight", "(J)I", (void*)nativeGetHeight},
+        {"nativeGetNextFrameNumber", "(J)J", (void*)nativeGetNextFrameNumber},
+        {"nativeSetScalingMode", "(JI)I", (void*)nativeSetScalingMode},
+        {"nativeForceScopedDisconnect", "(J)I", (void*)nativeForceScopedDisconnect},
+        {"nativeAttachAndQueueBufferWithColorSpace", "(JLandroid/hardware/HardwareBuffer;I)I",
+         (void*)nativeAttachAndQueueBufferWithColorSpace},
+        {"nativeSetSharedBufferModeEnabled", "(JZ)I", (void*)nativeSetSharedBufferModeEnabled},
+        {"nativeSetAutoRefreshEnabled", "(JZ)I", (void*)nativeSetAutoRefreshEnabled},
+        {"nativeSetFrameRate", "(JFI)I", (void*)nativeSetFrameRate},
+        {"nativeGetFromBlastBufferQueue", "(JJ)J", (void*)nativeGetFromBlastBufferQueue},
 };
 
 int register_android_view_Surface(JNIEnv* env)
