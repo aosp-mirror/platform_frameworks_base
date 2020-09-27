@@ -1666,10 +1666,12 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Zvýšit hlasitost nad doporučenou úroveň?\n\nDlouhodobý poslech hlasitého zvuku může poškodit sluch."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Použít zkratku přístupnosti?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Když je tato zkratka zapnutá, můžete funkci přístupnosti spustit tím, že na tři sekundy podržíte obě tlačítka hlasitosti."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Zapnout funkce pro usnadnění přístupu?"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (3135860819356676426) -->
+    <skip />
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Podržením obou tlačítek hlasitosti po dobu několika sekund zapnete funkce pro usnadnění přístupu. Tato funkce může změnit fungování zařízení.\n\nAktuální funkce:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nVybrané funkce můžete změnit v Nastavení &gt; Přístupnost."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Zapnout <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
+    <!-- no translation found for accessibility_shortcut_single_service_warning_title (1909518473488345266) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Podržením obou tlačítek hlasitosti po dobu několika sekund zapnete funkci pro usnadnění přístupu <xliff:g id="SERVICE">%1$s</xliff:g>. Tato funkce může změnit fungování zařízení.\n\nZkratku můžete nastavit na jinou funkci v Nastavení &gt; Přístupnost."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Zapnout"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Nezapínat"</string>

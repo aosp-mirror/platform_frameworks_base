@@ -1622,10 +1622,12 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Hækka hljóðstyrk umfram ráðlagðan styrk?\n\nEf hlustað er á háum hljóðstyrk í langan tíma kann það að skaða heyrnina."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Viltu nota aðgengisflýtileið?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Þegar flýtileiðin er virk er kveikt á aðgengiseiginleikanum með því að halda báðum hljóðstyrkshnöppunum inni í þrjár sekúndur."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Viltu kveikja á aðgengiseiginleikum?"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (3135860819356676426) -->
+    <skip />
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Kveikt er á aðgengiseiginleikum þegar báðum hljóðstyrkstökkunum er haldið inni í nokkrar sekúndur. Þetta getur breytt því hvernig tækið virkar.\n\nNúverandi eiginleikar:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nÞú getur breytt völdum eiginleikum í Stillingar &gt; Aðgengi."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Viltu kveikja á <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
+    <!-- no translation found for accessibility_shortcut_single_service_warning_title (1909518473488345266) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ef báðum hljóðstyrkstökkunum er haldið inni í nokkrar sekúndur er kveikt á aðgengiseiginleikanum <xliff:g id="SERVICE">%1$s</xliff:g>. Þetta getur breytt því hvernig tækið virkar.\n\nÞú getur breytt þessari flýtileið í annan eiginleika í Stillingar &gt; Aðgengi."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Kveikja"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Ekki kveikja"</string>

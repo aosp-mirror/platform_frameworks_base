@@ -1622,10 +1622,12 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要将音量调高到建议的音量以上吗？\n\n长时间保持高音量可能会损伤听力。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用无障碍快捷方式吗？"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"启用这项快捷方式后，同时按下两个音量按钮 3 秒钟即可启动无障碍功能。"</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"要开启无障碍功能吗？"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (3135860819356676426) -->
+    <skip />
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"同时按住两个音量键几秒钟，即可开启无障碍功能。这样做可能会改变您设备的工作方式。\n\n当前功能：\n<xliff:g id="SERVICE">%1$s</xliff:g>\n您可以在“设置”&gt;“无障碍”中更改所选功能。"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"要开启<xliff:g id="SERVICE">%1$s</xliff:g>吗？"</string>
+    <!-- no translation found for accessibility_shortcut_single_service_warning_title (1909518473488345266) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"同时按住两个音量键几秒钟，即可开启<xliff:g id="SERVICE">%1$s</xliff:g>无障碍功能。这样做可能会改变您设备的工作方式。\n\n您可以在“设置”&gt;“无障碍”中将此快捷方式更改为开启另一项功能。"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"开启"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"不开启"</string>

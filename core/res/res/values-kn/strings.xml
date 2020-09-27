@@ -1622,10 +1622,12 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ವಾಲ್ಯೂಮ್‌ ಅನ್ನು ಶಿಫಾರಸು ಮಾಡಲಾದ ಮಟ್ಟಕ್ಕಿಂತಲೂ ಹೆಚ್ಚು ಮಾಡುವುದೇ?\n\nದೀರ್ಘ ಅವಧಿಯವರೆಗೆ ಹೆಚ್ಚಿನ ವಾಲ್ಯೂಮ್‌ನಲ್ಲಿ ಆಲಿಸುವುದರಿಂದ ನಿಮ್ಮ ಆಲಿಸುವಿಕೆ ಸಾಮರ್ಥ್ಯಕ್ಕೆ ಹಾನಿಯುಂಟು ಮಾಡಬಹುದು."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ಪ್ರವೇಶಿಸುವಿಕೆ ಶಾರ್ಟ್‌ಕಟ್ ಬಳಸುವುದೇ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ಶಾರ್ಟ್‌ಕಟ್ ಆನ್ ಆಗಿರುವಾಗ, ಎರಡೂ ವಾಲ್ಯೂಮ್ ಬಟನ್‌ಗಳನ್ನು 3 ಸೆಕೆಂಡುಗಳ ಕಾಲ ಒತ್ತಿದರೆ ಪ್ರವೇಶಿಸುವಿಕೆ ವೈಶಿಷ್ಟ್ಯವೊಂದು ಪ್ರಾರಂಭವಾಗುತ್ತದೆ."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"ಪ್ರವೇಶಿಸುವಿಕೆ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಆನ್ ಮಾಡಬೇಕೇ?"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (3135860819356676426) -->
+    <skip />
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"ಎರಡೂ ವಾಲ್ಯೂಮ್ ಕೀಗಳನ್ನು ಕೆಲವು ಸೆಕೆಂಡುಗಳ ಕಾಲ ಹಿಡಿದಿಟ್ಟುಕೊಳ್ಳುವುದರಿಂದ ಪ್ರವೇಶಿಸುವಿಕೆ ವೈಶಿಷ್ಟ್ಯಗಳು ಆನ್ ಆಗುತ್ತವೆ. ಇದು ನಿಮ್ಮ ಸಾಧನವು ಹೇಗೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ ಎಂಬುದನ್ನು ಬದಲಾಯಿಸಬಹುದು.\n\n ಪ್ರಸ್ತುತ ವೈಶಿಷ್ಟ್ಯಗಳು:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nಸೆಟ್ಟಿಂಗ್‌ಗಳು ಮತ್ತು ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿಯಲ್ಲಿ ಆಯ್ದ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ನೀವು ಬದಲಾಯಿಸಬಹುದು."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> ಅನ್ನು ಆನ್‌ ಮಾಡುವುದೇ?"</string>
+    <!-- no translation found for accessibility_shortcut_single_service_warning_title (1909518473488345266) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"ಎರಡೂ ವಾಲ್ಯೂಮ್ ಕೀಗಳನ್ನು ಕೆಲವು ಸೆಕೆಂಡುಗಳ ಕಾಲ ಹಿಡಿದಿಟ್ಟುಕೊಳ್ಳುವುದರಿಂದ ಪ್ರವೇಶಿಸುವಿಕೆ ವೈಶಿಷ್ಟ್ಯವಾದ <xliff:g id="SERVICE">%1$s</xliff:g> ಆನ್ ಆಗುತ್ತದೆ. ಇದು ನಿಮ್ಮ ಸಾಧನವು ಹೇಗೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ ಎಂಬುದನ್ನು ಬದಲಾಯಿಸಬಹುದು.\n\nನೀವು ಈ ಶಾರ್ಟ್‌ಕಟ್ ಅನ್ನು ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಮತ್ತು ಅಕ್ಸೆಸಿಬಿಲಿಟಿಯಲ್ಲಿನ ಮತ್ತೊಂದು ವೈಶಿಷ್ಟ್ಯಕ್ಕೆ ಬದಲಾಯಿಸಬಹುದು."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ಆನ್ ಮಾಡಿ"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ಆನ್ ಮಾಡಬೇಡಿ"</string>
@@ -1829,8 +1831,7 @@
       <item quantity="one">%d ಗಂಟೆಗೆ</item>
       <item quantity="other">%d ಗಂಟೆಗೆ</item>
     </plurals>
-    <!-- no translation found for zen_mode_until_next_day (1403042784161725038) -->
-    <skip />
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ವರೆಗೆ"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ವರೆಗೆ"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ವರೆಗೆ (ಮುಂದಿನ ಅಲಾರಮ್)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"ನೀವು ಆಫ್ ಮಾಡುವವರೆಗೆ"</string>

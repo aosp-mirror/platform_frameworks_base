@@ -879,20 +879,13 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"குறைந்த முன்னுரிமை உள்ள அறிவிப்பு ஐகான்களைக் காட்டு"</string>
     <string name="other" msgid="429768510980739978">"மற்றவை"</string>
-    <!-- no translation found for accessibility_qs_edit_remove_tile_action (775511891457193480) -->
-    <skip />
-    <!-- no translation found for accessibility_qs_edit_tile_add_action (5051211910345301833) -->
-    <skip />
-    <!-- no translation found for accessibility_qs_edit_tile_start_move (2009373939914517817) -->
-    <skip />
-    <!-- no translation found for accessibility_qs_edit_tile_start_add (7560798153975555772) -->
-    <skip />
-    <!-- no translation found for accessibility_qs_edit_tile_move_to_position (5198161544045930556) -->
-    <skip />
-    <!-- no translation found for accessibility_qs_edit_tile_add_to_position (9029163095148274690) -->
-    <skip />
-    <!-- no translation found for accessibility_qs_edit_position (4509277359815711830) -->
-    <skip />
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"டைலை அகற்றும்"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"கடைசியில் டைலைச் சேர்க்கும்"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"டைலை நகர்த்து"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"டைலைச் சேர்"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> இடத்திற்கு நகர்த்தும்"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> என்ற இடத்தில் சேர்க்கும்"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"இடம்: <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"விரைவு அமைப்புகள் திருத்தி."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> அறிவிப்பு: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"அமைப்புகளைத் திற."</string>

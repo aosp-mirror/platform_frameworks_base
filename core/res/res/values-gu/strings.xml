@@ -1622,10 +1622,12 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ભલામણ કરેલ સ્તરની ઉપર વૉલ્યૂમ વધાર્યો?\n\nલાંબા સમય સુધી ઊંચા અવાજે સાંભળવું તમારી શ્રવણક્ષમતાને નુકસાન પહોંચાડી શકે છે."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ઍક્સેસિબિલિટી શૉર્ટકટનો ઉપયોગ કરીએ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"જ્યારે શૉર્ટકટ ચાલુ હોય, ત્યારે બન્ને વૉલ્યૂમ બટનને 3 સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધા શરૂ થઈ જશે."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"ઍક્સેસિબિલિટી સુવિધાઓ ચાલુ કરીએ?"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (3135860819356676426) -->
+    <skip />
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"બન્ને વૉલ્યૂમ કીને થોડી સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધાઓ ચાલુ થઈ જાય છે. આનાથી તમારા ડિવાઇસની કામ કરવાની રીત બદલાઈ શકે છે.\n\nવર્તમાન સુવિધાઓ:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nતમે સેટિંગ &gt; ઍક્સેસિબિલિટીમાં જઈને પસંદ કરેલી સુવિધાઓને બદલી શકો છો."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g>ને ચાલુ કરીએ?"</string>
+    <!-- no translation found for accessibility_shortcut_single_service_warning_title (1909518473488345266) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"બન્ને વૉલ્યૂમ કીને થોડી સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધા એવી <xliff:g id="SERVICE">%1$s</xliff:g> ચાલુ થઈ જાય છે. આનાથી તમારા ડિવાઇસની કામ કરવાની રીત બદલાઈ શકે છે.\n\nતમે સેટિંગ &gt; ઍક્સેસિબિલિટીમાં જઈને આ શૉર્ટકટને બીજી સુવિધામાં બદલી શકો છો."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ચાલુ કરો"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ચાલુ કરશો નહીં"</string>
@@ -1829,8 +1831,7 @@
       <item quantity="one">%d કલાક માટે</item>
       <item quantity="other">%d કલાક માટે</item>
     </plurals>
-    <!-- no translation found for zen_mode_until_next_day (1403042784161725038) -->
-    <skip />
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> સુધી"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> સુધી"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (આગલા એલાર્મ) સુધી"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"તમે બંધ ન કરો ત્યાં સુધી"</string>

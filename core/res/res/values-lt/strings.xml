@@ -1666,10 +1666,12 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Padidinti garsą daugiau nei rekomenduojamas lygis?\n\nIlgai klausydami dideliu garsu galite pažeisti klausą."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Naudoti spartųjį pritaikymo neįgaliesiems klavišą?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kai spartusis klavišas įjungtas, paspaudus abu garsumo mygtukus ir palaikius 3 sekundes bus įjungta pritaikymo neįgaliesiems funkcija."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Įjungti pritaikymo neįgaliesiems funkcijas?"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (3135860819356676426) -->
+    <skip />
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Paspaudus abu garsumo klavišus ir palaikius kelias sekundes įjungiamos pritaikymo neįgaliesiems funkcijos. Tai gali pakeisti įrenginio veikimą.\n\nDabartinės funkcijos:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPasirinktas funkcijas galite pakeisti skiltyje „Nustatymai“ &gt; „Pritaikomumas“."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Įjungti „<xliff:g id="SERVICE">%1$s</xliff:g>“?"</string>
+    <!-- no translation found for accessibility_shortcut_single_service_warning_title (1909518473488345266) -->
+    <skip />
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Paspaudus abu garsumo klavišus ir palaikius kelias sekundes įjungiama pritaikymo neįgaliesiems funkcija „<xliff:g id="SERVICE">%1$s</xliff:g>“. Tai gali pakeisti įrenginio veikimą.\n\nGalite pakeisti šį spartųjį klavišą į kitą funkciją skiltyje „Nustatymai“ &gt; „Pritaikomumas“."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Įjungti"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Neįjungti"</string>
