@@ -1338,7 +1338,7 @@ public final class MultiClientInputMethodManagerService {
                 switch (clientInfo.mState) {
                     case InputMethodClientState.WAITING_FOR_IME_SESSION:
                         try {
-                            clientInfo.mClient.setActive(true, false);
+                            clientInfo.mClient.setActive(true, false, false);
                         } catch (RemoteException e) {
                             // TODO(yukawa): Remove this client.
                             return;
@@ -1400,7 +1400,7 @@ public final class MultiClientInputMethodManagerService {
                     return;
                 }
                 try {
-                    clientInfo.mClient.setActive(active, false /* fullscreen */);
+                    clientInfo.mClient.setActive(active, false /* fullscreen */, false);
                 } catch (RemoteException e) {
                     return;
                 }
