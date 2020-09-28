@@ -325,9 +325,13 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
             return;
         }
 
+        final Configuration initialConfig = mInitialState.remove(mToken.asBinder());
+        if (initialConfig == null) {
+            Log.wtf(TAG, "Token not in record, this should not happen mToken=" + mToken);
+            return;
+        }
         mPipUiEventLoggerLogger.log(
                 PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_EXPAND_TO_FULLSCREEN);
-        final Configuration initialConfig = mInitialState.remove(mToken.asBinder());
         final boolean orientationDiffers = initialConfig.windowConfiguration.getRotation()
                 != mPipBoundsHandler.getDisplayRotation();
         final WindowContainerTransaction wct = new WindowContainerTransaction();
