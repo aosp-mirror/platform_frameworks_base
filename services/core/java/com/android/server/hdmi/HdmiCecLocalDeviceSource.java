@@ -167,8 +167,9 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         // If the path is under the current device, should switch
         if (physicalAddress == mService.getPhysicalAddress() && mService.isPlaybackDevice()) {
             setAndBroadcastActiveSource(message, physicalAddress);
-        }
-        if (physicalAddress != mService.getPhysicalAddress()) {
+        } else if (physicalAddress != mService.getPhysicalAddress() || !isActiveSource()) {
+            // Invalidate the active source if stream path is set to other physical address or
+            // our physical address while not active source
             setActiveSource(physicalAddress, "HdmiCecLocalDeviceSource#handleSetStreamPath()");
         }
         switchInputOnReceivingNewActivePath(physicalAddress);
@@ -180,7 +181,9 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     protected boolean handleRoutingChange(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams(), 2);
-        if (physicalAddress != mService.getPhysicalAddress()) {
+        if (physicalAddress != mService.getPhysicalAddress() || !isActiveSource()) {
+            // Invalidate the active source if routing is changed to other physical address or
+            // our physical address while not active source
             setActiveSource(physicalAddress, "HdmiCecLocalDeviceSource#handleRoutingChange()");
         }
         if (!isRoutingControlFeatureEnabled()) {
@@ -202,7 +205,9 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     protected boolean handleRoutingInformation(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
-        if (physicalAddress != mService.getPhysicalAddress()) {
+        if (physicalAddress != mService.getPhysicalAddress() || !isActiveSource()) {
+            // Invalidate the active source if routing is changed to other physical address or
+            // our physical address while not active source
             setActiveSource(physicalAddress, "HdmiCecLocalDeviceSource#handleRoutingInformation()");
         }
         if (!isRoutingControlFeatureEnabled()) {

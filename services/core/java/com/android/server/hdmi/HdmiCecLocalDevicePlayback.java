@@ -405,6 +405,12 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                     "HdmiCecLocalDevicePlayback#handleRoutingChangeAndInformation()");
             return;
         }
+        if (!isActiveSource()) {
+            // If routing is changed to the device while Active Source, don't invalidate the
+            // Active Source
+            setActiveSource(physicalAddress,
+                    "HdmiCecLocalDevicePlayback#handleRoutingChangeAndInformation()");
+        }
         switch (mPlaybackDeviceActionOnRoutingControl) {
             case WAKE_UP_AND_SEND_ACTIVE_SOURCE:
                 setAndBroadcastActiveSource(message, physicalAddress);
