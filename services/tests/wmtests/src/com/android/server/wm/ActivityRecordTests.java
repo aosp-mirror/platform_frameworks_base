@@ -75,7 +75,6 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 
-import android.window.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
@@ -102,6 +101,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.window.TaskSnapshot;
 
 import androidx.test.filters.MediumTest;
 
@@ -1662,7 +1662,8 @@ public class ActivityRecordTests extends WindowTestsBase {
                     any() /* requestedVisibility */, any() /* outFrame */,
                     any() /* outDisplayCutout */, any() /* outInputChannel */,
                     any() /* outInsetsState */, any() /* outActiveControls */);
-            TaskSnapshotSurface.create(mAtm.mWindowManager, activity, snapshot);
+            mAtm.mWindowManager.mStartingSurfaceController
+                    .createTaskSnapshotSurface(activity, snapshot);
         } catch (RemoteException ignored) {
         } finally {
             reset(session);

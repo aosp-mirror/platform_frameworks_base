@@ -18,6 +18,7 @@ package android.window;
 
 import android.view.SurfaceControl;
 import android.app.ActivityManager;
+import android.window.StartingWindowInfo;
 import android.window.WindowContainerToken;
 
 /**
@@ -30,15 +31,15 @@ oneway interface ITaskOrganizer {
      * application is starting. The client is responsible to add/remove the starting window if it
      * has create a starting window for the Task.
      *
-     * @param taskInfo The information about the Task that's available
+     * @param info The information about the Task that's available
      * @param appToken Token of the application being started.
      */
-    void addStartingWindow(in ActivityManager.RunningTaskInfo taskInfo, IBinder appToken);
+    void addStartingWindow(in StartingWindowInfo info, IBinder appToken);
 
     /**
      * Called when the Task want to remove the starting window.
      */
-    void removeStartingWindow(in ActivityManager.RunningTaskInfo taskInfo);
+    void removeStartingWindow(int taskId);
 
     /**
      * A callback when the Task is available for the registered organizer. The client is responsible

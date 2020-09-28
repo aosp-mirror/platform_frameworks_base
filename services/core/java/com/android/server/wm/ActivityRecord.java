@@ -1759,6 +1759,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final TaskSnapshot snapshot =
                 mWmService.mTaskSnapshotController.getSnapshot(task.mTaskId, task.mUserId,
                         false /* restoreFromDisk */, false /* isLowResolution */);
+        final int typeParameter = mWmService.mStartingSurfaceController
+                .makeStartingWindowTypeParameter(newTask, taskSwitch, processRunning,
+                        allowTaskSnapshot, activityCreated);
         final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
                 allowTaskSnapshot, activityCreated, snapshot);
 
@@ -1773,7 +1776,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     return false;
                 }
             }
-            return createSnapshot(snapshot);
+            return createSnapshot(snapshot, typeParameter);
         }
 
         // If this is a translucent window, then don't show a starting window -- the current
@@ -1833,18 +1836,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Creating SplashScreenStartingData");
         mStartingData = new SplashScreenStartingData(mWmService, pkg,
                 theme, compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
-                getMergedOverrideConfiguration());
+                getMergedOverrideConfiguration(), typeParameter);
         scheduleAddStartingWindow();
         return true;
     }
 
-    private boolean createSnapshot(TaskSnapshot snapshot) {
+    private boolean createSnapshot(TaskSnapshot snapshot, int typeParams) {
         if (snapshot == null) {
             return false;
         }
 
         ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Creating SnapshotStartingData");
-        mStartingData = new SnapshotStartingData(mWmService, snapshot);
+        mStartingData = new SnapshotStartingData(mWmService, snapshot, typeParams);
         scheduleAddStartingWindow();
         return true;
     }

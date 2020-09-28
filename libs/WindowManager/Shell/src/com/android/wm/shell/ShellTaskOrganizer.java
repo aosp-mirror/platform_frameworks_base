@@ -34,6 +34,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizerController;
+import android.window.StartingWindowInfo;
 import android.window.TaskAppearedInfo;
 import android.window.TaskOrganizer;
 
@@ -112,7 +113,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         // TODO(b/131727939) temporarily live here, the starting surface drawer should be controlled
         //  by a controller, that class should be create while porting
         //  ActivityRecord#addStartingWindow to WMShell.
-        mStartingSurfaceDrawer = new StartingSurfaceDrawer(context);
+        mStartingSurfaceDrawer = new StartingSurfaceDrawer(context, mainExecutor);
     }
 
     @Override
@@ -229,13 +230,13 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     }
 
     @Override
-    public void addStartingWindow(RunningTaskInfo taskInfo, IBinder appToken) {
-        mStartingSurfaceDrawer.addStartingWindow(taskInfo, appToken);
+    public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
+        mStartingSurfaceDrawer.addStartingWindow(info, appToken);
     }
 
     @Override
-    public void removeStartingWindow(RunningTaskInfo taskInfo) {
-        mStartingSurfaceDrawer.removeStartingWindow(taskInfo);
+    public void removeStartingWindow(int taskId) {
+        mStartingSurfaceDrawer.removeStartingWindow(taskId);
     }
 
     @Override

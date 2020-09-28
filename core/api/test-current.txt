@@ -2457,6 +2457,13 @@ package android.window {
     field public static final int FEATURE_WINDOW_TOKENS = 2; // 0x2
   }
 
+  public final class StartingWindowInfo implements android.os.Parcelable {
+    ctor public StartingWindowInfo();
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.window.StartingWindowInfo> CREATOR;
+  }
+
   public final class TaskAppearedInfo implements android.os.Parcelable {
     ctor public TaskAppearedInfo(@NonNull android.app.ActivityManager.RunningTaskInfo, @NonNull android.view.SurfaceControl);
     method public int describeContents();
@@ -2468,7 +2475,7 @@ package android.window {
 
   public class TaskOrganizer extends android.window.WindowOrganizer {
     ctor public TaskOrganizer();
-    method @BinderThread public void addStartingWindow(@NonNull android.app.ActivityManager.RunningTaskInfo, @NonNull android.os.IBinder);
+    method @BinderThread public void addStartingWindow(@NonNull android.window.StartingWindowInfo, @NonNull android.os.IBinder);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void createRootTask(int, int, @Nullable android.os.IBinder);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public boolean deleteRootTask(@NonNull android.window.WindowContainerToken);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public java.util.List<android.app.ActivityManager.RunningTaskInfo> getChildTasks(@NonNull android.window.WindowContainerToken, @NonNull int[]);
@@ -2479,7 +2486,7 @@ package android.window {
     method @BinderThread public void onTaskInfoChanged(@NonNull android.app.ActivityManager.RunningTaskInfo);
     method @BinderThread public void onTaskVanished(@NonNull android.app.ActivityManager.RunningTaskInfo);
     method @CallSuper @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public java.util.List<android.window.TaskAppearedInfo> registerOrganizer();
-    method @BinderThread public void removeStartingWindow(@NonNull android.app.ActivityManager.RunningTaskInfo);
+    method @BinderThread public void removeStartingWindow(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void setInterceptBackPressedOnTaskRoot(@NonNull android.window.WindowContainerToken, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void setLaunchRoot(int, @NonNull android.window.WindowContainerToken);
     method @CallSuper @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void unregisterOrganizer();

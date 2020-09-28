@@ -24,9 +24,11 @@ import com.android.server.policy.WindowManagerPolicy.StartingSurface;
 public abstract class StartingData {
 
     protected final WindowManagerService mService;
+    protected final int mTypeParams;
 
-    protected StartingData(WindowManagerService service) {
+    protected StartingData(WindowManagerService service, int typeParams) {
         mService = service;
+        mTypeParams = typeParams;
     }
 
     /**

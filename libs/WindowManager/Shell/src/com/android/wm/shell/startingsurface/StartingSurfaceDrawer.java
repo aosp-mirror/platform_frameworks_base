@@ -16,11 +16,18 @@
 
 package com.android.wm.shell.startingsurface;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.content.Context.CONTEXT_RESTRICTED;
 import static android.content.res.Configuration.EMPTY;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
 
-import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
+import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -30,18 +37,20 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
+import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
+import android.window.StartingWindowInfo;
 import android.window.TaskOrganizer;
+import android.window.TaskSnapshot;
 
 import com.android.internal.R;
 import com.android.internal.policy.PhoneWindow;
+import com.android.wm.shell.common.ShellExecutor;
 
 import java.util.function.Consumer;
 
@@ -56,22 +65,24 @@ import java.util.function.Consumer;
  * @hide
  */
 public class StartingSurfaceDrawer {
-    private static final String TAG = StartingSurfaceDrawer.class.getSimpleName();
-    private static final boolean DEBUG_SPLASH_SCREEN = false;
+    static final String TAG = StartingSurfaceDrawer.class.getSimpleName();
+    static final boolean DEBUG_SPLASH_SCREEN = false;
+    static final boolean DEBUG_TASK_SNAPSHOT = false;
 
     private final Context mContext;
     private final DisplayManager mDisplayManager;
+    final ShellExecutor mMainExecutor;
 
     // TODO(b/131727939) remove this when clearing ActivityRecord
     private static final int REMOVE_WHEN_TIMEOUT = 2000;
 
-    public StartingSurfaceDrawer(Context context) {
+    public StartingSurfaceDrawer(Context context, ShellExecutor mainExecutor) {
         mContext = context;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
+        mMainExecutor = mainExecutor;
     }
 
-    private final Handler mHandler = new Handler(Looper.getMainLooper());
-    private final SparseArray<TaskScreenView> mTaskScreenViews = new SparseArray<>();
+    private final SparseArray<StartingWindowRecord> mStartingWindowRecords = new SparseArray<>();
 
     /** Obtain proper context for showing splash screen on the provided display. */
     private Context getDisplayContext(Context context, int displayId) {
@@ -90,12 +101,111 @@ public class StartingSurfaceDrawer {
         return context.createDisplayContext(targetDisplay);
     }
 
+    private static class PreferredStartingTypeHelper {
+        private static final int STARTING_TYPE_NO = 0;
+        private static final int STARTING_TYPE_SPLASH_SCREEN = 1;
+        private static final int STARTING_TYPE_SNAPSHOT = 2;
+
+        TaskSnapshot mSnapshot;
+        int mPreferredType;
+
+        PreferredStartingTypeHelper(StartingWindowInfo taskInfo) {
+            final int parameter = taskInfo.startingWindowTypeParameter;
+            final boolean newTask = (parameter & TYPE_PARAMETER_NEW_TASK) != 0;
+            final boolean taskSwitch = (parameter & TYPE_PARAMETER_TASK_SWITCH) != 0;
+            final boolean processRunning = (parameter & TYPE_PARAMETER_PROCESS_RUNNING) != 0;
+            final boolean allowTaskSnapshot = (parameter & TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT) != 0;
+            final boolean activityCreated = (parameter & TYPE_PARAMETER_ACTIVITY_CREATED) != 0;
+            mPreferredType = preferredStartingWindowType(taskInfo, newTask, taskSwitch,
+                    processRunning, allowTaskSnapshot, activityCreated);
+        }
+
+        // reference from ActivityRecord#getStartingWindowType
+        private int preferredStartingWindowType(StartingWindowInfo windowInfo,
+                boolean newTask, boolean taskSwitch, boolean processRunning,
+                boolean allowTaskSnapshot, boolean activityCreated) {
+            if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
+                Slog.d(TAG, "preferredStartingWindowType newTask " + newTask
+                        + " taskSwitch " + taskSwitch
+                        + " processRunning " + processRunning
+                        + " allowTaskSnapshot " + allowTaskSnapshot
+                        + " activityCreated " + activityCreated);
+            }
+
+            if (newTask || !processRunning || (taskSwitch && !activityCreated)) {
+                return STARTING_TYPE_SPLASH_SCREEN;
+            } else if (taskSwitch && allowTaskSnapshot) {
+                final TaskSnapshot snapshot = getTaskSnapshot(windowInfo.taskInfo.taskId);
+                if (isSnapshotCompatible(windowInfo, snapshot)) {
+                    return STARTING_TYPE_SNAPSHOT;
+                }
+                if (windowInfo.taskInfo.topActivityType != ACTIVITY_TYPE_HOME) {
+                    return STARTING_TYPE_SPLASH_SCREEN;
+                }
+                return STARTING_TYPE_NO;
+            } else {
+                return STARTING_TYPE_NO;
+            }
+        }
+
+        /**
+         * Returns {@code true} if the task snapshot is compatible with this activity (at least the
+         * rotation must be the same).
+         */
+        private boolean isSnapshotCompatible(StartingWindowInfo windowInfo, TaskSnapshot snapshot) {
+            if (snapshot == null) {
+                if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
+                    Slog.d(TAG, "isSnapshotCompatible no snapshot " + windowInfo.taskInfo.taskId);
+                }
+                return false;
+            }
+
+            final int taskRotation = windowInfo.taskInfo.configuration
+                    .windowConfiguration.getRotation();
+            final int snapshotRotation = snapshot.getRotation();
+            if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
+                Slog.d(TAG, "isSnapshotCompatible rotation " + taskRotation
+                        + " snapshot " + snapshotRotation);
+            }
+            return taskRotation == snapshotRotation;
+        }
+
+        private TaskSnapshot getTaskSnapshot(int taskId) {
+            if (mSnapshot != null) {
+                return mSnapshot;
+            }
+            try {
+                mSnapshot = ActivityTaskManager.getService().getTaskSnapshot(taskId,
+                        false/* isLowResolution */);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Unable to get snapshot for task: " + taskId + ", from: " + e);
+                return null;
+            }
+            return mSnapshot;
+        }
+    }
+
     /**
      * Called when a task need a starting window.
      */
-    public void addStartingWindow(ActivityManager.RunningTaskInfo taskInfo, IBinder appToken) {
+    public void addStartingWindow(StartingWindowInfo windowInfo, IBinder appToken) {
+        final PreferredStartingTypeHelper helper =
+                new PreferredStartingTypeHelper(windowInfo);
+        final RunningTaskInfo runningTaskInfo = windowInfo.taskInfo;
+        if (helper.mPreferredType == PreferredStartingTypeHelper.STARTING_TYPE_SPLASH_SCREEN) {
+            addSplashScreenStartingWindow(runningTaskInfo, appToken);
+        } else if (helper.mPreferredType == PreferredStartingTypeHelper.STARTING_TYPE_SNAPSHOT) {
+            final TaskSnapshot snapshot = helper.mSnapshot;
+            makeTaskSnapshotWindow(windowInfo, appToken, snapshot);
+        }
+        // If prefer don't show, then don't show!
+    }
 
+    private void addSplashScreenStartingWindow(RunningTaskInfo taskInfo, IBinder appToken) {
         final ActivityInfo activityInfo = taskInfo.topActivityInfo;
+        if (activityInfo == null) {
+            return;
+        }
         final int displayId = taskInfo.displayId;
         if (activityInfo.packageName == null) {
             return;
@@ -250,18 +360,34 @@ public class StartingSurfaceDrawer {
     }
 
     /**
+     * Called when a task need a snapshot starting window.
+     */
+    private void makeTaskSnapshotWindow(StartingWindowInfo startingWindowInfo,
+            IBinder appToken, TaskSnapshot snapshot) {
+        final int taskId = startingWindowInfo.taskInfo.taskId;
+        final TaskSnapshotWindow surface = TaskSnapshotWindow.create(startingWindowInfo, appToken,
+                snapshot, mMainExecutor, () -> removeWindowSynced(taskId) /* clearWindow */);
+        mMainExecutor.execute(() -> {
+            mMainExecutor.executeDelayed(() -> removeWindowSynced(taskId), REMOVE_WHEN_TIMEOUT);
+            final StartingWindowRecord tView =
+                    new StartingWindowRecord(null/* decorView */, surface);
+            mStartingWindowRecords.put(taskId, tView);
+        });
+    }
+
+    /**
      * Called when the content of a task is ready to show, starting window can be removed.
      */
-    public void removeStartingWindow(ActivityManager.RunningTaskInfo taskInfo) {
-        if (DEBUG_SPLASH_SCREEN) {
-            Slog.d(TAG, "Task start finish, remove starting surface for task " + taskInfo.taskId);
+    public void removeStartingWindow(int taskId) {
+        if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
+            Slog.d(TAG, "Task start finish, remove starting surface for task " + taskId);
         }
-        mHandler.post(() -> removeWindowSynced(taskInfo.taskId));
+        mMainExecutor.execute(() -> removeWindowSynced(taskId));
     }
 
     protected void postAddWindow(int taskId, IBinder appToken,
             View view, WindowManager wm, WindowManager.LayoutParams params) {
-        mHandler.post(() -> {
+        mMainExecutor.execute(() -> {
             boolean shouldSaveView = true;
             try {
                 wm.addView(view, params);
@@ -286,25 +412,32 @@ public class StartingSurfaceDrawer {
 
             if (shouldSaveView) {
                 removeWindowSynced(taskId);
-                mHandler.postDelayed(() -> removeWindowSynced(taskId), REMOVE_WHEN_TIMEOUT);
-                final TaskScreenView tView = new TaskScreenView(view);
-                mTaskScreenViews.put(taskId, tView);
+                mMainExecutor.executeDelayed(() -> removeWindowSynced(taskId), REMOVE_WHEN_TIMEOUT);
+                final StartingWindowRecord tView =
+                        new StartingWindowRecord(view, null /* TaskSnapshotWindow */);
+                mStartingWindowRecords.put(taskId, tView);
             }
         });
     }
 
     protected void removeWindowSynced(int taskId) {
-        final TaskScreenView preView = mTaskScreenViews.get(taskId);
-        if (preView != null) {
-            if (preView.mDecorView != null) {
+        final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
+        if (record != null) {
+            if (record.mDecorView != null) {
                 if (DEBUG_SPLASH_SCREEN) {
                     Slog.v(TAG, "Removing splash screen window for task: " + taskId);
                 }
-                final WindowManager wm = preView.mDecorView.getContext()
+                final WindowManager wm = record.mDecorView.getContext()
                         .getSystemService(WindowManager.class);
-                wm.removeView(preView.mDecorView);
+                wm.removeView(record.mDecorView);
             }
-            mTaskScreenViews.remove(taskId);
+            if (record.mTaskSnapshotWindow != null) {
+                if (DEBUG_TASK_SNAPSHOT) {
+                    Slog.v(TAG, "Removing task snapshot window for " + taskId);
+                }
+                record.mTaskSnapshotWindow.remove(mMainExecutor);
+            }
+            mStartingWindowRecords.remove(taskId);
         }
     }
 
@@ -315,13 +448,15 @@ public class StartingSurfaceDrawer {
     }
 
     /**
-     * Record the views in a starting window.
+     * Record the view or surface for a starting window.
      */
-    private static class TaskScreenView {
+    private static class StartingWindowRecord {
         private final View mDecorView;
+        private final TaskSnapshotWindow mTaskSnapshotWindow;
 
-        TaskScreenView(View decorView) {
+        StartingWindowRecord(View decorView, TaskSnapshotWindow taskSnapshotWindow) {
             mDecorView = decorView;
+            mTaskSnapshotWindow = taskSnapshotWindow;
         }
     }
 

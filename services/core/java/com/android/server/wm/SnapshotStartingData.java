@@ -28,14 +28,15 @@ class SnapshotStartingData extends StartingData {
     private final WindowManagerService mService;
     private final TaskSnapshot mSnapshot;
 
-    SnapshotStartingData(WindowManagerService service, TaskSnapshot snapshot) {
-        super(service);
+    SnapshotStartingData(WindowManagerService service, TaskSnapshot snapshot, int typeParams) {
+        super(service, typeParams);
         mService = service;
         mSnapshot = snapshot;
     }
 
     @Override
     StartingSurface createStartingSurface(ActivityRecord activity) {
-        return mService.mTaskSnapshotController.createStartingSurface(activity, mSnapshot);
+        return mService.mStartingSurfaceController.createTaskSnapshotSurface(activity,
+                mSnapshot);
     }
 }

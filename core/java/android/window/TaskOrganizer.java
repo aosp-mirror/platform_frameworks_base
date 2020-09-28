@@ -89,19 +89,19 @@ public class TaskOrganizer extends WindowOrganizer {
      * application is starting. The client is responsible to add/remove the starting window if it
      * has create a starting window for the Task.
      *
-     * @param taskInfo The information about the Task that's available
+     * @param info The information about the Task that's available
      * @param appToken Token of the application being started.
      *        context to for resources
      */
     @BinderThread
-    public void addStartingWindow(@NonNull ActivityManager.RunningTaskInfo taskInfo,
+    public void addStartingWindow(@NonNull StartingWindowInfo info,
             @NonNull IBinder appToken) {}
 
     /**
      * Called when the Task want to remove the starting window.
      */
     @BinderThread
-    public void removeStartingWindow(@NonNull ActivityManager.RunningTaskInfo taskInfo) {}
+    public void removeStartingWindow(int taskId) {}
 
     /**
      * Called when a task with the registered windowing mode can be controlled by this task
@@ -221,13 +221,15 @@ public class TaskOrganizer extends WindowOrganizer {
 
     private final ITaskOrganizer mInterface = new ITaskOrganizer.Stub() {
         @Override
-        public void addStartingWindow(ActivityManager.RunningTaskInfo taskInfo, IBinder appToken) {
-            mExecutor.execute(() -> TaskOrganizer.this.addStartingWindow(taskInfo, appToken));
+
+        public void addStartingWindow(StartingWindowInfo windowInfo,
+                IBinder appToken) {
+            mExecutor.execute(() -> TaskOrganizer.this.addStartingWindow(windowInfo, appToken));
         }
 
         @Override
-        public void removeStartingWindow(ActivityManager.RunningTaskInfo taskInfo) {
-            mExecutor.execute(() -> TaskOrganizer.this.removeStartingWindow(taskInfo));
+        public void removeStartingWindow(int taskId) {
+            mExecutor.execute(() -> TaskOrganizer.this.removeStartingWindow(taskId));
         }
 
         @Override

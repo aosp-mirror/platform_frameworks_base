@@ -41,11 +41,14 @@ import android.testing.TestableContext;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
+import android.window.StartingWindowInfo;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.wm.shell.common.HandlerExecutor;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.startingsurface.StartingSurfaceDrawer;
 
 import org.junit.Before;
@@ -70,8 +73,8 @@ public class StartingSurfaceDrawerTests {
     static final class TestStartingSurfaceDrawer extends StartingSurfaceDrawer{
         int mAddWindowForTask = 0;
 
-        TestStartingSurfaceDrawer(Context context) {
-            super(context);
+        TestStartingSurfaceDrawer(Context context, ShellExecutor executor) {
+            super(context, executor);
         }
 
         @Override
@@ -109,36 +112,38 @@ public class StartingSurfaceDrawerTests {
         doReturn(metrics).when(mMockWindowManager).getMaximumWindowMetrics();
         doNothing().when(mMockWindowManager).addView(any(), any());
 
-        mStartingSurfaceDrawer = spy(new TestStartingSurfaceDrawer(context));
+        mStartingSurfaceDrawer = spy(new TestStartingSurfaceDrawer(context,
+                new HandlerExecutor(new Handler(Looper.getMainLooper()))));
     }
 
     @Test
     public void testAddSplashScreenSurface() {
         final int taskId = 1;
         final Handler mainLoop = new Handler(Looper.getMainLooper());
-        final ActivityManager.RunningTaskInfo taskInfo =
-                createTaskInfo(taskId, WINDOWING_MODE_FULLSCREEN);
-        mStartingSurfaceDrawer.addStartingWindow(taskInfo, mBinder);
+        final StartingWindowInfo windowInfo =
+                createWindowInfo(taskId, WINDOWING_MODE_FULLSCREEN);
+        mStartingSurfaceDrawer.addStartingWindow(windowInfo, mBinder);
         waitHandlerIdle(mainLoop);
         verify(mStartingSurfaceDrawer).postAddWindow(eq(taskId), eq(mBinder), any(), any(), any());
         assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, taskId);
 
-        mStartingSurfaceDrawer.removeStartingWindow(taskInfo);
+        mStartingSurfaceDrawer.removeStartingWindow(windowInfo.taskInfo.taskId);
         waitHandlerIdle(mainLoop);
         verify(mStartingSurfaceDrawer).removeWindowSynced(eq(taskId));
         assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, 0);
     }
 
-    private ActivityManager.RunningTaskInfo createTaskInfo(int taskId, int windowingMode) {
-        ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
+    private StartingWindowInfo createWindowInfo(int taskId, int windowingMode) {
+        StartingWindowInfo windowInfo = new StartingWindowInfo();
         final ActivityInfo info = new ActivityInfo();
         info.applicationInfo = new ApplicationInfo();
         info.packageName = "test";
         info.theme = android.R.style.Theme;
+        final ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.topActivityInfo = info;
         taskInfo.taskId = taskId;
-        taskInfo.configuration.windowConfiguration.setWindowingMode(windowingMode);
-        return taskInfo;
+        windowInfo.taskInfo = taskInfo;
+        return windowInfo;
     }
 
     private static void waitHandlerIdle(Handler handler) {
