@@ -46,6 +46,10 @@
        in frameworks/base/core package and thus will have no effect if
        set here. See car_product overlay for car specific defaults-->
 
+    <!-- Overrides the space between each status icon in the system bar -->
+    <dimen name="status_bar_system_icon_spacing">16dp</dimen>
+    <!-- Overrides the size of the network signal icon -->
+    <dimen name="signal_icon_size">32dp</dimen>
     <dimen name="system_bar_user_icon_padding">16dp</dimen>
     <dimen name="system_bar_user_icon_drawing_size">36dp</dimen>
     <!-- Padding on either side of the group of all system bar buttons -->

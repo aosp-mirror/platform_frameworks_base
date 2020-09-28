@@ -20,16 +20,24 @@
     android:id="@+id/system_icons"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
 
     <com.android.systemui.statusbar.phone.StatusIconContainer
         android:id="@+id/statusIcons"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:padding="10dp"
         android:scaleType="fitCenter"
         android:gravity="center_vertical"
         android:orientation="horizontal"
+    />
+
+    <ImageView
+        android:id="@+id/settingsIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginStart="@dimen/car_padding_2"
+        android:src="@drawable/car_ic_settings_icon"
     />
 </LinearLayout>
