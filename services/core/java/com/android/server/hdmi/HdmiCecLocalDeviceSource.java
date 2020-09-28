@@ -166,7 +166,8 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         // If current device is the target path, set to Active Source.
         // If the path is under the current device, should switch
         if (physicalAddress == mService.getPhysicalAddress() && mService.isPlaybackDevice()) {
-            setAndBroadcastActiveSource(message, physicalAddress);
+            setAndBroadcastActiveSource(message, physicalAddress,
+                    "HdmiCecLocalDeviceSource#handleSetStreamPath()");
         } else if (physicalAddress != mService.getPhysicalAddress() || !isActiveSource()) {
             // Invalidate the active source if stream path is set to other physical address or
             // our physical address while not active source
@@ -236,9 +237,10 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     // since service can decide who will be the active source when the device supports
     // multiple device types in this method.
     // This method should only be called when the device can be the active source.
-    protected void setAndBroadcastActiveSource(HdmiCecMessage message, int physicalAddress) {
+    protected void setAndBroadcastActiveSource(HdmiCecMessage message, int physicalAddress,
+            String caller) {
         mService.setAndBroadcastActiveSource(
-                physicalAddress, getDeviceInfo().getDeviceType(), message.getSource());
+                physicalAddress, getDeviceInfo().getDeviceType(), message.getSource(), caller);
     }
 
     // Indicates if current device is the active source or not

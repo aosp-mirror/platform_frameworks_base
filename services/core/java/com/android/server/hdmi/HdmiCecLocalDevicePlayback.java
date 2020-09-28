@@ -102,7 +102,8 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         assertRunOnServiceThread();
         if (reason == mService.INITIATED_BY_ENABLE_CEC) {
             mService.setAndBroadcastActiveSource(mService.getPhysicalAddress(),
-                    getDeviceInfo().getDeviceType(), Constants.ADDR_BROADCAST);
+                    getDeviceInfo().getDeviceType(), Constants.ADDR_BROADCAST,
+                    "HdmiCecLocalDevicePlayback#onAddressAllocated()");
         }
         mService.sendCecCommand(HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
                 mAddress, mService.getPhysicalAddress(), mDeviceType));
@@ -413,7 +414,8 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         }
         switch (mPlaybackDeviceActionOnRoutingControl) {
             case WAKE_UP_AND_SEND_ACTIVE_SOURCE:
-                setAndBroadcastActiveSource(message, physicalAddress);
+                setAndBroadcastActiveSource(message, physicalAddress,
+                        "HdmiCecLocalDevicePlayback#handleRoutingChangeAndInformation()");
                 break;
             case WAKE_UP_ONLY:
                 mService.wakeUp();
