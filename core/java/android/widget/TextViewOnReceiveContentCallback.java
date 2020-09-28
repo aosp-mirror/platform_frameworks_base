@@ -44,7 +44,7 @@ import java.util.Set;
  * provide consistent behavior for insertion of text.
  */
 public class TextViewOnReceiveContentCallback implements OnReceiveContentCallback<TextView> {
-    private static final String LOG_TAG = "OnReceiveContentCallback";
+    private static final String LOG_TAG = "OnReceiveContent";
 
     private static final Set<String> MIME_TYPES_ALL_TEXT = Collections.singleton("text/*");
 
