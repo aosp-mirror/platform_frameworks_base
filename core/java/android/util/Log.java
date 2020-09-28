@@ -227,7 +227,7 @@ public final class Log {
      * @param level The level to check.
      * @return Whether or not that this is allowed to be logged.
      * @throws IllegalArgumentException is thrown if the tag.length() > 23
-     *         for Nougat (7.0) releases (API <= 23) and prior, there is no
+     *         for Nougat (7.0) and prior releases (API <= 25), there is no
      *         tag limit of concern after this API level.
      */
     @FastNative
