@@ -561,7 +561,7 @@ public class BugreportReceiverTest {
             // Clear properties
             mContext.getSharedPreferences(PREFS_BUGREPORT, Context.MODE_PRIVATE)
                     .edit().clear().commit();
-            // Sanity check...
+            // Confidence check...
             assertEquals("Did not reset properties", STATE_UNKNOWN,
                     getWarningState(mContext, STATE_UNKNOWN));
         } else {
