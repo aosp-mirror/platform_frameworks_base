@@ -120,12 +120,6 @@ oneway interface IWindow {
     void updatePointerIcon(float x, float y);
 
     /**
-     * System chrome visibility changes
-     */
-    void dispatchSystemUiVisibilityChanged(int seq, int globalVisibility,
-            int localValue, int localChanges);
-
-    /**
      * Called for non-application windows when the enter animation has completed.
      */
     void dispatchWindowShown();

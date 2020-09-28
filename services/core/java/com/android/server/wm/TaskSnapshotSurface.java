@@ -241,7 +241,7 @@ class TaskSnapshotSurface implements StartingSurface {
             mergeInsetsSources(insetsState, topFullscreenOpaqueWindow.getRequestedInsetsState());
         }
         try {
-            final int res = session.addToDisplay(window, window.mSeq, layoutParams,
+            final int res = session.addToDisplay(window, layoutParams,
                     View.GONE, activity.getDisplayContent().getDisplayId(), tmpFrames.frame,
                     tmpFrames.contentInsets, tmpFrames.stableInsets, tmpFrames.displayCutout,
                     null /* outInputChannel */, mTmpInsetsState, mTempControls);
@@ -258,7 +258,7 @@ class TaskSnapshotSurface implements StartingSurface {
                 insetsState);
         window.setOuter(snapshotSurface);
         try {
-            session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, -1,
+            session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, -1,
                     tmpFrames, tmpMergedConfiguration, surfaceControl, mTmpInsetsState,
                     mTempControls, sTmpSurfaceSize, sTmpSurfaceControl);
         } catch (RemoteException e) {

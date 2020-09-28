@@ -271,14 +271,14 @@ public class SystemWindows {
         }
 
         @Override
-        public int relayout(IWindow window, int seq, WindowManager.LayoutParams attrs,
+        public int relayout(IWindow window, WindowManager.LayoutParams attrs,
                 int requestedWidth, int requestedHeight, int viewVisibility, int flags,
                 long frameNumber, ClientWindowFrames outFrames,
                 MergedConfiguration mergedConfiguration,
                 SurfaceControl outSurfaceControl, InsetsState outInsetsState,
                 InsetsSourceControl[] outActiveControls, Point outSurfaceSize,
                 SurfaceControl outBLASTSurfaceControl) {
-            int res = super.relayout(window, seq, attrs, requestedWidth, requestedHeight,
+            int res = super.relayout(window, attrs, requestedWidth, requestedHeight,
                     viewVisibility, flags, frameNumber, outFrames,
                     mergedConfiguration, outSurfaceControl, outInsetsState,
                     outActiveControls, outSurfaceSize, outBLASTSurfaceControl);
@@ -363,10 +363,6 @@ public class SystemWindows {
 
         @Override
         public void updatePointerIcon(float x, float y) {}
-
-        @Override
-        public void dispatchSystemUiVisibilityChanged(int seq, int globalVisibility,
-                int localValue, int localChanges) {}
 
         @Override
         public void dispatchWindowShown() {}

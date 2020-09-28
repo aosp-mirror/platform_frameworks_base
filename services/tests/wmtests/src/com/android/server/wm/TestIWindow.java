@@ -94,11 +94,6 @@ public class TestIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void dispatchSystemUiVisibilityChanged(int seq, int globalVisibility, int localValue,
-            int localChanges) throws RemoteException {
-    }
-
-    @Override
     public void dispatchWindowShown() throws RemoteException {
     }
 

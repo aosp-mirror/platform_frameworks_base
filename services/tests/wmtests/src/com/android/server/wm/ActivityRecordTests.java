@@ -1522,7 +1522,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         try {
             // Return error to skip unnecessary operation.
             doReturn(WindowManagerGlobal.ADD_STARTING_NOT_NEEDED).when(session).addToDisplay(
-                    any() /* window */, anyInt() /* seq */, any() /* attrs */,
+                    any() /* window */,  any() /* attrs */,
                     anyInt() /* viewVisibility */, anyInt() /* displayId */, any() /* outFrame */,
                     any() /* outContentInsets */, any() /* outStableInsets */,
                     any() /* outDisplayCutout */, any() /* outInputChannel */,

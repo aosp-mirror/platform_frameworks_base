@@ -302,7 +302,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final boolean mIsImWindow;
     final boolean mIsWallpaper;
     private final boolean mIsFloatingLayer;
-    int mSeq;
     int mViewVisibility;
     int mSystemUiVisibility;
 
@@ -834,10 +833,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
-            WindowState parentWindow, int appOp, int seq, WindowManager.LayoutParams a,
-            int viewVisibility, int ownerId, int showUserId,
-            boolean ownerCanAddInternalSystemWindow) {
-        this(service, s, c, token, parentWindow, appOp, seq, a, viewVisibility, ownerId, showUserId,
+            WindowState parentWindow, int appOp, WindowManager.LayoutParams a, int viewVisibility,
+            int ownerId, int showUserId, boolean ownerCanAddInternalSystemWindow) {
+        this(service, s, c, token, parentWindow, appOp, a, viewVisibility, ownerId, showUserId,
                 ownerCanAddInternalSystemWindow, new PowerManagerWrapper() {
                     @Override
                     public void wakeUp(long time, @WakeReason int reason, String details) {
@@ -852,9 +850,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
-            WindowState parentWindow, int appOp, int seq, WindowManager.LayoutParams a,
-            int viewVisibility, int ownerId, int showUserId,
-            boolean ownerCanAddInternalSystemWindow, PowerManagerWrapper powerManagerWrapper) {
+            WindowState parentWindow, int appOp, WindowManager.LayoutParams a, int viewVisibility,
+            int ownerId, int showUserId, boolean ownerCanAddInternalSystemWindow,
+            PowerManagerWrapper powerManagerWrapper) {
         super(service);
         mSession = s;
         mClient = c;
@@ -871,7 +869,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mPolicy = mWmService.mPolicy;
         mContext = mWmService.mContext;
         DeathRecipient deathRecipient = new DeathRecipient();
-        mSeq = seq;
         mPowerManagerWrapper = powerManagerWrapper;
         mForceSeamlesslyRotate = token.mRoundedCornerOverlay;
         if (DEBUG) {
@@ -4031,7 +4028,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             pw.println(prefix + "mViewVisibility=0x" + Integer.toHexString(mViewVisibility)
                     + " mHaveFrame=" + mHaveFrame
                     + " mObscured=" + mObscured);
-            pw.println(prefix + "mSeq=" + mSeq
+            pw.println(prefix
                     + " mSystemUiVisibility=0x" + Integer.toHexString(mSystemUiVisibility));
         }
         if (!isVisibleByPolicy() || !mLegacyPolicyVisibilityAfterAnim || !mAppOpVisibility
