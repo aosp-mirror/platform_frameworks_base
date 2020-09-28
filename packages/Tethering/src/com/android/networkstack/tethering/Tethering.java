@@ -2104,7 +2104,7 @@ public class Tethering {
     }
 
     private boolean hasCallingPermission(@NonNull String permission) {
-        return mContext.checkCallingPermission(permission) == PERMISSION_GRANTED;
+        return mContext.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED;
     }
 
     /** Unregister tethering event callback */
