@@ -1771,7 +1771,7 @@ public class ChooserActivity extends ResolverActivity implements
                 case ChooserListAdapter.TARGET_CALLER:
                 case ChooserListAdapter.TARGET_STANDARD:
                     cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_APP_TARGET;
-                    value -= currentListAdapter.getSelectableServiceTargetCount();
+                    value -= currentListAdapter.getSurfacedTargetInfo().size();
                     numCallerProvided = currentListAdapter.getCallerTargetCount();
                     getChooserActivityLogger().logShareTargetSelected(
                             SELECTION_TYPE_APP,
