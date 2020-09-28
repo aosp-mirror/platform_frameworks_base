@@ -61,7 +61,6 @@ import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.privacy.OngoingPrivacyChip;
-import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
@@ -69,8 +68,6 @@ import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -119,7 +116,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     private boolean mAllIndicatorsEnabled;
     private boolean mMicCameraIndicatorsEnabled;
 
-    private PrivacyItemController mPrivacyItemController;
     // Used for RingerModeTracker
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
 
@@ -135,11 +131,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
 
     @Inject
     public QuickStatusBarHeader(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            ZenModeController zenModeController, PrivacyItemController privacyItemController,
-            DemoModeController demoModeController, UserTracker userTracker) {
+            ZenModeController zenModeController, DemoModeController demoModeController,
+            UserTracker userTracker) {
         super(context, attrs);
         mZenController = zenModeController;
-        mPrivacyItemController = privacyItemController;
         mDualToneHandler = new DualToneHandler(
                 new ContextThemeWrapper(context, R.style.QSHeaderTheme));
         mDemoModeController = demoModeController;
@@ -184,9 +179,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
         mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
         mRingerModeTextView.setSelected(true);
         mNextAlarmTextView.setSelected(true);
-
-        mAllIndicatorsEnabled = mPrivacyItemController.getAllIndicatorsAvailable();
-        mMicCameraIndicatorsEnabled = mPrivacyItemController.getMicCameraAvailable();
     }
 
     void onAttach(TintedIconManager iconManager) {
@@ -203,22 +195,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
 
     public QuickQSPanel getHeaderQsPanel() {
         return mHeaderQsPanel;
-    }
-
-    List<String> getIgnoredIconSlots() {
-        ArrayList<String> ignored = new ArrayList<>();
-        if (getChipEnabled()) {
-            ignored.add(mContext.getResources().getString(
-                    com.android.internal.R.string.status_bar_camera));
-            ignored.add(mContext.getResources().getString(
-                    com.android.internal.R.string.status_bar_microphone));
-            if (mAllIndicatorsEnabled) {
-                ignored.add(mContext.getResources().getString(
-                        com.android.internal.R.string.status_bar_location));
-            }
-        }
-
-        return ignored;
     }
 
     void updateStatusText(int ringerMode, AlarmClockInfo nextAlarm) {
@@ -577,10 +553,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
                     mKeyguardExpansionFraction));
             updateHeaderTextContainerAlphaAnimator();
         }
-    }
-
-    boolean getChipEnabled() {
-        return mMicCameraIndicatorsEnabled || mAllIndicatorsEnabled;
     }
 
     private static class ClockDemoModeReceiver implements DemoMode {

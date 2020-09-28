@@ -52,6 +52,7 @@ import com.android.systemui.statusbar.policy.ZenModeController.Callback;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.ViewController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -141,7 +142,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
 
         private void update() {
             StatusIconContainer iconContainer = mView.requireViewById(R.id.statusIcons);
-            iconContainer.setIgnoredSlots(mView.getIgnoredIconSlots());
+            iconContainer.setIgnoredSlots(getIgnoredIconSlots());
             setChipVisibility(!mPrivacyChip.getPrivacyList().isEmpty());
         }
     };
@@ -224,9 +225,12 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mPrivacyChip.setOnClickListener(mOnClickListener);
 
         // Ignore privacy icons because they show in the space above QQS
-        mIconContainer.addIgnoredSlots(mView.getIgnoredIconSlots());
+        mIconContainer.addIgnoredSlots(getIgnoredIconSlots());
         mIconContainer.setShouldRestrictIcons(false);
         mStatusBarIconController.addIconGroup(mIconManager);
+
+        mAllIndicatorsEnabled = mPrivacyItemController.getAllIndicatorsAvailable();
+        mMicCameraIndicatorsEnabled = mPrivacyItemController.getMicCameraAvailable();
 
         setChipVisibility(mPrivacyChip.getVisibility() == View.VISIBLE);
 
@@ -275,7 +279,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     }
 
     private void setChipVisibility(boolean chipVisible) {
-        if (chipVisible && mView.getChipEnabled()) {
+        if (chipVisible && getChipEnabled()) {
             mPrivacyChip.setVisibility(View.VISIBLE);
             // Makes sure that the chip is logged as viewed at most once each time QS is opened
             // mListening makes sure that the callback didn't return after the user closed QS
@@ -286,6 +290,27 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         } else {
             mPrivacyChip.setVisibility(View.GONE);
         }
+    }
+
+    private List<String> getIgnoredIconSlots() {
+        ArrayList<String> ignored = new ArrayList<>();
+        if (getChipEnabled()) {
+            ignored.add(mView.getResources().getString(
+                    com.android.internal.R.string.status_bar_camera));
+            ignored.add(mView.getResources().getString(
+                    com.android.internal.R.string.status_bar_microphone));
+            if (mAllIndicatorsEnabled) {
+                ignored.add(mView.getResources().getString(
+                        com.android.internal.R.string.status_bar_location));
+            }
+        }
+
+        return ignored;
+    }
+
+
+    private boolean getChipEnabled() {
+        return mMicCameraIndicatorsEnabled || mAllIndicatorsEnabled;
     }
 
     static class Builder {
