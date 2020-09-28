@@ -56,7 +56,7 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.face.FaceManager;
-import android.hardware.face.FaceSensorProperties;
+import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
@@ -1336,7 +1336,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private CancellationSignal mFaceCancelSignal;
     private FingerprintManager mFpm;
     private FaceManager mFaceManager;
-    private List<FaceSensorProperties> mFaceSensorProperties;
+    private List<FaceSensorPropertiesInternal> mFaceSensorProperties;
     private boolean mFingerprintLockedOut;
     private TelephonyManager mTelephonyManager;
 
@@ -1778,7 +1778,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
         if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)) {
             mFaceManager = (FaceManager) context.getSystemService(Context.FACE_SERVICE);
-            mFaceSensorProperties = mFaceManager.getSensorProperties();
+            mFaceSensorProperties = mFaceManager.getSensorPropertiesInternal();
         }
 
         if (mFpm != null || mFaceManager != null) {

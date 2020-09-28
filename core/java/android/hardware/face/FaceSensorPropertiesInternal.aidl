@@ -15,4 +15,4 @@
  */
 package android.hardware.face;
 
-parcelable FaceSensorProperties;
+parcelable FaceSensorPropertiesInternal;

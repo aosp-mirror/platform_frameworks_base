@@ -53,10 +53,7 @@ import android.view.Surface;
 import java.security.Signature;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
@@ -608,7 +605,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
     public void generateChallenge(GenerateChallengeCallback callback) {
-        final List<FingerprintSensorProperties> fingerprintSensorProperties = getSensorProperties();
+        final List<FingerprintSensorPropertiesInternal> fingerprintSensorProperties =
+                getSensorPropertiesInternal();
         if (fingerprintSensorProperties.isEmpty()) {
             Slog.e(TAG, "No sensors");
             return;
@@ -850,17 +848,32 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
+     * Retrieves a list of properties for all fingerprint sensors on the device.
+     * @hide
+     */
+    @NonNull
+    public List<FingerprintSensorProperties> getSensorProperties() {
+        final List<FingerprintSensorProperties> properties = new ArrayList<>();
+        final List<FingerprintSensorPropertiesInternal> internalProperties
+                = getSensorPropertiesInternal();
+        for (FingerprintSensorPropertiesInternal internalProp : internalProperties) {
+            properties.add(FingerprintSensorProperties.from(internalProp));
+        }
+        return properties;
+    }
+
+    /**
      * Get statically configured sensor properties.
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     @NonNull
-    public List<FingerprintSensorProperties> getSensorProperties() {
+    public List<FingerprintSensorPropertiesInternal> getSensorPropertiesInternal() {
         try {
             if (mService == null || !mService.isHardwareDetected(mContext.getOpPackageName())) {
                 return new ArrayList<>();
             }
-            return mService.getSensorProperties(mContext.getOpPackageName());
+            return mService.getSensorPropertiesInternal(mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

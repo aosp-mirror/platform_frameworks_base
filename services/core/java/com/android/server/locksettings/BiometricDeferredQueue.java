@@ -20,9 +20,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.face.FaceManager;
-import android.hardware.face.FaceSensorProperties;
+import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
-import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.ServiceManager;
@@ -34,7 +34,6 @@ import com.android.internal.widget.VerifyCredentialResponse;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -203,9 +202,9 @@ public class BiometricDeferredQueue {
 
     private void processPendingLockoutsForFingerprint(List<UserAuthInfo> pendingResetLockouts) {
         if (mFingerprintManager != null) {
-            final List<FingerprintSensorProperties> fingerprintSensorProperties =
-                    mFingerprintManager.getSensorProperties();
-            for (FingerprintSensorProperties prop : fingerprintSensorProperties) {
+            final List<FingerprintSensorPropertiesInternal> fingerprintSensorProperties =
+                    mFingerprintManager.getSensorPropertiesInternal();
+            for (FingerprintSensorPropertiesInternal prop : fingerprintSensorProperties) {
                 if (!prop.resetLockoutRequiresHardwareAuthToken) {
                     for (UserAuthInfo user : pendingResetLockouts) {
                         mFingerprintManager.resetLockout(prop.sensorId, user.userId,
@@ -238,16 +237,16 @@ public class BiometricDeferredQueue {
                 Slog.w(TAG, "mFaceGenerateChallengeCallback not null, previous operation may be"
                         + " stuck");
             }
-            final List<FaceSensorProperties> faceSensorProperties =
-                    mFaceManager.getSensorProperties();
+            final List<FaceSensorPropertiesInternal> faceSensorProperties =
+                    mFaceManager.getSensorPropertiesInternal();
             final Set<Integer> sensorIds = new ArraySet<>();
-            for (FaceSensorProperties prop : faceSensorProperties) {
+            for (FaceSensorPropertiesInternal prop : faceSensorProperties) {
                 sensorIds.add(prop.sensorId);
             }
 
             mFaceResetLockoutTask = new FaceResetLockoutTask(mFaceFinishCallback, mFaceManager,
                     mSpManager, sensorIds, pendingResetLockouts);
-            for (final FaceSensorProperties prop : faceSensorProperties) {
+            for (final FaceSensorPropertiesInternal prop : faceSensorProperties) {
                 // Generate a challenge for each sensor. The challenge does not need to be
                 // per-user, since the HAT returned by gatekeeper contains userId.
                 mFaceManager.generateChallenge(prop.sensorId, mFaceResetLockoutTask);

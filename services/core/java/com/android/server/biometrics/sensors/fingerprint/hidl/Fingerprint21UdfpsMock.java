@@ -26,6 +26,7 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
 import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Handler;
 import android.os.IBinder;
@@ -124,7 +125,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
 
     @NonNull private final TestableBiometricScheduler mScheduler;
     @NonNull private final Handler mHandler;
-    @NonNull private final FingerprintSensorProperties mSensorProperties;
+    @NonNull private final FingerprintSensorPropertiesInternal mSensorProperties;
     @NonNull private final MockHalResultController mMockHalResultController;
     @NonNull private final TrustManager mTrustManager;
     @NonNull private final SparseBooleanArray mUserHasTrust;
@@ -418,7 +419,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
         final boolean resetLockoutRequiresHardwareAuthToken = false;
         final int maxTemplatesAllowed = mContext.getResources()
                 .getInteger(R.integer.config_fingerprintMaxTemplatesPerUser);
-        mSensorProperties = new FingerprintSensorProperties(sensorId,
+        mSensorProperties = new FingerprintSensorPropertiesInternal(sensorId,
                 Utils.authenticatorStrengthToPropertyStrength(strength), maxTemplatesAllowed,
                 FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
                 resetLockoutRequiresHardwareAuthToken);
@@ -453,8 +454,8 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
 
     @Override
     @NonNull
-    public List<FingerprintSensorProperties> getSensorProperties() {
-        final List<FingerprintSensorProperties> properties = new ArrayList<>();
+    public List<FingerprintSensorPropertiesInternal> getSensorProperties() {
+        final List<FingerprintSensorPropertiesInternal> properties = new ArrayList<>();
         properties.add(mSensorProperties);
         return properties;
     }
