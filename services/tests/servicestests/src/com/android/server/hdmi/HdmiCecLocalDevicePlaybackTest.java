@@ -780,8 +780,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleSetStreamPath_afterHotplug_broadcastsActiveSource() {
-        mHdmiControlService.onHotplug(1, false);
-        mHdmiControlService.onHotplug(1, true);
+        mNativeWrapper.onHotplugEvent(1, false);
+        mNativeWrapper.onHotplugEvent(1, true);
 
         HdmiCecMessage setStreamPath = HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV,
                 mPlaybackPhysicalAddress);
@@ -797,8 +797,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleSetStreamPath_afterHotplug_hasCorrectActiveSource() {
-        mHdmiControlService.onHotplug(1, false);
-        mHdmiControlService.onHotplug(1, true);
+        mNativeWrapper.onHotplugEvent(1, false);
+        mNativeWrapper.onHotplugEvent(1, true);
 
         HdmiCecMessage setStreamPath = HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV,
                 mPlaybackPhysicalAddress);
