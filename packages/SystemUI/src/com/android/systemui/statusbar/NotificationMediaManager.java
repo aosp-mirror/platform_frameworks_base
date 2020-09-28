@@ -40,6 +40,8 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
+import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.Log;
@@ -53,14 +55,18 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.Interpolators;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.media.MediaData;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
@@ -110,6 +116,7 @@ public class NotificationMediaManager implements Dumpable {
     private final NotificationEntryManager mEntryManager;
     private final MediaDataManager mMediaDataManager;
     private final NotifPipeline mNotifPipeline;
+    private final NotifCollection mNotifCollection;
     private final boolean mUsingNotifPipeline;
 
     @Nullable
@@ -195,6 +202,7 @@ public class NotificationMediaManager implements Dumpable {
             MediaArtworkProcessor mediaArtworkProcessor,
             KeyguardBypassController keyguardBypassController,
             NotifPipeline notifPipeline,
+            NotifCollection notifCollection,
             FeatureFlags featureFlags,
             @Main DelayableExecutor mainExecutor,
             DeviceConfigProxy deviceConfig,
@@ -214,6 +222,7 @@ public class NotificationMediaManager implements Dumpable {
         mMainExecutor = mainExecutor;
         mMediaDataManager = mediaDataManager;
         mNotifPipeline = notifPipeline;
+        mNotifCollection = notifCollection;
 
         if (!featureFlags.isNewNotifPipelineRenderingEnabled()) {
             setupNEM();
@@ -257,6 +266,27 @@ public class NotificationMediaManager implements Dumpable {
             @Override
             public void onEntryCleanUp(@NonNull NotificationEntry entry) {
                 removeEntry(entry);
+            }
+        });
+
+        mMediaDataManager.addListener(new MediaDataManager.Listener() {
+            @Override
+            public void onMediaDataLoaded(@NonNull String key,
+                    @Nullable String oldKey, @NonNull MediaData data) {
+            }
+
+            @Override
+            public void onMediaDataRemoved(@NonNull String key) {
+                mNotifPipeline.getAllNotifs()
+                        .stream()
+                        .filter(entry -> Objects.equals(entry.getKey(), key))
+                        .findAny()
+                        .ifPresent(entry -> {
+                            // TODO(b/160713608): "removing" this notification won't happen and
+                            //  won't send the 'deleteIntent' if the notification is ongoing.
+                            mNotifCollection.dismissNotification(entry,
+                                    getDismissedByUserStats(entry));
+                        });
             }
         });
     }
@@ -303,6 +333,43 @@ public class NotificationMediaManager implements Dumpable {
                 removeEntry(entry);
             }
         });
+
+        mMediaDataManager.addListener(new MediaDataManager.Listener() {
+            @Override
+            public void onMediaDataLoaded(@NonNull String key,
+                    @Nullable String oldKey, @NonNull MediaData data) {
+            }
+
+            @Override
+            public void onMediaDataRemoved(@NonNull String key) {
+                NotificationEntry entry = mEntryManager.getPendingOrActiveNotif(key);
+                if (entry != null) {
+                    // TODO(b/160713608): "removing" this notification won't happen and
+                    //  won't send the 'deleteIntent' if the notification is ongoing.
+                    mEntryManager.performRemoveNotification(entry.getSbn(),
+                            getDismissedByUserStats(entry),
+                            NotificationListenerService.REASON_CANCEL);
+                }
+            }
+        });
+    }
+
+    private DismissedByUserStats getDismissedByUserStats(NotificationEntry entry) {
+        final int activeNotificationsCount;
+        if (mUsingNotifPipeline) {
+            activeNotificationsCount = mNotifPipeline.getShadeListCount();
+        } else {
+            activeNotificationsCount = mEntryManager.getActiveNotificationsCount();
+        }
+        return new DismissedByUserStats(
+                NotificationStats.DISMISSAL_SHADE, // Add DISMISSAL_MEDIA?
+                NotificationStats.DISMISS_SENTIMENT_NEUTRAL,
+                NotificationVisibility.obtain(
+                        entry.getKey(),
+                        entry.getRanking().getRank(),
+                        activeNotificationsCount,
+                        /* visible= */ true,
+                        NotificationLogger.getNotificationLocation(entry)));
     }
 
     private void removeEntry(NotificationEntry entry) {
