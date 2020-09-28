@@ -16,6 +16,8 @@
 
 package android.hardware.display;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -381,6 +383,7 @@ public final class DisplayManager {
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_EXTERNAL);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_OVERLAY);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_VIRTUAL);
+                    addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_INTERNAL);
                 }
                 return mTempDisplays.toArray(new Display[mTempDisplays.size()]);
             } finally {
@@ -401,6 +404,9 @@ public final class DisplayManager {
     private void addPresentationDisplaysLocked(
             ArrayList<Display> displays, int[] displayIds, int matchType) {
         for (int i = 0; i < displayIds.length; i++) {
+            if (displayIds[i] == DEFAULT_DISPLAY) {
+                continue;
+            }
             Display display = getOrCreateDisplayLocked(displayIds[i], true /*assumeValid*/);
             if (display != null
                     && (display.getFlags() & Display.FLAG_PRESENTATION) != 0
