@@ -1729,6 +1729,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     public void makeInitialized(@UserIdInt int userId) {
+        if (DBG) Slog.d(LOG_TAG, "makeInitialized(" + userId + ")");
         checkManageUsersPermission("makeInitialized");
         boolean scheduleWriteUser = false;
         UserData userData;
@@ -3553,8 +3554,7 @@ public class UserManagerService extends IUserManager.Stub {
                 // Must start user (which will be stopped right away, through
                 // UserController.finishUserUnlockedCompleted) so services can properly
                 // intialize it.
-                // TODO(b/143092698): in the long-term, it might be better to add a onCreateUser()
-                // callback on SystemService instead.
+                // NOTE: user will be stopped on UserController.finishUserUnlockedCompleted().
                 Slog.i(LOG_TAG, "starting pre-created user " + userInfo.toFullString());
                 final IActivityManager am = ActivityManager.getService();
                 try {
@@ -4965,6 +4965,9 @@ public class UserManagerService extends IUserManager.Stub {
                         UserData userData = getUserDataNoChecks(userId);
                         if (userData != null) {
                             writeUserLP(userData);
+                        } else {
+                            Slog.i(LOG_TAG, "handle(WRITE_USER_MSG): no data for user " + userId
+                                    + ", it was probably removed before handler could handle it");
                         }
                     }
             }
