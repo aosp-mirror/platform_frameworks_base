@@ -138,8 +138,9 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
                         && dcTarget.getParentWindow() == mImeTargetFromIme
                         && dcTarget.mSubLayer > mImeTargetFromIme.getWindow().mSubLayer)
                 || mImeTargetFromIme == mDisplayContent.getImeFallback()
+                || mImeTargetFromIme == mDisplayContent.mInputMethodInputTarget
                 || controlTarget == mImeTargetFromIme
-                        && (mImeTargetFromIme.getWindow() == null 
+                        && (mImeTargetFromIme.getWindow() == null
                                 || !mImeTargetFromIme.getWindow().isClosing());
     }
 
