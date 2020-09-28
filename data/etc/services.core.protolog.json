@@ -2467,6 +2467,12 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
+    "781471998": {
+      "message": "moveWindowTokenToDisplay: Cannot move to the original display for token: %s",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "791468751": {
       "message": "Pausing rotation during re-position",
       "level": "DEBUG",
@@ -2670,6 +2676,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "1033274509": {
+      "message": "moveWindowTokenToDisplay: Attempted to move non-existing token: %s",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "1040675582": {
       "message": "Can't report activity configuration update - client not running, activityRecord=%s",
@@ -3456,6 +3468,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/WallpaperAnimationAdapter.java"
+    },
+    "2060978050": {
+      "message": "moveWindowTokenToDisplay: Attempted to move token: %s to non-exiting displayId=%d",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "2081291430": {
       "message": "Focus not requested for window=%s because it has no surface",

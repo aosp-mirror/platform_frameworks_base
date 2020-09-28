@@ -136,10 +136,7 @@ public class InputMethodMenuController {
                 }
             }
 
-            final ActivityThread currentThread = ActivityThread.currentActivityThread();
-            final Context settingsContext = new ContextThemeWrapper(
-                    currentThread.createSystemUiContext(displayId),
-                    com.android.internal.R.style.Theme_DeviceDefault_Settings);
+            final Context settingsContext = getSettingsContext(displayId);
             mDialogBuilder = new AlertDialog.Builder(settingsContext);
             mDialogBuilder.setOnCancelListener(dialog -> hideInputMethodMenu());
 
@@ -212,6 +209,32 @@ public class InputMethodMenuController {
             mService.updateSystemUiLocked();
             mSwitchingDialog.show();
         }
+    }
+
+    /**
+     * Returns the window context for IME switch dialogs to receive configuration changes.
+     *
+     * This method initializes the window context if it was not initialized. This method also moves
+     * the context to the targeted display if the current display of context is different than
+     * the display specified by {@code displayId}.
+     */
+    @VisibleForTesting
+    public Context getSettingsContext(int displayId) {
+        if (mSettingsContext == null) {
+            final Context systemUiContext = ActivityThread.currentActivityThread()
+                    .createSystemUiContext(displayId);
+            final Context windowContext = systemUiContext.createWindowContext(
+                    WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG, null /* options */);
+            mSettingsContext = new ContextThemeWrapper(
+                    windowContext, com.android.internal.R.style.Theme_DeviceDefault_Settings);
+            mSwitchingDialogToken = mSettingsContext.getActivityToken();
+        }
+        // TODO(b/159767464): register the listener to another display again if window token is not
+        // yet created.
+        if (mSettingsContext.getDisplayId() != displayId) {
+            mWindowManagerInternal.moveWindowTokenToDisplay(mSwitchingDialogToken, displayId);
+        }
+        return mSettingsContext;
     }
 
     private boolean isScreenLocked() {
