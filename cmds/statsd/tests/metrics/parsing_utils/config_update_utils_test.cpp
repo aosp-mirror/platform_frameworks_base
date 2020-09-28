@@ -1094,6 +1094,162 @@ TEST_F(ConfigUpdateTest, TestEventMetricActivationDepsChange) {
     EXPECT_EQ(metricsToUpdate[0], UPDATE_REPLACE);
 }
 
+TEST_F(ConfigUpdateTest, TestCountMetricPreserve) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    Predicate predicate = CreateScreenIsOnPredicate();
+    *config.add_predicate() = predicate;
+    State sliceState = CreateScreenState();
+    *config.add_state() = sliceState;
+
+    CountMetric* metric = config.add_count_metric();
+    metric->set_id(12345);
+    metric->set_what(whatMatcher.id());
+    metric->set_condition(predicate.id());
+    metric->add_slice_by_state(sliceState.id());
+    metric->set_bucket(ONE_HOUR);
+
+    // Create an initial config.
+    EXPECT_TRUE(initConfig(config));
+
+    unordered_map<int64_t, int> metricToActivationMap;
+    vector<UpdateStatus> metricsToUpdate(1, UPDATE_UNKNOWN);
+    EXPECT_TRUE(determineAllMetricUpdateStatuses(config, oldMetricProducerMap, oldMetricProducers,
+                                                 metricToActivationMap,
+                                                 /*replacedMatchers*/ {}, /*replacedConditions=*/{},
+                                                 /*replacedStates=*/{}, metricsToUpdate));
+    EXPECT_EQ(metricsToUpdate[0], UPDATE_PRESERVE);
+}
+
+TEST_F(ConfigUpdateTest, TestCountMetricDefinitionChange) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    Predicate predicate = CreateScreenIsOnPredicate();
+    *config.add_predicate() = predicate;
+
+    CountMetric* metric = config.add_count_metric();
+    metric->set_id(12345);
+    metric->set_what(whatMatcher.id());
+    metric->set_condition(predicate.id());
+    metric->set_bucket(ONE_HOUR);
+
+    // Create an initial config.
+    EXPECT_TRUE(initConfig(config));
+
+    // Change bucket size, which should change the proto, causing replacement.
+    metric->set_bucket(TEN_MINUTES);
+
+    unordered_map<int64_t, int> metricToActivationMap;
+    vector<UpdateStatus> metricsToUpdate(1, UPDATE_UNKNOWN);
+    EXPECT_TRUE(determineAllMetricUpdateStatuses(config, oldMetricProducerMap, oldMetricProducers,
+                                                 metricToActivationMap,
+                                                 /*replacedMatchers*/ {}, /*replacedConditions=*/{},
+                                                 /*replacedStates=*/{}, metricsToUpdate));
+    EXPECT_EQ(metricsToUpdate[0], UPDATE_REPLACE);
+}
+
+TEST_F(ConfigUpdateTest, TestCountMetricWhatChanged) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    Predicate predicate = CreateScreenIsOnPredicate();
+    *config.add_predicate() = predicate;
+
+    CountMetric* metric = config.add_count_metric();
+    metric->set_id(12345);
+    metric->set_what(whatMatcher.id());
+    metric->set_condition(predicate.id());
+    metric->set_bucket(ONE_HOUR);
+
+    // Create an initial config.
+    EXPECT_TRUE(initConfig(config));
+
+    unordered_map<int64_t, int> metricToActivationMap;
+    vector<UpdateStatus> metricsToUpdate(1, UPDATE_UNKNOWN);
+    EXPECT_TRUE(determineAllMetricUpdateStatuses(
+            config, oldMetricProducerMap, oldMetricProducers, metricToActivationMap,
+            /*replacedMatchers*/ {whatMatcher.id()}, /*replacedConditions=*/{},
+            /*replacedStates=*/{}, metricsToUpdate));
+    EXPECT_EQ(metricsToUpdate[0], UPDATE_REPLACE);
+}
+
+TEST_F(ConfigUpdateTest, TestCountMetricConditionChanged) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    Predicate predicate = CreateScreenIsOnPredicate();
+    *config.add_predicate() = predicate;
+
+    CountMetric* metric = config.add_count_metric();
+    metric->set_id(12345);
+    metric->set_what(whatMatcher.id());
+    metric->set_condition(predicate.id());
+    metric->set_bucket(ONE_HOUR);
+
+    // Create an initial config.
+    EXPECT_TRUE(initConfig(config));
+
+    unordered_map<int64_t, int> metricToActivationMap;
+    vector<UpdateStatus> metricsToUpdate(1, UPDATE_UNKNOWN);
+    EXPECT_TRUE(determineAllMetricUpdateStatuses(
+            config, oldMetricProducerMap, oldMetricProducers, metricToActivationMap,
+            /*replacedMatchers*/ {}, /*replacedConditions=*/{predicate.id()},
+            /*replacedStates=*/{}, metricsToUpdate));
+    EXPECT_EQ(metricsToUpdate[0], UPDATE_REPLACE);
+}
+
+TEST_F(ConfigUpdateTest, TestCountMetricStateChanged) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    State sliceState = CreateScreenState();
+    *config.add_state() = sliceState;
+
+    CountMetric* metric = config.add_count_metric();
+    metric->set_id(12345);
+    metric->set_what(whatMatcher.id());
+    metric->add_slice_by_state(sliceState.id());
+    metric->set_bucket(ONE_HOUR);
+
+    // Create an initial config.
+    EXPECT_TRUE(initConfig(config));
+
+    unordered_map<int64_t, int> metricToActivationMap;
+    vector<UpdateStatus> metricsToUpdate(1, UPDATE_UNKNOWN);
+    EXPECT_TRUE(determineAllMetricUpdateStatuses(
+            config, oldMetricProducerMap, oldMetricProducers, metricToActivationMap,
+            /*replacedMatchers*/ {}, /*replacedConditions=*/{},
+            /*replacedStates=*/{sliceState.id()}, metricsToUpdate));
+    EXPECT_EQ(metricsToUpdate[0], UPDATE_REPLACE);
+}
+
 TEST_F(ConfigUpdateTest, TestUpdateEventMetrics) {
     StatsdConfig config;
 
