@@ -190,12 +190,6 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
             mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
             return true;
         }
-        // if the current device is a pure playback device
-        if (!mIsSwitchDevice
-                && physicalAddress == mService.getPhysicalAddress()
-                && mService.isPlaybackDevice()) {
-            setAndBroadcastActiveSource(message, physicalAddress);
-        }
         handleRoutingChangeAndInformation(physicalAddress, message);
         return true;
     }
@@ -213,12 +207,6 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         if (!isRoutingControlFeatureEnabled()) {
             mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
             return true;
-        }
-        // if the current device is a pure playback device
-        if (!mIsSwitchDevice
-                && physicalAddress == mService.getPhysicalAddress()
-                && mService.isPlaybackDevice()) {
-            setAndBroadcastActiveSource(message, physicalAddress);
         }
         handleRoutingChangeAndInformation(physicalAddress, message);
         return true;
