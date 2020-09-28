@@ -275,6 +275,21 @@ public class DataManager {
         });
     }
 
+    /**
+     * Returns the last notification interaction with the specified conversation. If the
+     * conversation can't be found or no interactions have been recorded, returns 0L.
+     */
+    public long getLastInteraction(String packageName, int userId, String shortcutId) {
+        final PackageData packageData = getPackage(packageName, userId);
+        if (packageData != null) {
+            final ConversationInfo conversationInfo = packageData.getConversationInfo(shortcutId);
+            if (conversationInfo != null) {
+                return conversationInfo.getLastEventTimestamp();
+            }
+        }
+        return 0L;
+    }
+
     /** Reports the sharing related {@link AppTargetEvent} from App Prediction Manager. */
     public void reportShareTargetEvent(@NonNull AppTargetEvent event,
             @NonNull IntentFilter intentFilter) {
