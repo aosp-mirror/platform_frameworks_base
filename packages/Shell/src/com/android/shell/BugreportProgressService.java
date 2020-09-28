@@ -511,14 +511,14 @@ public class BugreportProgressService extends Service {
             }
 
             if (msg.what != MSG_SERVICE_COMMAND) {
-                // Sanity check.
+                // Confidence check.
                 Log.e(TAG, "Invalid message type: " + msg.what);
                 return;
             }
 
             // At this point it's handling onStartCommand(), with the intent passed as an Extra.
             if (!(msg.obj instanceof Intent)) {
-                // Sanity check.
+                // Confidence check.
                 Log.wtf(TAG, "handleMessage(): invalid msg.obj type: " + msg.obj);
                 return;
             }
