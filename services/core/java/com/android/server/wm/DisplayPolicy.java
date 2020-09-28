@@ -43,6 +43,7 @@ import static android.view.InsetsState.ITYPE_TOP_GESTURES;
 import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE;
@@ -156,6 +157,7 @@ import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Side.InsetsSide;
 import android.view.WindowInsets.Type;
@@ -1445,9 +1447,9 @@ public class DisplayPolicy {
     boolean getLayoutHint(LayoutParams attrs, WindowToken windowToken, Rect outFrame,
             Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout) {
-        final int fl = PolicyControl.getWindowFlags(null, attrs);
+        final int fl = attrs.flags;
         final int pfl = attrs.privateFlags;
-        final int sysUiVis = PolicyControl.getSystemUiVisibility(null, attrs);
+        final int sysUiVis = attrs.systemUiVisibility | attrs.subtreeSystemUiVisibility;
 
         final boolean layoutInScreen = (fl & FLAG_LAYOUT_IN_SCREEN) != 0;
         final boolean layoutInScreenAndInsetDecor = layoutInScreen
@@ -2001,7 +2003,7 @@ public class DisplayPolicy {
         final WindowManager.LayoutParams attrs = win.getAttrs();
 
         final int type = attrs.type;
-        final int fl = PolicyControl.getWindowFlags(win, attrs);
+        final int fl = attrs.flags;
         final int pfl = attrs.privateFlags;
         final int sim = attrs.softInputMode;
 
@@ -2243,7 +2245,7 @@ public class DisplayPolicy {
         final boolean affectsSystemUi = win.canAffectSystemUiFlags();
         if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": affectsSystemUi=" + affectsSystemUi);
         mService.mPolicy.applyKeyguardPolicyLw(win, imeTarget);
-        final int fl = PolicyControl.getWindowFlags(win, attrs);
+        final int fl = attrs.flags;
         if (mTopFullscreenOpaqueWindowState == null && affectsSystemUi
                 && attrs.type == TYPE_INPUT_METHOD) {
             mForcingShowNavBar = true;
@@ -2418,8 +2420,7 @@ public class DisplayPolicy {
             return false;
         }
         final LayoutParams attrs = mTopFullscreenOpaqueWindowState.getAttrs();
-        final int fl = PolicyControl.getWindowFlags(null, attrs);
-        final int sysui = PolicyControl.getSystemUiVisibility(null, attrs);
+        final int fl = attrs.flags;
         final InsetsSource request = mTopFullscreenOpaqueWindowState.getRequestedInsetsState()
                 .peekSource(ITYPE_STATUS_BAR);
         if (WindowManagerDebugConfig.DEBUG) {
@@ -2952,9 +2953,9 @@ public class DisplayPolicy {
 
         mDisplayContent.getInsetsPolicy().updateBarControlTarget(win);
 
-        final int fullscreenAppearance = updateLightStatusBarLw(0 /* vis */,
+        final int fullscreenAppearance = updateLightStatusBarLw(0 /* appearance */,
                 mTopFullscreenOpaqueWindowState, mTopFullscreenOpaqueOrDimmingWindowState);
-        final int dockedAppearance = updateLightStatusBarLw(0 /* vis */,
+        final int dockedAppearance = updateLightStatusBarLw(0 /* appearance */,
                 mTopDockedOpaqueWindowState, mTopDockedOpaqueOrDimmingWindowState);
         final boolean inSplitScreen =
                 mService.mRoot.getDefaultTaskDisplayArea().isSplitScreenModeActivated();
@@ -3025,6 +3026,10 @@ public class DisplayPolicy {
 
             }
         });
+        if (mDisplayContent.isDefaultDisplay) {
+            mService.mInputManager.setSystemUiLightsOut(
+                    isFullscreen || (appearance & APPEARANCE_LOW_PROFILE_BARS) != 0);
+        }
         return true;
     }
 
@@ -3037,9 +3042,7 @@ public class DisplayPolicy {
                 // If the top fullscreen-or-dimming window is also the top fullscreen, respect
                 // its light flag.
                 appearance &= ~APPEARANCE_LIGHT_STATUS_BARS;
-                final int legacyAppearance = InsetsFlags.getAppearance(
-                        PolicyControl.getSystemUiVisibility(statusColorWin, null));
-                appearance |= (statusColorWin.mAttrs.insetsFlags.appearance | legacyAppearance)
+                appearance |= statusColorWin.mAttrs.insetsFlags.appearance
                         & APPEARANCE_LIGHT_STATUS_BARS;
             } else if (statusColorWin.isDimming()) {
                 // Otherwise if it's dimming, clear the light flag.
@@ -3062,8 +3065,8 @@ public class DisplayPolicy {
         final boolean imeWindowCanNavColorWindow = imeWindow != null
                 && imeWindow.isVisibleLw()
                 && navBarPosition == NAV_BAR_BOTTOM
-                && (PolicyControl.getWindowFlags(imeWindow, null)
-                & WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
+                && (imeWindow.mAttrs.flags
+                        & WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
 
         if (opaque != null && opaqueOrDimming == opaque) {
             // If the top fullscreen-or-dimming window is also the top fullscreen, respect it
@@ -3085,7 +3088,7 @@ public class DisplayPolicy {
 
         // The IME window and the dimming window are competing.  Check if the dimming window can be
         // IME target or not.
-        if (LayoutParams.mayUseInputMethod(PolicyControl.getWindowFlags(opaqueOrDimming, null))) {
+        if (LayoutParams.mayUseInputMethod(opaqueOrDimming.mAttrs.flags)) {
             // The IME window is above the dimming window.
             return imeWindow;
         } else {
@@ -3359,22 +3362,30 @@ public class DisplayPolicy {
         pw.print(prefix); pw.print("mHdmiPlugged="); pw.println(mHdmiPlugged);
         if (mLastDisableFlags != 0) {
             pw.print(prefix); pw.print("mLastDisableFlags=0x");
-            pw.print(Integer.toHexString(mLastDisableFlags));
+            pw.println(Integer.toHexString(mLastDisableFlags));
+        }
+        if (mLastAppearance != 0) {
+            pw.print(prefix); pw.print("mLastAppearance=");
+            pw.println(ViewDebug.flagsToString(InsetsFlags.class, "appearance", mLastAppearance));
+        }
+        if (mLastBehavior != 0) {
+            pw.print(prefix); pw.print("mLastBehavior=");
+            pw.println(ViewDebug.flagsToString(InsetsFlags.class, "behavior", mLastBehavior));
         }
         pw.print(prefix); pw.print("mShowingDream="); pw.print(mShowingDream);
-        pw.print(" mDreamingLockscreen="); pw.print(mDreamingLockscreen);
+        pw.print(" mDreamingLockscreen="); pw.println(mDreamingLockscreen);
         if (mStatusBar != null) {
-            pw.print(prefix); pw.print("mStatusBar="); pw.print(mStatusBar);
+            pw.print(prefix); pw.print("mStatusBar="); pw.println(mStatusBar);
         }
         if (mStatusBarAlt != null) {
-            pw.print(prefix); pw.print("mStatusBarAlt="); pw.print(mStatusBarAlt);
+            pw.print(prefix); pw.print("mStatusBarAlt="); pw.println(mStatusBarAlt);
             pw.print(prefix); pw.print("mStatusBarAltPosition=");
             pw.println(mStatusBarAltPosition);
         }
         if (mNotificationShade != null) {
-            pw.print(prefix); pw.print("mExpandedPanel="); pw.print(mNotificationShade);
+            pw.print(prefix); pw.print("mExpandedPanel="); pw.println(mNotificationShade);
         }
-        pw.print(" isKeyguardShowing="); pw.println(isKeyguardShowing());
+        pw.print(prefix); pw.print("isKeyguardShowing="); pw.println(isKeyguardShowing());
         if (mNavigationBar != null) {
             pw.print(prefix); pw.print("mNavigationBar="); pw.println(mNavigationBar);
             pw.print(prefix); pw.print("mNavBarOpacityMode="); pw.println(mNavBarOpacityMode);
@@ -3415,9 +3426,9 @@ public class DisplayPolicy {
         }
         pw.print(prefix); pw.print("mTopIsFullscreen="); pw.println(mTopIsFullscreen);
         pw.print(prefix); pw.print("mForceStatusBar="); pw.print(mForceStatusBar);
-        pw.print(prefix); pw.print("mRemoteInsetsControllerControlsSystemBars");
-        pw.print(mDisplayContent.getInsetsPolicy().getRemoteInsetsControllerControlsSystemBars());
         pw.print(" mAllowLockscreenWhenOn="); pw.println(mAllowLockscreenWhenOn);
+        pw.print(prefix); pw.print("mRemoteInsetsControllerControlsSystemBars=");
+        pw.println(mDisplayContent.getInsetsPolicy().getRemoteInsetsControllerControlsSystemBars());
 
         pw.print(prefix); pw.println("Looper state:");
         mHandler.getLooper().dump(new PrintWriterPrinter(pw), prefix + "  ");

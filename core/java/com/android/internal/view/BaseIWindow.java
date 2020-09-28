@@ -43,7 +43,6 @@ public class BaseIWindow extends IWindow.Stub {
     public BaseIWindow() {}
 
     private IWindowSession mSession;
-    public int mSeq;
 
     public void setSession(IWindowSession session) {
         mSession = session;
@@ -137,12 +136,6 @@ public class BaseIWindow extends IWindow.Stub {
     @Override
     public void updatePointerIcon(float x, float y) {
         InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_NOT_SPECIFIED);
-    }
-
-    @Override
-    public void dispatchSystemUiVisibilityChanged(int seq, int globalUi,
-            int localValue, int localChanges) {
-        mSeq = seq;
     }
 
     @Override
