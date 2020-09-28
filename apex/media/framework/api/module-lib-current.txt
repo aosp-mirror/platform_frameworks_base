@@ -1,1 +1,15 @@
 // Signature format: 2.0
+package android.media {
+
+  public final class MediaParceledListSlice<T extends android.os.Parcelable> implements android.os.Parcelable {
+    ctor public MediaParceledListSlice(@NonNull java.util.List<T>);
+    method public int describeContents();
+    method @NonNull public static <T extends android.os.Parcelable> android.media.MediaParceledListSlice<T> emptyList();
+    method public java.util.List<T> getList();
+    method public void setInlineCountLimit(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.ClassLoaderCreator<android.media.MediaParceledListSlice> CREATOR;
+  }
+
+}
+
