@@ -1599,6 +1599,7 @@
         </activity>
 
         <activity android:name="android.app.activity.ActivityThreadTest$TestActivity"
+            android:configChanges="screenLayout|screenSize|orientation|smallestScreenSize"
             android:supportsPictureInPicture="true"
             android:exported="true">
         </activity>
