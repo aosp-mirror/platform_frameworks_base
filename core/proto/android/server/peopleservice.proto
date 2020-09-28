@@ -46,6 +46,10 @@ message ConversationInfoProto {
   // The notification channel id of the conversation.
   optional string notification_channel_id = 4 [(.android.privacy).dest = DEST_EXPLICIT];
 
+  // The parent notification channel ID of the conversation. This is the notification channel where
+  // the notifications are posted before this conversation is customized by the user.
+  optional string parent_notification_channel_id = 8 [(.android.privacy).dest = DEST_EXPLICIT];
+
   // Integer representation of shortcut bit flags.
   optional int32 shortcut_flags = 5;
 
@@ -54,6 +58,11 @@ message ConversationInfoProto {
 
   // The phone number of the contact.
   optional string contact_phone_number = 7 [(.android.privacy).dest = DEST_EXPLICIT];
+
+  // The timestamp of the last event in millis.
+  optional int64 last_event_timestamp = 9;
+
+  // Next tag: 10
 }
 
 // On disk data of events.
