@@ -402,6 +402,13 @@ public class LocalMediaManager implements BluetoothCallback {
         return mPackageName;
     }
 
+    /**
+     * Returns {@code true} if needed to disable media output, otherwise returns {@code false}.
+     */
+    public boolean shouldDisableMediaOutput(String packageName) {
+        return mInfoMediaManager.shouldDisableMediaOutput(packageName);
+    }
+
     @VisibleForTesting
     MediaDevice updateCurrentConnectedDevice() {
         MediaDevice connectedDevice = null;
