@@ -47,7 +47,6 @@ import android.widget.Space;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
@@ -65,11 +64,8 @@ import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
-import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
@@ -91,18 +87,15 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     public static final int MAX_TOOLTIP_SHOWN_COUNT = 2;
 
     private final ZenModeController mZenController;
-    private final StatusBarIconController mStatusBarIconController;
 
     private boolean mExpanded;
     private boolean mQsDisabled;
 
     protected QuickQSPanel mHeaderQsPanel;
-    private TintedIconManager mIconManager;
     private TouchAnimator mStatusIconsAlphaAnimator;
     private TouchAnimator mHeaderTextContainerAlphaAnimator;
     private TouchAnimator mPrivacyChipAlphaAnimator;
     private DualToneHandler mDualToneHandler;
-    private final CommandQueue mCommandQueue;
 
     private View mSystemIconsView;
     private View mQuickQsStatusIcons;
@@ -142,16 +135,13 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
 
     @Inject
     public QuickStatusBarHeader(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            ZenModeController zenModeController, StatusBarIconController statusBarIconController,
-            PrivacyItemController privacyItemController, CommandQueue commandQueue,
+            ZenModeController zenModeController, PrivacyItemController privacyItemController,
             DemoModeController demoModeController, UserTracker userTracker) {
         super(context, attrs);
         mZenController = zenModeController;
-        mStatusBarIconController = statusBarIconController;
         mPrivacyItemController = privacyItemController;
         mDualToneHandler = new DualToneHandler(
                 new ContextThemeWrapper(context, R.style.QSHeaderTheme));
-        mCommandQueue = commandQueue;
         mDemoModeController = demoModeController;
         mUserTracker = userTracker;
     }
@@ -163,11 +153,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
         mHeaderQsPanel = findViewById(R.id.quick_qs_panel);
         mSystemIconsView = findViewById(R.id.quick_status_bar_system_icons);
         mQuickQsStatusIcons = findViewById(R.id.quick_qs_status_icons);
-        StatusIconContainer iconContainer = findViewById(R.id.statusIcons);
-        // Ignore privacy icons because they show in the space above QQS
-        iconContainer.addIgnoredSlots(getIgnoredIconSlots());
-        iconContainer.setShouldRestrictIcons(false);
-        mIconManager = new TintedIconManager(iconContainer, mCommandQueue);
 
         // Views corresponding to the header info section (e.g. ringer and next alarm).
         mHeaderTextContainerView = findViewById(R.id.header_text_container);
@@ -183,18 +168,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
         updateResources();
 
         Rect tintArea = new Rect(0, 0, 0, 0);
-        int colorForeground = Utils.getColorAttrDefaultColor(getContext(),
-                android.R.attr.colorForeground);
-        float intensity = getColorIntensity(colorForeground);
-        int fillColor = mDualToneHandler.getSingleColor(intensity);
-
         // Set light text on the header icons because they will always be on a black background
         applyDarkness(R.id.clock, tintArea, 0, DarkIconDispatcher.DEFAULT_ICON_TINT);
-
-        // Set the correct tint for the status icons so they contrast
-        mIconManager.setTint(fillColor);
-        mNextAlarmIcon.setImageTintList(ColorStateList.valueOf(fillColor));
-        mRingerModeIcon.setImageTintList(ColorStateList.valueOf(fillColor));
 
         mClockView = findViewById(R.id.clock);
         mDemoModeReceiver = new ClockDemoModeReceiver(mClockView);
@@ -212,6 +187,18 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
 
         mAllIndicatorsEnabled = mPrivacyItemController.getAllIndicatorsAvailable();
         mMicCameraIndicatorsEnabled = mPrivacyItemController.getMicCameraAvailable();
+    }
+
+    void onAttach(TintedIconManager iconManager) {
+        int colorForeground = Utils.getColorAttrDefaultColor(getContext(),
+                android.R.attr.colorForeground);
+        float intensity = getColorIntensity(colorForeground);
+        int fillColor = mDualToneHandler.getSingleColor(intensity);
+
+        // Set the correct tint for the status icons so they contrast
+        iconManager.setTint(fillColor);
+        mNextAlarmIcon.setImageTintList(ColorStateList.valueOf(fillColor));
+        mRingerModeIcon.setImageTintList(ColorStateList.valueOf(fillColor));
     }
 
     public QuickQSPanel getHeaderQsPanel() {
@@ -436,7 +423,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mStatusBarIconController.addIconGroup(mIconManager);
         mDemoModeController.addCallback(mDemoModeReceiver);
     }
 
@@ -511,7 +497,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     @Override
     @VisibleForTesting
     public void onDetachedFromWindow() {
-        mStatusBarIconController.removeIconGroup(mIconManager);
         mDemoModeController.removeCallback(mDemoModeReceiver);
         super.onDetachedFromWindow();
     }

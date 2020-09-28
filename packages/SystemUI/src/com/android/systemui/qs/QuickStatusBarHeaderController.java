@@ -41,6 +41,8 @@ import com.android.systemui.privacy.PrivacyChipEvent;
 import com.android.systemui.privacy.PrivacyItem;
 import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.qs.carrier.QSCarrierGroupController;
+import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.NextAlarmController;
@@ -74,6 +76,10 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private final View mNextAlarmContainer;
     private final View mRingerContainer;
     private final QSTileHost mQSTileHost;
+    private final StatusBarIconController mStatusBarIconController;
+    private final CommandQueue mCommandQueue;
+    private final StatusIconContainer mIconContainer;
+    private final StatusBarIconController.TintedIconManager mIconManager;
 
     private boolean mListening;
     private AlarmClockInfo mNextAlarm;
@@ -175,7 +181,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             ZenModeController zenModeController, NextAlarmController nextAlarmController,
             PrivacyItemController privacyItemController, RingerModeTracker ringerModeTracker,
             ActivityStarter activityStarter, UiEventLogger uiEventLogger,
-            QSTileHost qsTileHost,
+            QSTileHost qsTileHost, StatusBarIconController statusBarIconController,
+            CommandQueue commandQueue,
             QSCarrierGroupController.Builder qsCarrierGroupControllerBuilder) {
         super(view);
         mZenModeController = zenModeController;
@@ -185,17 +192,23 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mActivityStarter = activityStarter;
         mUiEventLogger = uiEventLogger;
         mQSTileHost = qsTileHost;
+        mStatusBarIconController = statusBarIconController;
+        mCommandQueue = commandQueue;
         mLifecycle = new LifecycleRegistry(mLifecycleOwner);
 
         mQSCarrierGroupController = qsCarrierGroupControllerBuilder
                 .setQSCarrierGroup(mView.findViewById(R.id.carrier_group))
                 .build();
 
+
         mPrivacyChip = mView.findViewById(R.id.privacy_chip);
         mHeaderQsPanel = mView.findViewById(R.id.quick_qs_panel);
         mNextAlarmContainer = mView.findViewById(R.id.alarm_container);
         mClockView = mView.findViewById(R.id.clock);
         mRingerContainer = mView.findViewById(R.id.ringer_container);
+        mIconContainer = mView.findViewById(R.id.statusIcons);
+
+        mIconManager = new StatusBarIconController.TintedIconManager(mIconContainer, mCommandQueue);
     }
 
     @Override
@@ -209,7 +222,15 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mNextAlarmContainer.setOnClickListener(mOnClickListener);
         mRingerContainer.setOnClickListener(mOnClickListener);
         mPrivacyChip.setOnClickListener(mOnClickListener);
+
+        // Ignore privacy icons because they show in the space above QQS
+        mIconContainer.addIgnoredSlots(mView.getIgnoredIconSlots());
+        mIconContainer.setShouldRestrictIcons(false);
+        mStatusBarIconController.addIconGroup(mIconManager);
+
         setChipVisibility(mPrivacyChip.getVisibility() == View.VISIBLE);
+
+        mView.onAttach(mIconManager);
     }
 
     @Override
@@ -219,6 +240,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mNextAlarmContainer.setOnClickListener(null);
         mRingerContainer.setOnClickListener(null);
         mPrivacyChip.setOnClickListener(null);
+        mStatusBarIconController.removeIconGroup(mIconManager);
         setListening(false);
     }
 
@@ -274,6 +296,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         private final ActivityStarter mActivityStarter;
         private final UiEventLogger mUiEventLogger;
         private final QSTileHost mQsTileHost;
+        private final StatusBarIconController mStatusBarIconController;
+        private final CommandQueue mCommandQueue;
         private final QSCarrierGroupController.Builder mQSCarrierGroupControllerBuilder;
         private QuickStatusBarHeader mView;
 
@@ -281,6 +305,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         Builder(ZenModeController zenModeController, NextAlarmController nextAlarmController,
                 PrivacyItemController privacyItemController, RingerModeTracker ringerModeTracker,
                 ActivityStarter activityStarter, UiEventLogger uiEventLogger, QSTileHost qsTileHost,
+                StatusBarIconController statusBarIconController, CommandQueue commandQueue,
                 QSCarrierGroupController.Builder qsCarrierGroupControllerBuilder) {
             mZenModeController = zenModeController;
             mNextAlarmController = nextAlarmController;
@@ -289,6 +314,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             mActivityStarter = activityStarter;
             mUiEventLogger = uiEventLogger;
             mQsTileHost = qsTileHost;
+            mStatusBarIconController = statusBarIconController;
+            mCommandQueue = commandQueue;
             mQSCarrierGroupControllerBuilder = qsCarrierGroupControllerBuilder;
         }
 
@@ -301,8 +328,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         QuickStatusBarHeaderController build() {
             return new QuickStatusBarHeaderController(mView, mZenModeController,
                     mNextAlarmController, mPrivacyItemController, mRingerModeTracker,
-                    mActivityStarter, mUiEventLogger, mQsTileHost,
-                    mQSCarrierGroupControllerBuilder);
+                    mActivityStarter, mUiEventLogger, mQsTileHost, mStatusBarIconController,
+                    mCommandQueue, mQSCarrierGroupControllerBuilder);
         }
     }
 }

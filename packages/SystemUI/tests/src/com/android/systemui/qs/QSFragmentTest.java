@@ -37,7 +37,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.CarrierText;
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -116,13 +115,12 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
         qs.setListening(false);
         processAllMessages();
+        host.destroy();
+        processAllMessages();
 
         // Manually push header through detach so it can handle standard cleanup it does on
         // removed from window.
         ((QuickStatusBarHeader) qs.getView().findViewById(R.id.header)).onDetachedFromWindow();
-
-        host.destroy();
-        processAllMessages();
     }
 
     @Test
