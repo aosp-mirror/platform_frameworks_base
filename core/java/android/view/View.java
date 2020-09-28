@@ -5243,6 +5243,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @InputSourceClass
     int mUnbufferedInputSource = InputDevice.SOURCE_CLASS_NONE;
 
+    @Nullable
+    private OnReceiveContentCallback<? extends View> mOnReceiveContentCallback;
+
     /**
      * Simple constructor to use when creating a view from code.
      *
@@ -8995,6 +8998,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mContext.isAutofillCompatibilityEnabled()) {
             onProvideVirtualStructureCompat(structure, true);
         }
+    }
+
+    /**
+     * Returns the callback used for handling insertion of content into this view. See
+     * {@link #setOnReceiveContentCallback} for more info.
+     *
+     * @return The callback for handling insertion of content. Returns null if no callback has been
+     * {@link #setOnReceiveContentCallback set}.
+     */
+    @Nullable
+    public OnReceiveContentCallback<? extends View> getOnReceiveContentCallback() {
+        return mOnReceiveContentCallback;
+    }
+
+    /**
+     * Sets the callback to handle insertion of content into this view.
+     *
+     * <p>Depending on the view, this callback may be invoked for scenarios such as content
+     * insertion from the IME, Autofill, etc.
+     *
+     * <p>The callback will only be invoked if the MIME type of the content is
+     * {@link OnReceiveContentCallback#getSupportedMimeTypes declared as supported} by the callback.
+     * If the content type is not supported by the callback, the default platform handling will be
+     * executed instead.
+     *
+     * @param callback The callback to use. This can be null to reset to the default behavior.
+     */
+    public void setOnReceiveContentCallback(
+            @Nullable OnReceiveContentCallback<? extends View> callback) {
+        mOnReceiveContentCallback = callback;
     }
 
     /**

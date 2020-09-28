@@ -17,12 +17,15 @@
 package android.widget;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.view.OnReceiveContentCallback.Payload.FLAG_CONVERT_TO_PLAIN_TEXT;
+import static android.view.OnReceiveContentCallback.Payload.SOURCE_AUTOFILL;
+import static android.view.OnReceiveContentCallback.Payload.SOURCE_CLIPBOARD;
+import static android.view.OnReceiveContentCallback.Payload.SOURCE_PROCESS_TEXT;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_RENDERING_INFO_KEY;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
 import static android.view.inputmethod.CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
-import static android.widget.RichContentReceiver.SOURCE_PROCESS_TEXT;
 
 import android.R;
 import android.annotation.CallSuper;
@@ -39,6 +42,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.Size;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
+import android.annotation.TestApi;
 import android.annotation.XmlRes;
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -149,6 +153,7 @@ import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.OnReceiveContentCallback;
 import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -426,7 +431,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * @hide
      */
-    static final int PROCESS_TEXT_REQUEST_CODE = 100;
+    @TestApi
+    public static final int PROCESS_TEXT_REQUEST_CODE = 100;
 
     /**
      *  Return code of {@link #doKeyDown}.
@@ -882,12 +888,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * The default content insertion callback used by {@link TextView}. See
-     * {@link #setRichContentReceiver} for more info.
+     * {@link #setOnReceiveContentCallback} for more info.
      */
-    public static final @NonNull RichContentReceiver<TextView> DEFAULT_RICH_CONTENT_RECEIVER =
-            TextViewRichContentReceiver.INSTANCE;
-
-    private RichContentReceiver<TextView> mRichContentReceiver = DEFAULT_RICH_CONTENT_RECEIVER;
+    private static final TextViewOnReceiveContentCallback DEFAULT_ON_RECEIVE_CONTENT_CALLBACK =
+            new TextViewOnReceiveContentCallback();
 
     private static final int DEVICE_PROVISIONED_UNKNOWN = 0;
     private static final int DEVICE_PROVISIONED_NO = 1;
@@ -2138,15 +2142,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * @hide
      */
+    @TestApi
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == PROCESS_TEXT_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK && data != null) {
                 CharSequence result = data.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT);
                 if (result != null) {
                     if (isTextEditable()) {
                         ClipData clip = ClipData.newPlainText("", result);
-                        mRichContentReceiver.onReceive(this, clip, SOURCE_PROCESS_TEXT, 0);
+                        OnReceiveContentCallback.Payload payload =
+                                new OnReceiveContentCallback.Payload.Builder(
+                                        clip, SOURCE_PROCESS_TEXT)
+                                        .build();
+                        onReceiveContent(payload);
                         if (mEditor != null) {
                             mEditor.refreshTextActionMode();
                         }
@@ -8722,9 +8731,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 outAttrs.initialSelEnd = getSelectionEnd();
                 outAttrs.initialCapsMode = ic.getCursorCapsMode(getInputType());
                 outAttrs.setInitialSurroundingText(mText);
-                int targetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
-                if (targetSdkVersion > Build.VERSION_CODES.R) {
-                    outAttrs.contentMimeTypes = mRichContentReceiver.getSupportedMimeTypes()
+                // If a custom `OnReceiveContentCallback` is set, pass its supported MIME types.
+                OnReceiveContentCallback<TextView> receiver = getOnReceiveContentCallback();
+                if (receiver != null) {
+                    outAttrs.contentMimeTypes = receiver.getSupportedMimeTypes(this)
                             .toArray(new String[0]);
                 }
                 return ic;
@@ -11827,7 +11837,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             Log.w(LOG_TAG, "cannot autofill non-editable TextView: " + this);
             return;
         }
-        ClipData clip;
+        final ClipData clip;
         if (value.isRichContent()) {
             clip = value.getRichContentValue();
         } else if (value.isText()) {
@@ -11837,22 +11847,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     + " cannot be autofilled into " + this);
             return;
         }
-        mRichContentReceiver.onReceive(this, clip, RichContentReceiver.SOURCE_AUTOFILL, 0);
+        final OnReceiveContentCallback.Payload payload =
+                new OnReceiveContentCallback.Payload.Builder(clip, SOURCE_AUTOFILL).build();
+        onReceiveContent(payload);
     }
 
     @Override
     public @AutofillType int getAutofillType() {
-        if (!isTextEditable()) {
-            return AUTOFILL_TYPE_NONE;
-        }
-        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
-        if (targetSdkVersion <= Build.VERSION_CODES.R) {
-            return AUTOFILL_TYPE_TEXT;
-        }
-        // TODO(b/147301047): Update autofill framework code to check the target SDK of the autofill
-        //  provider and force the type AUTOFILL_TYPE_TEXT for providers that target older SDKs.
-        return mRichContentReceiver.supportsNonTextContent() ? AUTOFILL_TYPE_RICH_CONTENT
-                : AUTOFILL_TYPE_TEXT;
+        return isTextEditable() ? AUTOFILL_TYPE_TEXT : AUTOFILL_TYPE_NONE;
     }
 
     /**
@@ -12913,8 +12915,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (clip == null) {
             return;
         }
-        int flags = withFormatting ? 0 : RichContentReceiver.FLAG_CONVERT_TO_PLAIN_TEXT;
-        mRichContentReceiver.onReceive(this, clip, RichContentReceiver.SOURCE_CLIPBOARD, flags);
+        final OnReceiveContentCallback.Payload payload =
+                new OnReceiveContentCallback.Payload.Builder(clip, SOURCE_CLIPBOARD)
+                .setFlags(withFormatting ? 0 : FLAG_CONVERT_TO_PLAIN_TEXT)
+                .build();
+        onReceiveContent(payload);
         sLastCutCopyOrTextChangedTime = 0;
     }
 
@@ -13697,43 +13702,58 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Returns the callback that handles insertion of content into this view (e.g. pasting from
-     * the clipboard). See {@link #setRichContentReceiver} for more info.
+     * Returns the callback used for handling insertion of content into this view. See
+     * {@link #setOnReceiveContentCallback} for more info.
      *
-     * @return The callback that this view is using to handle insertion of content. Returns
-     * {@link #DEFAULT_RICH_CONTENT_RECEIVER} if no custom callback has been
-     * {@link #setRichContentReceiver set}.
+     * @return The callback for handling insertion of content. Returns null if no callback has been
+     * {@link #setOnReceiveContentCallback set}.
      */
-    @NonNull
-    public RichContentReceiver<TextView> getRichContentReceiver() {
-        return mRichContentReceiver;
+    @SuppressWarnings("unchecked")
+    @Nullable
+    @Override
+    public OnReceiveContentCallback<TextView> getOnReceiveContentCallback() {
+        return (OnReceiveContentCallback<TextView>) super.getOnReceiveContentCallback();
     }
 
     /**
      * Sets the callback to handle insertion of content into this view.
      *
-     * <p>"Content" and "rich content" here refers to both text and non-text: plain text, styled
-     * text, HTML, images, videos, audio files, etc.
-     *
-     * <p>The callback configured here should typically wrap {@link #DEFAULT_RICH_CONTENT_RECEIVER}
-     * to provide consistent behavior for text content.
-     *
      * <p>This callback will be invoked for the following scenarios:
      * <ol>
      *     <li>Paste from the clipboard (e.g. "Paste" or "Paste as plain text" action in the
      *     insertion/selection menu)
-     *     <li>Content insertion from the keyboard ({@link InputConnection#commitContent})
-     *     <li>Drag and drop ({@link View#onDragEvent})
-     *     <li>Autofill, when the type for the field is
-     *     {@link android.view.View.AutofillType#AUTOFILL_TYPE_RICH_CONTENT}
+     *     <li>Content insertion from the keyboard (from {@link InputConnection#commitContent})
+     *     <li>Drag and drop (drop events from {@link #onDragEvent(DragEvent)})
+     *     <li>Autofill (from {@link #autofill(AutofillValue)})
+     *     <li>{@link Intent#ACTION_PROCESS_TEXT} replacement
      * </ol>
      *
-     * @param receiver The callback to use. This can be {@link #DEFAULT_RICH_CONTENT_RECEIVER} to
-     * reset to the default behavior.
+     * <p>The callback will only be invoked if the MIME type of the content is
+     * {@link OnReceiveContentCallback#getSupportedMimeTypes declared as supported} by the callback.
+     * If the content type is not supported by the callback, the default platform handling will be
+     * executed instead.
+     *
+     * @param callback The callback to use. This can be null to reset to the default behavior.
      */
-    public void setRichContentReceiver(@NonNull RichContentReceiver<TextView> receiver) {
-        mRichContentReceiver = Objects.requireNonNull(receiver,
-                "RichContentReceiver should not be null.");
+    @Override
+    public void setOnReceiveContentCallback(
+            @Nullable OnReceiveContentCallback<? extends View> callback) {
+        super.setOnReceiveContentCallback(callback);
+    }
+
+    /**
+     * Handles the request to insert content using the configured callback or the default callback.
+     *
+     * @hide
+     */
+    void onReceiveContent(@NonNull OnReceiveContentCallback.Payload payload) {
+        OnReceiveContentCallback<TextView> receiver = getOnReceiveContentCallback();
+        ClipDescription description = payload.getClip().getDescription();
+        if (receiver != null && receiver.supports(this, description)) {
+            receiver.onReceiveContent(this, payload);
+        } else {
+            DEFAULT_ON_RECEIVE_CONTENT_CALLBACK.onReceiveContent(this, payload);
+        }
     }
 
     private static void logCursor(String location, @Nullable String msgFormat, Object ... msgArgs) {
