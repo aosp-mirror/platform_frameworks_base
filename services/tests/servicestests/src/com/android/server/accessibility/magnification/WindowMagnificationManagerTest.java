@@ -369,6 +369,16 @@ public class WindowMagnificationManagerTest {
         assertEquals(mWindowMagnificationManager.getCenterY(TEST_DISPLAY), 200f);
     }
 
+    @Test
+    public void onDisplayRemoved_enabledOnTestDisplay_disabled() {
+        mWindowMagnificationManager.requestConnection(true);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f, 100f, 200f);
+
+        mWindowMagnificationManager.onDisplayRemoved(TEST_DISPLAY);
+
+        assertFalse(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
+    }
+
     private MotionEvent generatePointersDownEvent(PointF[] pointersLocation) {
         final int len = pointersLocation.length;
 
