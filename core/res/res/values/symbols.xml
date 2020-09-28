@@ -3544,6 +3544,7 @@
   <java-symbol type="id" name="bubble_button" />
   <java-symbol type="dimen" name="bubble_visible_padding_end" />
   <java-symbol type="dimen" name="bubble_gone_padding_end" />
+  <java-symbol type="dimen" name="text_size_body_2_material" />
   <java-symbol type="dimen" name="messaging_avatar_size" />
   <java-symbol type="dimen" name="messaging_group_sending_progress_size" />
   <java-symbol type="dimen" name="messaging_image_rounding" />
