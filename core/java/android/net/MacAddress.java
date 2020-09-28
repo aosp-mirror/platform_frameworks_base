@@ -20,12 +20,12 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.net.util.MacAddressUtils;
 import android.net.wifi.WifiInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.util.Preconditions;
+import com.android.net.module.util.MacAddressUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
