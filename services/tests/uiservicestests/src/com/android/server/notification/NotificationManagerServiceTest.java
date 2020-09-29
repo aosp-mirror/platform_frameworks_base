@@ -166,6 +166,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 @SmallTest
@@ -238,17 +239,22 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             mNotificationAssistantAccessGrantedCallback;
     @Mock
     UserManager mUm;
+    private final FakeSystemClock mSystemClock = new FakeSystemClock();
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
         int countSystemChecks = 0;
         boolean isSystemUid = true;
         int countLogSmartSuggestionsVisible = 0;
+        // If true, don't enqueue the PostNotificationRunnables, just trap them
+        boolean trapEnqueuedNotifications = false;
+        final ArrayList<NotificationManagerService.PostNotificationRunnable> trappedRunnables =
+                new ArrayList<>();
         @Nullable
         NotificationAssistantAccessGrantedCallback mNotificationAssistantAccessGrantedCallback;
 
-        TestableNotificationManagerService(Context context) {
-            super(context);
+        TestableNotificationManagerService(Context context, InjectableSystemClock systemClock) {
+            super(context, systemClock);
         }
 
         @Override
@@ -294,6 +300,23 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             super.setNotificationAssistantAccessGrantedForUserInternal(assistant, userId, granted);
         }
 
+        @Override
+        protected void postPostNotificationRunnableMaybeDelayedLocked(NotificationRecord record,
+                PostNotificationRunnable runnable) {
+            if (trapEnqueuedNotifications) {
+                trappedRunnables.add(runnable);
+                return;
+            }
+
+            super.postPostNotificationRunnableMaybeDelayedLocked(record, runnable);
+        }
+
+        void drainTrappedRunnableQueue() {
+            for (Runnable r : trappedRunnables) {
+                getWorkHandler().post(r);
+            }
+        }
+
         private void setNotificationAssistantAccessGrantedCallback(
                 @Nullable NotificationAssistantAccessGrantedCallback callback) {
             this.mNotificationAssistantAccessGrantedCallback = callback;
@@ -335,7 +358,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
 
-        mService = new TestableNotificationManagerService(mContext);
+        mService = new TestableNotificationManagerService(mContext, mSystemClock);
 
         // Use this testable looper.
         mTestableLooper = TestableLooper.get(this);
@@ -448,7 +471,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setGroupSummary(isSummary);
 
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, id, "tag", mUid, 0,
-                nb.build(), new UserHandle(mUid), null, 0);
+                nb.build(), new UserHandle(mUid), null, mSystemClock.currentTimeMillis());
         return new NotificationRecord(mContext, sbn, channel);
     }
 
@@ -476,7 +499,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             nb.setBubbleMetadata(getBasicBubbleMetadataBuilder().build());
         }
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1, "tag", mUid, 0,
-                nb.build(), new UserHandle(mUid), null, 0);
+                nb.build(), new UserHandle(mUid), null, mSystemClock.currentTimeMillis());
         return new NotificationRecord(mContext, sbn, channel);
     }
 
@@ -917,6 +940,83 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testPostCancelPostNotifiesListeners() throws Exception {
+        // WHEN a notification is posted
+        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", sbn.getId(),
+                sbn.getNotification(), sbn.getUserId());
+        mSystemClock.advanceTime(1);
+        // THEN it is canceled
+        mBinderService.cancelNotificationWithTag(PKG, "tag", sbn.getId(), sbn.getUserId());
+        mSystemClock.advanceTime(1);
+        // THEN it is posted again (before the cancel has a chance to finish)
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", sbn.getId(),
+                sbn.getNotification(), sbn.getUserId());
+        // THEN the later enqueue isn't swallowed by the cancel. I.e., ordering is respected
+        waitForIdle();
+
+        // The final enqueue made it to the listener instead of being canceled
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifs.length);
+        assertEquals(1, mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testChangeSystemTimeAfterPost_thenCancel_noFgs() throws Exception {
+        // GIVEN time X
+        mSystemClock.setCurrentTimeMillis(10000);
+
+        // GIVEN a notification is posted
+        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", sbn.getId(),
+                sbn.getNotification(), sbn.getUserId());
+        mSystemClock.advanceTime(1);
+        waitForIdle();
+
+        // THEN the system time is changed to an earlier time
+        mSystemClock.setCurrentTimeMillis(5000);
+
+        // THEN a cancel is requested
+        mBinderService.cancelNotificationWithTag(PKG, "tag", sbn.getId(), sbn.getUserId());
+        waitForIdle();
+
+        // It should work
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(PKG);
+        assertEquals(0, notifs.length);
+        assertEquals(0, mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testChangeSystemTimeAfterPost_thenCancel_fgs() throws Exception {
+        // GIVEN time X
+        mSystemClock.setCurrentTimeMillis(10000);
+
+        // GIVEN a notification is posted
+        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
+        sbn.getNotification().flags =
+                Notification.FLAG_ONGOING_EVENT | FLAG_FOREGROUND_SERVICE;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", sbn.getId(),
+                sbn.getNotification(), sbn.getUserId());
+        mSystemClock.advanceTime(1);
+        waitForIdle();
+
+        // THEN the system time is changed to an earlier time
+        mSystemClock.setCurrentTimeMillis(5000);
+
+        // THEN a cancel is requested
+        mBinderService.cancelNotificationWithTag(PKG, "tag", sbn.getId(), sbn.getUserId());
+        waitForIdle();
+
+        // It should work
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(PKG);
+        assertEquals(0, notifs.length);
+        assertEquals(0, mService.getNotificationRecordCount());
+    }
+
+    @Test
     public void testCancelNotificationWhilePostedAndEnqueued() throws Exception {
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", 0,
                 generateNotificationRecord(null).getNotification(), 0);
@@ -932,6 +1032,56 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ArgumentCaptor<NotificationStats> captor = ArgumentCaptor.forClass(NotificationStats.class);
         verify(mListeners, times(1)).notifyRemovedLocked(any(), anyInt(), captor.capture());
         assertEquals(NotificationStats.DISMISSAL_OTHER, captor.getValue().getDismissalSurface());
+    }
+
+    @Test
+    public void testDelayCancelWhenEnqueuedHasNotPosted() throws Exception {
+        // Don't allow PostNotificationRunnables to execute so we can set up problematic state
+        mService.trapEnqueuedNotifications = true;
+        // GIVEN an enqueued notification
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testDelayCancelWhenEnqueuedHasNotPosted", 0,
+                generateNotificationRecord(null).getNotification(), 0);
+        mSystemClock.advanceTime(1);
+        // WHEN a cancel is requested before it has posted
+        mBinderService.cancelNotificationWithTag(PKG,
+                "testDelayCancelWhenEnqueuedHasNotPosted", 0, 0);
+
+        waitForIdle();
+
+        // THEN the cancel notification runnable is captured and associated with that record
+        ArrayMap<NotificationRecord,
+                ArrayList<NotificationManagerService.CancelNotificationRunnable>> delayed =
+                        mService.mDelayedCancelations;
+        Set<NotificationRecord> keySet = delayed.keySet();
+        assertEquals(1, keySet.size());
+    }
+
+    @Test
+    public void testDelayedCancelsExecuteAfterPost() throws Exception {
+        // Don't allow PostNotificationRunnables to execute so we can set up problematic state
+        mService.trapEnqueuedNotifications = true;
+        // GIVEN an enqueued notification
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testDelayCancelWhenEnqueuedHasNotPosted", 0,
+                generateNotificationRecord(null).getNotification(), 0);
+        mSystemClock.advanceTime(1);
+        // WHEN a cancel is requested before it has posted
+        mBinderService.cancelNotificationWithTag(PKG,
+                "testDelayCancelWhenEnqueuedHasNotPosted", 0, 0);
+
+        waitForIdle();
+
+        // We're now in a state with an a notification awaiting PostNotificationRunnable to execute
+        // WHEN the PostNotificationRunnable is allowed to execute
+        mService.drainTrappedRunnableQueue();
+        waitForIdle();
+
+        // THEN the cancel executes and the notification is removed
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(PKG);
+        assertEquals(0, notifs.length);
+        assertEquals(0, mService.getNotificationRecordCount());
     }
 
     @Test
@@ -1973,7 +2123,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testHasCompanionDevice_noService() {
-        mService = new TestableNotificationManagerService(mContext);
+        mService = new TestableNotificationManagerService(mContext, mSystemClock);
 
         assertFalse(mService.hasCompanionDevice(mListener));
     }
@@ -4833,8 +4983,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testCancelAllNotificationsFromListener_ignoresBubbles() throws Exception {
-        final NotificationRecord nrNormal = generateNotificationRecord(mTestNotificationChannel);
-        final NotificationRecord nrBubble = generateNotificationRecord(mTestNotificationChannel);
+        final NotificationRecord nrNormal = generateNotificationRecord(
+                  mTestNotificationChannel /* channel */,
+                  1 /* id */,
+                  null /* groupKey */,
+                  false /* isSummary */);
+        final NotificationRecord nrBubble = generateNotificationRecord(
+                  mTestNotificationChannel /* channel */,
+                  2 /* id */,
+                  null /* groupKey */,
+                  false /* isSummary */);
         nrBubble.sbn.getNotification().flags |= FLAG_BUBBLE;
 
         mService.addNotification(nrNormal);
@@ -4850,8 +5008,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testCancelNotificationsFromListener_ignoresBubbles() throws Exception {
-        final NotificationRecord nrNormal = generateNotificationRecord(mTestNotificationChannel);
-        final NotificationRecord nrBubble = generateNotificationRecord(mTestNotificationChannel);
+        final NotificationRecord nrNormal = generateNotificationRecord(
+                  mTestNotificationChannel /* channel */,
+                  1 /* id */,
+                  null /* groupKey */,
+                  false /* isSummary */);
+        final NotificationRecord nrBubble = generateNotificationRecord(
+                  mTestNotificationChannel /* channel */,
+                  2 /* id */,
+                  null /* groupKey */,
+                  false /* isSummary */);
         nrBubble.sbn.getNotification().flags |= FLAG_BUBBLE;
 
         mService.addNotification(nrNormal);

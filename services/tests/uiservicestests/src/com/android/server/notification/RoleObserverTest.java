@@ -18,7 +18,6 @@ package com.android.server.notification;
 
 import static android.app.role.RoleManager.ROLE_DIALER;
 import static android.app.role.RoleManager.ROLE_EMERGENCY;
-import static android.app.role.RoleManager.ROLE_SMS;
 import static android.content.pm.PackageManager.MATCH_ALL;
 
 import static junit.framework.Assert.assertFalse;
@@ -94,11 +93,12 @@ public class RoleObserverTest extends UiServiceTestCase {
     private RoleManager mRoleManager;
 
     private List<UserInfo> mUsers;
+    private InjectableSystemClock mSystemClock = new FakeSystemClock();
 
     private static class TestableNotificationManagerService extends NotificationManagerService {
 
-        TestableNotificationManagerService(Context context) {
-            super(context);
+        TestableNotificationManagerService(Context context, InjectableSystemClock systemClock) {
+            super(context, systemClock);
         }
 
         @Override
@@ -125,7 +125,7 @@ public class RoleObserverTest extends UiServiceTestCase {
         mUsers.add(new UserInfo(10, "second", 0));
         when(mUm.getUsers()).thenReturn(mUsers);
 
-        mService = new TestableNotificationManagerService(mContext);
+        mService = new TestableNotificationManagerService(mContext, mSystemClock);
         mRoleObserver = mService.new RoleObserver(mRoleManager, mPm, mExecutor);
 
         try {
