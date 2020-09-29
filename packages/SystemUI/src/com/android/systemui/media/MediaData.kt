@@ -33,7 +33,7 @@ data class MediaData(
     /**
      * Icon shown on player, close to app name.
      */
-    val appIcon: Drawable?,
+    val appIcon: Icon?,
     /**
      * Artist name.
      */
