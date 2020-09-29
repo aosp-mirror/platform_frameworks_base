@@ -499,9 +499,6 @@ public abstract class ActivityTaskManagerInternal {
     /** @return the process for the top-most resumed activity in the system. */
     public abstract WindowProcessController getTopApp();
 
-    /** Generate oom-score-adjustment rank for all tasks in the system based on z-order. */
-    public abstract void rankTaskLayersIfNeeded();
-
     /** Destroy all activities. */
     public abstract void scheduleDestroyAllActivities(String reason);
 
