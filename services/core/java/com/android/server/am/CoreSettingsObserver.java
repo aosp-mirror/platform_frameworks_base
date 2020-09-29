@@ -86,7 +86,7 @@ final class CoreSettingsObserver extends ContentObserver {
         sGlobalSettingToTypeMap.put(
                 Settings.Global.GLOBAL_SETTINGS_ANGLE_DEBUG_PACKAGE, String.class);
         sGlobalSettingToTypeMap.put(
-                Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE, String.class);
+                Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_ALL_ANGLE, int.class);
         sGlobalSettingToTypeMap.put(
                 Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_PKGS, String.class);
         sGlobalSettingToTypeMap.put(
