@@ -251,10 +251,9 @@ public class MediaControlPanel {
         // App icon
         ImageView appIcon = mViewHolder.getAppIcon();
         if (data.getAppIcon() != null) {
-            appIcon.setImageDrawable(data.getAppIcon());
+            appIcon.setImageIcon(data.getAppIcon());
         } else {
-            Drawable iconDrawable = mContext.getDrawable(R.drawable.ic_music_note);
-            appIcon.setImageDrawable(iconDrawable);
+            appIcon.setImageResource(R.drawable.ic_music_note);
         }
 
         // Song name

@@ -455,7 +455,7 @@ class MediaDataManager(
         val app = builder.loadHeaderAppName()
 
         // App Icon
-        val smallIconDrawable: Drawable = sbn.notification.smallIcon.loadDrawable(context)
+        val smallIcon = sbn.notification.smallIcon
 
         // Song name
         var song: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
@@ -518,7 +518,7 @@ class MediaDataManager(
             val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true
             val active = mediaEntries[key]?.active ?: true
             onMediaDataLoaded(key, oldKey, MediaData(sbn.normalizedUserId, true, bgColor, app,
-                    smallIconDrawable, artist, song, artWorkIcon, actionIcons,
+                    smallIcon, artist, song, artWorkIcon, actionIcons,
                     actionsToShowCollapsed, sbn.packageName, token, notif.contentIntent, null,
                     active, resumeAction = resumeAction, isLocalSession = isLocalSession,
                     notificationKey = key, hasCheckedForResume = hasCheckedForResume,
