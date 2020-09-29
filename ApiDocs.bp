@@ -135,7 +135,7 @@ doc_defaults {
     ],
     knowntags: [
         "docs/knowntags.txt",
-        ":known-oj-tags",
+        ":art.module.public.api{.doctags}",
     ],
     custom_template: "droiddoc-templates-sdk",
     resourcesdir: "docs/html/reference/images/",
