@@ -4618,7 +4618,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final int[] userIds = getAllUserIds();
         mPackageManagerInt.forEachPackageSetting(ps -> {
             final int appId = ps.getAppId();
-            final AppIdPermissionState appIdState = ps.getPermissionsState();
+            final LegacyPermissionState legacyState = ps.getLegacyPermissionState();
 
             synchronized (mLock) {
                 for (final int userId : userIds) {
@@ -4627,19 +4627,19 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     userState.setInstallPermissionsFixed(ps.name, ps.areInstallPermissionsFixed());
                     final UidPermissionState uidState = userState.getOrCreateUidState(appId);
                     uidState.reset();
-                    uidState.setMissing(appIdState.isMissing(userId));
+                    uidState.setMissing(legacyState.isMissing(userId));
                     readStateFromPermissionStates(uidState,
-                            appIdState.getInstallPermissionStates());
+                            legacyState.getInstallPermissionStates());
                     readStateFromPermissionStates(uidState,
-                            appIdState.getRuntimePermissionStates(userId));
+                            legacyState.getRuntimePermissionStates(userId));
                 }
             }
         });
     }
 
     private void readStateFromPermissionStates(@NonNull UidPermissionState uidState,
-            @NonNull Collection<AppIdPermissionState.PermissionState> permissionStates) {
-        for (final AppIdPermissionState.PermissionState permissionState : permissionStates) {
+            @NonNull Collection<LegacyPermissionState.PermissionState> permissionStates) {
+        for (final LegacyPermissionState.PermissionState permissionState : permissionStates) {
             uidState.putPermissionState(permissionState.getPermission(),
                     permissionState.isGranted(), permissionState.getFlags());
         }
@@ -4649,8 +4649,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final int[] userIds = mState.getUserIds();
         mPackageManagerInt.forEachPackageSetting(ps -> {
             ps.setInstallPermissionsFixed(false);
-            final AppIdPermissionState appIdState = ps.getPermissionsState();
-            appIdState.reset();
+            final LegacyPermissionState legacyState = ps.getLegacyPermissionState();
+            legacyState.reset();
             final int appId = ps.getAppId();
 
             synchronized (mLock) {
@@ -4672,21 +4672,21 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         continue;
                     }
 
-                    appIdState.setMissing(uidState.isMissing(), userId);
+                    legacyState.setMissing(uidState.isMissing(), userId);
                     final List<PermissionState> permissionStates = uidState.getPermissionStates();
                     final int permissionStatesSize = permissionStates.size();
                     for (int i = 0; i < permissionStatesSize; i++) {
                         final PermissionState permissionState = permissionStates.get(i);
 
-                        final AppIdPermissionState.PermissionState legacyPermissionState =
-                                new AppIdPermissionState.PermissionState(
+                        final LegacyPermissionState.PermissionState legacyPermissionState =
+                                new LegacyPermissionState.PermissionState(
                                         permissionState.getPermission(),
                                         permissionState.isGranted(), permissionState.getFlags());
                         if (permissionState.isRuntime()) {
-                            appIdState.putRuntimePermissionState(legacyPermissionState,
+                            legacyState.putRuntimePermissionState(legacyPermissionState,
                                     userId);
                         } else {
-                            appIdState.putInstallPermissionState(legacyPermissionState);
+                            legacyState.putInstallPermissionState(legacyPermissionState);
                         }
                     }
                 }
@@ -4695,8 +4695,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @NonNull
-    private AppIdPermissionState getAppIdPermissionState(@AppIdInt int appId) {
-        final AppIdPermissionState appIdState = new AppIdPermissionState();
+    private LegacyPermissionState getLegacyPermissionState(@AppIdInt int appId) {
+        final LegacyPermissionState legacyState = new LegacyPermissionState();
         final int[] userIds = mState.getUserIds();
         for (final int userId : userIds) {
             final UidPermissionState uidState = getUidState(appId, userId);
@@ -4711,17 +4711,17 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             for (int i = 0; i < permissionStatesSize; i++) {
                 final PermissionState permissionState = permissionStates.get(i);
 
-                final AppIdPermissionState.PermissionState legacyPermissionState =
-                        new AppIdPermissionState.PermissionState(permissionState.getPermission(),
+                final LegacyPermissionState.PermissionState legacyPermissionState =
+                        new LegacyPermissionState.PermissionState(permissionState.getPermission(),
                                 permissionState.isGranted(), permissionState.getFlags());
                 if (permissionState.isRuntime()) {
-                    appIdState.putRuntimePermissionState(legacyPermissionState, userId);
+                    legacyState.putRuntimePermissionState(legacyPermissionState, userId);
                 } else if (userId == UserHandle.USER_SYSTEM) {
-                    appIdState.putInstallPermissionState(legacyPermissionState);
+                    legacyState.putInstallPermissionState(legacyPermissionState);
                 }
             }
         }
-        return appIdState;
+        return legacyState;
     }
 
     @NonNull
@@ -5130,8 +5130,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @NonNull
-        public AppIdPermissionState getAppIdPermissionState(@AppIdInt int appId) {
-            return PermissionManagerService.this.getAppIdPermissionState(appId);
+        public LegacyPermissionState getLegacyPermissionState(@AppIdInt int appId) {
+            return PermissionManagerService.this.getLegacyPermissionState(appId);
         }
 
         @NonNull
