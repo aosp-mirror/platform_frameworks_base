@@ -16,6 +16,10 @@
 
 package android.view;
 
+import static android.view.InsetsSourceProto.FRAME;
+import static android.view.InsetsSourceProto.TYPE;
+import static android.view.InsetsSourceProto.VISIBLE;
+import static android.view.InsetsSourceProto.VISIBLE_FRAME;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 
@@ -25,6 +29,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.proto.ProtoOutputStream;
 import android.view.InsetsState.InternalInsetsType;
 
 import java.io.PrintWriter;
@@ -181,6 +186,17 @@ public class InsetsSource implements Parcelable {
         }
         out.setEmpty();
         return false;
+    }
+
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(TYPE, InsetsState.typeToString(mType));
+        mFrame.dumpDebug(proto, FRAME);
+        if (mVisibleFrame != null) {
+            mVisibleFrame.dumpDebug(proto, VISIBLE_FRAME);
+        }
+        proto.write(VISIBLE, mVisible);
+        proto.end(token);
     }
 
     public void dump(String prefix, PrintWriter pw) {

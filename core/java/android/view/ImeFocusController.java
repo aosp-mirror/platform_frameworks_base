@@ -16,15 +16,22 @@
 
 package android.view;
 
+import static android.view.ImeFocusControllerProto.HAS_IME_FOCUS;
+import static android.view.ImeFocusControllerProto.NEXT_SERVED_VIEW;
+import static android.view.ImeFocusControllerProto.SERVED_VIEW;
+
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.UiThread;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
+
+import java.util.Objects;
 
 /**
  * Responsible for IME focus handling inside {@link ViewRootImpl}.
@@ -279,5 +286,13 @@ public final class ImeFocusController {
     @UiThread
     boolean hasImeFocus() {
         return mHasImeFocus;
+    }
+
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(HAS_IME_FOCUS, mHasImeFocus);
+        proto.write(SERVED_VIEW, Objects.toString(mServedView));
+        proto.write(NEXT_SERVED_VIEW, Objects.toString(mNextServedView));
+        proto.end(token);
     }
 }

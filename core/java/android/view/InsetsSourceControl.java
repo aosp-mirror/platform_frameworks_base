@@ -16,10 +16,17 @@
 
 package android.view;
 
+import static android.graphics.PointProto.X;
+import static android.graphics.PointProto.Y;
+import static android.view.InsetsSourceControlProto.LEASH;
+import static android.view.InsetsSourceControlProto.POSITION;
+import static android.view.InsetsSourceControlProto.TYPE;
+
 import android.annotation.Nullable;
 import android.graphics.Point;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.proto.ProtoOutputStream;
 import android.view.InsetsState.InternalInsetsType;
 
 import java.io.PrintWriter;
@@ -120,4 +127,19 @@ public class InsetsSourceControl implements Parcelable {
             return new InsetsSourceControl[size];
         }
     };
+
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(TYPE, InsetsState.typeToString(mType));
+
+        final long surfaceToken = proto.start(POSITION);
+        proto.write(X, mSurfacePosition.x);
+        proto.write(Y, mSurfacePosition.y);
+        proto.end(surfaceToken);
+
+        if (mLeash != null) {
+            mLeash.dumpDebug(proto, LEASH);
+        }
+        proto.end(token);
+    }
 }
