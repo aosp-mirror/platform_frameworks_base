@@ -92,12 +92,12 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private final ZenModeController.Callback mZenModeControllerCallback = new Callback() {
         @Override
         public void onZenChanged(int zen) {
-            mView.updateStatusText(mRingerMode, mNextAlarm);
+            mView.updateStatusText(mRingerMode, mNextAlarm, isZenOverridingRinger());
         }
 
         @Override
         public void onConfigChanged(ZenModeConfig config) {
-            mView.updateStatusText(mRingerMode, mNextAlarm);
+            mView.updateStatusText(mRingerMode, mNextAlarm, isZenOverridingRinger());
         }
     };
 
@@ -105,7 +105,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         @Override
         public void onNextAlarmChanged(AlarmClockInfo nextAlarm) {
             mNextAlarm = nextAlarm;
-            mView.updateStatusText(mRingerMode, mNextAlarm);
+            mView.updateStatusText(mRingerMode, mNextAlarm, isZenOverridingRinger());
         }
     };
 
@@ -216,7 +216,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     protected void onViewAttached() {
         mRingerModeTracker.getRingerModeInternal().observe(mLifecycleOwner, ringer -> {
             mRingerMode = ringer;
-            mView.updateStatusText(mRingerMode, mNextAlarm);
+            mView.updateStatusText(mRingerMode, mNextAlarm, isZenOverridingRinger());
         });
 
         mClockView.setOnClickListener(mOnClickListener);
@@ -308,9 +308,13 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         return ignored;
     }
 
-
     private boolean getChipEnabled() {
         return mMicCameraIndicatorsEnabled || mAllIndicatorsEnabled;
+    }
+
+    private boolean isZenOverridingRinger() {
+        return ZenModeConfig.isZenOverridingRinger(mZenModeController.getZen(),
+                mZenModeController.getConsolidatedPolicy());
     }
 
     static class Builder {

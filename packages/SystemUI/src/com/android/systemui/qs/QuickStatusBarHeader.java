@@ -17,8 +17,6 @@ package com.android.systemui.qs;
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
-
 import android.annotation.ColorInt;
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
@@ -30,7 +28,6 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.os.Bundle;
-import android.service.notification.ZenModeConfig;
 import android.util.AttributeSet;
 import android.util.MathUtils;
 import android.util.Pair;
@@ -66,8 +63,8 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.policy.Clock;
-import com.android.systemui.statusbar.policy.ZenModeController;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -82,8 +79,6 @@ import javax.inject.Named;
 public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwner {
 
     public static final int MAX_TOOLTIP_SHOWN_COUNT = 2;
-
-    private final ZenModeController mZenController;
 
     private boolean mExpanded;
     private boolean mQsDisabled;
@@ -113,8 +108,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     private DemoModeController mDemoModeController;
     private DemoMode mDemoModeReceiver;
     private UserTracker mUserTracker;
-    private boolean mAllIndicatorsEnabled;
-    private boolean mMicCameraIndicatorsEnabled;
 
     // Used for RingerModeTracker
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
@@ -131,10 +124,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
 
     @Inject
     public QuickStatusBarHeader(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            ZenModeController zenModeController, DemoModeController demoModeController,
-            UserTracker userTracker) {
+            DemoModeController demoModeController, UserTracker userTracker) {
         super(context, attrs);
-        mZenController = zenModeController;
         mDualToneHandler = new DualToneHandler(
                 new ContextThemeWrapper(context, R.style.QSHeaderTheme));
         mDemoModeController = demoModeController;
@@ -197,8 +188,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
         return mHeaderQsPanel;
     }
 
-    void updateStatusText(int ringerMode, AlarmClockInfo nextAlarm) {
-        boolean changed = updateRingerStatus(ringerMode) || updateAlarmStatus(nextAlarm);
+    void updateStatusText(int ringerMode, AlarmClockInfo nextAlarm, boolean zenOverridingRinger) {
+        boolean changed = updateRingerStatus(ringerMode, zenOverridingRinger)
+                || updateAlarmStatus(nextAlarm);
 
         if (changed) {
             boolean alarmVisible = mNextAlarmTextView.getVisibility() == View.VISIBLE;
@@ -208,13 +200,12 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
         }
     }
 
-    private boolean updateRingerStatus(int ringerMode) {
+    private boolean updateRingerStatus(int ringerMode, boolean zenOverridingRinger) {
         boolean isOriginalVisible = mRingerModeTextView.getVisibility() == View.VISIBLE;
         CharSequence originalRingerText = mRingerModeTextView.getText();
 
         boolean ringerVisible = false;
-        if (!ZenModeConfig.isZenOverridingRinger(mZenController.getZen(),
-                mZenController.getConsolidatedPolicy())) {
+        if (!zenOverridingRinger) {
             if (ringerMode == AudioManager.RINGER_MODE_VIBRATE) {
                 mRingerModeIcon.setImageResource(R.drawable.ic_volume_ringer_vibrate);
                 mRingerModeTextView.setText(R.string.qs_status_phone_vibrate);
