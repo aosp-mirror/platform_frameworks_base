@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
+import android.app.UiModeManager;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.app.usage.UsageStatsManagerInternal;
@@ -147,6 +148,8 @@ public class JobSchedulerServiceTest {
         JobSchedulerService.sSystemClock = Clock.fixed(Clock.systemUTC().instant(), ZoneOffset.UTC);
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(SystemClock.elapsedRealtimeClock().instant(), ZoneOffset.UTC);
+        // Called by DeviceIdlenessTracker
+        when(mContext.getSystemService(UiModeManager.class)).thenReturn(mock(UiModeManager.class));
 
         mService = new TestJobSchedulerService(mContext);
     }
