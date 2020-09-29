@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.stack;
 import static android.service.notification.NotificationStats.DISMISSAL_SHADE;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.OnEmptySpaceClickListener;
@@ -47,6 +48,7 @@ import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -1556,6 +1558,14 @@ public class NotificationStackScrollLayoutController {
             if (ev.getActionMasked() == MotionEvent.ACTION_UP) {
                 mView.setCheckForLeaveBehind(true);
             }
+
+            // When swiping directly on the NSSL, this would only get an onTouchEvent.
+            // We log any touches other than down, which will be captured by onTouchEvent.
+            // In the intercept we only start tracing when it's not a down (otherwise that down
+            // would be duplicated when intercepted).
+            if (scrollWantsIt && ev.getActionMasked() != MotionEvent.ACTION_DOWN) {
+                InteractionJankMonitor.getInstance().begin(CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
+            }
             return swipeWantsIt || scrollWantsIt || expandWantsIt;
         }
 
@@ -1611,7 +1621,32 @@ public class NotificationStackScrollLayoutController {
             if (ev.getActionMasked() == MotionEvent.ACTION_UP) {
                 mView.setCheckForLeaveBehind(true);
             }
+            traceJankOnTouchEvent(ev.getActionMasked(), scrollerWantsIt);
             return horizontalSwipeWantsIt || scrollerWantsIt || expandWantsIt;
+        }
+
+        private void traceJankOnTouchEvent(int action, boolean scrollerWantsIt) {
+            // Handle interaction jank monitor cases.
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+                    if (scrollerWantsIt) {
+                        InteractionJankMonitor.getInstance()
+                                .begin(CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    if (scrollerWantsIt && !mView.isFlingAfterUpEvent()) {
+                        InteractionJankMonitor.getInstance()
+                                .end(CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
+                    }
+                    break;
+                case MotionEvent.ACTION_CANCEL:
+                    if (scrollerWantsIt) {
+                        InteractionJankMonitor.getInstance()
+                                .cancel(CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
+                    }
+                    break;
+            }
         }
     }
 }
