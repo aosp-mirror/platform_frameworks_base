@@ -7429,7 +7429,7 @@ package android.net.wifi {
     field public static final int EASY_CONNECT_NETWORK_ROLE_STA = 0; // 0x0
     field public static final String EXTRA_CHANGE_REASON = "changeReason";
     field @Deprecated public static final String EXTRA_LINK_PROPERTIES = "android.net.wifi.extra.LINK_PROPERTIES";
-    field public static final String EXTRA_MULTIPLE_NETWORKS_CHANGED = "multipleChanges";
+    field @Deprecated public static final String EXTRA_MULTIPLE_NETWORKS_CHANGED = "multipleChanges";
     field public static final String EXTRA_OSU_NETWORK = "android.net.wifi.extra.OSU_NETWORK";
     field public static final String EXTRA_PREVIOUS_WIFI_AP_STATE = "previous_wifi_state";
     field public static final String EXTRA_URL = "android.net.wifi.extra.URL";
@@ -7437,7 +7437,7 @@ package android.net.wifi {
     field public static final String EXTRA_WIFI_AP_INTERFACE_NAME = "android.net.wifi.extra.WIFI_AP_INTERFACE_NAME";
     field public static final String EXTRA_WIFI_AP_MODE = "android.net.wifi.extra.WIFI_AP_MODE";
     field public static final String EXTRA_WIFI_AP_STATE = "wifi_state";
-    field public static final String EXTRA_WIFI_CONFIGURATION = "wifiConfiguration";
+    field @Deprecated public static final String EXTRA_WIFI_CONFIGURATION = "wifiConfiguration";
     field public static final String EXTRA_WIFI_CREDENTIAL_EVENT_TYPE = "et";
     field public static final String EXTRA_WIFI_CREDENTIAL_SSID = "ssid";
     field public static final int IFACE_IP_MODE_CONFIGURATION_ERROR = 0; // 0x0
