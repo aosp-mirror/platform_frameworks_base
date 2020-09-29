@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.classifier.Classifier.UNLOCK;
@@ -40,6 +41,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.Interpolator;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
 import com.android.systemui.DejankUtils;
@@ -109,6 +111,7 @@ public abstract class PanelViewController {
     private boolean mMotionAborted;
     private boolean mUpwardsWhenThresholdReached;
     private boolean mAnimatingOnDown;
+    private boolean mHandlingPointerUp;
 
     private ValueAnimator mHeightAnimator;
     private ObjectAnimator mPeekAnimator;
@@ -356,6 +359,9 @@ public abstract class PanelViewController {
 
     protected void startExpandMotion(float newX, float newY, boolean startTracking,
             float expandedHeight) {
+        if (!mHandlingPointerUp) {
+            InteractionJankMonitor.getInstance().begin(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+        }
         mInitialOffsetOnTouch = expandedHeight;
         mInitialTouchY = newY;
         mInitialTouchX = newX;
@@ -571,6 +577,7 @@ public abstract class PanelViewController {
             target = getMaxPanelHeight() - getClearAllHeightWithPadding();
         }
         if (target == mExpandedHeight || getOverExpansionAmount() > 0f && expand) {
+            InteractionJankMonitor.getInstance().end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
             notifyExpandingFinished();
             return;
         }
@@ -622,7 +629,12 @@ public abstract class PanelViewController {
                 }
                 setAnimator(null);
                 if (!mCancelled) {
+                    InteractionJankMonitor.getInstance()
+                            .end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
                     notifyExpandingFinished();
+                } else {
+                    InteractionJankMonitor.getInstance()
+                            .cancel(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
                 }
                 notifyBarPanelExpansionChanged();
             }
@@ -1272,7 +1284,9 @@ public abstract class PanelViewController {
                         final float newY = event.getY(newIndex);
                         final float newX = event.getX(newIndex);
                         mTrackingPointer = event.getPointerId(newIndex);
+                        mHandlingPointerUp = true;
                         startExpandMotion(newX, newY, true /* startTracking */, mExpandedHeight);
+                        mHandlingPointerUp = false;
                     }
                     break;
                 case MotionEvent.ACTION_POINTER_DOWN:
@@ -1330,6 +1344,12 @@ public abstract class PanelViewController {
                 case MotionEvent.ACTION_CANCEL:
                     addMovement(event);
                     endMotionEvent(event, x, y, false /* forceCancel */);
+                    InteractionJankMonitor monitor = InteractionJankMonitor.getInstance();
+                    if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+                        monitor.end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+                    } else {
+                        monitor.cancel(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+                    }
                     break;
             }
             return !mGestureWaitForTouchSlop || mTracking;
