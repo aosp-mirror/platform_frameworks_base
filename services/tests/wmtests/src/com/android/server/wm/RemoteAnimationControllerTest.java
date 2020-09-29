@@ -117,7 +117,6 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             assertEquals(win.mActivityRecord.getPrefixOrderIndex(), app.prefixOrderIndex);
             assertEquals(win.mActivityRecord.getTask().mTaskId, app.taskId);
             assertEquals(mMockLeash, app.leash);
-            assertEquals(win.mWinAnimator.mLastClipRect, app.clipRect);
             assertEquals(false, app.isTranslucent);
             verify(mMockTransaction).setPosition(mMockLeash, app.position.x, app.position.y);
             verify(mMockTransaction).setWindowCrop(mMockLeash, 100, 50);
@@ -274,7 +273,6 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             assertEquals(new Rect(0, 0, 200, 200), app.startBounds);
             assertEquals(mMockLeash, app.leash);
             assertEquals(mMockThumbnailLeash, app.startLeash);
-            assertEquals(win.mWinAnimator.mLastClipRect, app.clipRect);
             assertEquals(false, app.isTranslucent);
             verify(mMockTransaction).setPosition(
                     mMockLeash, app.startBounds.left, app.startBounds.top);
@@ -325,7 +323,6 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             assertEquals(new Rect(50, 100, 150, 150), app.startBounds);
             assertEquals(mMockLeash, app.leash);
             assertEquals(mMockThumbnailLeash, app.startLeash);
-            assertEquals(win.mWinAnimator.mLastClipRect, app.clipRect);
             assertEquals(false, app.isTranslucent);
             verify(mMockTransaction).setPosition(
                     mMockLeash, app.startBounds.left, app.startBounds.top);
