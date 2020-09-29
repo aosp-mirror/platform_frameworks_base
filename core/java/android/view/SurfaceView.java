@@ -1083,7 +1083,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     + " top=" + (mWindowSpaceTop != mLocation[1]));
 
             try {
-                final boolean visible = mVisible = mRequestedVisible;
+                mVisible = mRequestedVisible;
                 mWindowSpaceLeft = mLocation[0];
                 mWindowSpaceTop = mLocation[1];
                 mSurfaceWidth = myWidth;
@@ -1115,20 +1115,20 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 final boolean realSizeChanged = performSurfaceTransaction(viewRoot,
                     translator, creating, sizeChanged, needBLASTSync);
                 final boolean redrawNeeded = sizeChanged || creating ||
-                    (visible && !mDrawFinished);
+                    (mVisible && !mDrawFinished);
 
                 try {
                     SurfaceHolder.Callback[] callbacks = null;
 
                     final boolean surfaceChanged = creating;
-                    if (mSurfaceCreated && (surfaceChanged || (!visible && visibleChanged))) {
+                    if (mSurfaceCreated && (surfaceChanged || (!mVisible && visibleChanged))) {
                         mSurfaceCreated = false;
                         notifySurfaceDestroyed();
                     }
 
                     copySurface(creating /* surfaceControlCreated */, sizeChanged);
 
-                    if (visible && mSurface.isValid()) {
+                    if (mVisible && mSurface.isValid()) {
                         if (!mSurfaceCreated && (surfaceChanged || visibleChanged)) {
                             mSurfaceCreated = true;
                             mIsCreating = true;
