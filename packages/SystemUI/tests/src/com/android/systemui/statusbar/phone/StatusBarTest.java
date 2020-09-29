@@ -93,7 +93,6 @@ import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
@@ -232,7 +231,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private KeyguardLiftController mKeyguardLiftController;
     @Mock private VolumeComponent mVolumeComponent;
     @Mock private CommandQueue mCommandQueue;
-    @Mock private Recents mRecents;
     @Mock private Provider<StatusBarComponent.Builder> mStatusBarComponentBuilderProvider;
     @Mock private StatusBarComponent.Builder mStatusBarComponentBuilder;
     @Mock private StatusBarComponent mStatusBarComponent;
@@ -392,7 +390,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mDozeScrimController,
                 mVolumeComponent,
                 mCommandQueue,
-                Optional.of(mRecents),
                 mStatusBarComponentBuilderProvider,
                 mPluginManager,
                 Optional.of(mSplitScreen),

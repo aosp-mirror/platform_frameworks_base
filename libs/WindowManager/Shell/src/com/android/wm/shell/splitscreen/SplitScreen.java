@@ -48,14 +48,6 @@ public interface SplitScreen {
     /** Switch to minimized state if appropriate. */
     void setMinimized(boolean minimized);
 
-    /**
-     * Workaround for b/62528361, at the time recents has drawn, it may happen before a
-     * configuration change to the Divider, and internally, the event will be posted to the
-     * subscriber, or DividerView, which has been removed and prevented from resizing. Instead,
-     * register the event handler here and proxy the event to the current DividerView.
-     */
-    void onRecentsDrawn();
-
     /** Called when there's an activity forced resizable. */
     void onActivityForcedResizable(String packageName, int taskId, int reason);
 
@@ -67,9 +59,6 @@ public interface SplitScreen {
 
     /** Called when there's a task undocking. */
     void onUndockingTask();
-
-    /** Called when top task docked. */
-    void onDockedTopTask();
 
     /** Called when app transition finished. */
     void onAppTransitionFinished();
@@ -85,4 +74,13 @@ public interface SplitScreen {
 
     /** @return the container token for the secondary split root task. */
     WindowContainerToken getSecondaryRoot();
+
+    /**
+     * Splits the primary task if feasible, this is to preserve legacy way to toggle split screen.
+     * Like triggering split screen through long pressing recents app button or through
+     * {@link android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_TOGGLE_SPLIT_SCREEN}.
+     *
+     * @return {@code true} if it successes to split the primary task.
+     */
+    boolean splitPrimaryTask();
 }

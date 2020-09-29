@@ -16,19 +16,25 @@
 
 package com.android.wm.shell.splitscreen;
 
+import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Toast;
 import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -47,6 +53,7 @@ import com.android.wm.shell.common.TransactionPool;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -57,7 +64,7 @@ public class SplitScreenController implements SplitScreen,
         DisplayController.OnDisplaysChangedListener {
     static final boolean DEBUG = false;
 
-    private static final String TAG = "Divider";
+    private static final String TAG = "SplitScreenCtrl";
     private static final int DEFAULT_APP_TRANSITION_DURATION = 336;
 
     private final Context mContext;
@@ -157,12 +164,12 @@ public class SplitScreenController implements SplitScreen,
         // Don't initialize the divider or anything until we get the default display.
     }
 
-    /** Returns {@code true} if split screen is supported on the device. */
+    @Override
     public boolean isSplitScreenSupported() {
         return mSplits.isSplitScreenSupported();
     }
 
-    /** Called when keyguard showing state changed. */
+    @Override
     public void onKeyguardVisibilityChanged(boolean showing) {
         if (!isSplitActive() || mView == null) {
             return;
@@ -229,21 +236,22 @@ public class SplitScreenController implements SplitScreen,
         mHandler.post(task);
     }
 
-    /** Returns {@link DividerView}. */
+    @Override
     public DividerView getDividerView() {
         return mView;
     }
 
-    /** Returns {@code true} if one of the split screen is in minimized mode. */
+    @Override
     public boolean isMinimized() {
         return mMinimized;
     }
 
+    @Override
     public boolean isHomeStackResizable() {
         return mHomeStackResizable;
     }
 
-    /** Returns {@code true} if the divider is visible. */
+    @Override
     public boolean isDividerVisible() {
         return mView != null && mView.getVisibility() == View.VISIBLE;
     }
@@ -328,7 +336,7 @@ public class SplitScreenController implements SplitScreen,
         }
     }
 
-    /** Switch to minimized state if appropriate. */
+    @Override
     public void setMinimized(final boolean minimized) {
         if (DEBUG) Slog.d(TAG, "posting ext setMinimized " + minimized + " vis:" + mVisible);
         mHandler.post(() -> {
@@ -392,48 +400,29 @@ public class SplitScreenController implements SplitScreen,
         mWindowManager.setTouchable(!mAdjustedForIme);
     }
 
-    /**
-     * Workaround for b/62528361, at the time recents has drawn, it may happen before a
-     * configuration change to the Divider, and internally, the event will be posted to the
-     * subscriber, or DividerView, which has been removed and prevented from resizing. Instead,
-     * register the event handler here and proxy the event to the current DividerView.
-     */
-    public void onRecentsDrawn() {
-        if (mView != null) {
-            mView.onRecentsDrawn();
-        }
-    }
-
-    /** Called when there's an activity forced resizable. */
+    @Override
     public void onActivityForcedResizable(String packageName, int taskId, int reason) {
         mForcedResizableController.activityForcedResizable(packageName, taskId, reason);
     }
 
-    /** Called when there's an activity dismissing split screen. */
+    @Override
     public void onActivityDismissingSplitScreen() {
         mForcedResizableController.activityDismissingSplitScreen();
     }
 
-    /** Called when there's an activity launch on secondary display failed. */
+    @Override
     public void onActivityLaunchOnSecondaryDisplayFailed() {
         mForcedResizableController.activityLaunchOnSecondaryDisplayFailed();
     }
 
-    /** Called when there's a task undocking. */
+    @Override
     public void onUndockingTask() {
         if (mView != null) {
             mView.onUndockingTask();
         }
     }
 
-    /** Called when top task docked. */
-    public void onDockedTopTask() {
-        if (mView != null) {
-            mView.onDockedTopTask();
-        }
-    }
-
-    /** Called when app transition finished. */
+    @Override
     public void onAppTransitionFinished() {
         if (mView == null) {
             return;
@@ -441,7 +430,7 @@ public class SplitScreenController implements SplitScreen,
         mForcedResizableController.onAppTransitionFinished();
     }
 
-    /** Dumps current status of Split Screen. */
+    @Override
     public void dump(PrintWriter pw) {
         pw.print("  mVisible="); pw.println(mVisible);
         pw.print("  mMinimized="); pw.println(mMinimized);
@@ -458,7 +447,7 @@ public class SplitScreenController implements SplitScreen,
         return (long) (transitionDuration * transitionScale);
     }
 
-    /** Registers listener that gets called whenever the existence of the divider changes. */
+    @Override
     public void registerInSplitScreenListener(Consumer<Boolean> listener) {
         listener.accept(isDividerVisible());
         synchronized (mDockedStackExistsListeners) {
@@ -470,6 +459,42 @@ public class SplitScreenController implements SplitScreen,
     public void registerBoundsChangeListener(BiConsumer<Rect, Rect> listener) {
         synchronized (mBoundsChangedListeners) {
             mBoundsChangedListeners.add(new WeakReference<>(listener));
+        }
+    }
+
+    @Override
+    public boolean splitPrimaryTask() {
+        try {
+            if (ActivityTaskManager.getService().getLockTaskModeState() == LOCK_TASK_MODE_PINNED
+                    || isSplitActive()) {
+                return false;
+            }
+
+            // Try fetching the top running task.
+            final List<RunningTaskInfo> runningTasks =
+                    ActivityTaskManager.getService().getTasks(1 /* maxNum */);
+            if (runningTasks == null || runningTasks.isEmpty()) {
+                return false;
+            }
+            // Note: The set of running tasks from the system is ordered by recency.
+            final RunningTaskInfo topRunningTask = runningTasks.get(0);
+
+            final int activityType = topRunningTask.configuration.windowConfiguration
+                    .getActivityType();
+            if (activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS) {
+                return false;
+            }
+
+            if (!topRunningTask.supportsSplitScreenMultiWindow) {
+                Toast.makeText(mContext, R.string.dock_non_resizeble_failed_to_dock_text,
+                        Toast.LENGTH_SHORT).show();
+                return false;
+            }
+
+            return ActivityTaskManager.getService().setTaskWindowingModeSplitScreenPrimary(
+                    topRunningTask.taskId, true /* onTop */);
+        } catch (RemoteException e) {
+            return false;
         }
     }
 
@@ -532,7 +557,7 @@ public class SplitScreenController implements SplitScreen,
         return mWindowManagerProxy;
     }
 
-    /** @return the container token for the secondary split root task. */
+    @Override
     public WindowContainerToken getSecondaryRoot() {
         if (mSplits == null || mSplits.mSecondary == null) {
             return null;

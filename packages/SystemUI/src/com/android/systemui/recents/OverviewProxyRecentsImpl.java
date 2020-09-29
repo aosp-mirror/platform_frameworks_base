@@ -16,30 +16,17 @@
 
 package com.android.systemui.recents;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.trust.TrustManager;
 import android.content.Context;
-import android.graphics.Point;
-import android.graphics.Rect;
-import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.Display;
-import android.widget.Toast;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.recents.IOverviewProxy;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.util.Optional;
 
@@ -56,7 +43,6 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
     private final static String TAG = "OverviewProxyRecentsImpl";
     @Nullable
     private final Lazy<StatusBar> mStatusBarLazy;
-    private final Optional<SplitScreen> mSplitScreenOptional;
 
     private Context mContext;
     private Handler mHandler;
@@ -65,10 +51,8 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
-    public OverviewProxyRecentsImpl(Optional<Lazy<StatusBar>> statusBarLazy,
-            Optional<SplitScreen> splitScreenOptional) {
+    public OverviewProxyRecentsImpl(Optional<Lazy<StatusBar>> statusBarLazy) {
         mStatusBarLazy = statusBarLazy.orElse(null);
-        mSplitScreenOptional = splitScreenOptional;
     }
 
     @Override
@@ -139,43 +123,5 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
         } else {
             // Do nothing
         }
-    }
-
-    @Override
-    public boolean splitPrimaryTask(int stackCreateMode, Rect initialBounds,
-            int metricsDockAction) {
-        Point realSize = new Point();
-        if (initialBounds == null) {
-            mContext.getSystemService(DisplayManager.class).getDisplay(Display.DEFAULT_DISPLAY)
-                    .getRealSize(realSize);
-            initialBounds = new Rect(0, 0, realSize.x, realSize.y);
-        }
-
-        ActivityManager.RunningTaskInfo runningTask =
-                ActivityManagerWrapper.getInstance().getRunningTask();
-        final int activityType = runningTask != null
-                ? runningTask.configuration.windowConfiguration.getActivityType()
-                : ACTIVITY_TYPE_UNDEFINED;
-        boolean screenPinningActive = ActivityManagerWrapper.getInstance().isScreenPinningActive();
-        boolean isRunningTaskInHomeOrRecentsStack =
-                activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS;
-        if (runningTask != null && !isRunningTaskInHomeOrRecentsStack && !screenPinningActive) {
-            if (runningTask.supportsSplitScreenMultiWindow) {
-                if (ActivityManagerWrapper.getInstance().setTaskWindowingModeSplitScreenPrimary(
-                        runningTask.id, stackCreateMode, initialBounds)) {
-                    mSplitScreenOptional.ifPresent(splitScreen -> {
-                        splitScreen.onDockedTopTask();
-                        // The overview service is handling split screen, so just skip the wait
-                        // for the first draw and notify the divider to start animating now
-                        splitScreen.onRecentsDrawn();
-                    });
-                    return true;
-                }
-            } else {
-                Toast.makeText(mContext, R.string.dock_non_resizeble_failed_to_dock_text,
-                        Toast.LENGTH_SHORT).show();
-            }
-        }
-        return false;
     }
 }
