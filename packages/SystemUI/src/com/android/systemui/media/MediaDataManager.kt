@@ -572,7 +572,7 @@ class MediaDataManager(
         val source = ImageDecoder.createSource(context.getContentResolver(), uri)
         return try {
             ImageDecoder.decodeBitmap(source) {
-                decoder, info, source -> decoder.isMutableRequired = true
+                decoder, info, source -> decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
             }
         } catch (e: IOException) {
             Log.e(TAG, "Unable to load bitmap", e)
