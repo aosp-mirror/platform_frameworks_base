@@ -46,6 +46,7 @@ import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -397,8 +398,9 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
 
             // Schedule this only after we invoke onClientFinished for the previous client, so that
             // internal preemption logic is not run.
-            mFingerprint21.scheduleAuthenticate(token, operationId, user, cookie,
-                    listener, opPackageName, restricted, statsClient, isKeyguard);
+            mFingerprint21.scheduleAuthenticate(mFingerprint21.mSensorProperties.sensorId, token,
+                    operationId, user, cookie, listener, opPackageName, restricted, statsClient,
+                    isKeyguard);
         }
     }
 
@@ -451,12 +453,14 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
 
     @Override
     @NonNull
-    public FingerprintSensorProperties getFingerprintSensorProperties() {
-        return mSensorProperties;
+    public List<FingerprintSensorProperties> getSensorProperties() {
+        final List<FingerprintSensorProperties> properties = new ArrayList<>();
+        properties.add(mSensorProperties);
+        return properties;
     }
 
     @Override
-    public void onFingerDown(int x, int y, float minor, float major) {
+    public void onFingerDown(int sensorId, int x, int y, float minor, float major) {
         mHandler.post(() -> {
             Slog.d(TAG, "onFingerDown");
             final AuthenticationConsumer lastAuthenticatedConsumer =
@@ -503,7 +507,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     @Override
-    public void onFingerUp() {
+    public void onFingerUp(int sensorId) {
         mHandler.post(() -> {
             Slog.d(TAG, "onFingerUp");
 
@@ -558,7 +562,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
             // Things can happen before SysUI loads and sets the controller.
             if (controller != null) {
                 Slog.d(TAG, "setDebugMessage: " + message);
-                controller.setDebugMessage(message);
+                controller.setDebugMessage(mSensorProperties.sensorId, message);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when sending message: " + message, e);
