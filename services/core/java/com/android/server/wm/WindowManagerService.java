@@ -411,7 +411,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @see #DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY
      */
     static boolean sDisableCustomTaskAnimationProperty =
-            SystemProperties.getBoolean(DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY, false);
+            SystemProperties.getBoolean(DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY, true);
 
     private static final String DISABLE_TRIPLE_BUFFERING_PROPERTY =
             "ro.sf.disable_triple_buffer";
