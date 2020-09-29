@@ -39,4 +39,10 @@ interface IPeopleManager {
 
     /** Removes all the recent conversations and uncaches their cached shortcuts. */
     void removeAllRecentConversations();
+
+    /**
+     * Returns the last interaction with the specified conversation. If the
+     * conversation can't be found or no interactions have been recorded, returns 0L.
+     */
+    long getLastInteraction(in String packageName, int userId, in String shortcutId);
 }

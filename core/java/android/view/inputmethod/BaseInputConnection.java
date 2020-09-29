@@ -16,7 +16,10 @@
 
 package android.view.inputmethod;
 
+import static android.view.OnReceiveContentCallback.Payload.SOURCE_INPUT_METHOD;
+
 import android.annotation.CallSuper;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Bundle;
@@ -34,6 +37,7 @@ import android.util.Log;
 import android.util.LogPrinter;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+import android.view.OnReceiveContentCallback;
 import android.view.View;
 
 class ComposingText implements NoCopySpan {
@@ -870,9 +874,41 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
-     * The default implementation does nothing.
+     * Default implementation which invokes the target view's {@link OnReceiveContentCallback} if
+     * it is {@link View#setOnReceiveContentCallback set} and supports the MIME type of the given
+     * content; otherwise, simply returns false.
      */
     public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
-        return false;
+        @SuppressWarnings("unchecked") final OnReceiveContentCallback<View> receiver =
+                (OnReceiveContentCallback<View>) mTargetView.getOnReceiveContentCallback();
+        if (receiver == null) {
+            if (DEBUG) {
+                Log.d(TAG, "Can't insert content from IME; no callback");
+            }
+            return false;
+        }
+        if (!receiver.supports(mTargetView, inputContentInfo.getDescription())) {
+            if (DEBUG) {
+                Log.d(TAG, "Can't insert content from IME; callback doesn't support MIME type: "
+                        + inputContentInfo.getDescription());
+            }
+            return false;
+        }
+        if ((flags & InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0) {
+            try {
+                inputContentInfo.requestPermission();
+            } catch (Exception e) {
+                Log.w(TAG, "Can't insert content from IME; requestPermission() failed", e);
+                return false;
+            }
+        }
+        final ClipData clip = new ClipData(inputContentInfo.getDescription(),
+                new ClipData.Item(inputContentInfo.getContentUri()));
+        final OnReceiveContentCallback.Payload payload =
+                new OnReceiveContentCallback.Payload.Builder(clip, SOURCE_INPUT_METHOD)
+                .setLinkUri(inputContentInfo.getLinkUri())
+                .setExtras(opts)
+                .build();
+        return receiver.onReceiveContent(mTargetView, payload);
     }
 }

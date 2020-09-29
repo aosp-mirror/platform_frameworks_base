@@ -36,6 +36,7 @@
             android:layout_height="match_parent"
             android:layout_alignParentStart="true"
             android:layout_marginTop="@dimen/car_padding_2"
+            android:layout_marginStart="@dimen/car_padding_2"
             android:layout_centerVertical="true"
             android:gravity="center_vertical"
         >
@@ -44,7 +45,6 @@
                 android:layout_height="match_parent"
                 android:background="@drawable/system_bar_background_pill"
                 android:layout_weight="1"
-                android:layout_marginStart="@dimen/car_padding_2"
                 android:gravity="center_vertical"
                 systemui:intent="intent:#Intent;component=com.android.car.settings/.common.CarSettingActivities$QuickSettingActivity;launchFlags=0x24000000;end">
 
@@ -53,6 +53,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:layout_marginStart="@dimen/car_padding_2"
+                    android:layout_marginEnd="@dimen/car_padding_2"
                     android:gravity="center_vertical"
                 />
             </com.android.systemui.car.navigationbar.CarNavigationButton>

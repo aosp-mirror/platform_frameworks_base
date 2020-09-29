@@ -53,8 +53,14 @@ package android.media {
     field public static final int FLAG_FROM_KEY = 4096; // 0x1000
   }
 
-  public static final class MediaMetadata.Builder {
-    ctor public MediaMetadata.Builder(@NonNull android.media.MediaMetadata, @IntRange(from=1) int);
+  public final class MediaParceledListSlice<T extends android.os.Parcelable> implements android.os.Parcelable {
+    ctor public MediaParceledListSlice(@NonNull java.util.List<T>);
+    method public int describeContents();
+    method @NonNull public static <T extends android.os.Parcelable> android.media.MediaParceledListSlice<T> emptyList();
+    method public java.util.List<T> getList();
+    method public void setInlineCountLimit(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.ClassLoaderCreator<android.media.MediaParceledListSlice> CREATOR;
   }
 
 }

@@ -139,7 +139,6 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
 
         final IntSupplier mViewVisibility;
 
-        int mSeq;
         int mFrameNumber;
         int mFlags;
 
@@ -156,7 +155,7 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
         void runBenchmark(BenchmarkState state) throws RemoteException {
             final IWindowSession session = WindowManagerGlobal.getWindowSession();
             while (state.keepRunning()) {
-                session.relayout(mWindow, mSeq, mParams, mWidth, mHeight,
+                session.relayout(mWindow, mParams, mWidth, mHeight,
                         mViewVisibility.getAsInt(), mFlags, mFrameNumber, mOutFrames,
                         mOutMergedConfiguration, mOutSurfaceControl, mOutInsetsState, mOutControls,
                         mOutSurfaceSize, mOutBlastSurfaceControl);

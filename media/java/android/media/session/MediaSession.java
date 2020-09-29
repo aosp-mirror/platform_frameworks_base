@@ -464,7 +464,9 @@ public final class MediaSession {
         int fields = 0;
         MediaDescription description = null;
         if (metadata != null) {
-            metadata = (new MediaMetadata.Builder(metadata, mMaxBitmapSize)).build();
+            metadata = new MediaMetadata.Builder(metadata)
+                    .setBitmapDimensionLimit(mMaxBitmapSize)
+                    .build();
             if (metadata.containsKey(MediaMetadata.METADATA_KEY_DURATION)) {
                 duration = metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
             }

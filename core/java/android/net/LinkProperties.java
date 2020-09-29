@@ -21,12 +21,13 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.net.util.LinkPropertiesUtils;
-import android.net.util.LinkPropertiesUtils.CompareResult;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+
+import com.android.net.module.util.LinkPropertiesUtils;
+import com.android.net.module.util.LinkPropertiesUtils.CompareResult;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;

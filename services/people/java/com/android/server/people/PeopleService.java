@@ -40,7 +40,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemService;
 import com.android.server.people.data.DataManager;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -106,17 +105,29 @@ public class PeopleService extends SystemService {
         @Override
         public ParceledListSlice<ConversationChannel> getRecentConversations() {
             enforceSystemOrRoot("get recent conversations");
-            return new ParceledListSlice<>(new ArrayList<>());
+            return new ParceledListSlice<>(
+                    mDataManager.getRecentConversations(
+                            Binder.getCallingUserHandle().getIdentifier()));
         }
 
         @Override
         public void removeRecentConversation(String packageName, int userId, String shortcutId) {
             enforceSystemOrRoot("remove a recent conversation");
+            mDataManager.removeRecentConversation(packageName, userId, shortcutId,
+                    Binder.getCallingUserHandle().getIdentifier());
         }
 
         @Override
         public void removeAllRecentConversations() {
             enforceSystemOrRoot("remove all recent conversations");
+            mDataManager.removeAllRecentConversations(
+                    Binder.getCallingUserHandle().getIdentifier());
+        }
+
+        @Override
+        public long getLastInteraction(String packageName, int userId, String shortcutId) {
+            enforceSystemOrRoot("get last interaction");
+            return mDataManager.getLastInteraction(packageName, userId, shortcutId);
         }
     }
 

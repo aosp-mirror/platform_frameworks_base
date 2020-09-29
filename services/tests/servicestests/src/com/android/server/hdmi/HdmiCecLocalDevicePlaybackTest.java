@@ -39,7 +39,6 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -370,16 +369,11 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(mStandby).isFalse();
     }
 
-    // Playback device does not handle routing control related feature right now
-    @Ignore("b/120845532")
     @Test
-    public void handleSetStreamPath_underCurrentDevice() {
-        assertThat(mHdmiCecLocalDevicePlayback.getLocalActivePath()).isEqualTo(0);
+    public void handleSetStreamPath() {
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV, 0x2100);
         assertThat(mHdmiCecLocalDevicePlayback.handleSetStreamPath(message)).isTrue();
-        // TODO(amyjojo): Move set and get LocalActivePath to Control Service.
-        assertThat(mHdmiCecLocalDevicePlayback.getLocalActivePath()).isEqualTo(1);
     }
 
     @Test
@@ -786,8 +780,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleSetStreamPath_afterHotplug_broadcastsActiveSource() {
-        mHdmiControlService.onHotplug(1, false);
-        mHdmiControlService.onHotplug(1, true);
+        mNativeWrapper.onHotplugEvent(1, false);
+        mNativeWrapper.onHotplugEvent(1, true);
 
         HdmiCecMessage setStreamPath = HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV,
                 mPlaybackPhysicalAddress);
@@ -803,8 +797,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleSetStreamPath_afterHotplug_hasCorrectActiveSource() {
-        mHdmiControlService.onHotplug(1, false);
-        mHdmiControlService.onHotplug(1, true);
+        mNativeWrapper.onHotplugEvent(1, false);
+        mNativeWrapper.onHotplugEvent(1, true);
 
         HdmiCecMessage setStreamPath = HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV,
                 mPlaybackPhysicalAddress);

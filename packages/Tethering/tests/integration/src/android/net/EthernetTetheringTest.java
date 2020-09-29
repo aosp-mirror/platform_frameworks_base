@@ -553,7 +553,6 @@ public class EthernetTetheringTest {
         TestNetworkManager tnm = mContext.getSystemService(TestNetworkManager.class);
         TestNetworkInterface iface = tnm.createTapInterface();
         Log.d(TAG, "Created test interface " + iface.getInterfaceName());
-        assertNotNull(NetworkInterface.getByName(iface.getInterfaceName()));
         return iface;
     }
 

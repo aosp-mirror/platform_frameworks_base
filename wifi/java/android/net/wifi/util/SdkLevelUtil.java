@@ -23,17 +23,17 @@ import android.os.Build;
  *
  * This can be used to disable new Wifi APIs added in Mainline updates on older SDK versions.
  *
+ * Note: if certain functionality is gated with SdkLevelUtil, its corresponding unit tests should
+ * also be gated by the same condition. Then, those unit tests will only be exercised on a base
+ * system image satisfying that condition.
+ * Alternatively, it can be tested via static mocking.
+ *
  * @hide
  */
 public class SdkLevelUtil {
 
-    /** This class is instantiable to allow easy mocking. */
-    public SdkLevelUtil() { }
-
-    /** See {@link #isAtLeastS()}. This version is non-static to allow easy mocking. */
-    public boolean isAtLeastSMockable() {
-        return isAtLeastS();
-    }
+    /** This class is not instantiable. */
+    private SdkLevelUtil() {}
 
     /** Returns true if the Android platform SDK is at least "S", false otherwise. */
     public static boolean isAtLeastS() {

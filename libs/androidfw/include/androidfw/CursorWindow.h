@@ -170,7 +170,7 @@ private:
     Header* mHeader;
 
     inline void* offsetToPtr(uint32_t offset, uint32_t bufferSize = 0) {
-        if (offset >= mSize) {
+        if (offset > mSize) {
             ALOGE("Offset %" PRIu32 " out of bounds, max value %zu", offset, mSize);
             return NULL;
         }

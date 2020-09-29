@@ -864,8 +864,7 @@ public class WindowManagerService extends IWindowManager.Stub
         void updateSystemUiSettings() {
             boolean changed;
             synchronized (mGlobalLock) {
-                changed = ImmersiveModeConfirmation.loadSetting(mCurrentUserId, mContext)
-                        || PolicyControl.reloadFromSetting(mContext);
+                changed = ImmersiveModeConfirmation.loadSetting(mCurrentUserId, mContext);
             }
             if (changed) {
                 updateRotation(false /* alwaysSendConfiguration */, false /* forceRelayout */);
@@ -1374,9 +1373,8 @@ public class WindowManagerService extends IWindowManager.Stub
         return false;
     }
 
-    public int addWindow(Session session, IWindow client, int seq,
-            LayoutParams attrs, int viewVisibility, int displayId, Rect outFrame,
-            Rect outContentInsets, Rect outStableInsets,
+    public int addWindow(Session session, IWindow client, LayoutParams attrs, int viewVisibility,
+            int displayId, Rect outFrame, Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
             InsetsState outInsetsState, InsetsSourceControl[] outActiveControls,
             int requestUserId) {
@@ -1557,7 +1555,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             final WindowState win = new WindowState(this, session, client, token, parentWindow,
-                    appOp[0], seq, attrs, viewVisibility, session.mUid, userId,
+                    appOp[0], attrs, viewVisibility, session.mUid, userId,
                     session.mCanAddInternalSystemWindow);
             if (win.mDeathRecipient == null) {
                 // Client has apparently died, so there is no reason to
@@ -2099,7 +2097,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         == PackageManager.PERMISSION_GRANTED;
     }
 
-    public int relayoutWindow(Session session, IWindow client, int seq, LayoutParams attrs,
+    public int relayoutWindow(Session session, IWindow client, LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility, int flags,
             long frameNumber, ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
@@ -2141,17 +2139,15 @@ public class WindowManagerService extends IWindowManager.Stub
             if (attrs != null) {
                 displayPolicy.adjustWindowParamsLw(win, attrs, pid, uid);
                 win.mToken.adjustWindowParams(win, attrs);
-                // if they don't have the permission, mask out the status bar bits
-                if (seq == win.mSeq) {
-                    int systemUiVisibility = attrs.systemUiVisibility
-                            | attrs.subtreeSystemUiVisibility;
-                    if ((systemUiVisibility & DISABLE_MASK) != 0) {
-                        if (!hasStatusBarPermission(pid, uid)) {
-                            systemUiVisibility &= ~DISABLE_MASK;
-                        }
+                int systemUiVisibility = attrs.systemUiVisibility
+                        | attrs.subtreeSystemUiVisibility;
+                if ((systemUiVisibility & DISABLE_MASK) != 0) {
+                    // if they don't have the permission, mask out the status bar bits
+                    if (!hasStatusBarPermission(pid, uid)) {
+                        systemUiVisibility &= ~DISABLE_MASK;
                     }
-                    win.mSystemUiVisibility = systemUiVisibility;
                 }
+                win.mSystemUiVisibility = systemUiVisibility;
                 if (win.mAttrs.type != attrs.type) {
                     throw new IllegalArgumentException(
                             "Window type can not be changed after the window is added.");
@@ -5731,31 +5727,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void statusBarVisibilityChanged(int displayId, int visibility) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Caller does not hold permission "
-                    + android.Manifest.permission.STATUS_BAR);
-        }
-
-        synchronized (mGlobalLock) {
-            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-            if (displayContent != null) {
-                displayContent.statusBarVisibilityChanged(visibility);
-            } else {
-                Slog.w(TAG, "statusBarVisibilityChanged with invalid displayId=" + displayId);
-            }
-        }
-    }
-
-    @Override
     public void hideTransientBars(int displayId) {
         mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.STATUS_BAR,
                 "hideTransientBars()");
         synchronized (mGlobalLock) {
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
             if (displayContent != null) {
-                displayContent.hideTransientBars();
+                displayContent.getInsetsPolicy().hideTransient();
             } else {
                 Slog.w(TAG, "hideTransientBars with invalid displayId=" + displayId);
             }
@@ -6112,7 +6090,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (inputMethodControlTarget != null) {
                 pw.print("  inputMethodControlTarget in display# "); pw.print(displayId);
-                pw.print(' '); pw.println(inputMethodControlTarget.getWindow());
+                pw.print(' '); pw.println(inputMethodControlTarget);
             }
         });
         pw.print("  mInTouchMode="); pw.println(mInTouchMode);
@@ -6164,7 +6142,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print("  mRecentsAnimationController="); pw.println(mRecentsAnimationController);
                 mRecentsAnimationController.dump(pw, "    ");
             }
-            PolicyControl.dump("  ", pw);
         }
     }
 

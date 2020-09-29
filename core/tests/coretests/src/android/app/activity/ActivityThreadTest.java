@@ -69,6 +69,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Test for verifying {@link android.app.ActivityThread} class.
@@ -78,6 +79,7 @@ import java.util.concurrent.CountDownLatch;
 @RunWith(AndroidJUnit4.class)
 @MediumTest
 public class ActivityThreadTest {
+    private static final int TIMEOUT_SEC = 10;
 
     // The first sequence number to try with. Use a large number to avoid conflicts with the first a
     // few sequence numbers the framework used to launch the test activity.
@@ -309,7 +311,7 @@ public class ActivityThreadTest {
         transaction.addCallback(ActivityConfigurationChangeItem.obtain(activityConfigPortrait));
         appThread.scheduleTransaction(transaction);
 
-        activity.mTestLatch.await();
+        activity.mTestLatch.await(TIMEOUT_SEC, TimeUnit.SECONDS);
         activity.mConfigLatch.countDown();
 
         activity.mConfigLatch = null;
@@ -352,7 +354,7 @@ public class ActivityThreadTest {
         // Wait until the main thread is performing the configuration change for the configuration
         // with sequence number BASE_SEQ + 1 before proceeding. This is to mimic the situation where
         // the activity takes very long time to process configuration changes.
-        activity.mTestLatch.await();
+        activity.mTestLatch.await(TIMEOUT_SEC, TimeUnit.SECONDS);
 
         config = new Configuration();
         config.seq = BASE_SEQ + 2;
@@ -738,7 +740,7 @@ public class ActivityThreadTest {
                     mTestLatch.countDown();
                 }
                 try {
-                    mConfigLatch.await();
+                    mConfigLatch.await(TIMEOUT_SEC, TimeUnit.SECONDS);
                 } catch (InterruptedException e) {
                     throw new IllegalStateException(e);
                 }
