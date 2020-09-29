@@ -155,8 +155,7 @@ interface IActivityManager {
     boolean refContentProvider(in IBinder connection, int stableDelta, int unstableDelta);
     PendingIntent getRunningServiceControlPanel(in ComponentName service);
     ComponentName startService(in IApplicationThread caller, in Intent service,
-            in String resolvedType, boolean requireForeground,
-            boolean hideForegroundNotification, in String callingPackage,
+            in String resolvedType, boolean requireForeground, in String callingPackage,
             in String callingFeatureId, int userId);
     @UnsupportedAppUsage
     int stopService(in IApplicationThread caller, in Intent service,

@@ -882,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Sett størrelsen på den øverste delen av skjermen til 50 %"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Sett størrelsen på den øverste delen av skjermen til 30 %"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Utvid den nederste delen av skjermen til hele skjermen"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Plassering <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Dobbelttrykk for å endre."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Dobbelttrykk for å legge til."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Flytt <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Fjern <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Legg til <xliff:g id="TILE_NAME">%1$s</xliff:g> i posisjon <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Flytt <xliff:g id="TILE_NAME">%1$s</xliff:g> til posisjon <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"fjerne infobrikken"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"legge til en infobrikke på slutten"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Flytt infobrikken"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Legg til en infobrikke"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Flytt til <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Legg til posisjonen <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Posisjon <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Redigeringsvindu for hurtiginnstillinger."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g>-varsel: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"Det kan hende at appen ikke fungerer med delt skjerm."</string>

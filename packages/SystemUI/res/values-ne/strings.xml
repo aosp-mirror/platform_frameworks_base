@@ -882,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"माथिल्लो भाग ५०%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"माथिल्लो भाग ३०%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"तल्लो भाग फुल स्क्रिन"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"स्थिति <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>। सम्पादन गर्नाका लागि डबल ट्याप गर्नुहोस्।"</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>। थप्नका लागि डबल ट्याप गर्नुहोस्।"</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> लाई सार्नुहोस्"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> लाई हटाउनुहोस्"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"<xliff:g id="TILE_NAME">%1$s</xliff:g> लाई <xliff:g id="POSITION">%2$d</xliff:g> स्थितिमा थप्नुहोस्"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g> लाई <xliff:g id="POSITION">%2$d</xliff:g> स्थितिमा सार्नुहोस्"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"टाइल हटाउनुहोस्"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"टाइल अन्त्यमा हाल्नुहोस्"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"टाइल सार्नुहोस्"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"टाइल हाल्नुहोस्"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"टाइल सारेर <xliff:g id="POSITION">%1$d</xliff:g> मा लैजानुहोस्"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"टाइल यो अवस्था <xliff:g id="POSITION">%1$d</xliff:g> मा हाल्नुहोस्"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"स्थिति <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"द्रुत सेटिङ सम्पादक।"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> को सूचना: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"अनुप्रयोगले विभाजित-स्क्रिनमा काम नगर्न सक्छ।"</string>

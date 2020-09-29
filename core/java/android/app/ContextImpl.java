@@ -187,16 +187,6 @@ class ContextImpl extends Context {
     private static final String XATTR_INODE_CODE_CACHE = "user.inode_code_cache";
 
     /**
-     * Special intent extra that critical system apps can use to hide the notification for a
-     * foreground service. This extra should be placed in the intent passed into {@link
-     * #startForegroundService(Intent)}.
-     *
-     * @hide
-     */
-    private static final String EXTRA_HIDDEN_FOREGROUND_SERVICE =
-            "android.intent.extra.HIDDEN_FOREGROUND_SERVICE";
-
-    /**
      * Map from package name, to preference name, to cached preferences.
      */
     @GuardedBy("ContextImpl.class")
@@ -1707,12 +1697,9 @@ class ContextImpl extends Context {
         try {
             validateServiceIntent(service);
             service.prepareToLeaveProcess(this);
-            final boolean hideForegroundNotification = requireForeground
-                    && service.getBooleanExtra(EXTRA_HIDDEN_FOREGROUND_SERVICE, false);
             ComponentName cn = ActivityManager.getService().startService(
                     mMainThread.getApplicationThread(), service,
                     service.resolveTypeIfNeeded(getContentResolver()), requireForeground,
-                    hideForegroundNotification,
                     getOpPackageName(), getAttributionTag(), user.getIdentifier());
             if (cn != null) {
                 if (cn.getPackageName().equals("!")) {

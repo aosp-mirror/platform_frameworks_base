@@ -224,6 +224,8 @@ public final class InputMethodDebug {
                 return "HIDE_DOCKED_STACK_ATTACHED";
             case SoftInputShowHideReason.HIDE_RECENTS_ANIMATION:
                 return "HIDE_RECENTS_ANIMATION";
+            case SoftInputShowHideReason.HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR:
+                return "HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR";
             default:
                 return "Unknown=" + reason;
         }

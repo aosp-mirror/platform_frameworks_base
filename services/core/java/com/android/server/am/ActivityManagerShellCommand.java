@@ -654,7 +654,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         pw.println("Starting service: " + intent);
         pw.flush();
         ComponentName cn = mInterface.startService(null, intent, intent.getType(),
-                asForeground, false, SHELL_PACKAGE_NAME, null, mUserId);
+                asForeground, SHELL_PACKAGE_NAME, null, mUserId);
         if (cn == null) {
             err.println("Error: Not found; no service started.");
             return -1;

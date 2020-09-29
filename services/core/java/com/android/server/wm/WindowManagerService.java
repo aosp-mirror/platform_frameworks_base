@@ -6187,7 +6187,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (inputMethodControlTarget != null) {
                 pw.print("  inputMethodControlTarget in display# "); pw.print(displayId);
-                pw.print(' '); pw.println(inputMethodControlTarget.getWindow());
+                pw.print(' '); pw.println(inputMethodControlTarget);
             }
         });
         pw.print("  mInTouchMode="); pw.println(mInTouchMode);
