@@ -34,6 +34,7 @@ import com.android.tradefed.util.CommandStatus;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -86,6 +87,9 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
     private static final String ROLLBACK_SUCCESS = "ROLLBACK_SUCCESS";
 
     private WatchdogEventLogger mLogger = new WatchdogEventLogger();
+
+    @Rule
+    public AbandonSessionsRule mHostTestRule = new AbandonSessionsRule(this);
 
     @Before
     public void setUp() throws Exception {
