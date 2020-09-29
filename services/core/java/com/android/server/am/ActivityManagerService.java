@@ -17334,4 +17334,18 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new SecurityException("Caller uid " + callerUid + " cannot set freezer state ");
         }
     }
+
+    /**
+     * Holds the AM lock for the specified amount of milliseconds.
+     * Intended for use by the tests that need to imitate lock contention.
+     * Requires permission identity of the shell UID.
+     */
+    @Override
+    public void holdLock(int durationMs) {
+        enforceCallingPermission(Manifest.permission.INJECT_EVENTS, "holdLock");
+
+        synchronized (this) {
+            SystemClock.sleep(durationMs);
+        }
+    }
 }

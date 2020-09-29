@@ -8247,4 +8247,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     embeddedWindow.getName(), grantFocus);
         }
     }
+
+    @Override
+    public void holdLock(int durationMs) {
+        mContext.enforceCallingPermission(
+                Manifest.permission.INJECT_EVENTS, "holdLock requires shell identity");
+
+        synchronized (mGlobalLock) {
+            SystemClock.sleep(durationMs);
+        }
+    }
 }
