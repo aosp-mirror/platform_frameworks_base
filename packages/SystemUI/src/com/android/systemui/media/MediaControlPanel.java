@@ -331,7 +331,7 @@ public class MediaControlPanel {
             int actionId = ACTION_IDS[i];
             final ImageButton button = mViewHolder.getAction(actionId);
             MediaAction mediaAction = actionIcons.get(i);
-            button.setImageDrawable(mediaAction.getDrawable());
+            button.setImageIcon(mediaAction.getIcon());
             button.setContentDescription(mediaAction.getContentDescription());
             Runnable action = mediaAction.getAction();
 
