@@ -21,6 +21,7 @@ import static java.lang.Math.min;
 
 import android.Manifest;
 import android.annotation.FloatRange;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -38,6 +39,8 @@ import android.util.TimeUtils;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 
@@ -65,16 +68,41 @@ public final class LocationRequest implements Parcelable {
      */
     public static final long PASSIVE_INTERVAL = Long.MAX_VALUE;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({QUALITY_LOW_POWER, QUALITY_BALANCED_POWER_ACCURACY, QUALITY_HIGH_ACCURACY})
+    public @interface Quality {}
+
+    /**
+     * A quality constant indicating a location provider may choose to satisfy this request by
+     * providing very accurate locations at the expense of potentially increased power usage.
+     */
+    public static final int QUALITY_HIGH_ACCURACY = 100;
+
+    /**
+     * A quality constant indicating a location provider may choose to satisfy this request by
+     * equally balancing power and accuracy constraints.
+     */
+    public static final int QUALITY_BALANCED_POWER_ACCURACY = 102;
+
+    /**
+     * A quality constant indicating a location provider may choose to satisfy this request by
+     * providing less accurate locations in order to save power.
+     */
+    public static final int QUALITY_LOW_POWER = 104;
+
     /**
      * Used with {@link #setQuality} to request the most accurate locations available.
      *
      * <p>This may be up to 1 meter accuracy, although this is implementation dependent.
      *
      * @hide
+     * @deprecated Use {@link #QUALITY_HIGH_ACCURACY} instead.
      */
+    @Deprecated
     @SystemApi
     @TestApi
-    public static final int ACCURACY_FINE = 100;
+    public static final int ACCURACY_FINE = QUALITY_HIGH_ACCURACY;
 
     /**
      * Used with {@link #setQuality} to request "block" level accuracy.
@@ -84,10 +112,12 @@ public final class LocationRequest implements Parcelable {
      * such as this often consumes less power.
      *
      * @hide
+     * @deprecated Use {@link #QUALITY_BALANCED_POWER_ACCURACY} instead.
      */
+    @Deprecated
     @SystemApi
     @TestApi
-    public static final int ACCURACY_BLOCK = 102;
+    public static final int ACCURACY_BLOCK = QUALITY_BALANCED_POWER_ACCURACY;
 
     /**
      * Used with {@link #setQuality} to request "city" level accuracy.
@@ -97,10 +127,12 @@ public final class LocationRequest implements Parcelable {
      * such as this often consumes less power.
      *
      * @hide
+     * @deprecated Use {@link #QUALITY_LOW_POWER} instead.
      */
+    @Deprecated
     @SystemApi
     @TestApi
-    public static final int ACCURACY_CITY = 104;
+    public static final int ACCURACY_CITY = QUALITY_LOW_POWER;
 
     /**
      * Used with {@link #setQuality} to require no direct power impact (passive locations).
@@ -123,7 +155,9 @@ public final class LocationRequest implements Parcelable {
      * possible.
      *
      * @hide
+     * @deprecated Use {@link #QUALITY_LOW_POWER} instead.
      */
+    @Deprecated
     @SystemApi
     @TestApi
     public static final int POWER_LOW = 201;
@@ -134,7 +168,9 @@ public final class LocationRequest implements Parcelable {
      * <p>This location request will allow high power location work.
      *
      * @hide
+     * @deprecated Use {@link #QUALITY_HIGH_ACCURACY} instead.
      */
+    @Deprecated
     @SystemApi
     @TestApi
     public static final int POWER_HIGH = 203;
@@ -144,7 +180,7 @@ public final class LocationRequest implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "Use {@link "
             + "LocationManager} methods to provide the provider explicitly.")
     @Nullable private String mProvider;
-    private int mQuality;
+    private @Quality int mQuality;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "Use {@link "
             + "LocationRequest} instead.")
     private long mInterval;
@@ -168,7 +204,7 @@ public final class LocationRequest implements Parcelable {
     public static LocationRequest create() {
         // 60 minutes is the default legacy interval
         return new LocationRequest.Builder(60 * 60 * 1000)
-                .setQuality(POWER_LOW)
+                .setQuality(QUALITY_LOW_POWER)
                 .build();
     }
 
@@ -241,7 +277,7 @@ public final class LocationRequest implements Parcelable {
     private LocationRequest(
             @Nullable String provider,
             long intervalMillis,
-            int quality,
+            @Quality int quality,
             long expireAtRealtimeMillis,
             long durationMillis,
             int maxUpdates,
@@ -251,9 +287,6 @@ public final class LocationRequest implements Parcelable {
             boolean locationSettingsIgnored,
             boolean lowPower,
             WorkSource workSource) {
-        Preconditions.checkArgument(intervalMillis != PASSIVE_INTERVAL || quality == POWER_NONE);
-        Preconditions.checkArgument(minUpdateIntervalMillis <= intervalMillis);
-
         mProvider = provider;
         mInterval = intervalMillis;
         mQuality = quality;
@@ -297,24 +330,39 @@ public final class LocationRequest implements Parcelable {
     @SystemApi
     @Deprecated
     public @NonNull LocationRequest setQuality(int quality) {
-        mQuality = Builder.checkQuality(quality, true);
+        switch (quality) {
+            case POWER_HIGH:
+                // fall through
+            case ACCURACY_FINE:
+                mQuality = QUALITY_HIGH_ACCURACY;
+                break;
+            case ACCURACY_BLOCK:
+                mQuality = QUALITY_BALANCED_POWER_ACCURACY;
+                break;
+            case POWER_LOW:
+                // fall through
+            case ACCURACY_CITY:
+                mQuality = QUALITY_LOW_POWER;
+                break;
+            case POWER_NONE:
+                mInterval = PASSIVE_INTERVAL;
+                break;
+            default:
+                throw new IllegalArgumentException("invalid quality: " + quality);
+        }
+
         return this;
     }
 
     /**
-     * Returns the quality of the location request.
+     * Returns the quality hint for this location request. The quality hint informs the provider how
+     * it should attempt to manage any accuracy vs power tradeoffs while attempting to satisfy this
+     * location request.
      *
-     * @return the quality of the location request
-     *
-     * @hide
+     * @return the desired quality tradeoffs between accuracy and power
      */
-    @SystemApi
-    public int getQuality() {
-        if (mInterval == PASSIVE_INTERVAL) {
-            return POWER_NONE;
-        } else {
-            return mQuality;
-        }
+    public @Quality int getQuality() {
+        return mQuality;
     }
 
     /**
@@ -749,66 +797,56 @@ public final class LocationRequest implements Parcelable {
         if (mProvider != null) {
             s.append(mProvider).append(" ");
         }
-        if (mQuality != POWER_NONE && mQuality != ACCURACY_BLOCK) {
-            s.append(qualityToString(mQuality)).append(" ");
-        }
         if (mInterval != PASSIVE_INTERVAL) {
             s.append("@");
             TimeUtils.formatDuration(mInterval, s);
+
+            switch (mQuality) {
+                case QUALITY_HIGH_ACCURACY:
+                    s.append(" HIGH_ACCURACY");
+                    break;
+                case QUALITY_BALANCED_POWER_ACCURACY:
+                    s.append(" BALANCED");
+                    break;
+                case QUALITY_LOW_POWER:
+                    s.append(" LOW_POWER");
+                    break;
+            }
         } else {
             s.append("PASSIVE");
         }
         if (mExpireAtRealtimeMillis != Long.MAX_VALUE) {
-            s.append(" expireAt=").append(TimeUtils.formatRealtime(mExpireAtRealtimeMillis));
+            s.append(", expireAt=").append(TimeUtils.formatRealtime(mExpireAtRealtimeMillis));
         }
         if (mDurationMillis != Long.MAX_VALUE) {
-            s.append(" duration=");
+            s.append(", duration=");
             TimeUtils.formatDuration(mDurationMillis, s);
         }
         if (mMaxUpdates != Integer.MAX_VALUE) {
-            s.append(" maxUpdates=").append(mMaxUpdates);
+            s.append(", maxUpdates=").append(mMaxUpdates);
         }
         if (mMinUpdateIntervalMillis != IMPLICIT_MIN_UPDATE_INTERVAL
                 && mMinUpdateIntervalMillis < mInterval) {
-            s.append(" minUpdateInterval=");
+            s.append(", minUpdateInterval=");
             TimeUtils.formatDuration(mMinUpdateIntervalMillis, s);
         }
         if (mMinUpdateDistanceMeters > 0.0) {
-            s.append(" minUpdateDistance=").append(mMinUpdateDistanceMeters);
+            s.append(", minUpdateDistance=").append(mMinUpdateDistanceMeters);
         }
         if (mLowPower) {
-            s.append(" lowPower");
+            s.append(", lowPower");
         }
         if (mHideFromAppOps) {
-            s.append(" hiddenFromAppOps");
+            s.append(", hiddenFromAppOps");
         }
         if (mLocationSettingsIgnored) {
-            s.append(" locationSettingsIgnored");
+            s.append(", locationSettingsIgnored");
         }
-        if (mWorkSource != null) {
-            s.append(" ").append(mWorkSource);
+        if (mWorkSource != null && !mWorkSource.isEmpty()) {
+            s.append(", ").append(mWorkSource);
         }
         s.append(']');
         return s.toString();
-    }
-
-    private static String qualityToString(int quality) {
-        switch (quality) {
-            case ACCURACY_FINE:
-                return "ACCURACY_FINE";
-            case ACCURACY_BLOCK:
-                return "ACCURACY_BLOCK";
-            case ACCURACY_CITY:
-                return "ACCURACY_CITY";
-            case POWER_NONE:
-                return "POWER_NONE";
-            case POWER_LOW:
-                return "POWER_LOW";
-            case POWER_HIGH:
-                return "POWER_HIGH";
-            default:
-                return "???";
-        }
     }
 
     /**
@@ -816,30 +854,8 @@ public final class LocationRequest implements Parcelable {
      */
     public static final class Builder {
 
-        private static int checkQuality(int quality, boolean allowDeprecated) {
-            switch (quality) {
-                case ACCURACY_FINE:
-                    // fall through
-                case ACCURACY_BLOCK:
-                    // fall through
-                case ACCURACY_CITY:
-                    // fall through
-                case POWER_LOW:
-                    // fall through
-                case POWER_HIGH:
-                    return quality;
-                case POWER_NONE:
-                    if (allowDeprecated) {
-                        return quality;
-                    }
-                    // fall through
-                default:
-                    throw new IllegalArgumentException("invalid quality: " + quality);
-            }
-        }
-
         private long mIntervalMillis;
-        private int mQuality;
+        private @Quality int mQuality;
         private long mDurationMillis;
         private int mMaxUpdates;
         private long mMinUpdateIntervalMillis;
@@ -857,7 +873,7 @@ public final class LocationRequest implements Parcelable {
             // gives us a range check
             setIntervalMillis(intervalMillis);
 
-            mQuality = ACCURACY_BLOCK;
+            mQuality = QUALITY_BALANCED_POWER_ACCURACY;
             mDurationMillis = Long.MAX_VALUE;
             mMaxUpdates = Integer.MAX_VALUE;
             mMinUpdateIntervalMillis = IMPLICIT_MIN_UPDATE_INTERVAL;
@@ -885,9 +901,6 @@ public final class LocationRequest implements Parcelable {
 
             // handle edge cases that can only happen with location request that has been modified
             // by deprecated SystemApi methods
-            if (mQuality == POWER_NONE) {
-                mIntervalMillis = PASSIVE_INTERVAL;
-            }
             if (mIntervalMillis == PASSIVE_INTERVAL
                     && mMinUpdateIntervalMillis == IMPLICIT_MIN_UPDATE_INTERVAL) {
                 // this is the legacy default minimum update interval, so if we're forced to
@@ -914,11 +927,17 @@ public final class LocationRequest implements Parcelable {
         }
 
         /**
-         * @hide
+         * Sets the request quality. The quality is a hint to providers on how they should weigh
+         * power vs accuracy tradeoffs. High accuracy locations may cost more power to produce, and
+         * lower accuracy locations may cost less power to produce. Defaults to
+         * {@link #QUALITY_BALANCED_POWER_ACCURACY}.
          */
-        @SystemApi
-        public @NonNull Builder setQuality(int quality) {
-            mQuality = checkQuality(quality, false);
+        public @NonNull Builder setQuality(@Quality int quality) {
+            Preconditions.checkArgument(
+                    quality == QUALITY_LOW_POWER || quality == QUALITY_BALANCED_POWER_ACCURACY
+                            || quality == QUALITY_HIGH_ACCURACY,
+                    "quality must be a defined QUALITY constant, not " + quality);
+            mQuality = quality;
             return this;
         }
 
@@ -1102,7 +1121,7 @@ public final class LocationRequest implements Parcelable {
             return new LocationRequest(
                     null,
                     mIntervalMillis,
-                    mIntervalMillis != PASSIVE_INTERVAL ? mQuality : POWER_NONE,
+                    mQuality,
                     Long.MAX_VALUE,
                     mDurationMillis,
                     mMaxUpdates,
