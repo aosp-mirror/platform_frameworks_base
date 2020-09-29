@@ -644,7 +644,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
      * A method used to inspect strategy state during tests. Not intended for general use.
      */
     @VisibleForTesting
-    public GeolocationTimeZoneSuggestion getLatestGeolocationSuggestion() {
+    public synchronized GeolocationTimeZoneSuggestion getLatestGeolocationSuggestion() {
         return mLatestGeoLocationSuggestion.get();
     }
 
@@ -652,7 +652,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
      * A {@link TelephonyTimeZoneSuggestion} with additional qualifying metadata.
      */
     @VisibleForTesting
-    public static class QualifiedTelephonyTimeZoneSuggestion {
+    public static final class QualifiedTelephonyTimeZoneSuggestion {
 
         @VisibleForTesting
         public final TelephonyTimeZoneSuggestion suggestion;
