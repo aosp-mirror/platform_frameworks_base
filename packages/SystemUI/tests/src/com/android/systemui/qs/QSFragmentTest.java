@@ -117,10 +117,6 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         processAllMessages();
         host.destroy();
         processAllMessages();
-
-        // Manually push header through detach so it can handle standard cleanup it does on
-        // removed from window.
-        ((QuickStatusBarHeader) qs.getView().findViewById(R.id.header)).onDetachedFromWindow();
     }
 
     @Test

@@ -17,6 +17,8 @@ package com.android.systemui.qs;
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
+
 import android.annotation.ColorInt;
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
@@ -27,7 +29,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.media.AudioManager;
-import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.MathUtils;
 import android.util.Pair;
@@ -53,8 +54,6 @@ import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DualToneHandler;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.demomode.DemoMode;
-import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.privacy.OngoingPrivacyChip;
@@ -64,7 +63,6 @@ import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconMa
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.policy.Clock;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -105,8 +103,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     private OngoingPrivacyChip mPrivacyChip;
     private Space mSpace;
     private BatteryMeterView mBatteryRemainingIcon;
-    private DemoModeController mDemoModeController;
-    private DemoMode mDemoModeReceiver;
     private UserTracker mUserTracker;
 
     // Used for RingerModeTracker
@@ -124,11 +120,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
 
     @Inject
     public QuickStatusBarHeader(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            DemoModeController demoModeController, UserTracker userTracker) {
+            UserTracker userTracker) {
         super(context, attrs);
         mDualToneHandler = new DualToneHandler(
                 new ContextThemeWrapper(context, R.style.QSHeaderTheme));
-        mDemoModeController = demoModeController;
         mUserTracker = userTracker;
     }
 
@@ -158,7 +153,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
         applyDarkness(R.id.clock, tintArea, 0, DarkIconDispatcher.DEFAULT_ICON_TINT);
 
         mClockView = findViewById(R.id.clock);
-        mDemoModeReceiver = new ClockDemoModeReceiver(mClockView);
         mSpace = findViewById(R.id.space);
 
         // Tint for the battery icons are handled in setupHost()
@@ -388,12 +382,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     }
 
     @Override
-    public void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        mDemoModeController.addCallback(mDemoModeReceiver);
-    }
-
-    @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         // Handle padding of the clock
         DisplayCutout cutout = insets.getDisplayCutout();
@@ -459,13 +447,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
                 mWaterfallTopInset + mStatusBarPaddingTop,
                 clockPaddingRight,
                 0);
-    }
-
-    @Override
-    @VisibleForTesting
-    public void onDetachedFromWindow() {
-        mDemoModeController.removeCallback(mDemoModeReceiver);
-        super.onDetachedFromWindow();
     }
 
     public void updateEverything() {
@@ -545,33 +526,4 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
             updateHeaderTextContainerAlphaAnimator();
         }
     }
-
-    private static class ClockDemoModeReceiver implements DemoMode {
-        private Clock mClockView;
-
-        @Override
-        public List<String> demoCommands() {
-            return List.of(COMMAND_CLOCK);
-        }
-
-        ClockDemoModeReceiver(Clock clockView) {
-            mClockView = clockView;
-        }
-
-        @Override
-        public void dispatchDemoCommand(String command, Bundle args) {
-            mClockView.dispatchDemoCommand(command, args);
-        }
-
-        @Override
-        public void onDemoModeStarted() {
-            mClockView.onDemoModeStarted();
-        }
-
-        @Override
-        public void onDemoModeFinished() {
-            mClockView.onDemoModeFinished();
-        }
-    }
-
 }
