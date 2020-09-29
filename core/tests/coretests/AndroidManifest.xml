@@ -161,6 +161,14 @@
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
+        <activity android:name="android.view.ViewInputConnectionTestActivity"
+                  android:label="View Input Connection Test"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
         <activity android:name="StubTestBrowserActivity"
             android:label="Stubbed Test Browser"
             android:exported="true">
