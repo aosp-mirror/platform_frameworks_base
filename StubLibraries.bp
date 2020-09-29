@@ -47,7 +47,7 @@ stubs_defaults {
         "core/java/**/*.logtags",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
-        ":art-module-public-api-stubs-source",
+        ":art.module.public.api{.public.stubs.source}",
         ":android_icu4j_public_api_files",
         "**/package.html",
     ],
