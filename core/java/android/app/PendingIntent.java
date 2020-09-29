@@ -199,7 +199,8 @@ public final class PendingIntent implements Parcelable {
      * either (@link #FLAG_IMMUTABLE} or {@link #FLAG_MUTABLE}. It is strongly
      * recommended to use {@link #FLAG_IMMUTABLE} when creating a
      * PendingIntent. {@link #FLAG_MUTABLE} should only be used when some
-     * functionality relies on modifying the underlying intent.
+     * functionality relies on modifying the underlying intent, e.g. any
+     * PendingIntent that needs to be used with inline reply or bubbles.
      */
     public static final int FLAG_MUTABLE = 1<<25;
 
@@ -320,7 +321,10 @@ public final class PendingIntent implements Parcelable {
         final boolean flagMutableSet = (flags & PendingIntent.FLAG_MUTABLE) != 0;
         String msg = packageName + ": Targeting S+ (version " + Build.VERSION_CODES.S
                     + " and above) requires that one of FLAG_IMMUTABLE or FLAG_MUTABLE"
-                    + " be specified when creating a PendingIntent";
+                    + " be specified when creating a PendingIntent.\nStrongly consider"
+                    + " using FLAG_IMMUTABLE, only use FLAG_MUTABLE if some functionality"
+                    + " depends on the PendingIntent being mutable, e.g. if it needs to"
+                    + " be used with inline replies or bubbles.";
 
         if (flagImmutableSet && flagMutableSet) {
             throw new IllegalArgumentException(
