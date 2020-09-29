@@ -56,8 +56,6 @@ public class ArcTerminationActionFromAvrTest {
     private HdmiCecLocalDeviceAudioSystem mHdmiCecLocalDeviceAudioSystem;
     private ArcTerminationActionFromAvr mAction;
 
-    private HdmiCecController mHdmiCecController;
-    private HdmiControlService mHdmiControlService;
     private FakeNativeWrapper mNativeWrapper;
 
     private TestLooper mTestLooper = new TestLooper();
@@ -79,7 +77,7 @@ public class ArcTerminationActionFromAvrTest {
         when(mContextSpy.getSystemService(PowerManager.class)).thenReturn(powerManager);
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
-        mHdmiControlService =
+        HdmiControlService hdmiControlService =
                 new HdmiControlService(mContextSpy) {
                     @Override
                     void wakeUp() {
@@ -112,16 +110,16 @@ public class ArcTerminationActionFromAvrTest {
                 };
 
         Looper looper = mTestLooper.getLooper();
-        mHdmiControlService.setIoLooper(looper);
+        hdmiControlService.setIoLooper(looper);
         mNativeWrapper = new FakeNativeWrapper();
-        mHdmiCecController = HdmiCecController.createWithNativeWrapper(
-                this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
-        mHdmiControlService.setCecController(mHdmiCecController);
-        mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
-        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
-        mHdmiControlService.initPortInfo();
+        HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
+                hdmiControlService, mNativeWrapper, hdmiControlService.getAtomWriter());
+        hdmiControlService.setCecController(hdmiCecController);
+        hdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(hdmiControlService));
+        hdmiControlService.setMessageValidator(new HdmiCecMessageValidator(hdmiControlService));
+        hdmiControlService.initPortInfo();
 
-        mHdmiCecLocalDeviceAudioSystem = new HdmiCecLocalDeviceAudioSystem(mHdmiControlService) {
+        mHdmiCecLocalDeviceAudioSystem = new HdmiCecLocalDeviceAudioSystem(hdmiControlService) {
             @Override
             protected void setPreferredAddress(int addr) {
             }
@@ -130,7 +128,7 @@ public class ArcTerminationActionFromAvrTest {
         mAction = new ArcTerminationActionFromAvr(mHdmiCecLocalDeviceAudioSystem);
 
         mLocalDevices.add(mHdmiCecLocalDeviceAudioSystem);
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        hdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mHdmiCecLocalDeviceAudioSystem.setArcStatus(true);
         mTestLooper.dispatchAll();
     }
@@ -173,7 +171,7 @@ public class ArcTerminationActionFromAvrTest {
         HdmiCecMessage arcTerminatedResponse = HdmiCecMessageBuilder.buildReportArcTerminated(
                 Constants.ADDR_TV, Constants.ADDR_AUDIO_SYSTEM);
 
-        mHdmiControlService.handleCecCommand(arcTerminatedResponse);
+        mNativeWrapper.onCecMessage(arcTerminatedResponse);
         mTestLooper.dispatchAll();
 
         assertThat(mHdmiCecLocalDeviceAudioSystem.isArcEnabled()).isFalse();

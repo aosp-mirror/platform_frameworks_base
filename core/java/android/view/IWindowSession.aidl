@@ -44,17 +44,17 @@ import java.util.List;
  * {@hide}
  */
 interface IWindowSession {
-    int addToDisplay(IWindow window, int seq, in WindowManager.LayoutParams attrs,
+    int addToDisplay(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out Rect outFrame,
             out Rect outContentInsets, out Rect outStableInsets,
             out DisplayCutout.ParcelableWrapper displayCutout, out InputChannel outInputChannel,
             out InsetsState insetsState, out InsetsSourceControl[] activeControls);
-    int addToDisplayAsUser(IWindow window, int seq, in WindowManager.LayoutParams attrs,
+    int addToDisplayAsUser(IWindow window, in WindowManager.LayoutParams attrs,
                 in int viewVisibility, in int layerStackId, in int userId,
                 out Rect outFrame, out Rect outContentInsets, out Rect outStableInsets,
                 out DisplayCutout.ParcelableWrapper displayCutout, out InputChannel outInputChannel,
                 out InsetsState insetsState, out InsetsSourceControl[] activeControls);
-    int addToDisplayWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
+    int addToDisplayWithoutInputChannel(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out Rect outContentInsets,
             out Rect outStableInsets, out InsetsState insetsState);
     @UnsupportedAppUsage
@@ -68,7 +68,6 @@ interface IWindowSession {
      * to draw the window's contents.
      *
      * @param window The window being modified.
-     * @param seq Ordering sequence number.
      * @param attrs If non-null, new attributes to apply to the window.
      * @param requestedWidth The width the window wants to be.
      * @param requestedHeight The height the window wants to be.
@@ -106,7 +105,7 @@ interface IWindowSession {
      * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_SHOW_FOCUS},
      * {@link WindowManagerGlobal#RELAYOUT_FIRST_TIME}.
      */
-    int relayout(IWindow window, int seq, in WindowManager.LayoutParams attrs,
+    int relayout(IWindow window, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
             int flags, long frameNumber, out ClientWindowFrames outFrames,
             out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,

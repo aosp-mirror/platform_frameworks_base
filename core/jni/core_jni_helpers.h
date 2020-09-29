@@ -90,6 +90,12 @@ static inline int RegisterMethodsOrDie(JNIEnv* env, const char* className,
     return res;
 }
 
+static inline jobject jniGetReferent(JNIEnv* env, jobject ref) {
+    jclass cls = FindClassOrDie(env, "java/lang/ref/Reference");
+    jmethodID get = GetMethodIDOrDie(env, cls, "get", "()Ljava/lang/Object;");
+    return env->CallObjectMethod(ref, get);
+}
+
 /**
  * Read the specified field from jobject, and convert to std::string.
  * If the field cannot be obtained, return defaultValue.

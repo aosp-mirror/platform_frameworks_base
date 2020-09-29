@@ -3995,89 +3995,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * @hide
-     *
-     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
-     * out of the public fields to keep the undefined bits out of the developer's way.
-     *
-     * Flag to specify that the status bar is displayed in transient mode.
-     */
-    public static final int STATUS_BAR_TRANSIENT = 0x04000000;
-
-    /**
-     * @hide
-     *
-     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
-     * out of the public fields to keep the undefined bits out of the developer's way.
-     *
-     * Flag to specify that the navigation bar is displayed in transient mode.
-     */
-    @UnsupportedAppUsage
-    public static final int NAVIGATION_BAR_TRANSIENT = 0x08000000;
-
-    /**
-     * @hide
-     *
-     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
-     * out of the public fields to keep the undefined bits out of the developer's way.
-     *
-     * Flag to specify that the hidden status bar would like to be shown.
-     */
-    public static final int STATUS_BAR_UNHIDE = 0x10000000;
-
-    /**
-     * @hide
-     *
-     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
-     * out of the public fields to keep the undefined bits out of the developer's way.
-     *
-     * Flag to specify that the hidden navigation bar would like to be shown.
-     */
-    public static final int NAVIGATION_BAR_UNHIDE = 0x20000000;
-
-    /**
-     * @hide
-     *
-     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
-     * out of the public fields to keep the undefined bits out of the developer's way.
-     *
-     * Flag to specify that the status bar is displayed in translucent mode.
-     */
-    public static final int STATUS_BAR_TRANSLUCENT = 0x40000000;
-
-    /**
-     * @hide
-     *
-     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
-     * out of the public fields to keep the undefined bits out of the developer's way.
-     *
-     * Flag to specify that the navigation bar is displayed in translucent mode.
-     */
-    public static final int NAVIGATION_BAR_TRANSLUCENT = 0x80000000;
-
-    /**
-     * @hide
-     *
-     * Makes navigation bar transparent (but not the status bar).
-     */
-    public static final int NAVIGATION_BAR_TRANSPARENT = 0x00008000;
-
-    /**
-     * @hide
-     *
-     * Makes status bar transparent (but not the navigation bar).
-     */
-    public static final int STATUS_BAR_TRANSPARENT = 0x00000008;
-
-    /**
-     * @hide
-     *
-     * Makes both status bar and navigation bar transparent.
-     */
-    public static final int SYSTEM_UI_TRANSPARENT = NAVIGATION_BAR_TRANSPARENT
-            | STATUS_BAR_TRANSPARENT;
-
-    /**
-     * @hide
      */
     public static final int PUBLIC_STATUS_BAR_VISIBILITY_MASK = 0x00003FF7;
 
@@ -4302,31 +4219,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     name = "STATUS_BAR_DISABLE_RECENT"),
             @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_SEARCH,
                     equals = STATUS_BAR_DISABLE_SEARCH,
-                    name = "STATUS_BAR_DISABLE_SEARCH"),
-            @ViewDebug.FlagToString(mask = STATUS_BAR_TRANSIENT,
-                    equals = STATUS_BAR_TRANSIENT,
-                    name = "STATUS_BAR_TRANSIENT"),
-            @ViewDebug.FlagToString(mask = NAVIGATION_BAR_TRANSIENT,
-                    equals = NAVIGATION_BAR_TRANSIENT,
-                    name = "NAVIGATION_BAR_TRANSIENT"),
-            @ViewDebug.FlagToString(mask = STATUS_BAR_UNHIDE,
-                    equals = STATUS_BAR_UNHIDE,
-                    name = "STATUS_BAR_UNHIDE"),
-            @ViewDebug.FlagToString(mask = NAVIGATION_BAR_UNHIDE,
-                    equals = NAVIGATION_BAR_UNHIDE,
-                    name = "NAVIGATION_BAR_UNHIDE"),
-            @ViewDebug.FlagToString(mask = STATUS_BAR_TRANSLUCENT,
-                    equals = STATUS_BAR_TRANSLUCENT,
-                    name = "STATUS_BAR_TRANSLUCENT"),
-            @ViewDebug.FlagToString(mask = NAVIGATION_BAR_TRANSLUCENT,
-                    equals = NAVIGATION_BAR_TRANSLUCENT,
-                    name = "NAVIGATION_BAR_TRANSLUCENT"),
-            @ViewDebug.FlagToString(mask = NAVIGATION_BAR_TRANSPARENT,
-                    equals = NAVIGATION_BAR_TRANSPARENT,
-                    name = "NAVIGATION_BAR_TRANSPARENT"),
-            @ViewDebug.FlagToString(mask = STATUS_BAR_TRANSPARENT,
-                    equals = STATUS_BAR_TRANSPARENT,
-                    name = "STATUS_BAR_TRANSPARENT")
+                    name = "STATUS_BAR_DISABLE_SEARCH")
     }, formatToHexString = true)
     @SystemUiVisibility
     int mSystemUiVisibility;
@@ -4355,14 +4248,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             STATUS_BAR_DISABLE_CLOCK,
             STATUS_BAR_DISABLE_RECENT,
             STATUS_BAR_DISABLE_SEARCH,
-            STATUS_BAR_TRANSIENT,
-            NAVIGATION_BAR_TRANSIENT,
-            STATUS_BAR_UNHIDE,
-            NAVIGATION_BAR_UNHIDE,
-            STATUS_BAR_TRANSLUCENT,
-            NAVIGATION_BAR_TRANSLUCENT,
-            NAVIGATION_BAR_TRANSPARENT,
-            STATUS_BAR_TRANSPARENT,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SystemUiVisibility {}
@@ -5357,6 +5242,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @InputSourceClass
     int mUnbufferedInputSource = InputDevice.SOURCE_CLASS_NONE;
+
+    @Nullable
+    private OnReceiveContentCallback<? extends View> mOnReceiveContentCallback;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -9110,6 +8998,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mContext.isAutofillCompatibilityEnabled()) {
             onProvideVirtualStructureCompat(structure, true);
         }
+    }
+
+    /**
+     * Returns the callback used for handling insertion of content into this view. See
+     * {@link #setOnReceiveContentCallback} for more info.
+     *
+     * @return The callback for handling insertion of content. Returns null if no callback has been
+     * {@link #setOnReceiveContentCallback set}.
+     */
+    @Nullable
+    public OnReceiveContentCallback<? extends View> getOnReceiveContentCallback() {
+        return mOnReceiveContentCallback;
+    }
+
+    /**
+     * Sets the callback to handle insertion of content into this view.
+     *
+     * <p>Depending on the view, this callback may be invoked for scenarios such as content
+     * insertion from the IME, Autofill, etc.
+     *
+     * <p>The callback will only be invoked if the MIME type of the content is
+     * {@link OnReceiveContentCallback#getSupportedMimeTypes declared as supported} by the callback.
+     * If the content type is not supported by the callback, the default platform handling will be
+     * executed instead.
+     *
+     * @param callback The callback to use. This can be null to reset to the default behavior.
+     */
+    public void setOnReceiveContentCallback(
+            @Nullable OnReceiveContentCallback<? extends View> callback) {
+        mOnReceiveContentCallback = callback;
     }
 
     /**

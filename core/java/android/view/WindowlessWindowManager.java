@@ -129,7 +129,7 @@ public class WindowlessWindowManager implements IWindowSession {
      * IWindowSession implementation.
      */
     @Override
-    public int addToDisplay(IWindow window, int seq, WindowManager.LayoutParams attrs,
+    public int addToDisplay(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, Rect outFrame, Rect outContentInsets,
             Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
@@ -165,18 +165,18 @@ public class WindowlessWindowManager implements IWindowSession {
      * IWindowSession implementation. Currently this class doesn't need to support for multi-user.
      */
     @Override
-    public int addToDisplayAsUser(IWindow window, int seq, WindowManager.LayoutParams attrs,
+    public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, int userId, Rect outFrame,
             Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
             InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
-        return addToDisplay(window, seq, attrs, viewVisibility, displayId,
+        return addToDisplay(window, attrs, viewVisibility, displayId,
                 outFrame, outContentInsets, outStableInsets, outDisplayCutout, outInputChannel,
                 outInsetsState, outActiveControls);
     }
 
     @Override
-    public int addToDisplayWithoutInputChannel(android.view.IWindow window, int seq,
+    public int addToDisplayWithoutInputChannel(android.view.IWindow window,
             android.view.WindowManager.LayoutParams attrs, int viewVisibility, int layerStackId,
             android.graphics.Rect outContentInsets, android.graphics.Rect outStableInsets,
             android.view.InsetsState insetsState) {
@@ -223,7 +223,7 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public int relayout(IWindow window, int seq, WindowManager.LayoutParams inAttrs,
+    public int relayout(IWindow window, WindowManager.LayoutParams inAttrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, long frameNumber,
             ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,

@@ -193,7 +193,6 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
-import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
@@ -551,11 +550,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private Point mLocationInParentWindow = new Point();
     private SurfaceControl mParentSurfaceControl;
     private InputWindowHandle mPortalWindowHandle;
-
-    // Last systemUiVisibility we received from status bar.
-    private int mLastStatusBarVisibility = 0;
-    // Last systemUiVisibility we dispatched to windows.
-    private int mLastDispatchedSystemUiVisibility = 0;
 
     /** Corner radius that windows should have in order to match the display. */
     private final float mWindowCornerRadius;
@@ -2907,10 +2901,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             pw.print("  mLastFocus="); pw.println(mLastFocus);
         }
         pw.print("  mFocusedApp="); pw.println(mFocusedApp);
-        if (mLastStatusBarVisibility != 0) {
-            pw.print("  mLastStatusBarVisibility=0x");
-            pw.println(Integer.toHexString(mLastStatusBarVisibility));
-        }
         if (mFixedRotationLaunchingApp != null) {
             pw.println("  mFixedRotationLaunchingApp=" + mFixedRotationLaunchingApp);
         }
@@ -3768,50 +3758,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     boolean hasSecureWindowOnScreen() {
         final WindowState win = getWindow(w -> w.isOnScreen() && w.isSecureLocked());
         return win != null;
-    }
-
-    void hideTransientBars() {
-        // TODO(b/118118435): Remove this after migration
-        final int transientFlags = View.STATUS_BAR_TRANSIENT | View.NAVIGATION_BAR_TRANSIENT;
-        statusBarVisibilityChanged(mLastStatusBarVisibility & ~transientFlags);
-
-        getInsetsPolicy().hideTransient();
-    }
-
-    void statusBarVisibilityChanged(int visibility) {
-        mLastStatusBarVisibility = visibility;
-        updateStatusBarVisibilityLocked(visibility);
-    }
-
-    private boolean updateStatusBarVisibilityLocked(int visibility) {
-        if (mLastDispatchedSystemUiVisibility == visibility) {
-            return false;
-        }
-        final int globalDiff = (visibility ^ mLastDispatchedSystemUiVisibility)
-                // We are only interested in differences of one of the
-                // clearable flags...
-                & View.SYSTEM_UI_CLEARABLE_FLAGS
-                // ...if it has actually been cleared.
-                & ~visibility;
-
-        mLastDispatchedSystemUiVisibility = visibility;
-        if (isDefaultDisplay) {
-            mWmService.mInputManager.setSystemUiVisibility(visibility);
-        }
-        updateSystemUiVisibility(visibility, globalDiff);
-        return true;
-    }
-
-    void updateSystemUiVisibility(int visibility, int globalDiff) {
-        forAllWindows(w -> {
-            final int curValue = w.mSystemUiVisibility;
-            final int diff = (curValue ^ visibility) & globalDiff;
-            final int newValue = (curValue & ~diff) | (visibility & diff);
-            if (newValue != curValue) {
-                w.mSeq++;
-                w.mSystemUiVisibility = newValue;
-            }
-        }, true /* traverseTopToBottom */);
     }
 
     void onWindowFreezeTimeout() {

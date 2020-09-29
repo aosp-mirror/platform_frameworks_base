@@ -107,7 +107,7 @@ public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase
                 final InputChannel inputChannel = new InputChannel();
 
                 long startTime = SystemClock.elapsedRealtimeNanos();
-                session.addToDisplay(this, mSeq, mLayoutParams, View.VISIBLE,
+                session.addToDisplay(this, mLayoutParams, View.VISIBLE,
                         Display.DEFAULT_DISPLAY, mOutFrame, mOutContentInsets, mOutStableInsets,
                         mOutDisplayCutout, inputChannel, mOutInsetsState, mOutControls);
                 final long elapsedTimeNsOfAdd = SystemClock.elapsedRealtimeNanos() - startTime;

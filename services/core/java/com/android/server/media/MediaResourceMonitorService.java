@@ -28,6 +28,8 @@ import android.util.Log;
 
 import com.android.server.SystemService;
 
+import java.util.List;
+
 /** This class provides a system service that monitors media resource usage. */
 public class MediaResourceMonitorService extends SystemService {
     private static final String TAG = "MediaResourceMonitor";
@@ -60,16 +62,18 @@ public class MediaResourceMonitorService extends SystemService {
                 if (pkgNames == null) {
                     return;
                 }
-                UserManager manager = getContext().getSystemService(UserManager.class);
-                int[] userIds = manager.getEnabledProfileIds(ActivityManager.getCurrentUser());
-                if (userIds == null || userIds.length == 0) {
+                UserManager manager = getContext().createContextAsUser(
+                        UserHandle.of(ActivityManager.getCurrentUser()), /*flags=*/0)
+                        .getSystemService(UserManager.class);
+                List<UserHandle> enabledProfiles = manager.getEnabledProfiles();
+                if (enabledProfiles.isEmpty()) {
                     return;
                 }
                 Intent intent = new Intent(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
                 intent.putExtra(Intent.EXTRA_PACKAGES, pkgNames);
                 intent.putExtra(Intent.EXTRA_MEDIA_RESOURCE_TYPE, type);
-                for (int userId : userIds) {
-                    getContext().sendBroadcastAsUser(intent, UserHandle.of(userId),
+                for (UserHandle userHandle : enabledProfiles) {
+                    getContext().sendBroadcastAsUser(intent, userHandle,
                             android.Manifest.permission.RECEIVE_MEDIA_RESOURCE_USAGE);
                 }
             } finally {

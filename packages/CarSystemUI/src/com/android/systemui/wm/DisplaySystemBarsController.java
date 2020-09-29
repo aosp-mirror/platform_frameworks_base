@@ -50,6 +50,7 @@ public class DisplaySystemBarsController extends DisplayImeController {
 
     private final Context mContext;
     private final DisplayController mDisplayController;
+    private final Handler mHandler;
     private SparseArray<PerDisplay> mPerDisplaySparseArray;
 
     public DisplaySystemBarsController(
@@ -58,9 +59,10 @@ public class DisplaySystemBarsController extends DisplayImeController {
             DisplayController displayController,
             @Main Handler mainHandler,
             TransactionPool transactionPool) {
-        super(wmService, displayController, mainHandler, transactionPool);
+        super(wmService, displayController, (r) -> mainHandler.post(r), transactionPool);
         mContext = context;
         mDisplayController = displayController;
+        mHandler = mainHandler;
     }
 
     @Override

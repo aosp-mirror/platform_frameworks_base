@@ -378,11 +378,6 @@ interface IWindowManager
     boolean requestAssistScreenshot(IAssistDataReceiver receiver);
 
     /**
-     * Called by the status bar to notify Views of changes to System UI visiblity.
-     */
-    oneway void statusBarVisibilityChanged(int displayId, int visibility);
-
-    /**
      * Called by System UI to notify Window Manager to hide transient bars.
      */
     oneway void hideTransientBars(int displayId);

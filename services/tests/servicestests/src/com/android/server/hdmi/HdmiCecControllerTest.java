@@ -70,7 +70,6 @@ public class HdmiCecControllerTest {
         }
     }
 
-    private HdmiControlService mHdmiControlService;
     private HdmiCecController mHdmiCecController;
     private int mLogicalAddress = 16;
     private AllocateAddressCallback mCallback =
@@ -87,10 +86,11 @@ public class HdmiCecControllerTest {
     public void SetUp() {
         mMyLooper = mTestLooper.getLooper();
         mMyLooper = mTestLooper.getLooper();
-        mHdmiControlService = new MyHdmiControlService(InstrumentationRegistry.getTargetContext());
+        HdmiControlService hdmiControlService = new MyHdmiControlService(
+                InstrumentationRegistry.getTargetContext());
         mNativeWrapper = new FakeNativeWrapper();
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
-                mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
+                hdmiControlService, mNativeWrapper, hdmiControlService.getAtomWriter());
     }
 
     /** Tests for {@link HdmiCecController#allocateLogicalAddress} */

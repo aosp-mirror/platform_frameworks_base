@@ -218,7 +218,7 @@ public:
     void setFocusedApplication(JNIEnv* env, int32_t displayId, jobject applicationHandleObj);
     void setFocusedDisplay(JNIEnv* env, int32_t displayId);
     void setInputDispatchMode(bool enabled, bool frozen);
-    void setSystemUiVisibility(int32_t visibility);
+    void setSystemUiLightsOut(bool lightsOut);
     void setPointerSpeed(int32_t speed);
     void setInputDeviceEnabled(uint32_t deviceId, bool enabled);
     void setShowTouches(bool enabled);
@@ -286,8 +286,8 @@ private:
         // Display size information.
         std::vector<DisplayViewport> viewports;
 
-        // System UI visibility.
-        int32_t systemUiVisibility;
+        // True if System UI is less noticeable.
+        bool systemUiLightsOut;
 
         // Pointer speed.
         int32_t pointerSpeed;
@@ -339,7 +339,7 @@ NativeInputManager::NativeInputManager(jobject contextObj,
 
     {
         AutoMutex _l(mLock);
-        mLocked.systemUiVisibility = ASYSTEM_UI_VISIBILITY_STATUS_BAR_VISIBLE;
+        mLocked.systemUiLightsOut = false;
         mLocked.pointerSpeed = 0;
         mLocked.pointerGesturesEnabled = true;
         mLocked.showTouches = false;
@@ -366,8 +366,8 @@ void NativeInputManager::dump(std::string& dump) {
     }
     {
         AutoMutex _l(mLock);
-        dump += StringPrintf(INDENT "System UI Visibility: 0x%0" PRIx32 "\n",
-                mLocked.systemUiVisibility);
+        dump += StringPrintf(INDENT "System UI Lights Out: %s\n",
+                             toString(mLocked.systemUiLightsOut));
         dump += StringPrintf(INDENT "Pointer Speed: %" PRId32 "\n", mLocked.pointerSpeed);
         dump += StringPrintf(INDENT "Pointer Gestures Enabled: %s\n",
                 toString(mLocked.pointerGesturesEnabled));
@@ -811,11 +811,11 @@ void NativeInputManager::setInputDispatchMode(bool enabled, bool frozen) {
     mInputManager->getDispatcher()->setInputDispatchMode(enabled, frozen);
 }
 
-void NativeInputManager::setSystemUiVisibility(int32_t visibility) {
+void NativeInputManager::setSystemUiLightsOut(bool lightsOut) {
     AutoMutex _l(mLock);
 
-    if (mLocked.systemUiVisibility != visibility) {
-        mLocked.systemUiVisibility = visibility;
+    if (mLocked.systemUiLightsOut != lightsOut) {
+        mLocked.systemUiLightsOut = lightsOut;
         updateInactivityTimeoutLocked();
     }
 }
@@ -826,9 +826,8 @@ void NativeInputManager::updateInactivityTimeoutLocked() REQUIRES(mLock) {
         return;
     }
 
-    bool lightsOut = mLocked.systemUiVisibility & ASYSTEM_UI_VISIBILITY_STATUS_BAR_HIDDEN;
-    controller->setInactivityTimeout(lightsOut ? InactivityTimeout::SHORT
-                                               : InactivityTimeout::NORMAL);
+    controller->setInactivityTimeout(mLocked.systemUiLightsOut ? InactivityTimeout::SHORT
+                                                               : InactivityTimeout::NORMAL);
 }
 
 void NativeInputManager::setPointerSpeed(int32_t speed) {
@@ -1578,11 +1577,11 @@ static void nativeSetInputDispatchMode(JNIEnv* /* env */,
     im->setInputDispatchMode(enabled, frozen);
 }
 
-static void nativeSetSystemUiVisibility(JNIEnv* /* env */,
-        jclass /* clazz */, jlong ptr, jint visibility) {
+static void nativeSetSystemUiLightsOut(JNIEnv* /* env */, jclass /* clazz */, jlong ptr,
+                                       jboolean lightsOut) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->setSystemUiVisibility(visibility);
+    im->setSystemUiLightsOut(lightsOut);
 }
 
 static jboolean nativeTransferTouchFocus(JNIEnv* env,
@@ -1802,7 +1801,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"nativeSetFocusedDisplay", "(JI)V", (void*)nativeSetFocusedDisplay},
         {"nativeSetPointerCapture", "(JZ)V", (void*)nativeSetPointerCapture},
         {"nativeSetInputDispatchMode", "(JZZ)V", (void*)nativeSetInputDispatchMode},
-        {"nativeSetSystemUiVisibility", "(JI)V", (void*)nativeSetSystemUiVisibility},
+        {"nativeSetSystemUiLightsOut", "(JZ)V", (void*)nativeSetSystemUiLightsOut},
         {"nativeTransferTouchFocus", "(JLandroid/os/IBinder;Landroid/os/IBinder;)Z",
          (void*)nativeTransferTouchFocus},
         {"nativeSetPointerSpeed", "(JI)V", (void*)nativeSetPointerSpeed},

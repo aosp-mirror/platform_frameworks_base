@@ -233,7 +233,7 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeToggleCapsLock(long ptr, int deviceId);
     private static native void nativeDisplayRemoved(long ptr, int displayId);
     private static native void nativeSetInputDispatchMode(long ptr, boolean enabled, boolean frozen);
-    private static native void nativeSetSystemUiVisibility(long ptr, int visibility);
+    private static native void nativeSetSystemUiLightsOut(long ptr, boolean lightsOut);
     private static native void nativeSetFocusedApplication(long ptr,
             int displayId, InputApplicationHandle application);
     private static native void nativeSetFocusedDisplay(long ptr, int displayId);
@@ -1560,8 +1560,8 @@ public class InputManagerService extends IInputManager.Stub
         nativeSetInputDispatchMode(mPtr, enabled, frozen);
     }
 
-    public void setSystemUiVisibility(int visibility) {
-        nativeSetSystemUiVisibility(mPtr, visibility);
+    public void setSystemUiLightsOut(boolean lightsOut) {
+        nativeSetSystemUiLightsOut(mPtr, lightsOut);
     }
 
     /**

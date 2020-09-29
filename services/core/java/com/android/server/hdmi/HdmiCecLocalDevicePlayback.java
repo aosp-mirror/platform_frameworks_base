@@ -58,11 +58,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     // If true, turn off TV upon standby. False by default.
     private boolean mAutoTvOff;
 
-    // Local active port number used for Routing Control.
-    // Default 0 means HOME is the current active path. Temp solution only.
-    // TODO(amyjojo): adding system constants for input ports to TIF mapping.
-    private int mLocalActivePath = 0;
-
     // Determines what action should be taken upon receiving Routing Control messages.
     @VisibleForTesting
     protected HdmiProperties.playback_device_action_on_routing_control_values
@@ -436,16 +431,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
 
         assertRunOnServiceThread();
         checkIfPendingActionsCleared();
-    }
-
-    private void routeToPort(int portId) {
-        // TODO(AMYJOJO): route to specific input of the port
-        mLocalActivePath = portId;
-    }
-
-    @VisibleForTesting
-    protected int getLocalActivePath() {
-        return mLocalActivePath;
     }
 
     @Override
