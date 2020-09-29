@@ -752,4 +752,10 @@ interface IWindowManager
      */
     void requestScrollCapture(int displayId, IBinder behindClient, int taskId,
             IScrollCaptureController controller);
+
+    /**
+     * Holds the WM lock for the specified amount of milliseconds.
+     * Intended for use by the tests that need to imitate lock contention.
+     */
+    void holdLock(in int durationMs);
 }

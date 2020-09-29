@@ -25949,6 +25949,15 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManager.writeStateToPackageSettingsTEMP();
         mSettings.writeLPr();
     }
+
+    @Override
+    public void holdLock(int durationMs) {
+        mContext.enforceCallingPermission(
+                Manifest.permission.INJECT_EVENTS, "holdLock requires shell identity");
+        synchronized (mLock) {
+            SystemClock.sleep(durationMs);
+        }
+    }
 }
 
 interface PackageSender {
