@@ -1188,7 +1188,7 @@ public class RecentTasksTest extends WindowTestsBase {
                 () -> mAtm.unregisterTaskStackListener(null));
         assertSecurityException(expectCallable, () -> mAtm.getTaskDescription(0));
         assertSecurityException(expectCallable, () -> mAtm.cancelTaskWindowTransition(0));
-        assertSecurityException(expectCallable, () -> mAtm.startRecentsActivity(null, null,
+        assertSecurityException(expectCallable, () -> mAtm.startRecentsActivity(null, 0,
                 null));
         assertSecurityException(expectCallable, () -> mAtm.cancelRecentsAnimation(true));
         assertSecurityException(expectCallable, () -> mAtm.stopAppSwitches());

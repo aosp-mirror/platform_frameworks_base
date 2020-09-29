@@ -161,7 +161,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         }
     }
 
-    void startRecentsActivity(IRecentsAnimationRunner recentsAnimationRunner) {
+    void startRecentsActivity(IRecentsAnimationRunner recentsAnimationRunner, long eventTime) {
         ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "startRecentsActivity(): intent=%s", mTargetIntent);
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "RecentsAnimation#startRecentsActivity");
 
@@ -249,8 +249,13 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             // we fetch the visible tasks to be controlled by the animation
             mService.mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
 
+            ActivityOptions options = null;
+            if (eventTime > 0) {
+                options = ActivityOptions.makeBasic();
+                options.setSourceInfo(ActivityOptions.SourceInfo.TYPE_RECENTS_ANIMATION, eventTime);
+            }
             mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState,
-                    START_TASK_TO_FRONT, targetActivity, null /* options */);
+                    START_TASK_TO_FRONT, targetActivity, options);
 
             // Register for stack order changes
             mDefaultTaskDisplayArea.registerStackOrderChangedListener(this);

@@ -1910,6 +1910,8 @@ public class ActivityOptions {
         public static final int TYPE_NOTIFICATION = 2;
         /** Launched from lockscreen, including notification while the device is locked. */
         public static final int TYPE_LOCKSCREEN = 3;
+        /** Launched from recents gesture handler. */
+        public static final int TYPE_RECENTS_ANIMATION = 4;
 
         @IntDef(flag = true, prefix = { "TYPE_" }, value = {
                 TYPE_LAUNCHER,
