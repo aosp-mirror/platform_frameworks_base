@@ -96,7 +96,9 @@ import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
 import static com.android.internal.util.XmlUtils.readStringAttribute;
+import static com.android.internal.util.XmlUtils.readThisIntArrayXml;
 import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
+import static com.android.internal.util.XmlUtils.writeIntArrayXml;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
@@ -229,6 +231,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.StatLogger;
+import com.android.internal.util.XmlUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -239,6 +242,7 @@ import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
@@ -313,7 +317,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int VERSION_ADDED_NETWORK_ID = 9;
     private static final int VERSION_SWITCH_UID = 10;
     private static final int VERSION_ADDED_CYCLE = 11;
-    private static final int VERSION_LATEST = VERSION_ADDED_CYCLE;
+    private static final int VERSION_ADDED_NETWORK_TYPES = 12;
+    private static final int VERSION_LATEST = VERSION_ADDED_NETWORK_TYPES;
 
     @VisibleForTesting
     public static final int TYPE_WARNING = SystemMessage.NOTE_NET_WARNING;
@@ -332,6 +337,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String TAG_WHITELIST = "whitelist";
     private static final String TAG_RESTRICT_BACKGROUND = "restrict-background";
     private static final String TAG_REVOKED_RESTRICT_BACKGROUND = "revoked-restrict-background";
+    private static final String TAG_XML_UTILS_INT_ARRAY = "int-array";
 
     private static final String ATTR_VERSION = "version";
     private static final String ATTR_RESTRICT_BACKGROUND = "restrictBackground";
@@ -360,6 +366,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_USAGE_BYTES = "usageBytes";
     private static final String ATTR_USAGE_TIME = "usageTime";
     private static final String ATTR_OWNER_PACKAGE = "ownerPackage";
+    private static final String ATTR_NETWORK_TYPES = "networkTypes";
+    private static final String ATTR_XML_UTILS_NAME = "name";
 
     private static final String ACTION_ALLOW_BACKGROUND =
             "com.android.server.net.action.ALLOW_BACKGROUND";
@@ -2311,13 +2319,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         }
 
                         final int subId = readIntAttribute(in, ATTR_SUB_ID);
+                        final String ownerPackage = readStringAttribute(in, ATTR_OWNER_PACKAGE);
+
+                        if (version >= VERSION_ADDED_NETWORK_TYPES) {
+                            final int depth = in.getDepth();
+                            while (XmlUtils.nextElementWithin(in, depth)) {
+                                if (TAG_XML_UTILS_INT_ARRAY.equals(in.getName())
+                                        && ATTR_NETWORK_TYPES.equals(
+                                                readStringAttribute(in, ATTR_XML_UTILS_NAME))) {
+                                    final int[] networkTypes =
+                                            readThisIntArrayXml(in, TAG_XML_UTILS_INT_ARRAY, null);
+                                    builder.setNetworkTypes(networkTypes);
+                                }
+                            }
+                        }
+
                         final SubscriptionPlan plan = builder.build();
                         mSubscriptionPlans.put(subId, ArrayUtils.appendElement(
                                 SubscriptionPlan.class, mSubscriptionPlans.get(subId), plan));
-
-                        final String ownerPackage = readStringAttribute(in, ATTR_OWNER_PACKAGE);
                         mSubscriptionPlansOwner.put(subId, ownerPackage);
-
                     } else if (TAG_UID_POLICY.equals(tag)) {
                         final int uid = readIntAttribute(in, ATTR_UID);
                         final int policy = readIntAttribute(in, ATTR_POLICY);
@@ -2513,6 +2533,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     writeIntAttribute(out, ATTR_LIMIT_BEHAVIOR, plan.getDataLimitBehavior());
                     writeLongAttribute(out, ATTR_USAGE_BYTES, plan.getDataUsageBytes());
                     writeLongAttribute(out, ATTR_USAGE_TIME, plan.getDataUsageTime());
+                    try {
+                        writeIntArrayXml(plan.getNetworkTypes(), ATTR_NETWORK_TYPES, out);
+                    } catch (XmlPullParserException ignored) { }
                     out.endTag(null, TAG_SUBSCRIPTION_PLAN);
                 }
             }
@@ -3310,7 +3333,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // let in core system components (like the Settings app).
             final String ownerPackage = mSubscriptionPlansOwner.get(subId);
             if (Objects.equals(ownerPackage, callingPackage)
-                    || (UserHandle.getCallingAppId() == android.os.Process.SYSTEM_UID)) {
+                    || (UserHandle.getCallingAppId() == android.os.Process.SYSTEM_UID)
+                    || (UserHandle.getCallingAppId() == android.os.Process.PHONE_UID)) {
                 return mSubscriptionPlans.get(subId);
             } else {
                 Log.w(TAG, "Not returning plans because caller " + callingPackage
