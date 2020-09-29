@@ -7187,16 +7187,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
 
-        @HotPath(caller = HotPath.OOM_ADJUSTMENT)
-        @Override
-        public void rankTaskLayersIfNeeded() {
-            synchronized (mGlobalLockWithoutBoost) {
-                if (mRootWindowContainer != null) {
-                    mRootWindowContainer.rankTaskLayersIfNeeded();
-                }
-            }
-        }
-
         @Override
         public void scheduleDestroyAllActivities(String reason) {
             synchronized (mGlobalLock) {
