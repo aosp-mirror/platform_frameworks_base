@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.InsetsControllerProto.CONTROL;
+import static android.view.InsetsControllerProto.STATE;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.toInternalType;
@@ -41,6 +43,8 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.util.imetracing.ImeTracing;
+import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSourceConsumer.ShowResult;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
@@ -298,6 +302,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
         @Override
         public void onReady(WindowInsetsAnimationController controller, int types) {
+            if ((types & ime()) != 0) {
+                ImeTracing.getInstance().triggerDump();
+            }
+
             mController = controller;
             if (DEBUG) Log.d(TAG, "default animation onReady types: " + types);
 
@@ -812,6 +820,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @VisibleForTesting
     public void show(@InsetsType int types, boolean fromIme) {
+        if (fromIme) {
+            ImeTracing.getInstance().triggerDump();
+        }
         // Handle pending request ready in case there was one set.
         if (fromIme && mPendingImeControlRequest != null) {
             PendingControlRequest pendingRequest = mPendingImeControlRequest;
@@ -860,6 +871,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     void hide(@InsetsType int types, boolean fromIme) {
+        if (fromIme) {
+            ImeTracing.getInstance().triggerDump();
+        }
         int typesReady = 0;
         final ArraySet<Integer> internalTypes = InsetsState.toInternalType(types);
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
@@ -893,6 +907,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if ((mState.calculateUncontrollableInsetsFromFrame(mFrame) & types) != 0) {
             listener.onCancelled(null);
             return;
+        }
+        if (fromIme) {
+            ImeTracing.getInstance().triggerDump();
         }
 
         controlAnimationUnchecked(types, cancellationSignal, listener, mFrame, fromIme, durationMs,
@@ -1292,6 +1309,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private void hideDirectly(
             @InsetsType int types, boolean animationFinished, @AnimationType int animationType) {
+        if ((types & ime()) != 0) {
+            ImeTracing.getInstance().triggerDump();
+        }
         final ArraySet<Integer> internalTypes = InsetsState.toInternalType(types);
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
             getSourceConsumer(internalTypes.valueAt(i)).hide(animationFinished, animationType);
@@ -1299,6 +1319,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     private void showDirectly(@InsetsType int types) {
+        if ((types & ime()) != 0) {
+            ImeTracing.getInstance().triggerDump();
+        }
         final ArraySet<Integer> internalTypes = InsetsState.toInternalType(types);
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
             getSourceConsumer(internalTypes.valueAt(i)).show(false /* fromIme */);
@@ -1316,6 +1339,16 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     void dump(String prefix, PrintWriter pw) {
         pw.println(prefix); pw.println("InsetsController:");
         mState.dump(prefix + "  ", pw);
+    }
+
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        mState.dumpDebug(proto, STATE);
+        for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
+            InsetsAnimationControlRunner runner = mRunningAnimations.get(i).runner;
+            runner.dumpDebug(proto, CONTROL);
+        }
+        proto.end(token);
     }
 
     @VisibleForTesting

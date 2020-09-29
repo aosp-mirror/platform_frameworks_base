@@ -17,6 +17,14 @@
 package android.view;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.InsetsAnimationControlImplProto.CURRENT_ALPHA;
+import static android.view.InsetsAnimationControlImplProto.IS_CANCELLED;
+import static android.view.InsetsAnimationControlImplProto.IS_FINISHED;
+import static android.view.InsetsAnimationControlImplProto.PENDING_ALPHA;
+import static android.view.InsetsAnimationControlImplProto.PENDING_FRACTION;
+import static android.view.InsetsAnimationControlImplProto.PENDING_INSETS;
+import static android.view.InsetsAnimationControlImplProto.SHOWN_ON_FINISH;
+import static android.view.InsetsAnimationControlImplProto.TMP_MATRIX;
 import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
 import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsController.DEBUG;
@@ -38,6 +46,8 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.SparseSetArray;
+import android.util.imetracing.ImeTracing;
+import android.util.proto.ProtoOutputStream;
 import android.view.InsetsState.InternalInsetsSide;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowInsets.Type.InsetsType;
@@ -48,6 +58,7 @@ import android.view.animation.Interpolator;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Implements {@link WindowInsetsAnimationController}
@@ -122,6 +133,10 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         mAnimationType = animationType;
         mController.startAnimation(this, listener, types, mAnimation,
                 new Bounds(mHiddenInsets, mShownInsets));
+
+        if ((mTypes & WindowInsets.Type.ime()) != 0) {
+            ImeTracing.getInstance().triggerDump();
+        }
     }
 
     private boolean calculatePerceptible(Insets currentInsets, float currentAlpha) {
@@ -283,6 +298,20 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     @Override
     public WindowInsetsAnimation getAnimation() {
         return mAnimation;
+    }
+
+    @Override
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(IS_CANCELLED, mCancelled);
+        proto.write(IS_FINISHED, mFinished);
+        proto.write(TMP_MATRIX, Objects.toString(mTmpMatrix));
+        proto.write(PENDING_INSETS, Objects.toString(mPendingInsets));
+        proto.write(PENDING_FRACTION, mPendingFraction);
+        proto.write(SHOWN_ON_FINISH, mShownOnFinish);
+        proto.write(CURRENT_ALPHA, mCurrentAlpha);
+        proto.write(PENDING_ALPHA, mPendingAlpha);
+        proto.end(token);
     }
 
     WindowInsetsAnimationControlListener getListener() {

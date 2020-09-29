@@ -18,6 +18,17 @@ package android.view.inputmethod;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
+import static android.util.imetracing.ImeTracing.PROTO_ARG;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.ClientSideProto.DISPLAY_ID;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.ClientSideProto.EDITOR_INFO;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.ClientSideProto.IME_INSETS_SOURCE_CONSUMER;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.ClientSideProto.INPUT_METHOD_MANAGER;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.ClientSideProto.VIEW_ROOT_IMPL;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.ClientsProto.CLIENT;
+import static android.view.inputmethod.InputMethodManagerProto.ACTIVE;
+import static android.view.inputmethod.InputMethodManagerProto.CUR_ID;
+import static android.view.inputmethod.InputMethodManagerProto.FULLSCREEN_MODE;
+import static android.view.inputmethod.InputMethodManagerProto.SERVED_CONNECTING;
 
 import static com.android.internal.inputmethod.StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION;
 import static com.android.internal.inputmethod.StartInputReason.WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION;
@@ -62,6 +73,8 @@ import android.util.Pools.SimplePool;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.SparseArray;
+import android.util.imetracing.ImeTracing;
+import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.ImeFocusController;
 import android.view.ImeInsetsSourceConsumer;
@@ -564,6 +577,7 @@ public final class InputMethodManager {
                 @StartInputFlags int startInputFlags, @SoftInputModeFlags int softInputMode,
                 int windowFlags) {
             final View servedView;
+            ImeTracing.getInstance().triggerDump();
             synchronized (mH) {
                 mCurrentTextBoxAttribute = null;
                 mCompletions = null;
@@ -1083,6 +1097,11 @@ public final class InputMethodManager {
         public void updateActivityViewToScreenMatrix(int bindSequence, float[] matrixValues) {
             mH.obtainMessage(MSG_UPDATE_ACTIVITY_VIEW_TO_SCREEN_MATRIX, bindSequence, 0,
                     matrixValues).sendToTarget();
+        }
+
+        @Override
+        public void setImeTraceEnabled(boolean enabled) {
+            ImeTracing.getInstance().setEnabled(enabled);
         }
     };
 
@@ -1652,6 +1671,7 @@ public final class InputMethodManager {
      * {@link #RESULT_HIDDEN}.
      */
     public boolean showSoftInput(View view, int flags, ResultReceiver resultReceiver) {
+        ImeTracing.getInstance().triggerDump();
         // Re-dispatch if there is a context mismatch.
         final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
         if (fallbackImm != null) {
@@ -1757,6 +1777,7 @@ public final class InputMethodManager {
      */
     public boolean hideSoftInputFromWindow(IBinder windowToken, int flags,
             ResultReceiver resultReceiver) {
+        ImeTracing.getInstance().triggerDump();
         checkFocus();
         synchronized (mH) {
             final View servedView = getServedViewLocked();
@@ -3108,6 +3129,10 @@ public final class InputMethodManager {
     }
 
     void doDump(FileDescriptor fd, PrintWriter fout, String[] args) {
+        if (processDump(fd, args)) {
+            return;
+        }
+
         final Printer p = new PrintWriterPrinter(fout);
         p.println("Input method client state for " + this + ":");
 
@@ -3201,5 +3226,75 @@ public final class InputMethodManager {
         sb.append(",hasImeFocus=" + view.hasImeFocus());
 
         return sb.toString();
+    }
+
+    /**
+     * Checks the args to see if a proto-based ime dump was requested and writes the client side
+     * ime dump to the given {@link FileDescriptor}.
+     *
+     * @return {@code true} if a proto-based ime dump was requested.
+     */
+    private boolean processDump(final FileDescriptor fd, final String[] args) {
+        if (args == null) {
+            return false;
+        }
+
+        for (String arg : args) {
+            if (arg.equals(PROTO_ARG)) {
+                final ProtoOutputStream proto = new ProtoOutputStream(fd);
+                dumpProto(proto);
+                proto.flush();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Write the proto dump for all displays associated with this client.
+     *
+     * @param proto The proto stream to which the dumps are written.
+     * @hide
+     */
+    public static void dumpProto(ProtoOutputStream proto) {
+        for (int i = sInstanceMap.size() - 1; i >= 0; i--) {
+            InputMethodManager imm = sInstanceMap.valueAt(i);
+            imm.dumpDebug(proto);
+        }
+    }
+
+    /**
+     * Write the proto dump of various client side components to the provided
+     * {@link ProtoOutputStream}.
+     *
+     * @param proto The proto stream to which the dumps are written.
+     * @hide
+     */
+    @GuardedBy("mH")
+    public void dumpDebug(ProtoOutputStream proto) {
+        if (mCurMethod == null) {
+            return;
+        }
+
+        final long clientDumpToken = proto.start(CLIENT);
+        proto.write(DISPLAY_ID, mDisplayId);
+        final long token = proto.start(INPUT_METHOD_MANAGER);
+        synchronized (mH) {
+            proto.write(CUR_ID, mCurId);
+            proto.write(FULLSCREEN_MODE, mFullscreenMode);
+            proto.write(ACTIVE, mActive);
+            proto.write(SERVED_CONNECTING, mServedConnecting);
+            proto.end(token);
+            if (mCurRootView != null) {
+                mCurRootView.dumpDebug(proto, VIEW_ROOT_IMPL);
+            }
+            if (mCurrentTextBoxAttribute != null) {
+                mCurrentTextBoxAttribute.dumpDebug(proto, EDITOR_INFO);
+            }
+            if (mImeInsetsConsumer != null) {
+                mImeInsetsConsumer.dumpDebug(proto, IME_INSETS_SOURCE_CONSUMER);
+            }
+        }
+        proto.end(clientDumpToken);
     }
 }

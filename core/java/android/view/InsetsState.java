@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.InsetsStateProto.DISPLAY_FRAME;
+import static android.view.InsetsStateProto.SOURCES;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
 import static android.view.WindowInsets.Type.MANDATORY_SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.SYSTEM_GESTURES;
@@ -41,6 +43,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
 import android.util.SparseIntArray;
+import android.util.proto.ProtoOutputStream;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
@@ -543,6 +546,16 @@ public class InsetsState implements Parcelable {
             if (source == null) continue;
             source.dump(prefix + "  ", pw);
         }
+    }
+
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        InsetsSource source = mSources[ITYPE_IME];
+        if (source != null) {
+            source.dumpDebug(proto, SOURCES);
+        }
+        mDisplayFrame.dumpDebug(proto, DISPLAY_FRAME);
+        proto.end(token);
     }
 
     public static String typeToString(@InternalInsetsType int type) {
