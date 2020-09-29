@@ -1552,6 +1552,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         startActivityAsUser(intent, UserHandle.CURRENT);
     }
 
+    private void toggleNotificationPanel() {
+        IStatusBarService statusBarService = getStatusBarService();
+        if (statusBarService != null) {
+            try {
+                statusBarService.togglePanel();
+            } catch (RemoteException e) {
+                // do nothing.
+            }
+        }
+    }
+
     private void showPictureInPictureMenu(KeyEvent event) {
         if (DEBUG_INPUT) Log.d(TAG, "showPictureInPictureMenu event=" + event);
         mHandler.removeMessages(MSG_SHOW_PICTURE_IN_PICTURE_MENU);
@@ -1696,14 +1707,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     launchAssistAction(null, deviceId);
                     break;
                 case LONG_PRESS_HOME_NOTIFICATION_PANEL:
-                    IStatusBarService statusBarService = getStatusBarService();
-                    if (statusBarService != null) {
-                        try {
-                            statusBarService.togglePanel();
-                        } catch (RemoteException e) {
-                            // do nothing.
-                        }
-                    }
+                    toggleNotificationPanel();
                     break;
                 default:
                     Log.w(TAG, "Undefined long press on home behavior: "
@@ -2805,6 +2809,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS);
                 msg.setAsynchronous(true);
                 msg.sendToTarget();
+            }
+            return -1;
+        } else if (keyCode == KeyEvent.KEYCODE_NOTIFICATION) {
+            if (!down) {
+                toggleNotificationPanel();
             }
             return -1;
         }

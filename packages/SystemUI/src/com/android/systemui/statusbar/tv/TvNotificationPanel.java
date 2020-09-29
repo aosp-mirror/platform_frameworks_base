@@ -58,6 +58,10 @@ public class TvNotificationPanel extends SystemUI implements CommandQueue.Callba
         if (!mNotificationHandlerPackage.isEmpty()) {
             startNotificationHandlerActivity(
                     new Intent(NotificationManager.ACTION_TOGGLE_NOTIFICATION_HANDLER_PANEL));
+        } else {
+            Log.w(TAG,
+                    "Not toggling notification panel: config_notificationHandlerPackage is "
+                            + "empty");
         }
     }
 
@@ -66,6 +70,10 @@ public class TvNotificationPanel extends SystemUI implements CommandQueue.Callba
         if (!mNotificationHandlerPackage.isEmpty()) {
             startNotificationHandlerActivity(
                     new Intent(NotificationManager.ACTION_OPEN_NOTIFICATION_HANDLER_PANEL));
+        } else {
+            Log.w(TAG,
+                    "Not expanding notification panel: config_notificationHandlerPackage is "
+                            + "empty");
         }
     }
 
@@ -77,6 +85,9 @@ public class TvNotificationPanel extends SystemUI implements CommandQueue.Callba
                     NotificationManager.ACTION_CLOSE_NOTIFICATION_HANDLER_PANEL);
             closeNotificationIntent.setPackage(mNotificationHandlerPackage);
             mContext.sendBroadcastAsUser(closeNotificationIntent, UserHandle.CURRENT);
+        } else {
+            Log.w(TAG,
+                    "Not closing notification panel: config_notificationHandlerPackage is empty");
         }
     }
 
