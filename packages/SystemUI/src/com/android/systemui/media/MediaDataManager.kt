@@ -501,8 +501,13 @@ class MediaDataManager(
                 } else {
                     null
                 }
+                val mediaActionIcon = if (action.getIcon()?.getType() == Icon.TYPE_RESOURCE) {
+                    Icon.createWithResource(packageContext, action.getIcon()!!.getResId())
+                } else {
+                    action.getIcon()
+                }
                 val mediaAction = MediaAction(
-                        action.getIcon().loadDrawable(packageContext),
+                        mediaActionIcon,
                         runnable,
                         action.title)
                 actionIcons.add(mediaAction)
@@ -612,7 +617,7 @@ class MediaDataManager(
 
     private fun getResumeMediaAction(action: Runnable): MediaAction {
         return MediaAction(
-            context.getDrawable(R.drawable.lb_ic_play),
+            Icon.createWithResource(context, R.drawable.lb_ic_play),
             action,
             context.getString(R.string.controls_media_resume)
         )
