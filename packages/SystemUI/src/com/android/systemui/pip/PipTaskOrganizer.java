@@ -262,10 +262,10 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
 
         if (!PipUtils.hasSystemFeature(context)) {
             Log.w(TAG, "Device not support PIP feature");
-            return;
+        } else {
+            mTaskOrganizer.addListener(this, WINDOWING_MODE_PINNED);
+            displayController.addDisplayWindowListener(this);
         }
-        mTaskOrganizer.addListener(this, WINDOWING_MODE_PINNED);
-        displayController.addDisplayWindowListener(this);
     }
 
     public Handler getUpdateHandler() {
