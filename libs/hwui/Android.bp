@@ -327,6 +327,7 @@ cc_defaults {
         "jni/PathMeasure.cpp",
         "jni/Picture.cpp",
         "jni/Shader.cpp",
+        "jni/RenderEffect.cpp",
         "jni/Typeface.cpp",
         "jni/Utils.cpp",
         "jni/YuvToJpegEncoder.cpp",

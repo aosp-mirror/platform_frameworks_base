@@ -18,11 +18,12 @@ package com.android.test.hwui;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.BlurShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
+import android.graphics.RenderEffect;
+import android.graphics.RenderNode;
 import android.graphics.Shader;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -51,16 +52,27 @@ public class BlurActivity extends Activity {
     }
 
     public static class BlurGradientView extends View {
-        private BlurShader mBlurShader = null;
-        private Paint mPaint;
+        private final float mBlurRadius = 25f;
+        private final Paint mPaint;
+        private final RenderNode mRenderNode;
 
         public BlurGradientView(Context c) {
             super(c);
+            mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            mRenderNode = new RenderNode("BlurGradientView");
+            mRenderNode.setRenderEffect(
+                    RenderEffect.createBlurEffect(
+                            mBlurRadius,
+                            mBlurRadius,
+                            null,
+                            Shader.TileMode.DECAL
+                    )
+            );
         }
 
         @Override
         protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-            if (changed || mBlurShader == null) {
+            if (changed) {
                 LinearGradient gradient = new LinearGradient(
                         0f,
                         0f,
@@ -70,41 +82,81 @@ public class BlurActivity extends Activity {
                         Color.YELLOW,
                         Shader.TileMode.CLAMP
                 );
-                mBlurShader = new BlurShader(30f, 40f, gradient);
-                mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                mPaint.setShader(mBlurShader);
+
+                mPaint.setShader(gradient);
+
+                final int width = right - left;
+                final int height = bottom - top;
+                mRenderNode.setPosition(0, 0, width, height);
+
+                Canvas canvas = mRenderNode.beginRecording();
+                canvas.drawRect(
+                        mBlurRadius * 2,
+                        mBlurRadius * 2,
+                        width - mBlurRadius * 2,
+                        height - mBlurRadius * 2,
+                        mPaint
+                );
+                mRenderNode.endRecording();
             }
         }
 
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-            canvas.drawRect(0, 0, getWidth(), getHeight(), mPaint);
+            canvas.drawRenderNode(mRenderNode);
         }
     }
 
     public static class BlurView extends View {
 
-        private final BlurShader mBlurShader;
         private final Paint mPaint;
+        private final RenderNode mRenderNode;
+        private final float mBlurRadius = 20f;
 
         public BlurView(Context c) {
             super(c);
 
-            mBlurShader = new BlurShader(20f, 20f, null);
             mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            mPaint.setShader(mBlurShader);
+            mRenderNode = new RenderNode("blurNode");
+            mRenderNode.setRenderEffect(
+                    RenderEffect.createBlurEffect(
+                            mBlurRadius,
+                            mBlurRadius,
+                            null,
+                            Shader.TileMode.DECAL
+                    )
+            );
+        }
+
+        @Override
+        protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+            if (changed) {
+                int width = right - left;
+                int height = bottom - top;
+                mRenderNode.setPosition(0, 0, width, height);
+                Canvas canvas = mRenderNode.beginRecording(width, height);
+                mPaint.setColor(Color.BLUE);
+
+                canvas.drawRect(
+                        mBlurRadius * 2,
+                        mBlurRadius * 2,
+                        width - mBlurRadius * 2,
+                        height - mBlurRadius * 2,
+                        mPaint
+                );
+
+                mPaint.setColor(Color.RED);
+                canvas.drawCircle((right - left) / 2f, (bottom - top) / 2f, 50f, mPaint);
+
+                mRenderNode.endRecording();
+            }
         }
 
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-
-            mPaint.setColor(Color.BLUE);
-            canvas.drawRect(0, 0, getWidth(), getHeight(), mPaint);
-
-            mPaint.setColor(Color.RED);
-            canvas.drawCircle(getWidth() / 2f, getHeight() / 2f, 50f, mPaint);
+            canvas.drawRenderNode(mRenderNode);
         }
     }
 }
