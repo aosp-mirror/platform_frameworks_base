@@ -239,9 +239,14 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             throw new RuntimeException("Callers should call scheduleOffset() instead of this "
                     + "directly");
         }
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
         mDisplayAreaMap.forEach(
-                (key, leash) -> animateWindows(leash, fromBounds, toBounds, direction,
-                        durationMs));
+                (key, leash) -> {
+                    animateWindows(leash, fromBounds, toBounds, direction,
+                            durationMs);
+                    wct.setBounds(key.token, toBounds);
+                });
+        applyTransaction(wct);
     }
 
     private void resetWindowsOffset() {
