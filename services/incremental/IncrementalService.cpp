@@ -1468,7 +1468,7 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
     // Need a shared pointer: will be passing it into all unpacking jobs.
     std::shared_ptr<ZipArchive> zipFile(zipFileHandle, [](ZipArchiveHandle h) { CloseArchive(h); });
     void* cookie = nullptr;
-    const auto libFilePrefix = path::join(constants().libDir, abi);
+    const auto libFilePrefix = path::join(constants().libDir, abi) + "/";
     if (StartIteration(zipFile.get(), &cookie, libFilePrefix, constants().libSuffix)) {
         LOG(ERROR) << "Failed to start zip iteration for " << apkFullPath;
         return false;
