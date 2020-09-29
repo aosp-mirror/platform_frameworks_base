@@ -161,6 +161,7 @@ import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.IActivityController;
+import android.app.PictureInPictureParams;
 import android.app.RemoteAction;
 import android.app.ResultInfo;
 import android.app.TaskInfo;
@@ -4059,15 +4060,18 @@ class Task extends WindowContainer<WindowContainer> {
         info.topActivityType = top.getActivityType();
         info.isResizeable = isResizeable();
 
-        ActivityRecord rootActivity = top.getRootActivity();
-        if (rootActivity == null || rootActivity.pictureInPictureArgs.empty()) {
-            info.pictureInPictureParams = null;
-        } else {
-            info.pictureInPictureParams = rootActivity.pictureInPictureArgs;
-        }
+        info.pictureInPictureParams = getPictureInPictureParams();
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
+    }
+
+    @Nullable PictureInPictureParams getPictureInPictureParams() {
+        final Task top = getTopMostTask();
+        if (top == null) return null;
+        final ActivityRecord rootActivity = top.getRootActivity();
+        return (rootActivity == null || rootActivity.pictureInPictureArgs.empty())
+                ? null : rootActivity.pictureInPictureArgs;
     }
 
     /**
