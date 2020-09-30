@@ -242,4 +242,10 @@ oneway interface IStatusBar
      * @param connect {@code true} if needs connection, otherwise set the connection to null.
      */
     void requestWindowMagnificationConnection(boolean connect);
+
+    /**
+     * Allow for pass-through arguments from `adb shell cmd statusbar <args>`, and write to the
+     * file descriptor passed in.
+     */
+     void passThroughShellCommand(in String[] args, in ParcelFileDescriptor pfd);
 }

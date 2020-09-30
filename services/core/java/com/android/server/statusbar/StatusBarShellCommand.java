@@ -46,7 +46,8 @@ public class StatusBarShellCommand extends ShellCommand {
     @Override
     public int onCommand(String cmd) {
         if (cmd == null) {
-            return handleDefaultCommands(cmd);
+            onHelp();
+            return 1;
         }
         try {
             switch (cmd) {
@@ -74,8 +75,16 @@ public class StatusBarShellCommand extends ShellCommand {
                     return runSendDisableFlag();
                 case "tracing":
                     return runTracing();
+                // Handle everything that would be handled in `handleDefaultCommand()` explicitly,
+                // so the default can be to pass all args to StatusBar
+                case "-h":
+                case "help":
+                    onHelp();
+                    return 0;
+                case "dump":
+                    return super.handleDefaultCommands(cmd);
                 default:
-                    return handleDefaultCommands(cmd);
+                    return runPassArgsToStatusBar();
             }
         } catch (RemoteException e) {
             final PrintWriter pw = getOutPrintWriter();
@@ -187,6 +196,11 @@ public class StatusBarShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runPassArgsToStatusBar() {
+        mInterface.passThroughShellCommand(getAllArgs(), getOutFileDescriptor());
+        return 0;
+    }
+
     private int runTracing() {
         switch (getNextArg()) {
             case "start":
@@ -250,6 +264,12 @@ public class StatusBarShellCommand extends ShellCommand {
         pw.println("  tracing (start | stop)");
         pw.println("    Start or stop SystemUI tracing");
         pw.println("");
+        pw.println("  NOTE: any command not listed here will be passed through to IStatusBar");
+        pw.println("");
+        pw.println("  Commands implemented in SystemUI:");
+        pw.flush();
+        // Sending null args to systemui will print help
+        mInterface.passThroughShellCommand(new String[] {}, getOutFileDescriptor());
     }
 
     /**
