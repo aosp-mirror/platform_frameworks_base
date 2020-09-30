@@ -25,12 +25,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.PointF;
 import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -1075,6 +1075,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mVisualMarginStart = visualMarginStart;
         mVisualMarginEnd = visualMarginEnd;
         updateTileLayoutMargins();
+    }
+
+    public Pair<Integer, Integer> getVisualSideMargins() {
+        return new Pair(mVisualMarginStart, mUsingHorizontalLayout ? 0 : mVisualMarginEnd);
     }
 
     private void updateTileLayoutMargins() {

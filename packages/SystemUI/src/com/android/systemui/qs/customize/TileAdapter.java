@@ -18,6 +18,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -75,6 +76,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private final List<TileInfo> mTiles = new ArrayList<>();
     private final ItemTouchHelper mItemTouchHelper;
     private final ItemDecoration mDecoration;
+    private final MarginTileDecoration mMarginDecoration;
     private final int mMinNumTiles;
     private int mEditIndex;
     private int mTileDividerIndex;
@@ -97,6 +99,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mUiEventLogger = uiEventLogger;
         mItemTouchHelper = new ItemTouchHelper(mCallbacks);
         mDecoration = new TileItemDecoration(context);
+        mMarginDecoration = new MarginTileDecoration();
         mMinNumTiles = context.getResources().getInteger(R.integer.quick_settings_min_num_tiles);
         mAccessibilityDelegate = new TileAdapterDelegate();
     }
@@ -121,6 +124,14 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     public ItemDecoration getItemDecoration() {
         return mDecoration;
+    }
+
+    public ItemDecoration getMarginItemDecoration() {
+        return mMarginDecoration;
+    }
+
+    public void changeHalfMargin(int halfMargin) {
+        mMarginDecoration.setHalfMargin(halfMargin);
     }
 
     public void saveSpecs(QSTileHost host) {
@@ -596,7 +607,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             mDrawable = context.getDrawable(R.drawable.qs_customize_tile_decoration);
         }
 
-
         @Override
         public void onDraw(Canvas c, RecyclerView parent, State state) {
             super.onDraw(c, parent, state);
@@ -620,6 +630,25 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                 mDrawable.setBounds(0, top, width, bottom);
                 mDrawable.draw(c);
                 break;
+            }
+        }
+    }
+
+    private static class MarginTileDecoration extends ItemDecoration {
+        private int mHalfMargin;
+
+        public void setHalfMargin(int halfMargin) {
+            mHalfMargin = halfMargin;
+        }
+
+        @Override
+        public void getItemOffsets(@NonNull Rect outRect, @NonNull View view,
+                @NonNull RecyclerView parent, @NonNull State state) {
+            if (view instanceof TextView) {
+                super.getItemOffsets(outRect, view, parent, state);
+            } else {
+                outRect.left = mHalfMargin;
+                outRect.right = mHalfMargin;
             }
         }
     }
