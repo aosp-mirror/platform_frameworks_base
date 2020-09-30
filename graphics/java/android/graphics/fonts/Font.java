@@ -26,8 +26,11 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
+import android.util.LongSparseArray;
 import android.util.TypedValue;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
 import dalvik.annotation.optimization.CriticalNative;
@@ -40,6 +43,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
@@ -55,6 +59,15 @@ public final class Font {
     private static final int NOT_SPECIFIED = -1;
     private static final int STYLE_ITALIC = 1;
     private static final int STYLE_NORMAL = 0;
+
+    private static final Object MAP_LOCK = new Object();
+    // We need to have mapping from native ptr to Font object for later accessing from TextShape
+    // result since Typeface doesn't have reference to Font object and it is not always created from
+    // Font object. Sometimes Typeface is created in native layer only and there might not be Font
+    // object in Java layer. So, if not found in this cache, create new Font object for API user.
+    @GuardedBy("MAP_LOCK")
+    private static final LongSparseArray<WeakReference<Font>> FONT_PTR_MAP =
+            new LongSparseArray<>();
 
     /**
      * A builder class for creating new Font.
@@ -501,6 +514,10 @@ public final class Font {
         mTtcIndex = ttcIndex;
         mAxes = axes;
         mLocaleList = localeList;
+
+        synchronized (MAP_LOCK) {
+            FONT_PTR_MAP.append(mNativePtr, new WeakReference<>(this));
+        }
     }
 
     /**
@@ -636,6 +653,63 @@ public final class Font {
             + ", buffer=" + mBuffer
             + "}";
     }
+
+    /**
+     * Lookup Font object from native pointer or create new one if not found.
+     * @hide
+     */
+    public static Font findOrCreateFontFromNativePtr(long ptr) {
+        // First, lookup from known mapps.
+        synchronized (MAP_LOCK) {
+            WeakReference<Font> fontRef = FONT_PTR_MAP.get(ptr);
+            if (fontRef != null) {
+                Font font = fontRef.get();
+                if (font != null) {
+                    return font;
+                }
+            }
+
+            // If not found, create Font object from native object for Java API users.
+            ByteBuffer buffer = NativeFontBufferHelper.refByteBuffer(ptr);
+            long packed = nGetFontInfo(ptr);
+            int weight = (int) (packed & 0x0000_0000_0000_FFFFL);
+            boolean italic = (packed & 0x0000_0000_0001_0000L) != 0;
+            int ttcIndex = (int) ((packed & 0x0000_FFFF_0000_0000L) >> 32);
+            int axisCount = (int) ((packed & 0xFFFF_0000_0000_0000L) >> 48);
+            FontVariationAxis[] axes = new FontVariationAxis[axisCount];
+            char[] charBuffer = new char[4];
+            for (int i = 0; i < axisCount; ++i) {
+                long packedAxis = nGetAxisInfo(ptr, i);
+                float value = Float.intBitsToFloat((int) (packedAxis & 0x0000_0000_FFFF_FFFFL));
+                charBuffer[0] = (char) ((packedAxis & 0xFF00_0000_0000_0000L) >> 56);
+                charBuffer[1] = (char) ((packedAxis & 0x00FF_0000_0000_0000L) >> 48);
+                charBuffer[2] = (char) ((packedAxis & 0x0000_FF00_0000_0000L) >> 40);
+                charBuffer[3] = (char) ((packedAxis & 0x0000_00FF_0000_0000L) >> 32);
+                axes[i] = new FontVariationAxis(new String(charBuffer), value);
+            }
+            Font.Builder builder = new Font.Builder(buffer)
+                    .setWeight(weight)
+                    .setSlant(italic ? FontStyle.FONT_SLANT_ITALIC : FontStyle.FONT_SLANT_UPRIGHT)
+                    .setTtcIndex(ttcIndex)
+                    .setFontVariationSettings(axes);
+
+            Font newFont = null;
+            try {
+                newFont = builder.build();
+                FONT_PTR_MAP.append(ptr, new WeakReference<>(newFont));
+            } catch (IOException e) {
+                // This must not happen since the buffer was already created once.
+                Log.e("Font", "Failed to create font object from existing buffer.", e);
+            }
+            return newFont;
+        }
+    }
+
+    @CriticalNative
+    private static native long nGetFontInfo(long ptr);
+
+    @CriticalNative
+    private static native long nGetAxisInfo(long ptr, int i);
 
     @FastNative
     private static native float nGetGlyphBounds(long font, int glyphId, long paint, RectF rect);

@@ -198,6 +198,59 @@ static jfloat Font_getFontMetrics(JNIEnv* env, jobject, jlong fontHandle, jlong 
     return spacing;
 }
 
+// Critical Native
+static jlong Font_getFontInfo(CRITICAL_JNI_PARAMS_COMMA jlong fontHandle) {
+    FontWrapper* font = reinterpret_cast<FontWrapper*>(fontHandle);
+    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->font.typeface().get());
+
+    uint64_t result = font->font.style().weight();
+    result |= font->font.style().slant() == minikin::FontStyle::Slant::ITALIC ? 0x10000 : 0x00000;
+    result |= ((static_cast<uint64_t>(minikinSkia->GetFontIndex())) << 32);
+    result |= ((static_cast<uint64_t>(minikinSkia->GetAxes().size())) << 48);
+    return result;
+}
+
+// Critical Native
+static jlong Font_getAxisInfo(CRITICAL_JNI_PARAMS_COMMA jlong fontHandle, jint index) {
+    FontWrapper* font = reinterpret_cast<FontWrapper*>(fontHandle);
+    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->font.typeface().get());
+    const minikin::FontVariation& var = minikinSkia->GetAxes().at(index);
+    uint32_t floatBinary = *reinterpret_cast<const uint32_t*>(&var.value);
+    return (static_cast<uint64_t>(var.axisTag) << 32) | static_cast<uint64_t>(floatBinary);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+struct FontBufferWrapper {
+    FontBufferWrapper(const std::shared_ptr<minikin::MinikinFont>& font) : minikinFont(font) {}
+    // MinikinFont holds a shared pointer of SkTypeface which has reference to font data.
+    std::shared_ptr<minikin::MinikinFont> minikinFont;
+};
+
+static void unrefBuffer(jlong nativePtr) {
+    FontBufferWrapper* wrapper = reinterpret_cast<FontBufferWrapper*>(nativePtr);
+    delete wrapper;
+}
+
+// Critical Native
+static jlong FontBufferHelper_refFontBuffer(CRITICAL_JNI_PARAMS_COMMA jlong fontHandle) {
+    FontWrapper* font = reinterpret_cast<FontWrapper*>(fontHandle);
+    return reinterpret_cast<jlong>(new FontBufferWrapper(font->font.typeface()));
+}
+
+// Fast Native
+static jobject FontBufferHelper_wrapByteBuffer(JNIEnv* env, jobject, jlong nativePtr) {
+    FontBufferWrapper* wrapper = reinterpret_cast<FontBufferWrapper*>(nativePtr);
+    return env->NewDirectByteBuffer(
+        const_cast<void*>(wrapper->minikinFont->GetFontData()),
+        wrapper->minikinFont->GetFontSize());
+}
+
+// Critical Native
+static jlong FontBufferHelper_getReleaseFunc(CRITICAL_JNI_PARAMS) {
+    return reinterpret_cast<jlong>(unrefBuffer);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gFontBuilderMethods[] = {
@@ -211,13 +264,23 @@ static const JNINativeMethod gFontBuilderMethods[] = {
 static const JNINativeMethod gFontMethods[] = {
     { "nGetGlyphBounds", "(JIJLandroid/graphics/RectF;)F", (void*) Font_getGlyphBounds },
     { "nGetFontMetrics", "(JJLandroid/graphics/Paint$FontMetrics;)F", (void*) Font_getFontMetrics },
+    { "nGetFontInfo", "(J)J", (void*) Font_getFontInfo },
+    { "nGetAxisInfo", "(JI)J", (void*) Font_getAxisInfo },
+};
+
+static const JNINativeMethod gFontBufferHelperMethods[] = {
+    { "nRefFontBuffer", "(J)J", (void*) FontBufferHelper_refFontBuffer },
+    { "nWrapByteBuffer", "(J)Ljava/nio/ByteBuffer;", (void*) FontBufferHelper_wrapByteBuffer },
+    { "nGetReleaseFunc", "()J", (void*) FontBufferHelper_getReleaseFunc },
 };
 
 int register_android_graphics_fonts_Font(JNIEnv* env) {
     return RegisterMethodsOrDie(env, "android/graphics/fonts/Font$Builder", gFontBuilderMethods,
             NELEM(gFontBuilderMethods)) +
             RegisterMethodsOrDie(env, "android/graphics/fonts/Font", gFontMethods,
-            NELEM(gFontMethods));
+            NELEM(gFontMethods)) +
+            RegisterMethodsOrDie(env, "android/graphics/fonts/NativeFontBufferHelper",
+            gFontBufferHelperMethods, NELEM(gFontBufferHelperMethods));
 }
 
 }
