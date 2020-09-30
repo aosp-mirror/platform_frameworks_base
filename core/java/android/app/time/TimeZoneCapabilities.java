@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package android.app.timezonedetector;
-
-import static android.app.timezonedetector.TimeZoneConfiguration.SETTING_AUTO_DETECTION_ENABLED;
-import static android.app.timezonedetector.TimeZoneConfiguration.SETTING_GEO_DETECTION_ENABLED;
+package android.app.time;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.timezonedetector.ManualTimeZoneSuggestion;
+import android.app.timezonedetector.TimeZoneDetector;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -42,15 +42,18 @@ import java.util.Objects;
  * <p>Actions have associated methods, see the documentation for each action for details.
  *
  * <p>For configuration settings capabilities, the associated settings value can be found via
- * {@link #getConfiguration()} and may be changed using {@link
- * TimeZoneDetector#updateConfiguration(TimeZoneConfiguration)} (if the user's capabilities allow).
+ * {@link TimeManager#getTimeZoneCapabilitiesAndConfig()} and may be changed using {@link
+ * TimeManager#updateTimeZoneConfiguration(TimeZoneConfiguration)} (if the user's capabilities
+ * allow).
  *
  * <p>Note: Capabilities are independent of app permissions required to call the associated APIs.
  *
  * @hide
  */
+// @SystemApi
 public final class TimeZoneCapabilities implements Parcelable {
 
+    /** @hide */
     @IntDef({ CAPABILITY_NOT_SUPPORTED, CAPABILITY_NOT_ALLOWED, CAPABILITY_NOT_APPLICABLE,
             CAPABILITY_POSSESSED })
     @Retention(RetentionPolicy.SOURCE)
@@ -94,64 +97,60 @@ public final class TimeZoneCapabilities implements Parcelable {
                 }
             };
 
-
-    @NonNull private final TimeZoneConfiguration mConfiguration;
-    private final @CapabilityState int mConfigureAutoDetectionEnabled;
-    private final @CapabilityState int mConfigureGeoDetectionEnabled;
-    private final @CapabilityState int mSuggestManualTimeZone;
+    /**
+     * The user the capabilities are for. This is used for object equality and debugging but there
+     * is no accessor.
+     */
+    @NonNull private final UserHandle mUserHandle;
+    private final @CapabilityState int mConfigureAutoDetectionEnabledCapability;
+    private final @CapabilityState int mConfigureGeoDetectionEnabledCapability;
+    private final @CapabilityState int mSuggestManualTimeZoneCapability;
 
     private TimeZoneCapabilities(@NonNull Builder builder) {
-        this.mConfiguration = Objects.requireNonNull(builder.mConfiguration);
-        this.mConfigureAutoDetectionEnabled = builder.mConfigureAutoDetectionEnabled;
-        this.mConfigureGeoDetectionEnabled = builder.mConfigureGeoDetectionEnabled;
-        this.mSuggestManualTimeZone = builder.mSuggestManualTimeZone;
+        this.mUserHandle = Objects.requireNonNull(builder.mUserHandle);
+        this.mConfigureAutoDetectionEnabledCapability =
+                builder.mConfigureAutoDetectionEnabledCapability;
+        this.mConfigureGeoDetectionEnabledCapability =
+                builder.mConfigureGeoDetectionEnabledCapability;
+        this.mSuggestManualTimeZoneCapability = builder.mSuggestManualTimeZoneCapability;
     }
 
     @NonNull
     private static TimeZoneCapabilities createFromParcel(Parcel in) {
-        return new TimeZoneCapabilities.Builder()
-                .setConfiguration(in.readParcelable(null))
-                .setConfigureAutoDetectionEnabled(in.readInt())
-                .setConfigureGeoDetectionEnabled(in.readInt())
-                .setSuggestManualTimeZone(in.readInt())
+        UserHandle userHandle = UserHandle.readFromParcel(in);
+        return new TimeZoneCapabilities.Builder(userHandle)
+                .setConfigureAutoDetectionEnabledCapability(in.readInt())
+                .setConfigureGeoDetectionEnabledCapability(in.readInt())
+                .setSuggestManualTimeZoneCapability(in.readInt())
                 .build();
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeParcelable(mConfiguration, flags);
-        dest.writeInt(mConfigureAutoDetectionEnabled);
-        dest.writeInt(mConfigureGeoDetectionEnabled);
-        dest.writeInt(mSuggestManualTimeZone);
-    }
-
-    /**
-     * Returns the user's time zone behavior configuration.
-     */
-    public @NonNull TimeZoneConfiguration getConfiguration() {
-        return mConfiguration;
+        UserHandle.writeToParcel(mUserHandle, dest);
+        dest.writeInt(mConfigureAutoDetectionEnabledCapability);
+        dest.writeInt(mConfigureGeoDetectionEnabledCapability);
+        dest.writeInt(mSuggestManualTimeZoneCapability);
     }
 
     /**
      * Returns the capability state associated with the user's ability to modify the automatic time
      * zone detection setting. The setting can be updated via {@link
-     * TimeZoneDetector#updateConfiguration(TimeZoneConfiguration)} and accessed via {@link
-     * #getConfiguration()}.
+     * TimeManager#updateTimeZoneConfiguration(TimeZoneConfiguration)}.
      */
     @CapabilityState
-    public int getConfigureAutoDetectionEnabled() {
-        return mConfigureAutoDetectionEnabled;
+    public int getConfigureAutoDetectionEnabledCapability() {
+        return mConfigureAutoDetectionEnabledCapability;
     }
 
     /**
      * Returns the capability state associated with the user's ability to modify the geolocation
      * detection setting. The setting can be updated via {@link
-     * TimeZoneDetector#updateConfiguration(TimeZoneConfiguration)} and accessed via {@link
-     * #getConfiguration()}.
+     * TimeManager#updateTimeZoneConfiguration(TimeZoneConfiguration)}.
      */
     @CapabilityState
-    public int getConfigureGeoDetectionEnabled() {
-        return mConfigureGeoDetectionEnabled;
+    public int getConfigureGeoDetectionEnabledCapability() {
+        return mConfigureGeoDetectionEnabledCapability;
     }
 
     /**
@@ -160,36 +159,37 @@ public final class TimeZoneCapabilities implements Parcelable {
      *
      * <p>The suggestion will be ignored in all cases unless the value is {@link
      * #CAPABILITY_POSSESSED}. See also {@link TimeZoneConfiguration#isAutoDetectionEnabled()}.
+     *
+     * @hide
      */
     @CapabilityState
-    public int getSuggestManualTimeZone() {
-        return mSuggestManualTimeZone;
+    public int getSuggestManualTimeZoneCapability() {
+        return mSuggestManualTimeZoneCapability;
     }
 
     /**
-     * Constructs a new {@link TimeZoneConfiguration} from an {@code oldConfiguration} and a set of
-     * {@code requestedChanges}, if the current capabilities allow. The new configuration is
-     * returned and the capabilities are left unchanged. If the capabilities do not permit one or
-     * more of the changes then {@code null} is returned.
+     * Tries to create a new {@link TimeZoneConfiguration} from the {@code config} and the set of
+     * {@code requestedChanges}, if {@code this} capabilities allow. The new configuration is
+     * returned. If the capabilities do not permit one or more of the requested changes then {@code
+     * null} is returned.
+     *
+     * @hide
      */
     @Nullable
-    public TimeZoneConfiguration applyUpdate(TimeZoneConfiguration requestedChanges) {
-        if (requestedChanges.getUserId() != mConfiguration.getUserId()) {
-            throw new IllegalArgumentException("User does not match:"
-                    + " this=" + mConfiguration + ", other=" + requestedChanges);
-        }
-
+    public TimeZoneConfiguration tryApplyConfigChanges(
+            @NonNull TimeZoneConfiguration config,
+            @NonNull TimeZoneConfiguration requestedChanges) {
         TimeZoneConfiguration.Builder newConfigBuilder =
-                new TimeZoneConfiguration.Builder(mConfiguration);
-        if (requestedChanges.hasSetting(SETTING_AUTO_DETECTION_ENABLED)) {
-            if (getConfigureAutoDetectionEnabled() < CAPABILITY_NOT_APPLICABLE) {
+                new TimeZoneConfiguration.Builder(config);
+        if (requestedChanges.hasIsAutoDetectionEnabled()) {
+            if (this.getConfigureAutoDetectionEnabledCapability() < CAPABILITY_NOT_APPLICABLE) {
                 return null;
             }
             newConfigBuilder.setAutoDetectionEnabled(requestedChanges.isAutoDetectionEnabled());
         }
 
-        if (requestedChanges.hasSetting(SETTING_GEO_DETECTION_ENABLED)) {
-            if (getConfigureGeoDetectionEnabled() < CAPABILITY_NOT_APPLICABLE) {
+        if (requestedChanges.hasIsGeoDetectionEnabled()) {
+            if (this.getConfigureGeoDetectionEnabledCapability() < CAPABILITY_NOT_APPLICABLE) {
                 return null;
             }
             newConfigBuilder.setGeoDetectionEnabled(requestedChanges.isGeoDetectionEnabled());
@@ -212,71 +212,71 @@ public final class TimeZoneCapabilities implements Parcelable {
             return false;
         }
         TimeZoneCapabilities that = (TimeZoneCapabilities) o;
-        return Objects.equals(mConfiguration, that.mConfiguration)
-                && mConfigureAutoDetectionEnabled == that.mConfigureAutoDetectionEnabled
-                && mConfigureGeoDetectionEnabled == that.mConfigureGeoDetectionEnabled
-                && mSuggestManualTimeZone == that.mSuggestManualTimeZone;
+        return mUserHandle.equals(that.mUserHandle)
+                && mConfigureAutoDetectionEnabledCapability
+                == that.mConfigureAutoDetectionEnabledCapability
+                && mConfigureGeoDetectionEnabledCapability
+                == that.mConfigureGeoDetectionEnabledCapability
+                && mSuggestManualTimeZoneCapability == that.mSuggestManualTimeZoneCapability;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mConfiguration,
-                mConfigureAutoDetectionEnabled,
-                mConfigureGeoDetectionEnabled,
-                mSuggestManualTimeZone);
+        return Objects.hash(mUserHandle, mConfigureAutoDetectionEnabledCapability,
+                mConfigureGeoDetectionEnabledCapability, mSuggestManualTimeZoneCapability);
     }
 
     @Override
     public String toString() {
         return "TimeZoneDetectorCapabilities{"
-                + "mConfiguration=" + mConfiguration
-                + ", mConfigureAutomaticDetectionEnabled=" + mConfigureAutoDetectionEnabled
-                + ", mConfigureGeoDetectionEnabled=" + mConfigureGeoDetectionEnabled
-                + ", mSuggestManualTimeZone=" + mSuggestManualTimeZone
+                + "mUserHandle=" + mUserHandle
+                + ", mConfigureAutoDetectionEnabledCapability="
+                + mConfigureAutoDetectionEnabledCapability
+                + ", mConfigureGeoDetectionEnabledCapability="
+                + mConfigureGeoDetectionEnabledCapability
+                + ", mSuggestManualTimeZoneCapability=" + mSuggestManualTimeZoneCapability
                 + '}';
     }
 
     /** @hide */
     public static class Builder {
 
-        private TimeZoneConfiguration mConfiguration;
-        private @CapabilityState int mConfigureAutoDetectionEnabled;
-        private @CapabilityState int mConfigureGeoDetectionEnabled;
-        private @CapabilityState int mSuggestManualTimeZone;
+        @NonNull private UserHandle mUserHandle;
+        private @CapabilityState int mConfigureAutoDetectionEnabledCapability;
+        private @CapabilityState int mConfigureGeoDetectionEnabledCapability;
+        private @CapabilityState int mSuggestManualTimeZoneCapability;
 
-        /** Sets the user-visible configuration settings. */
-        public Builder setConfiguration(@NonNull TimeZoneConfiguration configuration) {
-            if (!configuration.isComplete()) {
-                throw new IllegalArgumentException(configuration + " is not complete");
-            }
-            this.mConfiguration = configuration;
-            return this;
+        public Builder(@NonNull UserHandle userHandle) {
+            mUserHandle = Objects.requireNonNull(userHandle);
         }
 
         /** Sets the state for the automatic time zone detection enabled config. */
-        public Builder setConfigureAutoDetectionEnabled(@CapabilityState int value) {
-            this.mConfigureAutoDetectionEnabled = value;
+        public Builder setConfigureAutoDetectionEnabledCapability(@CapabilityState int value) {
+            this.mConfigureAutoDetectionEnabledCapability = value;
             return this;
         }
 
         /** Sets the state for the geolocation time zone detection enabled config. */
-        public Builder setConfigureGeoDetectionEnabled(@CapabilityState int value) {
-            this.mConfigureGeoDetectionEnabled = value;
+        public Builder setConfigureGeoDetectionEnabledCapability(@CapabilityState int value) {
+            this.mConfigureGeoDetectionEnabledCapability = value;
             return this;
         }
 
         /** Sets the state for the suggestManualTimeZone action. */
-        public Builder setSuggestManualTimeZone(@CapabilityState int value) {
-            this.mSuggestManualTimeZone = value;
+        public Builder setSuggestManualTimeZoneCapability(@CapabilityState int value) {
+            this.mSuggestManualTimeZoneCapability = value;
             return this;
         }
 
         /** Returns the {@link TimeZoneCapabilities}. */
         @NonNull
         public TimeZoneCapabilities build() {
-            verifyCapabilitySet(mConfigureAutoDetectionEnabled, "configureAutoDetectionEnabled");
-            verifyCapabilitySet(mConfigureGeoDetectionEnabled, "configureGeoDetectionEnabled");
-            verifyCapabilitySet(mSuggestManualTimeZone, "suggestManualTimeZone");
+            verifyCapabilitySet(mConfigureAutoDetectionEnabledCapability,
+                    "configureAutoDetectionEnabledCapability");
+            verifyCapabilitySet(mConfigureGeoDetectionEnabledCapability,
+                    "configureGeoDetectionEnabledCapability");
+            verifyCapabilitySet(mSuggestManualTimeZoneCapability,
+                    "suggestManualTimeZoneCapability");
             return new TimeZoneCapabilities(this);
         }
 

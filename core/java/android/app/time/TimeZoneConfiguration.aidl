@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-package android.app.timezonedetector;
+package android.app.time;
 
-import android.app.timezonedetector.TimeZoneConfiguration;
-
-/** {@hide} */
-oneway interface ITimeZoneConfigurationListener {
-    void onChange();
-}
+parcelable TimeZoneConfiguration;

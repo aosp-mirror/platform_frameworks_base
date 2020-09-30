@@ -15,20 +15,21 @@
  */
 package com.android.server.timezonedetector;
 
+import static android.app.time.TimeZoneCapabilities.CAPABILITY_POSSESSED;
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.MATCH_TYPE_EMULATOR_ZONE_ID;
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.MATCH_TYPE_TEST_NETWORK_OFFSET_ONLY;
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_MULTIPLE_ZONES_WITH_DIFFERENT_OFFSETS;
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET;
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_SINGLE_ZONE;
-import static android.app.timezonedetector.TimeZoneCapabilities.CAPABILITY_POSSESSED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.time.TimeZoneCapabilities;
+import android.app.time.TimeZoneCapabilitiesAndConfig;
+import android.app.time.TimeZoneConfiguration;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
-import android.app.timezonedetector.TimeZoneCapabilities;
-import android.app.timezonedetector.TimeZoneConfiguration;
 import android.content.Context;
 import android.os.Handler;
 import android.util.IndentingPrintWriter;
@@ -93,7 +94,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
          * All checks about user capabilities must be done by the caller and
          * {@link TimeZoneConfiguration#isComplete()} must be {@code true}.
          */
-        void storeConfiguration(TimeZoneConfiguration newConfiguration);
+        void storeConfiguration(@UserIdInt int userId, TimeZoneConfiguration newConfiguration);
     }
 
     private static final String LOG_TAG = "TimeZoneDetectorStrategy";
@@ -240,27 +241,26 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     }
 
     @Override
-    public synchronized boolean updateConfiguration(
+    public synchronized boolean updateConfiguration(@UserIdInt int userId,
             @NonNull TimeZoneConfiguration requestedConfiguration) {
         Objects.requireNonNull(requestedConfiguration);
 
-        int userId = requestedConfiguration.getUserId();
-        TimeZoneCapabilities capabilities = getConfigurationInternal(userId).createCapabilities();
+        TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
+                getConfigurationInternal(userId).createCapabilitiesAndConfig();
+        TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
+        TimeZoneConfiguration oldConfiguration = capabilitiesAndConfig.getConfiguration();
 
-        // Create a new configuration builder, and copy across the mutable properties users are
-        // able to modify. Other properties are therefore ignored.
         final TimeZoneConfiguration newConfiguration =
-                capabilities.applyUpdate(requestedConfiguration);
+                capabilities.tryApplyConfigChanges(oldConfiguration, requestedConfiguration);
         if (newConfiguration == null) {
-            // The changes could not be made due to
+            // The changes could not be made because the user's capabilities do not allow it.
             return false;
         }
 
         // Store the configuration / notify as needed. This will cause the mCallback to invoke
         // handleConfigChanged() asynchronously.
-        mCallback.storeConfiguration(newConfiguration);
+        mCallback.storeConfiguration(userId, newConfiguration);
 
-        TimeZoneConfiguration oldConfiguration = capabilities.getConfiguration();
         String logMsg = "Configuration changed:"
                 + " oldConfiguration=" + oldConfiguration
                 + ", newConfiguration=" + newConfiguration;
@@ -313,8 +313,10 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         String timeZoneId = suggestion.getZoneId();
         String cause = "Manual time suggestion received: suggestion=" + suggestion;
 
-        TimeZoneCapabilities capabilities = getConfigurationInternal(userId).createCapabilities();
-        if (capabilities.getSuggestManualTimeZone() != CAPABILITY_POSSESSED) {
+        TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
+                getConfigurationInternal(userId).createCapabilitiesAndConfig();
+        TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
+        if (capabilities.getSuggestManualTimeZoneCapability() != CAPABILITY_POSSESSED) {
             Slog.i(LOG_TAG, "User does not have the capability needed to set the time zone manually"
                     + ", capabilities=" + capabilities
                     + ", timeZoneId=" + timeZoneId
@@ -605,7 +607,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         ipw.println("mCallback.getCurrentUserId()=" + currentUserId);
         ConfigurationInternal configuration = mCallback.getConfigurationInternal(currentUserId);
         ipw.println("mCallback.getConfiguration(currentUserId)=" + configuration);
-        ipw.println("[Capabilities=" + configuration.createCapabilities() + "]");
+        ipw.println("[Capabilities=" + configuration.createCapabilitiesAndConfig() + "]");
         ipw.println("mCallback.isDeviceTimeZoneInitialized()="
                 + mCallback.isDeviceTimeZoneInitialized());
         ipw.println("mCallback.getDeviceTimeZone()=" + mCallback.getDeviceTimeZone());
