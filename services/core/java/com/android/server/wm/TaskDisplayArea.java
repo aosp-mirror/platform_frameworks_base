@@ -441,6 +441,12 @@ final class TaskDisplayArea extends DisplayArea<Task> {
     }
 
     @Override
+    void onChildPositionChanged(WindowContainer child) {
+        super.onChildPositionChanged(child);
+        mRootWindowContainer.invalidateTaskLayers();
+    }
+
+    @Override
     boolean forAllTaskDisplayAreas(Function<TaskDisplayArea, Boolean> callback,
             boolean traverseTopToBottom) {
         return callback.apply(this);

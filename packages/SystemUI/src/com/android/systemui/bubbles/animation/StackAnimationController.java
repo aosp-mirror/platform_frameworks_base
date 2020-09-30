@@ -74,7 +74,7 @@ public class StackAnimationController extends
      */
     public static final int DEFAULT_STIFFNESS = 12000;
     public static final float IME_ANIMATION_STIFFNESS = SpringForce.STIFFNESS_LOW;
-    private static final int FLING_FOLLOW_STIFFNESS = 20000;
+    private static final int FLING_FOLLOW_STIFFNESS = 500;
     public static final float DEFAULT_BOUNCINESS = 0.9f;
 
     private final PhysicsAnimator.SpringConfig mAnimateOutSpringConfig =

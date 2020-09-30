@@ -34,7 +34,9 @@ public class SystemServicePowerCalculator extends PowerCalculator {
     private final PowerProfile mPowerProfile;
     private final BatteryStats mBatteryStats;
     // Tracks system server CPU [cluster][speed] power in milliAmp-microseconds
-    private double[][] mSystemServicePowerMaUs;
+    // Data organized like this:
+    // {cluster1-speed1, cluster1-speed2, ..., cluster2-speed1, cluster2-speed2, ...}
+    private double[] mSystemServicePowerMaUs;
 
     public SystemServicePowerCalculator(PowerProfile powerProfile, BatteryStats batteryStats) {
         mPowerProfile = powerProfile;
@@ -50,37 +52,41 @@ public class SystemServicePowerCalculator extends PowerCalculator {
                 updateSystemServicePower();
             }
 
-            double cpuPowerMaUs = 0;
-            int numCpuClusters = mPowerProfile.getNumCpuClusters();
-            for (int cluster = 0; cluster < numCpuClusters; cluster++) {
-                final int numSpeeds = mPowerProfile.getNumSpeedStepsInCpuCluster(cluster);
-                for (int speed = 0; speed < numSpeeds; speed++) {
-                    cpuPowerMaUs += mSystemServicePowerMaUs[cluster][speed] * proportionalUsage;
+            if (mSystemServicePowerMaUs != null) {
+                double cpuPowerMaUs = 0;
+                for (int i = 0; i < mSystemServicePowerMaUs.length; i++) {
+                    cpuPowerMaUs += mSystemServicePowerMaUs[i] * proportionalUsage;
                 }
-            }
 
-            app.systemServiceCpuPowerMah = cpuPowerMaUs / MICROSEC_IN_HR;
+                app.systemServiceCpuPowerMah = cpuPowerMaUs / MICROSEC_IN_HR;
+            }
         }
     }
 
     private void updateSystemServicePower() {
+        final long[] systemServiceTimeAtCpuSpeeds = mBatteryStats.getSystemServiceTimeAtCpuSpeeds();
+        if (systemServiceTimeAtCpuSpeeds == null) {
+            return;
+        }
+
+        if (mSystemServicePowerMaUs == null) {
+            mSystemServicePowerMaUs = new double[systemServiceTimeAtCpuSpeeds.length];
+        }
+        int index = 0;
         final int numCpuClusters = mPowerProfile.getNumCpuClusters();
-        mSystemServicePowerMaUs = new double[numCpuClusters][];
         for (int cluster = 0; cluster < numCpuClusters; cluster++) {
             final int numSpeeds = mPowerProfile.getNumSpeedStepsInCpuCluster(cluster);
-            mSystemServicePowerMaUs[cluster] = new double[numSpeeds];
             for (int speed = 0; speed < numSpeeds; speed++) {
-                mSystemServicePowerMaUs[cluster][speed] =
-                        mBatteryStats.getSystemServiceTimeAtCpuSpeed(cluster, speed)
+                mSystemServicePowerMaUs[index] =
+                        systemServiceTimeAtCpuSpeeds[index]
                                 * mPowerProfile.getAveragePowerForCpuCore(cluster, speed);
+                index++;
             }
         }
+
         if (DEBUG) {
-            Log.d(TAG, "System service power per CPU cluster and frequency");
-            for (int cluster = 0; cluster < numCpuClusters; cluster++) {
-                Log.d(TAG, "Cluster[" + cluster  + "]: "
-                        + Arrays.toString(mSystemServicePowerMaUs[cluster]));
-            }
+            Log.d(TAG, "System service power per CPU cluster and frequency:"
+                    + Arrays.toString(mSystemServicePowerMaUs));
         }
     }
 

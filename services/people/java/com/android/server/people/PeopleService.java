@@ -94,10 +94,27 @@ public class PeopleService extends SystemService {
      * @throws SecurityException if the caller is not system or root
      */
     private static void enforceSystemOrRoot(String message) {
-        int uid = Binder.getCallingUid();
-        if (!UserHandle.isSameApp(uid, Process.SYSTEM_UID) && uid != Process.ROOT_UID) {
+        if (!isSystemOrRoot()) {
             throw new SecurityException("Only system may " + message);
         }
+    }
+
+    private static boolean isSystemOrRoot() {
+        final int uid = Binder.getCallingUid();
+        return UserHandle.isSameApp(uid, Process.SYSTEM_UID) || uid == Process.ROOT_UID;
+    }
+
+
+    /**
+     * Enforces that only the system, root UID or SystemUI can make certain calls.
+     *
+     * @param message used as message if SecurityException is thrown
+     * @throws SecurityException if the caller is not system or root
+     */
+    private static void enforceSystemRootOrSystemUI(Context context, String message) {
+        if (isSystemOrRoot()) return;
+        context.enforceCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
+                message);
     }
 
     private final class BinderService extends IPeopleManager.Stub {
@@ -126,7 +143,7 @@ public class PeopleService extends SystemService {
 
         @Override
         public long getLastInteraction(String packageName, int userId, String shortcutId) {
-            enforceSystemOrRoot("get last interaction");
+            enforceSystemRootOrSystemUI(getContext(), "get last interaction");
             return mDataManager.getLastInteraction(packageName, userId, shortcutId);
         }
     }

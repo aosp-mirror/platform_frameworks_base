@@ -83,6 +83,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getPackageImportance(String);
     method public long getTotalRam();
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidImportance(int);
+    method @RequiresPermission("android.permission.INJECT_EVENTS") public void holdLock(int);
     method public static boolean isHighEndGfx();
     method @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES) public void killProcessesWhenImperceptible(@NonNull int[], @NonNull String);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
@@ -1023,6 +1024,7 @@ package android.content.pm {
     method @Nullable public String getSystemTextClassifierPackageName();
     method @Nullable public String getWellbeingPackageName();
     method @RequiresPermission("android.permission.GRANT_RUNTIME_PERMISSIONS") public abstract void grantRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
+    method @RequiresPermission("android.permission.INJECT_EVENTS") public void holdLock(int);
     method @RequiresPermission("android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS") public abstract void removeOnPermissionsChangeListener(@NonNull android.content.pm.PackageManager.OnPermissionsChangedListener);
     method @RequiresPermission("android.permission.REVOKE_RUNTIME_PERMISSIONS") public abstract void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission("android.permission.REVOKE_RUNTIME_PERMISSIONS") public void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle, @NonNull String);
@@ -5289,6 +5291,7 @@ package android.view {
   }
 
   public interface WindowManager extends android.view.ViewManager {
+    method @RequiresPermission("android.permission.INJECT_EVENTS") public default void holdLock(int);
     method public default void setShouldShowIme(int, boolean);
     method public default void setShouldShowSystemDecors(int, boolean);
     method public default void setShouldShowWithInsecureKeyguard(int, boolean);

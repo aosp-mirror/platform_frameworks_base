@@ -931,9 +931,6 @@ public class WifiManager {
      * This can be as a result of adding/updating/deleting a network.
      * <br />
      * {@link #EXTRA_CHANGE_REASON} contains whether the configuration was added/changed/removed.
-     * {@link #EXTRA_WIFI_CONFIGURATION} is never set starting in Android 11.
-     * {@link #EXTRA_MULTIPLE_NETWORKS_CHANGED} is set for backwards compatibility reasons, but
-     * its value is always true, even if only a single network changed.
      * <br />
      * The {@link android.Manifest.permission#ACCESS_WIFI_STATE ACCESS_WIFI_STATE} permission is
      * required to receive this broadcast.
@@ -947,17 +944,20 @@ public class WifiManager {
      * The lookup key for a {@link android.net.wifi.WifiConfiguration} object representing
      * the changed Wi-Fi configuration when the {@link #CONFIGURED_NETWORKS_CHANGED_ACTION}
      * broadcast is sent.
-     * Note: this extra is never set starting in Android 11.
+     * @deprecated this extra is never set. Use {@link #getConfiguredNetworks} to get the full list
+     * of configured networks.
      * @hide
      */
+    @Deprecated
     @SystemApi
     public static final String EXTRA_WIFI_CONFIGURATION = "wifiConfiguration";
     /**
      * Multiple network configurations have changed.
      * @see #CONFIGURED_NETWORKS_CHANGED_ACTION
-     * Note: this extra is always true starting in Android 11.
+     * @deprecated this extra's value is always true.
      * @hide
      */
+    @Deprecated
     @SystemApi
     public static final String EXTRA_MULTIPLE_NETWORKS_CHANGED = "multipleChanges";
     /**

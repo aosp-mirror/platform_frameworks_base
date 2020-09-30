@@ -43,18 +43,18 @@ public class SystemServicePowerCalculatorTest {
     private PowerProfile mProfile;
     private MockBatteryStatsImpl mMockBatteryStats;
     private MockKernelCpuUidFreqTimeReader mMockCpuUidFreqTimeReader;
-    private MockServerCpuThreadReader mMockServerCpuThreadReader;
+    private MockSystemServerCpuThreadReader mMockSystemServerCpuThreadReader;
     private SystemServicePowerCalculator mSystemServicePowerCalculator;
 
     @Before
     public void setUp() throws IOException {
         Context context = InstrumentationRegistry.getContext();
         mProfile = new PowerProfile(context, true /* forTest */);
-        mMockServerCpuThreadReader = new MockServerCpuThreadReader();
+        mMockSystemServerCpuThreadReader = new MockSystemServerCpuThreadReader();
         mMockCpuUidFreqTimeReader = new MockKernelCpuUidFreqTimeReader();
         mMockBatteryStats = new MockBatteryStatsImpl(new MockClocks())
                 .setPowerProfile(mProfile)
-                .setSystemServerCpuThreadReader(mMockServerCpuThreadReader)
+                .setSystemServerCpuThreadReader(mMockSystemServerCpuThreadReader)
                 .setKernelCpuUidFreqTimeReader(mMockCpuUidFreqTimeReader)
                 .setUserInfoProvider(new MockUserInfoProvider());
         mMockBatteryStats.getOnBatteryTimeBase().setRunning(true, 0, 0);
@@ -65,12 +65,13 @@ public class SystemServicePowerCalculatorTest {
     @Test
     public void testCalculateApp() {
         // Test Power Profile has two CPU clusters with 3 and 4 speeds, thus 7 freq times total
-        mMockServerCpuThreadReader.setThreadTimes(
-                new long[]{30000, 40000, 50000, 60000, 70000, 80000, 90000},
-                new long[]{20000, 30000, 40000, 50000, 60000, 70000, 80000});
+        mMockSystemServerCpuThreadReader.setCpuTimes(
+                210000,
+                new long[] {30000, 40000, 50000, 60000, 70000, 80000, 90000},
+                new long[] {20000, 30000, 40000, 50000, 60000, 70000, 80000});
 
         mMockCpuUidFreqTimeReader.setSystemServerCpuTimes(
-                new long[]{10000, 20000, 30000, 40000, 50000, 60000, 70000}
+                new long[] {10000, 20000, 30000, 40000, 50000, 60000, 70000}
         );
 
         mMockBatteryStats.readKernelUidCpuFreqTimesLocked(null, true, false);
@@ -106,13 +107,13 @@ public class SystemServicePowerCalculatorTest {
                 mMockBatteryStats.getUidStatsLocked(workSourceUid1), 0);
         mSystemServicePowerCalculator.calculateApp(app1, app1.uidObj, 0, 0,
                 BatteryStats.STATS_SINCE_CHARGED);
-        assertEquals(0.27162, app1.systemServiceCpuPowerMah, 0.00001);
+        assertEquals(0.00018958, app1.systemServiceCpuPowerMah, 0.0000001);
 
         BatterySipper app2 = new BatterySipper(BatterySipper.DrainType.APP,
                 mMockBatteryStats.getUidStatsLocked(workSourceUid2), 0);
         mSystemServicePowerCalculator.calculateApp(app2, app2.uidObj, 0, 0,
                 BatteryStats.STATS_SINCE_CHARGED);
-        assertEquals(2.44458, app2.systemServiceCpuPowerMah, 0.00001);
+        assertEquals(0.00170625, app2.systemServiceCpuPowerMah, 0.0000001);
     }
 
     private static class MockKernelCpuUidFreqTimeReader extends
@@ -140,14 +141,16 @@ public class SystemServicePowerCalculatorTest {
         }
     }
 
-    private static class MockServerCpuThreadReader extends SystemServerCpuThreadReader {
+    private static class MockSystemServerCpuThreadReader extends SystemServerCpuThreadReader {
         private SystemServiceCpuThreadTimes mThreadTimes = new SystemServiceCpuThreadTimes();
 
-        MockServerCpuThreadReader() {
+        MockSystemServerCpuThreadReader() {
             super(null);
         }
 
-        public void setThreadTimes(long[] threadCpuTimesUs, long[] binderThreadCpuTimesUs) {
+        public void setCpuTimes(long processCpuTimeUs, long[] threadCpuTimesUs,
+                long[] binderThreadCpuTimesUs) {
+            mThreadTimes.processCpuTimeUs = processCpuTimeUs;
             mThreadTimes.threadCpuTimesUs = threadCpuTimesUs;
             mThreadTimes.binderThreadCpuTimesUs = binderThreadCpuTimesUs;
         }

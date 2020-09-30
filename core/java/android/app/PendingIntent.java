@@ -19,12 +19,16 @@ package android.app;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -35,6 +39,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.AndroidException;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.os.IResultReceiver;
@@ -102,10 +107,19 @@ import java.lang.annotation.RetentionPolicy;
  * FLAG_ONE_SHOT, <b>both</b> FLAG_ONE_SHOT and FLAG_NO_CREATE need to be supplied.
  */
 public final class PendingIntent implements Parcelable {
+    private static final String TAG = "PendingIntent";
     private final IIntentSender mTarget;
     private IResultReceiver mCancelReceiver;
     private IBinder mWhitelistToken;
     private ArraySet<CancelListener> mCancelListeners;
+
+    /**
+     * It is now required to specify either {@link #FLAG_IMMUTABLE}
+     * or {@link #FLAG_MUTABLE} when creating a PendingIntent.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.R)
+    static final long PENDING_INTENT_EXPLICIT_MUTABILITY_REQUIRED = 160794467L;
 
     /** @hide */
     @IntDef(flag = true,
@@ -115,6 +129,7 @@ public final class PendingIntent implements Parcelable {
                     FLAG_CANCEL_CURRENT,
                     FLAG_UPDATE_CURRENT,
                     FLAG_IMMUTABLE,
+                    FLAG_MUTABLE,
 
                     Intent.FILL_IN_ACTION,
                     Intent.FILL_IN_DATA,
@@ -173,6 +188,21 @@ public final class PendingIntent implements Parcelable {
      * ignored.
      */
     public static final int FLAG_IMMUTABLE = 1<<26;
+
+    /**
+     * Flag indicating that the created PendingIntent should be mutable.
+     * This flag cannot be combined with {@link #FLAG_IMMUTABLE}. <p>Up until
+     * {@link android.os.Build.VERSION_CODES#R}, PendingIntents are assumed to
+     * be mutable by default, unless {@link #FLAG_IMMUTABLE} is set. Starting
+     * with {@link android.os.Build.VERSION_CODES#S}, it will be required to
+     * explicitly specify the mutability of PendingIntents on creation with
+     * either (@link #FLAG_IMMUTABLE} or {@link #FLAG_MUTABLE}. It is strongly
+     * recommended to use {@link #FLAG_IMMUTABLE} when creating a
+     * PendingIntent. {@link #FLAG_MUTABLE} should only be used when some
+     * functionality relies on modifying the underlying intent, e.g. any
+     * PendingIntent that needs to be used with inline reply or bubbles.
+     */
+    public static final int FLAG_MUTABLE = 1<<25;
 
     /**
      * Exception thrown when trying to send through a PendingIntent that
@@ -286,6 +316,27 @@ public final class PendingIntent implements Parcelable {
         sOnMarshaledListener.set(listener);
     }
 
+    private static void checkFlags(int flags, String packageName) {
+        final boolean flagImmutableSet = (flags & PendingIntent.FLAG_IMMUTABLE) != 0;
+        final boolean flagMutableSet = (flags & PendingIntent.FLAG_MUTABLE) != 0;
+        String msg = packageName + ": Targeting S+ (version " + Build.VERSION_CODES.S
+                    + " and above) requires that one of FLAG_IMMUTABLE or FLAG_MUTABLE"
+                    + " be specified when creating a PendingIntent.\nStrongly consider"
+                    + " using FLAG_IMMUTABLE, only use FLAG_MUTABLE if some functionality"
+                    + " depends on the PendingIntent being mutable, e.g. if it needs to"
+                    + " be used with inline replies or bubbles.";
+
+        if (flagImmutableSet && flagMutableSet) {
+            throw new IllegalArgumentException(
+                "Cannot set both FLAG_IMMUTABLE and FLAG_MUTABLE for PendingIntent");
+        }
+
+        if (Compatibility.isChangeEnabled(PENDING_INTENT_EXPLICIT_MUTABILITY_REQUIRED)
+                && !flagImmutableSet && !flagMutableSet) {
+            Log.e(TAG, msg);
+        }
+    }
+
     /**
      * Retrieve a PendingIntent that will start a new activity, like calling
      * {@link Context#startActivity(Intent) Context.startActivity(Intent)}.
@@ -350,6 +401,7 @@ public final class PendingIntent implements Parcelable {
         String packageName = context.getPackageName();
         String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
                 context.getContentResolver()) : null;
+        checkFlags(flags, packageName);
         try {
             intent.migrateExtraStreamToClipData(context);
             intent.prepareToLeaveProcess(context);
@@ -376,6 +428,7 @@ public final class PendingIntent implements Parcelable {
         String packageName = context.getPackageName();
         String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
                 context.getContentResolver()) : null;
+        checkFlags(flags, packageName);
         try {
             intent.migrateExtraStreamToClipData(context);
             intent.prepareToLeaveProcess(context);
@@ -495,6 +548,7 @@ public final class PendingIntent implements Parcelable {
             intents[i].prepareToLeaveProcess(context);
             resolvedTypes[i] = intents[i].resolveTypeIfNeeded(context.getContentResolver());
         }
+        checkFlags(flags, packageName);
         try {
             IIntentSender target =
                 ActivityManager.getService().getIntentSenderWithFeature(
@@ -521,6 +575,7 @@ public final class PendingIntent implements Parcelable {
             intents[i].prepareToLeaveProcess(context);
             resolvedTypes[i] = intents[i].resolveTypeIfNeeded(context.getContentResolver());
         }
+        checkFlags(flags, packageName);
         try {
             IIntentSender target =
                 ActivityManager.getService().getIntentSenderWithFeature(
@@ -572,6 +627,7 @@ public final class PendingIntent implements Parcelable {
         String packageName = context.getPackageName();
         String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
                 context.getContentResolver()) : null;
+        checkFlags(flags, packageName);
         try {
             intent.prepareToLeaveProcess(context);
             IIntentSender target =
@@ -651,6 +707,7 @@ public final class PendingIntent implements Parcelable {
         String packageName = context.getPackageName();
         String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
                 context.getContentResolver()) : null;
+        checkFlags(flags, packageName);
         try {
             intent.prepareToLeaveProcess(context);
             IIntentSender target =

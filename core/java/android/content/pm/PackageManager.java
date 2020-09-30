@@ -8305,4 +8305,19 @@ public abstract class PackageManager {
     public static void uncorkPackageInfoCache() {
         PropertyInvalidatedCache.uncorkInvalidations(PermissionManager.CACHE_KEY_PACKAGE_INFO);
     }
+
+    /**
+     * Holds the PM lock for the specified amount of milliseconds.
+     * Intended for use by the tests that need to imitate lock contention.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.INJECT_EVENTS)
+    public void holdLock(int durationMs) {
+        try {
+            ActivityThread.getPackageManager().holdLock(durationMs);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

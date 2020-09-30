@@ -18,9 +18,7 @@ package android.hardware.fingerprint;
 
 import android.annotation.IntDef;
 import android.hardware.biometrics.SensorProperties;
-import android.hardware.face.FaceSensorProperties;
 import android.os.Parcel;
-import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

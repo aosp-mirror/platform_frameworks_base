@@ -16,6 +16,9 @@
 
 package android.view;
 
+import static android.view.ImeInsetsSourceConsumerProto.FOCUSED_EDITOR;
+import static android.view.ImeInsetsSourceConsumerProto.INSETS_SOURCE_CONSUMER;
+import static android.view.ImeInsetsSourceConsumerProto.IS_REQUESTED_VISIBLE_AWAITING_CONTROL;
 import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsState.ITYPE_IME;
 
@@ -24,6 +27,7 @@ import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.text.TextUtils;
+import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl.Transaction;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -111,7 +115,6 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     public @ShowResult int requestShow(boolean fromIme) {
         // TODO: ResultReceiver for IME.
         // TODO: Set mShowOnNextImeRender to automatically show IME and guard it with a flag.
-
         if (getControl() == null) {
             // If control is null, schedule to show IME when control is available.
             mIsRequestedVisibleAwaitingControl = true;
@@ -225,6 +228,17 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         parcel2.setDataPosition(0);
 
         return Arrays.equals(parcel1.createByteArray(), parcel2.createByteArray());
+    }
+
+    @Override
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        super.dumpDebug(proto, INSETS_SOURCE_CONSUMER);
+        if (mFocusedEditor != null) {
+            mFocusedEditor.dumpDebug(proto, FOCUSED_EDITOR);
+        }
+        proto.write(IS_REQUESTED_VISIBLE_AWAITING_CONTROL, mIsRequestedVisibleAwaitingControl);
+        proto.end(token);
     }
 
     private InputMethodManager getImm() {

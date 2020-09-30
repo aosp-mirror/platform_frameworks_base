@@ -16,9 +16,6 @@
 
 package com.android.systemui.shortcut;
 
-import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
-import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.RemoteException;
@@ -29,7 +26,6 @@ import android.view.WindowManagerGlobal;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.recents.Recents;
 import com.android.wm.shell.splitscreen.DividerView;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
@@ -46,7 +42,6 @@ public class ShortcutKeyDispatcher extends SystemUI
 
     private static final String TAG = "ShortcutKeyDispatcher";
     private final Optional<SplitScreen> mSplitScreenOptional;
-    private final Recents mRecents;
 
     private ShortcutKeyServiceProxy mShortcutKeyServiceProxy = new ShortcutKeyServiceProxy(this);
     private IWindowManager mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
@@ -60,11 +55,9 @@ public class ShortcutKeyDispatcher extends SystemUI
     protected final long SC_DOCK_RIGHT = META_MASK | KeyEvent.KEYCODE_RIGHT_BRACKET;
 
     @Inject
-    public ShortcutKeyDispatcher(Context context,
-            Optional<SplitScreen> splitScreenOptional, Recents recents) {
+    public ShortcutKeyDispatcher(Context context, Optional<SplitScreen> splitScreenOptional) {
         super(context);
         mSplitScreenOptional = splitScreenOptional;
-        mRecents = recents;
     }
 
     /**
@@ -96,8 +89,7 @@ public class ShortcutKeyDispatcher extends SystemUI
     }
 
     private void handleDockKey(long shortcutCode) {
-        if (mSplitScreenOptional.isPresent()) {
-            SplitScreen splitScreen = mSplitScreenOptional.get();
+        mSplitScreenOptional.ifPresent(splitScreen -> {
             if (splitScreen.isDividerVisible()) {
                 // If there is already a docked window, we respond by resizing the docking pane.
                 DividerView dividerView = splitScreen.getDividerView();
@@ -112,12 +104,9 @@ public class ShortcutKeyDispatcher extends SystemUI
                 dividerView.stopDragging(target.position, 0f, false /* avoidDismissStart */,
                         true /* logMetrics */);
                 return;
+            } else {
+                splitScreen.splitPrimaryTask();
             }
-        }
-
-        // Split the screen
-        mRecents.splitPrimaryTask((shortcutCode == SC_DOCK_LEFT)
-                ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
-                : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT, null, -1);
+        });
     }
 }

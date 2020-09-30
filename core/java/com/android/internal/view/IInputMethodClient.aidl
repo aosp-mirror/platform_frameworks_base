@@ -33,4 +33,5 @@ oneway interface IInputMethodClient {
     void reportPreRendered(in EditorInfo info);
     void applyImeVisibility(boolean setVisible);
     void updateActivityViewToScreenMatrix(int bindSequence, in float[] matrixValues);
+    void setImeTraceEnabled(boolean enabled);
 }

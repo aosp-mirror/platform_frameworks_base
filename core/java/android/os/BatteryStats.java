@@ -21,6 +21,7 @@ import static android.os.BatteryStatsManager.NUM_WIFI_STATES;
 import static android.os.BatteryStatsManager.NUM_WIFI_SUPPL_STATES;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.job.JobParameters;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -2889,14 +2890,17 @@ public abstract class BatteryStats implements Parcelable {
 
     /**
      * Returns the approximate CPU time (in microseconds) spent by the system server handling
-     * incoming service calls from apps.
+     * incoming service calls from apps.  The result is returned as an array of longs,
+     * organized as a sequence like this:
+     * <pre>
+     *     cluster1-speeed1, cluster1-speed2, ..., cluster2-speed1, cluster2-speed2, ...
+     * </pre>
      *
-     * @param cluster the index of the CPU cluster.
-     * @param step the index of the CPU speed. This is not the actual speed of the CPU.
      * @see com.android.internal.os.PowerProfile#getNumCpuClusters()
      * @see com.android.internal.os.PowerProfile#getNumSpeedStepsInCpuCluster(int)
      */
-    public abstract long getSystemServiceTimeAtCpuSpeed(int cluster, int step);
+    @Nullable
+    public abstract long[] getSystemServiceTimeAtCpuSpeeds();
 
     /**
      * Returns the total, last, or current battery uptime in microseconds.

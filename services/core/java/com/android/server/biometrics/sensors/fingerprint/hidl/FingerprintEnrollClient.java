@@ -70,7 +70,7 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
 
     @Override
     protected void startHalOperation() {
-        UdfpsHelper.showUdfpsOverlay(mUdfpsOverlayController);
+        UdfpsHelper.showUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
         try {
             // GroupId was never used. In fact, groupId is always the same as userId.
             getFreshDaemon().enroll(mHardwareAuthToken, getTargetUserId(), mTimeoutSec);
@@ -78,14 +78,14 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
             Slog.e(TAG, "Remote exception when requesting enroll", e);
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
-            UdfpsHelper.hideUdfpsOverlay(mUdfpsOverlayController);
+            UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
             mCallback.onClientFinished(this, false /* success */);
         }
     }
 
     @Override
     protected void stopHalOperation() {
-        UdfpsHelper.hideUdfpsOverlay(mUdfpsOverlayController);
+        UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
         try {
             getFreshDaemon().cancel();
         } catch (RemoteException e) {

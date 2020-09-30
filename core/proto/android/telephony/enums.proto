@@ -159,3 +159,50 @@ enum SimStateEnum {
      */
     SIM_STATE_PRESENT = 11;
 }
+
+// Format of SMS message
+enum SmsFormatEnum {
+    /** Unknown format */
+    SMS_FORMAT_UNKNOWN = 0;
+    /** Format compliant with 3GPP TS 23.040 */
+    SMS_FORMAT_3GPP = 1;
+    /** Format compliant with 3GPP2 TS C.S0015-B */
+    SMS_FORMAT_3GPP2 = 2;
+}
+
+// Technology used to carry an SMS message
+enum SmsTechEnum {
+    /**
+     * Unknown SMS technology used to carry the SMS.
+     * This value is also used for injected SMS.
+     */
+    SMS_TECH_UNKNOWN = 0;
+    /** The SMS was carried over CS bearer in 3GPP network */
+    SMS_TECH_CS_3GPP = 1;
+    /** The SMS was carried over CS bearer in 3GPP2 network */
+    SMS_TECH_CS_3GPP2 = 2;
+    /** The SMS was carried over IMS */
+    SMS_TECH_IMS = 3;
+}
+
+// Types of SMS message
+enum SmsTypeEnum {
+    /** Normal type. */
+    SMS_TYPE_NORMAL = 0;
+    /** SMS-PP (point-to-point). */
+    SMS_TYPE_SMS_PP = 1;
+    /** Voicemail indication. */
+    SMS_TYPE_VOICEMAIL_INDICATION = 2;
+    /** Type 0 message (3GPP TS 23.040 9.2.3.9). */
+    SMS_TYPE_ZERO = 3;
+    /** WAP-PUSH message. */
+    SMS_TYPE_WAP_PUSH = 4;
+}
+
+// SMS errors
+enum SmsIncomingErrorEnum {
+    SMS_SUCCESS = 0;
+    SMS_ERROR_GENERIC = 1;
+    SMS_ERROR_NO_MEMORY = 2;
+    SMS_ERROR_NOT_SUPPORTED = 3;
+}

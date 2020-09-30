@@ -17,6 +17,9 @@ package com.android.server.inputmethod;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.CLIENTS;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.ELAPSED_REALTIME_NANOS;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorTraceFileProto.ENTRY;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -96,12 +99,15 @@ import android.text.style.SuggestionSpan;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
+import android.util.Log;
 import android.util.LruCache;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.imetracing.ImeTracing;
+import android.util.proto.ProtoOutputStream;
 import android.view.ContextThemeWrapper;
 import android.view.DisplayInfo;
 import android.view.IWindowManager;
@@ -4032,6 +4038,55 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE_FROM_WINDOW, windowToken).sendToTarget();
     }
 
+    /**
+     * Starting point for dumping the IME tracing information in proto format.
+     *
+     * @param clientProtoDump dump information from the IME client side
+     */
+    @BinderThread
+    @Override
+    public void startProtoDump(byte[] clientProtoDump) {
+        if (!ImeTracing.getInstance().isAvailable() || !ImeTracing.getInstance().isEnabled()) {
+            return;
+        }
+        if (clientProtoDump == null && mCurClient == null) {
+            return;
+        }
+
+        ProtoOutputStream proto = new ProtoOutputStream();
+        final long token = proto.start(ENTRY);
+        proto.write(ELAPSED_REALTIME_NANOS, SystemClock.elapsedRealtimeNanos());
+        // TODO: get server side dump
+        if (clientProtoDump != null) {
+            proto.write(CLIENTS, clientProtoDump);
+        } else {
+            IBinder client = null;
+
+            synchronized (mMethodMap) {
+                if (mCurClient != null && mCurClient.client != null) {
+                    client = mCurClient.client.asBinder();
+                }
+            }
+
+            if (client != null) {
+                try {
+                    proto.write(CLIENTS,
+                            TransferPipe.dumpAsync(client, ImeTracing.PROTO_ARG));
+                } catch (IOException | RemoteException e) {
+                    Log.e(TAG, "Exception while collecting client side ime dump", e);
+                }
+            }
+        }
+        proto.end(token);
+        ImeTracing.getInstance().addToBuffer(proto);
+    }
+
+    @BinderThread
+    @Override
+    public boolean isImeTraceEnabled() {
+        return ImeTracing.getInstance().isEnabled();
+    }
+
     @BinderThread
     private void notifyUserAction(@NonNull IBinder token) {
         if (DEBUG) {
@@ -5426,6 +5481,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         return mService.handleShellCommandSetInputMethod(this);
                     case "reset":
                         return mService.handleShellCommandResetInputMethod(this);
+                    case "tracing":
+                        int result = ImeTracing.getInstance().onShellCommand(this);
+                        boolean isImeTraceEnabled = ImeTracing.getInstance().isEnabled();
+                        for (ClientState state : mService.mClients.values()) {
+                            if (state != null) {
+                                try {
+                                    state.client.setImeTraceEnabled(isImeTraceEnabled);
+                                } catch (RemoteException e) {
+                                    Log.e(TAG,
+                                            "Error while trying to enable/disable ime "
+                                                    + "trace on client window", e);
+                                }
+                            }
+                        }
+                        return result;
                     default:
                         getOutPrintWriter().println("Unknown command: " + imeCommand);
                         return ShellCommandResult.FAILURE;

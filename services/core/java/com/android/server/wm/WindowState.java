@@ -1409,15 +1409,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Add a window that is using blastSync to the resizing list if it hasn't been reported
         // already. This because the window is waiting on a finishDrawing from the client.
         if (didFrameInsetsChange
-                || winAnimator.mSurfaceResized
                 || configChanged
                 || dragResizingChanged
                 || mReportOrientationChanged
                 || shouldSendRedrawForSync()) {
             ProtoLog.v(WM_DEBUG_RESIZE,
-                        "Resize reasons for w=%s:  %s surfaceResized=%b configChanged=%b "
+                        "Resize reasons for w=%s:  %s configChanged=%b "
                                 + "dragResizingChanged=%b reportOrientationChanged=%b",
-                        this, mWindowFrames.getInsetsChangedInfo(), winAnimator.mSurfaceResized,
+                        this, mWindowFrames.getInsetsChangedInfo(),
                         configChanged, dragResizingChanged, mReportOrientationChanged);
 
             // If it's a dead window left on screen, and the configuration changed, there is nothing
@@ -3633,7 +3632,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // that may cause WINDOW_FREEZE_TIMEOUT because resizing the client keeps failing.
         mReportOrientationChanged = false;
         mDragResizingChangeReported = true;
-        mWinAnimator.mSurfaceResized = false;
         mWindowFrames.resetInsetsChanged();
 
         final MergedConfiguration mergedConfiguration = mLastReportedConfiguration;
