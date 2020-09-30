@@ -47,6 +47,7 @@ public class SyncRtSurfaceTransactionApplierCompat {
     public static final int FLAG_BACKGROUND_BLUR_RADIUS = 1 << 5;
     public static final int FLAG_VISIBILITY = 1 << 6;
     public static final int FLAG_RELATIVE_LAYER = 1 << 7;
+    public static final int FLAG_SHADOW_RADIUS = 1 << 8;
 
     private static final int MSG_UPDATE_SEQUENCE_NUMBER = 0;
 
@@ -196,6 +197,7 @@ public class SyncRtSurfaceTransactionApplierCompat {
             SurfaceControl relativeTo;
             int relativeLayer;
             boolean visible;
+            float shadowRadius;
 
             /**
              * @param surface The surface to modify.
@@ -274,6 +276,16 @@ public class SyncRtSurfaceTransactionApplierCompat {
             }
 
             /**
+             * @param radius the Radius for the shadows to apply to the surface.
+             * @return this Builder
+             */
+            public Builder withShadowRadius(float radius) {
+                this.shadowRadius = radius;
+                flags |= FLAG_SHADOW_RADIUS;
+                return this;
+            }
+
+            /**
              * @param radius the Radius for blur to apply to the background surfaces.
              * @return this Builder
              */
@@ -298,31 +310,14 @@ public class SyncRtSurfaceTransactionApplierCompat {
              */
             public SurfaceParams build() {
                 return new SurfaceParams(surface, flags, alpha, matrix, windowCrop, layer,
-                        relativeTo, relativeLayer, cornerRadius, backgroundBlurRadius, visible);
+                        relativeTo, relativeLayer, cornerRadius, backgroundBlurRadius, visible,
+                        shadowRadius);
             }
-        }
-
-        /**
-         * Constructs surface parameters to be applied when the current view state gets pushed to
-         * RenderThread.
-         *
-         * @param surface The surface to modify.
-         * @param alpha Alpha to apply.
-         * @param matrix Matrix to apply.
-         * @param windowCrop Crop to apply, only applied if not {@code null}
-         */
-        public SurfaceParams(SurfaceControlCompat surface, float alpha, Matrix matrix,
-                Rect windowCrop, int layer, SurfaceControl relativeTo, int relativeLayer,
-                float cornerRadius) {
-            this(surface.mSurfaceControl,
-                    FLAG_ALL & ~(FLAG_VISIBILITY | FLAG_BACKGROUND_BLUR_RADIUS), alpha,
-                    matrix, windowCrop, layer, relativeTo, relativeLayer, cornerRadius,
-                    0 /* backgroundBlurRadius */, true);
         }
 
         private SurfaceParams(SurfaceControl surface, int flags, float alpha, Matrix matrix,
                 Rect windowCrop, int layer, SurfaceControl relativeTo, int relativeLayer,
-                float cornerRadius, int backgroundBlurRadius, boolean visible) {
+                float cornerRadius, int backgroundBlurRadius, boolean visible, float shadowRadius) {
             this.flags = flags;
             this.surface = surface;
             this.alpha = alpha;
@@ -334,6 +329,7 @@ public class SyncRtSurfaceTransactionApplierCompat {
             this.cornerRadius = cornerRadius;
             this.backgroundBlurRadius = backgroundBlurRadius;
             this.visible = visible;
+            this.shadowRadius = shadowRadius;
         }
 
         private final int flags;
@@ -349,6 +345,7 @@ public class SyncRtSurfaceTransactionApplierCompat {
         public final SurfaceControl relativeTo;
         public final int relativeLayer;
         public final boolean visible;
+        public final float shadowRadius;
 
         public void applyTo(SurfaceControl.Transaction t) {
             if ((flags & FLAG_MATRIX) != 0) {
@@ -378,6 +375,9 @@ public class SyncRtSurfaceTransactionApplierCompat {
             }
             if ((flags & FLAG_RELATIVE_LAYER) != 0) {
                 t.setRelativeLayer(surface, relativeTo, relativeLayer);
+            }
+            if ((flags & FLAG_SHADOW_RADIUS) != 0) {
+                t.setShadowRadius(surface, shadowRadius);
             }
         }
     }

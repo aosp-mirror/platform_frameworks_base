@@ -19,6 +19,13 @@ package android.view;
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsController.DEBUG;
+import static android.view.InsetsSourceConsumerProto.HAS_WINDOW_FOCUS;
+import static android.view.InsetsSourceConsumerProto.INTERNAL_INSETS_TYPE;
+import static android.view.InsetsSourceConsumerProto.IS_REQUESTED_VISIBLE;
+import static android.view.InsetsSourceConsumerProto.PENDING_FRAME;
+import static android.view.InsetsSourceConsumerProto.PENDING_VISIBLE_FRAME;
+import static android.view.InsetsSourceConsumerProto.SOURCE_CONTROL;
+import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.getDefaultVisibility;
 import static android.view.InsetsState.toPublicType;
 
@@ -28,6 +35,8 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.util.Log;
+import android.util.imetracing.ImeTracing;
+import android.util.proto.ProtoOutputStream;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type.InsetsType;
@@ -319,6 +328,9 @@ public class InsetsSourceConsumer {
 
     @VisibleForTesting(visibility = PACKAGE)
     public boolean notifyAnimationFinished() {
+        if (mType == ITYPE_IME) {
+            ImeTracing.getInstance().triggerDump();
+        }
         if (mPendingFrame != null) {
             InsetsSource source = mState.getSource(mType);
             source.setFrame(mPendingFrame);
@@ -359,5 +371,22 @@ public class InsetsSourceConsumer {
         }
         t.apply();
         onPerceptible(mRequestedVisible);
+    }
+
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(INTERNAL_INSETS_TYPE, InsetsState.typeToString(mType));
+        proto.write(HAS_WINDOW_FOCUS, mHasWindowFocus);
+        proto.write(IS_REQUESTED_VISIBLE, mRequestedVisible);
+        if (mSourceControl != null) {
+            mSourceControl.dumpDebug(proto, SOURCE_CONTROL);
+        }
+        if (mPendingFrame != null) {
+            mPendingFrame.dumpDebug(proto, PENDING_FRAME);
+        }
+        if (mPendingVisibleFrame != null) {
+            mPendingVisibleFrame.dumpDebug(proto, PENDING_VISIBLE_FRAME);
+        }
+        proto.end(token);
     }
 }

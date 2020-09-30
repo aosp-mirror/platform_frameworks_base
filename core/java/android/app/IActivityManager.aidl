@@ -696,4 +696,10 @@ interface IActivityManager {
      * @param enable set it to true to enable the app freezer, false to disable it.
      */
     boolean enableAppFreezer(in boolean enable);
+
+    /**
+     * Holds the AM lock for the specified amount of milliseconds.
+     * This is intended for use by the tests that need to imitate lock contention.
+     */
+    void holdLock(in int durationMs);
 }

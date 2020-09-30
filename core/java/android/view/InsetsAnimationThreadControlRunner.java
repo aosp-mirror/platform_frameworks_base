@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.Trace;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 import android.view.InsetsController.AnimationType;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowInsets.Type.InsetsType;
@@ -118,6 +119,12 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
         for (int i = controls.size() - 1; i >= 0; i--) {
             controls.valueAt(i).release(SurfaceControl::release);
         }
+    }
+
+    @Override
+    @UiThread
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        mControl.dumpDebug(proto, fieldId);
     }
 
     @Override

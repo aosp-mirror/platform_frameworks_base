@@ -7663,6 +7663,8 @@ public final class Settings {
          * @hide
          */
         @UnsupportedAppUsage
+        @TestApi
+        @SuppressLint("NoSettingsProvider")
         public static final String SELECTED_SPELL_CHECKER = "selected_spell_checker";
 
         /**
@@ -7673,6 +7675,8 @@ public final class Settings {
          * @hide
          */
         @UnsupportedAppUsage
+        @TestApi
+        @SuppressLint("NoSettingsProvider")
         public static final String SELECTED_SPELL_CHECKER_SUBTYPE =
                 "selected_spell_checker_subtype";
 
@@ -14464,6 +14468,15 @@ public final class Settings {
          */
         public static final String NR_NSA_TRACKING_SCREEN_OFF_MODE =
                 "nr_nsa_tracking_screen_off_mode";
+
+        /**
+         * Whether to show People Space.
+         * Values are:
+         * 0: Disabled (default)
+         * 1: Enabled
+         * @hide
+         */
+        public static final String SHOW_PEOPLE_SPACE = "show_people_space";
     }
 
     /**

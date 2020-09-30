@@ -115,12 +115,6 @@ public class WindowFrameTests extends WindowTestsBase {
                 expectedRect.bottom);
     }
 
-    private void assertPolicyCrop(WindowState w, int left, int top, int right, int bottom) {
-        Rect policyCrop = new Rect();
-        w.calculatePolicyCrop(policyCrop);
-        assertRect(policyCrop, left, top, right, bottom);
-    }
-
     @Test
     public void testLayoutInFullscreenTaskInsets() {
         // fullscreen task doesn't use bounds for computeFrame
@@ -335,12 +329,10 @@ public class WindowFrameTests extends WindowTestsBase {
         final WindowFrames windowFrames = w.getWindowFrames();
         windowFrames.setFrames(pf, df, cf, vf, dcf, sf);
         w.computeFrame();
-        assertPolicyCrop(w, 0, cf.top, logicalWidth, cf.bottom);
 
         windowFrames.mDecorFrame.setEmpty();
         // Likewise with no decor frame we would get no crop
         w.computeFrame();
-        assertPolicyCrop(w, 0, 0, logicalWidth, logicalHeight);
 
         // Now we set up a window which doesn't fill the entire decor frame.
         // Normally it would be cropped to it's frame but in the case of docked resizing
@@ -355,16 +347,7 @@ public class WindowFrameTests extends WindowTestsBase {
         w.mRequestedHeight = logicalHeight / 2;
         w.computeFrame();
 
-        // Normally the crop is shrunk from the decor frame
-        // to the computed window frame.
-        assertPolicyCrop(w, 0, 0, logicalWidth / 2, logicalHeight / 2);
-
         doReturn(true).when(w).isDockedResizing();
-        // But if we are docked resizing it won't be, however we will still be
-        // shrunk to the decor frame and the display.
-        assertPolicyCrop(w, 0, 0,
-                Math.min(pf.width(), displayInfo.logicalWidth),
-                Math.min(pf.height(), displayInfo.logicalHeight));
     }
 
     @Test

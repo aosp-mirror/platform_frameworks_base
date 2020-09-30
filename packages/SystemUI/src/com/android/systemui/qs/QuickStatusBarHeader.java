@@ -30,6 +30,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.media.AudioManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.AlarmClock;
@@ -64,6 +65,8 @@ import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DualToneHandler;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.demomode.DemoMode;
+import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
@@ -151,6 +154,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private Space mSpace;
     private BatteryMeterView mBatteryRemainingIcon;
     private RingerModeTracker mRingerModeTracker;
+    private DemoModeController mDemoModeController;
+    private DemoMode mDemoModeReceiver;
     private boolean mAllIndicatorsEnabled;
     private boolean mMicCameraIndicatorsEnabled;
 
@@ -207,7 +212,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             StatusBarIconController statusBarIconController,
             ActivityStarter activityStarter, PrivacyItemController privacyItemController,
             CommandQueue commandQueue, RingerModeTracker ringerModeTracker,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger, DemoModeController demoModeController) {
         super(context, attrs);
         mAlarmController = nextAlarmController;
         mZenController = zenModeController;
@@ -219,6 +224,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mCommandQueue = commandQueue;
         mRingerModeTracker = ringerModeTracker;
         mUiEventLogger = uiEventLogger;
+        mDemoModeController = demoModeController;
     }
 
     @Override
@@ -268,6 +274,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         mClockView = findViewById(R.id.clock);
         mClockView.setOnClickListener(this);
+        mDemoModeReceiver = new ClockDemoModeReceiver(mClockView);
         mDateView = findViewById(R.id.date);
         mSpace = findViewById(R.id.space);
 
@@ -526,6 +533,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             updateStatusText();
         });
         mStatusBarIconController.addIconGroup(mIconManager);
+        mDemoModeController.addCallback(mDemoModeReceiver);
         requestApplyInsets();
     }
 
@@ -606,6 +614,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         setListening(false);
         mRingerModeTracker.getRingerModeInternal().removeObservers(this);
         mStatusBarIconController.removeIconGroup(mIconManager);
+        mDemoModeController.removeCallback(mDemoModeReceiver);
         super.onDetachedFromWindow();
     }
 
@@ -769,4 +778,33 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private boolean getChipEnabled() {
         return mMicCameraIndicatorsEnabled || mAllIndicatorsEnabled;
     }
+
+    private static class ClockDemoModeReceiver implements DemoMode {
+        private Clock mClockView;
+
+        @Override
+        public List<String> demoCommands() {
+            return List.of(COMMAND_CLOCK);
+        }
+
+        ClockDemoModeReceiver(Clock clockView) {
+            mClockView = clockView;
+        }
+
+        @Override
+        public void dispatchDemoCommand(String command, Bundle args) {
+            mClockView.dispatchDemoCommand(command, args);
+        }
+
+        @Override
+        public void onDemoModeStarted() {
+            mClockView.onDemoModeStarted();
+        }
+
+        @Override
+        public void onDemoModeFinished() {
+            mClockView.onDemoModeFinished();
+        }
+    }
+
 }

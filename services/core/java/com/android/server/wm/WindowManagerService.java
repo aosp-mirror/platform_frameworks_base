@@ -411,7 +411,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @see #DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY
      */
     static boolean sDisableCustomTaskAnimationProperty =
-            SystemProperties.getBoolean(DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY, false);
+            SystemProperties.getBoolean(DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY, true);
 
     private static final String DISABLE_TRIPLE_BUFFERING_PROPERTY =
             "ro.sf.disable_triple_buffer";
@@ -2423,8 +2423,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             }
             if (winAnimator.mSurfaceController != null) {
-                outSurfaceSize.set(winAnimator.mSurfaceController.getWidth(),
-                                         winAnimator.mSurfaceController.getHeight());
+                win.calculateSurfaceBounds(win.getAttrs(), mTmpRect);
+                outSurfaceSize.set(mTmpRect.width(), mTmpRect.height());
             }
             getInsetsSourceControls(win, outActiveControls);
         }
@@ -8245,6 +8245,16 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             ProtoLog.v(WM_DEBUG_FOCUS, "grantEmbeddedWindowFocus win=%s grantFocus=%s",
                     embeddedWindow.getName(), grantFocus);
+        }
+    }
+
+    @Override
+    public void holdLock(int durationMs) {
+        mContext.enforceCallingPermission(
+                Manifest.permission.INJECT_EVENTS, "holdLock requires shell identity");
+
+        synchronized (mGlobalLock) {
+            SystemClock.sleep(durationMs);
         }
     }
 }

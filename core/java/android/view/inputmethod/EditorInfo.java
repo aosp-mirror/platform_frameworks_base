@@ -17,6 +17,12 @@
 package android.view.inputmethod;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.view.inputmethod.EditorInfoProto.FIELD_ID;
+import static android.view.inputmethod.EditorInfoProto.IME_OPTIONS;
+import static android.view.inputmethod.EditorInfoProto.INPUT_TYPE;
+import static android.view.inputmethod.EditorInfoProto.PACKAGE_NAME;
+import static android.view.inputmethod.EditorInfoProto.PRIVATE_IME_OPTIONS;
+import static android.view.inputmethod.EditorInfoProto.TARGET_INPUT_METHOD_USER_ID;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -32,6 +38,7 @@ import android.text.InputType;
 import android.text.ParcelableSpan;
 import android.text.TextUtils;
 import android.util.Printer;
+import android.util.proto.ProtoOutputStream;
 import android.view.View;
 import android.view.autofill.AutofillId;
 
@@ -792,6 +799,26 @@ public class EditorInfo implements InputType, Parcelable {
                     break;
             }
         }
+    }
+
+    /**
+     * Export the state of {@link EditorInfo} into a protocol buffer output stream.
+     *
+     * @param proto Stream to write the state to
+     * @param fieldId FieldId of ViewRootImpl as defined in the parent message
+     * @hide
+     */
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(INPUT_TYPE, inputType);
+        proto.write(IME_OPTIONS, imeOptions);
+        proto.write(PRIVATE_IME_OPTIONS, privateImeOptions);
+        proto.write(PACKAGE_NAME, packageName);
+        proto.write(FIELD_ID, this.fieldId);
+        if (targetInputMethodUser != null) {
+            proto.write(TARGET_INPUT_METHOD_USER_ID, targetInputMethodUser.getIdentifier());
+        }
+        proto.end(token);
     }
 
     /**

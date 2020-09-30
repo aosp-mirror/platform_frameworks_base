@@ -1319,34 +1319,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 mBackground.getRight(), mBackground.getBottom(), Op.UNION);
     }
 
-    void onDockedTopTask() {
-        mState.animateAfterRecentsDrawn = true;
-        startDragging(false /* animate */, false /* touching */);
-        updateDockSide();
-        mEntranceAnimationRunning = true;
-
-        resizeStackSurfaces(calculatePositionForInsetBounds(),
-                mSplitLayout.getSnapAlgorithm().getMiddleTarget().position,
-                mSplitLayout.getSnapAlgorithm().getMiddleTarget(),
-                null /* transaction */);
-    }
-
-    void onRecentsDrawn() {
-        updateDockSide();
-        final int position = calculatePositionForInsetBounds();
-        if (mState.animateAfterRecentsDrawn) {
-            mState.animateAfterRecentsDrawn = false;
-
-            mHandler.post(() -> {
-                // Delay switching resizing mode because this might cause jank in recents animation
-                // that's longer than this animation.
-                stopDragging(position, getSnapAlgorithm().getMiddleTarget(),
-                        mLongPressEntraceAnimDuration, Interpolators.FAST_OUT_SLOW_IN,
-                        200 /* endDelay */);
-            });
-        }
-    }
-
     void onUndockingTask() {
         int dockSide = mSplitLayout.getPrimarySplitSide();
         if (inSplitMode()) {

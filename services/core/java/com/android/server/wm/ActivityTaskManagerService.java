@@ -666,7 +666,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     CompatModePackages mCompatModePackages;
 
-    private FontScaleSettingObserver mFontScaleSettingObserver;
+    private SettingObserver mSettingsObserver;
 
     WindowOrganizerController mWindowOrganizerController;
     TaskOrganizerController mTaskOrganizerController;
@@ -676,16 +676,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private int mDeviceOwnerUid = Process.INVALID_UID;
 
-    private final class FontScaleSettingObserver extends ContentObserver {
+    private final class SettingObserver extends ContentObserver {
         private final Uri mFontScaleUri = Settings.System.getUriFor(FONT_SCALE);
         private final Uri mHideErrorDialogsUri = Settings.Global.getUriFor(HIDE_ERROR_DIALOGS);
+        private final Uri mForceBoldTextUri = Settings.Secure.getUriFor(
+                Settings.Secure.FORCE_BOLD_TEXT);
 
-        public FontScaleSettingObserver() {
+        SettingObserver() {
             super(mH);
             final ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(mFontScaleUri, false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(mHideErrorDialogsUri, false, this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(mForceBoldTextUri, false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -698,6 +701,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     synchronized (mGlobalLock) {
                         updateShouldShowDialogsLocked(getGlobalConfiguration());
                     }
+                } else if (mForceBoldTextUri.equals(uri)) {
+                    updateForceBoldTextIfNeeded(userId);
                 }
             }
         }
@@ -757,7 +762,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     public void installSystemProviders() {
-        mFontScaleSettingObserver = new FontScaleSettingObserver();
+        mSettingsObserver = new SettingObserver();
     }
 
     public void retrieveSettings(ContentResolver resolver) {
@@ -5362,6 +5367,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    private void updateForceBoldTextIfNeeded(@UserIdInt int userId) {
+        final int forceBoldTextConfig = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.FORCE_BOLD_TEXT, Configuration.FORCE_BOLD_TEXT_UNDEFINED, userId);
+        synchronized (mGlobalLock) {
+            if (getGlobalConfiguration().forceBoldText == forceBoldTextConfig) {
+                return;
+            }
+            final Configuration configuration =
+                    mWindowManager.computeNewConfiguration(DEFAULT_DISPLAY);
+            configuration.forceBoldText = forceBoldTextConfig;
+            updatePersistentConfiguration(configuration, userId);
+        }
+    }
+
     // Actually is sleeping or shutting down or whatever else in the future
     // is an inactive state.
     boolean isSleepingOrShuttingDownLocked() {
@@ -7184,16 +7203,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 final ActivityRecord top = mRootWindowContainer.getTopResumedActivity();
                 return top != null ? top.app : null;
-            }
-        }
-
-        @HotPath(caller = HotPath.OOM_ADJUSTMENT)
-        @Override
-        public void rankTaskLayersIfNeeded() {
-            synchronized (mGlobalLockWithoutBoost) {
-                if (mRootWindowContainer != null) {
-                    mRootWindowContainer.rankTaskLayersIfNeeded();
-                }
             }
         }
 

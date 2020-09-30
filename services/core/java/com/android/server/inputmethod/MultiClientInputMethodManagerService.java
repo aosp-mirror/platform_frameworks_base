@@ -1805,5 +1805,16 @@ public final class MultiClientInputMethodManagerService {
                 mUserDataMap.dump(fd, ipw, args);
             }
         }
+
+        @BinderThread
+        @Override
+        public void startProtoDump(byte[] clientProtoDump) throws RemoteException {
+        }
+
+        @BinderThread
+        @Override
+        public boolean isImeTraceEnabled() throws RemoteException {
+            return false;
+        }
     }
 }

@@ -6214,8 +6214,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
         synchronized (mLock) {
             final AndroidPackage p = mPackages.get(packageName);
+            if (p == null) {
+                return false;
+            }
             final PackageSetting ps = getPackageSetting(p.getPackageName());
-            if (p == null || ps == null) {
+            if (ps == null) {
                 return false;
             }
             final int callingUid = Binder.getCallingUid();
@@ -25948,6 +25951,15 @@ public class PackageManagerService extends IPackageManager.Stub
     private void writeSettingsLPrTEMP() {
         mPermissionManager.writeStateToPackageSettingsTEMP();
         mSettings.writeLPr();
+    }
+
+    @Override
+    public void holdLock(int durationMs) {
+        mContext.enforceCallingPermission(
+                Manifest.permission.INJECT_EVENTS, "holdLock requires shell identity");
+        synchronized (mLock) {
+            SystemClock.sleep(durationMs);
+        }
     }
 }
 

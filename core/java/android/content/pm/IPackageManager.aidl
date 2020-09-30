@@ -795,4 +795,6 @@ interface IPackageManager {
     boolean isAutoRevokeWhitelisted(String packageName);
 
     void grantImplicitAccess(int queryingUid, String visibleAuthority);
+
+    void holdLock(in int durationMs);
 }
