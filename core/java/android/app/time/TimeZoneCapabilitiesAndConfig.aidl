@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.app.timezonedetector;
+package android.app.time;
 
-parcelable TimeZoneCapabilities;
+parcelable TimeZoneCapabilitiesAndConfig;

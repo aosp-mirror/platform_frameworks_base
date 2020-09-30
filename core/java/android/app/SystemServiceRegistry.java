@@ -33,6 +33,7 @@ import android.app.prediction.AppPredictionManager;
 import android.app.role.RoleControllerManager;
 import android.app.role.RoleManager;
 import android.app.slice.SliceManager;
+import android.app.time.TimeManager;
 import android.app.timedetector.TimeDetector;
 import android.app.timedetector.TimeDetectorImpl;
 import android.app.timezone.RulesManager;
@@ -1216,6 +1217,14 @@ public final class SystemServiceRegistry {
                     public TimeZoneDetector createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
                         return new TimeZoneDetectorImpl();
+                    }});
+
+        registerService(Context.TIME_MANAGER, TimeManager.class,
+                new CachedServiceFetcher<TimeManager>() {
+                    @Override
+                    public TimeManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new TimeManager();
                     }});
 
         registerService(Context.PERMISSION_SERVICE, PermissionManager.class,

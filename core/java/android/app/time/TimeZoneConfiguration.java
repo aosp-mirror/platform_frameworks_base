@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package android.app.timezonedetector;
+package android.app.time;
 
 import android.annotation.NonNull;
 import android.annotation.StringDef;
-import android.annotation.UserIdInt;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -36,15 +35,13 @@ import java.util.Objects;
  * several settings, the device behavior may not be directly affected by the setting value.
  *
  * <p>Settings can be left absent when updating configuration via {@link
- * TimeZoneDetector#updateConfiguration(TimeZoneConfiguration)} and those settings will not be
+ * TimeManager#updateTimeZoneConfiguration(TimeZoneConfiguration)} and those settings will not be
  * changed. Not all configuration settings can be modified by all users: see {@link
- * TimeZoneDetector#getCapabilities()} and {@link TimeZoneCapabilities} for details.
- *
- * <p>See {@link #hasSetting(String)} with {@code PROPERTY_} constants for testing for the presence
- * of individual settings.
+ * TimeManager#getTimeZoneCapabilitiesAndConfig()} and {@link TimeZoneCapabilities} for details.
  *
  * @hide
  */
+// @SystemApi
 public final class TimeZoneConfiguration implements Parcelable {
 
     public static final @NonNull Creator<TimeZoneConfiguration> CREATOR =
@@ -58,53 +55,48 @@ public final class TimeZoneConfiguration implements Parcelable {
                 }
             };
 
-    /** All configuration properties */
+    /**
+     * All configuration properties
+     *
+     * @hide
+     */
     @StringDef({ SETTING_AUTO_DETECTION_ENABLED, SETTING_GEO_DETECTION_ENABLED })
     @Retention(RetentionPolicy.SOURCE)
     @interface Setting {}
 
     /** See {@link TimeZoneConfiguration#isAutoDetectionEnabled()} for details. */
     @Setting
-    public static final String SETTING_AUTO_DETECTION_ENABLED = "autoDetectionEnabled";
+    private static final String SETTING_AUTO_DETECTION_ENABLED = "autoDetectionEnabled";
 
     /** See {@link TimeZoneConfiguration#isGeoDetectionEnabled()} for details. */
     @Setting
-    public static final String SETTING_GEO_DETECTION_ENABLED = "geoDetectionEnabled";
+    private static final String SETTING_GEO_DETECTION_ENABLED = "geoDetectionEnabled";
 
-    private final @UserIdInt int mUserId;
     @NonNull private final Bundle mBundle;
 
     private TimeZoneConfiguration(Builder builder) {
-        this.mUserId = builder.mUserId;
         this.mBundle = Objects.requireNonNull(builder.mBundle);
     }
 
     private static TimeZoneConfiguration createFromParcel(Parcel in) {
-        return new TimeZoneConfiguration.Builder(in.readInt())
+        return new TimeZoneConfiguration.Builder()
                 .setPropertyBundleInternal(in.readBundle())
                 .build();
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(mUserId);
         dest.writeBundle(mBundle);
     }
 
-    /** Returns the ID of the user this configuration is associated with. */
-    public @UserIdInt int getUserId() {
-        return mUserId;
-    }
-
-    /** Returns {@code true} if all known settings are present. */
+    /**
+     * Returns {@code true} if all known settings are present.
+     *
+     * @hide
+     */
     public boolean isComplete() {
-        return hasSetting(SETTING_AUTO_DETECTION_ENABLED)
-                && hasSetting(SETTING_GEO_DETECTION_ENABLED);
-    }
-
-    /** Returns true if the specified setting is set. */
-    public boolean hasSetting(@Setting String setting) {
-        return mBundle.containsKey(setting);
+        return hasIsAutoDetectionEnabled()
+                && hasIsGeoDetectionEnabled();
     }
 
     /**
@@ -112,9 +104,10 @@ public final class TimeZoneConfiguration implements Parcelable {
      * controls whether a device will attempt to determine the time zone automatically using
      * contextual information if the device supports auto detection.
      *
-     * <p>This setting is global and can be updated by some users.
+     * <p>See {@link TimeZoneCapabilities#getConfigureAutoDetectionEnabledCapability()} for how to
+     * tell if the setting is meaningful for the current user at this time.
      *
-     * @throws IllegalStateException if the setting has not been set
+     * @throws IllegalStateException if the setting is not present
      */
     public boolean isAutoDetectionEnabled() {
         enforceSettingPresent(SETTING_AUTO_DETECTION_ENABLED);
@@ -122,19 +115,37 @@ public final class TimeZoneConfiguration implements Parcelable {
     }
 
     /**
+     * Returns {@code true} if the {@link #isAutoDetectionEnabled()} setting is present.
+     *
+     * @hide
+     */
+    public boolean hasIsAutoDetectionEnabled() {
+        return mBundle.containsKey(SETTING_AUTO_DETECTION_ENABLED);
+    }
+
+    /**
      * Returns the value of the {@link #SETTING_GEO_DETECTION_ENABLED} setting. This
-     * controls whether a device can use geolocation to determine time zone. Only used when
-     * {@link #isAutoDetectionEnabled()} is {@code true} and when the user has allowed their
-     * location to be used.
+     * controls whether the device can use geolocation to determine time zone. This value may only
+     * be used by Android under some circumstances. For example, it is not used when
+     * {@link #isGeoDetectionEnabled()} is {@code false}.
      *
-     * <p>This setting is user-scoped and can be updated by some users.
-     * See {@link TimeZoneCapabilities#getConfigureGeoDetectionEnabled()}.
+     * <p>See {@link TimeZoneCapabilities#getConfigureGeoDetectionEnabledCapability()} for how to
+     * tell if the setting is meaningful for the current user at this time.
      *
-     * @throws IllegalStateException if the setting has not been set
+     * @throws IllegalStateException if the setting is not present
      */
     public boolean isGeoDetectionEnabled() {
         enforceSettingPresent(SETTING_GEO_DETECTION_ENABLED);
         return mBundle.getBoolean(SETTING_GEO_DETECTION_ENABLED);
+    }
+
+    /**
+     * Returns {@code true} if the {@link #isGeoDetectionEnabled()} setting is present.
+     *
+     * @hide
+     */
+    public boolean hasIsGeoDetectionEnabled() {
+        return mBundle.containsKey(SETTING_GEO_DETECTION_ENABLED);
     }
 
     @Override
@@ -151,20 +162,18 @@ public final class TimeZoneConfiguration implements Parcelable {
             return false;
         }
         TimeZoneConfiguration that = (TimeZoneConfiguration) o;
-        return mUserId == that.mUserId
-                && mBundle.kindofEquals(that.mBundle);
+        return mBundle.kindofEquals(that.mBundle);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mUserId, mBundle);
+        return Objects.hash(mBundle);
     }
 
     @Override
     public String toString() {
         return "TimeZoneConfiguration{"
-                + "mUserId=" + mUserId
-                + ", mBundle=" + mBundle
+                + "mBundle=" + mBundle
                 + '}';
     }
 
@@ -174,43 +183,43 @@ public final class TimeZoneConfiguration implements Parcelable {
         }
     }
 
-    /** @hide */
-    public static class Builder {
+    /**
+     * A builder for {@link TimeZoneConfiguration} objects.
+     *
+     * @hide
+     */
+    // @SystemApi
+    public static final class Builder {
 
-        private final @UserIdInt int mUserId;
         private final Bundle mBundle = new Bundle();
 
         /**
-         * Creates a new Builder for a userId with no settings held.
+         * Creates a new Builder with no settings held.
          */
-        public Builder(@UserIdInt int userId) {
-            mUserId = userId;
+        public Builder() {
         }
 
         /**
-         * Creates a new Builder by copying the user ID and settings from an existing instance.
+         * Creates a new Builder by copying the settings from an existing instance.
          */
-        public Builder(TimeZoneConfiguration toCopy) {
-            this.mUserId = toCopy.mUserId;
+        public Builder(@NonNull TimeZoneConfiguration toCopy) {
             mergeProperties(toCopy);
         }
 
         /**
          * Merges {@code other} settings into this instances, replacing existing values in this
          * where the settings appear in both.
+         *
+         * @hide
          */
-        public Builder mergeProperties(TimeZoneConfiguration other) {
-            if (mUserId != other.mUserId) {
-                throw new IllegalArgumentException(
-                        "Cannot merge configurations for different user IDs."
-                                + " this.mUserId=" + this.mUserId
-                                + ", other.mUserId=" + other.mUserId);
-            }
+        @NonNull
+        public Builder mergeProperties(@NonNull TimeZoneConfiguration other) {
             this.mBundle.putAll(other.mBundle);
             return this;
         }
 
-        Builder setPropertyBundleInternal(Bundle bundle) {
+        @NonNull
+        Builder setPropertyBundleInternal(@NonNull Bundle bundle) {
             this.mBundle.putAll(bundle);
             return this;
         }
@@ -218,6 +227,7 @@ public final class TimeZoneConfiguration implements Parcelable {
         /**
          * Sets the state of the {@link #SETTING_AUTO_DETECTION_ENABLED} setting.
          */
+        @NonNull
         public Builder setAutoDetectionEnabled(boolean enabled) {
             this.mBundle.putBoolean(SETTING_AUTO_DETECTION_ENABLED, enabled);
             return this;
@@ -226,6 +236,7 @@ public final class TimeZoneConfiguration implements Parcelable {
         /**
          * Sets the state of the {@link #SETTING_GEO_DETECTION_ENABLED} setting.
          */
+        @NonNull
         public Builder setGeoDetectionEnabled(boolean enabled) {
             this.mBundle.putBoolean(SETTING_GEO_DETECTION_ENABLED, enabled);
             return this;

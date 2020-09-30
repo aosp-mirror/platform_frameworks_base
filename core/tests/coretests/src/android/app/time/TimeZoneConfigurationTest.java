@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.app.timezonedetector;
+package android.app.time;
 
 import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
 
@@ -23,16 +23,20 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(AndroidJUnit4.class)
+@SmallTest
 public class TimeZoneConfigurationTest {
-
-    private static final int ARBITRARY_USER_ID = 9876;
 
     @Test
     public void testBuilder_copyConstructor() {
         TimeZoneConfiguration.Builder builder1 =
-                new TimeZoneConfiguration.Builder(ARBITRARY_USER_ID)
+                new TimeZoneConfiguration.Builder()
                         .setAutoDetectionEnabled(true)
                         .setGeoDetectionEnabled(true);
         TimeZoneConfiguration configuration1 = builder1.build();
@@ -45,27 +49,27 @@ public class TimeZoneConfigurationTest {
 
     @Test
     public void testIntrospectionMethods() {
-        TimeZoneConfiguration empty = new TimeZoneConfiguration.Builder(ARBITRARY_USER_ID).build();
+        TimeZoneConfiguration empty = new TimeZoneConfiguration.Builder().build();
         assertFalse(empty.isComplete());
-        assertFalse(empty.hasSetting(TimeZoneConfiguration.SETTING_AUTO_DETECTION_ENABLED));
+        assertFalse(empty.hasIsAutoDetectionEnabled());
 
-        TimeZoneConfiguration completeConfig = new TimeZoneConfiguration.Builder(ARBITRARY_USER_ID)
+        TimeZoneConfiguration completeConfig = new TimeZoneConfiguration.Builder()
                 .setAutoDetectionEnabled(true)
                 .setGeoDetectionEnabled(true)
                 .build();
         assertTrue(completeConfig.isComplete());
-        assertTrue(completeConfig.hasSetting(TimeZoneConfiguration.SETTING_AUTO_DETECTION_ENABLED));
+        assertTrue(completeConfig.hasIsGeoDetectionEnabled());
     }
 
     @Test
     public void testBuilder_mergeProperties() {
-        TimeZoneConfiguration configuration1 = new TimeZoneConfiguration.Builder(ARBITRARY_USER_ID)
+        TimeZoneConfiguration configuration1 = new TimeZoneConfiguration.Builder()
                 .setAutoDetectionEnabled(true)
                 .build();
 
         {
             TimeZoneConfiguration mergedEmptyAnd1 =
-                    new TimeZoneConfiguration.Builder(ARBITRARY_USER_ID)
+                    new TimeZoneConfiguration.Builder()
                             .mergeProperties(configuration1)
                             .build();
             assertEquals(configuration1, mergedEmptyAnd1);
@@ -73,7 +77,7 @@ public class TimeZoneConfigurationTest {
 
         {
             TimeZoneConfiguration configuration2 =
-                    new TimeZoneConfiguration.Builder(ARBITRARY_USER_ID)
+                    new TimeZoneConfiguration.Builder()
                             .setAutoDetectionEnabled(false)
                             .build();
 
@@ -90,22 +94,14 @@ public class TimeZoneConfigurationTest {
     @Test
     public void testEquals() {
         TimeZoneConfiguration.Builder builder1 =
-                new TimeZoneConfiguration.Builder(ARBITRARY_USER_ID);
+                new TimeZoneConfiguration.Builder();
         {
             TimeZoneConfiguration one = builder1.build();
             assertEquals(one, one);
         }
 
-        {
-            TimeZoneConfiguration.Builder differentUserBuilder =
-                    new TimeZoneConfiguration.Builder(ARBITRARY_USER_ID + 1);
-            TimeZoneConfiguration one = builder1.build();
-            TimeZoneConfiguration two = differentUserBuilder.build();
-            assertNotEquals(one, two);
-        }
-
         TimeZoneConfiguration.Builder builder2 =
-                new TimeZoneConfiguration.Builder(ARBITRARY_USER_ID);
+                new TimeZoneConfiguration.Builder();
         {
             TimeZoneConfiguration one = builder1.build();
             TimeZoneConfiguration two = builder2.build();
@@ -159,7 +155,7 @@ public class TimeZoneConfigurationTest {
     @Test
     public void testParcelable() {
         TimeZoneConfiguration.Builder builder =
-                new TimeZoneConfiguration.Builder(ARBITRARY_USER_ID);
+                new TimeZoneConfiguration.Builder();
         assertRoundTripParcelable(builder.build());
 
         builder.setAutoDetectionEnabled(true);
