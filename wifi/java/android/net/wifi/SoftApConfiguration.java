@@ -32,7 +32,6 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -712,10 +711,6 @@ public final class SoftApConfiguration implements Parcelable {
                 }
             } else {
                 Preconditions.checkStringNotEmpty(passphrase);
-                final CharsetEncoder asciiEncoder = StandardCharsets.US_ASCII.newEncoder();
-                if (!asciiEncoder.canEncode(passphrase)) {
-                    throw new IllegalArgumentException("passphrase not ASCII encodable");
-                }
                 if (securityType == SECURITY_TYPE_WPA2_PSK
                         || securityType == SECURITY_TYPE_WPA3_SAE_TRANSITION) {
                     if (passphrase.length() < PSK_MIN_LEN || passphrase.length() > PSK_MAX_LEN) {
