@@ -64,24 +64,6 @@ genrule {
 }
 
 genrule {
-    name: "frameworks-base-api-removed-merged.txt",
-    srcs: [
-        ":conscrypt.module.public.api{.public.removed-api.txt}",
-        ":framework-media{.public.removed-api.txt}",
-        ":framework-mediaprovider{.public.removed-api.txt}",
-        ":framework-permission{.public.removed-api.txt}",
-        ":framework-sdkextensions{.public.removed-api.txt}",
-        ":framework-statsd{.public.removed-api.txt}",
-        ":framework-tethering{.public.removed-api.txt}",
-        ":framework-wifi{.public.removed-api.txt}",
-        ":non-updatable-removed.txt",
-    ],
-    out: ["removed.txt"],
-    tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
-}
-
-genrule {
     name: "frameworks-base-api-system-current-merged.txt",
     srcs: [
         ":framework-graphics{.system.api.txt}",
@@ -100,23 +82,6 @@ genrule {
 }
 
 genrule {
-    name: "frameworks-base-api-system-removed-merged.txt",
-    srcs: [
-        ":framework-media{.system.removed-api.txt}",
-        ":framework-mediaprovider{.system.removed-api.txt}",
-        ":framework-permission{.system.removed-api.txt}",
-        ":framework-sdkextensions{.system.removed-api.txt}",
-        ":framework-statsd{.system.removed-api.txt}",
-        ":framework-tethering{.system.removed-api.txt}",
-        ":framework-wifi{.system.removed-api.txt}",
-        ":non-updatable-system-removed.txt",
-    ],
-    out: ["system-removed.txt"],
-    tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
-}
-
-genrule {
     name: "frameworks-base-api-module-lib-current-merged.txt",
     srcs: [
         ":framework-graphics{.module-lib.api.txt}",
@@ -130,23 +95,6 @@ genrule {
         ":non-updatable-module-lib-current.txt",
     ],
     out: ["module-lib-current.txt"],
-    tools: ["metalava"],
-    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
-}
-
-genrule {
-    name: "frameworks-base-api-module-lib-removed-merged.txt",
-    srcs: [
-        ":framework-media{.module-lib.removed-api.txt}",
-        ":framework-mediaprovider{.module-lib.removed-api.txt}",
-        ":framework-permission{.module-lib.removed-api.txt}",
-        ":framework-sdkextensions{.module-lib.removed-api.txt}",
-        ":framework-statsd{.module-lib.removed-api.txt}",
-        ":framework-tethering{.module-lib.removed-api.txt}",
-        ":framework-wifi{.module-lib.removed-api.txt}",
-        ":non-updatable-module-lib-removed.txt",
-    ],
-    out: ["module-lib-removed.txt"],
     tools: ["metalava"],
     cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
 }
