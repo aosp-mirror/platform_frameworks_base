@@ -68,6 +68,7 @@ public class WifiConfigurationTest {
         WifiConfiguration config = new WifiConfiguration();
         config.setPasspointManagementObjectTree(cookie);
         config.trusted = false;
+        config.oemPaid = true;
         config.updateIdentifier = "1234";
         config.fromWifiNetworkSpecifier = true;
         config.fromWifiNetworkSuggestion = true;
