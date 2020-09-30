@@ -39,27 +39,6 @@ public final class CallForwardingInfo implements Parcelable {
     private static final String TAG = "CallForwardingInfo";
 
     /**
-     * Indicates that the operation was successful.
-     */
-    public static final int SUCCESS = 0;
-
-    /**
-     * Indicates that setting or retrieving the call forwarding info failed with an unknown error.
-     */
-    public static final int ERROR_UNKNOWN = 1;
-
-    /**
-     * Indicates that call forwarding is not enabled because the recipient is not on a
-     * Fixed Dialing Number (FDN) list.
-     */
-    public static final int ERROR_FDN_CHECK_FAILURE = 2;
-
-    /**
-     * Indicates that call forwarding is not supported on the network at this time.
-     */
-    public static final int ERROR_NOT_SUPPORTED = 3;
-
-    /**
      * Indicates that call forwarding reason is "unconditional".
      * Reference: 3GPP TS 27.007 version 10.3.0 Release 10 - 7.11 Call forwarding number
      *            and conditions +CCFC
@@ -102,19 +81,6 @@ public final class CallForwardingInfo implements Parcelable {
      *            and conditions +CCFC
      */
     public static final int REASON_ALL_CONDITIONAL = 5;
-
-    /**
-     * Call forwarding errors
-     * @hide
-     */
-    @IntDef(prefix = { "ERROR_" }, value = {
-            ERROR_UNKNOWN,
-            ERROR_NOT_SUPPORTED,
-            ERROR_FDN_CHECK_FAILURE
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface CallForwardingError{
-    }
 
     /**
      * Call forwarding reason types
