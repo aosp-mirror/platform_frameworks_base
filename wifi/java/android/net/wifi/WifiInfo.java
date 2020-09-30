@@ -159,6 +159,11 @@ public class WifiInfo implements Parcelable {
     private boolean mTrusted;
 
     /**
+     * Whether the network is oem paid or not.
+     */
+    private boolean mOemPaid;
+
+    /**
      * OSU (Online Sign Up) AP for Passpoint R2.
      */
     private boolean mOsuAp;
@@ -358,6 +363,7 @@ public class WifiInfo implements Parcelable {
             mMeteredHint = source.mMeteredHint;
             mEphemeral = source.mEphemeral;
             mTrusted = source.mTrusted;
+            mTrusted = source.mOemPaid;
             mRequestingPackageName =
                     source.mRequestingPackageName;
             mOsuAp = source.mOsuAp;
@@ -722,6 +728,16 @@ public class WifiInfo implements Parcelable {
     }
 
     /** {@hide} */
+    public void setOemPaid(boolean oemPaid) {
+        mOemPaid = oemPaid;
+    }
+
+    /** {@hide} */
+    public boolean isOemPaid() {
+        return mOemPaid;
+    }
+
+    /** {@hide} */
     public void setOsuAp(boolean osuAp) {
         mOsuAp = osuAp;
     }
@@ -958,6 +974,7 @@ public class WifiInfo implements Parcelable {
         dest.writeInt(mMeteredHint ? 1 : 0);
         dest.writeInt(mEphemeral ? 1 : 0);
         dest.writeInt(mTrusted ? 1 : 0);
+        dest.writeInt(mOemPaid ? 1 : 0);
         dest.writeInt(score);
         dest.writeLong(txSuccess);
         dest.writeDouble(mSuccessfulTxPacketsPerSecond);
@@ -1003,6 +1020,7 @@ public class WifiInfo implements Parcelable {
                 info.mMeteredHint = in.readInt() != 0;
                 info.mEphemeral = in.readInt() != 0;
                 info.mTrusted = in.readInt() != 0;
+                info.mOemPaid = in.readInt() != 0;
                 info.score = in.readInt();
                 info.txSuccess = in.readLong();
                 info.mSuccessfulTxPacketsPerSecond = in.readDouble();
