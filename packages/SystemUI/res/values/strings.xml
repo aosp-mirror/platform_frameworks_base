@@ -2829,4 +2829,9 @@
     <string name="media_output_dialog_connect_failed">Couldn\'t connect. Try again.</string>
     <!-- Title for pairing item [CHAR LIMIT=60] -->
     <string name="media_output_dialog_pairing_new">Pair new device</string>
+
+    <!-- Label for clip data when copying the build number off QS [CHAR LIMIT=NONE]-->
+    <string name="build_number_clip_data_label">Build number</string>
+    <!-- Text to display when copying the build number off QS [CHAR LIMIT=NONE]-->
+    <string name="build_number_copy_toast">Build number copied to clipboard.</string>
 </resources>
