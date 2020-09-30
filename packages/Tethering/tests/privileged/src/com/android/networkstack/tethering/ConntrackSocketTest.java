@@ -120,8 +120,7 @@ public class ConntrackSocketTest {
                     break;
                 }
             }
-        }
-        finally {
+        } finally {
             socket.close();
             serverSocket.close();
         }
