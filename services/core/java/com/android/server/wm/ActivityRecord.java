@@ -2700,7 +2700,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // activities be updated, they may be seen by users.
                 ensureVisibility = true;
             } else if (mStackSupervisor.getKeyguardController().isKeyguardLocked()
-                    && stack.topActivityOccludesKeyguard()) {
+                    && mStackSupervisor.getKeyguardController().topActivityOccludesKeyguard(this)) {
                 // Ensure activity visibilities and update lockscreen occluded/dismiss state when
                 // finishing the top activity that occluded keyguard. So that, the
                 // ActivityStack#mTopActivityOccludesKeyguard can be updated and the activity below
@@ -4631,15 +4631,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(this);
     }
 
-    private void updateVisibleIgnoringKeyguard(boolean behindFullscreenActivity) {
-        // Check whether activity should be visible without Keyguard influence
-        visibleIgnoringKeyguard = (!behindFullscreenActivity || mLaunchTaskBehind)
-                && okToShowLocked();
-    }
-
     /** @return {@code true} if this activity should be made visible. */
     private boolean shouldBeVisible(boolean behindFullscreenActivity, boolean ignoringKeyguard) {
-        updateVisibleIgnoringKeyguard(behindFullscreenActivity);
+        updateVisibilityIgnoringKeyguard(behindFullscreenActivity);
 
         if (ignoringKeyguard) {
             return visibleIgnoringKeyguard;
@@ -4673,20 +4667,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mStackSupervisor.getKeyguardController().checkKeyguardVisibility(this);
     }
 
-    void updateVisibility(boolean behindFullscreenActivity) {
-        updateVisibleIgnoringKeyguard(behindFullscreenActivity);
-        final Task task = getRootTask();
-        if (task == null || !visibleIgnoringKeyguard) {
-            return;
-        }
-        // Now check whether it's really visible depending on Keyguard state, and update
-        // {@link ActivityStack} internal states.
-        // Inform the method if this activity is the top activity of this stack, but exclude the
-        // case where this is the top activity in a pinned stack.
-        final boolean isTop = this == task.getTopNonFinishingActivity();
-        final boolean isTopNotPinnedStack = task.isAttached()
-                && task.getDisplayArea().isTopNotFinishNotPinnedStack(task);
-        task.updateKeyguardVisibility(this, isTop && isTopNotPinnedStack);
+    void updateVisibilityIgnoringKeyguard(boolean behindFullscreenActivity) {
+        visibleIgnoringKeyguard = (!behindFullscreenActivity || mLaunchTaskBehind)
+                && okToShowLocked();
     }
 
     boolean shouldBeVisible() {

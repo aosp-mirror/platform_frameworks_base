@@ -2003,20 +2003,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         notifyClients);
             }
         } finally {
-            mStackSupervisor.endActivityVisibilityUpdate(starting, configChanges, preserveWindows,
-                    notifyClients);
+            mStackSupervisor.endActivityVisibilityUpdate();
         }
-    }
-
-    void commitActivitiesVisible(ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean notifyClients) {
-        forAllTaskDisplayAreas(taskDisplayArea -> {
-            for (int stackNdx = taskDisplayArea.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
-                final Task task = taskDisplayArea.getStackAt(stackNdx);
-                task.commitActivitiesVisible(starting, configChanges, preserveWindows,
-                        notifyClients);
-            }
-        });
     }
 
     boolean switchUser(int userId, UserState uss) {
