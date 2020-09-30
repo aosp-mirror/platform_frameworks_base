@@ -16,16 +16,4 @@
 
 package com.android.server.wm.flicker.pip
 
-import com.android.server.wm.flicker.NonRotationTestBase
-import com.android.server.wm.flicker.helpers.PipAppHelper
-
-abstract class PipTestBase(
-    rotationName: String,
-    rotation: Int
-) : NonRotationTestBase(rotationName, rotation) {
-    protected val testApp = PipAppHelper(instrumentation)
-
-    companion object {
-        const val sPipWindowTitle = "PipMenuActivity"
-    }
-}
+internal const val PIP_WINDOW_TITLE = "PipMenuActivity"
