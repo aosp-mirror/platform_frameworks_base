@@ -1126,7 +1126,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Verify the stack-top activity is occluded keyguard.
         assertEquals(topActivity, mStack.topRunningActivity());
-        assertTrue(mStack.topActivityOccludesKeyguard());
+        assertTrue(keyguardController.isDisplayOccluded(DEFAULT_DISPLAY));
 
         // Finish the top activity
         topActivity.setState(PAUSED, "true");
@@ -1135,7 +1135,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Verify new top activity does not occlude keyguard.
         assertEquals(mActivity, mStack.topRunningActivity());
-        assertFalse(mStack.topActivityOccludesKeyguard());
+        assertFalse(keyguardController.isDisplayOccluded(DEFAULT_DISPLAY));
     }
 
     /**
