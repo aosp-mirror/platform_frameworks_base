@@ -5803,7 +5803,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         mNotifyBlastOnSurfacePlacement = true;
-        return mWinAnimator.finishDrawingLocked(null);
+        mWinAnimator.finishDrawingLocked(null);
+        // We always want to force a traversal after a finish draw for blast sync.
+        return true;
     }
 
     private void notifyBlastSyncTransaction() {
