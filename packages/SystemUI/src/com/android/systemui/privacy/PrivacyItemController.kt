@@ -16,25 +16,23 @@
 
 package com.android.systemui.privacy
 
-import android.app.ActivityManager
 import android.app.AppOpsManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.UserInfo
 import android.os.UserHandle
-import android.os.UserManager
 import android.provider.DeviceConfig
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags
 import com.android.systemui.Dumpable
 import com.android.systemui.appops.AppOpItem
 import com.android.systemui.appops.AppOpsController
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.io.FileDescriptor
@@ -48,9 +46,8 @@ class PrivacyItemController @Inject constructor(
     private val appOpsController: AppOpsController,
     @Main uiExecutor: DelayableExecutor,
     @Background private val bgExecutor: Executor,
-    private val broadcastDispatcher: BroadcastDispatcher,
     private val deviceConfigProxy: DeviceConfigProxy,
-    private val userManager: UserManager,
+    private val userTracker: UserTracker,
     dumpManager: DumpManager
 ) : Dumpable {
 
@@ -153,12 +150,15 @@ class PrivacyItemController @Inject constructor(
     }
 
     @VisibleForTesting
-    internal var userSwitcherReceiver = Receiver()
-        set(value) {
-            unregisterReceiver()
-            field = value
-            if (listening) registerReceiver()
+    internal var userTrackerCallback = object : UserTracker.Callback {
+        override fun onUserChanged(newUser: Int, userContext: Context) {
+            update(true)
         }
+
+        override fun onProfilesChanged(profiles: List<UserInfo>) {
+            update(true)
+        }
+    }
 
     init {
         deviceConfigProxy.addOnPropertiesChangedListener(
@@ -168,20 +168,18 @@ class PrivacyItemController @Inject constructor(
         dumpManager.registerDumpable(TAG, this)
     }
 
-    private fun unregisterReceiver() {
-        broadcastDispatcher.unregisterReceiver(userSwitcherReceiver)
+    private fun unregisterListener() {
+        userTracker.removeCallback(userTrackerCallback)
     }
 
     private fun registerReceiver() {
-        broadcastDispatcher.registerReceiver(userSwitcherReceiver, intentFilter,
-                null /* handler */, UserHandle.ALL)
+        userTracker.addCallback(userTrackerCallback, bgExecutor)
     }
 
     private fun update(updateUsers: Boolean) {
         bgExecutor.execute {
             if (updateUsers) {
-                val currentUser = ActivityManager.getCurrentUser()
-                currentUserIds = userManager.getProfiles(currentUser).map { it.id }
+                currentUserIds = userTracker.userProfiles.map { it.id }
             }
             updateListAndNotifyChanges.run()
         }
@@ -206,7 +204,7 @@ class PrivacyItemController @Inject constructor(
             update(true)
         } else {
             appOpsController.removeCallback(OPS, cb)
-            unregisterReceiver()
+            unregisterListener()
             // Make sure that we remove all indicators and notify listeners if we are not
             // listening anymore due to indicators being disabled
             update(false)
@@ -273,14 +271,6 @@ class PrivacyItemController @Inject constructor(
 
         @JvmDefault
         fun onFlagMicCameraChanged(flag: Boolean) {}
-    }
-
-    internal inner class Receiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intentFilter.hasAction(intent.action)) {
-                update(true)
-            }
-        }
     }
 
     private class NotifyChangesToCallback(

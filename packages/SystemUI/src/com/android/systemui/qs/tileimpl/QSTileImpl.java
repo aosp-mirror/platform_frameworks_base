@@ -31,7 +31,6 @@ import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -521,9 +520,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     protected void checkIfRestrictionEnforcedByAdminOnly(State state, String userRestriction) {
         EnforcedAdmin admin = RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
-                userRestriction, ActivityManager.getCurrentUser());
+                userRestriction, mHost.getUserId());
         if (admin != null && !RestrictedLockUtilsInternal.hasBaseUserRestriction(mContext,
-                userRestriction, ActivityManager.getCurrentUser())) {
+                userRestriction, mHost.getUserId())) {
             state.disabledByPolicy = true;
             mEnforcedAdmin = admin;
         } else {

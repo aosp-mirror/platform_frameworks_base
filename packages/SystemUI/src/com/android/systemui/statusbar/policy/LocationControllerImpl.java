@@ -20,7 +20,6 @@ import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
 
 import static com.android.settingslib.Utils.updateLocationEnabled;
 
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -43,6 +42,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.Utils;
 
 import java.util.ArrayList;
@@ -60,6 +60,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     private final Context mContext;
     private final AppOpsController mAppOpsController;
     private final BootCompleteCache mBootCompleteCache;
+    private final UserTracker mUserTracker;
     private final H mHandler;
 
 
@@ -68,11 +69,13 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     @Inject
     public LocationControllerImpl(Context context, AppOpsController appOpsController,
             @Main Looper mainLooper, @Background Handler backgroundHandler,
-            BroadcastDispatcher broadcastDispatcher, BootCompleteCache bootCompleteCache) {
+            BroadcastDispatcher broadcastDispatcher, BootCompleteCache bootCompleteCache,
+            UserTracker userTracker) {
         mContext = context;
         mAppOpsController = appOpsController;
         mBootCompleteCache = bootCompleteCache;
         mHandler = new H(mainLooper);
+        mUserTracker = userTracker;
 
         // Register to listen for changes in location settings.
         IntentFilter filter = new IntentFilter();
@@ -113,7 +116,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     public boolean setLocationEnabled(boolean enabled) {
         // QuickSettings always runs as the owner, so specifically set the settings
         // for the current foreground user.
-        int currentUserId = ActivityManager.getCurrentUser();
+        int currentUserId = mUserTracker.getUserId();
         if (isUserLocationRestricted(currentUserId)) {
             return false;
         }
@@ -134,7 +137,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         LocationManager locationManager =
                 (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         return mBootCompleteCache.isBootComplete() && locationManager.isLocationEnabledForUser(
-                UserHandle.of(ActivityManager.getCurrentUser()));
+                mUserTracker.getUserHandle());
     }
 
     @Override

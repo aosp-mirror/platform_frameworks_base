@@ -15,6 +15,7 @@
  */
 package com.android.systemui.tuner;
 
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -22,6 +23,7 @@ import android.content.DialogInterface;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -122,7 +124,8 @@ public class TunerFragment extends PreferenceFragment {
                 getActivity().finish();
                 return true;
             case MENU_REMOVE:
-                TunerService.showResetRequest(getContext(), new Runnable() {
+                UserHandle user = new UserHandle(ActivityManager.getCurrentUser());
+                TunerService.showResetRequest(getContext(), user, new Runnable() {
                     @Override
                     public void run() {
                         if (getActivity() != null) {

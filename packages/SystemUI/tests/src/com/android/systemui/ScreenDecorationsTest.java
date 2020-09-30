@@ -62,6 +62,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R.dimen;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.tuner.TunerService;
 
 import org.junit.Before;
@@ -88,6 +89,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private TunerService mTunerService;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
+    @Mock
+    private UserTracker mUserTracker;
 
     @Before
     public void setup() {
@@ -109,7 +112,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mContext.addMockSystemService(DisplayManager.class, mDisplayManager);
 
         mScreenDecorations = spy(new ScreenDecorations(mContext, mMainHandler,
-                mBroadcastDispatcher, mTunerService) {
+                mBroadcastDispatcher, mTunerService, mUserTracker) {
             @Override
             public void start() {
                 super.start();

@@ -18,7 +18,6 @@ package com.android.systemui.qs.external;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
 
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -304,8 +303,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     }
 
     private Intent resolveIntent(Intent i) {
-        ResolveInfo result = mContext.getPackageManager().resolveActivityAsUser(i, 0,
-                ActivityManager.getCurrentUser());
+        ResolveInfo result = mContext.getPackageManager().resolveActivityAsUser(i, 0, mUser);
         return result != null ? new Intent(TileService.ACTION_QS_TILE_PREFERENCES)
                 .setClassName(result.activityInfo.packageName, result.activityInfo.name) : null;
     }

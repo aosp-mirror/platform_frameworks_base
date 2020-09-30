@@ -17,7 +17,6 @@
 package com.android.systemui.qs.customize;
 
 import android.Manifest.permission;
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +39,7 @@ import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.leak.GarbageMonitor;
 
 import java.util.ArrayList;
@@ -58,16 +58,18 @@ public class TileQueryHelper {
     private final Executor mMainExecutor;
     private final Executor mBgExecutor;
     private final Context mContext;
+    private final UserTracker mUserTracker;
     private TileStateListener mListener;
 
     private boolean mFinished;
 
     @Inject
-    public TileQueryHelper(Context context,
+    public TileQueryHelper(Context context, UserTracker userTracker,
             @Main Executor mainExecutor, @Background Executor bgExecutor) {
         mContext = context;
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
+        mUserTracker = userTracker;
     }
 
     public void setListener(TileStateListener listener) {
@@ -207,7 +209,7 @@ public class TileQueryHelper {
             Collection<QSTile> params = host.getTiles();
             PackageManager pm = mContext.getPackageManager();
             List<ResolveInfo> services = pm.queryIntentServicesAsUser(
-                    new Intent(TileService.ACTION_QS_TILE), 0, ActivityManager.getCurrentUser());
+                    new Intent(TileService.ACTION_QS_TILE), 0, mUserTracker.getUserId());
             String stockTiles = mContext.getString(R.string.quick_settings_tiles_stock);
 
             for (ResolveInfo info : services) {

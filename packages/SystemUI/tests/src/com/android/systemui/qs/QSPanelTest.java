@@ -38,7 +38,6 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.UiEventLoggerFake;
-import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -49,7 +48,7 @@ import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.util.animation.DisappearParameters;
 import com.android.systemui.util.animation.UniqueObjectHostView;
@@ -93,11 +92,9 @@ public class QSPanelTest extends SysuiTestCase {
     @Mock
     private MediaHost mMediaHost;
     @Mock
-    private LocalBluetoothManager mLocalBluetoothManager;
-    @Mock
     private ActivityStarter mActivityStarter;
-    @Mock
-    private NotificationEntryManager mEntryManager;
+    @Mock(stubOnly = true)
+    private UserTracker mUserTracker;
     private UiEventLoggerFake mUiEventLogger;
 
     @Before
@@ -117,7 +114,7 @@ public class QSPanelTest extends SysuiTestCase {
         mTestableLooper.runWithLooper(() -> {
             mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
             mQsPanel = new QSPanel(mContext, null, mDumpManager, mBroadcastDispatcher,
-                    mQSLogger, mMediaHost, mUiEventLogger);
+                    mQSLogger, mMediaHost, mUiEventLogger, mUserTracker);
             mQsPanel.onFinishInflate();
             // Provides a parent with non-zero size for QSPanel
             mParentView = new FrameLayout(mContext);

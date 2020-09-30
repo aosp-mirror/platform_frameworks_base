@@ -38,6 +38,7 @@ import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.After
@@ -82,6 +83,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
     private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock
     private lateinit var listingController: ControlsListingController
+    @Mock(stubOnly = true)
+    private lateinit var userTracker: UserTracker
 
     @Captor
     private lateinit var structureInfoCaptor: ArgumentCaptor<StructureInfo>
@@ -143,6 +146,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
         Settings.Secure.putIntForUser(mContext.contentResolver,
                 ControlsControllerImpl.CONTROLS_AVAILABLE, 1, otherUser)
 
+        `when`(userTracker.userHandle).thenReturn(UserHandle.of(user))
+
         delayableExecutor = FakeExecutor(FakeSystemClock())
 
         val wrapper = object : ContextWrapper(mContext) {
@@ -162,7 +167,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 listingController,
                 broadcastDispatcher,
                 Optional.of(persistenceWrapper),
-                mock(DumpManager::class.java)
+                mock(DumpManager::class.java),
+                userTracker
         )
         controller.auxiliaryPersistenceWrapper = auxiliaryPersistenceWrapper
 
@@ -217,7 +223,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 listingController,
                 broadcastDispatcher,
                 Optional.of(persistenceWrapper),
-                mock(DumpManager::class.java)
+                mock(DumpManager::class.java),
+                userTracker
         )
         assertEquals(listOf(TEST_STRUCTURE_INFO), controller_other.getFavorites())
     }
