@@ -23,7 +23,18 @@ java_library {
 
 filegroup {
     name: "wm_shell-sources",
-    srcs: ["src/**/*.java"],
+    srcs: [
+        "src/**/*.java",
+    ],
+    path: "src",
+}
+
+// TODO(b/168581922) protologtool do not support kotlin(*.kt)
+filegroup {
+    name: "wm_shell-sources-kt",
+    srcs: [
+        "src/**/*.kt",
+    ],
     path: "src",
 }
 
@@ -97,15 +108,23 @@ android_library {
     name: "WindowManager-Shell",
     srcs: [
         ":wm_shell_protolog_src",
+        // TODO(b/168581922) protologtool do not support kotlin(*.kt)
+        ":wm_shell-sources-kt",
         "src/**/I*.aidl",
     ],
     resource_dirs: [
         "res",
     ],
     static_libs: [
+        "androidx.dynamicanimation_dynamicanimation",
+        "kotlinx-coroutines-android",
+        "kotlinx-coroutines-core",
         "protolog-lib",
         "WindowManager-Shell-proto",
         "androidx.appcompat_appcompat",
     ],
+    kotlincflags: ["-Xjvm-default=enable"],
     manifest: "AndroidManifest.xml",
+
+    min_sdk_version: "26",
 }

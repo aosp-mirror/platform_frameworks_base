@@ -974,8 +974,6 @@
     <!-- The start margin of quick scrub onboarding toast. -->
     <dimen name="recents_quick_scrub_onboarding_margin_start">8dp</dimen>
 
-    <dimen name="floating_dismiss_bottom_margin">50dp</dimen>
-
     <dimen name="default_gear_space">18dp</dimen>
     <dimen name="cell_overlay_padding">18dp</dimen>
 
@@ -1231,8 +1229,6 @@
     <dimen name="bubble_dismiss_target_padding_x">40dp</dimen>
     <dimen name="bubble_dismiss_target_padding_y">20dp</dimen>
     <dimen name="bubble_manage_menu_elevation">4dp</dimen>
-
-    <dimen name="dismiss_target_x_size">24dp</dimen>
 
     <!-- Bubbles user education views -->
     <dimen name="bubbles_manage_education_width">160dp</dimen>
