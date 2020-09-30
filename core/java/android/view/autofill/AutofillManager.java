@@ -2465,8 +2465,7 @@ public final class AutofillManager {
      *  {@link #STATE_UNKNOWN_COMPAT_MODE} (beucase the session was finished when the URL bar
      *  changed on compat mode), {@link #STATE_UNKNOWN_FAILED} (because the session was finished
      *  when the service failed to fullfil the request, or {@link #STATE_DISABLED_BY_SERVICE}
-     *  (because the autofill service or {@link #STATE_DISABLED_BY_SERVICE} (because the autofill
-     *  service disabled further autofill requests for the activity).
+     *  (because the autofill service disabled further autofill requests for the activity).
      * @param autofillableIds list of ids that could trigger autofill, use to not handle a new
      *  session when they're entered.
      */
