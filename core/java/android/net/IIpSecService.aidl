@@ -58,6 +58,9 @@ interface IIpSecService
             in LinkAddress localAddr,
             in String callingPackage);
 
+    void setNetworkForTunnelInterface(
+            int tunnelResourceId, in Network underlyingNetwork, in String callingPackage);
+
     void deleteTunnelInterface(int resourceId, in String callingPackage);
 
     IpSecTransformResponse createTransform(
