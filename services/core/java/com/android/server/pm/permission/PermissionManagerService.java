@@ -2089,6 +2089,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return false;
         }
 
+        BasePermission permission = getPermission(permName);
+        if (permission == null) {
+            return false;
+        }
+        if (permission.isHardRestricted()
+                && (flags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) == 0) {
+            return false;
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             if (permName.equals(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
