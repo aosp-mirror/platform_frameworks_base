@@ -20,14 +20,12 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
-import android.location.LocationRequest;
 import android.os.Binder;
 
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.util.Preconditions;
 import com.android.server.location.util.Injector;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 class PassiveLocationProviderManager extends LocationProviderManager {
@@ -65,17 +63,20 @@ class PassiveLocationProviderManager extends LocationProviderManager {
 
     @Override
     protected ProviderRequest mergeRegistrations(Collection<Registration> registrations) {
-        ProviderRequest.Builder providerRequest = new ProviderRequest.Builder()
-                .setIntervalMillis(0);
-
-        ArrayList<LocationRequest> requests = new ArrayList<>(registrations.size());
+        boolean locationSettingsIgnored = false;
         for (Registration registration : registrations) {
-            requests.add(registration.getRequest());
-            if (registration.getRequest().isLocationSettingsIgnored()) {
-                providerRequest.setLocationSettingsIgnored(true);
-            }
+            locationSettingsIgnored |= registration.getRequest().isLocationSettingsIgnored();
         }
 
-        return providerRequest.setLocationRequests(requests).build();
+        return new ProviderRequest.Builder()
+                .setIntervalMillis(0)
+                .setLocationSettingsIgnored(locationSettingsIgnored)
+                .build();
+    }
+
+    @Override
+    protected long calculateRequestDelayMillis(long newIntervalMs,
+            Collection<Registration> registrations) {
+        return 0;
     }
 }

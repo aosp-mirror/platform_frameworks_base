@@ -16,6 +16,8 @@
 
 package android.location;
 
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -586,6 +588,11 @@ public class Location implements Parcelable {
     }
 
     /** @hide */
+    public long getElapsedRealtimeMillis() {
+        return NANOSECONDS.toMillis(getElapsedRealtimeNanos());
+    }
+
+    /** @hide */
     public long getElapsedRealtimeAgeNanos(long referenceRealtimeNs) {
         return referenceRealtimeNs - mElapsedRealtimeNanos;
     }
@@ -593,6 +600,11 @@ public class Location implements Parcelable {
     /** @hide */
     public long getElapsedRealtimeAgeNanos() {
         return getElapsedRealtimeAgeNanos(SystemClock.elapsedRealtimeNanos());
+    }
+
+    /** @hide */
+    public long getElapsedRealtimeAgeMillis() {
+        return NANOSECONDS.toMillis(getElapsedRealtimeAgeNanos());
     }
 
     /**
