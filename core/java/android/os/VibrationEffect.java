@@ -983,6 +983,8 @@ public abstract class VibrationEffect implements Parcelable {
                 Composition.checkPrimitive(effect.id);
                 Preconditions.checkArgumentInRange(
                         effect.scale, 0.0f, 1.0f, "scale");
+                Preconditions.checkArgumentNonNegative(effect.delay,
+                        "Primitive delay must be zero or positive");
             }
         }
 
