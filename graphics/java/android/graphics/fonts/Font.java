@@ -591,14 +591,14 @@ public final class Font {
      *
      * @param glyphId a glyph ID
      * @param paint a paint object used for resolving glyph style
-     * @param rect a nullable destination object. If null is passed, this function just return the
-     *             horizontal advance. If non-null is passed, this function fills bounding box
-     *             information to this object.
+     * @param outBoundingBox a nullable destination object. If null is passed, this function just
+     *                      return the horizontal advance. If non-null is passed, this function
+     *                      fills bounding box information to this object.
      * @return the amount of horizontal advance in pixels
      */
     public float getGlyphBounds(@IntRange(from = 0) int glyphId, @NonNull Paint paint,
-            @Nullable RectF rect) {
-        return nGetGlyphBounds(mNativePtr, glyphId, paint.getNativeInstance(), rect);
+            @Nullable RectF outBoundingBox) {
+        return nGetGlyphBounds(mNativePtr, glyphId, paint.getNativeInstance(), outBoundingBox);
     }
 
     /**
@@ -607,15 +607,15 @@ public final class Font {
      * Note that {@link android.graphics.Typeface} in {@link android.graphics.Paint} is ignored.
      *
      * @param paint a paint object used for retrieving font metrics.
-     * @param metrics a nullable destination object. If null is passed, this function only retrieve
-     *                recommended interline spacing. If non-null is passed, this function fills to
-     *                font metrics to it.
+     * @param outMetrics a nullable destination object. If null is passed, this function only
+     *                  retrieve recommended interline spacing. If non-null is passed, this function
+     *                  fills to font metrics to it.
      *
      * @see Paint#getFontMetrics()
      * @see Paint#getFontMetricsInt()
      */
-    public void getMetrics(@NonNull Paint paint, @Nullable Paint.FontMetrics metrics) {
-        nGetFontMetrics(mNativePtr, paint.getNativeInstance(), metrics);
+    public void getMetrics(@NonNull Paint paint, @Nullable Paint.FontMetrics outMetrics) {
+        nGetFontMetrics(mNativePtr, paint.getNativeInstance(), outMetrics);
     }
 
     /** @hide */
