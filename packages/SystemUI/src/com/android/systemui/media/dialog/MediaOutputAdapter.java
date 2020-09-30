@@ -44,6 +44,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     private static final String TAG = "MediaOutputAdapter";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    private ViewGroup mConnectedItem;
+
     public MediaOutputAdapter(MediaOutputController controller) {
         super(controller);
     }
@@ -79,18 +81,6 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         return mController.getMediaDevices().size();
     }
 
-    void onItemClick(MediaDevice device) {
-        mController.connectDevice(device);
-        device.setState(MediaDeviceState.STATE_CONNECTING);
-        notifyDataSetChanged();
-    }
-
-    void onItemClick(int customizedItem) {
-        if (customizedItem == CUSTOMIZED_ITEM_PAIR_NEW) {
-            mController.launchBluetoothPairing();
-        }
-    }
-
     @Override
     CharSequence getItemTitle(MediaDevice device) {
         if (device.getDeviceType() == MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE
@@ -117,6 +107,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         @Override
         void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin) {
             super.onBind(device, topMargin, bottomMargin);
+            final boolean currentlyConnected = isCurrentlyConnected(device);
+            if (currentlyConnected) {
+                mConnectedItem = mFrameLayout;
+            }
             if (mController.isTransferring()) {
                 if (device.getState() == MediaDeviceState.STATE_CONNECTING
                         && !mController.hasAdjustVolumeUserRestriction()) {
@@ -133,16 +127,16 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             false /* showSeekBar*/, false /* showProgressBar */,
                             true /* showSubtitle */);
                     mSubTitleText.setText(R.string.media_output_dialog_connect_failed);
-                    mFrameLayout.setOnClickListener(v -> onItemClick(device));
+                    mFrameLayout.setOnClickListener(v -> onItemClick(v, device));
                 } else if (!mController.hasAdjustVolumeUserRestriction()
-                        && isCurrentConnected(device)) {
+                        && currentlyConnected) {
                     setTwoLineLayout(device, null /* title */, true /* bFocused */,
                             true /* showSeekBar*/, false /* showProgressBar */,
                             false /* showSubtitle */);
                     initSeekbar(device);
                 } else {
                     setSingleLineLayout(getItemTitle(device), false /* bFocused */);
-                    mFrameLayout.setOnClickListener(v -> onItemClick(device));
+                    mFrameLayout.setOnClickListener(v -> onItemClick(v, device));
                 }
             }
         }
@@ -158,6 +152,25 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         Utils.getColorAccentDefaultColor(mContext), PorterDuff.Mode.SRC_IN));
                 mTitleIcon.setImageDrawable(d);
                 mFrameLayout.setOnClickListener(v -> onItemClick(CUSTOMIZED_ITEM_PAIR_NEW));
+            }
+        }
+
+        private void onItemClick(View view, MediaDevice device) {
+            if (mController.isTransferring()) {
+                return;
+            }
+
+            playSwitchingAnim(mConnectedItem, view);
+            mController.connectDevice(device);
+            device.setState(MediaDeviceState.STATE_CONNECTING);
+            if (!isAnimating()) {
+                notifyDataSetChanged();
+            }
+        }
+
+        private void onItemClick(int customizedItem) {
+            if (customizedItem == CUSTOMIZED_ITEM_PAIR_NEW) {
+                mController.launchBluetoothPairing();
             }
         }
     }
