@@ -32,8 +32,10 @@ import com.android.systemui.util.DeviceConfigProxy;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.animation.FlingAnimationUtils;
+import com.android.wm.shell.common.AnimationThread;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
+import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
@@ -132,8 +134,10 @@ public abstract class WMShellBaseModule {
 
     @SysUISingleton
     @Provides
-    static ShellTaskOrganizer provideShellTaskOrganizer(SyncTransactionQueue syncQueue) {
-        ShellTaskOrganizer organizer = new ShellTaskOrganizer(syncQueue);
+    static ShellTaskOrganizer provideShellTaskOrganizer(SyncTransactionQueue syncQueue,
+            @Main Handler handler, TransactionPool transactionPool) {
+        ShellTaskOrganizer organizer = new ShellTaskOrganizer(syncQueue, transactionPool,
+                new HandlerExecutor(handler), AnimationThread.instance().getExecutor());
         organizer.registerOrganizer();
         return organizer;
     }

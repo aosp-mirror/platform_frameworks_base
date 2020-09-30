@@ -354,7 +354,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 : null;
     }
 
-    private boolean isSupportedWindowingMode(int winMode) {
+    boolean isSupportedWindowingMode(int winMode) {
         return !ArrayUtils.contains(UNSUPPORTED_WINDOWING_MODES, winMode);
     }
 

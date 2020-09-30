@@ -50,9 +50,13 @@ class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
                 // properties in a bad state).
                 t.setPosition(leash, 0, 0);
                 t.setWindowCrop(leash, null);
-                t.setAlpha(leash, 1f);
-                t.setMatrix(leash, 1, 0, 0, 1);
-                t.show(leash);
+                // TODO(shell-transitions): Eventually set everything in transition so there's no
+                //                          SF Transaction here.
+                if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
+                    t.setAlpha(leash, 1f);
+                    t.setMatrix(leash, 1, 0, 0, 1);
+                    t.show(leash);
+                }
             });
         }
     }

@@ -78,6 +78,11 @@ public final class WindowContainerToken implements Parcelable {
     }
 
     @Override
+    public String toString() {
+        return "WCT{" + mRealToken + "}";
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof WindowContainerToken)) {
             return false;

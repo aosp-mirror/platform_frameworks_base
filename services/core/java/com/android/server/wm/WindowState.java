@@ -1683,6 +1683,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         || mControllableInsetProvider.isClientVisible());
     }
 
+    @Override
+    boolean isVisibleRequested() {
+        return isVisible();
+    }
+
     /**
      * Ensures that all the policy visibility bits are set.
      * @return {@code true} if all flags about visiblity are set
@@ -1771,7 +1776,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         final ActivityRecord atoken = mActivityRecord;
         if (atoken != null) {
-            return ((!isParentWindowHidden() && atoken.mVisibleRequested)
+            return ((!isParentWindowHidden() && atoken.isVisible())
                     || isAnimating(TRANSITION | PARENTS));
         }
         return !isParentWindowHidden() || isAnimating(TRANSITION | PARENTS);
