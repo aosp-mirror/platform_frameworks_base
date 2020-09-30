@@ -157,7 +157,6 @@ public:
 private:
 
     using SkPaint::setShader;
-    using SkPaint::setImageFilter;
 
     SkFont mFont;
     sk_sp<SkDrawLooper> mLooper;
