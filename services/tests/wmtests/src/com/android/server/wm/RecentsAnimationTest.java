@@ -100,7 +100,8 @@ public class RecentsAnimationTest extends WindowTestsBase {
 
         doCallRealMethod().when(mRootWindowContainer).ensureActivitiesVisible(
                 any() /* starting */, anyInt() /* configChanges */,
-                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
+                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */,
+                anyBoolean() /* userLeaving */);
 
         RecentsAnimationCallbacks recentsAnimation = startRecentsActivity(
                 mRecentsComponent, true /* getRecentsAnimation */);
@@ -191,7 +192,8 @@ public class RecentsAnimationTest extends WindowTestsBase {
 
         doCallRealMethod().when(mRootWindowContainer).ensureActivitiesVisible(
                 any() /* starting */, anyInt() /* configChanges */,
-                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
+                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */,
+                anyBoolean() /* userLeaving */);
         doReturn(app).when(mAtm).getProcessController(eq(recentActivity.processName), anyInt());
         ClientLifecycleManager lifecycleManager = mAtm.getLifecycleManager();
         doNothing().when(lifecycleManager).scheduleTransaction(any());
@@ -347,7 +349,8 @@ public class RecentsAnimationTest extends WindowTestsBase {
         doReturn(TEST_USER_ID).when(mAtm).getCurrentUserId();
         doCallRealMethod().when(mRootWindowContainer).ensureActivitiesVisible(
                 any() /* starting */, anyInt() /* configChanges */,
-                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
+                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */,
+                anyBoolean() /* userLeaving */);
 
         startRecentsActivity(otherUserHomeActivity.getTask().getBaseIntent().getComponent(),
                 true);

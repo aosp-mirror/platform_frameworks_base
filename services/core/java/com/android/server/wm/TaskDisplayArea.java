@@ -1806,13 +1806,13 @@ final class TaskDisplayArea extends DisplayArea<Task> {
     }
 
     void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean notifyClients) {
+            boolean preserveWindows, boolean notifyClients, boolean userLeaving) {
         mAtmService.mStackSupervisor.beginActivityVisibilityUpdate();
         try {
             for (int stackNdx = getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 final Task stack = getStackAt(stackNdx);
                 stack.ensureActivitiesVisible(starting, configChanges, preserveWindows,
-                        notifyClients);
+                        notifyClients, userLeaving);
             }
         } finally {
             mAtmService.mStackSupervisor.endActivityVisibilityUpdate();

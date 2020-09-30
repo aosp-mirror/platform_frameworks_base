@@ -2738,7 +2738,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             if (ensureVisibility) {
                 mDisplayContent.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                        false /* preserveWindows */, true /* notifyClients */);
+                        false /* preserveWindows */, true /* notifyClients */,
+                        mStackSupervisor.mUserLeaving);
             }
         }
 
@@ -4752,7 +4753,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         handleAlreadyVisible();
     }
 
-    void makeInvisible() {
+    void makeInvisible(boolean userLeaving) {
         if (!mVisibleRequested) {
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Already invisible: " + this);
             return;
@@ -4793,9 +4794,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     // If the app is capable of entering PIP, we should try pausing it now
                     // so it can PIP correctly.
                     if (deferHidingClient) {
-                        getRootTask().startPausingLocked(
-                                mStackSupervisor.mUserLeaving /* userLeaving */,
-                                false /* uiSleeping */, null /* resuming */, "makeInvisible");
+                        getRootTask().startPausingLocked(userLeaving, false /* uiSleeping */,
+                                null /* resuming */, "makeInvisible");
                         break;
                     }
                 case INITIALIZING:
