@@ -25,6 +25,7 @@ import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 
+import static com.android.internal.messages.nano.SystemMessageProto.SystemMessage.NOTE_FOREGROUND_SERVICE_BG_LAUNCH;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
@@ -119,6 +120,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -227,6 +229,10 @@ public final class ActiveServices {
 
     // white listed packageName.
     ArraySet<String> mWhiteListAllowWhileInUsePermissionInFgs = new ArraySet<>();
+
+    // TODO: remove this after feature development is done
+    private static final SimpleDateFormat DATE_FORMATTER =
+            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     final Runnable mLastAnrDumpClearer = new Runnable() {
         @Override public void run() {
@@ -553,8 +559,9 @@ public final class ActiveServices {
                 if (r.mAllowStartForeground == FGS_FEATURE_DENIED
                         && mAm.mConstants.mFlagFgsStartRestrictionEnabled) {
                     Slog.w(TAG, "startForegroundService() not allowed due to "
-                                    + " mAllowStartForeground false: service "
+                                    + "mAllowStartForeground false: service "
                                     + r.shortInstanceName);
+                    showFgsBgRestrictedNotificationLocked(r);
                     forcedStandby = true;
                 }
             }
@@ -1459,6 +1466,7 @@ public final class ActiveServices {
                                     "Service.startForeground() not allowed due to "
                                             + "mAllowStartForeground false: service "
                                             + r.shortInstanceName);
+                            showFgsBgRestrictedNotificationLocked(r);
                             updateServiceForegroundLocked(r.app, true);
                             ignoreForeground = true;
                         }
@@ -5056,4 +5064,27 @@ public final class ActiveServices {
                 && code != FGS_FEATURE_ALLOWED_BY_UID_VISIBLE;
     }
 
+    // TODO: remove this notification after feature development is done
+    private void showFgsBgRestrictedNotificationLocked(ServiceRecord r) {
+        final Context context = mAm.mContext;
+        final String title = "Foreground Service BG-Launch Restricted";
+        final String content = "App restricted: " + r.mRecentCallingPackage;
+        final long now = System.currentTimeMillis();
+        final String bigText = DATE_FORMATTER.format(now) + " " + r.mInfoAllowStartForeground;
+        final String groupKey = "com.android.fgs-bg-restricted";
+        final Notification.Builder n =
+                new Notification.Builder(context,
+                        SystemNotificationChannels.ALERTS)
+                        .setGroup(groupKey)
+                        .setSmallIcon(R.drawable.stat_sys_vitals)
+                        .setWhen(0)
+                        .setColor(context.getColor(
+                                com.android.internal.R.color.system_notification_accent_color))
+                        .setTicker(title)
+                        .setContentTitle(title)
+                        .setContentText(content)
+                        .setStyle(new Notification.BigTextStyle().bigText(bigText));
+        context.getSystemService(NotificationManager.class).notifyAsUser(Long.toString(now),
+                NOTE_FOREGROUND_SERVICE_BG_LAUNCH, n.build(), UserHandle.ALL);
+    }
 }
