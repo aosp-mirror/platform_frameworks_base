@@ -36,12 +36,13 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 
-import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.DumpState;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageSettingBase;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+
+import libcore.util.EmptyArray;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
@@ -95,7 +96,8 @@ public final class BasePermission {
     int uid;
 
     /** Additional GIDs given to apps granted this permission */
-    private int[] gids;
+    @NonNull
+    private int[] gids = EmptyArray.INT;
 
     /**
      * Flag indicating that {@link #gids} should be adjusted based on the
@@ -132,7 +134,7 @@ public final class BasePermission {
     public int getUid() {
         return uid;
     }
-    public void setGids(int[] gids, boolean perUser) {
+    public void setGids(@NonNull int[] gids, boolean perUser) {
         this.gids = gids;
         this.perUser = perUser;
     }
@@ -141,18 +143,20 @@ public final class BasePermission {
     }
 
     public boolean hasGids() {
-        return !ArrayUtils.isEmpty(gids);
+        return gids.length != 0;
     }
 
+    @NonNull
     public int[] computeGids(int userId) {
         if (perUser) {
             final int[] userGids = new int[gids.length];
             for (int i = 0; i < gids.length; i++) {
-                userGids[i] = UserHandle.getUid(userId, gids[i]);
+                final int gid = gids[i];
+                userGids[i] = UserHandle.getUid(userId, gid);
             }
             return userGids;
         } else {
-            return gids;
+            return gids.length != 0 ? gids.clone() : gids;
         }
     }
 
@@ -291,7 +295,8 @@ public final class BasePermission {
             pendingPermissionInfo.packageName = newPackageName;
         }
         uid = 0;
-        setGids(null, false);
+        gids = EmptyArray.INT;
+        perUser = false;
     }
 
     public boolean addToTree(@ProtectionLevel int protectionLevel,
