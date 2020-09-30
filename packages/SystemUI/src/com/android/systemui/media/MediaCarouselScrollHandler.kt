@@ -32,7 +32,7 @@ import com.android.systemui.qs.PageIndicator
 import com.android.systemui.R
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.util.animation.PhysicsAnimator
+import com.android.wm.shell.animation.PhysicsAnimator
 import com.android.systemui.util.concurrency.DelayableExecutor
 
 private const val FLING_SLOP = 1000000

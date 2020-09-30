@@ -10,8 +10,8 @@ import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringForce.DAMPING_RATIO_LOW_BOUNCY
 import androidx.dynamicanimation.animation.SpringForce.STIFFNESS_LOW
 import com.android.systemui.R
-import com.android.systemui.util.DismissCircleView
-import com.android.systemui.util.animation.PhysicsAnimator
+import com.android.wm.shell.common.DismissCircleView
+import com.android.wm.shell.animation.PhysicsAnimator
 
 /*
  * View that handles interactions between DismissCircleView and BubbleStackView.
@@ -29,7 +29,7 @@ class DismissView(context: Context) : FrameLayout(context) {
 
     var isShowing = false
     private val animator = PhysicsAnimator.getInstance(circle)
-    private val spring = PhysicsAnimator.SpringConfig(STIFFNESS_LOW, DAMPING_RATIO_LOW_BOUNCY);
+    private val spring = PhysicsAnimator.SpringConfig(STIFFNESS_LOW, DAMPING_RATIO_LOW_BOUNCY)
     private val DISMISS_SCRIM_FADE_MS = 200
     init {
         setLayoutParams(LayoutParams(
