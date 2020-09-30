@@ -76,7 +76,7 @@ int main(int /*argc*/, char** /*argv*/) {
     ABinderProcess_startThreadPool();
 
     std::shared_ptr<LogEventQueue> eventQueue =
-            std::make_shared<LogEventQueue>(2000 /*buffer limit. Buffer is NOT pre-allocated*/);
+            std::make_shared<LogEventQueue>(4000 /*buffer limit. Buffer is NOT pre-allocated*/);
 
     // Create the service
     gStatsService = SharedRefBase::make<StatsService>(looper, eventQueue);
