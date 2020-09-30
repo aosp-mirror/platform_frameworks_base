@@ -26,6 +26,9 @@ import "frameworks/base/core/proto/android/view/imeinsetssourceconsumer.proto";
 import "frameworks/base/core/proto/android/view/inputmethod/editorinfo.proto";
 import "frameworks/base/core/proto/android/view/imefocuscontroller.proto";
 
+import "frameworks/base/core/proto/android/server/inputmethod/inputmethodmanagerservice.proto";
+import "frameworks/base/core/proto/android/inputmethodservice/inputmethodservice.proto";
+
 /**
  * Represents a file full of input method editor trace entries.
  * Encoded, it should start with 0x9 0x49 0x4d 0x45 0x54 0x52 0x41 0x43 0x45 (.IMETRACE), such
@@ -54,12 +57,16 @@ message InputMethodEditorProto {
     /* required: elapsed realtime in nanos since boot of when this entry was logged */
     optional fixed64 elapsed_realtime_nanos = 1;
     optional ClientsProto clients = 2;
+    optional .android.inputmethodservice.InputMethodServiceProto input_method_service = 3;
+    optional .android.server.inputmethod.InputMethodManagerServiceProto input_method_manager_service = 4;
 
     // this wrapper helps to simplify the dumping logic
     message ClientsProto {
         repeated ClientSideProto client = 1;
     }
 
+    /* todo: extract as a separate message to allow other dumps to use this as their client side
+        proto */
     /* groups together the dump from ime related client side classes */
     message ClientSideProto {
         optional int32 display_id = 1;
