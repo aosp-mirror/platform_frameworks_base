@@ -17,8 +17,9 @@
 package com.android.networkstack.tethering;
 
 import static android.net.util.TetheringUtils.uint16;
-import static android.system.OsConstants.SOCK_STREAM;
+import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_UNIX;
+import static android.system.OsConstants.SOCK_STREAM;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -35,14 +36,15 @@ import android.hardware.tetheroffload.control.V1_0.ITetheringOffloadCallback;
 import android.hardware.tetheroffload.control.V1_0.NatTimeoutUpdate;
 import android.hardware.tetheroffload.control.V1_0.NetworkProtocol;
 import android.hardware.tetheroffload.control.V1_0.OffloadCallbackEvent;
+import android.net.netlink.StructNfGenMsg;
 import android.net.netlink.StructNlMsgHdr;
 import android.net.util.SharedLog;
 import android.os.Handler;
 import android.os.NativeHandle;
 import android.os.test.TestLooper;
 import android.system.ErrnoException;
-import android.system.OsConstants;
 import android.system.Os;
+import android.system.OsConstants;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -55,8 +57,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.FileDescriptor;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 
 @RunWith(AndroidJUnit4.class)
@@ -218,7 +220,7 @@ public final class OffloadHardwareInterfaceTest {
     }
 
     @Test
-    public void testNetlinkMessage() throws Exception {
+    public void testSendIpv4NfGenMsg() throws Exception {
         FileDescriptor writeSocket = new FileDescriptor();
         FileDescriptor readSocket = new FileDescriptor();
         try {
@@ -229,17 +231,25 @@ public final class OffloadHardwareInterfaceTest {
         }
         when(mNativeHandle.getFileDescriptor()).thenReturn(writeSocket);
 
-        mOffloadHw.sendNetlinkMessage(mNativeHandle, TEST_TYPE, TEST_FLAGS);
+        mOffloadHw.sendIpv4NfGenMsg(mNativeHandle, TEST_TYPE, TEST_FLAGS);
 
-        ByteBuffer buffer = ByteBuffer.allocate(StructNlMsgHdr.STRUCT_SIZE);
+        ByteBuffer buffer = ByteBuffer.allocate(9823);  // Arbitrary value > expectedLen.
+        buffer.order(ByteOrder.nativeOrder());
+
         int read = Os.read(readSocket, buffer);
+        final int expectedLen = StructNlMsgHdr.STRUCT_SIZE + StructNfGenMsg.STRUCT_SIZE;
+        assertEquals(expectedLen, read);
 
         buffer.flip();
-        assertEquals(StructNlMsgHdr.STRUCT_SIZE, buffer.getInt());
+        assertEquals(expectedLen, buffer.getInt());
         assertEquals(TEST_TYPE, buffer.getShort());
         assertEquals(TEST_FLAGS, buffer.getShort());
-        assertEquals(1 /* seq */, buffer.getInt());
+        assertEquals(0 /* seq */, buffer.getInt());
         assertEquals(0 /* pid */, buffer.getInt());
+        assertEquals(AF_INET, buffer.get());             // nfgen_family
+        assertEquals(0 /* error */, buffer.get());       // version
+        assertEquals(0 /* error */, buffer.getShort());  // res_id
+        assertEquals(expectedLen, buffer.position());
     }
 
     private NatTimeoutUpdate buildNatTimeoutUpdate(final int proto) {
