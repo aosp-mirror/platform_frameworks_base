@@ -11115,8 +11115,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSettings.addRenamedPackageLPw(parsedPackage.getRealPackage(),
                         originalPkgSetting.name);
                 mTransferredPackages.add(originalPkgSetting.name);
-            } else {
-                mSettings.removeRenamedPackageLPw(parsedPackage.getPackageName());
             }
         }
         if (pkgSetting.sharedUser != null) {
