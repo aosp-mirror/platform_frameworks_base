@@ -107,7 +107,10 @@ class PlatformCompatCommandNotInstalledTest {
     fun ParcelFileDescriptor.text() = FileReader(fileDescriptor).readText()
 
     @After
-    fun resetIdentity() = uiAutomation.dropShellPermissionIdentity()
+    fun resetChangeIdAndIdentity() {
+        command("am compat reset $TEST_CHANGE_ID $TEST_PKG")
+        uiAutomation.dropShellPermissionIdentity()
+    }
 
     @Test
     fun execute() {
