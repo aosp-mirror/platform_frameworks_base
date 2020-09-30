@@ -115,28 +115,7 @@ public class HandlerThreadingDomainTest {
     }
 
     @Test
-    public void singleRunnableHandler_runSynchronously() throws Exception {
-        ThreadingDomain domain = new HandlerThreadingDomain(mTestHandler);
-        SingleRunnableQueue singleRunnableQueue = domain.createSingleRunnableQueue();
-
-        AtomicBoolean testPassed = new AtomicBoolean(false);
-        // Calls to SingleRunnableQueue must be made on the handler thread it is associated with,
-        // so this uses runWithScissors() to block until the lambda has completed.
-        mTestHandler.runWithScissors(() -> {
-            Thread testThread = Thread.currentThread();
-            CountDownLatch latch = new CountDownLatch(1);
-            singleRunnableQueue.runSynchronously(() -> {
-                assertSame(Thread.currentThread(), testThread);
-                latch.countDown();
-            });
-            assertTrue(awaitWithRuntimeException(latch, 60, TimeUnit.SECONDS));
-            testPassed.set(true);
-        }, TimeUnit.SECONDS.toMillis(60));
-        assertTrue(testPassed.get());
-    }
-
-    @Test
-    public void singleRunnableHandler_runDelayed() throws Exception {
+    public void singleRunnableQueue_runDelayed() throws Exception {
         ThreadingDomain domain = new HandlerThreadingDomain(mTestHandler);
         SingleRunnableQueue singleRunnableQueue = domain.createSingleRunnableQueue();
 

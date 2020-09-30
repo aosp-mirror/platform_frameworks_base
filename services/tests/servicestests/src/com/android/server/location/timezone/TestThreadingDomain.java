@@ -16,13 +16,15 @@
 package com.android.server.location.timezone;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import java.time.Duration;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -33,6 +35,10 @@ import java.util.Objects;
 class TestThreadingDomain extends ThreadingDomain {
 
     static class QueuedRunnable {
+
+        static final Comparator<? super QueuedRunnable> COMPARATOR =
+                (o1, o2) -> (int) (o1.executionTimeMillis - o2.executionTimeMillis);
+
         @NonNull public final Runnable runnable;
         @Nullable public final Object token;
         public final long executionTimeMillis;
@@ -55,7 +61,7 @@ class TestThreadingDomain extends ThreadingDomain {
     }
 
     private long mCurrentTimeMillis;
-    private LinkedList<QueuedRunnable> mQueue = new LinkedList<>();
+    private ArrayList<QueuedRunnable> mQueue = new ArrayList<>();
 
     TestThreadingDomain() {
         // Pick an arbitrary time.
@@ -69,22 +75,23 @@ class TestThreadingDomain extends ThreadingDomain {
 
     @Override
     void post(Runnable r) {
-        mQueue.add(new QueuedRunnable(r, null, mCurrentTimeMillis));
+        postDelayed(r, null, 0);
     }
 
     @Override
     void postDelayed(Runnable r, long delayMillis) {
-        mQueue.add(new QueuedRunnable(r, null, mCurrentTimeMillis + delayMillis));
+        postDelayed(r, null, delayMillis);
     }
 
     @Override
     void postDelayed(Runnable r, Object token, long delayMillis) {
         mQueue.add(new QueuedRunnable(r, token, mCurrentTimeMillis + delayMillis));
+        mQueue.sort(QueuedRunnable.COMPARATOR);
     }
 
     @Override
     void removeQueuedRunnables(Object token) {
-        mQueue.removeIf(runnable -> runnable.token != null && runnable.token.equals(token));
+        mQueue.removeIf(runnable -> runnable.token != null && runnable.token == token);
     }
 
     void assertSingleDelayedQueueItem(Duration expectedDelay) {
@@ -114,14 +121,14 @@ class TestThreadingDomain extends ThreadingDomain {
     }
 
     long getNextQueueItemDelayMillis() {
-        assertQueueLength(1);
-        return mQueue.getFirst().executionTimeMillis - mCurrentTimeMillis;
+        assertFalse(mQueue.isEmpty());
+        return mQueue.get(0).executionTimeMillis - mCurrentTimeMillis;
     }
 
     void executeNext() {
-        assertQueueLength(1);
+        assertFalse(mQueue.isEmpty());
+        QueuedRunnable queued = mQueue.remove(0);
 
-        QueuedRunnable queued = mQueue.removeFirst();
         mCurrentTimeMillis = queued.executionTimeMillis;
         queued.runnable.run();
     }

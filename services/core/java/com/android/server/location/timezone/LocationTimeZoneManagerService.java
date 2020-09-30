@@ -160,7 +160,8 @@ public class LocationTimeZoneManagerService extends Binder {
         // Called on an arbitrary thread during initialization.
         synchronized (mSharedLock) {
             LocationTimeZoneProvider primary = createPrimaryProvider();
-            mLocationTimeZoneDetectorController = new ControllerImpl(mThreadingDomain, primary);
+            mLocationTimeZoneDetectorController =
+                    new ControllerImpl(mThreadingDomain, primary);
             ControllerCallbackImpl callback = new ControllerCallbackImpl(mThreadingDomain);
             ControllerEnvironmentImpl environment = new ControllerEnvironmentImpl(
                     mThreadingDomain, mLocationTimeZoneDetectorController);

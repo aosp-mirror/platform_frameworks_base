@@ -83,21 +83,14 @@ abstract class ThreadingDomain {
     }
 
     /**
-     * A class that allows up to one {@link Runnable} to be queued on the handler, i.e. calling any
-     * of the methods will cancel the execution of any previously queued / delayed runnable. All
+     * A class that allows up to one {@link Runnable} to be queued, i.e. calling {@link
+     * #runDelayed(Runnable, long)} will cancel the execution of any previously queued runnable. All
      * methods must be called from the {@link ThreadingDomain}'s thread.
      */
     final class SingleRunnableQueue {
 
-        /**
-         * Runs the supplied {@link Runnable} synchronously on the threading domain's thread,
-         * cancelling any queued but not-yet-executed {@link Runnable} previously added by this.
-         * This method must be called from the threading domain's thread.
-         */
-        void runSynchronously(Runnable r) {
-            cancel();
-            r.run();
-        }
+        private boolean mIsQueued;
+        private long mDelayMillis;
 
         /**
          * Posts the supplied {@link Runnable} asynchronously and delayed on the threading domain
@@ -106,15 +99,48 @@ abstract class ThreadingDomain {
          */
         void runDelayed(Runnable r, long delayMillis) {
             cancel();
-            ThreadingDomain.this.postDelayed(r, this, delayMillis);
+            mIsQueued = true;
+            mDelayMillis = delayMillis;
+            ThreadingDomain.this.postDelayed(() -> {
+                mIsQueued = false;
+                mDelayMillis = -2;
+                r.run();
+            }, this, delayMillis);
+        }
+
+        /**
+         * Returns {@code true} if there is an item current queued. This method must be called from
+         * the threading domain's thread.
+         */
+        boolean hasQueued() {
+            assertCurrentThread();
+            return mIsQueued;
+        }
+
+        /**
+         * Returns the delay in milliseconds for the currently queued item. Throws {@link
+         * IllegalStateException} if nothing is currently queued, see {@link #hasQueued()}.
+         * This method must be called from the threading domain's thread.
+         */
+        long getQueuedDelayMillis() {
+            assertCurrentThread();
+            if (!mIsQueued) {
+                throw new IllegalStateException("No item queued");
+            }
+            return mDelayMillis;
         }
 
         /**
          * Cancels any queued but not-yet-executed {@link Runnable} previously added by this.
+         * This method must be called from the threading domain's thread.
          */
         public void cancel() {
             assertCurrentThread();
-            removeQueuedRunnables(this);
+            if (mIsQueued) {
+                removeQueuedRunnables(this);
+            }
+            mIsQueued = false;
+            mDelayMillis = -1;
         }
     }
 }

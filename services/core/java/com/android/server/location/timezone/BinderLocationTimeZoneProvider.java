@@ -18,7 +18,9 @@ package com.android.server.location.timezone;
 
 import static com.android.server.location.timezone.LocationTimeZoneManagerService.debugLog;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DISABLED;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_ENABLED;
+import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_ENABLED_CERTAIN;
+import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_ENABLED_INITIALIZING;
+import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_ENABLED_UNCERTAIN;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
 
 import android.annotation.NonNull;
@@ -78,16 +80,19 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
         synchronized (mSharedLock) {
             ProviderState currentState = mCurrentState.get();
             switch (currentState.stateEnum) {
-                case PROVIDER_STATE_ENABLED: {
+                case PROVIDER_STATE_ENABLED_INITIALIZING:
+                case PROVIDER_STATE_ENABLED_UNCERTAIN:
+                case PROVIDER_STATE_ENABLED_CERTAIN: {
                     // Losing a remote provider is treated as becoming uncertain.
                     String msg = "handleProviderLost reason=" + reason
                             + ", mProviderName=" + mProviderName
                             + ", currentState=" + currentState;
                     debugLog(msg);
-                    // This is an unusual PROVIDER_STATE_ENABLED state because event == null
+                    // This is an unusual PROVIDER_STATE_ENABLED_UNCERTAIN state because
+                    // event == null
                     ProviderState newState = currentState.newState(
-                            PROVIDER_STATE_ENABLED, null, currentState.currentUserConfiguration,
-                            msg);
+                            PROVIDER_STATE_ENABLED_UNCERTAIN, null,
+                            currentState.currentUserConfiguration, msg);
                     setCurrentState(newState, true);
                     break;
                 }
@@ -118,7 +123,9 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
         synchronized (mSharedLock) {
             ProviderState currentState = mCurrentState.get();
             switch (currentState.stateEnum) {
-                case PROVIDER_STATE_ENABLED: {
+                case PROVIDER_STATE_ENABLED_INITIALIZING:
+                case PROVIDER_STATE_ENABLED_CERTAIN:
+                case PROVIDER_STATE_ENABLED_UNCERTAIN: {
                     debugLog("handleOnProviderBound mProviderName=" + mProviderName
                             + ", currentState=" + currentState + ": Provider is enabled.");
                     break;
