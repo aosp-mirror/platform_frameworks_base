@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.os.BatteryManager.EXTRA_PRESENT;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -75,6 +77,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     protected int mLevel;
     protected boolean mPluggedIn;
     protected boolean mCharging;
+    private boolean mStateUnknown = false;
     private boolean mCharged;
     protected boolean mPowerSave;
     private boolean mAodPowerSave;
@@ -138,6 +141,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         pw.print("  mCharging="); pw.println(mCharging);
         pw.print("  mCharged="); pw.println(mCharged);
         pw.print("  mPowerSave="); pw.println(mPowerSave);
+        pw.print("  mStateUnknown="); pw.println(mStateUnknown);
     }
 
     @Override
@@ -179,6 +183,13 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             mCharging = mCharged || status == BatteryManager.BATTERY_STATUS_CHARGING;
             mWirelessCharging = mCharging && intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
                     == BatteryManager.BATTERY_PLUGGED_WIRELESS;
+
+            boolean present = intent.getBooleanExtra(EXTRA_PRESENT, true);
+            boolean unknown = !present;
+            if (unknown != mStateUnknown) {
+                mStateUnknown = unknown;
+                fireBatteryUnknownStateChanged();
+            }
 
             fireBatteryLevelChanged();
         } else if (action.equals(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)) {
@@ -328,6 +339,15 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         }
     }
 
+    private void fireBatteryUnknownStateChanged() {
+        synchronized (mChangeCallbacks) {
+            final int n = mChangeCallbacks.size();
+            for (int i = 0; i < n; i++) {
+                mChangeCallbacks.get(i).onBatteryUnknownStateChanged(mStateUnknown);
+            }
+        }
+    }
+
     private void firePowerSaveChanged() {
         synchronized (mChangeCallbacks) {
             final int N = mChangeCallbacks.size();
@@ -346,6 +366,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         String level = args.getString("level");
         String plugged = args.getString("plugged");
         String powerSave = args.getString("powersave");
+        String present = args.getString("present");
         if (level != null) {
             mLevel = Math.min(Math.max(Integer.parseInt(level), 0), 100);
         }
@@ -355,6 +376,10 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         if (powerSave != null) {
             mPowerSave = powerSave.equals("true");
             firePowerSaveChanged();
+        }
+        if (present != null) {
+            mStateUnknown = !present.equals("true");
+            fireBatteryUnknownStateChanged();
         }
         fireBatteryLevelChanged();
     }

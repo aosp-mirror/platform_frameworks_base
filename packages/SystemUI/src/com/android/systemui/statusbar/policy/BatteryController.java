@@ -97,6 +97,9 @@ public interface BatteryController extends DemoMode, Dumpable,
         default void onPowerSaveChanged(boolean isPowerSave) {
         }
 
+        default void onBatteryUnknownStateChanged(boolean isUnknown) {
+        }
+
         default void onReverseChanged(boolean isReverse, int level, String name) {
         }
 
