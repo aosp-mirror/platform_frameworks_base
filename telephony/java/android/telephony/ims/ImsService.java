@@ -16,7 +16,6 @@
 
 package android.telephony.ims;
 
-import android.annotation.LongDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.Service;
@@ -41,11 +40,6 @@ import android.util.SparseArray;
 
 import com.android.ims.internal.IImsFeatureStatusCallback;
 import com.android.internal.annotations.VisibleForTesting;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Main ImsService implementation, which binds via the Telephony ImsResolver. Services that extend
@@ -102,32 +96,6 @@ import java.util.Map;
 public class ImsService extends Service {
 
     private static final String LOG_TAG = "ImsService";
-
-    /**
-     * This ImsService supports the capability to place emergency calls over MMTEL.
-     * @hide This is encoded into the {@link ImsFeature#FEATURE_EMERGENCY_MMTEL}, but we will be
-     * adding other capabilities in a central location, so track this capability here as well.
-     */
-    public static final long CAPABILITY_EMERGENCY_OVER_MMTEL = 1 << 0;
-
-    /**
-     * @hide
-     */
-    @LongDef(flag = true,
-            prefix = "CAPABILITY_",
-            value = {
-                    CAPABILITY_EMERGENCY_OVER_MMTEL
-            })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface ImsServiceCapability {}
-
-    /**
-     * Used for logging purposes, see {@link #getCapabilitiesString(long)}
-     * @hide
-     */
-    private static final Map<Long, String> CAPABILITIES_LOG_MAP = new HashMap<Long, String>() {{
-            put(CAPABILITY_EMERGENCY_OVER_MMTEL, "EMERGENCY_OVER_MMTEL");
-        }};
 
     /**
      * The intent that must be defined as an intent-filter in the AndroidManifest of the ImsService.
@@ -440,31 +408,5 @@ public class ImsService extends Service {
      */
     public ImsRegistrationImplBase getRegistration(int slotId) {
         return new ImsRegistrationImplBase();
-    }
-
-    /**
-     * @return A string representation of the ImsService capabilties for logging.
-     * @hide
-     */
-    public static String getCapabilitiesString(@ImsServiceCapability long caps) {
-        StringBuffer result = new StringBuffer();
-        result.append("capabilities={ ");
-        // filter incrementally fills 0s from  left to right. This is used to keep filtering out
-        // more bits in the long until the remaining leftmost bits are all zero.
-        long filter = 0xFFFFFFFFFFFFFFFFL;
-        // position of iterator to potentially print capability.
-        long i = 0;
-        while ((caps & filter) != 0 && i <= 63) {
-            long bitToCheck = (1L << i);
-            if ((caps & bitToCheck) != 0) {
-                result.append(CAPABILITIES_LOG_MAP.getOrDefault(bitToCheck, bitToCheck + "?"));
-                result.append(" ");
-            }
-            // shift left by one and fill in another 1 on the leftmost bit.
-            filter <<= 1;
-            i++;
-        }
-        result.append("}");
-        return result.toString();
     }
 }
