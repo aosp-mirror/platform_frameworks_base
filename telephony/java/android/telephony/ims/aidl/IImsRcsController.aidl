@@ -22,7 +22,6 @@ import android.telephony.ims.aidl.IRcsUceControllerCallback;
 import android.telephony.ims.aidl.IRcsUcePublishStateCallback;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 
-import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.IIntegerConsumer;
 
 /**
@@ -51,9 +50,4 @@ interface IImsRcsController {
     void setUceSettingEnabled(int subId, boolean isEnabled);
     void registerUcePublishStateCallback(int subId, IRcsUcePublishStateCallback c);
     void unregisterUcePublishStateCallback(int subId, IRcsUcePublishStateCallback c);
-
-    // Internal commands that should not be made public
-    void registerRcsFeatureCallback(int slotId, in IImsServiceFeatureCallback callback,
-            boolean oneShot);
-    void unregisterImsFeatureCallback(in IImsServiceFeatureCallback callback);
 }
