@@ -17,7 +17,7 @@
 #include "TestSceneBase.h"
 
 #include <SkColorMatrixFilter.h>
-#include <shader/LinearGradientShader.h>
+#include <SkGradientShader.h>
 
 class SimpleColorMatrixAnimation;
 
@@ -65,12 +65,9 @@ private:
                     // enough renderer might apply it directly to the paint color)
                     float pos[] = {0, 1};
                     SkPoint pts[] = {SkPoint::Make(0, 0), SkPoint::Make(width, height)};
-                    std::vector<SkColor4f> colors(2);
-                    colors[0] = SkColor4f::FromColor(Color::DeepPurple_500);
-                    colors[1] = SkColor4f::FromColor(Color::DeepOrange_500);
-                    paint.setShader(sk_make_sp<LinearGradientShader>(
-                            pts, colors, SkColorSpace::MakeSRGB(), pos, SkTileMode::kClamp,
-                            0, nullptr));
+                    SkColor colors[2] = {Color::DeepPurple_500, Color::DeepOrange_500};
+                    paint.setShader(SkGradientShader::MakeLinear(pts, colors, pos, 2,
+                                                                 SkTileMode::kClamp));
 
                     // overdraw several times to emphasize shader cost
                     for (int i = 0; i < 10; i++) {

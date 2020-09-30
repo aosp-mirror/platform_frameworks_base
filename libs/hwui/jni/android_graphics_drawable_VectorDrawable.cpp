@@ -143,13 +143,13 @@ static void updateFullPathPropertiesAndStrokeStyles(JNIEnv*, jobject, jlong full
 
 static void updateFullPathFillGradient(JNIEnv*, jobject, jlong pathPtr, jlong fillGradientPtr) {
     VectorDrawable::FullPath* path = reinterpret_cast<VectorDrawable::FullPath*>(pathPtr);
-    auto* fillShader = reinterpret_cast<Shader*>(fillGradientPtr);
+    SkShader* fillShader = reinterpret_cast<SkShader*>(fillGradientPtr);
     path->mutateStagingProperties()->setFillGradient(fillShader);
 }
 
 static void updateFullPathStrokeGradient(JNIEnv*, jobject, jlong pathPtr, jlong strokeGradientPtr) {
     VectorDrawable::FullPath* path = reinterpret_cast<VectorDrawable::FullPath*>(pathPtr);
-    auto* strokeShader = reinterpret_cast<Shader*>(strokeGradientPtr);
+    SkShader* strokeShader = reinterpret_cast<SkShader*>(strokeGradientPtr);
     path->mutateStagingProperties()->setStrokeGradient(strokeShader);
 }
 
