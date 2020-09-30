@@ -28,7 +28,9 @@ import android.window.TaskOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
@@ -59,16 +61,25 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     // require us to report to both old and new listeners)
     private final SparseArray<Pair<RunningTaskInfo, SurfaceControl>> mTasks = new SparseArray<>();
 
-    public ShellTaskOrganizer(SyncTransactionQueue syncQueue) {
+    // TODO(shell-transitions): move to a more "global" Shell location as this isn't only for Tasks
+    private final Transitions mTransitions;
+
+    public ShellTaskOrganizer(SyncTransactionQueue syncQueue, TransactionPool transactionPool,
+            ShellExecutor mainExecutor, ShellExecutor animExecutor) {
         super();
         addListener(new FullscreenTaskListener(syncQueue), WINDOWING_MODE_FULLSCREEN);
+        mTransitions = new Transitions(this, transactionPool, mainExecutor, animExecutor);
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) registerTransitionPlayer(mTransitions);
     }
 
     @VisibleForTesting
     ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController,
-                       SyncTransactionQueue syncQueue) {
+            SyncTransactionQueue syncQueue, TransactionPool transactionPool,
+            ShellExecutor mainExecutor, ShellExecutor animExecutor) {
         super(taskOrganizerController);
         addListener(new FullscreenTaskListener(syncQueue), WINDOWING_MODE_FULLSCREEN);
+        mTransitions = new Transitions(this, transactionPool, mainExecutor, animExecutor);
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) registerTransitionPlayer(mTransitions);
     }
 
     /**

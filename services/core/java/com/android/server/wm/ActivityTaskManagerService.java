@@ -958,6 +958,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mLockTaskController;
     }
 
+    TransitionController getTransitionController() {
+        return mWindowOrganizerController.getTransitionController();
+    }
+
     /**
      * Return the global configuration used by the process corresponding to the input pid. This is
      * usually the global configuration with some overrides specific to that process.

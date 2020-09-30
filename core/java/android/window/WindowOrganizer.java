@@ -19,8 +19,10 @@ package android.window;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.ActivityTaskManager;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Singleton;
 import android.view.SurfaceControl;
@@ -66,6 +68,48 @@ public class WindowOrganizer {
     }
 
     /**
+     * Start a transition.
+     * @param type The type of the transition. This is ignored if a transitionToken is provided.
+     * @param transitionToken An existing transition to start. If null, a new transition is created.
+     * @param t The set of window operations that are part of this transition.
+     * @return A token identifying the transition. This will be the same as transitionToken if it
+     *         was provided.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @NonNull
+    public IBinder startTransition(int type, @Nullable IBinder transitionToken,
+            @Nullable WindowContainerTransaction t) {
+        try {
+            return getWindowOrganizerController().startTransition(type, transitionToken, t);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Finishes a running transition.
+     * @param transitionToken The transition to finish. Can't be null.
+     * @param t A set of window operations to apply before finishing.
+     * @param callback A sync callback (if provided). See {@link #applySyncTransaction}.
+     * @return An ID for the sync operation if performed. See {@link #applySyncTransaction}.
+     *
+     * @hide
+     */
+    @SuppressLint("ExecutorRegistration")
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    public int finishTransition(@NonNull IBinder transitionToken,
+            @Nullable WindowContainerTransaction t,
+            @Nullable WindowContainerTransactionCallback callback) {
+        try {
+            return getWindowOrganizerController().finishTransition(transitionToken, t,
+                    callback != null ? callback.mInterface : null);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Take a screenshot for a specified Window
      * @param token The token for the WindowContainer that should get a screenshot taken.
      * @return A SurfaceControl where the screenshot will be attached, or null if failed.
@@ -82,6 +126,19 @@ public class WindowOrganizer {
             } else {
                 return null;
             }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Register an ITransitionPlayer to handle transition animations.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    public void registerTransitionPlayer(@Nullable ITransitionPlayer player) {
+        try {
+            getWindowOrganizerController().registerTransitionPlayer(player);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

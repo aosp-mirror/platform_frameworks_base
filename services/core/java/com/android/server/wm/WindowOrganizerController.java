@@ -26,6 +26,8 @@ import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -40,6 +42,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.IDisplayAreaOrganizerController;
 import android.window.ITaskOrganizerController;
+import android.window.ITransitionPlayer;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.IWindowOrganizerController;
 import android.window.WindowContainerToken;
@@ -88,21 +91,85 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     final TaskOrganizerController mTaskOrganizerController;
     final DisplayAreaOrganizerController mDisplayAreaOrganizerController;
 
+    final TransitionController mTransitionController;
+
     WindowOrganizerController(ActivityTaskManagerService atm) {
         mService = atm;
         mGlobalLock = atm.mGlobalLock;
         mTaskOrganizerController = new TaskOrganizerController(mService);
         mDisplayAreaOrganizerController = new DisplayAreaOrganizerController(mService);
+        mTransitionController = new TransitionController(atm);
+    }
+
+    TransitionController getTransitionController() {
+        return mTransitionController;
     }
 
     @Override
     public void applyTransaction(WindowContainerTransaction t) {
-        applySyncTransaction(t, null /*callback*/);
+        applyTransaction(t, null /*callback*/, null /*transition*/);
     }
 
     @Override
     public int applySyncTransaction(WindowContainerTransaction t,
             IWindowContainerTransactionCallback callback) {
+        return applyTransaction(t, callback, null /*transition*/);
+    }
+
+    @Override
+    public IBinder startTransition(int type, @Nullable IBinder transitionToken,
+            @Nullable WindowContainerTransaction t) {
+        enforceStackPermission("startTransition()");
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                Transition transition = Transition.fromBinder(transitionToken);
+                if (transition == null) {
+                    if (type < 0) {
+                        throw new IllegalArgumentException("Can't create transition with no type");
+                    }
+                    transition = mTransitionController.createTransition(type);
+                }
+                transition.start();
+                if (t == null) {
+                    t = new WindowContainerTransaction();
+                }
+                applyTransaction(t, null /*callback*/, transition);
+                return transition;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public int finishTransition(@NonNull IBinder transitionToken,
+            @Nullable WindowContainerTransaction t,
+            @Nullable IWindowContainerTransactionCallback callback) {
+        enforceStackPermission("finishTransition()");
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                int syncId = -1;
+                if (t != null) {
+                    syncId = applyTransaction(t, callback, null /*transition*/);
+                }
+                getTransitionController().finishTransition(transitionToken);
+                return syncId;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
+     * @param callback If non-null, this will be a sync-transaction.
+     * @param transition A transition to collect changes into.
+     * @return a BLAST sync-id if this is a non-transition, sync transaction.
+     */
+    private int applyTransaction(@NonNull WindowContainerTransaction t,
+            @Nullable IWindowContainerTransactionCallback callback,
+            @Nullable Transition transition) {
         enforceStackPermission("applySyncTransaction()");
         int syncId = -1;
         if (t == null) {
@@ -152,6 +219,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         }
 
                         int containerEffect = applyWindowContainerChange(wc, entry.getValue());
+                        if (transition != null) transition.collect(wc);
                         effects |= containerEffect;
 
                         // Lifecycle changes will trigger ensureConfig for everything.
@@ -173,6 +241,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                             addToSyncSet(syncId, wc);
                         }
                         effects |= sanitizeAndApplyHierarchyOp(wc, hop);
+                        if (transition != null) {
+                            transition.collect(wc);
+                            if (hop.isReparent() && hop.getNewParent() != null) {
+                                transition.collect(WindowContainer.fromBinder(hop.getNewParent()));
+                            }
+                        }
                     }
                     // Queue-up bounds-change transactions for tasks which are now organized. Do
                     // this after hierarchy ops so we have the final organized state.
@@ -510,6 +584,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         outSurfaceControl.copyFrom(screenshot, "WindowOrganizerController.takeScreenshot");
         return true;
+    }
+
+    @Override
+    public void registerTransitionPlayer(ITransitionPlayer player) {
+        enforceStackPermission("registerTransitionPlayer()");
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mTransitionController.registerTransitionPlayer(player);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     private void enforceStackPermission(String func) {

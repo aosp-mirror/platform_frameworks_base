@@ -417,7 +417,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     void setInitialSurfaceControlProperties(SurfaceControl.Builder b) {
         setSurfaceControl(b.setCallsite("WindowContainer.setInitialSurfaceControlProperties").build());
-        getSyncTransaction().show(mSurfaceControl);
+        if (showSurfaceOnCreation()) {
+            getSyncTransaction().show(mSurfaceControl);
+        }
         onSurfaceShown(getSyncTransaction());
         updateSurfacePositionNonOrganized();
     }
@@ -992,6 +994,21 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             if (wc.isVisible()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Is this window's surface needed?  This is almost like isVisible, except when participating
+     * in a transition, this will reflect the final visibility while isVisible won't change until
+     * the transition is finished.
+     */
+    boolean isVisibleRequested() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer child = mChildren.get(i);
+            if (child.isVisibleRequested()) {
                 return true;
             }
         }
@@ -2814,6 +2831,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     boolean isOrganized() {
         return false;
+    }
+
+    /**
+     * @return {@code true} if this container's surface should be shown when it is created.
+     */
+    boolean showSurfaceOnCreation() {
+        return true;
     }
 
     static WindowContainer fromBinder(IBinder binder) {
