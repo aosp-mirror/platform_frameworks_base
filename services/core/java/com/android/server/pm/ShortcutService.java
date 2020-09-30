@@ -26,6 +26,8 @@ import android.app.AppGlobals;
 import android.app.IUidObserver;
 import android.app.IUriGrantsManager;
 import android.app.UriGrantsManager;
+import android.app.role.OnRoleHoldersChangedListener;
+import android.app.role.RoleManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
@@ -108,7 +110,6 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.StatLogger;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
 import com.android.server.uri.UriGrantsManagerInternal;
 
@@ -347,6 +348,7 @@ public class ShortcutService extends IShortcutService.Stub {
     private final IUriGrantsManager mUriGrantsManager;
     private final UriGrantsManagerInternal mUriGrantsManagerInternal;
     private final IBinder mUriPermissionOwner;
+    private final RoleManager mRoleManager;
 
     private final ShortcutRequestPinProcessor mShortcutRequestPinProcessor;
     private final ShortcutBitmapSaver mShortcutBitmapSaver;
@@ -464,10 +466,11 @@ public class ShortcutService extends IShortcutService.Stub {
         mActivityManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityManagerInternal.class));
 
-        mUriGrantsManager = UriGrantsManager.getService();
+        mUriGrantsManager = Objects.requireNonNull(UriGrantsManager.getService());
         mUriGrantsManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(UriGrantsManagerInternal.class));
         mUriPermissionOwner = mUriGrantsManagerInternal.newUriPermissionOwner(TAG);
+        mRoleManager = Objects.requireNonNull(mContext.getSystemService(RoleManager.class));
 
         mShortcutRequestPinProcessor = new ShortcutRequestPinProcessor(this, mLock);
         mShortcutBitmapSaver = new ShortcutBitmapSaver(this);
@@ -491,12 +494,6 @@ public class ShortcutService extends IShortcutService.Stub {
         mContext.registerReceiverAsUser(mPackageMonitor, UserHandle.ALL,
                 packageFilter, null, mHandler);
 
-        final IntentFilter preferedActivityFilter = new IntentFilter();
-        preferedActivityFilter.addAction(Intent.ACTION_PREFERRED_ACTIVITY_CHANGED);
-        preferedActivityFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-        mContext.registerReceiverAsUser(mPackageMonitor, UserHandle.ALL,
-                preferedActivityFilter, null, mHandler);
-
         final IntentFilter localeFilter = new IntentFilter();
         localeFilter.addAction(Intent.ACTION_LOCALE_CHANGED);
         localeFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
@@ -505,6 +502,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
         injectRegisterUidObserver(mUidObserver, ActivityManager.UID_OBSERVER_PROCSTATE
                 | ActivityManager.UID_OBSERVER_GONE);
+
+        injectRegisterRoleHoldersListener(mOnRoleHoldersChangedListener);
     }
 
     long getStatStartTime() {
@@ -518,6 +517,31 @@ public class ShortcutService extends IShortcutService.Stub {
     public String injectGetLocaleTagsForUser(@UserIdInt int userId) {
         // TODO This should get the per-user locale.  b/30123329 b/30119489
         return LocaleList.getDefault().toLanguageTags();
+    }
+
+    private final OnRoleHoldersChangedListener mOnRoleHoldersChangedListener =
+            new OnRoleHoldersChangedListener() {
+        @Override
+        public void onRoleHoldersChanged(String roleName, UserHandle user) {
+            if (RoleManager.ROLE_HOME.equals(roleName)) {
+                injectPostToHandler(() -> handleOnDefaultLauncherChanged(user.getIdentifier()));
+            }
+        }
+    };
+
+    void handleOnDefaultLauncherChanged(int userId) {
+        if (DEBUG) {
+            Slog.v(TAG, "Default launcher changed for user: " + userId);
+        }
+
+        // Default launcher is removed or changed, revoke all URI permissions.
+        mUriGrantsManagerInternal.revokeUriPermissionFromOwner(mUriPermissionOwner, null, ~0, 0);
+
+        synchronized (mLock) {
+            // Clear the launcher cache for this user. It will be set again next time the default
+            // launcher is read from RoleManager.
+            getUserShortcutsLocked(userId).setCachedLauncher(null);
+        }
     }
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
@@ -2681,35 +2705,21 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             throwIfUserLockedL(userId);
 
-            final ShortcutUser user = getUserShortcutsLocked(userId);
+            final String defaultLauncher = getDefaultLauncher(userId);
 
-            // Always trust the cached component.
-            final ComponentName cached = user.getCachedLauncher();
-            if (cached != null) {
-                if (cached.getPackageName().equals(packageName)) {
-                    return true;
-                }
-            }
-            // If the cached one doesn't match, then go ahead
-
-            final ComponentName detected = getDefaultLauncher(userId);
-
-            // Update the cache.
-            user.setLauncher(detected);
-            if (detected != null) {
+            if (defaultLauncher != null) {
                 if (DEBUG) {
-                    Slog.v(TAG, "Detected launcher: " + detected);
+                    Slog.v(TAG, "Detected launcher: " + defaultLauncher + " user: " + userId);
                 }
-                return detected.getPackageName().equals(packageName);
+                return defaultLauncher.equals(packageName);
             } else {
-                // Default launcher not found.
                 return false;
             }
         }
     }
 
     @Nullable
-    ComponentName getDefaultLauncher(@UserIdInt int userId) {
+    String getDefaultLauncher(@UserIdInt int userId) {
         final long start = getStatStartTime();
         final long token = injectClearCallingIdentity();
         try {
@@ -2717,64 +2727,27 @@ public class ShortcutService extends IShortcutService.Stub {
                 throwIfUserLockedL(userId);
 
                 final ShortcutUser user = getUserShortcutsLocked(userId);
+                String cachedLauncher = user.getCachedLauncher();
+                if (cachedLauncher != null) {
+                    return cachedLauncher;
+                }
 
-                final List<ResolveInfo> allHomeCandidates = new ArrayList<>();
+                // Default launcher from role manager.
+                final long startGetHomeRoleHoldersAsUser = getStatStartTime();
+                final String defaultLauncher = injectGetHomeRoleHolderAsUser(userId);
+                logDurationStat(Stats.GET_DEFAULT_HOME, startGetHomeRoleHoldersAsUser);
 
-                // Default launcher from package manager.
-                final long startGetHomeActivitiesAsUser = getStatStartTime();
-                final ComponentName defaultLauncher = mPackageManagerInternal
-                        .getHomeActivitiesAsUser(allHomeCandidates, userId);
-                logDurationStat(Stats.GET_DEFAULT_HOME, startGetHomeActivitiesAsUser);
-
-                ComponentName detected = null;
                 if (defaultLauncher != null) {
-                    detected = defaultLauncher;
                     if (DEBUG) {
-                        Slog.v(TAG, "Default launcher from PM: " + detected);
+                        Slog.v(TAG, "Default launcher from RoleManager: " + defaultLauncher
+                                + " user: " + userId);
                     }
+                    user.setCachedLauncher(defaultLauncher);
                 } else {
-                    detected = user.getLastKnownLauncher();
-
-                    if (detected != null) {
-                        if (injectIsActivityEnabledAndExported(detected, userId)) {
-                            if (DEBUG) {
-                                Slog.v(TAG, "Cached launcher: " + detected);
-                            }
-                        } else {
-                            Slog.w(TAG, "Cached launcher " + detected + " no longer exists");
-                            detected = null;
-                            user.clearLauncher();
-                        }
-                    }
+                    Slog.e(TAG, "Default launcher not found." + " user: " + userId);
                 }
 
-                if (detected == null) {
-                    // If we reach here, that means it's the first check since the user was created,
-                    // and there's already multiple launchers and there's no default set.
-                    // Find the system one with the highest priority.
-                    // (We need to check the priority too because of FallbackHome in Settings.)
-                    // If there's no system launcher yet, then no one can access shortcuts, until
-                    // the user explicitly
-                    final int size = allHomeCandidates.size();
-
-                    int lastPriority = Integer.MIN_VALUE;
-                    for (int i = 0; i < size; i++) {
-                        final ResolveInfo ri = allHomeCandidates.get(i);
-                        if (!ri.activityInfo.applicationInfo.isSystemApp()) {
-                            continue;
-                        }
-                        if (DEBUG) {
-                            Slog.d(TAG, String.format("hasShortcutPermissionInner: pkg=%s prio=%d",
-                                    ri.activityInfo.getComponentName(), ri.priority));
-                        }
-                        if (ri.priority < lastPriority) {
-                            continue;
-                        }
-                        detected = ri.activityInfo.getComponentName();
-                        lastPriority = ri.priority;
-                    }
-                }
-                return detected;
+                return defaultLauncher;
             }
         } finally {
             injectRestoreCallingIdentity(token);
@@ -3351,11 +3324,11 @@ public class ShortcutService extends IShortcutService.Stub {
             Objects.requireNonNull(callingPackage);
 
             final int userId = UserHandle.getUserId(callingUid);
-            final ComponentName defaultLauncher = getDefaultLauncher(userId);
+            final String defaultLauncher = getDefaultLauncher(userId);
             if (defaultLauncher == null) {
                 return false;
             }
-            if (!callingPackage.equals(defaultLauncher.getPackageName())) {
+            if (!callingPackage.equals(defaultLauncher)) {
                 return false;
             }
             synchronized (mLock) {
@@ -3426,22 +3399,6 @@ public class ShortcutService extends IShortcutService.Stub {
                         }
                         return;
                     }
-
-                    // Whenever we get one of those package broadcasts, or get
-                    // ACTION_PREFERRED_ACTIVITY_CHANGED, we purge the default launcher cache.
-                    final ShortcutUser user = getUserShortcutsLocked(userId);
-                    user.clearLauncher();
-                }
-                if (Intent.ACTION_PREFERRED_ACTIVITY_CHANGED.equals(action)) {
-                    final ShortcutUser user = getUserShortcutsLocked(userId);
-                    final ComponentName lastLauncher = user.getLastKnownLauncher();
-                    final ComponentName currentLauncher = getDefaultLauncher(userId);
-                    if (currentLauncher == null || !currentLauncher.equals(lastLauncher)) {
-                        // Default launcher is removed or changed, revoke all URI permissions.
-                        mUriGrantsManagerInternal.revokeUriPermissionFromOwner(mUriPermissionOwner,
-                                null, ~0, 0);
-                    }
-                    return;
                 }
 
                 final Uri intentUri = intent.getData();
@@ -4629,9 +4586,6 @@ public class ShortcutService extends IShortcutService.Stub {
                     case "reset-config":
                         handleResetConfig();
                         break;
-                    case "clear-default-launcher":
-                        handleClearDefaultLauncher();
-                        break;
                     case "get-default-launcher":
                         handleGetDefaultLauncher();
                         break;
@@ -4672,11 +4626,10 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.println("cmd shortcut reset-config");
             pw.println("    Reset the configuration set with \"update-config\"");
             pw.println();
-            pw.println("cmd shortcut clear-default-launcher [--user USER_ID]");
-            pw.println("    Clear the cached default launcher");
-            pw.println();
-            pw.println("cmd shortcut get-default-launcher [--user USER_ID]");
+            pw.println("[Deprecated] cmd shortcut get-default-launcher [--user USER_ID]");
             pw.println("    Show the default launcher");
+            pw.println("    Note: This command is deprecated. Callers should query the default"
+                    + " launcher directly from RoleManager instead.");
             pw.println();
             pw.println("cmd shortcut unload-user [--user USER_ID]");
             pw.println("    Unload a user from the memory");
@@ -4723,36 +4676,17 @@ public class ShortcutService extends IShortcutService.Stub {
             }
         }
 
-        private void clearLauncher() {
-            synchronized (mLock) {
-                getUserShortcutsLocked(mUserId).forceClearLauncher();
-            }
-        }
-
-        private void showLauncher() {
-            synchronized (mLock) {
-                // This ensures to set the cached launcher.  Package name doesn't matter.
-                hasShortcutHostPermissionInner("-", mUserId);
-
-                getOutPrintWriter().println("Launcher: "
-                        + getUserShortcutsLocked(mUserId).getLastKnownLauncher());
-            }
-        }
-
-        private void handleClearDefaultLauncher() throws CommandException {
-            synchronized (mLock) {
-                parseOptionsLocked(/* takeUser =*/ true);
-
-                clearLauncher();
-            }
-        }
-
+        // This method is used by various cts modules to get the current default launcher. Tests
+        // should query this information directly from RoleManager instead. Keeping the old behavior
+        // by returning the result from package manager.
         private void handleGetDefaultLauncher() throws CommandException {
             synchronized (mLock) {
                 parseOptionsLocked(/* takeUser =*/ true);
-
-                clearLauncher();
-                showLauncher();
+                final List<ResolveInfo> allHomeCandidates = new ArrayList<>();
+                // Default launcher from package manager.
+                final ComponentName defaultLauncher = mPackageManagerInternal
+                        .getHomeActivitiesAsUser(allHomeCandidates, mUserId);
+                getOutPrintWriter().println("Launcher: " + defaultLauncher);
             }
         }
 
@@ -4879,6 +4813,19 @@ public class ShortcutService extends IShortcutService.Stub {
                     ActivityManager.PROCESS_STATE_UNKNOWN, null);
         } catch (RemoteException shouldntHappen) {
         }
+    }
+
+    @VisibleForTesting
+    void injectRegisterRoleHoldersListener(OnRoleHoldersChangedListener listener) {
+        mRoleManager.addOnRoleHoldersChangedListenerAsUser(mContext.getMainExecutor(), listener,
+                UserHandle.ALL);
+    }
+
+    @VisibleForTesting
+    String injectGetHomeRoleHolderAsUser(int userId) {
+        List<String> roleHolders = mRoleManager.getRoleHoldersAsUser(
+                RoleManager.ROLE_HOME, UserHandle.of(userId));
+        return roleHolders.isEmpty() ? null : roleHolders.get(0);
     }
 
     File getUserBitmapFilePath(@UserIdInt int userId) {
