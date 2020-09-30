@@ -472,7 +472,8 @@ public final class MediaController {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(publicAlternatives = "Check equality of {@link #getSessionToken() tokens}"
+            + "instead.")
     public boolean controlsSameSession(MediaController other) {
         if (other == null) return false;
         return mSessionBinder.asBinder() == other.getSessionBinder().asBinder();
