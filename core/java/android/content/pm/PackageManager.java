@@ -866,6 +866,12 @@ public abstract class PackageManager {
      * is set the restricted permissions will be whitelisted for all users, otherwise
      * only to the owner.
      *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
+     *
      * @hide
      */
     public static final int INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS = 0x00400000;
@@ -3569,12 +3575,24 @@ public abstract class PackageManager {
     /**
      * Permission whitelist flag: permissions whitelisted by the system.
      * Permissions can also be whitelisted by the installer or on upgrade.
+     *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
      */
     public static final int FLAG_PERMISSION_WHITELIST_SYSTEM = 1 << 0;
 
     /**
      * Permission whitelist flag: permissions whitelisted by the installer.
      * Permissions can also be whitelisted by the system or on upgrade.
+     *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
      */
     public static final int FLAG_PERMISSION_WHITELIST_INSTALLER = 1 << 1;
 
@@ -3583,6 +3601,12 @@ public abstract class PackageManager {
      * when upgrading from an OS version where the permission was not
      * restricted to an OS version where the permission is restricted.
      * Permissions can also be whitelisted by the installer or the system.
+     *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
      */
     public static final int FLAG_PERMISSION_WHITELIST_UPGRADE = 1 << 2;
 
@@ -4552,6 +4576,13 @@ public abstract class PackageManager {
      * This list corresponds to the {@link #FLAG_PERMISSION_WHITELIST_INSTALLER} flag.
      * Can be accessed by pre-installed holders of a dedicated permission or the
      * installer on record.
+     * </ol>
+     *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
      *
      * @param packageName The app for which to get whitelisted permissions.
      * @param whitelistFlag The flag to determine which whitelist to query. Only one flag
@@ -4605,6 +4636,13 @@ public abstract class PackageManager {
      * <p>You need to specify the whitelists for which to set the whitelisted permissions
      * which will clear the previous whitelisted permissions and replace them with the
      * provided ones.
+     * </ol>
+     *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
      *
      * @param packageName The app for which to get whitelisted permissions.
      * @param permName The whitelisted permission to add.
@@ -4660,6 +4698,12 @@ public abstract class PackageManager {
      * which will clear the previous whitelisted permissions and replace them with the
      * provided ones.
      *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
+     *
      * @param packageName The app for which to get whitelisted permissions.
      * @param permName The whitelisted permission to remove.
      * @param whitelistFlags The whitelists from which to remove. Passing multiple flags
@@ -4691,6 +4735,12 @@ public abstract class PackageManager {
      * un-whitelist the packages it installs, unless auto-revoking permissions from that package
      * would cause breakages beyond having to re-request the permission(s).
      *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
+     *
      * @param packageName The app for which to set exemption.
      * @param whitelisted Whether the app should be whitelisted.
      *
@@ -4712,6 +4762,13 @@ public abstract class PackageManager {
      *
      * Only the installer on record that installed the given package, or a holder of
      * {@code WHITELIST_AUTO_REVOKE_PERMISSIONS} is allowed to call this.
+     *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
+     *
      * @param packageName The app for which to set exemption.
      *
      * @return Whether the app is whitelisted.
@@ -8026,6 +8083,12 @@ public abstract class PackageManager {
     }
 
     /**
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
+     *
      * @return whether this package is whitelisted from having its runtime permission be
      *         auto-revoked if unused for an extended period of time.
      */
