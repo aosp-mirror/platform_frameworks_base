@@ -84,6 +84,7 @@ import com.android.server.SystemService;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -703,6 +704,7 @@ public class AppStandbyControllerTests {
         assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController, PACKAGE_1));
     }
 
+    @Ignore
     @Test
     public void testPredictionTimedOut() throws Exception {
         // Set it to timeout or usage, so that prediction can override it
