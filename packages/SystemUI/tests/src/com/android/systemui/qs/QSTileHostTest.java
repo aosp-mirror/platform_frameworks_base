@@ -55,6 +55,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -110,6 +111,8 @@ public class QSTileHostTest extends SysuiTestCase {
     private CustomTile mCustomTile;
     @Mock
     private UiEventLogger mUiEventLogger;
+    @Mock
+    private UserTracker mUserTracker;
 
     private Handler mHandler;
     private TestableLooper mLooper;
@@ -122,7 +125,7 @@ public class QSTileHostTest extends SysuiTestCase {
         mHandler = new Handler(mLooper.getLooper());
         mQSTileHost = new TestQSTileHost(mContext, mIconController, mDefaultFactory, mHandler,
                 mLooper.getLooper(), mPluginManager, mTunerService, mAutoTiles, mDumpManager,
-                mBroadcastDispatcher, mStatusBar, mQSLogger, mUiEventLogger);
+                mBroadcastDispatcher, mStatusBar, mQSLogger, mUiEventLogger, mUserTracker);
         setUpTileFactory();
 
         Settings.Secure.putStringForUser(mContext.getContentResolver(), QSTileHost.TILES_SETTING,
@@ -301,10 +304,10 @@ public class QSTileHostTest extends SysuiTestCase {
                 PluginManager pluginManager, TunerService tunerService,
                 Provider<AutoTileManager> autoTiles, DumpManager dumpManager,
                 BroadcastDispatcher broadcastDispatcher, StatusBar statusBar, QSLogger qsLogger,
-                UiEventLogger uiEventLogger) {
+                UiEventLogger uiEventLogger, UserTracker userTracker) {
             super(context, iconController, defaultFactory, mainHandler, bgLooper, pluginManager,
                     tunerService, autoTiles, dumpManager, broadcastDispatcher,
-                    Optional.of(statusBar), qsLogger, uiEventLogger);
+                    Optional.of(statusBar), qsLogger, uiEventLogger, userTracker);
         }
 
         @Override

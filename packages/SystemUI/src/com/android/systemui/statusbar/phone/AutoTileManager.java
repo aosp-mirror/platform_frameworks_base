@@ -169,7 +169,8 @@ public class AutoTileManager implements UserAwareController {
                 String setting = split[0];
                 String spec = split[1];
                 // Populate all the settings. As they may not have been added in other users
-                AutoAddSetting s = new AutoAddSetting(mContext, mHandler, setting, spec);
+                AutoAddSetting s = new AutoAddSetting(
+                        mContext, mHandler, setting, mCurrentUser.getIdentifier(), spec);
                 mAutoAddSettingList.add(s);
             } else {
                 Log.w(TAG, "Malformed item in array: " + tile);
@@ -319,8 +320,14 @@ public class AutoTileManager implements UserAwareController {
     private class AutoAddSetting extends SecureSetting {
         private final String mSpec;
 
-        AutoAddSetting(Context context, Handler handler, String setting, String tileSpec) {
-            super(context, handler, setting);
+        AutoAddSetting(
+                Context context,
+                Handler handler,
+                String setting,
+                int userId,
+                String tileSpec
+        ) {
+            super(context, handler, setting, userId);
             mSpec = tileSpec;
         }
 

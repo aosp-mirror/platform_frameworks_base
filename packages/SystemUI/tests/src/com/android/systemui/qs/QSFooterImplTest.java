@@ -31,6 +31,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.R.id;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
@@ -54,6 +55,7 @@ public class QSFooterImplTest extends LeakCheckedTest {
         mActivityStarter = mDependency.injectMockDependency(ActivityStarter.class);
         mDeviceProvisionedController = mDependency.injectMockDependency(
                 DeviceProvisionedController.class);
+        mDependency.injectMockDependency(UserTracker.class);
         TestableLooper.get(this).runWithLooper(
                 () -> mFooter = (QSFooterImpl) LayoutInflater.from(mContext).inflate(
                         R.layout.qs_footer_impl, null));

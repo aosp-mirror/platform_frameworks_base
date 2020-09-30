@@ -25,7 +25,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.PointF;
 import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.Handler;
@@ -57,6 +56,7 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSliderView;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController.BrightnessMirrorListener;
 import com.android.systemui.tuner.TunerService;
@@ -114,6 +114,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private final QSLogger mQSLogger;
     protected final UiEventLogger mUiEventLogger;
     protected QSTileHost mHost;
+    private final UserTracker mUserTracker;
 
     @Nullable
     protected QSSecurityFooter mSecurityFooter;
@@ -157,7 +158,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             BroadcastDispatcher broadcastDispatcher,
             QSLogger qsLogger,
             MediaHost mediaHost,
-            UiEventLogger uiEventLogger
+            UiEventLogger uiEventLogger,
+            UserTracker userTracker
     ) {
         super(context, attrs);
         mUsingMediaPlayer = useQsMediaPlayer(context);
@@ -173,6 +175,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mDumpManager = dumpManager;
         mBroadcastDispatcher = broadcastDispatcher;
         mUiEventLogger = uiEventLogger;
+        mUserTracker = userTracker;
 
         setOrientation(VERTICAL);
 
@@ -221,7 +224,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     protected void addSecurityFooter() {
-        mSecurityFooter = new QSSecurityFooter(this, mContext);
+        mSecurityFooter = new QSSecurityFooter(this, mContext, mUserTracker);
     }
 
     protected void addViewsAboveTiles() {
