@@ -199,10 +199,24 @@ enum SmsTypeEnum {
     SMS_TYPE_WAP_PUSH = 4;
 }
 
-// SMS errors
+// Incoming SMS errors
 enum SmsIncomingErrorEnum {
     SMS_SUCCESS = 0;
     SMS_ERROR_GENERIC = 1;
     SMS_ERROR_NO_MEMORY = 2;
     SMS_ERROR_NOT_SUPPORTED = 3;
+}
+
+// Outgoing SMS results
+enum SmsSendResultEnum {
+    // Unknown error
+    SMS_SEND_RESULT_UNKNOWN = 0;
+    // Success
+    SMS_SEND_RESULT_SUCCESS = 1;
+    // Permanent error
+    SMS_SEND_RESULT_ERROR = 2;
+    // Temporary error, retry
+    SMS_SEND_RESULT_ERROR_RETRY = 3;
+    // Error over IMS, retry on CS
+    SMS_SEND_RESULT_ERROR_FALLBACK = 4;
 }
