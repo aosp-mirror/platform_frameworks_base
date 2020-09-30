@@ -333,7 +333,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ShellCallback callback,
             ResultReceiver resultReceiver) {
-        (new TimeZoneDetectorShellCommand(this)).exec(
+        new TimeZoneDetectorShellCommand(this).exec(
                 this, in, out, err, args, callback, resultReceiver);
     }
 }
