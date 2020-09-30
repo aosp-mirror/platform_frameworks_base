@@ -2666,6 +2666,18 @@
     <string name="magnification_window_title">Magnification Window</string>
     <!-- Title for Magnification Controls Window [CHAR LIMIT=NONE] -->
     <string name="magnification_controls_title">Magnification Window Controls</string>
+    <!-- Action in accessibility menu to zoom in content of the magnification window. [CHAR LIMIT=30] -->
+    <string name="accessibility_control_zoom_in">Zoom in</string>
+    <!-- Action in accessibility menu to zoom out content of the magnification window. [CHAR LIMIT=30] -->
+    <string name="accessibility_control_zoom_out">Zoom out</string>
+    <!-- Action in accessibility menu to move the magnification window up. [CHAR LIMIT=30] -->
+    <string name="accessibility_control_move_up">Move up</string>
+    <!-- Action in accessibility menu to move the magnification window down. [CHAR LIMIT=30] -->
+    <string name="accessibility_control_move_down">Move down</string>
+    <!-- Action in accessibility menu to move the magnification window left. [CHAR LIMIT=30] -->
+    <string name="accessibility_control_move_left">Move left</string>
+    <!-- Action in accessibility menu to move the magnification window right. [CHAR LIMIT=30] -->
+    <string name="accessibility_control_move_right">Move right</string>
 
     <!-- Device Controls strings -->
     <!-- Device Controls empty state, title [CHAR LIMIT=30] -->
