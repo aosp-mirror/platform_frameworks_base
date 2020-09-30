@@ -19,6 +19,7 @@ package com.android.server.location.timezone;
 import android.annotation.NonNull;
 import android.os.Handler;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState;
 import com.android.server.timezonedetector.ConfigurationInternal;
 import com.android.server.timezonedetector.Dumpable;
@@ -84,6 +85,12 @@ abstract class LocationTimeZoneProviderController implements Dumpable {
      * call must be made on the {@link ThreadingDomain} handler thread.
      */
     abstract void onConfigChanged();
+
+    @VisibleForTesting
+    abstract boolean isUncertaintyTimeoutSet();
+
+    @VisibleForTesting
+    abstract long getUncertaintyTimeoutDelayMillis();
 
     /**
      * Used by {@link LocationTimeZoneProviderController} to obtain information from the surrounding
