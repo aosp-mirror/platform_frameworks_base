@@ -30,9 +30,11 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Range;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.Gravity;
@@ -47,11 +49,16 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.R;
 import com.android.systemui.shared.system.WindowManagerWrapper;
+
+import java.text.NumberFormat;
+import java.util.Locale;
 
 /**
  * Class to handle adding and removing a window magnification.
@@ -60,6 +67,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         MirrorWindowControl.MirrorWindowDelegate {
 
     private static final String TAG = "WindowMagnificationController";
+    // Delay to avoid updating state description too frequently.
+    private static final int UPDATE_STATE_DESCRIPTION_DELAY_MS = 100;
+    // It should be consistent with the value defined in WindowMagnificationGestureHandler.
+    private static final Range<Float> A11Y_ACTION_SCALE_RANGE = new Range<>(2.0f, 8.0f);
+    private static final float A11Y_CHANGE_SCALE_DIFFERENCE = 1.0f;
     private final Context mContext;
     private final Resources mResources;
     private final Handler mHandler;
@@ -95,6 +107,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private final View.OnLayoutChangeListener mMirrorViewLayoutChangeListener;
     private final View.OnLayoutChangeListener mMirrorSurfaceViewLayoutChangeListener;
     private final Runnable mMirrorViewRunnable;
+    private final Runnable mUpdateStateDescriptionRunnable;
     private View mMirrorView;
     private SurfaceView mMirrorSurfaceView;
     private int mMirrorSurfaceMargin;
@@ -106,6 +119,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
     private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
     private Choreographer.FrameCallback mMirrorViewGeometryVsyncCallback;
+    private Locale mLocale;
+    private NumberFormat mPercentFormat;
 
     @Nullable
     private MirrorWindowControl mMirrorWindowControl;
@@ -164,6 +179,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                         mWindowMagnifierCallback.onSourceBoundsChanged(mDisplayId, mSourceBounds);
                     }
                 };
+        mUpdateStateDescriptionRunnable = () -> {
+            if (isWindowVisible()) {
+                mMirrorView.setStateDescription(formatStateDescription(mScale));
+            }
+        };
     }
 
     private void updateDimensions() {
@@ -292,12 +312,13 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         mMirrorView.addOnLayoutChangeListener(mMirrorViewLayoutChangeListener);
+        mMirrorView.setAccessibilityDelegate(new MirrorWindowA11yDelegate());
+
         mWm.addView(mMirrorView, params);
 
         SurfaceHolder holder = mMirrorSurfaceView.getHolder();
         holder.addCallback(this);
         holder.setFormat(PixelFormat.RGBA_8888);
-
         addDragTouchListeners();
     }
 
@@ -526,6 +547,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         final float offsetY = Float.isNaN(centerY) ? 0
                 : centerY - mMagnificationFrame.exactCenterY();
         mScale = Float.isNaN(scale) ? mScale : scale;
+
         setMagnificationFrameBoundary();
         updateMagnificationFramePosition((int) offsetX, (int) offsetY);
         if (!isWindowVisible()) {
@@ -546,6 +568,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             return;
         }
         enableWindowMagnification(scale, Float.NaN, Float.NaN);
+        mHandler.removeCallbacks(mUpdateStateDescriptionRunnable);
+        mHandler.postDelayed(mUpdateStateDescriptionRunnable, UPDATE_STATE_DESCRIPTION_DELAY_MS);
     }
 
     /**
@@ -595,5 +619,79 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     //The window is visible when it is existed.
     private boolean isWindowVisible() {
         return mMirrorView != null;
+    }
+
+    private CharSequence formatStateDescription(float scale) {
+        // Cache the locale-appropriate NumberFormat.  Configuration locale is guaranteed
+        // non-null, so the first time this is called we will always get the appropriate
+        // NumberFormat, then never regenerate it unless the locale changes on the fly.
+        final Locale curLocale = mContext.getResources().getConfiguration().getLocales().get(0);
+        if (!curLocale.equals(mLocale)) {
+            mLocale = curLocale;
+            mPercentFormat = NumberFormat.getPercentInstance(curLocale);
+        }
+        return mPercentFormat.format(scale);
+    }
+
+    private class MirrorWindowA11yDelegate extends View.AccessibilityDelegate {
+
+        @Override
+        public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+            super.onInitializeAccessibilityNodeInfo(host, info);
+            info.addAction(
+                    new AccessibilityAction(R.id.accessibility_action_zoom_in,
+                            mContext.getString(R.string.accessibility_control_zoom_in)));
+            info.addAction(new AccessibilityAction(R.id.accessibility_action_zoom_out,
+                    mContext.getString(R.string.accessibility_control_zoom_out)));
+            info.addAction(new AccessibilityAction(R.id.accessibility_action_move_up,
+                    mContext.getString(R.string.accessibility_control_move_up)));
+            info.addAction(new AccessibilityAction(R.id.accessibility_action_move_down,
+                    mContext.getString(R.string.accessibility_control_move_down)));
+            info.addAction(new AccessibilityAction(R.id.accessibility_action_move_left,
+                    mContext.getString(R.string.accessibility_control_move_left)));
+            info.addAction(new AccessibilityAction(R.id.accessibility_action_move_right,
+                    mContext.getString(R.string.accessibility_control_move_right)));
+
+            info.setContentDescription(mContext.getString(R.string.magnification_window_title));
+            info.setStateDescription(formatStateDescription(getScale()));
+        }
+
+        @Override
+        public boolean performAccessibilityAction(View host, int action, Bundle args) {
+            if (performA11yAction(action)) {
+                return true;
+            }
+            return super.performAccessibilityAction(host, action, args);
+        }
+
+        private boolean performA11yAction(int action) {
+            if (action == R.id.accessibility_action_zoom_in) {
+                final float scale = mScale + A11Y_CHANGE_SCALE_DIFFERENCE;
+                setScale(A11Y_ACTION_SCALE_RANGE.clamp(scale));
+                return true;
+            }
+            if (action == R.id.accessibility_action_zoom_out) {
+                final float scale = mScale - A11Y_CHANGE_SCALE_DIFFERENCE;
+                setScale(A11Y_ACTION_SCALE_RANGE.clamp(scale));
+                return true;
+            }
+            if (action == R.id.accessibility_action_move_up) {
+                move(0, -mSourceBounds.height());
+                return true;
+            }
+            if (action == R.id.accessibility_action_move_down) {
+                move(0, mSourceBounds.height());
+                return true;
+            }
+            if (action == R.id.accessibility_action_move_left) {
+                move(-mSourceBounds.width(), 0);
+                return true;
+            }
+            if (action == R.id.accessibility_action_move_right) {
+                move(mSourceBounds.width(), 0);
+                return true;
+            }
+            return false;
+        }
     }
 }
