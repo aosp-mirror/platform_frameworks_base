@@ -70,6 +70,7 @@ public final class DataCallResponse implements Parcelable {
 
     /** {@hide} */
     @IntDef(prefix = "HANDOVER_FAILURE_MODE_", value = {
+            HANDOVER_FAILURE_MODE_UNKNOWN,
             HANDOVER_FAILURE_MODE_LEGACY,
             HANDOVER_FAILURE_MODE_DO_FALLBACK,
             HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_HANDOVER,
