@@ -5814,6 +5814,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
+        final Task task = getTask();
+        if (task != null) {
+            final SurfaceControl.Transaction t = task.getMainWindowSizeChangeTransaction();
+            if (t != null) {
+                mBLASTSyncTransaction.merge(t);
+            }
+            task.setMainWindowSizeChangeTransaction(null);
+        }
+
         // If localSyncId is >0 then we are syncing with children and will
         // invoke transaction ready from our own #transactionReady callback
         // we just need to signal our side of the sync (setReady). But if we

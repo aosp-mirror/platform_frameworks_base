@@ -636,6 +636,11 @@ class WindowStateAnimator {
     }
 
     private boolean shouldConsumeMainWindowSizeTransaction() {
+      // If we use BLASTSync we always consume the transaction when finishing
+      // the sync.
+      if (mService.useBLASTSync()) {
+          return false;
+      }
       // We only consume the transaction when the client is calling relayout
       // because this is the only time we know the frameNumber will be valid
       // due to the client renderer being paused. Put otherwise, only when
