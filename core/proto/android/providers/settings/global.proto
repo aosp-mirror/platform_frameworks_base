@@ -463,6 +463,8 @@ message GlobalSettingsProto {
         // Updatable Driver - List of Apps selected to use updatable prerelease driver
         // i.e. <pkg1>,<pkg2>,...,<pkgN>
         optional SettingProto updatable_driver_prerelease_opt_in_apps = 18;
+
+        optional SettingProto angle_egl_features = 19;
     }
     optional Gpu gpu = 59;
 
