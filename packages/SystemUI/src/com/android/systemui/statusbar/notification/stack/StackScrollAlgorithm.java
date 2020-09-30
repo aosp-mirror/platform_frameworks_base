@@ -29,6 +29,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.FooterView;
@@ -687,15 +688,27 @@ public class StackScrollAlgorithm {
             AmbientState ambientState) {
         int childCount = algorithmState.visibleChildren.size();
         float childrenOnTop = 0.0f;
+
+        int topHunIndex = -1;
+        for (int i = 0; i < childCount; i++) {
+            ExpandableView child = algorithmState.visibleChildren.get(i);
+            if (child instanceof ActivatableNotificationView
+                    && (child.isAboveShelf() || child.showingPulsing())) {
+                topHunIndex = i;
+                break;
+            }
+        }
+
         for (int i = childCount - 1; i >= 0; i--) {
             childrenOnTop = updateChildZValue(i, childrenOnTop,
-                    algorithmState, ambientState);
+                    algorithmState, ambientState, i == topHunIndex);
         }
     }
 
     protected float updateChildZValue(int i, float childrenOnTop,
             StackScrollAlgorithmState algorithmState,
-            AmbientState ambientState) {
+            AmbientState ambientState,
+            boolean shouldElevateHun) {
         ExpandableView child = algorithmState.visibleChildren.get(i);
         ExpandableViewState childViewState = child.getViewState();
         int zDistanceBetweenElements = ambientState.getZDistanceBetweenElements();
@@ -713,8 +726,7 @@ public class StackScrollAlgorithm {
             }
             childViewState.zTranslation = baseZ
                     + childrenOnTop * zDistanceBetweenElements;
-        } else if (child == ambientState.getTrackedHeadsUpRow()
-                || (i == 0 && (child.isAboveShelf() || child.showingPulsing()))) {
+        } else if (shouldElevateHun) {
             // In case this is a new view that has never been measured before, we don't want to
             // elevate if we are currently expanded more then the notification
             int shelfHeight = ambientState.getShelf() == null ? 0 :

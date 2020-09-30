@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Endelea"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Ghairi"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Shiriki"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Futa"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Imeghairi mchakato wa kurekodi skrini"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Imehifadhi rekodi ya skrini, gusa ili uangalie"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Imefuta rekodi ya skrini"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Hitilafu imetokea wakati wa kufuta rekodi ya skrini"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Imeshindwa kupata ruhusa"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Hitilafu imetokea wakati wa kuanza kurekodi skrini"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Juu 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Juu 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Skrini nzima ya chini"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Nafasi ya <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Gusa mara mbili ili ubadilishe."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Gusa mara mbili ili uongeze."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Hamisha <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Ondoa <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Ongeza <xliff:g id="TILE_NAME">%1$s</xliff:g> kwenye nafasi ya <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Sogeza <xliff:g id="TILE_NAME">%1$s</xliff:g> kwenye nafasi ya <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"ondoa kigae"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ongeza kigae mwishoni"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Hamisha kigae"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Ongeza kigae"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Hamishia kwenye <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Ongeza kwenye nafasi ya <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Nafasi ya <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Kihariri cha Mipangilio ya haraka."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Arifa kutoka <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"Huenda programu isifanye kazi kwenye skrini inayogawanywa."</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Ruka ufikie iliyotangulia"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Badilisha ukubwa"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Simu ilizima kutokana na joto"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Simu yako sasa inafanya kazi ipasavyo"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Simu yako sasa inafanya kazi ipasavyo.\nGusa ili upate maelezo zaidi"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Simu yako ilikuwa moto sana, kwa hivyo ilijizima ili ipoe. Simu yako sasa inafanya kazi ipasavyo.\n\nSimu yako inaweza kuwa moto sana ikiwa:\n	• Unatumia programu zinazotumia vipengee vingi (kama vile michezo ya video, video au programu za uelekezaji)\n	• Unapakua au upakie faili kubwa\n	• Unatumia simu yako katika maeneo yenye halijoto ya juu"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Angalia hatua za utunzaji"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Joto la simu linaongezeka"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Baadhi ya vipengele havitatumika kwenye simu wakati inapoa"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Baadhi ya vipengele havitatumika kwenye simu wakati inapoa.\nGusa ili upate maelezo zaidi"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Simu yako itajaribu kupoa kiotomatiki. Bado unaweza kutumia simu yako, lakini huenda ikafanya kazi polepole. \n\nPindi simu yako itakapopoa, itaendelea kufanya kazi kama kawaida."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Angalia hatua za utunzaji"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Chomoa chaja"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Kuna tatizo la kuchaji kifaa hiki. Chomoa adapta ya nishati na uwe mwangalifu, huenda kebo ni moto."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Angalia hatua za ulinzi"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Mipangilio"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Nimeelewa"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> inatumia <xliff:g id="TYPES_LIST">%2$s</xliff:g> yako."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Programu zinatumia <xliff:g id="TYPES_LIST">%s</xliff:g> yako."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" na "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"mahali"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"maikrofoni"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Umezima vitambuzi"</string>
     <string name="device_services" msgid="1549944177856658705">"Huduma za Kifaa"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Wimbo hauna jina"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Inapakia mapendekezo"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Maudhui"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Ficha kipindi cha sasa."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ficha"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Ondoa"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Endelea"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Mipangilio"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Haitumiki, angalia programu"</string>

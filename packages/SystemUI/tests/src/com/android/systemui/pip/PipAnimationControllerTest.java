@@ -61,8 +61,7 @@ public class PipAnimationControllerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         mPipAnimationController = new PipAnimationController(
-                mContext, new PipSurfaceTransactionHelper(mContext,
-                mock(ConfigurationController.class)));
+                new PipSurfaceTransactionHelper(mContext, mock(ConfigurationController.class)));
         mLeash = new SurfaceControl.Builder()
                 .setContainerLayer()
                 .setName("FakeLeash")

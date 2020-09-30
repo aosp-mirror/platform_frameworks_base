@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
+
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -40,6 +43,7 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.ServiceState;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.LocalServices;
@@ -145,6 +149,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     String stringName;      // caching of toString
 
     private int lastStartId;    // identifier of most recent start request.
+
+    boolean mKeepWarming; // Whether or not it'll keep critical code path of the host warm
 
     static class StartItem {
         final ServiceRecord sr;
@@ -514,6 +520,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         lastActivity = SystemClock.uptimeMillis();
         userId = UserHandle.getUserId(appInfo.uid);
         createdFromFg = callerIsFg;
+        updateKeepWarmLocked();
     }
 
     public ServiceState getTracker() {
@@ -732,6 +739,14 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
     }
 
+    @GuardedBy("ams")
+    void updateKeepWarmLocked() {
+        mKeepWarming = ams.mConstants.KEEP_WARMING_SERVICES.contains(name)
+                && (ams.mUserController.getCurrentUserId() == userId
+                || ams.isSingleton(processName, appInfo, instanceName.getClassName(),
+                        serviceInfo.flags));
+    }
+
     public AppBindRecord retrieveAppBindingLocked(Intent intent,
             ProcessRecord app) {
         Intent.FilterComparison filter = new Intent.FilterComparison(intent);
@@ -861,7 +876,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                                 runningIntent.setData(Uri.fromParts("package",
                                         appInfo.packageName, null));
                                 PendingIntent pi = PendingIntent.getActivityAsUser(ams.mContext, 0,
-                                        runningIntent, PendingIntent.FLAG_UPDATE_CURRENT, null,
+                                        runningIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE, null,
                                         UserHandle.of(userId));
                                 notiBuilder.setColor(ams.mContext.getColor(
                                         com.android.internal
@@ -900,7 +915,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                         }
                         if (localForegroundNoti.getSmallIcon() == null) {
                             // Notifications whose icon is 0 are defined to not show
-                            // a notification, silently ignoring it.  We don't want to
+                            // a notification.  We don't want to
                             // just ignore it, we want to prevent the service from
                             // being foreground.
                             throw new RuntimeException("invalid service notification: "

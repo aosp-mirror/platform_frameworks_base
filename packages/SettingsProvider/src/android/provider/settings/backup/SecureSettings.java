@@ -166,6 +166,9 @@ public class SecureSettings {
         Settings.Secure.PEOPLE_STRIP,
         Settings.Secure.MEDIA_CONTROLS_RESUME,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
-        Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS
+        Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+        Settings.Secure.ADAPTIVE_CONNECTIVITY_ENABLED,
+        Settings.Secure.ASSIST_HANDLES_LEARNING_TIME_ELAPSED_MILLIS,
+        Settings.Secure.ASSIST_HANDLES_LEARNING_EVENT_COUNT
     };
 }

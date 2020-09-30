@@ -143,6 +143,10 @@ applications that come with the platform
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
         <permission name="android.permission.PACKAGE_USAGE_STATS" />
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
+        <permission name="android.permission.MODIFY_AUDIO_ROUTING" />
+
+        <!-- For permission hub 2 debugging only -->
+        <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.phone">
@@ -160,9 +164,11 @@ applications that come with the platform
         <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
         <permission name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
         <permission name="android.permission.DUMP"/>
+        <permission name="android.permission.HANDLE_CAR_MODE_CHANGES"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.LOCAL_MAC_ADDRESS"/>
         <permission name="android.permission.MANAGE_USERS"/>
+        <permission name="android.permission.MANAGE_SUBSCRIPTION_PLANS" />
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.PACKAGE_USAGE_STATS"/>
         <permission name="android.permission.PERFORM_CDMA_PROVISIONING"/>
@@ -219,6 +225,7 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.UPDATE_DEVICE_STATS"/>
+        <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.media.module">

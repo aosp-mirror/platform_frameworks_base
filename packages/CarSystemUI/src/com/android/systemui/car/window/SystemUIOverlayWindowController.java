@@ -16,6 +16,7 @@
 
 package com.android.systemui.car.window;
 
+import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import android.content.Context;
@@ -25,6 +26,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import com.android.systemui.R;
@@ -99,15 +101,21 @@ public class SystemUIOverlayWindowController implements
                 PixelFormat.TRANSLUCENT);
         mLp.token = new Binder();
         mLp.gravity = Gravity.TOP;
-        mLp.setFitInsetsTypes(/* types= */ 0);
         mLp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         mLp.setTitle("SystemUIOverlayWindow");
         mLp.packageName = mContext.getPackageName();
         mLp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        mLp.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 
         mWindowManager.addView(mBaseLayout, mLp);
         mLpChanged.copyFrom(mLp);
         setWindowVisible(false);
+    }
+
+    /** Sets the types of insets to fit. Note: This should be rarely used. */
+    public void setFitInsetsTypes(@WindowInsets.Type.InsetsType int types) {
+        mLpChanged.setFitInsetsTypes(types);
+        updateWindow();
     }
 
     /** Sets the window to the visible state. */
@@ -154,6 +162,7 @@ public class SystemUIOverlayWindowController implements
     private void updateWindow() {
         if (mLp != null && mLp.copyFrom(mLpChanged) != 0) {
             if (isAttached()) {
+                mLp.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
                 mWindowManager.updateViewLayout(mBaseLayout, mLp);
             }
         }

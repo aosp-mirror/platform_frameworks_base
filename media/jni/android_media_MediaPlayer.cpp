@@ -33,6 +33,7 @@
 #include <utils/threads.h>
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
 #include "android_runtime/Log.h"
@@ -944,10 +945,12 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
 }
 
 static void
-android_media_MediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
+android_media_MediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
+                                       jstring opPackageName)
 {
     ALOGV("native_setup");
-    sp<MediaPlayer> mp = new MediaPlayer();
+    ScopedUtfChars opPackageNameStr(env, opPackageName);
+    sp<MediaPlayer> mp = new MediaPlayer(opPackageNameStr.c_str());
     if (mp == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
         return;
@@ -1403,7 +1406,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_setMetadataFilter", "(Landroid/os/Parcel;)I",      (void *)android_media_MediaPlayer_setMetadataFilter},
     {"native_getMetadata", "(ZZLandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer_getMetadata},
     {"native_init",         "()V",                              (void *)android_media_MediaPlayer_native_init},
-    {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_media_MediaPlayer_native_setup},
+    {"native_setup",        "(Ljava/lang/Object;Ljava/lang/String;)V",(void *)android_media_MediaPlayer_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer_native_finalize},
     {"getAudioSessionId",   "()I",                              (void *)android_media_MediaPlayer_get_audio_session_id},
     {"setAudioSessionId",   "(I)V",                             (void *)android_media_MediaPlayer_set_audio_session_id},

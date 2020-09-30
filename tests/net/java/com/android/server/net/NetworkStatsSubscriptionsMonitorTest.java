@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.net.NetworkTemplate;
 import android.os.Looper;
@@ -131,6 +132,11 @@ public final class NetworkStatsSubscriptionsMonitorTest {
         }
         final int[] subList = convertArrayListToIntArray(mTestSubList);
         when(mSubscriptionManager.getCompleteActiveSubscriptionIdList()).thenReturn(subList);
+        when(mTelephonyManager.getSubscriberId(subId)).thenReturn(subscriberId);
+        mMonitor.onSubscriptionsChanged();
+    }
+
+    private void updateSubscriberIdForTestSub(int subId, @Nullable final String subscriberId) {
         when(mTelephonyManager.getSubscriberId(subId)).thenReturn(subscriberId);
         mMonitor.onSubscriptionsChanged();
     }
@@ -267,5 +273,55 @@ public final class NetworkStatsSubscriptionsMonitorTest {
         when(serviceState.getNrState()).thenReturn(NetworkRegistrationInfo.NR_STATE_NONE);
         listener.onServiceStateChanged(serviceState);
         assertRatTypeNotChangedForSub(TEST_IMSI1, TelephonyManager.NETWORK_TYPE_NR);
+    }
+
+    @Test
+    public void testSubscriberIdUnavailable() {
+        final ArgumentCaptor<RatTypeListener> ratTypeListenerCaptor =
+                ArgumentCaptor.forClass(RatTypeListener.class);
+
+        mMonitor.start();
+        // Insert sim1, set subscriberId to null which is normal in SIM PIN locked case.
+        // Verify RAT type is NETWORK_TYPE_UNKNOWN and service will not perform listener
+        // registration.
+        addTestSub(TEST_SUBID1, null);
+        verify(mTelephonyManager, never()).listen(any(), anyInt());
+        assertRatTypeNotChangedForSub(TEST_IMSI1, TelephonyManager.NETWORK_TYPE_UNKNOWN);
+
+        // Set IMSI for sim1, verify the listener will be registered.
+        updateSubscriberIdForTestSub(TEST_SUBID1, TEST_IMSI1);
+        verify(mTelephonyManager, times(1)).listen(ratTypeListenerCaptor.capture(),
+                eq(PhoneStateListener.LISTEN_SERVICE_STATE));
+        reset(mTelephonyManager);
+        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
+
+        // Set RAT type of sim1 to UMTS. Verify RAT type of sim1 is changed.
+        setRatTypeForSub(ratTypeListenerCaptor.getAllValues(), TEST_SUBID1,
+                TelephonyManager.NETWORK_TYPE_UMTS);
+        assertRatTypeChangedForSub(TEST_IMSI1, TelephonyManager.NETWORK_TYPE_UMTS);
+        reset(mDelegate);
+
+        // Set IMSI to null again to simulate somehow IMSI is not available, such as
+        // modem crash. Verify service should not unregister listener.
+        updateSubscriberIdForTestSub(TEST_SUBID1, null);
+        verify(mTelephonyManager, never()).listen(any(), anyInt());
+        assertRatTypeNotChangedForSub(TEST_IMSI1, TelephonyManager.NETWORK_TYPE_UMTS);
+        reset(mDelegate);
+
+        // Set RAT type of sim1 to LTE. Verify RAT type of sim1 is still changed even if the IMSI
+        // is not available. The monitor keeps the listener even if the IMSI disappears because
+        // the IMSI can never change for any given subId, therefore even if the IMSI is updated
+        // to null, the monitor should continue accepting updates of the RAT type. However,
+        // telephony is never actually supposed to do this, if the IMSI disappears there should
+        // not be updates, but it's still the right thing to do theoretically.
+        setRatTypeForSub(ratTypeListenerCaptor.getAllValues(), TEST_SUBID1,
+                TelephonyManager.NETWORK_TYPE_LTE);
+        assertRatTypeChangedForSub(TEST_IMSI1, TelephonyManager.NETWORK_TYPE_LTE);
+        reset(mDelegate);
+
+        mMonitor.stop();
+        verify(mTelephonyManager, times(1)).listen(eq(ratTypeListenerCaptor.getValue()),
+                eq(PhoneStateListener.LISTEN_NONE));
+        assertRatTypeChangedForSub(TEST_IMSI1, TelephonyManager.NETWORK_TYPE_UNKNOWN);
     }
 }

@@ -935,6 +935,7 @@ public class VolumeDialogImpl implements VolumeDialog,
     protected void onStateChangedH(State state) {
         if (D.BUG) Log.d(TAG, "onStateChangedH() state: " + state.toString());
         if (mState != null && state != null
+                && mState.ringerModeInternal != -1
                 && mState.ringerModeInternal != state.ringerModeInternal
                 && state.ringerModeInternal == AudioManager.RINGER_MODE_VIBRATE) {
             mController.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK));

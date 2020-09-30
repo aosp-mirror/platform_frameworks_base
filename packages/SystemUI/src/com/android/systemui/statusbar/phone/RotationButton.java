@@ -20,9 +20,12 @@ import android.view.View;
 
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
+import java.util.function.Consumer;
+
 /** Interface of a rotation button that interacts {@link RotationButtonController}. */
 interface RotationButton {
     void setRotationButtonController(RotationButtonController rotationButtonController);
+    void setVisibilityChangedCallback(Consumer<Boolean> visibilityChangedCallback);
     View getCurrentView();
     boolean show();
     boolean hide();

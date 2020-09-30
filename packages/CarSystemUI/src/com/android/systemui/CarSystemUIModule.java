@@ -28,10 +28,9 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarDeviceProvisionedControllerImpl;
 import com.android.systemui.car.keyguard.CarKeyguardViewController;
-import com.android.systemui.car.statusbar.CarStatusBar;
-import com.android.systemui.car.statusbar.CarStatusBarKeyguardViewManager;
 import com.android.systemui.car.statusbar.DozeServiceHost;
 import com.android.systemui.car.statusbar.DummyNotificationShadeWindowController;
+import com.android.systemui.car.statusbar.UnusedStatusBar;
 import com.android.systemui.car.volume.CarVolumeDialogComponent;
 import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -60,13 +59,14 @@ import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.ShadeControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryControllerImpl;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.volume.VolumeDialogComponent;
+import com.android.systemui.wm.DisplayImeController;
+import com.android.systemui.wm.DisplaySystemBarsController;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -96,6 +96,10 @@ public abstract class CarSystemUIModule {
         return new HeadsUpManagerPhone(context, statusBarStateController, bypassController,
                 groupManager, configurationController);
     }
+
+    @Binds
+    abstract DisplayImeController bindDisplayImeController(
+            DisplaySystemBarsController displaySystemBarsController);
 
     @Singleton
     @Provides
@@ -152,15 +156,8 @@ public abstract class CarSystemUIModule {
             CarSystemUIRootComponent systemUIRootComponent);
 
     @Binds
-    public abstract StatusBar bindStatusBar(CarStatusBar statusBar);
-
-    @Binds
     abstract VolumeDialogComponent bindVolumeDialogComponent(
             CarVolumeDialogComponent carVolumeDialogComponent);
-
-    @Binds
-    abstract StatusBarKeyguardViewManager bindStatusBarKeyguardViewManager(
-            CarStatusBarKeyguardViewManager keyguardViewManager);
 
     @Binds
     abstract KeyguardViewController bindKeyguardViewController(
@@ -180,4 +177,7 @@ public abstract class CarSystemUIModule {
 
     @Binds
     abstract DozeHost bindDozeHost(DozeServiceHost dozeServiceHost);
+
+    @Binds
+    abstract StatusBar bindStatusBar(UnusedStatusBar statusBar);
 }

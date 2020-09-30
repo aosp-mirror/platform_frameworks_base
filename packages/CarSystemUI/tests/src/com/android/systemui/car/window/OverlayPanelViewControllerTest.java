@@ -39,6 +39,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.car.CarDeviceProvisionedController;
+import com.android.systemui.car.CarSystemUiTest;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.tests.R;
 
@@ -52,6 +53,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 
+@CarSystemUiTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
@@ -222,18 +224,6 @@ public class OverlayPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void animateCollapsePanel_removesWindowFocus() {
-        mOverlayPanelViewController.inflate(mBaseLayout);
-        mOverlayPanelViewController.setShouldAnimateCollapsePanel(true);
-        mOverlayPanelViewController.setPanelExpanded(true);
-        mOverlayPanelViewController.setPanelVisible(true);
-
-        mOverlayPanelViewController.animateCollapsePanel();
-
-        verify(mOverlayViewGlobalStateController).setWindowFocusable(false);
-    }
-
-    @Test
     public void animateExpandPanel_shouldNotAnimateExpandPanel_doesNotExpand() {
         mOverlayPanelViewController.inflate(mBaseLayout);
         mOverlayPanelViewController.setShouldAnimateExpandPanel(false);
@@ -363,14 +353,6 @@ public class OverlayPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void setPanelVisible_setTrue_setWindowFocusable() {
-        mOverlayPanelViewController.inflate(mBaseLayout);
-        mOverlayPanelViewController.setPanelVisible(true);
-
-        verify(mOverlayViewGlobalStateController).setWindowFocusable(true);
-    }
-
-    @Test
     public void setPanelVisible_setFalse_windowVisible_setsWindowNotVisible() {
         mOverlayPanelViewController.inflate(mBaseLayout);
         when(mOverlayViewGlobalStateController.isWindowVisible()).thenReturn(true);
@@ -399,15 +381,6 @@ public class OverlayPanelViewControllerTest extends SysuiTestCase {
 
         assertThat(mOverlayPanelViewController.getLayout().getVisibility()).isEqualTo(
                 View.INVISIBLE);
-    }
-
-    @Test
-    public void setPanelVisible_setFalse_setWindowNotFocusable() {
-        mOverlayPanelViewController.inflate(mBaseLayout);
-
-        mOverlayPanelViewController.setPanelVisible(false);
-
-        verify(mOverlayViewGlobalStateController).setWindowFocusable(false);
     }
 
     @Test

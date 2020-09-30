@@ -82,6 +82,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
     private boolean mClockVisibleByUser = true;
 
     private boolean mAttached;
+    private boolean mScreenReceiverRegistered;
     private Calendar mCalendar;
     private String mClockFormatString;
     private SimpleDateFormat mClockFormat;
@@ -213,6 +214,14 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        if (mScreenReceiverRegistered) {
+            mScreenReceiverRegistered = false;
+            mBroadcastDispatcher.unregisterReceiver(mScreenReceiver);
+            if (mSecondsHandler != null) {
+                mSecondsHandler.removeCallbacks(mSecondTick);
+                mSecondsHandler = null;
+            }
+        }
         if (mAttached) {
             mBroadcastDispatcher.unregisterReceiver(mIntentReceiver);
             mAttached = false;
@@ -363,12 +372,14 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
                     mSecondsHandler.postAtTime(mSecondTick,
                             SystemClock.uptimeMillis() / 1000 * 1000 + 1000);
                 }
+                mScreenReceiverRegistered = true;
                 IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
                 filter.addAction(Intent.ACTION_SCREEN_ON);
                 mBroadcastDispatcher.registerReceiver(mScreenReceiver, filter);
             }
         } else {
             if (mSecondsHandler != null) {
+                mScreenReceiverRegistered = false;
                 mBroadcastDispatcher.unregisterReceiver(mScreenReceiver);
                 mSecondsHandler.removeCallbacks(mSecondTick);
                 mSecondsHandler = null;

@@ -3865,7 +3865,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.updateUriPermissions(recordB, recordA, mContext.getPackageName(),
                 USER_SYSTEM);
         verify(mUgmInternal, times(1)).revokeUriPermissionFromOwner(any(),
-                eq(message1.getDataUri()), anyInt(), anyInt());
+                eq(message1.getDataUri()), anyInt(), anyInt(), eq(null), eq(-1));
 
         // Update back means we grant access to first again
         reset(mUgm);

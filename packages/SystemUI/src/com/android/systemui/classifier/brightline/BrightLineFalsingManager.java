@@ -132,7 +132,9 @@ public class BrightLineFalsingManager implements FalsingManager {
     }
 
     private void registerSensors() {
-        mProximitySensor.register(mSensorEventListener);
+        if (!mDataProvider.isWirelessCharging()) {
+            mProximitySensor.register(mSensorEventListener);
+        }
     }
 
     private void unregisterSensors() {

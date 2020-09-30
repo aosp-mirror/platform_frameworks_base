@@ -654,7 +654,7 @@
     <string name="permlab_accessNetworkConditions" msgid="1270732533356286514">"observer netværksforhold"</string>
     <string name="permdesc_accessNetworkConditions" msgid="2959269186741956109">"Tillader, at en applikation observerer netværksforhold. Bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"skift kalibrering for inputenheden"</string>
-    <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"Tillader, at appen ændrer kalibreringsparametrene for berøringsskærmen. Dette bør aldrig være nødvendigt for almindelige apps."</string>
+    <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"Tillader, at appen ændrer kalibreringsparametrene for touchskærmen. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_accessDrmCertificates" msgid="6473765454472436597">"få adgang til DRM-certifikater"</string>
     <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"Tillader, at en applikation provisionerer og anvender DRM-certifikater. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_handoverStatus" msgid="7620438488137057281">"modtag status for Android Beam-overførsler"</string>
@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Tryk på Menu for at låse op eller foretage et nødopkald."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Tryk på Menu for at låse op."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Tegn oplåsningsmønster"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Nødsituation"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Nødopkald"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Tilbage til opkald"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Rigtigt!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Prøv igen"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Opdateret af din administrator"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Slettet af din administrator"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Batterisparefunktionen gør følgende for at spare på batteriet:\n\n•Aktiverer Mørkt tema\n•Deaktiverer eller begrænser aktivitet i baggrunden, visse visuelle effekter og andre funktioner som f.eks. \"Hey Google\"\n\n"<annotation id="url">"Få flere oplysninger"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Batterisparefunktionen gør følgende for at spare på batteriet:\n\n•Aktiverer Mørkt tema\n•Deaktiverer eller begrænser aktivitet i baggrunden, visse visuelle effekter og andre funktioner som f.eks. \"Hey Google\""</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Batterisparefunktionen gør følgende for at spare på batteriet:\n\n• Aktiverer Mørkt tema\n• Deaktiverer eller begrænser aktivitet i baggrunden, visse visuelle effekter og andre funktioner som f.eks. \"Hey Google\"\n\n"<annotation id="url">"Få flere oplysninger"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Batterisparefunktionen gør følgende for at spare på batteriet:\n\n• Aktiverer Mørkt tema\n• Deaktiverer eller begrænser aktivitet i baggrunden, visse visuelle effekter og andre funktioner som f.eks. \"Hey Google\""</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Datasparefunktionen forhindrer nogle apps i at sende eller modtage data i baggrunden for at reducere dataforbruget. En app, der er i brug, kan få adgang til data, men gør det måske ikke så ofte. Dette kan f.eks. betyde, at billeder ikke vises, før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vil du aktivere Datasparefunktion?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivér"</string>

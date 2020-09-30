@@ -26,6 +26,10 @@ import static android.provider.Settings.Secure.VOLUME_HUSH_MUTE;
 import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
 import static android.provider.Settings.Secure.VOLUME_HUSH_VIBRATE;
 
+import static com.android.server.audio.AudioEventLogger.Event.ALOGE;
+import static com.android.server.audio.AudioEventLogger.Event.ALOGI;
+import static com.android.server.audio.AudioEventLogger.Event.ALOGW;
+
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -284,6 +288,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_PLAYBACK_CONFIG_CHANGE = 29;
     private static final int MSG_BROADCAST_MICROPHONE_MUTE = 30;
     private static final int MSG_CHECK_MODE_FOR_UID = 31;
+    private static final int MSG_REINIT_VOLUMES = 32;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -673,6 +678,7 @@ public class AudioService extends IAudioService.Stub
 
     public AudioService(Context context, AudioSystemAdapter audioSystem,
             SystemServerAdapter systemServer) {
+        sLifecycleLogger.log(new AudioEventLogger.StringEvent("AudioService()"));
         mContext = context;
         mContentResolver = context.getContentResolver();
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
@@ -892,6 +898,9 @@ public class AudioService extends IAudioService.Stub
                 mPrescaleAbsoluteVolume[i] = preScale[i];
             }
         }
+
+        // check on volume initialization
+        checkVolumeRangeInitialization("AudioService()");
     }
 
     public void systemReady() {
@@ -1019,11 +1028,15 @@ public class AudioService extends IAudioService.Stub
         if (!mSystemReady ||
                 (AudioSystem.checkAudioFlinger() != AudioSystem.AUDIO_STATUS_OK)) {
             Log.e(TAG, "Audioserver died.");
+            sLifecycleLogger.log(new AudioEventLogger.StringEvent(
+                    "onAudioServerDied() audioserver died"));
             sendMsg(mAudioHandler, MSG_AUDIO_SERVER_DIED, SENDMSG_NOOP, 0, 0,
                     null, 500);
             return;
         }
-        Log.e(TAG, "Audioserver started.");
+        Log.i(TAG, "Audioserver started.");
+        sLifecycleLogger.log(new AudioEventLogger.StringEvent(
+                "onAudioServerDied() audioserver started"));
 
         updateAudioHalPids();
 
@@ -1058,14 +1071,7 @@ public class AudioService extends IAudioService.Stub
         mDeviceBroker.setForceUse_Async(AudioSystem.FOR_SYSTEM, forSys, "onAudioServerDied");
 
         // Restore stream volumes
-        int numStreamTypes = AudioSystem.getNumStreamTypes();
-        for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
-            VolumeStreamState streamState = mStreamStates[streamType];
-            AudioSystem.initStreamVolume(
-                streamType, streamState.mIndexMin / 10, streamState.mIndexMax / 10);
-
-            streamState.applyAllVolumes();
-        }
+        onReinitVolumes("after audioserver restart");
 
         // Restore audio volume groups
         restoreVolumeGroups();
@@ -1161,6 +1167,72 @@ public class AudioService extends IAudioService.Stub
 
         setMicrophoneMuteNoCallerCheck(getCurrentUserId()); // will also update the mic mute cache
         setMicMuteFromSwitchInput();
+    }
+
+    private void onReinitVolumes(@NonNull String caller) {
+        final int numStreamTypes = AudioSystem.getNumStreamTypes();
+        // keep track of any error during stream volume initialization
+        int status = AudioSystem.AUDIO_STATUS_OK;
+        for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
+            VolumeStreamState streamState = mStreamStates[streamType];
+            final int res = AudioSystem.initStreamVolume(
+                    streamType, streamState.mIndexMin / 10, streamState.mIndexMax / 10);
+            if (res != AudioSystem.AUDIO_STATUS_OK) {
+                status = res;
+                Log.e(TAG, "Failed to initStreamVolume (" + res + ") for stream " + streamType);
+                // stream volume initialization failed, no need to try the others, it will be
+                // attempted again when MSG_REINIT_VOLUMES is handled
+                break;
+            }
+            streamState.applyAllVolumes();
+        }
+
+        // did it work? check based on status
+        if (status != AudioSystem.AUDIO_STATUS_OK) {
+            sLifecycleLogger.log(new AudioEventLogger.StringEvent(
+                    caller + ": initStreamVolume failed with " + status + " will retry")
+                    .printLog(ALOGE, TAG));
+            sendMsg(mAudioHandler, MSG_REINIT_VOLUMES, SENDMSG_NOOP, 0, 0,
+                    caller /*obj*/, 2 * INDICATE_SYSTEM_READY_RETRY_DELAY_MS);
+            return;
+        }
+
+        // did it work? check based on min/max values of some basic streams
+        if (!checkVolumeRangeInitialization(caller)) {
+            return;
+        }
+
+        // success
+        sLifecycleLogger.log(new AudioEventLogger.StringEvent(
+                caller + ": initStreamVolume succeeded").printLog(ALOGI, TAG));
+    }
+
+    /**
+     * Check volume ranges were properly initialized
+     * @return true if volume ranges were successfully initialized
+     */
+    private boolean checkVolumeRangeInitialization(String caller) {
+        boolean success = true;
+        final int[] basicStreams = { AudioSystem.STREAM_ALARM, AudioSystem.STREAM_RING,
+                AudioSystem.STREAM_MUSIC, AudioSystem.STREAM_VOICE_CALL,
+                AudioSystem.STREAM_ACCESSIBILITY };
+        for (int streamType : basicStreams) {
+            final AudioAttributes aa = new AudioAttributes.Builder()
+                    .setInternalLegacyStreamType(streamType).build();
+            if (AudioSystem.getMaxVolumeIndexForAttributes(aa) < 0
+                    || AudioSystem.getMinVolumeIndexForAttributes(aa) < 0) {
+                success = false;
+                break;
+            }
+        }
+        if (!success) {
+            sLifecycleLogger.log(new AudioEventLogger.StringEvent(
+                    caller + ": initStreamVolume succeeded but invalid mix/max levels, will retry")
+                    .printLog(ALOGW, TAG));
+            sendMsg(mAudioHandler, MSG_REINIT_VOLUMES, SENDMSG_NOOP, 0, 0,
+                    caller /*obj*/, 2 * INDICATE_SYSTEM_READY_RETRY_DELAY_MS);
+        }
+        return success;
     }
 
     private void onDispatchAudioServerStateChange(boolean state) {
@@ -3680,13 +3752,15 @@ public class AudioService extends IAudioService.Stub
         private final IBinder mCb; // To be notified of client's death
         private final int mPid;
         private final int mUid;
-        private String mPackage;
+        private final boolean mIsPrivileged;
+        private final String mPackage;
         private int mMode = AudioSystem.MODE_NORMAL; // Current mode set by this client
 
-        SetModeDeathHandler(IBinder cb, int pid, int uid, String caller) {
+        SetModeDeathHandler(IBinder cb, int pid, int uid, boolean isPrivileged, String caller) {
             mCb = cb;
             mPid = pid;
             mUid = uid;
+            mIsPrivileged = isPrivileged;
             mPackage = caller;
         }
 
@@ -3698,12 +3772,13 @@ public class AudioService extends IAudioService.Stub
                 if (index < 0) {
                     Log.w(TAG, "unregistered setMode() client died");
                 } else {
-                    newModeOwnerPid = setModeInt(AudioSystem.MODE_NORMAL, mCb, mPid, mUid, TAG);
+                    newModeOwnerPid = setModeInt(
+                            AudioSystem.MODE_NORMAL, mCb, mPid, mUid, mIsPrivileged, TAG);
                 }
             }
             // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
             // SCO connections not started by the application changing the mode when pid changes
-            mDeviceBroker.postSetModeOwnerPid(newModeOwnerPid);
+            mDeviceBroker.postSetModeOwnerPid(newModeOwnerPid, AudioService.this.getMode());
         }
 
         public int getPid() {
@@ -3728,6 +3803,10 @@ public class AudioService extends IAudioService.Stub
 
         public String getPackage() {
             return mPackage;
+        }
+
+        public boolean isPrivileged() {
+            return mIsPrivileged;
         }
     }
 
@@ -3780,18 +3859,19 @@ public class AudioService extends IAudioService.Stub
                         + " without permission or being mode owner");
                 return;
             }
-            newModeOwnerPid = setModeInt(
-                mode, cb, callingPid, Binder.getCallingUid(), callingPackage);
+            newModeOwnerPid = setModeInt(mode, cb, callingPid, Binder.getCallingUid(),
+                    hasModifyPhoneStatePermission, callingPackage);
         }
         // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
         // SCO connections not started by the application changing the mode when pid changes
-        mDeviceBroker.postSetModeOwnerPid(newModeOwnerPid);
+        mDeviceBroker.postSetModeOwnerPid(newModeOwnerPid, getMode());
     }
 
     // setModeInt() returns a valid PID if the audio mode was successfully set to
     // any mode other than NORMAL.
     @GuardedBy("mDeviceBroker.mSetModeLock")
-    private int setModeInt(int mode, IBinder cb, int pid, int uid, String caller) {
+    private int setModeInt(
+            int mode, IBinder cb, int pid, int uid, boolean isPrivileged, String caller) {
         if (DEBUG_MODE) {
             Log.v(TAG, "setModeInt(mode=" + mode + ", pid=" + pid
                     + ", uid=" + uid + ", caller=" + caller + ")");
@@ -3843,7 +3923,7 @@ public class AudioService extends IAudioService.Stub
                 }
             } else {
                 if (hdlr == null) {
-                    hdlr = new SetModeDeathHandler(cb, pid, uid, caller);
+                    hdlr = new SetModeDeathHandler(cb, pid, uid, isPrivileged, caller);
                 }
                 // Register for client death notification
                 try {
@@ -3902,7 +3982,8 @@ public class AudioService extends IAudioService.Stub
             // change of mode may require volume to be re-applied on some devices
             updateAbsVolumeMultiModeDevices(oldMode, actualMode);
 
-            if (actualMode == AudioSystem.MODE_IN_COMMUNICATION) {
+            if (actualMode == AudioSystem.MODE_IN_COMMUNICATION
+                    && !hdlr.isPrivileged()) {
                 sendMsg(mAudioHandler,
                         MSG_CHECK_MODE_FOR_UID,
                         SENDMSG_QUEUE,
@@ -5570,7 +5651,15 @@ public class AudioService extends IAudioService.Stub
             mIndexMin = MIN_STREAM_VOLUME[streamType] * 10;
             mIndexMinNoPerm = mIndexMin; // may be overwritten later in updateNoPermMinIndex()
             mIndexMax = MAX_STREAM_VOLUME[streamType] * 10;
-            AudioSystem.initStreamVolume(streamType, mIndexMin / 10, mIndexMax / 10);
+            final int status = AudioSystem.initStreamVolume(
+                    streamType, mIndexMin / 10, mIndexMax / 10);
+            if (status != AudioSystem.AUDIO_STATUS_OK) {
+                sLifecycleLogger.log(new AudioEventLogger.StringEvent(
+                         "VSS() stream:" + streamType + " initStreamVolume=" + status)
+                        .printLog(ALOGE, TAG));
+                sendMsg(mAudioHandler, MSG_REINIT_VOLUMES, SENDMSG_NOOP, 0, 0,
+                        "VSS()" /*obj*/, 2 * INDICATE_SYSTEM_READY_RETRY_DELAY_MS);
+            }
 
             readSettings();
             mVolumeChanged = new Intent(AudioManager.VOLUME_CHANGED_ACTION);
@@ -6401,14 +6490,17 @@ public class AudioService extends IAudioService.Stub
                         if (msg.obj == null) {
                             break;
                         }
-                        // If the app corresponding to this mode death handler object is not
-                        // capturing or playing audio anymore after 3 seconds, remove it
-                        // from the stack. Otherwise, check again in 3 seconds.
+                        // If no other app is currently owning the audio mode and
+                        // the app corresponding to this mode death handler object is still in the
+                        // mode owner stack but not capturing or playing audio after 3 seconds,
+                        // remove it from the stack.
+                        // Otherwise, check again in 3 seconds.
                         SetModeDeathHandler h = (SetModeDeathHandler) msg.obj;
                         if (mSetModeDeathHandlers.indexOf(h) < 0) {
                             break;
                         }
-                        if (mRecordMonitor.isRecordingActiveForUid(h.getUid())
+                        if (getModeOwnerUid() != h.getUid()
+                                || mRecordMonitor.isRecordingActiveForUid(h.getUid())
                                 || mPlaybackMonitor.isPlaybackActiveForUid(h.getUid())) {
                             sendMsg(mAudioHandler,
                                     MSG_CHECK_MODE_FOR_UID,
@@ -6419,10 +6511,14 @@ public class AudioService extends IAudioService.Stub
                                     CHECK_MODE_FOR_UID_PERIOD_MS);
                             break;
                         }
-                        // For now just log the fact that an app is hogging the audio mode.
-                        // TODO(b/160260850): remove abusive app from audio mode stack.
+                        setModeInt(AudioSystem.MODE_NORMAL, h.getBinder(), h.getPid(), h.getUid(),
+                                h.isPrivileged(), "MSG_CHECK_MODE_FOR_UID");
                         mModeLogger.log(new PhoneStateEvent(h.getPackage(), h.getPid()));
                     }
+                    break;
+
+                case MSG_REINIT_VOLUMES:
+                    onReinitVolumes((String) msg.obj);
                     break;
             }
         }
@@ -7354,11 +7450,15 @@ public class AudioService extends IAudioService.Stub
     //==========================================================================================
     // AudioService logging and dumpsys
     //==========================================================================================
+    static final int LOG_NB_EVENTS_LIFECYCLE = 20;
     static final int LOG_NB_EVENTS_PHONE_STATE = 20;
     static final int LOG_NB_EVENTS_DEVICE_CONNECTION = 30;
     static final int LOG_NB_EVENTS_FORCE_USE = 20;
     static final int LOG_NB_EVENTS_VOLUME = 40;
     static final int LOG_NB_EVENTS_DYN_POLICY = 10;
+
+    static final AudioEventLogger sLifecycleLogger = new AudioEventLogger(LOG_NB_EVENTS_LIFECYCLE,
+            "audio services lifecycle");
 
     final private AudioEventLogger mModeLogger = new AudioEventLogger(LOG_NB_EVENTS_PHONE_STATE,
             "phone state (logged after successful call to AudioSystem.setPhoneState(int, int))");
@@ -7436,6 +7536,7 @@ public class AudioService extends IAudioService.Stub
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
+        sLifecycleLogger.dump(pw);
         if (mAudioHandler != null) {
             pw.println("\nMessage handler (watch for unhandled messages):");
             mAudioHandler.dump(new PrintWriterPrinter(pw), "  ");

@@ -40,6 +40,11 @@ public final class InlinePresentation implements Parcelable {
 
     /**
      * Represents the UI content and the action for the inline suggestion.
+     *
+     * <p>The Slice should be constructed using the Content builder provided in the androidx
+     * autofill library e.g. {@code androidx.autofill.inline.v1.InlineSuggestionUi.Content.Builder}
+     * and then converted to a Slice with
+     * {@code androidx.autofill.inline.UiVersions.Content#getSlice()}.</p>
      */
     private final @NonNull Slice mSlice;
 
@@ -90,6 +95,11 @@ public final class InlinePresentation implements Parcelable {
      *
      * @param slice
      *   Represents the UI content and the action for the inline suggestion.
+     *
+     *   <p>The Slice should be constructed using the Content builder provided in the androidx
+     *   autofill library e.g. {@code androidx.autofill.inline.v1.InlineSuggestionUi.Content.Builder}
+     *   and then converted to a Slice with
+     *   {@code androidx.autofill.inline.UiVersions.Content#getSlice()}.</p>
      * @param inlinePresentationSpec
      *   Specifies the UI specification for the inline suggestion.
      * @param pinned
@@ -118,6 +128,11 @@ public final class InlinePresentation implements Parcelable {
 
     /**
      * Represents the UI content and the action for the inline suggestion.
+     *
+     * <p>The Slice should be constructed using the Content builder provided in the androidx
+     * autofill library e.g. {@code androidx.autofill.inline.v1.InlineSuggestionUi.Content.Builder}
+     * and then converted to a Slice with
+     * {@code androidx.autofill.inline.UiVersions.Content#getSlice()}.</p>
      */
     @DataClass.Generated.Member
     public @NonNull Slice getSlice() {
@@ -244,7 +259,7 @@ public final class InlinePresentation implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1593131904745L,
+            time = 1596484869201L,
             codegenVersion = "1.0.15",
             sourceFile = "frameworks/base/core/java/android/service/autofill/InlinePresentation.java",
             inputSignatures = "private final @android.annotation.NonNull android.app.slice.Slice mSlice\nprivate final @android.annotation.NonNull android.widget.inline.InlinePresentationSpec mInlinePresentationSpec\nprivate final  boolean mPinned\npublic @android.annotation.NonNull @android.annotation.Size(min=0L) java.lang.String[] getAutofillHints()\nclass InlinePresentation extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genHiddenConstDefs=true, genEqualsHashCode=true)")

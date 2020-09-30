@@ -29,10 +29,15 @@
 
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <binder/IPCThreadState.h>
 #include <jni.h>
+#include <processgroup/processgroup.h>
 
 using android::base::StringPrintf;
 using android::base::WriteStringToFile;
+
+#define SYNC_RECEIVED_WHILE_FROZEN (1)
+#define ASYNC_RECEIVED_WHILE_FROZEN (2)
 
 namespace android {
 
@@ -74,9 +79,60 @@ static void com_android_server_am_CachedAppOptimizer_compactSystem(JNIEnv *, job
     }
 }
 
+static void com_android_server_am_CachedAppOptimizer_enableFreezerInternal(
+        JNIEnv *env, jobject clazz, jboolean enable) {
+    bool success = true;
+
+    if (enable) {
+        success = SetTaskProfiles(0, {"FreezerEnabled"}, true);
+    } else {
+        success = SetTaskProfiles(0, {"FreezerDisabled"}, true);
+    }
+
+    if (!success) {
+        jniThrowException(env, "java/lang/RuntimeException", "Unknown error");
+    }
+}
+
+static void com_android_server_am_CachedAppOptimizer_freezeBinder(
+        JNIEnv *env, jobject clazz, jint pid, jboolean freeze) {
+
+    if (IPCThreadState::freeze(pid, freeze, 100 /* timeout [ms] */) != 0) {
+        jniThrowException(env, "java/lang/RuntimeException", "Unable to freeze/unfreeze binder");
+    }
+}
+
+static jint com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo(JNIEnv *env,
+        jobject clazz, jint pid) {
+    bool syncReceived = false, asyncReceived = false;
+
+    int error = IPCThreadState::getProcessFreezeInfo(pid, &syncReceived, &asyncReceived);
+
+    if (error < 0) {
+        jniThrowException(env, "java/lang/RuntimeException", strerror(error));
+    }
+
+    jint retVal = 0;
+
+    if(syncReceived) {
+        retVal |= SYNC_RECEIVED_WHILE_FROZEN;;
+    }
+
+    if(asyncReceived) {
+        retVal |= ASYNC_RECEIVED_WHILE_FROZEN;
+    }
+
+    return retVal;
+}
+
 static const JNINativeMethod sMethods[] = {
     /* name, signature, funcPtr */
     {"compactSystem", "()V", (void*)com_android_server_am_CachedAppOptimizer_compactSystem},
+    {"enableFreezerInternal", "(Z)V",
+        (void*)com_android_server_am_CachedAppOptimizer_enableFreezerInternal},
+    {"freezeBinder", "(IZ)V", (void*)com_android_server_am_CachedAppOptimizer_freezeBinder},
+    {"getBinderFreezeInfo", "(I)I",
+        (void*)com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo}
 };
 
 int register_android_server_am_CachedAppOptimizer(JNIEnv* env)

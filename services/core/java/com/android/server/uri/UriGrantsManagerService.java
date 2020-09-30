@@ -88,10 +88,10 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 
-import libcore.io.IoUtils;
-
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
+
+import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -1431,16 +1431,18 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
 
         @Override
         public void revokeUriPermissionFromOwner(IBinder token, Uri uri, int mode, int userId) {
+            revokeUriPermissionFromOwner(token, uri, mode, userId, null, UserHandle.USER_ALL);
+        }
+
+        @Override
+        public void revokeUriPermissionFromOwner(IBinder token, Uri uri, int mode, int userId,
+                String targetPkg, int targetUserId) {
             final UriPermissionOwner owner = UriPermissionOwner.fromExternalToken(token);
             if (owner == null) {
                 throw new IllegalArgumentException("Unknown owner: " + token);
             }
-
-            if (uri == null) {
-                owner.removeUriPermissions(mode);
-            } else {
-                owner.removeUriPermission(new GrantUri(userId, uri, mode), mode);
-            }
+            GrantUri grantUri = uri == null ? null : new GrantUri(userId, uri, mode);
+            owner.removeUriPermission(grantUri, mode, targetPkg, targetUserId);
         }
 
         @Override

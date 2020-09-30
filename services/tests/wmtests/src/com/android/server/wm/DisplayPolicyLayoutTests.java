@@ -20,6 +20,8 @@ import static android.view.Gravity.BOTTOM;
 import static android.view.Gravity.LEFT;
 import static android.view.Gravity.RIGHT;
 import static android.view.Gravity.TOP;
+import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
+import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.ITYPE_TOP_GESTURES;
@@ -36,12 +38,18 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
+import static android.view.WindowManagerPolicyConstants.ALT_BAR_BOTTOM;
+import static android.view.WindowManagerPolicyConstants.ALT_BAR_LEFT;
+import static android.view.WindowManagerPolicyConstants.ALT_BAR_RIGHT;
+import static android.view.WindowManagerPolicyConstants.ALT_BAR_TOP;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -60,6 +68,7 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
+import android.view.Gravity;
 import android.view.InsetsState;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Type;
@@ -67,7 +76,6 @@ import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Before;
@@ -148,6 +156,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void addingWindow_withInsetsTypes() {
+        mDisplayPolicy.removeWindowLw(mStatusBarWindow);  // Removes the existing one.
+
         WindowState win = createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, "StatusBarSubPanel");
         win.mAttrs.providesInsetsTypes = new int[]{ITYPE_STATUS_BAR, ITYPE_TOP_GESTURES};
         win.getFrameLw().set(0, 0, 500, 100);
@@ -190,10 +200,56 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void addingWindow_throwsException_WithMultipleInsetTypes() {
-        WindowState win = createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, "StatusBarSubPanel");
-        win.mAttrs.providesInsetsTypes = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
+        WindowState win1 = createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, "StatusBarSubPanel");
+        win1.mAttrs.providesInsetsTypes = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
 
-        expectThrows(IllegalArgumentException.class, () -> addWindow(win));
+        expectThrows(IllegalArgumentException.class, () -> addWindow(win1));
+
+        WindowState win2 = createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, "StatusBarSubPanel");
+        win2.mAttrs.providesInsetsTypes = new int[]{ITYPE_CLIMATE_BAR, ITYPE_EXTRA_NAVIGATION_BAR};
+
+        expectThrows(IllegalArgumentException.class, () -> addWindow(win2));
+    }
+
+    @Test
+    public void addingWindow_variousGravities_alternateBarPosUpdated() {
+        mDisplayPolicy.removeWindowLw(mNavBarWindow);  // Removes the existing one.
+
+        WindowState win1 = createWindow(null, TYPE_NAVIGATION_BAR_PANEL, "NavBarPanel1");
+        win1.mAttrs.providesInsetsTypes = new int[]{ITYPE_NAVIGATION_BAR};
+        win1.mAttrs.gravity = Gravity.TOP;
+        win1.getFrameLw().set(0, 0, 200, 500);
+        addWindow(win1);
+
+        assertEquals(mDisplayPolicy.getAlternateNavBarPosition(), ALT_BAR_TOP);
+        mDisplayPolicy.removeWindowLw(win1);
+
+        WindowState win2 = createWindow(null, TYPE_NAVIGATION_BAR_PANEL, "NavBarPanel2");
+        win2.mAttrs.providesInsetsTypes = new int[]{ITYPE_NAVIGATION_BAR};
+        win2.mAttrs.gravity = Gravity.BOTTOM;
+        win2.getFrameLw().set(0, 0, 200, 500);
+        addWindow(win2);
+
+        assertEquals(mDisplayPolicy.getAlternateNavBarPosition(), ALT_BAR_BOTTOM);
+        mDisplayPolicy.removeWindowLw(win2);
+
+        WindowState win3 = createWindow(null, TYPE_NAVIGATION_BAR_PANEL, "NavBarPanel3");
+        win3.mAttrs.providesInsetsTypes = new int[]{ITYPE_NAVIGATION_BAR};
+        win3.mAttrs.gravity = Gravity.LEFT;
+        win3.getFrameLw().set(0, 0, 200, 500);
+        addWindow(win3);
+
+        assertEquals(mDisplayPolicy.getAlternateNavBarPosition(), ALT_BAR_LEFT);
+        mDisplayPolicy.removeWindowLw(win3);
+
+        WindowState win4 = createWindow(null, TYPE_NAVIGATION_BAR_PANEL, "NavBarPanel4");
+        win4.mAttrs.providesInsetsTypes = new int[]{ITYPE_NAVIGATION_BAR};
+        win4.mAttrs.gravity = Gravity.RIGHT;
+        win4.getFrameLw().set(0, 0, 200, 500);
+        addWindow(win4);
+
+        assertEquals(mDisplayPolicy.getAlternateNavBarPosition(), ALT_BAR_RIGHT);
+        mDisplayPolicy.removeWindowLw(win4);
     }
 
     @Test
@@ -298,6 +354,24 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_insetParentFrameByIme() {
+        final InsetsState state =
+                mDisplayContent.getInsetsStateController().getRawInsetsState();
+        state.getSource(InsetsState.ITYPE_IME).setVisible(true);
+        state.getSource(InsetsState.ITYPE_IME).setFrame(
+                0, DISPLAY_HEIGHT - IME_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        mWindow.mAttrs.privateFlags |= PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
+        mWindow.mBehindIme = true;
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetByTopBottom(mWindow.getDisplayFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getParentFrame(), STATUS_BAR_HEIGHT, IME_HEIGHT);
     }
 
     @Test
@@ -804,27 +878,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
         assertEquals(new ToStringComparatorWrapper<>(realInsetsState),
                 new ToStringComparatorWrapper<>(simulatedInsetsState));
-    }
-
-    @Test
-    public void forceShowSystemBars_clearsSystemUIFlags() {
-        mDisplayPolicy.mLastSystemUiFlags |= SYSTEM_UI_FLAG_FULLSCREEN;
-        mWindow.mAttrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-        mWindow.mAttrs.flags =
-                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-        mWindow.mSystemUiVisibility = SYSTEM_UI_FLAG_FULLSCREEN;
-        mDisplayPolicy.setForceShowSystemBars(true);
-        addWindow(mWindow);
-
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
-        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
-        // triggers updateSystemUiVisibilityLw which will reset the flags as needed
-        int finishPostLayoutPolicyLw = mDisplayPolicy.focusChangedLw(mWindow, mWindow);
-
-        assertEquals(WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT, finishPostLayoutPolicyLw);
-        assertEquals(0, mDisplayPolicy.mLastSystemUiFlags);
-        assertEquals(0, mWindow.mAttrs.systemUiVisibility);
-        assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
     }
 
     @Test

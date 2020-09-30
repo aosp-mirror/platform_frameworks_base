@@ -1176,7 +1176,8 @@ class MediaRouter2ServiceImpl {
             super(Looper.getMainLooper(), null, true);
             mServiceRef = new WeakReference<>(service);
             mUserRecord = userRecord;
-            mSystemProvider = new SystemMediaRoute2Provider(service.mContext);
+            mSystemProvider = new SystemMediaRoute2Provider(service.mContext,
+                    UserHandle.of(userRecord.mUserId));
             mRouteProviders.add(mSystemProvider);
             mWatcher = new MediaRoute2ProviderWatcher(service.mContext, this,
                     this, mUserRecord.mUserId);

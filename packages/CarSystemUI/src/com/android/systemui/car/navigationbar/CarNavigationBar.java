@@ -16,8 +16,6 @@
 
 package com.android.systemui.car.navigationbar;
 
-import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
-import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.containsType;
@@ -28,13 +26,11 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARE
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.PixelFormat;
 import android.inputmethodservice.InputMethodService;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsetsController;
@@ -45,7 +41,6 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.internal.view.AppearanceRegion;
-import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarDeviceProvisionedListener;
@@ -74,7 +69,6 @@ import dagger.Lazy;
 
 /** Navigation bars customized for the automotive use case. */
 public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks {
-
     private final Resources mResources;
     private final CarNavigationBarController mCarNavigationBarController;
     private final SysuiDarkIconDispatcher mStatusBarIconController;
@@ -91,12 +85,17 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     private final Lazy<StatusBarIconController> mIconControllerLazy;
 
     private final int mDisplayId;
+    private final SystemBarConfigs mSystemBarConfigs;
 
     private StatusBarSignalPolicy mSignalPolicy;
     private ActivityManagerWrapper mActivityManagerWrapper;
 
     // If the nav bar should be hidden when the soft keyboard is visible.
-    private boolean mHideNavBarForKeyboard;
+    private boolean mHideTopBarForKeyboard;
+    private boolean mHideLeftBarForKeyboard;
+    private boolean mHideRightBarForKeyboard;
+    private boolean mHideBottomBarForKeyboard;
+
     private boolean mBottomNavBarVisible;
 
     // Nav bar views.
@@ -139,7 +138,8 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
             IStatusBarService barService,
             Lazy<KeyguardStateController> keyguardStateControllerLazy,
             Lazy<PhoneStatusBarPolicy> iconPolicyLazy,
-            Lazy<StatusBarIconController> iconControllerLazy
+            Lazy<StatusBarIconController> iconControllerLazy,
+            SystemBarConfigs systemBarConfigs
     ) {
         super(context);
         mResources = resources;
@@ -156,6 +156,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         mKeyguardStateControllerLazy = keyguardStateControllerLazy;
         mIconPolicyLazy = iconPolicyLazy;
         mIconControllerLazy = iconControllerLazy;
+        mSystemBarConfigs = systemBarConfigs;
 
         mDisplayId = context.getDisplayId();
     }
@@ -163,8 +164,13 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     @Override
     public void start() {
         // Set initial state.
-        mHideNavBarForKeyboard = mResources.getBoolean(
-                com.android.internal.R.bool.config_automotiveHideNavBarForKeyboard);
+        mHideTopBarForKeyboard = mSystemBarConfigs.getHideForKeyboardBySide(SystemBarConfigs.TOP);
+        mHideBottomBarForKeyboard = mSystemBarConfigs.getHideForKeyboardBySide(
+                SystemBarConfigs.BOTTOM);
+        mHideLeftBarForKeyboard = mSystemBarConfigs.getHideForKeyboardBySide(SystemBarConfigs.LEFT);
+        mHideRightBarForKeyboard = mSystemBarConfigs.getHideForKeyboardBySide(
+                SystemBarConfigs.RIGHT);
+
         mBottomNavBarVisible = false;
 
         // Connect into the status bar manager service
@@ -342,100 +348,63 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     private void buildNavBarContent() {
         mTopNavigationBarView = mCarNavigationBarController.getTopBar(isDeviceSetupForUser());
         if (mTopNavigationBarView != null) {
+            mSystemBarConfigs.insetSystemBar(SystemBarConfigs.TOP, mTopNavigationBarView);
             mTopNavigationBarWindow.addView(mTopNavigationBarView);
         }
 
         mBottomNavigationBarView = mCarNavigationBarController.getBottomBar(isDeviceSetupForUser());
         if (mBottomNavigationBarView != null) {
+            mSystemBarConfigs.insetSystemBar(SystemBarConfigs.BOTTOM, mBottomNavigationBarView);
             mBottomNavigationBarWindow.addView(mBottomNavigationBarView);
         }
 
         mLeftNavigationBarView = mCarNavigationBarController.getLeftBar(isDeviceSetupForUser());
         if (mLeftNavigationBarView != null) {
+            mSystemBarConfigs.insetSystemBar(SystemBarConfigs.LEFT, mLeftNavigationBarView);
             mLeftNavigationBarWindow.addView(mLeftNavigationBarView);
         }
 
         mRightNavigationBarView = mCarNavigationBarController.getRightBar(isDeviceSetupForUser());
         if (mRightNavigationBarView != null) {
+            mSystemBarConfigs.insetSystemBar(SystemBarConfigs.RIGHT, mRightNavigationBarView);
             mRightNavigationBarWindow.addView(mRightNavigationBarView);
         }
     }
 
     private void attachNavBarWindows() {
-        if (mTopNavigationBarWindow != null) {
-            int height = mResources.getDimensionPixelSize(
-                    com.android.internal.R.dimen.status_bar_height);
-            WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    height,
-                    WindowManager.LayoutParams.TYPE_STATUS_BAR,
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                            | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                            | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                            | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                    PixelFormat.TRANSLUCENT);
-            lp.setTitle("TopCarNavigationBar");
-            lp.windowAnimations = 0;
-            lp.gravity = Gravity.TOP;
-            mWindowManager.addView(mTopNavigationBarWindow, lp);
-        }
+        mSystemBarConfigs.getSystemBarSidesByZOrder().forEach(this::attachNavBarBySide);
+    }
 
-        if (mBottomNavigationBarWindow != null && !mBottomNavBarVisible) {
-            mBottomNavBarVisible = true;
-            int height = mResources.getDimensionPixelSize(
-                    com.android.internal.R.dimen.navigation_bar_height);
+    private void attachNavBarBySide(int side) {
+        switch(side) {
+            case SystemBarConfigs.TOP:
+                if (mTopNavigationBarWindow != null) {
+                    mWindowManager.addView(mTopNavigationBarWindow,
+                            mSystemBarConfigs.getLayoutParamsBySide(SystemBarConfigs.TOP));
+                }
+                break;
+            case SystemBarConfigs.BOTTOM:
+                if (mBottomNavigationBarWindow != null && !mBottomNavBarVisible) {
+                    mBottomNavBarVisible = true;
 
-            WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    height,
-                    WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                            | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                            | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                            | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                    PixelFormat.TRANSLUCENT);
-            lp.setTitle("BottomCarNavigationBar");
-            lp.windowAnimations = 0;
-            lp.gravity = Gravity.BOTTOM;
-            mWindowManager.addView(mBottomNavigationBarWindow, lp);
-        }
-
-        if (mLeftNavigationBarWindow != null) {
-            int width = mResources.getDimensionPixelSize(
-                    R.dimen.car_left_navigation_bar_width);
-            WindowManager.LayoutParams leftlp = new WindowManager.LayoutParams(
-                    width, ViewGroup.LayoutParams.MATCH_PARENT,
-                    WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                            | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                            | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                            | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                    PixelFormat.TRANSLUCENT);
-            leftlp.setTitle("LeftCarNavigationBar");
-            leftlp.providesInsetsTypes = new int[]{ITYPE_CLIMATE_BAR};
-            leftlp.setFitInsetsTypes(0);
-            leftlp.windowAnimations = 0;
-            leftlp.gravity = Gravity.LEFT;
-            mWindowManager.addView(mLeftNavigationBarWindow, leftlp);
-        }
-
-        if (mRightNavigationBarWindow != null) {
-            int width = mResources.getDimensionPixelSize(
-                    R.dimen.car_right_navigation_bar_width);
-            WindowManager.LayoutParams rightlp = new WindowManager.LayoutParams(
-                    width, ViewGroup.LayoutParams.MATCH_PARENT,
-                    WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                            | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                            | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                            | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                    PixelFormat.TRANSLUCENT);
-            rightlp.setTitle("RightCarNavigationBar");
-            rightlp.providesInsetsTypes = new int[]{ITYPE_EXTRA_NAVIGATION_BAR};
-            rightlp.setFitInsetsTypes(0);
-            rightlp.windowAnimations = 0;
-            rightlp.gravity = Gravity.RIGHT;
-            mWindowManager.addView(mRightNavigationBarWindow, rightlp);
+                    mWindowManager.addView(mBottomNavigationBarWindow,
+                            mSystemBarConfigs.getLayoutParamsBySide(SystemBarConfigs.BOTTOM));
+                }
+                break;
+            case SystemBarConfigs.LEFT:
+                if (mLeftNavigationBarWindow != null) {
+                    mWindowManager.addView(mLeftNavigationBarWindow,
+                            mSystemBarConfigs.getLayoutParamsBySide(SystemBarConfigs.LEFT));
+                }
+                break;
+            case SystemBarConfigs.RIGHT:
+                if (mRightNavigationBarWindow != null) {
+                    mWindowManager.addView(mRightNavigationBarWindow,
+                            mSystemBarConfigs.getLayoutParamsBySide(SystemBarConfigs.RIGHT));
+                }
+                break;
+            default:
+                return;
         }
     }
 
@@ -447,17 +416,30 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     @Override
     public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher) {
-        if (!mHideNavBarForKeyboard) {
-            return;
-        }
-
         if (mContext.getDisplayId() != displayId) {
             return;
         }
 
         boolean isKeyboardVisible = (vis & InputMethodService.IME_VISIBLE) != 0;
-        mCarNavigationBarController.setBottomWindowVisibility(
-                isKeyboardVisible ? View.GONE : View.VISIBLE);
+
+        if (mHideTopBarForKeyboard) {
+            mCarNavigationBarController.setTopWindowVisibility(
+                    isKeyboardVisible ? View.GONE : View.VISIBLE);
+        }
+
+        if (mHideBottomBarForKeyboard) {
+            mCarNavigationBarController.setBottomWindowVisibility(
+                    isKeyboardVisible ? View.GONE : View.VISIBLE);
+        }
+
+        if (mHideLeftBarForKeyboard) {
+            mCarNavigationBarController.setLeftWindowVisibility(
+                    isKeyboardVisible ? View.GONE : View.VISIBLE);
+        }
+        if (mHideRightBarForKeyboard) {
+            mCarNavigationBarController.setRightWindowVisibility(
+                    isKeyboardVisible ? View.GONE : View.VISIBLE);
+        }
     }
 
     @Override

@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"പുനരാരംഭിക്കുക"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"റദ്ദാക്കുക"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"പങ്കിടുക"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"ഇല്ലാതാക്കുക"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"സ്ക്രീൻ റെക്കോർഡിംഗ് റദ്ദാക്കി"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"സ്ക്രീൻ റെക്കോർഡിംഗ് സംരക്ഷിച്ചു, കാണാൻ ടാപ്പ് ചെയ്യുക"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"സ്ക്രീൻ റെക്കോർഡിംഗ് ഇല്ലാതാക്കി"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"സ്ക്രീൻ റെക്കോർഡിംഗ് ഇല്ലാതാക്കുന്നതിൽ പിശക്"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"അനുമതികൾ ലഭിച്ചില്ല"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"സ്ക്രീൻ റെക്കോർഡിംഗ് ആരംഭിക്കുന്നതിൽ പിശക്"</string>
@@ -125,7 +123,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"ഉപയോഗസഹായി"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"സ്‌ക്രീൻ തിരിക്കുക"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"അവലോകനം"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"തിരയൽ"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"Search"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"ക്യാമറ"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ഫോണ്‍"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"വോയ്‌സ് സഹായം"</string>
@@ -389,7 +387,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"വൈഫൈ കണക്റ്റ് ചെയ്‌തിട്ടില്ല"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"തെളിച്ചം"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"യാന്ത്രികം"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"നിറം മാറ്റുക"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"നെഗറ്റീവ് ലുക്ക്"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"വർണ്ണം ശരിയാക്കൽ മോഡ്"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"കൂടുതൽ ക്രമീകരണങ്ങൾ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"പൂർത്തിയാക്കി"</string>
@@ -441,7 +439,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"ഫുൾ ചാർജാകാൻ, <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"ചാർജ്ജുചെയ്യുന്നില്ല"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"നെറ്റ്‌വർക്ക്\nനിരീക്ഷിക്കപ്പെടാം"</string>
-    <string name="description_target_search" msgid="3875069993128855865">"തിരയൽ"</string>
+    <string name="description_target_search" msgid="3875069993128855865">"Search"</string>
     <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> എന്നതിനായി മുകളിലേയ്‌ക്ക് സ്ലൈഡുചെയ്യുക."</string>
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> എന്നതിനായി ഇടത്തേയ്‌ക്ക് സ്ലൈഡുചെയ്യുക."</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"നിങ്ങൾ സജ്ജീകരിച്ച അലാറങ്ങൾ, റിമൈൻഡറുകൾ, ഇവന്റുകൾ, കോളർമാർ എന്നിവയിൽ നിന്നുള്ള ശബ്‌ദങ്ങളും വൈബ്രേഷനുകളുമൊഴികെ മറ്റൊന്നും നിങ്ങളെ ശല്യപ്പെടുത്തുകയില്ല. സംഗീതം, വീഡിയോകൾ, ഗെയിമുകൾ എന്നിവയുൾപ്പെടെ പ്ലേ ചെയ്യുന്നതെന്തും നിങ്ങൾക്ക് ‌തുടർന്നും കേൾക്കാൻ കഴിയും."</string>
@@ -502,7 +500,7 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"ബാറ്ററി ലാഭിക്കൽ ഓണാണ്"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"പ്രവർത്തനവും പശ്ചാത്തല ഡാറ്റയും കുറയ്‌ക്കുന്നു"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"ബാറ്ററി ലാഭിക്കൽ ഓഫാക്കുക"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"റെക്കോർഡ് ചെയ്യുമ്പോഴോ കാസ്‌റ്റ് ചെയ്യുമ്പോഴോ നിങ്ങളുടെ ഉപകരണത്തിൽ നിന്ന് പ്ലേ ചെയ്യുന്നതോ നിങ്ങളുടെ സ്‌ക്രീനിൽ ദൃശ്യമാകുന്നതോ ആയ എല്ലാ വിവരങ്ങളിലേക്കും <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> എന്നതിന് ആക്‌സസ് ഉണ്ടായിരിക്കും. നിങ്ങൾ പ്ലേ ചെയ്യുന്ന ഒഡിയോ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, പാസ്‌വേഡുകൾ എന്നിവ പോലുള്ള വിവരങ്ങൾ ഇതിൽ ഉൾപ്പെടുന്നു."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"റെക്കോർഡ് ചെയ്യുമ്പോഴോ കാസ്‌റ്റ് ചെയ്യുമ്പോഴോ നിങ്ങളുടെ ഉപകരണത്തിൽ നിന്ന് പ്ലേ ചെയ്യുന്നതോ നിങ്ങളുടെ സ്‌ക്രീനിൽ ദൃശ്യമാകുന്നതോ ആയ എല്ലാ വിവരങ്ങളിലേക്കും <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>-ന് ആക്‌സസ് ഉണ്ടായിരിക്കും. നിങ്ങൾ പ്ലേ ചെയ്യുന്ന ഒഡിയോ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, പാസ്‌വേഡുകൾ എന്നിവ പോലുള്ള വിവരങ്ങൾ ഇതിൽ ഉൾപ്പെടുന്നു."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"റെക്കോർഡ് ചെയ്യുമ്പോഴോ കാസ്‌റ്റ് ചെയ്യുമ്പോഴോ നിങ്ങളുടെ ഉപകരണത്തിൽ നിന്ന് പ്ലേ ചെയ്യുന്നതോ നിങ്ങളുടെ സ്‌ക്രീനിൽ ദൃശ്യമാകുന്നതോ ആയ എല്ലാ വിവരങ്ങളിലേക്കും ഈ ഫംഗ്‌ഷൻ ലഭ്യമാക്കുന്ന സേവനത്തിന് ആക്‌സസ് ഉണ്ടായിരിക്കും. നിങ്ങൾ പ്ലേ ചെയ്യുന്ന ഓഡിയോ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, പാസ്‌വേഡുകൾ എന്നിവ പോലുള്ള വിവരങ്ങൾ ഇതിൽ ഉൾപ്പെടുന്നു."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"റെക്കോർഡ് ചെയ്യൽ അല്ലെങ്കിൽ കാസ്റ്റ് ചെയ്യൽ ആരംഭിക്കണോ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ഉപയോഗിച്ച് റെക്കോർഡ് ചെയ്യൽ അല്ലെങ്കിൽ കാസ്‌റ്റ് ചെയ്യൽ ആരംഭിക്കണോ?"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"മുകളിൽ 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"മുകളിൽ 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"താഴെ പൂർണ്ണ സ്ക്രീൻ"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"സ്ഥാനം <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. എഡിറ്റുചെയ്യുന്നതിന് രണ്ടുതവണ ടാപ്പുചെയ്യുക."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. ചേർക്കാൻ രണ്ടുതവണ ടാപ്പുചെയ്യുക."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> നീക്കുക"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> നീക്കംചെയ്യുക"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"<xliff:g id="POSITION">%2$d</xliff:g> സ്ഥാനത്തേയ്ക്ക് <xliff:g id="TILE_NAME">%1$s</xliff:g> ചേർക്കുക"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="POSITION">%2$d</xliff:g> സ്ഥാനത്തേയ്ക്ക് <xliff:g id="TILE_NAME">%1$s</xliff:g> നീക്കുക"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"ടൈൽ നീക്കം ചെയ്യുക"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ടൈൽ, അവസാന ഭാഗത്ത് ചേർക്കുക"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"ടൈൽ നീക്കുക"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"ടൈൽ ചേർക്കുക"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> എന്നതിലേക്ക് നീക്കുക"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> എന്ന സ്ഥാനത്തേക്ക് ചേർക്കുക"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"സ്ഥാനം <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ദ്രുത ക്രമീകരണ എഡിറ്റർ."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> അറിയിപ്പ്: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"സ്പ്ലിറ്റ്-സ്ക്രീനിനൊപ്പം ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല."</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"മുമ്പത്തേതിലേക്ക് പോകുക"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"വലുപ്പം മാറ്റുക"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ചൂട് കൂടിയതിനാൽ ഫോൺ ഓഫാക്കി"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"ഫോൺ ഇപ്പോൾ സാധാരണഗതിയിൽ പ്രവർത്തിക്കുന്നു"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"നിങ്ങളുടെ ഫോൺ ഇപ്പോൾ സാധാരണ ഗതിയിൽ പ്രവർത്തിക്കുന്നു.\nകൂടുതൽ വിവരങ്ങൾക്ക് ടാപ്പ് ചെയ്യുക"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ഫോൺ ചൂടായിരിക്കുന്നതിനാൽ തണുക്കാൻ ഓഫാക്കിയിരിക്കുന്നു. ഫോൺ ഇപ്പോൾ സാധാരണഗതിയിൽ പ്രവർത്തിക്കുന്നു.\n\nഫോണിന് ചൂട് കൂടാൻ കാരണം:\n	• ഗെയിമിംഗ്, വീഡിയോ അല്ലെങ്കിൽ നാവിഗേഷൻ തുടങ്ങിയ റിസോഴ്സ്-ഇന്റൻസീവായ ആപ്പുകൾ ഉപയോഗിക്കുന്നത്\n	• വലിയ ഫയലുകൾ അപ്‌ലോഡോ ഡൗൺലോഡോ ചെയ്യുന്നത്\n	• ഉയർന്ന താപനിലയിൽ ഫോൺ ഉപയോഗിക്കുന്നത്"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"പരിപാലന നിർദ്ദേശങ്ങൾ കാണുക"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ഫോൺ ചൂടായിക്കൊണ്ടിരിക്കുന്നു"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"ഫോൺ തണുത്തുകൊണ്ടിരിക്കുമ്പോൾ ചില ഫീച്ചറുകൾ പരിമിതപ്പെടുത്തപ്പെടും"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"ഫോൺ തണുത്തുകൊണ്ടിരിക്കുമ്പോൾ ചില ഫീച്ചറുകൾ പരിമിതപ്പെടുത്തപ്പെടും.\nകൂടുതൽ വിവരങ്ങൾക്ക് ടാപ്പ് ചെയ്യുക"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"നിങ്ങളുടെ ഫോൺ സ്വയമേവ തണുക്കാൻ ശ്രമിക്കും. നിങ്ങൾക്ക് അപ്പോഴും ഫോൺ ഉപയോഗിക്കാമെങ്കിലും പ്രവർത്തനം മന്ദഗതിയിലായിരിക്കും.\n\nതണുത്തുകഴിഞ്ഞാൽ, ഫോൺ സാധാരണ ഗതിയിൽ പ്രവർത്തിക്കും."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"പരിപാലന നിർദ്ദേശങ്ങൾ കാണുക"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"ചാർജർ അൺപ്ലഗ് ചെയ്യുക"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"ഈ ഉപകരണം ചാർജ് ചെയ്യുന്നതിൽ തടസ്സമുണ്ട്. പവർ അഡാപ്റ്റർ അൺപ്ലഗ് ചെയ്യുക, കേബിളിന് ചൂടുണ്ടായിരിക്കുമെന്നതിനാൽ ശ്രദ്ധിക്കണം."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"മുൻകരുതൽ നടപടികൾ കാണുക"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"ക്രമീകരണം"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"മനസ്സിലായി"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"SysUI ഹീപ്പ് ഡമ്പ് ചെയ്യുക"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> നിങ്ങളുടെ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ഉപയോഗിക്കുന്നു."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"ആപ്പുകൾ നിങ്ങളുടെ <xliff:g id="TYPES_LIST">%s</xliff:g> ഉപയോഗിക്കുന്നു."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" കൂടാതെ "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"ക്യാമറ"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"ലൊക്കേഷന്‍"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"മൈക്രോഫോൺ"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"സെൻസറുകൾ ഓഫാണ്"</string>
     <string name="device_services" msgid="1549944177856658705">"ഉപകരണ സേവനങ്ങള്‍"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"പേരില്ല"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"നിർദ്ദേശങ്ങൾ ലോഡ് ചെയ്യുന്നു"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"മീഡിയ"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"നിലവിലെ സെഷൻ മറയ്‌ക്കുക."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"മറയ്‌ക്കുക"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"പുനരാരംഭിക്കുക"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ക്രമീകരണം"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"നിഷ്‌ക്രിയം, ആപ്പ് പരിശോധിക്കൂ"</string>

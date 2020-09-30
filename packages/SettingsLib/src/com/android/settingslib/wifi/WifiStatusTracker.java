@@ -13,6 +13,7 @@ package com.android.settingslib.wifi;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 
 import android.content.Context;
 import android.content.Intent;
@@ -189,10 +190,12 @@ public class WifiStatusTracker {
                 }
             }
             updateStatusLabel();
+            mCallback.run();
         } else if (action.equals(WifiManager.RSSI_CHANGED_ACTION)) {
             // Default to -200 as its below WifiManager.MIN_RSSI.
             updateRssi(intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200));
             updateStatusLabel();
+            mCallback.run();
         }
     }
 
@@ -215,13 +218,15 @@ public class WifiStatusTracker {
 
     private void updateStatusLabel() {
         NetworkCapabilities networkCapabilities;
-        final Network currentWifiNetwork = mWifiManager.getCurrentNetwork();
-        if (currentWifiNetwork != null && currentWifiNetwork.equals(mDefaultNetwork)) {
+        isDefaultNetwork = false;
+        if (mDefaultNetworkCapabilities != null) {
+            isDefaultNetwork = mDefaultNetworkCapabilities.hasTransport(
+                    NetworkCapabilities.TRANSPORT_WIFI);
+        }
+        if (isDefaultNetwork) {
             // Wifi is connected and the default network.
-            isDefaultNetwork = true;
             networkCapabilities = mDefaultNetworkCapabilities;
         } else {
-            isDefaultNetwork = false;
             networkCapabilities = mConnectivityManager.getNetworkCapabilities(
                     mWifiManager.getCurrentNetwork());
         }
@@ -242,6 +247,10 @@ public class WifiStatusTracker {
                 } else {
                     statusLabel = mContext.getString(R.string.wifi_status_no_internet);
                 }
+                return;
+            } else if (!isDefaultNetwork && mDefaultNetworkCapabilities != null
+                    && mDefaultNetworkCapabilities.hasTransport(TRANSPORT_CELLULAR)) {
+                statusLabel = mContext.getString(R.string.wifi_connected_low_quality);
                 return;
             }
         }

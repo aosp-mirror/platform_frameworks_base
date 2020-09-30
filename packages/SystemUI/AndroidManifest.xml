@@ -113,6 +113,7 @@
     <uses-permission android:name="android.permission.SET_ORIENTATION" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.MONITOR_INPUT" />
+    <uses-permission android:name="android.permission.INPUT_CONSUMER" />
 
     <!-- DreamManager -->
     <uses-permission android:name="android.permission.READ_DREAM_STATE" />
@@ -239,6 +240,9 @@
 
     <!-- Listen app op changes -->
     <uses-permission android:name="android.permission.WATCH_APPOPS" />
+    <uses-permission android:name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS" />
+    <!-- For handling silent audio recordings -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_ROUTING" />
 
     <!-- to read and change hvac values in a car -->
     <uses-permission android:name="android.car.permission.CONTROL_CAR_CLIMATE" />
@@ -265,6 +269,7 @@
 
     <!-- Permission to make accessibility service access Bubbles -->
     <uses-permission android:name="android.permission.ADD_TRUSTED_DISPLAY" />
+
 
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
@@ -395,19 +400,15 @@
 
         <!-- Springboard for launching the share and edit activity. This needs to be in the main
              system ui process since we need to notify the status bar to dismiss the keyguard -->
-        <receiver android:name=".screenshot.GlobalScreenshot$ActionProxyReceiver"
-            android:exported="false" />
-
-        <!-- Callback for dismissing screenshot notification after a share target is picked -->
-        <receiver android:name=".screenshot.GlobalScreenshot$TargetChosenReceiver"
+        <receiver android:name=".screenshot.ActionProxyReceiver"
             android:exported="false" />
 
         <!-- Callback for deleting screenshot notification -->
-        <receiver android:name=".screenshot.GlobalScreenshot$DeleteScreenshotReceiver"
+        <receiver android:name=".screenshot.DeleteScreenshotReceiver"
             android:exported="false" />
 
         <!-- Callback for invoking a smart action from the screenshot notification. -->
-        <receiver android:name=".screenshot.GlobalScreenshot$SmartActionsReceiver"
+        <receiver android:name=".screenshot.SmartActionsReceiver"
                   android:exported="false"/>
 
         <!-- started from UsbDeviceSettingsManager -->
@@ -720,10 +721,9 @@
         <service android:name=".controls.controller.AuxiliaryPersistenceWrapper$DeletionJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE"/>
 
-        <!-- started from ControlsFavoritingActivity -->
+        <!-- started from ControlsRequestReceiver -->
         <activity
             android:name=".controls.management.ControlsRequestDialog"
-            android:exported="true"
             android:theme="@style/Theme.ControlsRequestDialog"
             android:finishOnCloseSystemDialogs="true"
             android:showForAllUsers="true"

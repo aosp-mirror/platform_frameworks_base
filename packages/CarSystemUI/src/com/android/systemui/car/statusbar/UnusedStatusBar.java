@@ -16,8 +16,6 @@
 
 package com.android.systemui.car.statusbar;
 
-import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
-
 import android.content.Context;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -30,10 +28,7 @@ import com.android.systemui.InitController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
-import com.android.systemui.car.CarDeviceProvisionedController;
-import com.android.systemui.car.navigationbar.CarNavigationBarController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
@@ -57,7 +52,6 @@ import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
-import com.android.systemui.statusbar.dagger.StatusBarDependenciesModule;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
@@ -66,7 +60,6 @@ import com.android.systemui.statusbar.notification.interruption.BypassHeadsUpNot
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
-import com.android.systemui.statusbar.notification.row.NotificationRowModule;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -75,23 +68,26 @@ import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
+import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightsOutNotifController;
 import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
+import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
-import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneDependenciesModule;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -103,27 +99,14 @@ import com.android.systemui.volume.VolumeComponent;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
-import javax.inject.Named;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
-import dagger.Module;
-import dagger.Provides;
 
-/**
- * Dagger Module providing {@link CarStatusBar}.
- */
-@Module(includes = {StatusBarDependenciesModule.class, StatusBarPhoneDependenciesModule.class,
-        NotificationRowModule.class})
-public class CarStatusBarModule {
-    /**
-     * Provides our instance of StatusBar which is considered optional.
-     */
-    @Provides
-    @Singleton
-    static CarStatusBar provideStatusBar(
-            Context context,
+/** Unused variant of {@link StatusBar} specifically used in the automotive context. */
+public class UnusedStatusBar extends StatusBar {
+
+    public UnusedStatusBar(Context context,
             NotificationsController notificationsController,
             LightBarController lightBarController,
             AutoHideController autoHideController,
@@ -141,12 +124,12 @@ public class CarStatusBarModule {
             RemoteInputQuickSettingsDisabler remoteInputQuickSettingsDisabler,
             NotificationGutsManager notificationGutsManager,
             NotificationLogger notificationLogger,
-            NotificationInterruptStateProvider notificationInterruptionStateProvider,
+            NotificationInterruptStateProvider notificationInterruptStateProvider,
             NotificationViewHierarchyManager notificationViewHierarchyManager,
             KeyguardViewMediator keyguardViewMediator,
             DisplayMetrics displayMetrics,
             MetricsLogger metricsLogger,
-            @UiBackground Executor uiBgExecutor,
+            Executor uiBgExecutor,
             NotificationMediaManager notificationMediaManager,
             NotificationLockscreenUserManager lockScreenUserManager,
             NotificationRemoteInputManager remoteInputManager,
@@ -161,7 +144,7 @@ public class CarStatusBarModule {
             BubbleController bubbleController,
             NotificationGroupManager groupManager,
             VisualStabilityManager visualStabilityManager,
-            CarDeviceProvisionedController carDeviceProvisionedController,
+            DeviceProvisionedController deviceProvisionedController,
             NavigationBarController navigationBarController,
             Lazy<AssistManager> assistManagerLazy,
             ConfigurationController configurationController,
@@ -169,6 +152,7 @@ public class CarStatusBarModule {
             LockscreenLockIconController lockscreenLockIconController,
             DozeParameters dozeParameters,
             ScrimController scrimController,
+            KeyguardLiftController keyguardLiftController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
             DozeServiceHost dozeServiceHost,
@@ -181,16 +165,15 @@ public class CarStatusBarModule {
             Provider<StatusBarComponent.Builder> statusBarComponentBuilder,
             PluginManager pluginManager,
             Optional<Divider> dividerOptional,
-            SuperStatusBarViewFactory superStatusBarViewFactory,
             LightsOutNotifController lightsOutNotifController,
-            StatusBarNotificationActivityStarter.Builder
-                    statusBarNotificationActivityStarterBuilder,
+            StatusBarNotificationActivityStarter.Builder statusBarNotifActivityStarterBuilder,
             ShadeController shadeController,
+            SuperStatusBarViewFactory superStatusBarViewFactory,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
             InitController initController,
             DarkIconDispatcher darkIconDispatcher,
-            @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
+            Handler timeTickHandler,
             PluginDependencyProvider pluginDependencyProvider,
             KeyguardDismissUtil keyguardDismissUtil,
             ExtensionController extensionController,
@@ -198,86 +181,44 @@ public class CarStatusBarModule {
             PhoneStatusBarPolicy phoneStatusBarPolicy,
             KeyguardIndicationController keyguardIndicationController,
             DismissCallbackRegistry dismissCallbackRegistry,
-            StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             Lazy<NotificationShadeDepthController> notificationShadeDepthControllerLazy,
-            CarNavigationBarController carNavigationBarController) {
-        return new CarStatusBar(
-                context,
-                notificationsController,
-                lightBarController,
-                autoHideController,
-                keyguardUpdateMonitor,
-                statusBarIconController,
-                pulseExpansionHandler,
-                notificationWakeUpCoordinator,
-                keyguardBypassController,
-                keyguardStateController,
-                headsUpManagerPhone,
-                dynamicPrivacyController,
-                bypassHeadsUpNotifier,
+            StatusBarTouchableRegionManager statusBarTouchableRegionManager) {
+        super(context, notificationsController, lightBarController, autoHideController,
+                keyguardUpdateMonitor, statusBarIconController, pulseExpansionHandler,
+                notificationWakeUpCoordinator, keyguardBypassController, keyguardStateController,
+                headsUpManagerPhone, dynamicPrivacyController, bypassHeadsUpNotifier,
                 falsingManager,
-                broadcastDispatcher,
-                remoteInputQuickSettingsDisabler,
-                notificationGutsManager,
-                notificationLogger,
-                notificationInterruptionStateProvider,
-                notificationViewHierarchyManager,
-                keyguardViewMediator,
-                displayMetrics,
+                broadcastDispatcher, remoteInputQuickSettingsDisabler, notificationGutsManager,
+                notificationLogger, notificationInterruptStateProvider,
+                notificationViewHierarchyManager, keyguardViewMediator, displayMetrics,
                 metricsLogger,
-                uiBgExecutor,
-                notificationMediaManager,
-                lockScreenUserManager,
-                remoteInputManager,
-                userSwitcherController,
-                networkController,
-                batteryController,
-                colorExtractor,
-                screenLifecycle,
-                wakefulnessLifecycle,
-                statusBarStateController,
-                vibratorHelper,
-                bubbleController,
-                groupManager,
-                visualStabilityManager,
-                carDeviceProvisionedController,
-                navigationBarController,
-                assistManagerLazy,
-                configurationController,
-                notificationShadeWindowController,
-                lockscreenLockIconController,
-                dozeParameters,
-                scrimController,
-                lockscreenWallpaperLazy,
-                biometricUnlockControllerLazy,
-                dozeServiceHost,
-                powerManager,
-                screenPinningRequest,
-                dozeScrimController,
-                volumeComponent,
-                commandQueue,
-                recentsOptional,
-                statusBarComponentBuilder,
-                pluginManager,
-                dividerOptional,
-                superStatusBarViewFactory,
-                lightsOutNotifController,
-                statusBarNotificationActivityStarterBuilder,
-                shadeController,
-                statusBarKeyguardViewManager,
-                viewMediatorCallback,
-                initController,
+                uiBgExecutor, notificationMediaManager, lockScreenUserManager, remoteInputManager,
+                userSwitcherController, networkController, batteryController, colorExtractor,
+                screenLifecycle, wakefulnessLifecycle, statusBarStateController, vibratorHelper,
+                bubbleController, groupManager, visualStabilityManager, deviceProvisionedController,
+                navigationBarController, assistManagerLazy, configurationController,
+                notificationShadeWindowController, lockscreenLockIconController, dozeParameters,
+                scrimController, keyguardLiftController, lockscreenWallpaperLazy,
+                biometricUnlockControllerLazy, dozeServiceHost, powerManager, screenPinningRequest,
+                dozeScrimController, volumeComponent, commandQueue, recentsOptional,
+                statusBarComponentBuilder, pluginManager, dividerOptional, lightsOutNotifController,
+                statusBarNotifActivityStarterBuilder, shadeController, superStatusBarViewFactory,
+                statusBarKeyguardViewManager, viewMediatorCallback, initController,
                 darkIconDispatcher,
-                timeTickHandler,
-                pluginDependencyProvider,
-                keyguardDismissUtil,
-                extensionController,
-                userInfoControllerImpl,
-                phoneStatusBarPolicy,
-                keyguardIndicationController,
-                dismissCallbackRegistry,
-                statusBarTouchableRegionManager,
-                notificationShadeDepthControllerLazy,
-                carNavigationBarController);
+                timeTickHandler, pluginDependencyProvider, keyguardDismissUtil, extensionController,
+                userInfoControllerImpl, phoneStatusBarPolicy, keyguardIndicationController,
+                dismissCallbackRegistry, notificationShadeDepthControllerLazy,
+                statusBarTouchableRegionManager);
+    }
+
+    @Override
+    public void notifyBiometricAuthModeChanged() {
+        // No-op for Automotive devices.
+    }
+
+    @Override
+    public NavigationBarView getNavigationBarView() {
+        // Return null for Automotive devices.
+        return null;
     }
 }

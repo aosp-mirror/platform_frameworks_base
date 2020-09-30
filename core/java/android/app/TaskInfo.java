@@ -176,6 +176,13 @@ public class TaskInfo {
      */
     public boolean isResizeable;
 
+    /**
+     * Screen orientation set by {@link #baseActivity} via
+     * {@link Activity#setRequestedOrientation(int)}.
+     * @hide
+     */
+    public @ActivityInfo.ScreenOrientation int requestedOrientation;
+
     TaskInfo() {
         // Do nothing
     }
@@ -247,6 +254,7 @@ public class TaskInfo {
                 ? ActivityInfo.CREATOR.createFromParcel(source)
                 : null;
         isResizeable = source.readBoolean();
+        requestedOrientation = source.readInt();
     }
 
     /**
@@ -297,6 +305,7 @@ public class TaskInfo {
             topActivityInfo.writeToParcel(dest, flags);
         }
         dest.writeBoolean(isResizeable);
+        dest.writeInt(requestedOrientation);
     }
 
     @Override
@@ -315,6 +324,7 @@ public class TaskInfo {
                 + " token=" + token
                 + " topActivityType=" + topActivityType
                 + " pictureInPictureParams=" + pictureInPictureParams
-                + " topActivityInfo=" + topActivityInfo;
+                + " topActivityInfo=" + topActivityInfo
+                + " requestedOrientation=" + requestedOrientation;
     }
 }

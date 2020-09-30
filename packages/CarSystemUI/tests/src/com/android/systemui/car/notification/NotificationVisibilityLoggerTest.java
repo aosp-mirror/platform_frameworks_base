@@ -37,6 +37,7 @@ import com.android.car.notification.NotificationDataManager;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.car.CarSystemUiTest;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -49,6 +50,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
 
+@CarSystemUiTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest

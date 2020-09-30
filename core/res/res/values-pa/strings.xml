@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"ਅਣਲਾਕ ਕਰਨ ਲਈ ਮੀਨੂ ਦਬਾਓ ਜਾਂ ਸੰਕਟਕਾਲੀਨ ਕਾਲ ਕਰੋ।"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"ਅਣਲਾਕ ਕਰਨ ਲਈ ਮੀਨੂ ਦਬਾਓ।"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"ਅਣਲਾਕ ਕਰਨ ਲਈ ਪੈਟਰਨ ਡ੍ਰਾ ਕਰੋ"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ਸੰਕਟਕਾਲ"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"ਸੰਕਟਕਾਲੀਨ ਕਾਲ"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"ਕਾਲ ਤੇ ਵਾਪਸ ਜਾਓ"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"ਸਹੀ!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
@@ -896,7 +896,7 @@
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"ਅਣਲਾਕ ਖੇਤਰ ਨਸ਼ਟ ਕੀਤਾ।"</string>
     <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ਵਿਜੇਟ।"</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"ਉਪਭੋਗਤਾ ਚੋਣਕਾਰ"</string>
-    <string name="keyguard_accessibility_status" msgid="6792745049712397237">"ਅਵਸਥਾ"</string>
+    <string name="keyguard_accessibility_status" msgid="6792745049712397237">"ਸਥਿਤੀ"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"ਕੈਮਰਾ"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"ਮੀਡੀਆ ਨਿਯੰਤਰਣ"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"ਵਿਜੇਟ ਨੂੰ ਪੁਨਰ ਤਰਤੀਬ ਦੇਣਾ ਸ਼ੁਰੂ ਹੋਇਆ।"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਮਿਟਾਇਆ ਗਿਆ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ਠੀਕ ਹੈ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ:\n\n•ਗੂੜ੍ਹਾ ਥੀਮ ਚਾਲੂ ਕਰਦਾ ਹੈ\n•ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ, ਕੁਝ ਦ੍ਰਿਸ਼ਟੀਗਤ ਪ੍ਰਭਾਵਾਂ, ਅਤੇ \"Ok Google\" ਵਰਗੀਆਂ ਹੋਰ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ ਜਾਂ ਉਹਨਾਂ \'ਤੇ ਪਾਬੰਦੀ ਲਗਾਉਂਦਾ ਹੈ\n\n"<annotation id="url">"ਹੋਰ ਜਾਣੋ"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ:\n\n•ਗੂੜ੍ਹਾ ਥੀਮ ਚਾਲੂ ਕਰਦਾ ਹੈ\n•ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ, ਕੁਝ ਦ੍ਰਿਸ਼ਟੀਗਤ ਪ੍ਰਭਾਵਾਂ, ਅਤੇ \"Ok Google\" ਵਰਗੀਆਂ ਹੋਰ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ ਜਾਂ ਉਹਨਾਂ \'ਤੇ ਪਾਬੰਦੀ ਲਗਾਉਂਦਾ ਹੈ"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ:\n\n• ਗੂੜ੍ਹਾ ਥੀਮ ਚਾਲੂ ਕਰਦਾ ਹੈ\n• ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ, ਕੁਝ ਦ੍ਰਿਸ਼ਟੀਗਤ ਪ੍ਰਭਾਵਾਂ, ਅਤੇ \"Ok Google\" ਵਰਗੀਆਂ ਹੋਰ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ ਜਾਂ ਉਹਨਾਂ \'ਤੇ ਪਾਬੰਦੀ ਲਗਾਉਂਦਾ ਹੈ\n\n"<annotation id="url">"ਹੋਰ ਜਾਣੋ"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ:\n\n• ਗੂੜ੍ਹੇ ਥੀਮ ਨੂੰ ਚਾਲੂ ਕਰਦਾ ਹੈ\n• ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ, ਕੁਝ ਦ੍ਰਿਸ਼ਟੀਗਤ ਪ੍ਰਭਾਵਾਂ, ਅਤੇ \"Ok Google\" ਵਰਗੀਆਂ ਹੋਰ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ ਜਾਂ ਉਹਨਾਂ \'ਤੇ ਪਾਬੰਦੀ ਲਗਾਉਂਦਾ ਹੈ"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ਡਾਟਾ ਵਰਤੋਂ ਘਟਾਉਣ ਵਿੱਚ ਮਦਦ ਲਈ, ਡਾਟਾ ਸੇਵਰ ਕੁਝ ਐਪਾਂ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡਾਟਾ ਭੇਜਣ ਜਾਂ ਪ੍ਰਾਪਤ ਕਰਨ ਤੋਂ ਰੋਕਦਾ ਹੈ। ਤੁਹਾਡੇ ਵੱਲੋਂ ਵਰਤਮਾਨ ਤੌਰ \'ਤੇ ਵਰਤੀ ਜਾ ਰਹੀ ਐਪ ਡਾਟਾ \'ਤੇ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਉਹ ਇੰਝ ਕਦੇ-ਕਦਾਈਂ ਕਰ ਸਕਦੀ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸ ਦਾ ਮਤਲਬ ਇਹ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਚਿੱਤਰ ਤਦ ਤੱਕ ਨਹੀਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕੀਤੇ ਜਾਂਦੇ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ \'ਤੇ ਟੈਪ ਨਹੀਂ ਕਰਦੇ।"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ਕੀ ਡਾਟਾ ਸੇਵਰ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ਚਾਲੂ ਕਰੋ"</string>

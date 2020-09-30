@@ -339,7 +339,7 @@ public class ProximitySensor implements ThresholdSensor {
         @Override
         public void run() {
             unregister();
-            mSensor.alertListeners();
+            onProximityEvent(null);
         }
 
         /**

@@ -510,6 +510,8 @@
         <item>com.android.systemui</item>
     </string-array>
 
+    <integer name="ongoing_appops_dialog_max_apps">5</integer>
+
     <!-- Launcher package name for overlaying icons. -->
     <string name="launcher_overlayable_package" translatable="false">com.android.launcher3</string>
 

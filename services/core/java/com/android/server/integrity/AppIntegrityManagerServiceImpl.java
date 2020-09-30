@@ -205,8 +205,13 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                     }
 
                     if (DEBUG_INTEGRITY_COMPONENT) {
-                        Slog.i(TAG, String.format("Successfully pushed rule set: %s", version));
+                        Slog.i(
+                                TAG,
+                                String.format(
+                                        "Successfully pushed rule set to version '%s' from '%s'",
+                                        version, ruleProvider));
                     }
+
                     FrameworkStatsLog.write(
                             FrameworkStatsLog.INTEGRITY_RULES_PUSHED,
                             success,
@@ -324,13 +329,12 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                                 + getAllowedInstallers(packageInfo));
             }
             IntegrityCheckResult result = mEvaluationEngine.evaluate(appInstallMetadata);
-            if (DEBUG_INTEGRITY_COMPONENT) {
+            if (!result.getMatchedRules().isEmpty() || DEBUG_INTEGRITY_COMPONENT) {
                 Slog.i(
                         TAG,
-                        "Integrity check result: "
-                                + result.getEffect()
-                                + " due to "
-                                + result.getMatchedRules());
+                        String.format(
+                                "Integrity check of %s result: %s due to %s",
+                                packageName, result.getEffect(), result.getMatchedRules()));
             }
 
             FrameworkStatsLog.write(
@@ -673,8 +677,10 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         // Obtain the system apps that are whitelisted in config_integrityRuleProviderPackages.
         List<String> allowedRuleProviders = getAllowedRuleProviderSystemApps();
         if (DEBUG_INTEGRITY_COMPONENT) {
-            Slog.i(TAG, String.format(
-                    "Rule provider system app list contains: %s", allowedRuleProviders));
+            Slog.i(
+                    TAG,
+                    String.format(
+                            "Rule provider system app list contains: %s", allowedRuleProviders));
         }
 
         // Identify the package names in the caller list.
@@ -730,9 +736,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
 
     private boolean integrityCheckIncludesRuleProvider() {
         return Settings.Global.getInt(
-                        mContext.getContentResolver(),
-                        Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
-                        0)
+                mContext.getContentResolver(),
+                Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
+                0)
                 == 1;
     }
 

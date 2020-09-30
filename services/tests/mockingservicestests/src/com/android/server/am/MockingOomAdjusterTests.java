@@ -84,6 +84,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManagerInternal;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -130,6 +131,7 @@ public class MockingOomAdjusterTests {
     private static final int MOCKAPP5_UID = MOCKAPP_UID + 4;
     private static final String MOCKAPP5_PROCESSNAME = "test #5";
     private static final String MOCKAPP5_PACKAGENAME = "com.android.test.test5";
+    private static final int MOCKAPP2_UID_OTHER = MOCKAPP2_UID + UserHandle.PER_USER_RANGE;
     private static Context sContext;
     private static PackageManagerInternal sPackageManagerInternal;
     private static ActivityManagerService sService;
@@ -168,6 +170,8 @@ public class MockingOomAdjusterTests {
                 mock(SparseArray.class));
         setFieldValue(ActivityManagerService.class, sService, "mOomAdjProfiler",
                 mock(OomAdjProfiler.class));
+        setFieldValue(ActivityManagerService.class, sService, "mUserController",
+                mock(UserController.class));
         doReturn(new ActivityManagerService.ProcessChangeItem()).when(sService)
                 .enqueueProcessChangeItemLocked(anyInt(), anyInt());
         sService.mOomAdjuster = new OomAdjuster(sService, sService.mProcessList,
@@ -1621,6 +1625,117 @@ public class MockingOomAdjusterTests {
         assertEquals(SERVICE_ADJ, app.setAdj);
     }
 
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoAll_Service_KeepWarmingList() {
+        final ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        final ProcessRecord app2 = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID_OTHER,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+        final int userOwner = 0;
+        final int userOther = 1;
+        final int cachedAdj1 = CACHED_APP_MIN_ADJ + ProcessList.CACHED_APP_IMPORTANCE_LEVELS;
+        final int cachedAdj2 = cachedAdj1 + ProcessList.CACHED_APP_IMPORTANCE_LEVELS * 2;
+        doReturn(userOwner).when(sService.mUserController).getCurrentUserId();
+
+        final ArrayList<ProcessRecord> lru = sService.mProcessList.mLruProcesses;
+        lru.clear();
+        lru.add(app2);
+        lru.add(app);
+
+        final ComponentName cn = ComponentName.unflattenFromString(
+                MOCKAPP_PACKAGENAME + "/.TestService");
+        final ComponentName cn2 = ComponentName.unflattenFromString(
+                MOCKAPP2_PACKAGENAME + "/.TestService");
+        final long now = SystemClock.uptimeMillis();
+
+        sService.mConstants.KEEP_WARMING_SERVICES.clear();
+        final ServiceInfo si = mock(ServiceInfo.class);
+        si.applicationInfo = mock(ApplicationInfo.class);
+        ServiceRecord s = spy(new ServiceRecord(sService, null, cn, cn, null, 0, null,
+                si, false, null));
+        doReturn(new ArrayMap<IBinder, ArrayList<ConnectionRecord>>()).when(s).getConnections();
+        s.startRequested = true;
+        s.lastActivity = now;
+
+        app.setCached(false);
+        app.startService(s);
+        app.hasShownUi = true;
+
+        final ServiceInfo si2 = mock(ServiceInfo.class);
+        si2.applicationInfo = mock(ApplicationInfo.class);
+        si2.applicationInfo.uid = MOCKAPP2_UID_OTHER;
+        ServiceRecord s2 = spy(new ServiceRecord(sService, null, cn2, cn2, null, 0, null,
+                si2, false, null));
+        doReturn(new ArrayMap<IBinder, ArrayList<ConnectionRecord>>()).when(s2).getConnections();
+        s2.startRequested = true;
+        s2.lastActivity = now - sService.mConstants.MAX_SERVICE_INACTIVITY - 1;
+
+        app2.setCached(false);
+        app2.startService(s2);
+        app2.hasShownUi = false;
+
+        sService.mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
+        sService.mOomAdjuster.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+
+        assertProcStates(app, true, PROCESS_STATE_SERVICE, cachedAdj1, "cch-started-ui-services");
+        assertProcStates(app2, true, PROCESS_STATE_SERVICE, cachedAdj2, "cch-started-services");
+
+        app.setProcState = PROCESS_STATE_NONEXISTENT;
+        app.adjType = null;
+        app.setAdj = UNKNOWN_ADJ;
+        app.hasShownUi = false;
+        sService.mOomAdjuster.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+
+        assertProcStates(app, false, PROCESS_STATE_SERVICE, SERVICE_ADJ, "started-services");
+
+        app.setCached(false);
+        app.setProcState = PROCESS_STATE_NONEXISTENT;
+        app.adjType = null;
+        app.setAdj = UNKNOWN_ADJ;
+        s.lastActivity = now - sService.mConstants.MAX_SERVICE_INACTIVITY - 1;
+        sService.mOomAdjuster.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+
+        assertProcStates(app, true, PROCESS_STATE_SERVICE, cachedAdj1, "cch-started-services");
+
+        app.stopService(s);
+        app.setProcState = PROCESS_STATE_NONEXISTENT;
+        app.adjType = null;
+        app.setAdj = UNKNOWN_ADJ;
+        app.hasShownUi = true;
+        sService.mConstants.KEEP_WARMING_SERVICES.add(cn);
+        sService.mConstants.KEEP_WARMING_SERVICES.add(cn2);
+        s = spy(new ServiceRecord(sService, null, cn, cn, null, 0, null,
+                si, false, null));
+        doReturn(new ArrayMap<IBinder, ArrayList<ConnectionRecord>>()).when(s).getConnections();
+        s.startRequested = true;
+        s.lastActivity = now;
+
+        app.startService(s);
+        sService.mOomAdjuster.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+
+        assertProcStates(app, false, PROCESS_STATE_SERVICE, SERVICE_ADJ, "started-services");
+        assertProcStates(app2, true, PROCESS_STATE_SERVICE, cachedAdj1, "cch-started-services");
+
+        app.setCached(true);
+        app.setProcState = PROCESS_STATE_NONEXISTENT;
+        app.adjType = null;
+        app.setAdj = UNKNOWN_ADJ;
+        app.hasShownUi = false;
+        s.lastActivity = now - sService.mConstants.MAX_SERVICE_INACTIVITY - 1;
+        sService.mOomAdjuster.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+
+        assertProcStates(app, false, PROCESS_STATE_SERVICE, SERVICE_ADJ, "started-services");
+        assertProcStates(app2, true, PROCESS_STATE_SERVICE, cachedAdj1, "cch-started-services");
+
+        doReturn(userOther).when(sService.mUserController).getCurrentUserId();
+        sService.mOomAdjuster.handleUserSwitchedLocked();
+
+        sService.mOomAdjuster.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+        assertProcStates(app, true, PROCESS_STATE_SERVICE, cachedAdj1, "cch-started-services");
+        assertProcStates(app2, false, PROCESS_STATE_SERVICE, SERVICE_ADJ, "started-services");
+    }
+
     private ProcessRecord makeDefaultProcessRecord(int pid, int uid, String processName,
             String packageName, boolean hasShownUi) {
         long now = SystemClock.uptimeMillis();
@@ -1746,5 +1861,13 @@ public class MockingOomAdjusterTests {
         assertEquals(expectedProcState, app.setProcState);
         assertEquals(expectedAdj, app.setAdj);
         assertEquals(expectedSchedGroup, app.setSchedGroup);
+    }
+
+    private void assertProcStates(ProcessRecord app, boolean expectedCached,
+            int expectedProcState, int expectedAdj, String expectedAdjType) {
+        assertEquals(expectedCached, app.isCached());
+        assertEquals(expectedProcState, app.setProcState);
+        assertEquals(expectedAdj, app.setAdj);
+        assertEquals(expectedAdjType, app.adjType);
     }
 }

@@ -21,8 +21,8 @@ import com.android.systemui.bubbles.dagger.BubbleModule;
 import com.android.systemui.car.navigationbar.CarNavigationBar;
 import com.android.systemui.car.notification.CarNotificationModule;
 import com.android.systemui.car.sideloaded.SideLoadedAppController;
-import com.android.systemui.car.statusbar.CarStatusBar;
-import com.android.systemui.car.statusbar.CarStatusBarModule;
+import com.android.systemui.car.statusbar.UnusedStatusBar;
+import com.android.systemui.car.statusbar.UnusedStatusBarModule;
 import com.android.systemui.car.voicerecognition.ConnectedDeviceVoiceRecognitionNotifier;
 import com.android.systemui.car.volume.VolumeUI;
 import com.android.systemui.car.window.OverlayWindowModule;
@@ -39,7 +39,6 @@ import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.notification.InstantAppNotifier;
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.tv.TvStatusBar;
 import com.android.systemui.theme.ThemeOverlayController;
 import com.android.systemui.toast.ToastUI;
 import com.android.systemui.util.leak.GarbageMonitor;
@@ -50,9 +49,9 @@ import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 
 /** Binder for car specific {@link SystemUI} modules. */
-@Module(includes = {RecentsModule.class, CarStatusBarModule.class, NotificationsModule.class,
+@Module(includes = {RecentsModule.class, NotificationsModule.class,
         BubbleModule.class, KeyguardModule.class, OverlayWindowModule.class,
-        CarNotificationModule.class})
+        CarNotificationModule.class, UnusedStatusBarModule.class})
 public abstract class CarSystemUIBinder {
     /** Inject into AuthController. */
     @Binds
@@ -155,19 +154,7 @@ public abstract class CarSystemUIBinder {
     @Binds
     @IntoMap
     @ClassKey(StatusBar.class)
-    public abstract SystemUI bindsStatusBar(CarStatusBar sysui);
-
-    /** Inject into TvStatusBar. */
-    @Binds
-    @IntoMap
-    @ClassKey(TvStatusBar.class)
-    public abstract SystemUI bindsTvStatusBar(TvStatusBar sysui);
-
-    /** Inject into StatusBarGoogle. */
-    @Binds
-    @IntoMap
-    @ClassKey(CarStatusBar.class)
-    public abstract SystemUI bindsCarStatusBar(CarStatusBar sysui);
+    public abstract SystemUI bindsStatusBar(UnusedStatusBar sysui);
 
     /** Inject into VolumeUI. */
     @Binds

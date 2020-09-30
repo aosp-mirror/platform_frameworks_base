@@ -2683,4 +2683,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     MEDIA_CONTROLS_SETTINGS = 1845;
+
+    // OPEN: Settings > Network & internet > Adaptive connectivity
+    // CATEGORY: SETTINGS
+    // OS: R QPR
+    ADAPTIVE_CONNECTIVITY_CATEGORY = 1850;
 }

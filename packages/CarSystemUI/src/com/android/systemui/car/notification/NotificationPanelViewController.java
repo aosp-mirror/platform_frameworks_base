@@ -23,6 +23,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.inputmethodservice.InputMethodService;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -80,6 +82,7 @@ public class NotificationPanelViewController extends OverlayPanelViewController
     private final StatusBarStateController mStatusBarStateController;
     private final boolean mEnableHeadsUpNotificationWhenNotificationShadeOpen;
     private final NotificationVisibilityLogger mNotificationVisibilityLogger;
+    private final int mNavBarHeight;
 
     private float mInitialBackgroundAlpha;
     private float mBackgroundAlphaDiff;
@@ -89,7 +92,6 @@ public class NotificationPanelViewController extends OverlayPanelViewController
     private RecyclerView mNotificationList;
     private NotificationViewController mNotificationViewController;
 
-    private boolean mIsTracking;
     private boolean mNotificationListAtEnd;
     private float mFirstTouchDownOnGlassPane;
     private boolean mNotificationListAtEndAtTimeOfTouch;
@@ -137,7 +139,10 @@ public class NotificationPanelViewController extends OverlayPanelViewController
         mStatusBarStateController = statusBarStateController;
         mNotificationVisibilityLogger = notificationVisibilityLogger;
 
+        mNavBarHeight = mResources.getDimensionPixelSize(R.dimen.car_bottom_navigation_bar_height);
+
         mCommandQueue.addCallback(this);
+
         // Notification background setup.
         mInitialBackgroundAlpha = (float) mResources.getInteger(
                 R.integer.config_initialNotificationBackgroundAlpha) / 100;
@@ -178,6 +183,27 @@ public class NotificationPanelViewController extends OverlayPanelViewController
         }
     }
 
+    @Override
+    public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
+            boolean showImeSwitcher) {
+        if (mContext.getDisplayId() != displayId) {
+            return;
+        }
+        boolean isKeyboardVisible = (vis & InputMethodService.IME_VISIBLE) != 0;
+        int bottomMargin = isKeyboardVisible ? 0 : mNavBarHeight;
+        ViewGroup container = (ViewGroup) getLayout();
+        if (container == null) {
+            // Notification panel hasn't been inflated before. We shouldn't try to update the layout
+            // params.
+            return;
+        }
+
+        ViewGroup.MarginLayoutParams params =
+                (ViewGroup.MarginLayoutParams) container.getLayoutParams();
+        params.setMargins(params.leftMargin, params.topMargin, params.rightMargin, bottomMargin);
+        container.setLayoutParams(params);
+    }
+
     // OverlayViewController
 
     @Override
@@ -192,8 +218,18 @@ public class NotificationPanelViewController extends OverlayPanelViewController
     }
 
     @Override
-    protected boolean shouldShowNavigationBar() {
+    protected boolean shouldShowNavigationBarInsets() {
         return true;
+    }
+
+    @Override
+    protected boolean shouldShowStatusBarInsets() {
+        return true;
+    }
+
+    @Override
+    protected int getInsetTypesToFit() {
+        return 0;
     }
 
     @Override
@@ -287,14 +323,14 @@ public class NotificationPanelViewController extends OverlayPanelViewController
         // The glass pane is used to view touch events before passed to the notification list.
         // This allows us to initialize gesture listeners and detect when to close the notifications
         glassPane.setOnTouchListener((v, event) -> {
-            if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+            if (isClosingAction(event)) {
                 mNotificationListAtEndAtTimeOfTouch = false;
             }
-            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            if (isOpeningAction(event)) {
                 mFirstTouchDownOnGlassPane = event.getRawX();
                 mNotificationListAtEndAtTimeOfTouch = mNotificationListAtEnd;
                 // Reset the tracker when there is a touch down on the glass pane.
-                mIsTracking = false;
+                setIsTracking(false);
                 // Pass the down event to gesture detector so that it knows where the touch event
                 // started.
                 closeGestureDetector.onTouchEvent(event);
@@ -329,22 +365,21 @@ public class NotificationPanelViewController extends OverlayPanelViewController
 
             // If the card is swiping we should not allow the notification shade to close.
             // Hence setting mNotificationListAtEndAtTimeOfTouch to false will stop that
-            // for us. We are also checking for mIsTracking because while swiping the
+            // for us. We are also checking for isTracking() because while swiping the
             // notification shade to close if the user goes a bit horizontal while swiping
             // upwards then also this should close.
-            if (mIsNotificationCardSwiping && !mIsTracking) {
+            if (mIsNotificationCardSwiping && !isTracking()) {
                 mNotificationListAtEndAtTimeOfTouch = false;
             }
 
             boolean handled = closeGestureDetector.onTouchEvent(event);
-            boolean isTracking = mIsTracking;
+            boolean isTracking = isTracking();
             Rect rect = getLayout().getClipBounds();
             float clippedHeight = 0;
             if (rect != null) {
                 clippedHeight = rect.bottom;
             }
-            if (!handled && event.getActionMasked() == MotionEvent.ACTION_UP
-                    && mIsSwipingVerticallyToClose) {
+            if (!handled && isClosingAction(event) && mIsSwipingVerticallyToClose) {
                 if (getSettleClosePercentage() < getPercentageFromEndingEdge() && isTracking) {
                     animatePanel(DEFAULT_FLING_VELOCITY, false);
                 } else if (clippedHeight != getLayout().getHeight() && isTracking) {
@@ -357,7 +392,7 @@ public class NotificationPanelViewController extends OverlayPanelViewController
             // Updating the mNotificationListAtEndAtTimeOfTouch state has to be done after
             // the event has been passed to the closeGestureDetector above, such that the
             // closeGestureDetector sees the up event before the state has changed.
-            if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+            if (isClosingAction(event)) {
                 mNotificationListAtEndAtTimeOfTouch = false;
             }
             return handled || isTracking;

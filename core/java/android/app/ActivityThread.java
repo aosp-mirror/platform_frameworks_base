@@ -3250,12 +3250,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         sendMessage(H.CLEAN_UP_CONTEXT, cci);
     }
 
-    @Override
-    public void handleFixedRotationAdjustments(@NonNull IBinder token,
-            @Nullable FixedRotationAdjustments fixedRotationAdjustments) {
-        handleFixedRotationAdjustments(token, fixedRotationAdjustments, null /* overrideConfig */);
-    }
-
     /**
      * Applies the rotation adjustments to override display information in resources belong to the
      * provided token. If the token is activity token, the adjustments also apply to application
@@ -3265,51 +3259,39 @@ public final class ActivityThread extends ClientTransactionHandler {
      * @param fixedRotationAdjustments The information to override the display adjustments of
      *                                 corresponding resources. If it is null, the exiting override
      *                                 will be cleared.
-     * @param overrideConfig The override configuration of activity. It is used to override
-     *                       application configuration. If it is non-null, it means the token is
-     *                       confirmed as activity token. Especially when launching new activity,
-     *                       {@link #mActivities} hasn't put the new token.
      */
-    private void handleFixedRotationAdjustments(@NonNull IBinder token,
-            @Nullable FixedRotationAdjustments fixedRotationAdjustments,
-            @Nullable Configuration overrideConfig) {
-        // The element of application configuration override is set only if the application
-        // adjustments are needed, because activity already has its own override configuration.
-        final Configuration[] appConfigOverride;
-        final Consumer<DisplayAdjustments> override;
-        if (fixedRotationAdjustments != null) {
-            appConfigOverride = new Configuration[1];
-            override = displayAdjustments -> {
-                displayAdjustments.setFixedRotationAdjustments(fixedRotationAdjustments);
-                if (appConfigOverride[0] != null) {
-                    displayAdjustments.getConfiguration().updateFrom(appConfigOverride[0]);
-                }
-            };
-        } else {
-            appConfigOverride = null;
-            override = null;
-        }
+    @Override
+    public void handleFixedRotationAdjustments(@NonNull IBinder token,
+            @Nullable FixedRotationAdjustments fixedRotationAdjustments) {
+        final Consumer<DisplayAdjustments> override = fixedRotationAdjustments != null
+                ? displayAdjustments -> displayAdjustments
+                        .setFixedRotationAdjustments(fixedRotationAdjustments)
+                : null;
         if (!mResourcesManager.overrideTokenDisplayAdjustments(token, override)) {
             // No resources are associated with the token.
             return;
         }
-        if (overrideConfig == null) {
-            final ActivityClientRecord r = mActivities.get(token);
-            if (r == null) {
-                // It is not an activity token. Nothing to do for application.
-                return;
-            }
-            overrideConfig = r.overrideConfig;
-        }
-        if (appConfigOverride != null) {
-            appConfigOverride[0] = overrideConfig;
+        if (mActivities.get(token) == null) {
+            // Nothing to do for application if it is not an activity token.
+            return;
         }
 
-        // Apply the last override to application resources for compatibility. Because the Resources
-        // of Display can be from application, e.g.
-        //    applicationContext.getSystemService(DisplayManager.class).getDisplay(displayId)
-        // and the deprecated usage:
-        //    applicationContext.getSystemService(WindowManager.class).getDefaultDisplay();
+        overrideApplicationDisplayAdjustments(token, override);
+    }
+
+    /**
+     * Applies the last override to application resources for compatibility. Because the Resources
+     * of Display can be from application, e.g.
+     *   applicationContext.getSystemService(DisplayManager.class).getDisplay(displayId)
+     * and the deprecated usage:
+     *   applicationContext.getSystemService(WindowManager.class).getDefaultDisplay();
+     *
+     * @param token The owner and target of the override.
+     * @param override The display adjustments override for application resources. If it is null,
+     *                 the override of the token will be removed and pop the last one to use.
+     */
+    private void overrideApplicationDisplayAdjustments(@NonNull IBinder token,
+            @Nullable Consumer<DisplayAdjustments> override) {
         final Consumer<DisplayAdjustments> appOverride;
         if (mActiveRotationAdjustments == null) {
             mActiveRotationAdjustments = new ArrayList<>(2);
@@ -3542,8 +3524,13 @@ public final class ActivityThread extends ClientTransactionHandler {
         // The rotation adjustments must be applied before creating the activity, so the activity
         // can get the adjusted display info during creation.
         if (r.mPendingFixedRotationAdjustments != null) {
-            handleFixedRotationAdjustments(r.token, r.mPendingFixedRotationAdjustments,
-                    r.overrideConfig);
+            // The adjustments should have been set by handleLaunchActivity, so the last one is the
+            // override for activity resources.
+            if (mActiveRotationAdjustments != null && !mActiveRotationAdjustments.isEmpty()) {
+                mResourcesManager.overrideTokenDisplayAdjustments(r.token,
+                        mActiveRotationAdjustments.get(
+                                mActiveRotationAdjustments.size() - 1).second);
+            }
             r.mPendingFixedRotationAdjustments = null;
         }
 
@@ -3580,6 +3567,13 @@ public final class ActivityThread extends ClientTransactionHandler {
         if (r.profilerInfo != null) {
             mProfiler.setProfiler(r.profilerInfo);
             mProfiler.startProfiling();
+        }
+
+        if (r.mPendingFixedRotationAdjustments != null) {
+            // The rotation adjustments must be applied before handling configuration, so process
+            // level display metrics can be adjusted.
+            overrideApplicationDisplayAdjustments(r.token, adjustments ->
+                    adjustments.setFixedRotationAdjustments(r.mPendingFixedRotationAdjustments));
         }
 
         // Make sure we are running with the most recent config.
@@ -5112,6 +5106,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 }
             }
             r.setState(ON_DESTROY);
+            mLastReportedWindowingMode.remove(r.activity.getActivityToken());
         }
         schedulePurgeIdler();
         // updatePendingActivityConfiguration() reads from mActivities to update
@@ -5776,7 +5771,15 @@ public final class ActivityThread extends ClientTransactionHandler {
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle configuration changed: "
                     + config);
 
-            mResourcesManager.applyConfigurationToResourcesLocked(config, compat);
+            final Resources appResources = mInitialApplication.getResources();
+            if (appResources.hasOverrideDisplayAdjustments()) {
+                // The value of Display#getRealSize will be adjusted by FixedRotationAdjustments,
+                // but Display#getSize refers to DisplayAdjustments#mConfiguration. So the rotated
+                // configuration also needs to set to the adjustments for consistency.
+                appResources.getDisplayAdjustments().getConfiguration().updateFrom(config);
+            }
+            mResourcesManager.applyConfigurationToResourcesLocked(config, compat,
+                    appResources.getDisplayAdjustments());
             updateLocaleListFromAppContext(mInitialApplication.getApplicationContext(),
                     mResourcesManager.getConfiguration().getLocales());
 
@@ -7389,7 +7392,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                 // We need to apply this change to the resources immediately, because upon returning
                 // the view hierarchy will be informed about it.
                 if (mResourcesManager.applyConfigurationToResourcesLocked(globalConfig,
-                        null /* compat */)) {
+                        null /* compat */,
+                        mInitialApplication.getResources().getDisplayAdjustments())) {
                     updateLocaleListFromAppContext(mInitialApplication.getApplicationContext(),
                             mResourcesManager.getConfiguration().getLocales());
 

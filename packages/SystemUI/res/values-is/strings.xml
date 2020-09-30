@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Halda áfram"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Hætta við"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Deila"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Eyða"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Hætt við skjáupptöku"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Skjáupptaka vistuð, ýttu til að skoða"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Skjáupptöku eytt"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Villa við að eyða skjáupptöku"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Ekki tókst að fá heimildir"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Villa við að hefja upptöku skjás"</string>
@@ -855,10 +853,10 @@
     <string name="right_keycode" msgid="2480715509844798438">"Lykiltákn til hægri"</string>
     <string name="left_icon" msgid="5036278531966897006">"Tákn til vinstri"</string>
     <string name="right_icon" msgid="1103955040645237425">"Tákn til hægri"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Haltu inni og dragðu til að bæta við reitum"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Haltu inni og dragðu til að bæta við flísum"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Haltu og dragðu til að endurraða flísum"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Dragðu hingað til að fjarlægja"</string>
-    <string name="drag_to_remove_disabled" msgid="933046987838658850">"Reitirnir mega ekki vera færri en <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>"</string>
+    <string name="drag_to_remove_disabled" msgid="933046987838658850">"Flísarnar mega ekki vera færri en <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Breyta"</string>
     <string name="tuner_time" msgid="2450785840990529997">"Tími"</string>
   <string-array name="clock_options">
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Efri 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Efri 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Neðri á öllum skjánum"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Staða <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Ýttu tvisvar til að breyta."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Ýttu tvisvar til að bæta við."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Færa <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Fjarlægja <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Bæta <xliff:g id="TILE_NAME">%1$s</xliff:g> við í stöðu <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Færa <xliff:g id="TILE_NAME">%1$s</xliff:g> í stöðu <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"fjarlægja flís"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"bæta flís við aftast"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Færa flís"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Bæta flís við"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Færa í <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Bæta við í stöðu <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Staða <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Flýtistillingaritill."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> tilkynning: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"Hugsanlega virkar forritið ekki ef skjánum er skipt upp."</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Fara á fyrra"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Breyta stærð"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Slökkt var á símanum vegna hita"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Síminn virkar núna sem skyldi"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Síminn virkar nú eins og venjulega.\nÝttu til að fá frekari upplýsingar"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Síminn varð of heitur og því var slökkt á honum til að kæla hann. Síminn virkar núna sem skyldi.\n\nSíminn getur orðið of heitur ef þú:\n	• Notar plássfrek forrit (t.d. leikja-, myndbands- eða leiðsagnarforrit\n	• Sækir eða hleður upp stórum skrám\n	• Notar símann í miklum hita"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Sjá varúðarskref"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Síminn er að hitna"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Sumir eiginleikar eru takmarkaðir þegar síminn kælir sig"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Sumir eiginleikar eru takmarkaðir meðan síminn kælir sig.\nÝttu til að fá frekari upplýsingar"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Síminn reynir sjálfkrafa að kæla sig. Þú getur enn notað símann en hann gæti verið hægvirkari.\n\nEftir að síminn hefur kælt sig niður virkar hann eðlilega."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Sjá varúðarskref"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Taktu hleðslutækið úr sambandi"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Upp kom vandamál varðandi hleðslu tækisins. Taktu straumbreytinn úr sambandi og farðu varlega því snúran gæti verið heit."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Sjá varúðarskref"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Stillingar"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Ég skil"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Vista SysUI-gögn"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> er að nota <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Forrit eru að nota <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" og "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"myndavél"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"staðsetning"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"hljóðnemi"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Slökkt á skynjurum"</string>
     <string name="device_services" msgid="1549944177856658705">"Tækjaþjónusta"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Enginn titill"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Hleður tillögum"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Margmiðlunarefni"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Fela núverandi lotu."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Fela"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Hunsa"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Halda áfram"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Stillingar"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Óvirkt, athugaðu forrit"</string>

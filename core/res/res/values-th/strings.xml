@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"กด เมนู เพื่อปลดล็อกหรือโทรฉุกเฉิน"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"กด เมนู เพื่อปลดล็อก"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"วาดรูปแบบเพื่อปลดล็อก"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"เหตุฉุกเฉิน"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"หมายเลขฉุกเฉิน"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"กลับสู่การโทร"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"ถูกต้อง!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"ลองอีกครั้ง"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"อัปเดตโดยผู้ดูแลระบบ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ลบโดยผู้ดูแลระบบ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ตกลง"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"โหมดประหยัดแบตเตอรี่จะดำเนินการดังต่อไปนี้เพื่อยืดอายุการใช้งานแบตเตอรี่\n\n•เปิดธีมมืด\n•ปิดหรือจำกัดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง และฟีเจอร์อื่นๆ อย่างเช่น “Ok Google”\n\n"<annotation id="url">"ดูข้อมูลเพิ่มเติม"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"โหมดประหยัดแบตเตอรี่จะดำเนินการดังต่อไปนี้เพื่อยืดอายุการใช้งานแบตเตอรี่\n\n•เปิดธีมมืด\n•ปิดหรือจำกัดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง และฟีเจอร์อื่นๆ อย่างเช่น “Ok Google”"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"โหมดประหยัดแบตเตอรี่จะดำเนินการดังต่อไปนี้เพื่อยืดอายุการใช้งานแบตเตอรี่\n\n• เปิดธีมมืด\n•ปิดหรือจำกัดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง และฟีเจอร์อื่นๆ อย่างเช่น “Ok Google”\n\n"<annotation id="url">"ดูข้อมูลเพิ่มเติม"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"โหมดประหยัดแบตเตอรี่จะดำเนินการดังต่อไปนี้เพื่อยืดอายุการใช้งานแบตเตอรี่\n\n• เปิดธีมมืด\n• ปิดหรือจำกัดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง และฟีเจอร์อื่นๆ อย่างเช่น \"Ok Google\""</string>
     <string name="data_saver_description" msgid="4995164271550590517">"เพื่อช่วยลดปริมาณการใช้อินเทอร์เน็ต โปรแกรมประหยัดอินเทอร์เน็ตจะช่วยป้องกันไม่ให้บางแอปส่งหรือรับข้อมูลโดยการใช้อินเทอร์เน็ตอยู่เบื้องหลัง แอปที่คุณกำลังใช้งานสามารถเข้าถึงอินเทอร์เน็ตได้ แต่อาจไม่บ่อยเท่าเดิม ตัวอย่างเช่น ภาพต่างๆ จะไม่แสดงจนกว่าคุณจะแตะที่ภาพเหล่านั้น"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"เปิดการประหยัดอินเทอร์เน็ตไหม"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"เปิด"</string>
@@ -2029,7 +2029,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> และอีก <xliff:g id="COUNT_3">%d</xliff:g> ไฟล์</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> และอีก <xliff:g id="COUNT_1">%d</xliff:g> ไฟล์</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ไม่มีบุคคลที่แนะนำให้แชร์ด้วย"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ไม่พบใครที่แนะนำให้แชร์ด้วย"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"รายชื่อแอป"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"แอปนี้ไม่ได้รับอนุญาตให้บันทึกเสียงแต่จะบันทึกเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"หน้าแรก"</string>

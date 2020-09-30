@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"అన్‌లాక్ చేయడానికి లేదా అత్యవసర కాల్ చేయడానికి మెను నొక్కండి."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"అన్‌లాక్ చేయడానికి మెను నొక్కండి."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"అన్‌లాక్ చేయడానికి నమూనాను గీయండి"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"అత్యవసరం"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"ఎమర్జెన్సీ కాల్"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"కాల్‌కు తిరిగి వెళ్లు"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"సరైనది!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"మళ్లీ ప్రయత్నించండి"</string>
@@ -980,9 +980,9 @@
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"delete"</string>
-    <string name="search_go" msgid="2141477624421347086">"వెతుకు"</string>
+    <string name="search_go" msgid="2141477624421347086">"సెర్చ్"</string>
     <string name="search_hint" msgid="455364685740251925">"వెతుకు..."</string>
-    <string name="searchview_description_search" msgid="1045552007537359343">"శోధించండి"</string>
+    <string name="searchview_description_search" msgid="1045552007537359343">"సెర్చ్"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"ప్రశ్నను శోధించండి"</string>
     <string name="searchview_description_clear" msgid="1989371719192982900">"ప్రశ్నను క్లియర్ చేయి"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"ప్రశ్నని సమర్పించండి"</string>
@@ -1398,7 +1398,7 @@
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"జూమ్ నియంత్రణ కోసం రెండుసార్లు నొక్కండి"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"విడ్జెట్‌ను జోడించడం సాధ్యపడలేదు."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"వెళ్లు"</string>
-    <string name="ime_action_search" msgid="4501435960587287668">"వెతుకు"</string>
+    <string name="ime_action_search" msgid="4501435960587287668">"సెర్చ్"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"పంపు"</string>
     <string name="ime_action_next" msgid="4169702997635728543">"తర్వాత"</string>
     <string name="ime_action_done" msgid="6299921014822891569">"పూర్తయింది"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"మీ నిర్వాహకులు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"మీ నిర్వాహకులు తొలగించారు"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"సరే"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్ వీటిని చేస్తుంది:\n\n•ముదురు రంగు రూపాన్ని ఆన్ చేస్తుంది\n•బ్యాక్‌గ్రౌండ్ యాక్టివిటీ, కొన్ని విజువల్ ఎఫెక్ట్‌లతో పాటు “Ok Google” వంటి ఇతర ఫీచర్‌లను ఆఫ్ చేస్తుంది లేదా పరిమితం చేస్తుంది\n\n"<annotation id="url">"మరింత తెలుసుకోండి"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్ వీటిని చేస్తుంది:\n\n•ముదురు రంగు రూపాన్ని ఆన్ చేస్తుంది\n•బ్యాక్‌గ్రౌండ్ యాక్టివిటీ, కొన్ని విజువల్ ఎఫెక్ట్‌లతో పాటు “Ok Google” వంటి ఇతర ఫీచర్‌లను ఆఫ్ చేస్తుంది లేదా పరిమితం చేస్తుంది"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్ వీటిని చేస్తుంది:\n\n• ముదురు రంగు రూపాన్ని ఆన్ చేస్తుంది\n•బ్యాక్‌గ్రౌండ్ యాక్టివిటీని, కొన్ని విజువల్ ఎఫెక్ట్‌లను, అలాగే “Ok Google” వంటి ఇతర ఫీచర్‌లను ఆఫ్ చేస్తుంది లేదా పరిమితం చేస్తుంది\n\n"<annotation id="url">"మరింత తెలుసుకోండి"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్ వీటిని చేస్తుంది:\n\n•ముదురు రంగు రూపాన్ని ఆన్ చేస్తుంది\n•బ్యాక్‌గ్రౌండ్ యాక్టివిటీని, కొన్ని విజువల్ ఎఫెక్ట్‌లను, అలాగే “Ok Google” వంటి ఇతర ఫీచర్‌లను ఆఫ్ చేస్తుంది లేదా పరిమితం చేస్తుంది"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"డేటా వినియోగాన్ని తగ్గించడంలో డేటా సేవర్ సహాయకరంగా ఉంటుంది. బ్యాక్‌గ్రౌండ్‌లో కొన్ని యాప్‌లు డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తోన్న యాప్‌, డేటాను యాక్సెస్ చేయగలదు. కానీ త‌క్కువ సార్లు మాత్ర‌మే అలా చేయవచ్చు. ఉదాహరణకు, మీరు నొక్కే వరకు ఫోటోలు ప్రదర్శించబడవు."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ఆన్ చేయి"</string>
@@ -1881,7 +1881,7 @@
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"సూచించినవి"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"అన్ని భాషలు"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"అన్ని ప్రాంతాలు"</string>
-    <string name="locale_search_menu" msgid="6258090710176422934">"వెతుకు"</string>
+    <string name="locale_search_menu" msgid="6258090710176422934">"సెర్చ్"</string>
     <string name="app_suspended_title" msgid="888873445010322650">"యాప్ అందుబాటులో లేదు"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ప్రస్తుతం అందుబాటులో లేదు. ఇది <xliff:g id="APP_NAME_1">%2$s</xliff:g> ద్వారా నిర్వహించబడుతుంది."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"మరింత తెలుసుకోండి"</string>

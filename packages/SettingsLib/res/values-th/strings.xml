@@ -143,7 +143,7 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"แอปพลิเคชันที่นำออก"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"แอปพลิเคชันและผู้ใช้ที่นำออก"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"การอัปเดตระบบ"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"ปล่อยสัญญาณผ่าน USB"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"เชื่อมต่อเน็ตผ่าน USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"ฮอตสปอตแบบพกพาได้"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"ปล่อยสัญญาณบลูทูธ"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"การปล่อยสัญญาณ"</string>

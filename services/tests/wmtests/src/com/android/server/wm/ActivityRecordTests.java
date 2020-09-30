@@ -20,6 +20,10 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
@@ -79,6 +83,7 @@ import android.app.servertransaction.PauseActivityItem;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -536,14 +541,14 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity = new ActivityBuilder(mService)
                 .setTask(mTask)
                 .setLaunchTaskBehind(true)
-                .setConfigChanges(CONFIG_ORIENTATION)
+                .setConfigChanges(CONFIG_ORIENTATION | CONFIG_SCREEN_LAYOUT)
                 .build();
         mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
 
         final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
         try {
             doReturn(false).when(stack).isTranslucent(any());
-            assertFalse(mStack.shouldBeVisible(null /* starting */));
+            assertTrue(mStack.shouldBeVisible(null /* starting */));
 
             mActivity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
                     mActivity.getConfiguration()));
@@ -1683,6 +1688,32 @@ public class ActivityRecordTests extends ActivityTestsBase {
         assertTrue(wpc.registeredForActivityConfigChanges());
         assertEquals(0, thirdActivity.getMergedOverrideConfiguration()
                 .diff(wpc.getRequestedOverrideConfiguration()));
+    }
+
+    @Test
+    public void testGetLockTaskLaunchMode() {
+        final ActivityOptions options = ActivityOptions.makeBasic().setLockTaskEnabled(true);
+        mActivity.info.lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_DEFAULT;
+        assertEquals(LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED,
+                ActivityRecord.getLockTaskLaunchMode(mActivity.info, options));
+
+        mActivity.info.lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_ALWAYS;
+        assertEquals(LOCK_TASK_LAUNCH_MODE_DEFAULT,
+                ActivityRecord.getLockTaskLaunchMode(mActivity.info, null /*options*/));
+
+        mActivity.info.lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_NEVER;
+        assertEquals(LOCK_TASK_LAUNCH_MODE_DEFAULT,
+                ActivityRecord.getLockTaskLaunchMode(mActivity.info, null /*options*/));
+
+        mActivity.info.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
+        mActivity.info.lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_ALWAYS;
+        assertEquals(LOCK_TASK_LAUNCH_MODE_ALWAYS,
+                ActivityRecord.getLockTaskLaunchMode(mActivity.info, null /*options*/));
+
+        mActivity.info.lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_NEVER;
+        assertEquals(LOCK_TASK_LAUNCH_MODE_NEVER,
+                ActivityRecord.getLockTaskLaunchMode(mActivity.info, null /*options*/));
+
     }
 
     /**

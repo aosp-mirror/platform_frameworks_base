@@ -403,6 +403,31 @@ public class TaskRecordTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testComputeConfigResourceLayoutOverrides() {
+        final Rect fullScreenBounds = new Rect(0, 0, 1000, 2500);
+        TestDisplayContent display = new TestDisplayContent.Builder(
+                mService, fullScreenBounds.width(), fullScreenBounds.height()).build();
+        final Task task = new TaskBuilder(mSupervisor).setDisplay(display).build();
+        final Configuration inOutConfig = new Configuration();
+        final Configuration parentConfig = new Configuration();
+        final Rect nonLongBounds = new Rect(0, 0, 1000, 1250);
+        parentConfig.windowConfiguration.setBounds(fullScreenBounds);
+        parentConfig.windowConfiguration.setAppBounds(fullScreenBounds);
+        parentConfig.densityDpi = 400;
+        parentConfig.screenHeightDp = (fullScreenBounds.bottom * 160) / parentConfig.densityDpi;
+        parentConfig.screenWidthDp = (fullScreenBounds.right * 160) / parentConfig.densityDpi;
+        parentConfig.windowConfiguration.setRotation(ROTATION_0);
+
+        // Set BOTH screenW/H to an override value
+        inOutConfig.screenWidthDp = nonLongBounds.width() * 160 / parentConfig.densityDpi;
+        inOutConfig.screenHeightDp = nonLongBounds.height() * 160 / parentConfig.densityDpi;
+        task.computeConfigResourceOverrides(inOutConfig, parentConfig);
+
+        // screenLayout should honor override when both screenW/H are set.
+        assertTrue((inOutConfig.screenLayout & Configuration.SCREENLAYOUT_LONG_NO) != 0);
+    }
+
+    @Test
     public void testComputeNestedConfigResourceOverrides() {
         final Task task = new TaskBuilder(mSupervisor).build();
         assertTrue(task.getResolvedOverrideBounds().isEmpty());

@@ -34,6 +34,7 @@ package android {
   public static final class R.bool {
     field public static final int config_assistantOnTopOfDream = 17891333; // 0x1110005
     field public static final int config_perDisplayFocusEnabled = 17891332; // 0x1110004
+    field public static final int config_remoteInsetsControllerControlsSystemBars = 17891334; // 0x1110006
   }
 
   public static final class R.string {

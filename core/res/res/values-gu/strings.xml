@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"અનલૉક કરવા માટે અથવા કટોકટીનો કૉલ કરવા માટે મેનૂ દબાવો."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"અનલૉક કરવા માટે મેનૂ દબાવો."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"અનલૉક કરવા માટે પૅટર્ન દોરો."</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ઇમર્જન્સી"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"ઇમર્જન્સી કૉલ"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"કૉલ પર પાછા ફરો"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"સાચું!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"ફરી પ્રયાસ કરો"</string>
@@ -982,7 +982,7 @@
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"ડિલીટ કરો"</string>
     <string name="search_go" msgid="2141477624421347086">"શોધો"</string>
     <string name="search_hint" msgid="455364685740251925">"શોધો…"</string>
-    <string name="searchview_description_search" msgid="1045552007537359343">"શોધ"</string>
+    <string name="searchview_description_search" msgid="1045552007537359343">"શોધો"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"શોધ ક્વેરી"</string>
     <string name="searchview_description_clear" msgid="1989371719192982900">"ક્વેરી સાફ કરો"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"ક્વેરી સબમિટ કરો"</string>
@@ -1135,7 +1135,7 @@
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"ઍક્સેસ આપો"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"આનાથી સંપાદિત કરો"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$s સાથે સંપાદિત કરો"</string>
-    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"સંપાદિત કરો"</string>
+    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"ફેરફાર કરો"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"શેર કરો"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"%1$s સાથે શેર કરો"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"શેર કરો"</string>
@@ -1221,7 +1221,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"સાઇલેન્ટ રિંગટોન સેટ કરી"</string>
     <string name="volume_call" msgid="7625321655265747433">"ઇન-કૉલ વૉલ્યૂમ"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"બ્લૂટૂથ ઇન-કૉલ વૉલ્યૂમ"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"એલાર્મ વૉલ્યૂમ"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"અલાર્મ વૉલ્યૂમ"</string>
     <string name="volume_notification" msgid="6864412249031660057">"સૂચના વૉલ્યૂમ"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"વૉલ્યૂમ"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"બ્લૂટૂથ વૉલ્યૂમ"</string>
@@ -1513,7 +1513,7 @@
     <string name="storage_usb_drive" msgid="448030813201444573">"USB ડ્રાઇવ"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ડ્રાઇવ"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB સ્ટોરેજ"</string>
-    <string name="extract_edit_menu_button" msgid="63954536535863040">"સંપાદિત કરો"</string>
+    <string name="extract_edit_menu_button" msgid="63954536535863040">"ફેરફાર કરો"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"ડેટા ચેતવણી"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"તમે <xliff:g id="APP">%s</xliff:g> ડેટા વાપર્યો છે"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"મોબાઇલ ડેટાની મર્યાદા આવી ગઈ"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ કરવામાં આવેલ છે"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખવામાં આવેલ છે"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ઓકે"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n\n•ઘેરી થીમ ચાલુ કરે છે\n•બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “ઓકે Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે\n\n"<annotation id="url">"વધુ જાણો"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n\n•ઘેરી થીમ ચાલુ કરે છે\n•બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “ઓકે Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n\n• ઘેરી થીમ ચાલુ કરે છે\n• બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “ઓકે Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે\n\n"<annotation id="url">"વધુ જાણો"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n\n• ઘેરી થીમ ચાલુ કરે છે\n• બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “ઓકે Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપને બૅકગ્રાઉન્ડમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેને ટૅપ નહીં કરો."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ડેટા સેવર ચાલુ કરીએ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ચાલુ કરો"</string>

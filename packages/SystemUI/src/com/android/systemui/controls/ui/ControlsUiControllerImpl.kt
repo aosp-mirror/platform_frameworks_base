@@ -44,6 +44,7 @@ import android.widget.Space
 import android.widget.TextView
 import com.android.systemui.R
 import com.android.systemui.controls.ControlsServiceInfo
+import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.StructureInfo
@@ -75,7 +76,8 @@ class ControlsUiControllerImpl @Inject constructor (
     @Main val sharedPreferences: SharedPreferences,
     val controlActionCoordinator: ControlActionCoordinator,
     private val activityStarter: ActivityStarter,
-    private val shadeController: ShadeController
+    private val shadeController: ShadeController,
+    private val iconCache: CustomIconCache
 ) : ControlsUiController {
 
     companion object {
@@ -102,6 +104,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private var hidden = true
     private lateinit var dismissGlobalActions: Runnable
     private val popupThemedContext = ContextThemeWrapper(context, R.style.Control_ListPopupWindow)
+    private var retainCache = false
 
     private val collator = Collator.getInstance(context.resources.configuration.locales[0])
     private val localeComparator = compareBy<SelectionItem, CharSequence>(collator) {
@@ -147,6 +150,7 @@ class ControlsUiControllerImpl @Inject constructor (
         this.parent = parent
         this.dismissGlobalActions = dismissGlobalActions
         hidden = false
+        retainCache = false
 
         allStructures = controlsController.get().getFavorites()
         selectedStructure = loadPreference(allStructures)
@@ -233,6 +237,8 @@ class ControlsUiControllerImpl @Inject constructor (
         }
         putIntentExtras(i, si)
         startActivity(context, i)
+
+        retainCache = true
     }
 
     private fun putIntentExtras(intent: Intent, si: StructureInfo) {
@@ -495,13 +501,14 @@ class ControlsUiControllerImpl @Inject constructor (
 
         controlsListingController.get().removeCallback(listingCallback)
 
-        RenderInfo.clearCache()
+        if (!retainCache) RenderInfo.clearCache()
     }
 
     override fun onRefreshState(componentName: ComponentName, controls: List<Control>) {
         controls.forEach { c ->
             controlsById.get(ControlKey(componentName, c.getControlId()))?.let {
                 Log.d(ControlsUiController.TAG, "onRefreshState() for id: " + c.getControlId())
+                iconCache.store(componentName, c.controlId, c.customIcon)
                 val cws = ControlWithState(componentName, it.ci, c)
                 val key = ControlKey(componentName, c.getControlId())
                 controlsById.put(key, cws)

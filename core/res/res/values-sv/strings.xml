@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Tryck på Menu för att låsa upp eller ringa nödsamtal."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Tryck på Menu för att låsa upp."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Rita grafiskt lösenord för att låsa upp"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Nödsamtal"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Nödsamtal"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Tillbaka till samtal"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Korrekt!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Försök igen"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administratören uppdaterade paketet"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administratören raderade paketet"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Batterisparläget förlänger batteritiden genom att:\n\n• aktivera mörkt tema\n• inaktivera eller begränsa aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”\n\n"<annotation id="url">"Läs mer"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Batterisparläget förlänger batteritiden genom att:\n\n• aktivera mörkt tema\n• inaktivera eller begränsa aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Batterisparläget förlänger batteritiden genom att\n\n• aktivera mörkt tema\n• inaktivera eller begränsa aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”\n\n"<annotation id="url">"Läs mer"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Batterisparläget förlänger batteritiden genom att\n\n• aktivera Mörkt tema\n• inaktivera eller begränsa aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Med databesparing kan du minska dataanvändningen genom att hindra en del appar från att skicka eller ta emot data i bakgrunden. Appar som du använder kan komma åt data, men det sker kanske inte lika ofta. Detta innebär t.ex. att bilder inte visas förrän du trycker på dem."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vill du aktivera Databesparing?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivera"</string>
@@ -1829,7 +1829,7 @@
       <item quantity="other">I %d tim</item>
       <item quantity="one">I en 1 tim</item>
     </plurals>
-    <string name="zen_mode_until" msgid="2250286190237669079">"Till kl. <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_until" msgid="2250286190237669079">"Till <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Till <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (nästa alarm)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Tills du stänger av"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Tills du inaktiverar Stör ej"</string>

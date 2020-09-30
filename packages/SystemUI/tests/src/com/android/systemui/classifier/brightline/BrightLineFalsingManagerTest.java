@@ -17,6 +17,7 @@
 package com.android.systemui.classifier.brightline;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
@@ -27,7 +28,6 @@ import android.util.DisplayMetrics;
 
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerFake;
 import com.android.systemui.statusbar.StatusBarState;
@@ -37,6 +37,8 @@ import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.sensors.ThresholdSensor;
+import com.android.systemui.utils.leaks.FakeBatteryController;
+import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +49,7 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class BrightLineFalsingManagerTest extends SysuiTestCase {
+public class BrightLineFalsingManagerTest extends LeakCheckedTest {
 
 
     @Mock
@@ -55,23 +57,26 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
     @Mock
     private ProximitySensor mProximitySensor;
     private SysuiStatusBarStateController mStatusBarStateController;
+    private FalsingDataProvider mFalsingDataProvider;
+    private FakeBatteryController mFakeBatteryController;
 
     private BrightLineFalsingManager mFalsingManager;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mFakeBatteryController = new FakeBatteryController(getLeakCheck());
         DisplayMetrics dm = new DisplayMetrics();
         dm.xdpi = 100;
         dm.ydpi = 100;
         dm.widthPixels = 100;
         dm.heightPixels = 100;
-        FalsingDataProvider falsingDataProvider = new FalsingDataProvider(dm);
+        mFalsingDataProvider = new FalsingDataProvider(dm, mFakeBatteryController);
         DeviceConfigProxy deviceConfigProxy = new DeviceConfigProxyFake();
         DockManager dockManager = new DockManagerFake();
         mStatusBarStateController = new StatusBarStateControllerImpl(new UiEventLoggerFake());
         mStatusBarStateController.setState(StatusBarState.KEYGUARD);
-        mFalsingManager = new BrightLineFalsingManager(falsingDataProvider,
+        mFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider,
                 mKeyguardUpdateMonitor, mProximitySensor, deviceConfigProxy, dockManager,
                 mStatusBarStateController);
     }
@@ -80,6 +85,13 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
     public void testRegisterSensor() {
         mFalsingManager.onScreenTurningOn();
         verify(mProximitySensor).register(any(ThresholdSensor.Listener.class));
+    }
+
+    @Test
+    public void testNoProximityWhenWirelessCharging() {
+        mFakeBatteryController.setWirelessCharging(true);
+        mFalsingManager.onScreenTurningOn();
+        verify(mProximitySensor, never()).register(any(ThresholdSensor.Listener.class));
     }
 
     @Test

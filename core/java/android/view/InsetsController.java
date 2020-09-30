@@ -618,16 +618,20 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             return false;
         }
         if (DEBUG) Log.d(TAG, "onStateChanged: " + state);
-        updateState(state);
-
-        boolean localStateChanged = !mState.equals(mLastDispatchedState,
-                true /* excludingCaptionInsets */, true /* excludeInvisibleIme */);
         mLastDispatchedState.set(state, true /* copySources */);
 
+        final InsetsState lastState = new InsetsState(mState, true /* copySources */);
+        updateState(state);
         applyLocalVisibilityOverride();
-        if (localStateChanged) {
-            if (DEBUG) Log.d(TAG, "onStateChanged, notifyInsetsChanged, send state to WM: " + mState);
+
+        if (!mState.equals(lastState, true /* excludingCaptionInsets */,
+                true /* excludeInvisibleIme */)) {
+            if (DEBUG) Log.d(TAG, "onStateChanged, notifyInsetsChanged");
             mHost.notifyInsetsChanged();
+        }
+        if (!mState.equals(mLastDispatchedState, true /* excludingCaptionInsets */,
+                true /* excludeInvisibleIme */)) {
+            if (DEBUG) Log.d(TAG, "onStateChanged, send state to WM: " + mState);
             updateRequestedState();
         }
         return true;

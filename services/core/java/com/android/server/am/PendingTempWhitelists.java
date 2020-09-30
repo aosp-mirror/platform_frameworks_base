@@ -32,13 +32,13 @@ final class PendingTempWhitelists {
 
     void put(int uid, ActivityManagerService.PendingTempWhitelist value) {
         mPendingTempWhitelist.put(uid, value);
-        mService.mAtmInternal.onUidAddedToPendingTempWhitelist(uid, value.tag);
+        mService.mAtmInternal.onUidAddedToPendingTempAllowlist(uid, value.tag);
     }
 
     void removeAt(int index) {
         final int uid = mPendingTempWhitelist.keyAt(index);
         mPendingTempWhitelist.removeAt(index);
-        mService.mAtmInternal.onUidRemovedFromPendingTempWhitelist(uid);
+        mService.mAtmInternal.onUidRemovedFromPendingTempAllowlist(uid);
     }
 
     ActivityManagerService.PendingTempWhitelist get(int uid) {

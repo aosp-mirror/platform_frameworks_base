@@ -50,6 +50,7 @@ java_library_static {
         "android.test.runner",
         "junit",
     ],
+    java_version: "1.8",
 }
 
 java_library_static {

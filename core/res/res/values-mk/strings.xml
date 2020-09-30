@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Притисни „Мени“ да се отклучи или да направи итен повик."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Притиснете „Мени“ за да се отклучи."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Употребете ја шемата за да се отклучи"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Итен случај"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Итен повик"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Врати се на повик"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Точно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Обидете се повторно"</string>
@@ -1122,7 +1122,7 @@
     <string name="capital_off" msgid="7443704171014626777">"ИСКЛУЧЕНО"</string>
     <string name="checked" msgid="9179896827054513119">"штиклирано"</string>
     <string name="not_checked" msgid="7972320087569023342">"не е штиклирано"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"Заврши дејство со"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"Активирај со"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Остварете го дејството со %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Заврши го дејството"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Отвори со"</string>
@@ -1773,7 +1773,7 @@
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Обиди се повторно подоцна"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Се прикажува на цел екран"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"За да излезете, повлечете одозгора надолу."</string>
-    <string name="immersive_cling_positive" msgid="7047498036346489883">"Разбрав"</string>
+    <string name="immersive_cling_positive" msgid="7047498036346489883">"Сфатив"</string>
     <string name="done_label" msgid="7283767013231718521">"Готово"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Приказ на часови во кружно движење"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Приказ на минути во кружно движење"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Избришано од администраторот"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Во ред"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"За да го продолжи траењето на батеријата, „Штедачот на батерија“:\n\n•вклучува темна тема;\n•исклучува или ограничува активност во заднина, некои визуелни ефекти и други функции како „Ok Google“.\n\n"<annotation id="url">"Дознајте повеќе"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"За да го продолжи траењето на батеријата, „Штедачот на батерија“:\n\n•вклучува темна тема;\n•исклучува или ограничува активност во заднина, некои визуелни ефекти и други функции како „Ok Google“."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"За да го продолжи траењето на батеријата, „Штедачот на батерија“:\n\n• вклучува темна тема\n• исклучува или ограничува активност во заднина, некои визуелни ефекти и други функции како „Hey Google“\n\n"<annotation id="url">"Дознајте повеќе"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"За да го продолжи траењето на батеријата, „Штедачот на батерија“:\n\n• вклучува темна тема\n• исклучува или ограничува активност во заднина, некои визуелни ефекти и други функции како „Hey Google“"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Одредена апликација што ја користите ќе може да користи интернет, но можеби тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажуваат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Да се вклучи „Штедач на интернет“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Вклучи"</string>
