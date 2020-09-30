@@ -31,8 +31,8 @@
 #include <SkPath.h>
 #include <SkPathMeasure.h>
 #include <SkRect.h>
+#include <SkShader.h>
 #include <SkSurface.h>
-#include <shader/Shader.h>
 
 #include <cutils/compiler.h>
 #include <stddef.h>
@@ -227,20 +227,20 @@ public:
             strokeGradient = prop.strokeGradient;
             onPropertyChanged();
         }
-        void setFillGradient(Shader* gradient) {
+        void setFillGradient(SkShader* gradient) {
             if (fillGradient.get() != gradient) {
                 fillGradient = sk_ref_sp(gradient);
                 onPropertyChanged();
             }
         }
-        void setStrokeGradient(Shader* gradient) {
+        void setStrokeGradient(SkShader* gradient) {
             if (strokeGradient.get() != gradient) {
                 strokeGradient = sk_ref_sp(gradient);
                 onPropertyChanged();
             }
         }
-        Shader* getFillGradient() const { return fillGradient.get(); }
-        Shader* getStrokeGradient() const { return strokeGradient.get(); }
+        SkShader* getFillGradient() const { return fillGradient.get(); }
+        SkShader* getStrokeGradient() const { return strokeGradient.get(); }
         float getStrokeWidth() const { return mPrimitiveFields.strokeWidth; }
         void setStrokeWidth(float strokeWidth) {
             VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(strokeWidth, strokeWidth);
@@ -320,8 +320,8 @@ public:
             count,
         };
         PrimitiveFields mPrimitiveFields;
-        sk_sp<Shader> fillGradient;
-        sk_sp<Shader> strokeGradient;
+        sk_sp<SkShader> fillGradient;
+        sk_sp<SkShader> strokeGradient;
     };
 
     // Called from UI thread

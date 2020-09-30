@@ -17,7 +17,6 @@
 #include "TestSceneBase.h"
 
 #include <SkGradientShader.h>
-#include <shader/LinearGradientShader.h>
 
 class SimpleGradientAnimation;
 
@@ -56,24 +55,9 @@ private:
                     // overdraw several times to emphasize shader cost
                     for (int i = 0; i < 10; i++) {
                         // use i%2 start position to pick 2 color combo with black in it
-                        std::vector<SkColor4f> vColors(2);
-                        vColors[0] = ((i % 2) == 0) ?
-                                SkColor4f::FromColor(Color::Transparent) :
-                                SkColor4f::FromColor(Color::Black);
-                        vColors[1] = (((i + 1) % 2) == 0) ?
-                                SkColor4f::FromColor(Color::Black) :
-                                SkColor4f::FromColor(Color::Cyan_500);
-
-                        sk_sp<LinearGradientShader> gradient = sk_make_sp<LinearGradientShader>(
-                                    pts,
-                                    vColors,
-                                    SkColorSpace::MakeSRGB(),
-                                    pos,
-                                    SkTileMode::kClamp,
-                                    0,
-                                    nullptr
-                                );
-                        paint.setShader(gradient);
+                        SkColor colors[3] = {Color::Transparent, Color::Black, Color::Cyan_500};
+                        paint.setShader(SkGradientShader::MakeLinear(pts, colors + (i % 2), pos, 2,
+                                                                     SkTileMode::kClamp));
                         canvas.drawRect(i, i, width, height, paint);
                     }
                 });
