@@ -21,6 +21,7 @@ import com.android.server.location.LocationRequestStatistics;
 public class TestInjector implements Injector {
 
     private final FakeUserInfoHelper mUserInfoHelper;
+    private final FakeAlarmHelper mAlarmHelper;
     private final FakeAppOpsHelper mAppOpsHelper;
     private final FakeLocationPermissionsHelper mLocationPermissionsHelper;
     private final FakeSettingsHelper mSettingsHelper;
@@ -33,6 +34,7 @@ public class TestInjector implements Injector {
 
     public TestInjector() {
         mUserInfoHelper = new FakeUserInfoHelper();
+        mAlarmHelper = new FakeAlarmHelper();
         mAppOpsHelper = new FakeAppOpsHelper();
         mLocationPermissionsHelper = new FakeLocationPermissionsHelper(mAppOpsHelper);
         mSettingsHelper = new FakeSettingsHelper();
@@ -47,6 +49,11 @@ public class TestInjector implements Injector {
     @Override
     public FakeUserInfoHelper getUserInfoHelper() {
         return mUserInfoHelper;
+    }
+
+    @Override
+    public FakeAlarmHelper getAlarmHelper() {
+        return mAlarmHelper;
     }
 
     @Override

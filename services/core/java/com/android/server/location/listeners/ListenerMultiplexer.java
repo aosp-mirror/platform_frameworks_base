@@ -57,6 +57,8 @@ import java.util.function.Predicate;
  * <li>{@link #onRegister()}</li>
  * <li>{@link ListenerRegistration#onRegister(Object)}</li>
  * <li>{@link #onRegistrationAdded(Object, ListenerRegistration)}</li>
+ * <li>{@link #onRegistrationReplaced(Object, ListenerRegistration, ListenerRegistration)} (only
+ * invoked if this registration is replacing a prior registration)</li>
  * <li>{@link #onActive()}</li>
  * <li>{@link ListenerRegistration#onActive()}</li>
  * <li>{@link ListenerRegistration#onInactive()}</li>
@@ -183,6 +185,17 @@ public abstract class ListenerMultiplexer<TKey, TListener,
     protected void onRegistrationAdded(@NonNull TKey key, @NonNull TRegistration registration) {}
 
     /**
+     * Invoked instead of {@link #onRegistrationAdded(Object, ListenerRegistration)} if a
+     * registration is replacing an old registration. The old registration will have already been
+     * unregistered. Invoked while holding the multiplexer's internal lock. The default behavior is
+     * simply to call into {@link #onRegistrationAdded(Object, ListenerRegistration)}.
+     */
+    protected void onRegistrationReplaced(@NonNull TKey key, @NonNull TRegistration oldRegistration,
+            @NonNull TRegistration newRegistration) {
+        onRegistrationAdded(key, newRegistration);
+    }
+
+    /**
      * Invoked when a registration is removed. Invoked while holding the multiplexer's internal
      * lock.
      */
@@ -227,9 +240,10 @@ public abstract class ListenerMultiplexer<TKey, TListener,
 
                 boolean wasEmpty = mRegistrations.isEmpty();
 
+                TRegistration oldRegistration = null;
                 int index = mRegistrations.indexOfKey(key);
                 if (index >= 0) {
-                    removeRegistration(index, false);
+                    oldRegistration = removeRegistration(index, false);
                     mRegistrations.setValueAt(index, registration);
                 } else {
                     mRegistrations.put(key, registration);
@@ -239,7 +253,11 @@ public abstract class ListenerMultiplexer<TKey, TListener,
                     onRegister();
                 }
                 registration.onRegister(key);
-                onRegistrationAdded(key, registration);
+                if (oldRegistration == null) {
+                    onRegistrationAdded(key, registration);
+                } else {
+                    onRegistrationReplaced(key, oldRegistration, registration);
+                }
                 onRegistrationActiveChanged(registration);
             }
         }
@@ -320,7 +338,7 @@ public abstract class ListenerMultiplexer<TKey, TListener,
     }
 
     @GuardedBy("mRegistrations")
-    private void removeRegistration(int index, boolean removeEntry) {
+    private TRegistration removeRegistration(int index, boolean removeEntry) {
         if (Build.IS_DEBUGGABLE) {
             Preconditions.checkState(Thread.holdsLock(mRegistrations));
         }
@@ -347,6 +365,8 @@ public abstract class ListenerMultiplexer<TKey, TListener,
                 }
             }
         }
+
+        return registration;
     }
 
     /**

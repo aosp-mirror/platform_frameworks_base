@@ -21,8 +21,6 @@ import static android.location.LocationManager.NETWORK_PROVIDER;
 
 import static androidx.test.ext.truth.location.LocationSubject.assertThat;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import android.content.Context;
 import android.location.Criteria;
 import android.location.Location;

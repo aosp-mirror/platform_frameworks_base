@@ -23,10 +23,10 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.location.LocationManager.FUSED_PROVIDER;
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
+import static android.location.LocationRequest.LOW_POWER_EXCEPTIONS;
 
 import static com.android.server.location.LocationPermissions.PERMISSION_COARSE;
 import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
-import static com.android.server.location.LocationProviderManager.FASTEST_COARSE_INTERVAL_MS;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
@@ -36,6 +36,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
+import android.app.compat.CompatChanges;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Criteria;
@@ -82,12 +83,12 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.location.LocationPermissions.PermissionLevel;
 import com.android.server.location.LocationRequestStatistics.PackageProviderKey;
 import com.android.server.location.LocationRequestStatistics.PackageStatistics;
 import com.android.server.location.geofence.GeofenceManager;
 import com.android.server.location.geofence.GeofenceProxy;
 import com.android.server.location.gnss.GnssManagerService;
+import com.android.server.location.util.AlarmHelper;
 import com.android.server.location.util.AppForegroundHelper;
 import com.android.server.location.util.AppOpsHelper;
 import com.android.server.location.util.Injector;
@@ -97,6 +98,7 @@ import com.android.server.location.util.LocationPowerSaveModeHelper;
 import com.android.server.location.util.LocationUsageLogger;
 import com.android.server.location.util.ScreenInteractiveHelper;
 import com.android.server.location.util.SettingsHelper;
+import com.android.server.location.util.SystemAlarmHelper;
 import com.android.server.location.util.SystemAppForegroundHelper;
 import com.android.server.location.util.SystemAppOpsHelper;
 import com.android.server.location.util.SystemLocationPermissionsHelper;
@@ -569,7 +571,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                     new IllegalArgumentException());
         }
 
-        request = validateAndSanitizeLocationRequest(request, permissionLevel);
+        request = validateLocationRequest(request);
 
         LocationProviderManager manager = getLocationProviderManager(provider);
         Preconditions.checkArgument(manager != null,
@@ -591,7 +593,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // clients in the system process must have an attribution tag set
         Preconditions.checkArgument(identity.getPid() != Process.myPid() || attributionTag != null);
 
-        request = validateAndSanitizeLocationRequest(request, permissionLevel);
+        request = validateLocationRequest(request);
 
         LocationProviderManager manager = getLocationProviderManager(provider);
         Preconditions.checkArgument(manager != null,
@@ -600,8 +602,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         manager.registerLocationRequest(request, identity, permissionLevel, pendingIntent);
     }
 
-    private LocationRequest validateAndSanitizeLocationRequest(LocationRequest request,
-            @PermissionLevel int permissionLevel) {
+    private LocationRequest validateLocationRequest(LocationRequest request) {
         WorkSource workSource = request.getWorkSource();
         if (workSource != null && !workSource.isEmpty()) {
             mContext.enforceCallingOrSelfPermission(
@@ -620,26 +621,20 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         LocationRequest.Builder sanitized = new LocationRequest.Builder(request);
-        if (mContext.checkCallingPermission(permission.LOCATION_HARDWARE) != PERMISSION_GRANTED) {
-            sanitized.setLowPower(false);
-        }
-        if (permissionLevel < PERMISSION_FINE) {
-            switch (request.getQuality()) {
-                case LocationRequest.ACCURACY_FINE:
-                    sanitized.setQuality(LocationRequest.ACCURACY_BLOCK);
-                    break;
-                case LocationRequest.POWER_HIGH:
-                    sanitized.setQuality(LocationRequest.POWER_LOW);
-                    break;
-            }
 
-            if (request.getIntervalMillis() < FASTEST_COARSE_INTERVAL_MS) {
-                sanitized.setIntervalMillis(FASTEST_COARSE_INTERVAL_MS);
+        if (CompatChanges.isChangeEnabled(LOW_POWER_EXCEPTIONS, Binder.getCallingUid())) {
+            if (request.isLowPower()) {
+                mContext.enforceCallingOrSelfPermission(
+                        permission.LOCATION_HARDWARE,
+                        "low power request requires " + permission.LOCATION_HARDWARE);
             }
-            if (request.getMinUpdateIntervalMillis() < FASTEST_COARSE_INTERVAL_MS) {
-                sanitized.clearMinUpdateIntervalMillis();
+        } else {
+            if (mContext.checkCallingPermission(permission.LOCATION_HARDWARE)
+                    != PERMISSION_GRANTED) {
+                sanitized.setLowPower(false);
             }
         }
+
         if (request.getWorkSource() != null) {
             if (request.getWorkSource().isEmpty()) {
                 sanitized.setWorkSource(null);
@@ -716,7 +711,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // clients in the system process must have an attribution tag set
         Preconditions.checkState(identity.getPid() != Process.myPid() || attributionTag != null);
 
-        request = validateAndSanitizeLocationRequest(request, permissionLevel);
+        request = validateLocationRequest(request);
 
         LocationProviderManager manager = getLocationProviderManager(provider);
         Preconditions.checkArgument(manager != null,
@@ -735,7 +730,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             // use fine permission level to avoid creating unnecessary coarse locations
             Location location = gpsManager.getLastLocationUnsafe(UserHandle.USER_ALL,
-                    PERMISSION_FINE, false);
+                    PERMISSION_FINE, false, Long.MAX_VALUE);
             if (location == null) {
                 return null;
             }
@@ -1237,6 +1232,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private static class SystemInjector implements Injector {
 
         private final UserInfoHelper mUserInfoHelper;
+        private final AlarmHelper mAlarmHelper;
         private final SystemAppOpsHelper mAppOpsHelper;
         private final SystemLocationPermissionsHelper mLocationPermissionsHelper;
         private final SystemSettingsHelper mSettingsHelper;
@@ -1249,6 +1245,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         SystemInjector(Context context, UserInfoHelper userInfoHelper) {
             mUserInfoHelper = userInfoHelper;
+            mAlarmHelper = new SystemAlarmHelper(context);
             mAppOpsHelper = new SystemAppOpsHelper(context);
             mLocationPermissionsHelper = new SystemLocationPermissionsHelper(context,
                     mAppOpsHelper);
@@ -1273,6 +1270,11 @@ public class LocationManagerService extends ILocationManager.Stub {
         @Override
         public UserInfoHelper getUserInfoHelper() {
             return mUserInfoHelper;
+        }
+
+        @Override
+        public AlarmHelper getAlarmHelper() {
+            return mAlarmHelper;
         }
 
         @Override
