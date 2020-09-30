@@ -785,6 +785,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             throw new IllegalArgumentException("Unknown permission: " + permName);
         }
 
+        if (bp.isInstallerExemptIgnored()) {
+            flagValues &= ~FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
+        }
+
         final UidPermissionState uidState = getUidState(pkg, userId);
         if (uidState == null) {
             Slog.e(TAG, "Missing permissions state for " + packageName + " and user " + userId);

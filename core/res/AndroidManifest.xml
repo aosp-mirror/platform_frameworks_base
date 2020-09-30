@@ -1254,7 +1254,7 @@
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_recordBackgroundAudio"
         android:description="@string/permdesc_recordBackgroundAudio"
-        android:permissionFlags="hardRestricted"
+        android:permissionFlags="hardRestricted|installerExemptIgnored"
         android:protectionLevel="dangerous" />
 
     <!-- ====================================================================== -->
@@ -1334,7 +1334,7 @@
             android:permissionGroup="android.permission-group.UNDEFINED"
             android:label="@string/permlab_backgroundCamera"
             android:description="@string/permdesc_backgroundCamera"
-            android:permissionFlags="hardRestricted"
+            android:permissionFlags="hardRestricted|installerExemptIgnored"
             android:protectionLevel="dangerous" />
 
     <!-- @SystemApi Required in addition to android.permission.CAMERA to be able to access
