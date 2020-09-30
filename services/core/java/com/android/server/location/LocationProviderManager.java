@@ -1004,7 +1004,7 @@ class LocationProviderManager extends
 
                 // if the provider is currently disabled fail immediately
                 int userId = getIdentity().getUserId();
-                if (!getRequest().isLocationSettingsIgnored() && !isEnabled(userId)) {
+                if (!isEnabled(userId)) {
                     deliverLocation(null);
                 }
             }
@@ -1165,7 +1165,7 @@ class LocationProviderManager extends
 
     protected final LocationManagerInternal mLocationManagerInternal;
     protected final SettingsHelper mSettingsHelper;
-    protected final UserInfoHelper mUserInfoHelper;
+    protected final UserInfoHelper mUserHelper;
     protected final AlarmHelper mAlarmHelper;
     protected final AppOpsHelper mAppOpsHelper;
     protected final LocationPermissionsHelper mLocationPermissionsHelper;
@@ -1227,7 +1227,7 @@ class LocationProviderManager extends
         mLocationManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(LocationManagerInternal.class));
         mSettingsHelper = injector.getSettingsHelper();
-        mUserInfoHelper = injector.getUserInfoHelper();
+        mUserHelper = injector.getUserInfoHelper();
         mAlarmHelper = injector.getAlarmHelper();
         mAppOpsHelper = injector.getAppOpsHelper();
         mLocationPermissionsHelper = injector.getLocationPermissionsHelper();
@@ -1252,7 +1252,7 @@ class LocationProviderManager extends
         synchronized (mLock) {
             mStarted = true;
 
-            mUserInfoHelper.addListener(mUserChangedListener);
+            mUserHelper.addListener(mUserChangedListener);
             mSettingsHelper.addOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
 
             long identity = Binder.clearCallingIdentity();
@@ -1267,20 +1267,19 @@ class LocationProviderManager extends
 
     public void stopManager() {
         synchronized (mLock) {
-            mUserInfoHelper.removeListener(mUserChangedListener);
+            mUserHelper.removeListener(mUserChangedListener);
             mSettingsHelper.removeOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
 
-            // notify and remove all listeners
+            mStarted = false;
+
             long identity = Binder.clearCallingIdentity();
             try {
-                onUserStopped(UserHandle.USER_ALL);
+                onEnabledChanged(UserHandle.USER_ALL);
                 removeRegistrationIf(key -> true);
+                mEnabledListeners.clear();
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
-
-            mEnabledListeners.clear();
-            mStarted = false;
         }
     }
 
@@ -1430,11 +1429,13 @@ class LocationProviderManager extends
                 identity.getPackageName())) {
             return null;
         }
-        if (!mUserInfoHelper.isCurrentUserId(identity.getUserId())) {
-            return null;
-        }
-        if (!ignoreLocationSettings && !isEnabled(identity.getUserId())) {
-            return null;
+        if (!ignoreLocationSettings) {
+            if (!isEnabled(identity.getUserId())) {
+                return null;
+            }
+            if (!identity.isSystem() && !mUserHelper.isCurrentUserId(identity.getUserId())) {
+                return null;
+            }
         }
 
         Location location = getLastLocationUnsafe(identity.getUserId(), permissionLevel,
@@ -1462,7 +1463,7 @@ class LocationProviderManager extends
         if (userId == UserHandle.USER_ALL) {
             // find the most recent location across all users
             Location lastLocation = null;
-            final int[] runningUserIds = mUserInfoHelper.getRunningUserIds();
+            final int[] runningUserIds = mUserHelper.getRunningUserIds();
             for (int i = 0; i < runningUserIds.length; i++) {
                 Location next = getLastLocationUnsafe(runningUserIds[i], permissionLevel,
                         ignoreLocationSettings, maximumAgeMs);
@@ -1507,7 +1508,7 @@ class LocationProviderManager extends
 
     private void setLastLocation(Location location, int userId) {
         if (userId == UserHandle.USER_ALL) {
-            final int[] runningUserIds = mUserInfoHelper.getRunningUserIds();
+            final int[] runningUserIds = mUserHelper.getRunningUserIds();
             for (int i = 0; i < runningUserIds.length; i++) {
                 setLastLocation(location, runningUserIds[i]);
             }
@@ -1533,7 +1534,7 @@ class LocationProviderManager extends
 
     @Nullable
     public ICancellationSignal getCurrentLocation(LocationRequest request,
-            CallerIdentity callerIdentity, int permissionLevel, ILocationCallback callback) {
+            CallerIdentity identity, int permissionLevel, ILocationCallback callback) {
         if (request.getDurationMillis() > GET_CURRENT_LOCATION_MAX_TIMEOUT_MS) {
             request = new LocationRequest.Builder(request)
                     .setDurationMillis(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS)
@@ -1543,27 +1544,31 @@ class LocationProviderManager extends
         GetCurrentLocationListenerRegistration registration =
                 new GetCurrentLocationListenerRegistration(
                         request,
-                        callerIdentity,
+                        identity,
                         new GetCurrentLocationTransport(callback),
                         permissionLevel);
 
         synchronized (mLock) {
-            if (mSettingsHelper.isLocationPackageBlacklisted(callerIdentity.getUserId(),
-                    callerIdentity.getPackageName())) {
+            // shortcut various failure conditions so that we can return immediately rather than
+            // waiting for location to timeout
+            if (mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),
+                    identity.getPackageName())) {
                 registration.deliverLocation(null);
                 return null;
             }
-            if (!mUserInfoHelper.isCurrentUserId(callerIdentity.getUserId())) {
-                registration.deliverLocation(null);
-                return null;
-            }
-            if (!request.isLocationSettingsIgnored() && !isEnabled(callerIdentity.getUserId())) {
-                registration.deliverLocation(null);
-                return null;
+            if (!request.isLocationSettingsIgnored()) {
+                if (!isEnabled(identity.getUserId())) {
+                    registration.deliverLocation(null);
+                    return null;
+                }
+                if (!identity.isSystem() && !mUserHelper.isCurrentUserId(identity.getUserId())) {
+                    registration.deliverLocation(null);
+                    return null;
+                }
             }
 
             Location lastLocation = getLastLocationUnsafe(
-                    callerIdentity.getUserId(),
+                    identity.getUserId(),
                     permissionLevel,
                     request.isLocationSettingsIgnored(),
                     MAX_CURRENT_LOCATION_AGE_MS);
@@ -1573,11 +1578,11 @@ class LocationProviderManager extends
             }
 
             // if last location isn't good enough then we add a location request
-            long identity = Binder.clearCallingIdentity();
+            long ident = Binder.clearCallingIdentity();
             try {
                 addRegistration(callback.asBinder(), registration);
             } finally {
-                Binder.restoreCallingIdentity(identity);
+                Binder.restoreCallingIdentity(ident);
             }
         }
 
@@ -1601,20 +1606,20 @@ class LocationProviderManager extends
         }
     }
 
-    public void registerLocationRequest(LocationRequest request, CallerIdentity callerIdentity,
+    public void registerLocationRequest(LocationRequest request, CallerIdentity identity,
             @PermissionLevel int permissionLevel, ILocationListener listener) {
         synchronized (mLock) {
-            long identity = Binder.clearCallingIdentity();
+            long ident = Binder.clearCallingIdentity();
             try {
                 addRegistration(
                         listener.asBinder(),
                         new LocationListenerRegistration(
                                 request,
-                                callerIdentity,
+                                identity,
                                 new LocationListenerTransport(listener),
                                 permissionLevel));
             } finally {
-                Binder.restoreCallingIdentity(identity);
+                Binder.restoreCallingIdentity(ident);
             }
         }
     }
@@ -1845,6 +1850,9 @@ class LocationProviderManager extends
             if (!isEnabled(identity.getUserId())) {
                 return false;
             }
+            if (!identity.isSystem() && !mUserHelper.isCurrentUserId(identity.getUserId())) {
+                return false;
+            }
 
             switch (mLocationPowerSaveModeHelper.getLocationPowerSaveMode()) {
                 case LOCATION_MODE_FOREGROUND_ONLY:
@@ -1973,7 +1981,8 @@ class LocationProviderManager extends
         synchronized (mLock) {
             switch (change) {
                 case UserListener.CURRENT_USER_CHANGED:
-                    onEnabledChanged(userId);
+                    updateRegistrations(
+                            registration -> registration.getIdentity().getUserId() == userId);
                     break;
                 case UserListener.USER_STARTED:
                     onUserStarted(userId);
@@ -2149,13 +2158,10 @@ class LocationProviderManager extends
         }
 
         if (userId == UserHandle.USER_ALL) {
-            onEnabledChanged(UserHandle.USER_ALL);
             mEnabled.clear();
             mLastLocations.clear();
         } else {
             Preconditions.checkArgument(userId >= 0);
-
-            onEnabledChanged(userId);
             mEnabled.delete(userId);
             mLastLocations.remove(userId);
         }
@@ -2172,7 +2178,7 @@ class LocationProviderManager extends
             // settings for instance) do not support the null user
             return;
         } else if (userId == UserHandle.USER_ALL) {
-            final int[] runningUserIds = mUserInfoHelper.getRunningUserIds();
+            final int[] runningUserIds = mUserHelper.getRunningUserIds();
             for (int i = 0; i < runningUserIds.length; i++) {
                 onEnabledChanged(runningUserIds[i]);
             }
@@ -2183,7 +2189,6 @@ class LocationProviderManager extends
 
         boolean enabled = mStarted
                 && mProvider.getState().allowed
-                && mUserInfoHelper.isCurrentUserId(userId)
                 && mSettingsHelper.isLocationEnabled(userId);
 
         int index = mEnabled.indexOfKey(userId);
@@ -2247,7 +2252,7 @@ class LocationProviderManager extends
 
             super.dump(fd, ipw, args);
 
-            int[] userIds = mUserInfoHelper.getRunningUserIds();
+            int[] userIds = mUserHelper.getRunningUserIds();
             for (int userId : userIds) {
                 if (userIds.length != 1) {
                     ipw.print("user ");
