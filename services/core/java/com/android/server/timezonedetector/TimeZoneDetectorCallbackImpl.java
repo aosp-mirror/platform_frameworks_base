@@ -87,6 +87,7 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
         contentResolver.registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.AUTO_TIME_ZONE), true,
                 new ContentObserver(mHandler) {
+                    @Override
                     public void onChange(boolean selfChange) {
                         handleConfigChangeOnHandlerThread();
                     }
@@ -97,6 +98,7 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
                 Settings.Secure.getUriFor(Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED),
                 true,
                 new ContentObserver(mHandler) {
+                    @Override
                     public void onChange(boolean selfChange) {
                         handleConfigChangeOnHandlerThread();
                     }
