@@ -829,15 +829,22 @@ interface ITelephony {
      *  as well as registering the MmTelFeature for callbacks using the IImsServiceFeatureCallback
      *  interface.
      */
-    void registerMmTelFeatureCallback(int slotId, in IImsServiceFeatureCallback callback,
-            boolean oneShot);
+    IImsMmTelFeature getMmTelFeatureAndListen(int slotId, in IImsServiceFeatureCallback callback);
+
+    /**
+     *  Get IImsRcsFeature binder from ImsResolver that corresponds to the subId and RCS feature
+     *  as well as registering the RcsFeature for callbacks using the IImsServiceFeatureCallback
+     *  interface.
+     */
+    IImsRcsFeature getRcsFeatureAndListen(int slotId, in IImsServiceFeatureCallback callback);
 
     /**
      * Unregister a callback that was previously registered through
-     * {@link #registerMmTelFeatureCallback}. This should always be called when the callback is no
-     * longer being used.
+     * {@link #getMmTelFeatureAndListen} or {@link #getRcsFeatureAndListen}. This should always be
+     * called when the callback is no longer being used.
      */
-    void unregisterImsFeatureCallback(in IImsServiceFeatureCallback callback);
+    void unregisterImsFeatureCallback(int slotId, int featureType,
+            in IImsServiceFeatureCallback callback);
 
     /**
     * Returns the IImsRegistration associated with the slot and feature specified.
