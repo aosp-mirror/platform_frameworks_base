@@ -28,6 +28,7 @@ import android.hardware.tetheroffload.control.V1_0.NatTimeoutUpdate;
 import android.hardware.tetheroffload.control.V1_0.NetworkProtocol;
 import android.hardware.tetheroffload.control.V1_0.OffloadCallbackEvent;
 import android.net.netlink.NetlinkSocket;
+import android.net.netlink.StructNfGenMsg;
 import android.net.netlink.StructNlMsgHdr;
 import android.net.util.SharedLog;
 import android.net.util.SocketUtils;
@@ -41,11 +42,12 @@ import android.system.OsConstants;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileDescriptor;
-import java.io.InterruptedIOException;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
@@ -66,11 +68,12 @@ public class OffloadHardwareInterface {
     private static final String NO_IPV4_ADDRESS = "";
     private static final String NO_IPV4_GATEWAY = "";
     // Reference kernel/uapi/linux/netfilter/nfnetlink_compat.h
-    private static final int NF_NETLINK_CONNTRACK_NEW = 1;
-    private static final int NF_NETLINK_CONNTRACK_UPDATE = 2;
-    private static final int NF_NETLINK_CONNTRACK_DESTROY = 4;
+    public static final int NF_NETLINK_CONNTRACK_NEW = 1;
+    public static final int NF_NETLINK_CONNTRACK_UPDATE = 2;
+    public static final int NF_NETLINK_CONNTRACK_DESTROY = 4;
     // Reference libnetfilter_conntrack/linux_nfnetlink_conntrack.h
     public static final short NFNL_SUBSYS_CTNETLINK = 1;
+    public static final short IPCTNL_MSG_CT_NEW = 0;
     public static final short IPCTNL_MSG_CT_GET = 1;
 
     private final long NETLINK_MESSAGE_TIMEOUT_MS = 500;
@@ -237,7 +240,7 @@ public class OffloadHardwareInterface {
                 NF_NETLINK_CONNTRACK_NEW | NF_NETLINK_CONNTRACK_DESTROY);
         if (h1 == null) return false;
 
-        sendNetlinkMessage(h1, (short) ((NFNL_SUBSYS_CTNETLINK << 8) | IPCTNL_MSG_CT_GET),
+        sendIpv4NfGenMsg(h1, (short) ((NFNL_SUBSYS_CTNETLINK << 8) | IPCTNL_MSG_CT_GET),
                            (short) (NLM_F_REQUEST | NLM_F_DUMP));
 
         final NativeHandle h2 = mDeps.createConntrackSocket(
@@ -267,16 +270,23 @@ public class OffloadHardwareInterface {
     }
 
     @VisibleForTesting
-    public void sendNetlinkMessage(@NonNull NativeHandle handle, short type, short flags) {
-        final int length = StructNlMsgHdr.STRUCT_SIZE;
+    public void sendIpv4NfGenMsg(@NonNull NativeHandle handle, short type, short flags) {
+        final int length = StructNlMsgHdr.STRUCT_SIZE + StructNfGenMsg.STRUCT_SIZE;
         final byte[] msg = new byte[length];
-        final StructNlMsgHdr nlh = new StructNlMsgHdr();
         final ByteBuffer byteBuffer = ByteBuffer.wrap(msg);
+        byteBuffer.order(ByteOrder.nativeOrder());
+
+        final StructNlMsgHdr nlh = new StructNlMsgHdr();
         nlh.nlmsg_len = length;
         nlh.nlmsg_type = type;
         nlh.nlmsg_flags = flags;
-        nlh.nlmsg_seq = 1;
+        nlh.nlmsg_seq = 0;
         nlh.pack(byteBuffer);
+
+        // Header needs to be added to buffer since a generic netlink request is being sent.
+        final StructNfGenMsg nfh = new StructNfGenMsg((byte) OsConstants.AF_INET);
+        nfh.pack(byteBuffer);
+
         try {
             NetlinkSocket.sendMessage(handle.getFileDescriptor(), msg, 0 /* offset */, length,
                                       NETLINK_MESSAGE_TIMEOUT_MS);
