@@ -344,6 +344,11 @@
              the app is uninstalled.
         -->
         <flag name="immutablyRestricted" value="0x10" />
+        <!--
+             Modifier for permission restriction. This permission cannot
+             be exempted by the installer.
+        -->
+        <flag name="installerExemptIgnored" value="0x20" />
     </attr>
 
     <!-- Specified the name of a group that this permission is associated

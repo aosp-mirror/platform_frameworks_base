@@ -866,6 +866,12 @@ public abstract class PackageManager {
      * is set the restricted permissions will be whitelisted for all users, otherwise
      * only to the owner.
      *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
+     *
      * @hide
      */
     public static final int INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS = 0x00400000;
@@ -3505,6 +3511,17 @@ public abstract class PackageManager {
     public static final int FLAG_PERMISSION_AUTO_REVOKED = 1 << 17;
 
     /**
+     * Permission flag: The permission is restricted but the app is exempt
+     * from the restriction and is allowed to hold this permission in its
+     * full form and the exemption is provided by the held roles.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final int FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT =  1 << 18;
+
+    /**
      * Permission flags: Reserved for use by the permission controller. The platform and any
      * packages besides the permission controller should not assume any definition about these
      * flags.
@@ -3522,7 +3539,8 @@ public abstract class PackageManager {
     public static final int FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT =
             FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT
                     | FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT
-                    | FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
+                    | FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT
+                    | FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT;
 
     /**
      * Mask for all permission flags.
@@ -3568,13 +3586,27 @@ public abstract class PackageManager {
 
     /**
      * Permission whitelist flag: permissions whitelisted by the system.
-     * Permissions can also be whitelisted by the installer or on upgrade.
+     * Permissions can also be whitelisted by the installer, on upgrade, or on
+     * role grant.
+     *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
      */
     public static final int FLAG_PERMISSION_WHITELIST_SYSTEM = 1 << 0;
 
     /**
      * Permission whitelist flag: permissions whitelisted by the installer.
-     * Permissions can also be whitelisted by the system or on upgrade.
+     * Permissions can also be whitelisted by the system, on upgrade, or on role
+     * grant.
+     *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
      */
     public static final int FLAG_PERMISSION_WHITELIST_INSTALLER = 1 << 1;
 
@@ -3582,15 +3614,31 @@ public abstract class PackageManager {
      * Permission whitelist flag: permissions whitelisted by the system
      * when upgrading from an OS version where the permission was not
      * restricted to an OS version where the permission is restricted.
-     * Permissions can also be whitelisted by the installer or the system.
+     * Permissions can also be whitelisted by the installer, the system, or on
+     * role grant.
+     *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
      */
     public static final int FLAG_PERMISSION_WHITELIST_UPGRADE = 1 << 2;
+
+    /**
+     * Permission allowlist flag: permissions exempted by the system
+     * when being granted a role.
+     * Permissions can also be exempted by the installer, the system, or on
+     * upgrade.
+     */
+    public static final int FLAG_PERMISSION_ALLOWLIST_ROLE = 1 << 3;
 
     /** @hide */
     @IntDef(flag = true, prefix = {"FLAG_PERMISSION_WHITELIST_"}, value = {
             FLAG_PERMISSION_WHITELIST_SYSTEM,
             FLAG_PERMISSION_WHITELIST_INSTALLER,
-            FLAG_PERMISSION_WHITELIST_UPGRADE
+            FLAG_PERMISSION_WHITELIST_UPGRADE,
+            FLAG_PERMISSION_ALLOWLIST_ROLE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PermissionWhitelistFlags {}
@@ -4536,7 +4584,7 @@ public abstract class PackageManager {
      * allows for the to hold that permission and whitelisting a soft restricted
      * permission allows the app to hold the permission in its full, unrestricted form.
      *
-     * <p><ol>There are three whitelists:
+     * <p><ol>There are four allowlists:
      *
      * <li>one for cases where the system permission policy whitelists a permission
      * This list corresponds to the{@link #FLAG_PERMISSION_WHITELIST_SYSTEM} flag.
@@ -4553,6 +4601,17 @@ public abstract class PackageManager {
      * Can be accessed by pre-installed holders of a dedicated permission or the
      * installer on record.
      *
+     * <li>one for cases where the system exempts the permission when granting a role.
+     * This list corresponds to the {@link #FLAG_PERMISSION_ALLOWLIST_ROLE} flag. Can
+     * be accessed by pre-installed holders of a dedicated permission.
+     * </ol>
+     *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
+     *
      * @param packageName The app for which to get whitelisted permissions.
      * @param whitelistFlag The flag to determine which whitelist to query. Only one flag
      * can be passed.s
@@ -4563,6 +4622,7 @@ public abstract class PackageManager {
      * @see #FLAG_PERMISSION_WHITELIST_SYSTEM
      * @see #FLAG_PERMISSION_WHITELIST_UPGRADE
      * @see #FLAG_PERMISSION_WHITELIST_INSTALLER
+     * @see #FLAG_PERMISSION_ALLOWLIST_ROLE
      *
      * @throws SecurityException if you try to access a whitelist that you have no access to.
      */
@@ -4584,7 +4644,7 @@ public abstract class PackageManager {
      * allows for the to hold that permission and whitelisting a soft restricted
      * permission allows the app to hold the permission in its full, unrestricted form.
      *
-     * <p><ol>There are three whitelists:
+     * <p><ol>There are four whitelists:
      *
      * <li>one for cases where the system permission policy whitelists a permission
      * This list corresponds to the {@link #FLAG_PERMISSION_WHITELIST_SYSTEM} flag.
@@ -4602,9 +4662,20 @@ public abstract class PackageManager {
      * Can be modified by pre-installed holders of a dedicated permission or the installer
      * on record.
      *
+     * <li>one for cases where the system exempts the permission when permission when
+     * granting a role. This list corresponds to the {@link #FLAG_PERMISSION_ALLOWLIST_ROLE}
+     * flag. Can be modified by pre-installed holders of a dedicated permission.
+     * </ol>
+     *
      * <p>You need to specify the whitelists for which to set the whitelisted permissions
      * which will clear the previous whitelisted permissions and replace them with the
      * provided ones.
+     *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
      *
      * @param packageName The app for which to get whitelisted permissions.
      * @param permName The whitelisted permission to add.
@@ -4617,6 +4688,7 @@ public abstract class PackageManager {
      * @see #FLAG_PERMISSION_WHITELIST_SYSTEM
      * @see #FLAG_PERMISSION_WHITELIST_UPGRADE
      * @see #FLAG_PERMISSION_WHITELIST_INSTALLER
+     * @see #FLAG_PERMISSION_ALLOWLIST_ROLE
      *
      * @throws SecurityException if you try to modify a whitelist that you have no access to.
      */
@@ -4638,7 +4710,7 @@ public abstract class PackageManager {
      * allows for the to hold that permission and whitelisting a soft restricted
      * permission allows the app to hold the permission in its full, unrestricted form.
      *
-     * <p><ol>There are three whitelists:
+     * <p><ol>There are four whitelists:
      *
      * <li>one for cases where the system permission policy whitelists a permission
      * This list corresponds to the {@link #FLAG_PERMISSION_WHITELIST_SYSTEM} flag.
@@ -4656,9 +4728,23 @@ public abstract class PackageManager {
      * Can be modified by pre-installed holders of a dedicated permission or the installer
      * on record.
      *
+     * <li>one for cases where the system exempts the permission when upgrading
+     * from an OS version in which the permission was not restricted to an OS version
+     * in which the permission is restricted. This list corresponds to the {@link
+     * #FLAG_PERMISSION_WHITELIST_UPGRADE} flag. Can be modified by pre-installed
+     * holders of a dedicated permission. The installer on record can only remove
+     * permissions from this allowlist.
+     * </ol>
+     *
      * <p>You need to specify the whitelists for which to set the whitelisted permissions
      * which will clear the previous whitelisted permissions and replace them with the
      * provided ones.
+     *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
      *
      * @param packageName The app for which to get whitelisted permissions.
      * @param permName The whitelisted permission to remove.
@@ -4671,6 +4757,7 @@ public abstract class PackageManager {
      * @see #FLAG_PERMISSION_WHITELIST_SYSTEM
      * @see #FLAG_PERMISSION_WHITELIST_UPGRADE
      * @see #FLAG_PERMISSION_WHITELIST_INSTALLER
+     * @see #FLAG_PERMISSION_ALLOWLIST_ROLE
      *
      * @throws SecurityException if you try to modify a whitelist that you have no access to.
      */
@@ -4690,6 +4777,12 @@ public abstract class PackageManager {
      * Packages start in whitelisted state, and it is the installer's responsibility to
      * un-whitelist the packages it installs, unless auto-revoking permissions from that package
      * would cause breakages beyond having to re-request the permission(s).
+     *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
      *
      * @param packageName The app for which to set exemption.
      * @param whitelisted Whether the app should be whitelisted.
@@ -4712,6 +4805,13 @@ public abstract class PackageManager {
      *
      * Only the installer on record that installed the given package, or a holder of
      * {@code WHITELIST_AUTO_REVOKE_PERMISSIONS} is allowed to call this.
+     *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
+     *
      * @param packageName The app for which to set exemption.
      *
      * @return Whether the app is whitelisted.
@@ -8026,6 +8126,12 @@ public abstract class PackageManager {
     }
 
     /**
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
+     *
      * @return whether this package is whitelisted from having its runtime permission be
      *         auto-revoked if unused for an extended period of time.
      */

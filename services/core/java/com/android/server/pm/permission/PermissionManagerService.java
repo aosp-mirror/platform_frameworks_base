@@ -24,12 +24,14 @@ import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.pm.ApplicationInfo.AUTO_REVOKE_DISALLOWED;
 import static android.content.pm.ApplicationInfo.AUTO_REVOKE_DISCOURAGED;
 import static android.content.pm.PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_ALLOWLIST_ROLE;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_ONE_TIME;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
@@ -785,6 +787,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             throw new IllegalArgumentException("Unknown permission: " + permName);
         }
 
+        if (bp.isInstallerExemptIgnored()) {
+            flagValues &= ~FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
+        }
+
         final UidPermissionState uidState = getUidState(pkg, userId);
         if (uidState == null) {
             Slog.e(TAG, "Missing permissions state for " + packageName + " and user " + userId);
@@ -1096,7 +1102,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         Preconditions.checkFlagsArgument(flags,
                 PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE
                         | PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM
-                        | PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER);
+                        | PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER
+                        | PackageManager.FLAG_PERMISSION_ALLOWLIST_ROLE);
         Preconditions.checkArgumentNonNegative(userId, null);
 
         if (UserHandle.getCallingUserId() != userId) {
@@ -1120,16 +1127,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final boolean isCallerInstallerOnRecord =
                 mPackageManagerInt.isCallerInstallerOfRecord(pkg, callingUid);
 
-        if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM) != 0
-                && !isCallerPrivileged) {
-            throw new SecurityException("Querying system whitelist requires "
+        if ((flags & (PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM
+                | PackageManager.FLAG_PERMISSION_ALLOWLIST_ROLE)) != 0 && !isCallerPrivileged) {
+            throw new SecurityException("Querying system or role allowlist requires "
                     + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
         }
 
         if ((flags & (PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE
                 | PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER)) != 0) {
             if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
-                throw new SecurityException("Querying upgrade or installer whitelist"
+                throw new SecurityException("Querying upgrade or installer allowlist"
                         + " requires being installer on record or "
                         + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
             }
@@ -1152,6 +1159,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
             if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER) != 0) {
                 queryFlags |=  FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
+            }
+            if ((flags & PackageManager.FLAG_PERMISSION_ALLOWLIST_ROLE) != 0) {
+                queryFlags |=  FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT;
             }
 
             ArrayList<String> whitelistedPermissions = null;
@@ -1245,7 +1255,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         Preconditions.checkFlagsArgument(flags,
                 PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE
                         | PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM
-                        | PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER);
+                        | PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER
+                        | PackageManager.FLAG_PERMISSION_ALLOWLIST_ROLE);
         Preconditions.checkArgument(Integer.bitCount(flags) == 1);
         Preconditions.checkArgumentNonNegative(userId, null);
 
@@ -1271,15 +1282,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final boolean isCallerInstallerOnRecord =
                 mPackageManagerInt.isCallerInstallerOfRecord(pkg, callingUid);
 
-        if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM) != 0
+        if ((flags & (PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM
+                | PackageManager.FLAG_PERMISSION_ALLOWLIST_ROLE)) != 0
                 && !isCallerPrivileged) {
-            throw new SecurityException("Modifying system whitelist requires "
+            throw new SecurityException("Modifying system or role allowlist requires "
                     + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
         }
 
         if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE) != 0) {
             if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
-                throw new SecurityException("Modifying upgrade whitelist requires"
+                throw new SecurityException("Modifying upgrade allowlist requires"
                         + " being installer on record or "
                         + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
             }
@@ -2074,6 +2086,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 | PackageManager.FLAG_PERMISSION_USER_FIXED;
 
         if ((flags & fixedFlags) != 0) {
+            return false;
+        }
+
+        BasePermission permission = getPermission(permName);
+        if (permission == null) {
+            return false;
+        }
+        if (permission.isHardRestricted()
+                && (flags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) == 0) {
             return false;
         }
 
@@ -3727,6 +3748,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 newFlags |= FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
                             } else {
                                 newFlags &= ~FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
+                            }
+                        }
+                        break;
+                        case FLAG_PERMISSION_ALLOWLIST_ROLE: {
+                            mask |= FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT;
+                            if (permissions != null && permissions.contains(permissionName)) {
+                                newFlags |= FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT;
+                            } else {
+                                newFlags &= ~FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT;
                             }
                         }
                         break;
