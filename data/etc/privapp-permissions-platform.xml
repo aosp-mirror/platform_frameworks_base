@@ -427,6 +427,8 @@ applications that come with the platform
         <permission name="android.permission.CAPTURE_AUDIO_OUTPUT" />
         <!-- Permissions required for CTS test - AdbManagerTest -->
         <permission name="android.permission.MANAGE_DEBUGGING" />
+        <!-- Permissions required for CTS test - TimeManagerTest -->
+        <permission name="android.permission.MANAGE_TIME_AND_ZONE_DETECTION" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
