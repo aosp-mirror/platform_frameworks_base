@@ -21,6 +21,7 @@ import static com.android.systemui.volume.VolumeDialogControllerImpl.STREAMS;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.app.KeyguardManager;
@@ -165,6 +166,45 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         verify(mAccessibilityMgr).getRecommendedTimeoutMillis(
                 VolumeDialogImpl.DIALOG_TIMEOUT_MILLIS,
                 AccessibilityManager.FLAG_CONTENT_CONTROLS);
+    }
+
+    @Test
+    public void testVibrateOnRingerChangedToVibrate() {
+        final State initialSilentState = new State();
+        initialSilentState.ringerModeInternal = AudioManager.RINGER_MODE_SILENT;
+
+        final State vibrateState = new State();
+        vibrateState.ringerModeInternal = AudioManager.RINGER_MODE_VIBRATE;
+
+        // change ringer to silent
+        mDialog.onStateChangedH(initialSilentState);
+
+        // expected: shouldn't call vibrate yet
+        verify(mController, never()).vibrate(any());
+
+        // changed ringer to vibrate
+        mDialog.onStateChangedH(vibrateState);
+
+        // expected: vibrate device
+        verify(mController).vibrate(any());
+    }
+
+    @Test
+    public void testNoVibrateOnRingerInitialization() {
+        final State initialUnsetState = new State();
+        initialUnsetState.ringerModeInternal = -1;
+
+        // ringer not initialized yet:
+        mDialog.onStateChangedH(initialUnsetState);
+
+        final State vibrateState = new State();
+        vibrateState.ringerModeInternal = AudioManager.RINGER_MODE_VIBRATE;
+
+        // changed ringer to vibrate
+        mDialog.onStateChangedH(vibrateState);
+
+        // shouldn't call vibrate
+        verify(mController, never()).vibrate(any());
     }
 
 /*
