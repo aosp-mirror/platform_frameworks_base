@@ -182,6 +182,40 @@ public class HdmiCecMessageValidatorTest {
         assertMessageValidity("40:0A:30").isEqualTo(ERROR_PARAMETER);
     }
 
+    @Test
+    public void isValid_setAnalogueTimer_clearAnalogueTimer() {
+        assertMessageValidity("04:33:0C:08:10:1E:04:30:08:00:13:AD:06").isEqualTo(OK);
+        assertMessageValidity("04:34:04:0C:16:0F:08:37:00:02:EA:60:03:34").isEqualTo(OK);
+
+        assertMessageValidity("0F:33:0C:08:10:1E:04:30:08:00:13:AD:06")
+                .isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:34:04:0C:16:0F:08:37:00:02:EA:60:03").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("04:33:0C:08:10:1E:04:30:08:13:AD:06")
+                .isEqualTo(ERROR_PARAMETER_SHORT);
+        // Out of range Day of Month
+        assertMessageValidity("04:34:20:0C:16:0F:08:37:00:02:EA:60:03").isEqualTo(ERROR_PARAMETER);
+        // Out of range Month of Year
+        assertMessageValidity("04:33:0C:00:10:1E:04:30:08:00:13:AD:06").isEqualTo(ERROR_PARAMETER);
+        // Out of range Start Time - Hour
+        assertMessageValidity("04:34:04:0C:18:0F:08:37:00:02:EA:60:03").isEqualTo(ERROR_PARAMETER);
+        // Out of range Start Time - Minute
+        assertMessageValidity("04:33:0C:08:10:50:04:30:08:00:13:AD:06").isEqualTo(ERROR_PARAMETER);
+        // Out of range Duration - Duration Hours
+        assertMessageValidity("04:34:04:0C:16:0F:64:37:00:02:EA:60:03").isEqualTo(ERROR_PARAMETER);
+        // Out of range Duration - Minute
+        assertMessageValidity("04:33:0C:08:10:1E:04:64:08:00:13:AD:06").isEqualTo(ERROR_PARAMETER);
+        // Invalid Recording Sequence
+        assertMessageValidity("04:34:04:0C:16:0F:08:37:88:02:EA:60:03").isEqualTo(ERROR_PARAMETER);
+        // Invalid Recording Sequence
+        assertMessageValidity("04:33:0C:08:10:1E:04:30:A2:00:13:AD:06").isEqualTo(ERROR_PARAMETER);
+        // Out of range Analogue Broadcast Type
+        assertMessageValidity("04:34:04:0C:16:0F:08:37:00:03:EA:60:03").isEqualTo(ERROR_PARAMETER);
+        // Out of range Analogue Frequency
+        assertMessageValidity("04:33:0C:08:10:1E:04:30:08:00:FF:FF:06").isEqualTo(ERROR_PARAMETER);
+        // Out of range Broadcast System
+        assertMessageValidity("04:34:04:0C:16:0F:08:37:00:02:EA:60:20").isEqualTo(ERROR_PARAMETER);
+    }
+
     private IntegerSubject assertMessageValidity(String message) {
         return assertThat(mHdmiCecMessageValidator.isValid(buildMessage(message)));
     }
