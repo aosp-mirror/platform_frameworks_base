@@ -53,6 +53,7 @@ import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorProperties;
+import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -132,7 +133,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Mock
     private FaceManager mFaceManager;
     @Mock
-    private List<FaceSensorProperties> mFaceSensorProperties;
+    private List<FaceSensorPropertiesInternal> mFaceSensorProperties;
     @Mock
     private BiometricManager mBiometricManager;
     @Mock
@@ -177,13 +178,14 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mFaceManager.isHardwareDetected()).thenReturn(true);
         when(mFaceManager.hasEnrolledTemplates()).thenReturn(true);
         when(mFaceManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
-        when(mFaceManager.getSensorProperties()).thenReturn(mFaceSensorProperties);
+        when(mFaceManager.getSensorPropertiesInternal()).thenReturn(mFaceSensorProperties);
 
         // IBiometricsFace@1.0 does not support detection, only authentication.
         when(mFaceSensorProperties.isEmpty()).thenReturn(false);
-        when(mFaceSensorProperties.get(anyInt())).thenReturn(new FaceSensorProperties(0 /* id */,
-                false /* supportsFaceDetection */, true /* supportsSelfIllumination */,
-                1 /* maxTemplatesAllowed */));
+        when(mFaceSensorProperties.get(anyInt())).thenReturn(new FaceSensorPropertiesInternal(
+                0 /* id */,
+                FaceSensorProperties.STRENGTH_STRONG, 1 /* maxTemplatesAllowed */,
+                false /* supportsFaceDetection */, true /* supportsSelfIllumination */));
 
         when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
         when(mFingerprintManager.hasEnrolledTemplates(anyInt())).thenReturn(true);

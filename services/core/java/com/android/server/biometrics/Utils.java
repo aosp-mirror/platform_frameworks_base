@@ -49,8 +49,10 @@ import android.hardware.biometrics.BiometricPrompt.AuthenticationResultType;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorProperties;
+import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -448,7 +450,7 @@ public class Utils {
 
     /**
      * Converts from {@link BiometricManager.Authenticators} biometric strength to the internal
-     * {@link SensorProperties} strength.
+     * {@link SensorPropertiesInternal} strength.
      */
     public static @SensorProperties.Strength int authenticatorStrengthToPropertyStrength(
             @BiometricManager.Authenticators.Types int strength) {

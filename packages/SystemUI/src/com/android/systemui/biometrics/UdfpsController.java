@@ -26,7 +26,7 @@ import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.hardware.fingerprint.FingerprintManager;
-import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.PowerManager;
 import android.os.UserHandle;
@@ -53,7 +53,6 @@ import com.android.systemui.util.settings.SystemSettings;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -182,7 +181,8 @@ class UdfpsController implements DozeReceiver {
         mLayoutParams = createLayoutParams(context);
 
         int udfpsSensorId = -1;
-        for (FingerprintSensorProperties props : mFingerprintManager.getSensorProperties()) {
+        for (FingerprintSensorPropertiesInternal props :
+                mFingerprintManager.getSensorPropertiesInternal()) {
             if (props.isAnyUdfpsType()) {
                 udfpsSensorId = props.sensorId;
                 break;

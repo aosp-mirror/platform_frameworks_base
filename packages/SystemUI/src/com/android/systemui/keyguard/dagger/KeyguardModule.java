@@ -134,7 +134,7 @@ public class KeyguardModule {
 
         // Cameras that support "self illumination," via IR for example, don't need low light
         // environment mitigation.
-        boolean needsLowLightMitigation = faceManager.getSensorProperties().stream()
+        boolean needsLowLightMitigation = faceManager.getSensorPropertiesInternal().stream()
                 .anyMatch((properties) -> !properties.supportsSelfIllumination);
         if (!needsLowLightMitigation) {
             return Optional.empty();
