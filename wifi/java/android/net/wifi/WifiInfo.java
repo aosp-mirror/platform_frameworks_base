@@ -17,15 +17,17 @@
 package android.net.wifi;
 
 import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.NetworkInfo.DetailedState;
-import android.net.NetworkUtils;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+
+import com.android.net.module.util.Inet4AddressUtils;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -34,7 +36,7 @@ import java.util.EnumMap;
 import java.util.Locale;
 
 /**
- * Describes the state of any Wifi connection that is active or
+ * Describes the state of any Wi-Fi connection that is active or
  * is in the process of being set up.
  */
 public class WifiInfo implements Parcelable {
@@ -53,7 +55,7 @@ public class WifiInfo implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public static final String DEFAULT_MAC_ADDRESS = "02:00:00:00:00:00";
 
     static {
@@ -79,8 +81,12 @@ public class WifiInfo implements Parcelable {
     private WifiSsid mWifiSsid;
     private int mNetworkId;
 
-    /** @hide **/
-    @UnsupportedAppUsage
+    /**
+     * Used to indicate that the RSSI is invalid, for example if no RSSI measurements are available
+     * yet.
+     * @hide
+     */
+    @SystemApi
     public static final int INVALID_RSSI = -127;
 
     /** @hide **/
@@ -94,6 +100,11 @@ public class WifiInfo implements Parcelable {
      * Received Signal Strength Indicator
      */
     private int mRssi;
+
+    /**
+     * Wi-Fi standard for the connection
+     */
+    private @WifiAnnotations.WifiStandard int mWifiStandard;
 
     /**
      * The unit in which links speeds are expressed.
@@ -112,9 +123,19 @@ public class WifiInfo implements Parcelable {
     private int mTxLinkSpeed;
 
     /**
+     * Max supported Tx(transmit) link speed in Mbps
+     */
+    private int mMaxSupportedTxLinkSpeed;
+
+    /**
      * Rx(receive) Link speed in Mbps
      */
     private int mRxLinkSpeed;
+
+    /**
+     * Max supported Rx(receive) link speed in Mbps
+     */
+    private int mMaxSupportedRxLinkSpeed;
 
     /**
      * Frequency in MHz
@@ -156,7 +177,7 @@ public class WifiInfo implements Parcelable {
      * If connected to a network suggestion or specifier, store the package name of the app,
      * else null.
      */
-    private String mNetworkSuggestionOrSpecifierPackageName;
+    private String mRequestingPackageName;
 
     /**
      * Running total count of lost (not ACKed) transmitted unicast data packets.
@@ -179,38 +200,100 @@ public class WifiInfo implements Parcelable {
      */
     public long rxSuccess;
 
+    private double mLostTxPacketsPerSecond;
+
     /**
      * Average rate of lost transmitted packets, in units of packets per second.
      * @hide
      */
-    public double txBadRate;
+    @SystemApi
+    public double getLostTxPacketsPerSecond() {
+        return mLostTxPacketsPerSecond;
+    }
+
+    /** @hide */
+    public void setLostTxPacketsPerSecond(double lostTxPacketsPerSecond) {
+        mLostTxPacketsPerSecond = lostTxPacketsPerSecond;
+    }
+
+    private double mTxRetriedTxPacketsPerSecond;
+
     /**
      * Average rate of transmitted retry packets, in units of packets per second.
      * @hide
      */
-    public double txRetriesRate;
+    @SystemApi
+    public double getRetriedTxPacketsPerSecond() {
+        return mTxRetriedTxPacketsPerSecond;
+    }
+
+    /** @hide */
+    public void setRetriedTxPacketsRate(double txRetriedTxPacketsPerSecond) {
+        mTxRetriedTxPacketsPerSecond = txRetriedTxPacketsPerSecond;
+    }
+
+    private double mSuccessfulTxPacketsPerSecond;
+
     /**
      * Average rate of successfully transmitted unicast packets, in units of packets per second.
      * @hide
      */
-    public double txSuccessRate;
+    @SystemApi
+    public double getSuccessfulTxPacketsPerSecond() {
+        return mSuccessfulTxPacketsPerSecond;
+    }
+
+    /** @hide */
+    public void setSuccessfulTxPacketsPerSecond(double successfulTxPacketsPerSecond) {
+        mSuccessfulTxPacketsPerSecond = successfulTxPacketsPerSecond;
+    }
+
+    private double mSuccessfulRxPacketsPerSecond;
+
     /**
      * Average rate of received unicast data packets, in units of packets per second.
      * @hide
      */
-    public double rxSuccessRate;
+    @SystemApi
+    public double getSuccessfulRxPacketsPerSecond() {
+        return mSuccessfulRxPacketsPerSecond;
+    }
 
-    /**
-     * @hide
-     */
+    /** @hide */
+    public void setSuccessfulRxPacketsPerSecond(double successfulRxPacketsPerSecond) {
+        mSuccessfulRxPacketsPerSecond = successfulRxPacketsPerSecond;
+    }
+
+    /** @hide */
     @UnsupportedAppUsage
     public int score;
+
+    /**
+     * The current Wifi score.
+     * NOTE: this value should only be used for debugging purposes. Do not rely on this value for
+     * any computations. The meaning of this value can and will change at any time without warning.
+     * @hide
+     */
+    @SystemApi
+    public int getScore() {
+        return score;
+    }
+
+    /** @hide */
+    public void setScore(int score) {
+        this.score = score;
+    }
 
     /**
      * Flag indicating that AP has hinted that upstream connection is metered,
      * and sensitive to heavy data transfers.
      */
     private boolean mMeteredHint;
+
+    /**
+     * Passpoint unique key
+     */
+    private String mPasspointUniqueId;
 
     /** @hide */
     @UnsupportedAppUsage
@@ -234,21 +317,24 @@ public class WifiInfo implements Parcelable {
         setLinkSpeed(LINK_SPEED_UNKNOWN);
         setTxLinkSpeedMbps(LINK_SPEED_UNKNOWN);
         setRxLinkSpeedMbps(LINK_SPEED_UNKNOWN);
+        setMaxSupportedTxLinkSpeedMbps(LINK_SPEED_UNKNOWN);
+        setMaxSupportedRxLinkSpeedMbps(LINK_SPEED_UNKNOWN);
         setFrequency(-1);
         setMeteredHint(false);
         setEphemeral(false);
         setOsuAp(false);
-        setNetworkSuggestionOrSpecifierPackageName(null);
+        setRequestingPackageName(null);
         setFQDN(null);
         setProviderFriendlyName(null);
+        setPasspointUniqueId(null);
         txBad = 0;
         txSuccess = 0;
         rxSuccess = 0;
         txRetries = 0;
-        txBadRate = 0;
-        txSuccessRate = 0;
-        rxSuccessRate = 0;
-        txRetriesRate = 0;
+        mLostTxPacketsPerSecond = 0;
+        mSuccessfulTxPacketsPerSecond = 0;
+        mSuccessfulRxPacketsPerSecond = 0;
+        mTxRetriedTxPacketsPerSecond = 0;
         score = 0;
     }
 
@@ -272,8 +358,8 @@ public class WifiInfo implements Parcelable {
             mMeteredHint = source.mMeteredHint;
             mEphemeral = source.mEphemeral;
             mTrusted = source.mTrusted;
-            mNetworkSuggestionOrSpecifierPackageName =
-                    source.mNetworkSuggestionOrSpecifierPackageName;
+            mRequestingPackageName =
+                    source.mRequestingPackageName;
             mOsuAp = source.mOsuAp;
             mFqdn = source.mFqdn;
             mProviderFriendlyName = source.mProviderFriendlyName;
@@ -281,11 +367,68 @@ public class WifiInfo implements Parcelable {
             txRetries = source.txRetries;
             txSuccess = source.txSuccess;
             rxSuccess = source.rxSuccess;
-            txBadRate = source.txBadRate;
-            txRetriesRate = source.txRetriesRate;
-            txSuccessRate = source.txSuccessRate;
-            rxSuccessRate = source.rxSuccessRate;
+            mLostTxPacketsPerSecond = source.mLostTxPacketsPerSecond;
+            mTxRetriedTxPacketsPerSecond = source.mTxRetriedTxPacketsPerSecond;
+            mSuccessfulTxPacketsPerSecond = source.mSuccessfulTxPacketsPerSecond;
+            mSuccessfulRxPacketsPerSecond = source.mSuccessfulRxPacketsPerSecond;
             score = source.score;
+            mWifiStandard = source.mWifiStandard;
+            mMaxSupportedTxLinkSpeed = source.mMaxSupportedTxLinkSpeed;
+            mMaxSupportedRxLinkSpeed = source.mMaxSupportedRxLinkSpeed;
+            mPasspointUniqueId = source.mPasspointUniqueId;
+        }
+    }
+
+    /** Builder for WifiInfo */
+    public static final class Builder {
+        private final WifiInfo mWifiInfo = new WifiInfo();
+
+        /**
+         * Set the SSID, in the form of a raw byte array.
+         * @see WifiInfo#getSSID()
+         */
+        @NonNull
+        public Builder setSsid(@NonNull byte[] ssid) {
+            mWifiInfo.setSSID(WifiSsid.createFromByteArray(ssid));
+            return this;
+        }
+
+        /**
+         * Set the BSSID.
+         * @see WifiInfo#getBSSID()
+         */
+        @NonNull
+        public Builder setBssid(@NonNull String bssid) {
+            mWifiInfo.setBSSID(bssid);
+            return this;
+        }
+
+        /**
+         * Set the RSSI, in dBm.
+         * @see WifiInfo#getRssi()
+         */
+        @NonNull
+        public Builder setRssi(int rssi) {
+            mWifiInfo.setRssi(rssi);
+            return this;
+        }
+
+        /**
+         * Set the network ID.
+         * @see WifiInfo#getNetworkId()
+         */
+        @NonNull
+        public Builder setNetworkId(int networkId) {
+            mWifiInfo.setNetworkId(networkId);
+            return this;
+        }
+
+        /**
+         * Build a WifiInfo object.
+         */
+        @NonNull
+        public WifiInfo build() {
+            return new WifiInfo(mWifiInfo);
         }
     }
 
@@ -299,9 +442,8 @@ public class WifiInfo implements Parcelable {
      * <p>
      * If the SSID can be decoded as UTF-8, it will be returned surrounded by double
      * quotation marks. Otherwise, it is returned as a string of hex digits.
-     * The SSID may be
-     * <lt>&lt;unknown ssid&gt;, if there is no network currently connected or if the caller has
-     * insufficient permissions to access the SSID.<lt>
+     * The SSID may be {@link WifiManager#UNKNOWN_SSID}, if there is no network currently connected
+     * or if the caller has insufficient permissions to access the SSID.
      * </p>
      * <p>
      * Prior to {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}, this method
@@ -317,10 +459,10 @@ public class WifiInfo implements Parcelable {
                 return "\"" + unicode + "\"";
             } else {
                 String hex = mWifiSsid.getHexString();
-                return (hex != null) ? hex : WifiSsid.NONE;
+                return (hex != null) ? hex : WifiManager.UNKNOWN_SSID;
             }
         }
-        return WifiSsid.NONE;
+        return WifiManager.UNKNOWN_SSID;
     }
 
     /** @hide */
@@ -374,6 +516,22 @@ public class WifiInfo implements Parcelable {
     }
 
     /**
+     * Sets the Wi-Fi standard
+     * @hide
+     */
+    public void setWifiStandard(@WifiAnnotations.WifiStandard int wifiStandard) {
+        mWifiStandard = wifiStandard;
+    }
+
+    /**
+     * Get connection Wi-Fi standard
+     * @return the connection Wi-Fi standard
+     */
+    public @WifiAnnotations.WifiStandard int getWifiStandard() {
+        return mWifiStandard;
+    }
+
+    /**
      * Returns the current link speed in {@link #LINK_SPEED_UNITS}.
      * @return the link speed or {@link #LINK_SPEED_UNKNOWN} if link speed is unknown.
      * @see #LINK_SPEED_UNITS
@@ -400,11 +558,28 @@ public class WifiInfo implements Parcelable {
     }
 
     /**
+     * Returns the maximum supported transmit link speed in Mbps
+     * @return the max supported tx link speed or {@link #LINK_SPEED_UNKNOWN} if link speed is
+     * unknown. @see #LINK_SPEED_UNKNOWN
+     */
+    public int getMaxSupportedTxLinkSpeedMbps() {
+        return mMaxSupportedTxLinkSpeed;
+    }
+
+    /**
      * Update the last transmitted packet bit rate in Mbps.
      * @hide
      */
     public void setTxLinkSpeedMbps(int txLinkSpeed) {
         mTxLinkSpeed = txLinkSpeed;
+    }
+
+    /**
+     * Set the maximum supported transmit link speed in Mbps
+     * @hide
+     */
+    public void setMaxSupportedTxLinkSpeedMbps(int maxSupportedTxLinkSpeed) {
+        mMaxSupportedTxLinkSpeed = maxSupportedTxLinkSpeed;
     }
 
     /**
@@ -418,11 +593,28 @@ public class WifiInfo implements Parcelable {
     }
 
     /**
+     * Returns the maximum supported receive link speed in Mbps
+     * @return the max supported Rx link speed or {@link #LINK_SPEED_UNKNOWN} if link speed is
+     * unknown. @see #LINK_SPEED_UNKNOWN
+     */
+    public int getMaxSupportedRxLinkSpeedMbps() {
+        return mMaxSupportedRxLinkSpeed;
+    }
+
+    /**
      * Update the last received packet bit rate in Mbps.
      * @hide
      */
     public void setRxLinkSpeedMbps(int rxLinkSpeed) {
         mRxLinkSpeed = rxLinkSpeed;
+    }
+
+    /**
+     * Set the maximum supported receive link speed in Mbps
+     * @hide
+     */
+    public void setMaxSupportedRxLinkSpeedMbps(int maxSupportedRxLinkSpeed) {
+        mMaxSupportedRxLinkSpeed = maxSupportedRxLinkSpeed;
     }
 
     /**
@@ -441,7 +633,6 @@ public class WifiInfo implements Parcelable {
 
     /**
      * @hide
-     * TODO: makes real freq boundaries
      */
     public boolean is24GHz() {
         return ScanResult.is24GHz(mFrequency);
@@ -449,11 +640,17 @@ public class WifiInfo implements Parcelable {
 
     /**
      * @hide
-     * TODO: makes real freq boundaries
      */
     @UnsupportedAppUsage
     public boolean is5GHz() {
         return ScanResult.is5GHz(mFrequency);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean is6GHz() {
+        return ScanResult.is6GHz(mFrequency);
     }
 
     /**
@@ -501,8 +698,15 @@ public class WifiInfo implements Parcelable {
         mEphemeral = ephemeral;
     }
 
-    /** {@hide} */
-    @UnsupportedAppUsage
+    /**
+     * Returns true if the current Wifi network is ephemeral, false otherwise.
+     * An ephemeral network is a network that is temporary and not persisted in the system.
+     * Ephemeral networks cannot be forgotten, only disabled with
+     * {@link WifiManager#disableEphemeralNetwork(String)}.
+     *
+     * @hide
+     */
+    @SystemApi
     public boolean isEphemeral() {
         return mEphemeral;
     }
@@ -541,6 +745,11 @@ public class WifiInfo implements Parcelable {
 
     /**
      * Returns the Fully Qualified Domain Name of the network if it is a Passpoint network.
+     * <p>
+     * The FQDN may be
+     * <lt>{@code null} if no network currently connected, currently connected network is not
+     * passpoint network or the caller has insufficient permissions to access the FQDN.</lt>
+     * </p>
      */
     public @Nullable String getPasspointFqdn() {
         return mFqdn;
@@ -553,19 +762,31 @@ public class WifiInfo implements Parcelable {
 
     /**
      * Returns the Provider Friendly Name of the network if it is a Passpoint network.
+     * <p>
+     * The Provider Friendly Name may be
+     * <lt>{@code null} if no network currently connected, currently connected network is not
+     * passpoint network or the caller has insufficient permissions to access the Provider Friendly
+     * Name. </lt>
+     * </p>
      */
     public @Nullable String getPasspointProviderFriendlyName() {
         return mProviderFriendlyName;
     }
 
     /** {@hide} */
-    public void setNetworkSuggestionOrSpecifierPackageName(@Nullable String packageName) {
-        mNetworkSuggestionOrSpecifierPackageName = packageName;
+    public void setRequestingPackageName(@Nullable String packageName) {
+        mRequestingPackageName = packageName;
     }
 
-    /** {@hide} */
-    public @Nullable String getNetworkSuggestionOrSpecifierPackageName() {
-        return mNetworkSuggestionOrSpecifierPackageName;
+    /**
+     * If this network was created in response to an app request (e.g. through Network Suggestion
+     * or Network Specifier), return the package name of the app that made the request.
+     * Null otherwise.
+     * @hide
+     */
+    @SystemApi
+    public @Nullable String getRequestingPackageName() {
+        return mRequestingPackageName;
     }
 
 
@@ -612,7 +833,7 @@ public class WifiInfo implements Parcelable {
     public int getIpAddress() {
         int result = 0;
         if (mIpAddress instanceof Inet4Address) {
-            result = NetworkUtils.inetAddressToInt((Inet4Address)mIpAddress);
+            result = Inet4AddressUtils.inet4AddressToIntHTL((Inet4Address) mIpAddress);
         }
         return result;
     }
@@ -626,7 +847,7 @@ public class WifiInfo implements Parcelable {
         return mWifiSsid.isHidden();
     }
 
-   /**
+    /**
      * Map a supplicant state into a fine-grained network connectivity state.
      * @param suppState the supplicant state
      * @return the corresponding {@link DetailedState}
@@ -686,15 +907,20 @@ public class WifiInfo implements Parcelable {
         StringBuffer sb = new StringBuffer();
         String none = "<none>";
 
-        sb.append("SSID: ").append(mWifiSsid == null ? WifiSsid.NONE : mWifiSsid)
+        sb.append("SSID: ").append(mWifiSsid == null ? WifiManager.UNKNOWN_SSID : mWifiSsid)
                 .append(", BSSID: ").append(mBSSID == null ? none : mBSSID)
                 .append(", MAC: ").append(mMacAddress == null ? none : mMacAddress)
                 .append(", Supplicant state: ")
                 .append(mSupplicantState == null ? none : mSupplicantState)
+                .append(", Wi-Fi standard: ").append(mWifiStandard)
                 .append(", RSSI: ").append(mRssi)
                 .append(", Link speed: ").append(mLinkSpeed).append(LINK_SPEED_UNITS)
                 .append(", Tx Link speed: ").append(mTxLinkSpeed).append(LINK_SPEED_UNITS)
+                .append(", Max Supported Tx Link speed: ")
+                .append(mMaxSupportedTxLinkSpeed).append(LINK_SPEED_UNITS)
                 .append(", Rx Link speed: ").append(mRxLinkSpeed).append(LINK_SPEED_UNITS)
+                .append(", Max Supported Rx Link speed: ")
+                .append(mMaxSupportedRxLinkSpeed).append(LINK_SPEED_UNITS)
                 .append(", Frequency: ").append(mFrequency).append(FREQUENCY_UNITS)
                 .append(", Net ID: ").append(mNetworkId)
                 .append(", Metered hint: ").append(mMeteredHint)
@@ -734,18 +960,22 @@ public class WifiInfo implements Parcelable {
         dest.writeInt(mTrusted ? 1 : 0);
         dest.writeInt(score);
         dest.writeLong(txSuccess);
-        dest.writeDouble(txSuccessRate);
+        dest.writeDouble(mSuccessfulTxPacketsPerSecond);
         dest.writeLong(txRetries);
-        dest.writeDouble(txRetriesRate);
+        dest.writeDouble(mTxRetriedTxPacketsPerSecond);
         dest.writeLong(txBad);
-        dest.writeDouble(txBadRate);
+        dest.writeDouble(mLostTxPacketsPerSecond);
         dest.writeLong(rxSuccess);
-        dest.writeDouble(rxSuccessRate);
+        dest.writeDouble(mSuccessfulRxPacketsPerSecond);
         mSupplicantState.writeToParcel(dest, flags);
         dest.writeInt(mOsuAp ? 1 : 0);
-        dest.writeString(mNetworkSuggestionOrSpecifierPackageName);
+        dest.writeString(mRequestingPackageName);
         dest.writeString(mFqdn);
         dest.writeString(mProviderFriendlyName);
+        dest.writeInt(mWifiStandard);
+        dest.writeInt(mMaxSupportedTxLinkSpeed);
+        dest.writeInt(mMaxSupportedRxLinkSpeed);
+        dest.writeString(mPasspointUniqueId);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -775,18 +1005,22 @@ public class WifiInfo implements Parcelable {
                 info.mTrusted = in.readInt() != 0;
                 info.score = in.readInt();
                 info.txSuccess = in.readLong();
-                info.txSuccessRate = in.readDouble();
+                info.mSuccessfulTxPacketsPerSecond = in.readDouble();
                 info.txRetries = in.readLong();
-                info.txRetriesRate = in.readDouble();
+                info.mTxRetriedTxPacketsPerSecond = in.readDouble();
                 info.txBad = in.readLong();
-                info.txBadRate = in.readDouble();
+                info.mLostTxPacketsPerSecond = in.readDouble();
                 info.rxSuccess = in.readLong();
-                info.rxSuccessRate = in.readDouble();
+                info.mSuccessfulRxPacketsPerSecond = in.readDouble();
                 info.mSupplicantState = SupplicantState.CREATOR.createFromParcel(in);
                 info.mOsuAp = in.readInt() != 0;
-                info.mNetworkSuggestionOrSpecifierPackageName = in.readString();
+                info.mRequestingPackageName = in.readString();
                 info.mFqdn = in.readString();
                 info.mProviderFriendlyName = in.readString();
+                info.mWifiStandard = in.readInt();
+                info.mMaxSupportedTxLinkSpeed = in.readInt();
+                info.mMaxSupportedRxLinkSpeed = in.readInt();
+                info.mPasspointUniqueId = in.readString();
                 return info;
             }
 
@@ -794,4 +1028,24 @@ public class WifiInfo implements Parcelable {
                 return new WifiInfo[size];
             }
         };
+
+    /**
+     * Set the Passpoint unique identifier for the current connection
+     *
+     * @param passpointUniqueId Unique identifier
+     * @hide
+     */
+    public void setPasspointUniqueId(@Nullable String passpointUniqueId) {
+        mPasspointUniqueId = passpointUniqueId;
+    }
+
+    /**
+     * Get the Passpoint unique identifier for the current connection
+     *
+     * @return Passpoint unique identifier
+     * @hide
+     */
+    public @Nullable String getPasspointUniqueId() {
+        return mPasspointUniqueId;
+    }
 }

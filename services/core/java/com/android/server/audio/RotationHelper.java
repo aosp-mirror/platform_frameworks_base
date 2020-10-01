@@ -80,6 +80,7 @@ class RotationHelper {
     static void updateOrientation() {
         // Even though we're responding to device orientation events,
         // use display rotation so audio stays in sync with video/dialogs
+        // TODO(b/148458001): Support multi-display
         int newRotation = ((WindowManager) sContext.getSystemService(
                 Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
         synchronized(sRotationLock) {

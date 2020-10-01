@@ -263,7 +263,8 @@ public class ExpandableViewState extends ViewState {
                 || previousAnimator.getAnimatedFraction() == 0)) {
             animator.setStartDelay(properties.delay);
         }
-        AnimatorListenerAdapter listener = properties.getAnimationFinishListener();
+        AnimatorListenerAdapter listener = properties.getAnimationFinishListener(
+                null /* no property for this height */);
         if (listener != null) {
             animator.addListener(listener);
         }
@@ -343,7 +344,8 @@ public class ExpandableViewState extends ViewState {
                 || previousAnimator.getAnimatedFraction() == 0)) {
             animator.setStartDelay(properties.delay);
         }
-        AnimatorListenerAdapter listener = properties.getAnimationFinishListener();
+        AnimatorListenerAdapter listener = properties.getAnimationFinishListener(
+                null /* no property for top inset */);
         if (listener != null) {
             animator.addListener(listener);
         }

@@ -101,13 +101,13 @@ import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
+import static com.android.server.net.NetworkPolicyLogger.NTWK_ALLOWED_ALLOWLIST;
 import static com.android.server.net.NetworkPolicyLogger.NTWK_ALLOWED_DEFAULT;
 import static com.android.server.net.NetworkPolicyLogger.NTWK_ALLOWED_NON_METERED;
 import static com.android.server.net.NetworkPolicyLogger.NTWK_ALLOWED_SYSTEM;
-import static com.android.server.net.NetworkPolicyLogger.NTWK_ALLOWED_TMP_WHITELIST;
-import static com.android.server.net.NetworkPolicyLogger.NTWK_ALLOWED_WHITELIST;
+import static com.android.server.net.NetworkPolicyLogger.NTWK_ALLOWED_TMP_ALLOWLIST;
 import static com.android.server.net.NetworkPolicyLogger.NTWK_BLOCKED_BG_RESTRICT;
-import static com.android.server.net.NetworkPolicyLogger.NTWK_BLOCKED_BLACKLIST;
+import static com.android.server.net.NetworkPolicyLogger.NTWK_BLOCKED_DENYLIST;
 import static com.android.server.net.NetworkPolicyLogger.NTWK_BLOCKED_POWER;
 import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_UPDATED;
 
@@ -171,7 +171,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
-import android.os.IDeviceIdleController;
 import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.MessageQueue.IdleHandler;
@@ -180,11 +179,11 @@ import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
+import android.os.PowerWhitelistManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -223,8 +222,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
-import com.android.internal.os.RoSystemProperties;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
@@ -234,6 +233,8 @@ import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
+import com.android.server.usage.AppStandbyInternal;
+import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import libcore.io.IoUtils;
 
@@ -368,7 +369,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             "com.android.server.net.action.SNOOZE_RAPID";
 
     /**
-     * Indicates the maximum wait time for admin data to be available;
+     * Indicates the maximum wait time for admin data to be available.
      */
     private static final long WAIT_FOR_ADMIN_DATA_TIMEOUT_MS = 10_000;
 
@@ -402,15 +403,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private NetworkStatsManagerInternal mNetworkStats;
     private final INetworkManagementService mNetworkManager;
     private UsageStatsManagerInternal mUsageStats;
+    private AppStandbyInternal mAppStandby;
     private final Clock mClock;
     private final UserManager mUserManager;
     private final CarrierConfigManager mCarrierConfigManager;
 
     private IConnectivityManager mConnManager;
     private PowerManagerInternal mPowerManagerInternal;
-    private IDeviceIdleController mDeviceIdleController;
+    private PowerWhitelistManager mPowerWhitelistManager;
+
+    /** Current cached value of the current Battery Saver mode's setting for restrict background. */
     @GuardedBy("mUidRulesFirstLock")
-    private PowerSaveState mRestrictBackgroundPowerState;
+    private boolean mRestrictBackgroundLowPowerMode;
 
     // Store the status of restrict background before turning on battery saver.
     // Used to restore mRestrictBackground when battery saver is turned off.
@@ -474,7 +478,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     // and "battery saver" are not equivalent.
 
     /**
-     * UIDs that have been white-listed to always be able to have network access
+     * UIDs that have been allowlisted to always be able to have network access
      * in power save mode, except device idle (doze) still applies.
      * TODO: An int array might be sufficient
      */
@@ -482,7 +486,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final SparseBooleanArray mPowerSaveWhitelistExceptIdleAppIds = new SparseBooleanArray();
 
     /**
-     * UIDs that have been white-listed to always be able to have network access
+     * UIDs that have been allowlisted to always be able to have network access
      * in power save mode.
      * TODO: An int array might be sufficient
      */
@@ -493,25 +497,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final SparseBooleanArray mPowerSaveTempWhitelistAppIds = new SparseBooleanArray();
 
     /**
-     * UIDs that have been white-listed temporarily to be able to have network access despite being
+     * UIDs that have been allowlisted temporarily to be able to have network access despite being
      * idle. Other power saving restrictions still apply.
      */
     @GuardedBy("mUidRulesFirstLock")
     private final SparseBooleanArray mAppIdleTempWhitelistAppIds = new SparseBooleanArray();
 
     /**
-     * UIDs that have been initially white-listed by system to avoid restricted background.
+     * UIDs that have been initially allowlisted by system to avoid restricted background.
      */
     @GuardedBy("mUidRulesFirstLock")
-    private final SparseBooleanArray mDefaultRestrictBackgroundWhitelistUids =
+    private final SparseBooleanArray mDefaultRestrictBackgroundAllowlistUids =
             new SparseBooleanArray();
 
     /**
-     * UIDs that have been initially white-listed by system to avoid restricted background,
+     * UIDs that have been initially allowlisted by system to avoid restricted background,
      * but later revoked by user.
      */
     @GuardedBy("mUidRulesFirstLock")
-    private final SparseBooleanArray mRestrictBackgroundWhitelistRevokedUids =
+    private final SparseBooleanArray mRestrictBackgroundAllowlistRevokedUids =
             new SparseBooleanArray();
 
     /** Set of ifaces that are metered. */
@@ -574,7 +578,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private final NetworkPolicyLogger mLogger = new NetworkPolicyLogger();
 
-    // TODO: keep whitelist of system-critical services that should never have
+    /** List of apps indexed by appId and whether they have the internet permission */
+    @GuardedBy("mUidRulesFirstLock")
+    private final SparseBooleanArray mInternetPermissionMap = new SparseBooleanArray();
+
+    // TODO: keep allowlist of system-critical services that should never have
     // rules enforced, such as system, phone, and radio UIDs.
 
     // TODO: migrate notifications to SystemUI
@@ -613,8 +621,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mContext = Objects.requireNonNull(context, "missing context");
         mActivityManager = Objects.requireNonNull(activityManager, "missing activityManager");
         mNetworkManager = Objects.requireNonNull(networkManagement, "missing networkManagement");
-        mDeviceIdleController = IDeviceIdleController.Stub.asInterface(ServiceManager.getService(
-                Context.DEVICE_IDLE_CONTROLLER));
+        mPowerWhitelistManager = mContext.getSystemService(PowerWhitelistManager.class);
         mClock = Objects.requireNonNull(clock, "missing Clock");
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mCarrierConfigManager = mContext.getSystemService(CarrierConfigManager.class);
@@ -646,47 +653,41 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @GuardedBy("mUidRulesFirstLock")
-    void updatePowerSaveWhitelistUL() {
-        try {
-            int[] whitelist = mDeviceIdleController.getAppIdWhitelistExceptIdle();
-            mPowerSaveWhitelistExceptIdleAppIds.clear();
-            if (whitelist != null) {
-                for (int uid : whitelist) {
-                    mPowerSaveWhitelistExceptIdleAppIds.put(uid, true);
-                }
-            }
-            whitelist = mDeviceIdleController.getAppIdWhitelist();
-            mPowerSaveWhitelistAppIds.clear();
-            if (whitelist != null) {
-                for (int uid : whitelist) {
-                    mPowerSaveWhitelistAppIds.put(uid, true);
-                }
-            }
-        } catch (RemoteException e) {
+    private void updatePowerSaveWhitelistUL() {
+        int[] whitelist = mPowerWhitelistManager.getWhitelistedAppIds(/* includingIdle */ false);
+        mPowerSaveWhitelistExceptIdleAppIds.clear();
+        for (int uid : whitelist) {
+            mPowerSaveWhitelistExceptIdleAppIds.put(uid, true);
+        }
+
+        whitelist = mPowerWhitelistManager.getWhitelistedAppIds(/* includingIdle */ true);
+        mPowerSaveWhitelistAppIds.clear();
+        for (int uid : whitelist) {
+            mPowerSaveWhitelistAppIds.put(uid, true);
         }
     }
 
     /**
-     * Whitelists pre-defined apps for restrict background, but only if the user didn't already
-     * revoke the whitelist.
+     * Allows pre-defined apps for restrict background, but only if the user didn't already
+     * revoked them.
      *
-     * @return whether any uid has been whitelisted.
+     * @return whether any uid has been allowlisted.
      */
     @GuardedBy("mUidRulesFirstLock")
-    boolean addDefaultRestrictBackgroundWhitelistUidsUL() {
+    boolean addDefaultRestrictBackgroundAllowlistUidsUL() {
         final List<UserInfo> users = mUserManager.getUsers();
         final int numberUsers = users.size();
 
         boolean changed = false;
         for (int i = 0; i < numberUsers; i++) {
             final UserInfo user = users.get(i);
-            changed = addDefaultRestrictBackgroundWhitelistUidsUL(user.id) || changed;
+            changed = addDefaultRestrictBackgroundAllowlistUidsUL(user.id) || changed;
         }
         return changed;
     }
 
     @GuardedBy("mUidRulesFirstLock")
-    private boolean addDefaultRestrictBackgroundWhitelistUidsUL(int userId) {
+    private boolean addDefaultRestrictBackgroundAllowlistUidsUL(int userId) {
         final SystemConfig sysConfig = SystemConfig.getInstance();
         final PackageManager pm = mContext.getPackageManager();
         final ArraySet<String> allowDataUsage = sysConfig.getAllowInDataUsageSave();
@@ -694,7 +695,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         for (int i = 0; i < allowDataUsage.size(); i++) {
             final String pkg = allowDataUsage.valueAt(i);
             if (LOGD)
-                Slog.d(TAG, "checking restricted background whitelisting for package " + pkg
+                Slog.d(TAG, "checking restricted background allowlisting for package " + pkg
                         + " and user " + userId);
             final ApplicationInfo app;
             try {
@@ -705,20 +706,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 continue;
             }
             if (!app.isPrivilegedApp()) {
-                Slog.e(TAG, "addDefaultRestrictBackgroundWhitelistUidsUL(): "
+                Slog.e(TAG, "addDefaultRestrictBackgroundAllowlistUidsUL(): "
                         + "skipping non-privileged app  " + pkg);
                 continue;
             }
             final int uid = UserHandle.getUid(userId, app.uid);
-            mDefaultRestrictBackgroundWhitelistUids.append(uid, true);
+            mDefaultRestrictBackgroundAllowlistUids.append(uid, true);
             if (LOGD)
                 Slog.d(TAG, "Adding uid " + uid + " (user " + userId + ") to default restricted "
-                        + "background whitelist. Revoked status: "
-                        + mRestrictBackgroundWhitelistRevokedUids.get(uid));
-            if (!mRestrictBackgroundWhitelistRevokedUids.get(uid)) {
+                        + "background allowlist. Revoked status: "
+                        + mRestrictBackgroundAllowlistRevokedUids.get(uid));
+            if (!mRestrictBackgroundAllowlistRevokedUids.get(uid)) {
                 if (LOGD)
                     Slog.d(TAG, "adding default package " + pkg + " (uid " + uid + " for user "
-                            + userId + ") to restrict background whitelist");
+                            + userId + ") to restrict background allowlist");
                 setUidPolicyUncheckedUL(uid, POLICY_ALLOW_METERED_BACKGROUND, false);
                 changed = true;
             }
@@ -738,6 +739,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
 
             mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
+            mAppStandby = LocalServices.getService(AppStandbyInternal.class);
             mNetworkStats = LocalServices.getService(NetworkStatsManagerInternal.class);
 
             synchronized (mUidRulesFirstLock) {
@@ -777,11 +779,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                     // Update the restrictBackground if battery saver is turned on
                     mRestrictBackgroundBeforeBsm = mLoadedRestrictBackground;
-                    mRestrictBackgroundPowerState = mPowerManagerInternal
-                            .getLowPowerState(ServiceType.DATA_SAVER);
-                    final boolean localRestrictBackground =
-                            mRestrictBackgroundPowerState.batterySaverEnabled;
-                    if (localRestrictBackground && !mLoadedRestrictBackground) {
+                    mRestrictBackgroundLowPowerMode = mPowerManagerInternal
+                            .getLowPowerState(ServiceType.DATA_SAVER).batterySaverEnabled;
+                    if (mRestrictBackgroundLowPowerMode && !mLoadedRestrictBackground) {
                         mLoadedRestrictBackground = true;
                     }
                     mPowerManagerInternal.registerLowPowerModeObserver(
@@ -799,11 +799,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                                 }
                             });
 
-                    if (addDefaultRestrictBackgroundWhitelistUidsUL()) {
+                    if (addDefaultRestrictBackgroundAllowlistUidsUL()) {
                         writePolicyAL();
                     }
 
-                    setRestrictBackgroundUL(mLoadedRestrictBackground);
+                    setRestrictBackgroundUL(mLoadedRestrictBackground, "init_service");
                     updateRulesForGlobalChangeAL(false);
                     updateNotificationsNL();
                 }
@@ -819,7 +819,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // ignored; both services live in system_server
             }
 
-            // listen for changes to power save whitelist
+            // listen for changes to power save allowlist
             final IntentFilter whitelistFilter = new IntentFilter(
                     PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED);
             mContext.registerReceiver(mPowerSaveWhitelistReceiver, whitelistFilter, null, mHandler);
@@ -873,7 +873,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mContext.getSystemService(ConnectivityManager.class).registerNetworkCallback(
                     new NetworkRequest.Builder().build(), mNetworkCallback);
 
-            mUsageStats.addAppIdleStateChangeListener(new AppIdleStateChangeListener());
+            mAppStandby.addListener(new NetPolicyAppIdleStateChangeListener());
+            synchronized (mUidRulesFirstLock) {
+                updateRulesForAppIdleParoleUL();
+            }
 
             // Listen for subscriber changes
             mContext.getSystemService(SubscriptionManager.class).addOnSubscriptionsChangedListener(
@@ -914,7 +917,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
-        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
+        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq,
+                int capability) {
             mUidEventHandler.obtainMessage(UID_MSG_STATE_CHANGED,
                     uid, procState, procStateSeq).sendToTarget();
         }
@@ -958,7 +962,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // update rules for UID, since it might be subject to
                 // global background data policy
                 if (LOGV) Slog.v(TAG, "ACTION_PACKAGE_ADDED for uid=" + uid);
+                // Clear the cache for the app
                 synchronized (mUidRulesFirstLock) {
+                    mInternetPermissionMap.delete(UserHandle.getAppId(uid));
                     updateRestrictionRulesForUidUL(uid);
                 }
             }
@@ -999,14 +1005,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 case ACTION_USER_ADDED:
                     synchronized (mUidRulesFirstLock) {
                         // Remove any persistable state for the given user; both cleaning up after a
-                        // USER_REMOVED, and one last sanity check during USER_ADDED
-                        removeUserStateUL(userId, true);
+                        // USER_REMOVED, and one last check during USER_ADDED
+                        removeUserStateUL(userId, true, false);
                         // Removing outside removeUserStateUL since that can also be called when
                         // user resets app preferences.
                         mMeteredRestrictedUids.remove(userId);
                         if (action == ACTION_USER_ADDED) {
-                            // Add apps that are whitelisted by default.
-                            addDefaultRestrictBackgroundWhitelistUidsUL(userId);
+                            // Add apps that are allowlisted by default.
+                            addDefaultRestrictBackgroundAllowlistUidsUL(userId);
                         }
                         // Update global restrict for that user
                         synchronized (mNetworkPoliciesSecondLock) {
@@ -1362,7 +1368,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                 final Intent viewIntent = buildViewDataUsageIntent(res, policy.template);
                 // TODO: Resolve to single code path.
-                if (isHeadlessSystemUserBuild()) {
+                if (UserManager.isHeadlessSystemUserMode()) {
                     builder.setContentIntent(PendingIntent.getActivityAsUser(
                             mContext, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT,
                             /* options= */ null, UserHandle.CURRENT));
@@ -1390,7 +1396,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                 final Intent intent = buildNetworkOverLimitIntent(res, policy.template);
                 // TODO: Resolve to single code path.
-                if (isHeadlessSystemUserBuild()) {
+                if (UserManager.isHeadlessSystemUserMode()) {
                     builder.setContentIntent(PendingIntent.getActivityAsUser(
                             mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT,
                             /* options= */ null, UserHandle.CURRENT));
@@ -1421,7 +1427,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                 final Intent intent = buildViewDataUsageIntent(res, policy.template);
                 // TODO: Resolve to single code path.
-                if (isHeadlessSystemUserBuild()) {
+                if (UserManager.isHeadlessSystemUserMode()) {
                     builder.setContentIntent(PendingIntent.getActivityAsUser(
                             mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT,
                             /* options= */ null, UserHandle.CURRENT));
@@ -1448,7 +1454,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                 final Intent viewIntent = buildViewDataUsageIntent(res, policy.template);
                 // TODO: Resolve to single code path.
-                if (isHeadlessSystemUserBuild()) {
+                if (UserManager.isHeadlessSystemUserMode()) {
                     builder.setContentIntent(PendingIntent.getActivityAsUser(
                             mContext, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT,
                             /* options= */ null, UserHandle.CURRENT));
@@ -1777,7 +1783,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
             for (int i = 0; i < matchingSubIds.size(); i++) {
                 final int subId = matchingSubIds.get(i);
-                tm.setPolicyDataEnabled(enabled, subId);
+                tm.createForSubscriptionId(subId).setPolicyDataEnabled(enabled);
             }
         }
     }
@@ -1800,7 +1806,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     /**
      * Examine all currently active subscriptions from
-     * {@link SubscriptionManager#getActiveSubscriptionIdList()} and update
+     * {@link SubscriptionManager#getActiveSubscriptionInfoList()} and update
      * internal data structures.
      * <p>
      * Callers <em>must not</em> hold any locks when this method called.
@@ -1811,21 +1817,22 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         final TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
         final SubscriptionManager sm = mContext.getSystemService(SubscriptionManager.class);
+        final List<SubscriptionInfo> subList = CollectionUtils.emptyIfNull(
+                sm.getActiveSubscriptionInfoList());
 
-        final int[] subIds = ArrayUtils.defeatNullable(sm.getActiveSubscriptionIdList());
         final List<String[]> mergedSubscriberIdsList = new ArrayList();
-
-        final SparseArray<String> subIdToSubscriberId = new SparseArray<>(subIds.length);
-        for (int subId : subIds) {
-            final String subscriberId = tm.getSubscriberId(subId);
+        final SparseArray<String> subIdToSubscriberId = new SparseArray<>(subList.size());
+        for (final SubscriptionInfo sub : subList) {
+            final TelephonyManager tmSub = tm.createForSubscriptionId(sub.getSubscriptionId());
+            final String subscriberId = tmSub.getSubscriberId();
             if (!TextUtils.isEmpty(subscriberId)) {
-                subIdToSubscriberId.put(subId, subscriberId);
+                subIdToSubscriberId.put(tmSub.getSubscriptionId(), subscriberId);
             } else {
-                Slog.wtf(TAG, "Missing subscriberId for subId " + subId);
+                Slog.wtf(TAG, "Missing subscriberId for subId " + tmSub.getSubscriptionId());
             }
 
-            String[] mergedSubscriberId = ArrayUtils.defeatNullable(
-                    tm.createForSubscriptionId(subId).getMergedSubscriberIdsFromGroup());
+            final String[] mergedSubscriberId = ArrayUtils.defeatNullable(
+                    tmSub.getMergedImsisFromGroup());
             mergedSubscriberIdsList.add(mergedSubscriberId);
         }
 
@@ -2189,12 +2196,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             in.setInput(fis, StandardCharsets.UTF_8.name());
 
              // Must save the <restrict-background> tags and convert them to <uid-policy> later,
-             // to skip UIDs that were explicitly blacklisted.
-            final SparseBooleanArray whitelistedRestrictBackground = new SparseBooleanArray();
+             // to skip UIDs that were explicitly denylisted.
+            final SparseBooleanArray allowlistedRestrictBackground = new SparseBooleanArray();
 
             int type;
             int version = VERSION_INIT;
-            boolean insideWhitelist = false;
+            boolean insideAllowlist = false;
             while ((type = in.next()) != END_DOCUMENT) {
                 final String tag = in.getName();
                 if (type == START_TAG) {
@@ -2333,28 +2340,28 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                             Slog.w(TAG, "unable to apply policy to UID " + uid + "; ignoring");
                         }
                     } else if (TAG_WHITELIST.equals(tag)) {
-                        insideWhitelist = true;
-                    } else if (TAG_RESTRICT_BACKGROUND.equals(tag) && insideWhitelist) {
+                        insideAllowlist = true;
+                    } else if (TAG_RESTRICT_BACKGROUND.equals(tag) && insideAllowlist) {
                         final int uid = readIntAttribute(in, ATTR_UID);
-                        whitelistedRestrictBackground.append(uid, true);
-                    } else if (TAG_REVOKED_RESTRICT_BACKGROUND.equals(tag) && insideWhitelist) {
+                        allowlistedRestrictBackground.append(uid, true);
+                    } else if (TAG_REVOKED_RESTRICT_BACKGROUND.equals(tag) && insideAllowlist) {
                         final int uid = readIntAttribute(in, ATTR_UID);
-                        mRestrictBackgroundWhitelistRevokedUids.put(uid, true);
+                        mRestrictBackgroundAllowlistRevokedUids.put(uid, true);
                     }
                 } else if (type == END_TAG) {
                     if (TAG_WHITELIST.equals(tag)) {
-                        insideWhitelist = false;
+                        insideAllowlist = false;
                     }
 
                 }
             }
 
-            final int size = whitelistedRestrictBackground.size();
+            final int size = allowlistedRestrictBackground.size();
             for (int i = 0; i < size; i++) {
-                final int uid = whitelistedRestrictBackground.keyAt(i);
+                final int uid = allowlistedRestrictBackground.keyAt(i);
                 final int policy = mUidPolicy.get(uid, POLICY_NONE);
                 if ((policy & POLICY_REJECT_METERED_BACKGROUND) != 0) {
-                    Slog.w(TAG, "ignoring restrict-background-whitelist for " + uid
+                    Slog.w(TAG, "ignoring restrict-background-allowlist for " + uid
                             + " because its policy is " + uidPoliciesToString(policy));
                     continue;
                 }
@@ -2526,13 +2533,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             out.endTag(null, TAG_POLICY_LIST);
 
-            // write all whitelists
+            // write all allowlists
             out.startTag(null, TAG_WHITELIST);
 
-            // revoked restrict background whitelist
-            int size = mRestrictBackgroundWhitelistRevokedUids.size();
+            // revoked restrict background allowlist
+            int size = mRestrictBackgroundAllowlistRevokedUids.size();
             for (int i = 0; i < size; i++) {
-                final int uid = mRestrictBackgroundWhitelistRevokedUids.keyAt(i);
+                final int uid = mRestrictBackgroundAllowlistRevokedUids.keyAt(i);
                 out.startTag(null, TAG_REVOKED_RESTRICT_BACKGROUND);
                 writeIntAttribute(out, ATTR_UID, uid);
                 out.endTag(null, TAG_REVOKED_RESTRICT_BACKGROUND);
@@ -2612,21 +2619,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         setUidPolicyUncheckedUL(uid, policy, false);
 
         final boolean notifyApp;
-        if (!isUidValidForWhitelistRules(uid)) {
+        if (!isUidValidForAllowlistRulesUL(uid)) {
             notifyApp = false;
         } else {
-            final boolean wasBlacklisted = oldPolicy == POLICY_REJECT_METERED_BACKGROUND;
-            final boolean isBlacklisted = policy == POLICY_REJECT_METERED_BACKGROUND;
-            final boolean wasWhitelisted = oldPolicy == POLICY_ALLOW_METERED_BACKGROUND;
-            final boolean isWhitelisted = policy == POLICY_ALLOW_METERED_BACKGROUND;
-            final boolean wasBlocked = wasBlacklisted || (mRestrictBackground && !wasWhitelisted);
-            final boolean isBlocked = isBlacklisted || (mRestrictBackground && !isWhitelisted);
-            if ((wasWhitelisted && (!isWhitelisted || isBlacklisted))
-                    && mDefaultRestrictBackgroundWhitelistUids.get(uid)
-                    && !mRestrictBackgroundWhitelistRevokedUids.get(uid)) {
+            final boolean wasDenylisted = oldPolicy == POLICY_REJECT_METERED_BACKGROUND;
+            final boolean isDenylisted = policy == POLICY_REJECT_METERED_BACKGROUND;
+            final boolean wasAllowlisted = oldPolicy == POLICY_ALLOW_METERED_BACKGROUND;
+            final boolean isAllowlisted = policy == POLICY_ALLOW_METERED_BACKGROUND;
+            final boolean wasBlocked = wasDenylisted || (mRestrictBackground && !wasAllowlisted);
+            final boolean isBlocked = isDenylisted || (mRestrictBackground && !isAllowlisted);
+            if ((wasAllowlisted && (!isAllowlisted || isDenylisted))
+                    && mDefaultRestrictBackgroundAllowlistUids.get(uid)
+                    && !mRestrictBackgroundAllowlistRevokedUids.get(uid)) {
                 if (LOGD)
-                    Slog.d(TAG, "Adding uid " + uid + " to revoked restrict background whitelist");
-                mRestrictBackgroundWhitelistRevokedUids.append(uid, true);
+                    Slog.d(TAG, "Adding uid " + uid + " to revoked restrict background allowlist");
+                mRestrictBackgroundAllowlistRevokedUids.append(uid, true);
             }
             notifyApp = wasBlocked != isBlocked;
         }
@@ -2688,16 +2695,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * if any changes that are made.
      */
     @GuardedBy("mUidRulesFirstLock")
-    boolean removeUserStateUL(int userId, boolean writePolicy) {
+    boolean removeUserStateUL(int userId, boolean writePolicy, boolean updateGlobalRules) {
 
         mLogger.removingUserState(userId);
         boolean changed = false;
 
-        // Remove entries from revoked default restricted background UID whitelist
-        for (int i = mRestrictBackgroundWhitelistRevokedUids.size() - 1; i >= 0; i--) {
-            final int uid = mRestrictBackgroundWhitelistRevokedUids.keyAt(i);
+        // Remove entries from revoked default restricted background UID allowlist
+        for (int i = mRestrictBackgroundAllowlistRevokedUids.size() - 1; i >= 0; i--) {
+            final int uid = mRestrictBackgroundAllowlistRevokedUids.keyAt(i);
             if (UserHandle.getUserId(uid) == userId) {
-                mRestrictBackgroundWhitelistRevokedUids.removeAt(i);
+                mRestrictBackgroundAllowlistRevokedUids.removeAt(i);
                 changed = true;
             }
         }
@@ -2718,7 +2725,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             changed = true;
         }
         synchronized (mNetworkPoliciesSecondLock) {
-            updateRulesForGlobalChangeAL(true);
+            if (updateGlobalRules) {
+                updateRulesForGlobalChangeAL(true);
+            }
             if (writePolicy && changed) {
                 writePolicyAL();
             }
@@ -2878,10 +2887,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "setRestrictBackground");
         try {
             mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+            final int callingUid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mUidRulesFirstLock) {
-                    setRestrictBackgroundUL(restrictBackground);
+                    setRestrictBackgroundUL(restrictBackground, "uid:" + callingUid);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -2892,7 +2902,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @GuardedBy("mUidRulesFirstLock")
-    private void setRestrictBackgroundUL(boolean restrictBackground) {
+    private void setRestrictBackgroundUL(boolean restrictBackground, String reason) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "setRestrictBackgroundUL");
         try {
             if (restrictBackground == mRestrictBackground) {
@@ -2900,10 +2910,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 Slog.w(TAG, "setRestrictBackgroundUL: already " + restrictBackground);
                 return;
             }
-            Slog.d(TAG, "setRestrictBackgroundUL(): " + restrictBackground);
+            Slog.d(TAG, "setRestrictBackgroundUL(): " + restrictBackground + "; reason: " + reason);
             final boolean oldRestrictBackground = mRestrictBackground;
             mRestrictBackground = restrictBackground;
-            // Must whitelist foreground apps before turning data saver mode on.
+            // Must allowlist foreground apps before turning data saver mode on.
             // TODO: there is no need to iterate through all apps here, just those in the foreground,
             // so it could call AM to get the UIDs of such apps, and iterate through them instead.
             updateRulesForRestrictBackgroundUL();
@@ -2923,7 +2933,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             sendRestrictBackgroundChangedMsg();
             mLogger.restrictBackgroundChanged(oldRestrictBackground, mRestrictBackground);
 
-            if (mRestrictBackgroundPowerState.globalBatterySaverEnabled) {
+            if (mRestrictBackgroundLowPowerMode) {
                 mRestrictBackgroundChangedInBsm = true;
             }
             synchronized (mNetworkPoliciesSecondLock) {
@@ -2956,7 +2966,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 Binder.restoreCallingIdentity(token);
             }
             if (policy == POLICY_REJECT_METERED_BACKGROUND) {
-                // App is blacklisted.
+                // App is denylisted.
                 return RESTRICT_BACKGROUND_STATUS_ENABLED;
             }
             if (!mRestrictBackground) {
@@ -3354,6 +3364,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * existing plans; it simply lets the debug package define new plans.
      */
     void setSubscriptionPlansOwner(int subId, String packageName) {
+        mContext.enforceCallingOrSelfPermission(NETWORK_SETTINGS, TAG);
         SystemProperties.set(PROP_SUB_PLAN_OWNER + "." + subId, packageName);
     }
 
@@ -3425,7 +3436,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 fout.print("Restrict background: "); fout.println(mRestrictBackground);
                 fout.print("Restrict power: "); fout.println(mRestrictPower);
                 fout.print("Device idle: "); fout.println(mDeviceIdleMode);
-                fout.print("Metered ifaces: "); fout.println(String.valueOf(mMeteredIfaces));
+                fout.print("Metered ifaces: "); fout.println(mMeteredIfaces);
+
+                fout.println();
+                fout.print("mRestrictBackgroundLowPowerMode: " + mRestrictBackgroundLowPowerMode);
+                fout.print("mRestrictBackgroundBeforeBsm: " + mRestrictBackgroundBeforeBsm);
+                fout.print("mLoadedRestrictBackground: " + mLoadedRestrictBackground);
+                fout.print("mRestrictBackgroundChangedInBsm: " + mRestrictBackgroundChangedInBsm);
 
                 fout.println();
                 fout.println("Network policies:");
@@ -3526,25 +3543,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     fout.decreaseIndent();
                 }
 
-                size = mDefaultRestrictBackgroundWhitelistUids.size();
+                size = mDefaultRestrictBackgroundAllowlistUids.size();
                 if (size > 0) {
-                    fout.println("Default restrict background whitelist uids:");
+                    fout.println("Default restrict background allowlist uids:");
                     fout.increaseIndent();
                     for (int i = 0; i < size; i++) {
                         fout.print("UID=");
-                        fout.print(mDefaultRestrictBackgroundWhitelistUids.keyAt(i));
+                        fout.print(mDefaultRestrictBackgroundAllowlistUids.keyAt(i));
                         fout.println();
                     }
                     fout.decreaseIndent();
                 }
 
-                size = mRestrictBackgroundWhitelistRevokedUids.size();
+                size = mRestrictBackgroundAllowlistRevokedUids.size();
                 if (size > 0) {
-                    fout.println("Default restrict background whitelist uids revoked by users:");
+                    fout.println("Default restrict background allowlist uids revoked by users:");
                     fout.increaseIndent();
                     for (int i = 0; i < size; i++) {
                         fout.print("UID=");
-                        fout.print(mRestrictBackgroundWhitelistRevokedUids.keyAt(i));
+                        fout.print(mRestrictBackgroundAllowlistRevokedUids.keyAt(i));
                         fout.println();
                     }
                     fout.decreaseIndent();
@@ -3615,6 +3632,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
         (new NetworkPolicyManagerShellCommand(mContext, this)).exec(
                 this, in, out, err, args, callback, resultReceiver);
+    }
+
+    void setDebugUid(int uid) {
+        mLogger.setDebugUid(uid);
     }
 
     @VisibleForTesting
@@ -3754,7 +3775,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     // NOTE: since both fw_dozable and fw_powersave uses the same map
-    // (mPowerSaveTempWhitelistAppIds) for whitelisting, we can reuse their logic in this method.
+    // (mPowerSaveTempWhitelistAppIds) for allowlisting, we can reuse their logic in this method.
     @GuardedBy("mUidRulesFirstLock")
     private void updateRulesForWhitelistedPowerSaveUL(boolean enabled, int chain,
             SparseIntArray rules) {
@@ -3796,12 +3817,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Returns whether a uid is whitelisted from power saving restrictions (eg: Battery Saver, Doze
+     * Returns whether a uid is allowlisted from power saving restrictions (eg: Battery Saver, Doze
      * mode, and app idle).
      *
      * @param deviceIdleMode if true then we don't consider
      *        {@link #mPowerSaveWhitelistExceptIdleAppIds} for checking if the {@param uid} is
-     *        whitelisted.
+     *        allowlisted.
      */
     @GuardedBy("mUidRulesFirstLock")
     private boolean isWhitelistedFromPowerSaveUL(int uid, boolean deviceIdleMode) {
@@ -3815,7 +3836,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     // NOTE: since both fw_dozable and fw_powersave uses the same map
-    // (mPowerSaveTempWhitelistAppIds) for whitelisting, we can reuse their logic in this method.
+    // (mPowerSaveTempWhitelistAppIds) for allowlisting, we can reuse their logic in this method.
     @GuardedBy("mUidRulesFirstLock")
     private void updateRulesForWhitelistedPowerSaveUL(int uid, boolean enabled, int chain) {
         if (enabled) {
@@ -3846,7 +3867,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         // quick check: if this uid doesn't have INTERNET permission, it
                         // doesn't have network access anyway, so it is a waste to mess
                         // with it here.
-                        if (hasInternetPermissions(uid)) {
+                        if (hasInternetPermissionUL(uid)) {
                             uidRules.put(uid, FIREWALL_RULE_DENY);
                         }
                     }
@@ -3861,7 +3882,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @GuardedBy("mUidRulesFirstLock")
     void updateRuleForAppIdleUL(int uid) {
-        if (!isUidValidForBlacklistRules(uid)) return;
+        if (!isUidValidForDenylistRulesUL(uid)) return;
 
         if (Trace.isTagEnabled(Trace.TRACE_TAG_NETWORK)) {
             Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateRuleForAppIdleUL: " + uid );
@@ -3886,18 +3907,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * changed.
      */
     @GuardedBy("mUidRulesFirstLock")
-    void updateRulesForAppIdleParoleUL() {
-        boolean paroled = mUsageStats.isAppIdleParoleOn();
-        boolean enableChain = !paroled;
-        enableFirewallChainUL(FIREWALL_CHAIN_STANDBY, enableChain);
+    private void updateRulesForAppIdleParoleUL() {
+        final boolean paroled = mAppStandby.isInParole();
+        final boolean enableChain = !paroled;
 
         int ruleCount = mUidFirewallStandbyRules.size();
+        final SparseIntArray blockedUids = new SparseIntArray();
         for (int i = 0; i < ruleCount; i++) {
-            int uid = mUidFirewallStandbyRules.keyAt(i);
+            final int uid = mUidFirewallStandbyRules.keyAt(i);
+            if (!isUidValidForDenylistRulesUL(uid)) {
+                continue;
+            }
             int oldRules = mUidRules.get(uid);
             if (enableChain) {
                 // Chain wasn't enabled before and the other power-related
-                // chains are whitelists, so we can clear the
+                // chains are allowlists, so we can clear the
                 // MASK_ALL_NETWORKS part of the rules and re-inform listeners if
                 // the effective rules result in blocking network access.
                 oldRules &= MASK_METERED_NETWORKS;
@@ -3905,13 +3929,24 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // Skip if it had no restrictions to begin with
                 if ((oldRules & MASK_ALL_NETWORKS) == 0) continue;
             }
-            final int newUidRules = updateRulesForPowerRestrictionsUL(uid, oldRules, paroled);
+            final boolean isUidIdle = !paroled && isUidIdle(uid);
+            if (isUidIdle && !mPowerSaveTempWhitelistAppIds.get(UserHandle.getAppId(uid))
+                    && !isUidForegroundOnRestrictPowerUL(uid)) {
+                mUidFirewallStandbyRules.put(uid, FIREWALL_RULE_DENY);
+                blockedUids.put(uid, FIREWALL_RULE_DENY);
+            } else {
+                mUidFirewallStandbyRules.put(uid, FIREWALL_RULE_DEFAULT);
+            }
+            final int newUidRules = updateRulesForPowerRestrictionsUL(uid, oldRules,
+                    isUidIdle);
             if (newUidRules == RULE_NONE) {
                 mUidRules.delete(uid);
             } else {
                 mUidRules.put(uid, newUidRules);
             }
         }
+        setUidFirewallRulesUL(FIREWALL_CHAIN_STANDBY, blockedUids,
+                enableChain ? CHAIN_TOGGLE_ENABLE : CHAIN_TOGGLE_DISABLE);
     }
 
     /**
@@ -4043,22 +4078,24 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     // TODO: the MEDIA / DRM restriction might not be needed anymore, in which case both
     // methods below could be merged into a isUidValidForRules() method.
-    private boolean isUidValidForBlacklistRules(int uid) {
+    @GuardedBy("mUidRulesFirstLock")
+    private boolean isUidValidForDenylistRulesUL(int uid) {
         // allow rules on specific system services, and any apps
         if (uid == android.os.Process.MEDIA_UID || uid == android.os.Process.DRM_UID
-            || (UserHandle.isApp(uid) && hasInternetPermissions(uid))) {
+                || isUidValidForAllowlistRulesUL(uid)) {
             return true;
         }
 
         return false;
     }
 
-    private boolean isUidValidForWhitelistRules(int uid) {
-        return UserHandle.isApp(uid) && hasInternetPermissions(uid);
+    @GuardedBy("mUidRulesFirstLock")
+    private boolean isUidValidForAllowlistRulesUL(int uid) {
+        return UserHandle.isApp(uid) && hasInternetPermissionUL(uid);
     }
 
     /**
-     * Set whether or not an app should be whitelisted for network access while in app idle. Other
+     * Set whether or not an app should be allowlisted for network access while in app idle. Other
      * power saving restrictions may still apply.
      */
     @VisibleForTesting
@@ -4087,7 +4124,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    /** Return the list of UIDs currently in the app idle whitelist. */
+    /** Return the list of UIDs currently in the app idle allowlist. */
     @VisibleForTesting
     int[] getAppIdleWhitelist() {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
@@ -4107,7 +4144,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     boolean isUidIdle(int uid) {
         synchronized (mUidRulesFirstLock) {
             if (mAppIdleTempWhitelistAppIds.get(uid)) {
-                // UID is temporarily whitelisted.
+                // UID is temporarily allowlisted.
                 return false;
             }
         }
@@ -4130,12 +4167,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * <p>
      * Useful for the cases where the lack of network access can simplify the rules.
      */
-    private boolean hasInternetPermissions(int uid) {
+    @GuardedBy("mUidRulesFirstLock")
+    private boolean hasInternetPermissionUL(int uid) {
         try {
-            if (mIPm.checkUidPermission(Manifest.permission.INTERNET, uid)
-                    != PackageManager.PERMISSION_GRANTED) {
-                return false;
+            final int appId = UserHandle.getAppId(uid);
+            final boolean hasPermission;
+            if (mInternetPermissionMap.indexOfKey(appId) < 0) {
+                hasPermission =
+                        mIPm.checkUidPermission(Manifest.permission.INTERNET, uid)
+                                == PackageManager.PERMISSION_GRANTED;
+                mInternetPermissionMap.put(appId, hasPermission);
+            } else {
+                hasPermission = mInternetPermissionMap.get(appId);
             }
+            return hasPermission;
         } catch (RemoteException e) {
         }
         return true;
@@ -4190,23 +4235,23 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     /**
      * Applies network rules to bandwidth controllers based on process state and user-defined
-     * restrictions (blacklist / whitelist).
+     * restrictions (allowlist / denylist).
      *
      * <p>
      * {@code netd} defines 3 firewall chains that govern whether an app has access to metered
      * networks:
      * <ul>
-     * <li>@{code bw_penalty_box}: UIDs added to this chain do not have access (blacklist).
-     * <li>@{code bw_happy_box}: UIDs added to this chain have access (whitelist), unless they're
-     *     also blacklisted.
+     * <li>@{code bw_penalty_box}: UIDs added to this chain do not have access (denylist).
+     * <li>@{code bw_happy_box}: UIDs added to this chain have access (allowlist), unless they're
+     *     also denylisted.
      * <li>@{code bw_data_saver}: when enabled (through {@link #setRestrictBackground(boolean)}),
-     *     no UIDs other than those whitelisted will have access.
+     *     no UIDs other than those allowlisted will have access.
      * <ul>
      *
      * <p>The @{code bw_penalty_box} and @{code bw_happy_box} are primarily managed through the
-     * {@link #setUidPolicy(int, int)} and {@link #addRestrictBackgroundWhitelistedUid(int)} /
-     * {@link #removeRestrictBackgroundWhitelistedUid(int)} methods (for blacklist and whitelist
-     * respectively): these methods set the proper internal state (blacklist / whitelist), then call
+     * {@link #setUidPolicy(int, int)} and {@link #addRestrictBackgroundAllowlistedUid(int)} /
+     * {@link #removeRestrictBackgroundDenylistedUid(int)} methods (for denylist and allowlist
+     * respectively): these methods set the proper internal state (denylist / allowlist), then call
      * this ({@link #updateRulesForDataUsageRestrictionsUL(int)}) to propagate the rules to
      * {@link INetworkManagementService}, but this method should also be called in events (like
      * Data Saver Mode flips or UID state changes) that might affect the foreground app, since the
@@ -4215,7 +4260,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * <ul>
      * <li>When Data Saver mode is on, the foreground app should be temporarily added to
      *     {@code bw_happy_box} before the @{code bw_data_saver} chain is enabled.
-     * <li>If the foreground app is blacklisted by the user, it should be temporarily removed from
+     * <li>If the foreground app is denylisted by the user, it should be temporarily removed from
      *     {@code bw_penalty_box}.
      * <li>When the app leaves foreground state, the temporary changes above should be reverted.
      * </ul>
@@ -4240,7 +4285,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     private void updateRulesForDataUsageRestrictionsULInner(int uid) {
-        if (!isUidValidForWhitelistRules(uid)) {
+        if (!isUidValidForAllowlistRulesUL(uid)) {
             if (LOGD) Slog.d(TAG, "no need to update restrict data rules for uid " + uid);
             return;
         }
@@ -4250,8 +4295,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final boolean isForeground = isUidForegroundOnRestrictBackgroundUL(uid);
         final boolean isRestrictedByAdmin = isRestrictedByAdminUL(uid);
 
-        final boolean isBlacklisted = (uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0;
-        final boolean isWhitelisted = (uidPolicy & POLICY_ALLOW_METERED_BACKGROUND) != 0;
+        final boolean isDenylisted = (uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0;
+        final boolean isAllowlisted = (uidPolicy & POLICY_ALLOW_METERED_BACKGROUND) != 0;
         final int oldRule = oldUidRules & MASK_METERED_NETWORKS;
         int newRule = RULE_NONE;
 
@@ -4259,15 +4304,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (isRestrictedByAdmin) {
             newRule = RULE_REJECT_METERED;
         } else if (isForeground) {
-            if (isBlacklisted || (mRestrictBackground && !isWhitelisted)) {
+            if (isDenylisted || (mRestrictBackground && !isAllowlisted)) {
                 newRule = RULE_TEMPORARY_ALLOW_METERED;
-            } else if (isWhitelisted) {
+            } else if (isAllowlisted) {
                 newRule = RULE_ALLOW_METERED;
             }
         } else {
-            if (isBlacklisted) {
+            if (isDenylisted) {
                 newRule = RULE_REJECT_METERED;
-            } else if (mRestrictBackground && isWhitelisted) {
+            } else if (mRestrictBackground && isAllowlisted) {
                 newRule = RULE_ALLOW_METERED;
             }
         }
@@ -4276,8 +4321,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (LOGV) {
             Log.v(TAG, "updateRuleForRestrictBackgroundUL(" + uid + ")"
                     + ": isForeground=" +isForeground
-                    + ", isBlacklisted=" + isBlacklisted
-                    + ", isWhitelisted=" + isWhitelisted
+                    + ", isDenylisted=" + isDenylisted
+                    + ", isAllowlisted=" + isAllowlisted
                     + ", isRestrictedByAdmin=" + isRestrictedByAdmin
                     + ", oldRule=" + uidRulesToString(oldRule)
                     + ", newRule=" + uidRulesToString(newRule)
@@ -4294,49 +4339,49 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // Second step: apply bw changes based on change of state.
         if (newRule != oldRule) {
             if (hasRule(newRule, RULE_TEMPORARY_ALLOW_METERED)) {
-                // Temporarily whitelist foreground app, removing from blacklist if necessary
+                // Temporarily allowlist foreground app, removing from denylist if necessary
                 // (since bw_penalty_box prevails over bw_happy_box).
 
-                setMeteredNetworkWhitelist(uid, true);
+                setMeteredNetworkAllowlist(uid, true);
                 // TODO: if statement below is used to avoid an unnecessary call to netd / iptables,
                 // but ideally it should be just:
-                //    setMeteredNetworkBlacklist(uid, isBlacklisted);
-                if (isBlacklisted) {
-                    setMeteredNetworkBlacklist(uid, false);
+                //    setMeteredNetworkDenylist(uid, isDenylisted);
+                if (isDenylisted) {
+                    setMeteredNetworkDenylist(uid, false);
                 }
             } else if (hasRule(oldRule, RULE_TEMPORARY_ALLOW_METERED)) {
-                // Remove temporary whitelist from app that is not on foreground anymore.
+                // Remove temporary allowlist from app that is not on foreground anymore.
 
                 // TODO: if statements below are used to avoid unnecessary calls to netd / iptables,
                 // but ideally they should be just:
-                //    setMeteredNetworkWhitelist(uid, isWhitelisted);
-                //    setMeteredNetworkBlacklist(uid, isBlacklisted);
-                if (!isWhitelisted) {
-                    setMeteredNetworkWhitelist(uid, false);
+                //    setMeteredNetworkAllowlist(uid, isAllowlisted);
+                //    setMeteredNetworkDenylist(uid, isDenylisted);
+                if (!isAllowlisted) {
+                    setMeteredNetworkAllowlist(uid, false);
                 }
-                if (isBlacklisted || isRestrictedByAdmin) {
-                    setMeteredNetworkBlacklist(uid, true);
+                if (isDenylisted || isRestrictedByAdmin) {
+                    setMeteredNetworkDenylist(uid, true);
                 }
             } else if (hasRule(newRule, RULE_REJECT_METERED)
                     || hasRule(oldRule, RULE_REJECT_METERED)) {
-                // Flip state because app was explicitly added or removed to blacklist.
-                setMeteredNetworkBlacklist(uid, (isBlacklisted || isRestrictedByAdmin));
-                if (hasRule(oldRule, RULE_REJECT_METERED) && isWhitelisted) {
-                    // Since blacklist prevails over whitelist, we need to handle the special case
-                    // where app is whitelisted and blacklisted at the same time (although such
-                    // scenario should be blocked by the UI), then blacklist is removed.
-                    setMeteredNetworkWhitelist(uid, isWhitelisted);
+                // Flip state because app was explicitly added or removed to denylist.
+                setMeteredNetworkDenylist(uid, (isDenylisted || isRestrictedByAdmin));
+                if (hasRule(oldRule, RULE_REJECT_METERED) && isAllowlisted) {
+                    // Since denylist prevails over allowlist, we need to handle the special case
+                    // where app is allowlisted and denylisted at the same time (although such
+                    // scenario should be blocked by the UI), then denylist is removed.
+                    setMeteredNetworkAllowlist(uid, isAllowlisted);
                 }
             } else if (hasRule(newRule, RULE_ALLOW_METERED)
                     || hasRule(oldRule, RULE_ALLOW_METERED)) {
-                // Flip state because app was explicitly added or removed to whitelist.
-                setMeteredNetworkWhitelist(uid, isWhitelisted);
+                // Flip state because app was explicitly added or removed to allowlist.
+                setMeteredNetworkAllowlist(uid, isAllowlisted);
             } else {
                 // All scenarios should have been covered above.
                 Log.wtf(TAG, "Unexpected change of metered UID state for " + uid
                         + ": foreground=" + isForeground
-                        + ", whitelisted=" + isWhitelisted
-                        + ", blacklisted=" + isBlacklisted
+                        + ", allowlisted=" + isAllowlisted
+                        + ", denylisted=" + isDenylisted
                         + ", isRestrictedByAdmin=" + isRestrictedByAdmin
                         + ", newRule=" + uidRulesToString(newUidRules)
                         + ", oldRule=" + uidRulesToString(oldUidRules));
@@ -4352,7 +4397,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * listeners in case of change.
      * <p>
      * There are 3 power-related rules that affects whether an app has background access on
-     * non-metered networks, and when the condition applies and the UID is not whitelisted for power
+     * non-metered networks, and when the condition applies and the UID is not allowlisted for power
      * restriction, it's added to the equivalent firewall chain:
      * <ul>
      * <li>App is idle: {@code fw_standby} firewall chain.
@@ -4361,7 +4406,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * </ul>
      * <p>
      * This method updates the power-related part of the {@link #mUidRules} for a given uid based on
-     * these modes, the UID process state (foreground or not), and the UIDwhitelist state.
+     * these modes, the UID process state (foreground or not), and the UID allowlist state.
      * <p>
      * <strong>NOTE: </strong>This method does not update the firewall rules on {@code netd}.
      */
@@ -4369,7 +4414,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void updateRulesForPowerRestrictionsUL(int uid) {
         final int oldUidRules = mUidRules.get(uid, RULE_NONE);
 
-        final int newUidRules = updateRulesForPowerRestrictionsUL(uid, oldUidRules, false);
+        final int newUidRules = updateRulesForPowerRestrictionsUL(uid, oldUidRules,
+                isUidIdle(uid));
 
         if (newUidRules == RULE_NONE) {
             mUidRules.delete(uid);
@@ -4383,31 +4429,33 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      *
      * @param uid the uid of the app to update rules for
      * @param oldUidRules the current rules for the uid, in order to determine if there's a change
-     * @param paroled whether to ignore idle state of apps and only look at other restrictions.
+     * @param isUidIdle whether uid is idle or not
      *
      * @return the new computed rules for the uid
      */
-    private int updateRulesForPowerRestrictionsUL(int uid, int oldUidRules, boolean paroled) {
+    @GuardedBy("mUidRulesFirstLock")
+    private int updateRulesForPowerRestrictionsUL(int uid, int oldUidRules, boolean isUidIdle) {
         if (Trace.isTagEnabled(Trace.TRACE_TAG_NETWORK)) {
             Trace.traceBegin(Trace.TRACE_TAG_NETWORK,
                     "updateRulesForPowerRestrictionsUL: " + uid + "/" + oldUidRules + "/"
-                    + (paroled ? "P" : "-"));
+                            + (isUidIdle ? "I" : "-"));
         }
         try {
-            return updateRulesForPowerRestrictionsULInner(uid, oldUidRules, paroled);
+            return updateRulesForPowerRestrictionsULInner(uid, oldUidRules, isUidIdle);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
     }
 
-    private int updateRulesForPowerRestrictionsULInner(int uid, int oldUidRules, boolean paroled) {
-        if (!isUidValidForBlacklistRules(uid)) {
+    @GuardedBy("mUidRulesFirstLock")
+    private int updateRulesForPowerRestrictionsULInner(int uid, int oldUidRules,
+            boolean isUidIdle) {
+        if (!isUidValidForDenylistRulesUL(uid)) {
             if (LOGD) Slog.d(TAG, "no need to update restrict power rules for uid " + uid);
             return RULE_NONE;
         }
 
-        final boolean isIdle = !paroled && isUidIdle(uid);
-        final boolean restrictMode = isIdle || mRestrictPower || mDeviceIdleMode;
+        final boolean restrictMode = isUidIdle || mRestrictPower || mDeviceIdleMode;
         final boolean isForeground = isUidForegroundOnRestrictPowerUL(uid);
 
         final boolean isWhitelisted = isWhitelistedFromPowerSaveUL(uid, mDeviceIdleMode);
@@ -4430,7 +4478,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         if (LOGV) {
             Log.v(TAG, "updateRulesForPowerRestrictionsUL(" + uid + ")"
-                    + ", isIdle: " + isIdle
+                    + ", isIdle: " + isUidIdle
                     + ", mRestrictPower: " + mRestrictPower
                     + ", mDeviceIdleMode: " + mDeviceIdleMode
                     + ", isForeground=" + isForeground
@@ -4461,9 +4509,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return newUidRules;
     }
 
-    private class AppIdleStateChangeListener
-            extends UsageStatsManagerInternal.AppIdleStateChangeListener {
-
+    private class NetPolicyAppIdleStateChangeListener extends AppIdleStateChangeListener {
         @Override
         public void onAppIdleStateChanged(String packageName, int userId, boolean idle, int bucket,
                 int reason) {
@@ -4813,23 +4859,23 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    private void setMeteredNetworkBlacklist(int uid, boolean enable) {
-        if (LOGV) Slog.v(TAG, "setMeteredNetworkBlacklist " + uid + ": " + enable);
+    private void setMeteredNetworkDenylist(int uid, boolean enable) {
+        if (LOGV) Slog.v(TAG, "setMeteredNetworkDenylist " + uid + ": " + enable);
         try {
-            mNetworkManager.setUidMeteredNetworkBlacklist(uid, enable);
+            mNetworkManager.setUidMeteredNetworkDenylist(uid, enable);
         } catch (IllegalStateException e) {
-            Log.wtf(TAG, "problem setting blacklist (" + enable + ") rules for " + uid, e);
+            Log.wtf(TAG, "problem setting denylist (" + enable + ") rules for " + uid, e);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
         }
     }
 
-    private void setMeteredNetworkWhitelist(int uid, boolean enable) {
-        if (LOGV) Slog.v(TAG, "setMeteredNetworkWhitelist " + uid + ": " + enable);
+    private void setMeteredNetworkAllowlist(int uid, boolean enable) {
+        if (LOGV) Slog.v(TAG, "setMeteredNetworkAllowlist " + uid + ": " + enable);
         try {
-            mNetworkManager.setUidMeteredNetworkWhitelist(uid, enable);
+            mNetworkManager.setUidMeteredNetworkAllowlist(uid, enable);
         } catch (IllegalStateException e) {
-            Log.wtf(TAG, "problem setting whitelist (" + enable + ") rules for " + uid, e);
+            Log.wtf(TAG, "problem setting allowlist (" + enable + ") rules for " + uid, e);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
         }
@@ -4848,7 +4894,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Calls {@link #setUidFirewallRules(int, SparseIntArray)} and
+     * Calls {@link #setUidFirewallRulesUL(int, SparseIntArray)} and
      * {@link #enableFirewallChainUL(int, boolean)} synchronously.
      *
      * @param chain firewall chain.
@@ -4890,7 +4936,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Add or remove a uid to the firewall blacklist for all network ifaces.
+     * Add or remove a uid to the firewall denylist for all network ifaces.
      */
     private void setUidFirewallRule(int chain, int uid, int rule) {
         if (Trace.isTagEnabled(Trace.TRACE_TAG_NETWORK)) {
@@ -4920,7 +4966,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Add or remove a uid to the firewall blacklist for all network ifaces.
+     * Add or remove a uid to the firewall denylist for all network ifaces.
      */
     @GuardedBy("mUidRulesFirstLock")
     private void enableFirewallChainUL(int chain, boolean enable) {
@@ -4949,8 +4995,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_STANDBY, uid, FIREWALL_RULE_DEFAULT);
             mNetworkManager
                     .setFirewallUidRule(FIREWALL_CHAIN_POWERSAVE, uid, FIREWALL_RULE_DEFAULT);
-            mNetworkManager.setUidMeteredNetworkWhitelist(uid, false);
-            mNetworkManager.setUidMeteredNetworkBlacklist(uid, false);
+            mNetworkManager.setUidMeteredNetworkAllowlist(uid, false);
+            mNetworkManager.setUidMeteredNetworkDenylist(uid, false);
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem resetting firewall uid rules for " + uid, e);
         } catch (RemoteException e) {
@@ -5037,17 +5083,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @GuardedBy("mUidRulesFirstLock")
     @VisibleForTesting
     void updateRestrictBackgroundByLowPowerModeUL(final PowerSaveState result) {
-        mRestrictBackgroundPowerState = result;
+        if (mRestrictBackgroundLowPowerMode == result.batterySaverEnabled) {
+            // Nothing changed. Nothing to do.
+            return;
+        }
+        mRestrictBackgroundLowPowerMode = result.batterySaverEnabled;
 
-        boolean restrictBackground = result.batterySaverEnabled;
+        boolean restrictBackground = mRestrictBackgroundLowPowerMode;
         boolean shouldInvokeRestrictBackground;
-        // store the temporary mRestrictBackgroundChangedInBsm and update it at last
+        // store the temporary mRestrictBackgroundChangedInBsm and update it at the end.
         boolean localRestrictBgChangedInBsm = mRestrictBackgroundChangedInBsm;
 
-        if (result.globalBatterySaverEnabled) {
+        if (mRestrictBackgroundLowPowerMode) {
             // Try to turn on restrictBackground if (1) it is off and (2) batter saver need to
             // turn it on.
-            shouldInvokeRestrictBackground = !mRestrictBackground && result.batterySaverEnabled;
+            shouldInvokeRestrictBackground = !mRestrictBackground;
             mRestrictBackgroundBeforeBsm = mRestrictBackground;
             localRestrictBgChangedInBsm = false;
         } else {
@@ -5057,7 +5107,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         if (shouldInvokeRestrictBackground) {
-            setRestrictBackgroundUL(restrictBackground);
+            setRestrictBackgroundUL(restrictBackground, "low_power");
         }
 
         // Change it at last so setRestrictBackground() won't affect this variable
@@ -5139,13 +5189,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             reason = NTWK_ALLOWED_NON_METERED;
         }
         else if (hasRule(uidRules, RULE_REJECT_METERED)) {
-            reason = NTWK_BLOCKED_BLACKLIST;
+            reason = NTWK_BLOCKED_DENYLIST;
         }
         else if (hasRule(uidRules, RULE_ALLOW_METERED)) {
-            reason = NTWK_ALLOWED_WHITELIST;
+            reason = NTWK_ALLOWED_ALLOWLIST;
         }
         else if (hasRule(uidRules, RULE_TEMPORARY_ALLOW_METERED)) {
-            reason = NTWK_ALLOWED_TMP_WHITELIST;
+            reason = NTWK_ALLOWED_TMP_ALLOWLIST;
         }
         else if (isBackgroundRestricted) {
             reason = NTWK_BLOCKED_BG_RESTRICT;
@@ -5158,13 +5208,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         switch(reason) {
             case NTWK_ALLOWED_DEFAULT:
             case NTWK_ALLOWED_NON_METERED:
-            case NTWK_ALLOWED_TMP_WHITELIST:
-            case NTWK_ALLOWED_WHITELIST:
+            case NTWK_ALLOWED_TMP_ALLOWLIST:
+            case NTWK_ALLOWED_ALLOWLIST:
             case NTWK_ALLOWED_SYSTEM:
                 blocked = false;
                 break;
             case NTWK_BLOCKED_POWER:
-            case NTWK_BLOCKED_BLACKLIST:
+            case NTWK_BLOCKED_DENYLIST:
             case NTWK_BLOCKED_BG_RESTRICT:
                 blocked = true;
                 break;
@@ -5183,8 +5233,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         @Override
         public void resetUserState(int userId) {
             synchronized (mUidRulesFirstLock) {
-                boolean changed = removeUserStateUL(userId, false);
-                changed = addDefaultRestrictBackgroundWhitelistUidsUL(userId) || changed;
+                boolean changed = removeUserStateUL(userId, false, true);
+                changed = addDefaultRestrictBackgroundAllowlistUidsUL(userId) || changed;
                 if (changed) {
                     synchronized (mNetworkPoliciesSecondLock) {
                         writePolicyAL();
@@ -5238,6 +5288,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         @Override
         public void onTempPowerSaveWhitelistChange(int appId, boolean added) {
             synchronized (mUidRulesFirstLock) {
+                if (!mSystemReady) {
+                    return;
+                }
                 mLogger.tempPowerSaveWlChanged(appId, added);
                 if (added) {
                     mPowerSaveTempWhitelistAppIds.put(appId, true);
@@ -5427,10 +5480,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static boolean getBooleanDefeatingNullable(@Nullable PersistableBundle bundle,
             String key, boolean defaultValue) {
         return (bundle != null) ? bundle.getBoolean(key, defaultValue) : defaultValue;
-    }
-
-    private static boolean isHeadlessSystemUserBuild() {
-        return RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER;
     }
 
     private class NotificationId {

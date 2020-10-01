@@ -57,8 +57,7 @@ public class AppEntitiesHeaderControllerTest {
                 .setIcon(mContext.getDrawable(com.android.internal.R.drawable.ic_menu))
                 .setTitle(TITLE)
                 .setSummary(SUMMARY)
-                .setOnClickListener(v -> {
-                })
+                .setOnClickListener(v -> { })
                 .build();
         mController.setAppEntity(0, mAppEntityInfo);
     }

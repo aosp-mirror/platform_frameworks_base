@@ -25,8 +25,11 @@ import android.graphics.Point;
 import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 
+import com.android.systemui.util.DeviceConfigProxy;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Penalizes gestures that change direction in either the x or y too much.
@@ -39,34 +42,38 @@ class ZigZagClassifier extends FalsingClassifier {
     // most swipes will follow somewhat of a 'C' or 'S' shape, we allow more deviance along the
     // `SECONDARY` axis.
     private static final float MAX_X_PRIMARY_DEVIANCE = .05f;
-    private static final float MAX_Y_PRIMARY_DEVIANCE = .1f;
-    private static final float MAX_X_SECONDARY_DEVIANCE = .6f;
+    private static final float MAX_Y_PRIMARY_DEVIANCE = .15f;
+    private static final float MAX_X_SECONDARY_DEVIANCE = .4f;
     private static final float MAX_Y_SECONDARY_DEVIANCE = .3f;
 
     private final float mMaxXPrimaryDeviance;
     private final float mMaxYPrimaryDeviance;
     private final float mMaxXSecondaryDeviance;
     private final float mMaxYSecondaryDeviance;
+    private float mLastDevianceX;
+    private float mLastDevianceY;
+    private float mLastMaxXDeviance;
+    private float mLastMaxYDeviance;
 
-    ZigZagClassifier(FalsingDataProvider dataProvider) {
+    ZigZagClassifier(FalsingDataProvider dataProvider, DeviceConfigProxy deviceConfigProxy) {
         super(dataProvider);
 
-        mMaxXPrimaryDeviance = DeviceConfig.getFloat(
+        mMaxXPrimaryDeviance = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_ZIGZAG_X_PRIMARY_DEVIANCE,
                 MAX_X_PRIMARY_DEVIANCE);
 
-        mMaxYPrimaryDeviance = DeviceConfig.getFloat(
+        mMaxYPrimaryDeviance = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_ZIGZAG_Y_PRIMARY_DEVIANCE,
                 MAX_Y_PRIMARY_DEVIANCE);
 
-        mMaxXSecondaryDeviance = DeviceConfig.getFloat(
+        mMaxXSecondaryDeviance = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_ZIGZAG_X_SECONDARY_DEVIANCE,
                 MAX_X_SECONDARY_DEVIANCE);
 
-        mMaxYSecondaryDeviance = DeviceConfig.getFloat(
+        mMaxYSecondaryDeviance = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_ZIGZAG_Y_SECONDARY_DEVIANCE,
                 MAX_Y_SECONDARY_DEVIANCE);
@@ -137,9 +144,23 @@ class ZigZagClassifier extends FalsingClassifier {
             maxYDeviance = mMaxYPrimaryDeviance * totalDistanceIn * getYdpi();
         }
 
+        // These values are saved for logging reasons. {@see #getReason()}
+        mLastDevianceX = devianceX;
+        mLastDevianceY = devianceY;
+        mLastMaxXDeviance = maxXDeviance;
+        mLastMaxYDeviance = maxYDeviance;
+
         logDebug("Straightness Deviance: (" + devianceX + "," + devianceY + ") vs "
                 + "(" + maxXDeviance + "," + maxYDeviance + ")");
         return devianceX > maxXDeviance || devianceY > maxYDeviance;
+    }
+
+    @Override
+    String getReason() {
+        return String.format(
+                (Locale) null,
+                "{devianceX=%f, maxDevianceX=%s, devianceY=%s, maxDevianceY=%s}",
+                mLastDevianceX, mLastMaxXDeviance, mLastDevianceY, mLastMaxYDeviance);
     }
 
     private float getAtan2LastPoint() {

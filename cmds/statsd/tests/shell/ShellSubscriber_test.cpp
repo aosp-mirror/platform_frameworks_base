@@ -12,17 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#include "src/shell/ShellSubscriber.h"
 
+#include <gtest/gtest.h>
+#include <stdio.h>
 #include <unistd.h>
+
+#include <vector>
+
 #include "frameworks/base/cmds/statsd/src/atoms.pb.h"
 #include "frameworks/base/cmds/statsd/src/shell/shell_config.pb.h"
 #include "frameworks/base/cmds/statsd/src/shell/shell_data.pb.h"
-#include "src/shell/ShellSubscriber.h"
+#include "stats_event.h"
 #include "tests/metrics/metrics_test_helper.h"
-
-#include <stdio.h>
-#include <vector>
+#include "tests/statsd_test_util.h"
 
 using namespace android::os::statsd;
 using android::sp;
@@ -33,27 +36,6 @@ using testing::NaggyMock;
 using testing::StrictMock;
 
 #ifdef __ANDROID__
-
-class MyResultReceiver : public BnResultReceiver {
-public:
-    Mutex mMutex;
-    Condition mCondition;
-    bool mHaveResult = false;
-    int32_t mResult = 0;
-
-    virtual void send(int32_t resultCode) {
-        AutoMutex _l(mMutex);
-        mResult = resultCode;
-        mHaveResult = true;
-        mCondition.signal();
-    }
-
-    int32_t waitForResult() {
-        AutoMutex _l(mMutex);
-        mCondition.waitRelative(mMutex, 1000000000);
-        return mResult;
-    }
-};
 
 void runShellTest(ShellSubscription config, sp<MockUidMap> uidMap,
                   sp<MockStatsPullerManager> pullerManager,
@@ -67,10 +49,7 @@ void runShellTest(ShellSubscription config, sp<MockUidMap> uidMap,
     ASSERT_EQ(0, pipe(fds_data));
 
     size_t bufferSize = config.ByteSize();
-
     // write the config to pipe, first write size of the config
-    vector<uint8_t> size_buffer(sizeof(bufferSize));
-    std::memcpy(size_buffer.data(), &bufferSize, sizeof(bufferSize));
     write(fds_config[1], &bufferSize, sizeof(bufferSize));
     // then write config itself
     vector<uint8_t> buffer(bufferSize);
@@ -79,11 +58,10 @@ void runShellTest(ShellSubscription config, sp<MockUidMap> uidMap,
     close(fds_config[1]);
 
     sp<ShellSubscriber> shellClient = new ShellSubscriber(uidMap, pullerManager);
-    sp<MyResultReceiver> resultReceiver = new MyResultReceiver();
 
     // mimic a binder thread that a shell subscriber runs on. it would block.
-    std::thread reader([&resultReceiver, &fds_config, &fds_data, &shellClient] {
-        shellClient->startNewSubscription(fds_config[0], fds_data[1], resultReceiver, -1);
+    std::thread reader([&shellClient, &fds_config, &fds_data] {
+        shellClient->startNewSubscription(fds_config[0], fds_data[1], /*timeoutSec=*/-1);
     });
     reader.detach();
 
@@ -108,26 +86,37 @@ void runShellTest(ShellSubscription config, sp<MockUidMap> uidMap,
     // wait for the data to be written.
     std::this_thread::sleep_for(100ms);
 
-    int expected_data_size = expectedData.ByteSize();
+    // Because we might receive heartbeats from statsd, consisting of data sizes
+    // of 0, encapsulate reads within a while loop.
+    bool readAtom = false;
+    while (!readAtom) {
+        // Read the atom size.
+        size_t dataSize = 0;
+        read(fds_data[0], &dataSize, sizeof(dataSize));
+        if (dataSize == 0) continue;
+        EXPECT_EQ(expectedData.ByteSize(), int(dataSize));
 
-    // now read from the pipe. firstly read the atom size.
-    size_t dataSize = 0;
-    EXPECT_EQ((int)sizeof(dataSize), read(fds_data[0], &dataSize, sizeof(dataSize)));
-    EXPECT_EQ(expected_data_size, (int)dataSize);
+        // Read that much data in proto binary format.
+        vector<uint8_t> dataBuffer(dataSize);
+        EXPECT_EQ((int)dataSize, read(fds_data[0], dataBuffer.data(), dataSize));
 
-    // then read that much data which is the atom in proto binary format
-    vector<uint8_t> dataBuffer(dataSize);
-    EXPECT_EQ((int)dataSize, read(fds_data[0], dataBuffer.data(), dataSize));
+        // Make sure the received bytes can be parsed to an atom.
+        ShellData receivedAtom;
+        EXPECT_TRUE(receivedAtom.ParseFromArray(dataBuffer.data(), dataSize) != 0);
 
-    // make sure the received bytes can be parsed to an atom
-    ShellData receivedAtom;
-    EXPECT_TRUE(receivedAtom.ParseFromArray(dataBuffer.data(), dataSize) != 0);
+        // Serialize the expected atom to byte array and compare to make sure
+        // they are the same.
+        vector<uint8_t> expectedAtomBuffer(expectedData.ByteSize());
+        expectedData.SerializeToArray(expectedAtomBuffer.data(), expectedData.ByteSize());
+        EXPECT_EQ(expectedAtomBuffer, dataBuffer);
 
-    // serialze the expected atom to bytes. and compare. to make sure they are the same.
-    vector<uint8_t> atomBuffer(expected_data_size);
-    expectedData.SerializeToArray(&atomBuffer[0], expected_data_size);
-    EXPECT_EQ(atomBuffer, dataBuffer);
+        readAtom = true;
+    }
+
     close(fds_data[0]);
+    if (reader.joinable()) {
+        reader.join();
+    }
 }
 
 TEST(ShellSubscriberTest, testPushedSubscription) {
@@ -136,11 +125,10 @@ TEST(ShellSubscriberTest, testPushedSubscription) {
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     vector<std::shared_ptr<LogEvent>> pushedList;
 
-    std::shared_ptr<LogEvent> event1 =
-            std::make_shared<LogEvent>(29 /*screen_state_atom_id*/, 1000 /*timestamp*/);
-    event1->write(::android::view::DisplayStateEnum::DISPLAY_STATE_ON);
-    event1->init();
-    pushedList.push_back(event1);
+    // Create the LogEvent from an AStatsEvent
+    std::unique_ptr<LogEvent> logEvent = CreateScreenStateChangedEvent(
+            1000 /*timestamp*/, ::android::view::DisplayStateEnum::DISPLAY_STATE_ON);
+    pushedList.push_back(std::move(logEvent));
 
     // create a simple config to get screen events
     ShellSubscription config;
@@ -183,29 +171,33 @@ ShellSubscription getPulledConfig() {
     return config;
 }
 
+shared_ptr<LogEvent> makeCpuActiveTimeAtom(int32_t uid, int64_t timeMillis) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, 10016);
+    AStatsEvent_overwriteTimestamp(statsEvent, 1111L);
+    AStatsEvent_writeInt32(statsEvent, uid);
+    AStatsEvent_writeInt64(statsEvent, timeMillis);
+
+    std::shared_ptr<LogEvent> logEvent = std::make_shared<LogEvent>(/*uid=*/0, /*pid=*/0);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
+    return logEvent;
+}
+
 }  // namespace
 
 TEST(ShellSubscriberTest, testPulledSubscription) {
     sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-    EXPECT_CALL(*pullerManager, Pull(10016, _))
-            .WillRepeatedly(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+    const vector<int32_t> uids = {AID_SYSTEM};
+    EXPECT_CALL(*pullerManager, Pull(10016, uids, _, _, _))
+            .WillRepeatedly(Invoke([](int tagId, const vector<int32_t>&, const int64_t,
+                                      vector<std::shared_ptr<LogEvent>>* data, bool) {
                 data->clear();
-                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, 1111L);
-                event->write(kUid1);
-                event->write(kCpuTime1);
-                event->init();
-                data->push_back(event);
-                // another event
-                event = make_shared<LogEvent>(tagId, 1111L);
-                event->write(kUid2);
-                event->write(kCpuTime2);
-                event->init();
-                data->push_back(event);
+                data->push_back(makeCpuActiveTimeAtom(/*uid=*/kUid1, /*timeMillis=*/kCpuTime1));
+                data->push_back(makeCpuActiveTimeAtom(/*uid=*/kUid2, /*timeMillis=*/kCpuTime2));
                 return true;
             }));
-
     runShellTest(getPulledConfig(), uidMap, pullerManager, vector<std::shared_ptr<LogEvent>>(),
                  getExpectedShellData());
 }

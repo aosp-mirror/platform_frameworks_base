@@ -26,17 +26,19 @@ namespace statsd {
 
 AlarmMonitor::AlarmMonitor(
         uint32_t minDiffToUpdateRegisteredAlarmTimeSec,
-        const std::function<void(const sp<IStatsCompanionService>&, int64_t)>& updateAlarm,
-        const std::function<void(const sp<IStatsCompanionService>&)>& cancelAlarm)
-    : mRegisteredAlarmTimeSec(0), mMinUpdateTimeSec(minDiffToUpdateRegisteredAlarmTimeSec),
+        const std::function<void(const shared_ptr<IStatsCompanionService>&, int64_t)>& updateAlarm,
+        const std::function<void(const shared_ptr<IStatsCompanionService>&)>& cancelAlarm)
+    : mRegisteredAlarmTimeSec(0),
+      mMinUpdateTimeSec(minDiffToUpdateRegisteredAlarmTimeSec),
       mUpdateAlarm(updateAlarm),
       mCancelAlarm(cancelAlarm) {}
 
 AlarmMonitor::~AlarmMonitor() {}
 
-void AlarmMonitor::setStatsCompanionService(sp<IStatsCompanionService> statsCompanionService) {
+void AlarmMonitor::setStatsCompanionService(
+        shared_ptr<IStatsCompanionService> statsCompanionService) {
     std::lock_guard<std::mutex> lock(mLock);
-    sp<IStatsCompanionService> tmpForLock = mStatsCompanionService;
+    shared_ptr<IStatsCompanionService> tmpForLock = mStatsCompanionService;
     mStatsCompanionService = statsCompanionService;
     if (statsCompanionService == nullptr) {
         VLOG("Erasing link to statsCompanionService");

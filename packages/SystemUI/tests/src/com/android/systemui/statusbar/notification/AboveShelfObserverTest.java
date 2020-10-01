@@ -26,8 +26,8 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.widget.FrameLayout;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -46,8 +46,11 @@ public class AboveShelfObserverTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
-        mNotificationTestHelper = new NotificationTestHelper(getContext());
+        allowTestableLooperAsMainThread();
+        mNotificationTestHelper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
         mHostLayout = new FrameLayout(getContext());
         mObserver = new AboveShelfObserver(mHostLayout);
         ExpandableNotificationRow row = mNotificationTestHelper.createRow();

@@ -522,9 +522,15 @@ TEST(JavaClassGeneratorTest, GenerateOnResourcesLoadedCallbackForSharedLibrary) 
   ASSERT_TRUE(generator.Generate("android", &out));
   out.Flush();
 
-  EXPECT_THAT(output, HasSubstr("void onResourcesLoaded"));
-  EXPECT_THAT(output, HasSubstr("com.foo.R.onResourcesLoaded"));
-  EXPECT_THAT(output, HasSubstr("com.boo.R.onResourcesLoaded"));
+  EXPECT_THAT(output, HasSubstr(
+          R"(  public static void onResourcesLoaded(int p) {
+    com.foo.R.onResourcesLoaded(p);
+    com.boo.R.onResourcesLoaded(p);
+    final int packageIdBits = p << 24;
+    attr.foo = (attr.foo & 0x00ffffff) | packageIdBits;
+    id.foo = (id.foo & 0x00ffffff) | packageIdBits;
+    style.foo = (style.foo & 0x00ffffff) | packageIdBits;
+  })"));
 }
 
 TEST(JavaClassGeneratorTest, OnlyGenerateRText) {

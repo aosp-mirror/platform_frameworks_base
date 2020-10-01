@@ -23,8 +23,12 @@ import android.os.Looper;
 import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.statusbar.NotificationInteractionTracker;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.util.time.SystemClock;
+
+import javax.inject.Inject;
 
 /**
  * Extends the lifetime of foreground notification services such that they show for at least
@@ -39,8 +43,15 @@ public class ForegroundServiceLifetimeExtender implements NotificationLifetimeEx
     private NotificationSafeToRemoveCallback mNotificationSafeToRemoveCallback;
     private ArraySet<NotificationEntry> mManagedEntries = new ArraySet<>();
     private Handler mHandler = new Handler(Looper.getMainLooper());
+    private final SystemClock mSystemClock;
+    private final NotificationInteractionTracker mInteractionTracker;
 
-    public ForegroundServiceLifetimeExtender() {
+    @Inject
+    public ForegroundServiceLifetimeExtender(
+            NotificationInteractionTracker interactionTracker,
+            SystemClock systemClock) {
+        mSystemClock = systemClock;
+        mInteractionTracker = interactionTracker;
     }
 
     @Override
@@ -50,13 +61,20 @@ public class ForegroundServiceLifetimeExtender implements NotificationLifetimeEx
 
     @Override
     public boolean shouldExtendLifetime(@NonNull NotificationEntry entry) {
-        if ((entry.notification.getNotification().flags
+        if ((entry.getSbn().getNotification().flags
                 & Notification.FLAG_FOREGROUND_SERVICE) == 0) {
             return false;
         }
 
-        long currentTime = System.currentTimeMillis();
-        return currentTime - entry.notification.getPostTime() < MIN_FGS_TIME_MS;
+        // Entry has triggered a HUN or some other interruption, therefore it has been seen and the
+        // interrupter might be retaining it anyway.
+        if (entry.hasInterrupted()) {
+            return false;
+        }
+
+        boolean hasInteracted = mInteractionTracker.hasUserInteractedWith(entry.getKey());
+        long aliveTime = mSystemClock.uptimeMillis() - entry.getCreationTime();
+        return aliveTime < MIN_FGS_TIME_MS && !hasInteracted;
     }
 
     @Override
@@ -79,12 +97,13 @@ public class ForegroundServiceLifetimeExtender implements NotificationLifetimeEx
             if (mManagedEntries.contains(entry)) {
                 mManagedEntries.remove(entry);
                 if (mNotificationSafeToRemoveCallback != null) {
-                    mNotificationSafeToRemoveCallback.onSafeToRemove(entry.key);
+                    mNotificationSafeToRemoveCallback.onSafeToRemove(entry.getKey());
                 }
             }
         };
         long delayAmt = MIN_FGS_TIME_MS
-                - (System.currentTimeMillis() - entry.notification.getPostTime());
+                - (mSystemClock.uptimeMillis() - entry.getCreationTime());
         mHandler.postDelayed(r, delayAmt);
     }
 }
+

@@ -31,6 +31,7 @@ import android.hardware.fingerprint.IFingerprintService;
 import android.view.KeyEvent;
 
 import com.android.server.accessibility.FingerprintGestureDispatcher.FingerprintGestureClient;
+import com.android.server.accessibility.test.MessageCapturingHandler;
 
 import org.junit.After;
 import org.junit.Before;

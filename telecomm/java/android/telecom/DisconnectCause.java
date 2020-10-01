@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.SystemApi;
 import android.media.ToneGenerator;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -80,21 +81,26 @@ public final class DisconnectCause implements Parcelable {
      * Reason code (returned via {@link #getReason()}) which indicates that a call could not be
      * completed because the cellular radio is off or out of service, the device is connected to
      * a wifi network, but the user has not enabled wifi calling.
-     * @hide
      */
     public static final String REASON_WIFI_ON_BUT_WFC_OFF = "REASON_WIFI_ON_BUT_WFC_OFF";
 
     /**
      * Reason code (returned via {@link #getReason()}), which indicates that the video telephony
      * call was disconnected because IMS access is blocked.
-     * @hide
      */
     public static final String REASON_IMS_ACCESS_BLOCKED = "REASON_IMS_ACCESS_BLOCKED";
 
     /**
-     * Reason code, which indicates that the conference call is simulating single party conference.
+     * Reason code (returned via {@link #getReason()}), which indicates that the connection service
+     * is setting the call's state to {@link Call#STATE_DISCONNECTED} because it is internally
+     * changing the representation of an IMS conference call to simulate a single-party call.
+     *
+     * This reason code is only used for communication between a {@link ConnectionService} and
+     * Telecom and should not be surfaced to the user.
+     *
      * @hide
      */
+    @SystemApi
     public static final String REASON_EMULATING_SINGLE_CALL = "EMULATING_SINGLE_CALL";
 
     /**

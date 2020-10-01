@@ -41,6 +41,10 @@
         <item type="string" name="policy_oem" />
     </policy>
 
+    <policy type="actor">
+        <item type="string" name="policy_actor" />
+    </policy>
+
     <!-- Resources publicly overlayable -->
     <policy type="public">
         <item type="string" name="policy_public" />

@@ -43,7 +43,11 @@ android_robolectric_test {
     // Include the testing libraries
     libs: [
         "platform-test-annotations",
+        "services.backup",
         "testng",
+    ],
+    static_libs: [
+        "androidx.test.ext.truth",
     ],
 
     instrumentation_for: "FrameworksServicesLib",

@@ -109,7 +109,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings.Config;
-import com.android.testutils.HandlerUtilsKt;
+import com.android.testutils.HandlerUtils;
 import com.android.testutils.TestableNetworkStatsProviderBinder;
 
 import libcore.io.IoUtils;
@@ -700,7 +700,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         when(mNetworkStatsSubscriptionsMonitor.getRatTypeForSubscriberId(anyString()))
                 .thenReturn(ratType);
         mService.handleOnCollapsedRatTypeChanged();
-        HandlerUtilsKt.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
+        HandlerUtils.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
     }
 
     @Test
@@ -1065,7 +1065,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         long minThresholdInBytes = 2 * 1024 * 1024; // 2 MB
         assertEquals(minThresholdInBytes, request.thresholdInBytes);
 
-        HandlerUtilsKt.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
+        HandlerUtils.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
 
         // Make sure that the caller binder gets connected
         verify(mBinder).linkToDeath(any(IBinder.DeathRecipient.class), anyInt());
@@ -1203,7 +1203,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
         // Simulates alert quota of the provider has been reached.
         cb.notifyAlertReached();
-        HandlerUtilsKt.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
+        HandlerUtils.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
 
         // Verifies that polling is triggered by alert reached.
         provider.expectOnRequestStatsUpdate(0 /* unused */);
@@ -1264,7 +1264,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         // Call handleOnCollapsedRatTypeChanged manually to simulate the callback fired
         // when stopping monitor, this is needed by NetworkStatsService to trigger updateIfaces.
         mService.handleOnCollapsedRatTypeChanged();
-        HandlerUtilsKt.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
+        HandlerUtils.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
         // Create some traffic.
         incrementCurrentTime(MINUTE_IN_MILLIS);
         // Append more traffic on existing snapshot.
@@ -1286,7 +1286,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         setCombineSubtypeEnabled(false);
 
         mService.handleOnCollapsedRatTypeChanged();
-        HandlerUtilsKt.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
+        HandlerUtils.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
         // Create some traffic.
         incrementCurrentTime(MINUTE_IN_MILLIS);
         // Append more traffic on existing snapshot.
@@ -1520,7 +1520,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     }
 
     private void waitForIdle() {
-        HandlerUtilsKt.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
+        HandlerUtils.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
     }
 
     static class LatchedHandler extends Handler {

@@ -92,6 +92,10 @@
             android:label="@string/keyboard_layout_czech"
             android:keyboardLayout="@raw/keyboard_layout_czech" />
 
+    <keyboard-layout android:name="keyboard_layout_czech_qwerty"
+            android:label="@string/keyboard_layout_czech_qwerty"
+            android:keyboardLayout="@raw/keyboard_layout_czech_qwerty" />
+
     <keyboard-layout android:name="keyboard_layout_estonian"
             android:label="@string/keyboard_layout_estonian"
             android:keyboardLayout="@raw/keyboard_layout_estonian" />
@@ -167,4 +171,12 @@
     <keyboard-layout android:name="keyboard_layout_belarusian"
             android:label="@string/keyboard_layout_belarusian"
             android:keyboardLayout="@raw/keyboard_layout_belarusian" />
+
+    <keyboard-layout android:name="keyboard_layout_mongolian"
+            android:label="@string/keyboard_layout_mongolian"
+            android:keyboardLayout="@raw/keyboard_layout_mongolian" />
+
+    <keyboard-layout android:name="keyboard_layout_georgian"
+            android:label="@string/keyboard_layout_georgian"
+            android:keyboardLayout="@raw/keyboard_layout_georgian" />
 </keyboard-layouts>

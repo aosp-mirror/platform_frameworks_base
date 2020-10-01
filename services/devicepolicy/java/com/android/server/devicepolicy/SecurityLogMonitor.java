@@ -51,15 +51,17 @@ class SecurityLogMonitor implements Runnable {
 
     private final Lock mLock = new ReentrantLock();
 
+    private int mEnabledUser;
+
     SecurityLogMonitor(DevicePolicyManagerService service) {
         this(service, 0 /* id */);
     }
 
     @VisibleForTesting
     SecurityLogMonitor(DevicePolicyManagerService service, long id) {
-        this.mService = service;
-        this.mId = id;
-        this.mLastForceNanos = System.nanoTime();
+        mService = service;
+        mId = id;
+        mLastForceNanos = System.nanoTime();
     }
 
     private static final boolean DEBUG = false;  // STOPSHIP if true.
@@ -136,8 +138,15 @@ class SecurityLogMonitor implements Runnable {
     @GuardedBy("mForceSemaphore")
     private long mLastForceNanos = 0;
 
-    void start() {
-        Slog.i(TAG, "Starting security logging.");
+    /**
+     * Start security logging.
+     *
+     * @param enabledUser which user logging is enabled on, or USER_ALL to enable logging for all
+     *     users on the device.
+     */
+    void start(int enabledUser) {
+        Slog.i(TAG, "Starting security logging for user " + enabledUser);
+        mEnabledUser = enabledUser;
         SecurityLog.writeEvent(SecurityLog.TAG_LOGGING_STARTED);
         mLock.lock();
         try {
@@ -286,7 +295,7 @@ class SecurityLogMonitor implements Runnable {
                 break;
             }
         }
-
+        SecurityLog.redactEvents(newLogs, mEnabledUser);
         if (DEBUG) Slog.d(TAG, "Got " + newLogs.size() + " new events.");
     }
 

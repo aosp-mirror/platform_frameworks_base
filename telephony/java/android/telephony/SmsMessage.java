@@ -317,6 +317,23 @@ public class SmsMessage {
     }
 
     /**
+     * Create an SmsMessage from a native SMS-Submit PDU, specified by Bluetooth Message Access
+     * Profile Specification v1.4.2 5.8.
+     * This is used by Bluetooth MAP profile to decode message when sending non UTF-8 SMS messages.
+     *
+     * @param data Message data.
+     * @param isCdma Indicates weather the type of the SMS is CDMA.
+     * @return An SmsMessage representing the message.
+     *
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public static SmsMessage createFromNativeSmsSubmitPdu(@NonNull byte[] data, boolean isCdma) {
+        return null;
+    }
+
+    /**
      * Get the TP-Layer-Length for the given SMS-SUBMIT PDU Basically, the
      * length in bytes (not hex chars) less the SMSC header
      *
@@ -744,9 +761,9 @@ public class SmsMessage {
 
         if (isTypeGsm) {
             data = com.android.internal.telephony.gsm.SmsMessage.getSubmitPdu(null,
-                destinationAddress, message, false,
-                SmsHeader.toByteArray(smsHeader), encoding, languageTable,
-                languageShiftTable).encodedMessage;
+                    destinationAddress, message, false,
+                    SmsHeader.toByteArray(smsHeader), encoding, languageTable,
+                    languageShiftTable).encodedMessage;
         } else { // SMS_TYPE_CDMA
             UserData uData = new UserData();
             uData.payloadStr = message;
@@ -758,7 +775,7 @@ public class SmsMessage {
             }
             uData.msgEncodingSet = true;
             data = com.android.internal.telephony.cdma.SmsMessage.getSubmitPdu(
-                destinationAddress, uData, false).encodedMessage;
+                    destinationAddress, uData, false).encodedMessage;
         }
         if (data == null) {
             return new byte[0];
@@ -1176,6 +1193,7 @@ public class SmsMessage {
     /**
      * Returns the recipient address(receiver) of this SMS message in String form or null if
      * unavailable.
+     * {@hide}
      */
     @Nullable
     public String getRecipientAddress() {

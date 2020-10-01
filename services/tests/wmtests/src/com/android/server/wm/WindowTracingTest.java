@@ -125,7 +125,7 @@ public class WindowTracingTest {
     public void trace_dumpsWindowManagerState_whenTracing() throws Exception {
         mWindowTracing.startTrace(mock(PrintWriter.class));
         mWindowTracing.logState("where");
-        verify(mWmMock, times(2)).writeToProtoLocked(any(), eq(WindowTraceLogLevel.TRIM));
+        verify(mWmMock, times(2)).dumpDebugLocked(any(), eq(WindowTraceLogLevel.TRIM));
     }
 
     @Test
@@ -151,7 +151,7 @@ public class WindowTracingTest {
             inv.<ProtoOutputStream>getArgument(0).write(
                     WindowManagerTraceProto.WHERE, "TEST_WM_PROTO");
             return null;
-        }).when(mWmMock).writeToProtoLocked(any(), any());
+        }).when(mWmMock).dumpDebugLocked(any(), any());
         mWindowTracing.logState("TEST_WHERE");
 
         mWindowTracing.stopTrace(mock(PrintWriter.class));

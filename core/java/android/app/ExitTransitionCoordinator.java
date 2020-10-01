@@ -48,7 +48,7 @@ import java.util.ArrayList;
  */
 class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     private static final String TAG = "ExitTransitionCoordinator";
-    private static final long MAX_WAIT_MS = 1000;
+    static long sMaxWaitMillis = 1000;
 
     private Bundle mSharedElementBundle;
     private boolean mExitNotified;
@@ -120,7 +120,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private void delayCancel() {
         if (mHandler != null) {
-            mHandler.sendEmptyMessageDelayed(MSG_CANCEL, MAX_WAIT_MS);
+            mHandler.sendEmptyMessageDelayed(MSG_CANCEL, sMaxWaitMillis);
         }
     }
 

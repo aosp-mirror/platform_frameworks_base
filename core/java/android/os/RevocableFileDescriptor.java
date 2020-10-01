@@ -48,6 +48,8 @@ public class RevocableFileDescriptor {
 
     private volatile boolean mRevoked;
 
+    private ParcelFileDescriptor.OnCloseListener mOnCloseListener;
+
     /** {@hide} */
     public RevocableFileDescriptor() {
     }
@@ -95,6 +97,14 @@ public class RevocableFileDescriptor {
     public void revoke() {
         mRevoked = true;
         IoUtils.closeQuietly(mInner);
+    }
+
+    /**
+     * Callback for indicating that {@link ParcelFileDescriptor} passed to the client
+     * process ({@link #getRevocableFileDescriptor()}) has been closed.
+     */
+    public void addOnCloseListener(ParcelFileDescriptor.OnCloseListener onCloseListener) {
+        mOnCloseListener = onCloseListener;
     }
 
     public boolean isRevoked() {
@@ -156,6 +166,9 @@ public class RevocableFileDescriptor {
             if (DEBUG) Slog.v(TAG, "onRelease()");
             mRevoked = true;
             IoUtils.closeQuietly(mInner);
+            if (mOnCloseListener != null) {
+                mOnCloseListener.onClose(null);
+            }
         }
     };
 }

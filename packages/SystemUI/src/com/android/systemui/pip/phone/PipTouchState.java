@@ -31,15 +31,17 @@ import java.io.PrintWriter;
  * This keeps track of the touch state throughout the current touch gesture.
  */
 public class PipTouchState {
-    private static final String TAG = "PipTouchHandler";
+    private static final String TAG = "PipTouchState";
     private static final boolean DEBUG = false;
 
     @VisibleForTesting
     static final long DOUBLE_TAP_TIMEOUT = 200;
+    static final long HOVER_EXIT_TIMEOUT = 50;
 
     private final Handler mHandler;
     private final ViewConfiguration mViewConfig;
     private final Runnable mDoubleTapTimeoutCallback;
+    private final Runnable mHoverExitTimeoutCallback;
 
     private VelocityTracker mVelocityTracker;
     private long mDownTouchTime = 0;
@@ -64,10 +66,11 @@ public class PipTouchState {
     private int mActivePointerId;
 
     public PipTouchState(ViewConfiguration viewConfig, Handler handler,
-            Runnable doubleTapTimeoutCallback) {
+            Runnable doubleTapTimeoutCallback, Runnable hoverExitTimeoutCallback) {
         mViewConfig = viewConfig;
         mHandler = handler;
         mDoubleTapTimeoutCallback = doubleTapTimeoutCallback;
+        mHoverExitTimeoutCallback = hoverExitTimeoutCallback;
     }
 
     /**
@@ -92,7 +95,7 @@ public class PipTouchState {
 
                 // Initialize the velocity tracker
                 initOrResetVelocityTracker();
-                addMovement(ev);
+                addMovementToVelocityTracker(ev);
 
                 mActivePointerId = ev.getPointerId(0);
                 if (DEBUG) {
@@ -120,7 +123,7 @@ public class PipTouchState {
                 }
 
                 // Update the velocity tracker
-                addMovement(ev);
+                addMovementToVelocityTracker(ev);
                 int pointerIndex = ev.findPointerIndex(mActivePointerId);
                 if (pointerIndex == -1) {
                     Log.e(TAG, "Invalid active pointer id on MOVE: " + mActivePointerId);
@@ -151,7 +154,7 @@ public class PipTouchState {
                 }
 
                 // Update the velocity tracker
-                addMovement(ev);
+                addMovementToVelocityTracker(ev);
 
                 int pointerIndex = ev.getActionIndex();
                 int pointerId = ev.getPointerId(pointerIndex);
@@ -174,7 +177,7 @@ public class PipTouchState {
                 }
 
                 // Update the velocity tracker
-                addMovement(ev);
+                addMovementToVelocityTracker(ev);
                 mVelocityTracker.computeCurrentVelocity(1000,
                         mViewConfig.getScaledMaximumFlingVelocity());
                 mVelocity.set(mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
@@ -195,6 +198,10 @@ public class PipTouchState {
             }
             case MotionEvent.ACTION_CANCEL: {
                 recycleVelocityTracker();
+                break;
+            }
+            case MotionEvent.ACTION_BUTTON_PRESS: {
+                removeHoverExitTimeoutCallback();
                 break;
             }
         }
@@ -318,6 +325,37 @@ public class PipTouchState {
         return -1;
     }
 
+    /**
+     * Removes the timeout callback if it's in queue.
+     */
+    public void removeDoubleTapTimeoutCallback() {
+        mIsWaitingForDoubleTap = false;
+        mHandler.removeCallbacks(mDoubleTapTimeoutCallback);
+    }
+
+    void scheduleHoverExitTimeoutCallback() {
+        mHandler.removeCallbacks(mHoverExitTimeoutCallback);
+        mHandler.postDelayed(mHoverExitTimeoutCallback, HOVER_EXIT_TIMEOUT);
+    }
+
+    void removeHoverExitTimeoutCallback() {
+        mHandler.removeCallbacks(mHoverExitTimeoutCallback);
+    }
+
+    void addMovementToVelocityTracker(MotionEvent event) {
+        if (mVelocityTracker == null) {
+            return;
+        }
+
+        // Add movement to velocity tracker using raw screen X and Y coordinates instead
+        // of window coordinates because the window frame may be moving at the same time.
+        float deltaX = event.getRawX() - event.getX();
+        float deltaY = event.getRawY() - event.getY();
+        event.offsetLocation(deltaX, deltaY);
+        mVelocityTracker.addMovement(event);
+        event.offsetLocation(-deltaX, -deltaY);
+    }
+
     private void initOrResetVelocityTracker() {
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
@@ -331,16 +369,6 @@ public class PipTouchState {
             mVelocityTracker.recycle();
             mVelocityTracker = null;
         }
-    }
-
-    private void addMovement(MotionEvent event) {
-        // Add movement to velocity tracker using raw screen X and Y coordinates instead
-        // of window coordinates because the window frame may be moving at the same time.
-        float deltaX = event.getRawX() - event.getX();
-        float deltaY = event.getRawY() - event.getY();
-        event.offsetLocation(deltaX, deltaY);
-        mVelocityTracker.addMovement(event);
-        event.offsetLocation(-deltaX, -deltaY);
     }
 
     public void dump(PrintWriter pw, String prefix) {

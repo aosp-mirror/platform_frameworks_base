@@ -54,7 +54,7 @@ import android.view.accessibility.AccessibilityEvent;
  * For example, if it received a down motion event followed by a cancel motion
  * event, it should not handle subsequent move and up events until it gets a down.
  */
-interface EventStreamTransformation {
+public interface EventStreamTransformation {
 
     /**
      * Receives a motion event. Passed are the event transformed by previous

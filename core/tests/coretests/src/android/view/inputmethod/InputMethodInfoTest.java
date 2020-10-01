@@ -54,10 +54,12 @@ public class InputMethodInfoTest {
         final InputMethodInfo imi = buildInputMethodForTest(R.xml.ime_meta);
 
         assertThat(imi.supportsSwitchingToNextInputMethod(), is(false));
+        assertThat(imi.isInlineSuggestionsEnabled(), is(false));
 
         final InputMethodInfo clone = cloneViaParcel(imi);
 
         assertThat(clone.supportsSwitchingToNextInputMethod(), is(false));
+        assertThat(imi.isInlineSuggestionsEnabled(), is(false));
     }
 
     @Test
@@ -69,6 +71,17 @@ public class InputMethodInfoTest {
         final InputMethodInfo clone = cloneViaParcel(imi);
 
         assertThat(clone.supportsSwitchingToNextInputMethod(), is(true));
+    }
+
+    @Test
+    public void testInlineSuggestionsEnabled() throws Exception {
+        final InputMethodInfo imi = buildInputMethodForTest(R.xml.ime_meta_inline_suggestions);
+
+        assertThat(imi.isInlineSuggestionsEnabled(), is(true));
+
+        final InputMethodInfo clone = cloneViaParcel(imi);
+
+        assertThat(clone.isInlineSuggestionsEnabled(), is(true));
     }
 
     @Test

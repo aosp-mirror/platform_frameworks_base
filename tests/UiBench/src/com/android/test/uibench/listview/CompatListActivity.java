@@ -16,22 +16,29 @@
 package com.android.test.uibench.listview;
 
 import android.os.Bundle;
+import android.widget.ListAdapter;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.ListFragment;
-import androidx.appcompat.app.AppCompatActivity;
-import android.widget.ListAdapter;
 
 public abstract class CompatListActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        initializeActivity();
 
+        int containerViewId = getListFragmentContainerViewId();
         FragmentManager fm = getSupportFragmentManager();
-        if (fm.findFragmentById(android.R.id.content) == null) {
+        Fragment fragment = fm.findFragmentById(containerViewId);
+        if (fragment == null) {
             ListFragment listFragment = createListFragment();
             listFragment.setListAdapter(createListAdapter());
-            fm.beginTransaction().add(android.R.id.content, listFragment).commit();
+            fm.beginTransaction().add(containerViewId, listFragment).commit();
+        } else if (fragment instanceof ListFragment) {
+            ((ListFragment) fragment).setListAdapter(createListAdapter());
         }
     }
 
@@ -39,5 +46,12 @@ public abstract class CompatListActivity extends AppCompatActivity {
 
     protected ListFragment createListFragment() {
         return new ListFragment();
+    }
+
+    protected int getListFragmentContainerViewId() {
+        return android.R.id.content;
+    }
+
+    protected void initializeActivity() {
     }
 }

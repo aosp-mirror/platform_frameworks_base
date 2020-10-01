@@ -16,52 +16,51 @@
 
 package com.android.server.location;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.location.Address;
 import android.location.GeocoderParams;
 import android.location.IGeocodeProvider;
 
-import com.android.server.FgThread;
+import com.android.internal.os.BackgroundThread;
 import com.android.server.ServiceWatcher;
 
 import java.util.List;
 
 /**
  * Proxy for IGeocodeProvider implementations.
+ *
+ * @hide
  */
 public class GeocoderProxy {
-    private static final String TAG = "GeocoderProxy";
 
     private static final String SERVICE_ACTION = "com.android.location.service.GeocodeProvider";
 
-    private final ServiceWatcher mServiceWatcher;
-
-    public static GeocoderProxy createAndBind(Context context,
-            int overlaySwitchResId, int defaultServicePackageNameResId,
-            int initialPackageNamesResId) {
-        GeocoderProxy proxy = new GeocoderProxy(context, overlaySwitchResId,
-                defaultServicePackageNameResId, initialPackageNamesResId);
-        if (proxy.bind()) {
+    /**
+     * Creates and registers this proxy. If no suitable service is available for the proxy, returns
+     * null.
+     */
+    @Nullable
+    public static GeocoderProxy createAndRegister(Context context) {
+        GeocoderProxy proxy = new GeocoderProxy(context);
+        if (proxy.register()) {
             return proxy;
         } else {
             return null;
         }
     }
 
-    private GeocoderProxy(Context context,
-            int overlaySwitchResId, int defaultServicePackageNameResId,
-            int initialPackageNamesResId) {
-        mServiceWatcher = new ServiceWatcher(context, TAG, SERVICE_ACTION, overlaySwitchResId,
-                defaultServicePackageNameResId, initialPackageNamesResId,
-                FgThread.getHandler());
+    private final ServiceWatcher mServiceWatcher;
+
+    private GeocoderProxy(Context context) {
+        mServiceWatcher = new ServiceWatcher(context, BackgroundThread.getHandler(), SERVICE_ACTION,
+                null, null,
+                com.android.internal.R.bool.config_enableGeocoderOverlay,
+                com.android.internal.R.string.config_geocoderProviderPackageName);
     }
 
-    private boolean bind() {
-        return mServiceWatcher.start();
-    }
-
-    public String getConnectedPackageName() {
-        return mServiceWatcher.getCurrentPackageName();
+    private boolean register() {
+        return mServiceWatcher.register();
     }
 
     public String getFromLocation(double latitude, double longitude, int maxResults,
@@ -83,5 +82,4 @@ public class GeocoderProxy {
                     maxResults, params, addrs);
         }, "Service not Available");
     }
-
 }

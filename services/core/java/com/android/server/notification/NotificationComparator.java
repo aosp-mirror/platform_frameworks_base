@@ -59,6 +59,12 @@ public class NotificationComparator
             return -1 * Boolean.compare(isLeftHighImportance, isRightHighImportance);
         }
 
+        // If a score has been assigned by notification assistant service, use this service
+        // rank results within each bucket instead of this comparator implementation.
+        if (left.getRankingScore() != right.getRankingScore()) {
+            return -1 * Float.compare(left.getRankingScore(), right.getRankingScore());
+        }
+
         // first all colorized notifications
         boolean leftImportantColorized = isImportantColorized(left);
         boolean rightImportantColorized = isImportantColorized(right);
@@ -116,8 +122,8 @@ public class NotificationComparator
             return -1 * Integer.compare(leftPackagePriority, rightPackagePriority);
         }
 
-        final int leftPriority = left.sbn.getNotification().priority;
-        final int rightPriority = right.sbn.getNotification().priority;
+        final int leftPriority = left.getSbn().getNotification().priority;
+        final int rightPriority = right.getSbn().getNotification().priority;
         if (leftPriority != rightPriority) {
             // by priority, high to low
             return -1 * Integer.compare(leftPriority, rightPriority);
@@ -163,7 +169,7 @@ public class NotificationComparator
     }
 
     protected boolean isImportantMessaging(NotificationRecord record) {
-        return mMessagingUtil.isImportantMessaging(record.sbn, record.getImportance());
+        return mMessagingUtil.isImportantMessaging(record.getSbn(), record.getImportance());
     }
 
     private boolean isOngoing(NotificationRecord record) {
@@ -177,7 +183,7 @@ public class NotificationComparator
 
     private boolean isCall(NotificationRecord record) {
         return record.isCategory(Notification.CATEGORY_CALL)
-                && isDefaultPhoneApp(record.sbn.getPackageName());
+                && isDefaultPhoneApp(record.getSbn().getPackageName());
     }
 
     private boolean isDefaultPhoneApp(String pkg) {

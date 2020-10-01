@@ -34,6 +34,7 @@ import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 
 import java.util.List;
@@ -72,10 +73,10 @@ public class TileServiceManager {
     private boolean mStarted = false;
 
     TileServiceManager(TileServices tileServices, Handler handler, ComponentName component,
-            Tile tile) {
+            Tile tile, BroadcastDispatcher broadcastDispatcher) {
         this(tileServices, handler, new TileLifecycleManager(handler,
                 tileServices.getContext(), tileServices, tile, new Intent().setComponent(component),
-                new UserHandle(ActivityManager.getCurrentUser())));
+                new UserHandle(ActivityManager.getCurrentUser()), broadcastDispatcher));
     }
 
     @VisibleForTesting
@@ -121,6 +122,10 @@ public class TileServiceManager {
 
     public boolean isActiveTile() {
         return mStateManager.isActiveTile();
+    }
+
+    public boolean isToggleableTile() {
+        return mStateManager.isToggleableTile();
     }
 
     public void setShowingDialog(boolean dialog) {

@@ -1,0 +1,71 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+option java_multiple_files = true;
+
+import "frameworks/base/core/proto/android/privacy.proto";
+
+package android.os;
+
+message CpuUsageProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    message Load {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional float load1 = 1;
+        optional float load5 = 2;
+        optional float load15 = 3;
+    }
+    optional Load current_load = 1;
+
+    optional int64 now = 2;
+    optional int64 last_sample_time = 3;
+    optional int64 current_sample_time = 4;
+    optional int64 last_sample_real_time = 5;
+    optional int64 current_sample_real_time = 6;
+    optional int64 last_sample_wall_time = 7;
+    optional int64 current_sample_wall_time = 8;
+
+    optional int32 total_user_time = 9;
+    optional int32 total_system_time = 10;
+    optional int32 total_iowait_time = 11;
+    optional int32 total_irq_time = 12;
+    optional int32 total_soft_irq_time = 13;
+    optional int32 total_idle_time = 14;
+    optional int32 total_time = 15;
+
+    message Stat {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 uid = 1;
+        optional int32 pid = 2;
+        optional string name = 3;
+        optional bool added = 4;
+        optional bool removed = 5;
+        optional int32 uptime = 6;
+        optional int32 user_time = 7;
+        optional int32 system_time = 8;
+        optional int32 minor_faults = 9;
+        optional int32 major_faults = 10;
+        optional int32 parent_pid = 11;
+    }
+    repeated Stat processes = 16;
+
+    // Next tag: 17
+}

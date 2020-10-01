@@ -31,6 +31,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
@@ -86,7 +87,7 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
     @Inject
     public KeyguardMessageArea(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
             ConfigurationController configurationController) {
-        this(context, attrs, KeyguardUpdateMonitor.getInstance(context), configurationController);
+        this(context, attrs, Dependency.get(KeyguardUpdateMonitor.class), configurationController);
     }
 
     public KeyguardMessageArea(Context context, AttributeSet attrs, KeyguardUpdateMonitor monitor,
@@ -178,7 +179,7 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
 
     @Override
     protected void onFinishInflate() {
-        boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
+        boolean shouldMarquee = Dependency.get(KeyguardUpdateMonitor.class).isDeviceInteractive();
         setSelected(shouldMarquee); // This is required to ensure marquee works
     }
 

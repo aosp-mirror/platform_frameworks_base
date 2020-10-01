@@ -24,7 +24,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI_AWARE;
 
-import static com.android.server.ConnectivityServiceTestUtilsKt.transportToLegacyType;
+import static com.android.server.ConnectivityServiceTestUtils.transportToLegacyType;
 
 import static junit.framework.Assert.assertTrue;
 
@@ -49,7 +49,7 @@ import android.os.Message;
 import android.util.Log;
 
 import com.android.server.connectivity.ConnectivityConstants;
-import com.android.testutils.HandlerUtilsKt;
+import com.android.testutils.HandlerUtils;
 import com.android.testutils.TestableNetworkCallback;
 
 import java.util.Set;
@@ -67,6 +67,9 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
     private NetworkAgent mNetworkAgent;
     private int mStartKeepaliveError = SocketKeepalive.ERROR_UNSUPPORTED;
     private int mStopKeepaliveError = SocketKeepalive.NO_KEEPALIVE;
+    // Controls how test network agent is going to wait before responding to keepalive
+    // start/stop. Useful when simulate KeepaliveTracker is waiting for response from modem.
+    private long mKeepaliveResponseDelay = 0L;
     private Integer mExpectedKeepaliveSlot = null;
 
     public NetworkAgentWrapper(int transport, LinkProperties linkProperties, Context context)
@@ -134,12 +137,17 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
             if (mWrapper.mExpectedKeepaliveSlot != null) {
                 assertEquals((int) mWrapper.mExpectedKeepaliveSlot, slot);
             }
-            onSocketKeepaliveEvent(slot, mWrapper.mStartKeepaliveError);
+            mWrapper.mHandlerThread.getThreadHandler().postDelayed(
+                    () -> onSocketKeepaliveEvent(slot, mWrapper.mStartKeepaliveError),
+                    mWrapper.mKeepaliveResponseDelay);
         }
 
         @Override
         public void stopSocketKeepalive(Message msg) {
-            onSocketKeepaliveEvent(msg.arg1, mWrapper.mStopKeepaliveError);
+            final int slot = msg.arg1;
+            mWrapper.mHandlerThread.getThreadHandler().postDelayed(
+                    () -> onSocketKeepaliveEvent(slot, mWrapper.mStopKeepaliveError),
+                    mWrapper.mKeepaliveResponseDelay);
         }
 
         @Override
@@ -248,6 +256,10 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
         mStopKeepaliveError = reason;
     }
 
+    public void setKeepaliveResponseDelay(long delay) {
+        mKeepaliveResponseDelay = delay;
+    }
+
     public void setExpectedKeepaliveSlot(Integer slot) {
         mExpectedKeepaliveSlot = slot;
     }
@@ -265,6 +277,6 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
     }
 
     public void waitForIdle(long timeoutMs) {
-        HandlerUtilsKt.waitForIdle(mHandlerThread, timeoutMs);
+        HandlerUtils.waitForIdle(mHandlerThread, timeoutMs);
     }
 }

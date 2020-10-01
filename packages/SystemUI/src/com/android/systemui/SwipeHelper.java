@@ -69,6 +69,7 @@ public class SwipeHelper implements Gefingerpoken {
 
     private final FlingAnimationUtils mFlingAnimationUtils;
     private float mPagingTouchSlop;
+    private final float mSlopMultiplier;
     private final Callback mCallback;
     private final int mSwipeDirection;
     private final VelocityTracker mVelocityTracker;
@@ -84,27 +85,44 @@ public class SwipeHelper implements Gefingerpoken {
     private float mTranslation = 0;
 
     private boolean mMenuRowIntercepting;
-    private boolean mLongPressSent;
-    private Runnable mWatchLongPress;
     private final long mLongPressTimeout;
+    private boolean mLongPressSent;
+    private final float[] mDownLocation = new float[2];
+    private final Runnable mPerformLongPress = new Runnable() {
 
-    final private int[] mTmpPos = new int[2];
+        private final int[] mViewOffset = new int[2];
+
+        @Override
+        public void run() {
+            if (mCurrView != null && !mLongPressSent) {
+                mLongPressSent = true;
+                if (mCurrView instanceof ExpandableNotificationRow) {
+                    mCurrView.getLocationOnScreen(mViewOffset);
+                    final int x = (int) mDownLocation[0] - mViewOffset[0];
+                    final int y = (int) mDownLocation[1] - mViewOffset[1];
+                    mCurrView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
+                    ((ExpandableNotificationRow) mCurrView).doLongClickCallback(x, y);
+                }
+            }
+        }
+    };
+
     private final int mFalsingThreshold;
     private boolean mTouchAboveFalsingThreshold;
     private boolean mDisableHwLayers;
     private final boolean mFadeDependingOnAmountSwiped;
-    private final Context mContext;
 
     private final ArrayMap<View, Animator> mDismissPendingMap = new ArrayMap<>();
 
     public SwipeHelper(
             int swipeDirection, Callback callback, Context context, FalsingManager falsingManager) {
-        mContext = context;
         mCallback = callback;
         mHandler = new Handler();
         mSwipeDirection = swipeDirection;
         mVelocityTracker = VelocityTracker.obtain();
-        mPagingTouchSlop = ViewConfiguration.get(context).getScaledPagingTouchSlop();
+        final ViewConfiguration configuration = ViewConfiguration.get(context);
+        mPagingTouchSlop = configuration.getScaledPagingTouchSlop();
+        mSlopMultiplier = configuration.getScaledAmbiguousGestureMultiplier();
 
         // Extra long-press!
         mLongPressTimeout = (long) (ViewConfiguration.getLongPressTimeout() * 1.5f);
@@ -114,7 +132,8 @@ public class SwipeHelper implements Gefingerpoken {
         mFalsingThreshold = res.getDimensionPixelSize(R.dimen.swipe_helper_falsing_threshold);
         mFadeDependingOnAmountSwiped = res.getBoolean(R.bool.config_fadeDependingOnAmountSwiped);
         mFalsingManager = falsingManager;
-        mFlingAnimationUtils = new FlingAnimationUtils(context, getMaxEscapeAnimDuration() / 1000f);
+        mFlingAnimationUtils = new FlingAnimationUtils(res.getDisplayMetrics(),
+                getMaxEscapeAnimDuration() / 1000f);
     }
 
     public void setDensityScale(float densityScale) {
@@ -256,10 +275,7 @@ public class SwipeHelper implements Gefingerpoken {
     }
 
     public void cancelLongPress() {
-        if (mWatchLongPress != null) {
-            mHandler.removeCallbacks(mWatchLongPress);
-            mWatchLongPress = null;
-        }
+        mHandler.removeCallbacks(mPerformLongPress);
     }
 
     @Override
@@ -288,27 +304,9 @@ public class SwipeHelper implements Gefingerpoken {
                     mInitialTouchPos = getPos(ev);
                     mPerpendicularInitialTouchPos = getPerpendicularPos(ev);
                     mTranslation = getTranslation(mCurrView);
-                    if (mWatchLongPress == null) {
-                        mWatchLongPress = new Runnable() {
-                            @Override
-                            public void run() {
-                                if (mCurrView != null && !mLongPressSent) {
-                                    mLongPressSent = true;
-                                    mCurrView.getLocationOnScreen(mTmpPos);
-                                    final int x = (int) ev.getRawX() - mTmpPos[0];
-                                    final int y = (int) ev.getRawY() - mTmpPos[1];
-                                    if (mCurrView instanceof ExpandableNotificationRow) {
-                                        mCurrView.sendAccessibilityEvent(
-                                                AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
-                                        ExpandableNotificationRow currRow =
-                                                (ExpandableNotificationRow) mCurrView;
-                                        currRow.doLongClickCallback(x, y);
-                                    }
-                                }
-                            }
-                        };
-                    }
-                    mHandler.postDelayed(mWatchLongPress, mLongPressTimeout);
+                    mDownLocation[0] = ev.getRawX();
+                    mDownLocation[1] = ev.getRawY();
+                    mHandler.postDelayed(mPerformLongPress, mLongPressTimeout);
                 }
                 break;
 
@@ -319,7 +317,12 @@ public class SwipeHelper implements Gefingerpoken {
                     float perpendicularPos = getPerpendicularPos(ev);
                     float delta = pos - mInitialTouchPos;
                     float deltaPerpendicular = perpendicularPos - mPerpendicularInitialTouchPos;
-                    if (Math.abs(delta) > mPagingTouchSlop
+                    // Adjust the touch slop if another gesture may be being performed.
+                    final float pagingTouchSlop =
+                            ev.getClassification() == MotionEvent.CLASSIFICATION_AMBIGUOUS_GESTURE
+                            ? mPagingTouchSlop * mSlopMultiplier
+                            : mPagingTouchSlop;
+                    if (Math.abs(delta) > pagingTouchSlop
                             && Math.abs(delta) > Math.abs(deltaPerpendicular)) {
                         if (mCallback.canChildBeDragged(mCurrView)) {
                             mCallback.onBeginDrag(mCurrView);
@@ -328,6 +331,11 @@ public class SwipeHelper implements Gefingerpoken {
                             mTranslation = getTranslation(mCurrView);
                         }
                         cancelLongPress();
+                    } else if (ev.getClassification() == MotionEvent.CLASSIFICATION_DEEP_PRESS
+                                    && mHandler.hasCallbacks(mPerformLongPress)) {
+                        // Accelerate the long press signal.
+                        cancelLongPress();
+                        mPerformLongPress.run();
                     }
                 }
                 break;
@@ -695,7 +703,7 @@ public class SwipeHelper implements Gefingerpoken {
 
     public boolean isFalseGesture(MotionEvent ev) {
         boolean falsingDetected = mCallback.isAntiFalsingNeeded();
-        if (mFalsingManager.isClassiferEnabled()) {
+        if (mFalsingManager.isClassifierEnabled()) {
             falsingDetected = falsingDetected && mFalsingManager.isFalseTouch();
         } else {
             falsingDetected = falsingDetected && !mTouchAboveFalsingThreshold;

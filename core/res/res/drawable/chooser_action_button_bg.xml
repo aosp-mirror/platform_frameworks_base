@@ -25,8 +25,8 @@
             <shape android:shape="rectangle">
               <corners android:radius="16dp"></corners>
                 <stroke android:width="1dp"
-                        android:color="?attr/textColorSecondary" />
-                <solid android:color="?attr/colorBackground" />
+                        android:color="?attr/opacityListDivider" />
+                <solid android:color="?attr/colorBackgroundFloating" />
             </shape>
         </inset>
     </item>

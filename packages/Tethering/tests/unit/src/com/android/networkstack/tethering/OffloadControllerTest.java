@@ -30,8 +30,8 @@ import static com.android.networkstack.tethering.OffloadController.StatsType.STA
 import static com.android.networkstack.tethering.OffloadController.StatsType.STATS_PER_UID;
 import static com.android.networkstack.tethering.OffloadHardwareInterface.ForwardedStats;
 import static com.android.networkstack.tethering.TetheringConfiguration.DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS;
-import static com.android.testutils.MiscAssertsKt.assertContainsAll;
-import static com.android.testutils.MiscAssertsKt.assertThrows;
+import static com.android.testutils.MiscAsserts.assertContainsAll;
+import static com.android.testutils.MiscAsserts.assertThrows;
 import static com.android.testutils.NetworkStatsUtilsKt.assertNetworkStatsEquals;
 
 import static junit.framework.Assert.assertNotNull;

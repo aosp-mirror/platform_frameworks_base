@@ -19,6 +19,7 @@ apex {
     updatable: true,
     min_sdk_version: "current",
     java_libs: ["framework-tethering"],
+    bpfs: ["offload.o"],
     apps: ["Tethering"],
     manifest: "manifest.json",
     key: "com.android.tethering.key",

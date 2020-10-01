@@ -64,7 +64,7 @@ public class BatteryPreference extends DropDownPreference implements TunerServic
     @Override
     public void onTuningChanged(String key, String newValue) {
         if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
-            mBlacklist = StatusBarIconController.getIconBlacklist(newValue);
+            mBlacklist = StatusBarIconController.getIconBlacklist(getContext(), newValue);
             mBatteryEnabled = !mBlacklist.contains(mBattery);
         }
         if (!mHasSetValue) {

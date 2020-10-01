@@ -40,11 +40,16 @@ namespace android {
 
 static const bool kDebugDispatchCycle = false;
 
+static const char* toString(bool value) {
+    return value ? "true" : "false";
+}
+
 static struct {
     jclass clazz;
 
     jmethodID dispatchInputEvent;
-    jmethodID dispatchBatchedInputEventPending;
+    jmethodID onFocusEvent;
+    jmethodID onBatchedInputEventPending;
 } gInputEventReceiverClassInfo;
 
 
@@ -83,7 +88,7 @@ private:
         return mInputConsumer.getChannel()->getName();
     }
 
-    virtual int handleEvent(int receiveFd, int events, void* data);
+    virtual int handleEvent(int receiveFd, int events, void* data) override;
 };
 
 
@@ -148,7 +153,7 @@ void NativeInputEventReceiver::setFdEvents(int events) {
         mFdEvents = events;
         int fd = mInputConsumer.getChannel()->getFd();
         if (events) {
-            mMessageQueue->getLooper()->addFd(fd, 0, events, this, NULL);
+            mMessageQueue->getLooper()->addFd(fd, 0, events, this, nullptr);
         } else {
             mMessageQueue->getLooper()->removeFd(fd);
         }
@@ -169,7 +174,7 @@ int NativeInputEventReceiver::handleEvent(int receiveFd, int events, void* data)
 
     if (events & ALOOPER_EVENT_INPUT) {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
-        status_t status = consumeEvents(env, false /*consumeBatches*/, -1, NULL);
+        status_t status = consumeEvents(env, false /*consumeBatches*/, -1, nullptr);
         mMessageQueue->raiseAndClearException(env, "handleReceiveCallback");
         return status == OK || status == NO_MEMORY ? 1 : 0;
     }
@@ -219,8 +224,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
         bool consumeBatches, nsecs_t frameTime, bool* outConsumedBatch) {
     if (kDebugDispatchCycle) {
         ALOGD("channel '%s' ~ Consuming input events, consumeBatches=%s, frameTime=%" PRId64,
-                getInputChannelName().c_str(),
-                consumeBatches ? "true" : "false", frameTime);
+              getInputChannelName().c_str(), toString(consumeBatches), frameTime);
     }
 
     if (consumeBatches) {
@@ -230,44 +234,48 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
         *outConsumedBatch = false;
     }
 
-    ScopedLocalRef<jobject> receiverObj(env, NULL);
+    ScopedLocalRef<jobject> receiverObj(env, nullptr);
     bool skipCallbacks = false;
     for (;;) {
         uint32_t seq;
         InputEvent* inputEvent;
+
         status_t status = mInputConsumer.consume(&mInputEventFactory,
                 consumeBatches, frameTime, &seq, &inputEvent);
-        if (status) {
-            if (status == WOULD_BLOCK) {
-                if (!skipCallbacks && !mBatchedInputEventPending
-                        && mInputConsumer.hasPendingBatch()) {
-                    // There is a pending batch.  Come back later.
-                    if (!receiverObj.get()) {
-                        receiverObj.reset(jniGetReferent(env, mReceiverWeakGlobal));
-                        if (!receiverObj.get()) {
-                            ALOGW("channel '%s' ~ Receiver object was finalized "
-                                    "without being disposed.", getInputChannelName().c_str());
-                            return DEAD_OBJECT;
-                        }
-                    }
+        if (status != OK && status != WOULD_BLOCK) {
+            ALOGE("channel '%s' ~ Failed to consume input event.  status=%d",
+                  getInputChannelName().c_str(), status);
+            return status;
+        }
 
-                    mBatchedInputEventPending = true;
-                    if (kDebugDispatchCycle) {
-                        ALOGD("channel '%s' ~ Dispatching batched input event pending notification.",
-                                getInputChannelName().c_str());
-                    }
-                    env->CallVoidMethod(receiverObj.get(),
-                            gInputEventReceiverClassInfo.dispatchBatchedInputEventPending);
-                    if (env->ExceptionCheck()) {
-                        ALOGE("Exception dispatching batched input events.");
-                        mBatchedInputEventPending = false; // try again later
+        if (status == WOULD_BLOCK) {
+            if (!skipCallbacks && !mBatchedInputEventPending && mInputConsumer.hasPendingBatch()) {
+                // There is a pending batch.  Come back later.
+                if (!receiverObj.get()) {
+                    receiverObj.reset(jniGetReferent(env, mReceiverWeakGlobal));
+                    if (!receiverObj.get()) {
+                        ALOGW("channel '%s' ~ Receiver object was finalized "
+                              "without being disposed.",
+                              getInputChannelName().c_str());
+                        return DEAD_OBJECT;
                     }
                 }
-                return OK;
+
+                mBatchedInputEventPending = true;
+                if (kDebugDispatchCycle) {
+                    ALOGD("channel '%s' ~ Dispatching batched input event pending notification.",
+                          getInputChannelName().c_str());
+                }
+
+                env->CallVoidMethod(receiverObj.get(),
+                                    gInputEventReceiverClassInfo.onBatchedInputEventPending,
+                                    mInputConsumer.getPendingBatchSource());
+                if (env->ExceptionCheck()) {
+                    ALOGE("Exception dispatching batched input events.");
+                    mBatchedInputEventPending = false; // try again later
+                }
             }
-            ALOGE("channel '%s' ~ Failed to consume input event.  status=%d",
-                    getInputChannelName().c_str(), status);
-            return status;
+            return OK;
         }
         assert(inputEvent);
 
@@ -302,10 +310,23 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                 inputEventObj = android_view_MotionEvent_obtainAsCopy(env, motionEvent);
                 break;
             }
+            case AINPUT_EVENT_TYPE_FOCUS: {
+                FocusEvent* focusEvent = static_cast<FocusEvent*>(inputEvent);
+                if (kDebugDispatchCycle) {
+                    ALOGD("channel '%s' ~ Received focus event: hasFocus=%s, inTouchMode=%s.",
+                          getInputChannelName().c_str(), toString(focusEvent->getHasFocus()),
+                          toString(focusEvent->getInTouchMode()));
+                }
+                env->CallVoidMethod(receiverObj.get(), gInputEventReceiverClassInfo.onFocusEvent,
+                                    jboolean(focusEvent->getHasFocus()),
+                                    jboolean(focusEvent->getInTouchMode()));
+                finishInputEvent(seq, true /* handled */);
+                return OK;
+            }
 
             default:
                 assert(false); // InputConsumer should prevent this from ever happening
-                inputEventObj = NULL;
+                inputEventObj = nullptr;
             }
 
             if (inputEventObj) {
@@ -337,13 +358,13 @@ static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak,
         jobject inputChannelObj, jobject messageQueueObj) {
     sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
             inputChannelObj);
-    if (inputChannel == NULL) {
+    if (inputChannel == nullptr) {
         jniThrowRuntimeException(env, "InputChannel is not initialized.");
         return 0;
     }
 
     sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueueObj);
-    if (messageQueue == NULL) {
+    if (messageQueue == nullptr) {
         jniThrowRuntimeException(env, "MessageQueue is not initialized.");
         return 0;
     }
@@ -421,8 +442,11 @@ int register_android_view_InputEventReceiver(JNIEnv* env) {
     gInputEventReceiverClassInfo.dispatchInputEvent = GetMethodIDOrDie(env,
             gInputEventReceiverClassInfo.clazz,
             "dispatchInputEvent", "(ILandroid/view/InputEvent;)V");
-    gInputEventReceiverClassInfo.dispatchBatchedInputEventPending = GetMethodIDOrDie(env,
-            gInputEventReceiverClassInfo.clazz, "dispatchBatchedInputEventPending", "()V");
+    gInputEventReceiverClassInfo.onFocusEvent =
+            GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onFocusEvent", "(ZZ)V");
+    gInputEventReceiverClassInfo.onBatchedInputEventPending =
+            GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onBatchedInputEventPending",
+                             "(I)V");
 
     return res;
 }

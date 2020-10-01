@@ -94,11 +94,14 @@ public class Lifecycle extends LifecycleRegistry {
         }
     }
 
+    /**
+     * Pass all onAttach event to {@link LifecycleObserver}.
+     */
     public void onAttach(Context context) {
         for (int i = 0, size = mObservers.size(); i < size; i++) {
             final LifecycleObserver observer = mObservers.get(i);
             if (observer instanceof OnAttach) {
-                ((OnAttach) observer).onAttach(context);
+                ((OnAttach) observer).onAttach();
             }
         }
     }

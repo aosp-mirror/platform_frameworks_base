@@ -39,11 +39,10 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 import com.android.systemui.statusbar.phone.LightBarController;
-import com.android.systemui.util.Assert;
 
 import org.junit.After;
 import org.junit.Before;
@@ -74,7 +73,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
         MockitoAnnotations.initMocks(this);
 
         mDependency.injectTestDependency(RemoteInputQuickSettingsDisabler.class,
@@ -106,7 +105,11 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
     @Test
     public void testSendRemoteInput_intentContainsResultsAndSource() throws Exception {
-        ExpandableNotificationRow row = new NotificationTestHelper(mContext).createRow();
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        ExpandableNotificationRow row = helper.createRow();
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
 
         setTestPendingIntent(view);
@@ -127,7 +130,11 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
     private UserHandle getTargetInputMethodUser(UserHandle fromUser, UserHandle toUser)
             throws Exception {
-        ExpandableNotificationRow row = new NotificationTestHelper(mContext).createRow(
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        ExpandableNotificationRow row = helper.createRow(
                 DUMMY_MESSAGE_APP_PKG,
                 UserHandle.getUid(fromUser.getIdentifier(), DUMMY_MESSAGE_APP_ID),
                 toUser);
@@ -169,7 +176,11 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
     @Test
     public void testNoCrashWithoutVisibilityListener() throws Exception {
-        ExpandableNotificationRow row = new NotificationTestHelper(mContext).createRow();
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        ExpandableNotificationRow row = helper.createRow();
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
 
         view.setOnVisibilityChangedListener(null);

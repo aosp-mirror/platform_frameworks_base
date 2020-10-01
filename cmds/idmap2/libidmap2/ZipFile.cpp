@@ -34,6 +34,7 @@ std::unique_ptr<const ZipFile> ZipFile::Open(const std::string& path) {
   ::ZipArchiveHandle handle;
   int32_t status = ::OpenArchive(path.c_str(), &handle);
   if (status != 0) {
+    ::CloseArchive(handle);
     return nullptr;
   }
   return std::unique_ptr<ZipFile>(new ZipFile(handle));

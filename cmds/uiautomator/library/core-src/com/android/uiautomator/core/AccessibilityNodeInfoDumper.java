@@ -16,11 +16,17 @@
 
 package com.android.uiautomator.core;
 
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.hardware.display.DisplayManagerGlobal;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.util.Log;
+import android.util.SparseArray;
 import android.util.Xml;
+import android.view.Display;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import org.xmlpull.v1.XmlSerializer;
 
@@ -28,6 +34,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.List;
 
 /**
  *
@@ -96,6 +103,95 @@ public class AccessibilityNodeInfoDumper {
         }
         final long endTime = SystemClock.uptimeMillis();
         Log.w(LOGTAG, "Fetch time: " + (endTime - startTime) + "ms");
+    }
+
+    /**
+     * Using {@link AccessibilityWindowInfo} this method will dump some window information and
+     * then walk the layout hierarchy of it's
+     * and generates an xml dump to the location specified by <code>dumpFile</code>
+     * @param allWindows All windows indexed by display-id.
+     * @param dumpFile The file to dump to.
+     */
+    public static void dumpWindowsToFile(SparseArray<List<AccessibilityWindowInfo>> allWindows,
+            File dumpFile, DisplayManagerGlobal displayManager) {
+        if (allWindows.size() == 0) {
+            return;
+        }
+        final long startTime = SystemClock.uptimeMillis();
+        try {
+            FileWriter writer = new FileWriter(dumpFile);
+            XmlSerializer serializer = Xml.newSerializer();
+            StringWriter stringWriter = new StringWriter();
+            serializer.setOutput(stringWriter);
+            serializer.startDocument("UTF-8", true);
+            serializer.startTag("", "displays");
+            for (int d = 0, nd = allWindows.size(); d < nd; ++d) {
+                int displayId = allWindows.keyAt(d);
+                Display display = displayManager.getRealDisplay(displayId);
+                if (display == null) {
+                    continue;
+                }
+                final List<AccessibilityWindowInfo> windows = allWindows.valueAt(d);
+                if (windows.isEmpty()) {
+                    continue;
+                }
+                serializer.startTag("", "display");
+                serializer.attribute("", "id", Integer.toString(displayId));
+                int rotation = display.getRotation();
+                Point size = new Point();
+                display.getSize(size);
+                for (int i = 0, n = windows.size(); i < n; ++i) {
+                    dumpWindowRec(windows.get(i), serializer, i, size.x, size.y, rotation);
+                }
+                serializer.endTag("", "display");
+            }
+            serializer.endTag("", "displays");
+            serializer.endDocument();
+            writer.write(stringWriter.toString());
+            writer.close();
+        } catch (IOException e) {
+            Log.e(LOGTAG, "failed to dump window to file", e);
+        }
+        final long endTime = SystemClock.uptimeMillis();
+        Log.w(LOGTAG, "Fetch time: " + (endTime - startTime) + "ms");
+    }
+
+    private static void dumpWindowRec(AccessibilityWindowInfo winfo, XmlSerializer serializer,
+            int index, int width, int height, int rotation) throws IOException {
+        serializer.startTag("", "window");
+        serializer.attribute("", "index", Integer.toString(index));
+        final CharSequence title = winfo.getTitle();
+        serializer.attribute("", "title", title != null ? title.toString() : "");
+        final Rect tmpBounds = new Rect();
+        winfo.getBoundsInScreen(tmpBounds);
+        serializer.attribute("", "bounds", tmpBounds.toShortString());
+        serializer.attribute("", "active", Boolean.toString(winfo.isActive()));
+        serializer.attribute("", "focused", Boolean.toString(winfo.isFocused()));
+        serializer.attribute("", "accessibility-focused",
+                Boolean.toString(winfo.isAccessibilityFocused()));
+        serializer.attribute("", "id", Integer.toString(winfo.getId()));
+        serializer.attribute("", "layer", Integer.toString(winfo.getLayer()));
+        serializer.attribute("", "type", AccessibilityWindowInfo.typeToString(winfo.getType()));
+        int count = winfo.getChildCount();
+        for (int i = 0; i < count; ++i) {
+            AccessibilityWindowInfo child = winfo.getChild(i);
+            if (child == null) {
+                Log.i(LOGTAG, String.format("Null window child %d/%d, parent: %s", i, count,
+                        winfo.getTitle()));
+                continue;
+            }
+            dumpWindowRec(child, serializer, i, width, height, rotation);
+            child.recycle();
+        }
+        AccessibilityNodeInfo root = winfo.getRoot();
+        if (root != null) {
+            serializer.startTag("", "hierarchy");
+            serializer.attribute("", "rotation", Integer.toString(rotation));
+            dumpNodeRec(root, serializer, 0, width, height);
+            root.recycle();
+            serializer.endTag("", "hierarchy");
+        }
+        serializer.endTag("", "window");
     }
 
     private static void dumpNodeRec(AccessibilityNodeInfo node, XmlSerializer serializer,int index,

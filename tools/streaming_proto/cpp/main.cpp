@@ -33,13 +33,13 @@ write_enum(stringstream& text, const EnumDescriptorProto& enu, const string& ind
     if (GENERATE_MAPPING) {
         string name = make_constant_name(enu.name());
         string prefix = name + "_";
-        text << indent << "const int _ENUM_" << name << "_COUNT = " << N << ";" << endl;
-        text << indent << "const char* _ENUM_" << name << "_NAMES[" << N << "] = {" << endl;
+        text << indent << "static const int _ENUM_" << name << "_COUNT = " << N << ";" << endl;
+        text << indent << "static const char* _ENUM_" << name << "_NAMES[" << N << "] = {" << endl;
         for (int i=0; i<N; i++) {
             text << indent << INDENT << "\"" << stripPrefix(enu.value(i).name(), prefix) << "\"," << endl;
         }
         text << indent << "};" << endl;
-        text << indent << "const int _ENUM_" << name << "_VALUES[" << N << "] = {" << endl;
+        text << indent << "static const int _ENUM_" << name << "_VALUES[" << N << "] = {" << endl;
         for (int i=0; i<N; i++) {
             text << indent << INDENT << make_constant_name(enu.value(i).name()) << "," << endl;
         }
@@ -102,13 +102,13 @@ write_message(stringstream& text, const DescriptorProto& message, const string& 
 
     if (GENERATE_MAPPING) {
         N = message.field_size();
-        text << indented << "const int _FIELD_COUNT = " << N << ";" << endl;
-        text << indented << "const char* _FIELD_NAMES[" << N << "] = {" << endl;
+        text << indented << "static const int _FIELD_COUNT = " << N << ";" << endl;
+        text << indented << "static const char* _FIELD_NAMES[" << N << "] = {" << endl;
         for (int i=0; i<N; i++) {
             text << indented << INDENT << "\"" << message.field(i).name() << "\"," << endl;
         }
         text << indented << "};" << endl;
-        text << indented << "const uint64_t _FIELD_IDS[" << N << "] = {" << endl;
+        text << indented << "static const uint64_t _FIELD_IDS[" << N << "] = {" << endl;
         for (int i=0; i<N; i++) {
             text << indented << INDENT << make_constant_name(message.field(i).name()) << "," << endl;
         }
@@ -152,7 +152,7 @@ write_header_file(CodeGeneratorResponse* response, const FileDescriptorProto& fi
         write_message(text, file_descriptor.message_type(i), "");
     }
 
-    for (vector<string>::iterator it = namespaces.begin(); it != namespaces.end(); it++) {
+    for (vector<string>::reverse_iterator it = namespaces.rbegin(); it != namespaces.rend(); it++) {
         text << "} // " << *it << endl;
     }
 

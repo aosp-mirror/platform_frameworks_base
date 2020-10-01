@@ -25,11 +25,7 @@
 #include <gui/GLConsumer.h>
 #include <gui/Surface.h>
 
-#include <SkBitmap.h>
-#include <SkCanvas.h>
-#include <SkImage.h>
-
-#include "android/graphics/GraphicsJNI.h"
+#include <android/graphics/canvas.h>
 
 #include "core_jni_helpers.h"
 
@@ -70,33 +66,6 @@ static struct {
 // Native layer
 // ----------------------------------------------------------------------------
 
-// FIXME: consider exporting this to share (e.g. android_view_Surface.cpp)
-static inline SkImageInfo convertPixelFormat(const ANativeWindow_Buffer& buffer) {
-    SkColorType colorType = kUnknown_SkColorType;
-    SkAlphaType alphaType = kOpaque_SkAlphaType;
-    switch (buffer.format) {
-        case WINDOW_FORMAT_RGBA_8888:
-            colorType = kN32_SkColorType;
-            alphaType = kPremul_SkAlphaType;
-            break;
-        case WINDOW_FORMAT_RGBX_8888:
-            colorType = kN32_SkColorType;
-            alphaType = kOpaque_SkAlphaType;
-            break;
-        case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
-            colorType = kRGBA_F16_SkColorType;
-            alphaType = kPremul_SkAlphaType;
-            break;
-        case WINDOW_FORMAT_RGB_565:
-            colorType = kRGB_565_SkColorType;
-            alphaType = kOpaque_SkAlphaType;
-            break;
-        default:
-            break;
-    }
-    return SkImageInfo::Make(buffer.width, buffer.height, colorType, alphaType);
-}
-
 /**
  * This is a private API, and this implementation is also provided in the NDK.
  * However, the NDK links against android_runtime, which means that using the
@@ -134,13 +103,11 @@ static void android_view_TextureView_destroyNativeWindow(JNIEnv* env, jobject te
 }
 
 static jboolean android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
-        jlong nativeWindow, jobject canvas, jobject dirtyRect) {
+        jlong nativeWindow, jobject canvasObj, jobject dirtyRect) {
 
     if (!nativeWindow) {
         return JNI_FALSE;
     }
-
-    ANativeWindow_Buffer buffer;
 
     Rect rect(Rect::EMPTY_RECT);
     if (dirtyRect) {
@@ -152,25 +119,14 @@ static jboolean android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
         rect.set(Rect(0x3FFF, 0x3FFF));
     }
 
+    ANativeWindow_Buffer outBuffer;
     sp<ANativeWindow> window((ANativeWindow*) nativeWindow);
-    int32_t status = native_window_lock(window.get(), &buffer, &rect);
+    int32_t status = native_window_lock(window.get(), &outBuffer, &rect);
     if (status) return JNI_FALSE;
 
-    ssize_t bytesCount = buffer.stride * bytesPerPixel(buffer.format);
-
-    SkBitmap bitmap;
-    bitmap.setInfo(convertPixelFormat(buffer), bytesCount);
-
-    if (buffer.width > 0 && buffer.height > 0) {
-        bitmap.setPixels(buffer.bits);
-    } else {
-        bitmap.setPixels(NULL);
-    }
-
-    Canvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvas);
-    nativeCanvas->setBitmap(bitmap);
-    nativeCanvas->clipRect(rect.left, rect.top, rect.right, rect.bottom,
-            SkClipOp::kIntersect);
+    graphics::Canvas canvas(env, canvasObj);
+    canvas.setBuffer(&outBuffer, ANativeWindow_getBuffersDataSpace(window.get()));
+    canvas.clipRect({rect.left, rect.top, rect.right, rect.bottom});
 
     if (dirtyRect) {
         INVOKEV(dirtyRect, gRectClassInfo.set,
@@ -181,10 +137,11 @@ static jboolean android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
 }
 
 static void android_view_TextureView_unlockCanvasAndPost(JNIEnv* env, jobject,
-        jlong nativeWindow, jobject canvas) {
+        jlong nativeWindow, jobject canvasObj) {
 
-    Canvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvas);
-    nativeCanvas->setBitmap(SkBitmap());
+    // release the buffer from the canvas
+    graphics::Canvas canvas(env, canvasObj);
+    canvas.setBuffer(nullptr, ADATASPACE_UNKNOWN);
 
     if (nativeWindow) {
         sp<ANativeWindow> window((ANativeWindow*) nativeWindow);

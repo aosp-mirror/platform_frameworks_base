@@ -20,8 +20,6 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import android.annotation.SystemApi.Client;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -30,12 +28,11 @@ import java.lang.annotation.Target;
  * <p>
  * This is a marker annotation and it has no specific attributes.
  *
- * @paramDoc This value must never be {@code null}.
- * @returnDoc This value will never be {@code null}.
+ * @paramDoc This value cannot be {@code null}.
+ * @returnDoc This value cannot be {@code null}.
  * @hide
  */
 @Retention(SOURCE)
 @Target({METHOD, PARAMETER, FIELD})
-@SystemApi(client = Client.MODULE_LIBRARIES)
 public @interface NonNull {
 }

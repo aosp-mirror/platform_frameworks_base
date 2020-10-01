@@ -16,18 +16,13 @@
 
 package com.android.systemui.statusbar.notification;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
-import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
-import android.util.ArraySet;
-
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
+
+import java.util.Objects;
 
 /**
  * Root controller for the list of notifications in the shade.
@@ -38,18 +33,15 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceP
 public class NotificationListController {
     private final NotificationEntryManager mEntryManager;
     private final NotificationListContainer mListContainer;
-    private final ForegroundServiceController mForegroundServiceController;
     private final DeviceProvisionedController mDeviceProvisionedController;
 
     public NotificationListController(
             NotificationEntryManager entryManager,
             NotificationListContainer listContainer,
-            ForegroundServiceController foregroundServiceController,
             DeviceProvisionedController deviceProvisionedController) {
-        mEntryManager = checkNotNull(entryManager);
-        mListContainer = checkNotNull(listContainer);
-        mForegroundServiceController = checkNotNull(foregroundServiceController);
-        mDeviceProvisionedController = checkNotNull(deviceProvisionedController);
+        mEntryManager = Objects.requireNonNull(entryManager);
+        mListContainer = Objects.requireNonNull(listContainer);
+        mDeviceProvisionedController = Objects.requireNonNull(deviceProvisionedController);
     }
 
     /**
@@ -67,46 +59,19 @@ public class NotificationListController {
         public void onEntryRemoved(
                 NotificationEntry entry,
                 NotificationVisibility visibility,
-                boolean removedByUser) {
+                boolean removedByUser,
+                int reason) {
             mListContainer.cleanUpViewStateForEntry(entry);
-        }
-
-        @Override
-        public void onBeforeNotificationAdded(NotificationEntry entry) {
-            tagForeground(entry.notification);
         }
     };
 
+    // TODO: (b/145659174) remove after moving to NewNotifPipeline. Replaced by
+    //  DeviceProvisionedCoordinator
     private final DeviceProvisionedListener mDeviceProvisionedListener =
             new DeviceProvisionedListener() {
                 @Override
                 public void onDeviceProvisionedChanged() {
-                    mEntryManager.updateNotifications();
+                    mEntryManager.updateNotifications("device provisioned changed");
                 }
             };
-
-    // TODO: This method is horrifically inefficient
-    private void tagForeground(StatusBarNotification notification) {
-        ArraySet<Integer> activeOps =
-                mForegroundServiceController.getAppOps(
-                        notification.getUserId(), notification.getPackageName());
-        if (activeOps != null) {
-            int len = activeOps.size();
-            for (int i = 0; i < len; i++) {
-                updateNotificationsForAppOp(activeOps.valueAt(i), notification.getUid(),
-                        notification.getPackageName(), true);
-            }
-        }
-    }
-
-    /** When an app op changes, propagate that change to notifications. */
-    public void updateNotificationsForAppOp(int appOp, int uid, String pkg, boolean showIcon) {
-        String foregroundKey =
-                mForegroundServiceController.getStandardLayoutKey(UserHandle.getUserId(uid), pkg);
-        if (foregroundKey != null) {
-            mEntryManager
-                    .getNotificationData().updateAppOp(appOp, uid, pkg, foregroundKey, showIcon);
-            mEntryManager.updateNotifications();
-        }
-    }
 }

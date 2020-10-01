@@ -28,6 +28,7 @@ public interface UserAuthArgs {
 
     boolean isUserAuthenticationRequired();
     int getUserAuthenticationValidityDurationSeconds();
+    @KeyProperties.AuthEnum int getUserAuthenticationType();
     boolean isUserAuthenticationValidWhileOnBody();
     boolean isInvalidatedByBiometricEnrollment();
     boolean isUserConfirmationRequired();

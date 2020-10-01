@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.IPowerManager;
+import android.os.IThermalService;
 import android.os.OsProtoEnums;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -52,13 +53,14 @@ import org.mockito.MockitoAnnotations;
 public class CachedDeviceStateServiceTest {
     @Mock private BatteryManagerInternal mBatteryManager;
     @Mock private IPowerManager mPowerManager;
+    @Mock private IThermalService mThermalService;
     private BroadcastInterceptingContext mContext;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         Context context = InstrumentationRegistry.getContext();
-        PowerManager powerManager = new PowerManager(context, mPowerManager, null);
+        PowerManager powerManager = new PowerManager(context, mPowerManager, mThermalService, null);
         mContext = new BroadcastInterceptingContext(context) {
             @Override
             public Object getSystemService(String name) {

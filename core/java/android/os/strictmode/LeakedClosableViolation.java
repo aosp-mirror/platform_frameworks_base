@@ -21,4 +21,9 @@ public final class LeakedClosableViolation extends Violation {
         super(message);
         initCause(allocationSite);
     }
+
+    /** @hide */
+    public LeakedClosableViolation(String message) {
+        super(message);
+    }
 }

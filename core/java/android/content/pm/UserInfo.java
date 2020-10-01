@@ -17,6 +17,8 @@
 package android.content.pm;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -24,17 +26,28 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.DebugUtils;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
  * Per-user information.
+ *
+ * <p>There are 3 base properties of users: {@link #FLAG_SYSTEM}, {@link #FLAG_FULL}, and
+ * {@link #FLAG_PROFILE}. Every user must have one of the following combination of these
+ * flags:
+ * <ul>
+ *    <li>FLAG_SYSTEM (user {@link UserHandle#USER_SYSTEM} on a headless-user-0 device)</li>
+ *    <li>FLAG_SYSTEM and FLAG_FULL (user {@link UserHandle#USER_SYSTEM} on a regular device)</li>
+ *    <li>FLAG_FULL (non-profile secondary user)</li>
+ *    <li>FLAG_PROFILE (profile users)</li>
+ * </ul>
+ * Users can have also have additional flags (such as FLAG_GUEST) as appropriate.
+ *
  * @hide
  */
 public class UserInfo implements Parcelable {
-
-    /** 16 bits for user type */
-    public static final int FLAG_MASK_USER_TYPE = 0x0000FFFF;
 
     /**
      * *************************** NOTE ***************************
@@ -44,7 +57,7 @@ public class UserInfo implements Parcelable {
 
     /**
      * Primary user. Only one user can have this flag set. It identifies the first human user
-     * on a device.
+     * on a device. This flag is not supported in headless system user mode.
      */
     @UnsupportedAppUsage
     public static final int FLAG_PRIMARY = 0x00000001;
@@ -57,13 +70,17 @@ public class UserInfo implements Parcelable {
 
     /**
      * Indicates a guest user that may be transient.
+     * @deprecated Use {@link UserManager#USER_TYPE_FULL_GUEST} instead.
      */
+    @Deprecated
     public static final int FLAG_GUEST   = 0x00000004;
 
     /**
      * Indicates the user has restrictions in privileges, in addition to those for normal users.
      * Exact meaning TBD. For instance, maybe they can't install apps or administer WiFi access pts.
+     * @deprecated Use {@link UserManager#USER_TYPE_FULL_RESTRICTED} instead.
      */
+    @Deprecated
     public static final int FLAG_RESTRICTED = 0x00000008;
 
     /**
@@ -74,7 +91,9 @@ public class UserInfo implements Parcelable {
     /**
      * Indicates that this user is a profile of another user, for example holding a users
      * corporate data.
+     * @deprecated Use {@link UserManager#USER_TYPE_PROFILE_MANAGED} instead.
      */
+    @Deprecated
     public static final int FLAG_MANAGED_PROFILE = 0x00000020;
 
     /**
@@ -95,8 +114,30 @@ public class UserInfo implements Parcelable {
 
     /**
      * User is for demo purposes only and can be removed at any time.
+     * @deprecated Use {@link UserManager#USER_TYPE_FULL_DEMO} instead.
      */
+    @Deprecated
     public static final int FLAG_DEMO = 0x00000200;
+
+    /**
+     * Indicates that this user is a non-profile human user.
+     *
+     * <p>When creating a new (non-system) user, this flag will always be forced true unless the
+     * user is a {@link #FLAG_PROFILE}. If user {@link UserHandle#USER_SYSTEM} is also a
+     * human user, it must also be flagged as FULL.
+     */
+    public static final int FLAG_FULL = 0x00000400;
+
+    /**
+     * Indicates that this user is {@link UserHandle#USER_SYSTEM}. Not applicable to created users.
+     */
+    public static final int FLAG_SYSTEM = 0x00000800;
+
+    /**
+     * Indicates that this user is a profile human user, such as a managed profile.
+     * Mutually exclusive with {@link #FLAG_FULL}.
+     */
+    public static final int FLAG_PROFILE = 0x00001000;
 
     /**
      * @hide
@@ -111,7 +152,10 @@ public class UserInfo implements Parcelable {
             FLAG_DISABLED,
             FLAG_QUIET_MODE,
             FLAG_EPHEMERAL,
-            FLAG_DEMO
+            FLAG_DEMO,
+            FLAG_FULL,
+            FLAG_SYSTEM,
+            FLAG_PROFILE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserInfoFlag {
@@ -120,7 +164,7 @@ public class UserInfo implements Parcelable {
     public static final int NO_PROFILE_GROUP_ID = UserHandle.USER_NULL;
 
     @UnsupportedAppUsage
-    public int id;
+    public @UserIdInt int id;
     @UnsupportedAppUsage
     public int serialNumber;
     @UnsupportedAppUsage
@@ -128,12 +172,19 @@ public class UserInfo implements Parcelable {
     @UnsupportedAppUsage
     public String iconPath;
     @UnsupportedAppUsage
-    public int flags;
+    public @UserInfoFlag int flags;
     @UnsupportedAppUsage
     public long creationTime;
     @UnsupportedAppUsage
     public long lastLoggedInTime;
     public String lastLoggedInFingerprint;
+
+    /**
+     * Type of user, such as {@link UserManager#USER_TYPE_PROFILE_MANAGED}, corresponding to
+     * {@link com.android.server.pm.UserTypeDetails#getName()}.
+     */
+    public String userType;
+
     /**
      * If this user is a parent user, it would be its own user id.
      * If this user is a child user, it would be its parent user id.
@@ -142,7 +193,13 @@ public class UserInfo implements Parcelable {
     @UnsupportedAppUsage
     public int profileGroupId;
     public int restrictedProfileParentId;
-    /** Which profile badge color/label to use. */
+
+    /**
+     * Index for distinguishing different profiles with the same parent and user type for the
+     * purpose of badging.
+     * It is used for determining which badge color/label to use (if applicable) from
+     * the options available for a particular user type.
+     */
     public int profileBadge;
 
     /** User is only partially created. */
@@ -163,19 +220,66 @@ public class UserInfo implements Parcelable {
      */
     public boolean preCreated;
 
+    /**
+     * Creates a UserInfo whose user type is determined automatically by the flags according to
+     * {@link #getDefaultUserType}; can only be used for user types handled there.
+     */
     @UnsupportedAppUsage
     public UserInfo(int id, String name, int flags) {
         this(id, name, null, flags);
     }
 
+    /**
+     * Creates a UserInfo whose user type is determined automatically by the flags according to
+     * {@link #getDefaultUserType}; can only be used for user types handled there.
+     */
     @UnsupportedAppUsage
     public UserInfo(int id, String name, String iconPath, int flags) {
+        this(id, name, iconPath, flags, getDefaultUserType(flags));
+    }
+
+    public UserInfo(int id, String name, String iconPath, int flags, String userType) {
         this.id = id;
         this.name = name;
         this.flags = flags;
+        this.userType = userType;
         this.iconPath = iconPath;
         this.profileGroupId = NO_PROFILE_GROUP_ID;
         this.restrictedProfileParentId = NO_PROFILE_GROUP_ID;
+    }
+
+    /**
+     * Get the user type (such as {@link UserManager#USER_TYPE_PROFILE_MANAGED}) that corresponds to
+     * the given {@link UserInfoFlag}s.
+
+     * <p>The userInfoFlag can contain GUEST, RESTRICTED, MANAGED_PROFILE, DEMO, or else be
+     * interpreted as a regular "secondary" user. It cannot contain more than one of these.
+     * It can contain other UserInfoFlag properties (like EPHEMERAL), which will be ignored here.
+     *
+     * @throws IllegalArgumentException if userInfoFlag is more than one type of user or if it
+     *                                  is a SYSTEM user.
+     *
+     * @hide
+     */
+    public static @NonNull String getDefaultUserType(@UserInfoFlag int userInfoFlag) {
+        if ((userInfoFlag & FLAG_SYSTEM) != 0) {
+            throw new IllegalArgumentException("Cannot getDefaultUserType for flags "
+                    + Integer.toHexString(userInfoFlag) + " because it corresponds to a "
+                    + "SYSTEM user type.");
+        }
+        final int supportedFlagTypes =
+                FLAG_GUEST | FLAG_RESTRICTED | FLAG_MANAGED_PROFILE | FLAG_DEMO;
+        switch (userInfoFlag & supportedFlagTypes) {
+            case 0 :                   return UserManager.USER_TYPE_FULL_SECONDARY;
+            case FLAG_GUEST:           return UserManager.USER_TYPE_FULL_GUEST;
+            case FLAG_RESTRICTED:      return UserManager.USER_TYPE_FULL_RESTRICTED;
+            case FLAG_MANAGED_PROFILE: return UserManager.USER_TYPE_PROFILE_MANAGED;
+            case FLAG_DEMO:            return UserManager.USER_TYPE_FULL_DEMO;
+            default:
+                throw new IllegalArgumentException("Cannot getDefaultUserType for flags "
+                        + Integer.toHexString(userInfoFlag) + " because it doesn't correspond to a "
+                        + "valid user type.");
+        }
     }
 
     @UnsupportedAppUsage
@@ -190,31 +294,21 @@ public class UserInfo implements Parcelable {
 
     @UnsupportedAppUsage
     public boolean isGuest() {
-        return isGuest(flags);
-    }
-
-    /**
-     * Checks if the flag denotes a guest user.
-     */
-    public static boolean isGuest(@UserInfoFlag int flags) {
-        return (flags & FLAG_GUEST) == FLAG_GUEST;
+        return UserManager.isUserTypeGuest(userType);
     }
 
     @UnsupportedAppUsage
     public boolean isRestricted() {
-        return (flags & FLAG_RESTRICTED) == FLAG_RESTRICTED;
+        return UserManager.isUserTypeRestricted(userType);
+    }
+
+    public boolean isProfile() {
+        return (flags & FLAG_PROFILE) != 0;
     }
 
     @UnsupportedAppUsage
     public boolean isManagedProfile() {
-        return isManagedProfile(flags);
-    }
-
-    /**
-     * Checks if the flag denotes a managed profile.
-     */
-    public static boolean isManagedProfile(@UserInfoFlag int flags) {
-        return (flags & FLAG_MANAGED_PROFILE) == FLAG_MANAGED_PROFILE;
+        return UserManager.isUserTypeManagedProfile(userType);
     }
 
     @UnsupportedAppUsage
@@ -235,7 +329,11 @@ public class UserInfo implements Parcelable {
     }
 
     public boolean isDemo() {
-        return (flags & FLAG_DEMO) == FLAG_DEMO;
+        return UserManager.isUserTypeDemo(userType);
+    }
+
+    public boolean isFull() {
+        return (flags & FLAG_FULL) == FLAG_FULL;
     }
 
     /**
@@ -264,7 +362,11 @@ public class UserInfo implements Parcelable {
             // Don't support switching to an ephemeral user with removal in progress.
             return false;
         }
-        return !isManagedProfile();
+        if (preCreated) {
+            // Don't support switching to pre-created users until they become "real" users.
+            return false;
+        }
+        return !isProfile();
     }
 
     /**
@@ -272,22 +374,30 @@ public class UserInfo implements Parcelable {
      */
     public boolean supportsSwitchToByUser() {
         // Hide the system user when it does not represent a human user.
-        boolean hideSystemUser = UserManager.isSplitSystemUser();
+        boolean hideSystemUser = UserManager.isHeadlessSystemUserMode();
         return (!hideSystemUser || id != UserHandle.USER_SYSTEM) && supportsSwitchTo();
     }
 
+    // TODO(b/142482943): Make this logic more specific and customizable. (canHaveProfile(userType))
     /* @hide */
     public boolean canHaveProfile() {
-        if (isManagedProfile() || isGuest() || isRestricted()) {
+        if (isProfile() || isGuest() || isRestricted()) {
             return false;
         }
-        if (UserManager.isSplitSystemUser()) {
+        if (UserManager.isSplitSystemUser() || UserManager.isHeadlessSystemUserMode()) {
             return id != UserHandle.USER_SYSTEM;
         } else {
             return id == UserHandle.USER_SYSTEM;
         }
     }
 
+    // TODO(b/142482943): Get rid of this (after removing it from all tests) if feasible.
+    /**
+     * @deprecated This is dangerous since it doesn't set the mandatory fields. Use a different
+     * constructor instead.
+     */
+    @Deprecated
+    @VisibleForTesting
     public UserInfo() {
     }
 
@@ -296,6 +406,7 @@ public class UserInfo implements Parcelable {
         iconPath = orig.iconPath;
         id = orig.id;
         flags = orig.flags;
+        userType = orig.userType;
         serialNumber = orig.serialNumber;
         creationTime = orig.creationTime;
         lastLoggedInTime = orig.lastLoggedInTime;
@@ -310,11 +421,15 @@ public class UserInfo implements Parcelable {
 
     @UnsupportedAppUsage
     public UserHandle getUserHandle() {
-        return new UserHandle(id);
+        return UserHandle.of(id);
     }
 
+    // TODO(b/142482943): Probably include mUserType here, which means updating TestDevice, etc.
     @Override
     public String toString() {
+        // NOTE:  do not change this string, it's used by 'pm list users', which in turn is
+        // used and parsed by TestDevice. In other words, if you change it, you'd have to change
+        // TestDevice, TestDeviceTest, and possibly others....
         return "UserInfo{" + id + ":" + name + ":" + Integer.toHexString(flags) + "}";
     }
 
@@ -322,6 +437,7 @@ public class UserInfo implements Parcelable {
     public String toFullString() {
         return "UserInfo[id=" + id
                 + ", name=" + name
+                + ", type=" + userType
                 + ", flags=" + flagsToString(flags)
                 + (preCreated ? " (pre-created)" : "")
                 + (partial ? " (partial)" : "")
@@ -338,15 +454,17 @@ public class UserInfo implements Parcelable {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         dest.writeInt(id);
-        dest.writeString(name);
-        dest.writeString(iconPath);
+        dest.writeString8(name);
+        dest.writeString8(iconPath);
         dest.writeInt(flags);
+        dest.writeString8(userType);
         dest.writeInt(serialNumber);
         dest.writeLong(creationTime);
         dest.writeLong(lastLoggedInTime);
-        dest.writeString(lastLoggedInFingerprint);
+        dest.writeString8(lastLoggedInFingerprint);
         dest.writeBoolean(partial);
         dest.writeBoolean(preCreated);
         dest.writeInt(profileGroupId);
@@ -368,13 +486,14 @@ public class UserInfo implements Parcelable {
 
     private UserInfo(Parcel source) {
         id = source.readInt();
-        name = source.readString();
-        iconPath = source.readString();
+        name = source.readString8();
+        iconPath = source.readString8();
         flags = source.readInt();
+        userType = source.readString8();
         serialNumber = source.readInt();
         creationTime = source.readLong();
         lastLoggedInTime = source.readLong();
-        lastLoggedInFingerprint = source.readString();
+        lastLoggedInFingerprint = source.readString8();
         partial = source.readBoolean();
         preCreated = source.readBoolean();
         profileGroupId = source.readInt();

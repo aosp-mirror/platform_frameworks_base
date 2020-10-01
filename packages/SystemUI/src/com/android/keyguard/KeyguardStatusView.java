@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -135,7 +134,7 @@ public class KeyguardStatusView extends GridLayout implements
         super(context, attrs, defStyle);
         mIActivityManager = ActivityManager.getService();
         mLockPatternUtils = new LockPatternUtils(getContext());
-        mHandler = new Handler(Looper.myLooper());
+        mHandler = new Handler();
         onDensityOrFontScaleChanged();
     }
 
@@ -199,7 +198,7 @@ public class KeyguardStatusView extends GridLayout implements
         mKeyguardSlice.setContentChangeListener(this::onSliceContentChanged);
         onSliceContentChanged();
 
-        boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
+        boolean shouldMarquee = Dependency.get(KeyguardUpdateMonitor.class).isDeviceInteractive();
         setEnableMarquee(shouldMarquee);
         refreshFormat();
         updateOwnerInfo();
@@ -315,14 +314,14 @@ public class KeyguardStatusView extends GridLayout implements
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mInfoCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).registerCallback(mInfoCallback);
         Dependency.get(ConfigurationController.class).addCallback(this);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mInfoCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).removeCallback(mInfoCallback);
         Dependency.get(ConfigurationController.class).removeCallback(this);
     }
 
@@ -442,7 +441,7 @@ public class KeyguardStatusView extends GridLayout implements
     }
 
     private boolean shouldShowLogout() {
-        return KeyguardUpdateMonitor.getInstance(mContext).isLogoutEnabled()
+        return Dependency.get(KeyguardUpdateMonitor.class).isLogoutEnabled()
                 && KeyguardUpdateMonitor.getCurrentUser() != UserHandle.USER_SYSTEM;
     }
 

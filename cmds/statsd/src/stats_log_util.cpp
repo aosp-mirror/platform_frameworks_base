@@ -17,15 +17,13 @@
 #include "hash.h"
 #include "stats_log_util.h"
 
-#include <logd/LogEvent.h>
+#include <aidl/android/os/IStatsCompanionService.h>
 #include <private/android_filesystem_config.h>
-#include <utils/Log.h>
 #include <set>
-#include <stack>
-#include <utils/Log.h>
 #include <utils/SystemClock.h>
 
-using android::util::AtomsInfo;
+#include "statscompanion_util.h"
+
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_BOOL;
 using android::util::FIELD_TYPE_FIXED64;
@@ -36,6 +34,10 @@ using android::util::FIELD_TYPE_MESSAGE;
 using android::util::FIELD_TYPE_STRING;
 using android::util::FIELD_TYPE_UINT64;
 using android::util::ProtoOutputStream;
+
+using aidl::android::os::IStatsCompanionService;
+using std::shared_ptr;
+using std::string;
 
 namespace android {
 namespace os {
@@ -53,6 +55,11 @@ const int DIMENSIONS_VALUE_VALUE_STR_HASH = 8;
 
 const int DIMENSIONS_VALUE_TUPLE_VALUE = 1;
 
+// for StateValue Proto
+const int STATE_VALUE_ATOM_ID = 1;
+const int STATE_VALUE_CONTENTS_GROUP_ID = 2;
+const int STATE_VALUE_CONTENTS_VALUE = 3;
+
 // for PulledAtomStats proto
 const int FIELD_ID_PULLED_ATOM_STATS = 10;
 const int FIELD_ID_PULL_ATOM_ID = 1;
@@ -67,11 +74,17 @@ const int FIELD_ID_DATA_ERROR = 9;
 const int FIELD_ID_PULL_TIMEOUT = 10;
 const int FIELD_ID_PULL_EXCEED_MAX_DELAY = 11;
 const int FIELD_ID_PULL_FAILED = 12;
-const int FIELD_ID_STATS_COMPANION_FAILED = 13;
-const int FIELD_ID_STATS_COMPANION_BINDER_TRANSACTION_FAILED = 14;
 const int FIELD_ID_EMPTY_DATA = 15;
 const int FIELD_ID_PULL_REGISTERED_COUNT = 16;
 const int FIELD_ID_PULL_UNREGISTERED_COUNT = 17;
+const int FIELD_ID_ATOM_ERROR_COUNT = 18;
+const int FIELD_ID_BINDER_CALL_FAIL_COUNT = 19;
+const int FIELD_ID_PULL_UID_PROVIDER_NOT_FOUND = 20;
+const int FIELD_ID_PULLER_NOT_FOUND = 21;
+const int FIELD_ID_PULL_TIMEOUT_METADATA = 22;
+const int FIELD_ID_PULL_TIMEOUT_METADATA_UPTIME_MILLIS = 1;
+const int FIELD_ID_PULL_TIMEOUT_METADATA_ELAPSED_MILLIS = 2;
+
 // for AtomMetricStats proto
 const int FIELD_ID_ATOM_METRIC_STATS = 17;
 const int FIELD_ID_METRIC_ID = 1;
@@ -349,30 +362,7 @@ void writeFieldValueTreeToStreamHelper(int tagId, const std::vector<FieldValue>&
                     protoOutput->write(FIELD_TYPE_FLOAT | fieldNum, dim.mValue.float_value);
                     break;
                 case STRING: {
-                    bool isBytesField = false;
-                    // Bytes field is logged via string format in log_msg format. So here we check
-                    // if this string field is a byte field.
-                    std::map<int, std::vector<int>>::const_iterator itr;
-                    if (depth == 0 && (itr = AtomsInfo::kBytesFieldAtoms.find(tagId)) !=
-                                              AtomsInfo::kBytesFieldAtoms.end()) {
-                        const std::vector<int>& bytesFields = itr->second;
-                        for (int bytesField : bytesFields) {
-                            if (bytesField == fieldNum) {
-                                // This is a bytes field
-                                isBytesField = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (isBytesField) {
-                        if (dim.mValue.str_value.length() > 0) {
-                            protoOutput->write(FIELD_TYPE_MESSAGE | fieldNum,
-                                               (const char*)dim.mValue.str_value.c_str(),
-                                               dim.mValue.str_value.length());
-                        }
-                    } else {
-                        protoOutput->write(FIELD_TYPE_STRING | fieldNum, dim.mValue.str_value);
-                    }
+                    protoOutput->write(FIELD_TYPE_STRING | fieldNum, dim.mValue.str_value);
                     break;
                 }
                 case STORAGE:
@@ -416,6 +406,23 @@ void writeFieldValueTreeToStream(int tagId, const std::vector<FieldValue>& value
     protoOutput->end(atomToken);
 }
 
+void writeStateToProto(const FieldValue& state, util::ProtoOutputStream* protoOutput) {
+    protoOutput->write(FIELD_TYPE_INT32 | STATE_VALUE_ATOM_ID, state.mField.getTag());
+
+    switch (state.mValue.getType()) {
+        case INT:
+            protoOutput->write(FIELD_TYPE_INT32 | STATE_VALUE_CONTENTS_VALUE,
+                               state.mValue.int_value);
+            break;
+        case LONG:
+            protoOutput->write(FIELD_TYPE_INT64 | STATE_VALUE_CONTENTS_GROUP_ID,
+                               state.mValue.long_value);
+            break;
+        default:
+            break;
+    }
+}
+
 int64_t TimeUnitToBucketSizeInMillisGuardrailed(int uid, TimeUnit unit) {
     int64_t bucketSizeMillis = TimeUnitToBucketSizeInMillis(unit);
     if (bucketSizeMillis > 1000 && bucketSizeMillis < 5 * 60 * 1000LL && uid != AID_SHELL &&
@@ -445,6 +452,8 @@ int64_t TimeUnitToBucketSizeInMillis(TimeUnit unit) {
             return 12 * 60 * 60 * 1000LL;
         case ONE_DAY:
             return 24 * 60 * 60 * 1000LL;
+        case ONE_WEEK:
+            return 7 * 24 * 60 * 60 * 1000LL;
         case CTS:
             return 1000;
         case TIME_UNIT_UNSPECIFIED:
@@ -478,16 +487,29 @@ void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>
                        (long long)pair.second.pullExceedMaxDelay);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULL_FAILED,
                        (long long)pair.second.pullFailed);
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_STATS_COMPANION_FAILED,
-                       (long long)pair.second.statsCompanionPullFailed);
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_STATS_COMPANION_BINDER_TRANSACTION_FAILED,
-                       (long long)pair.second.statsCompanionPullBinderTransactionFailed);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_EMPTY_DATA,
                        (long long)pair.second.emptyData);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULL_REGISTERED_COUNT,
                        (long long) pair.second.registeredCount);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULL_UNREGISTERED_COUNT,
                        (long long) pair.second.unregisteredCount);
+    protoOutput->write(FIELD_TYPE_INT32 | FIELD_ID_ATOM_ERROR_COUNT, pair.second.atomErrorCount);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_BINDER_CALL_FAIL_COUNT,
+                       (long long)pair.second.binderCallFailCount);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULL_UID_PROVIDER_NOT_FOUND,
+                       (long long)pair.second.pullUidProviderNotFound);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULLER_NOT_FOUND,
+                       (long long)pair.second.pullerNotFound);
+    for (const auto& pullTimeoutMetadata : pair.second.pullTimeoutMetadata) {
+        uint64_t timeoutMetadataToken = protoOutput->start(FIELD_TYPE_MESSAGE |
+                                                           FIELD_ID_PULL_TIMEOUT_METADATA |
+                                                           FIELD_COUNT_REPEATED);
+        protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULL_TIMEOUT_METADATA_UPTIME_MILLIS,
+                           pullTimeoutMetadata.pullTimeoutUptimeMillis);
+        protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULL_TIMEOUT_METADATA_ELAPSED_MILLIS,
+                           pullTimeoutMetadata.pullTimeoutElapsedMillis);
+        protoOutput->end(timeoutMetadataToken);
+    }
     protoOutput->end(token);
 }
 
@@ -533,6 +555,10 @@ int64_t getElapsedRealtimeMillis() {
     return ::android::elapsedRealtime();
 }
 
+int64_t getSystemUptimeMillis() {
+    return ::android::uptimeMillis();
+}
+
 int64_t getWallClockNs() {
     return time(nullptr) * NS_PER_SEC;
 }
@@ -545,14 +571,13 @@ int64_t getWallClockMillis() {
     return time(nullptr) * MS_PER_SEC;
 }
 
-int64_t truncateTimestampIfNecessary(int atomId, int64_t timestampNs) {
-    if (AtomsInfo::kTruncatingTimestampAtomBlackList.find(atomId) !=
-            AtomsInfo::kTruncatingTimestampAtomBlackList.end() ||
-        (atomId >= StatsdStats::kTimestampTruncationStartTag &&
-         atomId <= StatsdStats::kTimestampTruncationEndTag)) {
-        return timestampNs / NS_PER_SEC / (5 * 60) * NS_PER_SEC * (5 * 60);
+int64_t truncateTimestampIfNecessary(const LogEvent& event) {
+    if (event.shouldTruncateTimestamp() ||
+        (event.GetTagId() >= StatsdStats::kTimestampTruncationStartTag &&
+         event.GetTagId() <= StatsdStats::kTimestampTruncationEndTag)) {
+        return event.GetElapsedTimestampNs() / NS_PER_SEC / (5 * 60) * NS_PER_SEC * (5 * 60);
     } else {
-        return timestampNs;
+        return event.GetElapsedTimestampNs();
     }
 }
 
@@ -562,6 +587,21 @@ int64_t NanoToMillis(const int64_t nano) {
 
 int64_t MillisToNano(const int64_t millis) {
     return millis * 1000000;
+}
+
+bool checkPermissionForIds(const char* permission, pid_t pid, uid_t uid) {
+    shared_ptr<IStatsCompanionService> scs = getStatsCompanionService();
+    if (scs == nullptr) {
+        return false;
+    }
+
+    bool success;
+    ::ndk::ScopedAStatus status = scs->checkPermission(string(permission), pid, uid, &success);
+    if (!status.isOk()) {
+        return false;
+    }
+
+    return success;
 }
 
 }  // namespace statsd

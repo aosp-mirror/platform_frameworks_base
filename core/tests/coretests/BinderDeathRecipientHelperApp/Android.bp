@@ -1,0 +1,19 @@
+android_test_helper_app {
+    name: "BinderDeathRecipientHelperApp1",
+
+    srcs: ["**/*.java"],
+
+    sdk_version: "current",
+}
+
+android_test_helper_app {
+    name: "BinderDeathRecipientHelperApp2",
+
+    srcs: ["**/*.java"],
+
+    sdk_version: "current",
+
+    aaptflags: [
+            "--rename-manifest-package com.android.frameworks.coretests.bdr_helper_app2",
+        ],
+}

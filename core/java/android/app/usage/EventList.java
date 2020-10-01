@@ -79,6 +79,21 @@ public class EventList {
     }
 
     /**
+     * Removes the event at the given index.
+     *
+     * @param index the index of the event to remove
+     * @return the event removed, or {@code null} if the index was out of bounds
+     */
+    public UsageEvents.Event remove(int index) {
+        try {
+            return mEvents.remove(index);
+        } catch (IndexOutOfBoundsException e) {
+            // catch and handle the exception here instead of throwing it to the client
+            return null;
+        }
+    }
+
+    /**
      * Finds the index of the first event whose timestamp is greater than or equal to the given
      * timestamp.
      *

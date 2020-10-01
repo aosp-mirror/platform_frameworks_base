@@ -20,12 +20,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.NetworkSpecifier;
+import android.util.CloseGuard;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import dalvik.system.CloseGuard;
-
+import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 
 /**
@@ -58,7 +58,7 @@ public class DiscoverySession implements AutoCloseable {
     /** @hide */
     protected boolean mTerminated = false;
 
-    private final CloseGuard mCloseGuard = CloseGuard.get();
+    private final CloseGuard mCloseGuard = new CloseGuard();
 
     /**
      * Return the maximum permitted retry count when sending messages using
@@ -108,6 +108,7 @@ public class DiscoverySession implements AutoCloseable {
         mTerminated = true;
         mMgr.clear();
         mCloseGuard.close();
+        Reference.reachabilityFence(this);
     }
 
     /**

@@ -23,13 +23,12 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
-
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Objects;
 
 /**
- * Helper class for keeping track of whitelisted packages/activities.
+ * Helper class for keeping track of allowlisted packages/activities.
  *
  * <p><b>NOTE: </b>this class is not thread safe.
  * @hide
@@ -39,18 +38,18 @@ public final class WhitelistHelper {
     private static final String TAG = "WhitelistHelper";
 
     /**
-     * Map of whitelisted packages/activities. The whole package is whitelisted if its
+     * Map of allowlisted packages/activities. The whole package is allowlisted if its
      * corresponding value is {@code null}.
      */
     @Nullable
     private ArrayMap<String, ArraySet<ComponentName>> mWhitelistedPackages;
 
     /**
-     * Sets the whitelist with the given packages and activities. The list is cleared if both
+     * Sets the allowlist with the given packages and activities. The list is cleared if both
      * packageNames and components are {@code null}.
      *
-     * @param packageNames packages to be whitelisted.
-     * @param components activities to be whitelisted.
+     * @param packageNames packages to be allowlisted.
+     * @param components activities to be allowlisted.
      *
      * @throws IllegalArgumentException if packages or components are empty.
      */
@@ -104,10 +103,10 @@ public final class WhitelistHelper {
     }
 
     /**
-     * Returns {@code true} if the entire package is whitelisted.
+     * Returns {@code true} if the entire package is allowlisted.
      */
     public boolean isWhitelisted(@NonNull String packageName) {
-        Preconditions.checkNotNull(packageName);
+        Objects.requireNonNull(packageName);
 
         if (mWhitelistedPackages == null) return false;
 
@@ -116,10 +115,10 @@ public final class WhitelistHelper {
     }
 
     /**
-     * Returns {@code true} if the specified activity is whitelisted.
+     * Returns {@code true} if the specified activity is allowlisted.
      */
     public boolean isWhitelisted(@NonNull ComponentName componentName) {
-        Preconditions.checkNotNull(componentName);
+        Objects.requireNonNull(componentName);
 
         final String packageName = componentName.getPackageName();
         final ArraySet<ComponentName> whitelistedComponents = getWhitelistedComponents(packageName);
@@ -131,12 +130,12 @@ public final class WhitelistHelper {
     }
 
     /**
-     * Returns a set of whitelisted components with the given package, or null if nothing is
-     * whitelisted.
+     * Returns a set of allowlisted components with the given package, or null if nothing is
+     * allowlisted.
      */
     @Nullable
     public ArraySet<ComponentName> getWhitelistedComponents(@NonNull String packageName) {
-        Preconditions.checkNotNull(packageName);
+        Objects.requireNonNull(packageName);
 
         return mWhitelistedPackages == null ? null : mWhitelistedPackages.get(packageName);
     }

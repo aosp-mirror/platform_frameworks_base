@@ -18,6 +18,7 @@ package android.os.storage;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -29,6 +30,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -147,23 +149,27 @@ public final class StorageVolume implements Parcelable {
     }
 
     private StorageVolume(Parcel in) {
-        mId = in.readString();
-        mPath = new File(in.readString());
-        mInternalPath = new File(in.readString());
-        mDescription = in.readString();
+        mId = in.readString8();
+        mPath = new File(in.readString8());
+        mInternalPath = new File(in.readString8());
+        mDescription = in.readString8();
         mPrimary = in.readInt() != 0;
         mRemovable = in.readInt() != 0;
         mEmulated = in.readInt() != 0;
         mAllowMassStorage = in.readInt() != 0;
         mMaxFileSize = in.readLong();
         mOwner = in.readParcelable(null);
-        mFsUuid = in.readString();
-        mState = in.readString();
+        mFsUuid = in.readString8();
+        mState = in.readString8();
     }
 
-    /** {@hide} */
-    @UnsupportedAppUsage
-    public String getId() {
+    /**
+     * Return an opaque ID that can be used to identify this volume.
+     *
+     * @hide
+     */
+    @SystemApi
+    public @NonNull String getId() {
         return mId;
     }
 
@@ -173,7 +179,7 @@ public final class StorageVolume implements Parcelable {
      * @return the mount path
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "{@link StorageVolume#getDirectory()}")
     @TestApi
     public String getPath() {
         return mPath.toString();
@@ -190,9 +196,32 @@ public final class StorageVolume implements Parcelable {
     }
 
     /** {@hide} */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "{@link StorageVolume#getDirectory()}")
     public File getPathFile() {
         return mPath;
+    }
+
+    /**
+     * Returns the directory where this volume is currently mounted.
+     * <p>
+     * Direct filesystem access via this path has significant emulation
+     * overhead, and apps are instead strongly encouraged to interact with media
+     * on storage volumes via the {@link MediaStore} APIs.
+     * <p>
+     * This directory does not give apps any additional access beyond what they
+     * already have via {@link MediaStore}.
+     *
+     * @return directory where this volume is mounted, or {@code null} if the
+     *         volume is not currently mounted.
+     */
+    public @Nullable File getDirectory() {
+        switch (mState) {
+            case Environment.MEDIA_MOUNTED:
+            case Environment.MEDIA_MOUNTED_READ_ONLY:
+                return mPath;
+            default:
+                return null;
+        }
     }
 
     /**
@@ -263,6 +292,24 @@ public final class StorageVolume implements Parcelable {
      */
     public @Nullable String getUuid() {
         return mFsUuid;
+    }
+
+    /**
+     * Return the volume name that can be used to interact with this storage
+     * device through {@link MediaStore}.
+     *
+     * @return opaque volume name, or {@code null} if this volume is not indexed
+     *         by {@link MediaStore}.
+     * @see android.provider.MediaStore.Audio.Media#getContentUri(String)
+     * @see android.provider.MediaStore.Video.Media#getContentUri(String)
+     * @see android.provider.MediaStore.Images.Media#getContentUri(String)
+     */
+    public @Nullable String getMediaStoreVolumeName() {
+        if (isPrimary()) {
+            return MediaStore.VOLUME_EXTERNAL_PRIMARY;
+        } else {
+            return getNormalizedUuid();
+        }
     }
 
     /** {@hide} */
@@ -456,17 +503,17 @@ public final class StorageVolume implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeString(mId);
-        parcel.writeString(mPath.toString());
-        parcel.writeString(mInternalPath.toString());
-        parcel.writeString(mDescription);
+        parcel.writeString8(mId);
+        parcel.writeString8(mPath.toString());
+        parcel.writeString8(mInternalPath.toString());
+        parcel.writeString8(mDescription);
         parcel.writeInt(mPrimary ? 1 : 0);
         parcel.writeInt(mRemovable ? 1 : 0);
         parcel.writeInt(mEmulated ? 1 : 0);
         parcel.writeInt(mAllowMassStorage ? 1 : 0);
         parcel.writeLong(mMaxFileSize);
         parcel.writeParcelable(mOwner, flags);
-        parcel.writeString(mFsUuid);
-        parcel.writeString(mState);
+        parcel.writeString8(mFsUuid);
+        parcel.writeString8(mState);
     }
 }

@@ -181,6 +181,7 @@ public class AppBindingService extends Binder {
         // (app uninstall/disable will be notified by RoleManager.)
         final IntentFilter packageFilter = new IntentFilter();
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         packageFilter.addDataScheme("package");
 
         mContext.registerReceiverAsUser(mPackageUserMonitor, UserHandle.ALL,
@@ -254,6 +255,9 @@ public class AppBindingService extends Binder {
                     if (replacing) {
                         handlePackageAddedReplacing(packageName, userId);
                     }
+                    break;
+                case Intent.ACTION_PACKAGE_CHANGED:
+                    handlePackageAddedReplacing(packageName, userId);
                     break;
             }
         }

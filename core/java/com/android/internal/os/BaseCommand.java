@@ -18,14 +18,14 @@
 package com.android.internal.os;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.ShellCommand;
+import android.os.BasicShellCommandHandler;
 
 import java.io.PrintStream;
 
 public abstract class BaseCommand {
 
     @UnsupportedAppUsage
-    final protected ShellCommand mArgs = new ShellCommand() {
+    final protected BasicShellCommandHandler mArgs = new BasicShellCommandHandler() {
         @Override public int onCommand(String cmd) {
             return 0;
         }
@@ -54,7 +54,7 @@ public abstract class BaseCommand {
         }
 
         mRawArgs = args;
-        mArgs.init(null, null, null, null, args, null, 0);
+        mArgs.init(null, null, null, null, args, 0);
 
         try {
             onRun();

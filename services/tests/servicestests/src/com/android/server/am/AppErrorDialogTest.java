@@ -29,6 +29,7 @@ import com.android.server.appop.AppOpsService;
 import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.File;
@@ -41,13 +42,16 @@ import java.io.File;
 @FlakyTest(bugId = 113616538)
 public class AppErrorDialogTest {
 
+    @Rule
+    public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();
+
     private Context mContext;
     private ActivityManagerService mService;
 
     @Before
     public void setUp() throws Exception {
         mContext = getInstrumentation().getTargetContext();
-        mService = new ActivityManagerService(new ActivityManagerService.Injector() {
+        mService = new ActivityManagerService(new ActivityManagerService.Injector(mContext) {
             @Override
             public AppOpsService getAppOpsService(File file, Handler handler) {
                 return null;
@@ -55,14 +59,14 @@ public class AppErrorDialogTest {
 
             @Override
             public Handler getUiHandler(ActivityManagerService service) {
-                return null;
+                return mServiceThreadRule.getThread().getThreadHandler();
             }
 
             @Override
             public boolean isNetworkRestrictedForUid(int uid) {
                 return false;
             }
-        });
+        }, mServiceThreadRule.getThread());
         mService.mActivityTaskManager = new ActivityTaskManagerService(mContext);
         mService.mActivityTaskManager.initialize(null, null, mContext.getMainLooper());
     }

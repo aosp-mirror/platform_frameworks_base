@@ -383,15 +383,17 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * When set, indicates that this {@link Connection} supports initiation of a conference call
-     * by directly adding participants using {@link #onAddConferenceParticipants(List)}.
-     * @hide
+     * by directly adding participants using {@link #onAddConferenceParticipants(List)}. When
+     * participants are added to a {@link Connection}, it will be replaced by a {@link Conference}
+     * instance with {@link #PROPERTY_IS_ADHOC_CONFERENCE} set to indicate that it is an adhoc
+     * conference call.
      */
     public static final int CAPABILITY_ADD_PARTICIPANT = 0x04000000;
 
     /**
      * Indicates that this {@code Connection} can be transferred to another
      * number.
-     * Connection supports the blind and assured call transfer feature.
+     * Connection supports the confirmed and unconfirmed call transfer feature.
      * @hide
      */
     public static final int CAPABILITY_TRANSFER = 0x08000000;
@@ -526,10 +528,9 @@ public abstract class Connection extends Conferenceable {
     public static final int PROPERTY_REMOTELY_HOSTED = 1 << 11;
 
     /**
-     * Set by the framework to indicate that it is an adhoc conference call.
+     * Set by the framework to indicate that a call is an adhoc conference call.
      * <p>
-     * This is used for Outgoing and incoming conference calls.
-     * @hide
+     * This is used for outgoing and incoming conference calls.
      */
     public static final int PROPERTY_IS_ADHOC_CONFERENCE = 1 << 12;
 
@@ -732,6 +733,31 @@ public abstract class Connection extends Conferenceable {
      */
     public static final String EXTRA_ORIGINAL_CONNECTION_ID =
             "android.telecom.extra.ORIGINAL_CONNECTION_ID";
+
+    /**
+     * Extra key set on a {@link Connection} when it was created via a remote connection service.
+     * For example, if a connection manager requests a remote connection service to create a call
+     * using one of the remote connection service's phone account handle, this extra will be set so
+     * that Telecom knows that the wrapped remote connection originated in a remote connection
+     * service.  We stash this in the extras since connection managers will typically copy the
+     * extras from a {@link RemoteConnection} to a {@link Connection} (there is ultimately not
+     * other way to relate a {@link RemoteConnection} to a {@link Connection}.
+     * @hide
+     */
+    public static final String EXTRA_REMOTE_PHONE_ACCOUNT_HANDLE =
+            "android.telecom.extra.REMOTE_PHONE_ACCOUNT_HANDLE";
+
+    /**
+     * Extra key set from a {@link ConnectionService} when using the remote connection APIs
+     * (e.g. {@link RemoteConnectionService#createRemoteConnection(PhoneAccountHandle,
+     * ConnectionRequest, boolean)}) to create a remote connection.  Provides the receiving
+     * {@link ConnectionService} with a means to know the package name of the requesting
+     * {@link ConnectionService} so that {@link #EXTRA_REMOTE_PHONE_ACCOUNT_HANDLE} can be set for
+     * better visibility in Telecom of where a connection ultimately originated.
+     * @hide
+     */
+    public static final String EXTRA_REMOTE_CONNECTION_ORIGINATING_PACKAGE_NAME =
+            "android.telecom.extra.REMOTE_CONNECTION_ORIGINATING_PACKAGE_NAME";
 
     /**
      * Boolean connection extra key set on the extras passed to
@@ -3009,7 +3035,6 @@ public abstract class Connection extends Conferenceable {
      * Supports initiation of a conference call by directly adding participants to an ongoing call.
      *
      * @param participants with which conference call will be formed.
-     * @hide
      */
     public void onAddConferenceParticipants(@NonNull List<Uri> participants) {}
 

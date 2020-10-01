@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.utils.hardware.FakeSensorManager;
+import com.android.systemui.util.sensors.FakeSensorManager;
 
 import org.mockito.Answers;
 import org.mockito.MockSettings;
@@ -53,6 +53,7 @@ public class DozeConfigurationUtil {
         when(config.pickupGestureEnabled(anyInt())).thenReturn(false);
         when(config.pulseOnNotificationEnabled(anyInt())).thenReturn(true);
         when(config.alwaysOnEnabled(anyInt())).thenReturn(false);
+        when(config.dozeSuppressed(anyInt())).thenReturn(false);
         when(config.enabled(anyInt())).thenReturn(true);
         when(config.getWakeLockScreenDebounce()).thenReturn(0L);
 

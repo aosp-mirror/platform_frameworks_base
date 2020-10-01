@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.hardware.location.GeofenceHardwareService;
 import android.hardware.location.IGeofenceHardware;
-import android.location.IFusedGeofenceHardware;
 import android.location.IGeofenceProvider;
 import android.location.IGpsGeofenceHardware;
 import android.os.IBinder;
@@ -33,6 +32,8 @@ import android.util.Log;
 import com.android.server.FgThread;
 import com.android.server.ServiceWatcher;
 
+import java.util.Objects;
+
 /**
  * @hide
  */
@@ -41,64 +42,41 @@ public final class GeofenceProxy {
     private static final String TAG = "GeofenceProxy";
     private static final String SERVICE_ACTION = "com.android.location.service.GeofenceProvider";
 
-    private final Context mContext;
-    private final ServiceWatcher mServiceWatcher;
-
     @Nullable
-    private final IGpsGeofenceHardware mGpsGeofenceHardware;
-    @Nullable
-    private final IFusedGeofenceHardware mFusedGeofenceHardware;
-
-    private volatile IGeofenceHardware mGeofenceHardware;
-
-    private final ServiceWatcher.BinderRunner mUpdateGeofenceHardware = (binder) -> {
-        IGeofenceProvider provider = IGeofenceProvider.Stub.asInterface(binder);
-        try {
-            provider.setGeofenceHardware(mGeofenceHardware);
-        } catch (RemoteException e) {
-            Log.w(TAG, e);
-        }
-    };
-
-    public static GeofenceProxy createAndBind(Context context,
-            int overlaySwitchResId, int defaultServicePackageNameResId,
-            int initialPackageNamesResId, @Nullable IGpsGeofenceHardware gpsGeofence,
-            @Nullable IFusedGeofenceHardware fusedGeofenceHardware) {
-        GeofenceProxy proxy = new GeofenceProxy(context, overlaySwitchResId,
-                defaultServicePackageNameResId, initialPackageNamesResId, gpsGeofence,
-                fusedGeofenceHardware);
-
-        if (proxy.bind()) {
+    public static GeofenceProxy createAndBind(Context context, IGpsGeofenceHardware gpsGeofence) {
+        GeofenceProxy proxy = new GeofenceProxy(context, gpsGeofence);
+        if (proxy.register(context)) {
             return proxy;
         } else {
             return null;
         }
     }
 
-    private GeofenceProxy(Context context,
-            int overlaySwitchResId, int defaultServicePackageNameResId,
-            int initialPackageNamesResId, @Nullable IGpsGeofenceHardware gpsGeofence,
-            @Nullable IFusedGeofenceHardware fusedGeofenceHardware) {
-        mContext = context;
-        mServiceWatcher = new ServiceWatcher(context, TAG, SERVICE_ACTION, overlaySwitchResId,
-                defaultServicePackageNameResId, initialPackageNamesResId,
-                FgThread.getHandler()) {
-            @Override
-            protected void onBind() {
-                runOnBinder(mUpdateGeofenceHardware);
-            }
-        };
+    private final IGpsGeofenceHardware mGpsGeofenceHardware;
+    private final ServiceWatcher mServiceWatcher;
 
-        mGpsGeofenceHardware = gpsGeofence;
-        mFusedGeofenceHardware = fusedGeofenceHardware;
+    private volatile IGeofenceHardware mGeofenceHardware;
+
+    private GeofenceProxy(Context context, IGpsGeofenceHardware gpsGeofence) {
+        mGpsGeofenceHardware = Objects.requireNonNull(gpsGeofence);
+        mServiceWatcher = new ServiceWatcher(context, FgThread.getHandler(), SERVICE_ACTION,
+                this::updateGeofenceHardware, null,
+                com.android.internal.R.bool.config_enableGeofenceOverlay,
+                com.android.internal.R.string.config_geofenceProviderPackageName);
 
         mGeofenceHardware = null;
     }
 
-    private boolean bind() {
-        if (mServiceWatcher.start()) {
-            mContext.bindServiceAsUser(new Intent(mContext, GeofenceHardwareService.class),
-                    new GeofenceProxyServiceConnection(), Context.BIND_AUTO_CREATE,
+    private void updateGeofenceHardware(IBinder binder) throws RemoteException {
+        IGeofenceProvider.Stub.asInterface(binder).setGeofenceHardware(mGeofenceHardware);
+    }
+
+    private boolean register(Context context) {
+        if (mServiceWatcher.register()) {
+            context.bindServiceAsUser(
+                    new Intent(context, GeofenceHardwareService.class),
+                    new GeofenceProxyServiceConnection(),
+                    Context.BIND_AUTO_CREATE,
                     UserHandle.SYSTEM);
             return true;
         }
@@ -113,24 +91,18 @@ public final class GeofenceProxy {
             IGeofenceHardware geofenceHardware = IGeofenceHardware.Stub.asInterface(service);
 
             try {
-                if (mGpsGeofenceHardware != null) {
-                    geofenceHardware.setGpsGeofenceHardware(mGpsGeofenceHardware);
-                }
-                if (mFusedGeofenceHardware != null) {
-                    geofenceHardware.setFusedGeofenceHardware(mFusedGeofenceHardware);
-                }
-
+                geofenceHardware.setGpsGeofenceHardware(mGpsGeofenceHardware);
                 mGeofenceHardware = geofenceHardware;
-                mServiceWatcher.runOnBinder(mUpdateGeofenceHardware);
-            } catch (Exception e) {
-                Log.w(TAG, e);
+                mServiceWatcher.runOnBinder(GeofenceProxy.this::updateGeofenceHardware);
+            } catch (RemoteException e) {
+                Log.w(TAG, "unable to initialize geofence hardware", e);
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mGeofenceHardware = null;
-            mServiceWatcher.runOnBinder(mUpdateGeofenceHardware);
+            mServiceWatcher.runOnBinder(GeofenceProxy.this::updateGeofenceHardware);
         }
     }
 }

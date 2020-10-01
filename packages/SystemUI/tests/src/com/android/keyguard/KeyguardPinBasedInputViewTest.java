@@ -53,6 +53,7 @@ public class KeyguardPinBasedInputViewTest extends SysuiTestCase {
     @Before
     public void setup() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
+        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mKeyguardPinView =
                 (KeyguardPinBasedInputView) inflater.inflate(R.layout.keyguard_pin_view, null);
         MockitoAnnotations.initMocks(this);

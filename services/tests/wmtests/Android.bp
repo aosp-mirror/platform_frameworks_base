@@ -20,10 +20,12 @@ android_test {
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
         "servicestests-utils",
+        "testng",
         "truth-prebuilt",
         "testables",
         "ub-uiautomator",
         "hamcrest-library",
+        "compatibility-device-util-axt",
     ],
 
     libs: [

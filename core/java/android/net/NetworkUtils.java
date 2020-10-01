@@ -21,12 +21,13 @@ import static android.system.OsConstants.AF_INET6;
 
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.net.shared.Inet4AddressUtils;
 import android.os.Build;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
 import android.util.Pair;
+
+import com.android.net.module.util.Inet4AddressUtils;
 
 import java.io.FileDescriptor;
 import java.math.BigInteger;
@@ -475,5 +476,36 @@ public class NetworkUtils {
         }
 
         return true;
+    }
+
+    /**
+     * Safely multiple a value by a rational.
+     * <p>
+     * Internally it uses integer-based math whenever possible, but switches
+     * over to double-based math if values would overflow.
+     * @hide
+     */
+    public static long multiplySafeByRational(long value, long num, long den) {
+        if (den == 0) {
+            throw new ArithmeticException("Invalid Denominator");
+        }
+        long x = value;
+        long y = num;
+
+        // Logic shamelessly borrowed from Math.multiplyExact()
+        long r = x * y;
+        long ax = Math.abs(x);
+        long ay = Math.abs(y);
+        if (((ax | ay) >>> 31 != 0)) {
+            // Some bits greater than 2^31 that might cause overflow
+            // Check the result using the divide operator
+            // and check for the special case of Long.MIN_VALUE * -1
+            if (((y != 0) && (r / y != x)) ||
+                    (x == Long.MIN_VALUE && y == -1)) {
+                // Use double math to avoid overflowing
+                return (long) (((double) num / den) * value);
+            }
+        }
+        return r / den;
     }
 }

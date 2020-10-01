@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -27,26 +26,27 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 
 import android.content.ComponentName;
-import android.content.pm.PackageList;
 import android.content.pm.PackageManagerInternal;
 import android.graphics.Rect;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
-import android.view.DisplayInfo;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.LocalServices;
+import com.android.server.pm.PackageList;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import java.io.File;
@@ -64,6 +64,7 @@ import java.util.function.Predicate;
  */
 @MediumTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class LaunchParamsPersisterTests extends ActivityTestsBase {
     private static final int TEST_USER_ID = 3;
     private static final int ALTERNATIVE_USER_ID = 0;
@@ -71,6 +72,10 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
             ComponentName.createRelative("com.android.foo", ".BarActivity");
     private static final ComponentName ALTERNATIVE_COMPONENT =
             ComponentName.createRelative("com.android.foo", ".AlternativeBarActivity");
+    private static final String TEST_WINDOW_LAYOUT_AFFINITY = "135:.Affinity";
+    private static final String TEST_ALTERNATIVE_WINDOW_LAYOUT_AFFINITY =
+            "246:.AlternativeAffinity";
+    private static final String TEST_DIFFERENT_AFFINITY_WITH_SAME_UID = "135:.DifferentAffinity";
 
     private static final int TEST_WINDOWING_MODE = WINDOWING_MODE_FREEFORM;
     private static final Rect TEST_BOUNDS = new Rect(100, 200, 300, 400);
@@ -79,11 +84,11 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
 
     private TestPersisterQueue mPersisterQueue;
     private File mFolder;
-    private ActivityDisplay mTestDisplay;
+    private DisplayContent mTestDisplay;
     private String mDisplayUniqueId;
-    private TaskRecord mTestTask;
-    private TaskRecord mTaskWithDifferentUser;
-    private TaskRecord mTaskWithDifferentComponent;
+    private Task mTestTask;
+    private Task mTaskWithDifferentUser;
+    private Task mTaskWithDifferentComponent;
     private PackageManagerInternal mMockPmi;
     private PackageManagerInternal.PackageListObserver mObserver;
 
@@ -98,32 +103,31 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
     public void setUp() throws Exception {
         mPersisterQueue = new TestPersisterQueue();
 
-        final File cacheFolder = InstrumentationRegistry.getContext().getCacheDir();
+        final File cacheFolder =
+                InstrumentationRegistry.getInstrumentation().getContext().getCacheDir();
         mFolder = new File(cacheFolder, "launch_params_tests");
         deleteRecursively(mFolder);
 
-        mDisplayUniqueId = "test:" + Integer.toString(sNextUniqueId++);
-        final DisplayInfo info = new DisplayInfo();
-        info.uniqueId = mDisplayUniqueId;
-        mTestDisplay = createNewActivityDisplay(info);
-        mRootActivityContainer.addChild(mTestDisplay, ActivityDisplay.POSITION_TOP);
-        when(mRootActivityContainer.getActivityDisplay(eq(mDisplayUniqueId)))
+        mDisplayUniqueId = "test:" + sNextUniqueId++;
+        mTestDisplay = new TestDisplayContent.Builder(mService, 1000, 1500)
+                .setUniqueId(mDisplayUniqueId).build();
+        when(mRootWindowContainer.getDisplayContent(eq(mDisplayUniqueId)))
                 .thenReturn(mTestDisplay);
 
-        ActivityStack stack = mTestDisplay.createStack(TEST_WINDOWING_MODE,
-                ACTIVITY_TYPE_STANDARD, /* onTop */ true);
+        ActivityStack stack = mTestDisplay.getDefaultTaskDisplayArea()
+                .createStack(TEST_WINDOWING_MODE, ACTIVITY_TYPE_STANDARD, /* onTop */ true);
         mTestTask = new TaskBuilder(mSupervisor).setComponent(TEST_COMPONENT).setStack(stack)
                 .build();
-        mTestTask.userId = TEST_USER_ID;
+        mTestTask.mUserId = TEST_USER_ID;
         mTestTask.mLastNonFullscreenBounds = TEST_BOUNDS;
-        mTestTask.hasBeenVisible = true;
+        mTestTask.setHasBeenVisible(true);
 
         mTaskWithDifferentComponent = new TaskBuilder(mSupervisor)
                 .setComponent(ALTERNATIVE_COMPONENT).build();
-        mTaskWithDifferentComponent.userId = TEST_USER_ID;
+        mTaskWithDifferentComponent.mUserId = TEST_USER_ID;
 
         mTaskWithDifferentUser = new TaskBuilder(mSupervisor).setComponent(TEST_COMPONENT).build();
-        mTaskWithDifferentUser.userId = ALTERNATIVE_USER_ID;
+        mTaskWithDifferentUser.mUserId = ALTERNATIVE_USER_ID;
 
         mTarget = new LaunchParamsPersister(mPersisterQueue, mSupervisor, mUserFolderGetter);
 
@@ -132,6 +136,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
         LocalServices.addService(PackageManagerInternal.class, mMockPmi);
         when(mMockPmi.getPackageList(any())).thenReturn(new PackageList(
                 Collections.singletonList(TEST_COMPONENT.getPackageName()), /* observer */ null));
+        when(mMockPmi.getSystemUiServiceComponent()).thenReturn(new ComponentName("", ""));
         mTarget.onSystemReady();
 
         final ArgumentCaptor<PackageManagerInternal.PackageListObserver> observerCaptor =
@@ -158,7 +163,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
 
         mTarget.getLaunchParams(mTestTask, null, mResult);
 
-        assertEquals(mTestDisplay.mDisplayId, mResult.mPreferredDisplayId);
+        assertEquals(mTestDisplay.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
         assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
         assertEquals(TEST_BOUNDS, mResult.mBounds);
     }
@@ -172,7 +177,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
 
         mTarget.getLaunchParams(null, activity, mResult);
 
-        assertEquals(mTestDisplay.mDisplayId, mResult.mPreferredDisplayId);
+        assertEquals(mTestDisplay.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
         assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
         assertEquals(TEST_BOUNDS, mResult.mBounds);
     }
@@ -181,11 +186,11 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
     public void testReturnsEmptyDisplayIfDisplayIsNotFound() {
         mTarget.saveTask(mTestTask);
 
-        when(mRootActivityContainer.getActivityDisplay(eq(mDisplayUniqueId))).thenReturn(null);
+        when(mRootWindowContainer.getDisplayContent(eq(mDisplayUniqueId))).thenReturn(null);
 
         mTarget.getLaunchParams(mTestTask, null, mResult);
 
-        assertEquals(INVALID_DISPLAY, mResult.mPreferredDisplayId);
+        assertNull(mResult.mPreferredTaskDisplayArea);
         assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
         assertEquals(TEST_BOUNDS, mResult.mBounds);
     }
@@ -211,6 +216,61 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testUsesRecordWithSameWindowLayoutAffinityInSameInstance_NoPreviousRecord() {
+        mTestTask.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.saveTask(mTestTask);
+
+        mTaskWithDifferentComponent.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
+
+        assertEquals(mTestDisplay.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
+        assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
+        assertEquals(TEST_BOUNDS, mResult.mBounds);
+    }
+
+    @Test
+    public void testUsesRecordWithSameWindowLayoutAffinityInSameInstance_HasOldPreviousRecord()
+            throws Exception {
+        mTaskWithDifferentComponent.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.saveTask(mTaskWithDifferentComponent);
+
+        Thread.sleep(1);  // Sleep 1ms so that the timestamp can for sure increase.
+
+        mTestTask.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.saveTask(mTestTask);
+
+        mTarget.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
+
+        assertEquals(mTestDisplay.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
+        assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
+        assertEquals(TEST_BOUNDS, mResult.mBounds);
+    }
+
+    @Test
+    public void testReturnsEmptyLaunchParamsUidInLaunchAffinityMismatch() {
+        mTestTask.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.saveTask(mTestTask);
+
+        mTaskWithDifferentComponent.mWindowLayoutAffinity = TEST_DIFFERENT_AFFINITY_WITH_SAME_UID;
+        mResult.mWindowingMode = WINDOWING_MODE_FULLSCREEN;
+        mTarget.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
+
+        assertTrue("Result must be empty.", mResult.isEmpty());
+    }
+
+    @Test
+    public void testReturnsEmptyLaunchParamsWindowLayoutAffinityMismatch() {
+        mTestTask.affinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.saveTask(mTestTask);
+
+        mTaskWithDifferentComponent.mWindowLayoutAffinity = TEST_ALTERNATIVE_WINDOW_LAYOUT_AFFINITY;
+        mResult.mWindowingMode = WINDOWING_MODE_FULLSCREEN;
+        mTarget.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
+
+        assertTrue("Result must be empty.", mResult.isEmpty());
+    }
+
+    @Test
     public void testSavesAndRestoresLaunchParamsAcrossInstances() {
         mTarget.saveTask(mTestTask);
         mPersisterQueue.flush();
@@ -222,7 +282,53 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
 
         target.getLaunchParams(mTestTask, null, mResult);
 
-        assertEquals(mTestDisplay.mDisplayId, mResult.mPreferredDisplayId);
+        assertEquals(mTestDisplay.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
+        assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
+        assertEquals(TEST_BOUNDS, mResult.mBounds);
+    }
+
+    @Test
+    public void testUsesRecordWithSameWindowLayoutAffinityAcrossInstances_NoPreviousRecord() {
+        mTestTask.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.saveTask(mTestTask);
+        mPersisterQueue.flush();
+
+        final LaunchParamsPersister target = new LaunchParamsPersister(mPersisterQueue, mSupervisor,
+                mUserFolderGetter);
+        target.onSystemReady();
+        target.onUnlockUser(TEST_USER_ID);
+
+        mTaskWithDifferentComponent.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        target.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
+
+        assertEquals(mTestDisplay.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
+        assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
+        assertEquals(TEST_BOUNDS, mResult.mBounds);
+    }
+
+    @Test
+    public void testUsesRecordWithSameWindowLayoutAffinityAcrossInstances_HasOldPreviousRecord()
+            throws Exception {
+        mTaskWithDifferentComponent.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.saveTask(mTaskWithDifferentComponent);
+        mPersisterQueue.flush();
+
+        // Sleep 1s because many file systems only save last modified time as precise as 1s so we
+        // can for sure know the last modified time is different.
+        Thread.sleep(1000);
+
+        mTestTask.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.saveTask(mTestTask);
+        mPersisterQueue.flush();
+
+        final LaunchParamsPersister target = new LaunchParamsPersister(mPersisterQueue, mSupervisor,
+                mUserFolderGetter);
+        target.onSystemReady();
+        target.onUnlockUser(TEST_USER_ID);
+
+        target.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
+
+        assertEquals(mTestDisplay.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
         assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
         assertEquals(TEST_BOUNDS, mResult.mBounds);
     }
@@ -231,28 +337,28 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
     public void testClearsRecordsOfTheUserOnUserCleanUp() {
         mTarget.saveTask(mTestTask);
 
-        ActivityStack stack = mTestDisplay.createStack(TEST_WINDOWING_MODE,
-                ACTIVITY_TYPE_STANDARD, /* onTop */ true);
-        final TaskRecord anotherTaskOfTheSameUser = new TaskBuilder(mSupervisor)
+        ActivityStack stack = mTestDisplay.getDefaultTaskDisplayArea().createStack(
+                TEST_WINDOWING_MODE, ACTIVITY_TYPE_STANDARD, /* onTop */ true);
+        final Task anotherTaskOfTheSameUser = new TaskBuilder(mSupervisor)
                 .setComponent(ALTERNATIVE_COMPONENT)
                 .setUserId(TEST_USER_ID)
                 .setStack(stack)
                 .build();
         anotherTaskOfTheSameUser.setWindowingMode(WINDOWING_MODE_FREEFORM);
         anotherTaskOfTheSameUser.setBounds(200, 300, 400, 500);
-        anotherTaskOfTheSameUser.hasBeenVisible = true;
+        anotherTaskOfTheSameUser.setHasBeenVisible(true);
         mTarget.saveTask(anotherTaskOfTheSameUser);
 
-        stack = mTestDisplay.createStack(TEST_WINDOWING_MODE,
+        stack = mTestDisplay.getDefaultTaskDisplayArea().createStack(TEST_WINDOWING_MODE,
                 ACTIVITY_TYPE_STANDARD, /* onTop */ true);
-        final TaskRecord anotherTaskOfDifferentUser = new TaskBuilder(mSupervisor)
+        final Task anotherTaskOfDifferentUser = new TaskBuilder(mSupervisor)
                 .setComponent(TEST_COMPONENT)
                 .setUserId(ALTERNATIVE_USER_ID)
                 .setStack(stack)
                 .build();
         anotherTaskOfDifferentUser.setWindowingMode(WINDOWING_MODE_FREEFORM);
         anotherTaskOfDifferentUser.setBounds(300, 400, 500, 600);
-        anotherTaskOfDifferentUser.hasBeenVisible = true;
+        anotherTaskOfDifferentUser.setHasBeenVisible(true);
         mTarget.saveTask(anotherTaskOfDifferentUser);
 
         mTarget.onCleanupUser(TEST_USER_ID);

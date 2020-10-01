@@ -117,7 +117,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         if (!StatusBarIconController.ICON_BLACKLIST.equals(key)) {
             return;
         }
-        ArraySet<String> blockList = StatusBarIconController.getIconBlacklist(newValue);
+        ArraySet<String> blockList = StatusBarIconController.getIconBlacklist(mContext, newValue);
         boolean blockAirplane = blockList.contains(mSlotAirplane);
         boolean blockMobile = blockList.contains(mSlotMobile);
         boolean blockWifi = blockList.contains(mSlotWifi);

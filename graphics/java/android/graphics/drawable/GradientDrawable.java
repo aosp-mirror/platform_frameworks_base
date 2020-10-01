@@ -97,6 +97,14 @@ import java.lang.annotation.RetentionPolicy;
  * @attr ref android.R.styleable#GradientDrawablePadding_bottom
  */
 public class GradientDrawable extends Drawable {
+
+    /**
+     * Flag to determine if we should wrap negative gradient angle measurements
+     * for API levels that support it
+     * @hide
+     */
+    public static boolean sWrapNegativeAngleMeasurements = true;
+
     /**
      * Shape is a rectangle, possibly with rounded corners
      */
@@ -150,6 +158,9 @@ public class GradientDrawable extends Drawable {
 
     /** Radius is a fraction of the bounds size. */
     private static final int RADIUS_TYPE_FRACTION_PARENT = 2;
+
+    /** Default orientation for GradientDrawable **/
+    private static final Orientation DEFAULT_ORIENTATION = Orientation.TOP_BOTTOM;
 
     /** @hide */
     @IntDef({RADIUS_TYPE_PIXELS, RADIUS_TYPE_FRACTION, RADIUS_TYPE_FRACTION_PARENT})
@@ -207,7 +218,7 @@ public class GradientDrawable extends Drawable {
     }
 
     public GradientDrawable() {
-        this(new GradientState(Orientation.TOP_BOTTOM, null), null);
+        this(new GradientState(DEFAULT_ORIENTATION, null), null);
     }
 
     /**
@@ -637,7 +648,7 @@ public class GradientDrawable extends Drawable {
      * @see #setOrientation(Orientation)
      */
     public Orientation getOrientation() {
-        return mGradientState.getOrientation();
+        return mGradientState.mOrientation;
     }
 
     /**
@@ -653,7 +664,7 @@ public class GradientDrawable extends Drawable {
      * @see #getOrientation()
      */
     public void setOrientation(Orientation orientation) {
-        mGradientState.setOrientation(orientation);
+        mGradientState.mOrientation = orientation;
         mGradientIsDirty = true;
         invalidateSelf();
     }
@@ -1270,7 +1281,7 @@ public class GradientDrawable extends Drawable {
 
                 if (st.mGradient == LINEAR_GRADIENT) {
                     final float level = st.mUseLevel ? getLevel() / 10000.0f : 1.0f;
-                    switch (st.getOrientation()) {
+                    switch (st.mOrientation) {
                     case TOP_BOTTOM:
                         x0 = r.left;            y0 = r.top;
                         x1 = x0;                y1 = level * r.bottom;
@@ -1757,7 +1768,49 @@ public class GradientDrawable extends Drawable {
         }
 
         int angle = (int) a.getFloat(R.styleable.GradientDrawableGradient_angle, st.mAngle);
-        st.mAngle = ((angle % 360) + 360) % 360; // offset negative angle measures
+
+        // GradientDrawable historically has not parsed negative angle measurements and always
+        // stays on the default orientation for API levels older than Q.
+        // Only configure the orientation if the angle is greater than zero.
+        // Otherwise fallback on Orientation.TOP_BOTTOM
+        // In Android Q and later, actually wrap the negative angle measurement to the correct
+        // value
+        if (sWrapNegativeAngleMeasurements) {
+            st.mAngle = ((angle % 360) + 360) % 360; // offset negative angle measures
+        } else {
+            st.mAngle = angle % 360;
+        }
+
+        if (st.mAngle >= 0) {
+            switch (st.mAngle) {
+                case 0:
+                    st.mOrientation = Orientation.LEFT_RIGHT;
+                    break;
+                case 45:
+                    st.mOrientation = Orientation.BL_TR;
+                    break;
+                case 90:
+                    st.mOrientation = Orientation.BOTTOM_TOP;
+                    break;
+                case 135:
+                    st.mOrientation = Orientation.BR_TL;
+                    break;
+                case 180:
+                    st.mOrientation = Orientation.RIGHT_LEFT;
+                    break;
+                case 225:
+                    st.mOrientation = Orientation.TR_BL;
+                    break;
+                case 270:
+                    st.mOrientation = Orientation.TOP_BOTTOM;
+                    break;
+                case 315:
+                    st.mOrientation = Orientation.TL_BR;
+                    break;
+            }
+        } else {
+            st.mOrientation = DEFAULT_ORIENTATION;
+        }
 
         final TypedValue tv = a.peekValue(R.styleable.GradientDrawableGradient_gradientRadius);
         if (tv != null) {
@@ -1862,7 +1915,7 @@ public class GradientDrawable extends Drawable {
             case RECTANGLE:
                 if (st.mRadiusArray != null) {
                     buildPathIfDirty();
-                    outline.setConvexPath(mPath);
+                    outline.setPath(mPath);
                     return;
                 }
 
@@ -1981,7 +2034,7 @@ public class GradientDrawable extends Drawable {
         int[] mAttrPadding;
 
         public GradientState(Orientation orientation, int[] gradientColors) {
-            setOrientation(orientation);
+            mOrientation = orientation;
             setGradientColors(gradientColors);
         }
 
@@ -2184,91 +2237,9 @@ public class GradientDrawable extends Drawable {
             mCenterY = y;
         }
 
-        public void setOrientation(Orientation orientation) {
-            // Update the angle here so that subsequent attempts to obtain the orientation
-            // from the angle overwrite previously configured values during inflation
-            mAngle = getAngleFromOrientation(orientation);
-            mOrientation = orientation;
-        }
-
         @NonNull
         public Orientation getOrientation() {
-            updateGradientStateOrientation();
             return mOrientation;
-        }
-
-        /**
-         * Update the orientation of the gradient based on the given angle only if the type is
-         * {@link #LINEAR_GRADIENT}
-         */
-        private void updateGradientStateOrientation() {
-            if (mGradient == LINEAR_GRADIENT) {
-                int angle = mAngle;
-                if (angle % 45 != 0) {
-                    throw new IllegalArgumentException("Linear gradient requires 'angle' attribute "
-                            + "to be a multiple of 45");
-                }
-
-                Orientation orientation;
-                switch (angle) {
-                    case 0:
-                        orientation = Orientation.LEFT_RIGHT;
-                        break;
-                    case 45:
-                        orientation = Orientation.BL_TR;
-                        break;
-                    case 90:
-                        orientation = Orientation.BOTTOM_TOP;
-                        break;
-                    case 135:
-                        orientation = Orientation.BR_TL;
-                        break;
-                    case 180:
-                        orientation = Orientation.RIGHT_LEFT;
-                        break;
-                    case 225:
-                        orientation = Orientation.TR_BL;
-                        break;
-                    case 270:
-                        orientation = Orientation.TOP_BOTTOM;
-                        break;
-                    case 315:
-                        orientation = Orientation.TL_BR;
-                        break;
-                    default:
-                        // Should not get here as exception is thrown above if angle is not multiple
-                        // of 45 degrees
-                        orientation = Orientation.LEFT_RIGHT;
-                        break;
-                }
-                mOrientation = orientation;
-            }
-        }
-
-        private int getAngleFromOrientation(@Nullable Orientation orientation) {
-            if (orientation != null) {
-                switch (orientation) {
-                    default:
-                    case LEFT_RIGHT:
-                        return 0;
-                    case BL_TR:
-                        return 45;
-                    case BOTTOM_TOP:
-                        return 90;
-                    case BR_TL:
-                        return 135;
-                    case RIGHT_LEFT:
-                        return 180;
-                    case TR_BL:
-                        return 225;
-                    case TOP_BOTTOM:
-                        return 270;
-                    case TL_BR:
-                        return 315;
-                }
-            } else {
-                return 0;
-            }
         }
 
         public void setGradientColors(@Nullable int[] colors) {

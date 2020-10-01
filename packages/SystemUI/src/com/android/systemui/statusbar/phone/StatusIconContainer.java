@@ -56,6 +56,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     private static final int MAX_DOTS = 1;
 
     private int mDotPadding;
+    private int mIconSpacing;
     private int mStaticDotDiameter;
     private int mUnderflowWidth;
     private int mUnderflowStart = 0;
@@ -99,6 +100,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         mIconDotFrameWidth = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_icon_size);
         mDotPadding = getResources().getDimensionPixelSize(R.dimen.overflow_icon_dot_padding);
+        mIconSpacing = getResources().getDimensionPixelSize(R.dimen.status_bar_system_icon_spacing);
         int radius = getResources().getDimensionPixelSize(R.dimen.overflow_dot_radius);
         mStaticDotDiameter = 2 * radius;
         mUnderflowWidth = mIconDotFrameWidth + (MAX_DOTS - 1) * (mStaticDotDiameter + mDotPadding);
@@ -163,20 +165,21 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         // Measure all children so that they report the correct width
         int childWidthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.UNSPECIFIED);
         mNeedsUnderflow = mShouldRestrictIcons && visibleCount > MAX_ICONS;
-        for (int i = 0; i < mMeasureViews.size(); i++) {
+        for (int i = 0; i < visibleCount; i++) {
             // Walking backwards
             View child = mMeasureViews.get(visibleCount - i - 1);
             measureChild(child, childWidthSpec, heightMeasureSpec);
+            int spacing = i == visibleCount - 1 ? 0 : mIconSpacing;
             if (mShouldRestrictIcons) {
                 if (i < maxVisible && trackWidth) {
-                    totalWidth += getViewTotalMeasuredWidth(child);
+                    totalWidth += getViewTotalMeasuredWidth(child) + spacing;
                 } else if (trackWidth) {
                     // We've hit the icon limit; add space for dots
                     totalWidth += mUnderflowWidth;
                     trackWidth = false;
                 }
             } else {
-                totalWidth += getViewTotalMeasuredWidth(child);
+                totalWidth += getViewTotalMeasuredWidth(child) + spacing;
             }
         }
 
@@ -284,11 +287,15 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
                 continue;
             }
 
+            // Move translationX to the spot within StatusIconContainer's layout to add the view
+            // without cutting off the child view.
+            translationX -= getViewTotalWidth(child);
             childState.visibleState = STATE_ICON;
-            childState.xTranslation = translationX - getViewTotalWidth(child);
+            childState.xTranslation = translationX;
             mLayoutStates.add(0, childState);
 
-            translationX -= getViewTotalWidth(child);
+            // Shift translationX over by mIconSpacing for the next view.
+            translationX -= mIconSpacing;
         }
 
         // Show either 1-MAX_ICONS icons, or (MAX_ICONS - 1) icons + overflow
@@ -306,7 +313,8 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
                 firstUnderflowIndex = i;
                 break;
             }
-            mUnderflowStart = (int) Math.max(contentStart, state.xTranslation - mUnderflowWidth);
+            mUnderflowStart = (int) Math.max(
+                    contentStart, state.xTranslation - mUnderflowWidth - mIconSpacing);
             visible++;
         }
 

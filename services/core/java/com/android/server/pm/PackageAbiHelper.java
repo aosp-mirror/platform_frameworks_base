@@ -17,29 +17,32 @@
 package com.android.server.pm;
 
 import android.annotation.Nullable;
-import android.content.pm.PackageParser;
 import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.io.File;
 import java.util.Set;
 
+// TODO: Move to .parsing sub-package
 @VisibleForTesting
-interface PackageAbiHelper {
+public interface PackageAbiHelper {
     /**
      * Derive and get the location of native libraries for the given package,
      * which varies depending on where and how the package was installed.
      */
-    NativeLibraryPaths getNativeLibraryPaths(
-            PackageParser.Package pkg, File appLib32InstallDir);
+    NativeLibraryPaths getNativeLibraryPaths(AndroidPackage pkg, PackageSetting pkgSetting,
+            File appLib32InstallDir);
 
     /**
      * Calculate the abis for a bundled app. These can uniquely be determined from the contents of
      * the system partition, i.e whether it contains 64 or 32 bit shared libraries etc. We do not
      * validate any of this information, and instead assume that the system was built sensibly.
      */
-    Abis getBundledAppAbis(PackageParser.Package pkg);
+    Abis getBundledAppAbis(AndroidPackage pkg);
 
     /**
      * Derive the ABI of a non-system package located at {@code pkg}. This information
@@ -47,9 +50,8 @@ interface PackageAbiHelper {
      *
      * If {@code extractLibs} is true, native libraries are extracted from the app if required.
      */
-    Pair<Abis, NativeLibraryPaths> derivePackageAbi(
-            PackageParser.Package pkg, String cpuAbiOverride, boolean extractLibs)
-            throws PackageManagerException;
+    Pair<Abis, NativeLibraryPaths> derivePackageAbi(AndroidPackage pkg, boolean isUpdatedSystemApp,
+            String cpuAbiOverride, boolean extractLibs) throws PackageManagerException;
 
     /**
      * Calculates adjusted ABIs for a set of packages belonging to a shared user so that they all
@@ -69,11 +71,11 @@ interface PackageAbiHelper {
      */
     @Nullable
     String getAdjustedAbiForSharedUser(
-            Set<PackageSetting> packagesForUser, PackageParser.Package scannedPackage);
+            Set<PackageSetting> packagesForUser, AndroidPackage scannedPackage);
 
     /**
      * The native library paths and related properties that should be set on a
-     * {@link android.content.pm.PackageParser.Package}.
+     * {@link ParsedPackage}.
      */
     final class NativeLibraryPaths {
         public final String nativeLibraryRootDir;
@@ -91,11 +93,11 @@ interface PackageAbiHelper {
             this.secondaryNativeLibraryDir = secondaryNativeLibraryDir;
         }
 
-        public void applyTo(PackageParser.Package pkg) {
-            pkg.applicationInfo.nativeLibraryRootDir = nativeLibraryRootDir;
-            pkg.applicationInfo.nativeLibraryRootRequiresIsa = nativeLibraryRootRequiresIsa;
-            pkg.applicationInfo.nativeLibraryDir = nativeLibraryDir;
-            pkg.applicationInfo.secondaryNativeLibraryDir = secondaryNativeLibraryDir;
+        public void applyTo(ParsedPackage pkg) {
+            pkg.setNativeLibraryRootDir(nativeLibraryRootDir)
+                    .setNativeLibraryRootRequiresIsa(nativeLibraryRootRequiresIsa)
+                    .setNativeLibraryDir(nativeLibraryDir)
+                    .setSecondaryNativeLibraryDir(secondaryNativeLibraryDir);
         }
     }
 
@@ -112,13 +114,14 @@ interface PackageAbiHelper {
             this.secondary = secondary;
         }
 
-        Abis(PackageParser.Package pkg) {
-            this(pkg.applicationInfo.primaryCpuAbi, pkg.applicationInfo.secondaryCpuAbi);
+        Abis(AndroidPackage pkg, PackageSetting pkgSetting)  {
+            this(AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting),
+                    AndroidPackageUtils.getSecondaryCpuAbi(pkg, pkgSetting));
         }
 
-        public void applyTo(PackageParser.Package pkg) {
-            pkg.applicationInfo.primaryCpuAbi = primary;
-            pkg.applicationInfo.secondaryCpuAbi = secondary;
+        public void applyTo(ParsedPackage pkg) {
+            pkg.setPrimaryCpuAbi(primary)
+                    .setSecondaryCpuAbi(secondary);
         }
         public void applyTo(PackageSetting pkgSetting) {
             // pkgSetting might be null during rescan following uninstall of updates

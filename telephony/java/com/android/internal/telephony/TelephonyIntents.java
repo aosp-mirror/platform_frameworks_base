@@ -18,6 +18,7 @@ package com.android.internal.telephony;
 
 import android.content.Intent;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsManager;
 
 /**
@@ -100,7 +101,7 @@ public class TelephonyIntents {
      * by the system.
      */
     public static final String ACTION_EMERGENCY_CALLBACK_MODE_CHANGED
-            = "android.intent.action.EMERGENCY_CALLBACK_MODE_CHANGED";
+            = TelephonyManager.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED;
 
     /**
      * <p>Broadcast Action: The emergency call state is changed.
@@ -121,33 +122,7 @@ public class TelephonyIntents {
      * by the system.
      */
     public static final String ACTION_EMERGENCY_CALL_STATE_CHANGED
-            = "android.intent.action.EMERGENCY_CALL_STATE_CHANGED";
-
-    /**
-     * Broadcast Action: The phone's signal strength has changed. The intent will have the
-     * following extra values:</p>
-     * <ul>
-     *   <li><em>phoneName</em> - A string version of the phone name.</li>
-     *   <li><em>asu</em> - A numeric value for the signal strength.
-     *          An ASU is 0-31 or -1 if unknown (for GSM, dBm = -113 - 2 * asu).
-     *          The following special values are defined:
-     *          <ul><li>0 means "-113 dBm or less".</li><li>31 means "-51 dBm or greater".</li></ul>
-     *   </li>
-     * </ul>
-     *
-     * <p class="note">
-     * You can <em>not</em> receive this through components declared
-     * in manifests, only by exlicitly registering for it with
-     * {@link android.content.Context#registerReceiver(android.content.BroadcastReceiver,
-     * android.content.IntentFilter) Context.registerReceiver()}.
-     *
-     * <p class="note">
-     * Requires the READ_PHONE_STATE permission.
-     *
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
-     */
-    public static final String ACTION_SIGNAL_STRENGTH_CHANGED = "android.intent.action.SIG_STR";
+            = TelephonyManager.ACTION_EMERGENCY_CALL_STATE_CHANGED;
 
 
     /**
@@ -215,7 +190,7 @@ public class TelephonyIntents {
      * by the system.
      */
     public static final String ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS
-            = "com.android.internal.intent.action.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS";
+            = TelephonyManager.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS;
 
     /**
      * <p>Broadcast Action: Indicates that the action is forbidden by network.
@@ -235,37 +210,6 @@ public class TelephonyIntents {
      * {@code android_secret_code://<code>}
      */
     public static final String SECRET_CODE_ACTION = "android.provider.Telephony.SECRET_CODE";
-
-    /**
-     * Broadcast Action: The Service Provider string(s) have been updated.  Activities or
-     * services that use these strings should update their display.
-     * The intent will have the following extra values:</p>
-     *
-     * <dl>
-     *   <dt>showPlmn</dt><dd>Boolean that indicates whether the PLMN should be shown.</dd>
-     *   <dt>plmn</dt><dd>The operator name of the registered network, as a string.</dd>
-     *   <dt>showSpn</dt><dd>Boolean that indicates whether the SPN should be shown.</dd>
-     *   <dt>spn</dt><dd>The service provider name, as a string.</dd>
-     * </dl>
-     *
-     * Note that <em>showPlmn</em> may indicate that <em>plmn</em> should be displayed, even
-     * though the value for <em>plmn</em> is null.  This can happen, for example, if the phone
-     * has not registered to a network yet.  In this case the receiver may substitute an
-     * appropriate placeholder string (eg, "No service").
-     *
-     * It is recommended to display <em>plmn</em> before / above <em>spn</em> if
-     * both are displayed.
-     *
-     * <p>Note: this is a protected intent that can only be sent by the system.
-     */
-    public static final String SPN_STRINGS_UPDATED_ACTION =
-            "android.provider.Telephony.SPN_STRINGS_UPDATED";
-
-    public static final String EXTRA_SHOW_PLMN  = "showPlmn";
-    public static final String EXTRA_PLMN       = "plmn";
-    public static final String EXTRA_SHOW_SPN   = "showSpn";
-    public static final String EXTRA_SPN        = "spn";
-    public static final String EXTRA_DATA_SPN   = "spnData";
 
     /**
      * <p>Broadcast Action: It indicates one column of a subinfo record has been changed
@@ -304,7 +248,7 @@ public class TelephonyIntents {
      * </ul>
      */
     public static final String ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED
-            = "android.intent.action.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED";
+            = TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED;
 
     /**
      * Broadcast Action: The default voice subscription has changed.  This has the following
@@ -314,7 +258,7 @@ public class TelephonyIntents {
      * </ul>
      */
     public static final String ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED
-            = "android.intent.action.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED";
+            = TelephonyManager.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED;
 
     /**
      * Broadcast Action: The default sms subscription has changed.  This has the following
@@ -354,7 +298,7 @@ public class TelephonyIntents {
      * Broadcast action to trigger CI OMA-DM Session.
      */
     public static final String ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE =
-            "com.android.omadm.service.CONFIGURATION_UPDATE";
+            TelephonyManager.ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE;
 
     /**
      * Broadcast action to trigger the Carrier Certificate download.
@@ -373,16 +317,8 @@ public class TelephonyIntents {
             "com.android.internal.telephony.ACTION_LINE1_NUMBER_ERROR_DETECTED";
 
     /**
-     * Broadcast action to notify radio bug.
-     *
-     * Requires the READ_PRIVILEGED_PHONE_STATE permission.
-     *
-     * @hide
+     * Broadcast sent when a user activity is detected.
      */
-    public static final String ACTION_REPORT_RADIO_BUG =
-            "com.android.internal.telephony.ACTION_REPORT_RADIO_BUG";
-
-    // ACTION_REPORT_RADIO_BUG extra keys
-    public static final String EXTRA_SLOT_ID = "slotId";
-    public static final String EXTRA_RADIO_BUG_TYPE = "radioBugType";
+    public static final String ACTION_USER_ACTIVITY_NOTIFICATION =
+            "android.intent.action.USER_ACTIVITY_NOTIFICATION";
 }

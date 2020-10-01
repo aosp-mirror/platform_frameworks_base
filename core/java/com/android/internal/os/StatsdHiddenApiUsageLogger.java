@@ -18,10 +18,10 @@ package com.android.internal.os;
 
 import android.metrics.LogMaker;
 import android.os.Process;
-import android.util.StatsLog;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.FrameworkStatsLog;
 
 import dalvik.system.VMRuntime.HiddenApiUsageLogger;
 
@@ -33,12 +33,8 @@ class StatsdHiddenApiUsageLogger implements HiddenApiUsageLogger {
     private int mHiddenApiAccessStatslogSampleRate = 0;
 
     static void setHiddenApiAccessLogSampleRates(int sampleRate, int newSampleRate) {
-        if (sampleRate != -1) {
-            sInstance.mHiddenApiAccessLogSampleRate = sampleRate;
-        }
-        if (newSampleRate != -1) {
-            sInstance.mHiddenApiAccessStatslogSampleRate = newSampleRate;
-        }
+        sInstance.mHiddenApiAccessLogSampleRate = sampleRate;
+        sInstance.mHiddenApiAccessStatslogSampleRate = newSampleRate;
     }
 
     static StatsdHiddenApiUsageLogger getInstance() {
@@ -88,23 +84,24 @@ class StatsdHiddenApiUsageLogger implements HiddenApiUsageLogger {
     }
 
     private void newLogUsage(String signature, int accessMethod, boolean accessDenied) {
-        int accessMethodProto = StatsLog.HIDDEN_API_USED__ACCESS_METHOD__NONE;
+        int accessMethodProto = FrameworkStatsLog.HIDDEN_API_USED__ACCESS_METHOD__NONE;
         switch(accessMethod) {
             case HiddenApiUsageLogger.ACCESS_METHOD_NONE:
-                accessMethodProto = StatsLog.HIDDEN_API_USED__ACCESS_METHOD__NONE;
+                accessMethodProto = FrameworkStatsLog.HIDDEN_API_USED__ACCESS_METHOD__NONE;
                 break;
             case HiddenApiUsageLogger.ACCESS_METHOD_REFLECTION:
-                accessMethodProto = StatsLog.HIDDEN_API_USED__ACCESS_METHOD__REFLECTION;
+                accessMethodProto = FrameworkStatsLog.HIDDEN_API_USED__ACCESS_METHOD__REFLECTION;
                 break;
             case HiddenApiUsageLogger.ACCESS_METHOD_JNI:
-                accessMethodProto = StatsLog.HIDDEN_API_USED__ACCESS_METHOD__JNI;
+                accessMethodProto = FrameworkStatsLog.HIDDEN_API_USED__ACCESS_METHOD__JNI;
                 break;
             case HiddenApiUsageLogger.ACCESS_METHOD_LINKING:
-                accessMethodProto = StatsLog.HIDDEN_API_USED__ACCESS_METHOD__LINKING;
+                accessMethodProto = FrameworkStatsLog.HIDDEN_API_USED__ACCESS_METHOD__LINKING;
                 break;
         }
 
         int uid = Process.myUid();
-        StatsLog.write(StatsLog.HIDDEN_API_USED, uid, signature, accessMethodProto, accessDenied);
+        FrameworkStatsLog.write(FrameworkStatsLog.HIDDEN_API_USED, uid, signature,
+                accessMethodProto, accessDenied);
     }
 }

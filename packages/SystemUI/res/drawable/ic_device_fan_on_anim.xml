@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2020 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+  <aapt:attr name="android:drawable">
+    <vector android:height="24dp" android:width="24dp" android:viewportHeight="24" android:viewportWidth="24">
+      <group android:name="_R_G">
+        <group android:name="_R_G_L_1_G_N_1_T_0" android:translateX="12" android:translateY="12" android:rotation="180">
+          <group android:name="_R_G_L_1_G" android:rotation="360">
+            <path android:name="_R_G_L_1_G_D_0_P_0" android:fillColor="#000000" android:fillAlpha="1" android:fillType="nonZero" android:pathData=" M5.4 0.25 C5.99,0.64 6.5,1.14 6.89,1.73 C6.89,1.73 6.89,1.73 6.89,1.73 C6.96,1.84 7.07,1.93 7.19,1.97 C7.31,2.02 7.45,2.03 7.57,1.99 C7.7,1.95 7.81,1.87 7.89,1.76 C7.97,1.66 8,1.53 8,1.39 C8.07,0.81 7.99,0.22 7.78,-0.33 C7.57,-0.88 7.23,-1.37 6.78,-1.76 C6.54,-1.91 6.27,-1.99 5.99,-2 C5.71,-2.01 5.42,-1.95 5.17,-1.82 C5.17,-1.82 3.29,-1.14 3.29,-1.14 C3.36,-0.94 3.42,-0.73 3.45,-0.52 C4.14,-0.4 4.81,-0.14 5.4,0.25c  M0.33 7.78 C0.88,7.57 1.37,7.22 1.76,6.78 C1.76,6.78 1.76,6.78 1.76,6.78 C1.9,6.54 1.99,6.27 2,5.99 C2.01,5.71 1.95,5.42 1.82,5.17 C1.82,5.17 1.14,3.29 1.14,3.29 C0.94,3.36 0.73,3.42 0.52,3.45 C0.4,4.14 0.13,4.81 -0.25,5.4 C-0.64,5.99 -1.14,6.5 -1.73,6.89 C-1.84,6.96 -1.93,7.07 -1.97,7.19 C-2.02,7.31 -2.02,7.45 -1.99,7.57 C-1.95,7.7 -1.87,7.81 -1.76,7.89 C-1.66,7.97 -1.53,8 -1.39,8 C-0.81,8.07 -0.22,7.99 0.33,7.78c  M-5.99 2 C-5.7,2.01 -5.42,1.95 -5.17,1.82 C-5.17,1.82 -3.29,1.14 -3.29,1.14 C-3.36,0.94 -3.42,0.73 -3.45,0.52 C-4.14,0.4 -4.81,0.14 -5.4,-0.25 C-5.99,-0.64 -6.5,-1.14 -6.89,-1.73 C-6.96,-1.84 -7.06,-1.93 -7.19,-1.97 C-7.31,-2.02 -7.45,-2.02 -7.57,-1.99 C-7.7,-1.95 -7.81,-1.87 -7.89,-1.76 C-7.96,-1.66 -8,-1.53 -8,-1.39 C-8.07,-0.81 -7.99,-0.22 -7.78,0.33 C-7.57,0.88 -7.23,1.37 -6.78,1.75 C-6.54,1.9 -6.27,1.99 -5.99,2c  M-0.33 -7.78 C-0.88,-7.57 -1.37,-7.23 -1.75,-6.78 C-1.9,-6.54 -1.99,-6.27 -2,-5.99 C-2.01,-5.7 -1.95,-5.42 -1.82,-5.17 C-1.82,-5.17 -1.14,-3.29 -1.14,-3.29 C-0.94,-3.36 -0.73,-3.41 -0.52,-3.45 C-0.4,-4.14 -0.13,-4.81 0.25,-5.4 C0.64,-5.99 1.14,-6.5 1.73,-6.89 C1.84,-6.96 1.93,-7.06 1.97,-7.19 C2.02,-7.31 2.03,-7.45 1.99,-7.57 C1.95,-7.7 1.87,-7.81 1.76,-7.89 C1.66,-7.96 1.53,-8 1.39,-8 C0.81,-8.07 0.22,-7.99 -0.33,-7.78c  M-0.83 1.25 C-0.59,1.41 -0.3,1.5 0,1.5 C0.4,1.5 0.78,1.34 1.06,1.06 C1.34,0.78 1.5,0.4 1.5,0 C1.5,-0.3 1.41,-0.59 1.25,-0.83 C1.08,-1.08 0.85,-1.27 0.57,-1.39 C0.3,-1.5 0,-1.53 -0.29,-1.47 C-0.58,-1.41 -0.85,-1.27 -1.06,-1.06 C-1.27,-0.85 -1.41,-0.58 -1.47,-0.29 C-1.53,0 -1.5,0.3 -1.39,0.57 C-1.27,0.85 -1.08,1.08 -0.83,1.25c  M2.06 -2.82 C2.06,-2.82 4.35,-3.64 4.35,-3.64 C6.99,-4.84 10,-3 10,1.39 C10,1.96 9.83,2.5 9.49,2.95 C9.16,3.41 8.69,3.74 8.15,3.9 C7.62,4.06 7.04,4.05 6.51,3.86 C5.99,3.67 5.54,3.31 5.23,2.84 C4.75,2.13 4.01,1.64 3.16,1.48 C3.07,1.68 2.95,1.87 2.82,2.06 C2.82,2.06 3.64,4.35 3.64,4.35 C4.84,6.99 3.01,10 -1.39,10 C-1.95,10 -2.5,9.83 -2.95,9.49 C-3.41,9.16 -3.74,8.69 -3.9,8.15 C-4.06,7.62 -4.05,7.04 -3.86,6.51 C-3.67,5.99 -3.31,5.54 -2.84,5.23 C-2.13,4.75 -1.64,4.01 -1.47,3.16 C-1.68,3.07 -1.87,2.95 -2.06,2.82 C-2.06,2.82 -4.34,3.64 -4.34,3.64 C-6.99,4.84 -10,3.01 -10,-1.39 C-10,-1.95 -9.83,-2.5 -9.49,-2.95 C-9.16,-3.41 -8.69,-3.74 -8.15,-3.9 C-7.62,-4.06 -7.04,-4.05 -6.51,-3.86 C-5.99,-3.66 -5.53,-3.31 -5.23,-2.84 C-4.75,-2.13 -4,-1.64 -3.16,-1.47 C-3.07,-1.68 -2.95,-1.87 -2.82,-2.06 C-2.82,-2.06 -3.64,-4.34 -3.64,-4.34 C-4.84,-6.99 -3.01,-10 1.39,-10 C1.96,-10 2.5,-9.83 2.95,-9.49 C3.41,-9.16 3.74,-8.69 3.9,-8.15 C4.06,-7.62 4.05,-7.04 3.86,-6.51 C3.67,-5.99 3.31,-5.53 2.84,-5.23 C2.13,-4.75 1.64,-4 1.47,-3.16 C1.68,-3.07 1.87,-2.95 2.06,-2.82c "/>
+          </group>
+        </group>
+        <group android:name="_R_G_L_0_G" android:translateX="12" android:translateY="12" android:rotation="180">
+          <group android:name="_R_G_L_0_C_0_G">
+            <clip-path android:name="_R_G_L_0_C_0" android:pathData=" M0.03 -1.6 C-0.85,-1.62 -1.58,-0.92 -1.6,-0.03 C-1.62,0.85 -0.92,1.58 -0.03,1.6 C0.85,1.62 1.58,0.92 1.6,0.03 C1.62,-0.85 0.92,-1.58 0.03,-1.6c "/>
+            <group android:name="_R_G_L_0_C_0_G_G">
+              <path android:name="_R_G_L_0_G_G_0_D_0_P_0" android:fillColor="#000000" android:fillAlpha="1" android:fillType="nonZero" android:pathData=" M-0.83 1.25 C-0.59,1.41 -0.3,1.5 0,1.5 C0.4,1.5 0.78,1.34 1.06,1.06 C1.34,0.78 1.5,0.4 1.5,0 C1.5,-0.3 1.41,-0.59 1.25,-0.83 C1.08,-1.08 0.85,-1.27 0.57,-1.39 C0.3,-1.5 0,-1.53 -0.29,-1.47 C-0.58,-1.41 -0.85,-1.27 -1.06,-1.06 C-1.27,-0.85 -1.41,-0.58 -1.47,-0.29 C-1.53,0 -1.5,0.3 -1.39,0.57 C-1.27,0.85 -1.08,1.08 -0.83,1.25c  M2.06 -2.82 C2.06,-2.82 4.35,-3.64 4.35,-3.64 C6.99,-4.84 10,-3 10,1.39 C10,1.96 9.83,2.5 9.49,2.95 C9.16,3.41 8.69,3.74 8.15,3.9 C7.62,4.06 7.04,4.05 6.51,3.86 C5.99,3.67 5.54,3.31 5.23,2.84 C4.75,2.13 4.01,1.64 3.16,1.48 C3.07,1.68 2.95,1.87 2.82,2.06 C2.82,2.06 3.64,4.35 3.64,4.35 C4.84,6.99 3.01,10 -1.39,10 C-1.95,10 -2.5,9.83 -2.95,9.49 C-3.41,9.16 -3.74,8.69 -3.9,8.15 C-4.06,7.62 -4.05,7.04 -3.86,6.51 C-3.67,5.99 -3.31,5.54 -2.84,5.23 C-2.13,4.75 -1.64,4.01 -1.47,3.16 C-1.68,3.07 -1.87,2.95 -2.06,2.82 C-2.06,2.82 -4.34,3.64 -4.34,3.64 C-6.99,4.84 -10,3.01 -10,-1.39 C-10,-1.95 -9.83,-2.5 -9.49,-2.95 C-9.16,-3.41 -8.69,-3.74 -8.15,-3.9 C-7.62,-4.06 -7.04,-4.05 -6.51,-3.86 C-5.99,-3.66 -5.53,-3.31 -5.23,-2.84 C-4.75,-2.13 -4,-1.64 -3.16,-1.47 C-3.07,-1.68 -2.95,-1.87 -2.82,-2.06 C-2.82,-2.06 -3.64,-4.34 -3.64,-4.34 C-4.84,-6.99 -3.01,-10 1.39,-10 C1.96,-10 2.5,-9.83 2.95,-9.49 C3.41,-9.16 3.74,-8.69 3.9,-8.15 C4.06,-7.62 4.05,-7.04 3.86,-6.51 C3.67,-5.99 3.31,-5.53 2.84,-5.23 C2.13,-4.75 1.64,-4 1.47,-3.16 C1.68,-3.07 1.87,-2.95 2.06,-2.82c "/>
+            </group>
+          </group>
+        </group>
+      </group>
+      <group android:name="time_group"/>
+    </vector>
+  </aapt:attr>
+  <target android:name="_R_G_L_1_G_N_1_T_0">
+    <aapt:attr name="android:animation">
+      <set android:ordering="together">
+        <objectAnimator android:propertyName="rotation" android:duration="500" android:startOffset="0" android:valueFrom="180" android:valueTo="360" android:valueType="floatType">
+          <aapt:attr name="android:interpolator">
+            <pathInterpolator android:pathData="M 0.0,0.0 c0.4,0 0.2,1 1.0,1.0"/>
+          </aapt:attr>
+        </objectAnimator>
+      </set>
+    </aapt:attr>
+  </target>
+  <target android:name="_R_G_L_0_C_0">
+    <aapt:attr name="android:animation">
+      <set android:ordering="together">
+        <objectAnimator android:propertyName="pathData" android:duration="500" android:startOffset="0" android:valueFrom="M0.03 -1.6 C-0.85,-1.62 -1.58,-0.92 -1.6,-0.03 C-1.62,0.85 -0.92,1.58 -0.03,1.6 C0.85,1.62 1.58,0.92 1.6,0.03 C1.62,-0.85 0.92,-1.58 0.03,-1.6c " android:valueTo="M0.25 -12 C-6.37,-12.14 -11.86,-6.88 -12,-0.25 C-12.14,6.37 -6.88,11.86 -0.25,12 C6.37,12.14 11.86,6.88 12,0.25 C12.14,-6.37 6.88,-11.86 0.25,-12c " android:valueType="pathType">
+          <aapt:attr name="android:interpolator">
+            <pathInterpolator android:pathData="M 0.0,0.0 c0.4,0 0.2,1 1.0,1.0"/>
+          </aapt:attr>
+        </objectAnimator>
+      </set>
+    </aapt:attr>
+  </target>
+  <target android:name="_R_G_L_0_G">
+    <aapt:attr name="android:animation">
+      <set android:ordering="together">
+        <objectAnimator android:propertyName="rotation" android:duration="500" android:startOffset="0" android:valueFrom="180" android:valueTo="360" android:valueType="floatType">
+          <aapt:attr name="android:interpolator">
+            <pathInterpolator android:pathData="M 0.0,0.0 c0.4,0 0.2,1 1.0,1.0"/>
+          </aapt:attr>
+        </objectAnimator>
+      </set>
+    </aapt:attr>
+  </target>
+  <target android:name="time_group">
+    <aapt:attr name="android:animation">
+      <set android:ordering="together">
+        <objectAnimator android:propertyName="translateX" android:duration="750" android:startOffset="0" android:valueFrom="0" android:valueTo="1" android:valueType="floatType"/>
+      </set>
+    </aapt:attr>
+  </target>
+</animated-vector>

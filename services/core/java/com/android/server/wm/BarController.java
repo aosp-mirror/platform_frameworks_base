@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static com.android.server.wm.BarControllerProto.STATE;
 import static com.android.server.wm.BarControllerProto.TRANSIENT_STATE;
 
+import android.annotation.NonNull;
 import android.app.StatusBarManager;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -27,6 +28,7 @@ import android.os.SystemClock;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 
 import com.android.server.LocalServices;
@@ -58,6 +60,7 @@ public class BarController {
     private final int mTransparentFlag;
     private final int mStatusBarManagerId;
     private final int mTranslucentWmFlag;
+    private final int mWindowType;
     protected final Handler mHandler;
     private final Object mServiceAquireLock = new Object();
     private StatusBarManagerInternal mStatusBarInternal;
@@ -76,19 +79,24 @@ public class BarController {
     private OnBarVisibilityChangedListener mVisibilityChangeListener;
 
     BarController(String tag, int displayId, int transientFlag, int unhideFlag, int translucentFlag,
-            int statusBarManagerId, int translucentWmFlag, int transparentFlag) {
+            int statusBarManagerId, int windowType, int translucentWmFlag, int transparentFlag) {
         mTag = "BarController." + tag;
         mDisplayId = displayId;
         mTransientFlag = transientFlag;
         mUnhideFlag = unhideFlag;
         mTranslucentFlag = translucentFlag;
         mStatusBarManagerId = statusBarManagerId;
+        mWindowType = windowType;
         mTranslucentWmFlag = translucentWmFlag;
         mTransparentFlag = transparentFlag;
         mHandler = new BarHandler();
     }
 
     void setWindow(WindowState win) {
+        if (ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL) {
+            // BarController gets replaced with InsetsPolicy in the full insets mode.
+            return;
+        }
         mWin = win;
     }
 
@@ -141,8 +149,7 @@ public class BarController {
 
     int applyTranslucentFlagLw(WindowState win, int vis, int oldVis) {
         if (mWin != null) {
-            if (win != null && (win.getAttrs().privateFlags
-                    & WindowManager.LayoutParams.PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR) == 0) {
+            if (win != null) {
                 int fl = PolicyControl.getWindowFlags(win, null);
                 if ((fl & mTranslucentWmFlag) != 0) {
                     vis |= mTranslucentFlag;
@@ -163,9 +170,23 @@ public class BarController {
         return vis;
     }
 
+    private Rect getContentFrame(@NonNull WindowState win) {
+        final Rect rotatedContentFrame = win.mToken.getFixedRotationBarContentFrame(mWindowType);
+        return rotatedContentFrame != null ? rotatedContentFrame : mContentFrame;
+    }
+
+    boolean isLightAppearanceAllowed(WindowState win) {
+        if (win == null) {
+            return true;
+        }
+        return !win.isLetterboxedOverlappingWith(getContentFrame(win));
+    }
+
     boolean isTransparentAllowed(WindowState win) {
-        return win == null || mState == StatusBarManager.WINDOW_STATE_HIDING
-                || !win.isLetterboxedOverlappingWith(mContentFrame);
+        if (win == null) {
+            return true;
+        }
+        return win.letterboxNotIntersectsOrFullyContains(getContentFrame(win));
     }
 
     boolean setBarShowingLw(final boolean show) {
@@ -336,7 +357,7 @@ public class BarController {
         throw new IllegalArgumentException("Unknown state " + state);
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(STATE, mState);
         proto.write(TRANSIENT_STATE, mTransientBarState);

@@ -127,7 +127,7 @@ public final class ApfCapabilities implements Parcelable {
     }
 
     /**
-     * @return An array of blacklisted EtherType, packets with EtherTypes within it will be dropped.
+     * @return An array of denylisted EtherType, packets with EtherTypes within it will be dropped.
      */
     public static @NonNull int[] getApfEtherTypeBlackList() {
         return Resources.getSystem().getIntArray(R.array.config_apfEthTypeBlackList);

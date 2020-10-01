@@ -81,6 +81,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
 
     private boolean mQsDisabled;
     private QSPanel mQsPanel;
+    private QuickQSPanel mQuickQsPanel;
 
     private boolean mExpanded;
 
@@ -97,7 +98,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     private TouchAnimator mSettingsCogAnimator;
 
     private View mActionsContainer;
-    private View mDragHandle;
 
     private OnClickListener mExpandClickListener;
 
@@ -145,7 +145,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         mMultiUserSwitch = findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
 
-        mDragHandle = findViewById(R.id.qs_drag_handle_view);
         mActionsContainer = findViewById(R.id.qs_footer_actions_container);
         mEditContainer = findViewById(R.id.qs_footer_actions_edit_container);
 
@@ -168,7 +167,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         if (DevelopmentSettingsEnabler.isDevelopmentSettingsEnabled(mContext)) {
             v.setText(mContext.getString(
                     com.android.internal.R.string.bugreport_status,
-                    Build.VERSION.RELEASE,
+                    Build.VERSION.RELEASE_OR_CODENAME,
                     Build.ID));
             v.setVisibility(View.VISIBLE);
         } else {
@@ -177,7 +176,8 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     }
 
     private void updateAnimator(int width) {
-        int numTiles = QuickQSPanel.getNumQuickTiles(mContext);
+        int numTiles = mQuickQsPanel != null ? mQuickQsPanel.getNumQuickTiles()
+                : QuickQSPanel.getDefaultMaxTiles();
         int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size)
                 - mContext.getResources().getDimensionPixelSize(dimen.qs_quick_tile_padding);
         int remaining = (width - numTiles * size) / (numTiles - 1);
@@ -217,9 +217,8 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         return new TouchAnimator.Builder()
                 .addFloat(mActionsContainer, "alpha", 0, 1)
                 .addFloat(mEditContainer, "alpha", 0, 1)
-                .addFloat(mDragHandle, "alpha", 1, 0, 0)
                 .addFloat(mPageIndicator, "alpha", 0, 1)
-                .setStartDelay(0.15f)
+                .setStartDelay(0.9f)
                 .build();
     }
 
@@ -343,6 +342,11 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
             mMultiUserSwitch.setQsPanel(qsPanel);
             mQsPanel.setFooterPageIndicator(mPageIndicator);
         }
+    }
+
+    @Override
+    public void setQQSPanel(@Nullable QuickQSPanel panel) {
+        mQuickQsPanel = panel;
     }
 
     @Override

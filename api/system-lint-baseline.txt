@@ -1,15 +1,59 @@
 // Baseline format: 1.0
-// Tethering broadcast action / extras cannot change name for backwards compatibility
-ActionValue: android.net.TetheringManager#ACTION_TETHER_STATE_CHANGED:
-    Inconsistent action value; expected `android.net.action.TETHER_STATE_CHANGED`, was `android.net.conn.TETHER_STATE_CHANGED`
-ActionValue: android.net.TetheringManager#EXTRA_ACTIVE_TETHER:
-    Inconsistent extra value; expected `android.net.extra.ACTIVE_TETHER`, was `tetherArray`
-ActionValue: android.net.TetheringManager#EXTRA_AVAILABLE_TETHER:
-    Inconsistent extra value; expected `android.net.extra.AVAILABLE_TETHER`, was `availableArray`
-ActionValue: android.net.TetheringManager#EXTRA_ERRORED_TETHER:
-    Inconsistent extra value; expected `android.net.extra.ERRORED_TETHER`, was `erroredArray`
+AcronymName: android.net.NetworkCapabilities#setSSID(String):
+    
 
+
+ActionValue: android.location.Location#EXTRA_NO_GPS_LOCATION:
+    
+ActionValue: android.net.TetheringManager#ACTION_TETHER_STATE_CHANGED:
+    
+ActionValue: android.net.TetheringManager#EXTRA_ACTIVE_TETHER:
+    
+ActionValue: android.net.TetheringManager#EXTRA_AVAILABLE_TETHER:
+    
+ActionValue: android.net.TetheringManager#EXTRA_ERRORED_TETHER:
+    
+ActionValue: android.net.wifi.WifiManager#ACTION_LINK_CONFIGURATION_CHANGED:
+    
+
+
+ArrayReturn: android.bluetooth.BluetoothCodecStatus#BluetoothCodecStatus(android.bluetooth.BluetoothCodecConfig, android.bluetooth.BluetoothCodecConfig[], android.bluetooth.BluetoothCodecConfig[]) parameter #1:
+    
+ArrayReturn: android.bluetooth.BluetoothCodecStatus#BluetoothCodecStatus(android.bluetooth.BluetoothCodecConfig, android.bluetooth.BluetoothCodecConfig[], android.bluetooth.BluetoothCodecConfig[]) parameter #2:
+    
+ArrayReturn: android.bluetooth.BluetoothCodecStatus#getCodecsLocalCapabilities():
+    
+ArrayReturn: android.bluetooth.BluetoothCodecStatus#getCodecsSelectableCapabilities():
+    
+ArrayReturn: android.bluetooth.BluetoothUuid#containsAnyUuid(android.os.ParcelUuid[], android.os.ParcelUuid[]) parameter #0:
+    
+ArrayReturn: android.bluetooth.BluetoothUuid#containsAnyUuid(android.os.ParcelUuid[], android.os.ParcelUuid[]) parameter #1:
+    
+ArrayReturn: android.media.tv.tuner.Tuner.FilterCallback#onFilterEvent(android.media.tv.tuner.Tuner.Filter, android.media.tv.tuner.filter.FilterEvent[]) parameter #1:
+    
+ArrayReturn: android.net.NetworkScoreManager#requestScores(android.net.NetworkKey[]) parameter #0:
+    
 ArrayReturn: android.view.contentcapture.ViewNode#getAutofillOptions():
+    
+
+
+BuilderSetStyle: android.net.IpSecTransform.Builder#buildTunnelModeTransform(java.net.InetAddress, android.net.IpSecManager.SecurityParameterIndex):
+    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.net.IpSecTransform.Builder.buildTunnelModeTransform(java.net.InetAddress,android.net.IpSecManager.SecurityParameterIndex)
+
+
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#deletePersistentGroup(android.net.wifi.p2p.WifiP2pManager.Channel, int, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#factoryReset(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#listen(android.net.wifi.p2p.WifiP2pManager.Channel, boolean, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#requestPersistentGroupInfo(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.PersistentGroupInfoListener):
+    
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#setDeviceName(android.net.wifi.p2p.WifiP2pManager.Channel, String, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#setWfdInfo(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pWfdInfo, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#setWifiP2pChannels(android.net.wifi.p2p.WifiP2pManager.Channel, int, int, android.net.wifi.p2p.WifiP2pManager.ActionListener):
     
 
 
@@ -23,10 +67,46 @@ GenericException: android.service.autofill.augmented.FillWindow#finalize():
     
 
 
+IntentBuilderName: android.content.Context#registerReceiverForAllUsers(android.content.BroadcastReceiver, android.content.IntentFilter, String, android.os.Handler):
+    
+
+
 KotlinKeyword: android.app.Notification#when:
     
 
 
+KotlinOperator: android.telephony.CbGeoUtils.Geometry#contains(android.telephony.CbGeoUtils.LatLng):
+    
+
+
+MissingGetterMatchingBuilder: android.net.wifi.rtt.RangingRequest.Builder#addResponder(android.net.wifi.rtt.ResponderConfig):
+    android.net.wifi.rtt.RangingRequest does not declare a `getResponders()` method matching method android.net.wifi.rtt.RangingRequest.Builder.addResponder(android.net.wifi.rtt.ResponderConfig)
+MissingGetterMatchingBuilder: android.security.keystore.KeyGenParameterSpec.Builder#setUid(int):
+    android.security.keystore.KeyGenParameterSpec does not declare a `getUid()` method matching method android.security.keystore.KeyGenParameterSpec.Builder.setUid(int)
+MissingGetterMatchingBuilder: android.service.autofill.Dataset.Builder#setFieldInlinePresentation(android.view.autofill.AutofillId, android.view.autofill.AutofillValue, java.util.regex.Pattern, android.service.autofill.InlinePresentation):
+    android.service.autofill.Dataset does not declare a `getFieldInlinePresentation()` method matching method android.service.autofill.Dataset.Builder.setFieldInlinePresentation(android.view.autofill.AutofillId,android.view.autofill.AutofillValue,java.util.regex.Pattern,android.service.autofill.InlinePresentation)
+MissingGetterMatchingBuilder: android.telecom.CallScreeningService.CallResponse.Builder#setShouldScreenCallViaAudioProcessing(boolean):
+    android.telecom.CallScreeningService.CallResponse does not declare a `shouldScreenCallViaAudioProcessing()` method matching method android.telecom.CallScreeningService.CallResponse.Builder.setShouldScreenCallViaAudioProcessing(boolean)
+MissingGetterMatchingBuilder: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String):
+    android.telephony.mbms.DownloadRequest does not declare a `getServiceId()` method matching method android.telephony.mbms.DownloadRequest.Builder.setServiceId(String)
+
+
+MissingNullability: android.hardware.soundtrigger.SoundTrigger.ModuleProperties#toString():
+    
+MissingNullability: android.hardware.soundtrigger.SoundTrigger.ModuleProperties#writeToParcel(android.os.Parcel, int) parameter #0:
+    
+MissingNullability: android.media.session.MediaSessionManager.Callback#onAddressedPlayerChanged(android.content.ComponentName) parameter #0:
+    
+MissingNullability: android.media.session.MediaSessionManager.Callback#onAddressedPlayerChanged(android.media.session.MediaSession.Token) parameter #0:
+    
+MissingNullability: android.media.session.MediaSessionManager.Callback#onMediaKeyEventDispatched(android.view.KeyEvent, android.content.ComponentName) parameter #0:
+    
+MissingNullability: android.media.session.MediaSessionManager.Callback#onMediaKeyEventDispatched(android.view.KeyEvent, android.content.ComponentName) parameter #1:
+    
+MissingNullability: android.media.session.MediaSessionManager.Callback#onMediaKeyEventDispatched(android.view.KeyEvent, android.media.session.MediaSession.Token) parameter #0:
+    
+MissingNullability: android.media.session.MediaSessionManager.Callback#onMediaKeyEventDispatched(android.view.KeyEvent, android.media.session.MediaSession.Token) parameter #1:
+    
 MissingNullability: android.media.soundtrigger.SoundTriggerDetectionService#onUnbind(android.content.Intent) parameter #0:
     
 MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #0:
@@ -61,14 +141,24 @@ MissingNullability: android.service.notification.NotificationAssistantService#at
     
 MissingNullability: android.telecom.CallScreeningService.CallResponse.Builder#setShouldScreenCallFurther(boolean):
     
+MissingNullability: android.telephony.CallerInfo#toString():
+    
 MissingNullability: android.telephony.CellBroadcastService#onBind(android.content.Intent):
-    Missing nullability on method `onBind` return
+    
 MissingNullability: android.telephony.CellBroadcastService#onBind(android.content.Intent) parameter #0:
-    Missing nullability on parameter `intent` in method `onBind`
+    
 MissingNullability: android.telephony.CellBroadcastService#onCdmaCellBroadcastSms(int, byte[]) parameter #1:
-    Missing nullability on parameter `message` in method `onCdmaCellBroadcastSms`
+    
+MissingNullability: android.telephony.CellBroadcastService#onCdmaCellBroadcastSms(int, byte[], int) parameter #1:
+    
 MissingNullability: android.telephony.CellBroadcastService#onGsmCellBroadcastSms(int, byte[]) parameter #1:
-    Missing nullability on parameter `message` in method `onGsmCellBroadcastSms`
+    
+MissingNullability: android.telephony.ModemActivityInfo#toString():
+    
+MissingNullability: android.telephony.ModemActivityInfo#writeToParcel(android.os.Parcel, int) parameter #0:
+    
+MissingNullability: android.telephony.ModemActivityInfo.TransmitPower#toString():
+    
 MissingNullability: android.telephony.NetworkService#onUnbind(android.content.Intent) parameter #0:
     
 MissingNullability: android.telephony.SmsCbCmasInfo#toString():
@@ -109,48 +199,63 @@ MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(
     
 MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String) parameter #0:
     
-MissingNullability: android.view.contentcapture.ViewNode#getAutofillId():
-    
-MissingNullability: android.view.contentcapture.ViewNode#getClassName():
-    
-MissingNullability: android.view.contentcapture.ViewNode#getContentDescription():
-    
-MissingNullability: android.view.contentcapture.ViewNode#getExtras():
-    
-MissingNullability: android.view.contentcapture.ViewNode#getHint():
-    
-MissingNullability: android.view.contentcapture.ViewNode#getIdEntry():
-    
-MissingNullability: android.view.contentcapture.ViewNode#getIdPackage():
-    
-MissingNullability: android.view.contentcapture.ViewNode#getIdType():
-    
-MissingNullability: android.view.contentcapture.ViewNode#getLocaleList():
-    
-MissingNullability: android.view.contentcapture.ViewNode#getText():
-    
-MissingNullability: android.view.contentcapture.ViewNode#getTextIdEntry():
-    
-MissingNullability: android.view.contentcapture.ViewNode#getTextLineBaselines():
-    
-MissingNullability: android.view.contentcapture.ViewNode#getTextLineCharOffsets():
-    
 
 
+MutableBareField: android.net.IpConfiguration#httpProxy:
+    
+MutableBareField: android.net.IpConfiguration#ipAssignment:
+    
+MutableBareField: android.net.IpConfiguration#proxySettings:
+    
+MutableBareField: android.net.IpConfiguration#staticIpConfiguration:
+    
 MutableBareField: android.net.wifi.WifiConfiguration#allowAutojoin:
     
 MutableBareField: android.net.wifi.WifiConfiguration#carrierId:
     
+MutableBareField: android.net.wifi.WifiConfiguration#fromWifiNetworkSpecifier:
+    
+MutableBareField: android.net.wifi.WifiConfiguration#fromWifiNetworkSuggestion:
+    
+MutableBareField: android.net.wifi.WifiConfiguration#macRandomizationSetting:
+    
+MutableBareField: android.net.wifi.WifiConfiguration#meteredOverride:
+    
+MutableBareField: android.net.wifi.WifiConfiguration#requirePmf:
+    
+MutableBareField: android.net.wifi.WifiConfiguration#saePasswordId:
+    
+MutableBareField: android.net.wifi.WifiConfiguration#shared:
+    
+MutableBareField: android.net.wifi.WifiScanner.ScanSettings#type:
+    
 
 
 NoClone: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #0:
-
+    
 
 
 NoSettingsProvider: android.provider.Settings.Global#TETHER_OFFLOAD_DISABLED:
-    New setting keys are not allowed. (Field: TETHER_OFFLOAD_DISABLED)
+    
 NoSettingsProvider: android.provider.Settings.Global#TETHER_SUPPORTED:
-    New setting keys are not allowed. (Field: TETHER_SUPPORTED)
+    
+
+
+NotCloseable: android.bluetooth.BluetoothA2dpSink:
+    
+NotCloseable: android.bluetooth.BluetoothMap:
+    
+NotCloseable: android.bluetooth.BluetoothPan:
+    
+NotCloseable: android.bluetooth.BluetoothPbap:
+    
+
+
+OnNameExpected: android.content.ContentProvider#checkUriPermission(android.net.Uri, int, int):
+    
+
+
+PairedRegistration: android.net.wifi.nl80211.WifiNl80211Manager#registerApCallback(String, java.util.concurrent.Executor, android.net.wifi.nl80211.WifiNl80211Manager.SoftApCallback):
     
 
 
@@ -160,16 +265,6 @@ ProtectedMember: android.service.contentcapture.ContentCaptureService#dump(java.
     
 ProtectedMember: android.service.notification.NotificationAssistantService#attachBaseContext(android.content.Context):
     
-
-PublicTypedef: android.content.integrity.AtomicFormula.Key: Don't expose @IntDef: @Key must be hidden.
-
-PublicTypedef: android.content.integrity.AtomicFormula.Operator: Don't expose @IntDef: @Operator must be hidden.
-
-PublicTypedef: android.content.integrity.CompoundFormula.Connector: Don't expose @IntDef: @Connector must be hidden.
-
-PublicTypedef: android.content.integrity.Formula.Tag: Don't expose @IntDef: @Tag must be hidden.
-
-PublicTypedef: android.content.integrity.Rule.Effect: Don't expose @IntDef: @Effect must be hidden.
 
 
 SamShouldBeLast: android.accounts.AccountManager#addAccount(String, String, String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
@@ -218,6 +313,8 @@ SamShouldBeLast: android.app.AlarmManager#setWindow(int, long, long, String, and
     
 SamShouldBeLast: android.app.WallpaperInfo#dump(android.util.Printer, String):
     
+SamShouldBeLast: android.app.WallpaperManager#addOnColorsChangedListener(android.app.WallpaperManager.OnColorsChangedListener, android.os.Handler):
+    
 SamShouldBeLast: android.app.admin.DevicePolicyManager#installSystemUpdate(android.content.ComponentName, android.net.Uri, java.util.concurrent.Executor, android.app.admin.DevicePolicyManager.InstallSystemUpdateCallback):
     
 SamShouldBeLast: android.content.Context#bindIsolatedService(android.content.Intent, int, String, java.util.concurrent.Executor, android.content.ServiceConnection):
@@ -244,6 +341,26 @@ SamShouldBeLast: android.location.Location#dump(android.util.Printer, String):
     
 SamShouldBeLast: android.location.LocationManager#addNmeaListener(android.location.OnNmeaMessageListener, android.os.Handler):
     
+SamShouldBeLast: android.location.LocationManager#registerGnssMeasurementsCallback(java.util.concurrent.Executor, android.location.GnssMeasurementsEvent.Callback):
+    
+SamShouldBeLast: android.location.LocationManager#registerGnssNavigationMessageCallback(java.util.concurrent.Executor, android.location.GnssNavigationMessage.Callback):
+    
+SamShouldBeLast: android.location.LocationManager#registerGnssStatusCallback(java.util.concurrent.Executor, android.location.GnssStatus.Callback):
+    
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, android.location.LocationListener, android.os.Looper):
+    
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, java.util.concurrent.Executor, android.location.LocationListener):
+    
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(android.location.LocationRequest, java.util.concurrent.Executor, android.location.LocationListener):
+    
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, android.location.LocationListener, android.os.Looper):
+    
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, java.util.concurrent.Executor, android.location.LocationListener):
+    
+SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(String, android.location.LocationListener, android.os.Looper):
+    
+SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(android.location.Criteria, android.location.LocationListener, android.os.Looper):
+    
 SamShouldBeLast: android.media.AudioFocusRequest.Builder#setOnAudioFocusChangeListener(android.media.AudioManager.OnAudioFocusChangeListener, android.os.Handler):
     
 SamShouldBeLast: android.media.AudioManager#requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int):
@@ -256,6 +373,8 @@ SamShouldBeLast: android.media.AudioRecordingMonitor#registerAudioRecordingCallb
     
 SamShouldBeLast: android.media.AudioRouting#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
     
+SamShouldBeLast: android.media.AudioTrack#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioTrack.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.MediaRecorder#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
     
 SamShouldBeLast: android.media.MediaRecorder#registerAudioRecordingCallback(java.util.concurrent.Executor, android.media.AudioManager.AudioRecordingCallback):
@@ -266,7 +385,11 @@ SamShouldBeLast: android.media.session.MediaSessionManager#addOnActiveSessionsCh
     
 SamShouldBeLast: android.media.session.MediaSessionManager#addOnSession2TokensChangedListener(android.media.session.MediaSessionManager.OnSession2TokensChangedListener, android.os.Handler):
     
+SamShouldBeLast: android.media.session.MediaSessionManager#registerCallback(java.util.concurrent.Executor, android.media.session.MediaSessionManager.Callback):
+    
 SamShouldBeLast: android.net.ConnectivityManager#createSocketKeepalive(android.net.Network, android.net.IpSecManager.UdpEncapsulationSocket, java.net.InetAddress, java.net.InetAddress, java.util.concurrent.Executor, android.net.SocketKeepalive.Callback):
+    
+SamShouldBeLast: android.net.wifi.WifiManager#startLocalOnlyHotspot(android.net.wifi.SoftApConfiguration, java.util.concurrent.Executor, android.net.wifi.WifiManager.LocalOnlyHotspotCallback):
     
 SamShouldBeLast: android.net.wifi.rtt.WifiRttManager#startRanging(android.net.wifi.rtt.RangingRequest, java.util.concurrent.Executor, android.net.wifi.rtt.RangingResultCallback):
     
@@ -359,12 +482,14 @@ ServiceName: android.Manifest.permission#BIND_ATTENTION_SERVICE:
 ServiceName: android.Manifest.permission#BIND_AUGMENTED_AUTOFILL_SERVICE:
     
 ServiceName: android.Manifest.permission#BIND_CELL_BROADCAST_SERVICE:
-    Inconsistent service value; expected `BIND_CELL_BROADCAST`, was `android.permission.BIND_CELL_BROADCAST_SERVICE`
+    
 ServiceName: android.Manifest.permission#BIND_CONTENT_CAPTURE_SERVICE:
     
 ServiceName: android.Manifest.permission#BIND_CONTENT_SUGGESTIONS_SERVICE:
     
 ServiceName: android.Manifest.permission#BIND_EUICC_SERVICE:
+    
+ServiceName: android.Manifest.permission#BIND_EXTERNAL_STORAGE_SERVICE:
     
 ServiceName: android.Manifest.permission#BIND_IMS_SERVICE:
     
@@ -395,4 +520,14 @@ ServiceName: android.Manifest.permission#BIND_TV_REMOTE_SERVICE:
 ServiceName: android.Manifest.permission#PROVIDE_RESOLVER_RANKER_SERVICE:
     
 ServiceName: android.Manifest.permission#REQUEST_NOTIFICATION_ASSISTANT_SERVICE:
+    
+ServiceName: android.provider.DeviceConfig#NAMESPACE_PACKAGE_MANAGER_SERVICE:
+    
+
+
+UserHandle: android.companion.CompanionDeviceManager#isDeviceAssociated(String, android.net.MacAddress, android.os.UserHandle):
+    
+
+
+UserHandleName: android.telephony.CellBroadcastIntents#sendOrderedBroadcastForBackgroundReceivers(android.content.Context, android.os.UserHandle, android.content.Intent, String, String, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle):
     

@@ -182,6 +182,12 @@ public final class ConfigParser {
             throw new IOException("Passpoint profile missing credential");
         }
 
+        // Don't allow the installer to make changes to the update identifier. This is an
+        // indicator of an R2 (or newer) network.
+        if (config.getUpdateIdentifier() != Integer.MIN_VALUE) {
+            config.setUpdateIdentifier(Integer.MIN_VALUE);
+        }
+
         // Parse CA (Certificate Authority) certificate.
         byte[] caCertData = mimeParts.get(TYPE_CA_CERT);
         if (caCertData != null) {

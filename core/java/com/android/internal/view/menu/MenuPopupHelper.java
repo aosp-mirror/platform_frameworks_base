@@ -22,9 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.graphics.Point;
 import android.graphics.Rect;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -224,13 +222,10 @@ public class MenuPopupHelper implements MenuHelper {
      */
     @NonNull
     private MenuPopup createPopup() {
-        final WindowManager windowManager = (WindowManager) mContext.getSystemService(
-            Context.WINDOW_SERVICE);
-        final Display display = windowManager.getDefaultDisplay();
-        final Point displaySize = new Point();
-        display.getRealSize(displaySize);
+        final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
+        final Rect maxWindowBounds = windowManager.getMaximumWindowMetrics().getBounds();
 
-        final int smallestWidth = Math.min(displaySize.x, displaySize.y);
+        final int smallestWidth = Math.min(maxWindowBounds.width(), maxWindowBounds.height());
         final int minSmallestWidthCascading = mContext.getResources().getDimensionPixelSize(
             com.android.internal.R.dimen.cascading_menus_min_smallest_width);
         final boolean enableCascadingSubmenus = smallestWidth >= minSmallestWidthCascading;

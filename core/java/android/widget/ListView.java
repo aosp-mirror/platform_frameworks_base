@@ -3255,6 +3255,9 @@ public class ListView extends AbsListView {
      */
     @UnsupportedAppUsage
     private void scrollListItemsBy(int amount) {
+        int oldX = mScrollX;
+        int oldY = mScrollY;
+
         offsetChildrenTopAndBottom(amount);
 
         final int listBottom = getHeight() - mListPadding.bottom;
@@ -3327,6 +3330,7 @@ public class ListView extends AbsListView {
         recycleBin.fullyDetachScrapViews();
         removeUnusedFixedViews(mHeaderViewInfos);
         removeUnusedFixedViews(mFooterViewInfos);
+        onScrollChanged(mScrollX, mScrollY, oldX, oldY);
     }
 
     private View addViewAbove(View theView, int position) {
@@ -4105,7 +4109,7 @@ public class ListView extends AbsListView {
         final int rowsCount = getCount();
         final int selectionMode = getSelectionModeForAccessibility();
         final CollectionInfo collectionInfo = CollectionInfo.obtain(
-                rowsCount, 1, false, selectionMode);
+                -1, -1, false, selectionMode);
         info.setCollectionInfo(collectionInfo);
 
         if (rowsCount > 0) {

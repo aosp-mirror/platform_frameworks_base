@@ -67,29 +67,6 @@ public:
         return (filter->getFlags() & SkColorFilter::kAlphaUnchanged_Flag) == 0;
     }
 
-    struct TextShadow {
-        SkScalar radius;
-        float dx;
-        float dy;
-        SkColor color;
-    };
-
-    static inline bool getTextShadow(const SkPaint* paint, TextShadow* textShadow) {
-        SkDrawLooper::BlurShadowRec blur;
-        if (paint && paint->getLooper() && paint->getLooper()->asABlurShadow(&blur)) {
-            if (textShadow) {
-                textShadow->radius = Blur::convertSigmaToRadius(blur.fSigma);
-                textShadow->dx = blur.fOffset.fX;
-                textShadow->dy = blur.fOffset.fY;
-                textShadow->color = blur.fColor;
-            }
-            return true;
-        }
-        return false;
-    }
-
-    static inline bool hasTextShadow(const SkPaint* paint) { return getTextShadow(paint, nullptr); }
-
     static inline SkBlendMode getBlendModeDirect(const SkPaint* paint) {
         return paint ? paint->getBlendMode() : SkBlendMode::kSrcOver;
     }

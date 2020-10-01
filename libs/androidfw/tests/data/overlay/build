@@ -17,6 +17,15 @@
 
 set -e
 
+FRAMEWORK_RES_APK=${ANDROID_PRODUCT_OUT}/system/framework/framework-res.apk
+
 aapt2 compile --dir res -o compiled.flata
-aapt2 link --manifest AndroidManifest.xml -o overlay.apk compiled.flata
+aapt2 link -I $FRAMEWORK_RES_APK --manifest AndroidManifest.xml -o overlay.apk compiled.flata \
+    --no-auto-version
 rm compiled.flata
+
+# Navigate back a directory so the idmap can find the overlays in the test data directory when being
+# loaded during testing.
+cd ../
+idmap2 create --target-apk-path overlayable/overlayable.apk \
+    --overlay-apk-path overlay/overlay.apk --idmap-path overlay/overlay.idmap

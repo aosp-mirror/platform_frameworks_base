@@ -39,7 +39,12 @@ import android.os.Parcelable;
  * <p>Creators of chooser targets should consult the relevant design guidelines for the type
  * of target they are presenting. For example, targets involving people should be presented
  * with a circular icon.</p>
+ *
+ * @deprecated For publishing direct share targets, please follow the instructions in
+ * https://developer.android.com/training/sharing/receive.html#providing-direct-share-targets
+ * instead.
  */
+@Deprecated
 public final class ChooserTarget implements Parcelable {
     private static final String TAG = "ChooserTarget";
 

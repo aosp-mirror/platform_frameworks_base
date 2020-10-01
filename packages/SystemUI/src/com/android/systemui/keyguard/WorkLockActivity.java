@@ -36,6 +36,9 @@ import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+
+import javax.inject.Inject;
 
 /**
  * Bouncer between work activities and the activity used to confirm credentials before unlocking
@@ -61,14 +64,21 @@ public class WorkLockActivity extends Activity {
      * @see KeyguardManager
      */
     private KeyguardManager mKgm;
+    private final BroadcastDispatcher mBroadcastDispatcher;
+
+    @Inject
+    public WorkLockActivity(BroadcastDispatcher broadcastDispatcher) {
+        super();
+        mBroadcastDispatcher = broadcastDispatcher;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        registerReceiverAsUser(mLockEventReceiver, UserHandle.ALL,
-                new IntentFilter(Intent.ACTION_DEVICE_LOCKED_CHANGED), /* permission */ null,
-                /* scheduler */ null);
+        mBroadcastDispatcher.registerReceiver(mLockEventReceiver,
+                new IntentFilter(Intent.ACTION_DEVICE_LOCKED_CHANGED), null /* handler */,
+                UserHandle.ALL);
 
         // Once the receiver is registered, check whether anything happened between now and the time
         // when this activity was launched. If it did and the user is unlocked now, just quit.
@@ -101,9 +111,14 @@ public class WorkLockActivity extends Activity {
         }
     }
 
+    @VisibleForTesting
+    protected void unregisterBroadcastReceiver() {
+        mBroadcastDispatcher.unregisterReceiver(mLockEventReceiver);
+    }
+
     @Override
     public void onDestroy() {
-        unregisterReceiver(mLockEventReceiver);
+        unregisterBroadcastReceiver();
         super.onDestroy();
     }
 
@@ -135,7 +150,8 @@ public class WorkLockActivity extends Activity {
         }
 
         final Intent credential = getKeyguardManager()
-                .createConfirmDeviceCredentialIntent(null, null, getTargetUserId());
+                .createConfirmDeviceCredentialIntent(null, null, getTargetUserId(),
+                true /* disallowBiometricsIfPolicyExists */);
         if (credential == null) {
             return;
         }
@@ -153,7 +169,12 @@ public class WorkLockActivity extends Activity {
             credential.putExtra(Intent.EXTRA_INTENT, target.getIntentSender());
         }
 
-        startActivityForResult(credential, REQUEST_CODE_CONFIRM_CREDENTIALS);
+        final ActivityOptions launchOptions = ActivityOptions.makeBasic();
+        launchOptions.setLaunchTaskId(getTaskId());
+        launchOptions.setTaskOverlay(true /* taskOverlay */, true /* canResume */);
+
+        startActivityForResult(credential, REQUEST_CODE_CONFIRM_CREDENTIALS,
+                launchOptions.toBundle());
     }
 
     @Override

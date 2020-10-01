@@ -134,14 +134,14 @@ public final class BluetoothGatt implements BluetoothProfile {
     /*package*/ static final int AUTHENTICATION_NONE = 0;
 
     /**
-     * Authentication requested; no man-in-the-middle protection required.
+     * Authentication requested; no person-in-the-middle protection required.
      *
      * @hide
      */
     /*package*/ static final int AUTHENTICATION_NO_MITM = 1;
 
     /**
-     * Authentication with man-in-the-middle protection requested.
+     * Authentication with person-in-the-middle protection requested.
      *
      * @hide
      */
@@ -684,6 +684,31 @@ public final class BluetoothGatt implements BluetoothProfile {
                             if (callback != null) {
                                 callback.onConnectionUpdated(BluetoothGatt.this, interval, latency,
                                         timeout, status);
+                            }
+                        }
+                    });
+                }
+
+                /**
+                 * Callback invoked when service changed event is received
+                 * @hide
+                 */
+                @Override
+                public void onServiceChanged(String address) {
+                    if (DBG) {
+                        Log.d(TAG, "onServiceChanged() - Device=" + address);
+                    }
+
+                    if (!address.equals(mDevice.getAddress())) {
+                        return;
+                    }
+
+                    runOrQueueCallback(new Runnable() {
+                        @Override
+                        public void run() {
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onServiceChanged(BluetoothGatt.this);
                             }
                         }
                     });

@@ -202,6 +202,14 @@ public class RemoteViews implements Parcelable, Filter {
     public static final int FLAG_USE_LIGHT_BACKGROUND_LAYOUT = 4;
 
     /**
+     * Used to restrict the views which can be inflated
+     *
+     * @see android.view.LayoutInflater.Filter#onLoadClass(java.lang.Class)
+     */
+    private static final LayoutInflater.Filter INFLATER_FILTER =
+            (clazz) -> clazz.isAnnotationPresent(RemoteViews.RemoteView.class);
+
+    /**
      * Application that hosts the remote views.
      *
      * @hide
@@ -557,7 +565,8 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     private static void visitIconUri(Icon icon, @NonNull Consumer<Uri> visitor) {
-        if (icon != null && icon.getType() == Icon.TYPE_URI) {
+        if (icon != null && (icon.getType() == Icon.TYPE_URI
+                || icon.getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP)) {
             visitor.accept(icon.getUri());
         }
     }
@@ -1204,7 +1213,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         BitmapReflectionAction(Parcel in) {
             viewId = in.readInt();
-            methodName = in.readString();
+            methodName = in.readString8();
             bitmapId = in.readInt();
             bitmap = mBitmapCache.getBitmapForId(bitmapId);
         }
@@ -1212,7 +1221,7 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(viewId);
-            dest.writeString(methodName);
+            dest.writeString8(methodName);
             dest.writeInt(bitmapId);
         }
 
@@ -1273,7 +1282,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         ReflectionAction(Parcel in) {
             this.viewId = in.readInt();
-            this.methodName = in.readString();
+            this.methodName = in.readString8();
             this.type = in.readInt();
             //noinspection ConstantIfStatement
             if (false) {
@@ -1309,7 +1318,7 @@ public class RemoteViews implements Parcelable, Filter {
                     this.value = (char)in.readInt();
                     break;
                 case STRING:
-                    this.value = in.readString();
+                    this.value = in.readString8();
                     break;
                 case CHAR_SEQUENCE:
                     this.value = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
@@ -1338,7 +1347,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         public void writeToParcel(Parcel out, int flags) {
             out.writeInt(this.viewId);
-            out.writeString(this.methodName);
+            out.writeString8(this.methodName);
             out.writeInt(this.type);
             //noinspection ConstantIfStatement
             if (false) {
@@ -1374,7 +1383,7 @@ public class RemoteViews implements Parcelable, Filter {
                     out.writeInt((int)((Character)this.value).charValue());
                     break;
                 case STRING:
-                    out.writeString((String)this.value);
+                    out.writeString8((String)this.value);
                     break;
                 case CHAR_SEQUENCE:
                     TextUtils.writeToParcel((CharSequence)this.value, out, flags);
@@ -2809,7 +2818,7 @@ public class RemoteViews implements Parcelable, Filter {
 
     /**
      * When using collections (eg. {@link ListView}, {@link StackView} etc.) in widgets, it is very
-     * costly to set PendingIntents on the individual items, and is hence not permitted. Instead
+     * costly to set PendingIntents on the individual items, and is hence not recommended. Instead
      * this method should be used to set a single PendingIntent template on the collection, and
      * individual items can differentiate their on-click behavior using
      * {@link RemoteViews#setOnClickFillInIntent(int, Intent)}.
@@ -2825,7 +2834,7 @@ public class RemoteViews implements Parcelable, Filter {
 
     /**
      * When using collections (eg. {@link ListView}, {@link StackView} etc.) in widgets, it is very
-     * costly to set PendingIntents on the individual items, and is hence not permitted. Instead
+     * costly to set PendingIntents on the individual items, and is hence not recommended. Instead
      * a single PendingIntent template can be set on the collection, see {@link
      * RemoteViews#setPendingIntentTemplate(int, PendingIntent)}, and the individual on-click
      * action of a given item can be distinguished by setting a fillInIntent on that item. The
@@ -3413,10 +3422,21 @@ public class RemoteViews implements Parcelable, Filter {
         // Clone inflater so we load resources from correct context and
         // we don't add a filter to the static version returned by getSystemService.
         inflater = inflater.cloneInContext(inflationContext);
-        inflater.setFilter(this);
+        inflater.setFilter(shouldUseStaticFilter() ? INFLATER_FILTER : this);
         View v = inflater.inflate(rv.getLayoutId(), parent, false);
         v.setTagInternal(R.id.widget_frame, rv.getLayoutId());
         return v;
+    }
+
+    /**
+     * A static filter is much lighter than RemoteViews itself. It's optimized here only for
+     * RemoteVies class. Subclasses should always override this and return true if not overriding
+     * {@link this#onLoadClass(Class)}.
+     *
+     * @hide
+     */
+    protected boolean shouldUseStaticFilter() {
+        return this.getClass().equals(RemoteViews.class);
     }
 
     /**
@@ -3454,18 +3474,10 @@ public class RemoteViews implements Parcelable, Filter {
         return applyAsync(context, parent, executor, listener, null);
     }
 
-    private CancellationSignal startTaskOnExecutor(AsyncApplyTask task, Executor executor) {
-        CancellationSignal cancelSignal = new CancellationSignal();
-        cancelSignal.setOnCancelListener(task);
-
-        task.executeOnExecutor(executor == null ? AsyncTask.THREAD_POOL_EXECUTOR : executor);
-        return cancelSignal;
-    }
-
     /** @hide */
     public CancellationSignal applyAsync(Context context, ViewGroup parent,
             Executor executor, OnViewAppliedListener listener, OnClickHandler handler) {
-        return startTaskOnExecutor(getAsyncApplyTask(context, parent, listener, handler), executor);
+        return getAsyncApplyTask(context, parent, listener, handler).startTaskOnExecutor(executor);
     }
 
     private AsyncApplyTask getAsyncApplyTask(Context context, ViewGroup parent,
@@ -3476,6 +3488,7 @@ public class RemoteViews implements Parcelable, Filter {
 
     private class AsyncApplyTask extends AsyncTask<Void, Void, ViewTree>
             implements CancellationSignal.OnCancelListener {
+        final CancellationSignal mCancelSignal = new CancellationSignal();
         final RemoteViews mRV;
         final ViewGroup mParent;
         final Context mContext;
@@ -3526,6 +3539,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         protected void onPostExecute(ViewTree viewTree) {
+            mCancelSignal.setOnCancelListener(null);
             if (mError == null) {
                 if (mListener != null) {
                     mListener.onViewInflated(viewTree.mRoot);
@@ -3562,6 +3576,12 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public void onCancel() {
             cancel(true);
+        }
+
+        private CancellationSignal startTaskOnExecutor(Executor executor) {
+            mCancelSignal.setOnCancelListener(this);
+            executeOnExecutor(executor == null ? AsyncTask.THREAD_POOL_EXECUTOR : executor);
+            return mCancelSignal;
         }
     }
 
@@ -3627,8 +3647,8 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        return startTaskOnExecutor(new AsyncApplyTask(rvToApply, (ViewGroup) v.getParent(),
-                context, listener, handler, v), executor);
+        return new AsyncApplyTask(rvToApply, (ViewGroup) v.getParent(),
+                context, listener, handler, v).startTaskOnExecutor(executor);
     }
 
     private void performApply(View v, ViewGroup parent, OnClickHandler handler) {
@@ -3686,11 +3706,15 @@ public class RemoteViews implements Parcelable, Filter {
         return (mActions == null) ? 0 : mActions.size();
     }
 
-    /* (non-Javadoc)
+    /**
      * Used to restrict the views which can be inflated
      *
      * @see android.view.LayoutInflater.Filter#onLoadClass(java.lang.Class)
+     * @deprecated Used by system to enforce safe inflation of {@link RemoteViews}. Apps should not
+     * override this method. Changing of this method will NOT affect the process where RemoteViews
+     * is rendered.
      */
+    @Deprecated
     public boolean onLoadClass(Class clazz) {
         return clazz.isAnnotationPresent(RemoteView.class);
     }
@@ -3936,7 +3960,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         /**
          * When using collections (eg. {@link ListView}, {@link StackView} etc.) in widgets, it is
-         * very costly to set PendingIntents on the individual items, and is hence not permitted.
+         * very costly to set PendingIntents on the individual items, and is hence not recommended.
          * Instead a single PendingIntent template can be set on the collection, see {@link
          * RemoteViews#setPendingIntentTemplate(int, PendingIntent)}, and the individual on-click
          * action of a given item can be distinguished by setting a fillInIntent on that item. The

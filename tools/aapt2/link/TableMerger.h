@@ -37,6 +37,8 @@ struct TableMergerOptions {
   bool auto_add_overlay = false;
   // If true, resource overlays with conflicting visibility are not allowed.
   bool strict_visibility = false;
+  // If true, styles specified via "aapt2 link -R" completely replace any previously-seen resources.
+  bool override_styles_instead_of_overlaying = false;
 };
 
 // TableMerger takes resource tables and merges all packages within the tables that have the same

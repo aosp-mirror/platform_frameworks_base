@@ -16,12 +16,16 @@
 
 package com.android.server.pm;
 
-import android.content.pm.PackageParser;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.UserHandle;
 
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
+
 class ScanRequestBuilder {
-    private final PackageParser.Package mPkg;
-    private PackageParser.Package mOldPkg;
+    private final ParsedPackage mPkg;
+    private AndroidPackage mOldPkg;
     private SharedUserSetting mSharedUserSetting;
     private PackageSetting mPkgSetting;
     private PackageSetting mDisabledPkgSetting;
@@ -31,12 +35,14 @@ class ScanRequestBuilder {
     private int mScanFlags;
     private UserHandle mUser;
     private boolean mIsPlatformPackage;
+    @Nullable
+    private String mCpuAbiOverride;
 
-    ScanRequestBuilder(PackageParser.Package pkg) {
+    ScanRequestBuilder(ParsedPackage pkg) {
         this.mPkg = pkg;
     }
 
-    public ScanRequestBuilder setOldPkg(PackageParser.Package oldPkg) {
+    public ScanRequestBuilder setOldPkg(AndroidPackage oldPkg) {
         this.mOldPkg = oldPkg;
         return this;
     }
@@ -96,10 +102,16 @@ class ScanRequestBuilder {
         return this;
     }
 
+    @NonNull
+    public ScanRequestBuilder setCpuAbiOverride(@Nullable String cpuAbiOverride) {
+        this.mCpuAbiOverride = cpuAbiOverride;
+        return this;
+    }
+
     PackageManagerService.ScanRequest build() {
         return new PackageManagerService.ScanRequest(
                 mPkg, mSharedUserSetting, mOldPkg, mPkgSetting, mDisabledPkgSetting,
                 mOriginalPkgSetting, mRealPkgName, mParseFlags, mScanFlags, mIsPlatformPackage,
-                mUser);
+                mUser, mCpuAbiOverride);
     }
 }

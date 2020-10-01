@@ -48,7 +48,8 @@ public class DragDownHelper implements Gefingerpoken {
     private float mInitialTouchX;
     private float mInitialTouchY;
     private boolean mDraggingDown;
-    private float mTouchSlop;
+    private final float mTouchSlop;
+    private final float mSlopMultiplier;
     private DragDownCallback mDragDownCallback;
     private View mHost;
     private final int[] mTemp2 = new int[2];
@@ -62,7 +63,9 @@ public class DragDownHelper implements Gefingerpoken {
             FalsingManager falsingManager) {
         mMinDragDistance = context.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_drag_down_min_distance);
-        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        final ViewConfiguration configuration = ViewConfiguration.get(context);
+        mTouchSlop = configuration.getScaledTouchSlop();
+        mSlopMultiplier = configuration.getScaledAmbiguousGestureMultiplier();
         mCallback = callback;
         mDragDownCallback = dragDownCallback;
         mHost = host;
@@ -85,7 +88,12 @@ public class DragDownHelper implements Gefingerpoken {
 
             case MotionEvent.ACTION_MOVE:
                 final float h = y - mInitialTouchY;
-                if (h > mTouchSlop && h > Math.abs(x - mInitialTouchX)) {
+                // Adjust the touch slop if another gesture may be being performed.
+                final float touchSlop =
+                        event.getClassification() == MotionEvent.CLASSIFICATION_AMBIGUOUS_GESTURE
+                        ? mTouchSlop * mSlopMultiplier
+                        : mTouchSlop;
+                if (h > touchSlop && h > Math.abs(x - mInitialTouchX)) {
                     mFalsingManager.onNotificatonStartDraggingDown();
                     mDraggingDown = true;
                     captureStartingChild(mInitialTouchX, mInitialTouchY);

@@ -199,6 +199,11 @@ public abstract class ColorSpace {
 
     private static final float[] SRGB_PRIMARIES = { 0.640f, 0.330f, 0.300f, 0.600f, 0.150f, 0.060f };
     private static final float[] NTSC_1953_PRIMARIES = { 0.67f, 0.33f, 0.21f, 0.71f, 0.14f, 0.08f };
+    /**
+     * A gray color space does not have meaningful primaries, so we use this arbitrary set.
+     */
+    private static final float[] GRAY_PRIMARIES = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+
     private static final float[] ILLUMINANT_D50_XYZ = { 0.964212f, 1.0f, 0.825188f };
 
     private static final Rgb.TransferParameters SRGB_TRANSFER_PARAMETERS =
@@ -867,7 +872,8 @@ public abstract class ColorSpace {
         }
     }
 
-    private ColorSpace(
+    /** @hide */
+    ColorSpace(
             @NonNull String name,
             @NonNull Model model,
             @IntRange(from = MIN_ID, to = MAX_ID) int id) {
@@ -1380,9 +1386,9 @@ public abstract class ColorSpace {
      */
     @NonNull
     static ColorSpace get(@IntRange(from = MIN_ID, to = MAX_ID) int index) {
-        if (index < 0 || index >= Named.values().length) {
+        if (index < 0 || index >= sNamedColorSpaces.length) {
             throw new IllegalArgumentException("Invalid ID, must be in the range [0.." +
-                    Named.values().length + ")");
+                    sNamedColorSpaces.length + ")");
         }
         return sNamedColorSpaces[index];
     }
@@ -1456,6 +1462,7 @@ public abstract class ColorSpace {
                 "sRGB IEC61966-2.1",
                 SRGB_PRIMARIES,
                 ILLUMINANT_D65,
+                null,
                 SRGB_TRANSFER_PARAMETERS,
                 Named.SRGB.ordinal()
         );
@@ -1490,6 +1497,7 @@ public abstract class ColorSpace {
                 "Rec. ITU-R BT.709-5",
                 new float[] { 0.640f, 0.330f, 0.300f, 0.600f, 0.150f, 0.060f },
                 ILLUMINANT_D65,
+                null,
                 new Rgb.TransferParameters(1 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081, 1 / 0.45),
                 Named.BT709.ordinal()
         );
@@ -1497,6 +1505,7 @@ public abstract class ColorSpace {
                 "Rec. ITU-R BT.2020-1",
                 new float[] { 0.708f, 0.292f, 0.170f, 0.797f, 0.131f, 0.046f },
                 ILLUMINANT_D65,
+                null,
                 new Rgb.TransferParameters(1 / 1.0993, 0.0993 / 1.0993, 1 / 4.5, 0.08145, 1 / 0.45),
                 Named.BT2020.ordinal()
         );
@@ -1512,6 +1521,7 @@ public abstract class ColorSpace {
                 "Display P3",
                 new float[] { 0.680f, 0.320f, 0.265f, 0.690f, 0.150f, 0.060f },
                 ILLUMINANT_D65,
+                null,
                 SRGB_TRANSFER_PARAMETERS,
                 Named.DISPLAY_P3.ordinal()
         );
@@ -1519,6 +1529,7 @@ public abstract class ColorSpace {
                 "NTSC (1953)",
                 NTSC_1953_PRIMARIES,
                 ILLUMINANT_C,
+                null,
                 new Rgb.TransferParameters(1 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081, 1 / 0.45),
                 Named.NTSC_1953.ordinal()
         );
@@ -1526,6 +1537,7 @@ public abstract class ColorSpace {
                 "SMPTE-C RGB",
                 new float[] { 0.630f, 0.340f, 0.310f, 0.595f, 0.155f, 0.070f },
                 ILLUMINANT_D65,
+                null,
                 new Rgb.TransferParameters(1 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081, 1 / 0.45),
                 Named.SMPTE_C.ordinal()
         );
@@ -1541,6 +1553,7 @@ public abstract class ColorSpace {
                 "ROMM RGB ISO 22028-2:2013",
                 new float[] { 0.7347f, 0.2653f, 0.1596f, 0.8404f, 0.0366f, 0.0001f },
                 ILLUMINANT_D50,
+                null,
                 new Rgb.TransferParameters(1.0, 0.0, 1 / 16.0, 0.031248, 1.8),
                 Named.PRO_PHOTO_RGB.ordinal()
         );
@@ -2470,7 +2483,11 @@ public abstract class ColorSpace {
                 @NonNull @Size(min = 1) String name,
                 @NonNull @Size(9) float[] toXYZ,
                 @NonNull TransferParameters function) {
-            this(name, computePrimaries(toXYZ), computeWhitePoint(toXYZ), function, MIN_ID);
+            // Note: when isGray() returns false, this passes null for the transform for
+            // consistency with other constructors, which compute the transform from the primaries
+            // and white point.
+            this(name, isGray(toXYZ) ? GRAY_PRIMARIES : computePrimaries(toXYZ),
+                    computeWhitePoint(toXYZ), isGray(toXYZ) ? toXYZ : null, function, MIN_ID);
         }
 
         /**
@@ -2510,7 +2527,7 @@ public abstract class ColorSpace {
                 @NonNull @Size(min = 6, max = 9) float[] primaries,
                 @NonNull @Size(min = 2, max = 3) float[] whitePoint,
                 @NonNull TransferParameters function) {
-            this(name, primaries, whitePoint, function, MIN_ID);
+            this(name, primaries, whitePoint, null, function, MIN_ID);
         }
 
         /**
@@ -2533,6 +2550,8 @@ public abstract class ColorSpace {
          * @param name Name of the color space, cannot be null, its length must be >= 1
          * @param primaries RGB primaries as an array of 6 (xy) or 9 (XYZ) floats
          * @param whitePoint Reference white as an array of 2 (xy) or 3 (XYZ) floats
+         * @param transform Computed transform matrix that converts from RGB to XYZ, or
+         *      {@code null} to compute it from {@code primaries} and {@code whitePoint}.
          * @param function Parameters for the transfer functions
          * @param id ID of this color space as an integer between {@link #MIN_ID} and {@link #MAX_ID}
          *
@@ -2551,9 +2570,10 @@ public abstract class ColorSpace {
                 @NonNull @Size(min = 1) String name,
                 @NonNull @Size(min = 6, max = 9) float[] primaries,
                 @NonNull @Size(min = 2, max = 3) float[] whitePoint,
+                @Nullable @Size(9) float[] transform,
                 @NonNull TransferParameters function,
                 @IntRange(from = MIN_ID, to = MAX_ID) int id) {
-            this(name, primaries, whitePoint, null,
+            this(name, primaries, whitePoint, transform,
                     function.e == 0.0 && function.f == 0.0 ?
                             x -> rcpResponse(x, function.a, function.b,
                                     function.c, function.d, function.g) :
@@ -2845,7 +2865,7 @@ public abstract class ColorSpace {
          *
          * @return The destination array passed as a parameter
          *
-         * @see #getWhitePoint(float[])
+         * @see #getWhitePoint()
          */
         @NonNull
         @Size(min = 2)
@@ -2863,7 +2883,7 @@ public abstract class ColorSpace {
          *
          * @return A new non-null array of 2 floats
          *
-         * @see #getWhitePoint()
+         * @see #getWhitePoint(float[])
          */
         @NonNull
         @Size(2)
@@ -2877,12 +2897,16 @@ public abstract class ColorSpace {
          * destination. The x and y components of the first primary are written
          * in the array at positions 0 and 1 respectively.
          *
+         * <p>Note: Some ColorSpaces represent gray profiles. The concept of
+         * primaries for such a ColorSpace does not make sense, so we use a special
+         * set of primaries that are all 1s.</p>
+         *
          * @param primaries The destination array, cannot be null, its length
          *                  must be >= 6
          *
          * @return The destination array passed as a parameter
          *
-         * @see #getPrimaries(float[])
+         * @see #getPrimaries()
          */
         @NonNull
         @Size(min = 6)
@@ -2897,9 +2921,13 @@ public abstract class ColorSpace {
          * the destination. The x and y components of the first primary are
          * written in the array at positions 0 and 1 respectively.
          *
+         * <p>Note: Some ColorSpaces represent gray profiles. The concept of
+         * primaries for such a ColorSpace does not make sense, so we use a special
+         * set of primaries that are all 1s.</p>
+         *
          * @return A new non-null array of 2 floats
          *
-         * @see #getWhitePoint()
+         * @see #getPrimaries(float[])
          */
         @NonNull
         @Size(6)
@@ -2921,7 +2949,7 @@ public abstract class ColorSpace {
          *
          * @return The destination array passed as a parameter
          *
-         * @see #getInverseTransform()
+         * @see #getTransform()
          */
         @NonNull
         @Size(min = 9)
@@ -2941,7 +2969,7 @@ public abstract class ColorSpace {
          *
          * @return A new array of 9 floats
          *
-         * @see #getInverseTransform(float[])
+         * @see #getTransform(float[])
          */
         @NonNull
         @Size(9)
@@ -2963,7 +2991,7 @@ public abstract class ColorSpace {
          *
          * @return The destination array passed as a parameter
          *
-         * @see #getTransform()
+         * @see #getInverseTransform()
          */
         @NonNull
         @Size(min = 9)
@@ -2983,7 +3011,7 @@ public abstract class ColorSpace {
          *
          * @return A new array of 9 floats
          *
-         * @see #getTransform(float[])
+         * @see #getInverseTransform(float[])
          */
         @NonNull
         @Size(9)
@@ -3284,6 +3312,16 @@ public abstract class ColorSpace {
             }
 
             return true;
+        }
+
+        /**
+         * Report whether this matrix is a special gray matrix.
+         * @param toXYZ A XYZD50 matrix. Skia uses a special form for a gray profile.
+         * @return true if this is a special gray matrix.
+         */
+        private static boolean isGray(@NonNull @Size(9) float[] toXYZ) {
+            return toXYZ.length == 9 && toXYZ[1] == 0 && toXYZ[2] == 0 && toXYZ[3] == 0
+                    && toXYZ[5] == 0 && toXYZ[6] == 0 && toXYZ[7] == 0;
         }
 
         private static boolean compare(double point, @NonNull DoubleUnaryOperator a,

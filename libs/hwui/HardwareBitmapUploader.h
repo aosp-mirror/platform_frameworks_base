@@ -27,7 +27,13 @@ public:
 
     static sk_sp<Bitmap> allocateHardwareBitmap(const SkBitmap& sourceBitmap);
 
+#ifdef __ANDROID__
     static bool hasFP16Support();
+#else
+    static bool hasFP16Support() {
+        return true;
+    }
+#endif
 };
 
 }  // namespace android::uirenderer

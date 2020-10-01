@@ -21,12 +21,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
-import android.text.TextUtils;
 import android.util.Slog;
 
-import java.util.Locale;
+import java.io.PrintWriter;
 import java.util.UUID;
 
 /**
@@ -39,7 +37,7 @@ public class SoundTriggerDbHelper extends SQLiteOpenHelper {
     static final boolean DBG = false;
 
     private static final String NAME = "st_sound_model.db";
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
 
     // Sound trigger-based sound models.
     public static interface GenericSoundModelContract {
@@ -47,15 +45,16 @@ public class SoundTriggerDbHelper extends SQLiteOpenHelper {
         public static final String KEY_MODEL_UUID = "model_uuid";
         public static final String KEY_VENDOR_UUID = "vendor_uuid";
         public static final String KEY_DATA = "data";
+        public static final String KEY_MODEL_VERSION = "model_version";
     }
-
 
     // Table Create Statement for the sound trigger table
     private static final String CREATE_TABLE_ST_SOUND_MODEL = "CREATE TABLE "
             + GenericSoundModelContract.TABLE + "("
             + GenericSoundModelContract.KEY_MODEL_UUID + " TEXT PRIMARY KEY,"
             + GenericSoundModelContract.KEY_VENDOR_UUID + " TEXT,"
-            + GenericSoundModelContract.KEY_DATA + " BLOB" + " )";
+            + GenericSoundModelContract.KEY_DATA + " BLOB,"
+            + GenericSoundModelContract.KEY_MODEL_VERSION + " INTEGER" + " )";
 
 
     public SoundTriggerDbHelper(Context context) {
@@ -70,9 +69,13 @@ public class SoundTriggerDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // TODO: For now, drop older tables and recreate new ones.
-        db.execSQL("DROP TABLE IF EXISTS " + GenericSoundModelContract.TABLE);
-        onCreate(db);
+        if (oldVersion == 1) {
+            // In version 2, a model version number was added.
+            Slog.d(TAG, "Adding model version column");
+            db.execSQL("ALTER TABLE " + GenericSoundModelContract.TABLE + " ADD COLUMN "
+                    + GenericSoundModelContract.KEY_MODEL_VERSION + " INTEGER DEFAULT -1");
+            oldVersion++;
+        }
     }
 
     /**
@@ -83,9 +86,11 @@ public class SoundTriggerDbHelper extends SQLiteOpenHelper {
         synchronized(this) {
             SQLiteDatabase db = getWritableDatabase();
             ContentValues values = new ContentValues();
-            values.put(GenericSoundModelContract.KEY_MODEL_UUID, soundModel.uuid.toString());
-            values.put(GenericSoundModelContract.KEY_VENDOR_UUID, soundModel.vendorUuid.toString());
-            values.put(GenericSoundModelContract.KEY_DATA, soundModel.data);
+            values.put(GenericSoundModelContract.KEY_MODEL_UUID, soundModel.getUuid().toString());
+            values.put(GenericSoundModelContract.KEY_VENDOR_UUID,
+                    soundModel.getVendorUuid().toString());
+            values.put(GenericSoundModelContract.KEY_DATA, soundModel.getData());
+            values.put(GenericSoundModelContract.KEY_MODEL_VERSION, soundModel.getVersion());
 
             try {
                 return db.insertWithOnConflict(GenericSoundModelContract.TABLE, null, values,
@@ -113,8 +118,10 @@ public class SoundTriggerDbHelper extends SQLiteOpenHelper {
                                 GenericSoundModelContract.KEY_DATA));
                         String vendor_uuid = c.getString(
                                 c.getColumnIndex(GenericSoundModelContract.KEY_VENDOR_UUID));
+                        int version = c.getInt(
+                                c.getColumnIndex(GenericSoundModelContract.KEY_MODEL_VERSION));
                         return new GenericSoundModel(model_uuid, UUID.fromString(vendor_uuid),
-                                data);
+                                data, version);
                     } while (c.moveToNext());
                 }
             } finally {
@@ -134,10 +141,54 @@ public class SoundTriggerDbHelper extends SQLiteOpenHelper {
             // Delete all sound models for the given keyphrase and specified user.
             SQLiteDatabase db = getWritableDatabase();
             String soundModelClause = GenericSoundModelContract.KEY_MODEL_UUID
-                    + "='" + soundModel.uuid.toString() + "'";
+                    + "='" + soundModel.getUuid().toString() + "'";
             try {
                 return db.delete(GenericSoundModelContract.TABLE, soundModelClause, null) != 0;
             } finally {
+                db.close();
+            }
+        }
+    }
+
+    public void dump(PrintWriter pw) {
+        synchronized(this) {
+            String selectQuery = "SELECT  * FROM " + GenericSoundModelContract.TABLE;
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.rawQuery(selectQuery, null);
+            try {
+                pw.println("  Enrolled GenericSoundModels:");
+                if (c.moveToFirst()) {
+                    String[] columnNames = c.getColumnNames();
+                    do {
+                        for (String name : columnNames) {
+                            int colNameIndex = c.getColumnIndex(name);
+                            int type = c.getType(colNameIndex);
+                            switch (type) {
+                                case Cursor.FIELD_TYPE_STRING:
+                                    pw.printf("    %s: %s\n", name,
+                                            c.getString(colNameIndex));
+                                    break;
+                                case Cursor.FIELD_TYPE_BLOB:
+                                    pw.printf("    %s: data blob\n", name);
+                                    break;
+                                case Cursor.FIELD_TYPE_INTEGER:
+                                    pw.printf("    %s: %d\n", name,
+                                            c.getInt(colNameIndex));
+                                    break;
+                                case Cursor.FIELD_TYPE_FLOAT:
+                                    pw.printf("    %s: %f\n", name,
+                                            c.getFloat(colNameIndex));
+                                    break;
+                                case Cursor.FIELD_TYPE_NULL:
+                                    pw.printf("    %s: null\n", name);
+                                    break;
+                            }
+                        }
+                        pw.println();
+                    } while (c.moveToNext());
+                }
+            } finally {
+                c.close();
                 db.close();
             }
         }

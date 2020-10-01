@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.TaskSnapshot;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -53,17 +54,8 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
 
     @Override
     @UnsupportedAppUsage
-    public void onPinnedActivityRestartAttempt(boolean clearedTask) throws RemoteException {
-    }
-
-    @Override
-    @UnsupportedAppUsage
-    public void onPinnedStackAnimationStarted() throws RemoteException {
-    }
-
-    @Override
-    @UnsupportedAppUsage
-    public void onPinnedStackAnimationEnded() throws RemoteException {
+    public void onActivityRestartAttempt(RunningTaskInfo task, boolean homeTaskVisible,
+            boolean clearedTask, boolean wasVisible) throws RemoteException {
     }
 
     @Override
@@ -78,14 +70,14 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    public void onActivityLaunchOnSecondaryDisplayFailed(ActivityManager.RunningTaskInfo taskInfo,
+    public void onActivityLaunchOnSecondaryDisplayFailed(RunningTaskInfo taskInfo,
             int requestedDisplayId) throws RemoteException {
         onActivityLaunchOnSecondaryDisplayFailed();
     }
 
     /**
      * @deprecated see {@link
-     *         #onActivityLaunchOnSecondaryDisplayFailed(ActivityManager.RunningTaskInfo, int)}
+     *         #onActivityLaunchOnSecondaryDisplayFailed(RunningTaskInfo, int)}
      */
     @Deprecated
     @UnsupportedAppUsage
@@ -94,7 +86,7 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
 
     @Override
     @UnsupportedAppUsage
-    public void onActivityLaunchOnSecondaryDisplayRerouted(ActivityManager.RunningTaskInfo taskInfo,
+    public void onActivityLaunchOnSecondaryDisplayRerouted(RunningTaskInfo taskInfo,
             int requestedDisplayId) throws RemoteException {
     }
 
@@ -108,13 +100,13 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo)
+    public void onTaskMovedToFront(RunningTaskInfo taskInfo)
             throws RemoteException {
         onTaskMovedToFront(taskInfo.taskId);
     }
 
     /**
-     * @deprecated see {@link #onTaskMovedToFront(ActivityManager.RunningTaskInfo)}
+     * @deprecated see {@link #onTaskMovedToFront(RunningTaskInfo)}
      */
     @Deprecated
     @UnsupportedAppUsage
@@ -122,26 +114,26 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    public void onTaskRemovalStarted(ActivityManager.RunningTaskInfo taskInfo)
+    public void onTaskRemovalStarted(RunningTaskInfo taskInfo)
             throws RemoteException {
         onTaskRemovalStarted(taskInfo.taskId);
     }
 
     /**
-     * @deprecated see {@link #onTaskRemovalStarted(ActivityManager.RunningTaskInfo)}
+     * @deprecated see {@link #onTaskRemovalStarted(RunningTaskInfo)}
      */
     @Deprecated
     public void onTaskRemovalStarted(int taskId) throws RemoteException {
     }
 
     @Override
-    public void onTaskDescriptionChanged(ActivityManager.RunningTaskInfo taskInfo)
+    public void onTaskDescriptionChanged(RunningTaskInfo taskInfo)
             throws RemoteException {
         onTaskDescriptionChanged(taskInfo.taskId, taskInfo.taskDescription);
     }
 
     /**
-     * @deprecated see {@link #onTaskDescriptionChanged(ActivityManager.RunningTaskInfo)}
+     * @deprecated see {@link #onTaskDescriptionChanged(RunningTaskInfo)}
      */
     @Deprecated
     public void onTaskDescriptionChanged(int taskId, ActivityManager.TaskDescription td)
@@ -176,7 +168,7 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo)
+    public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo)
             throws RemoteException {
     }
 
@@ -190,5 +182,25 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
 
     @Override
     public void onTaskDisplayChanged(int taskId, int newDisplayId) throws RemoteException {
+    }
+
+    @Override
+    public void onRecentTaskListUpdated() throws RemoteException {
+    }
+
+    @Override
+    public void onRecentTaskListFrozenChanged(boolean frozen) {
+    }
+
+    @Override
+    public void onTaskFocusChanged(int taskId, boolean focused) {
+    }
+
+    @Override
+    public void onTaskRequestedOrientationChanged(int taskId, int requestedOrientation) {
+    }
+
+    @Override
+    public void onActivityRotation(int displayId) {
     }
 }

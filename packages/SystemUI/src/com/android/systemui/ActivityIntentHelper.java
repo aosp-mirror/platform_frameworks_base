@@ -24,14 +24,20 @@ import android.content.pm.ResolveInfo;
 
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Contains useful methods for querying properties of an Activity Intent.
  */
+@Singleton
 public class ActivityIntentHelper {
 
     private final Context mContext;
 
+    @Inject
     public ActivityIntentHelper(Context context) {
+        // TODO: inject a package manager, not a context.
         mContext = context;
     }
 

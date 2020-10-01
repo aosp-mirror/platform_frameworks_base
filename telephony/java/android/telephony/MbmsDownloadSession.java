@@ -509,7 +509,7 @@ public class MbmsDownloadSession implements AutoCloseable {
      * provided directory is the same as what has been previously configured.
      *
      * The {@link File} supplied as a root temp file directory must already exist. If not, an
-     * {@link IllegalArgumentException} will be thrown. In addition, as an additional sanity
+     * {@link IllegalArgumentException} will be thrown. In addition, as an additional correctness
      * check, an {@link IllegalArgumentException} will be thrown if you attempt to set the temp
      * file root directory to one of your data roots (the value of {@link Context#getDataDir()},
      * {@link Context#getFilesDir()}, or {@link Context#getCacheDir()}).

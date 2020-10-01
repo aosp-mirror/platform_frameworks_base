@@ -65,6 +65,11 @@ message ReportFileProto {
          * the given client.
          */
         optional bool share_approved = 8;
+
+        /**
+         * Whether the report is gzipped.
+         */
+        optional bool gzip = 9;
     }
 
     /**

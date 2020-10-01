@@ -17,6 +17,7 @@
 #include "link/ReferenceLinker.h"
 
 #include "android-base/logging.h"
+#include "android-base/stringprintf.h"
 #include "androidfw/ResourceTypes.h"
 
 #include "Diagnostics.h"
@@ -33,6 +34,7 @@
 
 using ::aapt::ResourceUtils::StringBuilder;
 using ::android::StringPiece;
+using ::android::base::StringPrintf;
 
 namespace aapt {
 
@@ -81,7 +83,7 @@ class ReferenceLinkerVisitor : public DescendingValueVisitor {
 
       // Find the attribute in the symbol table and check if it is visible from this callsite.
       const SymbolTable::Symbol* symbol = ReferenceLinker::ResolveAttributeCheckVisibility(
-          transformed_reference, callsite_, symbols_, &err_str);
+          transformed_reference, callsite_, context_, symbols_, &err_str);
       if (symbol) {
         // Assign our style key the correct ID. The ID may not exist.
         entry.key.id = symbol->id;
@@ -203,12 +205,35 @@ bool IsSymbolVisible(const SymbolTable::Symbol& symbol, const Reference& ref,
 
 const SymbolTable::Symbol* ReferenceLinker::ResolveSymbol(const Reference& reference,
                                                           const CallSite& callsite,
+                                                          IAaptContext* context,
                                                           SymbolTable* symbols) {
   if (reference.name) {
     const ResourceName& name = reference.name.value();
     if (name.package.empty()) {
       // Use the callsite's package name if no package name was defined.
-      return symbols->FindByName(ResourceName(callsite.package, name.type, name.entry));
+      const SymbolTable::Symbol* symbol = symbols->FindByName(
+          ResourceName(callsite.package, name.type, name.entry));
+      if (symbol) {
+        return symbol;
+      }
+
+      // If the callsite package is the same as the current compilation package,
+      // check the feature split dependencies as well. Feature split resources
+      // can be referenced without a namespace, just like the base package.
+      // TODO: modify the package name of included splits instead of having the
+      // symbol table look up the resource in in every package. b/136105066
+      if (callsite.package == context->GetCompilationPackage()) {
+        const auto& split_name_dependencies = context->GetSplitNameDependencies();
+        for (const std::string& split_name : split_name_dependencies) {
+          std::string split_package =
+              StringPrintf("%s.%s", callsite.package.c_str(), split_name.c_str());
+          symbol = symbols->FindByName(ResourceName(split_package, name.type, name.entry));
+          if (symbol) {
+            return symbol;
+          }
+        }
+      }
+      return nullptr;
     }
     return symbols->FindByName(name);
   } else if (reference.id) {
@@ -220,9 +245,10 @@ const SymbolTable::Symbol* ReferenceLinker::ResolveSymbol(const Reference& refer
 
 const SymbolTable::Symbol* ReferenceLinker::ResolveSymbolCheckVisibility(const Reference& reference,
                                                                          const CallSite& callsite,
+                                                                         IAaptContext* context,
                                                                          SymbolTable* symbols,
                                                                          std::string* out_error) {
-  const SymbolTable::Symbol* symbol = ResolveSymbol(reference, callsite, symbols);
+  const SymbolTable::Symbol* symbol = ResolveSymbol(reference, callsite, context, symbols);
   if (!symbol) {
     if (out_error) *out_error = "not found";
     return nullptr;
@@ -236,10 +262,10 @@ const SymbolTable::Symbol* ReferenceLinker::ResolveSymbolCheckVisibility(const R
 }
 
 const SymbolTable::Symbol* ReferenceLinker::ResolveAttributeCheckVisibility(
-    const Reference& reference, const CallSite& callsite, SymbolTable* symbols,
-    std::string* out_error) {
+    const Reference& reference, const CallSite& callsite, IAaptContext* context,
+    SymbolTable* symbols, std::string* out_error) {
   const SymbolTable::Symbol* symbol =
-      ResolveSymbolCheckVisibility(reference, callsite, symbols, out_error);
+      ResolveSymbolCheckVisibility(reference, callsite, context, symbols, out_error);
   if (!symbol) {
     return nullptr;
   }
@@ -253,10 +279,11 @@ const SymbolTable::Symbol* ReferenceLinker::ResolveAttributeCheckVisibility(
 
 Maybe<xml::AaptAttribute> ReferenceLinker::CompileXmlAttribute(const Reference& reference,
                                                                const CallSite& callsite,
+                                                               IAaptContext* context,
                                                                SymbolTable* symbols,
                                                                std::string* out_error) {
   const SymbolTable::Symbol* symbol =
-      ResolveAttributeCheckVisibility(reference, callsite, symbols, out_error);
+      ResolveAttributeCheckVisibility(reference, callsite, context, symbols, out_error);
   if (!symbol) {
     return {};
   }
@@ -335,7 +362,7 @@ bool ReferenceLinker::LinkReference(const CallSite& callsite, Reference* referen
 
   std::string err_str;
   const SymbolTable::Symbol* s =
-      ResolveSymbolCheckVisibility(transformed_reference, callsite, symbols, &err_str);
+      ResolveSymbolCheckVisibility(transformed_reference, callsite, context, symbols, &err_str);
   if (s) {
     // The ID may not exist. This is fine because of the possibility of building
     // against libraries without assigned IDs.

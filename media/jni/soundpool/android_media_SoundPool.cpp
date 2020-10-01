@@ -52,7 +52,7 @@ android_media_SoundPool_load_FD(JNIEnv *env, jobject thiz, jobject fileDescripto
 {
     ALOGV("android_media_SoundPool_load_FD");
     SoundPool *ap = MusterSoundPool(env, thiz);
-    if (ap == NULL) return 0;
+    if (ap == nullptr) return 0;
     return (jint) ap->load(jniGetFDFromFileDescriptor(env, fileDescriptor),
             int64_t(offset), int64_t(length), int(priority));
 }
@@ -61,7 +61,7 @@ static jboolean
 android_media_SoundPool_unload(JNIEnv *env, jobject thiz, jint sampleID) {
     ALOGV("android_media_SoundPool_unload\n");
     SoundPool *ap = MusterSoundPool(env, thiz);
-    if (ap == NULL) return JNI_FALSE;
+    if (ap == nullptr) return JNI_FALSE;
     return ap->unload(sampleID) ? JNI_TRUE : JNI_FALSE;
 }
 
@@ -72,7 +72,7 @@ android_media_SoundPool_play(JNIEnv *env, jobject thiz, jint sampleID,
 {
     ALOGV("android_media_SoundPool_play\n");
     SoundPool *ap = MusterSoundPool(env, thiz);
-    if (ap == NULL) return 0;
+    if (ap == nullptr) return 0;
     return (jint) ap->play(sampleID, leftVolume, rightVolume, priority, loop, rate);
 }
 
@@ -81,7 +81,7 @@ android_media_SoundPool_pause(JNIEnv *env, jobject thiz, jint channelID)
 {
     ALOGV("android_media_SoundPool_pause");
     SoundPool *ap = MusterSoundPool(env, thiz);
-    if (ap == NULL) return;
+    if (ap == nullptr) return;
     ap->pause(channelID);
 }
 
@@ -90,7 +90,7 @@ android_media_SoundPool_resume(JNIEnv *env, jobject thiz, jint channelID)
 {
     ALOGV("android_media_SoundPool_resume");
     SoundPool *ap = MusterSoundPool(env, thiz);
-    if (ap == NULL) return;
+    if (ap == nullptr) return;
     ap->resume(channelID);
 }
 
@@ -99,7 +99,7 @@ android_media_SoundPool_autoPause(JNIEnv *env, jobject thiz)
 {
     ALOGV("android_media_SoundPool_autoPause");
     SoundPool *ap = MusterSoundPool(env, thiz);
-    if (ap == NULL) return;
+    if (ap == nullptr) return;
     ap->autoPause();
 }
 
@@ -108,7 +108,7 @@ android_media_SoundPool_autoResume(JNIEnv *env, jobject thiz)
 {
     ALOGV("android_media_SoundPool_autoResume");
     SoundPool *ap = MusterSoundPool(env, thiz);
-    if (ap == NULL) return;
+    if (ap == nullptr) return;
     ap->autoResume();
 }
 
@@ -117,7 +117,7 @@ android_media_SoundPool_stop(JNIEnv *env, jobject thiz, jint channelID)
 {
     ALOGV("android_media_SoundPool_stop");
     SoundPool *ap = MusterSoundPool(env, thiz);
-    if (ap == NULL) return;
+    if (ap == nullptr) return;
     ap->stop(channelID);
 }
 
@@ -127,7 +127,7 @@ android_media_SoundPool_setVolume(JNIEnv *env, jobject thiz, jint channelID,
 {
     ALOGV("android_media_SoundPool_setVolume");
     SoundPool *ap = MusterSoundPool(env, thiz);
-    if (ap == NULL) return;
+    if (ap == nullptr) return;
     ap->setVolume(channelID, (float) leftVolume, (float) rightVolume);
 }
 
@@ -136,7 +136,7 @@ android_media_SoundPool_mute(JNIEnv *env, jobject thiz, jboolean muting)
 {
     ALOGV("android_media_SoundPool_mute(%d)", muting);
     SoundPool *ap = MusterSoundPool(env, thiz);
-    if (ap == NULL) return;
+    if (ap == nullptr) return;
     ap->mute(muting == JNI_TRUE);
 }
 
@@ -146,7 +146,7 @@ android_media_SoundPool_setPriority(JNIEnv *env, jobject thiz, jint channelID,
 {
     ALOGV("android_media_SoundPool_setPriority");
     SoundPool *ap = MusterSoundPool(env, thiz);
-    if (ap == NULL) return;
+    if (ap == nullptr) return;
     ap->setPriority(channelID, (int) priority);
 }
 
@@ -156,7 +156,7 @@ android_media_SoundPool_setLoop(JNIEnv *env, jobject thiz, jint channelID,
 {
     ALOGV("android_media_SoundPool_setLoop");
     SoundPool *ap = MusterSoundPool(env, thiz);
-    if (ap == NULL) return;
+    if (ap == nullptr) return;
     ap->setLoop(channelID, loop);
 }
 
@@ -166,7 +166,7 @@ android_media_SoundPool_setRate(JNIEnv *env, jobject thiz, jint channelID,
 {
     ALOGV("android_media_SoundPool_setRate");
     SoundPool *ap = MusterSoundPool(env, thiz);
-    if (ap == NULL) return;
+    if (ap == nullptr) return;
     ap->setRate(channelID, (float) rate);
 }
 
@@ -174,24 +174,26 @@ static void android_media_callback(SoundPoolEvent event, SoundPool* soundPool, v
 {
     ALOGV("callback: (%d, %d, %d, %p, %p)", event.mMsg, event.mArg1, event.mArg2, soundPool, user);
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    env->CallStaticVoidMethod(fields.mSoundPoolClass, fields.mPostEvent, user, event.mMsg, event.mArg1, event.mArg2, NULL);
+    env->CallStaticVoidMethod(
+            fields.mSoundPoolClass, fields.mPostEvent, user, event.mMsg, event.mArg1, event.mArg2,
+            nullptr /* object */);
 }
 
 static jint
 android_media_SoundPool_native_setup(JNIEnv *env, jobject thiz, jobject weakRef,
         jint maxChannels, jobject jaa)
 {
-    if (jaa == 0) {
+    if (jaa == nullptr) {
         ALOGE("Error creating SoundPool: invalid audio attributes");
         return -1;
     }
 
-    audio_attributes_t *paa = NULL;
+    audio_attributes_t *paa = nullptr;
     // read the AudioAttributes values
     paa = (audio_attributes_t *) calloc(1, sizeof(audio_attributes_t));
-    const jstring jtags =
+    const auto jtags =
             (jstring) env->GetObjectField(jaa, javaAudioAttrFields.fieldFormattedTags);
-    const char* tags = env->GetStringUTFChars(jtags, NULL);
+    const char* tags = env->GetStringUTFChars(jtags, nullptr);
     // copying array size -1, char array for tags was calloc'd, no need to NULL-terminate it
     strncpy(paa->tags, tags, AUDIO_ATTRIBUTES_TAGS_MAX_SIZE - 1);
     env->ReleaseStringUTFChars(jtags, tags);
@@ -201,8 +203,8 @@ android_media_SoundPool_native_setup(JNIEnv *env, jobject thiz, jobject weakRef,
     paa->flags = env->GetIntField(jaa, javaAudioAttrFields.fieldFlags);
 
     ALOGV("android_media_SoundPool_native_setup");
-    SoundPool *ap = new SoundPool(maxChannels, paa);
-    if (ap == NULL) {
+    auto *ap = new SoundPool(maxChannels, paa);
+    if (ap == nullptr) {
         return -1;
     }
 
@@ -224,12 +226,12 @@ android_media_SoundPool_release(JNIEnv *env, jobject thiz)
 {
     ALOGV("android_media_SoundPool_release");
     SoundPool *ap = MusterSoundPool(env, thiz);
-    if (ap != NULL) {
+    if (ap != nullptr) {
 
         // release weak reference and clear callback
-        jobject weakRef = (jobject) ap->getUserData();
-        ap->setCallback(NULL, NULL);
-        if (weakRef != NULL) {
+        auto weakRef = (jobject) ap->getUserData();
+        ap->setCallback(nullptr /* callback */, nullptr /* user */);
+        if (weakRef != nullptr) {
             env->DeleteGlobalRef(weakRef);
         }
 
@@ -309,7 +311,7 @@ static const char* const kClassPathName = "android/media/SoundPool";
 
 jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
 {
-    JNIEnv* env = NULL;
+    JNIEnv* env = nullptr;
     jint result = -1;
     jclass clazz;
 
@@ -317,23 +319,23 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
         ALOGE("ERROR: GetEnv failed\n");
         return result;
     }
-    assert(env != NULL);
+    assert(env != nullptr);
 
     clazz = env->FindClass(kClassPathName);
-    if (clazz == NULL) {
+    if (clazz == nullptr) {
         ALOGE("Can't find %s", kClassPathName);
         return result;
     }
 
     fields.mNativeContext = env->GetFieldID(clazz, "mNativeContext", "J");
-    if (fields.mNativeContext == NULL) {
+    if (fields.mNativeContext == nullptr) {
         ALOGE("Can't find SoundPool.mNativeContext");
         return result;
     }
 
     fields.mPostEvent = env->GetStaticMethodID(clazz, "postEventFromNative",
                                                "(Ljava/lang/Object;IIILjava/lang/Object;)V");
-    if (fields.mPostEvent == NULL) {
+    if (fields.mPostEvent == nullptr) {
         ALOGE("Can't find android/media/SoundPool.postEventFromNative");
         return result;
     }
@@ -342,16 +344,18 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     // since it's a static object.
     fields.mSoundPoolClass = (jclass) env->NewGlobalRef(clazz);
 
-    if (AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods)) < 0)
+    if (AndroidRuntime::registerNativeMethods(
+                env, kClassPathName, gMethods, NELEM(gMethods)) < 0) {
         return result;
+    }
 
     // Get the AudioAttributes class and fields
     jclass audioAttrClass = env->FindClass(kAudioAttributesClassPathName);
-    if (audioAttrClass == NULL) {
+    if (audioAttrClass == nullptr) {
         ALOGE("Can't find %s", kAudioAttributesClassPathName);
         return result;
     }
-    jclass audioAttributesClassRef = (jclass)env->NewGlobalRef(audioAttrClass);
+    auto audioAttributesClassRef = (jclass)env->NewGlobalRef(audioAttrClass);
     javaAudioAttrFields.fieldUsage = env->GetFieldID(audioAttributesClassRef, "mUsage", "I");
     javaAudioAttrFields.fieldContentType
                                    = env->GetFieldID(audioAttributesClassRef, "mContentType", "I");
@@ -359,9 +363,10 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     javaAudioAttrFields.fieldFormattedTags =
             env->GetFieldID(audioAttributesClassRef, "mFormattedTags", "Ljava/lang/String;");
     env->DeleteGlobalRef(audioAttributesClassRef);
-    if (javaAudioAttrFields.fieldUsage == NULL || javaAudioAttrFields.fieldContentType == NULL
-            || javaAudioAttrFields.fieldFlags == NULL
-            || javaAudioAttrFields.fieldFormattedTags == NULL) {
+    if (javaAudioAttrFields.fieldUsage == nullptr
+            || javaAudioAttrFields.fieldContentType == nullptr
+            || javaAudioAttrFields.fieldFlags == nullptr
+            || javaAudioAttrFields.fieldFormattedTags == nullptr) {
         ALOGE("Can't initialize AudioAttributes fields");
         return result;
     }

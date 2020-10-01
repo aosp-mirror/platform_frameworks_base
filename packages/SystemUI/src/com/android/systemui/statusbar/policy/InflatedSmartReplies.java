@@ -124,7 +124,7 @@ public class InflatedSmartReplies {
         if (left == right) return true;
         if (left == null || right == null) return false;
 
-        if (!Arrays.equals(left.getSmartReplies(), right.getSmartReplies())) {
+        if (!left.getSmartReplies().equals(right.getSmartReplies())) {
             return false;
         }
 
@@ -144,13 +144,13 @@ public class InflatedSmartReplies {
             return false;
         }
         // If we are showing the spinner we don't want to add the buttons.
-        boolean showingSpinner = entry.notification.getNotification()
+        boolean showingSpinner = entry.getSbn().getNotification()
                 .extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
         if (showingSpinner) {
             return false;
         }
         // If we are keeping the notification around while sending we don't want to add the buttons.
-        boolean hideSmartReplies = entry.notification.getNotification()
+        boolean hideSmartReplies = entry.getSbn().getNotification()
                 .extras.getBoolean(Notification.EXTRA_HIDE_SMART_REPLIES, false);
         if (hideSmartReplies) {
             return false;
@@ -168,7 +168,7 @@ public class InflatedSmartReplies {
     public static SmartRepliesAndActions chooseSmartRepliesAndActions(
             SmartReplyConstants smartReplyConstants,
             final NotificationEntry entry) {
-        Notification notification = entry.notification.getNotification();
+        Notification notification = entry.getSbn().getNotification();
         Pair<RemoteInput, Notification.Action> remoteInputActionPair =
                 notification.findRemoteInputActionPair(false /* freeform */);
         Pair<RemoteInput, Notification.Action> freeformRemoteInputActionPair =
@@ -177,7 +177,7 @@ public class InflatedSmartReplies {
         if (!smartReplyConstants.isEnabled()) {
             if (DEBUG) {
                 Log.d(TAG, "Smart suggestions not enabled, not adding suggestions for "
-                        + entry.notification.getKey());
+                        + entry.getSbn().getKey());
             }
             return new SmartRepliesAndActions(null, null);
         }
@@ -200,7 +200,7 @@ public class InflatedSmartReplies {
         SmartReplyView.SmartActions smartActions = null;
         if (appGeneratedSmartRepliesExist) {
             smartReplies = new SmartReplyView.SmartReplies(
-                    remoteInputActionPair.first.getChoices(),
+                    Arrays.asList(remoteInputActionPair.first.getChoices()),
                     remoteInputActionPair.first,
                     remoteInputActionPair.second.actionIntent,
                     false /* fromAssistant */);
@@ -211,22 +211,22 @@ public class InflatedSmartReplies {
         }
         // Apps didn't provide any smart replies / actions, use those from NAS (if any).
         if (!appGeneratedSmartRepliesExist && !appGeneratedSmartActionsExist) {
-            boolean useGeneratedReplies = !ArrayUtils.isEmpty(entry.systemGeneratedSmartReplies)
+            boolean useGeneratedReplies = !ArrayUtils.isEmpty(entry.getSmartReplies())
                     && freeformRemoteInputActionPair != null
                     && freeformRemoteInputActionPair.second.getAllowGeneratedReplies()
                     && freeformRemoteInputActionPair.second.actionIntent != null;
             if (useGeneratedReplies) {
                 smartReplies = new SmartReplyView.SmartReplies(
-                        entry.systemGeneratedSmartReplies,
+                        entry.getSmartReplies(),
                         freeformRemoteInputActionPair.first,
                         freeformRemoteInputActionPair.second.actionIntent,
                         true /* fromAssistant */);
             }
-            boolean useSmartActions = !ArrayUtils.isEmpty(entry.systemGeneratedSmartActions)
+            boolean useSmartActions = !ArrayUtils.isEmpty(entry.getSmartActions())
                     && notification.getAllowSystemGeneratedContextualActions();
             if (useSmartActions) {
                 List<Notification.Action> systemGeneratedActions =
-                        entry.systemGeneratedSmartActions;
+                        entry.getSmartActions();
                 // Filter actions if we're in kiosk-mode - we don't care about screen pinning mode,
                 // since notifications aren't shown there anyway.
                 ActivityManagerWrapper activityManagerWrapper =
@@ -271,7 +271,7 @@ public class InflatedSmartReplies {
      * through the remote input.
      */
     public static boolean hasFreeformRemoteInput(NotificationEntry entry) {
-        Notification notification = entry.notification.getNotification();
+        Notification notification = entry.getSbn().getNotification();
         return null != notification.findRemoteInputActionPair(true /* freeform */);
     }
 
@@ -289,8 +289,8 @@ public class InflatedSmartReplies {
             this.smartActions = smartActions;
         }
 
-        @NonNull public CharSequence[] getSmartReplies() {
-            return smartReplies == null ? new CharSequence[0] : smartReplies.choices;
+        @NonNull public List<CharSequence> getSmartReplies() {
+            return smartReplies == null ? Collections.emptyList() : smartReplies.choices;
         }
 
         @NonNull public List<Notification.Action> getSmartActions() {

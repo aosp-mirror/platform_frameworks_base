@@ -1,0 +1,133 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.util.quota;
+
+option java_multiple_files = true;
+
+import "frameworks/base/core/proto/android/privacy.proto";
+
+// A com.android.util.quota.QuotaTracker object.
+message QuotaTrackerProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+  optional bool is_enabled = 1;
+
+  // If quota is free for everything in the tracker.
+  optional bool is_global_quota_free = 2;
+
+  // Current elapsed realtime.
+  optional int64 elapsed_realtime = 3;
+
+  message InQuotaAlarmListener {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // The time at which the alarm is set to go off, in the elapsed realtime timebase.
+    optional int64 trigger_time_elapsed = 1;
+
+    message Alarm {
+      option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+      optional UptcProto uptc = 1;
+
+      // The time at which the UPTC will be in quota, in the elapsed realtime timebase.
+      optional int64 in_quota_time_elapsed = 2;
+    }
+    repeated Alarm alarms = 2;
+  }
+  optional InQuotaAlarmListener in_quota_alarm_listener = 4;
+
+  // Next tag: 5
+}
+
+// A com.android.util.quota.Category object.
+message CategoryProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+  // Name of the category set by the system service.
+  optional string name = 1;
+}
+
+// A com.android.util.quota.Uptc object.
+message UptcProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+  // UserHandle value. Should be 0, 10, 11, 12, etc. where 0 is the owner.
+  optional int32 user_id = 1;
+  // Package name
+  optional string name = 2;
+  // Tag set by the system service to differentiate calls.
+  optional string tag = 3;
+}
+
+// A com.android.util.quota.CountQuotaTracker object.
+message CountQuotaTrackerProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+  optional QuotaTrackerProto base_quota_data = 1;
+
+  message CountLimit {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional CategoryProto category = 1;
+    optional int32 limit = 2;
+    optional int64 window_size_ms = 3;
+  }
+  repeated CountLimit count_limit = 2;
+
+  message Event {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // The time the event occurred, in the elapsed realtime timebase.
+    optional int64 timestamp_elapsed = 1;
+  }
+
+  message ExecutionStats {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // The time after which this record should be considered invalid (out of date), in the
+    // elapsed realtime timebase.
+    optional int64 expiration_time_elapsed = 1;
+
+    optional int64 window_size_ms = 2;
+    optional int32 count_limit = 3;
+
+    // The total number of events that occurred in the window.
+    optional int32 count_in_window = 4;
+
+    // The time after which the app will be under the bucket quota. This is only valid if
+    // count_in_window >= count_limit.
+    optional int64 in_quota_time_elapsed = 5;
+  }
+
+  message UptcStats {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional UptcProto uptc = 1;
+
+    // True if the UPTC has been given free quota.
+    optional bool is_quota_free = 2;
+
+    repeated Event events = 3;
+
+    repeated ExecutionStats execution_stats = 4;
+  }
+  repeated UptcStats uptc_stats = 3;
+
+  // Next tag: 4
+}

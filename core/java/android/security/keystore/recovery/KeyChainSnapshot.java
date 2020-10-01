@@ -27,6 +27,7 @@ import com.android.internal.util.Preconditions;
 import java.security.cert.CertPath;
 import java.security.cert.CertificateException;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A snapshot of a version of the keystore. Two events can trigger the generation of a new snapshot:
@@ -272,9 +273,9 @@ public final class KeyChainSnapshot implements Parcelable {
                     "keyChainProtectionParams");
             Preconditions.checkCollectionElementsNotNull(mInstance.mEntryRecoveryData,
                     "entryRecoveryData");
-            Preconditions.checkNotNull(mInstance.mEncryptedRecoveryKeyBlob);
-            Preconditions.checkNotNull(mInstance.mServerParams);
-            Preconditions.checkNotNull(mInstance.mCertPath);
+            Objects.requireNonNull(mInstance.mEncryptedRecoveryKeyBlob);
+            Objects.requireNonNull(mInstance.mServerParams);
+            Objects.requireNonNull(mInstance.mCertPath);
             return mInstance;
         }
     }

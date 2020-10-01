@@ -155,13 +155,19 @@ class MenuVisitor : public BaseVisitor {
   void Visit(xml::Element* node) override {
     if (node->namespace_uri.empty() && node->name == "item") {
       for (const auto& attr : node->attributes) {
-        if (attr.namespace_uri == xml::kSchemaAndroid) {
-          if ((attr.name == "actionViewClass" || attr.name == "actionProviderClass") &&
-              util::IsJavaClassName(attr.value)) {
-            AddClass(node->line_number, attr.value, "android.content.Context");
-          } else if (attr.name == "onClick") {
-            AddMethod(node->line_number, attr.value, "android.view.MenuItem");
-          }
+        // AppCompat-v7 defines its own versions of Android attributes if
+        // they're defined after SDK 7 (the below are from 11 and 14,
+        // respectively), so don't bother checking the XML namespace.
+        //
+        // Given the names of the containing XML files and the attribute
+        // names, it's unlikely that keeping these classes would be wrong.
+        if ((attr.name == "actionViewClass" || attr.name == "actionProviderClass") &&
+            util::IsJavaClassName(attr.value)) {
+          AddClass(node->line_number, attr.value, "android.content.Context");
+        }
+
+        if (attr.namespace_uri == xml::kSchemaAndroid && attr.name == "onClick") {
+          AddMethod(node->line_number, attr.value, "android.view.MenuItem");
         }
       }
     }
@@ -388,11 +394,15 @@ bool CollectProguardRules(IAaptContext* context_, xml::XmlResource* res, KeepSet
   return true;
 }
 
-void WriteKeepSet(const KeepSet& keep_set, OutputStream* out, bool minimal_keep) {
+void WriteKeepSet(const KeepSet& keep_set, OutputStream* out, bool minimal_keep,
+                  bool no_location_reference) {
+
   Printer printer(out);
   for (const auto& entry : keep_set.manifest_class_set_) {
-    for (const UsageLocation& location : entry.second) {
-      printer.Print("# Referenced at ").Println(location.source.to_string());
+    if (!no_location_reference) {
+      for (const UsageLocation& location : entry.second) {
+        printer.Print("# Referenced at ").Println(location.source.to_string());
+      }
     }
     printer.Print("-keep class ").Print(entry.first).Println(" { <init>(); }");
   }
@@ -409,7 +419,9 @@ void WriteKeepSet(const KeepSet& keep_set, OutputStream* out, bool minimal_keep)
 
     if (can_be_conditional) {
       for (const UsageLocation& location : locations) {
-        printer.Print("# Referenced at ").Println(location.source.to_string());
+        if (!no_location_reference) {
+          printer.Print("# Referenced at ").Println(location.source.to_string());
+        }
         printer.Print("-if class **.R$layout { int ")
             .Print(JavaClassGenerator::TransformToFieldName(location.name.entry))
             .Println("; }");
@@ -419,8 +431,10 @@ void WriteKeepSet(const KeepSet& keep_set, OutputStream* out, bool minimal_keep)
         printer.Println("); }");
       }
     } else {
-      for (const UsageLocation& location : entry.second) {
-        printer.Print("# Referenced at ").Println(location.source.to_string());
+      if (!no_location_reference) {
+        for (const UsageLocation& location : entry.second) {
+          printer.Print("# Referenced at ").Println(location.source.to_string());
+        }
       }
 
       printer.Print("-keep class ").Print(entry.first.name).Print(" { <init>(");
@@ -431,8 +445,10 @@ void WriteKeepSet(const KeepSet& keep_set, OutputStream* out, bool minimal_keep)
   }
 
   for (const auto& entry : keep_set.method_set_) {
-    for (const UsageLocation& location : entry.second) {
-      printer.Print("# Referenced at ").Println(location.source.to_string());
+    if (!no_location_reference) {
+      for (const UsageLocation& location : entry.second) {
+        printer.Print("# Referenced at ").Println(location.source.to_string());
+      }
     }
     printer.Print("-keepclassmembers class * { *** ").Print(entry.first.name)
         .Print("(").Print(entry.first.signature).Println("); }");

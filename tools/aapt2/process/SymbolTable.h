@@ -194,7 +194,7 @@ class AssetManagerSymbolSource : public ISymbolSource {
 
   bool AddAssetPath(const android::StringPiece& path);
   std::map<size_t, std::string> GetAssignedPackageIds() const;
-  bool IsPackageDynamic(uint32_t packageId) const;
+  bool IsPackageDynamic(uint32_t packageId, const std::string& package_name) const;
 
   std::unique_ptr<SymbolTable::Symbol> FindByName(
       const ResourceName& name) override;

@@ -47,10 +47,12 @@ import java.util.Objects;
 public class AudioMixingRule {
 
     private AudioMixingRule(int mixType, ArrayList<AudioMixMatchCriterion> criteria,
-                            boolean allowPrivilegedPlaybackCapture) {
+                            boolean allowPrivilegedPlaybackCapture,
+                            boolean voiceCommunicationCaptureAllowed) {
         mCriteria = criteria;
         mTargetMixType = mixType;
         mAllowPrivilegedPlaybackCapture = allowPrivilegedPlaybackCapture;
+        mVoiceCommunicationCaptureAllowed = voiceCommunicationCaptureAllowed;
     }
 
     /**
@@ -73,6 +75,12 @@ public class AudioMixingRule {
      * parameter is an instance of {@link java.lang.Integer}.
      */
     public static final int RULE_MATCH_UID = 0x1 << 2;
+    /**
+     * A rule requiring the userId of the audio stream to match that specified.
+     * This mixing rule can be added with {@link Builder#addMixRule(int, Object)} where the Object
+     * parameter is an instance of {@link java.lang.Integer}.
+     */
+    public static final int RULE_MATCH_USERID = 0x1 << 3;
 
     private final static int RULE_EXCLUSION_MASK = 0x8000;
     /**
@@ -93,6 +101,13 @@ public class AudioMixingRule {
      */
     public static final int RULE_EXCLUDE_UID =
             RULE_EXCLUSION_MASK | RULE_MATCH_UID;
+
+    /**
+     * @hide
+     * A rule requiring the userId information to differ.
+     */
+    public static final int RULE_EXCLUDE_USERID =
+            RULE_EXCLUSION_MASK | RULE_MATCH_USERID;
 
     /** @hide */
     public static final class AudioMixMatchCriterion {
@@ -125,19 +140,20 @@ public class AudioMixingRule {
             dest.writeInt(mRule);
             final int match_rule = mRule & ~RULE_EXCLUSION_MASK;
             switch (match_rule) {
-            case RULE_MATCH_ATTRIBUTE_USAGE:
-                dest.writeInt(mAttr.getUsage());
-                break;
-            case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
-                dest.writeInt(mAttr.getCapturePreset());
-                break;
-            case RULE_MATCH_UID:
-                dest.writeInt(mIntProp);
-                break;
-            default:
-                Log.e("AudioMixMatchCriterion", "Unknown match rule" + match_rule
-                        + " when writing to Parcel");
-                dest.writeInt(-1);
+                case RULE_MATCH_ATTRIBUTE_USAGE:
+                    dest.writeInt(mAttr.getUsage());
+                    break;
+                case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
+                    dest.writeInt(mAttr.getCapturePreset());
+                    break;
+                case RULE_MATCH_UID:
+                case RULE_MATCH_USERID:
+                    dest.writeInt(mIntProp);
+                    break;
+                default:
+                    Log.e("AudioMixMatchCriterion", "Unknown match rule" + match_rule
+                            + " when writing to Parcel");
+                    dest.writeInt(-1);
             }
         }
 
@@ -149,6 +165,23 @@ public class AudioMixingRule {
     boolean isAffectingUsage(int usage) {
         for (AudioMixMatchCriterion criterion : mCriteria) {
             if ((criterion.mRule & RULE_MATCH_ATTRIBUTE_USAGE) != 0
+                    && criterion.mAttr != null
+                    && criterion.mAttr.getUsage() == usage) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+      * Returns {@code true} if this rule contains a RULE_MATCH_ATTRIBUTE_USAGE criterion for
+      * the given usage
+      *
+      * @hide
+      */
+    boolean containsMatchAttributeRuleForUsage(int usage) {
+        for (AudioMixMatchCriterion criterion : mCriteria) {
+            if (criterion.mRule == RULE_MATCH_ATTRIBUTE_USAGE
                     && criterion.mAttr != null
                     && criterion.mAttr.getUsage() == usage) {
                 return true;
@@ -174,10 +207,22 @@ public class AudioMixingRule {
     public ArrayList<AudioMixMatchCriterion> getCriteria() { return mCriteria; }
     @UnsupportedAppUsage
     private boolean mAllowPrivilegedPlaybackCapture = false;
+    @UnsupportedAppUsage
+    private boolean mVoiceCommunicationCaptureAllowed = false;
 
     /** @hide */
     public boolean allowPrivilegedPlaybackCapture() {
         return mAllowPrivilegedPlaybackCapture;
+    }
+
+    /** @hide */
+    public boolean voiceCommunicationCaptureAllowed() {
+        return mVoiceCommunicationCaptureAllowed;
+    }
+
+    /** @hide */
+    public void setVoiceCommunicationCaptureAllowed(boolean allowed) {
+        mVoiceCommunicationCaptureAllowed = allowed;
     }
 
     /** @hide */
@@ -189,12 +234,18 @@ public class AudioMixingRule {
         final AudioMixingRule that = (AudioMixingRule) o;
         return (this.mTargetMixType == that.mTargetMixType)
                 && (areCriteriaEquivalent(this.mCriteria, that.mCriteria)
-                && this.mAllowPrivilegedPlaybackCapture == that.mAllowPrivilegedPlaybackCapture);
+                && this.mAllowPrivilegedPlaybackCapture == that.mAllowPrivilegedPlaybackCapture
+                && this.mVoiceCommunicationCaptureAllowed
+                    == that.mVoiceCommunicationCaptureAllowed);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mTargetMixType, mCriteria, mAllowPrivilegedPlaybackCapture);
+        return Objects.hash(
+            mTargetMixType,
+            mCriteria,
+            mAllowPrivilegedPlaybackCapture,
+            mVoiceCommunicationCaptureAllowed);
     }
 
     private static boolean isValidSystemApiRule(int rule) {
@@ -203,6 +254,7 @@ public class AudioMixingRule {
             case RULE_MATCH_ATTRIBUTE_USAGE:
             case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
             case RULE_MATCH_UID:
+            case RULE_MATCH_USERID:
                 return true;
             default:
                 return false;
@@ -225,6 +277,7 @@ public class AudioMixingRule {
             case RULE_MATCH_ATTRIBUTE_USAGE:
             case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
             case RULE_MATCH_UID:
+            case RULE_MATCH_USERID:
                 return true;
             default:
                 return false;
@@ -234,11 +287,12 @@ public class AudioMixingRule {
     private static boolean isPlayerRule(int rule) {
         final int match_rule = rule & ~RULE_EXCLUSION_MASK;
         switch (match_rule) {
-        case RULE_MATCH_ATTRIBUTE_USAGE:
-        case RULE_MATCH_UID:
-            return true;
-        default:
-            return false;
+            case RULE_MATCH_ATTRIBUTE_USAGE:
+            case RULE_MATCH_UID:
+            case RULE_MATCH_USERID:
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -259,6 +313,8 @@ public class AudioMixingRule {
         private ArrayList<AudioMixMatchCriterion> mCriteria;
         private int mTargetMixType = AudioMix.MIX_TYPE_INVALID;
         private boolean mAllowPrivilegedPlaybackCapture = false;
+        // This value should be set internally according to a permission check
+        private boolean mVoiceCommunicationCaptureAllowed = false;
 
         /**
          * Constructs a new Builder with no rules.
@@ -319,7 +375,8 @@ public class AudioMixingRule {
          * property to match against.
          * @param rule one of {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_USAGE},
          *     {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET} or
-         *     {@link AudioMixingRule#RULE_MATCH_UID}.
+         *     {@link AudioMixingRule#RULE_MATCH_UID} or
+         *     {@link AudioMixingRule#RULE_MATCH_USERID}.
          * @param property see the definition of each rule for the type to use (either an
          *     {@link AudioAttributes} or an {@link java.lang.Integer}).
          * @return the same Builder instance.
@@ -349,7 +406,8 @@ public class AudioMixingRule {
          * coming from the specified UID.
          * @param rule one of {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_USAGE},
          *     {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET} or
-         *     {@link AudioMixingRule#RULE_MATCH_UID}.
+         *     {@link AudioMixingRule#RULE_MATCH_UID} or
+         *     {@link AudioMixingRule#RULE_MATCH_USERID}.
          * @param property see the definition of each rule for the type to use (either an
          *     {@link AudioAttributes} or an {@link java.lang.Integer}).
          * @return the same Builder instance.
@@ -378,6 +436,23 @@ public class AudioMixingRule {
          */
         public @NonNull Builder allowPrivilegedPlaybackCapture(boolean allow) {
             mAllowPrivilegedPlaybackCapture = allow;
+            return this;
+        }
+
+        /**
+         * Set if the caller of the rule is able to capture voice communication output.
+         * A system app can capture voice communication output only if it is granted with the.
+         * CAPTURE_VOICE_COMMUNICATION_OUTPUT permission.
+         *
+         * Note that this method is for internal use only and should not be called by the app that
+         * creates the rule.
+         *
+         * @return the same Builder instance.
+         *
+         * @hide
+         */
+        public @NonNull Builder voiceCommunicationCaptureAllowed(boolean allowed) {
+            mVoiceCommunicationCaptureAllowed = allowed;
             return this;
         }
 
@@ -425,6 +500,8 @@ public class AudioMixingRule {
          *     {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET} or
          *     {@link AudioMixingRule#RULE_EXCLUDE_ATTRIBUTE_CAPTURE_PRESET},
          *     {@link AudioMixingRule#RULE_MATCH_UID}, {@link AudioMixingRule#RULE_EXCLUDE_UID}.
+         *     {@link AudioMixingRule#RULE_MATCH_USERID},
+         *     {@link AudioMixingRule#RULE_EXCLUDE_USERID}.
          * @return the same Builder instance.
          * @throws IllegalArgumentException
          */
@@ -495,6 +572,20 @@ public class AudioMixingRule {
                                 }
                             }
                             break;
+                        case RULE_MATCH_USERID:
+                            // "userid"-based rule
+                            if (criterion.mIntProp == intProp.intValue()) {
+                                if (criterion.mRule == rule) {
+                                    // rule already exists, we're done
+                                    return this;
+                                } else {
+                                    // criterion already exists with a another rule,
+                                    // it is incompatible
+                                    throw new IllegalArgumentException("Contradictory rule exists"
+                                            + " for userId " + intProp);
+                                }
+                            }
+                            break;
                     }
                 }
                 // rule didn't exist, add it
@@ -504,6 +595,7 @@ public class AudioMixingRule {
                         mCriteria.add(new AudioMixMatchCriterion(attrToMatch, rule));
                         break;
                     case RULE_MATCH_UID:
+                    case RULE_MATCH_USERID:
                         mCriteria.add(new AudioMixMatchCriterion(intProp, rule));
                         break;
                     default:
@@ -530,6 +622,7 @@ public class AudioMixingRule {
                             .setInternalCapturePreset(preset).build();
                     break;
                 case RULE_MATCH_UID:
+                case RULE_MATCH_USERID:
                     intProp = new Integer(in.readInt());
                     break;
                 default:
@@ -546,7 +639,8 @@ public class AudioMixingRule {
          * @return a new {@link AudioMixingRule} object
          */
         public AudioMixingRule build() {
-            return new AudioMixingRule(mTargetMixType, mCriteria, mAllowPrivilegedPlaybackCapture);
+            return new AudioMixingRule(mTargetMixType, mCriteria,
+                mAllowPrivilegedPlaybackCapture, mVoiceCommunicationCaptureAllowed);
         }
     }
 }

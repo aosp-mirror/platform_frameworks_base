@@ -24,8 +24,11 @@ import android.os.Parcelable;
 /**
  * A class representing a GPS satellite measurement, containing raw and computed information.
  *
+ * @deprecated use {@link GnssMeasurement} instead.
+ *
  * @hide
  */
+@Deprecated
 @SystemApi
 public class GpsMeasurement implements Parcelable {
     private int mFlags;

@@ -20,11 +20,11 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.android.internal.telephony.IccCardConstants.State;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.WirelessUtils;
@@ -70,7 +70,7 @@ public class OperatorNameView extends TextView implements DemoMode, DarkReceiver
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mKeyguardUpdateMonitor.registerCallback(mCallback);
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(this);
         Dependency.get(NetworkController.class).addCallback(this);
@@ -138,9 +138,9 @@ public class OperatorNameView extends TextView implements DemoMode, DarkReceiver
         final int N = subs.size();
         for (int i = 0; i < N; i++) {
             int subId = subs.get(i).getSubscriptionId();
-            State simState = mKeyguardUpdateMonitor.getSimState(subId);
+            int simState = mKeyguardUpdateMonitor.getSimState(subId);
             CharSequence carrierName = subs.get(i).getCarrierName();
-            if (!TextUtils.isEmpty(carrierName) && simState == State.READY) {
+            if (!TextUtils.isEmpty(carrierName) && simState == TelephonyManager.SIM_STATE_READY) {
                 ServiceState ss = mKeyguardUpdateMonitor.getServiceState(subId);
                 if (ss != null && ss.getState() == ServiceState.STATE_IN_SERVICE) {
                     displayText = carrierName;

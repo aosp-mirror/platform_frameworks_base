@@ -39,6 +39,7 @@ public class ProtoTests {
         suite.addTestSuite(ProtoInputStreamBytesTest.class);
         suite.addTestSuite(ProtoInputStreamEnumTest.class);
         suite.addTestSuite(ProtoInputStreamObjectTest.class);
+        suite.addTestSuite(ProtoInputStreamIncompleteValueTest.class);
 
         return suite;
     }

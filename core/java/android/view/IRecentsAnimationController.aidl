@@ -67,21 +67,9 @@ interface IRecentsAnimationController {
     void setAnimationTargetsBehindSystemBars(boolean behindSystemBars);
 
     /**
-     * Informs the system that the primary split-screen stack should be minimized.
-     */
-    void setSplitScreenMinimized(boolean minimized);
-
-    /**
      * Hides the current input method if one is showing.
      */
     void hideCurrentInputMethod();
-
-    /**
-     * This call is deprecated, use #setDeferCancelUntilNextTransition() instead
-     * TODO(138144750): Remove this method once there are no callers
-     * @deprecated
-     */
-    void setCancelWithDeferredScreenshot(boolean screenshot);
 
     /**
      * Clean up the screenshot of previous task which was created during recents animation that
@@ -120,4 +108,22 @@ interface IRecentsAnimationController {
      * @see IRecentsAnimationRunner#onCancelled
      */
     void setDeferCancelUntilNextTransition(boolean defer, boolean screenshot);
+
+    /**
+     * Sets a state for controller to decide which surface is the destination when the recents
+     * animation is cancelled through fail safe mechanism.
+     */
+    void setWillFinishToHome(boolean willFinishToHome);
+
+    /**
+     * Stops controlling a task that is currently controlled by this recents animation.
+     *
+     * This method should be called when a task that has been received via {@link #onAnimationStart}
+     * or {@link #onTaskAppeared} is no longer needed.  After calling this method, the task will
+     * either disappear from the screen, or jump to its final position in case it was the top task.
+     *
+     * @param taskId Id of the Task target to remove
+     * @return {@code true} when target removed successfully, {@code false} otherwise.
+     */
+    boolean removeTask(int taskId);
 }

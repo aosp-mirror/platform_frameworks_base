@@ -570,7 +570,7 @@ public class Camera2StillCaptureTest extends Camera2SurfaceViewTestCase {
     }
 
     /**
-     * Validate JPEG capture image object sanity and test.
+     * Validate JPEG capture image object soundness and test.
      * <p>
      * In addition to image object sanity, this function also does the decoding
      * test, which is slower.

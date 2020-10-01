@@ -52,9 +52,9 @@ import android.util.Slog;
  * entropy estimate is not increased. This is to avoid having to trust/verify
  * the quality and authenticity of the &quot;randomness&quot; of the HW RNG.
  *
- * <p>This class was modeled after the script in
- * <a href="http://www.kernel.org/doc/man-pages/online/pages/man4/random.4.html">man
- * 4 random</a>.
+ * <p>This class was modeled after the script in the
+ * <a href="http://www.kernel.org/doc/man-pages/online/pages/man4/random.4.html">
+ * random(4) manual page</a>.
  */
 public class EntropyMixer extends Binder {
     private static final String TAG = "EntropyMixer";

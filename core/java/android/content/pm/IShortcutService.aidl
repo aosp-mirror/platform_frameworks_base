@@ -29,18 +29,12 @@ interface IShortcutService {
     boolean setDynamicShortcuts(String packageName, in ParceledListSlice shortcutInfoList,
             int userId);
 
-    ParceledListSlice getDynamicShortcuts(String packageName, int userId);
-
-    ParceledListSlice getManifestShortcuts(String packageName, int userId);
-
     boolean addDynamicShortcuts(String packageName, in ParceledListSlice shortcutInfoList,
             int userId);
 
     void removeDynamicShortcuts(String packageName, in List shortcutIds, int userId);
 
     void removeAllDynamicShortcuts(String packageName, int userId);
-
-    ParceledListSlice getPinnedShortcuts(String packageName, int userId);
 
     boolean updateShortcuts(String packageName, in ParceledListSlice shortcuts, int userId);
 
@@ -78,4 +72,10 @@ interface IShortcutService {
     ParceledListSlice getShareTargets(String packageName, in IntentFilter filter, int userId);
 
     boolean hasShareTargets(String packageName, String packageToCheck, int userId);
+
+    void removeLongLivedShortcuts(String packageName, in List shortcutIds, int userId);
+
+    ParceledListSlice getShortcuts(String packageName, int matchFlags, int userId);
+
+    void pushDynamicShortcut(String packageName, in ShortcutInfo shortcut, int userId);
 }

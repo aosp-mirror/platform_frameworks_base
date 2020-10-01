@@ -28,6 +28,17 @@ import android.os.UserHandle;
  */
 interface ICrossProfileApps {
     void startActivityAsUser(in IApplicationThread caller, in String callingPackage,
-            in ComponentName component, int userId, boolean launchMainActivity);
+            in String callingFeatureId, in ComponentName component, int userId,
+            boolean launchMainActivity);
+    void startActivityAsUserByIntent(in IApplicationThread caller, in String callingPackage,
+            in String callingFeatureId, in Intent intent, int userId, in IBinder callingActivity,
+            in Bundle options);
     List<UserHandle> getTargetUserProfiles(in String callingPackage);
+    boolean canInteractAcrossProfiles(in String callingPackage);
+    boolean canRequestInteractAcrossProfiles(in String callingPackage);
+    void setInteractAcrossProfilesAppOp(in String packageName, int newMode);
+    boolean canConfigureInteractAcrossProfiles(in String packageName);
+    boolean canUserAttemptToConfigureInteractAcrossProfiles(in String packageName);
+    void resetInteractAcrossProfilesAppOps(in List<String> packageNames);
+    void clearInteractAcrossProfilesAppOps();
 }

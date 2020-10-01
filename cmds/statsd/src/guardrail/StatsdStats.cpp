@@ -20,7 +20,7 @@
 
 #include <android/util/ProtoOutputStream.h>
 #include "../stats_log_util.h"
-#include "statslog.h"
+#include "statslog_statsd.h"
 #include "storage/StorageManager.h"
 
 namespace android {
@@ -36,9 +36,9 @@ using android::util::FIELD_TYPE_MESSAGE;
 using android::util::FIELD_TYPE_STRING;
 using android::util::ProtoOutputStream;
 using std::lock_guard;
-using std::map;
 using std::shared_ptr;
 using std::string;
+using std::to_string;
 using std::vector;
 
 const int FIELD_ID_BEGIN_TIME = 1;
@@ -55,6 +55,7 @@ const int FIELD_ID_ACTIVATION_BROADCAST_GUARDRAIL = 19;
 
 const int FIELD_ID_ATOM_STATS_TAG = 1;
 const int FIELD_ID_ATOM_STATS_COUNT = 2;
+const int FIELD_ID_ATOM_STATS_ERROR_COUNT = 3;
 
 const int FIELD_ID_ANOMALY_ALARMS_REGISTERED = 1;
 const int FIELD_ID_PERIODIC_ALARMS_REGISTERED = 1;
@@ -114,13 +115,13 @@ const int FIELD_ID_ACTIVATION_BROADCAST_GUARDRAIL_UID = 1;
 const int FIELD_ID_ACTIVATION_BROADCAST_GUARDRAIL_TIME = 2;
 
 const std::map<int, std::pair<size_t, size_t>> StatsdStats::kAtomDimensionKeySizeLimitMap = {
-        {android::util::BINDER_CALLS, {6000, 10000}},
-        {android::util::LOOPER_STATS, {1500, 2500}},
-        {android::util::CPU_TIME_PER_UID_FREQ, {6000, 10000}},
+        {util::BINDER_CALLS, {6000, 10000}},
+        {util::LOOPER_STATS, {1500, 2500}},
+        {util::CPU_TIME_PER_UID_FREQ, {6000, 10000}},
 };
 
 StatsdStats::StatsdStats() {
-    mPushedAtomStats.resize(android::util::kMaxPushedAtomId + 1);
+    mPushedAtomStats.resize(kMaxPushedAtomId + 1);
     mStartTimeSec = getWallClockSec();
 }
 
@@ -436,9 +437,18 @@ void StatsdStats::notePullDataError(int pullAtomId) {
     mPulledAtomStats[pullAtomId].dataError++;
 }
 
-void StatsdStats::notePullTimeout(int pullAtomId) {
+void StatsdStats::notePullTimeout(int pullAtomId,
+                                  int64_t pullUptimeMillis,
+                                  int64_t pullElapsedMillis) {
     lock_guard<std::mutex> lock(mLock);
-    mPulledAtomStats[pullAtomId].pullTimeout++;
+    PulledAtomStats& pulledAtomStats = mPulledAtomStats[pullAtomId];
+    pulledAtomStats.pullTimeout++;
+
+    if (pulledAtomStats.pullTimeoutMetadata.size() == kMaxTimestampCount) {
+        pulledAtomStats.pullTimeoutMetadata.pop_front();
+    }
+
+    pulledAtomStats.pullTimeoutMetadata.emplace_back(pullUptimeMillis, pullElapsedMillis);
 }
 
 void StatsdStats::notePullExceedMaxDelay(int pullAtomId) {
@@ -449,7 +459,7 @@ void StatsdStats::notePullExceedMaxDelay(int pullAtomId) {
 void StatsdStats::noteAtomLogged(int atomId, int32_t timeSec) {
     lock_guard<std::mutex> lock(mLock);
 
-    if (atomId <= android::util::kMaxPushedAtomId) {
+    if (atomId <= kMaxPushedAtomId) {
         mPushedAtomStats[atomId]++;
     } else {
         if (mNonPlatformPushedAtomStats.size() < kMaxNonPlatformPushedAtoms) {
@@ -472,14 +482,19 @@ void StatsdStats::notePullFailed(int atomId) {
     mPulledAtomStats[atomId].pullFailed++;
 }
 
-void StatsdStats::noteStatsCompanionPullFailed(int atomId) {
+void StatsdStats::notePullUidProviderNotFound(int atomId) {
     lock_guard<std::mutex> lock(mLock);
-    mPulledAtomStats[atomId].statsCompanionPullFailed++;
+    mPulledAtomStats[atomId].pullUidProviderNotFound++;
 }
 
-void StatsdStats::noteStatsCompanionPullBinderTransactionFailed(int atomId) {
+void StatsdStats::notePullerNotFound(int atomId) {
     lock_guard<std::mutex> lock(mLock);
-    mPulledAtomStats[atomId].statsCompanionPullBinderTransactionFailed++;
+    mPulledAtomStats[atomId].pullerNotFound++;
+}
+
+void StatsdStats::notePullBinderCallFailed(int atomId) {
+    lock_guard<std::mutex> lock(mLock);
+    mPulledAtomStats[atomId].binderCallFailCount++;
 }
 
 void StatsdStats::noteEmptyData(int atomId) {
@@ -550,6 +565,20 @@ void StatsdStats::noteBucketBoundaryDelayNs(int64_t metricId, int64_t timeDelayN
             std::min(pullStats.minBucketBoundaryDelayNs, timeDelayNs);
 }
 
+void StatsdStats::noteAtomError(int atomTag, bool pull) {
+    lock_guard<std::mutex> lock(mLock);
+    if (pull) {
+        mPulledAtomStats[atomTag].atomErrorCount++;
+        return;
+    }
+
+    bool present = (mPushedAtomErrorStats.find(atomTag) != mPushedAtomErrorStats.end());
+    bool full = (mPushedAtomErrorStats.size() >= (size_t)kMaxPushedAtomErrorStatsSize);
+    if (!full || present) {
+        mPushedAtomErrorStats[atomTag]++;
+    }
+}
+
 StatsdStats::AtomMetricStats& StatsdStats::getAtomMetricStats(int64_t metricId) {
     auto atomMetricStatsIter = mAtomMetricStats.find(metricId);
     if (atomMetricStatsIter != mAtomMetricStats.end()) {
@@ -594,6 +623,7 @@ void StatsdStats::resetInternalLocked() {
     for (auto& pullStats : mPulledAtomStats) {
         pullStats.second.totalPull = 0;
         pullStats.second.totalPullFromCache = 0;
+        pullStats.second.minPullIntervalSec = LONG_MAX;
         pullStats.second.avgPullTimeNs = 0;
         pullStats.second.maxPullTimeNs = 0;
         pullStats.second.numPullTime = 0;
@@ -603,11 +633,18 @@ void StatsdStats::resetInternalLocked() {
         pullStats.second.dataError = 0;
         pullStats.second.pullTimeout = 0;
         pullStats.second.pullExceedMaxDelay = 0;
+        pullStats.second.pullFailed = 0;
+        pullStats.second.pullUidProviderNotFound = 0;
+        pullStats.second.pullerNotFound = 0;
         pullStats.second.registeredCount = 0;
         pullStats.second.unregisteredCount = 0;
+        pullStats.second.atomErrorCount = 0;
+        pullStats.second.binderCallFailCount = 0;
+        pullStats.second.pullTimeoutMetadata.clear();
     }
     mAtomMetricStats.clear();
     mActivationBroadcastGuardrailStats.clear();
+    mPushedAtomErrorStats.clear();
 }
 
 string buildTimeString(int64_t timeSec) {
@@ -616,6 +653,15 @@ string buildTimeString(int64_t timeSec) {
     char timeBuffer[80];
     strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %I:%M%p", tm);
     return string(timeBuffer);
+}
+
+int StatsdStats::getPushedAtomErrors(int atomId) const {
+    const auto& it = mPushedAtomErrorStats.find(atomId);
+    if (it != mPushedAtomErrorStats.end()) {
+        return it->second;
+    } else {
+        return 0;
+    }
 }
 
 void StatsdStats::dumpStats(int out) const {
@@ -722,11 +768,13 @@ void StatsdStats::dumpStats(int out) const {
     const size_t atomCounts = mPushedAtomStats.size();
     for (size_t i = 2; i < atomCounts; i++) {
         if (mPushedAtomStats[i] > 0) {
-            dprintf(out, "Atom %lu->%d\n", (unsigned long)i, mPushedAtomStats[i]);
+            dprintf(out, "Atom %zu->(total count)%d, (error count)%d\n", i, mPushedAtomStats[i],
+                    getPushedAtomErrors((int)i));
         }
     }
     for (const auto& pair : mNonPlatformPushedAtomStats) {
-        dprintf(out, "Atom %lu->%d\n", (unsigned long)pair.first, pair.second);
+        dprintf(out, "Atom %d->(total count)%d, (error count)%d\n", pair.first, pair.second,
+                getPushedAtomErrors(pair.first));
     }
 
     dprintf(out, "********Pulled Atom stats***********\n");
@@ -737,14 +785,32 @@ void StatsdStats::dumpStats(int out) const {
                 "  (average pull time nanos)%lld, (max pull time nanos)%lld, (average pull delay "
                 "nanos)%lld, "
                 "  (max pull delay nanos)%lld, (data error)%ld\n"
-                "  (pull timeout)%ld, (pull exceed max delay)%ld\n"
-                "  (registered count) %ld, (unregistered count) %ld\n",
+                "  (pull timeout)%ld, (pull exceed max delay)%ld"
+                "  (no uid provider count)%ld, (no puller found count)%ld\n"
+                "  (registered count) %ld, (unregistered count) %ld"
+                "  (atom error count) %d\n",
                 (int)pair.first, (long)pair.second.totalPull, (long)pair.second.totalPullFromCache,
                 (long)pair.second.pullFailed, (long)pair.second.minPullIntervalSec,
                 (long long)pair.second.avgPullTimeNs, (long long)pair.second.maxPullTimeNs,
                 (long long)pair.second.avgPullDelayNs, (long long)pair.second.maxPullDelayNs,
                 pair.second.dataError, pair.second.pullTimeout, pair.second.pullExceedMaxDelay,
-                pair.second.registeredCount, pair.second.unregisteredCount);
+                pair.second.pullUidProviderNotFound, pair.second.pullerNotFound,
+                pair.second.registeredCount, pair.second.unregisteredCount,
+                pair.second.atomErrorCount);
+        if (pair.second.pullTimeoutMetadata.size() > 0) {
+            string uptimeMillis = "(pull timeout system uptime millis) ";
+            string pullTimeoutMillis = "(pull timeout elapsed time millis) ";
+            for (const auto& stats : pair.second.pullTimeoutMetadata) {
+                uptimeMillis.append(to_string(stats.pullTimeoutUptimeMillis)).append(",");;
+                pullTimeoutMillis.append(to_string(stats.pullTimeoutElapsedMillis)).append(",");
+            }
+            uptimeMillis.pop_back();
+            uptimeMillis.push_back('\n');
+            pullTimeoutMillis.pop_back();
+            pullTimeoutMillis.push_back('\n');
+            dprintf(out, "%s", uptimeMillis.c_str());
+            dprintf(out, "%s", pullTimeoutMillis.c_str());
+        }
     }
 
     if (mAnomalyAlarmRegisteredStats > 0) {
@@ -920,6 +986,10 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
                     proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_ATOM_STATS | FIELD_COUNT_REPEATED);
             proto.write(FIELD_TYPE_INT32 | FIELD_ID_ATOM_STATS_TAG, (int32_t)i);
             proto.write(FIELD_TYPE_INT32 | FIELD_ID_ATOM_STATS_COUNT, mPushedAtomStats[i]);
+            int errors = getPushedAtomErrors(i);
+            if (errors > 0) {
+                proto.write(FIELD_TYPE_INT32 | FIELD_ID_ATOM_STATS_ERROR_COUNT, errors);
+            }
             proto.end(token);
         }
     }
@@ -929,6 +999,10 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
                 proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_ATOM_STATS | FIELD_COUNT_REPEATED);
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_ATOM_STATS_TAG, pair.first);
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_ATOM_STATS_COUNT, pair.second);
+        int errors = getPushedAtomErrors(pair.first);
+        if (errors > 0) {
+            proto.write(FIELD_TYPE_INT32 | FIELD_ID_ATOM_STATS_ERROR_COUNT, errors);
+        }
         proto.end(token);
     }
 

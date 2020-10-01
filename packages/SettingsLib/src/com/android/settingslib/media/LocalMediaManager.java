@@ -15,17 +15,27 @@
  */
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
+
 import android.app.Notification;
-import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.media.RoutingSessionInfo;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.settingslib.bluetooth.A2dpProfile;
 import com.android.settingslib.bluetooth.BluetoothCallback;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
+import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
+import com.android.settingslib.bluetooth.HearingAidProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.settingslib.bluetooth.LocalBluetoothProfile;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -34,6 +44,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * LocalMediaManager provide interface to get MediaDevice list and transfer media to MediaDevice.
@@ -41,112 +52,143 @@ import java.util.List;
 public class LocalMediaManager implements BluetoothCallback {
     private static final Comparator<MediaDevice> COMPARATOR = Comparator.naturalOrder();
     private static final String TAG = "LocalMediaManager";
+    private static final int MAX_DISCONNECTED_DEVICE_NUM = 5;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({MediaDeviceState.STATE_CONNECTED,
             MediaDeviceState.STATE_CONNECTING,
-            MediaDeviceState.STATE_DISCONNECTED})
+            MediaDeviceState.STATE_DISCONNECTED,
+            MediaDeviceState.STATE_CONNECTING_FAILED})
     public @interface MediaDeviceState {
-        int STATE_CONNECTED = 1;
-        int STATE_CONNECTING = 2;
-        int STATE_DISCONNECTED = 3;
+        int STATE_CONNECTED = 0;
+        int STATE_CONNECTING = 1;
+        int STATE_DISCONNECTED = 2;
+        int STATE_CONNECTING_FAILED = 3;
     }
 
-    private final Collection<DeviceCallback> mCallbacks = new ArrayList<>();
+    private final Collection<DeviceCallback> mCallbacks = new CopyOnWriteArrayList<>();
+    private final Object mMediaDevicesLock = new Object();
     @VisibleForTesting
     final MediaDeviceCallback mMediaDeviceCallback = new MediaDeviceCallback();
 
     private Context mContext;
-    private BluetoothMediaManager mBluetoothMediaManager;
     private LocalBluetoothManager mLocalBluetoothManager;
+    private InfoMediaManager mInfoMediaManager;
+    private String mPackageName;
+    private MediaDevice mOnTransferBluetoothDevice;
 
     @VisibleForTesting
-    List<MediaDevice> mMediaDevices = new ArrayList<>();
+    List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
+    @VisibleForTesting
+    List<MediaDevice> mDisconnectedMediaDevices = new CopyOnWriteArrayList<>();
     @VisibleForTesting
     MediaDevice mPhoneDevice;
     @VisibleForTesting
     MediaDevice mCurrentConnectedDevice;
+    @VisibleForTesting
+    DeviceAttributeChangeCallback mDeviceAttributeChangeCallback =
+            new DeviceAttributeChangeCallback();
+    @VisibleForTesting
+    BluetoothAdapter mBluetoothAdapter;
 
     /**
      * Register to start receiving callbacks for MediaDevice events.
      */
     public void registerCallback(DeviceCallback callback) {
-        synchronized (mCallbacks) {
-            mCallbacks.add(callback);
-        }
+        mCallbacks.add(callback);
     }
 
     /**
      * Unregister to stop receiving callbacks for MediaDevice events
      */
     public void unregisterCallback(DeviceCallback callback) {
-        synchronized (mCallbacks) {
-            mCallbacks.remove(callback);
-        }
+        mCallbacks.remove(callback);
     }
 
+    /**
+     * Creates a LocalMediaManager with references to given managers.
+     *
+     * It will obtain a {@link LocalBluetoothManager} by calling
+     * {@link LocalBluetoothManager#getInstance} and create an {@link InfoMediaManager} passing
+     * that bluetooth manager.
+     *
+     * It will use {@link BluetoothAdapter#getDefaultAdapter()] for setting the bluetooth adapter.
+     */
     public LocalMediaManager(Context context, String packageName, Notification notification) {
         mContext = context;
+        mPackageName = packageName;
         mLocalBluetoothManager =
                 LocalBluetoothManager.getInstance(context, /* onInitCallback= */ null);
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mLocalBluetoothManager == null) {
             Log.e(TAG, "Bluetooth is not supported on this device");
             return;
         }
 
-        mBluetoothMediaManager =
-                new BluetoothMediaManager(context, mLocalBluetoothManager, notification);
+        mInfoMediaManager =
+                new InfoMediaManager(context, packageName, notification, mLocalBluetoothManager);
     }
 
-    @VisibleForTesting
-    LocalMediaManager(Context context, LocalBluetoothManager localBluetoothManager,
-            BluetoothMediaManager bluetoothMediaManager, InfoMediaManager infoMediaManager) {
+    /**
+     * Creates a LocalMediaManager with references to given managers.
+     *
+     * It will use {@link BluetoothAdapter#getDefaultAdapter()] for setting the bluetooth adapter.
+     */
+    public LocalMediaManager(Context context, LocalBluetoothManager localBluetoothManager,
+            InfoMediaManager infoMediaManager, String packageName) {
         mContext = context;
         mLocalBluetoothManager = localBluetoothManager;
-        mBluetoothMediaManager = bluetoothMediaManager;
+        mInfoMediaManager = infoMediaManager;
+        mPackageName = packageName;
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
     /**
      * Connect the MediaDevice to transfer media
      * @param connectDevice the MediaDevice
+     * @return {@code true} if successfully call, otherwise return {@code false}
      */
-    public void connectDevice(MediaDevice connectDevice) {
-        final MediaDevice device = getMediaDeviceById(mMediaDevices, connectDevice.getId());
+    public boolean connectDevice(MediaDevice connectDevice) {
+        MediaDevice device = null;
+        synchronized (mMediaDevicesLock) {
+            device = getMediaDeviceById(mMediaDevices, connectDevice.getId());
+        }
+        if (device == null) {
+            Log.w(TAG, "connectDevice() connectDevice not in the list!");
+            return false;
+        }
         if (device instanceof BluetoothMediaDevice) {
             final CachedBluetoothDevice cachedDevice =
                     ((BluetoothMediaDevice) device).getCachedDevice();
             if (!cachedDevice.isConnected() && !cachedDevice.isBusy()) {
+                mOnTransferBluetoothDevice = connectDevice;
+                device.setState(MediaDeviceState.STATE_CONNECTING);
                 cachedDevice.connect();
-                return;
+                return true;
             }
         }
 
         if (device == mCurrentConnectedDevice) {
             Log.d(TAG, "connectDevice() this device all ready connected! : " + device.getName());
-            return;
+            return false;
         }
 
-        //TODO(b/121083246): Update it once remote media API is ready.
-        if (mCurrentConnectedDevice != null && !(connectDevice instanceof InfoMediaDevice)) {
+        if (mCurrentConnectedDevice != null) {
             mCurrentConnectedDevice.disconnect();
         }
 
-        final boolean isConnected = device.connect();
-        if (isConnected) {
-            mCurrentConnectedDevice = device;
+        device.setState(MediaDeviceState.STATE_CONNECTING);
+        if (TextUtils.isEmpty(mPackageName)) {
+            mInfoMediaManager.connectDeviceWithoutPackageName(device);
+        } else {
+            device.connect();
         }
-
-        final int state = isConnected
-                ? MediaDeviceState.STATE_CONNECTED
-                : MediaDeviceState.STATE_DISCONNECTED;
-        dispatchSelectedDeviceStateChanged(device, state);
+        return true;
     }
 
     void dispatchSelectedDeviceStateChanged(MediaDevice device, @MediaDeviceState int state) {
-        synchronized (mCallbacks) {
-            for (DeviceCallback callback : mCallbacks) {
-                callback.onSelectedDeviceStateChanged(device, state);
-            }
+        for (DeviceCallback callback : getCallbacks()) {
+            callback.onSelectedDeviceStateChanged(device, state);
         }
     }
 
@@ -154,34 +196,30 @@ public class LocalMediaManager implements BluetoothCallback {
      * Start scan connected MediaDevice
      */
     public void startScan() {
-        mMediaDevices.clear();
-        mBluetoothMediaManager.registerCallback(mMediaDeviceCallback);
-        mBluetoothMediaManager.startScan();
-    }
-
-    private void addPhoneDeviceIfNecessary() {
-        // add phone device to list if there have any Bluetooth device and cast device.
-        if (mMediaDevices.size() > 0 && !mMediaDevices.contains(mPhoneDevice)) {
-            if (mPhoneDevice == null) {
-                mPhoneDevice = new PhoneMediaDevice(mContext, mLocalBluetoothManager);
-            }
-            mMediaDevices.add(mPhoneDevice);
-        }
-    }
-
-    private void removePhoneMediaDeviceIfNecessary() {
-        // if PhoneMediaDevice is the last item in the list, remove it.
-        if (mMediaDevices.size() == 1 && mMediaDevices.contains(mPhoneDevice)) {
+        synchronized (mMediaDevicesLock) {
             mMediaDevices.clear();
         }
+        mInfoMediaManager.registerCallback(mMediaDeviceCallback);
+        mInfoMediaManager.startScan();
     }
 
     void dispatchDeviceListUpdate() {
-        synchronized (mCallbacks) {
-            Collections.sort(mMediaDevices, COMPARATOR);
-            for (DeviceCallback callback : mCallbacks) {
-                callback.onDeviceListUpdate(new ArrayList<>(mMediaDevices));
-            }
+        final List<MediaDevice> mediaDevices = new ArrayList<>(mMediaDevices);
+        Collections.sort(mediaDevices, COMPARATOR);
+        for (DeviceCallback callback : getCallbacks()) {
+            callback.onDeviceListUpdate(mediaDevices);
+        }
+    }
+
+    void dispatchDeviceAttributesChanged() {
+        for (DeviceCallback callback : getCallbacks()) {
+            callback.onDeviceAttributesChanged();
+        }
+    }
+
+    void dispatchOnRequestFailed(int reason) {
+        for (DeviceCallback callback : getCallbacks()) {
+            callback.onRequestFailed(reason);
         }
     }
 
@@ -189,8 +227,9 @@ public class LocalMediaManager implements BluetoothCallback {
      * Stop scan MediaDevice
      */
     public void stopScan() {
-        mBluetoothMediaManager.unregisterCallback(mMediaDeviceCallback);
-        mBluetoothMediaManager.stopScan();
+        mInfoMediaManager.unregisterCallback(mMediaDeviceCallback);
+        mInfoMediaManager.stopScan();
+        unRegisterDeviceAttributeChangeCallback();
     }
 
     /**
@@ -202,7 +241,7 @@ public class LocalMediaManager implements BluetoothCallback {
      */
     public MediaDevice getMediaDeviceById(List<MediaDevice> devices, String id) {
         for (MediaDevice mediaDevice : devices) {
-            if (mediaDevice.getId().equals(id)) {
+            if (TextUtils.equals(mediaDevice.getId(), id)) {
                 return mediaDevice;
             }
         }
@@ -211,97 +250,353 @@ public class LocalMediaManager implements BluetoothCallback {
     }
 
     /**
+     * Find the MediaDevice from all media devices by id.
+     *
+     * @param id the unique id of MediaDevice
+     * @return MediaDevice
+     */
+    public MediaDevice getMediaDeviceById(String id) {
+        synchronized (mMediaDevicesLock) {
+            for (MediaDevice mediaDevice : mMediaDevices) {
+                if (TextUtils.equals(mediaDevice.getId(), id)) {
+                    return mediaDevice;
+                }
+            }
+        }
+        Log.i(TAG, "Unable to find device " + id);
+        return null;
+    }
+
+    /**
      * Find the current connected MediaDevice.
      *
      * @return MediaDevice
      */
+    @Nullable
     public MediaDevice getCurrentConnectedDevice() {
         return mCurrentConnectedDevice;
     }
 
-    private MediaDevice updateCurrentConnectedDevice() {
-        for (MediaDevice device : mMediaDevices) {
-            if (device instanceof  BluetoothMediaDevice) {
-                if (isConnected(((BluetoothMediaDevice) device).getCachedDevice())) {
-                    return device;
+    /**
+     * Add a MediaDevice to let it play current media.
+     *
+     * @param device MediaDevice
+     * @return If add device successful return {@code true}, otherwise return {@code false}
+     */
+    public boolean addDeviceToPlayMedia(MediaDevice device) {
+        return mInfoMediaManager.addDeviceToPlayMedia(device);
+    }
+
+    /**
+     * Remove a {@code device} from current media.
+     *
+     * @param device MediaDevice
+     * @return If device stop successful return {@code true}, otherwise return {@code false}
+     */
+    public boolean removeDeviceFromPlayMedia(MediaDevice device) {
+        return mInfoMediaManager.removeDeviceFromPlayMedia(device);
+    }
+
+    /**
+     * Get the MediaDevice list that can be added to current media.
+     *
+     * @return list of MediaDevice
+     */
+    public List<MediaDevice> getSelectableMediaDevice() {
+        return mInfoMediaManager.getSelectableMediaDevice();
+    }
+
+    /**
+     * Get the MediaDevice list that can be removed from current media session.
+     *
+     * @return list of MediaDevice
+     */
+    public List<MediaDevice> getDeselectableMediaDevice() {
+        return mInfoMediaManager.getDeselectableMediaDevice();
+    }
+
+    /**
+     * Release session to stop playing media on MediaDevice.
+     */
+    public boolean releaseSession() {
+        return mInfoMediaManager.releaseSession();
+    }
+
+    /**
+     * Get the MediaDevice list that has been selected to current media.
+     *
+     * @return list of MediaDevice
+     */
+    public List<MediaDevice> getSelectedMediaDevice() {
+        return mInfoMediaManager.getSelectedMediaDevice();
+    }
+
+    /**
+     * Adjust the volume of session.
+     *
+     * @param sessionId the value of media session id
+     * @param volume the value of volume
+     */
+    public void adjustSessionVolume(String sessionId, int volume) {
+        final List<RoutingSessionInfo> infos = getActiveMediaSession();
+        for (RoutingSessionInfo info : infos) {
+            if (TextUtils.equals(sessionId, info.getId())) {
+                mInfoMediaManager.adjustSessionVolume(info, volume);
+                return;
+            }
+        }
+        Log.w(TAG, "adjustSessionVolume: Unable to find session: " + sessionId);
+    }
+
+    /**
+     * Adjust the volume of session.
+     *
+     * @param volume the value of volume
+     */
+    public void adjustSessionVolume(int volume) {
+        mInfoMediaManager.adjustSessionVolume(volume);
+    }
+
+    /**
+     * Gets the maximum volume of the {@link android.media.RoutingSessionInfo}.
+     *
+     * @return  maximum volume of the session, and return -1 if not found.
+     */
+    public int getSessionVolumeMax() {
+        return mInfoMediaManager.getSessionVolumeMax();
+    }
+
+    /**
+     * Gets the current volume of the {@link android.media.RoutingSessionInfo}.
+     *
+     * @return current volume of the session, and return -1 if not found.
+     */
+    public int getSessionVolume() {
+        return mInfoMediaManager.getSessionVolume();
+    }
+
+    /**
+     * Gets the user-visible name of the {@link android.media.RoutingSessionInfo}.
+     *
+     * @return current name of the session, and return {@code null} if not found.
+     */
+    public CharSequence getSessionName() {
+        return mInfoMediaManager.getSessionName();
+    }
+
+    /**
+     * Gets the current active session.
+     *
+     * @return current active session list{@link android.media.RoutingSessionInfo}
+     */
+    public List<RoutingSessionInfo> getActiveMediaSession() {
+        return mInfoMediaManager.getActiveMediaSession();
+    }
+
+    /**
+     * Gets the current package name.
+     *
+     * @return current package name
+     */
+    public String getPackageName() {
+        return mPackageName;
+    }
+
+    @VisibleForTesting
+    MediaDevice updateCurrentConnectedDevice() {
+        MediaDevice connectedDevice = null;
+        synchronized (mMediaDevicesLock) {
+            for (MediaDevice device : mMediaDevices) {
+                if (device instanceof BluetoothMediaDevice) {
+                    if (isActiveDevice(((BluetoothMediaDevice) device).getCachedDevice())
+                            && device.isConnected()) {
+                        return device;
+                    }
+                } else if (device instanceof PhoneMediaDevice) {
+                    connectedDevice = device;
                 }
             }
         }
-        return mMediaDevices.contains(mPhoneDevice) ? mPhoneDevice : null;
+
+        return connectedDevice;
     }
 
-    private boolean isConnected(CachedBluetoothDevice device) {
-        return device.isActiveDevice(BluetoothProfile.A2DP)
-                || device.isActiveDevice(BluetoothProfile.HEARING_AID);
+    private boolean isActiveDevice(CachedBluetoothDevice device) {
+        boolean isActiveDeviceA2dp = false;
+        boolean isActiveDeviceHearingAid = false;
+        final A2dpProfile a2dpProfile = mLocalBluetoothManager.getProfileManager().getA2dpProfile();
+        if (a2dpProfile != null) {
+            isActiveDeviceA2dp = device.getDevice().equals(a2dpProfile.getActiveDevice());
+        }
+        if (!isActiveDeviceA2dp) {
+            final HearingAidProfile hearingAidProfile = mLocalBluetoothManager.getProfileManager()
+                    .getHearingAidProfile();
+            if (hearingAidProfile != null) {
+                isActiveDeviceHearingAid =
+                        hearingAidProfile.getActiveDevices().contains(device.getDevice());
+            }
+        }
+
+        return isActiveDeviceA2dp || isActiveDeviceHearingAid;
+    }
+
+    private Collection<DeviceCallback> getCallbacks() {
+        return new CopyOnWriteArrayList<>(mCallbacks);
     }
 
     class MediaDeviceCallback implements MediaManager.MediaDeviceCallback {
         @Override
         public void onDeviceAdded(MediaDevice device) {
-            if (!mMediaDevices.contains(device)) {
-                mMediaDevices.add(device);
-                addPhoneDeviceIfNecessary();
+            boolean isAdded = false;
+            synchronized (mMediaDevicesLock) {
+                if (!mMediaDevices.contains(device)) {
+                    mMediaDevices.add(device);
+                    isAdded = true;
+                }
+            }
+
+            if (isAdded) {
                 dispatchDeviceListUpdate();
             }
         }
 
         @Override
         public void onDeviceListAdded(List<MediaDevice> devices) {
-            for (MediaDevice device : devices) {
-                if (getMediaDeviceById(mMediaDevices, device.getId()) == null) {
-                    mMediaDevices.add(device);
-                }
+            synchronized (mMediaDevicesLock) {
+                mMediaDevices.clear();
+                mMediaDevices.addAll(devices);
+                mMediaDevices.addAll(buildDisconnectedBluetoothDevice());
             }
-            addPhoneDeviceIfNecessary();
-            mCurrentConnectedDevice = updateCurrentConnectedDevice();
-            updatePhoneMediaDeviceSummary();
+
+            final MediaDevice infoMediaDevice = mInfoMediaManager.getCurrentConnectedDevice();
+            mCurrentConnectedDevice = infoMediaDevice != null
+                    ? infoMediaDevice : updateCurrentConnectedDevice();
             dispatchDeviceListUpdate();
+            if (mOnTransferBluetoothDevice != null && mOnTransferBluetoothDevice.isConnected()) {
+                connectDevice(mOnTransferBluetoothDevice);
+                mOnTransferBluetoothDevice.setState(MediaDeviceState.STATE_CONNECTED);
+                dispatchSelectedDeviceStateChanged(mOnTransferBluetoothDevice,
+                        MediaDeviceState.STATE_CONNECTED);
+                mOnTransferBluetoothDevice = null;
+            }
         }
 
-        private void updatePhoneMediaDeviceSummary() {
-            if (mPhoneDevice != null) {
-                ((PhoneMediaDevice) mPhoneDevice)
-                        .updateSummary(mCurrentConnectedDevice == mPhoneDevice);
+        private List<MediaDevice> buildDisconnectedBluetoothDevice() {
+            if (mBluetoothAdapter == null) {
+                Log.w(TAG, "buildDisconnectedBluetoothDevice() BluetoothAdapter is null");
+                return new ArrayList<>();
             }
+
+            final List<BluetoothDevice> bluetoothDevices =
+                    mBluetoothAdapter.getMostRecentlyConnectedDevices();
+            final CachedBluetoothDeviceManager cachedDeviceManager =
+                    mLocalBluetoothManager.getCachedDeviceManager();
+
+            final List<CachedBluetoothDevice> cachedBluetoothDeviceList = new ArrayList<>();
+            int deviceCount = 0;
+            for (BluetoothDevice device : bluetoothDevices) {
+                final CachedBluetoothDevice cachedDevice =
+                        cachedDeviceManager.findDevice(device);
+                if (cachedDevice != null) {
+                    if (cachedDevice.getBondState() == BluetoothDevice.BOND_BONDED
+                            && !cachedDevice.isConnected()
+                            && isA2dpOrHearingAidDevice(cachedDevice)) {
+                        deviceCount++;
+                        cachedBluetoothDeviceList.add(cachedDevice);
+                        if (deviceCount >= MAX_DISCONNECTED_DEVICE_NUM) {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            unRegisterDeviceAttributeChangeCallback();
+            mDisconnectedMediaDevices.clear();
+            for (CachedBluetoothDevice cachedDevice : cachedBluetoothDeviceList) {
+                final MediaDevice mediaDevice = new BluetoothMediaDevice(mContext,
+                        cachedDevice,
+                        null, null, mPackageName);
+                if (!mMediaDevices.contains(mediaDevice)) {
+                    cachedDevice.registerCallback(mDeviceAttributeChangeCallback);
+                    mDisconnectedMediaDevices.add(mediaDevice);
+                }
+            }
+            return new ArrayList<>(mDisconnectedMediaDevices);
+        }
+
+        private boolean isA2dpOrHearingAidDevice(CachedBluetoothDevice device) {
+            for (LocalBluetoothProfile profile : device.getConnectableProfiles()) {
+                if (profile instanceof A2dpProfile || profile instanceof HearingAidProfile) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         @Override
         public void onDeviceRemoved(MediaDevice device) {
-            if (mMediaDevices.contains(device)) {
-                mMediaDevices.remove(device);
-                removePhoneMediaDeviceIfNecessary();
+            boolean isRemoved = false;
+            synchronized (mMediaDevicesLock) {
+                if (mMediaDevices.contains(device)) {
+                    mMediaDevices.remove(device);
+                    isRemoved = true;
+                }
+            }
+            if (isRemoved) {
                 dispatchDeviceListUpdate();
             }
         }
 
         @Override
         public void onDeviceListRemoved(List<MediaDevice> devices) {
-            mMediaDevices.removeAll(devices);
-            removePhoneMediaDeviceIfNecessary();
+            synchronized (mMediaDevicesLock) {
+                mMediaDevices.removeAll(devices);
+            }
             dispatchDeviceListUpdate();
         }
 
         @Override
         public void onConnectedDeviceChanged(String id) {
-            final MediaDevice connectDevice = getMediaDeviceById(mMediaDevices, id);
-
-            if (connectDevice == mCurrentConnectedDevice) {
-                Log.d(TAG, "onConnectedDeviceChanged() this device all ready connected!");
-                return;
+            MediaDevice connectDevice = null;
+            synchronized (mMediaDevicesLock) {
+                connectDevice = getMediaDeviceById(mMediaDevices, id);
             }
+            connectDevice = connectDevice != null
+                    ? connectDevice : updateCurrentConnectedDevice();
+
             mCurrentConnectedDevice = connectDevice;
-            updatePhoneMediaDeviceSummary();
-            dispatchDeviceListUpdate();
+            if (connectDevice != null) {
+                connectDevice.setState(MediaDeviceState.STATE_CONNECTED);
+
+                dispatchSelectedDeviceStateChanged(mCurrentConnectedDevice,
+                        MediaDeviceState.STATE_CONNECTED);
+            }
         }
 
         @Override
         public void onDeviceAttributesChanged() {
-            addPhoneDeviceIfNecessary();
-            removePhoneMediaDeviceIfNecessary();
-            dispatchDeviceListUpdate();
+            dispatchDeviceAttributesChanged();
+        }
+
+        @Override
+        public void onRequestFailed(int reason) {
+            synchronized (mMediaDevicesLock) {
+                for (MediaDevice device : mMediaDevices) {
+                    if (device.getState() == MediaDeviceState.STATE_CONNECTING) {
+                        device.setState(MediaDeviceState.STATE_CONNECTING_FAILED);
+                    }
+                }
+            }
+            dispatchOnRequestFailed(reason);
         }
     }
 
+    private void unRegisterDeviceAttributeChangeCallback() {
+        for (MediaDevice device : mDisconnectedMediaDevices) {
+            ((BluetoothMediaDevice) device).getCachedDevice()
+                    .unregisterCallback(mDeviceAttributeChangeCallback);
+        }
+    }
 
     /**
      * Callback for notifying device information updating
@@ -312,7 +607,7 @@ public class LocalMediaManager implements BluetoothCallback {
          *
          * @param devices MediaDevice list
          */
-        void onDeviceListUpdate(List<MediaDevice> devices);
+        default void onDeviceListUpdate(List<MediaDevice> devices) {};
 
         /**
          * Callback for notifying the connected device is changed.
@@ -323,6 +618,46 @@ public class LocalMediaManager implements BluetoothCallback {
          * {@link MediaDeviceState#STATE_CONNECTING},
          * {@link MediaDeviceState#STATE_DISCONNECTED}
          */
-        void onSelectedDeviceStateChanged(MediaDevice device, @MediaDeviceState int state);
+        default void onSelectedDeviceStateChanged(MediaDevice device,
+                @MediaDeviceState int state) {};
+
+        /**
+         * Callback for notifying the device attributes is changed.
+         */
+        default void onDeviceAttributesChanged() {};
+
+        /**
+         * Callback for notifying that transferring is failed.
+         *
+         * @param reason the reason that the request has failed. Can be one of followings:
+         * {@link android.media.MediaRoute2ProviderService#REASON_UNKNOWN_ERROR},
+         * {@link android.media.MediaRoute2ProviderService#REASON_REJECTED},
+         * {@link android.media.MediaRoute2ProviderService#REASON_NETWORK_ERROR},
+         * {@link android.media.MediaRoute2ProviderService#REASON_ROUTE_NOT_AVAILABLE},
+         * {@link android.media.MediaRoute2ProviderService#REASON_INVALID_COMMAND},
+         */
+        default void onRequestFailed(int reason){};
+    }
+
+    /**
+     * This callback is for update {@link BluetoothMediaDevice} summary when
+     * {@link CachedBluetoothDevice} connection state is changed.
+     */
+    @VisibleForTesting
+    class DeviceAttributeChangeCallback implements CachedBluetoothDevice.Callback {
+
+        @Override
+        public void onDeviceAttributesChanged() {
+            if (mOnTransferBluetoothDevice != null
+                    && !((BluetoothMediaDevice) mOnTransferBluetoothDevice).getCachedDevice()
+                    .isBusy()
+                    && !mOnTransferBluetoothDevice.isConnected()) {
+                // Failed to connect
+                mOnTransferBluetoothDevice.setState(MediaDeviceState.STATE_CONNECTING_FAILED);
+                mOnTransferBluetoothDevice = null;
+                dispatchOnRequestFailed(REASON_UNKNOWN_ERROR);
+            }
+            dispatchDeviceAttributesChanged();
+        }
     }
 }

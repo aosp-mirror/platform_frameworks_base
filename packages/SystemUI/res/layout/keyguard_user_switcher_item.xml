@@ -17,7 +17,7 @@
   -->
 
 <!-- LinearLayout -->
-<com.android.systemui.qs.tiles.UserDetailItemView
+<com.android.systemui.statusbar.policy.KeyguardUserDetailItemView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:sysui="http://schemas.android.com/apk/res-auto"
         android:layout_width="wrap_content"
@@ -27,24 +27,21 @@
         android:gravity="center_vertical"
         android:clickable="true"
         android:background="@drawable/ripple_drawable"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        sysui:activatedFontFamily="sans-serif-medium">
+        sysui:regularTextAppearance="@style/TextAppearance.StatusBar.Expanded.UserSwitcher"
+        sysui:activatedTextAppearance="@style/TextAppearance.StatusBar.Expanded.UserSwitcher.Activated">
     <TextView android:id="@+id/user_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="13dp"
-            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.UserSwitcher.UserName"
+            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.UserSwitcher"
             />
     <com.android.systemui.statusbar.phone.UserAvatarView android:id="@+id/user_picture"
-            android:layout_width="@dimen/framed_avatar_size"
-            android:layout_height="@dimen/framed_avatar_size"
+            android:layout_width="@dimen/kg_framed_avatar_size"
+            android:layout_height="@dimen/kg_framed_avatar_size"
             android:contentDescription="@null"
-            android:backgroundTint="@color/qs_user_detail_avatar_tint"
-            android:backgroundTintMode="src_atop"
             sysui:frameWidth="@dimen/keyguard_user_switcher_border_thickness"
             sysui:framePadding="2.5dp"
             sysui:badgeDiameter="18dp"
             sysui:badgeMargin="1dp"
-            sysui:frameColor="@color/qs_user_detail_avatar_frame" />
-</com.android.systemui.qs.tiles.UserDetailItemView>
+            sysui:frameColor="@color/kg_user_switcher_rounded_background_color" />
+</com.android.systemui.statusbar.policy.KeyguardUserDetailItemView>

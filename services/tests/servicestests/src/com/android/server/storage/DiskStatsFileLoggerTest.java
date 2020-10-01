@@ -123,7 +123,7 @@ public class DiskStatsFileLoggerTest extends AndroidTestCase {
         JSONArray cacheSizes = output.getJSONArray(DiskStatsFileLogger.APP_CACHES_KEY);
         assertThat(cacheSizes.length()).isEqualTo(2);
 
-        // We need to do this crazy Set over this because the DiskStatsFileLogger provides no
+        // We need to do this unexpected Set over this because the DiskStatsFileLogger provides no
         // guarantee of the ordering of the apps in its output. By using a set, we avoid any order
         // problems.
         ArraySet<AppSizeGrouping> apps = new ArraySet<>();

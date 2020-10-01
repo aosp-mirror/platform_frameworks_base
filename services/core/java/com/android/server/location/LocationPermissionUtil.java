@@ -49,13 +49,13 @@ public final class LocationPermissionUtil {
     private static boolean hasPermissionLocationHardware(Context context,
             CallerIdentity callerIdentity) {
         return context.checkPermission(android.Manifest.permission.LOCATION_HARDWARE,
-                callerIdentity.mPid, callerIdentity.mUid) == PackageManager.PERMISSION_GRANTED;
+                callerIdentity.pid, callerIdentity.uid) == PackageManager.PERMISSION_GRANTED;
     }
 
     private static boolean hasPermissionUpdateAppOpsStats(Context context,
             CallerIdentity callerIdentity) {
         return context.checkPermission(android.Manifest.permission.UPDATE_APP_OPS_STATS,
-                callerIdentity.mPid, callerIdentity.mUid) == PackageManager.PERMISSION_GRANTED;
+                callerIdentity.pid, callerIdentity.uid) == PackageManager.PERMISSION_GRANTED;
     }
 
     private LocationPermissionUtil() {}

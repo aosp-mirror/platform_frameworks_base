@@ -23,6 +23,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -34,6 +36,7 @@ import android.util.Log;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.util.NotificationChannels;
 
 /**
@@ -49,7 +52,9 @@ public class PipNotification {
     private static final String ACTION_MENU = "PipNotification.menu";
     private static final String ACTION_CLOSE = "PipNotification.close";
 
-    private final PipManager mPipManager = PipManager.getInstance();
+    private final PackageManager mPackageManager;
+
+    private final PipManager mPipManager;
 
     private final NotificationManager mNotificationManager;
     private final Notification.Builder mNotificationBuilder;
@@ -58,13 +63,16 @@ public class PipNotification {
     private String mDefaultTitle;
     private int mDefaultIconResId;
 
+    /** Package name for the application that owns PiP window. */
+    private String mPackageName;
     private boolean mNotified;
-    private String mTitle;
+    private String mMediaTitle;
     private Bitmap mArt;
 
     private PipManager.Listener mPipListener = new PipManager.Listener() {
         @Override
-        public void onPipEntered() {
+        public void onPipEntered(String packageName) {
+            mPackageName = packageName;
             updateMediaControllerMetadata();
             notifyPipNotification();
         }
@@ -72,6 +80,7 @@ public class PipNotification {
         @Override
         public void onPipActivityClosed() {
             dismissPipNotification();
+            mPackageName = null;
         }
 
         @Override
@@ -87,6 +96,7 @@ public class PipNotification {
         @Override
         public void onMoveToFullscreen() {
             dismissPipNotification();
+            mPackageName = null;
         }
 
         @Override
@@ -143,7 +153,10 @@ public class PipNotification {
         }
     };
 
-    public PipNotification(Context context) {
+    public PipNotification(Context context, BroadcastDispatcher broadcastDispatcher,
+            PipManager pipManager) {
+        mPackageManager = context.getPackageManager();
+
         mNotificationManager = (NotificationManager) context.getSystemService(
                 Context.NOTIFICATION_SERVICE);
 
@@ -155,13 +168,14 @@ public class PipNotification {
                         .setContentIntent(createPendingIntent(context, ACTION_MENU))
                         .setDeleteIntent(createPendingIntent(context, ACTION_CLOSE)));
 
+        mPipManager = pipManager;
         mPipManager.addListener(mPipListener);
         mPipManager.addMediaListener(mPipMediaListener);
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ACTION_MENU);
         intentFilter.addAction(ACTION_CLOSE);
-        context.registerReceiver(mEventReceiver, intentFilter);
+        broadcastDispatcher.registerReceiver(mEventReceiver, intentFilter);
 
         onConfigurationChanged(context);
     }
@@ -185,7 +199,7 @@ public class PipNotification {
                 .setShowWhen(true)
                 .setWhen(System.currentTimeMillis())
                 .setSmallIcon(mDefaultIconResId)
-                .setContentTitle(!TextUtils.isEmpty(mTitle) ? mTitle : mDefaultTitle);
+                .setContentTitle(getNotificationTitle());
         if (mArt != null) {
             mNotificationBuilder.setStyle(new Notification.BigPictureStyle()
                     .bigPicture(mArt));
@@ -217,12 +231,34 @@ public class PipNotification {
                 }
             }
         }
-        if (!TextUtils.equals(title, mTitle) || art != mArt) {
-            mTitle = title;
+        if (!TextUtils.equals(title, mMediaTitle) || art != mArt) {
+            mMediaTitle = title;
             mArt = art;
             return true;
         }
         return false;
+    }
+
+    private String getNotificationTitle() {
+        if (!TextUtils.isEmpty(mMediaTitle)) {
+            return mMediaTitle;
+        }
+
+        final String applicationTitle = getApplicationLabel(mPackageName);
+        if (!TextUtils.isEmpty(applicationTitle)) {
+            return applicationTitle;
+        }
+
+        return mDefaultTitle;
+    }
+
+    private String getApplicationLabel(String packageName) {
+        try {
+            final ApplicationInfo appInfo = mPackageManager.getApplicationInfo(packageName, 0);
+            return mPackageManager.getApplicationLabel(appInfo).toString();
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }
     }
 
     private static PendingIntent createPendingIntent(Context context, String action) {

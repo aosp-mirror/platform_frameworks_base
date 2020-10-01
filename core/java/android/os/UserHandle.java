@@ -39,6 +39,7 @@ public final class UserHandle implements Parcelable {
 
     /** @hide A user id to indicate all users on the device */
     @UnsupportedAppUsage
+    @TestApi
     public static final @UserIdInt int USER_ALL = -1;
 
     /** @hide A user handle to indicate all users on the device */
@@ -69,7 +70,10 @@ public final class UserHandle implements Parcelable {
 
     /** @hide An undefined user id */
     @UnsupportedAppUsage
+    @TestApi
     public static final @UserIdInt int USER_NULL = -10000;
+
+    private static final @NonNull UserHandle NULL = new UserHandle(USER_NULL);
 
     /**
      * @hide A user id constant to indicate the "owner" user of the device
@@ -91,6 +95,7 @@ public final class UserHandle implements Parcelable {
 
     /** @hide A user id constant to indicate the "system" user of the device */
     @UnsupportedAppUsage
+    @TestApi
     public static final @UserIdInt int USER_SYSTEM = 0;
 
     /** @hide A user serial constant to indicate the "system" user of the device */
@@ -108,6 +113,27 @@ public final class UserHandle implements Parcelable {
      */
     @UnsupportedAppUsage
     public static final boolean MU_ENABLED = true;
+
+    /** @hide */
+    @TestApi
+    public static final int MIN_SECONDARY_USER_ID = 10;
+
+    /**
+     * Arbitrary user handle cache size. We use the cache even when {@link #MU_ENABLED} is false
+     * anyway, so we can always assume in CTS that UserHandle.of(10) returns a cached instance
+     * even on non-multiuser devices.
+     */
+    private static final int NUM_CACHED_USERS = 4;
+
+    private static final UserHandle[] CACHED_USER_INFOS = new UserHandle[NUM_CACHED_USERS];
+
+    static {
+        // Not lazily initializing the cache, so that we can share them across processes.
+        // (We'll create them in zygote.)
+        for (int i = 0; i < CACHED_USER_INFOS.length; i++) {
+            CACHED_USER_INFOS[i] = new UserHandle(MIN_SECONDARY_USER_ID + i);
+        }
+    }
 
     /** @hide */
     @UnsupportedAppUsage
@@ -128,8 +154,9 @@ public final class UserHandle implements Parcelable {
     @UnsupportedAppUsage
     public static final int AID_CACHE_GID_START = android.os.Process.FIRST_APPLICATION_CACHE_GID;
 
+    /** The userId represented by this UserHandle. */
     @UnsupportedAppUsage
-    final int mHandle;
+    final @UserIdInt int mHandle;
 
     /**
      * Checks to see if the user id is the same for the two uids, i.e., they belong to the same
@@ -209,6 +236,7 @@ public final class UserHandle implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public static @UserIdInt int getUserId(int uid) {
         if (MU_ENABLED) {
             return uid / PER_USER_RANGE;
@@ -229,9 +257,31 @@ public final class UserHandle implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     @SystemApi
     public static UserHandle of(@UserIdInt int userId) {
-        return userId == USER_SYSTEM ? SYSTEM : new UserHandle(userId);
+        if (userId == USER_SYSTEM) {
+            return SYSTEM; // Most common.
+        }
+        // These are sequential; so use a switch. Maybe they'll be optimized to a table lookup.
+        switch (userId) {
+            case USER_ALL:
+                return ALL;
+
+            case USER_CURRENT:
+                return CURRENT;
+
+            case USER_CURRENT_OR_SELF:
+                return CURRENT_OR_SELF;
+        }
+        if (userId >= MIN_SECONDARY_USER_ID
+                && userId < (MIN_SECONDARY_USER_ID + CACHED_USER_INFOS.length)) {
+            return CACHED_USER_INFOS[userId - MIN_SECONDARY_USER_ID];
+        }
+        if (userId == USER_NULL) { // Not common.
+            return NULL;
+        }
+        return new UserHandle(userId);
     }
 
     /**
@@ -239,6 +289,7 @@ public final class UserHandle implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public static int getUid(@UserIdInt int userId, @AppIdInt int appId) {
         if (MU_ENABLED) {
             return userId * PER_USER_RANGE + (appId % PER_USER_RANGE);
@@ -271,7 +322,7 @@ public final class UserHandle implements Parcelable {
     }
 
     /** @hide */
-    public static int getSharedAppGid(int userId, int appId) {
+    public static int getSharedAppGid(@UserIdInt int userId, @AppIdInt int appId) {
         if (appId >= AID_APP_START && appId <= AID_APP_END) {
             return (appId - AID_APP_START) + AID_SHARED_GID_START;
         } else if (appId >= AID_ROOT && appId <= AID_APP_START) {
@@ -301,7 +352,7 @@ public final class UserHandle implements Parcelable {
     }
 
     /** @hide */
-    public static int getCacheAppGid(int userId, int appId) {
+    public static int getCacheAppGid(@UserIdInt int userId, @AppIdInt int appId) {
         if (appId >= AID_APP_START && appId <= AID_APP_END) {
             return getUid(userId, (appId - AID_APP_START) + AID_CACHE_GID_START);
         } else {
@@ -342,8 +393,13 @@ public final class UserHandle implements Parcelable {
     /**
      * Generate a text representation of the uid, breaking out its individual
      * components -- user, app, isolated, etc.
+     *
+     * @param uid The uid to format
+     * @return A string representing the UID with its individual components broken out
      * @hide
      */
+    @SystemApi
+    @NonNull
     public static String formatUid(int uid) {
         StringBuilder sb = new StringBuilder();
         formatUid(sb, uid);
@@ -404,6 +460,7 @@ public final class UserHandle implements Parcelable {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static @UserIdInt int myUserId() {
         return getUserId(Process.myUid());
     }
@@ -433,8 +490,8 @@ public final class UserHandle implements Parcelable {
 
     /** @hide */
     @UnsupportedAppUsage
-    public UserHandle(int h) {
-        mHandle = h;
+    public UserHandle(@UserIdInt int userId) {
+        mHandle = userId;
     }
 
     /**
@@ -468,7 +525,7 @@ public final class UserHandle implements Parcelable {
     public int hashCode() {
         return mHandle;
     }
-    
+
     public int describeContents() {
         return 0;
     }
@@ -480,10 +537,10 @@ public final class UserHandle implements Parcelable {
     /**
      * Write a UserHandle to a Parcel, handling null pointers.  Must be
      * read with {@link #readFromParcel(Parcel)}.
-     * 
+     *
      * @param h The UserHandle to be written.
      * @param out The Parcel in which the UserHandle will be placed.
-     * 
+     *
      * @see #readFromParcel(Parcel)
      */
     public static void writeToParcel(UserHandle h, Parcel out) {
@@ -493,27 +550,29 @@ public final class UserHandle implements Parcelable {
             out.writeInt(USER_NULL);
         }
     }
-    
+
     /**
      * Read a UserHandle from a Parcel that was previously written
      * with {@link #writeToParcel(UserHandle, Parcel)}, returning either
      * a null or new object as appropriate.
-     * 
+     *
      * @param in The Parcel from which to read the UserHandle
      * @return Returns a new UserHandle matching the previously written
      * object, or null if a null had been written.
-     * 
+     *
      * @see #writeToParcel(UserHandle, Parcel)
      */
     public static UserHandle readFromParcel(Parcel in) {
         int h = in.readInt();
         return h != USER_NULL ? new UserHandle(h) : null;
     }
-    
+
     public static final @android.annotation.NonNull Parcelable.Creator<UserHandle> CREATOR
             = new Parcelable.Creator<UserHandle>() {
         public UserHandle createFromParcel(Parcel in) {
-            return new UserHandle(in);
+            // Try to avoid allocation; use of() here. Keep this and the constructor below
+            // in sync.
+            return UserHandle.of(in.readInt());
         }
 
         public UserHandle[] newArray(int size) {
@@ -527,11 +586,11 @@ public final class UserHandle implements Parcelable {
      * must not use this with data written by
      * {@link #writeToParcel(UserHandle, Parcel)} since it is not possible
      * to handle a null UserHandle here.
-     * 
+     *
      * @param in The Parcel containing the previously written UserHandle,
      * positioned at the location in the buffer where it was written.
      */
     public UserHandle(Parcel in) {
-        mHandle = in.readInt();
+        mHandle = in.readInt(); // Keep this and createFromParcel() in sync.
     }
 }

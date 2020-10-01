@@ -22,7 +22,6 @@ import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 
 import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_AUTO;
 import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_DISABLED;
-import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_DEFAULT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -38,6 +37,7 @@ import android.util.Xml;
 import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.DisplayInfo;
+import android.view.IWindowManager;
 import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -100,10 +100,6 @@ class DisplayWindowSettings {
 
     private static class Entry {
         private final String mName;
-        private int mOverscanLeft;
-        private int mOverscanTop;
-        private int mOverscanRight;
-        private int mOverscanBottom;
         private int mWindowingMode = WindowConfiguration.WINDOWING_MODE_UNDEFINED;
         private int mUserRotationMode = WindowManagerPolicy.USER_ROTATION_FREE;
         private int mUserRotation = Surface.ROTATION_0;
@@ -115,8 +111,7 @@ class DisplayWindowSettings {
         private boolean mShouldShowWithInsecureKeyguard = false;
         private boolean mShouldShowSystemDecors = false;
         private boolean mShouldShowIme = false;
-        private @DisplayRotation.FixedToUserRotation int mFixedToUserRotation =
-                FIXED_TO_USER_ROTATION_DEFAULT;
+        private int mFixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
 
         private Entry(String name) {
             mName = name;
@@ -124,10 +119,6 @@ class DisplayWindowSettings {
 
         private Entry(String name, Entry copyFrom) {
             this(name);
-            mOverscanLeft = copyFrom.mOverscanLeft;
-            mOverscanTop = copyFrom.mOverscanTop;
-            mOverscanRight = copyFrom.mOverscanRight;
-            mOverscanBottom = copyFrom.mOverscanBottom;
             mWindowingMode = copyFrom.mWindowingMode;
             mUserRotationMode = copyFrom.mUserRotationMode;
             mUserRotation = copyFrom.mUserRotation;
@@ -144,9 +135,7 @@ class DisplayWindowSettings {
 
         /** @return {@code true} if all values are default. */
         private boolean isEmpty() {
-            return mOverscanLeft == 0 && mOverscanTop == 0 && mOverscanRight == 0
-                    && mOverscanBottom == 0
-                    && mWindowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED
+            return mWindowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED
                     && mUserRotationMode == WindowManagerPolicy.USER_ROTATION_FREE
                     && mUserRotation == Surface.ROTATION_0
                     && mForcedWidth == 0 && mForcedHeight == 0 && mForcedDensity == 0
@@ -155,7 +144,7 @@ class DisplayWindowSettings {
                     && !mShouldShowWithInsecureKeyguard
                     && !mShouldShowSystemDecors
                     && !mShouldShowIme
-                    && mFixedToUserRotation == FIXED_TO_USER_ROTATION_DEFAULT;
+                    && mFixedToUserRotation == IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
         }
     }
 
@@ -200,15 +189,6 @@ class DisplayWindowSettings {
         removeEntry(displayInfo);
         mEntries.put(newEntry.mName, newEntry);
         return newEntry;
-    }
-
-    void setOverscanLocked(DisplayInfo displayInfo, int left, int top, int right, int bottom) {
-        final Entry entry = getOrCreateEntry(displayInfo);
-        entry.mOverscanLeft = left;
-        entry.mOverscanTop = top;
-        entry.mOverscanRight = right;
-        entry.mOverscanBottom = bottom;
-        writeSettingsIfNeeded(entry, displayInfo);
     }
 
     void setUserRotation(DisplayContent displayContent, int rotationMode, int rotation) {
@@ -261,8 +241,7 @@ class DisplayWindowSettings {
         writeSettingsIfNeeded(entry, displayInfo);
     }
 
-    void setFixedToUserRotation(DisplayContent displayContent,
-            @DisplayRotation.FixedToUserRotation int fixedToUserRotation) {
+    void setFixedToUserRotation(DisplayContent displayContent, int fixedToUserRotation) {
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final Entry entry = getOrCreateEntry(displayInfo);
         entry.mFixedToUserRotation = fixedToUserRotation;
@@ -275,14 +254,14 @@ class DisplayWindowSettings {
         // This display used to be in freeform, but we don't support freeform anymore, so fall
         // back to fullscreen.
         if (windowingMode == WindowConfiguration.WINDOWING_MODE_FREEFORM
-                && !mService.mSupportsFreeformWindowManagement) {
+                && !mService.mAtmService.mSupportsFreeformWindowManagement) {
             return WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
         }
         // No record is present so use default windowing mode policy.
         if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
             final boolean forceDesktopMode = mService.mForceDesktopModeOnExternalDisplays
                     && displayId != Display.DEFAULT_DISPLAY;
-            windowingMode = mService.mSupportsFreeformWindowManagement
+            windowingMode = mService.mAtmService.mSupportsFreeformWindowManagement
                     && (mService.mIsPc || forceDesktopMode)
                     ? WindowConfiguration.WINDOWING_MODE_FREEFORM
                     : WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -404,11 +383,6 @@ class DisplayWindowSettings {
 
         // Setting windowing mode first, because it may override overscan values later.
         dc.setWindowingMode(getWindowingModeLocked(entry, dc.getDisplayId()));
-
-        displayInfo.overscanLeft = entry.mOverscanLeft;
-        displayInfo.overscanTop = entry.mOverscanTop;
-        displayInfo.overscanRight = entry.mOverscanRight;
-        displayInfo.overscanBottom = entry.mOverscanBottom;
 
         dc.getDisplayRotation().restoreSettings(entry.mUserRotationMode,
                 entry.mUserRotation, entry.mFixedToUserRotation);
@@ -536,10 +510,6 @@ class DisplayWindowSettings {
         String name = parser.getAttributeValue(null, "name");
         if (name != null) {
             Entry entry = new Entry(name);
-            entry.mOverscanLeft = getIntAttribute(parser, "overscanLeft");
-            entry.mOverscanTop = getIntAttribute(parser, "overscanTop");
-            entry.mOverscanRight = getIntAttribute(parser, "overscanRight");
-            entry.mOverscanBottom = getIntAttribute(parser, "overscanBottom");
             entry.mWindowingMode = getIntAttribute(parser, "windowingMode",
                     WindowConfiguration.WINDOWING_MODE_UNDEFINED);
             entry.mUserRotationMode = getIntAttribute(parser, "userRotationMode",
@@ -602,18 +572,6 @@ class DisplayWindowSettings {
             for (Entry entry : mEntries.values()) {
                 out.startTag(null, "display");
                 out.attribute(null, "name", entry.mName);
-                if (entry.mOverscanLeft != 0) {
-                    out.attribute(null, "overscanLeft", Integer.toString(entry.mOverscanLeft));
-                }
-                if (entry.mOverscanTop != 0) {
-                    out.attribute(null, "overscanTop", Integer.toString(entry.mOverscanTop));
-                }
-                if (entry.mOverscanRight != 0) {
-                    out.attribute(null, "overscanRight", Integer.toString(entry.mOverscanRight));
-                }
-                if (entry.mOverscanBottom != 0) {
-                    out.attribute(null, "overscanBottom", Integer.toString(entry.mOverscanBottom));
-                }
                 if (entry.mWindowingMode != WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
                     out.attribute(null, "windowingMode", Integer.toString(entry.mWindowingMode));
                 }
@@ -650,7 +608,7 @@ class DisplayWindowSettings {
                 if (entry.mShouldShowIme) {
                     out.attribute(null, "shouldShowIme", Boolean.toString(entry.mShouldShowIme));
                 }
-                if (entry.mFixedToUserRotation != FIXED_TO_USER_ROTATION_DEFAULT) {
+                if (entry.mFixedToUserRotation != IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT) {
                     out.attribute(null, "fixedToUserRotation",
                             Integer.toString(entry.mFixedToUserRotation));
                 }
@@ -684,7 +642,8 @@ class DisplayWindowSettings {
         if (mIdentifier == IDENTIFIER_PORT && displayInfo.address != null) {
             // Config suggests using port as identifier for physical displays.
             if (displayInfo.address instanceof DisplayAddress.Physical) {
-                return "port:" + ((DisplayAddress.Physical) displayInfo.address).getPort();
+                byte port = ((DisplayAddress.Physical) displayInfo.address).getPort();
+                return "port:" + Byte.toUnsignedInt(port);
             }
         }
         return displayInfo.uniqueId;

@@ -16,6 +16,13 @@
 
 package com.android.systemui;
 
+import com.android.systemui.dagger.DependencyBinder;
+import com.android.systemui.dagger.DependencyProvider;
+import com.android.systemui.dagger.SystemServicesModule;
+import com.android.systemui.dagger.SystemUIModule;
+import com.android.systemui.dagger.SystemUIRootComponent;
+import com.android.systemui.pip.phone.dagger.PipModule;
+
 import javax.inject.Singleton;
 
 import dagger.Component;
@@ -23,13 +30,16 @@ import dagger.Component;
 @Singleton
 @Component(
         modules = {
+                CarComponentBinder.class,
                 DependencyProvider.class,
                 DependencyBinder.class,
-                ServiceBinder.class,
+                PipModule.class,
                 SystemUIFactory.ContextHolder.class,
+                SystemServicesModule.class,
                 SystemUIModule.class,
-                CarSystemUIModule.class
+                CarSystemUIModule.class,
+                CarSystemUIBinder.class
         })
-interface CarSystemUIRootComponent extends SystemUIRootComponent {
+public interface CarSystemUIRootComponent extends SystemUIRootComponent {
 
 }

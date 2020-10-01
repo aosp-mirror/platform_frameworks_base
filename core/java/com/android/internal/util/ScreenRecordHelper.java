@@ -24,10 +24,6 @@ import android.content.Intent;
  * Helper class to initiate a screen recording
  */
 public class ScreenRecordHelper {
-    private static final String SYSUI_PACKAGE = "com.android.systemui";
-    private static final String SYSUI_SCREENRECORD_LAUNCHER =
-            "com.android.systemui.screenrecord.ScreenRecordDialog";
-
     private final Context mContext;
 
     /**
@@ -42,8 +38,9 @@ public class ScreenRecordHelper {
      * Show dialog of screen recording options to user.
      */
     public void launchRecordPrompt() {
-        final ComponentName launcherComponent = new ComponentName(SYSUI_PACKAGE,
-                SYSUI_SCREENRECORD_LAUNCHER);
+        final ComponentName launcherComponent = ComponentName.unflattenFromString(
+                mContext.getResources().getString(
+                        com.android.internal.R.string.config_screenRecorderComponent));
         final Intent intent = new Intent();
         intent.setComponent(launcherComponent);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

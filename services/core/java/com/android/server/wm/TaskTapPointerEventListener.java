@@ -48,6 +48,16 @@ public class TaskTapPointerEventListener implements PointerEventListener {
         mDisplayContent = displayContent;
     }
 
+    private void restorePointerIcon(int x, int y) {
+        if (mPointerIconType != TYPE_NOT_SPECIFIED) {
+            mPointerIconType = TYPE_NOT_SPECIFIED;
+            // Find the underlying window and ask it to restore the pointer icon.
+            mService.mH.removeMessages(H.RESTORE_POINTER_ICON);
+            mService.mH.obtainMessage(H.RESTORE_POINTER_ICON,
+                    x, y, mDisplayContent).sendToTarget();
+        }
+    }
+
     @Override
     public void onPointerEvent(MotionEvent motionEvent) {
         switch (motionEvent.getActionMasked()) {
@@ -67,6 +77,10 @@ public class TaskTapPointerEventListener implements PointerEventListener {
             case MotionEvent.ACTION_HOVER_MOVE: {
                 final int x = (int) motionEvent.getX();
                 final int y = (int) motionEvent.getY();
+                if (mTouchExcludeRegion.contains(x, y)) {
+                    restorePointerIcon(x, y);
+                    break;
+                }
                 final Task task = mDisplayContent.findTaskForResizePoint(x, y);
                 int iconType = TYPE_NOT_SPECIFIED;
                 if (task != null) {
@@ -103,13 +117,7 @@ public class TaskTapPointerEventListener implements PointerEventListener {
             case MotionEvent.ACTION_HOVER_EXIT: {
                 final int x = (int) motionEvent.getX();
                 final int y = (int) motionEvent.getY();
-                if (mPointerIconType != TYPE_NOT_SPECIFIED) {
-                    mPointerIconType = TYPE_NOT_SPECIFIED;
-                    // Find the underlying window and ask it to restore the pointer icon.
-                    mService.mH.removeMessages(H.RESTORE_POINTER_ICON);
-                    mService.mH.obtainMessage(H.RESTORE_POINTER_ICON,
-                            x, y, mDisplayContent).sendToTarget();
-                }
+                restorePointerIcon(x, y);
             }
             break;
         }

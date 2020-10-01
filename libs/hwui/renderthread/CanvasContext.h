@@ -22,25 +22,26 @@
 #include "FrameMetricsReporter.h"
 #include "IContextFactory.h"
 #include "IRenderPipeline.h"
+#include "JankTracker.h"
 #include "LayerUpdateQueue.h"
 #include "Lighting.h"
 #include "ReliableSurface.h"
 #include "RenderNode.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
+#include "utils/RingBuffer.h"
 
-#include <EGL/egl.h>
 #include <SkBitmap.h>
 #include <SkRect.h>
 #include <SkSize.h>
 #include <cutils/compiler.h>
-#include <gui/Surface.h>
 #include <utils/Functor.h>
 
 #include <functional>
 #include <future>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace android {
@@ -55,7 +56,6 @@ class RenderState;
 
 namespace renderthread {
 
-class EglManager;
 class Frame;
 
 // This per-renderer class manages the bridge between the global EGL context
@@ -110,7 +110,7 @@ public:
     // Won't take effect until next EGLSurface creation
     void setSwapBehavior(SwapBehavior swapBehavior);
 
-    void setSurface(sp<Surface>&& surface, bool enableTimeout = true);
+    void setSurface(ANativeWindow* window, bool enableTimeout = true);
     bool pauseSurface();
     void setStopped(bool stopped);
     bool hasSurface() const { return mNativeSurface.get(); }
@@ -151,8 +151,6 @@ public:
     void removeRenderNode(RenderNode* node);
 
     void setContentDrawBounds(const Rect& bounds) { mContentDrawBounds = bounds; }
-
-    RenderState& getRenderState() { return mRenderThread.renderState(); }
 
     void addFrameMetricsObserver(FrameMetricsObserver* observer) {
         if (mFrameMetricsReporter.get() == nullptr) {
@@ -216,11 +214,12 @@ private:
 
     SkRect computeDirtyRect(const Frame& frame, SkRect* dirty);
 
-    EGLint mLastFrameWidth = 0;
-    EGLint mLastFrameHeight = 0;
+    // The same type as Frame.mWidth and Frame.mHeight
+    int32_t mLastFrameWidth = 0;
+    int32_t mLastFrameHeight = 0;
 
     RenderThread& mRenderThread;
-    sp<ReliableSurface> mNativeSurface;
+    std::unique_ptr<ReliableSurface> mNativeSurface;
     // stopped indicates the CanvasContext will reject actual redraw operations,
     // and defer repaint until it is un-stopped
     bool mStopped = false;
@@ -242,14 +241,15 @@ private:
         nsecs_t queueDuration;
     };
 
-    RingBuffer<SwapHistory, 3> mSwapHistory;
+    // Need at least 4 because we do quad buffer. Add a 5th for good measure.
+    RingBuffer<SwapHistory, 5> mSwapHistory;
     int64_t mFrameNumber = -1;
+    int64_t mDamageId = 0;
 
     // last vsync for a dropped frame due to stuffed queue
     nsecs_t mLastDropVsync = 0;
 
     bool mOpaque;
-    bool mWideColorGamut = false;
     bool mUseForceDark = false;
     LightInfo mLightInfo;
     LightGeometry mLightGeometry = {{0, 0, 0}, 0};
@@ -262,6 +262,7 @@ private:
     std::vector<sp<RenderNode>> mRenderNodes;
 
     FrameInfo* mCurrentFrameInfo = nullptr;
+    RingBuffer<std::pair<FrameInfo*, int64_t>, 4> mLast4FrameInfos;
     std::string mName;
     JankTracker mJankTracker;
     FrameInfoVisualizer mProfiler;

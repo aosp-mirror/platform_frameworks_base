@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="376893116792604964">"SIM ბარათი უზრუნველყოფილი არ არის (MM#2)"</string>
-    <string name="mmcc_illegal_ms" msgid="1593063035884873292">"SIM ბარათი დაუშვებელია (MM#3)"</string>
-    <string name="mmcc_illegal_me" msgid="4477688981805467729">"ტელეფონი დაუშვებელია MM#6"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="8861901652350883183">"SIM ბარათი უზრუნველყოფილი არ არის (MM#2)"</string>
+    <string name="mmcc_illegal_ms" msgid="2604694337529846283">"SIM ბარათი დაუშვებელია (MM#3)"</string>
+    <string name="mmcc_illegal_me" msgid="3099618295079374317">"ტელეფონი დაუშვებელია MM#6"</string>
 </resources>

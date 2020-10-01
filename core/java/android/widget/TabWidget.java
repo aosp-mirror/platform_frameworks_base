@@ -53,14 +53,23 @@ import com.android.internal.R;
  * @attr ref android.R.styleable#TabWidget_tabStripEnabled
  * @attr ref android.R.styleable#TabWidget_tabStripLeft
  * @attr ref android.R.styleable#TabWidget_tabStripRight
+ *
+ * @deprecated new applications should use fragment APIs instead of this class:
+ * Use <a href="{@docRoot}guide/navigation/navigation-swipe-view">TabLayout and ViewPager</a>
+ * instead.
  */
+@Deprecated
 public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     private final Rect mBounds = new Rect();
 
     private OnTabSelectionChanged mSelectionChangedListener;
 
     // This value will be set to 0 as soon as the first tab is added to TabHost.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 137825207, maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@code androidx.viewpager.widget.ViewPager} and "
+                    + "{@code com.google.android.material.tabs.TabLayout} instead.\n"
+                    + "See <a href=\"{@docRoot}guide/navigation/navigation-swipe-view"
+                    + "\">TabLayout and ViewPager</a>")
     private int mSelectedTab = -1;
 
     @Nullable
@@ -69,7 +78,11 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     @Nullable
     private Drawable mRightStrip;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 137825207, maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@code androidx.viewpager.widget.ViewPager} and "
+                    + "{@code com.google.android.material.tabs.TabLayout} instead.\n"
+                    + "See <a href=\"{@docRoot}guide/navigation/navigation-swipe-view"
+                    + "\">TabLayout and ViewPager</a>")
     private boolean mDrawBottomStrips = true;
     private boolean mStripMoved;
 
@@ -546,7 +559,11 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * Provides a way for {@link TabHost} to be notified that the user clicked
      * on a tab indicator.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 137825207, maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@code androidx.viewpager.widget.ViewPager} and "
+                    + "{@code com.google.android.material.tabs.TabLayout} instead.\n"
+                    + "See <a href=\"{@docRoot}guide/navigation/navigation-swipe-view"
+                    + "\">TabLayout and ViewPager</a>")
     void setTabSelectionListener(OnTabSelectionChanged listener) {
         mSelectionChangedListener = listener;
     }

@@ -16,40 +16,50 @@
 
 package android.content;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.ParcelableException;
 
-import com.android.internal.util.Preconditions;
+import java.util.Objects;
 
 /**
- * Contains the result of the application of a {@link ContentProviderOperation}. It is guaranteed
- * to have exactly one of {@link #uri} or {@link #count} set.
+ * Contains the result of the application of a {@link ContentProviderOperation}.
+ * <p>
+ * It is guaranteed to have exactly one of {@link #uri}, {@link #count},
+ * {@link #extras}, or {@link #exception} set.
  */
 public class ContentProviderResult implements Parcelable {
-    public final Uri uri;
-    public final Integer count;
-    /** {@hide} */
-    public final String failure;
+    public final @Nullable Uri uri;
+    public final @Nullable Integer count;
+    public final @Nullable Bundle extras;
+    public final @Nullable Throwable exception;
 
-    public ContentProviderResult(Uri uri) {
-        this(Preconditions.checkNotNull(uri), null, null);
+    public ContentProviderResult(@NonNull Uri uri) {
+        this(Objects.requireNonNull(uri), null, null, null);
     }
 
     public ContentProviderResult(int count) {
-        this(null, count, null);
+        this(null, count, null, null);
+    }
+
+    public ContentProviderResult(@NonNull Bundle extras) {
+        this(null, null, Objects.requireNonNull(extras), null);
+    }
+
+    public ContentProviderResult(@NonNull Throwable exception) {
+        this(null, null, null, exception);
     }
 
     /** {@hide} */
-    public ContentProviderResult(String failure) {
-        this(null, null, failure);
-    }
-
-    /** {@hide} */
-    public ContentProviderResult(Uri uri, Integer count, String failure) {
+    public ContentProviderResult(Uri uri, Integer count, Bundle extras, Throwable exception) {
         this.uri = uri;
         this.count = count;
-        this.failure = failure;
+        this.extras = extras;
+        this.exception = exception;
     }
 
     public ContentProviderResult(Parcel source) {
@@ -64,9 +74,14 @@ public class ContentProviderResult implements Parcelable {
             count = null;
         }
         if (source.readInt() != 0) {
-            failure = source.readString();
+            extras = source.readBundle();
         } else {
-            failure = null;
+            extras = null;
+        }
+        if (source.readInt() != 0) {
+            exception = ParcelableException.readFromParcel(source);
+        } else {
+            exception = null;
         }
     }
 
@@ -74,7 +89,8 @@ public class ContentProviderResult implements Parcelable {
     public ContentProviderResult(ContentProviderResult cpr, int userId) {
         uri = ContentProvider.maybeAddUserId(cpr.uri, userId);
         count = cpr.count;
-        failure = cpr.failure;
+        extras = cpr.extras;
+        exception = cpr.exception;
     }
 
     @Override
@@ -91,9 +107,15 @@ public class ContentProviderResult implements Parcelable {
         } else {
             dest.writeInt(0);
         }
-        if (failure != null) {
+        if (extras != null) {
             dest.writeInt(1);
-            dest.writeString(failure);
+            dest.writeBundle(extras);
+        } else {
+            dest.writeInt(0);
+        }
+        if (exception != null) {
+            dest.writeInt(1);
+            ParcelableException.writeToParcel(dest, exception);
         } else {
             dest.writeInt(0);
         }
@@ -126,8 +148,11 @@ public class ContentProviderResult implements Parcelable {
         if (count != null) {
             sb.append("count=" + count + " ");
         }
-        if (uri != null) {
-            sb.append("failure=" + failure + " ");
+        if (extras != null) {
+            sb.append("extras=" + extras + " ");
+        }
+        if (exception != null) {
+            sb.append("exception=" + exception + " ");
         }
         sb.deleteCharAt(sb.length() - 1);
         sb.append(")");

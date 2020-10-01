@@ -16,10 +16,14 @@
 
 package android.security;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import java.security.KeyPair;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -33,21 +37,37 @@ import java.util.List;
 
 public final class AttestedKeyPair {
     private final KeyPair mKeyPair;
-    private final Certificate[] mAttestationRecord;
+    private final List<Certificate> mAttestationRecord;
 
     /**
-     * @hide Only created by the platform, no need to expose as public API.
+     * Public constructor for creating a new instance (useful for testing).
+     *
+     * @param keyPair the key pair associated with the attestation record.
+     * @param attestationRecord attestation record for the provided key pair.
      */
-    public AttestedKeyPair(KeyPair keyPair, Certificate[] attestationRecord) {
+    public AttestedKeyPair(
+            @Nullable KeyPair keyPair, @NonNull List<Certificate> attestationRecord) {
         mKeyPair = keyPair;
         mAttestationRecord = attestationRecord;
+    }
+
+    /**
+     * @hide used by platform.
+     */
+    public AttestedKeyPair(@Nullable KeyPair keyPair, @Nullable Certificate[] attestationRecord) {
+        mKeyPair = keyPair;
+        if (attestationRecord == null) {
+            mAttestationRecord = new ArrayList();
+        } else {
+            mAttestationRecord = Arrays.asList(attestationRecord);
+        }
     }
 
     /**
      * Returns the generated key pair associated with the attestation record
      * in this instance.
      */
-    public KeyPair getKeyPair() {
+    public @Nullable KeyPair getKeyPair() {
         return mKeyPair;
     }
 
@@ -66,10 +86,7 @@ public final class AttestedKeyPair {
      * and  <a href="https://developer.android.com/training/articles/security-key-attestation.html">
      * Key Attestation</a> for the format of the attestation record inside the certificate.
      */
-    public List<Certificate> getAttestationRecord() {
-        if (mAttestationRecord == null) {
-            return new ArrayList();
-        }
-        return Arrays.asList(mAttestationRecord);
+    public @NonNull List<Certificate> getAttestationRecord() {
+        return Collections.unmodifiableList(mAttestationRecord);
     }
 }

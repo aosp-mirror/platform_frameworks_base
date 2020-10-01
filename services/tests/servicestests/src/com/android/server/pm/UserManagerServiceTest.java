@@ -22,9 +22,13 @@ import android.os.FileUtils;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.support.test.uiautomator.UiDevice;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.text.TextUtils;
 import android.util.AtomicFile;
+
+import androidx.test.InstrumentationRegistry;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,6 +78,14 @@ public class UserManagerServiceTest extends AndroidTestCase {
         assertEquals(accountName, um.getUserAccount(tempUserId));
     }
 
+    public void testUserSystemPackageWhitelist() throws Exception {
+        String cmd = "cmd user report-system-user-package-whitelist-problems --critical-only";
+        final String result = runShellCommand(cmd);
+        if (!TextUtils.isEmpty(result)) {
+            fail("Command '" + cmd + " reported errors:\n" + result);
+        }
+    }
+
     private Bundle createBundle() {
         Bundle result = new Bundle();
         // Tests for 6 allowed types: Integer, Boolean, String, String[], Bundle and Parcelable[]
@@ -118,4 +130,8 @@ public class UserManagerServiceTest extends AndroidTestCase {
         assertEquals(1, childBundle.getInt("bundle_int"));
     }
 
+    private static String runShellCommand(String cmd) throws Exception {
+        return UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+                .executeShellCommand(cmd);
+    }
 }

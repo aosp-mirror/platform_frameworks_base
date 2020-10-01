@@ -149,7 +149,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         mCsiRsrq = inRangeOrUnavailable(csiRsrq, -20, -3);
         mCsiSinr = inRangeOrUnavailable(csiSinr, -23, 23);
         mSsRsrp = inRangeOrUnavailable(ssRsrp, -140, -44);
-        mSsRsrq = inRangeOrUnavailable(ssRsrq, -20, -3);
+        mSsRsrq = inRangeOrUnavailable(ssRsrq, -43, 20);
         mSsSinr = inRangeOrUnavailable(ssSinr, -23, 40);
         updateLevel(null, null);
     }

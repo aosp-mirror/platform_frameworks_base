@@ -93,6 +93,13 @@ public abstract class AutofillFieldClassificationService extends Service {
      */
     public static final String REQUIRED_ALGORITHM_EXACT_MATCH = "EXACT_MATCH";
 
+    /**
+     * Field classification algorithm that compares a credit card string to known last four digits.
+     *
+     * <p>Service implementation must provide this algorithm.</p>
+     */
+    public static final String REQUIRED_ALGORITHM_CREDIT_CARD = "CREDIT_CARD";
+
     /** {@hide} **/
     public static final String EXTRA_SCORES = "scores";
 
@@ -113,8 +120,9 @@ public abstract class AutofillFieldClassificationService extends Service {
     private final Handler mHandler = new Handler(Looper.getMainLooper(), null, true);
 
     /** @hide */
+    @SystemApi
+    @TestApi
     public AutofillFieldClassificationService() {
-
     }
 
     @Override

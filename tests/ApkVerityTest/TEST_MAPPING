@@ -1,0 +1,12 @@
+{
+  "presubmit": [
+    {
+      "name": "ApkVerityTest"
+    },
+    // nextgen test only runs during postsubmit.
+    {
+      "name": "ApkVerityTest",
+      "keywords": ["nextgen"]
+    }
+  ]
+}

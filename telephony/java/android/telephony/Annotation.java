@@ -431,7 +431,7 @@ public class Annotation {
             DataFailCause.LIMITED_TO_IPV6,
             DataFailCause.VSNCP_TIMEOUT,
             DataFailCause.VSNCP_GEN_ERROR,
-            DataFailCause.VSNCP_APN_UNATHORIZED,
+            DataFailCause.VSNCP_APN_UNAUTHORIZED,
             DataFailCause.VSNCP_PDN_LIMIT_EXCEEDED,
             DataFailCause.VSNCP_NO_PDN_GATEWAY_ADDRESS,
             DataFailCause.VSNCP_PDN_GATEWAY_UNREACHABLE,

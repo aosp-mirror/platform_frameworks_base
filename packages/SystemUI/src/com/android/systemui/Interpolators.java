@@ -49,9 +49,16 @@ public class Interpolators {
     public static final Interpolator CUSTOM_40_40 = new PathInterpolator(0.4f, 0f, 0.6f, 1f);
     public static final Interpolator HEADS_UP_APPEAR = new HeadsUpAppearInterpolator();
     public static final Interpolator ICON_OVERSHOT = new PathInterpolator(0.4f, 0f, 0.2f, 1.4f);
+    public static final Interpolator ICON_OVERSHOT_LESS
+            = new PathInterpolator(0.4f, 0f, 0.2f, 1.1f);
     public static final Interpolator PANEL_CLOSE_ACCELERATED
             = new PathInterpolator(0.3f, 0, 0.5f, 1);
     public static final Interpolator BOUNCE = new BounceInterpolator();
+    /**
+     * For state transitions on the control panel that lives in GlobalActions.
+     */
+    public static final Interpolator CONTROL_STATE = new PathInterpolator(0.4f, 0f, 0.2f,
+            1.0f);
 
     /**
      * Interpolator to be used when animating a move based on a click. Pair with enough duration.

@@ -68,12 +68,13 @@ public class IpClientCallbacks {
      */
     public void onNewDhcpResults(DhcpResultsParcelable dhcpResults) {
         // In general callbacks would not use a parcelable directly (DhcpResultsParcelable), and
-        // would use a wrapper instead. But there are already two classes in the tree for DHCP
-        // information: DhcpInfo and DhcpResults, and each of them do not expose an appropriate API
-        // (they are bags of mutable fields and can't be changed because they are public API and
-        // @UnsupportedAppUsage). Adding a third class would cost more than the gain considering
-        // that the only client of this callback is WiFi, which will end up converting the results
-        // to DhcpInfo anyway.
+        // would use a wrapper instead, because of the lack of safety of stable parcelables. But
+        // there are already two classes in the tree for DHCP information: DhcpInfo and DhcpResults,
+        // and neither of them exposes an appropriate API (they are bags of mutable fields and can't
+        // be changed because they are public API and @UnsupportedAppUsage, being no better than the
+        // stable parcelable). Adding a third class would cost more than the gain considering that
+        // the only client of this callback is WiFi, which will end up converting the results to
+        // DhcpInfo anyway.
     }
 
     /**

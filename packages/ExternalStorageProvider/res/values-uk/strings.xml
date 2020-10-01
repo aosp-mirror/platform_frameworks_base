@@ -16,8 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7123375275748530234">"Зовнішня пам’ять"</string>
-    <string name="storage_description" msgid="8541974407321172792">"Локальна пам’ять"</string>
-    <string name="root_internal_storage" msgid="827844243068584127">"Внутрішня пам’ять"</string>
-    <string name="root_documents" msgid="4051252304075469250">"Документи"</string>
+    <string name="app_label" msgid="748293919008814871">"Зовнішня пам’ять"</string>
+    <string name="storage_description" msgid="9176081505553938524">"Локальна пам’ять"</string>
+    <string name="root_internal_storage" msgid="4980477711224234931">"Внутрішня пам’ять"</string>
+    <string name="root_documents" msgid="5695037589229175941">"Документи"</string>
 </resources>

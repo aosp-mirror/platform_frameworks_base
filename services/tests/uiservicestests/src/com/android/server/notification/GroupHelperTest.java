@@ -15,6 +15,8 @@
  */
 package com.android.server.notification;
 
+import static com.android.server.notification.GroupHelper.AUTOGROUP_KEY;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
@@ -153,6 +155,196 @@ public class GroupHelperTest extends UiServiceTestCase {
         verify(mCallback, never()).removeAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
     }
+
+    @Test
+    public void testAutoGroupCount_addingNoGroupSBN() {
+        final String pkg = "package";
+        ArrayList<StatusBarNotification>  notifications = new ArrayList<>();
+        for (int i = 0; i < AUTOGROUP_AT_COUNT + 1; i++) {
+            notifications.add(getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM));
+        }
+
+        for (StatusBarNotification sbn: notifications) {
+            sbn.getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
+            sbn.setOverrideGroupKey(AUTOGROUP_KEY);
+        }
+
+        for (StatusBarNotification sbn: notifications) {
+            mGroupHelper.onNotificationPosted(sbn, true);
+        }
+
+        verify(mCallback, times(AUTOGROUP_AT_COUNT + 1))
+            .updateAutogroupSummary(anyString(), eq(true));
+
+        int userId = UserHandle.SYSTEM.getIdentifier();
+        assertEquals(mGroupHelper.getOngoingGroupCount(
+                userId, pkg, AUTOGROUP_KEY), AUTOGROUP_AT_COUNT + 1);
+    }
+
+    @Test
+    public void testAutoGroupCount_UpdateNotification() {
+        final String pkg = "package";
+        ArrayList<StatusBarNotification>  notifications = new ArrayList<>();
+        for (int i = 0; i < AUTOGROUP_AT_COUNT + 1; i++) {
+            notifications.add(getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM));
+        }
+
+        for (StatusBarNotification sbn: notifications) {
+            sbn.getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
+            sbn.setOverrideGroupKey(AUTOGROUP_KEY);
+        }
+
+        for (StatusBarNotification sbn: notifications) {
+            mGroupHelper.onNotificationPosted(sbn, true);
+        }
+
+        notifications.get(0).getNotification().flags &= ~Notification.FLAG_ONGOING_EVENT;
+
+        mGroupHelper.onNotificationUpdated(notifications.get(0), true);
+
+        verify(mCallback, times(AUTOGROUP_AT_COUNT + 2))
+                .updateAutogroupSummary(anyString(), eq(true));
+
+        int userId = UserHandle.SYSTEM.getIdentifier();
+        assertEquals(mGroupHelper.getOngoingGroupCount(
+                userId, pkg, AUTOGROUP_KEY), AUTOGROUP_AT_COUNT);
+    }
+
+    @Test
+    public void testAutoGroupCount_UpdateNotificationAfterChanges() {
+        final String pkg = "package";
+        ArrayList<StatusBarNotification>  notifications = new ArrayList<>();
+        for (int i = 0; i < AUTOGROUP_AT_COUNT + 1; i++) {
+            notifications.add(getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM));
+        }
+
+        for (StatusBarNotification sbn: notifications) {
+            sbn.getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
+            sbn.setOverrideGroupKey(AUTOGROUP_KEY);
+        }
+
+        for (StatusBarNotification sbn: notifications) {
+            mGroupHelper.onNotificationPosted(sbn, true);
+        }
+
+        notifications.get(0).getNotification().flags &= ~Notification.FLAG_ONGOING_EVENT;
+
+        mGroupHelper.onNotificationUpdated(notifications.get(0), true);
+
+        notifications.get(0).getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
+
+        mGroupHelper.onNotificationUpdated(notifications.get(0), true);
+
+        verify(mCallback, times(AUTOGROUP_AT_COUNT + 3))
+                .updateAutogroupSummary(anyString(), eq(true));
+
+        int userId = UserHandle.SYSTEM.getIdentifier();
+        assertEquals(mGroupHelper.getOngoingGroupCount(
+                userId, pkg, AUTOGROUP_KEY), AUTOGROUP_AT_COUNT + 1);
+    }
+
+    @Test
+    public void testAutoGroupCount_RemoveNotification() {
+        final String pkg = "package";
+        ArrayList<StatusBarNotification>  notifications = new ArrayList<>();
+        for (int i = 0; i < AUTOGROUP_AT_COUNT + 1; i++) {
+            notifications.add(getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM));
+        }
+
+        for (StatusBarNotification sbn: notifications) {
+            sbn.getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
+            sbn.setOverrideGroupKey(AUTOGROUP_KEY);
+        }
+
+        for (StatusBarNotification sbn: notifications) {
+            mGroupHelper.onNotificationPosted(sbn, true);
+        }
+
+        mGroupHelper.onNotificationRemoved(notifications.get(0));
+
+        verify(mCallback, times(AUTOGROUP_AT_COUNT + 2))
+                .updateAutogroupSummary(anyString(), eq(true));
+
+        int userId = UserHandle.SYSTEM.getIdentifier();
+        assertEquals(mGroupHelper.getOngoingGroupCount(
+                userId, pkg, AUTOGROUP_KEY), AUTOGROUP_AT_COUNT);
+    }
+
+
+    @Test
+    public void testAutoGroupCount_UpdateToNoneOngoingNotification() {
+        final String pkg = "package";
+        ArrayList<StatusBarNotification>  notifications = new ArrayList<>();
+        for (int i = 0; i < AUTOGROUP_AT_COUNT + 1; i++) {
+            notifications.add(getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM));
+        }
+
+        for (StatusBarNotification sbn: notifications) {
+            sbn.setOverrideGroupKey(AUTOGROUP_KEY);
+        }
+
+        for (StatusBarNotification sbn: notifications) {
+            mGroupHelper.onNotificationPosted(sbn, true);
+        }
+
+        notifications.get(0).getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
+        mGroupHelper.onNotificationUpdated(notifications.get(0), true);
+
+        verify(mCallback, times(1))
+                .updateAutogroupSummary(anyString(), eq(true));
+
+        int userId = UserHandle.SYSTEM.getIdentifier();
+        assertEquals(mGroupHelper.getOngoingGroupCount(
+                userId, pkg, AUTOGROUP_KEY), 1);
+    }
+
+    @Test
+    public void testAutoGroupCount_AddOneOngoingNotification() {
+        final String pkg = "package";
+        ArrayList<StatusBarNotification>  notifications = new ArrayList<>();
+        for (int i = 0; i < AUTOGROUP_AT_COUNT + 1; i++) {
+            notifications.add(getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM));
+        }
+        StatusBarNotification sbn = notifications.get(0);
+        sbn.getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
+        sbn.setOverrideGroupKey(AUTOGROUP_KEY);
+
+
+        for (StatusBarNotification current: notifications) {
+            mGroupHelper.onNotificationPosted(current, true);
+        }
+
+        verify(mCallback, times(1))
+                .updateAutogroupSummary(anyString(), eq(true));
+
+        int userId = UserHandle.SYSTEM.getIdentifier();
+        assertEquals(mGroupHelper.getOngoingGroupCount(
+                userId, pkg, AUTOGROUP_KEY), 1);
+    }
+
+    @Test
+    public void testAutoGroupCount_UpdateNoneOngoing() {
+        final String pkg = "package";
+        ArrayList<StatusBarNotification>  notifications = new ArrayList<>();
+        for (int i = 0; i < AUTOGROUP_AT_COUNT + 1; i++) {
+            notifications.add(getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM));
+        }
+
+        for (StatusBarNotification sbn: notifications) {
+            sbn.setOverrideGroupKey(AUTOGROUP_KEY);
+        }
+
+        for (StatusBarNotification sbn: notifications) {
+            mGroupHelper.onNotificationPosted(sbn, true);
+        }
+
+        verify(mCallback, times(0))
+                .updateAutogroupSummary(anyString(), eq(true));
+
+        int userId = UserHandle.SYSTEM.getIdentifier();
+        assertEquals(mGroupHelper.getOngoingGroupCount(userId, pkg, AUTOGROUP_KEY), 0);
+    }
+
 
     @Test
     public void testDropToZeroRemoveGroup() throws Exception {

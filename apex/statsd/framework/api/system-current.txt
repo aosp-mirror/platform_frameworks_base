@@ -1,0 +1,111 @@
+// Signature format: 2.0
+package android.app {
+
+  public final class StatsManager {
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void addConfig(long, byte[]) throws android.app.StatsManager.StatsUnavailableException;
+    method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean addConfiguration(long, byte[]);
+    method @RequiresPermission(android.Manifest.permission.REGISTER_STATS_PULL_ATOM) public void clearPullAtomCallback(int);
+    method @Deprecated @Nullable @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getData(long);
+    method @Deprecated @Nullable @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getMetadata();
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public long[] getRegisteredExperimentIds() throws android.app.StatsManager.StatsUnavailableException;
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getReports(long) throws android.app.StatsManager.StatsUnavailableException;
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getStatsMetadata() throws android.app.StatsManager.StatsUnavailableException;
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void removeConfig(long) throws android.app.StatsManager.StatsUnavailableException;
+    method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean removeConfiguration(long);
+    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public long[] setActiveConfigsChangedOperation(@Nullable android.app.PendingIntent) throws android.app.StatsManager.StatsUnavailableException;
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void setBroadcastSubscriber(android.app.PendingIntent, long, long) throws android.app.StatsManager.StatsUnavailableException;
+    method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean setBroadcastSubscriber(long, long, android.app.PendingIntent);
+    method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean setDataFetchOperation(long, android.app.PendingIntent);
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void setFetchReportsOperation(android.app.PendingIntent, long) throws android.app.StatsManager.StatsUnavailableException;
+    method @RequiresPermission(android.Manifest.permission.REGISTER_STATS_PULL_ATOM) public void setPullAtomCallback(int, @Nullable android.app.StatsManager.PullAtomMetadata, @NonNull java.util.concurrent.Executor, @NonNull android.app.StatsManager.StatsPullAtomCallback);
+    field public static final String ACTION_STATSD_STARTED = "android.app.action.STATSD_STARTED";
+    field public static final String EXTRA_STATS_ACTIVE_CONFIG_KEYS = "android.app.extra.STATS_ACTIVE_CONFIG_KEYS";
+    field public static final String EXTRA_STATS_BROADCAST_SUBSCRIBER_COOKIES = "android.app.extra.STATS_BROADCAST_SUBSCRIBER_COOKIES";
+    field public static final String EXTRA_STATS_CONFIG_KEY = "android.app.extra.STATS_CONFIG_KEY";
+    field public static final String EXTRA_STATS_CONFIG_UID = "android.app.extra.STATS_CONFIG_UID";
+    field public static final String EXTRA_STATS_DIMENSIONS_VALUE = "android.app.extra.STATS_DIMENSIONS_VALUE";
+    field public static final String EXTRA_STATS_SUBSCRIPTION_ID = "android.app.extra.STATS_SUBSCRIPTION_ID";
+    field public static final String EXTRA_STATS_SUBSCRIPTION_RULE_ID = "android.app.extra.STATS_SUBSCRIPTION_RULE_ID";
+    field public static final int PULL_SKIP = 1; // 0x1
+    field public static final int PULL_SUCCESS = 0; // 0x0
+  }
+
+  public static class StatsManager.PullAtomMetadata {
+    method @Nullable public int[] getAdditiveFields();
+    method public long getCoolDownMillis();
+    method public long getTimeoutMillis();
+  }
+
+  public static class StatsManager.PullAtomMetadata.Builder {
+    ctor public StatsManager.PullAtomMetadata.Builder();
+    method @NonNull public android.app.StatsManager.PullAtomMetadata build();
+    method @NonNull public android.app.StatsManager.PullAtomMetadata.Builder setAdditiveFields(@NonNull int[]);
+    method @NonNull public android.app.StatsManager.PullAtomMetadata.Builder setCoolDownMillis(long);
+    method @NonNull public android.app.StatsManager.PullAtomMetadata.Builder setTimeoutMillis(long);
+  }
+
+  public static interface StatsManager.StatsPullAtomCallback {
+    method public int onPullAtom(int, @NonNull java.util.List<android.util.StatsEvent>);
+  }
+
+  public static class StatsManager.StatsUnavailableException extends android.util.AndroidException {
+    ctor public StatsManager.StatsUnavailableException(String);
+    ctor public StatsManager.StatsUnavailableException(String, Throwable);
+  }
+
+}
+
+package android.os {
+
+  public final class StatsDimensionsValue implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean getBooleanValue();
+    method public int getField();
+    method public float getFloatValue();
+    method public int getIntValue();
+    method public long getLongValue();
+    method public String getStringValue();
+    method public java.util.List<android.os.StatsDimensionsValue> getTupleValueList();
+    method public int getValueType();
+    method public boolean isValueType(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int BOOLEAN_VALUE_TYPE = 5; // 0x5
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.StatsDimensionsValue> CREATOR;
+    field public static final int FLOAT_VALUE_TYPE = 6; // 0x6
+    field public static final int INT_VALUE_TYPE = 3; // 0x3
+    field public static final int LONG_VALUE_TYPE = 4; // 0x4
+    field public static final int STRING_VALUE_TYPE = 2; // 0x2
+    field public static final int TUPLE_VALUE_TYPE = 7; // 0x7
+  }
+
+}
+
+package android.util {
+
+  public final class StatsEvent {
+    method @NonNull public static android.util.StatsEvent.Builder newBuilder();
+  }
+
+  public static final class StatsEvent.Builder {
+    method @NonNull public android.util.StatsEvent.Builder addBooleanAnnotation(byte, boolean);
+    method @NonNull public android.util.StatsEvent.Builder addIntAnnotation(byte, int);
+    method @NonNull public android.util.StatsEvent build();
+    method @NonNull public android.util.StatsEvent.Builder setAtomId(int);
+    method @NonNull public android.util.StatsEvent.Builder usePooledBuffer();
+    method @NonNull public android.util.StatsEvent.Builder writeAttributionChain(@NonNull int[], @NonNull String[]);
+    method @NonNull public android.util.StatsEvent.Builder writeBoolean(boolean);
+    method @NonNull public android.util.StatsEvent.Builder writeByteArray(@NonNull byte[]);
+    method @NonNull public android.util.StatsEvent.Builder writeFloat(float);
+    method @NonNull public android.util.StatsEvent.Builder writeInt(int);
+    method @NonNull public android.util.StatsEvent.Builder writeKeyValuePairs(@Nullable android.util.SparseIntArray, @Nullable android.util.SparseLongArray, @Nullable android.util.SparseArray<java.lang.String>, @Nullable android.util.SparseArray<java.lang.Float>);
+    method @NonNull public android.util.StatsEvent.Builder writeLong(long);
+    method @NonNull public android.util.StatsEvent.Builder writeString(@NonNull String);
+  }
+
+  public final class StatsLog {
+    method public static void write(@NonNull android.util.StatsEvent);
+    method public static void writeRaw(@NonNull byte[], int);
+  }
+
+}
+

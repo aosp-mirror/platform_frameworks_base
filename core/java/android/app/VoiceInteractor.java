@@ -44,6 +44,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -1129,8 +1130,8 @@ public final class VoiceInteractor {
      */
     public boolean registerOnDestroyedCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull Runnable callback) {
-        Preconditions.checkNotNull(executor);
-        Preconditions.checkNotNull(callback);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
         if (isDestroyed()) {
             Log.w(TAG, "Cannot interact with a destroyed voice interactor");
             return false;
@@ -1146,7 +1147,7 @@ public final class VoiceInteractor {
      * @return whether the callback was unregistered.
      */
     public boolean unregisterOnDestroyedCallback(@NonNull Runnable callback) {
-        Preconditions.checkNotNull(callback);
+        Objects.requireNonNull(callback);
         if (isDestroyed()) {
             Log.w(TAG, "Cannot interact with a destroyed voice interactor");
             return false;

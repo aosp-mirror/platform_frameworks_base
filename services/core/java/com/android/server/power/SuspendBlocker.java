@@ -43,5 +43,5 @@ interface SuspendBlocker {
      */
     void release();
 
-    void writeToProto(ProtoOutputStream proto, long fieldId);
+    void dumpDebug(ProtoOutputStream proto, long fieldId);
 }

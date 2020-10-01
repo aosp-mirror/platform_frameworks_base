@@ -51,6 +51,7 @@ public class ActivityOptionsTest {
         opts.setLaunchTaskId(Integer.MAX_VALUE);
         opts.setLockTaskEnabled(true);
         opts.setRotationAnimationHint(ROTATION_ANIMATION_ROTATE);
+        opts.setTaskAlwaysOnTop(true);
         opts.setTaskOverlay(true, true);
         opts.setSplitScreenCreateMode(SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT);
         Bundle optsBundle = opts.toBundle();
@@ -67,6 +68,7 @@ public class ActivityOptionsTest {
         assertEquals(Integer.MAX_VALUE, restoredOpts.getLaunchTaskId());
         assertTrue(restoredOpts.getLockTaskMode());
         assertEquals(ROTATION_ANIMATION_ROTATE, restoredOpts.getRotationAnimationHint());
+        assertTrue(restoredOpts.getTaskAlwaysOnTop());
         assertTrue(restoredOpts.getTaskOverlay());
         assertTrue(restoredOpts.canTaskOverlayResume());
         assertEquals(SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT,

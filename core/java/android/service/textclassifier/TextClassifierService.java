@@ -17,15 +17,16 @@
 package android.service.textclassifier;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Bundle;
@@ -51,6 +52,8 @@ import android.view.textclassifier.TextSelection;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -58,8 +61,8 @@ import java.util.concurrent.Executors;
  * Abstract base class for the TextClassifier service.
  *
  * <p>A TextClassifier service provides text classification related features for the system.
- * The system's default TextClassifierService is configured in
- * {@code config_defaultTextClassifierService}. If this config has no value, a
+ * The system's default TextClassifierService provider is configured in
+ * {@code config_defaultTextClassifierPackage}. If this config has no value, a
  * {@link android.view.textclassifier.TextClassifierImpl} is loaded in the calling app's process.
  *
  * <p>See: {@link TextClassifier}.
@@ -85,6 +88,7 @@ import java.util.concurrent.Executors;
  * @hide
  */
 @SystemApi
+@TestApi
 public abstract class TextClassifierService extends Service {
 
     private static final String LOG_TAG = "TextClassifierService";
@@ -97,6 +101,18 @@ public abstract class TextClassifierService extends Service {
      */
     public static final String SERVICE_INTERFACE =
             "android.service.textclassifier.TextClassifierService";
+
+    /** @hide **/
+    public static final int CONNECTED = 0;
+    /** @hide **/
+    public static final int DISCONNECTED = 1;
+    /** @hide */
+    @IntDef(value = {
+            CONNECTED,
+            DISCONNECTED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ConnectionState{}
 
     /** @hide **/
     private static final String KEY_RESULT = "key_result";
@@ -195,15 +211,41 @@ public abstract class TextClassifierService extends Service {
             mMainThreadHandler.post(
                     () -> TextClassifierService.this.onDestroyTextClassificationSession(sessionId));
         }
+
+        @Override
+        public void onConnectedStateChanged(@ConnectionState int connected) {
+            mMainThreadHandler.post(connected == CONNECTED ? TextClassifierService.this::onConnected
+                    : TextClassifierService.this::onDisconnected);
+        }
     };
 
     @Nullable
     @Override
-    public final IBinder onBind(Intent intent) {
+    public final IBinder onBind(@NonNull Intent intent) {
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
             return mBinder;
         }
         return null;
+    }
+
+    @Override
+    public boolean onUnbind(@NonNull Intent intent) {
+        onDisconnected();
+        return super.onUnbind(intent);
+    }
+
+    /**
+     * Called when the Android system connects to service.
+     */
+    public void onConnected() {
+    }
+
+    /**
+     * Called when the Android system disconnects from the service.
+     *
+     * <p> At this point this service may no longer be an active {@link TextClassifierService}.
+     */
+    public void onDisconnected() {
     }
 
     /**
@@ -350,26 +392,41 @@ public abstract class TextClassifierService extends Service {
      */
     @Deprecated
     public final TextClassifier getLocalTextClassifier() {
-        // Deprecated: In the future, we may not guarantee that this runs in the service's process.
-        return getDefaultTextClassifierImplementation(this);
+        return TextClassifier.NO_OP;
     }
 
     /**
      * Returns the platform's default TextClassifier implementation.
+     *
+     * @throws RuntimeException if the TextClassifier from
+     *                          PackageManager#getDefaultTextClassifierPackageName() calls
+     *                          this method.
      */
     @NonNull
     public static TextClassifier getDefaultTextClassifierImplementation(@NonNull Context context) {
+        final String defaultTextClassifierPackageName =
+                context.getPackageManager().getDefaultTextClassifierPackageName();
+        if (TextUtils.isEmpty(defaultTextClassifierPackageName)) {
+            return TextClassifier.NO_OP;
+        }
+        if (defaultTextClassifierPackageName.equals(context.getPackageName())) {
+            throw new RuntimeException(
+                    "The default text classifier itself should not call the"
+                            + "getDefaultTextClassifierImplementation() method.");
+        }
         final TextClassificationManager tcm =
                 context.getSystemService(TextClassificationManager.class);
-        if (tcm != null) {
-            return tcm.getTextClassifier(TextClassifier.LOCAL);
-        }
-        return TextClassifier.NO_OP;
+        return tcm.getTextClassifier(TextClassifier.DEFAULT_SYSTEM);
     }
 
     /** @hide **/
     public static <T extends Parcelable> T getResponse(Bundle bundle) {
         return bundle.getParcelable(KEY_RESULT);
+    }
+
+    /** @hide **/
+    public static <T extends Parcelable> void putResponse(Bundle bundle, T response) {
+        bundle.putParcelable(KEY_RESULT, response);
     }
 
     /**
@@ -386,32 +443,31 @@ public abstract class TextClassifierService extends Service {
         /**
          * Signals a failure.
          */
-        void onFailure(CharSequence error);
+        void onFailure(@NonNull CharSequence error);
     }
 
     /**
-     * Returns the component name of the system default textclassifier service if it can be found
-     * on the system. Otherwise, returns null.
+     * Returns the component name of the textclassifier service from the given package.
+     * Otherwise, returns null.
+     *
+     * @param context
+     * @param packageName  the package to look for.
+     * @param resolveFlags the flags that are used by PackageManager to resolve the component name.
      * @hide
      */
     @Nullable
-    public static ComponentName getServiceComponentName(Context context) {
-        final String packageName = context.getPackageManager().getSystemTextClassifierPackageName();
-        if (TextUtils.isEmpty(packageName)) {
-            Slog.d(LOG_TAG, "No configured system TextClassifierService");
-            return null;
-        }
-
+    public static ComponentName getServiceComponentName(
+            Context context, String packageName, int resolveFlags) {
         final Intent intent = new Intent(SERVICE_INTERFACE).setPackage(packageName);
 
-        final ResolveInfo ri = context.getPackageManager().resolveService(intent,
-                PackageManager.MATCH_SYSTEM_ONLY);
+        final ResolveInfo ri = context.getPackageManager().resolveService(intent, resolveFlags);
 
         if ((ri == null) || (ri.serviceInfo == null)) {
             Slog.w(LOG_TAG, String.format("Package or service not found in package %s for user %d",
                     packageName, context.getUserId()));
             return null;
         }
+
         final ServiceInfo si = ri.serviceInfo;
 
         final String permission = si.permission;
@@ -450,6 +506,7 @@ public abstract class TextClassifierService extends Service {
         @Override
         public void onFailure(CharSequence error) {
             try {
+                Slog.w(LOG_TAG, "Request fail: " + error);
                 mTextClassifierCallback.onFailure();
             } catch (RemoteException e) {
                 Slog.d(LOG_TAG, "Error calling callback");

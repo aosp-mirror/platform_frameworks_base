@@ -17,7 +17,6 @@
 package android.hardware.camera2.params;
 
 import static com.android.internal.util.Preconditions.checkArrayElementsNotNull;
-import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
@@ -491,7 +490,7 @@ public final class StreamConfigurationMap {
      * @see #isOutputSupportedFor(Surface)
      */
     public static <T> boolean isOutputSupportedFor(Class<T> klass) {
-        checkNotNull(klass, "klass must not be null");
+        Objects.requireNonNull(klass, "klass must not be null");
 
         if (klass == android.media.ImageReader.class) {
             return true;
@@ -548,7 +547,7 @@ public final class StreamConfigurationMap {
      * @see #isOutputSupportedFor(Class)
      */
     public boolean isOutputSupportedFor(Surface surface) {
-        checkNotNull(surface, "surface must not be null");
+        Objects.requireNonNull(surface, "surface must not be null");
 
         Size surfaceSize = SurfaceUtils.getSurfaceSize(surface);
         int surfaceFormat = SurfaceUtils.getSurfaceFormat(surface);
@@ -866,22 +865,21 @@ public final class StreamConfigurationMap {
      * <p>{@code size} should be one of the ones returned by
      * {@link #getOutputSizes(int)}.</p>
      *
-     * <p>This should correspond to the frame duration when only that stream is active, with all
-     * processing (typically in {@code android.*.mode}) set to either {@code OFF} or {@code FAST}.
-     * </p>
+     * <p>This corresponds to the minimum frame duration (maximum frame rate) possible when only
+     * that stream is configured in a session, with all processing (typically in
+     * {@code android.*.mode}) set to either {@code OFF} or {@code FAST}.  </p>
      *
-     * <p>When multiple streams are used in a request, the minimum frame duration will be
-     * {@code max(individual stream min durations)}.</p>
+     * <p>When multiple streams are used in a session, the minimum frame duration will be
+     * {@code max(individual stream min durations)}.  See {@link #getOutputStallDuration} for
+     * details of timing for formats that may cause frame rate slowdown when they are targeted by a
+     * capture request.</p>
      *
      * <p>For devices that do not support manual sensor control
      * ({@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR}),
      * this function may return 0.</p>
      *
-     * <!--
-     * TODO: uncomment after adding input stream support
      * <p>The minimum frame duration of a stream (of a particular format, size) is the same
      * regardless of whether the stream is input or output.</p>
-     * -->
      *
      * @param format an image format from {@link ImageFormat} or {@link PixelFormat}
      * @param size an output-compatible size
@@ -897,7 +895,7 @@ public final class StreamConfigurationMap {
      * @see PixelFormat
      */
     public long getOutputMinFrameDuration(int format, Size size) {
-        checkNotNull(size, "size must not be null");
+        Objects.requireNonNull(size, "size must not be null");
         checkArgumentFormatSupported(format, /*output*/true);
 
         return getInternalFormatDuration(imageFormatToInternal(format),
@@ -919,22 +917,21 @@ public final class StreamConfigurationMap {
      * <p>{@code size} should be one of the ones returned by
      * {@link #getOutputSizes(int)}.</p>
      *
-     * <p>This should correspond to the frame duration when only that stream is active, with all
-     * processing (typically in {@code android.*.mode}) set to either {@code OFF} or {@code FAST}.
-     * </p>
+     * <p>This corresponds to the minimum frame duration (maximum frame rate) possible when only
+     * that stream is configured in a session, with all processing (typically in
+     * {@code android.*.mode}) set to either {@code OFF} or {@code FAST}.  </p>
      *
-     * <p>When multiple streams are used in a request, the minimum frame duration will be
-     * {@code max(individual stream min durations)}.</p>
+     * <p>When multiple streams are used in a session, the minimum frame duration will be
+     * {@code max(individual stream min durations)}.  See {@link #getOutputStallDuration} for
+     * details of timing for formats that may cause frame rate slowdown when they are targeted by a
+     * capture request.</p>
      *
      * <p>For devices that do not support manual sensor control
      * ({@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR}),
      * this function may return 0.</p>
      *
-     * <!--
-     * TODO: uncomment after adding input stream support
      * <p>The minimum frame duration of a stream (of a particular format, size) is the same
      * regardless of whether the stream is input or output.</p>
-     * -->
      *
      * @param klass
      *          a class which is supported by {@link #isOutputSupportedFor(Class)} and has a

@@ -16,9 +16,13 @@
 
 package android.net.wifi.aware;
 
+import android.annotation.IntDef;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * The characteristics of the Wi-Fi Aware implementation.
@@ -31,6 +35,8 @@ public final class Characteristics implements Parcelable {
             "key_max_service_specific_info_length";
     /** @hide */
     public static final String KEY_MAX_MATCH_FILTER_LENGTH = "key_max_match_filter_length";
+    /** @hide */
+    public static final String KEY_SUPPORTED_CIPHER_SUITES = "key_supported_cipher_suites";
 
     private Bundle mCharacteristics = new Bundle();
 
@@ -71,10 +77,39 @@ public final class Characteristics implements Parcelable {
      * {@link PublishConfig.Builder#setMatchFilter(java.util.List)} and
      * {@link SubscribeConfig.Builder#setMatchFilter(java.util.List)}.
      *
-     * @return A positive integer, maximum legngth of byte array for Aware discovery match filter.
+     * @return A positive integer, maximum length of byte array for Aware discovery match filter.
      */
     public int getMaxMatchFilterLength() {
         return mCharacteristics.getInt(KEY_MAX_MATCH_FILTER_LENGTH);
+    }
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "WIFI_AWARE_CIPHER_SUITE_" }, value = {
+            WIFI_AWARE_CIPHER_SUITE_NCS_SK_128,
+            WIFI_AWARE_CIPHER_SUITE_NCS_SK_256,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface WifiAwareCipherSuites {}
+
+    /**
+     * Wi-Fi Aware supported ciphier suite representing NCS SK 128: 128 bit shared-key.
+     */
+    public static final int WIFI_AWARE_CIPHER_SUITE_NCS_SK_128 = 1 << 0;
+
+    /**
+     * Wi-Fi Aware supported ciphier suite representing NCS SK 256: 256 bit shared-key.
+     */
+    public static final int WIFI_AWARE_CIPHER_SUITE_NCS_SK_256 = 1 << 1;
+
+    /**
+     * Returns the set of cipher suites supported by the device for use in Wi-Fi Aware data-paths.
+     * The device automatically picks the strongest cipher suite when initiating a data-path setup.
+     *
+     * @return A set of flags from {@link #WIFI_AWARE_CIPHER_SUITE_NCS_SK_128}, or
+     * {@link #WIFI_AWARE_CIPHER_SUITE_NCS_SK_256}.
+     */
+    public @WifiAwareCipherSuites int getSupportedCipherSuites() {
+        return mCharacteristics.getInt(KEY_SUPPORTED_CIPHER_SUITES);
     }
 
     @Override

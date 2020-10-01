@@ -176,7 +176,7 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
     }
 
     /**
-     * Sends dummy widget updates to {@link #mManager}.
+     * Sends placeholder widget updates to {@link #mManager}.
      * @param widgetId widget to update
      * @param viewIds a list of view ids for which
      *                {@link AppWidgetManager#notifyAppWidgetViewDataChanged} will be called

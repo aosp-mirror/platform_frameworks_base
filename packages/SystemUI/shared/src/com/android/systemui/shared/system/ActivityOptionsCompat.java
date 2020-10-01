@@ -76,7 +76,7 @@ public abstract class ActivityOptionsCompat {
                             callbackHandler.post(callback);
                         }
                     }
-                });
+                }, null /* finishedListener */);
     }
 
     /**

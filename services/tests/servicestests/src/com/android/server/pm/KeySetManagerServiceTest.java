@@ -19,17 +19,17 @@ package com.android.server.pm;
 
 import android.content.pm.PackageParser;
 import android.content.pm.Signature;
+import android.test.AndroidTestCase;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LongSparseArray;
+
 import com.android.internal.util.ArrayUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.cert.CertificateException;
 import java.security.PublicKey;
-
-import android.test.AndroidTestCase;
+import java.security.cert.CertificateException;
 
 public class KeySetManagerServiceTest extends AndroidTestCase {
 
@@ -39,8 +39,8 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
     public PackageSetting generateFakePackageSetting(String name) {
         return new PackageSetting(name, name, new File(mContext.getCacheDir(), "fakeCodePath"),
                 new File(mContext.getCacheDir(), "fakeResPath"), "", "", "",
-                "", 1, 0, 0, null, null, 0 /*sharedUserId*/, null /*usesStaticLibraries*/,
-                null /*usesStaticLibrariesVersions*/);
+                "", 1, 0, 0, 0 /*sharedUserId*/, null /*usesStaticLibraries*/,
+                null /*usesStaticLibrariesVersions*/, null /*mimeGroups*/);
     }
 
     @Override

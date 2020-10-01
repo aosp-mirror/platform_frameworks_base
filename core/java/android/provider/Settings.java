@@ -16,17 +16,6 @@
 
 package android.provider;
 
-import static android.provider.SettingsValidators.ANY_INTEGER_VALIDATOR;
-import static android.provider.SettingsValidators.ANY_STRING_VALIDATOR;
-import static android.provider.SettingsValidators.BOOLEAN_VALIDATOR;
-import static android.provider.SettingsValidators.COMPONENT_NAME_VALIDATOR;
-import static android.provider.SettingsValidators.LENIENT_IP_ADDRESS_VALIDATOR;
-import static android.provider.SettingsValidators.LOCALE_VALIDATOR;
-import static android.provider.SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR;
-import static android.provider.SettingsValidators.NULLABLE_COMPONENT_NAME_VALIDATOR;
-import static android.provider.SettingsValidators.PACKAGE_NAME_VALIDATOR;
-import static android.provider.SettingsValidators.URI_VALIDATOR;
-
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -35,12 +24,14 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.Application;
+import android.app.AutomaticZenRule;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.SearchManager;
@@ -59,13 +50,13 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
-import android.hardware.display.ColorDisplayManager;
 import android.location.LocationManager;
-import android.media.AudioFormat;
 import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
 import android.net.Uri;
+import android.net.wifi.SoftApConfiguration;
 import android.net.wifi.WifiManager;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
@@ -75,11 +66,11 @@ import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.PowerManager.AutoPowerSaveModeTriggers;
 import android.os.Process;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.provider.SettingsValidators.Validator;
 import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
 import android.util.AndroidException;
@@ -88,18 +79,19 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.MemoryIntArray;
 import android.view.Display;
-import android.view.inputmethod.InputMethodSystemProperty;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 import com.android.internal.widget.ILockSettings;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.URISyntaxException;
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -107,6 +99,8 @@ import java.util.Set;
  * The Settings provider contains global system-level device preferences.
  */
 public final class Settings {
+    /** @hide */
+    public static final boolean DEFAULT_OVERRIDEABLE_BY_RESTORE = false;
 
     // Intent actions for Settings
 
@@ -265,6 +259,9 @@ public final class Settings {
     /** @hide */
     public static final String EXTRA_NETWORK_TEMPLATE = "network_template";
 
+    /** @hide */
+    public static final String KEY_CONFIG_SET_RETURN = "config_set_return";
+
     /**
      * An int extra specifying a subscription ID.
      *
@@ -398,6 +395,21 @@ public final class Settings {
             "android.settings.MANAGE_UNKNOWN_APP_SOURCES";
 
     /**
+     * Activity Action: Show settings to allow configuration of cross-profile access for apps
+     *
+     * Input: Optionally, the Intent's data URI can specify the application package name to
+     * directly invoke the management GUI specific to the package name. For example
+     * "package:com.my.app".
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_CROSS_PROFILE_ACCESS =
+            "android.settings.MANAGE_CROSS_PROFILE_ACCESS";
+
+    /**
      * Activity Action: Show the "Open by Default" page in a particular application's details page.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
@@ -504,26 +516,121 @@ public final class Settings {
             "android.settings.WIFI_IP_SETTINGS";
 
     /**
-     * Activity Action: Show setting page to process an Easy Connect (Wi-Fi DPP) QR code and start
+     * Activity Action: Show setting page to process a Wi-Fi Easy Connect (aka DPP) URI and start
      * configuration. This intent should be used when you want to use this device to take on the
-     * configurator role for an IoT/other device. When provided with a valid DPP URI string Settings
-     * will open a wifi selection screen for the user to indicate which network they would like
-     * to configure the device specified in the DPP URI string for and carry them through the rest
-     * of the flow for provisioning the device.
+     * configurator role for an IoT/other device. When provided with a valid DPP URI
+     * string, Settings will open a Wi-Fi selection screen for the user to indicate which network
+     * they would like to configure the device specified in the DPP URI string and
+     * carry them through the rest of the flow for provisioning the device.
      * <p>
-     * In some cases, a matching Activity may not exist, so ensure you safeguard
-     * against this by checking WifiManager.isEasyConnectSupported();
+     * In some cases, a matching Activity may not exist, so ensure to safeguard against this by
+     * checking {@link WifiManager#isEasyConnectSupported()}.
      * <p>
      * Input: The Intent's data URI specifies bootstrapping information for authenticating and
-     * provisioning the peer, with the "DPP" scheme.
+     * provisioning the peer, and uses a "DPP" scheme. The URI should be attached to the intent
+     * using {@link Intent#setData(Uri)}. The calling app can obtain a DPP URI in any
+     * way, e.g. by scanning a QR code or other out-of-band methods. The calling app may also
+     * attach the {@link #EXTRA_EASY_CONNECT_BAND_LIST} extra to provide information
+     * about the bands supported by the enrollee device.
      * <p>
-     * Output: After {@code startActivityForResult}, the callback {@code onActivityResult} will have
-     *         resultCode {@link android.app.Activity#RESULT_OK} if Wi-Fi Easy Connect configuration
-     *         success and the user clicks 'Done' button.
+     * Output: After calling {@link android.app.Activity#startActivityForResult}, the callback
+     * {@code onActivityResult} will have resultCode {@link android.app.Activity#RESULT_OK} if
+     * the Wi-Fi Easy Connect configuration succeeded and the user tapped the 'Done' button, or
+     * {@link android.app.Activity#RESULT_CANCELED} if the operation failed and user tapped the
+     * 'Cancel' button. In case the operation has failed, a status code from
+     * {@link android.net.wifi.EasyConnectStatusCallback} {@code EASY_CONNECT_EVENT_FAILURE_*} will
+     * be returned as an Extra {@link #EXTRA_EASY_CONNECT_ERROR_CODE}. Easy Connect R2
+     * Enrollees report additional details about the error they encountered, which will be
+     * provided in the {@link #EXTRA_EASY_CONNECT_ATTEMPTED_SSID},
+     * {@link #EXTRA_EASY_CONNECT_CHANNEL_LIST}, and {@link #EXTRA_EASY_CONNECT_BAND_LIST}.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROCESS_WIFI_EASY_CONNECT_URI =
             "android.settings.PROCESS_WIFI_EASY_CONNECT_URI";
+
+    /**
+     * Activity Extra: The Easy Connect operation error code
+     * <p>
+     * An extra returned on the result intent received when using the
+     * {@link #ACTION_PROCESS_WIFI_EASY_CONNECT_URI} intent to launch the Easy Connect Operation.
+     * This extra contains the integer error code of the operation - one of
+     * {@link android.net.wifi.EasyConnectStatusCallback} {@code EASY_CONNECT_EVENT_FAILURE_*}. If
+     * there is no error, i.e. if the operation returns {@link android.app.Activity#RESULT_OK},
+     * then this extra is not attached to the result intent.
+     * <p>
+     * Use the {@link Intent#hasExtra(String)} to determine whether the extra is attached and
+     * {@link Intent#getIntExtra(String, int)} to obtain the error code data.
+     */
+    public static final String EXTRA_EASY_CONNECT_ERROR_CODE =
+            "android.provider.extra.EASY_CONNECT_ERROR_CODE";
+
+    /**
+     * Activity Extra: The SSID that the Enrollee tried to connect to.
+     * <p>
+     * An extra returned on the result intent received when using the {@link
+     * #ACTION_PROCESS_WIFI_EASY_CONNECT_URI} intent to launch the Easy Connect Operation. This
+     * extra contains the SSID of the Access Point that the remote Enrollee tried to connect to.
+     * This value is populated only by remote R2 devices, and only for the following error codes:
+     * {@link android.net.wifi.EasyConnectStatusCallback#EASY_CONNECT_EVENT_FAILURE_CANNOT_FIND_NETWORK}
+     * {@link android.net.wifi.EasyConnectStatusCallback#EASY_CONNECT_EVENT_FAILURE_ENROLLEE_AUTHENTICATION}.
+     * Therefore, always check if this extra is available using {@link Intent#hasExtra(String)}. If
+     * there is no error, i.e. if the operation returns {@link android.app.Activity#RESULT_OK}, then
+     * this extra is not attached to the result intent.
+     * <p>
+     * Use the {@link Intent#getStringExtra(String)} to obtain the SSID.
+     */
+    public static final String EXTRA_EASY_CONNECT_ATTEMPTED_SSID =
+            "android.provider.extra.EASY_CONNECT_ATTEMPTED_SSID";
+
+    /**
+     * Activity Extra: The Channel List that the Enrollee used to scan a network.
+     * <p>
+     * An extra returned on the result intent received when using the {@link
+     * #ACTION_PROCESS_WIFI_EASY_CONNECT_URI} intent to launch the Easy Connect Operation. This
+     * extra contains the channel list that the Enrollee scanned for a network. This value is
+     * populated only by remote R2 devices, and only for the following error code: {@link
+     * android.net.wifi.EasyConnectStatusCallback#EASY_CONNECT_EVENT_FAILURE_CANNOT_FIND_NETWORK}.
+     * Therefore, always check if this extra is available using {@link Intent#hasExtra(String)}. If
+     * there is no error, i.e. if the operation returns {@link android.app.Activity#RESULT_OK}, then
+     * this extra is not attached to the result intent. The list is JSON formatted, as an array
+     * (Wi-Fi global operating classes) of arrays (Wi-Fi channels).
+     * <p>
+     * Use the {@link Intent#getStringExtra(String)} to obtain the list.
+     */
+    public static final String EXTRA_EASY_CONNECT_CHANNEL_LIST =
+            "android.provider.extra.EASY_CONNECT_CHANNEL_LIST";
+
+    /**
+     * Activity Extra: The Band List that the Enrollee supports.
+     * <p>
+     * This extra contains the bands the Enrollee supports, expressed as the Global Operating
+     * Class, see Table E-4 in IEEE Std 802.11-2016 Global operating classes. It is used both as
+     * input, to configure the Easy Connect operation and as output of the operation.
+     * <p>
+     * As input: an optional extra to be attached to the
+     * {@link #ACTION_PROCESS_WIFI_EASY_CONNECT_URI}. If attached, it indicates the bands which
+     * the remote device (enrollee, device-to-be-configured) supports. The Settings operation
+     * may take this into account when presenting the user with list of networks configurations
+     * to be used. The calling app may obtain this information in any out-of-band method. The
+     * information should be attached as an array of raw integers - using the
+     * {@link Intent#putExtra(String, int[])}.
+     * <p>
+     * As output: an extra returned on the result intent received when using the
+     * {@link #ACTION_PROCESS_WIFI_EASY_CONNECT_URI} intent to launch the Easy Connect Operation
+     * . This value is populated only by remote R2 devices, and only for the following error
+     * codes:
+     * {@link android.net.wifi.EasyConnectStatusCallback#EASY_CONNECT_EVENT_FAILURE_CANNOT_FIND_NETWORK},
+     * {@link android.net.wifi.EasyConnectStatusCallback#EASY_CONNECT_EVENT_FAILURE_ENROLLEE_AUTHENTICATION},
+     * or
+     * {@link android.net.wifi.EasyConnectStatusCallback#EASY_CONNECT_EVENT_FAILURE_ENROLLEE_REJECTED_CONFIGURATION}.
+     * Therefore, always check if this extra is available using {@link Intent#hasExtra(String)}.
+     * If there is no error, i.e. if the operation returns {@link android.app.Activity#RESULT_OK}
+     * , then this extra is not attached to the result intent.
+     * <p>
+     * Use the {@link Intent#getIntArrayExtra(String)} to obtain the list.
+     */
+    public static final String EXTRA_EASY_CONNECT_BAND_LIST =
+            "android.provider.extra.EASY_CONNECT_BAND_LIST";
 
     /**
      * Activity Action: Show settings to allow configuration of data and view data usage.
@@ -581,14 +688,47 @@ public final class Settings {
     /**
      * Activity Action: Show settings to enroll fingerprints, and setup PIN/Pattern/Pass if
      * necessary.
+     * @deprecated See {@link #ACTION_BIOMETRIC_ENROLL}.
      * <p>
      * Input: Nothing.
      * <p>
      * Output: Nothing.
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_FINGERPRINT_ENROLL =
             "android.settings.FINGERPRINT_ENROLL";
+
+    /**
+     * Activity Action: Show settings to enroll biometrics, and setup PIN/Pattern/Pass if
+     * necessary. By default, this prompts the user to enroll biometrics with strength
+     * Weak or above, as defined by the CDD. Only biometrics that meet or exceed Strong, as defined
+     * in the CDD are allowed to participate in Keystore operations.
+     * <p>
+     * Input: extras {@link #EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED} as an integer, with
+     * constants defined in {@link android.hardware.biometrics.BiometricManager.Authenticators},
+     * e.g. {@link android.hardware.biometrics.BiometricManager.Authenticators#BIOMETRIC_STRONG}.
+     * If not specified, the default behavior is
+     * {@link android.hardware.biometrics.BiometricManager.Authenticators#BIOMETRIC_WEAK}.
+     * <p>
+     * Output: Nothing. Note that callers should still check
+     * {@link android.hardware.biometrics.BiometricManager#canAuthenticate(int)}
+     * afterwards to ensure that the user actually completed enrollment.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_BIOMETRIC_ENROLL =
+            "android.settings.BIOMETRIC_ENROLL";
+
+    /**
+     * Activity Extra: The minimum strength to request enrollment for.
+     * <p>
+     * This can be passed as an extra field to the {@link #ACTION_BIOMETRIC_ENROLL} intent to
+     * indicate that only enrollment for sensors that meet these requirements should be shown. The
+     * value should be a combination of the constants defined in
+     * {@link android.hardware.biometrics.BiometricManager.Authenticators}.
+     */
+    public static final String EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED =
+            "android.provider.extra.BIOMETRIC_AUTHENTICATORS_ALLOWED";
 
     /**
      * Activity Action: Show settings to allow configuration of cast endpoints.
@@ -861,18 +1001,44 @@ public final class Settings {
     /**
      * Activity Action: Show screen for controlling which apps can draw on top of other apps.
      * <p>
-     * In some cases, a matching Activity may not exist, so ensure you
-     * safeguard against this.
+     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
      * <p>
-     * Input: Optionally, the Intent's data URI can specify the application package name to
-     * directly invoke the management GUI specific to the package name. For example
-     * "package:com.my.app".
+     * Input: Optionally, in versions of Android prior to {@link android.os.Build.VERSION_CODES#R},
+     * the Intent's data URI can specify the application package name to directly invoke the
+     * management GUI specific to the package name.
+     * For example "package:com.my.app".
      * <p>
      * Output: Nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_OVERLAY_PERMISSION =
             "android.settings.action.MANAGE_OVERLAY_PERMISSION";
+
+    /**
+     * Activity Action: Show screen for controlling if the app specified in the data URI of the
+     * intent can draw on top of other apps.
+     * <p>
+     * Unlike {@link #ACTION_MANAGE_OVERLAY_PERMISSION}, which in Android {@link
+     * android.os.Build.VERSION_CODES#R} can't be used to show a GUI for a specific package,
+     * permission {@code android.permission.INTERNAL_SYSTEM_WINDOW} is needed to start an activity
+     * with this intent.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: The Intent's data URI MUST specify the application package name whose ability of
+     * drawing on top of other apps you want to control.
+     * For example "package:com.my.app".
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_APP_OVERLAY_PERMISSION =
+            "android.settings.MANAGE_APP_OVERLAY_PERMISSION";
 
     /**
      * Activity Action: Show screen for controlling which apps are allowed to write/modify
@@ -1290,6 +1456,33 @@ public final class Settings {
             = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
 
     /**
+     * Activity Action: Show notification listener permission settings page for app.
+     * <p>
+     * Users can grant and deny access to notifications for a {@link ComponentName} from here.
+     * See
+     * {@link android.app.NotificationManager#isNotificationListenerAccessGranted(ComponentName)}
+     * for more details.
+     * <p>
+     * Input: The extra {@link #EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME} containing the name
+     * of the component to grant or revoke notification listener access to.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS =
+            "android.settings.NOTIFICATION_LISTENER_DETAIL_SETTINGS";
+
+    /**
+     * Activity Extra: What component name to show the notification listener permission
+     * page for.
+     * <p>
+     * A string extra containing a {@link ComponentName}. This must be passed as an extra field to
+     * {@link #ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS}.
+     */
+    public static final String EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME =
+            "android.provider.extra.NOTIFICATION_LISTENER_COMPONENT_NAME";
+
+    /**
      * Activity Action: Show Do Not Disturb access settings.
      * <p>
      * Users can grant and deny access to Do Not Disturb configuration from here. Managed
@@ -1329,7 +1522,17 @@ public final class Settings {
             "android.settings.NOTIFICATION_POLICY_ACCESS_DETAIL_SETTINGS";
 
     /**
-     * @hide
+     * Activity Action: Show the automatic do not disturb rule listing page
+     * <p>
+     *     Users can add, enable, disable, and remove automatic do not disturb rules from this
+     *     screen. See {@link NotificationManager#addAutomaticZenRule(AutomaticZenRule)} for more
+     *     details.
+     * </p>
+     * <p>
+     *     Input: Nothing
+     *     Output: Nothing
+     * </p>
+     *
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CONDITION_PROVIDER_SETTINGS
@@ -1576,6 +1779,24 @@ public final class Settings {
             = "android.settings.NOTIFICATION_SETTINGS";
 
     /**
+     * Activity Action: Show conversation settings.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CONVERSATION_SETTINGS
+            = "android.settings.CONVERSATION_SETTINGS";
+
+    /**
+     * Activity Action: Show notification history screen.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NOTIFICATION_HISTORY
+            = "android.settings.NOTIFICATION_HISTORY";
+
+    /**
      * Activity Action: Show app listing settings, filtered by those that send notifications.
      *
      * @hide
@@ -1635,6 +1856,17 @@ public final class Settings {
     public static final String EXTRA_CHANNEL_ID = "android.provider.extra.CHANNEL_ID";
 
     /**
+     * Activity Extra: The {@link NotificationChannel#getConversationId()} of the notification
+     * conversation settings to display.
+     * <p>
+     * This is an optional extra field to the {@link #ACTION_CHANNEL_NOTIFICATION_SETTINGS}. If
+     * included the system will first look up notification settings by channel and conversation id,
+     * and will fall back to channel id if a specialized channel for this conversation doesn't
+     * exist, similar to {@link NotificationManager#getNotificationChannel(String, String)}.
+     */
+    public static final String EXTRA_CONVERSATION_ID = "android.provider.extra.CONVERSATION_ID";
+
+    /**
      * Activity Action: Show notification redaction settings.
      *
      * @hide
@@ -1646,6 +1878,33 @@ public final class Settings {
     /** @hide */
     @UnsupportedAppUsage
     public static final String EXTRA_APP_UID = "app_uid";
+
+    /**
+     * Activity Action: Show power menu settings.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_POWER_MENU_SETTINGS =
+            "android.settings.ACTION_POWER_MENU_SETTINGS";
+
+    /**
+     * Activity Action: Show controls settings.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_DEVICE_CONTROLS_SETTINGS =
+            "android.settings.ACTION_DEVICE_CONTROLS_SETTINGS";
+
+    /**
+     * Activity Action: Show media control settings
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MEDIA_CONTROLS_SETTINGS =
+            "android.settings.ACTION_MEDIA_CONTROLS_SETTINGS";
 
     /**
      * Activity Action: Show a dialog with disabled by policy message.
@@ -1722,6 +1981,10 @@ public final class Settings {
      * Input: Nothing.
      * <p>
      * Output: Nothing.
+     * <p class="note">
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_WEBVIEW_SETTINGS = "android.settings.WEBVIEW_SETTINGS";
@@ -1739,6 +2002,20 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS
             = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
+
+    /**
+     * Activity Action: Show Work Policy info.
+     * DPC apps can implement an activity that handles this intent in order to show device policies
+     * associated with the work profile or managed device.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SHOW_WORK_POLICY_INFO =
+            "android.settings.SHOW_WORK_POLICY_INFO";
 
     /**
      * Activity Action: Show screen that let user select its Autofill Service.
@@ -1759,6 +2036,20 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_REQUEST_SET_AUTOFILL_SERVICE =
             "android.settings.REQUEST_SET_AUTOFILL_SERVICE";
+
+    /**
+     * Activity Action: Show screen for controlling the Quick Access Wallet.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_QUICK_ACCESS_WALLET_SETTINGS =
+            "android.settings.QUICK_ACCESS_WALLET_SETTINGS";
 
     /**
      * Activity Action: Show screen for controlling which apps have access on volume directories.
@@ -1950,6 +2241,21 @@ public final class Settings {
      */
     public static final String CALL_METHOD_PREFIX_KEY = "_prefix";
 
+    /**
+     * @hide - RemoteCallback monitor callback argument extra to the fast-path call()-based requests
+     */
+    public static final String CALL_METHOD_MONITOR_CALLBACK_KEY = "_monitor_callback_key";
+
+    /**
+     * @hide - String argument extra to the fast-path call()-based requests
+     */
+    public static final String CALL_METHOD_FLAGS_KEY = "_flags";
+
+    /**
+     * @hide - String argument extra to the fast-path call()-based requests
+     */
+    public static final String CALL_METHOD_OVERRIDEABLE_BY_RESTORE_KEY = "_overrideable_by_restore";
+
     /** @hide - Private call() method to write to 'system' table */
     public static final String CALL_METHOD_PUT_SYSTEM = "PUT_system";
 
@@ -1961,6 +2267,9 @@ public final class Settings {
 
     /** @hide - Private call() method to write to 'configuration' table */
     public static final String CALL_METHOD_PUT_CONFIG = "PUT_config";
+
+    /** @hide - Private call() method to write to and delete from the 'configuration' table */
+    public static final String CALL_METHOD_SET_ALL_CONFIG = "SET_ALL_config";
 
     /** @hide - Private call() method to delete from the 'system' table */
     public static final String CALL_METHOD_DELETE_SYSTEM = "DELETE_system";
@@ -1994,6 +2303,26 @@ public final class Settings {
 
     /** @hide - Private call() method to reset to defaults the 'configuration' table */
     public static final String CALL_METHOD_LIST_CONFIG = "LIST_config";
+
+    /** @hide - Private call() method to register monitor callback for 'configuration' table */
+    public static final String CALL_METHOD_REGISTER_MONITOR_CALLBACK_CONFIG =
+            "REGISTER_MONITOR_CALLBACK_config";
+
+    /** @hide - String argument extra to the config monitor callback */
+    public static final String EXTRA_MONITOR_CALLBACK_TYPE = "monitor_callback_type";
+
+    /** @hide - String argument extra to the config monitor callback */
+    public static final String EXTRA_ACCESS_CALLBACK = "access_callback";
+
+    /** @hide - String argument extra to the config monitor callback */
+    public static final String EXTRA_NAMESPACE_UPDATED_CALLBACK =
+            "namespace_updated_callback";
+
+    /** @hide - String argument extra to the config monitor callback */
+    public static final String EXTRA_NAMESPACE = "namespace";
+
+    /** @hide - String argument extra to the config monitor callback */
+    public static final String EXTRA_CALLING_PACKAGE = "calling_package";
 
     /**
      * Activity Extra: Limit available options in launched activity based on the given authority.
@@ -2138,10 +2467,6 @@ public final class Settings {
     private static final String TAG = "Settings";
     private static final boolean LOCAL_LOGV = false;
 
-    // Lock ensures that when enabling/disabling the master location switch, we don't end up
-    // with a partial enable/disable state in multi-threaded situations.
-    private static final Object mLocationSettingsLock = new Object();
-
     // Used in system server calling uid workaround in call()
     private static boolean sInSystemServer = false;
     private static final Object sInSystemServerLock = new Object();
@@ -2172,6 +2497,10 @@ public final class Settings {
     public static class NameValueTable implements BaseColumns {
         public static final String NAME = "name";
         public static final String VALUE = "value";
+        // A flag indicating whether the current value of a setting should be preserved during
+        // restore.
+        /** @hide */
+        public static final String IS_PRESERVED_IN_RESTORE = "is_preserved_in_restore";
 
         protected static boolean putString(ContentResolver resolver, Uri uri,
                 String name, String value) {
@@ -2287,7 +2616,7 @@ public final class Settings {
         private static final String NAME_EQ_PLACEHOLDER = "name=?";
 
         // Must synchronize on 'this' to access mValues and mValuesVersion.
-        private final HashMap<String, String> mValues = new HashMap<>();
+        private final ArrayMap<String, String> mValues = new ArrayMap<>();
 
         private final Uri mUri;
         @UnsupportedAppUsage
@@ -2297,20 +2626,30 @@ public final class Settings {
         // for the fast path of retrieving settings.
         private final String mCallGetCommand;
         private final String mCallSetCommand;
+        private final String mCallListCommand;
+        private final String mCallSetAllCommand;
 
         @GuardedBy("this")
         private GenerationTracker mGenerationTracker;
 
         public NameValueCache(Uri uri, String getCommand, String setCommand,
                 ContentProviderHolder providerHolder) {
+            this(uri, getCommand, setCommand, null, null, providerHolder);
+        }
+
+        NameValueCache(Uri uri, String getCommand, String setCommand, String listCommand,
+                String setAllCommand, ContentProviderHolder providerHolder) {
             mUri = uri;
             mCallGetCommand = getCommand;
             mCallSetCommand = setCommand;
+            mCallListCommand = listCommand;
+            mCallSetAllCommand = setAllCommand;
             mProviderHolder = providerHolder;
         }
 
         public boolean putStringForUser(ContentResolver cr, String name, String value,
-                String tag, boolean makeDefault, final int userHandle) {
+                String tag, boolean makeDefault, final int userHandle,
+                boolean overrideableByRestore) {
             try {
                 Bundle arg = new Bundle();
                 arg.putString(Settings.NameValueTable.VALUE, value);
@@ -2321,14 +2660,38 @@ public final class Settings {
                 if (makeDefault) {
                     arg.putBoolean(CALL_METHOD_MAKE_DEFAULT_KEY, true);
                 }
+                if (overrideableByRestore) {
+                    arg.putBoolean(CALL_METHOD_OVERRIDEABLE_BY_RESTORE_KEY, true);
+                }
                 IContentProvider cp = mProviderHolder.getProvider(cr);
-                cp.call(cr.getPackageName(), mProviderHolder.mUri.getAuthority(),
-                        mCallSetCommand, name, arg);
+                cp.call(cr.getPackageName(), cr.getAttributionTag(),
+                        mProviderHolder.mUri.getAuthority(), mCallSetCommand, name, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't set key " + name + " in " + mUri, e);
                 return false;
             }
             return true;
+        }
+
+        public boolean setStringsForPrefix(ContentResolver cr, String prefix,
+                HashMap<String, String> keyValues) {
+            if (mCallSetAllCommand == null) {
+                // This NameValueCache does not support atomically setting multiple flags
+                return false;
+            }
+            try {
+                Bundle args = new Bundle();
+                args.putString(CALL_METHOD_PREFIX_KEY, prefix);
+                args.putSerializable(CALL_METHOD_FLAGS_KEY, keyValues);
+                IContentProvider cp = mProviderHolder.getProvider(cr);
+                Bundle bundle = cp.call(cr.getPackageName(), cr.getAttributionTag(),
+                        mProviderHolder.mUri.getAuthority(),
+                        mCallSetAllCommand, null, args);
+                return bundle.getBoolean(KEY_CONFIG_SET_RETURN);
+            } catch (RemoteException e) {
+                // Not supported by the remote side
+                return false;
+            }
         }
 
         @UnsupportedAppUsage
@@ -2396,14 +2759,15 @@ public final class Settings {
                     if (Settings.isInSystemServer() && Binder.getCallingUid() != Process.myUid()) {
                         final long token = Binder.clearCallingIdentity();
                         try {
-                            b = cp.call(cr.getPackageName(), mProviderHolder.mUri.getAuthority(),
-                                    mCallGetCommand, name, args);
+                            b = cp.call(cr.getPackageName(), cr.getAttributionTag(),
+                                    mProviderHolder.mUri.getAuthority(), mCallGetCommand, name,
+                                    args);
                         } finally {
                             Binder.restoreCallingIdentity(token);
                         }
                     } else {
-                        b = cp.call(cr.getPackageName(), mProviderHolder.mUri.getAuthority(),
-                                mCallGetCommand, name, args);
+                        b = cp.call(cr.getPackageName(), cr.getAttributionTag(),
+                                mProviderHolder.mUri.getAuthority(), mCallGetCommand, name, args);
                     }
                     if (b != null) {
                         String value = b.getString(Settings.NameValueTable.VALUE);
@@ -2441,6 +2805,7 @@ public final class Settings {
                                                 }
                                             }
                                         });
+                                        currentGeneration = generation;
                                     }
                                 }
                                 if (mGenerationTracker != null && currentGeneration ==
@@ -2471,14 +2836,14 @@ public final class Settings {
                 if (Settings.isInSystemServer() && Binder.getCallingUid() != Process.myUid()) {
                     final long token = Binder.clearCallingIdentity();
                     try {
-                        c = cp.query(cr.getPackageName(), mUri, SELECT_VALUE_PROJECTION, queryArgs,
-                                null);
+                        c = cp.query(cr.getPackageName(), cr.getAttributionTag(), mUri,
+                                SELECT_VALUE_PROJECTION, queryArgs, null);
                     } finally {
                         Binder.restoreCallingIdentity(token);
                     }
                 } else {
-                    c = cp.query(cr.getPackageName(), mUri, SELECT_VALUE_PROJECTION, queryArgs,
-                            null);
+                    c = cp.query(cr.getPackageName(), cr.getAttributionTag(), mUri,
+                            SELECT_VALUE_PROJECTION, queryArgs, null);
                 }
                 if (c == null) {
                     Log.w(TAG, "Can't get key " + name + " from " + mUri);
@@ -2487,8 +2852,8 @@ public final class Settings {
 
                 String value = c.moveToNext() ? c.getString(0) : null;
                 synchronized (NameValueCache.this) {
-                    if(mGenerationTracker != null &&
-                            currentGeneration == mGenerationTracker.getCurrentGeneration()) {
+                    if (mGenerationTracker != null
+                            && currentGeneration == mGenerationTracker.getCurrentGeneration()) {
                         mValues.put(name, value);
                     }
                 }
@@ -2502,6 +2867,141 @@ public final class Settings {
                 return null;  // Return null, but don't cache it.
             } finally {
                 if (c != null) c.close();
+            }
+        }
+
+        public ArrayMap<String, String> getStringsForPrefix(ContentResolver cr, String prefix,
+                List<String> names) {
+            String namespace = prefix.substring(0, prefix.length() - 1);
+            DeviceConfig.enforceReadPermission(ActivityThread.currentApplication(), namespace);
+            ArrayMap<String, String> keyValues = new ArrayMap<>();
+            int currentGeneration = -1;
+
+            synchronized (NameValueCache.this) {
+                if (mGenerationTracker != null) {
+                    if (mGenerationTracker.isGenerationChanged()) {
+                        if (DEBUG) {
+                            Log.i(TAG, "Generation changed for type:" + mUri.getPath()
+                                    + " in package:" + cr.getPackageName());
+                        }
+                        mValues.clear();
+                    } else {
+                        boolean prefixCached = mValues.containsKey(prefix);
+                        if (prefixCached) {
+                            if (!names.isEmpty()) {
+                                for (String name : names) {
+                                    if (mValues.containsKey(name)) {
+                                        keyValues.put(name, mValues.get(name));
+                                    }
+                                }
+                            } else {
+                                for (int i = 0; i < mValues.size(); ++i) {
+                                    String key = mValues.keyAt(i);
+                                    // Explicitly exclude the prefix as it is only there to
+                                    // signal that the prefix has been cached.
+                                    if (key.startsWith(prefix) && !key.equals(prefix)) {
+                                        keyValues.put(key, mValues.get(key));
+                                    }
+                                }
+                            }
+                            return keyValues;
+                        }
+                    }
+                    if (mGenerationTracker != null) {
+                        currentGeneration = mGenerationTracker.getCurrentGeneration();
+                    }
+                }
+            }
+
+            if (mCallListCommand == null) {
+                // No list command specified, return empty map
+                return keyValues;
+            }
+            IContentProvider cp = mProviderHolder.getProvider(cr);
+
+            try {
+                Bundle args = new Bundle();
+                args.putString(Settings.CALL_METHOD_PREFIX_KEY, prefix);
+                boolean needsGenerationTracker = false;
+                synchronized (NameValueCache.this) {
+                    if (mGenerationTracker == null) {
+                        needsGenerationTracker = true;
+                        args.putString(CALL_METHOD_TRACK_GENERATION_KEY, null);
+                        if (DEBUG) {
+                            Log.i(TAG, "Requested generation tracker for type: "
+                                    + mUri.getPath() + " in package:" + cr.getPackageName());
+                        }
+                    }
+                }
+
+                // Fetch all flags for the namespace at once for caching purposes
+                Bundle b = cp.call(cr.getPackageName(), cr.getAttributionTag(),
+                        mProviderHolder.mUri.getAuthority(), mCallListCommand, null, args);
+                if (b == null) {
+                    // Invalid response, return an empty map
+                    return keyValues;
+                }
+
+                // All flags for the namespace
+                Map<String, String> flagsToValues =
+                        (HashMap) b.getSerializable(Settings.NameValueTable.VALUE);
+                // Only the flags requested by the caller
+                if (!names.isEmpty()) {
+                    for (Map.Entry<String, String> flag : flagsToValues.entrySet()) {
+                        if (names.contains(flag.getKey())) {
+                            keyValues.put(flag.getKey(), flag.getValue());
+                        }
+                    }
+                } else {
+                    keyValues.putAll(flagsToValues);
+                }
+
+                synchronized (NameValueCache.this) {
+                    if (needsGenerationTracker) {
+                        MemoryIntArray array = b.getParcelable(
+                                CALL_METHOD_TRACK_GENERATION_KEY);
+                        final int index = b.getInt(
+                                CALL_METHOD_GENERATION_INDEX_KEY, -1);
+                        if (array != null && index >= 0) {
+                            final int generation = b.getInt(
+                                    CALL_METHOD_GENERATION_KEY, 0);
+                            if (DEBUG) {
+                                Log.i(TAG, "Received generation tracker for type:"
+                                        + mUri.getPath() + " in package:"
+                                        + cr.getPackageName() + " with index:" + index);
+                            }
+                            if (mGenerationTracker != null) {
+                                mGenerationTracker.destroy();
+                            }
+                            mGenerationTracker = new GenerationTracker(array, index,
+                                    generation, () -> {
+                                synchronized (NameValueCache.this) {
+                                    Log.e(TAG, "Error accessing generation tracker"
+                                            + " - removing");
+                                    if (mGenerationTracker != null) {
+                                        GenerationTracker generationTracker =
+                                                mGenerationTracker;
+                                        mGenerationTracker = null;
+                                        generationTracker.destroy();
+                                        mValues.clear();
+                                    }
+                                }
+                            });
+                            currentGeneration = generation;
+                        }
+                    }
+                    if (mGenerationTracker != null && currentGeneration
+                            == mGenerationTracker.getCurrentGeneration()) {
+                        // cache the complete list of flags for the namespace
+                        mValues.putAll(flagsToValues);
+                        // Adding the prefix as a signal that the prefix is cached.
+                        mValues.put(prefix, null);
+                    }
+                }
+                return keyValues;
+            } catch (RemoteException e) {
+                // Not supported by the remote side, return an empty map
+                return keyValues;
             }
         }
 
@@ -2566,6 +3066,7 @@ public final class Settings {
         private static final HashSet<String> MOVED_TO_SECURE;
         static {
             MOVED_TO_SECURE = new HashSet<>(30);
+            MOVED_TO_SECURE.add(Secure.ADAPTIVE_SLEEP);
             MOVED_TO_SECURE.add(Secure.ANDROID_ID);
             MOVED_TO_SECURE.add(Secure.HTTP_PROXY);
             MOVED_TO_SECURE.add(Secure.LOCATION_PROVIDERS_ALLOWED);
@@ -2714,10 +3215,36 @@ public final class Settings {
             return putStringForUser(resolver, name, value, resolver.getUserId());
         }
 
+        /**
+         * Store a name/value pair into the database. Values written by this method will be
+         * overridden if a restore happens in the future.
+         *
+         * @param resolver to access the database with
+         * @param name to store
+         * @param value to associate with the name
+         *
+         * @return true if the value was set, false on database errors
+         *
+         * @hide
+         */
+        @RequiresPermission(Manifest.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE)
+        @SystemApi
+        public static boolean putString(@NonNull ContentResolver resolver,
+                @NonNull String name, @Nullable String value, boolean overrideableByRestore) {
+            return putStringForUser(resolver, name, value, resolver.getUserId(),
+                   overrideableByRestore);
+        }
+
         /** @hide */
         @UnsupportedAppUsage
         public static boolean putStringForUser(ContentResolver resolver, String name, String value,
                 int userHandle) {
+            return putStringForUser(resolver, name, value, userHandle,
+                    DEFAULT_OVERRIDEABLE_BY_RESTORE);
+        }
+
+        private static boolean putStringForUser(ContentResolver resolver, String name, String value,
+                int userHandle, boolean overrideableByRestore) {
             if (MOVED_TO_SECURE.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
                         + " to android.provider.Settings.Secure, value is unchanged.");
@@ -2728,7 +3255,8 @@ public final class Settings {
                         + " to android.provider.Settings.Global, value is unchanged.");
                 return false;
             }
-            return sNameValueCache.putStringForUser(resolver, name, value, null, false, userHandle);
+            return sNameValueCache.putStringForUser(resolver, name, value, null, false, userHandle,
+                    overrideableByRestore);
         }
 
         /**
@@ -3052,7 +3580,7 @@ public final class Settings {
                     // need to store the adjusted configuration as the initial settings.
                     Settings.System.putStringForUser(
                             cr, SYSTEM_LOCALES, outConfig.getLocales().toLanguageTags(),
-                            userHandle);
+                            userHandle, DEFAULT_OVERRIDEABLE_BY_RESTORE);
                 }
             }
         }
@@ -3085,7 +3613,8 @@ public final class Settings {
                 int userHandle) {
             return Settings.System.putFloatForUser(cr, FONT_SCALE, config.fontScale, userHandle) &&
                     Settings.System.putStringForUser(
-                            cr, SYSTEM_LOCALES, config.getLocales().toLanguageTags(), userHandle);
+                            cr, SYSTEM_LOCALES, config.getLocales().toLanguageTags(), userHandle,
+                            DEFAULT_OVERRIDEABLE_BY_RESTORE);
         }
 
         /** @hide */
@@ -3132,30 +3661,6 @@ public final class Settings {
         @Deprecated
         public static final String STAY_ON_WHILE_PLUGGED_IN = Global.STAY_ON_WHILE_PLUGGED_IN;
 
-        private static final Validator STAY_ON_WHILE_PLUGGED_IN_VALIDATOR = new Validator() {
-            @Override
-            public boolean validate(String value) {
-                try {
-                    int val = Integer.parseInt(value);
-                    return (val == 0)
-                            || (val == BatteryManager.BATTERY_PLUGGED_AC)
-                            || (val == BatteryManager.BATTERY_PLUGGED_USB)
-                            || (val == BatteryManager.BATTERY_PLUGGED_WIRELESS)
-                            || (val == (BatteryManager.BATTERY_PLUGGED_AC
-                                    | BatteryManager.BATTERY_PLUGGED_USB))
-                            || (val == (BatteryManager.BATTERY_PLUGGED_AC
-                                    | BatteryManager.BATTERY_PLUGGED_WIRELESS))
-                            || (val == (BatteryManager.BATTERY_PLUGGED_USB
-                                    | BatteryManager.BATTERY_PLUGGED_WIRELESS))
-                            || (val == (BatteryManager.BATTERY_PLUGGED_AC
-                                    | BatteryManager.BATTERY_PLUGGED_USB
-                                    | BatteryManager.BATTERY_PLUGGED_WIRELESS));
-                } catch (NumberFormatException e) {
-                    return false;
-                }
-            }
-        };
-
         /**
          * What happens when the user presses the end call button if they're not
          * on a call.<br/>
@@ -3167,9 +3672,6 @@ public final class Settings {
          * home screen, it puts the device to sleep.
          */
         public static final String END_BUTTON_BEHAVIOR = "end_button_behavior";
-
-        private static final Validator END_BUTTON_BEHAVIOR_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 3);
 
         /**
          * END_BUTTON_BEHAVIOR value for "go home".
@@ -3194,8 +3696,6 @@ public final class Settings {
          * @hide
          */
         public static final String ADVANCED_SETTINGS = "advanced_settings";
-
-        private static final Validator ADVANCED_SETTINGS_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * ADVANCED_SETTINGS default value.
@@ -3297,8 +3797,6 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_USE_STATIC_IP = "wifi_use_static_ip";
 
-        private static final Validator WIFI_USE_STATIC_IP_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * The static IP address.
          * <p>
@@ -3308,8 +3806,6 @@ public final class Settings {
          */
         @Deprecated
         public static final String WIFI_STATIC_IP = "wifi_static_ip";
-
-        private static final Validator WIFI_STATIC_IP_VALIDATOR = LENIENT_IP_ADDRESS_VALIDATOR;
 
         /**
          * If using static IP, the gateway's IP address.
@@ -3321,8 +3817,6 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_STATIC_GATEWAY = "wifi_static_gateway";
 
-        private static final Validator WIFI_STATIC_GATEWAY_VALIDATOR = LENIENT_IP_ADDRESS_VALIDATOR;
-
         /**
          * If using static IP, the net mask.
          * <p>
@@ -3332,8 +3826,6 @@ public final class Settings {
          */
         @Deprecated
         public static final String WIFI_STATIC_NETMASK = "wifi_static_netmask";
-
-        private static final Validator WIFI_STATIC_NETMASK_VALIDATOR = LENIENT_IP_ADDRESS_VALIDATOR;
 
         /**
          * If using static IP, the primary DNS's IP address.
@@ -3345,8 +3837,6 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_STATIC_DNS1 = "wifi_static_dns1";
 
-        private static final Validator WIFI_STATIC_DNS1_VALIDATOR = LENIENT_IP_ADDRESS_VALIDATOR;
-
         /**
          * If using static IP, the secondary DNS's IP address.
          * <p>
@@ -3356,8 +3846,6 @@ public final class Settings {
          */
         @Deprecated
         public static final String WIFI_STATIC_DNS2 = "wifi_static_dns2";
-
-        private static final Validator WIFI_STATIC_DNS2_VALIDATOR = LENIENT_IP_ADDRESS_VALIDATOR;
 
         /**
          * Determines whether remote devices may discover and/or connect to
@@ -3370,9 +3858,6 @@ public final class Settings {
         public static final String BLUETOOTH_DISCOVERABILITY =
             "bluetooth_discoverability";
 
-        private static final Validator BLUETOOTH_DISCOVERABILITY_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 2);
-
         /**
          * Bluetooth discoverability timeout.  If this value is nonzero, then
          * Bluetooth becomes discoverable for a certain number of seconds,
@@ -3380,9 +3865,6 @@ public final class Settings {
          */
         public static final String BLUETOOTH_DISCOVERABILITY_TIMEOUT =
             "bluetooth_discoverability_timeout";
-
-        private static final Validator BLUETOOTH_DISCOVERABILITY_TIMEOUT_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Secure#LOCK_PATTERN_ENABLED}
@@ -3416,31 +3898,10 @@ public final class Settings {
         @Deprecated
         public static final String NEXT_ALARM_FORMATTED = "next_alarm_formatted";
 
-        private static final Validator NEXT_ALARM_FORMATTED_VALIDATOR = new Validator() {
-            private static final int MAX_LENGTH = 1000;
-
-            @Override
-            public boolean validate(String value) {
-                // TODO: No idea what the correct format is.
-                return value == null || value.length() < MAX_LENGTH;
-            }
-        };
-
         /**
          * Scaling factor for fonts, float.
          */
         public static final String FONT_SCALE = "font_scale";
-
-        private static final Validator FONT_SCALE_VALIDATOR = new Validator() {
-            @Override
-            public boolean validate(@Nullable String value) {
-                try {
-                    return Float.parseFloat(value) >= 0;
-                } catch (NumberFormatException | NullPointerException e) {
-                    return false;
-                }
-            }
-        };
 
         /**
          * The serialized system locale value.
@@ -3478,33 +3939,11 @@ public final class Settings {
         @Deprecated
         public static final String DIM_SCREEN = "dim_screen";
 
-        private static final Validator DIM_SCREEN_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * The display color mode.
          * @hide
          */
         public static final String DISPLAY_COLOR_MODE = "display_color_mode";
-
-        private static final Validator DISPLAY_COLOR_MODE_VALIDATOR = new Validator() {
-            @Override
-            public boolean validate(@Nullable String value) {
-                // Assume the actual validation that this device can properly handle this kind of
-                // color mode further down in ColorDisplayManager / ColorDisplayService.
-                try {
-                    final int setting = Integer.parseInt(value);
-                    final boolean isInFrameworkRange =
-                            setting >= ColorDisplayManager.COLOR_MODE_NATURAL
-                                    && setting <= ColorDisplayManager.COLOR_MODE_AUTOMATIC;
-                    final boolean isInVendorRange =
-                            setting >= ColorDisplayManager.VENDOR_COLOR_MODE_RANGE_MIN
-                                    && setting <= ColorDisplayManager.VENDOR_COLOR_MODE_RANGE_MAX;
-                    return isInFrameworkRange || isInVendorRange;
-                } catch (NumberFormatException | NullPointerException e) {
-                    return false;
-                }
-            }
-        };
 
         /**
          * The user selected min refresh rate in frames per second.
@@ -3522,9 +3961,6 @@ public final class Settings {
          */
         public static final String PEAK_REFRESH_RATE = "peak_refresh_rate";
 
-        private static final Validator PEAK_REFRESH_RATE_VALIDATOR =
-                new SettingsValidators.InclusiveFloatRangeValidator(24f, Float.MAX_VALUE);
-
         /**
          * The amount of time in milliseconds before the device goes to sleep or begins
          * to dream after a period of inactivity.  This value is also known as the
@@ -3537,9 +3973,6 @@ public final class Settings {
          */
         public static final String SCREEN_OFF_TIMEOUT = "screen_off_timeout";
 
-        private static final Validator SCREEN_OFF_TIMEOUT_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
-
         /**
          * The screen backlight brightness between 0 and 255.
          */
@@ -3551,15 +3984,23 @@ public final class Settings {
          */
         public static final String SCREEN_BRIGHTNESS_FOR_VR = "screen_brightness_for_vr";
 
-        private static final Validator SCREEN_BRIGHTNESS_FOR_VR_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 255);
+        /**
+         * The screen backlight brightness between 0.0f and 1.0f.
+         * @hide
+         */
+        public static final String SCREEN_BRIGHTNESS_FOR_VR_FLOAT =
+                "screen_brightness_for_vr_float";
+
+        /**
+         * The screen backlight brightness between 0.0f and 1.0f.
+         * @hide
+         */
+        public static final String SCREEN_BRIGHTNESS_FLOAT = "screen_brightness_float";
 
         /**
          * Control whether to enable automatic brightness mode.
          */
         public static final String SCREEN_BRIGHTNESS_MODE = "screen_brightness_mode";
-
-        private static final Validator SCREEN_BRIGHTNESS_MODE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Adjustment to auto-brightness to make it generally more (>0.0 <1.0)
@@ -3568,9 +4009,6 @@ public final class Settings {
          */
         @UnsupportedAppUsage
         public static final String SCREEN_AUTO_BRIGHTNESS_ADJ = "screen_auto_brightness_adj";
-
-        private static final Validator SCREEN_AUTO_BRIGHTNESS_ADJ_VALIDATOR =
-                new SettingsValidators.InclusiveFloatRangeValidator(-1, 1);
 
         /**
          * SCREEN_BRIGHTNESS_MODE value for manual mode.
@@ -3584,11 +4022,10 @@ public final class Settings {
 
         /**
          * Control whether to enable adaptive sleep mode.
+         * @deprecated Use {@link android.provider.Settings.Secure#ADAPTIVE_SLEEP} instead.
          * @hide
          */
         public static final String ADAPTIVE_SLEEP = "adaptive_sleep";
-
-        private static final Validator ADAPTIVE_SLEEP_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Control whether the process CPU usage meter should be shown.
@@ -3616,9 +4053,6 @@ public final class Settings {
          */
         public static final String MODE_RINGER_STREAMS_AFFECTED = "mode_ringer_streams_affected";
 
-        private static final Validator MODE_RINGER_STREAMS_AFFECTED_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
-
         /**
           * Determines which streams are affected by mute. The
           * stream type's bit should be set to 1 if it should be muted when a mute request
@@ -3626,16 +4060,11 @@ public final class Settings {
           */
         public static final String MUTE_STREAMS_AFFECTED = "mute_streams_affected";
 
-        private static final Validator MUTE_STREAMS_AFFECTED_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
-
         /**
          * Whether vibrate is on for different events. This is used internally,
          * changing this value will not change the vibrate. See AudioManager.
          */
         public static final String VIBRATE_ON = "vibrate_on";
-
-        private static final Validator VIBRATE_ON_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * If 1, redirects the system vibrator to all currently attached input devices
@@ -3650,8 +4079,6 @@ public final class Settings {
          * @hide
          */
         public static final String VIBRATE_INPUT_DEVICES = "vibrate_input_devices";
-
-        private static final Validator VIBRATE_INPUT_DEVICES_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * The intensity of notification vibrations, if configurable.
@@ -3702,9 +4129,6 @@ public final class Settings {
          */
         public static final String HAPTIC_FEEDBACK_INTENSITY =
                 "haptic_feedback_intensity";
-
-        private static final Validator VIBRATION_INTENSITY_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 3);
 
         /**
          * Ringer volume. This is used internally, changing this value will not
@@ -3770,6 +4194,12 @@ public final class Settings {
         public static final String VOLUME_ACCESSIBILITY = "volume_a11y";
 
         /**
+         * @hide
+         * Volume index for virtual assistant.
+         */
+        public static final String VOLUME_ASSISTANT = "volume_assistant";
+
+        /**
          * Master volume (float in the range 0.0f to 1.0f).
          *
          * @hide
@@ -3784,17 +4214,12 @@ public final class Settings {
         @UnsupportedAppUsage
         public static final String MASTER_MONO = "master_mono";
 
-        private static final Validator MASTER_MONO_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Master balance (float -1.f = 100% left, 0.f = dead center, 1.f = 100% right).
          *
          * @hide
          */
         public static final String MASTER_BALANCE = "master_balance";
-
-        private static final Validator MASTER_BALANCE_VALIDATOR =
-                new SettingsValidators.InclusiveFloatRangeValidator(-1.f, 1.f);
 
         /**
          * Whether the notifications should use the ring volume (value of 1) or
@@ -3814,8 +4239,6 @@ public final class Settings {
         public static final String NOTIFICATIONS_USE_RING_VOLUME =
             "notifications_use_ring_volume";
 
-        private static final Validator NOTIFICATIONS_USE_RING_VOLUME_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Whether silent mode should allow vibration feedback. This is used
          * internally in AudioService and the Sound settings activity to
@@ -3830,8 +4253,6 @@ public final class Settings {
          */
         @UnsupportedAppUsage
         public static final String VIBRATE_IN_SILENT = "vibrate_in_silent";
-
-        private static final Validator VIBRATE_IN_SILENT_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * The mapping of stream type (integer) to its setting.
@@ -3856,7 +4277,7 @@ public final class Settings {
                 "" /*STREAM_SYSTEM_ENFORCED, no setting for this stream*/,
                 "" /*STREAM_DTMF, no setting for this stream*/,
                 "" /*STREAM_TTS, no setting for this stream*/,
-                VOLUME_ACCESSIBILITY
+                VOLUME_ACCESSIBILITY, VOLUME_ASSISTANT
             };
 
         /**
@@ -3878,8 +4299,6 @@ public final class Settings {
          * @see #DEFAULT_RINGTONE_URI
          */
         public static final String RINGTONE = "ringtone";
-
-        private static final Validator RINGTONE_VALIDATOR = URI_VALIDATOR;
 
         /**
          * A {@link Uri} that will point to the current default ringtone at any
@@ -3904,8 +4323,6 @@ public final class Settings {
          */
         public static final String NOTIFICATION_SOUND = "notification_sound";
 
-        private static final Validator NOTIFICATION_SOUND_VALIDATOR = URI_VALIDATOR;
-
         /**
          * A {@link Uri} that will point to the current default notification
          * sound at any given time.
@@ -3927,8 +4344,6 @@ public final class Settings {
          */
         public static final String ALARM_ALERT = "alarm_alert";
 
-        private static final Validator ALARM_ALERT_VALIDATOR = URI_VALIDATOR;
-
         /**
          * A {@link Uri} that will point to the current default alarm alert at
          * any given time.
@@ -3949,21 +4364,15 @@ public final class Settings {
          */
         public static final String MEDIA_BUTTON_RECEIVER = "media_button_receiver";
 
-        private static final Validator MEDIA_BUTTON_RECEIVER_VALIDATOR = COMPONENT_NAME_VALIDATOR;
-
         /**
          * Setting to enable Auto Replace (AutoText) in text editors. 1 = On, 0 = Off
          */
         public static final String TEXT_AUTO_REPLACE = "auto_replace";
 
-        private static final Validator TEXT_AUTO_REPLACE_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Setting to enable Auto Caps in text editors. 1 = On, 0 = Off
          */
         public static final String TEXT_AUTO_CAPS = "auto_caps";
-
-        private static final Validator TEXT_AUTO_CAPS_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Setting to enable Auto Punctuate in text editors. 1 = On, 0 = Off. This
@@ -3971,19 +4380,13 @@ public final class Settings {
          */
         public static final String TEXT_AUTO_PUNCTUATE = "auto_punctuate";
 
-        private static final Validator TEXT_AUTO_PUNCTUATE_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Setting to showing password characters in text editors. 1 = On, 0 = Off
          */
         public static final String TEXT_SHOW_PASSWORD = "show_password";
 
-        private static final Validator TEXT_SHOW_PASSWORD_VALIDATOR = BOOLEAN_VALIDATOR;
-
         public static final String SHOW_GTALK_SERVICE_STATUS =
                 "SHOW_GTALK_SERVICE_STATUS";
-
-        private static final Validator SHOW_GTALK_SERVICE_STATUS_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Name of activity to use for wallpaper on the home screen.
@@ -3993,26 +4396,12 @@ public final class Settings {
         @Deprecated
         public static final String WALLPAPER_ACTIVITY = "wallpaper_activity";
 
-        private static final Validator WALLPAPER_ACTIVITY_VALIDATOR = new Validator() {
-            private static final int MAX_LENGTH = 1000;
-
-            @Override
-            public boolean validate(String value) {
-                if (value != null && value.length() > MAX_LENGTH) {
-                    return false;
-                }
-                return ComponentName.unflattenFromString(value) != null;
-            }
-        };
-
         /**
          * @deprecated Use {@link android.provider.Settings.Global#AUTO_TIME}
          * instead
          */
         @Deprecated
         public static final String AUTO_TIME = Global.AUTO_TIME;
-
-        private static final Validator AUTO_TIME_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#AUTO_TIME_ZONE}
@@ -4021,18 +4410,12 @@ public final class Settings {
         @Deprecated
         public static final String AUTO_TIME_ZONE = Global.AUTO_TIME_ZONE;
 
-        private static final Validator AUTO_TIME_ZONE_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Display times as 12 or 24 hours
          *   12
          *   24
          */
         public static final String TIME_12_24 = "time_12_24";
-
-        /** @hide */
-        public static final Validator TIME_12_24_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(new String[] {"12", "24", null});
 
         /**
          * Date format string
@@ -4042,19 +4425,6 @@ public final class Settings {
          */
         public static final String DATE_FORMAT = "date_format";
 
-        /** @hide */
-        public static final Validator DATE_FORMAT_VALIDATOR = new Validator() {
-            @Override
-            public boolean validate(@Nullable String value) {
-                try {
-                    new SimpleDateFormat(value);
-                    return true;
-                } catch (IllegalArgumentException | NullPointerException e) {
-                    return false;
-                }
-            }
-        };
-
         /**
          * Whether the setup wizard has been run before (on first boot), or if
          * it still needs to be run.
@@ -4063,9 +4433,6 @@ public final class Settings {
          * 0 = it has not been run in the past
          */
         public static final String SETUP_WIZARD_HAS_RUN = "setup_wizard_has_run";
-
-        /** @hide */
-        public static final Validator SETUP_WIZARD_HAS_RUN_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Scaling factor for normal window animations. Setting to 0 will disable window
@@ -4103,9 +4470,6 @@ public final class Settings {
          */
         public static final String ACCELEROMETER_ROTATION = "accelerometer_rotation";
 
-        /** @hide */
-        public static final Validator ACCELEROMETER_ROTATION_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Default screen rotation when no other policy applies.
          * When {@link #ACCELEROMETER_ROTATION} is zero and no on-screen Activity expresses a
@@ -4115,10 +4479,6 @@ public final class Settings {
          * @see Display#getRotation
          */
         public static final String USER_ROTATION = "user_rotation";
-
-        /** @hide */
-        public static final Validator USER_ROTATION_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 3);
 
         /**
          * Control whether the rotation lock toggle in the System UI should be hidden.
@@ -4135,10 +4495,6 @@ public final class Settings {
         public static final String HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY =
                 "hide_rotation_lock_toggle_for_accessibility";
 
-        /** @hide */
-        public static final Validator HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
         /**
          * Whether the phone vibrates when it is ringing due to an incoming call. This will
          * be used by Phone and Setting apps; it shouldn't affect other apps.
@@ -4150,9 +4506,6 @@ public final class Settings {
          * calls.
          */
         public static final String VIBRATE_WHEN_RINGING = "vibrate_when_ringing";
-
-        /** @hide */
-        public static final Validator VIBRATE_WHEN_RINGING_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * When {@code 1}, Telecom enhanced call blocking functionality is enabled.  When
@@ -4168,9 +4521,6 @@ public final class Settings {
          */
         public static final String DTMF_TONE_WHEN_DIALING = "dtmf_tone";
 
-        /** @hide */
-        public static final Validator DTMF_TONE_WHEN_DIALING_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * CDMA only settings
          * DTMF tone type played by the dialer when dialing.
@@ -4179,9 +4529,6 @@ public final class Settings {
          */
         public static final String DTMF_TONE_TYPE_WHEN_DIALING = "dtmf_tone_type";
 
-        /** @hide */
-        public static final Validator DTMF_TONE_TYPE_WHEN_DIALING_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Whether the hearing aid is enabled. The value is
          * boolean (1 or 0).
@@ -4189,9 +4536,6 @@ public final class Settings {
          */
         @UnsupportedAppUsage
         public static final String HEARING_AID = "hearing_aid";
-
-        /** @hide */
-        public static final Validator HEARING_AID_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * CDMA only settings
@@ -4205,27 +4549,17 @@ public final class Settings {
         @UnsupportedAppUsage
         public static final String TTY_MODE = "tty_mode";
 
-        /** @hide */
-        public static final Validator TTY_MODE_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 3);
-
         /**
          * Whether the sounds effects (key clicks, lid open ...) are enabled. The value is
          * boolean (1 or 0).
          */
         public static final String SOUND_EFFECTS_ENABLED = "sound_effects_enabled";
 
-        /** @hide */
-        public static final Validator SOUND_EFFECTS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Whether haptic feedback (Vibrate on tap) is enabled. The value is
          * boolean (1 or 0).
          */
         public static final String HAPTIC_FEEDBACK_ENABLED = "haptic_feedback_enabled";
-
-        /** @hide */
-        public static final Validator HAPTIC_FEEDBACK_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * @deprecated Each application that shows web suggestions should have its own
@@ -4234,9 +4568,6 @@ public final class Settings {
         @Deprecated
         public static final String SHOW_WEB_SUGGESTIONS = "show_web_suggestions";
 
-        /** @hide */
-        public static final Validator SHOW_WEB_SUGGESTIONS_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Whether the notification LED should repeatedly flash when a notification is
          * pending. The value is boolean (1 or 0).
@@ -4244,9 +4575,6 @@ public final class Settings {
          */
         @UnsupportedAppUsage
         public static final String NOTIFICATION_LIGHT_PULSE = "notification_light_pulse";
-
-        /** @hide */
-        public static final Validator NOTIFICATION_LIGHT_PULSE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Show pointer location on screen?
@@ -4257,9 +4585,6 @@ public final class Settings {
         @UnsupportedAppUsage
         public static final String POINTER_LOCATION = "pointer_location";
 
-        /** @hide */
-        public static final Validator POINTER_LOCATION_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Show touch positions on screen?
          * 0 = no
@@ -4268,9 +4593,6 @@ public final class Settings {
          */
         @UnsupportedAppUsage
         public static final String SHOW_TOUCHES = "show_touches";
-
-        /** @hide */
-        public static final Validator SHOW_TOUCHES_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Log raw orientation data from
@@ -4283,9 +4605,6 @@ public final class Settings {
         public static final String WINDOW_ORIENTATION_LISTENER_LOG =
                 "window_orientation_listener_log";
 
-        /** @hide */
-        public static final Validator WINDOW_ORIENTATION_LISTENER_LOG_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * @deprecated Use {@link android.provider.Settings.Global#POWER_SOUNDS_ENABLED}
          * instead
@@ -4293,8 +4612,6 @@ public final class Settings {
          */
         @Deprecated
         public static final String POWER_SOUNDS_ENABLED = Global.POWER_SOUNDS_ENABLED;
-
-        private static final Validator POWER_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#DOCK_SOUNDS_ENABLED}
@@ -4305,8 +4622,6 @@ public final class Settings {
         @UnsupportedAppUsage
         public static final String DOCK_SOUNDS_ENABLED = Global.DOCK_SOUNDS_ENABLED;
 
-        private static final Validator DOCK_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Whether to play sounds when the keyguard is shown and dismissed.
          * @hide
@@ -4314,17 +4629,11 @@ public final class Settings {
         @UnsupportedAppUsage
         public static final String LOCKSCREEN_SOUNDS_ENABLED = "lockscreen_sounds_enabled";
 
-        /** @hide */
-        public static final Validator LOCKSCREEN_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Whether the lockscreen should be completely disabled.
          * @hide
          */
         public static final String LOCKSCREEN_DISABLED = "lockscreen.disabled";
-
-        /** @hide */
-        public static final Validator LOCKSCREEN_DISABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#LOW_BATTERY_SOUND}
@@ -4396,9 +4705,6 @@ public final class Settings {
          */
         public static final String SIP_RECEIVE_CALLS = "sip_receive_calls";
 
-        /** @hide */
-        public static final Validator SIP_RECEIVE_CALLS_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Call Preference String.
          * "SIP_ALWAYS" : Always use SIP with network access
@@ -4407,28 +4713,17 @@ public final class Settings {
          */
         public static final String SIP_CALL_OPTIONS = "sip_call_options";
 
-        /** @hide */
-        public static final Validator SIP_CALL_OPTIONS_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(
-                        new String[] {"SIP_ALWAYS", "SIP_ADDRESS_ONLY"});
-
         /**
          * One of the sip call options: Always use SIP with network access.
          * @hide
          */
         public static final String SIP_ALWAYS = "SIP_ALWAYS";
 
-        /** @hide */
-        public static final Validator SIP_ALWAYS_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * One of the sip call options: Only if destination is a SIP address.
          * @hide
          */
         public static final String SIP_ADDRESS_ONLY = "SIP_ADDRESS_ONLY";
-
-        /** @hide */
-        public static final Validator SIP_ADDRESS_ONLY_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * @deprecated Use SIP_ALWAYS or SIP_ADDRESS_ONLY instead.  Formerly used to indicate that
@@ -4439,9 +4734,6 @@ public final class Settings {
          */
         @Deprecated
         public static final String SIP_ASK_ME_EACH_TIME = "SIP_ASK_ME_EACH_TIME";
-
-        /** @hide */
-        public static final Validator SIP_ASK_ME_EACH_TIME_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Pointer speed setting.
@@ -4454,18 +4746,11 @@ public final class Settings {
         @UnsupportedAppUsage
         public static final String POINTER_SPEED = "pointer_speed";
 
-        /** @hide */
-        public static final Validator POINTER_SPEED_VALIDATOR =
-                new SettingsValidators.InclusiveFloatRangeValidator(-7, 7);
-
         /**
          * Whether lock-to-app will be triggered by long-press on recents.
          * @hide
          */
         public static final String LOCK_TO_APP_ENABLED = "lock_to_app_enabled";
-
-        /** @hide */
-        public static final Validator LOCK_TO_APP_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * I am the lolrus.
@@ -4476,18 +4761,6 @@ public final class Settings {
          */
         public static final String EGG_MODE = "egg_mode";
 
-        /** @hide */
-        public static final Validator EGG_MODE_VALIDATOR = new Validator() {
-            @Override
-            public boolean validate(@Nullable String value) {
-                try {
-                    return Long.parseLong(value) >= 0;
-                } catch (NumberFormatException e) {
-                    return false;
-                }
-            }
-        };
-
         /**
          * Setting to determine whether or not to show the battery percentage in the status bar.
          *    0 - Don't show percentage
@@ -4496,8 +4769,13 @@ public final class Settings {
          */
         public static final String SHOW_BATTERY_PERCENT = "status_bar_show_battery_percent";
 
-        /** @hide */
-        private static final Validator SHOW_BATTERY_PERCENT_VALIDATOR = BOOLEAN_VALIDATOR;
+        /**
+         * Whether or not to enable multiple audio focus.
+         * When enabled, requires more management by user over application playback activity,
+         * for instance pausing media apps when another starts.
+         * @hide
+         */
+        public static final String MULTI_AUDIO_FOCUS_ENABLED = "multi_audio_focus_enabled";
 
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
@@ -4505,73 +4783,6 @@ public final class Settings {
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
          * the setting value. See an example above.
          */
-
-        /**
-         * Settings to backup. This is here so that it's in the same place as the settings
-         * keys and easy to update.
-         *
-         * NOTE: Settings are backed up and restored in the order they appear
-         *       in this array. If you have one setting depending on another,
-         *       make sure that they are ordered appropriately.
-         *
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public static final String[] SETTINGS_TO_BACKUP = {
-            STAY_ON_WHILE_PLUGGED_IN,   // moved to global
-            WIFI_USE_STATIC_IP,
-            WIFI_STATIC_IP,
-            WIFI_STATIC_GATEWAY,
-            WIFI_STATIC_NETMASK,
-            WIFI_STATIC_DNS1,
-            WIFI_STATIC_DNS2,
-            BLUETOOTH_DISCOVERABILITY,
-            BLUETOOTH_DISCOVERABILITY_TIMEOUT,
-            FONT_SCALE,
-            DIM_SCREEN,
-            SCREEN_OFF_TIMEOUT,
-            SCREEN_BRIGHTNESS_MODE,
-            SCREEN_AUTO_BRIGHTNESS_ADJ,
-            SCREEN_BRIGHTNESS_FOR_VR,
-            ADAPTIVE_SLEEP,
-            VIBRATE_INPUT_DEVICES,
-            MODE_RINGER_STREAMS_AFFECTED,
-            TEXT_AUTO_REPLACE,
-            TEXT_AUTO_CAPS,
-            TEXT_AUTO_PUNCTUATE,
-            TEXT_SHOW_PASSWORD,
-            AUTO_TIME,                  // moved to global
-            AUTO_TIME_ZONE,             // moved to global
-            TIME_12_24,
-            DATE_FORMAT,
-            DTMF_TONE_WHEN_DIALING,
-            DTMF_TONE_TYPE_WHEN_DIALING,
-            HEARING_AID,
-            TTY_MODE,
-            MASTER_MONO,
-            MASTER_BALANCE,
-            SOUND_EFFECTS_ENABLED,
-            HAPTIC_FEEDBACK_ENABLED,
-            POWER_SOUNDS_ENABLED,       // moved to global
-            DOCK_SOUNDS_ENABLED,        // moved to global
-            LOCKSCREEN_SOUNDS_ENABLED,
-            SHOW_WEB_SUGGESTIONS,
-            SIP_CALL_OPTIONS,
-            SIP_RECEIVE_CALLS,
-            POINTER_SPEED,
-            VIBRATE_WHEN_RINGING,
-            RINGTONE,
-            LOCK_TO_APP_ENABLED,
-            NOTIFICATION_SOUND,
-            ACCELEROMETER_ROTATION,
-            SHOW_BATTERY_PERCENT,
-            NOTIFICATION_VIBRATION_INTENSITY,
-            RING_VIBRATION_INTENSITY,
-            HAPTIC_FEEDBACK_INTENSITY,
-            DISPLAY_COLOR_MODE,
-            ALARM_ALERT,
-            NOTIFICATION_LIGHT_PULSE,
-        };
 
         /**
          * Keys we no longer back up under the current schema, but want to continue to
@@ -4608,9 +4819,10 @@ public final class Settings {
             PUBLIC_SETTINGS.add(DIM_SCREEN);
             PUBLIC_SETTINGS.add(SCREEN_OFF_TIMEOUT);
             PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS);
+            PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS_FLOAT);
             PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS_FOR_VR);
+            PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS_FOR_VR_FLOAT);
             PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS_MODE);
-            PUBLIC_SETTINGS.add(ADAPTIVE_SLEEP);
             PUBLIC_SETTINGS.add(MODE_RINGER_STREAMS_AFFECTED);
             PUBLIC_SETTINGS.add(MUTE_STREAMS_AFFECTED);
             PUBLIC_SETTINGS.add(VIBRATE_ON);
@@ -4621,6 +4833,7 @@ public final class Settings {
             PUBLIC_SETTINGS.add(VOLUME_ALARM);
             PUBLIC_SETTINGS.add(VOLUME_NOTIFICATION);
             PUBLIC_SETTINGS.add(VOLUME_BLUETOOTH_SCO);
+            PUBLIC_SETTINGS.add(VOLUME_ASSISTANT);
             PUBLIC_SETTINGS.add(RINGTONE);
             PUBLIC_SETTINGS.add(NOTIFICATION_SOUND);
             PUBLIC_SETTINGS.add(ALARM_ALERT);
@@ -4690,99 +4903,6 @@ public final class Settings {
             PRIVATE_SETTINGS.add(EGG_MODE);
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE);
-        }
-
-        /**
-         * These are all public system settings
-         *
-         * All settings in {@link SETTINGS_TO_BACKUP} array *must* have a non-null validator,
-         * otherwise they won't be restored.
-         *
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public static final Map<String, Validator> VALIDATORS = new ArrayMap<>();
-        static {
-            VALIDATORS.put(STAY_ON_WHILE_PLUGGED_IN, STAY_ON_WHILE_PLUGGED_IN_VALIDATOR);
-            VALIDATORS.put(END_BUTTON_BEHAVIOR, END_BUTTON_BEHAVIOR_VALIDATOR);
-            VALIDATORS.put(WIFI_USE_STATIC_IP, WIFI_USE_STATIC_IP_VALIDATOR);
-            VALIDATORS.put(BLUETOOTH_DISCOVERABILITY, BLUETOOTH_DISCOVERABILITY_VALIDATOR);
-            VALIDATORS.put(BLUETOOTH_DISCOVERABILITY_TIMEOUT,
-                    BLUETOOTH_DISCOVERABILITY_TIMEOUT_VALIDATOR);
-            VALIDATORS.put(NEXT_ALARM_FORMATTED, NEXT_ALARM_FORMATTED_VALIDATOR);
-            VALIDATORS.put(FONT_SCALE, FONT_SCALE_VALIDATOR);
-            VALIDATORS.put(DIM_SCREEN, DIM_SCREEN_VALIDATOR);
-            VALIDATORS.put(DISPLAY_COLOR_MODE, DISPLAY_COLOR_MODE_VALIDATOR);
-            VALIDATORS.put(SCREEN_OFF_TIMEOUT, SCREEN_OFF_TIMEOUT_VALIDATOR);
-            VALIDATORS.put(SCREEN_BRIGHTNESS_FOR_VR, SCREEN_BRIGHTNESS_FOR_VR_VALIDATOR);
-            VALIDATORS.put(SCREEN_BRIGHTNESS_MODE, SCREEN_BRIGHTNESS_MODE_VALIDATOR);
-            VALIDATORS.put(ADAPTIVE_SLEEP, ADAPTIVE_SLEEP_VALIDATOR);
-            VALIDATORS.put(MODE_RINGER_STREAMS_AFFECTED, MODE_RINGER_STREAMS_AFFECTED_VALIDATOR);
-            VALIDATORS.put(MUTE_STREAMS_AFFECTED, MUTE_STREAMS_AFFECTED_VALIDATOR);
-            VALIDATORS.put(VIBRATE_ON, VIBRATE_ON_VALIDATOR);
-            VALIDATORS.put(NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_VALIDATOR);
-            VALIDATORS.put(RING_VIBRATION_INTENSITY, VIBRATION_INTENSITY_VALIDATOR);
-            VALIDATORS.put(HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_VALIDATOR);
-            VALIDATORS.put(RINGTONE, RINGTONE_VALIDATOR);
-            VALIDATORS.put(NOTIFICATION_SOUND, NOTIFICATION_SOUND_VALIDATOR);
-            VALIDATORS.put(ALARM_ALERT, ALARM_ALERT_VALIDATOR);
-            VALIDATORS.put(TEXT_AUTO_REPLACE, TEXT_AUTO_REPLACE_VALIDATOR);
-            VALIDATORS.put(TEXT_AUTO_CAPS, TEXT_AUTO_CAPS_VALIDATOR);
-            VALIDATORS.put(TEXT_AUTO_PUNCTUATE, TEXT_AUTO_PUNCTUATE_VALIDATOR);
-            VALIDATORS.put(TEXT_SHOW_PASSWORD, TEXT_SHOW_PASSWORD_VALIDATOR);
-            VALIDATORS.put(AUTO_TIME, AUTO_TIME_VALIDATOR);
-            VALIDATORS.put(AUTO_TIME_ZONE, AUTO_TIME_ZONE_VALIDATOR);
-            VALIDATORS.put(SHOW_GTALK_SERVICE_STATUS, SHOW_GTALK_SERVICE_STATUS_VALIDATOR);
-            VALIDATORS.put(WALLPAPER_ACTIVITY, WALLPAPER_ACTIVITY_VALIDATOR);
-            VALIDATORS.put(TIME_12_24, TIME_12_24_VALIDATOR);
-            VALIDATORS.put(DATE_FORMAT, DATE_FORMAT_VALIDATOR);
-            VALIDATORS.put(SETUP_WIZARD_HAS_RUN, SETUP_WIZARD_HAS_RUN_VALIDATOR);
-            VALIDATORS.put(ACCELEROMETER_ROTATION, ACCELEROMETER_ROTATION_VALIDATOR);
-            VALIDATORS.put(USER_ROTATION, USER_ROTATION_VALIDATOR);
-            VALIDATORS.put(DTMF_TONE_WHEN_DIALING, DTMF_TONE_WHEN_DIALING_VALIDATOR);
-            VALIDATORS.put(SOUND_EFFECTS_ENABLED, SOUND_EFFECTS_ENABLED_VALIDATOR);
-            VALIDATORS.put(HAPTIC_FEEDBACK_ENABLED, HAPTIC_FEEDBACK_ENABLED_VALIDATOR);
-            VALIDATORS.put(POWER_SOUNDS_ENABLED, POWER_SOUNDS_ENABLED_VALIDATOR);
-            VALIDATORS.put(DOCK_SOUNDS_ENABLED, DOCK_SOUNDS_ENABLED_VALIDATOR);
-            VALIDATORS.put(SHOW_WEB_SUGGESTIONS, SHOW_WEB_SUGGESTIONS_VALIDATOR);
-            VALIDATORS.put(WIFI_USE_STATIC_IP, WIFI_USE_STATIC_IP_VALIDATOR);
-            VALIDATORS.put(END_BUTTON_BEHAVIOR, END_BUTTON_BEHAVIOR_VALIDATOR);
-            VALIDATORS.put(ADVANCED_SETTINGS, ADVANCED_SETTINGS_VALIDATOR);
-            VALIDATORS.put(SCREEN_AUTO_BRIGHTNESS_ADJ, SCREEN_AUTO_BRIGHTNESS_ADJ_VALIDATOR);
-            VALIDATORS.put(VIBRATE_INPUT_DEVICES, VIBRATE_INPUT_DEVICES_VALIDATOR);
-            VALIDATORS.put(MASTER_MONO, MASTER_MONO_VALIDATOR);
-            VALIDATORS.put(MASTER_BALANCE, MASTER_BALANCE_VALIDATOR);
-            VALIDATORS.put(NOTIFICATIONS_USE_RING_VOLUME, NOTIFICATIONS_USE_RING_VOLUME_VALIDATOR);
-            VALIDATORS.put(VIBRATE_IN_SILENT, VIBRATE_IN_SILENT_VALIDATOR);
-            VALIDATORS.put(MEDIA_BUTTON_RECEIVER, MEDIA_BUTTON_RECEIVER_VALIDATOR);
-            VALIDATORS.put(HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
-                    HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY_VALIDATOR);
-            VALIDATORS.put(VIBRATE_WHEN_RINGING, VIBRATE_WHEN_RINGING_VALIDATOR);
-            VALIDATORS.put(DTMF_TONE_TYPE_WHEN_DIALING, DTMF_TONE_TYPE_WHEN_DIALING_VALIDATOR);
-            VALIDATORS.put(HEARING_AID, HEARING_AID_VALIDATOR);
-            VALIDATORS.put(TTY_MODE, TTY_MODE_VALIDATOR);
-            VALIDATORS.put(NOTIFICATION_LIGHT_PULSE, NOTIFICATION_LIGHT_PULSE_VALIDATOR);
-            VALIDATORS.put(POINTER_LOCATION, POINTER_LOCATION_VALIDATOR);
-            VALIDATORS.put(SHOW_TOUCHES, SHOW_TOUCHES_VALIDATOR);
-            VALIDATORS.put(WINDOW_ORIENTATION_LISTENER_LOG,
-                    WINDOW_ORIENTATION_LISTENER_LOG_VALIDATOR);
-            VALIDATORS.put(LOCKSCREEN_SOUNDS_ENABLED, LOCKSCREEN_SOUNDS_ENABLED_VALIDATOR);
-            VALIDATORS.put(LOCKSCREEN_DISABLED, LOCKSCREEN_DISABLED_VALIDATOR);
-            VALIDATORS.put(SIP_RECEIVE_CALLS, SIP_RECEIVE_CALLS_VALIDATOR);
-            VALIDATORS.put(SIP_CALL_OPTIONS, SIP_CALL_OPTIONS_VALIDATOR);
-            VALIDATORS.put(SIP_ALWAYS, SIP_ALWAYS_VALIDATOR);
-            VALIDATORS.put(SIP_ADDRESS_ONLY, SIP_ADDRESS_ONLY_VALIDATOR);
-            VALIDATORS.put(SIP_ASK_ME_EACH_TIME, SIP_ASK_ME_EACH_TIME_VALIDATOR);
-            VALIDATORS.put(POINTER_SPEED, POINTER_SPEED_VALIDATOR);
-            VALIDATORS.put(LOCK_TO_APP_ENABLED, LOCK_TO_APP_ENABLED_VALIDATOR);
-            VALIDATORS.put(EGG_MODE, EGG_MODE_VALIDATOR);
-            VALIDATORS.put(WIFI_STATIC_IP, WIFI_STATIC_IP_VALIDATOR);
-            VALIDATORS.put(WIFI_STATIC_GATEWAY, WIFI_STATIC_GATEWAY_VALIDATOR);
-            VALIDATORS.put(WIFI_STATIC_NETMASK, WIFI_STATIC_NETMASK_VALIDATOR);
-            VALIDATORS.put(WIFI_STATIC_DNS1, WIFI_STATIC_DNS1_VALIDATOR);
-            VALIDATORS.put(WIFI_STATIC_DNS2, WIFI_STATIC_DNS2_VALIDATOR);
-            VALIDATORS.put(SHOW_BATTERY_PERCENT, SHOW_BATTERY_PERCENT_VALIDATOR);
-            VALIDATORS.put(NOTIFICATION_LIGHT_PULSE, BOOLEAN_VALIDATOR);
         }
 
         /**
@@ -4871,8 +4991,6 @@ public final class Settings {
         @Deprecated
         public static final String BLUETOOTH_ON = Global.BLUETOOTH_ON;
 
-        private static final Validator BLUETOOTH_ON_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * @deprecated Use {@link android.provider.Settings.Global#DATA_ROAMING} instead
          */
@@ -4950,8 +5068,6 @@ public final class Settings {
         @Deprecated
         public static final String USB_MASS_STORAGE_ENABLED = Global.USB_MASS_STORAGE_ENABLED;
 
-        private static final Validator USB_MASS_STORAGE_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * @deprecated Use {@link android.provider.Settings.Global#USE_GOOGLE_MAIL} instead
          */
@@ -4981,9 +5097,6 @@ public final class Settings {
         public static final String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON =
                 Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON;
 
-        private static final Validator WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
         /**
          * @deprecated Use
          * {@link android.provider.Settings.Global#WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY} instead
@@ -4992,18 +5105,12 @@ public final class Settings {
         public static final String WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY =
                 Global.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY;
 
-        private static final Validator WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
-
         /**
          * @deprecated Use {@link android.provider.Settings.Global#WIFI_NUM_OPEN_NETWORKS_KEPT}
          * instead
          */
         @Deprecated
         public static final String WIFI_NUM_OPEN_NETWORKS_KEPT = Global.WIFI_NUM_OPEN_NETWORKS_KEPT;
-
-        private static final Validator WIFI_NUM_OPEN_NETWORKS_KEPT_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#WIFI_ON} instead
@@ -5115,8 +5222,9 @@ public final class Settings {
     /**
      * Secure system settings, containing system preferences that applications
      * can read but are not allowed to write.  These are for preferences that
-     * the user must explicitly modify through the system UI or specialized
-     * APIs for those values, not modified directly by applications.
+     * the user must explicitly modify through the UI of a system app. Normal
+     * applications cannot modify the secure settings database, either directly
+     * or by calling the "put" methods that this class contains.
      */
     public static final class Secure extends NameValueTable {
         // NOTE: If you add new settings here, be sure to add them to
@@ -5216,9 +5324,7 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_NUM_OPEN_NETWORKS_KEPT);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_ON);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_P2P_DEVICE_NAME);
-            MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SAVED_STATE);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS);
-            MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_ENHANCED_AUTO_JOIN);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_NETWORK_SHOW_RSSI);
@@ -5226,7 +5332,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_P2P_PENDING_FACTORY_RESET);
             MOVED_TO_GLOBAL.add(Settings.Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON);
-            MOVED_TO_GLOBAL.add(Settings.Global.PACKAGE_VERIFIER_ENABLE);
             MOVED_TO_GLOBAL.add(Settings.Global.PACKAGE_VERIFIER_TIMEOUT);
             MOVED_TO_GLOBAL.add(Settings.Global.PACKAGE_VERIFIER_DEFAULT_RESPONSE);
             MOVED_TO_GLOBAL.add(Settings.Global.DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS);
@@ -5334,6 +5439,24 @@ public final class Settings {
         }
 
         /**
+         * Store a name/value pair into the database. Values written by this method will be
+         * overridden if a restore happens in the future.
+         *
+         * @param resolver to access the database with
+         * @param name to store
+         * @param value to associate with the name
+         * @return true if the value was set, false on database errors
+         *
+         * @hide
+         */
+        @RequiresPermission(Manifest.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE)
+        public static boolean putString(ContentResolver resolver, String name,
+                String value, boolean overrideableByRestore) {
+            return putStringForUser(resolver, name, value, /* tag */ null, /* makeDefault */ false,
+                    resolver.getUserId(), overrideableByRestore);
+        }
+
+        /**
          * Store a name/value pair into the database.
          * @param resolver to access the database with
          * @param name to store
@@ -5348,22 +5471,23 @@ public final class Settings {
         @UnsupportedAppUsage
         public static boolean putStringForUser(ContentResolver resolver, String name, String value,
                 int userHandle) {
-            return putStringForUser(resolver, name, value, null, false, userHandle);
+            return putStringForUser(resolver, name, value, null, false, userHandle,
+                    DEFAULT_OVERRIDEABLE_BY_RESTORE);
         }
 
         /** @hide */
         @UnsupportedAppUsage
         public static boolean putStringForUser(@NonNull ContentResolver resolver,
                 @NonNull String name, @Nullable String value, @Nullable String tag,
-                boolean makeDefault, @UserIdInt int userHandle) {
+                boolean makeDefault, @UserIdInt int userHandle, boolean overrideableByRestore) {
             if (MOVED_TO_GLOBAL.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.Secure"
                         + " to android.provider.Settings.Global");
                 return Global.putStringForUser(resolver, name, value,
-                        tag, makeDefault, userHandle);
+                        tag, makeDefault, userHandle, DEFAULT_OVERRIDEABLE_BY_RESTORE);
             }
             return sNameValueCache.putStringForUser(resolver, name, value, tag,
-                    makeDefault, userHandle);
+                    makeDefault, userHandle, overrideableByRestore);
         }
 
         /**
@@ -5412,7 +5536,7 @@ public final class Settings {
                 @NonNull String name, @Nullable String value, @Nullable String tag,
                 boolean makeDefault) {
             return putStringForUser(resolver, name, value, tag, makeDefault,
-                    resolver.getUserId());
+                    resolver.getUserId(), DEFAULT_OVERRIDEABLE_BY_RESTORE);
         }
 
         /**
@@ -5465,8 +5589,8 @@ public final class Settings {
                 }
                 arg.putInt(CALL_METHOD_RESET_MODE_KEY, mode);
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
-                cp.call(resolver.getPackageName(), sProviderHolder.mUri.getAuthority(),
-                        CALL_METHOD_RESET_SECURE, null, arg);
+                cp.call(resolver.getPackageName(), resolver.getAttributionTag(),
+                        sProviderHolder.mUri.getAuthority(), CALL_METHOD_RESET_SECURE, null, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't reset do defaults for " + CONTENT_URI, e);
             }
@@ -5753,6 +5877,12 @@ public final class Settings {
         }
 
         /**
+         * Control whether to enable adaptive sleep mode.
+         * @hide
+         */
+        public static final String ADAPTIVE_SLEEP = "adaptive_sleep";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Global#DEVELOPMENT_SETTINGS_ENABLED}
          * instead
          */
@@ -5768,8 +5898,6 @@ public final class Settings {
          */
         @Deprecated
         public static final String BUGREPORT_IN_POWER_MENU = "bugreport_in_power_menu";
-
-        private static final Validator BUGREPORT_IN_POWER_MENU_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#ADB_ENABLED} instead
@@ -5788,8 +5916,6 @@ public final class Settings {
         @Deprecated
         public static final String ALLOW_MOCK_LOCATION = "mock_location";
 
-        private static final Validator ALLOW_MOCK_LOCATION_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Setting to indicate that on device captions are enabled.
          *
@@ -5797,8 +5923,6 @@ public final class Settings {
          */
         @SystemApi
         public static final String ODI_CAPTIONS_ENABLED = "odi_captions_enabled";
-
-        private static final Validator ODI_CAPTIONS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * On Android 8.0 (API level 26) and higher versions of the platform,
@@ -5844,8 +5968,6 @@ public final class Settings {
          */
         @Deprecated
         public static final String BLUETOOTH_ON = Global.BLUETOOTH_ON;
-
-        private static final Validator BLUETOOTH_ON_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#DATA_ROAMING} instead
@@ -5894,9 +6016,6 @@ public final class Settings {
         @TestApi
         public static final String AUTOFILL_SERVICE = "autofill_service";
 
-        private static final Validator AUTOFILL_SERVICE_VALIDATOR =
-                NULLABLE_COMPONENT_NAME_VALIDATOR;
-
         /**
          * Boolean indicating if Autofill supports field classification.
          *
@@ -5916,6 +6035,22 @@ public final class Settings {
          */
         public static final String DARK_MODE_DIALOG_SEEN =
                 "dark_mode_dialog_seen";
+
+        /**
+         * Custom time when Dark theme is scheduled to activate.
+         * Represented as milliseconds from midnight (e.g. 79200000 == 10pm).
+         * @hide
+         */
+        public static final String DARK_THEME_CUSTOM_START_TIME =
+                "dark_theme_custom_start_time";
+
+        /**
+         * Custom time when Dark theme is scheduled to deactivate.
+         * Represented as milliseconds from midnight (e.g. 79200000 == 10pm).
+         * @hide
+         */
+        public static final String DARK_THEME_CUSTOM_END_TIME =
+                "dark_theme_custom_end_time";
 
         /**
          * Defines value returned by {@link android.service.autofill.UserData#getMaxUserDataSize()}.
@@ -5997,6 +6132,15 @@ public final class Settings {
          */
         public static final String MANAGED_PROVISIONING_DPC_DOWNLOADED =
                 "managed_provisioning_dpc_downloaded";
+
+        /**
+         * Indicates whether the device is under restricted secure FRP mode.
+         * Secure FRP mode is enabled when the device is under FRP. On solving of FRP challenge,
+         * device is removed from this mode.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         */
+        public static final String SECURE_FRP_MODE = "secure_frp_mode";
 
         /**
          * Indicates whether the current user has completed setup via the setup wizard.
@@ -6108,9 +6252,9 @@ public final class Settings {
          * determines if the IME should be shown when a hard keyboard is attached.
          * @hide
          */
+        @TestApi
+        @SuppressLint("NoSettingsProvider")
         public static final String SHOW_IME_WITH_HARD_KEYBOARD = "show_ime_with_hard_keyboard";
-
-        private static final Validator SHOW_IME_WITH_HARD_KEYBOARD_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Host name and port for global http proxy. Uses ':' seperator for
@@ -6197,16 +6341,19 @@ public final class Settings {
          * @hide
          */
         public static final String LOCATION_CHANGER = "location_changer";
+
         /**
          * The location changer is unknown or unable to detect.
          * @hide
          */
         public static final int LOCATION_CHANGER_UNKNOWN = 0;
+
         /**
          * Location settings in system settings.
          * @hide
          */
         public static final int LOCATION_CHANGER_SYSTEM_SETTINGS = 1;
+
         /**
          * The location icon in drop down notification drawer.
          * @hide
@@ -6252,6 +6399,14 @@ public final class Settings {
          */
         @SystemApi
         public static final int LOCATION_MODE_ON = LOCATION_MODE_HIGH_ACCURACY;
+
+        /**
+         * The accuracy in meters used for coarsening location for clients with only the coarse
+         * location permission.
+         *
+         * @hide
+         */
+        public static final String LOCATION_COARSE_ACCURACY_M = "locationCoarseAccuracy";
 
         /**
          * A flag containing settings used for biometric weak
@@ -6360,6 +6515,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS =
                 "lock_screen_allow_private_notifications";
 
@@ -6378,9 +6534,6 @@ public final class Settings {
          * @hide
          */
         public static final String LOCK_SCREEN_CUSTOM_CLOCK_FACE = "lock_screen_custom_clock_face";
-
-        private static final Validator LOCK_SCREEN_CUSTOM_CLOCK_FACE_VALIDATOR =
-                SettingsValidators.JSON_OBJECT_VALIDATOR;
 
         /**
          * Indicates which clock face to show on lock screen and AOD while docked.
@@ -6447,8 +6600,6 @@ public final class Settings {
         @Deprecated
         public static final String USB_MASS_STORAGE_ENABLED = Global.USB_MASS_STORAGE_ENABLED;
 
-        private static final Validator USB_MASS_STORAGE_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * @deprecated Use {@link android.provider.Settings.Global#USE_GOOGLE_MAIL} instead
          */
@@ -6460,26 +6611,12 @@ public final class Settings {
          */
         public static final String ACCESSIBILITY_ENABLED = "accessibility_enabled";
 
-        private static final Validator ACCESSIBILITY_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
-
-        /**
-         * Setting specifying if the accessibility shortcut is enabled.
-         * @hide
-         */
-        public static final String ACCESSIBILITY_SHORTCUT_ENABLED =
-                "accessibility_shortcut_enabled";
-
-        private static final Validator ACCESSIBILITY_SHORTCUT_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Setting specifying if the accessibility shortcut is enabled.
          * @hide
          */
         public static final String ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN =
                 "accessibility_shortcut_on_lock_screen";
-
-        private static final Validator ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN_VALIDATOR =
-                BOOLEAN_VALIDATOR;
 
         /**
          * Setting specifying if the accessibility shortcut dialog has been shown to this user.
@@ -6488,21 +6625,19 @@ public final class Settings {
         public static final String ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN =
                 "accessibility_shortcut_dialog_shown";
 
-        private static final Validator ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
         /**
-         * Setting specifying the accessibility service to be toggled via the accessibility
-         * shortcut. Must be its flattened {@link ComponentName}.
+         * Setting specifying the accessibility services, accessibility shortcut targets,
+         * or features to be toggled via the accessibility shortcut.
+         *
+         * <p> This is a colon-separated string list which contains the flattened
+         * {@link ComponentName} and the class name of a system class implementing a supported
+         * accessibility feature.
          * @hide
          */
         @UnsupportedAppUsage
         @TestApi
         public static final String ACCESSIBILITY_SHORTCUT_TARGET_SERVICE =
                 "accessibility_shortcut_target_service";
-
-        private static final Validator ACCESSIBILITY_SHORTCUT_TARGET_SERVICE_VALIDATOR =
-                NULLABLE_COMPONENT_NAME_VALIDATOR;
 
         /**
          * Setting specifying the accessibility service or feature to be toggled via the
@@ -6514,31 +6649,36 @@ public final class Settings {
         public static final String ACCESSIBILITY_BUTTON_TARGET_COMPONENT =
                 "accessibility_button_target_component";
 
-        private static final Validator ACCESSIBILITY_BUTTON_TARGET_COMPONENT_VALIDATOR =
-                new Validator() {
-                    @Override
-                    public boolean validate(@Nullable String value) {
-                        // technically either ComponentName or class name, but there's proper value
-                        // validation at callsites, so allow any non-null string
-                        return value != null;
-                    }
-                };
+        /**
+         * Setting specifying the accessibility services, accessibility shortcut targets,
+         * or features to be toggled via the accessibility button in the navigation bar.
+         *
+         * <p> This is a colon-separated string list which contains the flattened
+         * {@link ComponentName} and the class name of a system class implementing a supported
+         * accessibility feature.
+         * @hide
+         */
+        public static final String ACCESSIBILITY_BUTTON_TARGETS = "accessibility_button_targets";
+
+        /**
+         * The system class name of magnification controller which is a target to be toggled via
+         * accessibility shortcut or accessibility button.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER =
+                "com.android.server.accessibility.MagnificationController";
 
         /**
          * If touch exploration is enabled.
          */
         public static final String TOUCH_EXPLORATION_ENABLED = "touch_exploration_enabled";
 
-        private static final Validator TOUCH_EXPLORATION_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * List of the enabled accessibility providers.
          */
         public static final String ENABLED_ACCESSIBILITY_SERVICES =
             "enabled_accessibility_services";
-
-        private static final Validator ENABLED_ACCESSIBILITY_SERVICES_VALIDATOR =
-                new SettingsValidators.ComponentNameListValidator(":");
 
         /**
          * List of the accessibility services to which the user has granted
@@ -6549,16 +6689,11 @@ public final class Settings {
         public static final String TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES =
             "touch_exploration_granted_accessibility_services";
 
-        private static final Validator TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES_VALIDATOR =
-                new SettingsValidators.ComponentNameListValidator(":");
-
         /**
          * Whether the Global Actions Panel is enabled.
          * @hide
          */
         public static final String GLOBAL_ACTIONS_PANEL_ENABLED = "global_actions_panel_enabled";
-
-        private static final Validator GLOBAL_ACTIONS_PANEL_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether the Global Actions Panel can be toggled on or off in Settings.
@@ -6581,16 +6716,11 @@ public final class Settings {
         @SystemApi
         public static final String HUSH_GESTURE_USED = "hush_gesture_used";
 
-        private static final Validator HUSH_GESTURE_USED_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Number of times the user has manually clicked the ringer toggle
          * @hide
          */
         public static final String MANUAL_RINGER_TOGGLE_COUNT = "manual_ringer_toggle_count";
-
-        private static final Validator MANUAL_RINGER_TOGGLE_COUNT_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
 
         /**
          * Whether to play a sound for charging events.
@@ -6612,8 +6742,6 @@ public final class Settings {
          * @hide
          */
         public static final String ZEN_DURATION = "zen_duration";
-
-        private static final Validator ZEN_DURATION_VALIDATOR = ANY_INTEGER_VALIDATOR;
 
         /** @hide */ public static final int ZEN_DURATION_PROMPT = -1;
         /** @hide */ public static final int ZEN_DURATION_FOREVER = 0;
@@ -6650,8 +6778,6 @@ public final class Settings {
          */
         public static final String IN_CALL_NOTIFICATION_ENABLED = "in_call_notification_enabled";
 
-        private static final Validator IN_CALL_NOTIFICATION_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Uri of the slice that's presented on the keyguard.
          * Defaults to a slice with the date and next alarm.
@@ -6678,9 +6804,6 @@ public final class Settings {
         public static final String ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED =
                 "high_text_contrast_enabled";
 
-        private static final Validator ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
         /**
          * Setting that specifies whether the display magnification is enabled via a system-wide
          * triple tap gesture. Display magnifications allows the user to zoom in the display content
@@ -6694,23 +6817,20 @@ public final class Settings {
         public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED =
                 "accessibility_display_magnification_enabled";
 
-        private static final Validator ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
         /**
          * Setting that specifies whether the display magnification is enabled via a shortcut
          * affordance within the system's navigation area. Display magnifications allows the user to
          * zoom in the display content and is targeted to low vision users. The current
          * magnification scale is controlled by {@link #ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE}.
          *
+         * @deprecated Use {@link #ACCESSIBILITY_BUTTON_TARGETS} instead.
+         * {@link #ACCESSIBILITY_BUTTON_TARGETS} holds the magnification system class name
+         * when navigation bar magnification is enabled.
          * @hide
          */
         @SystemApi
         public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED =
                 "accessibility_display_magnification_navbar_enabled";
-
-        private static final Validator ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED_VALIDATOR
-                = BOOLEAN_VALIDATOR;
 
         /**
          * Setting that specifies what the display magnification scale is.
@@ -6724,9 +6844,6 @@ public final class Settings {
          */
         public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE =
                 "accessibility_display_magnification_scale";
-
-        private static final Validator ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE_VALIDATOR =
-                new SettingsValidators.InclusiveFloatRangeValidator(1.0f, Float.MAX_VALUE);
 
         /**
          * Unused mangnification setting
@@ -6780,9 +6897,6 @@ public final class Settings {
         public static final String ACCESSIBILITY_CAPTIONING_ENABLED =
                 "accessibility_captioning_enabled";
 
-        private static final Validator ACCESSIBILITY_CAPTIONING_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
         /**
          * Setting that specifies the language for captions as a locale string,
          * e.g. en_US.
@@ -6792,8 +6906,6 @@ public final class Settings {
          */
         public static final String ACCESSIBILITY_CAPTIONING_LOCALE =
                 "accessibility_captioning_locale";
-
-        private static final Validator ACCESSIBILITY_CAPTIONING_LOCALE_VALIDATOR = LOCALE_VALIDATOR;
 
         /**
          * Integer property that specifies the preset style for captions, one
@@ -6809,10 +6921,6 @@ public final class Settings {
         public static final String ACCESSIBILITY_CAPTIONING_PRESET =
                 "accessibility_captioning_preset";
 
-        private static final Validator ACCESSIBILITY_CAPTIONING_PRESET_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(new String[]{"-1", "0", "1", "2",
-                        "3", "4"});
-
         /**
          * Integer property that specifes the background color for captions as a
          * packed 32-bit color.
@@ -6823,9 +6931,6 @@ public final class Settings {
         public static final String ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR =
                 "accessibility_captioning_background_color";
 
-        private static final Validator ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR_VALIDATOR =
-                ANY_INTEGER_VALIDATOR;
-
         /**
          * Integer property that specifes the foreground color for captions as a
          * packed 32-bit color.
@@ -6835,9 +6940,6 @@ public final class Settings {
          */
         public static final String ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR =
                 "accessibility_captioning_foreground_color";
-
-        private static final Validator ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR_VALIDATOR =
-                ANY_INTEGER_VALIDATOR;
 
         /**
          * Integer property that specifes the edge type for captions, one of:
@@ -6853,9 +6955,6 @@ public final class Settings {
         public static final String ACCESSIBILITY_CAPTIONING_EDGE_TYPE =
                 "accessibility_captioning_edge_type";
 
-        private static final Validator ACCESSIBILITY_CAPTIONING_EDGE_TYPE_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(new String[]{"0", "1", "2"});
-
         /**
          * Integer property that specifes the edge color for captions as a
          * packed 32-bit color.
@@ -6867,9 +6966,6 @@ public final class Settings {
         public static final String ACCESSIBILITY_CAPTIONING_EDGE_COLOR =
                 "accessibility_captioning_edge_color";
 
-        private static final Validator ACCESSIBILITY_CAPTIONING_EDGE_COLOR_VALIDATOR =
-                ANY_INTEGER_VALIDATOR;
-
         /**
          * Integer property that specifes the window color for captions as a
          * packed 32-bit color.
@@ -6879,9 +6975,6 @@ public final class Settings {
          */
         public static final String ACCESSIBILITY_CAPTIONING_WINDOW_COLOR =
                 "accessibility_captioning_window_color";
-
-        private static final Validator ACCESSIBILITY_CAPTIONING_WINDOW_COLOR_VALIDATOR =
-                ANY_INTEGER_VALIDATOR;
 
         /**
          * String property that specifies the typeface for captions, one of:
@@ -6899,10 +6992,6 @@ public final class Settings {
         public static final String ACCESSIBILITY_CAPTIONING_TYPEFACE =
                 "accessibility_captioning_typeface";
 
-        private static final Validator ACCESSIBILITY_CAPTIONING_TYPEFACE_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(new String[]{"DEFAULT",
-                        "MONOSPACE", "SANS_SERIF", "SERIF"});
-
         /**
          * Floating point property that specifies font scaling for captions.
          *
@@ -6911,17 +7000,11 @@ public final class Settings {
         public static final String ACCESSIBILITY_CAPTIONING_FONT_SCALE =
                 "accessibility_captioning_font_scale";
 
-        private static final Validator ACCESSIBILITY_CAPTIONING_FONT_SCALE_VALIDATOR =
-                new SettingsValidators.InclusiveFloatRangeValidator(0.5f, 2.0f);
-
         /**
          * Setting that specifies whether display color inversion is enabled.
          */
         public static final String ACCESSIBILITY_DISPLAY_INVERSION_ENABLED =
                 "accessibility_display_inversion_enabled";
-
-        private static final Validator ACCESSIBILITY_DISPLAY_INVERSION_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
 
         /**
          * Setting that specifies whether display color space adjustment is
@@ -6932,9 +7015,6 @@ public final class Settings {
         @UnsupportedAppUsage
         public static final String ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED =
                 "accessibility_display_daltonizer_enabled";
-
-        private static final Validator ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
 
         /**
          * Integer property that specifies the type of color space adjustment to
@@ -6952,10 +7032,6 @@ public final class Settings {
         public static final String ACCESSIBILITY_DISPLAY_DALTONIZER =
                 "accessibility_display_daltonizer";
 
-        private static final Validator ACCESSIBILITY_DISPLAY_DALTONIZER_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(
-                        new String[] {"-1", "0", "11", "12", "13"});
-
         /**
          * Setting that specifies whether automatic click when the mouse pointer stops moving is
          * enabled.
@@ -6965,9 +7041,6 @@ public final class Settings {
         @UnsupportedAppUsage
         public static final String ACCESSIBILITY_AUTOCLICK_ENABLED =
                 "accessibility_autoclick_enabled";
-
-        private static final Validator ACCESSIBILITY_AUTOCLICK_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
 
         /**
          * Integer setting specifying amount of time in ms the mouse pointer has to stay still
@@ -6979,9 +7052,6 @@ public final class Settings {
         public static final String ACCESSIBILITY_AUTOCLICK_DELAY =
                 "accessibility_autoclick_delay";
 
-        private static final Validator ACCESSIBILITY_AUTOCLICK_DELAY_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
-
         /**
          * Whether or not larger size icons are used for the pointer of mouse/trackpad for
          * accessibility.
@@ -6992,18 +7062,12 @@ public final class Settings {
         public static final String ACCESSIBILITY_LARGE_POINTER_ICON =
                 "accessibility_large_pointer_icon";
 
-        private static final Validator ACCESSIBILITY_LARGE_POINTER_ICON_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
         /**
          * The timeout for considering a press to be a long press in milliseconds.
          * @hide
          */
         @UnsupportedAppUsage
         public static final String LONG_PRESS_TIMEOUT = "long_press_timeout";
-
-        private static final Validator LONG_PRESS_TIMEOUT_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
 
         /**
          * The duration in milliseconds between the first tap's up event and the second tap's
@@ -7077,21 +7141,15 @@ public final class Settings {
          */
         public static final String TTS_DEFAULT_RATE = "tts_default_rate";
 
-        private static final Validator TTS_DEFAULT_RATE_VALIDATOR = NON_NEGATIVE_INTEGER_VALIDATOR;
-
         /**
          * Default text-to-speech engine pitch. 100 = 1x
          */
         public static final String TTS_DEFAULT_PITCH = "tts_default_pitch";
 
-        private static final Validator TTS_DEFAULT_PITCH_VALIDATOR = NON_NEGATIVE_INTEGER_VALIDATOR;
-
         /**
          * Default text-to-speech engine.
          */
         public static final String TTS_DEFAULT_SYNTH = "tts_default_synth";
-
-        private static final Validator TTS_DEFAULT_SYNTH_VALIDATOR = PACKAGE_NAME_VALIDATOR;
 
         /**
          * Default text-to-speech language.
@@ -7140,32 +7198,10 @@ public final class Settings {
          */
         public static final String TTS_DEFAULT_LOCALE = "tts_default_locale";
 
-        private static final Validator TTS_DEFAULT_LOCALE_VALIDATOR = new Validator() {
-            @Override
-            public boolean validate(@Nullable String value) {
-                if (value == null || value.length() == 0) {
-                    return false;
-                }
-                String[] ttsLocales = value.split(",");
-                boolean valid = true;
-                for (String ttsLocale : ttsLocales) {
-                    String[] parts = ttsLocale.split(":");
-                    valid |= ((parts.length == 2)
-                            && (parts[0].length() > 0)
-                            && ANY_STRING_VALIDATOR.validate(parts[0])
-                            && LOCALE_VALIDATOR.validate(parts[1]));
-                }
-                return valid;
-            }
-        };
-
         /**
          * Space delimited list of plugin packages that are enabled.
          */
         public static final String TTS_ENABLED_PLUGINS = "tts_enabled_plugins";
-
-        private static final Validator TTS_ENABLED_PLUGINS_VALIDATOR =
-                new SettingsValidators.PackageNameListValidator(" ");
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON}
@@ -7175,9 +7211,6 @@ public final class Settings {
         public static final String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON =
                 Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON;
 
-        private static final Validator WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
         /**
          * @deprecated Use {@link android.provider.Settings.Global#WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY}
          * instead.
@@ -7186,9 +7219,6 @@ public final class Settings {
         public static final String WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY =
                 Global.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY;
 
-        private static final Validator WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
-
         /**
          * @deprecated Use {@link android.provider.Settings.Global#WIFI_NUM_OPEN_NETWORKS_KEPT}
          * instead.
@@ -7196,9 +7226,6 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_NUM_OPEN_NETWORKS_KEPT =
                 Global.WIFI_NUM_OPEN_NETWORKS_KEPT;
-
-        private static final Validator WIFI_NUM_OPEN_NETWORKS_KEPT_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#WIFI_ON}
@@ -7358,9 +7385,6 @@ public final class Settings {
         public static final String PREFERRED_TTY_MODE =
                 "preferred_tty_mode";
 
-        private static final Validator PREFERRED_TTY_MODE_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(new String[]{"0", "1", "2", "3"});
-
         /**
          * Whether the enhanced voice privacy mode is enabled.
          * 0 = normal voice privacy
@@ -7368,8 +7392,6 @@ public final class Settings {
          * @hide
          */
         public static final String ENHANCED_VOICE_PRIVACY_ENABLED = "enhanced_voice_privacy_enabled";
-
-        private static final Validator ENHANCED_VOICE_PRIVACY_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether the TTY mode mode is enabled.
@@ -7379,8 +7401,6 @@ public final class Settings {
          */
         public static final String TTY_MODE_ENABLED = "tty_mode_enabled";
 
-        private static final Validator TTY_MODE_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * User-selected RTT mode. When on, outgoing and incoming calls will be answered as RTT
          * calls when supported by the device and carrier. Boolean value.
@@ -7388,8 +7408,6 @@ public final class Settings {
          * 1 = ON
          */
         public static final String RTT_CALLING_MODE = "rtt_calling_mode";
-
-        private static final Validator RTT_CALLING_MODE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
         /**
@@ -7568,15 +7586,11 @@ public final class Settings {
          */
         public static final String MOUNT_PLAY_NOTIFICATION_SND = "mount_play_not_snd";
 
-        private static final Validator MOUNT_PLAY_NOTIFICATION_SND_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Whether or not UMS auto-starts on UMS host detection. (0 = false, 1 = true)
          * @hide
          */
         public static final String MOUNT_UMS_AUTOSTART = "mount_ums_autostart";
-
-        private static final Validator MOUNT_UMS_AUTOSTART_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether or not a notification is displayed on UMS host detection. (0 = false, 1 = true)
@@ -7584,15 +7598,11 @@ public final class Settings {
          */
         public static final String MOUNT_UMS_PROMPT = "mount_ums_prompt";
 
-        private static final Validator MOUNT_UMS_PROMPT_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Whether or not a notification is displayed while UMS is enabled. (0 = false, 1 = true)
          * @hide
          */
         public static final String MOUNT_UMS_NOTIFY_ENABLED = "mount_ums_notify_enabled";
-
-        private static final Validator MOUNT_UMS_NOTIFY_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * If nonzero, ANRs in invisible background processes bring up a dialog.
@@ -7612,9 +7622,6 @@ public final class Settings {
         public static final String SHOW_FIRST_CRASH_DIALOG_DEV_OPTION =
                 "show_first_crash_dialog_dev_option";
 
-        private static final Validator SHOW_FIRST_CRASH_DIALOG_DEV_OPTION_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
         /**
          * The {@link ComponentName} string of the service to be used as the voice recognition
          * service.
@@ -7623,16 +7630,6 @@ public final class Settings {
          */
         @UnsupportedAppUsage
         public static final String VOICE_RECOGNITION_SERVICE = "voice_recognition_service";
-
-        /**
-         * Stores whether an user has consented to have apps verified through PAM.
-         * The value is boolean (1 or 0).
-         *
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public static final String PACKAGE_VERIFIER_USER_CONSENT =
-            "package_verifier_user_consent";
 
         /**
          * The {@link ComponentName} string of the selected spell checker service which is
@@ -7673,8 +7670,20 @@ public final class Settings {
         @UnsupportedAppUsage
         public static final String INCALL_POWER_BUTTON_BEHAVIOR = "incall_power_button_behavior";
 
-        private static final Validator INCALL_POWER_BUTTON_BEHAVIOR_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(new String[]{"1", "2"});
+        /**
+         * Whether the user allows minimal post processing or not.
+         *
+         * <p>Values:
+         * 0 - Not allowed. Any preferences set through the Window.setPreferMinimalPostProcessing
+         *     API will be ignored.
+         * 1 - Allowed. Any preferences set through the Window.setPreferMinimalPostProcessing API
+         *     will be respected and the appropriate signals will be sent to display.
+         *     (Default behaviour)
+         *
+         * @hide
+         */
+        public static final String MINIMAL_POST_PROCESSING_ALLOWED =
+                "minimal_post_processing_allowed";
 
         /**
          * INCALL_POWER_BUTTON_BEHAVIOR value for "turn off screen".
@@ -7731,16 +7740,12 @@ public final class Settings {
          */
         public static final String WAKE_GESTURE_ENABLED = "wake_gesture_enabled";
 
-        private static final Validator WAKE_GESTURE_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Whether the device should doze if configured.
          * @hide
          */
         @UnsupportedAppUsage
         public static final String DOZE_ENABLED = "doze_enabled";
-
-        private static final Validator DOZE_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Indicates whether doze should be always on.
@@ -7753,15 +7758,11 @@ public final class Settings {
         @TestApi
         public static final String DOZE_ALWAYS_ON = "doze_always_on";
 
-        private static final Validator DOZE_ALWAYS_ON_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Whether the device should pulse on pick up gesture.
          * @hide
          */
         public static final String DOZE_PICK_UP_GESTURE = "doze_pulse_on_pick_up";
-
-        private static final Validator DOZE_PICK_UP_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether the device should pulse on long press gesture.
@@ -7775,23 +7776,17 @@ public final class Settings {
          */
         public static final String DOZE_DOUBLE_TAP_GESTURE = "doze_pulse_on_double_tap";
 
-        private static final Validator DOZE_DOUBLE_TAP_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Whether the device should respond to the SLPI tap gesture.
          * @hide
          */
         public static final String DOZE_TAP_SCREEN_GESTURE = "doze_tap_gesture";
 
-        private static final Validator DOZE_TAP_SCREEN_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Gesture that wakes up the display, showing some version of the lock screen.
          * @hide
          */
         public static final String DOZE_WAKE_LOCK_SCREEN_GESTURE = "doze_wake_screen_gesture";
-
-        private static final Validator DOZE_WAKE_LOCK_SCREEN_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Gesture that wakes up the display, toggling between {@link Display.STATE_OFF} and
@@ -7800,15 +7795,17 @@ public final class Settings {
          */
         public static final String DOZE_WAKE_DISPLAY_GESTURE = "doze_wake_display_gesture";
 
-        private static final Validator DOZE_WAKE_DISPLAY_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
+        /**
+         * Whether the device should suppress the current doze configuration and disable dozing.
+         * @hide
+         */
+        public static final String SUPPRESS_DOZE = "suppress_doze";
 
         /**
          * Gesture that skips media.
          * @hide
          */
         public static final String SKIP_GESTURE = "skip_gesture";
-
-        private static final Validator SKIP_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Count of successful gestures.
@@ -7822,9 +7819,6 @@ public final class Settings {
          */
         public static final String SKIP_TOUCH_COUNT = "skip_touch_count";
 
-        private static final Validator SKIP_GESTURE_COUNT_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
-
         /**
          * Direction to advance media for skip gesture
          * @hide
@@ -7832,20 +7826,10 @@ public final class Settings {
         public static final String SKIP_DIRECTION = "skip_gesture_direction";
 
         /**
-         * Only used if FeatureFlag "settings_skip_direction_mutable" is enabled.
-         * If feature flag is disabled, should assume SKIP_DIRECTION = 0.
-         *      0 / false = right to left to advance to next
-         *      1 / true = left to right to advance to next
-         */
-        private static final Validator SKIP_DIRECTION_VALIDATOR = BOOLEAN_VALIDATOR;
-
-        /**
          * Gesture that silences sound (alarms, notification, calls).
          * @hide
          */
         public static final String SILENCE_GESTURE = "silence_gesture";
-
-        private static final Validator SILENCE_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Count of successful silence alarms gestures.
@@ -7883,9 +7867,6 @@ public final class Settings {
          */
         public static final String SILENCE_CALL_TOUCH_COUNT = "silence_call_touch_count";
 
-        private static final Validator SILENCE_GESTURE_COUNT_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
-
         /**
          * Number of successful "Motion Sense" tap gestures to pause media.
          * @hide
@@ -7907,16 +7888,27 @@ public final class Settings {
          */
         public static final String UI_NIGHT_MODE = "ui_night_mode";
 
-        private static final Validator UI_NIGHT_MODE_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 2);
+        /**
+         * The current night mode that has been overridden to turn on by the system.  Owned
+         * and controlled by UiModeManagerService.  Constants are as per
+         * UiModeManager.
+         * @hide
+         */
+        public static final String UI_NIGHT_MODE_OVERRIDE_ON = "ui_night_mode_override_on";
+
+        /**
+         * The current night mode that has been overridden to turn off by the system.  Owned
+         * and controlled by UiModeManagerService.  Constants are as per
+         * UiModeManager.
+         * @hide
+         */
+        public static final String UI_NIGHT_MODE_OVERRIDE_OFF = "ui_night_mode_override_off";
 
         /**
          * Whether screensavers are enabled.
          * @hide
          */
         public static final String SCREENSAVER_ENABLED = "screensaver_enabled";
-
-        private static final Validator SCREENSAVER_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * The user's chosen screensaver components.
@@ -7927,9 +7919,6 @@ public final class Settings {
          */
         public static final String SCREENSAVER_COMPONENTS = "screensaver_components";
 
-        private static final Validator SCREENSAVER_COMPONENTS_VALIDATOR =
-                new SettingsValidators.ComponentNameListValidator(",");
-
         /**
          * If screensavers are enabled, whether the screensaver should be automatically launched
          * when the device is inserted into a (desk) dock.
@@ -7937,16 +7926,12 @@ public final class Settings {
          */
         public static final String SCREENSAVER_ACTIVATE_ON_DOCK = "screensaver_activate_on_dock";
 
-        private static final Validator SCREENSAVER_ACTIVATE_ON_DOCK_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * If screensavers are enabled, whether the screensaver should be automatically launched
          * when the screen times out when not on battery.
          * @hide
          */
         public static final String SCREENSAVER_ACTIVATE_ON_SLEEP = "screensaver_activate_on_sleep";
-
-        private static final Validator SCREENSAVER_ACTIVATE_ON_SLEEP_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * If screensavers are enabled, the default screensaver component.
@@ -7959,10 +7944,8 @@ public final class Settings {
          * @hide
          */
         @UnsupportedAppUsage
+        @TestApi
         public static final String NFC_PAYMENT_DEFAULT_COMPONENT = "nfc_payment_default_component";
-
-        private static final Validator NFC_PAYMENT_DEFAULT_COMPONENT_VALIDATOR =
-                COMPONENT_NAME_VALIDATOR;
 
         /**
          * Whether NFC payment is handled by the foreground application or a default.
@@ -8079,9 +8062,6 @@ public final class Settings {
         public static final String ENABLED_NOTIFICATION_ASSISTANT =
                 "enabled_notification_assistant";
 
-        private static final Validator ENABLED_NOTIFICATION_ASSISTANT_VALIDATOR =
-                new SettingsValidators.ComponentNameListValidator(":");
-
         /**
          * Read only list of the service components that the current user has explicitly allowed to
          * see all of the user's notifications, separated by ':'.
@@ -8094,9 +8074,6 @@ public final class Settings {
         @UnsupportedAppUsage
         public static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
 
-        private static final Validator ENABLED_NOTIFICATION_LISTENERS_VALIDATOR =
-                new SettingsValidators.ComponentNameListValidator(":");
-
         /**
          * Read only list of the packages that the current user has explicitly allowed to
          * manage do not disturb, separated by ':'.
@@ -8108,9 +8085,6 @@ public final class Settings {
         @TestApi
         public static final String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES =
                 "enabled_notification_policy_access_packages";
-
-        private static final Validator ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES_VALIDATOR =
-                new SettingsValidators.PackageNameListValidator(":");
 
         /**
          * Defines whether managed profile ringtones should be synced from it's parent profile
@@ -8125,10 +8099,11 @@ public final class Settings {
         @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
         public static final String SYNC_PARENT_SOUNDS = "sync_parent_sounds";
 
-        private static final Validator SYNC_PARENT_SOUNDS_VALIDATOR = BOOLEAN_VALIDATOR;
-
-        /** @hide */
+        /**
+         * @hide
+         */
         @UnsupportedAppUsage
+        @TestApi
         public static final String IMMERSIVE_MODE_CONFIRMATIONS = "immersive_mode_confirmations";
 
         /**
@@ -8175,6 +8150,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS =
                 "lock_screen_show_notifications";
 
@@ -8255,12 +8231,24 @@ public final class Settings {
         public static final String SLEEP_TIMEOUT = "sleep_timeout";
 
         /**
+         * The timeout in milliseconds before the device goes to sleep due to user inattentiveness,
+         * even if the system is holding wakelocks. It should generally be longer than {@code
+         * config_attentiveWarningDuration}, as otherwise the device will show the attentive
+         * warning constantly. Small timeouts are discouraged, as they will cause the device to
+         * go to sleep quickly after waking up.
+         * <p>
+         * Use -1 to disable this timeout.
+         * </p>
+         *
+         * @hide
+         */
+        public static final String ATTENTIVE_TIMEOUT = "attentive_timeout";
+
+        /**
          * Controls whether double tap to wake is enabled.
          * @hide
          */
         public static final String DOUBLE_TAP_TO_WAKE = "double_tap_to_wake";
-
-        private static final Validator DOUBLE_TAP_TO_WAKE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * The current assistant component. It could be a voice interaction service,
@@ -8282,8 +8270,6 @@ public final class Settings {
          */
         public static final String CAMERA_GESTURE_DISABLED = "camera_gesture_disabled";
 
-        private static final Validator CAMERA_GESTURE_DISABLED_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Whether the camera launch gesture to double tap the power button when the screen is off
          * should be disabled.
@@ -8293,9 +8279,6 @@ public final class Settings {
         public static final String CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED =
                 "camera_double_tap_power_gesture_disabled";
 
-        private static final Validator CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
         /**
          * Whether the camera double twist gesture to flip between front and back mode should be
          * enabled.
@@ -8304,9 +8287,6 @@ public final class Settings {
          */
         public static final String CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED =
                 "camera_double_twist_to_flip_enabled";
-
-        private static final Validator CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
 
         /**
          * Whether or not the smart camera lift trigger that launches the camera when the user moves
@@ -8344,9 +8324,6 @@ public final class Settings {
          */
         public static final String FACE_UNLOCK_KEYGUARD_ENABLED = "face_unlock_keyguard_enabled";
 
-        private static final Validator FACE_UNLOCK_KEYGUARD_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
         /**
          * Whether or not face unlock dismisses the keyguard.
          * @hide
@@ -8354,18 +8331,12 @@ public final class Settings {
         public static final String FACE_UNLOCK_DISMISSES_KEYGUARD =
                 "face_unlock_dismisses_keyguard";
 
-        private static final Validator FACE_UNLOCK_DISMISSES_KEYGUARD_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
         /**
          * Whether or not media is shown automatically when bypassing as a heads up.
          * @hide
          */
         public static final String SHOW_MEDIA_WHEN_BYPASSING =
                 "show_media_when_bypassing";
-
-        private static final Validator SHOW_MEDIA_WHEN_BYPASSING_VALIDATOR =
-                BOOLEAN_VALIDATOR;
 
         /**
          * Whether or not face unlock requires attention. This is a cached value, the source of
@@ -8390,9 +8361,6 @@ public final class Settings {
          */
         public static final String FACE_UNLOCK_APP_ENABLED = "face_unlock_app_enabled";
 
-        private static final Validator FACE_UNLOCK_APP_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
         /**
          * Whether or not face unlock always requires user confirmation, meaning {@link
          * android.hardware.biometrics.BiometricPrompt.Builder#setConfirmationRequired(boolean)}
@@ -8402,9 +8370,6 @@ public final class Settings {
          */
         public static final String FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION =
                 "face_unlock_always_require_confirmation";
-
-        private static final Validator FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION_VALIDATOR =
-                BOOLEAN_VALIDATOR;
 
         /**
          * Whether or not a user should re enroll their face.
@@ -8433,9 +8398,6 @@ public final class Settings {
          */
         public static final String ASSIST_GESTURE_ENABLED = "assist_gesture_enabled";
 
-        private static final Validator ASSIST_GESTURE_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
         /**
          * Sensitivity control for the assist gesture.
          *
@@ -8451,9 +8413,6 @@ public final class Settings {
         public static final String ASSIST_GESTURE_SILENCE_ALERTS_ENABLED =
                 "assist_gesture_silence_alerts_enabled";
 
-        private static final Validator ASSIST_GESTURE_SILENCE_ALERTS_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
         /**
          * Whether the assist gesture should wake the phone.
          *
@@ -8461,9 +8420,6 @@ public final class Settings {
          */
         public static final String ASSIST_GESTURE_WAKE_ENABLED =
                 "assist_gesture_wake_enabled";
-
-        private static final Validator ASSIST_GESTURE_WAKE_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
 
         /**
          * Indicates whether the Assist Gesture Deferred Setup has been completed.
@@ -8481,17 +8437,11 @@ public final class Settings {
          */
         public static final String TRUST_AGENTS_EXTEND_UNLOCK = "trust_agents_extend_unlock";
 
-        private static final Validator TRUST_AGENTS_EXTEND_UNLOCK_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
         /**
          * Control whether the screen locks when trust is lost.
          * @hide
          */
         public static final String LOCK_SCREEN_WHEN_TRUST_LOST = "lock_screen_when_trust_lost";
-
-        private static final Validator LOCK_SCREEN_WHEN_TRUST_LOST_VALIDATOR =
-                BOOLEAN_VALIDATOR;
 
         /**
          * Control whether Night display is currently activated.
@@ -8505,18 +8455,12 @@ public final class Settings {
          */
         public static final String NIGHT_DISPLAY_AUTO_MODE = "night_display_auto_mode";
 
-        private static final Validator NIGHT_DISPLAY_AUTO_MODE_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 2);
-
         /**
          * Control the color temperature of Night Display, represented in Kelvin.
          * @hide
          */
         public static final String NIGHT_DISPLAY_COLOR_TEMPERATURE =
                 "night_display_color_temperature";
-
-        private static final Validator NIGHT_DISPLAY_COLOR_TEMPERATURE_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
 
         /**
          * Custom time when Night display is scheduled to activate.
@@ -8526,18 +8470,12 @@ public final class Settings {
         public static final String NIGHT_DISPLAY_CUSTOM_START_TIME =
                 "night_display_custom_start_time";
 
-        private static final Validator NIGHT_DISPLAY_CUSTOM_START_TIME_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
-
         /**
          * Custom time when Night display is scheduled to deactivate.
          * Represented as milliseconds from midnight (e.g. 21600000 == 6am).
          * @hide
          */
         public static final String NIGHT_DISPLAY_CUSTOM_END_TIME = "night_display_custom_end_time";
-
-        private static final Validator NIGHT_DISPLAY_CUSTOM_END_TIME_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
 
         /**
          * A String representing the LocalDateTime when Night display was last activated. Use to
@@ -8554,9 +8492,6 @@ public final class Settings {
          */
         public static final String DISPLAY_WHITE_BALANCE_ENABLED = "display_white_balance_enabled";
 
-        private static final Validator DISPLAY_WHITE_BALANCE_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
         /**
          * Names of the service components that the current user has explicitly allowed to
          * be a VR mode listener, separated by ':'.
@@ -8567,9 +8502,6 @@ public final class Settings {
         @TestApi
         public static final String ENABLED_VR_LISTENERS = "enabled_vr_listeners";
 
-        private static final Validator ENABLED_VR_LISTENERS_VALIDATOR =
-                new SettingsValidators.ComponentNameListValidator(":");
-
         /**
          * Behavior of the display while in VR mode.
          *
@@ -8578,9 +8510,6 @@ public final class Settings {
          * @hide
          */
         public static final String VR_DISPLAY_MODE = "vr_display_mode";
-
-        private static final Validator VR_DISPLAY_MODE_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(new String[]{"0", "1"});
 
         /**
          * Lower the display persistence while the system is in VR mode.
@@ -8601,14 +8530,15 @@ public final class Settings {
         public static final int VR_DISPLAY_MODE_OFF = 1;
 
         /**
-         * Whether CarrierAppUtils#disableCarrierAppsUntilPrivileged has been executed at least
-         * once.
+         * The latest SDK version that CarrierAppUtils#disableCarrierAppsUntilPrivileged has been
+         * executed for.
          *
          * <p>This is used to ensure that we only take one pass which will disable apps that are not
          * privileged (if any). From then on, we only want to enable apps (when a matching SIM is
          * inserted), to avoid disabling an app that the user might actively be using.
          *
-         * <p>Will be set to 1 once executed.
+         * <p>Will be set to {@link android.os.Build.VERSION#SDK_INT} once executed. Note that older
+         * SDK versions prior to R set 1 for this value.
          *
          * @hide
          */
@@ -8646,9 +8576,6 @@ public final class Settings {
         public static final String AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN =
                 "automatic_storage_manager_days_to_retain";
 
-        private static final Validator AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
-
         /**
          * Default number of days of information for the automatic storage manager to retain.
          *
@@ -8664,7 +8591,6 @@ public final class Settings {
         public static final String AUTOMATIC_STORAGE_MANAGER_BYTES_CLEARED =
                 "automatic_storage_manager_bytes_cleared";
 
-
         /**
          * Last run time for the automatic storage manager.
          *
@@ -8672,7 +8598,6 @@ public final class Settings {
          */
         public static final String AUTOMATIC_STORAGE_MANAGER_LAST_RUN =
                 "automatic_storage_manager_last_run";
-
         /**
          * If the automatic storage manager has been disabled by policy. Note that this doesn't
          * mean that the automatic storage manager is prevented from being re-enabled -- this only
@@ -8690,29 +8615,32 @@ public final class Settings {
         public static final String SYSTEM_NAVIGATION_KEYS_ENABLED =
                 "system_navigation_keys_enabled";
 
-        private static final Validator SYSTEM_NAVIGATION_KEYS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Holds comma separated list of ordering of QS tiles.
+         *
          * @hide
          */
         public static final String QS_TILES = "sysui_qs_tiles";
 
-        private static final Validator QS_TILES_VALIDATOR = new Validator() {
-            @Override
-            public boolean validate(@Nullable String value) {
-                if (value == null) {
-                    return false;
-                }
-                String[] tiles = value.split(",");
-                boolean valid = true;
-                for (String tile : tiles) {
-                    // tile can be any non-empty string as specified by OEM
-                    valid |= ((tile.length() > 0) && ANY_STRING_VALIDATOR.validate(tile));
-                }
-                return valid;
-            }
-        };
+        /**
+         * Whether this user has enabled Quick controls.
+         *
+         * 0 indicates disabled and 1 indicates enabled. A non existent value should be treated as
+         * enabled.
+         *
+         * @hide
+         */
+        public static final String CONTROLS_ENABLED = "controls_enabled";
+
+        /**
+         * Whether power menu content (cards, passes, controls) will be shown when device is locked.
+         *
+         * 0 indicates hide and 1 indicates show. A non existent value will be treated as hide.
+         * @hide
+         */
+        @TestApi
+        public static final String POWER_MENU_LOCKED_SHOW_CONTENT =
+                "power_menu_locked_show_content";
 
         /**
          * Specifies whether the web action API is enabled.
@@ -8729,14 +8657,6 @@ public final class Settings {
         public static final String DEVICE_PAIRED = "device_paired";
 
         /**
-         * Integer state indicating whether package verifier is enabled.
-         * TODO(b/34259924): Remove this setting.
-         *
-         * @hide
-         */
-        public static final String PACKAGE_VERIFIER_STATE = "package_verifier_state";
-
-        /**
          * Specifies additional package name for broadcasting the CMAS messages.
          * @hide
          */
@@ -8751,23 +8671,23 @@ public final class Settings {
         @TestApi
         public static final String NOTIFICATION_BADGING = "notification_badging";
 
-        private static final Validator NOTIFICATION_BADGING_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
-         * Whether the notification bubbles are globally enabled
-         * The value is boolean (1 or 0).
+         * When enabled the system will maintain a rolling history of received notifications. When
+         * disabled the history will be disabled and deleted.
+         *
+         * The value 1 - enable, 0 - disable
          * @hide
-         * @deprecated use {@link Global#NOTIFICATION_BUBBLES} instead.
          */
-        @TestApi
-        @Deprecated
-        public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
+        public static final String NOTIFICATION_HISTORY_ENABLED = "notification_history_enabled";
 
         /**
-         * @deprecated use {@link Global#NOTIFICATION_BUBBLES_VALIDATOR} instead.
+         * When enabled conversations marked as favorites will be set to bubble.
+         *
+         * The value 1 - enable, 0 - disable
+         * @hide
          */
-        @Deprecated
-        private static final Validator NOTIFICATION_BUBBLES_VALIDATOR = BOOLEAN_VALIDATOR;
+        public static final String BUBBLE_IMPORTANT_CONVERSATIONS
+                = "bubble_important_conversations";
 
         /**
          * Whether notifications are dismissed by a right-to-left swipe (instead of a left-to-right
@@ -8777,37 +8697,17 @@ public final class Settings {
          */
         public static final String NOTIFICATION_DISMISS_RTL = "notification_dismiss_rtl";
 
-        private static final Validator NOTIFICATION_DISMISS_RTL_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Comma separated list of QS tiles that have been auto-added already.
          * @hide
          */
         public static final String QS_AUTO_ADDED_TILES = "qs_auto_tiles";
 
-        private static final Validator QS_AUTO_ADDED_TILES_VALIDATOR = new Validator() {
-            @Override
-            public boolean validate(@Nullable String value) {
-                if (value == null) {
-                    return false;
-                }
-                String[] tiles = value.split(",");
-                boolean valid = true;
-                for (String tile : tiles) {
-                    // tile can be any non-empty string as specified by OEM
-                    valid |= ((tile.length() > 0) && ANY_STRING_VALIDATOR.validate(tile));
-                }
-                return valid;
-            }
-        };
-
         /**
          * Whether the Lockdown button should be shown in the power menu.
          * @hide
          */
         public static final String LOCKDOWN_IN_POWER_MENU = "lockdown_in_power_menu";
-
-        private static final Validator LOCKDOWN_IN_POWER_MENU_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Backup manager behavioral parameters.
@@ -8880,9 +8780,6 @@ public final class Settings {
         @SystemApi
         public static final int VOLUME_HUSH_MUTE = 2;
 
-        private static final Validator VOLUME_HUSH_GESTURE_VALIDATOR =
-                NON_NEGATIVE_INTEGER_VALIDATOR;
-
         /**
          * The number of times (integer) the user has manually enabled battery saver.
          * @hide
@@ -8940,18 +8837,20 @@ public final class Settings {
                 "location_access_check_delay_millis";
 
         /**
-         * What should happen to the location permissions when upgraded to Android Q.
-         *
-         * <ul>
-         *     <li>0/unset == revoke permissions</li>
-         *     <li>anything else == Don't do anything</li>
-         * </ul>
-         *
+         * @deprecated This setting does not have any effect anymore
          * @hide
          */
         @SystemApi
+        @Deprecated
         public static final String LOCATION_PERMISSIONS_UPGRADE_TO_Q_MODE =
                 "location_permissions_upgrade_to_q_mode";
+
+        /**
+         * Whether or not the system Auto Revoke feature is disabled.
+         * @hide
+         */
+        @SystemApi
+        public static final String AUTO_REVOKE_DISABLED = "auto_revoke_disabled";
 
         /**
          * Map of android.theme.customization.* categories to the enabled overlay package for that
@@ -8964,9 +8863,6 @@ public final class Settings {
         public static final String THEME_CUSTOMIZATION_OVERLAY_PACKAGES =
                 "theme_customization_overlay_packages";
 
-        private static final Validator THEME_CUSTOMIZATION_OVERLAY_PACKAGES_VALIDATOR =
-                SettingsValidators.JSON_OBJECT_VALIDATOR;
-
         /**
          * Navigation bar mode.
          *  0 = 3 button
@@ -8976,8 +8872,20 @@ public final class Settings {
          */
         public static final String NAVIGATION_MODE =
                 "navigation_mode";
-        private static final Validator NAVIGATION_MODE_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(new String[] {"0", "1", "2"});
+
+        /**
+         * Scale factor for the back gesture inset size on the left side of the screen.
+         * @hide
+         */
+        public static final String BACK_GESTURE_INSET_SCALE_LEFT =
+                "back_gesture_inset_scale_left";
+
+        /**
+         * Scale factor for the back gesture inset size on the right side of the screen.
+         * @hide
+         */
+        public static final String BACK_GESTURE_INSET_SCALE_RIGHT =
+                "back_gesture_inset_scale_right";
 
         /**
          * Current provider of proximity-based sharing services.
@@ -8993,15 +8901,11 @@ public final class Settings {
          */
         public static final String AWARE_ENABLED = "aware_enabled";
 
-        private static final Validator AWARE_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Controls whether aware_lock is enabled.
          * @hide
          */
         public static final String AWARE_LOCK_ENABLED = "aware_lock_enabled";
-
-        private static final Validator AWARE_LOCK_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Controls whether tap gesture is enabled.
@@ -9009,343 +8913,49 @@ public final class Settings {
          */
         public static final String TAP_GESTURE = "tap_gesture";
 
-        private static final Validator TAP_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
-         * This are the settings to be backed up.
-         *
-         * NOTE: Settings are backed up and restored in the order they appear
-         *       in this array. If you have one setting depending on another,
-         *       make sure that they are ordered appropriately.
-         *
+         * Controls whether the people strip is enabled.
          * @hide
          */
-        @UnsupportedAppUsage
-        public static final String[] SETTINGS_TO_BACKUP = {
-            BUGREPORT_IN_POWER_MENU,                            // moved to global
-            ALLOW_MOCK_LOCATION,
-            USB_MASS_STORAGE_ENABLED,                           // moved to global
-            ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
-            ACCESSIBILITY_DISPLAY_DALTONIZER,
-            ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
-            ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
-            ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED,
-            AUTOFILL_SERVICE,
-            ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
-            ENABLED_ACCESSIBILITY_SERVICES,
-            ENABLED_VR_LISTENERS,
-            TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
-            TOUCH_EXPLORATION_ENABLED,
-            ACCESSIBILITY_ENABLED,
-            ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
-            ACCESSIBILITY_BUTTON_TARGET_COMPONENT,
-            ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
-            ACCESSIBILITY_SHORTCUT_ENABLED,
-            ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN,
-            ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
-            ACCESSIBILITY_CAPTIONING_PRESET,
-            ACCESSIBILITY_CAPTIONING_ENABLED,
-            ACCESSIBILITY_CAPTIONING_LOCALE,
-            ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR,
-            ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR,
-            ACCESSIBILITY_CAPTIONING_EDGE_TYPE,
-            ACCESSIBILITY_CAPTIONING_EDGE_COLOR,
-            ACCESSIBILITY_CAPTIONING_TYPEFACE,
-            ACCESSIBILITY_CAPTIONING_FONT_SCALE,
-            ACCESSIBILITY_CAPTIONING_WINDOW_COLOR,
-            TTS_DEFAULT_RATE,
-            TTS_DEFAULT_PITCH,
-            TTS_DEFAULT_SYNTH,
-            TTS_ENABLED_PLUGINS,
-            TTS_DEFAULT_LOCALE,
-            SHOW_IME_WITH_HARD_KEYBOARD,
-            WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,            // moved to global
-            WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,               // moved to global
-            WIFI_NUM_OPEN_NETWORKS_KEPT,                        // moved to global
-            MOUNT_PLAY_NOTIFICATION_SND,
-            MOUNT_UMS_AUTOSTART,
-            MOUNT_UMS_PROMPT,
-            MOUNT_UMS_NOTIFY_ENABLED,
-            DOUBLE_TAP_TO_WAKE,
-            WAKE_GESTURE_ENABLED,
-            LONG_PRESS_TIMEOUT,
-            CAMERA_GESTURE_DISABLED,
-            ACCESSIBILITY_AUTOCLICK_ENABLED,
-            ACCESSIBILITY_AUTOCLICK_DELAY,
-            ACCESSIBILITY_LARGE_POINTER_ICON,
-            PREFERRED_TTY_MODE,
-            ENHANCED_VOICE_PRIVACY_ENABLED,
-            TTY_MODE_ENABLED,
-            RTT_CALLING_MODE,
-            INCALL_POWER_BUTTON_BEHAVIOR,
-            NIGHT_DISPLAY_CUSTOM_START_TIME,
-            NIGHT_DISPLAY_CUSTOM_END_TIME,
-            NIGHT_DISPLAY_COLOR_TEMPERATURE,
-            NIGHT_DISPLAY_AUTO_MODE,
-            DISPLAY_WHITE_BALANCE_ENABLED,
-            SYNC_PARENT_SOUNDS,
-            CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
-            CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
-            SYSTEM_NAVIGATION_KEYS_ENABLED,
-            QS_TILES,
-            DOZE_ENABLED,
-            DOZE_ALWAYS_ON,
-            DOZE_PICK_UP_GESTURE,
-            DOZE_DOUBLE_TAP_GESTURE,
-            DOZE_TAP_SCREEN_GESTURE,
-            NFC_PAYMENT_DEFAULT_COMPONENT,
-            AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
-            FACE_UNLOCK_KEYGUARD_ENABLED,
-            SHOW_MEDIA_WHEN_BYPASSING,
-            FACE_UNLOCK_DISMISSES_KEYGUARD,
-            FACE_UNLOCK_APP_ENABLED,
-            FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
-            VR_DISPLAY_MODE,
-            NOTIFICATION_BADGING,
-            NOTIFICATION_DISMISS_RTL,
-            QS_AUTO_ADDED_TILES,
-            SCREENSAVER_ENABLED,
-            SCREENSAVER_COMPONENTS,
-            SCREENSAVER_ACTIVATE_ON_DOCK,
-            SCREENSAVER_ACTIVATE_ON_SLEEP,
-            LOCKDOWN_IN_POWER_MENU,
-            SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
-            VOLUME_HUSH_GESTURE,
-            MANUAL_RINGER_TOGGLE_COUNT,
-            HUSH_GESTURE_USED,
-            IN_CALL_NOTIFICATION_ENABLED,
-            LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
-            LOCK_SCREEN_CUSTOM_CLOCK_FACE,
-            LOCK_SCREEN_SHOW_NOTIFICATIONS,
-            LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS,
-            SHOW_NOTIFICATION_SNOOZE,
-            ZEN_DURATION,
-            SHOW_ZEN_UPGRADE_NOTIFICATION,
-            SHOW_ZEN_SETTINGS_SUGGESTION,
-            ZEN_SETTINGS_UPDATED,
-            ZEN_SETTINGS_SUGGESTION_VIEWED,
-            CHARGING_SOUNDS_ENABLED,
-            CHARGING_VIBRATION_ENABLED,
-            ACCESSIBILITY_NON_INTERACTIVE_UI_TIMEOUT_MS,
-            ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS,
-            NOTIFICATION_NEW_INTERRUPTION_MODEL,
-            TRUST_AGENTS_EXTEND_UNLOCK,
-            UI_NIGHT_MODE,
-            LOCK_SCREEN_WHEN_TRUST_LOST,
-            SKIP_DIRECTION,
-            THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
-            NAVIGATION_MODE,
-            SKIP_GESTURE_COUNT,
-            SKIP_TOUCH_COUNT,
-            SILENCE_ALARMS_GESTURE_COUNT,
-            SILENCE_CALL_GESTURE_COUNT,
-            SILENCE_TIMER_GESTURE_COUNT,
-            SILENCE_ALARMS_TOUCH_COUNT,
-            SILENCE_CALL_TOUCH_COUNT,
-            SILENCE_TIMER_TOUCH_COUNT,
-            DARK_MODE_DIALOG_SEEN,
-            GLOBAL_ACTIONS_PANEL_ENABLED,
-            AWARE_LOCK_ENABLED,
-            AWARE_TAP_PAUSE_GESTURE_COUNT,
-            AWARE_TAP_PAUSE_TOUCH_COUNT
-        };
+        public static final String PEOPLE_STRIP = "people_strip";
 
         /**
-         * All settings in {@link SETTINGS_TO_BACKUP} array *must* have a non-null validator,
-         * otherwise they won't be restored.
-         *
+         * Whether or not to enable media resumption
+         * When enabled, media controls in quick settings will populate on boot and persist if
+         * resumable via a MediaBrowserService.
+         * @see Settings.Global#SHOW_MEDIA_ON_QUICK_SETTINGS
          * @hide
          */
-        public static final Map<String, Validator> VALIDATORS = new ArrayMap<>();
-        static {
-            VALIDATORS.put(BUGREPORT_IN_POWER_MENU, BUGREPORT_IN_POWER_MENU_VALIDATOR);
-            VALIDATORS.put(ALLOW_MOCK_LOCATION, ALLOW_MOCK_LOCATION_VALIDATOR);
-            VALIDATORS.put(USB_MASS_STORAGE_ENABLED, USB_MASS_STORAGE_ENABLED_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
-                    ACCESSIBILITY_DISPLAY_INVERSION_ENABLED_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_DISPLAY_DALTONIZER,
-                    ACCESSIBILITY_DISPLAY_DALTONIZER_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
-                    ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
-                    ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED,
-                    ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED_VALIDATOR);
-            VALIDATORS.put(AUTOFILL_SERVICE, AUTOFILL_SERVICE_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
-                    ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE_VALIDATOR);
-            VALIDATORS.put(ENABLED_ACCESSIBILITY_SERVICES,
-                    ENABLED_ACCESSIBILITY_SERVICES_VALIDATOR);
-            VALIDATORS.put(ENABLED_VR_LISTENERS, ENABLED_VR_LISTENERS_VALIDATOR);
-            VALIDATORS.put(TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
-                    TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES_VALIDATOR);
-            VALIDATORS.put(TOUCH_EXPLORATION_ENABLED, TOUCH_EXPLORATION_ENABLED_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_ENABLED, ACCESSIBILITY_ENABLED_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
-                    ACCESSIBILITY_SHORTCUT_TARGET_SERVICE_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_BUTTON_TARGET_COMPONENT,
-                    ACCESSIBILITY_BUTTON_TARGET_COMPONENT_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
-                    ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_SHORTCUT_ENABLED,
-                    ACCESSIBILITY_SHORTCUT_ENABLED_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN,
-                    ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
-                    ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_CAPTIONING_PRESET,
-                    ACCESSIBILITY_CAPTIONING_PRESET_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_CAPTIONING_ENABLED,
-                    ACCESSIBILITY_CAPTIONING_ENABLED_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_CAPTIONING_LOCALE,
-                    ACCESSIBILITY_CAPTIONING_LOCALE_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR,
-                    ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR,
-                    ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_CAPTIONING_EDGE_TYPE,
-                    ACCESSIBILITY_CAPTIONING_EDGE_TYPE_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_CAPTIONING_EDGE_COLOR,
-                    ACCESSIBILITY_CAPTIONING_EDGE_COLOR_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_CAPTIONING_TYPEFACE,
-                    ACCESSIBILITY_CAPTIONING_TYPEFACE_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_CAPTIONING_FONT_SCALE,
-                    ACCESSIBILITY_CAPTIONING_FONT_SCALE_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_CAPTIONING_WINDOW_COLOR,
-                    ACCESSIBILITY_CAPTIONING_WINDOW_COLOR_VALIDATOR);
-            VALIDATORS.put(TTS_DEFAULT_RATE, TTS_DEFAULT_RATE_VALIDATOR);
-            VALIDATORS.put(TTS_DEFAULT_PITCH, TTS_DEFAULT_PITCH_VALIDATOR);
-            VALIDATORS.put(TTS_DEFAULT_SYNTH, TTS_DEFAULT_SYNTH_VALIDATOR);
-            VALIDATORS.put(TTS_ENABLED_PLUGINS, TTS_ENABLED_PLUGINS_VALIDATOR);
-            VALIDATORS.put(TTS_DEFAULT_LOCALE, TTS_DEFAULT_LOCALE_VALIDATOR);
-            VALIDATORS.put(SHOW_IME_WITH_HARD_KEYBOARD, SHOW_IME_WITH_HARD_KEYBOARD_VALIDATOR);
-            VALIDATORS.put(WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
-                    WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR);
-            VALIDATORS.put(WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
-                    WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY_VALIDATOR);
-            VALIDATORS.put(WIFI_NUM_OPEN_NETWORKS_KEPT, WIFI_NUM_OPEN_NETWORKS_KEPT_VALIDATOR);
-            VALIDATORS.put(MOUNT_PLAY_NOTIFICATION_SND, MOUNT_PLAY_NOTIFICATION_SND_VALIDATOR);
-            VALIDATORS.put(MOUNT_UMS_AUTOSTART, MOUNT_UMS_AUTOSTART_VALIDATOR);
-            VALIDATORS.put(MOUNT_UMS_PROMPT, MOUNT_UMS_PROMPT_VALIDATOR);
-            VALIDATORS.put(MOUNT_UMS_NOTIFY_ENABLED, MOUNT_UMS_NOTIFY_ENABLED_VALIDATOR);
-            VALIDATORS.put(DOUBLE_TAP_TO_WAKE, DOUBLE_TAP_TO_WAKE_VALIDATOR);
-            VALIDATORS.put(WAKE_GESTURE_ENABLED, WAKE_GESTURE_ENABLED_VALIDATOR);
-            VALIDATORS.put(LONG_PRESS_TIMEOUT, LONG_PRESS_TIMEOUT_VALIDATOR);
-            VALIDATORS.put(CAMERA_GESTURE_DISABLED, CAMERA_GESTURE_DISABLED_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_AUTOCLICK_ENABLED,
-                    ACCESSIBILITY_AUTOCLICK_ENABLED_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_AUTOCLICK_DELAY, ACCESSIBILITY_AUTOCLICK_DELAY_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_LARGE_POINTER_ICON,
-                    ACCESSIBILITY_LARGE_POINTER_ICON_VALIDATOR);
-            VALIDATORS.put(PREFERRED_TTY_MODE, PREFERRED_TTY_MODE_VALIDATOR);
-            VALIDATORS.put(ENHANCED_VOICE_PRIVACY_ENABLED,
-                    ENHANCED_VOICE_PRIVACY_ENABLED_VALIDATOR);
-            VALIDATORS.put(TTY_MODE_ENABLED, TTY_MODE_ENABLED_VALIDATOR);
-            VALIDATORS.put(RTT_CALLING_MODE, RTT_CALLING_MODE_VALIDATOR);
-            VALIDATORS.put(INCALL_POWER_BUTTON_BEHAVIOR, INCALL_POWER_BUTTON_BEHAVIOR_VALIDATOR);
-            VALIDATORS.put(NIGHT_DISPLAY_CUSTOM_START_TIME,
-                    NIGHT_DISPLAY_CUSTOM_START_TIME_VALIDATOR);
-            VALIDATORS.put(NIGHT_DISPLAY_CUSTOM_END_TIME, NIGHT_DISPLAY_CUSTOM_END_TIME_VALIDATOR);
-            VALIDATORS.put(NIGHT_DISPLAY_COLOR_TEMPERATURE,
-                    NIGHT_DISPLAY_COLOR_TEMPERATURE_VALIDATOR);
-            VALIDATORS.put(NIGHT_DISPLAY_AUTO_MODE, NIGHT_DISPLAY_AUTO_MODE_VALIDATOR);
-            VALIDATORS.put(DISPLAY_WHITE_BALANCE_ENABLED, DISPLAY_WHITE_BALANCE_ENABLED_VALIDATOR);
-            VALIDATORS.put(SYNC_PARENT_SOUNDS, SYNC_PARENT_SOUNDS_VALIDATOR);
-            VALIDATORS.put(CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
-                    CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED_VALIDATOR);
-            VALIDATORS.put(CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
-                    CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED_VALIDATOR);
-            VALIDATORS.put(SYSTEM_NAVIGATION_KEYS_ENABLED,
-                    SYSTEM_NAVIGATION_KEYS_ENABLED_VALIDATOR);
-            VALIDATORS.put(QS_TILES, QS_TILES_VALIDATOR);
-            VALIDATORS.put(DOZE_ENABLED, DOZE_ENABLED_VALIDATOR);
-            VALIDATORS.put(DOZE_ALWAYS_ON, DOZE_ALWAYS_ON_VALIDATOR);
-            VALIDATORS.put(DOZE_PICK_UP_GESTURE, DOZE_PICK_UP_GESTURE_VALIDATOR);
-            VALIDATORS.put(DOZE_DOUBLE_TAP_GESTURE, DOZE_DOUBLE_TAP_GESTURE_VALIDATOR);
-            VALIDATORS.put(DOZE_TAP_SCREEN_GESTURE, DOZE_TAP_SCREEN_GESTURE_VALIDATOR);
-            VALIDATORS.put(DOZE_WAKE_LOCK_SCREEN_GESTURE, DOZE_WAKE_LOCK_SCREEN_GESTURE_VALIDATOR);
-            VALIDATORS.put(DOZE_WAKE_DISPLAY_GESTURE, DOZE_WAKE_DISPLAY_GESTURE_VALIDATOR);
-            VALIDATORS.put(NFC_PAYMENT_DEFAULT_COMPONENT, NFC_PAYMENT_DEFAULT_COMPONENT_VALIDATOR);
-            VALIDATORS.put(AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
-                    AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN_VALIDATOR);
-            VALIDATORS.put(FACE_UNLOCK_KEYGUARD_ENABLED, FACE_UNLOCK_KEYGUARD_ENABLED_VALIDATOR);
-            VALIDATORS.put(FACE_UNLOCK_DISMISSES_KEYGUARD,
-                    FACE_UNLOCK_DISMISSES_KEYGUARD_VALIDATOR);
-            VALIDATORS.put(SHOW_MEDIA_WHEN_BYPASSING, SHOW_MEDIA_WHEN_BYPASSING_VALIDATOR);
-            VALIDATORS.put(FACE_UNLOCK_APP_ENABLED, FACE_UNLOCK_APP_ENABLED_VALIDATOR);
-            VALIDATORS.put(FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
-                    FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION_VALIDATOR);
-            VALIDATORS.put(ASSIST_GESTURE_ENABLED, ASSIST_GESTURE_ENABLED_VALIDATOR);
-            VALIDATORS.put(ASSIST_GESTURE_SILENCE_ALERTS_ENABLED,
-                    ASSIST_GESTURE_SILENCE_ALERTS_ENABLED_VALIDATOR);
-            VALIDATORS.put(ASSIST_GESTURE_WAKE_ENABLED, ASSIST_GESTURE_WAKE_ENABLED_VALIDATOR);
-            VALIDATORS.put(VR_DISPLAY_MODE, VR_DISPLAY_MODE_VALIDATOR);
-            VALIDATORS.put(NOTIFICATION_BADGING, NOTIFICATION_BADGING_VALIDATOR);
-            VALIDATORS.put(NOTIFICATION_BUBBLES, NOTIFICATION_BUBBLES_VALIDATOR);
-            VALIDATORS.put(NOTIFICATION_DISMISS_RTL, NOTIFICATION_DISMISS_RTL_VALIDATOR);
-            VALIDATORS.put(QS_AUTO_ADDED_TILES, QS_AUTO_ADDED_TILES_VALIDATOR);
-            VALIDATORS.put(SCREENSAVER_ENABLED, SCREENSAVER_ENABLED_VALIDATOR);
-            VALIDATORS.put(SCREENSAVER_COMPONENTS, SCREENSAVER_COMPONENTS_VALIDATOR);
-            VALIDATORS.put(SCREENSAVER_ACTIVATE_ON_DOCK, SCREENSAVER_ACTIVATE_ON_DOCK_VALIDATOR);
-            VALIDATORS.put(SCREENSAVER_ACTIVATE_ON_SLEEP, SCREENSAVER_ACTIVATE_ON_SLEEP_VALIDATOR);
-            VALIDATORS.put(LOCKDOWN_IN_POWER_MENU, LOCKDOWN_IN_POWER_MENU_VALIDATOR);
-            VALIDATORS.put(SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
-                    SHOW_FIRST_CRASH_DIALOG_DEV_OPTION_VALIDATOR);
-            VALIDATORS.put(VOLUME_HUSH_GESTURE, VOLUME_HUSH_GESTURE_VALIDATOR);
-            VALIDATORS.put(ENABLED_NOTIFICATION_LISTENERS,
-                    ENABLED_NOTIFICATION_LISTENERS_VALIDATOR); //legacy restore setting
-            VALIDATORS.put(ENABLED_NOTIFICATION_ASSISTANT,
-                    ENABLED_NOTIFICATION_ASSISTANT_VALIDATOR); //legacy restore setting
-            VALIDATORS.put(ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
-                    ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES_VALIDATOR); //legacy restore setting
-            VALIDATORS.put(HUSH_GESTURE_USED, HUSH_GESTURE_USED_VALIDATOR);
-            VALIDATORS.put(MANUAL_RINGER_TOGGLE_COUNT, MANUAL_RINGER_TOGGLE_COUNT_VALIDATOR);
-            VALIDATORS.put(IN_CALL_NOTIFICATION_ENABLED, IN_CALL_NOTIFICATION_ENABLED_VALIDATOR);
-            VALIDATORS.put(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(LOCK_SCREEN_SHOW_NOTIFICATIONS, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(SHOW_NOTIFICATION_SNOOZE, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(ZEN_DURATION, ZEN_DURATION_VALIDATOR);
-            VALIDATORS.put(SHOW_ZEN_UPGRADE_NOTIFICATION, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(SHOW_ZEN_SETTINGS_SUGGESTION, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(ZEN_SETTINGS_UPDATED, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(ZEN_SETTINGS_SUGGESTION_VIEWED, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(CHARGING_SOUNDS_ENABLED, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(CHARGING_VIBRATION_ENABLED, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_NON_INTERACTIVE_UI_TIMEOUT_MS,
-                    NON_NEGATIVE_INTEGER_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS, NON_NEGATIVE_INTEGER_VALIDATOR);
-            VALIDATORS.put(USER_SETUP_COMPLETE, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(ASSIST_GESTURE_SETUP_COMPLETE, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(NOTIFICATION_NEW_INTERRUPTION_MODEL, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(TRUST_AGENTS_EXTEND_UNLOCK, TRUST_AGENTS_EXTEND_UNLOCK_VALIDATOR);
-            VALIDATORS.put(LOCK_SCREEN_CUSTOM_CLOCK_FACE, LOCK_SCREEN_CUSTOM_CLOCK_FACE_VALIDATOR);
-            VALIDATORS.put(LOCK_SCREEN_WHEN_TRUST_LOST, LOCK_SCREEN_WHEN_TRUST_LOST_VALIDATOR);
-            VALIDATORS.put(SKIP_GESTURE, SKIP_GESTURE_VALIDATOR);
-            VALIDATORS.put(SKIP_DIRECTION, SKIP_DIRECTION_VALIDATOR);
-            VALIDATORS.put(SKIP_DIRECTION, SKIP_DIRECTION_VALIDATOR);
-            VALIDATORS.put(SILENCE_GESTURE, SILENCE_GESTURE_VALIDATOR);
-            VALIDATORS.put(THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
-                    THEME_CUSTOMIZATION_OVERLAY_PACKAGES_VALIDATOR);
-            VALIDATORS.put(NAVIGATION_MODE, NAVIGATION_MODE_VALIDATOR);
-            VALIDATORS.put(AWARE_ENABLED, AWARE_ENABLED_VALIDATOR);
-            VALIDATORS.put(SKIP_GESTURE_COUNT, SKIP_GESTURE_COUNT_VALIDATOR);
-            VALIDATORS.put(SKIP_TOUCH_COUNT, SKIP_GESTURE_COUNT_VALIDATOR);
-            VALIDATORS.put(SILENCE_ALARMS_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
-            VALIDATORS.put(SILENCE_TIMER_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
-            VALIDATORS.put(SILENCE_CALL_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
-            VALIDATORS.put(SILENCE_ALARMS_TOUCH_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
-            VALIDATORS.put(SILENCE_TIMER_TOUCH_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
-            VALIDATORS.put(SILENCE_CALL_TOUCH_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
-            VALIDATORS.put(ODI_CAPTIONS_ENABLED, ODI_CAPTIONS_ENABLED_VALIDATOR);
-            VALIDATORS.put(DARK_MODE_DIALOG_SEEN, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(UI_NIGHT_MODE, UI_NIGHT_MODE_VALIDATOR);
-            VALIDATORS.put(GLOBAL_ACTIONS_PANEL_ENABLED, GLOBAL_ACTIONS_PANEL_ENABLED_VALIDATOR);
-            VALIDATORS.put(AWARE_LOCK_ENABLED, AWARE_LOCK_ENABLED_VALIDATOR);
-            VALIDATORS.put(AWARE_TAP_PAUSE_GESTURE_COUNT, NON_NEGATIVE_INTEGER_VALIDATOR);
-            VALIDATORS.put(AWARE_TAP_PAUSE_TOUCH_COUNT, NON_NEGATIVE_INTEGER_VALIDATOR);
-            VALIDATORS.put(TAP_GESTURE, TAP_GESTURE_VALIDATOR);
-        }
+        public static final String MEDIA_CONTROLS_RESUME = "qs_media_resumption";
+
+        /**
+         * Controls if window magnification is enabled.
+         * @hide
+         */
+        public static final String WINDOW_MAGNIFICATION = "window_magnification";
+
+        /**
+         * Controls magnification mode when magnification is enabled via a system-wide
+         * triple tap gesture or the accessibility shortcut.
+         *
+         * @see#ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
+         * @see#ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
+         * @hide
+         */
+        public static final String ACCESSIBILITY_MAGNIFICATION_MODE =
+                "accessibility_magnification_mode";
+
+        /**
+         * Magnification mode value that magnifies whole display.
+         * @hide
+         */
+        public static final int ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN = 0x1;
+
+        /**
+         * Magnification mode value that magnifies magnify particular region in a window
+         * @hide
+         */
+        public static final int ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW = 0x2;
 
         /**
          * Keys we no longer back up under the current schema, but want to continue to
@@ -9378,13 +8988,6 @@ public final class Settings {
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_MODE);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_PROVIDERS_ALLOWED);
             CLONE_TO_MANAGED_PROFILE.add(SHOW_IME_WITH_HARD_KEYBOARD);
-            if (!InputMethodSystemProperty.PER_PROFILE_IME_ENABLED) {
-                CLONE_TO_MANAGED_PROFILE.add(DEFAULT_INPUT_METHOD);
-                CLONE_TO_MANAGED_PROFILE.add(ENABLED_INPUT_METHODS);
-                CLONE_TO_MANAGED_PROFILE.add(SELECTED_INPUT_METHOD_SUBTYPE);
-                CLONE_TO_MANAGED_PROFILE.add(SELECTED_SPELL_CHECKER);
-                CLONE_TO_MANAGED_PROFILE.add(SELECTED_SPELL_CHECKER_SUBTYPE);
-            }
         }
 
         /** @hide */
@@ -9422,7 +9025,6 @@ public final class Settings {
 
             INSTANT_APP_SETTINGS.add(ANDROID_ID);
 
-            INSTANT_APP_SETTINGS.add(PACKAGE_VERIFIER_USER_CONSENT);
             INSTANT_APP_SETTINGS.add(ALLOW_MOCK_LOCATION);
         }
 
@@ -9479,8 +9081,6 @@ public final class Settings {
         @TestApi
         public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
 
-        private static final Validator NOTIFICATION_BUBBLES_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Whether users are allowed to add more users or guest from lockscreen.
          * <p>
@@ -9495,8 +9095,6 @@ public final class Settings {
          * <p>0 = do not apply ramping ringer
          */
         public static final String APPLY_RAMPING_RINGER = "apply_ramping_ringer";
-
-        private static final Validator APPLY_RAMPING_RINGER_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Setting whether the global gesture for enabling accessibility is enabled.
@@ -9559,9 +9157,9 @@ public final class Settings {
          * added to both AIRPLANE_MODE_RADIOS and AIRPLANE_MODE_TOGGLEABLE_RADIOS, then Wifi
          * will be turned off when entering airplane mode, but the user will be able to reenable
          * Wifi in the Settings app.
-         *
-         * {@hide}
+         * @hide
          */
+        @SystemApi
         public static final String AIRPLANE_MODE_TOGGLEABLE_RADIOS = "airplane_mode_toggleable_radios";
 
         /**
@@ -9597,26 +9195,34 @@ public final class Settings {
          * Set to one of {@link #WIFI_SLEEP_POLICY_DEFAULT},
          * {@link #WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED}, or
          * {@link #WIFI_SLEEP_POLICY_NEVER}.
+         * @deprecated This is no longer used or set by the platform.
          */
+        @Deprecated
         public static final String WIFI_SLEEP_POLICY = "wifi_sleep_policy";
 
         /**
          * Value for {@link #WIFI_SLEEP_POLICY} to use the default Wi-Fi sleep
          * policy, which is to sleep shortly after the turning off
          * according to the {@link #STAY_ON_WHILE_PLUGGED_IN} setting.
+         * @deprecated This is no longer used by the platform.
          */
+        @Deprecated
         public static final int WIFI_SLEEP_POLICY_DEFAULT = 0;
 
         /**
          * Value for {@link #WIFI_SLEEP_POLICY} to use the default policy when
          * the device is on battery, and never go to sleep when the device is
          * plugged in.
+         * @deprecated This is no longer used by the platform.
          */
+        @Deprecated
         public static final int WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED = 1;
 
         /**
          * Value for {@link #WIFI_SLEEP_POLICY} to never go to sleep.
+         * @deprecated This is no longer used by the platform.
          */
+        @Deprecated
         public static final int WIFI_SLEEP_POLICY_NEVER = 2;
 
         /**
@@ -9625,15 +9231,11 @@ public final class Settings {
          */
         public static final String AUTO_TIME = "auto_time";
 
-        private static final Validator AUTO_TIME_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Value to specify if the user prefers the time zone
          * to be automatically fetched from the network (NITZ). 1=yes, 0=no
          */
         public static final String AUTO_TIME_ZONE = "auto_time_zone";
-
-        private static final Validator AUTO_TIME_ZONE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * URI for the car dock "in" event sound.
@@ -9664,8 +9266,6 @@ public final class Settings {
          * @hide
          */
         public static final String DOCK_SOUNDS_ENABLED = "dock_sounds_enabled";
-
-        private static final Validator DOCK_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether to play a sound for dock events, only when an accessibility service is on.
@@ -9704,14 +9304,18 @@ public final class Settings {
          */
         public static final String POWER_SOUNDS_ENABLED = "power_sounds_enabled";
 
-        private static final Validator POWER_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
-         * URI for the "wireless charging started" and "wired charging started" sound.
+         * URI for the "wireless charging started" sound.
          * @hide
          */
-        public static final String CHARGING_STARTED_SOUND =
+        public static final String WIRELESS_CHARGING_STARTED_SOUND =
                 "wireless_charging_started_sound";
+
+        /**
+         * URI for "wired charging started" sound.
+         * @hide
+         */
+        public static final String CHARGING_STARTED_SOUND = "charging_started_sound";
 
         /**
          * Whether to play a sound for charging events.
@@ -9721,8 +9325,6 @@ public final class Settings {
         @Deprecated
         public static final String CHARGING_SOUNDS_ENABLED = "charging_sounds_enabled";
 
-        private static final Validator CHARGING_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Whether to vibrate for wireless charging events.
          * @deprecated Use {@link android.provider.Settings.Secure#CHARGING_VIBRATION_ENABLED}
@@ -9730,8 +9332,6 @@ public final class Settings {
          */
         @Deprecated
         public static final String CHARGING_VIBRATION_ENABLED = "charging_vibration_enabled";
-
-        private static final Validator CHARGING_VIBRATION_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether we keep the device on while the device is plugged in.
@@ -9746,30 +9346,6 @@ public final class Settings {
          */
         public static final String STAY_ON_WHILE_PLUGGED_IN = "stay_on_while_plugged_in";
 
-        private static final Validator STAY_ON_WHILE_PLUGGED_IN_VALIDATOR = new Validator() {
-            @Override
-            public boolean validate(@Nullable String value) {
-                try {
-                    int val = Integer.parseInt(value);
-                    return (val == 0)
-                            || (val == BatteryManager.BATTERY_PLUGGED_AC)
-                            || (val == BatteryManager.BATTERY_PLUGGED_USB)
-                            || (val == BatteryManager.BATTERY_PLUGGED_WIRELESS)
-                            || (val == (BatteryManager.BATTERY_PLUGGED_AC
-                                    | BatteryManager.BATTERY_PLUGGED_USB))
-                            || (val == (BatteryManager.BATTERY_PLUGGED_AC
-                                    | BatteryManager.BATTERY_PLUGGED_WIRELESS))
-                            || (val == (BatteryManager.BATTERY_PLUGGED_USB
-                                    | BatteryManager.BATTERY_PLUGGED_WIRELESS))
-                            || (val == (BatteryManager.BATTERY_PLUGGED_AC
-                                    | BatteryManager.BATTERY_PLUGGED_USB
-                                    | BatteryManager.BATTERY_PLUGGED_WIRELESS));
-                } catch (NumberFormatException e) {
-                    return false;
-                }
-            }
-        };
-
         /**
          * When the user has enable the option to have a "bug report" command
          * in the power menu.
@@ -9777,7 +9353,21 @@ public final class Settings {
          */
         public static final String BUGREPORT_IN_POWER_MENU = "bugreport_in_power_menu";
 
-        private static final Validator BUGREPORT_IN_POWER_MENU_VALIDATOR = BOOLEAN_VALIDATOR;
+        /**
+         * The package name for the custom bugreport handler app. This app must be whitelisted.
+         * This is currently used only by Power Menu short press.
+         *
+         * @hide
+         */
+        public static final String CUSTOM_BUGREPORT_HANDLER_APP = "custom_bugreport_handler_app";
+
+        /**
+         * The user id for the custom bugreport handler app. This is currently used only by Power
+         * Menu short press.
+         *
+         * @hide
+         */
+        public static final String CUSTOM_BUGREPORT_HANDLER_USER = "custom_bugreport_handler_user";
 
         /**
          * Whether ADB over USB is enabled.
@@ -9814,8 +9404,6 @@ public final class Settings {
          * 0=disabled. 1=enabled.
          */
         public static final String BLUETOOTH_ON = "bluetooth_on";
-
-        private static final Validator BLUETOOTH_ON_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * CDMA Cell Broadcast SMS
@@ -9932,7 +9520,7 @@ public final class Settings {
          *
          * @hide
          */
-        //TODO(b/77914569) Changes this to System Api.
+        @SystemApi
         public static final String EUICC_SUPPORTED_COUNTRIES = "euicc_supported_countries";
 
         /**
@@ -9947,10 +9535,8 @@ public final class Settings {
          *
          * @hide
          */
-        //TODO(b/77914569) Changes this to System Api.
+        @SystemApi
         public static final String EUICC_UNSUPPORTED_COUNTRIES = "euicc_unsupported_countries";
-        private static final Validator EUICC_UNSUPPORTED_COUNTRIES_VALIDATOR =
-                new SettingsValidators.ComponentNameListValidator(",");
 
         /**
          * Whether any activity can be resized. When this is true, any
@@ -9974,6 +9560,23 @@ public final class Settings {
          */
         public static final String DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS =
                 "force_desktop_mode_on_external_displays";
+
+        /**
+         * Whether to allow non-resizable apps to be freeform.
+         * @hide
+         */
+        public static final String DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM =
+                "enable_sizecompat_freeform";
+
+        /**
+         * If true, shadows drawn around the window will be rendered by the system compositor. If
+         * false, shadows will be drawn by the client by setting an elevation on the root view and
+         * the contents will be inset by the surface insets.
+         * (0 = false, 1 = true)
+         * @hide
+         */
+        public static final String DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR =
+                "render_shadows_in_compositor";
 
        /**
         * Whether user has enabled development settings.
@@ -10046,6 +9649,43 @@ public final class Settings {
         */
        public static final String HDMI_CONTROL_ENABLED = "hdmi_control_enabled";
 
+        /**
+         * Controls whether volume control commands via HDMI CEC are enabled. (0 = false, 1 =
+         * true).
+         *
+         * <p>Effects on different device types:
+         * <table>
+         *     <tr><th>HDMI CEC device type</th><th>0: disabled</th><th>1: enabled</th></tr>
+         *     <tr>
+         *         <td>TV (type: 0)</td>
+         *         <td>Per CEC specification.</td>
+         *         <td>TV changes system volume. TV no longer reacts to incoming volume changes
+         *         via {@code <User Control Pressed>}. TV no longer handles {@code <Report Audio
+         *         Status>}.</td>
+         *     </tr>
+         *     <tr>
+         *         <td>Playback device (type: 4)</td>
+         *         <td>Device sends volume commands to TV/Audio system via {@code <User Control
+         *         Pressed>}</td>
+         *         <td>Device does not send volume commands via {@code <User Control Pressed>}.</td>
+         *     </tr>
+         *     <tr>
+         *         <td>Audio device (type: 5)</td>
+         *         <td>Full "System Audio Control" capabilities.</td>
+         *         <td>Audio device no longer reacts to incoming {@code <User Control Pressed>}
+         *         volume commands. Audio device no longer reports volume changes via {@code
+         *         <Report Audio Status>}.</td>
+         *     </tr>
+         * </table>
+         *
+         * <p> Due to the resulting behavior, usage on TV and Audio devices is discouraged.
+         *
+         * @hide
+         * @see android.hardware.hdmi.HdmiControlManager#setHdmiCecVolumeControlEnabled(boolean)
+         */
+        public static final String HDMI_CONTROL_VOLUME_CONTROL_ENABLED =
+                "hdmi_control_volume_control_enabled";
+
        /**
         * Whether HDMI System Audio Control feature is enabled. If enabled, TV will try to turn on
         * system audio mode if there's a connected CEC-enabled AV Receiver. Then audio stream will
@@ -10084,6 +9724,13 @@ public final class Settings {
                 "hdmi_control_auto_device_off_enabled";
 
         /**
+         * Whether or not media is shown automatically when bypassing as a heads up.
+         * @hide
+         */
+        public static final String SHOW_MEDIA_ON_QUICK_SETTINGS =
+                "qs_media_player";
+
+        /**
          * The interval in milliseconds at which location requests will be throttled when they are
          * coming from the background.
          *
@@ -10115,21 +9762,6 @@ public final class Settings {
         @TestApi
         public static final String LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST =
                 "location_ignore_settings_package_whitelist";
-
-        /**
-         * Whether to disable location status callbacks in preparation for deprecation.
-         * @hide
-         */
-        public static final String LOCATION_DISABLE_STATUS_CALLBACKS =
-                "location_disable_status_callbacks";
-
-        /**
-         * Maximum staleness allowed for last location when returned to clients with only foreground
-         * location permissions.
-         * @hide
-         */
-        public static final String LOCATION_LAST_LOCATION_MAX_AGE_MILLIS =
-                "location_last_location_max_age_millis";
 
         /**
         * Whether TV will switch to MHL port when a mobile device is plugged in.
@@ -10335,19 +9967,14 @@ public final class Settings {
        @SystemApi
        public static final String OTA_DISABLE_AUTOMATIC_UPDATE = "ota_disable_automatic_update";
 
-       /**
-        * Whether the package manager should send package verification broadcasts for verifiers to
-        * review apps prior to installation.
-        * 1 = request apps to be verified prior to installation, if a verifier exists.
-        * 0 = do not verify apps before installation
-        * @hide
-        */
-       @UnsupportedAppUsage
-       public static final String PACKAGE_VERIFIER_ENABLE = "package_verifier_enable";
-
        /** Timeout for package verification.
         * @hide */
        public static final String PACKAGE_VERIFIER_TIMEOUT = "verifier_timeout";
+
+        /** Timeout for app integrity verification.
+         * @hide */
+        public static final String APP_INTEGRITY_VERIFICATION_TIMEOUT =
+                "app_integrity_verification_timeout";
 
        /** Default response code for package verification.
         * @hide */
@@ -10368,6 +9995,15 @@ public final class Settings {
         * @hide
         */
        public static final String PACKAGE_VERIFIER_INCLUDE_ADB = "verifier_verify_adb_installs";
+
+        /**
+         * Run integrity checks for integrity rule providers.
+         * 0 = bypass integrity verification on installs from rule providers (default)
+         * 1 = perform integrity verification on installs from rule providers
+         * @hide
+         */
+        public static final String INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER =
+                "verify_integrity_for_rule_provider";
 
        /**
         * Time since last fstrim (milliseconds) after which we force one to happen
@@ -10568,8 +10204,6 @@ public final class Settings {
         */
        public static final String USB_MASS_STORAGE_ENABLED = "usb_mass_storage_enabled";
 
-       private static final Validator USB_MASS_STORAGE_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
-
        /**
         * If this setting is set (to anything), then all references
         * to Gmail on the device must change to Google Mail.
@@ -10722,25 +10356,6 @@ public final class Settings {
        public static final String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON =
                "wifi_networks_available_notification_on";
 
-       private static final Validator WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR =
-               BOOLEAN_VALIDATOR;
-
-       /**
-        * Whether to notify the user of carrier networks.
-        * <p>
-        * If not connected and the scan results have a carrier network, we will
-        * put this notification up. If we attempt to connect to a network or
-        * the carrier network(s) disappear, we remove the notification. When we
-        * show the notification, we will not show it again for
-        * {@link android.provider.Settings.Global#WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY} time.
-        * @hide
-        */
-       public static final String WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON =
-               "wifi_carrier_networks_available_notification_on";
-
-       private static final Validator WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR =
-               BOOLEAN_VALIDATOR;
-
        /**
         * {@hide}
         */
@@ -10750,12 +10365,11 @@ public final class Settings {
        /**
         * Delay (in seconds) before repeating the Wi-Fi networks available notification.
         * Connecting to a network will reset the timer.
+        * @deprecated This is no longer used or set by the platform.
         */
+       @Deprecated
        public static final String WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY =
                "wifi_networks_available_repeat_delay";
-
-       private static final Validator WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY_VALIDATOR =
-               NON_NEGATIVE_INTEGER_VALIDATOR;
 
        /**
         * 802.11 country code in ISO 3166 format
@@ -10783,11 +10397,10 @@ public final class Settings {
        /**
         * When the number of open networks exceeds this number, the
         * least-recently-used excess networks will be removed.
+        * @deprecated This is no longer used or set by the platform.
         */
+       @Deprecated
        public static final String WIFI_NUM_OPEN_NETWORKS_KEPT = "wifi_num_open_networks_kept";
-
-       private static final Validator WIFI_NUM_OPEN_NETWORKS_KEPT_VALIDATOR =
-               NON_NEGATIVE_INTEGER_VALIDATOR;
 
        /**
         * Whether the Wi-Fi should be on.  Only the Wi-Fi service should touch this.
@@ -10797,24 +10410,18 @@ public final class Settings {
        /**
         * Setting to allow scans to be enabled even wifi is turned off for connectivity.
         * @hide
+        * @deprecated To be removed. Use {@link WifiManager#setScanAlwaysAvailable(boolean)} for
+        * setting the value and {@link WifiManager#isScanAlwaysAvailable()} for query.
         */
        public static final String WIFI_SCAN_ALWAYS_AVAILABLE =
                 "wifi_scan_always_enabled";
-
-        /**
-         * The interval in milliseconds at which wifi rtt ranging requests will be throttled when
-         * they are coming from the background.
-         *
-         * @hide
-         */
-        public static final String WIFI_RTT_BACKGROUND_EXEC_GAP_MS =
-                "wifi_rtt_background_exec_gap_ms";
 
         /**
          * Indicate whether factory reset request is pending.
          *
          * Type: int (0 for false, 1 for true)
          * @hide
+         * @deprecated To be removed.
          */
         public static final String WIFI_P2P_PENDING_FACTORY_RESET =
                 "wifi_p2p_pending_factory_reset";
@@ -10824,21 +10431,32 @@ public final class Settings {
          *
          * Type: int (0 for false, 1 for true)
          * @hide
+         * @deprecated To be removed. Use {@link SoftApConfiguration.Builder#
+         * setAutoShutdownEnabled(boolean)} for setting the value and {@link SoftApConfiguration#
+         * isAutoShutdownEnabled()} for query.
          */
         public static final String SOFT_AP_TIMEOUT_ENABLED = "soft_ap_timeout_enabled";
-
-        private static final Validator SOFT_AP_TIMEOUT_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Value to specify if Wi-Fi Wakeup feature is enabled.
          *
          * Type: int (0 for false, 1 for true)
          * @hide
+         * @deprecated Use {@link WifiManager#setAutoWakeupEnabled(boolean)} for setting the value
+         * and {@link WifiManager#isAutoWakeupEnabled()} for query.
          */
+        @Deprecated
         @SystemApi
         public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
 
-        private static final Validator WIFI_WAKEUP_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+        /**
+         * Value to specify if wifi settings migration is complete or not.
+         * Note: This should only be used from within {@link android.net.wifi.WifiMigration} class.
+         *
+         * Type: int (0 for false, 1 for true)
+         * @hide
+         */
+        public static final String WIFI_MIGRATION_COMPLETED = "wifi_migration_completed";
 
         /**
          * Value to specify whether network quality scores and badging should be shown in the UI.
@@ -10871,12 +10489,10 @@ public final class Settings {
          * Most readers of this setting should simply check if value == 1 to determined the
          * enabled state.
          * @hide
+         * @deprecated To be removed.
          */
         public static final String NETWORK_RECOMMENDATIONS_ENABLED =
                 "network_recommendations_enabled";
-
-        private static final Validator NETWORK_RECOMMENDATIONS_ENABLED_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(new String[] {"-1", "0", "1"});
 
         /**
          * Which package name to use for network recommendations. If null, network recommendations
@@ -10901,24 +10517,6 @@ public final class Settings {
         @TestApi
         public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
 
-        private static final Validator USE_OPEN_WIFI_PACKAGE_VALIDATOR = new Validator() {
-            @Override
-            public boolean validate(@Nullable String value) {
-                return (value == null) || PACKAGE_NAME_VALIDATOR.validate(value);
-            }
-        };
-
-        /**
-         * The number of milliseconds the {@link com.android.server.NetworkScoreService}
-         * will give a recommendation request to complete before returning a default response.
-         *
-         * Type: long
-         * @hide
-         * @deprecated to be removed
-         */
-        public static final String NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS =
-                "network_recommendation_request_timeout_ms";
-
         /**
          * The expiration time in milliseconds for the {@link android.net.WifiKey} request cache in
          * {@link com.android.server.wifi.RecommendedNetworkEvaluator}.
@@ -10931,15 +10529,13 @@ public final class Settings {
 
         /**
          * Whether wifi scan throttle is enabled or not.
-         * This is intended to be used via adb commands or a menu in developer option to turn off
-         * the default wifi scan throttling mechanism for apps.
          *
          * Type: int (0 for false, 1 for true)
          * @hide
+         * @deprecated Use {@link WifiManager#setScanThrottleEnabled(boolean)} for setting the value
+         * and {@link WifiManager#isScanThrottleEnabled()} for query.
          */
         public static final String WIFI_SCAN_THROTTLE_ENABLED = "wifi_scan_throttle_enabled";
-
-        private static final Validator WIFI_SCAN_THROTTLE_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
         * Settings to allow BLE scans to be enabled even when Bluetooth is turned off for
@@ -10995,16 +10591,6 @@ public final class Settings {
         public static final String BLE_SCAN_BACKGROUND_MODE = "ble_scan_background_mode";
 
        /**
-        * Used to save the Wifi_ON state prior to tethering.
-        * This state will be checked to restore Wifi after
-        * the user turns off tethering.
-        *
-        * @hide
-        */
-       @UnsupportedAppUsage
-       public static final String WIFI_SAVED_STATE = "wifi_saved_state";
-
-       /**
         * The interval in milliseconds to scan as used by the wifi supplicant
         * @hide
         */
@@ -11046,21 +10632,12 @@ public final class Settings {
        public static final String WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED =
                "wifi_watchdog_poor_network_test_enabled";
 
-       private static final Validator WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED_VALIDATOR =
-               ANY_STRING_VALIDATOR;
-
-       /**
-        * Setting to turn on suspend optimizations at screen off on Wi-Fi. Enabled by default and
-        * needs to be set to 0 to disable it.
-        * @hide
-        */
-       public static final String WIFI_SUSPEND_OPTIMIZATIONS_ENABLED =
-               "wifi_suspend_optimizations_enabled";
-
        /**
         * Setting to enable verbose logging in Wi-Fi; disabled by default, and setting to 1
         * will enable it. In the future, additional values may be supported.
         * @hide
+        * @deprecated Use {@link WifiManager#setVerboseLoggingEnabled(boolean)} for setting the
+        * value and {@link WifiManager#isVerboseLoggingEnabled()} for query.
         */
        public static final String WIFI_VERBOSE_LOGGING_ENABLED =
                "wifi_verbose_logging_enabled";
@@ -11086,78 +10663,10 @@ public final class Settings {
          * Default values are provided by code or device configurations.
          * Errors in the parameters will cause the entire setting to be ignored.
          * @hide
+         * @deprecated This is no longer used or set by the platform.
          */
         public static final String WIFI_SCORE_PARAMS =
                 "wifi_score_params";
-
-        /**
-         * Setting to enable logging WifiIsUnusableEvent in metrics
-         * which gets triggered when wifi becomes unusable.
-         * Disabled by default, and setting it to 1 will enable it.
-         * @hide
-         */
-        public static final String WIFI_IS_UNUSABLE_EVENT_METRICS_ENABLED =
-                "wifi_is_unusable_event_metrics_enabled";
-
-        /**
-         * The minimum number of txBad the framework has to observe
-         * to trigger a wifi data stall.
-         * @hide
-         */
-        public static final String WIFI_DATA_STALL_MIN_TX_BAD =
-                "wifi_data_stall_min_tx_bad";
-
-        /**
-         * The minimum number of txSuccess the framework has to observe
-         * to trigger a wifi data stall when rxSuccess is 0.
-         * @hide
-         */
-        public static final String WIFI_DATA_STALL_MIN_TX_SUCCESS_WITHOUT_RX =
-                "wifi_data_stall_min_tx_success_without_rx";
-
-        /**
-         * Setting to enable logging Wifi LinkSpeedCounts in metrics.
-         * Disabled by default, and setting it to 1 will enable it.
-         * @hide
-         */
-        public static final String WIFI_LINK_SPEED_METRICS_ENABLED =
-                "wifi_link_speed_metrics_enabled";
-
-        /**
-         * Setting to enable the PNO frequency culling optimization.
-         * Disabled by default, and setting it to 1 will enable it.
-         * The value is boolean (0 or 1).
-         * @hide
-         */
-        public static final String WIFI_PNO_FREQUENCY_CULLING_ENABLED =
-                "wifi_pno_frequency_culling_enabled";
-
-        private static final Validator WIFI_PNO_FREQUENCY_CULLING_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
-        /**
-         * Setting to enable including recency information when determining pno network priorities.
-         * Disabled by default, and setting it to 1 will enable it.
-         * The value is boolean (0 or 1).
-         * @hide
-         */
-        public static final String WIFI_PNO_RECENCY_SORTING_ENABLED =
-                "wifi_pno_recency_sorting_enabled";
-
-        private static final Validator WIFI_PNO_RECENCY_SORTING_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
-
-        /**
-         * Setting to enable the Wi-Fi link probing.
-         * Enabled by default, and setting it to 0 will disable it.
-         * The value is boolean (0 or 1).
-         * @hide
-         */
-        public static final String WIFI_LINK_PROBING_ENABLED =
-                "wifi_link_probing_enabled";
-
-        private static final Validator WIFI_LINK_PROBING_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
 
        /**
         * The maximum number of times we will retry a connection to an access
@@ -11197,14 +10706,11 @@ public final class Settings {
        /**
         * The Wi-Fi peer-to-peer device name
         * @hide
+        * @deprecated Use {@link WifiP2pManager#setDeviceName(WifiP2pManager.Channel, String,
+        * WifiP2pManager.ActionListener)} for setting the value and
+        * {@link android.net.wifi.p2p.WifiP2pDevice#deviceName} for query.
         */
        public static final String WIFI_P2P_DEVICE_NAME = "wifi_p2p_device_name";
-
-       /**
-        * The min time between wifi disable and wifi enable
-        * @hide
-        */
-       public static final String WIFI_REENABLE_DELAY_MS = "wifi_reenable_delay";
 
        /**
         * Timeout for ephemeral networks when all known BSSIDs go out of range. We will disconnect
@@ -11264,17 +10770,48 @@ public final class Settings {
        public static final String MODE_RINGER = "mode_ringer";
 
         /**
+         * Specifies whether Enhanced Connectivity is enabled or not. This setting allows the
+         * Connectivity Thermal Power Manager to actively help the device to save power in 5G
+         * scenarios
+         * Type: int 1 is enabled, 0 is disabled
+         *
+         * @hide
+         */
+        public static final String ENHANCED_CONNECTIVITY_ENABLED =
+                "enhanced_connectivity_enable";
+
+        /**
          * Overlay display devices setting.
          * The associated value is a specially formatted string that describes the
          * size and density of simulated secondary display devices.
          * <p>
-         * Format: {width}x{height}/{dpi};...
+         * Format:
+         * <pre>
+         * [display1];[display2];...
+         * </pre>
+         * with each display specified as:
+         * <pre>
+         * [mode1]|[mode2]|...,[flag1],[flag2],...
+         * </pre>
+         * with each mode specified as:
+         * <pre>
+         * [width]x[height]/[densityDpi]
+         * </pre>
+         * Supported flags:
+         * <ul>
+         * <li><pre>secure</pre>: creates a secure display</li>
+         * <li><pre>own_content_only</pre>: only shows this display's own content</li>
+         * <li><pre>should_show_system_decorations</pre>: supports system decorations</li>
+         * </ul>
          * </p><p>
          * Example:
          * <ul>
          * <li><code>1280x720/213</code>: make one overlay that is 1280x720 at 213dpi.</li>
-         * <li><code>1920x1080/320;1280x720/213</code>: make two overlays, the first
-         * at 1080p and the second at 720p.</li>
+         * <li><code>1920x1080/320,secure;1280x720/213</code>: make two overlays, the first at
+         * 1080p and secure; the second at 720p.</li>
+         * <li><code>1920x1080/320|3840x2160/640</code>: make one overlay that is 1920x1080 at
+         * 213dpi by default, but can also be upscaled to 3840x2160 at 640dpi by the system if the
+         * display device allows.</li>
          * <li>If the value is empty, then no overlay display devices are created.</li>
          * </ul></p>
          *
@@ -11362,6 +10899,19 @@ public final class Settings {
          * @hide
          */
         public static final String ERROR_LOGCAT_PREFIX = "logcat_for_";
+
+        /**
+         * Maximum number of bytes of a system crash/ANR/etc. report that
+         * ActivityManagerService should send to DropBox, as a prefix of the
+         * dropbox tag of the report type. For example,
+         * "max_error_bytes_for_system_server_anr" controls the maximum
+         * number of bytes captured with system server ANR reports.
+         * <p>
+         * Type: int (max size in bytes)
+         *
+         * @hide
+         */
+        public static final String MAX_ERROR_BYTES_PREFIX = "max_error_bytes_for_";
 
         /**
          * The interval in minutes after which the amount of free storage left
@@ -11705,14 +11255,10 @@ public final class Settings {
          */
         public static final String PRIVATE_DNS_MODE = "private_dns_mode";
 
-        private static final Validator PRIVATE_DNS_MODE_VALIDATOR = ANY_STRING_VALIDATOR;
-
         /**
          * @hide
          */
         public static final String PRIVATE_DNS_SPECIFIER = "private_dns_specifier";
-
-        private static final Validator PRIVATE_DNS_SPECIFIER_VALIDATOR = ANY_STRING_VALIDATOR;
 
         /**
           * Forced override of the default mode (hardcoded as "automatic", nee "opportunistic").
@@ -11765,6 +11311,7 @@ public final class Settings {
         /** {@hide} */
         public static final String
                 BLUETOOTH_HEARING_AID_PRIORITY_PREFIX = "bluetooth_hearing_aid_priority_";
+
         /**
          * Enable/disable radio bug detection
          *
@@ -11845,6 +11392,15 @@ public final class Settings {
                 = "activity_starts_logging_enabled";
 
         /**
+         * Feature flag to enable or disable the foreground service starts logging feature.
+         * Type: int (0 for false, 1 for true)
+         * Default: 1
+         * @hide
+         */
+        public static final String FOREGROUND_SERVICE_STARTS_LOGGING_ENABLED =
+                "foreground_service_starts_logging_enabled";
+
+        /**
          * @hide
          * @see com.android.server.appbinding.AppBindingConstants
          */
@@ -11869,6 +11425,7 @@ public final class Settings {
          * @hide
          * @see com.android.server.AppOpsService.Constants
          */
+        @TestApi
         public static final String APP_OPS_CONSTANTS = "app_ops_constants";
 
         /**
@@ -12116,16 +11673,13 @@ public final class Settings {
          * App standby (app idle) specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          * <p>
-         * "idle_duration=5000,parole_interval=4500,screen_thresholds=0/0/60000/120000"
+         * "idle_duration=5000,prediction_timeout=4500,screen_thresholds=0/0/60000/120000"
          * <p>
          * All durations are in millis.
          * Array values are separated by forward slashes
          * The following keys are supported:
          *
          * <pre>
-         * parole_interval                  (long)
-         * parole_window                    (long)
-         * parole_duration                  (long)
          * screen_thresholds                (long[4])
          * elapsed_thresholds               (long[4])
          * strong_usage_duration            (long)
@@ -12136,17 +11690,13 @@ public final class Settings {
          * exempted_sync_duration           (long)
          * system_interaction_duration      (long)
          * initial_foreground_service_start_duration (long)
-         * stable_charging_threshold        (long)
-         *
-         * idle_duration        (long) // This is deprecated and used to circumvent b/26355386.
-         * idle_duration2       (long) // deprecated
-         * wallclock_threshold  (long) // deprecated
+         * cross_profile_apps_share_standby_buckets  (boolean)
          * </pre>
          *
          * <p>
          * Type: string
          * @hide
-         * @see com.android.server.usage.UsageStatsService.SettingsObserver
+         * @see com.android.server.usage.AppStandbyController
          */
         public static final String APP_IDLE_CONSTANTS = "app_idle_constants";
 
@@ -12435,8 +11985,24 @@ public final class Settings {
                 "adaptive_battery_management_enabled";
 
         /**
+         * Whether or not apps are allowed into the
+         * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED} bucket.
+         * Type: int (0 for false, 1 for true)
+         * Default: {@value #DEFAULT_ENABLE_RESTRICTED_BUCKET}
+         *
+         * @hide
+         */
+        public static final String ENABLE_RESTRICTED_BUCKET = "enable_restricted_bucket";
+
+        /**
+         * @see #ENABLE_RESTRICTED_BUCKET
+         * @hide
+         */
+        public static final int DEFAULT_ENABLE_RESTRICTED_BUCKET = 0;
+
+        /**
          * Whether or not app auto restriction is enabled. When it is enabled, settings app will
-         * auto restrict the app if it has bad behavior(e.g. hold wakelock for long time).
+         * auto restrict the app if it has bad behavior (e.g. hold wakelock for long time).
          *
          * Type: boolean (0 for false, 1 for true)
          * Default: 1
@@ -12445,9 +12011,6 @@ public final class Settings {
          */
         public static final String APP_AUTO_RESTRICTION_ENABLED =
                 "app_auto_restriction_enabled";
-
-        private static final Validator APP_AUTO_RESTRICTION_ENABLED_VALIDATOR =
-                BOOLEAN_VALIDATOR;
 
         /**
          * Feature flag to enable or disable the Forced App Standby feature.
@@ -12624,9 +12187,6 @@ public final class Settings {
          */
         public static final String EMERGENCY_TONE = "emergency_tone";
 
-        private static final Validator EMERGENCY_TONE_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(new String[] {"0", "1", "2"});
-
         /**
          * CDMA only settings
          * Whether the auto retry is enabled. The value is
@@ -12634,8 +12194,6 @@ public final class Settings {
          * @hide
          */
         public static final String CALL_AUTO_RETRY = "call_auto_retry";
-
-        private static final Validator CALL_AUTO_RETRY_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * A setting that can be read whether the emergency affordance is currently needed.
@@ -12653,9 +12211,6 @@ public final class Settings {
          */
         public static final String ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS =
                 "enable_automatic_system_server_heap_dumps";
-
-        private static final Validator ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(new String[] {"0", "1"});
 
         /**
          * See RIL_PreferredNetworkType in ril.h
@@ -12848,9 +12403,6 @@ public final class Settings {
         public static final String LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL =
                 "low_power_sticky_auto_disable_level";
 
-        private static final Validator LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 100);
-
         /**
          * Whether sticky battery saver should be deactivated once the battery level has reached the
          * threshold specified by {@link #LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL}.
@@ -12859,9 +12411,6 @@ public final class Settings {
          */
         public static final String LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED =
                 "low_power_sticky_auto_disable_enabled";
-
-        private static final Validator LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(new String[] {"0", "1"});
 
         /**
          * Battery level [1-100] at which low power mode automatically turns on.
@@ -12875,9 +12424,6 @@ public final class Settings {
          */
         public static final String LOW_POWER_MODE_TRIGGER_LEVEL = "low_power_trigger_level";
 
-        private static final Validator LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 100);
-
         /**
          * Whether battery saver is currently set to trigger based on percentage, dynamic power
          * savings trigger, or none. See {@link AutoPowerSaveModeTriggers} for
@@ -12887,9 +12433,6 @@ public final class Settings {
          */
         @TestApi
         public static final String AUTOMATIC_POWER_SAVE_MODE = "automatic_power_save_mode";
-
-        private static final Validator AUTOMATIC_POWER_SAVE_MODE_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(new String[] {"0", "1"});
 
         /**
          * The setting that backs the disable threshold for the setPowerSavingsWarning api in
@@ -12901,8 +12444,6 @@ public final class Settings {
         @TestApi
         public static final String DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD =
                 "dynamic_power_savings_disable_threshold";
-        private static final Validator DYNAMIC_POWER_SAVINGS_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 100);
 
         /**
          * The setting which backs the setDynamicPowerSaveHint api in PowerManager.
@@ -12980,6 +12521,7 @@ public final class Settings {
          * as if they had been accepted by the user.
          * @hide
          */
+        @TestApi
         public static final String HIDE_ERROR_DIALOGS = "hide_error_dialogs";
 
         /**
@@ -12989,8 +12531,6 @@ public final class Settings {
          * @hide
          */
         public static final String DOCK_AUDIO_MEDIA_ENABLED = "dock_audio_media_enabled";
-
-        private static final Validator DOCK_AUDIO_MEDIA_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * The surround sound formats AC3, DTS or IEC61937 are
@@ -13051,9 +12591,6 @@ public final class Settings {
          */
         public static final String ENCODED_SURROUND_OUTPUT = "encoded_surround_output";
 
-        private static final Validator ENCODED_SURROUND_OUTPUT_VALIDATOR =
-                new SettingsValidators.DiscreteValueValidator(new String[] {"0", "1", "2", "3"});
-
         /**
          * Surround sounds formats that are enabled when ENCODED_SURROUND_OUTPUT is set to
          * ENCODED_SURROUND_OUTPUT_MANUAL. Encoded as comma separated list. Allowed values
@@ -13065,32 +12602,6 @@ public final class Settings {
          */
         public static final String ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS =
                 "encoded_surround_output_enabled_formats";
-
-        private static final Validator ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS_VALIDATOR =
-                new Validator() {
-            @Override
-            public boolean validate(@Nullable String value) {
-                try {
-                    String[] surroundFormats = TextUtils.split(value, ",");
-                    for (String format : surroundFormats) {
-                        int audioFormat = Integer.valueOf(format);
-                        boolean isSurroundFormat = false;
-                        for (int sf : AudioFormat.SURROUND_SOUND_ENCODING) {
-                            if (sf == audioFormat) {
-                                isSurroundFormat = true;
-                                break;
-                            }
-                        }
-                        if (!isSurroundFormat) {
-                            return false;
-                        }
-                    }
-                    return true;
-                } catch (NumberFormatException e) {
-                    return false;
-                }
-            }
-        };
 
         /**
          * Persisted safe headphone volume management state by AudioService
@@ -13333,8 +12844,6 @@ public final class Settings {
          */
         @Deprecated
         public static final String ZEN_DURATION = "zen_duration";
-
-        private static final Validator ZEN_DURATION_VALIDATOR = ANY_INTEGER_VALIDATOR;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Secure#ZEN_DURATION_PROMPT} instead
@@ -13696,6 +13205,18 @@ public final class Settings {
                 "chained_battery_attribution_enabled";
 
         /**
+         * Toggle to enable/disable the incremental ADB installation by default.
+         * If not set, default adb installations are incremental; set to zero to use full ones.
+         * Note: only ADB uses it, no usages in the Framework code.
+         * <p>
+         * Type: int (0 to disable, 1 to enable)
+         *
+         * @hide
+         */
+        public static final String ENABLE_ADB_INCREMENTAL_INSTALL_DEFAULT =
+                "enable_adb_incremental_install_default";
+
+        /**
          * The packages whitelisted to be run in autofill compatibility mode. The list
          * of packages is {@code ":"} colon delimited, and each entry has the name of the
          * package and an optional list of url bar resource ids (the list is delimited by
@@ -13795,8 +13316,6 @@ public final class Settings {
          */
         public static final String AWARE_ALLOWED = "aware_allowed";
 
-        private static final Validator AWARE_ALLOWED_VALIDATOR = BOOLEAN_VALIDATOR;
-
         /**
          * Overrides internal R.integer.config_longPressOnPowerBehavior.
          * Allowable values detailed in frameworks/base/core/res/res/values/config.xml.
@@ -13805,8 +13324,6 @@ public final class Settings {
          */
         public static final String POWER_BUTTON_LONG_PRESS =
                 "power_button_long_press";
-        private static final Validator POWER_BUTTON_LONG_PRESS_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 5);
 
         /**
          * Overrides internal R.integer.config_veryLongPressOnPowerBehavior.
@@ -13816,128 +13333,6 @@ public final class Settings {
          */
         public static final String POWER_BUTTON_VERY_LONG_PRESS =
                 "power_button_very_long_press";
-        private static final Validator POWER_BUTTON_VERY_LONG_PRESS_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 1);
-
-        /**
-         * Settings to backup. This is here so that it's in the same place as the settings
-         * keys and easy to update.
-         *
-         * These keys may be mentioned in the SETTINGS_TO_BACKUP arrays in System
-         * and Secure as well.  This is because those tables drive both backup and
-         * restore, and restore needs to properly whitelist keys that used to live
-         * in those namespaces.  The keys will only actually be backed up / restored
-         * if they are also mentioned in this table (Global.SETTINGS_TO_BACKUP).
-         *
-         * NOTE: Settings are backed up and restored in the order they appear
-         *       in this array. If you have one setting depending on another,
-         *       make sure that they are ordered appropriately.
-         *
-         * @hide
-         */
-        public static final String[] SETTINGS_TO_BACKUP = {
-            APPLY_RAMPING_RINGER,
-            BUGREPORT_IN_POWER_MENU,
-            STAY_ON_WHILE_PLUGGED_IN,
-            APP_AUTO_RESTRICTION_ENABLED,
-            AUTO_TIME,
-            AUTO_TIME_ZONE,
-            POWER_SOUNDS_ENABLED,
-            DOCK_SOUNDS_ENABLED,
-            CHARGING_SOUNDS_ENABLED,
-            USB_MASS_STORAGE_ENABLED,
-            NETWORK_RECOMMENDATIONS_ENABLED,
-            WIFI_WAKEUP_ENABLED,
-            WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
-            WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON,
-            USE_OPEN_WIFI_PACKAGE,
-            WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED,
-            EMERGENCY_TONE,
-            CALL_AUTO_RETRY,
-            DOCK_AUDIO_MEDIA_ENABLED,
-            ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS,
-            ENCODED_SURROUND_OUTPUT,
-            ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS,
-            LOW_POWER_MODE_TRIGGER_LEVEL,
-            LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED,
-            LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL,
-            BLUETOOTH_ON,
-            PRIVATE_DNS_MODE,
-            PRIVATE_DNS_SPECIFIER,
-            SOFT_AP_TIMEOUT_ENABLED,
-            ZEN_DURATION,
-            CHARGING_VIBRATION_ENABLED,
-            AWARE_ALLOWED,
-            NOTIFICATION_BUBBLES,
-        };
-
-        /**
-         * All settings in {@link SETTINGS_TO_BACKUP} array *must* have a non-null validator,
-         * otherwise they won't be restored.
-         *
-         * @hide
-         */
-        public static final Map<String, Validator> VALIDATORS = new ArrayMap<>();
-        static {
-            VALIDATORS.put(APPLY_RAMPING_RINGER, APPLY_RAMPING_RINGER_VALIDATOR);
-            VALIDATORS.put(BUGREPORT_IN_POWER_MENU, BUGREPORT_IN_POWER_MENU_VALIDATOR);
-            VALIDATORS.put(STAY_ON_WHILE_PLUGGED_IN, STAY_ON_WHILE_PLUGGED_IN_VALIDATOR);
-            VALIDATORS.put(AUTO_TIME, AUTO_TIME_VALIDATOR);
-            VALIDATORS.put(AUTO_TIME_ZONE, AUTO_TIME_ZONE_VALIDATOR);
-            VALIDATORS.put(POWER_SOUNDS_ENABLED, POWER_SOUNDS_ENABLED_VALIDATOR);
-            VALIDATORS.put(DOCK_SOUNDS_ENABLED, DOCK_SOUNDS_ENABLED_VALIDATOR);
-            VALIDATORS.put(CHARGING_SOUNDS_ENABLED, CHARGING_SOUNDS_ENABLED_VALIDATOR);
-            VALIDATORS.put(USB_MASS_STORAGE_ENABLED, USB_MASS_STORAGE_ENABLED_VALIDATOR);
-            VALIDATORS.put(NETWORK_RECOMMENDATIONS_ENABLED,
-                    NETWORK_RECOMMENDATIONS_ENABLED_VALIDATOR);
-            VALIDATORS.put(WIFI_WAKEUP_ENABLED, WIFI_WAKEUP_ENABLED_VALIDATOR);
-            VALIDATORS.put(WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
-                    WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR);
-            VALIDATORS.put(USE_OPEN_WIFI_PACKAGE, USE_OPEN_WIFI_PACKAGE_VALIDATOR);
-            VALIDATORS.put(WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED,
-                    WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED_VALIDATOR);
-            VALIDATORS.put(EMERGENCY_TONE, EMERGENCY_TONE_VALIDATOR);
-            VALIDATORS.put(CALL_AUTO_RETRY, CALL_AUTO_RETRY_VALIDATOR);
-            VALIDATORS.put(DOCK_AUDIO_MEDIA_ENABLED, DOCK_AUDIO_MEDIA_ENABLED_VALIDATOR);
-            VALIDATORS.put(ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS,
-                    ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_VALIDATOR);
-            VALIDATORS.put(ENCODED_SURROUND_OUTPUT, ENCODED_SURROUND_OUTPUT_VALIDATOR);
-            VALIDATORS.put(ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS,
-                    ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS_VALIDATOR);
-            VALIDATORS.put(LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL,
-                    LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL_VALIDATOR);
-            VALIDATORS.put(LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED,
-                    LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED_VALIDATOR);
-            VALIDATORS.put(LOW_POWER_MODE_TRIGGER_LEVEL, LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR);
-            VALIDATORS.put(LOW_POWER_MODE_TRIGGER_LEVEL_MAX,
-                    LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR);
-            VALIDATORS.put(AUTOMATIC_POWER_SAVE_MODE, AUTOMATIC_POWER_SAVE_MODE_VALIDATOR);
-            VALIDATORS.put(DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
-                    DYNAMIC_POWER_SAVINGS_VALIDATOR);
-            VALIDATORS.put(BLUETOOTH_ON, BLUETOOTH_ON_VALIDATOR);
-            VALIDATORS.put(EUICC_UNSUPPORTED_COUNTRIES, EUICC_UNSUPPORTED_COUNTRIES_VALIDATOR);
-            VALIDATORS.put(PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_VALIDATOR);
-            VALIDATORS.put(PRIVATE_DNS_SPECIFIER, PRIVATE_DNS_SPECIFIER_VALIDATOR);
-            VALIDATORS.put(SOFT_AP_TIMEOUT_ENABLED, SOFT_AP_TIMEOUT_ENABLED_VALIDATOR);
-            VALIDATORS.put(WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON,
-                    WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR);
-            VALIDATORS.put(WIFI_SCAN_THROTTLE_ENABLED, WIFI_SCAN_THROTTLE_ENABLED_VALIDATOR);
-            VALIDATORS.put(APP_AUTO_RESTRICTION_ENABLED, APP_AUTO_RESTRICTION_ENABLED_VALIDATOR);
-            VALIDATORS.put(ZEN_DURATION, ZEN_DURATION_VALIDATOR);
-            VALIDATORS.put(CHARGING_VIBRATION_ENABLED, CHARGING_VIBRATION_ENABLED_VALIDATOR);
-            VALIDATORS.put(DEVICE_PROVISIONING_MOBILE_DATA_ENABLED, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(REQUIRE_PASSWORD_TO_DECRYPT, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(DEVICE_DEMO_MODE, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(WIFI_PNO_FREQUENCY_CULLING_ENABLED,
-                    WIFI_PNO_FREQUENCY_CULLING_ENABLED_VALIDATOR);
-            VALIDATORS.put(WIFI_PNO_RECENCY_SORTING_ENABLED,
-                    WIFI_PNO_RECENCY_SORTING_ENABLED_VALIDATOR);
-            VALIDATORS.put(WIFI_LINK_PROBING_ENABLED, WIFI_LINK_PROBING_ENABLED_VALIDATOR);
-            VALIDATORS.put(AWARE_ALLOWED, AWARE_ALLOWED_VALIDATOR);
-            VALIDATORS.put(POWER_BUTTON_LONG_PRESS, POWER_BUTTON_LONG_PRESS_VALIDATOR);
-            VALIDATORS.put(POWER_BUTTON_VERY_LONG_PRESS, POWER_BUTTON_VERY_LONG_PRESS_VALIDATOR);
-            VALIDATORS.put(NOTIFICATION_BUBBLES, NOTIFICATION_BUBBLES_VALIDATOR);
-        }
 
         /**
          * Global settings that shouldn't be persisted.
@@ -14030,7 +13425,29 @@ public final class Settings {
          */
         public static boolean putString(ContentResolver resolver,
                 String name, String value) {
-            return putStringForUser(resolver, name, value, null, false, resolver.getUserId());
+            return putStringForUser(resolver, name, value, null, false, resolver.getUserId(),
+                    DEFAULT_OVERRIDEABLE_BY_RESTORE);
+        }
+
+        /**
+         * Store a name/value pair into the database.
+         *
+         * @param resolver to access the database with
+         * @param name to store
+         * @param value to associate with the name
+         * @param tag to associated with the setting.
+         * @param makeDefault whether to make the value the default one.
+         * @param overrideableByRestore whether restore can override this value
+         * @return true if the value was set, false on database errors
+         *
+         * @hide
+         */
+        @RequiresPermission(Manifest.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE)
+        public static boolean putString(@NonNull ContentResolver resolver,
+                @NonNull String name, @Nullable String value, @Nullable String tag,
+                boolean makeDefault, boolean overrideableByRestore) {
+            return putStringForUser(resolver, name, value, tag, makeDefault,
+                    resolver.getUserId(), overrideableByRestore);
         }
 
         /**
@@ -14079,7 +13496,7 @@ public final class Settings {
                 @NonNull String name, @Nullable String value, @Nullable String tag,
                 boolean makeDefault) {
             return putStringForUser(resolver, name, value, tag, makeDefault,
-                    resolver.getUserId());
+                    resolver.getUserId(), DEFAULT_OVERRIDEABLE_BY_RESTORE);
         }
 
         /**
@@ -14130,8 +13547,8 @@ public final class Settings {
                 }
                 arg.putInt(CALL_METHOD_RESET_MODE_KEY, mode);
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
-                cp.call(resolver.getPackageName(), sProviderHolder.mUri.getAuthority(),
-                        CALL_METHOD_RESET_GLOBAL, null, arg);
+                cp.call(resolver.getPackageName(), resolver.getAttributionTag(),
+                        sProviderHolder.mUri.getAuthority(), CALL_METHOD_RESET_GLOBAL, null, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't reset do defaults for " + CONTENT_URI, e);
             }
@@ -14141,13 +13558,14 @@ public final class Settings {
         @UnsupportedAppUsage
         public static boolean putStringForUser(ContentResolver resolver,
                 String name, String value, int userHandle) {
-            return putStringForUser(resolver, name, value, null, false, userHandle);
+            return putStringForUser(resolver, name, value, null, false, userHandle,
+                    DEFAULT_OVERRIDEABLE_BY_RESTORE);
         }
 
         /** @hide */
         public static boolean putStringForUser(@NonNull ContentResolver resolver,
                 @NonNull String name, @Nullable String value, @Nullable String tag,
-                boolean makeDefault, @UserIdInt int userHandle) {
+                boolean makeDefault, @UserIdInt int userHandle, boolean overrideableByRestore) {
             if (LOCAL_LOGV) {
                 Log.v(TAG, "Global.putString(name=" + name + ", value=" + value
                         + " for " + userHandle);
@@ -14157,10 +13575,10 @@ public final class Settings {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.Global"
                         + " to android.provider.Settings.Secure, value is unchanged.");
                 return Secure.putStringForUser(resolver, name, value, tag,
-                        makeDefault, userHandle);
+                        makeDefault, userHandle, overrideableByRestore);
             }
             return sNameValueCache.putStringForUser(resolver, name, value, tag,
-                    makeDefault, userHandle);
+                    makeDefault, userHandle, overrideableByRestore);
         }
 
         /**
@@ -14660,6 +14078,14 @@ public final class Settings {
                 "zram_enabled";
 
         /**
+         * Whether the app freezer is enabled on this device.
+         * The value of "enabled" enables the app freezer, "disabled" disables it and
+         * "device_default" will let the system decide whether to enable the freezer or not
+         * @hide
+         */
+        public static final String CACHED_APPS_FREEZER_ENABLED = "cached_apps_freezer";
+
+        /**
          * Configuration flags for smart replies in notifications.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
@@ -14775,14 +14201,6 @@ public final class Settings {
                 "backup_agent_timeout_parameters";
 
         /**
-         * Whether the backup system service supports multiple users (0 = disabled, 1 = enabled). If
-         * disabled, the service will only be active for the system user.
-         *
-         * @hide
-         */
-        public static final String BACKUP_MULTI_USER_ENABLED = "backup_multi_user_enabled";
-
-        /**
          * Blacklist of GNSS satellites.
          *
          * This is a list of integers separated by commas to represent pairs of (constellation,
@@ -14851,22 +14269,6 @@ public final class Settings {
         public static final String KERNEL_CPU_THREAD_READER = "kernel_cpu_thread_reader";
 
         /**
-         * Default user id to boot into. They map to user ids, for example, 10, 11, 12.
-         *
-         * @hide
-         */
-        public static final String DEFAULT_USER_ID_TO_BOOT_INTO = "default_boot_into_user_id";
-
-        /**
-         * Persistent user id that is last logged in to.
-         *
-         * They map to user ids, for example, 10, 11, 12.
-         *
-         * @hide
-         */
-        public static final String LAST_ACTIVE_USER_ID = "last_active_persistent_user_id";
-
-        /**
          * Whether we've enabled native flags health check on this device. Takes effect on
          * reboot. The value "1" enables native flags health check; otherwise it's disabled.
          * @hide
@@ -14922,6 +14324,23 @@ public final class Settings {
                 "appop_history_parameters";
 
         /**
+         * Auto revoke parameters. These parameters are represented by
+         * a comma-delimited key-value list.
+         *
+         * <pre>
+         *     enabledForPreRApps    (bolean)
+         *     unusedThresholdMs     (long)
+         *     checkFrequencyMs      (long)
+         * </pre>
+         *
+         * Ex: "enabledForPreRApps=false,unusedThresholdMs=7776000000,checkFrequencyMs=1296000000"
+         *
+         * @hide
+         */
+        public static final String AUTO_REVOKE_PARAMETERS =
+                "auto_revoke_parameters";
+
+        /**
          * Delay for sending ACTION_CHARGING after device is plugged in.
          * This is used as an override for constants defined in BatteryStatsImpl for
          * ease of experimentation.
@@ -14952,6 +14371,13 @@ public final class Settings {
          */
         public static final String POWER_BUTTON_SUPPRESSION_DELAY_AFTER_GESTURE_WAKE =
                 "power_button_suppression_delay_after_gesture_wake";
+
+        /**
+         * The usage amount of advanced battery. The value is 0~100.
+         *
+         * @hide
+         */
+        public static final String ADVANCED_BATTERY_USAGE_AMOUNT = "advanced_battery_usage_amount";
 
         /**
          * For 5G NSA capable devices, determines whether NR tracking indications are on
@@ -14985,6 +14411,8 @@ public final class Settings {
                 DeviceConfig.CONTENT_URI,
                 CALL_METHOD_GET_CONFIG,
                 CALL_METHOD_PUT_CONFIG,
+                CALL_METHOD_LIST_CONFIG,
+                CALL_METHOD_SET_ALL_CONFIG,
                 sProviderHolder);
 
         /**
@@ -15001,7 +14429,39 @@ public final class Settings {
         }
 
         /**
-         * Store a name/value pair into the database.
+         * Look up a list of names in the database, within the specified namespace.
+         *
+         * @param resolver to access the database with
+         * @param namespace to which the names belong
+         * @param names to look up in the table
+         * @return a non null, but possibly empty, map from name to value for any of the names that
+         *         were found during lookup.
+         *
+         * @hide
+         */
+        @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
+        public static Map<String, String> getStrings(@NonNull ContentResolver resolver,
+                @NonNull String namespace, @NonNull List<String> names) {
+            List<String> compositeNames = new ArrayList<>(names.size());
+            for (String name : names) {
+                compositeNames.add(createCompositeName(namespace, name));
+            }
+
+            String prefix = createPrefix(namespace);
+            ArrayMap<String, String> rawKeyValues = sNameValueCache.getStringsForPrefix(
+                    resolver, prefix, compositeNames);
+            int size = rawKeyValues.size();
+            int substringLength = prefix.length();
+            ArrayMap<String, String> keyValues = new ArrayMap<>(size);
+            for (int i = 0; i < size; ++i) {
+                keyValues.put(rawKeyValues.keyAt(i).substring(substringLength),
+                        rawKeyValues.valueAt(i));
+            }
+            return keyValues;
+        }
+
+        /**
+         * Store a name/value pair into the database within the specified namespace.
          * <p>
          * Also the method takes an argument whether to make the value the default for this setting.
          * If the system already specified a default value, then the one passed in here will
@@ -15009,6 +14469,7 @@ public final class Settings {
          * </p>
          *
          * @param resolver to access the database with.
+         * @param namespace to store the name/value pair in.
          * @param name to store.
          * @param value to associate with the name.
          * @param makeDefault whether to make the value the default one.
@@ -15019,10 +14480,39 @@ public final class Settings {
          * @hide
          */
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
-        static boolean putString(@NonNull ContentResolver resolver, @NonNull String name,
-                @Nullable String value, boolean makeDefault) {
-            return sNameValueCache.putStringForUser(resolver, name, value, null, makeDefault,
-                    resolver.getUserId());
+        static boolean putString(@NonNull ContentResolver resolver, @NonNull String namespace,
+                @NonNull String name, @Nullable String value, boolean makeDefault) {
+            return sNameValueCache.putStringForUser(resolver, createCompositeName(namespace, name),
+                    value, null, makeDefault, resolver.getUserId(),
+                    DEFAULT_OVERRIDEABLE_BY_RESTORE);
+        }
+
+        /**
+         * Clear all name/value pairs for the provided namespace and save new name/value pairs in
+         * their place.
+         *
+         * @param resolver to access the database with.
+         * @param namespace to which the names should be set.
+         * @param keyValues map of key names (without the prefix) to values.
+         * @return
+         *
+         * @hide
+         */
+        @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
+        public static boolean setStrings(@NonNull ContentResolver resolver,
+                @NonNull String namespace, @NonNull Map<String, String> keyValues)
+                throws DeviceConfig.BadConfigException {
+            HashMap<String, String> compositeKeyValueMap = new HashMap<>(keyValues.keySet().size());
+            for (Map.Entry<String, String> entry : keyValues.entrySet()) {
+                compositeKeyValueMap.put(
+                        createCompositeName(namespace, entry.getKey()), entry.getValue());
+            }
+            // If can't set given configuration that means it's bad
+            if (!sNameValueCache.setStringsForPrefix(resolver, createPrefix(namespace),
+                    compositeKeyValueMap)) {
+                throw new DeviceConfig.BadConfigException();
+            }
+            return true;
         }
 
         /**
@@ -15033,28 +14523,75 @@ public final class Settings {
          *
          * @param resolver Handle to the content resolver.
          * @param resetMode The reset mode to use.
-         * @param prefix Optionally, to limit which which pairs are reset.
+         * @param namespace Optionally, to limit which which namespace is reset.
          *
-         * @see #putString(ContentResolver, String, String, boolean)
+         * @see #putString(ContentResolver, String, String, String, boolean)
          *
          * @hide
          */
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
         static void resetToDefaults(@NonNull ContentResolver resolver, @ResetMode int resetMode,
-                @Nullable String prefix) {
+                @Nullable String namespace) {
             try {
                 Bundle arg = new Bundle();
                 arg.putInt(CALL_METHOD_USER_KEY, resolver.getUserId());
                 arg.putInt(CALL_METHOD_RESET_MODE_KEY, resetMode);
-                if (prefix != null) {
-                    arg.putString(Settings.CALL_METHOD_PREFIX_KEY, prefix);
+                if (namespace != null) {
+                    arg.putString(Settings.CALL_METHOD_PREFIX_KEY, createPrefix(namespace));
                 }
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
-                cp.call(resolver.getPackageName(), sProviderHolder.mUri.getAuthority(),
-                        CALL_METHOD_RESET_CONFIG, null, arg);
+                cp.call(resolver.getPackageName(), resolver.getAttributionTag(),
+                        sProviderHolder.mUri.getAuthority(), CALL_METHOD_RESET_CONFIG, null, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't reset to defaults for " + DeviceConfig.CONTENT_URI, e);
             }
+        }
+
+        /**
+         * Register callback for monitoring Config table.
+         *
+         * @param resolver Handle to the content resolver.
+         * @param callback callback to register
+         *
+         * @hide
+         */
+        @RequiresPermission(Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS)
+        public static void registerMonitorCallback(@NonNull ContentResolver resolver,
+                @NonNull RemoteCallback callback) {
+            registerMonitorCallbackAsUser(resolver, resolver.getUserId(), callback);
+        }
+
+        private static void registerMonitorCallbackAsUser(
+                @NonNull ContentResolver resolver, @UserIdInt int userHandle,
+                @NonNull RemoteCallback callback) {
+            try {
+                Bundle arg = new Bundle();
+                arg.putInt(CALL_METHOD_USER_KEY, userHandle);
+                arg.putParcelable(CALL_METHOD_MONITOR_CALLBACK_KEY, callback);
+                IContentProvider cp = sProviderHolder.getProvider(resolver);
+                cp.call(resolver.getPackageName(), resolver.getAttributionTag(),
+                        sProviderHolder.mUri.getAuthority(),
+                        CALL_METHOD_REGISTER_MONITOR_CALLBACK_CONFIG, null, arg);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Can't register config monitor callback", e);
+            }
+        }
+
+        /** @hide */
+        public static void clearProviderForTest() {
+            sProviderHolder.clearProviderForTest();
+            sNameValueCache.clearGenerationTrackerForTest();
+        }
+
+        private static String createCompositeName(@NonNull String namespace, @NonNull String name) {
+            Preconditions.checkNotNull(namespace);
+            Preconditions.checkNotNull(name);
+            return createPrefix(namespace) + name;
+        }
+
+        private static String createPrefix(@NonNull String namespace) {
+            Preconditions.checkNotNull(namespace);
+            return namespace + "/";
         }
     }
 
@@ -15322,6 +14859,119 @@ public final class Settings {
                 "android.settings.panel.action.VOLUME";
     }
 
+    /**
+     * Activity Action: Show setting page to process the addition of Wi-Fi networks to the user's
+     * saved network list. The app should send a new intent with an extra that holds a maximum
+     * of five {@link android.net.wifi.WifiNetworkSuggestion} that specify credentials for the
+     * networks to be added to the user's database. The Intent should be sent via the
+     * {@link android.app.Activity#startActivityForResult(Intent, int)} API.
+     * <p>
+     * Note: The app sending the Intent to add the credentials doesn't get any ownership over the
+     * newly added network(s). For the Wi-Fi stack, these networks will look like the user
+     * manually added them from the Settings UI.
+     * <p>
+     * Input: The app should put parcelable array list of
+     * {@link android.net.wifi.WifiNetworkSuggestion} into the {@link #EXTRA_WIFI_NETWORK_LIST}
+     * extra.
+     * <p>
+     * Output: After {@link android.app.Activity#startActivityForResult(Intent, int)}, the
+     * callback {@link android.app.Activity#onActivityResult(int, int, Intent)} will have a
+     * result code {@link android.app.Activity#RESULT_OK} to indicate user pressed the save
+     * button to save the networks or {@link android.app.Activity#RESULT_CANCELED} to indicate
+     * that the user rejected the request. Additionally, an integer array list, stored in
+     * {@link #EXTRA_WIFI_NETWORK_RESULT_LIST}, will indicate the process result of each network.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_WIFI_ADD_NETWORKS =
+            "android.settings.WIFI_ADD_NETWORKS";
+
+    /**
+     * A bundle extra of {@link #ACTION_WIFI_ADD_NETWORKS} intent action that indicates the list
+     * of the {@link android.net.wifi.WifiNetworkSuggestion} elements. The maximum count of the
+     * {@link android.net.wifi.WifiNetworkSuggestion} elements in the list will be five.
+     * <p>
+     * For example:
+     * To provide credentials for one open and one WPA2 networks:
+     *
+     * <pre>{@code
+     * final WifiNetworkSuggestion suggestion1 =
+     *       new WifiNetworkSuggestion.Builder()
+     *       .setSsid("test111111")
+     *       .build();
+     * final WifiNetworkSuggestion suggestion2 =
+     *       new WifiNetworkSuggestion.Builder()
+     *       .setSsid("test222222")
+     *       .setWpa2Passphrase("test123456")
+     *       .build();
+     * final List<WifiNetworkSuggestion> suggestionsList = new ArrayList<>;
+     * suggestionsList.add(suggestion1);
+     * suggestionsList.add(suggestion2);
+     * Bundle bundle = new Bundle();
+     * bundle.putParcelableArrayList(Settings.EXTRA_WIFI_NETWORK_LIST,(ArrayList<? extends
+     * Parcelable>) suggestionsList);
+     * final Intent intent = new Intent(Settings.ACTION_WIFI_ADD_NETWORKS);
+     * intent.putExtras(bundle);
+     * startActivityForResult(intent, 0);
+     * }</pre>
+     */
+    public static final String EXTRA_WIFI_NETWORK_LIST =
+            "android.provider.extra.WIFI_NETWORK_LIST";
+
+    /**
+     * A bundle extra of the result of {@link #ACTION_WIFI_ADD_NETWORKS} intent action that
+     * indicates the action result of the saved {@link android.net.wifi.WifiNetworkSuggestion}.
+     * Its value is a list of integers, and all the elements will be 1:1 mapping to the elements
+     * in {@link #EXTRA_WIFI_NETWORK_LIST}, if user press cancel to cancel the add networks
+     * request, then its value will be null.
+     * <p>
+     * Note: The integer value will be one of the {@link #ADD_WIFI_RESULT_SUCCESS},
+     * {@link #ADD_WIFI_RESULT_ADD_OR_UPDATE_FAILED}, or {@link #ADD_WIFI_RESULT_ALREADY_EXISTS}}.
+     */
+    public static final String EXTRA_WIFI_NETWORK_RESULT_LIST =
+            "android.provider.extra.WIFI_NETWORK_RESULT_LIST";
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"ADD_WIFI_RESULT_"}, value = {
+            ADD_WIFI_RESULT_SUCCESS,
+            ADD_WIFI_RESULT_ADD_OR_UPDATE_FAILED,
+            ADD_WIFI_RESULT_ALREADY_EXISTS
+    })
+    public @interface AddWifiResult {
+    }
+
+    /**
+     * A result of {@link #ACTION_WIFI_ADD_NETWORKS} intent action that saving or updating the
+     * corresponding Wi-Fi network was successful.
+     */
+    public static final int ADD_WIFI_RESULT_SUCCESS = 0;
+
+    /**
+     * A result of {@link #ACTION_WIFI_ADD_NETWORKS} intent action that saving the corresponding
+     * Wi-Fi network failed.
+     */
+    public static final int ADD_WIFI_RESULT_ADD_OR_UPDATE_FAILED = 1;
+
+    /**
+     * A result of {@link #ACTION_WIFI_ADD_NETWORKS} intent action that indicates the Wi-Fi network
+     * already exists.
+     */
+    public static final int ADD_WIFI_RESULT_ALREADY_EXISTS = 2;
+
+    /**
+     * Activity Action: Allows user to select current bug report handler.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_BUGREPORT_HANDLER_SETTINGS =
+            "android.settings.BUGREPORT_HANDLER_SETTINGS";
+
     private static final String[] PM_WRITE_SETTINGS = {
         android.Manifest.permission.WRITE_SETTINGS
     };
@@ -15332,6 +14982,42 @@ public final class Settings {
     private static final String[] PM_SYSTEM_ALERT_WINDOW = {
         android.Manifest.permission.SYSTEM_ALERT_WINDOW
     };
+
+    /**
+     * Activity Action: Show screen for controlling which apps have access to manage external
+     * storage.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
+     * <p>
+     * If you want to control a specific app's access to manage external storage, use
+     * {@link #ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION} instead.
+     * <p>
+     * Output: Nothing.
+     * @see #ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION =
+            "android.settings.MANAGE_ALL_FILES_ACCESS_PERMISSION";
+
+    /**
+     * Activity Action: Show screen for controlling if the app specified in the data URI of the
+     * intent can manage external storage.
+     * <p>
+     * Launching the corresponding activity requires the permission
+     * {@link Manifest.permission#MANAGE_EXTERNAL_STORAGE}.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
+     * <p>
+     * Input: The Intent's data URI MUST specify the application package name whose ability of
+     * managing external storage you want to control.
+     * For example "package:com.my.app".
+     * <p>
+     * Output: Nothing.
+     * @see #ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION =
+            "android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION";
 
     /**
      * Performs a strict and comprehensive check of whether a calling package is allowed to

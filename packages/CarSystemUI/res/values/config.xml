@@ -25,12 +25,27 @@
     <bool name="config_enableFullscreenUserSwitcher">true</bool>
 
     <!-- configure which system ui bars should be displayed -->
+    <bool name="config_enableTopNavigationBar">true</bool>
     <bool name="config_enableLeftNavigationBar">false</bool>
     <bool name="config_enableRightNavigationBar">false</bool>
     <bool name="config_enableBottomNavigationBar">true</bool>
 
+    <!-- Disable normal notification rendering; we handle that ourselves -->
+    <bool name="config_renderNotifications">false</bool>
+
+    <!-- Whether navigationBar touch events should be consumed before reaching the CarFacetButton \
+         when the notification panel is open. -->
+    <bool name="config_consumeNavigationBarTouchWhenNotificationPanelOpen">false</bool>
+
     <!-- Whether heads-up notifications should be shown when shade is open. -->
     <bool name="config_enableHeadsUpNotificationWhenNotificationShadeOpen">true</bool>
+    <!-- Whether heads-up notifications should be shown on the bottom. If false, heads-up
+         notifications will be shown pushed to the top of their parent container. If true, they will
+         be shown pushed to the bottom of their parent container. If true, then should override
+         config_headsUpNotificationAnimationHelper to use a different AnimationHelper, such as
+         com.android.car.notification.headsup.animationhelper.
+         CarHeadsUpNotificationBottomAnimationHelper. -->
+    <bool name="config_showHeadsUpNotificationOnBottom">false</bool>
 
     <bool name="config_hideNavWhenKeyguardBouncerShown">true</bool>
     <bool name="config_enablePersistentDockedActivity">false</bool>
@@ -55,4 +70,55 @@
         to a constant alpha percent value using the initial alpha. -->
     <integer name="config_finalNotificationBackgroundAlpha">100</integer>
 
+    <!-- Car System UI's OverlayViewsMediator.
+         Whenever a new class is added, make sure to also add that class to OverlayWindowModule. -->
+    <string-array name="config_carSystemUIOverlayViewsMediators" translatable="false">
+        <item>@string/config_notificationPanelViewMediator</item>
+        <item>com.android.systemui.car.keyguard.CarKeyguardViewMediator</item>
+        <item>com.android.systemui.car.userswitcher.FullscreenUserSwitcherViewMediator</item>
+        <item>com.android.systemui.car.userswitcher.UserSwitchTransitionViewMediator</item>
+    </string-array>
+
+    <!--
+        Car SystemUI's notification mediator. Replace with other notification mediators to have
+        the notification panel show from another system bar. The system bar should be enabled to
+        use the mediator with that system bar.
+        Example: config_enableBottomNavigationBar=true
+                 config_notificationPanelViewMediator=
+                    com.android.systemui.car.notification.BottomNotificationPanelViewMediator -->
+    <string name="config_notificationPanelViewMediator" translatable="false">
+        com.android.systemui.car.notification.TopNotificationPanelViewMediator</string>
+
+    <!-- List of package names that are allowed sources of app installation. -->
+    <string-array name="config_allowedAppInstallSources" translatable="false">
+        <item>com.android.vending</item>
+    </string-array>
+
+    <!-- The list of components to exclude from config_systemUIServiceComponents. -->
+    <string-array name="config_systemUIServiceComponentsExclude" translatable="false">
+        <item>com.android.systemui.recents.Recents</item>
+        <item>com.android.systemui.volume.VolumeUI</item>
+        <item>com.android.systemui.stackdivider.Divider</item>
+        <item>com.android.systemui.statusbar.phone.StatusBar</item>
+        <item>com.android.systemui.keyboard.KeyboardUI</item>
+        <item>com.android.systemui.pip.PipUI</item>
+        <item>com.android.systemui.shortcut.ShortcutKeyDispatcher</item>
+        <item>com.android.systemui.LatencyTester</item>
+        <item>com.android.systemui.globalactions.GlobalActionsComponent</item>
+        <item>com.android.systemui.SliceBroadcastRelayHandler</item>
+        <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>
+        <item>com.android.systemui.accessibility.WindowMagnification</item>
+        <item>com.android.systemui.accessibility.SystemActions</item>
+    </string-array>
+
+    <!-- The list of components to append to config_systemUIServiceComponents. -->
+    <string-array name="config_systemUIServiceComponentsInclude" translatable="false">
+        <item>com.android.systemui.car.navigationbar.CarNavigationBar</item>
+        <item>com.android.systemui.car.voicerecognition.ConnectedDeviceVoiceRecognitionNotifier</item>
+        <item>com.android.systemui.car.window.SystemUIOverlayWindowManager</item>
+        <item>com.android.systemui.car.volume.VolumeUI</item>
+    </string-array>
+
+    <!-- How many milliseconds to wait before force hiding the UserSwitchTransitionView -->
+    <integer name="config_userSwitchTransitionViewShownTimeoutMs" translatable="false">5000</integer>
 </resources>

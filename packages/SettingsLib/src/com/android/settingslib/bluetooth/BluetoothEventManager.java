@@ -212,15 +212,21 @@ public class BluetoothEventManager {
     }
 
     private void dispatchAudioModeChanged() {
-        mDeviceManager.dispatchAudioModeChanged();
+        for (CachedBluetoothDevice cachedDevice : mDeviceManager.getCachedDevicesCopy()) {
+            cachedDevice.onAudioModeChanged();
+        }
         for (BluetoothCallback callback : mCallbacks) {
             callback.onAudioModeChanged();
         }
     }
 
-    private void dispatchActiveDeviceChanged(CachedBluetoothDevice activeDevice,
+    @VisibleForTesting
+    void dispatchActiveDeviceChanged(CachedBluetoothDevice activeDevice,
             int bluetoothProfile) {
-        mDeviceManager.onActiveDeviceChanged(activeDevice, bluetoothProfile);
+        for (CachedBluetoothDevice cachedDevice : mDeviceManager.getCachedDevicesCopy()) {
+            boolean isActive = Objects.equals(cachedDevice, activeDevice);
+            cachedDevice.onActiveDeviceChanged(isActive, bluetoothProfile);
+        }
         for (BluetoothCallback callback : mCallbacks) {
             callback.onActiveDeviceChanged(activeDevice, bluetoothProfile);
         }
@@ -292,18 +298,12 @@ public class BluetoothEventManager {
             CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
             if (cachedDevice == null) {
                 cachedDevice = mDeviceManager.addDevice(device);
-                Log.d(TAG, "DeviceFoundHandler created new CachedBluetoothDevice: "
-                        + cachedDevice);
+                Log.d(TAG, "DeviceFoundHandler created new CachedBluetoothDevice");
             } else if (cachedDevice.getBondState() == BluetoothDevice.BOND_BONDED
                     && !cachedDevice.getDevice().isConnected()) {
                 // Dispatch device add callback to show bonded but
                 // not connected devices in discovery mode
                 dispatchDeviceAdded(cachedDevice);
-                Log.d(TAG, "DeviceFoundHandler found bonded and not connected device:"
-                        + cachedDevice);
-            } else {
-                Log.d(TAG, "DeviceFoundHandler found existing CachedBluetoothDevice:"
-                        + cachedDevice);
             }
             cachedDevice.setRssi(rssi);
             cachedDevice.setJustDiscovered(true);

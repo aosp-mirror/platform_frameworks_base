@@ -26,9 +26,11 @@ public class DetectTvSystemAudioModeSupportAction extends HdmiCecFeatureAction {
 
     // State that waits for <Active Source> once send <Request Active Source>.
     private static final int STATE_WAITING_FOR_FEATURE_ABORT = 1;
+    private static final int STATE_WAITING_FOR_SET_SAM = 2;
+    private int mSendSetSystemAudioModeRetryCount = 0;
+    static final int MAX_RETRY_COUNT = 5;
 
     private TvSystemAudioModeSupportedCallback mCallback;
-    private int mState;
 
     DetectTvSystemAudioModeSupportAction(HdmiCecLocalDevice source,
             TvSystemAudioModeSupportedCallback callback) {
@@ -50,8 +52,18 @@ public class DetectTvSystemAudioModeSupportAction extends HdmiCecFeatureAction {
             if (mState != STATE_WAITING_FOR_FEATURE_ABORT) {
                 return false;
             }
-            if ((cmd.getParams()[0] & 0xFF) == Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE) {
-                finishAction(false);
+            if (HdmiUtils.getAbortFeatureOpcode(cmd) == Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE) {
+                if (HdmiUtils.getAbortReason(cmd) == Constants.ABORT_NOT_IN_CORRECT_MODE) {
+                    mActionTimer.clearTimerMessage();
+                    mState = STATE_WAITING_FOR_SET_SAM;
+                    // Outgoing User Control Press commands, when in 'Press and Hold' mode, should
+                    // be this much apart from the adjacent one so as not to place unnecessarily
+                    // heavy load on the CEC line. We also wait this much time to send the next
+                    // retry of the System Audio Mode support detection message.
+                    addTimer(mState, HdmiConfig.IRT_MS);
+                } else {
+                    finishAction(false);
+                }
                 return true;
             }
         }
@@ -68,6 +80,18 @@ public class DetectTvSystemAudioModeSupportAction extends HdmiCecFeatureAction {
             case STATE_WAITING_FOR_FEATURE_ABORT:
                 finishAction(true);
                 break;
+            case STATE_WAITING_FOR_SET_SAM:
+                mSendSetSystemAudioModeRetryCount++;
+                if (mSendSetSystemAudioModeRetryCount < MAX_RETRY_COUNT) {
+                    mState = STATE_WAITING_FOR_FEATURE_ABORT;
+                    addTimer(mState, HdmiConfig.TIMEOUT_MS);
+                    sendSetSystemAudioMode();
+                } else {
+                    finishAction(false);
+                }
+                break;
+            default:
+                return;
         }
     }
 

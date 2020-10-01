@@ -43,7 +43,7 @@ public abstract class UsbDescriptor implements Reporting {
     protected int mHierarchyLevel;
 
     protected final int mLength;    // 0:1 bLength Number Size of the Descriptor in Bytes (18 bytes)
-                                    // we store this as an int because Java bytes are SIGNED.
+    // we store this as an int because Java bytes are SIGNED.
     protected final byte mType;     // 1:1 bDescriptorType Constant Device Descriptor (0x01)
 
     private byte[] mRawData;
@@ -52,11 +52,11 @@ public abstract class UsbDescriptor implements Reporting {
     private static byte[] sStringBuffer = new byte[SIZE_STRINGBUFFER];
 
     // Status
-    public static final int STATUS_UNPARSED         = 0;
-    public static final int STATUS_PARSED_OK        = 1;
-    public static final int STATUS_PARSED_UNDERRUN  = 2;
-    public static final int STATUS_PARSED_OVERRUN   = 3;
-    public static final int STATUS_PARSE_EXCEPTION  = 4;
+    public static final int STATUS_UNPARSED = 0;
+    public static final int STATUS_PARSED_OK = 1;
+    public static final int STATUS_PARSED_UNDERRUN = 2;
+    public static final int STATUS_PARSED_OVERRUN = 3;
+    public static final int STATUS_PARSE_EXCEPTION = 4;
 
     private int mStatus = STATUS_UNPARSED;
 
@@ -78,53 +78,53 @@ public abstract class UsbDescriptor implements Reporting {
     public static final byte DESCRIPTORTYPE_HID = 0x21;                // 33
     public static final byte DESCRIPTORTYPE_REPORT = 0x22;             // 34
     public static final byte DESCRIPTORTYPE_PHYSICAL = 0x23;           // 35
-    public static final byte DESCRIPTORTYPE_AUDIO_INTERFACE = 0x24;    // 36
-    public static final byte DESCRIPTORTYPE_AUDIO_ENDPOINT = 0x25;     // 37
+    public static final byte DESCRIPTORTYPE_CLASSSPECIFIC_INTERFACE = 0x24;    // 36
+    public static final byte DESCRIPTORTYPE_CLASSSPECIFIC_ENDPOINT = 0x25;     // 37
     public static final byte DESCRIPTORTYPE_HUB = 0x29;                // 41
     public static final byte DESCRIPTORTYPE_SUPERSPEED_HUB = 0x2A;     // 42
     public static final byte DESCRIPTORTYPE_ENDPOINT_COMPANION = 0x30; // 48
 
     // Class IDs
-    public static final int CLASSID_DEVICE  =      0x00;
-    public static final int CLASSID_AUDIO =        0x01;
-    public static final int CLASSID_COM =          0x02;
-    public static final int CLASSID_HID =          0x03;
+    public static final int CLASSID_DEVICE = 0x00;
+    public static final int CLASSID_AUDIO = 0x01;
+    public static final int CLASSID_COM = 0x02;
+    public static final int CLASSID_HID = 0x03;
     // public static final int CLASSID_??? =       0x04;
-    public static final int CLASSID_PHYSICAL =     0x05;
-    public static final int CLASSID_IMAGE =        0x06;
-    public static final int CLASSID_PRINTER =      0x07;
-    public static final int CLASSID_STORAGE =      0x08;
-    public static final int CLASSID_HUB =          0x09;
-    public static final int CLASSID_CDC_CONTROL =  0x0A;
-    public static final int CLASSID_SMART_CARD =   0x0B;
+    public static final int CLASSID_PHYSICAL = 0x05;
+    public static final int CLASSID_IMAGE = 0x06;
+    public static final int CLASSID_PRINTER = 0x07;
+    public static final int CLASSID_STORAGE = 0x08;
+    public static final int CLASSID_HUB = 0x09;
+    public static final int CLASSID_CDC_CONTROL = 0x0A;
+    public static final int CLASSID_SMART_CARD = 0x0B;
     //public static final int CLASSID_??? =        0x0C;
-    public static final int CLASSID_SECURITY =     0x0D;
-    public static final int CLASSID_VIDEO =        0x0E;
-    public static final int CLASSID_HEALTHCARE =   0x0F;
-    public static final int CLASSID_AUDIOVIDEO =   0x10;
-    public static final int CLASSID_BILLBOARD =    0x11;
-    public static final int CLASSID_TYPECBRIDGE =  0x12;
-    public static final int CLASSID_DIAGNOSTIC =   0xDC;
-    public static final int CLASSID_WIRELESS =     0xE0;
-    public static final int CLASSID_MISC =         0xEF;
-    public static final int CLASSID_APPSPECIFIC =  0xFE;
+    public static final int CLASSID_SECURITY = 0x0D;
+    public static final int CLASSID_VIDEO = 0x0E;
+    public static final int CLASSID_HEALTHCARE = 0x0F;
+    public static final int CLASSID_AUDIOVIDEO = 0x10;
+    public static final int CLASSID_BILLBOARD = 0x11;
+    public static final int CLASSID_TYPECBRIDGE = 0x12;
+    public static final int CLASSID_DIAGNOSTIC = 0xDC;
+    public static final int CLASSID_WIRELESS = 0xE0;
+    public static final int CLASSID_MISC = 0xEF;
+    public static final int CLASSID_APPSPECIFIC = 0xFE;
     public static final int CLASSID_VENDSPECIFIC = 0xFF;
 
     // Audio Subclass codes
-    public static final int AUDIO_SUBCLASS_UNDEFINED   = 0x00;
-    public static final int AUDIO_AUDIOCONTROL         = 0x01;
-    public static final int AUDIO_AUDIOSTREAMING       = 0x02;
-    public static final int AUDIO_MIDISTREAMING        = 0x03;
+    public static final int AUDIO_SUBCLASS_UNDEFINED = 0x00;
+    public static final int AUDIO_AUDIOCONTROL = 0x01;
+    public static final int AUDIO_AUDIOSTREAMING = 0x02;
+    public static final int AUDIO_MIDISTREAMING = 0x03;
 
     // Request IDs
-    public static final int REQUEST_GET_STATUS         = 0x00;
-    public static final int REQUEST_CLEAR_FEATURE      = 0x01;
-    public static final int REQUEST_SET_FEATURE        = 0x03;
-    public static final int REQUEST_GET_ADDRESS        = 0x05;
-    public static final int REQUEST_GET_DESCRIPTOR     = 0x06;
-    public static final int REQUEST_SET_DESCRIPTOR     = 0x07;
-    public static final int REQUEST_GET_CONFIGURATION  = 0x08;
-    public static final int REQUEST_SET_CONFIGURATION  = 0x09;
+    public static final int REQUEST_GET_STATUS = 0x00;
+    public static final int REQUEST_CLEAR_FEATURE = 0x01;
+    public static final int REQUEST_SET_FEATURE = 0x03;
+    public static final int REQUEST_GET_ADDRESS = 0x05;
+    public static final int REQUEST_GET_DESCRIPTOR = 0x06;
+    public static final int REQUEST_SET_DESCRIPTOR = 0x07;
+    public static final int REQUEST_GET_CONFIGURATION = 0x08;
+    public static final int REQUEST_SET_CONFIGURATION = 0x09;
 
     // USB control transfer timeout
     public static final int USB_CONTROL_TRANSFER_TIMEOUT_MS = 200;
@@ -163,7 +163,6 @@ public abstract class UsbDescriptor implements Reporting {
     public int getOverUnderRunCount() {
         return mOverUnderRunCount;
     }
-
     public String getStatusString() {
         return sStatusStrings[mStatus];
     }
@@ -277,5 +276,25 @@ public abstract class UsbDescriptor implements Reporting {
         String text = descTypeStr + ": " + ReportCanvas.getHexString(getType())
                 + " Len: " + getLength();
         canvas.writeParagraph(text, false);
+    }
+
+    /*
+     * Logging Helpers
+     */
+    static String getDescriptorName(byte descriptorType, int descriptorLength) {
+        String name = UsbStrings.getDescriptorName(descriptorType);
+        if (name != null) {
+            return name;
+        } else {
+            return "Unknown Descriptor Type " + descriptorType
+                + " 0x" + Integer.toHexString(descriptorType)
+                + " length:" + descriptorLength;
+        }
+    }
+
+    static void logDescriptorName(byte descriptorType, int descriptorLength) {
+        if (UsbDescriptorParser.DEBUG) {
+            Log.d(TAG, "----> " + getDescriptorName(descriptorType, descriptorLength));
+        }
     }
 }

@@ -16,8 +16,8 @@
 
 #define LOG_TAG "SELinuxJNI"
 
-#include <fcntl.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include <utils/Log.h>
 

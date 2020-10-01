@@ -67,6 +67,9 @@ class ActiveInstrumentation {
     // Set to true when we have told the watcher the instrumentation is finished.
     boolean mFinished;
 
+    // The uid of the process who started this instrumentation.
+    int mSourceUid;
+
     ActiveInstrumentation(ActivityManagerService service) {
         mService = service;
     }
@@ -126,26 +129,26 @@ class ActiveInstrumentation {
         pw.println(mArguments);
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
-        mClass.writeToProto(proto, ActiveInstrumentationProto.CLASS);
+        mClass.dumpDebug(proto, ActiveInstrumentationProto.CLASS);
         proto.write(ActiveInstrumentationProto.FINISHED, mFinished);
         for (int i=0; i<mRunningProcesses.size(); i++) {
-            mRunningProcesses.get(i).writeToProto(proto,
+            mRunningProcesses.get(i).dumpDebug(proto,
                     ActiveInstrumentationProto.RUNNING_PROCESSES);
         }
         for (String p : mTargetProcesses) {
             proto.write(ActiveInstrumentationProto.TARGET_PROCESSES, p);
         }
         if (mTargetInfo != null) {
-            mTargetInfo.writeToProto(proto, ActiveInstrumentationProto.TARGET_INFO, 0);
+            mTargetInfo.dumpDebug(proto, ActiveInstrumentationProto.TARGET_INFO, 0);
         }
         proto.write(ActiveInstrumentationProto.PROFILE_FILE, mProfileFile);
         proto.write(ActiveInstrumentationProto.WATCHER, mWatcher.toString());
         proto.write(ActiveInstrumentationProto.UI_AUTOMATION_CONNECTION,
                 mUiAutomationConnection.toString());
         if (mArguments != null) {
-            mArguments.writeToProto(proto, ActiveInstrumentationProto.ARGUMENTS);
+            mArguments.dumpDebug(proto, ActiveInstrumentationProto.ARGUMENTS);
         }
         proto.end(token);
     }

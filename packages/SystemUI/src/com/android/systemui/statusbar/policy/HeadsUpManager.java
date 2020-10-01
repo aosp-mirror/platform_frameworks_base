@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_HEADS_UP;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -33,7 +33,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -117,7 +117,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     }
 
     protected boolean hasFullScreenIntent(@NonNull NotificationEntry entry) {
-        return entry.notification.getNotification().fullScreenIntent != null;
+        return entry.getSbn().getNotification().fullScreenIntent != null;
     }
 
     protected void setEntryPinned(
@@ -161,7 +161,6 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpStateChanged(entry, false);
         }
-        entry.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_HEADS_UP);
     }
 
     protected void updatePinnedMode() {
@@ -206,7 +205,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     public void snooze() {
         for (String key : mAlertEntries.keySet()) {
             AlertEntry entry = getHeadsUpEntry(key);
-            String packageName = entry.mEntry.notification.getPackageName();
+            String packageName = entry.mEntry.getSbn().getPackageName();
             mSnoozedPackages.put(snoozeKey(packageName, mUser),
                     mClock.currentTimeMillis() + mSnoozeLengthMs);
         }
@@ -328,8 +327,8 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
      * one should be ranked higher and 0 if they are equal.
      */
     public int compare(@NonNull NotificationEntry a, @NonNull NotificationEntry b) {
-        AlertEntry aEntry = getHeadsUpEntry(a.key);
-        AlertEntry bEntry = getHeadsUpEntry(b.key);
+        AlertEntry aEntry = getHeadsUpEntry(a.getKey());
+        AlertEntry bEntry = getHeadsUpEntry(b.getKey());
         if (aEntry == null || bEntry == null) {
             return aEntry == null ? 1 : -1;
         }
@@ -341,7 +340,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
      * until it's collapsed again.
      */
     public void setExpanded(@NonNull NotificationEntry entry, boolean expanded) {
-        HeadsUpEntry headsUpEntry = getHeadsUpEntry(entry.key);
+        HeadsUpEntry headsUpEntry = getHeadsUpEntry(entry.getKey());
         if (headsUpEntry != null && entry.isRowPinned()) {
             headsUpEntry.setExpanded(expanded);
         }
@@ -369,7 +368,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         protected boolean expanded;
 
         @Override
-        protected boolean isSticky() {
+        public boolean isSticky() {
             return (mEntry.isRowPinned() && expanded)
                     || remoteInputActive || hasFullScreenIntent(mEntry);
         }

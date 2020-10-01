@@ -34,6 +34,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.icu.text.DecimalFormatSymbols;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputFilter;
@@ -60,8 +61,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.R;
-
-import libcore.icu.LocaleData;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -209,7 +208,7 @@ public class NumberPicker extends LinearLayout {
         }
 
         private static char getZeroDigit(Locale locale) {
-            return LocaleData.get(locale).zeroDigit;
+            return DecimalFormatSymbols.getInstance(locale).getZeroDigit();
         }
 
         private java.util.Formatter createFormatter(Locale locale) {
@@ -555,7 +554,7 @@ public class NumberPicker extends LinearLayout {
         public static int SCROLL_STATE_IDLE = 0;
 
         /**
-         * The user is scrolling using touch, and his finger is still on the screen.
+         * The user is scrolling using touch, and their finger is still on the screen.
          */
         public static int SCROLL_STATE_TOUCH_SCROLL = 1;
 
@@ -774,7 +773,6 @@ public class NumberPicker extends LinearLayout {
         mInputText.setFilters(new InputFilter[] {
             new InputTextFilter()
         });
-        mInputText.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
 
         mInputText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
         mInputText.setImeOptions(EditorInfo.IME_ACTION_DONE);
@@ -1034,6 +1032,7 @@ public class NumberPicker extends LinearLayout {
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_ENTER:
+            case KeyEvent.KEYCODE_NUMPAD_ENTER:
                 removeAllCallbacks();
                 break;
             case KeyEvent.KEYCODE_DPAD_DOWN:
@@ -1676,7 +1675,7 @@ public class NumberPicker extends LinearLayout {
             // Do not draw the middle item if input is visible since the input
             // is shown only if the wheel is static and it covers the middle
             // item. Otherwise, if the user starts editing the text via the
-            // IME he may see a dimmed version of the old value intermixed
+            // IME they may see a dimmed version of the old value intermixed
             // with the new one.
             if ((showSelectorWheel && i != SELECTOR_MIDDLE_ITEM_INDEX) ||
                 (i == SELECTOR_MIDDLE_ITEM_INDEX && mInputText.getVisibility() != VISIBLE)) {
@@ -2559,14 +2558,16 @@ public class NumberPicker extends LinearLayout {
                             }
                             return false;
                         }
-                        case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+                        case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
+                        case R.id.accessibilityActionScrollDown: {
                             if (NumberPicker.this.isEnabled()
                                     && (getWrapSelectorWheel() || getValue() < getMaxValue())) {
                                 changeValueByOne(true);
                                 return true;
                             }
                         } return false;
-                        case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+                        case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
+                        case R.id.accessibilityActionScrollUp: {
                             if (NumberPicker.this.isEnabled()
                                     && (getWrapSelectorWheel() || getValue() > getMinValue())) {
                                 changeValueByOne(false);
@@ -2868,10 +2869,13 @@ public class NumberPicker extends LinearLayout {
             }
             if (NumberPicker.this.isEnabled()) {
                 if (getWrapSelectorWheel() || getValue() < getMaxValue()) {
-                    info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                    info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD);
+                    info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_DOWN);
                 }
                 if (getWrapSelectorWheel() || getValue() > getMinValue()) {
-                    info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+                    info.addAction(
+                            AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD);
+                    info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_UP);
                 }
             }
 

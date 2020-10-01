@@ -55,12 +55,12 @@ public final class InputChannel implements Parcelable {
     private static native InputChannel[] nativeOpenInputChannelPair(String name);
 
     private native void nativeDispose(boolean finalized);
+    private native void nativeRelease();
     private native void nativeTransferTo(InputChannel other);
     private native void nativeReadFromParcel(Parcel parcel);
     private native void nativeWriteToParcel(Parcel parcel);
     private native void nativeDup(InputChannel target);
     private native IBinder nativeGetToken();
-    private native void nativeSetToken(IBinder token);
 
     private native String nativeGetName();
 
@@ -120,6 +120,14 @@ public final class InputChannel implements Parcelable {
     }
 
     /**
+     * Release the Java objects hold over the native InputChannel. If other references
+     * still exist in native-land, then the channel may continue to exist.
+     */
+    public void release() {
+        nativeRelease();
+    }
+
+    /**
      * Transfers ownership of the internal state of the input channel to another
      * instance and invalidates this instance.  This is used to pass an input channel
      * as an out parameter in a binder call.
@@ -175,9 +183,5 @@ public final class InputChannel implements Parcelable {
 
     public IBinder getToken() {
         return nativeGetToken();
-    }
-
-    public void setToken(IBinder token) {
-        nativeSetToken(token);
     }
 }

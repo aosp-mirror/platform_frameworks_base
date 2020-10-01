@@ -1,0 +1,12 @@
+{
+  "presubmit": [
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "android.content.integrity."
+        }
+      ]
+    }
+  ]
+}

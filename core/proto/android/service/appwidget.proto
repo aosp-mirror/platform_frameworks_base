@@ -36,4 +36,5 @@ message WidgetProto {
     optional int32 minHeight = 7;
     optional int32 maxWidth = 8;
     optional int32 maxHeight = 9;
+    optional bool restoreCompleted = 10;
 }

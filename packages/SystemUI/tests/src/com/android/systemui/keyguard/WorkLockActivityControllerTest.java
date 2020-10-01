@@ -119,6 +119,7 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
         doReturn(code).when(mIActivityTaskManager).startActivityAsUser(
                 eq((IApplicationThread) null),
                 eq((String) null),
+                eq((String) null),
                 any(Intent.class),
                 eq((String) null),
                 eq((IBinder) null),
@@ -133,6 +134,7 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
     private void verifyStartActivity(int taskId, boolean taskOverlay) throws Exception {
         verify(mIActivityTaskManager).startActivityAsUser(
                 eq((IApplicationThread) null),
+                eq((String) null),
                 eq((String) null),
                 any(Intent.class),
                 eq((String) null),

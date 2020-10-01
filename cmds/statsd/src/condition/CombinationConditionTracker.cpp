@@ -18,15 +18,10 @@
 #include "Log.h"
 #include "CombinationConditionTracker.h"
 
-#include <log/logprint.h>
-
 namespace android {
 namespace os {
 namespace statsd {
 
-using std::map;
-using std::string;
-using std::unique_ptr;
 using std::unordered_map;
 using std::vector;
 
@@ -42,7 +37,8 @@ CombinationConditionTracker::~CombinationConditionTracker() {
 bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConfig,
                                        const vector<sp<ConditionTracker>>& allConditionTrackers,
                                        const unordered_map<int64_t, int>& conditionIdIndexMap,
-                                       vector<bool>& stack) {
+                                       vector<bool>& stack,
+                                       vector<ConditionState>& initialConditionCache) {
     VLOG("Combination predicate init() %lld", (long long)mConditionId);
     if (mInitialized) {
         return true;
@@ -78,15 +74,15 @@ bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConf
             return false;
         }
 
-
-        bool initChildSucceeded = childTracker->init(allConditionConfig, allConditionTrackers,
-                                                     conditionIdIndexMap, stack);
+        bool initChildSucceeded =
+                childTracker->init(allConditionConfig, allConditionTrackers, conditionIdIndexMap,
+                                   stack, initialConditionCache);
 
         if (!initChildSucceeded) {
             ALOGW("Child initialization failed %lld ", (long long)child);
             return false;
         } else {
-            ALOGW("Child initialization success %lld ", (long long)child);
+            VLOG("Child initialization success %lld ", (long long)child);
         }
 
         if (allConditionTrackers[childIndex]->isSliced()) {
@@ -100,6 +96,11 @@ bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConf
                              childTracker->getLogTrackerIndex().end());
     }
 
+    mUnSlicedPartCondition = evaluateCombinationCondition(mUnSlicedChildren, mLogicalOperation,
+                                                          initialConditionCache);
+    initialConditionCache[mIndex] =
+            evaluateCombinationCondition(mChildren, mLogicalOperation, initialConditionCache);
+
     // unmark this node in the recursion stack.
     stack[mIndex] = false;
 
@@ -110,20 +111,14 @@ bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConf
 
 void CombinationConditionTracker::isConditionMet(
         const ConditionKey& conditionParameters, const vector<sp<ConditionTracker>>& allConditions,
-        const std::vector<Matcher>& dimensionFields,
-        const bool isSubOutputDimensionFields,
         const bool isPartialLink,
-        vector<ConditionState>& conditionCache,
-        std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const {
+        vector<ConditionState>& conditionCache) const {
     // So far, this is fine as there is at most one child having sliced output.
     for (const int childIndex : mChildren) {
         if (conditionCache[childIndex] == ConditionState::kNotEvaluated) {
             allConditions[childIndex]->isConditionMet(conditionParameters, allConditions,
-                                                      dimensionFields,
-                                                      isSubOutputDimensionFields,
                                                       isPartialLink,
-                                                      conditionCache,
-                                                      dimensionsKeySet);
+                                                      conditionCache);
         }
     }
     conditionCache[mIndex] =
@@ -152,17 +147,14 @@ void CombinationConditionTracker::evaluateCondition(
     ConditionState newCondition =
             evaluateCombinationCondition(mChildren, mLogicalOperation, nonSlicedConditionCache);
     if (!mSliced) {
+        bool nonSlicedChanged = (mUnSlicedPartCondition != newCondition);
+        mUnSlicedPartCondition = newCondition;
 
-        bool nonSlicedChanged = (mNonSlicedConditionState != newCondition);
-        mNonSlicedConditionState = newCondition;
-
-        nonSlicedConditionCache[mIndex] = mNonSlicedConditionState;
-
+        nonSlicedConditionCache[mIndex] = mUnSlicedPartCondition;
         conditionChangedCache[mIndex] = nonSlicedChanged;
-        mUnSlicedPart = newCondition;
     } else {
-        mUnSlicedPart = evaluateCombinationCondition(
-            mUnSlicedChildren, mLogicalOperation, nonSlicedConditionCache);
+        mUnSlicedPartCondition = evaluateCombinationCondition(mUnSlicedChildren, mLogicalOperation,
+                                                              nonSlicedConditionCache);
 
         for (const int childIndex : mChildren) {
             // If any of the sliced condition in children condition changes, the combination
@@ -176,25 +168,6 @@ void CombinationConditionTracker::evaluateCondition(
         VLOG("CombinationPredicate %lld sliced may changed? %d", (long long)mConditionId,
             conditionChangedCache[mIndex] == true);
     }
-}
-
-ConditionState CombinationConditionTracker::getMetConditionDimension(
-        const std::vector<sp<ConditionTracker>>& allConditions,
-        const std::vector<Matcher>& dimensionFields,
-        const bool isSubOutputDimensionFields,
-        std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const {
-    vector<ConditionState> conditionCache(allConditions.size(), ConditionState::kNotEvaluated);
-    // So far, this is fine as there is at most one child having sliced output.
-    for (const int childIndex : mChildren) {
-        conditionCache[childIndex] = conditionCache[childIndex] |
-            allConditions[childIndex]->getMetConditionDimension(
-                allConditions, dimensionFields, isSubOutputDimensionFields, dimensionsKeySet);
-    }
-    evaluateCombinationCondition(mChildren, mLogicalOperation, conditionCache);
-    if (conditionCache[mIndex] == ConditionState::kTrue && dimensionsKeySet.empty()) {
-        dimensionsKeySet.insert(DEFAULT_DIMENSION_KEY);
-    }
-    return conditionCache[mIndex];
 }
 
 bool CombinationConditionTracker::equalOutputDimensions(

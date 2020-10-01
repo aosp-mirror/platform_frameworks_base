@@ -27,9 +27,8 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.os.FileUtils;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
-
 import java.io.File;
+import java.util.Objects;
 
 /**
  * A helper class to manage database creation and version management.
@@ -161,7 +160,7 @@ public abstract class SQLiteOpenHelper implements AutoCloseable {
     private SQLiteOpenHelper(@Nullable Context context, @Nullable String name, int version,
             int minimumSupportedVersion,
             @NonNull SQLiteDatabase.OpenParams.Builder openParamsBuilder) {
-        Preconditions.checkNotNull(openParamsBuilder);
+        Objects.requireNonNull(openParamsBuilder);
         if (version < 1) throw new IllegalArgumentException("Version must be >= 1, was " + version);
 
         mContext = context;
@@ -245,7 +244,7 @@ public abstract class SQLiteOpenHelper implements AutoCloseable {
      * @throws IllegalStateException if the database is already open
      */
     public void setOpenParams(@NonNull SQLiteDatabase.OpenParams openParams) {
-        Preconditions.checkNotNull(openParams);
+        Objects.requireNonNull(openParams);
         synchronized (this) {
             if (mDatabase != null && mDatabase.isOpen()) {
                 throw new IllegalStateException(

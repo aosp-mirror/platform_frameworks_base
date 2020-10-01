@@ -38,6 +38,7 @@ import com.android.server.wm.ActivityStarter.Factory;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Random;
 
@@ -49,6 +50,7 @@ import java.util.Random;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class ActivityStartControllerTests extends ActivityTestsBase {
     private ActivityStartController mController;
     private Factory mFactory;
@@ -71,10 +73,12 @@ public class ActivityStartControllerTests extends ActivityTestsBase {
         final Random random = new Random();
 
         final ActivityRecord activity = new ActivityBuilder(mService).build();
-        final ActivityRecord source = new ActivityBuilder(mService).build();
+        final ActivityRecord source = new ActivityBuilder(mService)
+                .setCreateTask(true)
+                .build();
         final int startFlags = random.nextInt();
-        final ActivityStack stack = mService.mRootActivityContainer.getDefaultDisplay().createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final ActivityStack stack = mService.mRootWindowContainer.getDefaultTaskDisplayArea()
+                .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final WindowProcessController wpc = new WindowProcessController(mService,
                 mService.mContext.getApplicationInfo(), "name", 12345,
                 UserHandle.getUserId(12345), mock(Object.class),
@@ -82,12 +86,12 @@ public class ActivityStartControllerTests extends ActivityTestsBase {
         wpc.setThread(mock(IApplicationThread.class));
 
         mController.addPendingActivityLaunch(
-                new PendingActivityLaunch(activity, source, startFlags, stack, wpc));
+                new PendingActivityLaunch(activity, source, startFlags, stack, wpc, null));
         final boolean resume = random.nextBoolean();
         mController.doPendingActivityLaunches(resume);
 
         verify(mStarter, times(1)).startResolvedActivity(eq(activity), eq(source), eq(null),
-                eq(null), eq(startFlags), eq(resume), eq(null), eq(null));
+                eq(null), eq(startFlags), eq(resume), eq(null), eq(null), eq(null));
     }
 
 

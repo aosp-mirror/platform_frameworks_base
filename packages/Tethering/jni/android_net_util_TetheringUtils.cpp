@@ -17,17 +17,62 @@
 #include <errno.h>
 #include <error.h>
 #include <jni.h>
+#include <linux/filter.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/JNIHelpCompat.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <net/if.h>
+#include <netinet/ether.h>
+#include <netinet/ip6.h>
 #include <netinet/icmp6.h>
 #include <sys/socket.h>
+#include <stdio.h>
 
 #define LOG_TAG "TetheringUtils"
 #include <android/log.h>
 
 namespace android {
+
+static const uint32_t kIPv6NextHeaderOffset = offsetof(ip6_hdr, ip6_nxt);
+static const uint32_t kIPv6PayloadStart = sizeof(ip6_hdr);
+static const uint32_t kICMPv6TypeOffset = kIPv6PayloadStart + offsetof(icmp6_hdr, icmp6_type);
+
+static void android_net_util_setupIcmpFilter(JNIEnv *env, jobject javaFd, uint32_t type) {
+    sock_filter filter_code[] = {
+        // Check header is ICMPv6.
+        BPF_STMT(BPF_LD  | BPF_B   | BPF_ABS,  kIPv6NextHeaderOffset),
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,    IPPROTO_ICMPV6, 0, 3),
+
+        // Check ICMPv6 type.
+        BPF_STMT(BPF_LD  | BPF_B   | BPF_ABS,  kICMPv6TypeOffset),
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,    type, 0, 1),
+
+        // Accept or reject.
+        BPF_STMT(BPF_RET | BPF_K,              0xffff),
+        BPF_STMT(BPF_RET | BPF_K,              0)
+    };
+
+    const sock_fprog filter = {
+        sizeof(filter_code) / sizeof(filter_code[0]),
+        filter_code,
+    };
+
+    int fd = jniGetFDFromFileDescriptor(env, javaFd);
+    if (setsockopt(fd, SOL_SOCKET, SO_ATTACH_FILTER, &filter, sizeof(filter)) != 0) {
+        jniThrowExceptionFmt(env, "java/net/SocketException",
+                "setsockopt(SO_ATTACH_FILTER): %s", strerror(errno));
+    }
+}
+
+static void android_net_util_setupNaSocket(JNIEnv *env, jobject clazz, jobject javaFd)
+{
+    android_net_util_setupIcmpFilter(env, javaFd, ND_NEIGHBOR_ADVERT);
+}
+
+static void android_net_util_setupNsSocket(JNIEnv *env, jobject clazz, jobject javaFd)
+{
+    android_net_util_setupIcmpFilter(env, javaFd, ND_NEIGHBOR_SOLICIT);
+}
 
 static void android_net_util_setupRaSocket(JNIEnv *env, jobject clazz, jobject javaFd,
         jint ifIndex)
@@ -125,7 +170,12 @@ static void android_net_util_setupRaSocket(JNIEnv *env, jobject clazz, jobject j
  */
 static const JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
-    { "setupRaSocket", "(Ljava/io/FileDescriptor;I)V", (void*) android_net_util_setupRaSocket },
+    { "setupNaSocket", "(Ljava/io/FileDescriptor;)V",
+        (void*) android_net_util_setupNaSocket },
+    { "setupNsSocket", "(Ljava/io/FileDescriptor;)V",
+        (void*) android_net_util_setupNsSocket },
+    { "setupRaSocket", "(Ljava/io/FileDescriptor;I)V",
+        (void*) android_net_util_setupRaSocket },
 };
 
 int register_android_net_util_TetheringUtils(JNIEnv* env) {

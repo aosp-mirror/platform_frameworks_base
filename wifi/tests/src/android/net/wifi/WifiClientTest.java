@@ -16,8 +16,8 @@
 
 package android.net.wifi;
 
-import static com.android.testutils.MiscAssertsKt.assertFieldCountEquals;
-import static com.android.testutils.ParcelUtilsKt.assertParcelSane;
+import static com.android.testutils.MiscAsserts.assertFieldCountEquals;
+import static com.android.testutils.ParcelUtils.assertParcelSane;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;

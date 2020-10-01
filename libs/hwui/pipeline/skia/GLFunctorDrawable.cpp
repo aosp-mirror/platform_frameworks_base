@@ -26,6 +26,7 @@
 #include "SkAndroidFrameworkUtils.h"
 #include "SkClipStack.h"
 #include "SkRect.h"
+#include "include/private/SkM44.h"
 
 namespace android {
 namespace uirenderer {
@@ -47,29 +48,20 @@ static void setScissor(int viewportHeight, const SkIRect& clip) {
     glScissor(clip.fLeft, y, clip.width(), height);
 }
 
-static bool GetFboDetails(SkCanvas* canvas, GLuint* outFboID, SkISize* outFboSize) {
+static void GetFboDetails(SkCanvas* canvas, GLuint* outFboID, SkISize* outFboSize) {
     GrRenderTargetContext* renderTargetContext =
             canvas->internal_private_accessTopLayerRenderTargetContext();
-    if (!renderTargetContext) {
-        ALOGW("Unable to extract renderTarget info from canvas; aborting GLFunctor draw");
-        return false;
-    }
+    LOG_ALWAYS_FATAL_IF(!renderTargetContext, "Failed to retrieve GrRenderTargetContext");
 
     GrRenderTarget* renderTarget = renderTargetContext->accessRenderTarget();
-    if (!renderTarget) {
-        ALOGW("Unable to extract renderTarget info from canvas; aborting GLFunctor draw");
-        return false;
-    }
+    LOG_ALWAYS_FATAL_IF(!renderTarget, "accessRenderTarget failed");
 
     GrGLFramebufferInfo fboInfo;
-    if (!renderTarget->getBackendRenderTarget().getGLFramebufferInfo(&fboInfo)) {
-        ALOGW("Unable to extract renderTarget info from canvas; aborting GLFunctor draw");
-        return false;
-    }
+    LOG_ALWAYS_FATAL_IF(!renderTarget->getBackendRenderTarget().getGLFramebufferInfo(&fboInfo),
+        "getGLFrameBufferInfo failed");
 
     *outFboID = fboInfo.fFBOID;
     *outFboSize = SkISize::Make(renderTargetContext->width(), renderTargetContext->height());
-    return true;
 }
 
 void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
@@ -84,15 +76,16 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         return;
     }
 
+    // flush will create a GrRenderTarget if not already present.
+    canvas->flush();
+
     GLuint fboID = 0;
     SkISize fboSize;
-    if (!GetFboDetails(canvas, &fboID, &fboSize)) {
-        return;
-    }
+    GetFboDetails(canvas, &fboID, &fboSize);
 
     SkIRect surfaceBounds = canvas->internal_private_getTopLayerBounds();
     SkIRect clipBounds = canvas->getDeviceClipBounds();
-    SkMatrix44 mat4(canvas->getTotalMatrix());
+    SkM44 mat4(canvas->experimental_getLocalToDevice());
     SkRegion clipRegion;
     canvas->temporary_internal_getRgnClip(&clipRegion);
 
@@ -118,7 +111,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
 
         // update the matrix and clip that we pass to the WebView to match the coordinates of
         // the offscreen layer
-        mat4.preTranslate(-clipBounds.fLeft, -clipBounds.fTop, 0);
+        mat4.preTranslate(-clipBounds.fLeft, -clipBounds.fTop);
         clipBounds.offsetTo(0, 0);
         clipRegion.translate(-surfaceBounds.fLeft, -surfaceBounds.fTop);
 
@@ -126,7 +119,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         // we are drawing into a (clipped) offscreen layer so we must update the clip and matrix
         // from device coordinates to the layer's coordinates
         clipBounds.offset(-surfaceBounds.fLeft, -surfaceBounds.fTop);
-        mat4.preTranslate(-surfaceBounds.fLeft, -surfaceBounds.fTop, 0);
+        mat4.preTranslate(-surfaceBounds.fLeft, -surfaceBounds.fTop);
     }
 
     DrawGlInfo info;
@@ -137,12 +130,11 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
     info.isLayer = fboID != 0;
     info.width = fboSize.width();
     info.height = fboSize.height();
-    mat4.asColMajorf(&info.transform[0]);
+    mat4.getColMajor(&info.transform[0]);
     info.color_space_ptr = canvas->imageInfo().colorSpace();
 
     // ensure that the framebuffer that the webview will render into is bound before we clear
     // the stencil and/or draw the functor.
-    canvas->flush();
     glViewport(0, 0, info.width, info.height);
     glBindFramebuffer(GL_FRAMEBUFFER, fboID);
 

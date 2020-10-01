@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.content.Context;
+import android.content.res.Resources;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.PowerManager;
 import android.os.SystemProperties;
@@ -24,18 +24,21 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.MathUtils;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
 import com.android.systemui.tuner.TunerService;
 
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Retrieve doze information
  */
+@Singleton
 public class DozeParameters implements TunerService.Tunable,
         com.android.systemui.plugins.statusbar.DozeParameters {
     private static final int MAX_DURATION = 60 * 1000;
@@ -44,35 +47,33 @@ public class DozeParameters implements TunerService.Tunable,
     public static final boolean FORCE_BLANKING =
             SystemProperties.getBoolean("debug.force_blanking", false);
 
-    private static DozeParameters sInstance;
-
-    private final Context mContext;
     private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     private final PowerManager mPowerManager;
 
     private final AlwaysOnDisplayPolicy mAlwaysOnPolicy;
+    private final Resources mResources;
 
     private boolean mDozeAlwaysOn;
     private boolean mControlScreenOffAnimation;
 
-    public static DozeParameters getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new DozeParameters(context);
-        }
-        return sInstance;
-    }
-
-    @VisibleForTesting
-    protected DozeParameters(Context context) {
-        mContext = context.getApplicationContext();
-        mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
-        mAlwaysOnPolicy = new AlwaysOnDisplayPolicy(mContext);
+    @Inject
+    protected DozeParameters(
+            @Main Resources resources,
+            AmbientDisplayConfiguration ambientDisplayConfiguration,
+            AlwaysOnDisplayPolicy alwaysOnDisplayPolicy,
+            PowerManager powerManager,
+            TunerService tunerService) {
+        mResources = resources;
+        mAmbientDisplayConfiguration = ambientDisplayConfiguration;
+        mAlwaysOnPolicy = alwaysOnDisplayPolicy;
 
         mControlScreenOffAnimation = !getDisplayNeedsBlanking();
-        mPowerManager = mContext.getSystemService(PowerManager.class);
+        mPowerManager = powerManager;
         mPowerManager.setDozeAfterScreenOff(!mControlScreenOffAnimation);
 
-        Dependency.get(TunerService.class).addTunable(this, Settings.Secure.DOZE_ALWAYS_ON,
+        tunerService.addTunable(
+                this,
+                Settings.Secure.DOZE_ALWAYS_ON,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
     }
 
@@ -95,7 +96,7 @@ public class DozeParameters implements TunerService.Tunable,
     }
 
     public boolean getDozeSuspendDisplayStateSupported() {
-        return mContext.getResources().getBoolean(R.bool.doze_suspend_display_state_supported);
+        return mResources.getBoolean(R.bool.doze_suspend_display_state_supported);
     }
 
     public int getPulseDuration() {
@@ -103,7 +104,7 @@ public class DozeParameters implements TunerService.Tunable,
     }
 
     public float getScreenBrightnessDoze() {
-        return mContext.getResources().getInteger(
+        return mResources.getInteger(
                 com.android.internal.R.integer.config_screenBrightnessDoze) / 255f;
     }
 
@@ -173,7 +174,7 @@ public class DozeParameters implements TunerService.Tunable,
      * @return {@code true} if screen needs to be completely black before a power transition.
      */
     public boolean getDisplayNeedsBlanking() {
-        return FORCE_BLANKING || !FORCE_NO_BLANKING && mContext.getResources().getBoolean(
+        return FORCE_BLANKING || !FORCE_NO_BLANKING && mResources.getBoolean(
                 com.android.internal.R.bool.config_displayBlanksAfterDoze);
     }
 
@@ -186,25 +187,16 @@ public class DozeParameters implements TunerService.Tunable,
             return;
         }
         mControlScreenOffAnimation = controlScreenOffAnimation;
-        getPowerManager().setDozeAfterScreenOff(!controlScreenOffAnimation);
-    }
-
-    @VisibleForTesting
-    protected PowerManager getPowerManager() {
-        return mPowerManager;
+        mPowerManager.setDozeAfterScreenOff(!controlScreenOffAnimation);
     }
 
     private boolean getBoolean(String propName, int resId) {
-        return SystemProperties.getBoolean(propName, mContext.getResources().getBoolean(resId));
+        return SystemProperties.getBoolean(propName, mResources.getBoolean(resId));
     }
 
     private int getInt(String propName, int resId) {
-        int value = SystemProperties.getInt(propName, mContext.getResources().getInteger(resId));
+        int value = SystemProperties.getInt(propName, mResources.getInteger(resId));
         return MathUtils.constrain(value, 0, MAX_DURATION);
-    }
-
-    private String getString(String propName, int resId) {
-        return SystemProperties.get(propName, mContext.getString(resId));
     }
 
     public int getPulseVisibleDurationExtended() {
@@ -212,7 +204,7 @@ public class DozeParameters implements TunerService.Tunable,
     }
 
     public boolean doubleTapReportsTouchCoordinates() {
-        return mContext.getResources().getBoolean(R.bool.doze_double_tap_reports_touch_coordinates);
+        return mResources.getBoolean(R.bool.doze_double_tap_reports_touch_coordinates);
     }
 
     @Override

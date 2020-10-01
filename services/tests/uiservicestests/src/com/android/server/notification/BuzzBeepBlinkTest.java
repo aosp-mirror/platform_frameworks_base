@@ -22,6 +22,8 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
+import static android.media.AudioAttributes.USAGE_NOTIFICATION;
+import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
@@ -70,6 +72,8 @@ import android.view.accessibility.IAccessibilityManagerClient;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.logging.InstanceIdSequence;
+import com.android.internal.logging.InstanceIdSequenceFake;
 import com.android.internal.util.IntPair;
 import com.android.server.UiServiceTestCase;
 import com.android.server.lights.LogicalLight;
@@ -96,6 +100,9 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     NotificationUsageStats mUsageStats;
     @Mock
     IAccessibilityManager mAccessibilityService;
+    NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
+    private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
+            1 << 30);
 
     private NotificationManagerService mService;
     private String mPkg = "com.android.server.notification";
@@ -105,6 +112,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     private int mUid = 1000;
     private int mPid = 2000;
     private android.os.UserHandle mUser = UserHandle.of(ActivityManager.getCurrentUser());
+    private NotificationChannel mChannel;
 
     private VibrateRepeatMatcher mVibrateOnceMatcher = new VibrateRepeatMatcher(-1);
     private VibrateRepeatMatcher mVibrateLoopMatcher = new VibrateRepeatMatcher(0);
@@ -145,7 +153,8 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verify(mAccessibilityService).addClient(any(IAccessibilityManagerClient.class), anyInt());
         assertTrue(accessibilityManager.isEnabled());
 
-        mService = spy(new NotificationManagerService(getContext()));
+        mService = spy(new NotificationManagerService(getContext(), mNotificationRecordLogger,
+                mNotificationInstanceIdSequence));
         mService.setAudioManager(mAudioManager);
         mService.setVibrator(mVibrator);
         mService.setSystemReady(true);
@@ -158,6 +167,8 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.mScreenOn = false;
         mService.mInCallStateOffHook = false;
         mService.mNotificationPulseEnabled = true;
+
+        mChannel = new NotificationChannel("test", "test", IMPORTANCE_HIGH);
     }
 
     //
@@ -174,13 +185,18 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
                 true /* noisy */, false /* buzzy*/, false /* lights */);
     }
 
+    private NotificationRecord getBeepyOtherNotification() {
+        return getNotificationRecord(mOtherId, false /* insistent */, false /* once */,
+                true /* noisy */, false /* buzzy*/, false /* lights */);
+    }
+
     private NotificationRecord getBeepyOnceNotification() {
         return getNotificationRecord(mId, false /* insistent */, true /* once */,
                 true /* noisy */, false /* buzzy*/, false /* lights */);
     }
 
     private NotificationRecord getQuietNotification() {
-        return getNotificationRecord(mId, false /* insistent */, false /* once */,
+        return getNotificationRecord(mId, false /* insistent */, true /* once */,
                 false /* noisy */, false /* buzzy*/, false /* lights */);
     }
 
@@ -214,6 +230,11 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
                 false /* noisy */, true /* buzzy*/, false /* lights */);
     }
 
+    private NotificationRecord getBuzzyOtherNotification() {
+        return getNotificationRecord(mOtherId, false /* insistent */, false /* once */,
+                false /* noisy */, true /* buzzy*/, false /* lights */);
+    }
+
     private NotificationRecord getBuzzyOnceNotification() {
         return getNotificationRecord(mId, false /* insistent */, true /* once */,
                 false /* noisy */, true /* buzzy*/, false /* lights */);
@@ -239,22 +260,34 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
                 false /* noisy */, false /* buzzy*/, true /* lights */);
     }
 
-    private NotificationRecord getCallRecord(int id, boolean insistent) {
-        return getNotificationRecord(id, false, false /* once */, true /* noisy */,
-                false /* buzzy */, false /* lights */, false /* default vib */,
-                false /* default sound */, false /* default lights */, "",
-                Notification.GROUP_ALERT_ALL, false);
+    private NotificationRecord getCallRecord(int id, NotificationChannel channel, boolean looping) {
+        final Builder builder = new Builder(getContext())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setPriority(Notification.PRIORITY_HIGH);
+        Notification n = builder.build();
+        if (looping) {
+            n.flags |= Notification.FLAG_INSISTENT;
+        }
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, id, mTag, mUid,
+                mPid, n, mUser, null, System.currentTimeMillis());
+        NotificationRecord r = new NotificationRecord(getContext(), sbn, channel);
+        mService.addNotification(r);
+
+        return r;
     }
 
     private NotificationRecord getNotificationRecord(int id, boolean insistent, boolean once,
             boolean noisy, boolean buzzy, boolean lights) {
-        return getNotificationRecord(id, insistent, once, noisy, buzzy, lights, true, true, true,
-                null, Notification.GROUP_ALERT_ALL, false);
+        return getNotificationRecord(id, insistent, once, noisy, buzzy, lights, buzzy, noisy,
+                lights, null, Notification.GROUP_ALERT_ALL, false);
     }
 
-    private NotificationRecord getLeanbackNotificationRecord(int id, boolean insistent, boolean once,
+    private NotificationRecord getLeanbackNotificationRecord(int id, boolean insistent,
+            boolean once,
             boolean noisy, boolean buzzy, boolean lights) {
-        return getNotificationRecord(id, insistent, once, noisy, buzzy, lights, true, true, true,
+        return getNotificationRecord(id, insistent, once, noisy, buzzy, lights, true, true,
+                true,
                 null, Notification.GROUP_ALERT_ALL, true);
     }
 
@@ -265,16 +298,16 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
     private NotificationRecord getLightsNotificationRecord(String groupKey,
             int groupAlertBehavior) {
-        return getNotificationRecord(mId, false, false, false, false, true /*lights*/, true, true,
-                true, groupKey, groupAlertBehavior, false);
+        return getNotificationRecord(mId, false, false, false, false, true /*lights*/, true,
+                true, true, groupKey, groupAlertBehavior, false);
     }
 
-    private NotificationRecord getNotificationRecord(int id, boolean insistent, boolean once,
+    private NotificationRecord getNotificationRecord(int id,
+            boolean insistent, boolean once,
             boolean noisy, boolean buzzy, boolean lights, boolean defaultVibration,
             boolean defaultSound, boolean defaultLights, String groupKey, int groupAlertBehavior,
             boolean isLeanback) {
-        NotificationChannel channel =
-                new NotificationChannel("test", "test", IMPORTANCE_HIGH);
+
         final Builder builder = new Builder(getContext())
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
@@ -285,31 +318,37 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         if (noisy) {
             if (defaultSound) {
                 defaults |= Notification.DEFAULT_SOUND;
-                channel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,
+                mChannel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,
                         Notification.AUDIO_ATTRIBUTES_DEFAULT);
             } else {
                 builder.setSound(CUSTOM_SOUND);
-                channel.setSound(CUSTOM_SOUND, CUSTOM_ATTRIBUTES);
+                mChannel.setSound(CUSTOM_SOUND, CUSTOM_ATTRIBUTES);
             }
         } else {
-            channel.setSound(null, null);
+            mChannel.setSound(null, null);
         }
         if (buzzy) {
             if (defaultVibration) {
                 defaults |= Notification.DEFAULT_VIBRATE;
             } else {
                 builder.setVibrate(CUSTOM_VIBRATION);
-                channel.setVibrationPattern(CUSTOM_VIBRATION);
+                mChannel.setVibrationPattern(CUSTOM_VIBRATION);
             }
-            channel.enableVibration(true);
+            mChannel.enableVibration(true);
+        } else {
+            mChannel.setVibrationPattern(null);
+            mChannel.enableVibration(false);
         }
+
         if (lights) {
             if (defaultLights) {
                 defaults |= Notification.DEFAULT_LIGHTS;
             } else {
                 builder.setLights(CUSTOM_LIGHT_COLOR, CUSTOM_LIGHT_ON, CUSTOM_LIGHT_OFF);
             }
-            channel.enableLights(true);
+            mChannel.enableLights(true);
+        } else {
+            mChannel.enableLights(false);
         }
         builder.setDefaults(defaults);
 
@@ -329,7 +368,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, id, mTag, mUid,
                 mPid, n, mUser, null, System.currentTimeMillis());
-        NotificationRecord r = new NotificationRecord(context, sbn, channel);
+        NotificationRecord r = new NotificationRecord(context, sbn, mChannel);
         mService.addNotification(r);
         return r;
     }
@@ -339,18 +378,19 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     //
 
     private void verifyNeverBeep() throws RemoteException {
-        verify(mRingtonePlayer, never()).playAsync((Uri) anyObject(), (UserHandle) anyObject(),
-                anyBoolean(), (AudioAttributes) anyObject());
+        verify(mRingtonePlayer, never()).playAsync(any(), any(), anyBoolean(), any());
     }
 
-    private void verifyBeep() throws RemoteException {
-        verify(mRingtonePlayer, times(1)).playAsync((Uri) anyObject(), (UserHandle) anyObject(),
-                eq(true), (AudioAttributes) anyObject());
+    private void verifyBeepUnlooped() throws RemoteException  {
+        verify(mRingtonePlayer, times(1)).playAsync(any(), any(), eq(false), any());
     }
 
-    private void verifyBeepLooped() throws RemoteException {
-        verify(mRingtonePlayer, times(1)).playAsync((Uri) anyObject(), (UserHandle) anyObject(),
-                eq(false), (AudioAttributes) anyObject());
+    private void verifyBeepLooped() throws RemoteException  {
+        verify(mRingtonePlayer, times(1)).playAsync(any(), any(), eq(true), any());
+    }
+
+    private void verifyBeep(int times)  throws RemoteException  {
+        verify(mRingtonePlayer, times(times)).playAsync(any(), any(), anyBoolean(), any());
     }
 
     private void verifyNeverStopAudio() throws RemoteException {
@@ -362,24 +402,31 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     }
 
     private void verifyNeverVibrate() {
-        verify(mVibrator, never()).vibrate(anyInt(), anyString(), (VibrationEffect) anyObject(),
-                anyString(), (AudioAttributes) anyObject());
+        verify(mVibrator, never()).vibrate(anyInt(), anyString(), any(), anyString(), any());
     }
 
     private void verifyVibrate() {
         verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), argThat(mVibrateOnceMatcher),
-                anyString(), (AudioAttributes) anyObject());
+                anyString(), any());
+    }
+
+    private void verifyVibrate(int times) {
+        verify(mVibrator, times(times)).vibrate(anyInt(), anyString(), any(), anyString(), any());
     }
 
     private void verifyVibrateLooped() {
         verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), argThat(mVibrateLoopMatcher),
-                anyString(), (AudioAttributes) anyObject());
+                anyString(), any());
     }
 
     private void verifyDelayedVibrateLooped() {
         verify(mVibrator, timeout(MAX_VIBRATION_DELAY).times(1)).vibrate(anyInt(), anyString(),
-                argThat(mVibrateLoopMatcher), anyString(),
-                (AudioAttributes) anyObject());
+                argThat(mVibrateLoopMatcher), anyString(), any());
+    }
+
+    private void verifyDelayedVibrate() {
+        verify(mVibrator, timeout(MAX_VIBRATION_DELAY).times(1)).vibrate(anyInt(), anyString(),
+                argThat(mVibrateOnceMatcher), anyString(), any());
     }
 
     private void verifyStopVibrate() {
@@ -396,11 +443,6 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
     private void verifyLights() {
         verify(mLight, times(1)).setFlashing(anyInt(), anyInt(), anyInt(), anyInt());
-    }
-
-    private void verifyCustomLights() {
-        verify(mLight, times(1)).setFlashing(
-                eq(CUSTOM_LIGHT_COLOR), anyInt(), eq(CUSTOM_LIGHT_ON), eq(CUSTOM_LIGHT_OFF));
     }
 
     //
@@ -425,7 +467,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         mService.buzzBeepBlinkLocked(r);
 
-        verifyBeepLooped();
+        verifyBeepUnlooped();
         verifyNeverVibrate();
         verify(mAccessibilityService, times(1)).sendAccessibilityEvent(any(), anyInt());
         assertTrue(r.isInterruptive());
@@ -438,7 +480,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         mService.buzzBeepBlinkLocked(r);
 
-        verifyBeep();
+        verifyBeepLooped();
         assertTrue(r.isInterruptive());
         assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
@@ -492,7 +534,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         mService.buzzBeepBlinkLocked(r);
 
-        verifyBeepLooped();
+        verifyBeepUnlooped();
         assertTrue(r.isInterruptive());
     }
 
@@ -533,7 +575,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         // update should beep
         r.isUpdate = true;
         mService.buzzBeepBlinkLocked(r);
-        verifyBeepLooped();
+        verifyBeepUnlooped();
         verify(mAccessibilityService, times(2)).sendAccessibilityEvent(any(), anyInt());
         assertTrue(r.isInterruptive());
         assertNotEquals(-1, r.getLastAudiblyAlertedMs());
@@ -723,7 +765,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(r);
 
         verifyNeverVibrate();
-        verifyBeepLooped();
+        verifyBeepUnlooped();
         assertTrue(r.isInterruptive());
         assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
@@ -804,6 +846,18 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testPostSilently() throws Exception {
+        NotificationRecord r = getBuzzyNotification();
+        r.setPostSilently(true);
+
+        mService.buzzBeepBlinkLocked(r);
+
+        verifyNeverBeep();
+        assertFalse(r.isInterruptive());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
+    }
+
+    @Test
     public void testGroupAlertSummarySilenceChild() throws Exception {
         NotificationRecord child = getBeepyNotificationRecord("a", GROUP_ALERT_SUMMARY);
 
@@ -821,7 +875,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         mService.buzzBeepBlinkLocked(summary);
 
-        verifyBeepLooped();
+        verifyBeepUnlooped();
         // summaries are never interruptive for notification counts
         assertFalse(summary.isInterruptive());
         assertNotEquals(-1, summary.getLastAudiblyAlertedMs());
@@ -833,7 +887,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         mService.buzzBeepBlinkLocked(nonGroup);
 
-        verifyBeepLooped();
+        verifyBeepUnlooped();
         assertTrue(nonGroup.isInterruptive());
         assertNotEquals(-1, nonGroup.getLastAudiblyAlertedMs());
     }
@@ -856,7 +910,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         mService.buzzBeepBlinkLocked(child);
 
-        verifyBeepLooped();
+        verifyBeepUnlooped();
         assertTrue(child.isInterruptive());
         assertNotEquals(-1, child.getLastAudiblyAlertedMs());
     }
@@ -867,7 +921,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         mService.buzzBeepBlinkLocked(nonGroup);
 
-        verifyBeepLooped();
+        verifyBeepUnlooped();
         assertTrue(nonGroup.isInterruptive());
         assertNotEquals(-1, nonGroup.getLastAudiblyAlertedMs());
     }
@@ -878,7 +932,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         mService.buzzBeepBlinkLocked(group);
 
-        verifyBeepLooped();
+        verifyBeepUnlooped();
         assertTrue(group.isInterruptive());
         assertNotEquals(-1, group.getLastAudiblyAlertedMs());
     }
@@ -1309,7 +1363,11 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
     @Test
     public void testListenerHintCall() throws Exception {
-        NotificationRecord r = getCallRecord(1, true);
+        NotificationChannel ringtoneChannel =
+                new NotificationChannel("ringtone", "", IMPORTANCE_HIGH);
+        ringtoneChannel.setSound(Settings.System.DEFAULT_RINGTONE_URI,
+                new AudioAttributes.Builder().setUsage(USAGE_NOTIFICATION_RINGTONE).build());
+        NotificationRecord r = getCallRecord(1, ringtoneChannel, true);
 
         mService.setHints(NotificationListenerService.HINT_HOST_DISABLE_CALL_EFFECTS);
 
@@ -1326,7 +1384,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         mService.buzzBeepBlinkLocked(r);
 
-        verifyBeepLooped();
+        verifyBeepUnlooped();
     }
 
     @Test
@@ -1342,7 +1400,11 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
     @Test
     public void testListenerHintBoth() throws Exception {
-        NotificationRecord r = getCallRecord(1, true);
+        NotificationChannel ringtoneChannel =
+                new NotificationChannel("ringtone", "", IMPORTANCE_HIGH);
+        ringtoneChannel.setSound(Settings.System.DEFAULT_RINGTONE_URI,
+                new AudioAttributes.Builder().setUsage(USAGE_NOTIFICATION_RINGTONE).build());
+        NotificationRecord r = getCallRecord(1, ringtoneChannel, true);
         NotificationRecord s = getBeepyNotification();
 
         mService.setHints(NotificationListenerService.HINT_HOST_DISABLE_NOTIFICATION_EFFECTS
@@ -1356,13 +1418,180 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
     @Test
     public void testListenerHintNotification_callSound() throws Exception {
-        NotificationRecord r = getCallRecord(1, true);
+        NotificationChannel ringtoneChannel =
+                new NotificationChannel("ringtone", "", IMPORTANCE_HIGH);
+        ringtoneChannel.setSound(Settings.System.DEFAULT_RINGTONE_URI,
+                new AudioAttributes.Builder().setUsage(USAGE_NOTIFICATION_RINGTONE).build());
+        NotificationRecord r = getCallRecord(1, ringtoneChannel, true);
 
         mService.setHints(NotificationListenerService.HINT_HOST_DISABLE_NOTIFICATION_EFFECTS);
 
         mService.buzzBeepBlinkLocked(r);
 
         verifyBeepLooped();
+    }
+
+    @Test
+    public void testCannotInterruptRingtoneInsistentBeep() throws Exception {
+        NotificationChannel ringtoneChannel =
+                new NotificationChannel("ringtone", "", IMPORTANCE_HIGH);
+        ringtoneChannel.setSound(Settings.System.DEFAULT_RINGTONE_URI,
+                new AudioAttributes.Builder().setUsage(USAGE_NOTIFICATION_RINGTONE).build());
+        NotificationRecord ringtoneNotification = getCallRecord(1, ringtoneChannel, true);
+        mService.addNotification(ringtoneNotification);
+
+        mService.buzzBeepBlinkLocked(ringtoneNotification);
+        verifyBeepLooped();
+
+        NotificationRecord interrupter = getBeepyOtherNotification();
+        assertTrue(mService.shouldMuteNotificationLocked(interrupter));
+        mService.buzzBeepBlinkLocked(interrupter);
+
+        verifyBeep(1);
+
+        assertFalse(interrupter.isInterruptive());
+        assertEquals(-1, interrupter.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    public void testCannotInterruptRingtoneInsistentBuzz() {
+        NotificationChannel ringtoneChannel =
+                new NotificationChannel("ringtone", "", IMPORTANCE_HIGH);
+        ringtoneChannel.setSound(Uri.EMPTY,
+                new AudioAttributes.Builder().setUsage(USAGE_NOTIFICATION_RINGTONE).build());
+        ringtoneChannel.enableVibration(true);
+        NotificationRecord ringtoneNotification = getCallRecord(1, ringtoneChannel, true);
+        assertFalse(mService.shouldMuteNotificationLocked(ringtoneNotification));
+
+        mService.buzzBeepBlinkLocked(ringtoneNotification);
+        verifyVibrateLooped();
+
+        NotificationRecord interrupter = getBuzzyOtherNotification();
+        assertTrue(mService.shouldMuteNotificationLocked(interrupter));
+        mService.buzzBeepBlinkLocked(interrupter);
+
+        verifyVibrate(1);
+
+        assertFalse(interrupter.isInterruptive());
+        assertEquals(-1, interrupter.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    public void testCanInterruptRingtoneNonInsistentBeep() throws Exception {
+        NotificationChannel ringtoneChannel =
+                new NotificationChannel("ringtone", "", IMPORTANCE_HIGH);
+        ringtoneChannel.setSound(Settings.System.DEFAULT_RINGTONE_URI,
+                new AudioAttributes.Builder().setUsage(USAGE_NOTIFICATION_RINGTONE).build());
+        NotificationRecord ringtoneNotification = getCallRecord(1, ringtoneChannel, false);
+
+        mService.buzzBeepBlinkLocked(ringtoneNotification);
+        verifyBeepUnlooped();
+
+        NotificationRecord interrupter = getBeepyOtherNotification();
+        mService.buzzBeepBlinkLocked(interrupter);
+
+        verifyBeep(2);
+
+        assertTrue(interrupter.isInterruptive());
+    }
+
+    @Test
+    public void testCanInterruptRingtoneNonInsistentBuzz() {
+        NotificationChannel ringtoneChannel =
+                new NotificationChannel("ringtone", "", IMPORTANCE_HIGH);
+        ringtoneChannel.setSound(null,
+                new AudioAttributes.Builder().setUsage(USAGE_NOTIFICATION_RINGTONE).build());
+        ringtoneChannel.enableVibration(true);
+        NotificationRecord ringtoneNotification = getCallRecord(1, ringtoneChannel, false);
+
+        mService.buzzBeepBlinkLocked(ringtoneNotification);
+        verifyVibrate();
+
+        NotificationRecord interrupter = getBuzzyOtherNotification();
+        mService.buzzBeepBlinkLocked(interrupter);
+
+        verifyVibrate(2);
+
+        assertTrue(interrupter.isInterruptive());
+    }
+
+    @Test
+    public void testRingtoneInsistentBeep_doesNotBlockFutureSoundsOnceStopped() throws Exception {
+        NotificationChannel ringtoneChannel =
+                new NotificationChannel("ringtone", "", IMPORTANCE_HIGH);
+        ringtoneChannel.setSound(Settings.System.DEFAULT_RINGTONE_URI,
+                new AudioAttributes.Builder().setUsage(USAGE_NOTIFICATION_RINGTONE).build());
+        NotificationRecord ringtoneNotification = getCallRecord(1, ringtoneChannel, true);
+
+        mService.buzzBeepBlinkLocked(ringtoneNotification);
+        verifyBeepLooped();
+
+        mService.clearSoundLocked();
+
+        NotificationRecord interrupter = getBeepyOtherNotification();
+        mService.buzzBeepBlinkLocked(interrupter);
+
+        verifyBeep(2);
+
+        assertTrue(interrupter.isInterruptive());
+    }
+
+    @Test
+    public void testRingtoneInsistentBuzz_doesNotBlockFutureSoundsOnceStopped() {
+        NotificationChannel ringtoneChannel =
+                new NotificationChannel("ringtone", "", IMPORTANCE_HIGH);
+        ringtoneChannel.setSound(null,
+                new AudioAttributes.Builder().setUsage(USAGE_NOTIFICATION_RINGTONE).build());
+        ringtoneChannel.enableVibration(true);
+        NotificationRecord ringtoneNotification = getCallRecord(1, ringtoneChannel, true);
+
+        mService.buzzBeepBlinkLocked(ringtoneNotification);
+        verifyVibrateLooped();
+
+        mService.clearVibrateLocked();
+
+        NotificationRecord interrupter = getBuzzyOtherNotification();
+        mService.buzzBeepBlinkLocked(interrupter);
+
+        verifyVibrate(2);
+
+        assertTrue(interrupter.isInterruptive());
+    }
+
+    @Test
+    public void testCanInterruptNonRingtoneInsistentBeep() throws Exception {
+        NotificationChannel fakeRingtoneChannel =
+                new NotificationChannel("ringtone", "", IMPORTANCE_HIGH);
+        NotificationRecord ringtoneNotification = getCallRecord(1, fakeRingtoneChannel, true);
+
+        mService.buzzBeepBlinkLocked(ringtoneNotification);
+        verifyBeepLooped();
+
+        NotificationRecord interrupter = getBeepyOtherNotification();
+        mService.buzzBeepBlinkLocked(interrupter);
+
+        verifyBeep(2);
+
+        assertTrue(interrupter.isInterruptive());
+    }
+
+    @Test
+    public void testCanInterruptNonRingtoneInsistentBuzz() {
+        NotificationChannel fakeRingtoneChannel =
+                new NotificationChannel("ringtone", "", IMPORTANCE_HIGH);
+        fakeRingtoneChannel.enableVibration(true);
+        fakeRingtoneChannel.setSound(null,
+                new AudioAttributes.Builder().setUsage(USAGE_NOTIFICATION).build());
+        NotificationRecord ringtoneNotification = getCallRecord(1, fakeRingtoneChannel, true);
+
+        mService.buzzBeepBlinkLocked(ringtoneNotification);
+
+        NotificationRecord interrupter = getBuzzyOtherNotification();
+        mService.buzzBeepBlinkLocked(interrupter);
+
+        verifyVibrate(2);
+
+        assertTrue(interrupter.isInterruptive());
     }
 
     static class VibrateRepeatMatcher implements ArgumentMatcher<VibrationEffect> {

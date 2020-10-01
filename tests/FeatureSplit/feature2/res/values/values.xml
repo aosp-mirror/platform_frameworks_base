@@ -15,10 +15,11 @@
 -->
 
 <resources>
+    <string name="feature2_string">feature 2 string referenced from feature 1</string>
     <integer name="test_integer3">300</integer>
     <color name="test_color3">#0000ff</color>
     <string-array name="string_array3">
-        <item>@string/app_title</item>
+      <item>@string/app_title</item>
     </string-array>
 </resources>
 

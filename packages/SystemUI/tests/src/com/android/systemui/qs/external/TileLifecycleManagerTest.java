@@ -45,6 +45,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 
 import org.junit.After;
 import org.junit.Before;
@@ -59,6 +60,8 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
 
     private final PackageManagerAdapter mMockPackageManagerAdapter =
             Mockito.mock(PackageManagerAdapter.class);
+    private final BroadcastDispatcher mMockBroadcastDispatcher =
+            Mockito.mock(BroadcastDispatcher.class);
     private final IQSTileService.Stub mMockTileService = Mockito.mock(IQSTileService.Stub.class);
     private ComponentName mTileServiceComponentName;
     private Intent mTileServiceIntent;
@@ -87,7 +90,8 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 Mockito.mock(IQSService.class), new Tile(),
                 mTileServiceIntent,
                 mUser,
-                mMockPackageManagerAdapter);
+                mMockPackageManagerAdapter,
+                mMockBroadcastDispatcher);
     }
 
     @After
@@ -101,6 +105,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
             defaultServiceInfo = new ServiceInfo();
             defaultServiceInfo.metaData = new Bundle();
             defaultServiceInfo.metaData.putBoolean(TileService.META_DATA_ACTIVE_TILE, true);
+            defaultServiceInfo.metaData.putBoolean(TileService.META_DATA_TOGGLEABLE_TILE, true);
         }
         when(mMockPackageManagerAdapter.getServiceInfo(any(), anyInt(), anyInt()))
                 .thenReturn(defaultServiceInfo);
@@ -236,5 +241,10 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         // Two calls: one for the first bind, one for the restart.
         verifyBind(2);
         verify(mMockTileService, times(2)).onStartListening();
+    }
+
+    @Test
+    public void testToggleableTile() throws Exception {
+        assertTrue(mStateManager.isToggleableTile());
     }
 }

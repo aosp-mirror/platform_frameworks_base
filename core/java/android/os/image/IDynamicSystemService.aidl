@@ -39,6 +39,13 @@ interface IDynamicSystemService
     boolean createPartition(@utf8InCpp String name, long size, boolean readOnly);
 
     /**
+     * Complete the current partition installation.
+     *
+     * @return true if the partition installation completes without error.
+     */
+    boolean closePartition();
+
+    /**
      * Finish a previously started installation. Installations without
      * a cooresponding finishInstallation() will be cleaned up during device boot.
      */

@@ -25,6 +25,7 @@
 
 #include <binder/IServiceManager.h>
 #include <hidl/HidlTransportSupport.h>
+#include <incremental_service.h>
 
 #include <schedulerservice/SchedulingPolicyService.h>
 #include <sensorservice/SensorService.h>
@@ -132,18 +133,31 @@ static void android_server_SystemServer_spawnFdLeakCheckThread(JNIEnv*, jobject)
     }).detach();
 }
 
+static jlong android_server_SystemServer_startIncrementalService(JNIEnv* env, jclass klass,
+                                                                 jobject self) {
+    return Incremental_IncrementalService_Start(env);
+}
+
+static void android_server_SystemServer_setIncrementalServiceSystemReady(JNIEnv* env, jclass klass,
+                                                                         jlong handle) {
+    Incremental_IncrementalService_OnSystemReady(handle);
+}
+
 /*
  * JNI registration.
  */
 static const JNINativeMethod gMethods[] = {
-    /* name, signature, funcPtr */
-    { "startSensorService", "()V", (void*) android_server_SystemServer_startSensorService },
-    { "startHidlServices", "()V", (void*) android_server_SystemServer_startHidlServices },
-    { "initZygoteChildHeapProfiling", "()V",
-      (void*) android_server_SystemServer_initZygoteChildHeapProfiling },
-    { "spawnFdLeakCheckThread", "()V",
-      (void*) android_server_SystemServer_spawnFdLeakCheckThread },
-
+        /* name, signature, funcPtr */
+        {"startSensorService", "()V", (void*)android_server_SystemServer_startSensorService},
+        {"startHidlServices", "()V", (void*)android_server_SystemServer_startHidlServices},
+        {"initZygoteChildHeapProfiling", "()V",
+         (void*)android_server_SystemServer_initZygoteChildHeapProfiling},
+        {"spawnFdLeakCheckThread", "()V",
+         (void*)android_server_SystemServer_spawnFdLeakCheckThread},
+        {"startIncrementalService", "()J",
+         (void*)android_server_SystemServer_startIncrementalService},
+        {"setIncrementalServiceSystemReady", "(J)V",
+         (void*)android_server_SystemServer_setIncrementalServiceSystemReady},
 };
 
 int register_android_server_SystemServer(JNIEnv* env)

@@ -46,12 +46,12 @@ public interface DockManager {
     int ALIGN_STATE_GOOD = 0;
 
     /**
-     * Indicates it's slightly not aligned with dock. Normally combines with slow charging issue.
+     * Indicates it's slightly not aligned with dock.
      */
     int ALIGN_STATE_POOR = 1;
 
     /**
-     * Indicates it's not aligned with dock. Normally combines with not charging issue.
+     * Indicates it's not aligned with dock.
      */
     int ALIGN_STATE_TERRIBLE = 2;
 
@@ -87,6 +87,11 @@ public interface DockManager {
     * Returns true if the device is in docking state.
     */
     boolean isDocked();
+
+    /**
+     * Returns true if it is hiding docking UI.
+     */
+    boolean isHidden();
 
     /**
      * Listens to dock events.

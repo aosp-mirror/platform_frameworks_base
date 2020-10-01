@@ -448,7 +448,7 @@ public class EmergencyAffordanceServiceTest {
         List<SubscriptionInfo> subInfos = new ArrayList<>(2);
 
         // Test with Multiple SIMs. SIM1 is a non-EA SIM
-        // Only country iso is valuable, all other info are filled with dummy values
+        // Only country iso is valuable, all other info are filled with placeholder values
         SubscriptionInfo subInfo = new SubscriptionInfo(1, "890126042XXXXXXXXXXX", 0, "T-mobile",
                 "T-mobile", 0, 255, "12345", 0, null,
                 "310", "226", NON_EMERGENCY_ISO_CODE, false, null, null);

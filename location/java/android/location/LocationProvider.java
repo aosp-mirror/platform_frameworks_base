@@ -53,28 +53,10 @@ public class LocationProvider {
     @Deprecated
     public static final int AVAILABLE = 2;
 
-    /**
-     * A regular expression matching characters that may not appear
-     * in the name of a LocationProvider
-     * @hide
-     */
-    public static final String BAD_CHARS_REGEX = "[^a-zA-Z0-9]";
-
     private final String mName;
     private final ProviderProperties mProperties;
 
-    /**
-     * Constructs a LocationProvider with the given name.   Provider names must
-     * consist only of the characters [a-zA-Z0-9].
-     *
-     * @throws IllegalArgumentException if name contains an illegal character
-     *
-     * @hide
-     */
-    public LocationProvider(String name, ProviderProperties properties) {
-        if (name.matches(BAD_CHARS_REGEX)) {
-            throw new IllegalArgumentException("provider name contains illegal character: " + name);
-        }
+    LocationProvider(String name, ProviderProperties properties) {
         mName = name;
         mProperties = properties;
     }

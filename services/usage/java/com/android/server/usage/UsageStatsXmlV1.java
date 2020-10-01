@@ -26,7 +26,6 @@ import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.net.ProtocolException;
@@ -219,7 +218,7 @@ final class UsageStatsXmlV1 {
         try {
             event.mInstanceId = XmlUtils.readIntAttribute(parser, INSTANCE_ID_ATTR);
         } catch (IOException e) {
-            Log.e(TAG, "Failed to parse mInstanceId", e);
+            Log.i(TAG, "Failed to parse mInstanceId");
         }
 
         switch (event.mEventType) {
@@ -243,135 +242,6 @@ final class UsageStatsXmlV1 {
         statsOut.addEvent(event);
     }
 
-    private static void writeUsageStats(XmlSerializer xml, final IntervalStats stats,
-            final UsageStats usageStats) throws IOException {
-        xml.startTag(null, PACKAGE_TAG);
-
-        // Write the time offset.
-        XmlUtils.writeLongAttribute(xml, LAST_TIME_ACTIVE_ATTR,
-                usageStats.mLastTimeUsed - stats.beginTime);
-        XmlUtils.writeLongAttribute(xml, LAST_TIME_VISIBLE_ATTR,
-                usageStats.mLastTimeVisible - stats.beginTime);
-        XmlUtils.writeLongAttribute(xml, LAST_TIME_SERVICE_USED_ATTR,
-                usageStats.mLastTimeForegroundServiceUsed - stats.beginTime);
-        XmlUtils.writeStringAttribute(xml, PACKAGE_ATTR, usageStats.mPackageName);
-        XmlUtils.writeLongAttribute(xml, TOTAL_TIME_ACTIVE_ATTR, usageStats.mTotalTimeInForeground);
-        XmlUtils.writeLongAttribute(xml, TOTAL_TIME_VISIBLE_ATTR, usageStats.mTotalTimeVisible);
-        XmlUtils.writeLongAttribute(xml, TOTAL_TIME_SERVICE_USED_ATTR,
-                usageStats.mTotalTimeForegroundServiceUsed);
-        XmlUtils.writeIntAttribute(xml, LAST_EVENT_ATTR, usageStats.mLastEvent);
-        if (usageStats.mAppLaunchCount > 0) {
-            XmlUtils.writeIntAttribute(xml, APP_LAUNCH_COUNT_ATTR, usageStats.mAppLaunchCount);
-        }
-        writeChooserCounts(xml, usageStats);
-        xml.endTag(null, PACKAGE_TAG);
-    }
-
-    private static void writeCountAndTime(XmlSerializer xml, String tag, int count, long time)
-            throws IOException {
-        xml.startTag(null, tag);
-        XmlUtils.writeIntAttribute(xml, COUNT_ATTR, count);
-        XmlUtils.writeLongAttribute(xml, TIME_ATTR, time);
-        xml.endTag(null, tag);
-    }
-
-    private static void writeChooserCounts(XmlSerializer xml, final UsageStats usageStats)
-            throws IOException {
-        if (usageStats == null || usageStats.mChooserCounts == null ||
-                usageStats.mChooserCounts.keySet().isEmpty()) {
-            return;
-        }
-        final int chooserCountSize = usageStats.mChooserCounts.size();
-        for (int i = 0; i < chooserCountSize; i++) {
-            final String action = usageStats.mChooserCounts.keyAt(i);
-            final ArrayMap<String, Integer> counts = usageStats.mChooserCounts.valueAt(i);
-            if (action == null || counts == null || counts.isEmpty()) {
-                continue;
-            }
-            xml.startTag(null, CHOOSER_COUNT_TAG);
-            XmlUtils.writeStringAttribute(xml, NAME, action);
-            writeCountsForAction(xml, counts);
-            xml.endTag(null, CHOOSER_COUNT_TAG);
-        }
-    }
-
-    private static void writeCountsForAction(XmlSerializer xml, ArrayMap<String, Integer> counts)
-            throws IOException {
-        final int countsSize = counts.size();
-        for (int i = 0; i < countsSize; i++) {
-            String key = counts.keyAt(i);
-            int count = counts.valueAt(i);
-            if (count > 0) {
-                xml.startTag(null, CATEGORY_TAG);
-                XmlUtils.writeStringAttribute(xml, NAME, key);
-                XmlUtils.writeIntAttribute(xml, COUNT, count);
-                xml.endTag(null, CATEGORY_TAG);
-            }
-        }
-    }
-
-    private static void writeConfigStats(XmlSerializer xml, final IntervalStats stats,
-            final ConfigurationStats configStats, boolean isActive) throws IOException {
-        xml.startTag(null, CONFIG_TAG);
-
-        // Write the time offset.
-        XmlUtils.writeLongAttribute(xml, LAST_TIME_ACTIVE_ATTR,
-                configStats.mLastTimeActive - stats.beginTime);
-
-        XmlUtils.writeLongAttribute(xml, TOTAL_TIME_ACTIVE_ATTR, configStats.mTotalTimeActive);
-        XmlUtils.writeIntAttribute(xml, COUNT_ATTR, configStats.mActivationCount);
-        if (isActive) {
-            XmlUtils.writeBooleanAttribute(xml, ACTIVE_ATTR, true);
-        }
-
-        // Now write the attributes representing the configuration object.
-        Configuration.writeXmlAttrs(xml, configStats.mConfiguration);
-
-        xml.endTag(null, CONFIG_TAG);
-    }
-
-    private static void writeEvent(XmlSerializer xml, final IntervalStats stats,
-            final UsageEvents.Event event) throws IOException {
-        xml.startTag(null, EVENT_TAG);
-
-        // Store the time offset.
-        XmlUtils.writeLongAttribute(xml, TIME_ATTR, event.mTimeStamp - stats.beginTime);
-
-        XmlUtils.writeStringAttribute(xml, PACKAGE_ATTR, event.mPackage);
-        if (event.mClass != null) {
-            XmlUtils.writeStringAttribute(xml, CLASS_ATTR, event.mClass);
-        }
-        XmlUtils.writeIntAttribute(xml, FLAGS_ATTR, event.mFlags);
-        XmlUtils.writeIntAttribute(xml, TYPE_ATTR, event.mEventType);
-        XmlUtils.writeIntAttribute(xml, INSTANCE_ID_ATTR, event.mInstanceId);
-
-        switch (event.mEventType) {
-            case UsageEvents.Event.CONFIGURATION_CHANGE:
-                if (event.mConfiguration != null) {
-                    Configuration.writeXmlAttrs(xml, event.mConfiguration);
-                }
-                break;
-            case UsageEvents.Event.SHORTCUT_INVOCATION:
-                if (event.mShortcutId != null) {
-                    XmlUtils.writeStringAttribute(xml, SHORTCUT_ID_ATTR, event.mShortcutId);
-                }
-                break;
-            case UsageEvents.Event.STANDBY_BUCKET_CHANGED:
-                if (event.mBucketAndReason != 0) {
-                    XmlUtils.writeIntAttribute(xml, STANDBY_BUCKET_ATTR, event.mBucketAndReason);
-                }
-                break;
-            case UsageEvents.Event.NOTIFICATION_INTERRUPTION:
-                if (event.mNotificationChannelId != null) {
-                    XmlUtils.writeStringAttribute(
-                            xml, NOTIFICATION_CHANNEL_ATTR, event.mNotificationChannelId);
-                }
-                break;
-        }
-
-        xml.endTag(null, EVENT_TAG);
-    }
-
     /**
      * Reads from the {@link XmlPullParser}, assuming that it is already on the
      * <code><usagestats></code> tag.
@@ -390,13 +260,13 @@ final class UsageStatsXmlV1 {
         try {
             statsOut.majorVersion = XmlUtils.readIntAttribute(parser, MAJOR_VERSION_ATTR);
         } catch (IOException e) {
-            Log.e(TAG, "Failed to parse majorVersion", e);
+            Log.i(TAG, "Failed to parse majorVersion");
         }
 
         try {
             statsOut.minorVersion = XmlUtils.readIntAttribute(parser, MINOR_VERSION_ATTR);
         } catch (IOException e) {
-            Log.e(TAG, "Failed to parse minorVersion", e);
+            Log.i(TAG, "Failed to parse minorVersion");
         }
 
         int eventCode;
@@ -438,51 +308,6 @@ final class UsageStatsXmlV1 {
                     break;
             }
         }
-    }
-
-    /**
-     * Writes the stats object to an XML file. The {@link XmlSerializer}
-     * has already written the <code><usagestats></code> tag, but attributes may still
-     * be added.
-     *
-     * @param xml The serializer to which to write the packageStats data.
-     * @param stats The stats object to write to the XML file.
-     */
-    public static void write(XmlSerializer xml, IntervalStats stats) throws IOException {
-        XmlUtils.writeLongAttribute(xml, END_TIME_ATTR, stats.endTime - stats.beginTime);
-        XmlUtils.writeIntAttribute(xml, MAJOR_VERSION_ATTR, stats.majorVersion);
-        XmlUtils.writeIntAttribute(xml, MINOR_VERSION_ATTR, stats.minorVersion);
-
-        writeCountAndTime(xml, INTERACTIVE_TAG, stats.interactiveTracker.count,
-                stats.interactiveTracker.duration);
-        writeCountAndTime(xml, NON_INTERACTIVE_TAG, stats.nonInteractiveTracker.count,
-                stats.nonInteractiveTracker.duration);
-        writeCountAndTime(xml, KEYGUARD_SHOWN_TAG, stats.keyguardShownTracker.count,
-                stats.keyguardShownTracker.duration);
-        writeCountAndTime(xml, KEYGUARD_HIDDEN_TAG, stats.keyguardHiddenTracker.count,
-                stats.keyguardHiddenTracker.duration);
-
-        xml.startTag(null, PACKAGES_TAG);
-        final int statsCount = stats.packageStats.size();
-        for (int i = 0; i < statsCount; i++) {
-            writeUsageStats(xml, stats, stats.packageStats.valueAt(i));
-        }
-        xml.endTag(null, PACKAGES_TAG);
-
-        xml.startTag(null, CONFIGURATIONS_TAG);
-        final int configCount = stats.configurations.size();
-        for (int i = 0; i < configCount; i++) {
-            boolean active = stats.activeConfiguration.equals(stats.configurations.keyAt(i));
-            writeConfigStats(xml, stats, stats.configurations.valueAt(i), active);
-        }
-        xml.endTag(null, CONFIGURATIONS_TAG);
-
-        xml.startTag(null, EVENT_LOG_TAG);
-        final int eventCount = stats.events.size();
-        for (int i = 0; i < eventCount; i++) {
-            writeEvent(xml, stats, stats.events.get(i));
-        }
-        xml.endTag(null, EVENT_LOG_TAG);
     }
 
     private UsageStatsXmlV1() {

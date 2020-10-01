@@ -16,6 +16,7 @@
 
 package android.database;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentValues;
@@ -42,6 +43,7 @@ import com.android.internal.util.ArrayUtils;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.text.Collator;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -189,6 +191,58 @@ public class DatabaseUtils {
         }
     }
 
+    /** {@hide} */
+    public static long executeInsert(@NonNull SQLiteDatabase db, @NonNull String sql,
+            @Nullable Object[] bindArgs) throws SQLException {
+        try (SQLiteStatement st = db.compileStatement(sql)) {
+            bindArgs(st, bindArgs);
+            return st.executeInsert();
+        }
+    }
+
+    /** {@hide} */
+    public static int executeUpdateDelete(@NonNull SQLiteDatabase db, @NonNull String sql,
+            @Nullable Object[] bindArgs) throws SQLException {
+        try (SQLiteStatement st = db.compileStatement(sql)) {
+            bindArgs(st, bindArgs);
+            return st.executeUpdateDelete();
+        }
+    }
+
+    /** {@hide} */
+    private static void bindArgs(@NonNull SQLiteStatement st, @Nullable Object[] bindArgs) {
+        if (bindArgs == null) return;
+
+        for (int i = 0; i < bindArgs.length; i++) {
+            final Object bindArg = bindArgs[i];
+            switch (getTypeOfObject(bindArg)) {
+                case Cursor.FIELD_TYPE_NULL:
+                    st.bindNull(i + 1);
+                    break;
+                case Cursor.FIELD_TYPE_INTEGER:
+                    st.bindLong(i + 1, ((Number) bindArg).longValue());
+                    break;
+                case Cursor.FIELD_TYPE_FLOAT:
+                    st.bindDouble(i + 1, ((Number) bindArg).doubleValue());
+                    break;
+                case Cursor.FIELD_TYPE_BLOB:
+                    st.bindBlob(i + 1, (byte[]) bindArg);
+                    break;
+                case Cursor.FIELD_TYPE_STRING:
+                default:
+                    if (bindArg instanceof Boolean) {
+                        // Provide compatibility with legacy
+                        // applications which may pass Boolean values in
+                        // bind args.
+                        st.bindLong(i + 1, ((Boolean) bindArg).booleanValue() ? 1 : 0);
+                    } else {
+                        st.bindString(i + 1, bindArg.toString());
+                    }
+                    break;
+            }
+        }
+    }
+
     /**
      * Binds the given Object to the given SQLiteProgram using the proper
      * typing. For example, bind numbers as longs/doubles, and everything else
@@ -304,6 +358,34 @@ public class DatabaseUtils {
             }
         }
         return res.toString();
+    }
+
+    /**
+     * Make a deep copy of the given argument list, ensuring that the returned
+     * value is completely isolated from any changes to the original arguments.
+     *
+     * @hide
+     */
+    public static @Nullable Object[] deepCopyOf(@Nullable Object[] args) {
+        if (args == null) return null;
+
+        final Object[] res = new Object[args.length];
+        for (int i = 0; i < args.length; i++) {
+            final Object arg = args[i];
+
+            if ((arg == null) || (arg instanceof Number) || (arg instanceof String)) {
+                // When the argument is immutable, we can copy by reference
+                res[i] = arg;
+            } else if (arg instanceof byte[]) {
+                // Need to deep copy blobs
+                final byte[] castArg = (byte[]) arg;
+                res[i] = Arrays.copyOf(castArg, castArg.length);
+            } else {
+                // Convert everything else to string, making it immutable
+                res[i] = String.valueOf(arg);
+            }
+        }
+        return res;
     }
 
     /**
@@ -1547,5 +1629,25 @@ public class DatabaseUtils {
             }
         }
         return -1;
+    }
+
+    /**
+     * Escape the given argument for use in a {@code LIKE} statement.
+     * @hide
+     */
+    public static String escapeForLike(@NonNull String arg) {
+        // Shamelessly borrowed from com.android.providers.media.util.DatabaseUtils
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < arg.length(); i++) {
+            final char c = arg.charAt(i);
+            switch (c) {
+                case '%': sb.append('\\');
+                    break;
+                case '_': sb.append('\\');
+                    break;
+            }
+            sb.append(c);
+        }
+        return sb.toString();
     }
 }

@@ -26,6 +26,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
+import androidx.preference.Preference;
+
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import org.junit.Before;
@@ -60,19 +62,42 @@ public class MetricsFeatureProviderTest {
     }
 
     @Test
-    public void logDashboardStartIntent_intentEmpty_shouldNotLog() {
-        mProvider.logDashboardStartIntent(mContext, null /* intent */,
+    public void logClickedPreference_preferenceEmpty_shouldNotLog() {
+        final boolean loggable = mProvider.logClickedPreference(null /* preference */,
                 MetricsEvent.SETTINGS_GESTURES);
 
+        assertThat(loggable).isFalse();
         verifyNoMoreInteractions(mLogWriter);
     }
 
     @Test
-    public void logDashboardStartIntent_intentHasNoComponent_shouldLog() {
+    public void logClickedPreference_preferenceHasKey_shouldLog() {
+        final String key = "abc";
+        final Preference preference = new Preference(mContext);
+        preference.setKey(key);
+
+        final boolean loggable = mProvider.logClickedPreference(preference,
+                MetricsEvent.SETTINGS_GESTURES);
+
+        assertThat(loggable).isTrue();
+        verify(mLogWriter).action(
+                MetricsEvent.SETTINGS_GESTURES,
+                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
+                SettingsEnums.PAGE_UNKNOWN,
+                key,
+                0);
+    }
+
+    @Test
+    public void logClickedPreference_preferenceHasIntent_shouldLog() {
+        final Preference preference = new Preference(mContext);
         final Intent intent = new Intent(Intent.ACTION_ASSIST);
+        preference.setIntent(intent);
 
-        mProvider.logDashboardStartIntent(mContext, intent, MetricsEvent.SETTINGS_GESTURES);
+        final boolean loggable = mProvider.logClickedPreference(preference,
+                MetricsEvent.SETTINGS_GESTURES);
 
+        assertThat(loggable).isTrue();
         verify(mLogWriter).action(
                 MetricsEvent.SETTINGS_GESTURES,
                 MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
@@ -82,16 +107,91 @@ public class MetricsFeatureProviderTest {
     }
 
     @Test
-    public void logDashboardStartIntent_intentIsExternal_shouldLog() {
+    public void logClickedPreference_preferenceHasFragment_shouldLog() {
+        final Preference preference = new Preference(mContext);
+        final String fragment = "com.android.settings.tts.TextToSpeechSettings";
+        preference.setFragment(fragment);
+
+        final boolean loggable = mProvider.logClickedPreference(preference,
+                MetricsEvent.SETTINGS_GESTURES);
+
+        assertThat(loggable).isTrue();
+        verify(mLogWriter).action(
+                MetricsEvent.SETTINGS_GESTURES,
+                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
+                SettingsEnums.PAGE_UNKNOWN,
+                fragment,
+                0);
+    }
+
+    @Test
+    public void logStartedIntent_intentEmpty_shouldNotLog() {
+        final boolean loggable = mProvider.logStartedIntent(null /* intent */,
+                MetricsEvent.SETTINGS_GESTURES);
+
+        assertThat(loggable).isFalse();
+        verifyNoMoreInteractions(mLogWriter);
+    }
+
+    @Test
+    public void logStartedIntent_intentHasNoComponent_shouldLog() {
+        final Intent intent = new Intent(Intent.ACTION_ASSIST);
+
+        final boolean loggable = mProvider.logStartedIntent(intent, MetricsEvent.SETTINGS_GESTURES);
+
+        assertThat(loggable).isTrue();
+        verify(mLogWriter).action(
+                MetricsEvent.SETTINGS_GESTURES,
+                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
+                SettingsEnums.PAGE_UNKNOWN,
+                Intent.ACTION_ASSIST,
+                0);
+    }
+
+    @Test
+    public void logStartedIntent_intentIsExternal_shouldLog() {
         final Intent intent = new Intent().setComponent(new ComponentName("pkg", "cls"));
 
-        mProvider.logDashboardStartIntent(mContext, intent, MetricsEvent.SETTINGS_GESTURES);
+        final boolean loggable = mProvider.logStartedIntent(intent, MetricsEvent.SETTINGS_GESTURES);
 
+        assertThat(loggable).isTrue();
         verify(mLogWriter).action(
                 MetricsEvent.SETTINGS_GESTURES,
                 MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
                 SettingsEnums.PAGE_UNKNOWN,
                 "pkg/cls",
+                0);
+    }
+
+    @Test
+    public void logStartedIntentWithProfile_isPersonalProfile_shouldTagPersonal() {
+        final Intent intent = new Intent().setComponent(new ComponentName("pkg", "cls"));
+
+        final boolean loggable = mProvider.logStartedIntentWithProfile(intent,
+                MetricsEvent.SETTINGS_GESTURES, false);
+
+        assertThat(loggable).isTrue();
+        verify(mLogWriter).action(
+                MetricsEvent.SETTINGS_GESTURES,
+                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
+                SettingsEnums.PAGE_UNKNOWN,
+                "pkg/cls/personal",
+                0);
+    }
+
+    @Test
+    public void logStartedIntentWithProfile_isWorkProfile_shouldTagWork() {
+        final Intent intent = new Intent().setComponent(new ComponentName("pkg", "cls"));
+
+        final boolean loggable = mProvider.logStartedIntentWithProfile(intent,
+                MetricsEvent.SETTINGS_GESTURES, true);
+
+        assertThat(loggable).isTrue();
+        verify(mLogWriter).action(
+                MetricsEvent.SETTINGS_GESTURES,
+                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
+                SettingsEnums.PAGE_UNKNOWN,
+                "pkg/cls/work",
                 0);
     }
 
@@ -117,5 +217,30 @@ public class MetricsFeatureProviderTest {
         final Activity activity = Robolectric.buildActivity(Activity.class, intent).create().get();
 
         assertThat(mProvider.getAttribution(activity)).isEqualTo(100);
+    }
+
+    @Test
+    public void logSettingsTileClick_hasKey_shouldLog() {
+        final String key = "abc";
+        final boolean loggable = mProvider.logSettingsTileClick(key,
+                MetricsEvent.SETTINGS_GESTURES);
+
+        assertThat(loggable).isTrue();
+        verify(mLogWriter).action(
+                MetricsEvent.SETTINGS_GESTURES,
+                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
+                SettingsEnums.PAGE_UNKNOWN,
+                key,
+                0);
+    }
+
+    @Test
+    public void logSettingsTileClick_keyEmpty_shouldNotLog() {
+        final String key = "";
+        boolean loggable = mProvider.logSettingsTileClick(key,
+                MetricsEvent.SETTINGS_GESTURES);
+
+        assertThat(loggable).isFalse();
+        verifyNoMoreInteractions(mLogWriter);
     }
 }

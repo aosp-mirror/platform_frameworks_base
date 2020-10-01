@@ -16,6 +16,7 @@
 #include "config/ConfigKey.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
+#include <android/binder_interface_utils.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -29,33 +30,34 @@ namespace os {
 namespace statsd {
 
 using android::util::ProtoOutputStream;
+using ::ndk::SharedRefBase;
 
 #ifdef __ANDROID__
 
 TEST(StatsServiceTest, TestAddConfig_simple) {
-    StatsService service(nullptr, nullptr);
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
     StatsdConfig config;
     config.set_id(12345);
     string serialized = config.SerializeAsString();
 
     EXPECT_TRUE(
-            service.addConfigurationChecked(123, 12345, {serialized.begin(), serialized.end()}));
+            service->addConfigurationChecked(123, 12345, {serialized.begin(), serialized.end()}));
 }
 
 TEST(StatsServiceTest, TestAddConfig_empty) {
-    StatsService service(nullptr, nullptr);
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
     string serialized = "";
 
     EXPECT_TRUE(
-            service.addConfigurationChecked(123, 12345, {serialized.begin(), serialized.end()}));
+            service->addConfigurationChecked(123, 12345, {serialized.begin(), serialized.end()}));
 }
 
 TEST(StatsServiceTest, TestAddConfig_invalid) {
-    StatsService service(nullptr, nullptr);
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
     string serialized = "Invalid config!";
 
     EXPECT_FALSE(
-            service.addConfigurationChecked(123, 12345, {serialized.begin(), serialized.end()}));
+            service->addConfigurationChecked(123, 12345, {serialized.begin(), serialized.end()}));
 }
 
 TEST(StatsServiceTest, TestGetUidFromArgs) {
@@ -63,38 +65,34 @@ TEST(StatsServiceTest, TestGetUidFromArgs) {
     args.push(String8("-1"));
     args.push(String8("0"));
     args.push(String8("1"));
-    args.push(String8("9999999999999999999999999999999999"));
     args.push(String8("a1"));
     args.push(String8(""));
 
     int32_t uid;
 
-    StatsService service(nullptr, nullptr);
-    service.mEngBuild = true;
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
+    service->mEngBuild = true;
 
     // "-1"
-    EXPECT_FALSE(service.getUidFromArgs(args, 0, uid));
+    EXPECT_FALSE(service->getUidFromArgs(args, 0, uid));
 
     // "0"
-    EXPECT_TRUE(service.getUidFromArgs(args, 1, uid));
+    EXPECT_TRUE(service->getUidFromArgs(args, 1, uid));
     EXPECT_EQ(0, uid);
 
     // "1"
-    EXPECT_TRUE(service.getUidFromArgs(args, 2, uid));
+    EXPECT_TRUE(service->getUidFromArgs(args, 2, uid));
     EXPECT_EQ(1, uid);
 
-    // "999999999999999999"
-    EXPECT_FALSE(service.getUidFromArgs(args, 3, uid));
-
     // "a1"
-    EXPECT_FALSE(service.getUidFromArgs(args, 4, uid));
+    EXPECT_FALSE(service->getUidFromArgs(args, 3, uid));
 
     // ""
-    EXPECT_FALSE(service.getUidFromArgs(args, 5, uid));
+    EXPECT_FALSE(service->getUidFromArgs(args, 4, uid));
 
     // For a non-userdebug, uid "1" cannot be impersonated.
-    service.mEngBuild = false;
-    EXPECT_FALSE(service.getUidFromArgs(args, 2, uid));
+    service->mEngBuild = false;
+    EXPECT_FALSE(service->getUidFromArgs(args, 2, uid));
 }
 
 #else

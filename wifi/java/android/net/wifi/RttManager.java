@@ -1212,7 +1212,7 @@ public class RttManager {
      *
      * @hide
      */
-    public RttManager(Context context, WifiRttManager service) {
+    public RttManager(@NonNull Context context, @NonNull WifiRttManager service) {
         mNewService = service;
         mContext = context;
 

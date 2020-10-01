@@ -1,0 +1,248 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.service;
+
+import "frameworks/base/core/proto/android/privacy.proto";
+
+option java_multiple_files = true;
+
+/*
+ * Notes:
+ * 1. When using ProtoOutputStream to write this proto message, must call
+ *    token = ProtoOutputStream#start(fieldId) before and ProtoOutputStream#end(token) after
+ *    writing a nested message.
+ * 2. Never reuse a proto field number. When removing a field, mark it as reserved.
+ */
+
+// Proto dump of android::SensorService. dumpsys sensorservice --proto
+message SensorServiceProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    enum OperatingModeEnum {
+        OP_MODE_UNKNOWN = 0;
+        OP_MODE_NORMAL = 1;
+        OP_MODE_RESTRICTED = 2;
+        OP_MODE_DATA_INJECTION = 3;
+    }
+    optional sint32 init_status = 16;
+    optional int64 current_time_ms = 1;
+    optional SensorDeviceProto sensor_device = 2;
+    optional SensorListProto sensors = 3;
+    optional SensorFusionProto fusion_state = 4;
+    optional SensorEventsProto sensor_events = 5;
+    repeated ActiveSensorProto active_sensors = 6;
+    optional int32 socket_buffer_size = 7;
+    optional int32 socket_buffer_size_in_events = 8;
+    optional bool wake_lock_acquired = 9;
+    optional OperatingModeEnum operating_mode = 10;
+    // Non-empty only if operating_mode is RESTRICTED or DATA_INJECTION.
+    optional string whitelisted_package = 11;
+    optional bool sensor_privacy = 12;
+    repeated SensorEventConnectionProto active_connections = 13;
+    repeated SensorDirectConnectionProto direct_connections = 14;
+    repeated SensorRegistrationInfoProto previous_registrations = 15;
+
+    // Next tag: 17
+}
+
+// Proto dump of android::SensorDevice
+message SensorDeviceProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional bool initialized = 1;
+    optional int32 total_sensors = 2;
+    optional int32 active_sensors = 3;
+
+    message SensorProto {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 handle = 1;
+        optional int32 active_count = 2;
+        repeated float sampling_period_ms = 3;
+        optional float sampling_period_selected = 4;
+        repeated float batching_period_ms = 5;
+        optional float batching_period_selected = 6;
+    }
+    repeated SensorProto sensors = 4;
+}
+
+// Proto dump of android::SensorServiceUtil::SensorList
+message SensorListProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    enum ReportingModeEnum {
+        RM_UNKNOWN = 0;
+        RM_CONTINUOUS = 1;
+        RM_ON_CHANGE = 2;
+        RM_ONE_SHOT = 3;
+        RM_SPECIAL_TRIGGER = 4;
+    }
+
+    message SensorProto {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 handle = 1;
+        optional string name = 2;
+        optional string vendor = 3;
+        optional int32 version = 4;
+        optional string string_type = 5;
+        optional int32 type = 6;
+        optional string required_permission = 7;
+        optional int32 flags = 8;
+        optional ReportingModeEnum reporting_mode = 9;
+        optional int32 max_delay_us = 10;
+        optional int32 min_delay_us = 11;
+        optional int32 fifo_max_event_count = 12;
+        optional int32 fifo_reserved_event_count = 13;
+        optional bool is_wakeup = 14;
+        optional bool data_injection_supported = 15;
+        optional bool is_dynamic = 16;
+        optional bool has_additional_info = 17;
+        optional int32 highest_rate_level = 18;
+        optional bool ashmem = 19;
+        optional bool gralloc = 20;
+        optional float min_value = 21;
+        optional float max_value = 22;
+        optional float resolution = 23;
+        optional float power_usage = 24;
+    }
+    repeated SensorProto sensors = 1;
+}
+
+
+// Proto dump of android::SensorFusion
+message SensorFusionProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    message FusionProto {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional bool enabled = 1;
+        optional int32 num_clients = 2;
+        optional float estimated_gyro_rate = 3;
+        optional float attitude_x = 4;
+        optional float attitude_y = 5;
+        optional float attitude_z = 6;
+        optional float attitude_w = 7;
+        optional float attitude_length = 8;
+        optional float bias_x = 9;
+        optional float bias_y = 10;
+        optional float bias_z = 11;
+    }
+    optional FusionProto fusion_9axis = 1;
+    optional FusionProto fusion_nomag = 2;
+    optional FusionProto fusion_nogyro = 3;
+}
+
+// Proto dump of android::SensorServiceUtil::RecentEventLogger
+message SensorEventsProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    message Event {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional float timestamp_sec = 1;
+        optional int64 wall_timestamp_ms = 2;
+        optional bool masked = 3;
+        optional int64 int64_data = 4;
+        repeated float float_array = 5;
+    }
+
+    message RecentEventsLog {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string name = 1 [(.android.privacy).dest = DEST_EXPLICIT];
+        optional int32 recent_events_count = 2;
+        repeated Event events = 3;
+    }
+    repeated RecentEventsLog recent_events_logs = 1;
+}
+
+message ActiveSensorProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional string name = 1;
+    optional int32 handle = 2;
+    optional int32 num_connections = 3;
+}
+
+// Proto dump of android::SensorService::SensorDirectConnection
+message SensorDirectConnectionProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    message SensorProto {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 sensor = 1;
+        optional int32 rate = 2;
+    }
+
+    optional string package_name = 1;
+    optional int32 hal_channel_handle = 2;
+    optional int32 num_sensor_activated = 3;
+    repeated SensorProto sensors = 4;
+}
+
+// Proto dump of android::SensorService::SensorEventConnection
+message SensorEventConnectionProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    message FlushInfoProto {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string sensor_name = 1;
+        optional int32 sensor_handle = 2;
+        optional bool first_flush_pending = 3;
+        optional int32 pending_flush_events_to_send = 4;
+    }
+
+    enum OperatingModeEnum {
+        OP_MODE_UNKNOWN = 0;
+        OP_MODE_NORMAL = 1;
+        OP_MODE_RESTRICTED = 2;
+        OP_MODE_DATA_INJECTION = 3;
+    }
+
+    optional OperatingModeEnum operating_mode = 1;
+    optional string package_name = 2;
+    optional int32 wake_lock_ref_count = 3;
+    optional int32 uid = 4;
+    optional int32 cache_size = 5;
+    optional int32 max_cache_size = 6;
+    repeated FlushInfoProto flush_infos = 7;
+    optional int32 events_received = 8;
+    optional int32 events_sent = 9;
+    optional int32 events_cache = 10;
+    optional int32 events_dropped = 11;
+    optional int32 total_acks_needed = 12;
+    optional int32 total_acks_received = 13;
+}
+
+// Proto dump of android::SensorService::SensorRegistrationInfo
+message SensorRegistrationInfoProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int64 timestamp_sec = 1;
+    optional int32 sensor_handle = 2;
+    optional string package_name = 3;
+    optional int32 pid = 4;
+    optional int32 uid = 5;
+    optional int64 sampling_rate_us = 6;
+    optional int64 max_report_latency_us = 7;
+    optional bool activated = 8;
+}

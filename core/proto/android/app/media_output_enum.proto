@@ -1,0 +1,65 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.app.settings.mediaoutput;
+option java_multiple_files = true;
+
+/**
+ * The medium type specified in an output switching operation.
+ */
+enum MediumType {
+    UNKNOWN_TYPE = 0;
+    BUILTIN_SPEAKER = 1;
+    WIRED_3POINT5_MM_AUDIO = 100;
+    WIRED_3POINT5_MM_HEADSET = 101;
+    WIRED_3POINT5_MM_HEADPHONES = 102;
+    USB_C_AUDIO = 200;
+    USB_C_DEVICE = 201;
+    USB_C_HEADSET = 202;
+    USB_C_ACCESSORY = 203;
+    USB_C_DOCK = 204;
+    USB_C_HDMI = 205;
+    BLUETOOTH = 300;
+    BLUETOOTH_HEARING_AID = 301;
+    BLUETOOTH_A2DP = 302;
+    REMOTE_SINGLE = 400;
+    REMOTE_TV = 401;
+    REMOTE_SPEAKER = 402;
+    REMOTE_GROUP = 500;
+    REMOTE_DYNAMIC_GROUP = 501;
+};
+
+/**
+ * The result of an output switching operation.
+ */
+enum SwitchResult {
+    ERROR = 0;
+    OK = 1;
+};
+
+/**
+ * The sub result of an output switching operation.
+ */
+enum SubResult {
+    UNKNOWN_ERROR = 0;
+    NO_ERROR = 1;
+    REJECTED = 2;
+    NETWORK_ERROR = 3;
+    ROUTE_NOT_AVAILABLE = 4;
+    INVALID_COMMAND = 5;
+}

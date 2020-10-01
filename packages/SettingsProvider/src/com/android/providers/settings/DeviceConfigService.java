@@ -16,7 +16,6 @@
 
 package com.android.providers.settings;
 
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.ActivityManager;
 import android.content.IContentProvider;
@@ -195,8 +194,17 @@ public final class DeviceConfigService extends Binder {
                             : "Failed to delete " + key + " from " + namespace);
                     break;
                 case LIST:
-                    for (String line : list(iprovider, namespace)) {
-                        pout.println(line);
+                    if (namespace != null) {
+                        DeviceConfig.Properties properties = DeviceConfig.getProperties(namespace);
+                        List<String> keys = new ArrayList<>(properties.getKeyset());
+                        Collections.sort(keys);
+                        for (String name : keys) {
+                            pout.println(name + "=" + properties.getString(name, null));
+                        }
+                    } else {
+                        for (String line : listAll(iprovider)) {
+                            pout.println(line);
+                        }
                     }
                     break;
                 case RESET:
@@ -242,7 +250,7 @@ public final class DeviceConfigService extends Binder {
                 Bundle args = new Bundle();
                 args.putInt(Settings.CALL_METHOD_USER_KEY,
                         ActivityManager.getService().getCurrentUser().id);
-                Bundle b = provider.call(resolveCallingPackage(), Settings.AUTHORITY,
+                Bundle b = provider.call(resolveCallingPackage(), null, Settings.AUTHORITY,
                         Settings.CALL_METHOD_DELETE_CONFIG, compositeKey, args);
                 success = (b != null && b.getInt(SettingsProvider.RESULT_ROWS_DELETED) == 1);
             } catch (RemoteException e) {
@@ -251,17 +259,14 @@ public final class DeviceConfigService extends Binder {
             return success;
         }
 
-        private List<String> list(IContentProvider provider, @Nullable String namespace) {
+        private List<String> listAll(IContentProvider provider) {
             final ArrayList<String> lines = new ArrayList<>();
 
             try {
                 Bundle args = new Bundle();
                 args.putInt(Settings.CALL_METHOD_USER_KEY,
                         ActivityManager.getService().getCurrentUser().id);
-                if (namespace != null) {
-                    args.putString(Settings.CALL_METHOD_PREFIX_KEY, namespace);
-                }
-                Bundle b = provider.call(resolveCallingPackage(), Settings.AUTHORITY,
+                Bundle b = provider.call(resolveCallingPackage(), null, Settings.AUTHORITY,
                         Settings.CALL_METHOD_LIST_CONFIG, null, args);
                 if (b != null) {
                     Map<String, String> flagsToValues =

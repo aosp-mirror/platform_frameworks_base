@@ -16,7 +16,6 @@
 
 package com.android.server.rollback;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -28,6 +27,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
@@ -35,26 +35,34 @@ import android.content.rollback.PackageRollbackInfo.RestoreInfo;
 import android.util.IntArray;
 import android.util.SparseLongArray;
 
+import com.android.server.pm.ApexManager;
 import com.android.server.pm.Installer;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.InOrder;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Set;
 
 @RunWith(JUnit4.class)
 public class AppDataRollbackHelperTest {
 
+    @Mock private ApexManager mApexManager;
+
+    @Before
+    public void setUp() {
+        initMocks(this);
+    }
+
     @Test
     public void testSnapshotAppData() throws Exception {
         Installer installer = mock(Installer.class);
-        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer));
+        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer, mApexManager));
 
         // All users are unlocked so we should snapshot data for them.
         doReturn(true).when(helper).isUserCredentialLocked(eq(10));
@@ -101,7 +109,7 @@ public class AppDataRollbackHelperTest {
             final int[] installedUsers) {
         return new PackageRollbackInfo(
                 new VersionedPackage(packageName, 2), new VersionedPackage(packageName, 1),
-                new IntArray(), new ArrayList<>(), false, IntArray.wrap(installedUsers),
+                new IntArray(), new ArrayList<>(), false, false, IntArray.wrap(installedUsers),
                 new SparseLongArray());
     }
 
@@ -109,10 +117,15 @@ public class AppDataRollbackHelperTest {
         return createPackageRollbackInfo(packageName, new int[] {});
     }
 
+    private static Rollback createRollbackForId(int rollbackId) {
+        return new Rollback(rollbackId, new File("/does/not/exist"), -1,
+                0, "com.xyz");
+    }
+
     @Test
     public void testRestoreAppDataSnapshot_pendingBackupForUser() throws Exception {
         Installer installer = mock(Installer.class);
-        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer));
+        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer, mApexManager));
 
         PackageRollbackInfo info = createPackageRollbackInfo("com.foo");
         IntArray pendingBackups = info.getPendingBackups();
@@ -137,7 +150,7 @@ public class AppDataRollbackHelperTest {
     @Test
     public void testRestoreAppDataSnapshot_availableBackupForLockedUser() throws Exception {
         Installer installer = mock(Installer.class);
-        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer));
+        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer, mApexManager));
         doReturn(true).when(helper).isUserCredentialLocked(eq(10));
 
         PackageRollbackInfo info = createPackageRollbackInfo("com.foo");
@@ -161,7 +174,7 @@ public class AppDataRollbackHelperTest {
     @Test
     public void testRestoreAppDataSnapshot_availableBackupForUnlockedUser() throws Exception {
         Installer installer = mock(Installer.class);
-        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer));
+        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer, mApexManager));
         doReturn(false).when(helper).isUserCredentialLocked(eq(10));
 
         PackageRollbackInfo info = createPackageRollbackInfo("com.foo");
@@ -182,7 +195,7 @@ public class AppDataRollbackHelperTest {
     @Test
     public void destroyAppData() throws Exception {
         Installer installer = mock(Installer.class);
-        AppDataRollbackHelper helper = new AppDataRollbackHelper(installer);
+        AppDataRollbackHelper helper = new AppDataRollbackHelper(installer, mApexManager);
 
         PackageRollbackInfo info = createPackageRollbackInfo("com.foo.bar");
         info.putCeSnapshotInode(11, 239L);
@@ -204,7 +217,7 @@ public class AppDataRollbackHelperTest {
     @Test
     public void commitPendingBackupAndRestoreForUser() throws Exception {
         Installer installer = mock(Installer.class);
-        AppDataRollbackHelper helper = new AppDataRollbackHelper(installer);
+        AppDataRollbackHelper helper = new AppDataRollbackHelper(installer, mApexManager);
 
         when(installer.snapshotAppData(anyString(), anyInt(), anyInt(), anyInt())).thenReturn(53L);
 
@@ -235,59 +248,40 @@ public class AppDataRollbackHelperTest {
         wasRecentlyRestored.getPendingRestores().add(
                 new RestoreInfo(73 /* userId */, 239 /* appId*/, "seInfo"));
 
-        Rollback dataWithPendingBackup = new Rollback(101, new File("/does/not/exist"), -1);
+        Rollback dataWithPendingBackup = createRollbackForId(101);
         dataWithPendingBackup.info.getPackages().add(pendingBackup);
 
-        Rollback dataWithRecentRestore = new Rollback(17239, new File("/does/not/exist"),
-                -1);
+        Rollback dataWithRecentRestore = createRollbackForId(17239);
         dataWithRecentRestore.info.getPackages().add(wasRecentlyRestored);
 
-        Rollback dataForDifferentUser = new Rollback(17239, new File("/does/not/exist"),
-                -1);
+        Rollback dataForDifferentUser = createRollbackForId(17239);
         dataForDifferentUser.info.getPackages().add(ignoredInfo);
 
-        Rollback dataForRestore = new Rollback(17239, new File("/does/not/exist"), -1);
+        Rollback dataForRestore = createRollbackForId(17239);
         dataForRestore.info.getPackages().add(pendingRestore);
         dataForRestore.info.getPackages().add(wasRecentlyRestored);
 
-        Set<Rollback> changed = helper.commitPendingBackupAndRestoreForUser(37,
-                Arrays.asList(dataWithPendingBackup, dataWithRecentRestore, dataForDifferentUser,
-                    dataForRestore));
         InOrder inOrder = Mockito.inOrder(installer);
 
         // Check that pending backup and restore for the same package mutually destroyed each other.
+        assertTrue(helper.commitPendingBackupAndRestoreForUser(37, dataWithRecentRestore));
         assertEquals(-1, wasRecentlyRestored.getPendingBackups().indexOf(37));
         assertNull(wasRecentlyRestored.getRestoreInfo(37));
 
         // Check that backup was performed.
+        assertTrue(helper.commitPendingBackupAndRestoreForUser(37, dataWithPendingBackup));
         inOrder.verify(installer).snapshotAppData(eq("com.foo"), eq(37), eq(101),
                 eq(Installer.FLAG_STORAGE_CE));
         assertEquals(-1, pendingBackup.getPendingBackups().indexOf(37));
         assertEquals(53, pendingBackup.getCeSnapshotInodes().get(37));
 
-        // Check that changed returns correct Rollback.
-        assertEquals(3, changed.size());
-        assertTrue(changed.contains(dataWithPendingBackup));
-        assertTrue(changed.contains(dataWithRecentRestore));
-        assertTrue(changed.contains(dataForRestore));
-
         // Check that restore was performed.
+        assertTrue(helper.commitPendingBackupAndRestoreForUser(37, dataForRestore));
         inOrder.verify(installer).restoreAppDataSnapshot(
                 eq("com.abc"), eq(57) /* appId */, eq("seInfo"), eq(37) /* userId */,
                 eq(17239) /* rollbackId */, eq(Installer.FLAG_STORAGE_CE));
         assertNull(pendingRestore.getRestoreInfo(37));
 
         inOrder.verifyNoMoreInteractions();
-    }
-
-    @Test
-    public void snapshotAddDataSavesSnapshottedUsersToInfo() {
-        Installer installer = mock(Installer.class);
-        AppDataRollbackHelper helper = new AppDataRollbackHelper(installer);
-
-        PackageRollbackInfo info = createPackageRollbackInfo("com.foo.bar");
-        helper.snapshotAppData(5, info, new int[]{10, 11});
-
-        assertArrayEquals(info.getSnapshottedUsers().toArray(), new int[]{10, 11});
     }
 }

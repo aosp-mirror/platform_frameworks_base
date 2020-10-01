@@ -35,7 +35,7 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.PopupWindow.OnDismissListener;
 
-import com.android.internal.util.Preconditions;
+import java.util.Objects;
 
 /**
  * A standard menu popup in which when a submenu is opened, it replaces its parent menu in the
@@ -113,7 +113,7 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
 
     public StandardMenuPopup(Context context, MenuBuilder menu, View anchorView, int popupStyleAttr,
             int popupStyleRes, boolean overflowOnly) {
-        mContext = Preconditions.checkNotNull(context);
+        mContext = Objects.requireNonNull(context);
         mMenu = menu;
         mOverflowOnly = overflowOnly;
         final LayoutInflater inflater = LayoutInflater.from(context);

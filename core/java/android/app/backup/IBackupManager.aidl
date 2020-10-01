@@ -597,6 +597,12 @@ interface IBackupManager {
     boolean isBackupServiceActive(int whichUser);
 
     /**
+    * Checks if the user is ready for backup or not.
+    * @param userId User id for which this operation should be performed.
+    */
+    boolean isUserReadyForBackup(int userId);
+
+    /**
      * Ask the framework which dataset, if any, the given package's data would be
      * restored from if we were to install it right now.
      *
@@ -710,4 +716,10 @@ interface IBackupManager {
      */
     void setAncestralSerialNumber(in long ancestralSerialNumber);
 
+    /**
+     * Excludes keys from KV restore for a given package. The corresponding data will be excluded
+     * from the data set available the backup agent during restore. However,  final list  of keys
+     * that have been excluded will be passed to the agent to make it aware of the exclusions.
+     */
+    void excludeKeysFromRestore(String packageName, in List<String> keys);
 }

@@ -21,7 +21,6 @@ import "frameworks/base/tools/aapt2/Configuration.proto";
 package aapt.pb;
 
 option java_package = "com.android.aapt";
-option optimize_for = LITE_RUNTIME;
 
 // A string pool that wraps the binary form of the C++ class android::ResStringPool.
 message StringPool {
@@ -168,6 +167,7 @@ message OverlayableItem {
     SIGNATURE = 5;
     ODM = 6;
     OEM = 7;
+    ACTOR = 8;
   }
 
   // The location of the <item> declaration in source.
@@ -270,6 +270,11 @@ message CompoundValue {
   }
 }
 
+// Message holding a boolean, so it can be optionally encoded.
+message Boolean {
+  bool value = 1;
+}
+
 // A value that is a reference to another resource. This reference can be by name or resource ID.
 message Reference {
   enum Type {
@@ -290,6 +295,9 @@ message Reference {
 
   // Whether this reference is referencing a private resource (@*package:type/entry).
   bool private = 4;
+
+  // Whether this reference is dynamic.
+  Boolean is_dynamic = 5;
 }
 
 // A value that represents an ID. This is just a placeholder, as ID values are used to occupy a
@@ -388,6 +396,9 @@ message Attribute {
 
     // The value of the enum/flag.
     uint32 value = 4;
+
+    // The data type of the enum/flag as defined in android::Res_value.
+    uint32 type = 5;
   }
 
   // Bitmask of formats allowed for an attribute.

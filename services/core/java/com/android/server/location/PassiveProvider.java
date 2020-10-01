@@ -16,11 +16,12 @@
 
 package com.android.server.location;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+
 import android.content.Context;
 import android.location.Criteria;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.WorkSource;
 
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
@@ -38,25 +39,31 @@ import java.io.PrintWriter;
 public class PassiveProvider extends AbstractLocationProvider {
 
     private static final ProviderProperties PROPERTIES = new ProviderProperties(
-            false, false, false, false, false, false, false,
-            Criteria.POWER_LOW, Criteria.ACCURACY_COARSE);
+            /* requiresNetwork = */false,
+            /* requiresSatellite = */false,
+            /* requiresCell = */false,
+            /* hasMonetaryCost = */false,
+            /* supportsAltitude = */false,
+            /* supportsSpeed = */false,
+            /* supportsBearing = */false,
+            Criteria.POWER_LOW,
+            Criteria.ACCURACY_COARSE);
 
-    private boolean mReportLocation;
+    private volatile boolean mReportLocation;
 
-    public PassiveProvider(Context context, LocationProviderManager locationProviderManager) {
-        super(context, locationProviderManager);
+    public PassiveProvider(Context context) {
+        // using a direct executor is ok because this class has no locks that could deadlock
+        super(DIRECT_EXECUTOR, context);
 
         mReportLocation = false;
 
         setProperties(PROPERTIES);
-        setEnabled(true);
+        setAllowed(true);
     }
 
-    @Override
-    public void setRequest(ProviderRequest request, WorkSource source) {
-        mReportLocation = request.reportLocation;
-    }
-
+    /**
+     * Pass a location into the passive provider.
+     */
     public void updateLocation(Location location) {
         if (mReportLocation) {
             reportLocation(location);
@@ -64,10 +71,13 @@ public class PassiveProvider extends AbstractLocationProvider {
     }
 
     @Override
-    public void sendExtraCommand(String command, Bundle extras) {}
+    public void onSetRequest(ProviderRequest request) {
+        mReportLocation = request.reportLocation;
+    }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println(" report location=" + mReportLocation);
-    }
+    protected void onExtraCommand(int uid, int pid, String command, Bundle extras) {}
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {}
 }

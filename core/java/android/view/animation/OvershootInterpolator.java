@@ -20,19 +20,19 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
+import android.graphics.animation.HasNativeInterpolator;
+import android.graphics.animation.NativeInterpolator;
+import android.graphics.animation.NativeInterpolatorFactory;
 import android.util.AttributeSet;
 
 import com.android.internal.R;
-import com.android.internal.view.animation.HasNativeInterpolator;
-import com.android.internal.view.animation.NativeInterpolatorFactory;
-import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
 
 /**
  * An interpolator where the change flings forward and overshoots the last value
  * then comes back.
  */
 @HasNativeInterpolator
-public class OvershootInterpolator extends BaseInterpolator implements NativeInterpolatorFactory {
+public class OvershootInterpolator extends BaseInterpolator implements NativeInterpolator {
     private final float mTension;
 
     public OvershootInterpolator() {
@@ -76,6 +76,6 @@ public class OvershootInterpolator extends BaseInterpolator implements NativeInt
     /** @hide */
     @Override
     public long createNativeInterpolator() {
-        return NativeInterpolatorFactoryHelper.createOvershootInterpolator(mTension);
+        return NativeInterpolatorFactory.createOvershootInterpolator(mTension);
     }
 }

@@ -59,7 +59,7 @@ public class AppCollector {
      * @param volume Volume to check for apps.
      */
     public AppCollector(Context context, @NonNull VolumeInfo volume) {
-        Preconditions.checkNotNull(volume);
+        Objects.requireNonNull(volume);
 
         mBackgroundHandler = new BackgroundHandler(BackgroundThread.get().getLooper(),
                 volume,

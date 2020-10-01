@@ -18,13 +18,16 @@ package android.telephony;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.os.Binder;
+import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.DataActivityType;
-import android.telephony.Annotation.DataFailureCause;
 import android.telephony.Annotation.DisconnectCauses;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.Annotation.PreciseCallStates;
@@ -32,14 +35,7 @@ import android.telephony.Annotation.PreciseDisconnectCauses;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
 import android.telephony.Annotation.SrvccState;
-import android.telephony.CallQuality;
-import android.telephony.CellInfo;
-import android.telephony.DisconnectCause;
-import android.telephony.PhoneCapability;
-import android.telephony.ServiceState;
-import android.telephony.SignalStrength;
-import android.telephony.TelephonyManager;
-import android.telephony.data.ApnSetting;
+import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
 import android.util.Log;
 
@@ -105,17 +101,20 @@ public class TelephonyRegistryManager {
     public void addOnSubscriptionsChangedListener(
             @NonNull SubscriptionManager.OnSubscriptionsChangedListener listener,
             @NonNull Executor executor) {
+        if (mSubscriptionChangedListenerMap.get(listener) != null) {
+            Log.d(TAG, "addOnSubscriptionsChangedListener listener already present");
+            return;
+        }
         IOnSubscriptionsChangedListener callback = new IOnSubscriptionsChangedListener.Stub() {
             @Override
             public void onSubscriptionsChanged () {
-                Log.d(TAG, "onSubscriptionsChangedListener callback received.");
                 executor.execute(() -> listener.onSubscriptionsChanged());
             }
         };
         mSubscriptionChangedListenerMap.put(listener, callback);
         try {
             sRegistry.addOnSubscriptionsChangedListener(mContext.getOpPackageName(),
-                    null, callback);
+                    mContext.getAttributionTag(), callback);
         } catch (RemoteException ex) {
             // system server crash
         }
@@ -155,6 +154,10 @@ public class TelephonyRegistryManager {
     public void addOnOpportunisticSubscriptionsChangedListener(
             @NonNull SubscriptionManager.OnOpportunisticSubscriptionsChangedListener listener,
             @NonNull Executor executor) {
+        if (mOpportunisticSubscriptionChangedListenerMap.get(listener) != null) {
+            Log.d(TAG, "addOnOpportunisticSubscriptionsChangedListener listener already present");
+            return;
+        }
         /**
          * The callback methods need to be called on the executor thread where
          * this object was created.  If the binder did that for us it'd be nice.
@@ -174,7 +177,7 @@ public class TelephonyRegistryManager {
         mOpportunisticSubscriptionChangedListenerMap.put(listener, callback);
         try {
             sRegistry.addOnOpportunisticSubscriptionsChangedListener(mContext.getOpPackageName(),
-                    null, callback);
+                    mContext.getAttributionTag(), callback);
         } catch (RemoteException ex) {
             // system server crash
         }
@@ -190,12 +193,51 @@ public class TelephonyRegistryManager {
      */
     public void removeOnOpportunisticSubscriptionsChangedListener(
             @NonNull SubscriptionManager.OnOpportunisticSubscriptionsChangedListener listener) {
+        if (mOpportunisticSubscriptionChangedListenerMap.get(listener) == null) {
+            return;
+        }
         try {
             sRegistry.removeOnSubscriptionsChangedListener(mContext.getOpPackageName(),
                     mOpportunisticSubscriptionChangedListenerMap.get(listener));
             mOpportunisticSubscriptionChangedListenerMap.remove(listener);
         } catch (RemoteException ex) {
             // system server crash
+        }
+    }
+
+    /**
+     * To check the SDK version for {@link #listenForSubscriber}.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.P)
+    private static final long LISTEN_CODE_CHANGE = 147600208L;
+
+    /**
+     * Listen for incoming subscriptions
+     * @param subId Subscription ID
+     * @param pkg Package name
+     * @param featureId Feature ID
+     * @param listener Listener providing callback
+     * @param events Events
+     * @param notifyNow Whether to notify instantly
+     */
+    public void listenForSubscriber(int subId, @NonNull String pkg, @NonNull String featureId,
+            @NonNull PhoneStateListener listener, int events, boolean notifyNow) {
+        try {
+            // subId from PhoneStateListener is deprecated Q on forward, use the subId from
+            // TelephonyManager instance. Keep using subId from PhoneStateListener for pre-Q.
+            if (Compatibility.isChangeEnabled(LISTEN_CODE_CHANGE)) {
+                // Since mSubId in PhoneStateListener is deprecated from Q on forward, this is
+                // the only place to set mSubId and its for "informational" only.
+                listener.mSubId = (events == PhoneStateListener.LISTEN_NONE)
+                        ? SubscriptionManager.INVALID_SUBSCRIPTION_ID : subId;
+            } else if (listener.mSubId != null) {
+                subId = listener.mSubId;
+            }
+            sRegistry.listenForSubscriber(
+                    subId, pkg, featureId, listener.callback, events, notifyNow);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -252,6 +294,30 @@ public class TelephonyRegistryManager {
             @Nullable String incomingNumber) {
         try {
             sRegistry.notifyCallStateForAllSubs(state, incomingNumber);
+        } catch (RemoteException ex) {
+            // system server crash
+        }
+    }
+
+    /**
+     * Notify {@link SubscriptionInfo} change.
+     * @hide
+     */
+    public void notifySubscriptionInfoChanged() {
+        try {
+            sRegistry.notifySubscriptionInfoChanged();
+        } catch (RemoteException ex) {
+            // system server crash
+        }
+    }
+
+    /**
+     * Notify opportunistic {@link SubscriptionInfo} change.
+     * @hide
+     */
+    public void notifyOpportunisticSubscriptionInfoChanged() {
+        try {
+            sRegistry.notifyOpportunisticSubscriptionInfoChanged();
         } catch (RemoteException ex) {
             // system server crash
         }
@@ -344,17 +410,16 @@ public class TelephonyRegistryManager {
      * @param subId for which data connection state changed.
      * @param slotIndex for which data connections state changed. Can be derived from subId except
      * when subId is invalid.
-     * @param apnType the APN type that triggered this update
      * @param preciseState the PreciseDataConnectionState
      *
-     * @see android.telephony.PreciseDataConnection
+     * @see PreciseDataConnectionState
      * @see TelephonyManager#DATA_DISCONNECTED
      */
     public void notifyDataConnectionForSubscriber(int slotIndex, int subId,
-            String apnType, @Nullable PreciseDataConnectionState preciseState) {
+            @NonNull PreciseDataConnectionState preciseState) {
         try {
             sRegistry.notifyDataConnectionForSubscriber(
-                    slotIndex, subId, apnType, preciseState);
+                    slotIndex, subId, preciseState);
         } catch (RemoteException ex) {
             // system process is dead
         }
@@ -388,6 +453,36 @@ public class TelephonyRegistryManager {
     public void notifyEmergencyNumberList(int subId, int slotIndex) {
         try {
             sRegistry.notifyEmergencyNumberList(slotIndex, subId);
+        } catch (RemoteException ex) {
+            // system process is dead
+        }
+    }
+
+    /**
+     * Notify outgoing emergency call.
+     * @param phoneId Sender phone ID.
+     * @param subId Sender subscription ID.
+     * @param emergencyNumber Emergency number.
+     */
+    public void notifyOutgoingEmergencyCall(int phoneId, int subId,
+            @NonNull EmergencyNumber emergencyNumber) {
+        try {
+            sRegistry.notifyOutgoingEmergencyCall(phoneId, subId, emergencyNumber);
+        } catch (RemoteException ex) {
+            // system process is dead
+        }
+    }
+
+    /**
+     * Notify outgoing emergency SMS.
+     * @param phoneId Sender phone ID.
+     * @param subId Sender subscription ID.
+     * @param emergencyNumber Emergency number.
+     */
+    public void notifyOutgoingEmergencySms(int phoneId, int subId,
+            @NonNull EmergencyNumber emergencyNumber) {
+        try {
+            sRegistry.notifyOutgoingEmergencySms(phoneId, subId, emergencyNumber);
         } catch (RemoteException ex) {
             // system process is dead
         }
@@ -524,25 +619,6 @@ public class TelephonyRegistryManager {
     }
 
     /**
-     * Notify precise data connection failed cause on certain subscription.
-     *
-     * @param subId for which data connection failed.
-     * @param slotIndex for which data conenction failed. Can be derived from subId except when
-     * subId is invalid.
-     * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN.
-     * @param apn the APN {@link ApnSetting#getApnName()} of this data connection.
-     * @param failCause data fail cause.
-     */
-    public void notifyPreciseDataConnectionFailed(int subId, int slotIndex, String apnType,
-            @Nullable String apn, @DataFailureCause int failCause) {
-        try {
-            sRegistry.notifyPreciseDataConnectionFailed(slotIndex, subId, apnType, apn, failCause);
-        } catch (RemoteException ex) {
-            // system process is dead
-        }
-    }
-
-    /**
      * Notify single Radio Voice Call Continuity (SRVCC) state change for the currently active call
      * on certain subscription.
      *
@@ -569,9 +645,9 @@ public class TelephonyRegistryManager {
      * @param backgroundCallPreciseState background call state.
      */
     public void notifyPreciseCallState(int subId, int slotIndex,
-        @PreciseCallStates int ringCallPreciseState,
-        @PreciseCallStates int foregroundCallPreciseState,
-        @PreciseCallStates int backgroundCallPreciseState) {
+            @PreciseCallStates int ringCallPreciseState,
+            @PreciseCallStates int foregroundCallPreciseState,
+            @PreciseCallStates int backgroundCallPreciseState) {
         try {
             sRegistry.notifyPreciseCallState(slotIndex, subId, ringCallPreciseState,
                 foregroundCallPreciseState, backgroundCallPreciseState);
@@ -665,7 +741,7 @@ public class TelephonyRegistryManager {
      */
     public void notifyRegistrationFailed(int slotIndex, int subId,
             @NonNull CellIdentity cellIdentity, @NonNull String chosenPlmn,
-            @NetworkRegistrationInfo.Domain int domain, int causeCode, int additionalCauseCode) {
+            int domain, int causeCode, int additionalCauseCode) {
         try {
             sRegistry.notifyRegistrationFailed(slotIndex, subId, cellIdentity,
                     chosenPlmn, domain, causeCode, additionalCauseCode);

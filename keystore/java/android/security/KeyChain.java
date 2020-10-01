@@ -34,6 +34,7 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
@@ -55,8 +56,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -343,6 +344,16 @@ public final class KeyChain {
     public static final int KEY_ATTESTATION_FAILURE = 4;
 
     /**
+     * Used by DPC or delegated app in
+     * {@link android.app.admin.DeviceAdminReceiver#onChoosePrivateKeyAlias} or
+     * {@link android.app.admin.DelegatedAdminReceiver#onChoosePrivateKeyAlias} to identify that
+     * the requesting app is not granted access to any key, and nor will the user be able to grant
+     * access manually.
+     */
+    public static final String KEY_ALIAS_SELECTION_DENIED =
+            "android:alias-selection-denied";
+
+    /**
      * Returns an {@code Intent} that can be used for credential
      * installation. The intent may be used without any extras, in
      * which case the user will be able to install credentials from
@@ -358,6 +369,13 @@ public final class KeyChain {
      * {@link Activity#RESULT_OK} will be returned if a credential was
      * successfully installed, otherwise {@link
      * Activity#RESULT_CANCELED} will be returned.
+     *
+     * <p>Starting from {@link android.os.Build.VERSION_CODES#R}, the intent returned by this
+     * method cannot be used for installing CA certificates. Since CA certificates can only be
+     * installed via Settings, the app should provide the user with a file containing the
+     * CA certificate. One way to do this would be to use the {@link android.provider.MediaStore}
+     * API to write the certificate to the {@link android.provider.MediaStore.Downloads}
+     * collection.
      */
     @NonNull
     public static Intent createInstallIntent() {
@@ -753,28 +771,33 @@ public final class KeyChain {
      * @see KeyChain#bind
      */
     public static class KeyChainConnection implements Closeable {
-        private final Context context;
-        private final ServiceConnection serviceConnection;
-        private final IKeyChainService service;
+        private final Context mContext;
+        private final ServiceConnection mServiceConnection;
+        private final IKeyChainService mService;
         protected KeyChainConnection(Context context,
                                      ServiceConnection serviceConnection,
                                      IKeyChainService service) {
-            this.context = context;
-            this.serviceConnection = serviceConnection;
-            this.service = service;
+            this.mContext = context;
+            this.mServiceConnection = serviceConnection;
+            this.mService = service;
         }
         @Override public void close() {
-            context.unbindService(serviceConnection);
+            mContext.unbindService(mServiceConnection);
         }
+
+        /** returns the service binder. */
         public IKeyChainService getService() {
-            return service;
+            return mService;
         }
     }
 
     /**
-     * @hide for reuse by CertInstaller and Settings.
-     *
+     * Bind to KeyChainService in the current user.
      * Caller should call unbindService on the result when finished.
+     *
+     *@throws InterruptedException if interrupted during binding.
+     *@throws AssertionError if unable to bind to KeyChainService.
+     * @hide for reuse by CertInstaller and Settings.
      */
     @WorkerThread
     public static KeyChainConnection bind(@NonNull Context context) throws InterruptedException {
@@ -782,6 +805,11 @@ public final class KeyChain {
     }
 
     /**
+     * Bind to KeyChainService in the target user.
+     * Caller should call unbindService on the result when finished.
+     *
+     * @throws InterruptedException if interrupted during binding.
+     * @throws AssertionError if unable to bind to KeyChainService.
      * @hide
      */
     @WorkerThread
@@ -791,17 +819,26 @@ public final class KeyChain {
             throw new NullPointerException("context == null");
         }
         ensureNotOnMainThread(context);
-        final BlockingQueue<IKeyChainService> q = new LinkedBlockingQueue<IKeyChainService>(1);
+        if (!UserManager.get(context).isUserUnlocked(user)) {
+            throw new IllegalStateException("User must be unlocked");
+        }
+
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        final AtomicReference<IKeyChainService> keyChainService = new AtomicReference<>();
         ServiceConnection keyChainServiceConnection = new ServiceConnection() {
             volatile boolean mConnectedAtLeastOnce = false;
             @Override public void onServiceConnected(ComponentName name, IBinder service) {
                 if (!mConnectedAtLeastOnce) {
                     mConnectedAtLeastOnce = true;
-                    try {
-                        q.put(IKeyChainService.Stub.asInterface(Binder.allowBlocking(service)));
-                    } catch (InterruptedException e) {
-                        // will never happen, since the queue starts with one available slot
-                    }
+                    keyChainService.set(
+                            IKeyChainService.Stub.asInterface(Binder.allowBlocking(service)));
+                    countDownLatch.countDown();
+                }
+            }
+            @Override public void onBindingDied(ComponentName name) {
+                if (!mConnectedAtLeastOnce) {
+                    mConnectedAtLeastOnce = true;
+                    countDownLatch.countDown();
                 }
             }
             @Override public void onServiceDisconnected(ComponentName name) {}
@@ -813,7 +850,14 @@ public final class KeyChain {
                 intent, keyChainServiceConnection, Context.BIND_AUTO_CREATE, user)) {
             throw new AssertionError("could not bind to KeyChainService");
         }
-        return new KeyChainConnection(context, keyChainServiceConnection, q.take());
+        countDownLatch.await();
+        IKeyChainService service = keyChainService.get();
+        if (service != null) {
+            return new KeyChainConnection(context, keyChainServiceConnection, service);
+        } else {
+            context.unbindService(keyChainServiceConnection);
+            throw new AssertionError("KeyChainService died while binding");
+        }
     }
 
     private static void ensureNotOnMainThread(@NonNull Context context) {

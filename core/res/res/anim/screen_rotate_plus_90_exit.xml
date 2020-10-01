@@ -18,31 +18,16 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:shareInterpolator="false">
-    <!-- Version for two-phase animation
+    android:shareInterpolator="false">
     <rotate android:fromDegrees="0" android:toDegrees="-90"
-            android:pivotX="50%" android:pivotY="50%"
-            android:interpolator="@interpolator/decelerate_quint"
-            android:fillEnabled="true"
-            android:fillBefore="true" android:fillAfter="true"
-            android:duration="@android:integer/config_longAnimTime" />
-    -->
-    <scale android:fromXScale="100%" android:toXScale="100%p"
-            android:fromYScale="100%" android:toYScale="100%p"
-            android:pivotX="50%" android:pivotY="50%"
-            android:interpolator="@interpolator/decelerate_quint"
-            android:fillEnabled="true"
-            android:fillBefore="true" android:fillAfter="true"
-            android:duration="@android:integer/config_mediumAnimTime" />
-    <rotate android:fromDegrees="0" android:toDegrees="-90"
-            android:pivotX="50%" android:pivotY="50%"
-            android:interpolator="@interpolator/decelerate_quint"
-            android:fillEnabled="true"
-            android:fillBefore="true" android:fillAfter="true"
-            android:duration="@android:integer/config_mediumAnimTime" />
-    <alpha android:fromAlpha="1.0" android:toAlpha="0"
-            android:interpolator="@interpolator/decelerate_quint"
-            android:fillEnabled="true"
-            android:fillBefore="true" android:fillAfter="true"
-            android:duration="@android:integer/config_mediumAnimTime" />
+        android:pivotX="50%" android:pivotY="50%"
+        android:fillEnabled="true"
+        android:fillBefore="true" android:fillAfter="true"
+        android:interpolator="@interpolator/fast_out_slow_in"
+        android:duration="@android:integer/config_screen_rotation_total_90" />
+    <alpha android:fromAlpha="1.0" android:toAlpha="0.0"
+        android:interpolator="@interpolator/screen_rotation_alpha_out"
+        android:fillEnabled="true"
+        android:fillBefore="true" android:fillAfter="true"
+        android:duration="@android:integer/config_screen_rotation_fade_out" />
 </set>

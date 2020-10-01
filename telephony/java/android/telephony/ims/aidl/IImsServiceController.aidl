@@ -31,12 +31,14 @@ import com.android.ims.internal.IImsFeatureStatusCallback;
  */
 interface IImsServiceController {
     void setListener(IImsServiceControllerListener l);
-    IImsMmTelFeature createMmTelFeature(int slotId, in IImsFeatureStatusCallback c);
-    IImsRcsFeature createRcsFeature(int slotId, in IImsFeatureStatusCallback c);
+    IImsMmTelFeature createMmTelFeature(int slotId);
+    IImsRcsFeature createRcsFeature(int slotId);
     ImsFeatureConfiguration querySupportedImsFeatures();
+    void addFeatureStatusCallback(int slotId, int featureType, in IImsFeatureStatusCallback c);
+    void removeFeatureStatusCallback(int slotId, int featureType, in IImsFeatureStatusCallback c);
     // Synchronous call to ensure the ImsService is ready before continuing with feature creation.
     void notifyImsServiceReadyForFeatureCreation();
-    void removeImsFeature(int slotId, int featureType, in IImsFeatureStatusCallback c);
+    void removeImsFeature(int slotId, int featureType);
     IImsConfig getConfig(int slotId);
     IImsRegistration getRegistration(int slotId);
     oneway void enableIms(int slotId);

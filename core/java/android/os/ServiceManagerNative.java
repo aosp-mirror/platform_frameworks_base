@@ -87,7 +87,11 @@ class ServiceManagerProxy implements IServiceManager {
     }
 
     public boolean isDeclared(String name) throws RemoteException {
-        throw new RemoteException();
+        return mServiceManager.isDeclared(name);
+    }
+
+    public String[] getDeclaredInstances(String iface) throws RemoteException {
+        return mServiceManager.getDeclaredInstances(iface);
     }
 
     public void registerClientCallback(String name, IBinder service, IClientCallback cb)

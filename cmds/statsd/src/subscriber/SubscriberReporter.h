@@ -16,17 +16,24 @@
 
 #pragma once
 
-#include <android/os/IStatsCompanionService.h>
+#include <aidl/android/os/IPendingIntentRef.h>
 #include <utils/RefBase.h>
+#include <utils/String16.h>
 
 #include "config/ConfigKey.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"  // subscription
-#include "android/os/StatsDimensionsValue.h"
 #include "HashableDimensionKey.h"
 
 #include <mutex>
 #include <unordered_map>
 #include <vector>
+
+using aidl::android::os::IPendingIntentRef;
+using std::mutex;
+using std::shared_ptr;
+using std::string;
+using std::unordered_map;
+using std::vector;
 
 namespace android {
 namespace os {
@@ -47,31 +54,16 @@ public:
     void operator=(SubscriberReporter const&) = delete;
 
     /**
-     * Tells SubscriberReporter what IStatsCompanionService to use.
-     * May be nullptr, but SubscriberReporter will not send broadcasts for any calls
-     * to alertBroadcastSubscriber that occur while nullptr.
-     */
-    void setStatsCompanionService(sp<IStatsCompanionService> statsCompanionService) {
-        std::lock_guard<std::mutex> lock(mLock);
-        sp<IStatsCompanionService> tmpForLock = mStatsCompanionService;
-        mStatsCompanionService = statsCompanionService;
-    }
-
-    /**
      * Stores the given intentSender, associating it with the given (configKey, subscriberId) pair.
-     * intentSender must be convertible into an IntentSender (in Java) using IntentSender(IBinder).
      */
     void setBroadcastSubscriber(const ConfigKey& configKey,
                                 int64_t subscriberId,
-                                const sp<android::IBinder>& intentSender);
+                                const shared_ptr<IPendingIntentRef>& pir);
 
     /**
      * Erases any intentSender information from the given (configKey, subscriberId) pair.
      */
     void unsetBroadcastSubscriber(const ConfigKey& configKey, int64_t subscriberId);
-
-    /** Remove all information stored by SubscriberReporter about the given config. */
-    void removeConfig(const ConfigKey& configKey);
 
     /**
      * Sends a broadcast via the intentSender previously stored for the
@@ -82,29 +74,34 @@ public:
                                   const Subscription& subscription,
                                   const MetricDimensionKey& dimKey) const;
 
-    static StatsDimensionsValue getStatsDimensionsValue(const HashableDimensionKey& dim);
+    shared_ptr<IPendingIntentRef> getBroadcastSubscriber(const ConfigKey& configKey,
+                                                         int64_t subscriberId);
 
 private:
-    SubscriberReporter() {};
+    SubscriberReporter();
 
-    mutable std::mutex mLock;
+    mutable mutex mLock;
 
-    /** Binder interface for communicating with StatsCompanionService. */
-    sp<IStatsCompanionService> mStatsCompanionService = nullptr;
-
-    /** Maps <ConfigKey, SubscriberId> -> IBinder (which represents an IIntentSender). */
-    std::unordered_map<ConfigKey,
-            std::unordered_map<int64_t, sp<android::IBinder>>> mIntentMap;
+    /** Maps <ConfigKey, SubscriberId> -> IPendingIntentRef (which represents a PendingIntent). */
+    unordered_map<ConfigKey, unordered_map<int64_t, shared_ptr<IPendingIntentRef>>> mIntentMap;
 
     /**
      * Sends a broadcast via the given intentSender (using mStatsCompanionService), along
      * with the information in the other parameters.
      */
-    void sendBroadcastLocked(const sp<android::IBinder>& intentSender,
+    void sendBroadcastLocked(const shared_ptr<IPendingIntentRef>& pir,
                              const ConfigKey& configKey,
                              const Subscription& subscription,
-                             const std::vector<String16>& cookies,
+                             const vector<string>& cookies,
                              const MetricDimensionKey& dimKey) const;
+
+    ::ndk::ScopedAIBinder_DeathRecipient mBroadcastSubscriberDeathRecipient;
+
+    /**
+     * Death recipient callback that is called when a broadcast subscriber dies.
+     * The cookie is a pointer to a BroadcastSubscriberDeathCookie.
+     */
+    static void broadcastSubscriberDied(void* cookie);
 };
 
 }  // namespace statsd

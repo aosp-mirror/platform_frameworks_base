@@ -45,6 +45,12 @@ package com.android.xml.permission.configfile {
     method public void set_package(String);
   }
 
+  public class AppDataIsolationWhitelistedApp {
+    ctor public AppDataIsolationWhitelistedApp();
+    method public String get_package();
+    method public void set_package(String);
+  }
+
   public class AppLink {
     ctor public AppLink();
     method public String get_package();
@@ -160,6 +166,7 @@ package com.android.xml.permission.configfile {
     method public java.util.List<com.android.xml.permission.configfile.AllowInPowerSaveExceptIdle> getAllowInPowerSaveExceptIdle_optional();
     method public java.util.List<com.android.xml.permission.configfile.AllowInPowerSave> getAllowInPowerSave_optional();
     method public java.util.List<com.android.xml.permission.configfile.AllowUnthrottledLocation> getAllowUnthrottledLocation_optional();
+    method public java.util.List<com.android.xml.permission.configfile.AppDataIsolationWhitelistedApp> getAppDataIsolationWhitelistedApp_optional();
     method public java.util.List<com.android.xml.permission.configfile.AppLink> getAppLink_optional();
     method public java.util.List<com.android.xml.permission.configfile.AssignPermission> getAssignPermission_optional();
     method public java.util.List<com.android.xml.permission.configfile.BackupTransportWhitelistedService> getBackupTransportWhitelistedService_optional();

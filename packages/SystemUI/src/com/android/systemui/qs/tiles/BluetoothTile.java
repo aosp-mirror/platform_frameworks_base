@@ -82,10 +82,6 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    public void handleSetListening(boolean listening) {
-    }
-
-    @Override
     protected void handleClick() {
         // Secondary clicks are header clicks, just toggle.
         final boolean isEnabled = mState.value;
@@ -134,25 +130,27 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
         state.secondaryLabel = TextUtils.emptyIfNull(
                 getSecondaryLabel(enabled, connecting, connected, state.isTransient));
+        state.contentDescription = state.label;
+        state.stateDescription = "";
         if (enabled) {
             if (connected) {
                 state.icon = new BluetoothConnectedTileIcon();
                 if (!TextUtils.isEmpty(mController.getConnectedDeviceName())) {
                     state.label = mController.getConnectedDeviceName();
                 }
-                state.contentDescription =
+                state.stateDescription =
                         mContext.getString(R.string.accessibility_bluetooth_name, state.label)
                                 + ", " + state.secondaryLabel;
             } else if (state.isTransient) {
                 state.icon = ResourceIcon.get(
                         com.android.internal.R.drawable.ic_bluetooth_transient_animation);
-                state.contentDescription = state.secondaryLabel;
+                state.stateDescription = state.secondaryLabel;
             } else {
                 state.icon =
                         ResourceIcon.get(com.android.internal.R.drawable.ic_qs_bluetooth);
                 state.contentDescription = mContext.getString(
-                        R.string.accessibility_quick_settings_bluetooth) + ","
-                        + mContext.getString(R.string.accessibility_not_connected);
+                        R.string.accessibility_quick_settings_bluetooth);
+                state.stateDescription = mContext.getString(R.string.accessibility_not_connected);
             }
             state.state = Tile.STATE_ACTIVE;
         } else {

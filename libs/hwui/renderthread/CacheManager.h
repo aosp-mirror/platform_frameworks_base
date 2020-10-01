@@ -17,13 +17,12 @@
 #ifndef CACHEMANAGER_H
 #define CACHEMANAGER_H
 
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
 #include <GrContext.h>
+#endif
 #include <SkSurface.h>
-#include <ui/DisplayInfo.h>
 #include <utils/String8.h>
 #include <vector>
-
-#include "pipeline/skia/VectorDrawableAtlas.h"
 
 namespace android {
 
@@ -42,41 +41,38 @@ class CacheManager {
 public:
     enum class TrimMemoryMode { Complete, UiHidden };
 
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     void configureContext(GrContextOptions* context, const void* identity, ssize_t size);
+#endif
     void trimMemory(TrimMemoryMode mode);
     void trimStaleResources();
     void dumpMemoryUsage(String8& log, const RenderState* renderState = nullptr);
 
-    sp<skiapipeline::VectorDrawableAtlas> acquireVectorDrawableAtlas();
-
     size_t getCacheSize() const { return mMaxResourceBytes; }
     size_t getBackgroundCacheSize() const { return mBackgroundResourceBytes; }
+    void onFrameCompleted();
 
 private:
     friend class RenderThread;
 
-    explicit CacheManager(const DisplayInfo& display);
+    explicit CacheManager();
 
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     void reset(sk_sp<GrContext> grContext);
+#endif
     void destroy();
 
     const size_t mMaxSurfaceArea;
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     sk_sp<GrContext> mGrContext;
+#endif
 
-    int mMaxResources = 0;
     const size_t mMaxResourceBytes;
     const size_t mBackgroundResourceBytes;
 
     const size_t mMaxGpuFontAtlasBytes;
     const size_t mMaxCpuFontCacheBytes;
     const size_t mBackgroundCpuFontCacheBytes;
-
-    struct PipelineProps {
-        const void* pipelineKey = nullptr;
-        size_t surfaceArea = 0;
-    };
-
-    sp<skiapipeline::VectorDrawableAtlas> mVectorDrawableAtlas;
 };
 
 } /* namespace renderthread */

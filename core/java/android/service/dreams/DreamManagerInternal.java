@@ -16,6 +16,8 @@
 
 package android.service.dreams;
 
+import android.content.ComponentName;
+
 /**
  * Dream manager local system service interface.
  *
@@ -42,4 +44,19 @@ public abstract class DreamManagerInternal {
      * Called by the power manager to determine whether a dream is running.
      */
     public abstract boolean isDreaming();
+
+    /**
+     * Called by the ActivityTaskManagerService to verify that the startDreamActivity
+     * request comes from the current active dream component.
+     *
+     * This function and its call path should not acquire the DreamManagerService lock
+     * to avoid deadlock with the ActivityTaskManager lock.
+     *
+     * TODO: Make this interaction push-based - the DreamManager should inform the
+     * ActivityTaskManager whenever the active dream component changes.
+     *
+     * @param doze If true returns the current active doze component. Otherwise, returns the
+     *             active dream component.
+     */
+    public abstract ComponentName getActiveDreamComponent(boolean doze);
 }

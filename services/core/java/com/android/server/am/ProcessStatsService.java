@@ -539,15 +539,29 @@ public final class ProcessStatsService extends IProcessStats.Stub {
      * @param highWaterMarkMs Report stats committed after this time.
      * @param section Integer mask to indicage which sections to include in the stats.
      * @param doAggregate Whether to aggregate the stats or keep them separated.
-     * @return List of proto binary of individual commit files or one that is merged from them.
+     * @return List of proto binary of individual commit files or one that is merged from them
      */
     @Override
     public long getCommittedStats(long highWaterMarkMs, int section, boolean doAggregate,
             List<ParcelFileDescriptor> committedStats) {
+        return getCommittedStatsMerged(highWaterMarkMs, section, doAggregate, committedStats,
+                new ProcessStats(false));
+    }
+
+    /**
+     * Get stats committed after highWaterMarkMs
+     * @param highWaterMarkMs Report stats committed after this time.
+     * @param section Integer mask to indicage which sections to include in the stats.
+     * @param doAggregate Whether to aggregate the stats or keep them separated.
+     * @return List of proto binary of individual commit files or one that is merged from them;
+     *         the merged, final ProcessStats object.
+     */
+    @Override
+    public long getCommittedStatsMerged(long highWaterMarkMs, int section, boolean doAggregate,
+            List<ParcelFileDescriptor> committedStats, ProcessStats mergedStats) {
         mAm.mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.PACKAGE_USAGE_STATS, null);
 
-        ProcessStats mergedStats = new ProcessStats(false);
         long newHighWaterMark = highWaterMarkMs;
         mWriteLock.lock();
         try {
@@ -576,7 +590,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                             }
                             if (doAggregate) {
                                 mergedStats.add(stats);
-                            } else {
+                            } else if (committedStats != null) {
                                 committedStats.add(protoToParcelFileDescriptor(stats, section));
                             }
                             if (stats.mReadError != null) {
@@ -590,7 +604,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                         Slog.w(TAG, "Failure to read and parse commit file " + fileName, e);
                     }
                 }
-                if (doAggregate) {
+                if (doAggregate && committedStats != null) {
                     committedStats.add(protoToParcelFileDescriptor(mergedStats, section));
                 }
                 return newHighWaterMark;
@@ -603,6 +617,14 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return newHighWaterMark;
     }
 
+    /**
+     * @return The threshold to decide if a given association should be dumped into metrics.
+     */
+    @Override
+    public long getMinAssociationDumpDuration() {
+        return mAm.mConstants.MIN_ASSOC_LOG_DURATION;
+    }
+
     private ParcelFileDescriptor protoToParcelFileDescriptor(ProcessStats stats, int section)
             throws IOException {
         final ParcelFileDescriptor[] fds = ParcelFileDescriptor.createPipe();
@@ -611,7 +633,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 try {
                     FileOutputStream fout = new ParcelFileDescriptor.AutoCloseOutputStream(fds[1]);
                     final ProtoOutputStream proto = new ProtoOutputStream(fout);
-                    stats.writeToProto(proto, stats.mTimePeriodEndRealtime, section);
+                    stats.dumpDebug(proto, stats.mTimePeriodEndRealtime, section);
                     proto.flush();
                     fout.close();
                 } catch (IOException e) {
@@ -775,11 +797,16 @@ public final class ProcessStatsService extends IProcessStats.Stub {
 
         long ident = Binder.clearCallingIdentity();
         try {
-            if (args.length > 0 && "--proto".equals(args[0])) {
-                dumpProto(fd);
-            } else {
-                dumpInner(pw, args);
+            if (args.length > 0) {
+                if ("--proto".equals(args[0])) {
+                    dumpProto(fd);
+                    return;
+                } else if ("--statsd".equals(args[0])) {
+                    dumpProtoForStatsd(fd);
+                    return;
+                }
             }
+            dumpInner(pw, args);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -1101,7 +1128,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         }
 
         boolean sepNeeded = false;
-        if (dumpAll || isCheckin) {
+        if ((dumpAll || isCheckin) && !currentOnly) {
             mWriteLock.lock();
             try {
                 ArrayList<String> files = getCommittedFiles(0, false, !isCheckin);
@@ -1213,7 +1240,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             return;
         }
         final long token = proto.start(fieldId);
-        stats.writeToProto(proto, now, ProcessStats.REPORT_ALL);
+        stats.dumpDebug(proto, now, ProcessStats.REPORT_ALL);
         proto.end(token);
     }
 
@@ -1225,7 +1252,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         synchronized (mAm) {
             now = SystemClock.uptimeMillis();
             final long token = proto.start(ProcessStatsServiceDumpProto.PROCSTATS_NOW);
-            mProcessStats.writeToProto(proto, now, ProcessStats.REPORT_ALL);
+            mProcessStats.dumpDebug(proto, now, ProcessStats.REPORT_ALL);
             proto.end(token);
         }
 
@@ -1236,5 +1263,18 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         dumpAggregatedStats(proto, ProcessStatsServiceDumpProto.PROCSTATS_OVER_24HRS, 24, now);
 
         proto.flush();
+    }
+
+    /**
+     * Dump proto for the statsd, mainly for testing.
+     */
+    private void dumpProtoForStatsd(FileDescriptor fd) {
+        final ProtoOutputStream[] protos = {new ProtoOutputStream(fd)};
+
+        ProcessStats procStats = new ProcessStats(false);
+        getCommittedStatsMerged(0, 0, true, null, procStats);
+        procStats.dumpAggregatedProtoForStatsd(protos, 999999 /* max bytes per shard */);
+
+        protos[0].flush();
     }
 }

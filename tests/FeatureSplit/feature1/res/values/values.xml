@@ -20,7 +20,8 @@
     <integer name="test_integer2">200</integer>
     <color name="test_color2">#00ff00</color>
     <string-array name="string_array2">
-        <item>@string/app_title</item>
+      <item>@string/app_title</item>
+      <item>@string/feature2_string</item>
     </string-array>
 </resources>
 

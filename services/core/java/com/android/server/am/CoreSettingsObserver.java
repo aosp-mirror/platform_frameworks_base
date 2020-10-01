@@ -16,16 +16,24 @@
 
 package com.android.server.am;
 
+import android.annotation.NonNull;
+import android.app.ActivityThread;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.widget.WidgetFlags;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Helper class for watching a set of core settings which the framework
@@ -35,6 +43,23 @@ import java.util.Map;
  */
 final class CoreSettingsObserver extends ContentObserver {
     private static final String LOG_TAG = CoreSettingsObserver.class.getSimpleName();
+
+    private static class DeviceConfigEntry<T> {
+        String namespace;
+        String flag;
+        String coreSettingKey;
+        Class<T> type;
+        T defaultValue;
+
+        DeviceConfigEntry(String namespace, String flag, String coreSettingKey, Class<T> type,
+                @NonNull T defaultValue) {
+            this.namespace = namespace;
+            this.flag = flag;
+            this.coreSettingKey = coreSettingKey;
+            this.type = type;
+            this.defaultValue = Objects.requireNonNull(defaultValue);
+        }
+    }
 
     // mapping form property name to its type
     @VisibleForTesting
@@ -46,6 +71,7 @@ final class CoreSettingsObserver extends ContentObserver {
     @VisibleForTesting
     static final Map<String, Class<?>> sGlobalSettingToTypeMap = new HashMap<
             String, Class<?>>();
+    static final List<DeviceConfigEntry> sDeviceConfigEntries = new ArrayList<DeviceConfigEntry>();
     static {
         sSecureSettingToTypeMap.put(Settings.Secure.LONG_PRESS_TIMEOUT, int.class);
         sSecureSettingToTypeMap.put(Settings.Secure.MULTI_PRESS_TIMEOUT, int.class);
@@ -84,6 +110,40 @@ final class CoreSettingsObserver extends ContentObserver {
         sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_BLACKLISTS, String.class);
         sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES, String.class);
         // add other global settings here...
+
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Boolean>(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ENABLE_CURSOR_DRAG_FROM_ANYWHERE,
+                WidgetFlags.KEY_ENABLE_CURSOR_DRAG_FROM_ANYWHERE, boolean.class,
+                WidgetFlags.ENABLE_CURSOR_DRAG_FROM_ANYWHERE_DEFAULT));
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Integer>(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.FINGER_TO_CURSOR_DISTANCE,
+                WidgetFlags.KEY_FINGER_TO_CURSOR_DISTANCE, int.class,
+                WidgetFlags.FINGER_TO_CURSOR_DISTANCE_DEFAULT));
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Boolean>(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ENABLE_INSERTION_HANDLE_GESTURES,
+                WidgetFlags.KEY_ENABLE_INSERTION_HANDLE_GESTURES, boolean.class,
+                WidgetFlags.ENABLE_INSERTION_HANDLE_GESTURES_DEFAULT));
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Integer>(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.INSERTION_HANDLE_DELTA_HEIGHT,
+                WidgetFlags.KEY_INSERTION_HANDLE_DELTA_HEIGHT, int.class,
+                WidgetFlags.INSERTION_HANDLE_DELTA_HEIGHT_DEFAULT));
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Integer>(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.INSERTION_HANDLE_OPACITY,
+                WidgetFlags.KEY_INSERTION_HANDLE_OPACITY, int.class,
+                WidgetFlags.INSERTION_HANDLE_OPACITY_DEFAULT));
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Boolean>(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ENABLE_NEW_MAGNIFIER,
+                WidgetFlags.KEY_ENABLE_NEW_MAGNIFIER, boolean.class,
+                WidgetFlags.ENABLE_NEW_MAGNIFIER_DEFAULT));
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Float>(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.MAGNIFIER_ZOOM_FACTOR,
+                WidgetFlags.KEY_MAGNIFIER_ZOOM_FACTOR, float.class,
+                WidgetFlags.MAGNIFIER_ZOOM_FACTOR_DEFAULT));
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Float>(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.MAGNIFIER_ASPECT_RATIO,
+                WidgetFlags.KEY_MAGNIFIER_ASPECT_RATIO, float.class,
+                WidgetFlags.MAGNIFIER_ASPECT_RATIO_DEFAULT));
+        // add other device configs here...
     }
 
     private final Bundle mCoreSettings = new Bundle();
@@ -112,6 +172,7 @@ final class CoreSettingsObserver extends ContentObserver {
         populateSettings(mCoreSettings, sSecureSettingToTypeMap);
         populateSettings(mCoreSettings, sSystemSettingToTypeMap);
         populateSettings(mCoreSettings, sGlobalSettingToTypeMap);
+        populateSettingsFromDeviceConfig();
         mActivityManagerService.onCoreSettingsChange(mCoreSettings);
     }
 
@@ -132,6 +193,16 @@ final class CoreSettingsObserver extends ContentObserver {
             Uri uri = Settings.Global.getUriFor(setting);
             mActivityManagerService.mContext.getContentResolver().registerContentObserver(
                     uri, false, this);
+        }
+
+        HashSet<String> deviceConfigNamespaces = new HashSet<>();
+        for (DeviceConfigEntry entry : sDeviceConfigEntries) {
+            if (!deviceConfigNamespaces.contains(entry.namespace)) {
+                DeviceConfig.addOnPropertiesChangedListener(
+                        entry.namespace, ActivityThread.currentApplication().getMainExecutor(),
+                        (DeviceConfig.Properties prop) -> onChange(false));
+                deviceConfigNamespaces.add(entry.namespace);
+            }
         }
     }
 
@@ -161,6 +232,33 @@ final class CoreSettingsObserver extends ContentObserver {
                 snapshot.putFloat(setting, Float.parseFloat(value));
             } else if (type == long.class) {
                 snapshot.putLong(setting, Long.parseLong(value));
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void populateSettingsFromDeviceConfig() {
+        for (DeviceConfigEntry<?> entry : sDeviceConfigEntries) {
+            if (entry.type == String.class) {
+                String defaultValue = ((DeviceConfigEntry<String>) entry).defaultValue;
+                mCoreSettings.putString(entry.coreSettingKey,
+                        DeviceConfig.getString(entry.namespace, entry.flag, defaultValue));
+            } else if (entry.type == int.class) {
+                int defaultValue = ((DeviceConfigEntry<Integer>) entry).defaultValue;
+                mCoreSettings.putInt(entry.coreSettingKey,
+                        DeviceConfig.getInt(entry.namespace, entry.flag, defaultValue));
+            } else if (entry.type == float.class) {
+                float defaultValue = ((DeviceConfigEntry<Float>) entry).defaultValue;
+                mCoreSettings.putFloat(entry.coreSettingKey,
+                        DeviceConfig.getFloat(entry.namespace, entry.flag, defaultValue));
+            } else if (entry.type == long.class) {
+                long defaultValue = ((DeviceConfigEntry<Long>) entry).defaultValue;
+                mCoreSettings.putLong(entry.coreSettingKey,
+                        DeviceConfig.getLong(entry.namespace, entry.flag, defaultValue));
+            } else if (entry.type == boolean.class) {
+                boolean defaultValue = ((DeviceConfigEntry<Boolean>) entry).defaultValue;
+                mCoreSettings.putInt(entry.coreSettingKey,
+                        DeviceConfig.getBoolean(entry.namespace, entry.flag, defaultValue) ? 1 : 0);
             }
         }
     }

@@ -79,7 +79,8 @@ public final class BrightnessChangeEvent implements Parcelable {
     /**
      * Histogram counting how many times a pixel of a given value was displayed onscreen for the
      * Value component of HSV if the device supports color sampling, if the device does not support
-     * color sampling the value will be null.
+     * color sampling or {@link BrightnessConfiguration#shouldCollectColorSamples()} is false the
+     * value will be null.
      *
      * The buckets of the histogram are evenly weighted, the number of buckets is device specific.
      * The units are in pixels * milliseconds, with 1 pixel millisecond being 1 pixel displayed
@@ -94,7 +95,8 @@ public final class BrightnessChangeEvent implements Parcelable {
 
     /**
      * How many milliseconds of data are contained in the colorValueBuckets, if the device does
-     * not support color sampling the value will be 0L.
+     * not support color sampling or {@link BrightnessConfiguration#shouldCollectColorSamples()} is
+     * false the value will be 0L.
      *
      * {@see #colorValueBuckets}
      */

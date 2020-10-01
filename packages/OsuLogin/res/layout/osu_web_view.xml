@@ -3,7 +3,7 @@
              android:id="@+id/container"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             tools:context="com.android.hotspot2.osu.OsuLoginActivity">
+             tools:context="com.android.hotspot2.osulogin.OsuLoginActivity">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

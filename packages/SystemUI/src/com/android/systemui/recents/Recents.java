@@ -17,11 +17,11 @@
 package com.android.systemui.recents;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.provider.Settings;
 
-import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -33,14 +33,19 @@ import java.io.PrintWriter;
  */
 public class Recents extends SystemUI implements CommandQueue.Callbacks {
 
-    private RecentsImplementation mImpl;
+    private final RecentsImplementation mImpl;
+    private final CommandQueue mCommandQueue;
+
+    public Recents(Context context, RecentsImplementation impl, CommandQueue commandQueue) {
+        super(context);
+        mImpl = impl;
+        mCommandQueue = commandQueue;
+    }
 
     @Override
     public void start() {
-        getComponent(CommandQueue.class).addCallback(this);
-        putComponent(Recents.class, this);
-        mImpl = createRecentsImplementationFromConfig();
-        mImpl.onStart(mContext, this);
+        mCommandQueue.addCallback(this);
+        mImpl.onStart(mContext);
     }
 
     @Override
@@ -137,28 +142,6 @@ public class Recents extends SystemUI implements CommandQueue.Callbacks {
         ContentResolver cr = mContext.getContentResolver();
         return (Settings.Global.getInt(cr, Settings.Global.DEVICE_PROVISIONED, 0) != 0) &&
                 (Settings.Secure.getInt(cr, Settings.Secure.USER_SETUP_COMPLETE, 0) != 0);
-    }
-
-    /**
-     * @return The recents implementation from the config.
-     */
-    private RecentsImplementation createRecentsImplementationFromConfig() {
-        final String clsName = mContext.getString(R.string.config_recentsComponent);
-        if (clsName == null || clsName.length() == 0) {
-            throw new RuntimeException("No recents component configured", null);
-        }
-        Class<?> cls = null;
-        try {
-            cls = mContext.getClassLoader().loadClass(clsName);
-        } catch (Throwable t) {
-            throw new RuntimeException("Error loading recents component: " + clsName, t);
-        }
-        try {
-            RecentsImplementation impl = (RecentsImplementation) cls.newInstance();
-            return impl;
-        } catch (Throwable t) {
-            throw new RuntimeException("Error creating recents component: " + clsName, t);
-        }
     }
 
     @Override

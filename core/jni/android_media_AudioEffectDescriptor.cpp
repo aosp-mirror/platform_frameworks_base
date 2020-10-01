@@ -39,17 +39,21 @@ jint convertAudioEffectDescriptorFromNative(JNIEnv* env, jobject* jDescriptor,
     jstring jImplementor;
     char str[EFFECT_STRING_LEN_MAX];
 
-    if ((nDescriptor->flags & EFFECT_FLAG_TYPE_MASK)
-        == EFFECT_FLAG_TYPE_AUXILIARY) {
-        jConnect = env->NewStringUTF("Auxiliary");
-    } else if ((nDescriptor->flags & EFFECT_FLAG_TYPE_MASK)
-        == EFFECT_FLAG_TYPE_INSERT) {
-        jConnect = env->NewStringUTF("Insert");
-    } else if ((nDescriptor->flags & EFFECT_FLAG_TYPE_MASK)
-        == EFFECT_FLAG_TYPE_PRE_PROC) {
-        jConnect = env->NewStringUTF("Pre Processing");
-    } else {
-        return (jint) AUDIO_JAVA_BAD_VALUE;
+    switch (nDescriptor->flags & EFFECT_FLAG_TYPE_MASK) {
+        case EFFECT_FLAG_TYPE_AUXILIARY:
+            jConnect = env->NewStringUTF("Auxiliary");
+            break;
+        case EFFECT_FLAG_TYPE_INSERT:
+            jConnect = env->NewStringUTF("Insert");
+            break;
+        case EFFECT_FLAG_TYPE_PRE_PROC:
+            jConnect = env->NewStringUTF("Pre Processing");
+            break;
+        case EFFECT_FLAG_TYPE_POST_PROC:
+            jConnect = env->NewStringUTF("Post Processing");
+            break;
+        default:
+            return (jint)AUDIO_JAVA_BAD_VALUE;
     }
 
     AudioEffect::guidToString(&nDescriptor->type, str, EFFECT_STRING_LEN_MAX);
@@ -98,9 +102,9 @@ void convertAudioEffectDescriptorVectorFromNative(JNIEnv *env, jobjectArray *jDe
 
     *jDescriptors = env->NewObjectArray(actualSize, audioEffectDescriptorClass(), NULL);
     for (size_t i = 0; i < actualSize; i++) {
-        env->SetObjectArrayElement(*jDescriptors,
-                                   i,
-                                   env->GetObjectArrayElement(temp, i));
+        jobject jdesc = env->GetObjectArrayElement(temp, i);
+        env->SetObjectArrayElement(*jDescriptors, i, jdesc);
+        env->DeleteLocalRef(jdesc);
     }
     env->DeleteLocalRef(temp);
 }

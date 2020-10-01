@@ -19,8 +19,11 @@ import static org.mockito.Mockito.mock;
 import android.content.Context;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 
 public class TestableDependency extends Dependency {
+    private static final String TAG = "TestableDependency";
+
     private final ArrayMap<Object, Object> mObjs = new ArrayMap<>();
     private final ArraySet<Object> mInstantiatedObjects = new ArraySet<>();
 
@@ -44,7 +47,7 @@ public class TestableDependency extends Dependency {
 
     public <T> void injectTestDependency(Class<T> key, T obj) {
         if (mInstantiatedObjects.contains(key)) {
-            throw new IllegalStateException(key + " was already initialized");
+            Log.d(TAG, key + " was already initialized but overriding with testDependency.");
         }
         mObjs.put(key, obj);
     }
@@ -52,8 +55,14 @@ public class TestableDependency extends Dependency {
     @Override
     protected <T> T createDependency(Object key) {
         if (mObjs.containsKey(key)) return (T) mObjs.get(key);
+
         mInstantiatedObjects.add(key);
         return super.createDependency(key);
+    }
+
+    @Override
+    protected boolean autoRegisterModulesForDump() {
+        return false;
     }
 
     public <T> boolean hasInstantiatedDependency(Class<T> key) {

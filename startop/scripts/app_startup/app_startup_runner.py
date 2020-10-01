@@ -30,130 +30,116 @@ import argparse
 import csv
 import itertools
 import os
-import subprocess
 import sys
 import tempfile
-from typing import Any, Callable, Dict, Generic, Iterable, List, NamedTuple, TextIO, Tuple, TypeVar, Optional, Union
+from datetime import timedelta
+from typing import Any, Callable, Iterable, List, NamedTuple, TextIO, Tuple, \
+    TypeVar, Union, Optional
+
+# local import
+DIR = os.path.abspath(os.path.dirname(__file__))
+sys.path.append(os.path.dirname(DIR))
+import lib.cmd_utils as cmd_utils
+import lib.print_utils as print_utils
+from app_startup.run_app_with_prefetch import PrefetchAppRunner
+import app_startup.lib.args_utils as args_utils
+from app_startup.lib.data_frame import DataFrame
+from app_startup.lib.perfetto_trace_collector import PerfettoTraceCollector
+from iorap.compiler import CompilerType
+import iorap.compiler as compiler
 
 # The following command line options participate in the combinatorial generation.
 # All other arguments have a global effect.
-_COMBINATORIAL_OPTIONS=['packages', 'readaheads', 'compiler_filters']
-_TRACING_READAHEADS=['mlock', 'fadvise']
-_FORWARD_OPTIONS={'loop_count': '--count'}
-_RUN_SCRIPT=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'run_app_with_prefetch')
+_COMBINATORIAL_OPTIONS = ['package', 'readahead', 'compiler_filter',
+                          'activity', 'trace_duration']
+_TRACING_READAHEADS = ['mlock', 'fadvise']
+_FORWARD_OPTIONS = {'loop_count': '--count'}
+_RUN_SCRIPT = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                           'run_app_with_prefetch.py')
 
-RunCommandArgs = NamedTuple('RunCommandArgs', [('package', str), ('readahead', str), ('compiler_filter', Optional[str])])
-CollectorPackageInfo = NamedTuple('CollectorPackageInfo', [('package', str), ('compiler_filter', str)])
-_COLLECTOR_SCRIPT=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'collector')
-_COLLECTOR_TIMEOUT_MULTIPLIER = 2 # take the regular --timeout and multiply by 2; systrace starts up slowly.
+CollectorPackageInfo = NamedTuple('CollectorPackageInfo',
+                                  [('package', str), ('compiler_filter', str)])
+# by 2; systrace starts up slowly.
 
-_UNLOCK_SCREEN_SCRIPT=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'unlock_screen')
+_UNLOCK_SCREEN_SCRIPT = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), 'unlock_screen')
+
+RunCommandArgs = NamedTuple('RunCommandArgs',
+                            [('package', str),
+                             ('readahead', str),
+                             ('activity', Optional[str]),
+                             ('compiler_filter', Optional[str]),
+                             ('timeout', Optional[int]),
+                             ('debug', bool),
+                             ('simulate', bool),
+                             ('input', Optional[str]),
+                             ('trace_duration', Optional[timedelta])])
 
 # This must be the only mutable global variable. All other global variables are constants to avoid magic literals.
 _debug = False  # See -d/--debug flag.
 _DEBUG_FORCE = None  # Ignore -d/--debug if this is not none.
+_PERFETTO_TRACE_DURATION_MS = 5000 # milliseconds
+_PERFETTO_TRACE_DURATION = timedelta(milliseconds=_PERFETTO_TRACE_DURATION_MS)
 
 # Type hinting names.
 T = TypeVar('T')
-NamedTupleMeta = Callable[..., T]  # approximation of a (S : NamedTuple<T> where S() == T) metatype.
+NamedTupleMeta = Callable[
+    ..., T]  # approximation of a (S : NamedTuple<T> where S() == T) metatype.
 
 def parse_options(argv: List[str] = None):
   """Parse command line arguments and return an argparse Namespace object."""
-  parser = argparse.ArgumentParser(description="Run one or more Android applications under various settings in order to measure startup time.")
+  parser = argparse.ArgumentParser(description="Run one or more Android "
+                                               "applications under various "
+                                               "settings in order to measure "
+                                               "startup time.")
   # argparse considers args starting with - and -- optional in --help, even though required=True.
   # by using a named argument group --help will clearly say that it's required instead of optional.
   required_named = parser.add_argument_group('required named arguments')
-  required_named.add_argument('-p', '--package', action='append', dest='packages', help='package of the application', required=True)
-  required_named.add_argument('-r', '--readahead', action='append', dest='readaheads', help='which readahead mode to use', choices=('warm', 'cold', 'mlock', 'fadvise'), required=True)
+  required_named.add_argument('-p', '--package', action='append',
+                              dest='packages',
+                              help='package of the application', required=True)
+  required_named.add_argument('-r', '--readahead', action='append',
+                              dest='readaheads',
+                              help='which readahead mode to use',
+                              choices=('warm', 'cold', 'mlock', 'fadvise'),
+                              required=True)
 
   # optional arguments
   # use a group here to get the required arguments to appear 'above' the optional arguments in help.
   optional_named = parser.add_argument_group('optional named arguments')
-  optional_named.add_argument('-c', '--compiler-filter', action='append', dest='compiler_filters', help='which compiler filter to use. if omitted it does not enforce the app\'s compiler filter', choices=('speed', 'speed-profile', 'quicken'))
-  optional_named.add_argument('-s', '--simulate', dest='simulate', action='store_true', help='Print which commands will run, but don\'t run the apps')
-  optional_named.add_argument('-d', '--debug', dest='debug', action='store_true', help='Add extra debugging output')
-  optional_named.add_argument('-o', '--output', dest='output', action='store', help='Write CSV output to file.')
-  optional_named.add_argument('-t', '--timeout', dest='timeout', action='store', type=int, help='Timeout after this many seconds when executing a single run.')
-  optional_named.add_argument('-lc', '--loop-count', dest='loop_count', default=1, type=int, action='store', help='How many times to loop a single run.')
-  optional_named.add_argument('-in', '--inodes', dest='inodes', type=str, action='store', help='Path to inodes file (system/extras/pagecache/pagecache.py -d inodes)')
+  optional_named.add_argument('-c', '--compiler-filter', action='append',
+                              dest='compiler_filters',
+                              help='which compiler filter to use. if omitted it does not enforce the app\'s compiler filter',
+                              choices=('speed', 'speed-profile', 'quicken'))
+  optional_named.add_argument('-s', '--simulate', dest='simulate',
+                              action='store_true',
+                              help='Print which commands will run, but don\'t run the apps')
+  optional_named.add_argument('-d', '--debug', dest='debug',
+                              action='store_true',
+                              help='Add extra debugging output')
+  optional_named.add_argument('-o', '--output', dest='output', action='store',
+                              help='Write CSV output to file.')
+  optional_named.add_argument('-t', '--timeout', dest='timeout', action='store',
+                              type=int, default=10,
+                              help='Timeout after this many seconds when executing a single run.')
+  optional_named.add_argument('-lc', '--loop-count', dest='loop_count',
+                              default=1, type=int, action='store',
+                              help='How many times to loop a single run.')
+  optional_named.add_argument('-in', '--inodes', dest='inodes', type=str,
+                              action='store',
+                              help='Path to inodes file (system/extras/pagecache/pagecache.py -d inodes)')
+  optional_named.add_argument('--compiler-trace-duration-ms',
+                              dest='trace_duration',
+                              type=lambda ms_str: timedelta(milliseconds=int(ms_str)),
+                              action='append',
+                              help='The trace duration (milliseconds) in '
+                                   'compilation')
+  optional_named.add_argument('--compiler-type', dest='compiler_type',
+                              type=CompilerType, choices=list(CompilerType),
+                              default=CompilerType.DEVICE,
+                              help='The type of compiler.')
 
   return parser.parse_args(argv)
-
-# TODO: refactor this with a common library file with analyze_metrics.py
-def _debug_print(*args, **kwargs):
-  """Print the args to sys.stderr if the --debug/-d flag was passed in."""
-  if _debug:
-    print(*args, **kwargs, file=sys.stderr)
-
-def _expand_gen_repr(args):
-  """Like repr but any generator-like object has its iterator consumed
-  and then called repr on."""
-  new_args_list = []
-  for i in args:
-    # detect iterable objects that do not have their own override of __str__
-    if hasattr(i, '__iter__'):
-      to_str = getattr(i, '__str__')
-      if to_str.__objclass__ == object:
-        # the repr for a generator is just type+address, expand it out instead.
-        new_args_list.append([_expand_gen_repr([j])[0] for j in i])
-        continue
-    # normal case: uses the built-in to-string
-    new_args_list.append(i)
-  return new_args_list
-
-def _debug_print_gen(*args, **kwargs):
-  """Like _debug_print but will turn any iterable args into a list."""
-  if not _debug:
-    return
-
-  new_args_list = _expand_gen_repr(args)
-  _debug_print(*new_args_list, **kwargs)
-
-def _debug_print_nd(*args, **kwargs):
-  """Like _debug_print but will turn any NamedTuple-type args into a string."""
-  if not _debug:
-    return
-
-  new_args_list = []
-  for i in args:
-    if hasattr(i, '_field_types'):
-      new_args_list.append("%s: %s" %(i.__name__, i._field_types))
-    else:
-      new_args_list.append(i)
-
-  _debug_print(*new_args_list, **kwargs)
-
-def dict_lookup_any_key(dictionary: dict, *keys: List[Any]):
-  for k in keys:
-    if k in dictionary:
-      return dictionary[k]
-  raise KeyError("None of the keys %s were in the dictionary" %(keys))
-
-def generate_run_combinations(named_tuple: NamedTupleMeta[T], opts_dict: Dict[str, List[Optional[str]]])\
-    -> Iterable[T]:
-  """
-  Create all possible combinations given the values in opts_dict[named_tuple._fields].
-
-  :type T: type annotation for the named_tuple type.
-  :param named_tuple: named tuple type, whose fields are used to make combinations for
-  :param opts_dict: dictionary of keys to value list. keys correspond to the named_tuple fields.
-  :return: an iterable over named_tuple instances.
-  """
-  combinations_list = []
-  for k in named_tuple._fields:
-    # the key can be either singular or plural , e.g. 'package' or 'packages'
-    val = dict_lookup_any_key(opts_dict, k, k + "s")
-
-    # treat {'x': None} key value pairs as if it was [None]
-    # otherwise itertools.product throws an exception about not being able to iterate None.
-    combinations_list.append(val or [None])
-
-  _debug_print("opts_dict: ", opts_dict)
-  _debug_print_nd("named_tuple: ", named_tuple)
-  _debug_print("combinations_list: ", combinations_list)
-
-  for combo in itertools.product(*combinations_list):
-    yield named_tuple(*combo)
 
 def key_to_cmdline_flag(key: str) -> str:
   """Convert key into a command line flag, e.g. 'foo-bars' -> '--foo-bar' """
@@ -175,120 +161,194 @@ def as_run_command(tpl: NamedTuple) -> List[Union[str, Any]]:
     args.append(value)
   return args
 
-def generate_group_run_combinations(run_combinations: Iterable[NamedTuple], dst_nt: NamedTupleMeta[T])\
-    -> Iterable[Tuple[T, Iterable[NamedTuple]]]:
+def run_perfetto_collector(collector_info: CollectorPackageInfo,
+                           timeout: int,
+                           simulate: bool) -> Tuple[bool, TextIO]:
+  """Run collector to collect prefetching trace.
 
-  def group_by_keys(src_nt):
-    src_d = src_nt._asdict()
-    # now remove the keys that aren't legal in dst.
-    for illegal_key in set(src_d.keys()) - set(dst_nt._fields):
-      if illegal_key in src_d:
-        del src_d[illegal_key]
+  Returns:
+    A tuple of whether the collection succeeds and the generated trace file.
+  """
+  tmp_output_file = tempfile.NamedTemporaryFile()
 
-    return dst_nt(**src_d)
+  collector = PerfettoTraceCollector(package=collector_info.package,
+                                     activity=None,
+                                     compiler_filter=collector_info.compiler_filter,
+                                     timeout=timeout,
+                                     simulate=simulate,
+                                     trace_duration=_PERFETTO_TRACE_DURATION,
+                                     save_destination_file_path=tmp_output_file.name)
+  result = collector.run()
 
-  for args_list_it in itertools.groupby(run_combinations, group_by_keys):
-    (group_key_value, args_it) = args_list_it
-    yield (group_key_value, args_it)
+  return result is not None, tmp_output_file
 
-def parse_run_script_csv_file(csv_file: TextIO) -> List[int]:
-  """Parse a CSV file full of integers into a flat int list."""
+def parse_run_script_csv_file(csv_file: TextIO) -> DataFrame:
+  """Parse a CSV file full of integers into a DataFrame."""
   csv_reader = csv.reader(csv_file)
-  arr = []
+
+  try:
+    header_list = next(csv_reader)
+  except StopIteration:
+    header_list = []
+
+  if not header_list:
+    return None
+
+  headers = [i for i in header_list]
+
+  d = {}
   for row in csv_reader:
+    header_idx = 0
+
     for i in row:
+      v = i
       if i:
-        arr.append(int(i))
-  return arr
+        v = int(i)
 
-def make_script_command_with_temp_output(script: str, args: List[str], **kwargs)\
-    -> Tuple[str, TextIO]:
-  """
-  Create a command to run a script given the args.
-  Appends --count <loop_count> --output <tmp-file-name>.
-  Returns a tuple (cmd, tmp_file)
-  """
-  tmp_output_file = tempfile.NamedTemporaryFile(mode='r')
-  cmd = [script] + args
-  for key, value in kwargs.items():
-    cmd += ['--%s' %(key), "%s" %(value)]
-  if _debug:
-    cmd += ['--verbose']
-  cmd = cmd + ["--output", tmp_output_file.name]
-  return cmd, tmp_output_file
+      header_key = headers[header_idx]
+      l = d.get(header_key, [])
+      l.append(v)
+      d[header_key] = l
 
-def execute_arbitrary_command(cmd: List[str], simulate: bool, timeout: int) -> Tuple[bool, str]:
-  if simulate:
-    print(" ".join(cmd))
-    return (True, "")
-  else:
-    _debug_print("[EXECUTE]", cmd)
-    proc = subprocess.Popen(cmd,
-                            stderr=subprocess.STDOUT,
-                            stdout=subprocess.PIPE,
-                            universal_newlines=True)
-    try:
-      script_output = proc.communicate(timeout=timeout)[0]
-    except subprocess.TimeoutExpired:
-      print("[TIMEDOUT]")
-      proc.kill()
-      script_output = proc.communicate()[0]
+      header_idx = header_idx + 1
 
-    _debug_print("[STDOUT]", script_output)
-    return_code = proc.wait()
-    passed = (return_code == 0)
-    _debug_print("[$?]", return_code)
+  return DataFrame(d)
+
+def build_ri_compiler_argv(inodes_path: str,
+                           perfetto_trace_file: str,
+                           trace_duration: Optional[timedelta]
+                           ) -> str:
+  argv = ['-i', inodes_path, '--perfetto-trace',
+          perfetto_trace_file]
+
+  if trace_duration is not None:
+    argv += ['--duration', str(int(trace_duration.total_seconds()
+                                   * PerfettoTraceCollector.MS_PER_SEC))]
+
+  print_utils.debug_print(argv)
+  return argv
+
+def execute_run_using_perfetto_trace(collector_info,
+                                     run_combos: Iterable[RunCommandArgs],
+                                     simulate: bool,
+                                     inodes_path: str,
+                                     timeout: int,
+                                     compiler_type: CompilerType,
+                                     requires_trace_collection: bool) -> DataFrame:
+  """ Executes run based on perfetto trace. """
+  if requires_trace_collection:
+    passed, perfetto_trace_file = run_perfetto_collector(collector_info,
+                                                         timeout,
+                                                         simulate)
     if not passed:
-      print("[FAILED, code:%s]" %(return_code), script_output, file=sys.stderr)
+      raise RuntimeError('Cannot run perfetto collector!')
+  else:
+    perfetto_trace_file = tempfile.NamedTemporaryFile()
 
-    return (passed, script_output)
+  with perfetto_trace_file:
+    for combos in run_combos:
+      if combos.readahead in _TRACING_READAHEADS:
+        if simulate:
+          compiler_trace_file = tempfile.NamedTemporaryFile()
+        else:
+          ri_compiler_argv = build_ri_compiler_argv(inodes_path,
+                                                    perfetto_trace_file.name,
+                                                    combos.trace_duration)
+          compiler_trace_file = compiler.compile(compiler_type,
+                                                 inodes_path,
+                                                 ri_compiler_argv,
+                                                 combos.package,
+                                                 combos.activity)
 
-def execute_run_combos(grouped_run_combos: Iterable[Tuple[CollectorPackageInfo, Iterable[RunCommandArgs]]], simulate: bool, inodes_path: str, timeout: int, loop_count: int, need_trace: bool):
+        with compiler_trace_file:
+          combos = combos._replace(input=compiler_trace_file.name)
+          print_utils.debug_print(combos)
+          output = PrefetchAppRunner(**combos._asdict()).run()
+      else:
+        print_utils.debug_print(combos)
+        output = PrefetchAppRunner(**combos._asdict()).run()
+
+      yield DataFrame(dict((x, [y]) for x, y in output)) if output else None
+
+def execute_run_combos(
+    grouped_run_combos: Iterable[Tuple[CollectorPackageInfo, Iterable[RunCommandArgs]]],
+    simulate: bool,
+    inodes_path: str,
+    timeout: int,
+    compiler_type: CompilerType,
+    requires_trace_collection: bool):
   # nothing will work if the screen isn't unlocked first.
-  execute_arbitrary_command([_UNLOCK_SCREEN_SCRIPT], simulate, timeout)
+  cmd_utils.execute_arbitrary_command([_UNLOCK_SCREEN_SCRIPT],
+                                      timeout,
+                                      simulate=simulate,
+                                      shell=False)
 
   for collector_info, run_combos in grouped_run_combos:
-    #collector_args = ["--package", package_name]
-    collector_args = as_run_command(collector_info)
-    # TODO: forward --wait_time for how long systrace runs?
-    # TODO: forward --trace_buffer_size for size of systrace buffer size?
-    collector_cmd, collector_tmp_output_file = make_script_command_with_temp_output(_COLLECTOR_SCRIPT, collector_args, inodes=inodes_path)
+    yield from execute_run_using_perfetto_trace(collector_info,
+                                                run_combos,
+                                                simulate,
+                                                inodes_path,
+                                                timeout,
+                                                compiler_type,
+                                                requires_trace_collection)
 
-    with collector_tmp_output_file:
-      collector_passed = True
-      if need_trace:
-        collector_timeout = timeout and _COLLECTOR_TIMEOUT_MULTIPLIER * timeout
-        (collector_passed, collector_script_output) = execute_arbitrary_command(collector_cmd, simulate, collector_timeout)
-        # TODO: consider to print a ; collector wrote file to <...> into the CSV file so we know it was ran.
-
-      for combos in run_combos:
-        args = as_run_command(combos)
-
-        cmd, tmp_output_file = make_script_command_with_temp_output(_RUN_SCRIPT, args, count=loop_count, input=collector_tmp_output_file.name)
-        with tmp_output_file:
-          (passed, script_output) = execute_arbitrary_command(cmd, simulate, timeout)
-          parsed_output = simulate and [1,2,3] or parse_run_script_csv_file(tmp_output_file)
-          yield (passed, script_output, parsed_output)
-
-def gather_results(commands: Iterable[Tuple[bool, str, List[int]]], key_list: List[str], value_list: List[Tuple[str, ...]]):
-  _debug_print("gather_results: key_list = ", key_list)
-  yield key_list + ["time(ms)"]
-
+def gather_results(commands: Iterable[Tuple[DataFrame]],
+                   key_list: List[str], value_list: List[Tuple[str, ...]]):
+  print_utils.debug_print("gather_results: key_list = ", key_list)
   stringify_none = lambda s: s is None and "<none>" or s
+  #  yield key_list + ["time(ms)"]
+  for (run_result_list, values) in itertools.zip_longest(commands, value_list):
+    print_utils.debug_print("run_result_list = ", run_result_list)
+    print_utils.debug_print("values = ", values)
 
-  for ((passed, script_output, run_result_list), values) in itertools.zip_longest(commands, value_list):
-    if not passed:
+    if not run_result_list:
       continue
-    for result in run_result_list:
-      yield [stringify_none(i) for i in values] + [result]
 
-    yield ["; avg(%s), min(%s), max(%s), count(%s)" %(sum(run_result_list, 0.0) / len(run_result_list), min(run_result_list), max(run_result_list), len(run_result_list)) ]
+    # RunCommandArgs(package='com.whatever', readahead='warm', compiler_filter=None)
+    # -> {'package':['com.whatever'], 'readahead':['warm'], 'compiler_filter':[None]}
+    values_dict = {}
+    for k, v in values._asdict().items():
+      if not k in key_list:
+        continue
+      values_dict[k] = [stringify_none(v)]
+
+    values_df = DataFrame(values_dict)
+    # project 'values_df' to be same number of rows as run_result_list.
+    values_df = values_df.repeat(run_result_list.data_row_len)
+
+    # the results are added as right-hand-side columns onto the existing labels for the table.
+    values_df.merge_data_columns(run_result_list)
+
+    yield values_df
 
 def eval_and_save_to_csv(output, annotated_result_values):
+  printed_header = False
+
   csv_writer = csv.writer(output)
   for row in annotated_result_values:
-    csv_writer.writerow(row)
-    output.flush() # see the output live.
+    if not printed_header:
+      headers = row.headers
+      csv_writer.writerow(headers)
+      printed_header = True
+      # TODO: what about when headers change?
+
+    for data_row in row.data_table:
+      data_row = [d for d in data_row]
+      csv_writer.writerow(data_row)
+
+    output.flush()  # see the output live.
+
+def coerce_to_list(opts: dict):
+  """Tranform values of the dictionary to list.
+  For example:
+  1 -> [1], None -> [None], [1,2,3] -> [1,2,3]
+  [[1],[2]] -> [[1],[2]], {1:1, 2:2} -> [{1:1, 2:2}]
+  """
+  result = {}
+  for key in opts:
+    val = opts[key]
+    result[key] = val if issubclass(type(val), list) else [val]
+  return result
 
 def main():
   global _debug
@@ -297,26 +357,37 @@ def main():
   _debug = opts.debug
   if _DEBUG_FORCE is not None:
     _debug = _DEBUG_FORCE
-  _debug_print("parsed options: ", opts)
-  need_trace = not not set(opts.readaheads).intersection(set(_TRACING_READAHEADS))
-  if need_trace and not opts.inodes:
-    print("Error: Missing -in/--inodes, required when using a readahead of %s" %(_TRACING_READAHEADS), file=sys.stderr)
-    return 1
+
+  print_utils.DEBUG = _debug
+  cmd_utils.SIMULATE = opts.simulate
+
+  print_utils.debug_print("parsed options: ", opts)
 
   output_file = opts.output and open(opts.output, 'w') or sys.stdout
 
-  combos = lambda: generate_run_combinations(RunCommandArgs, vars(opts))
-  _debug_print_gen("run combinations: ", combos())
+  combos = lambda: args_utils.generate_run_combinations(
+      RunCommandArgs,
+      coerce_to_list(vars(opts)),
+      opts.loop_count)
+  print_utils.debug_print_gen("run combinations: ", combos())
 
-  grouped_combos = lambda: generate_group_run_combinations(combos(), CollectorPackageInfo)
-  _debug_print_gen("grouped run combinations: ", grouped_combos())
+  grouped_combos = lambda: args_utils.generate_group_run_combinations(combos(),
+                                                                      CollectorPackageInfo)
 
-  exec = execute_run_combos(grouped_combos(), opts.simulate, opts.inodes, opts.timeout, opts.loop_count, need_trace)
+  print_utils.debug_print_gen("grouped run combinations: ", grouped_combos())
+  requires_trace_collection = any(i in _TRACING_READAHEADS for i in opts.readaheads)
+  exec = execute_run_combos(grouped_combos(),
+                            opts.simulate,
+                            opts.inodes,
+                            opts.timeout,
+                            opts.compiler_type,
+                            requires_trace_collection)
+
   results = gather_results(exec, _COMBINATORIAL_OPTIONS, combos())
+
   eval_and_save_to_csv(output_file, results)
 
-  return 0
-
+  return 1
 
 if __name__ == '__main__':
   sys.exit(main())

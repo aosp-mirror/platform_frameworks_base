@@ -23,12 +23,12 @@ import android.net.NetworkSpecifier;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.CloseGuard;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import dalvik.system.CloseGuard;
-
+import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 
 /**
@@ -45,7 +45,7 @@ public class WifiAwareSession implements AutoCloseable {
     private final int mClientId;
 
     private boolean mTerminated = true;
-    private final CloseGuard mCloseGuard = CloseGuard.get();
+    private final CloseGuard mCloseGuard = new CloseGuard();
 
     /** @hide */
     public WifiAwareSession(WifiAwareManager manager, Binder binder, int clientId) {
@@ -80,6 +80,7 @@ public class WifiAwareSession implements AutoCloseable {
         mTerminated = true;
         mMgr.clear();
         mCloseGuard.close();
+        Reference.reachabilityFence(this);
     }
 
     /** @hide */

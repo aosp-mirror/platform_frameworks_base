@@ -78,16 +78,16 @@ import static android.net.RouteInfo.RTN_UNREACHABLE;
 import static android.os.Process.INVALID_UID;
 import static android.system.OsConstants.IPPROTO_TCP;
 
-import static com.android.server.ConnectivityServiceTestUtilsKt.transportToLegacyType;
-import static com.android.testutils.ConcurrentUtilsKt.await;
-import static com.android.testutils.ConcurrentUtilsKt.durationOf;
+import static com.android.server.ConnectivityServiceTestUtils.transportToLegacyType;
+import static com.android.testutils.ConcurrentUtils.await;
+import static com.android.testutils.ConcurrentUtils.durationOf;
 import static com.android.testutils.ExceptionUtils.ignoreExceptions;
-import static com.android.testutils.HandlerUtilsKt.waitForIdleSerialExecutor;
-import static com.android.testutils.MiscAssertsKt.assertContainsExactly;
-import static com.android.testutils.MiscAssertsKt.assertEmpty;
-import static com.android.testutils.MiscAssertsKt.assertLength;
-import static com.android.testutils.MiscAssertsKt.assertRunsInAtMost;
-import static com.android.testutils.MiscAssertsKt.assertThrows;
+import static com.android.testutils.HandlerUtils.waitForIdleSerialExecutor;
+import static com.android.testutils.MiscAsserts.assertContainsExactly;
+import static com.android.testutils.MiscAsserts.assertEmpty;
+import static com.android.testutils.MiscAsserts.assertLength;
+import static com.android.testutils.MiscAsserts.assertRunsInAtMost;
+import static com.android.testutils.MiscAsserts.assertThrows;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -218,7 +218,6 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -242,7 +241,7 @@ import com.android.server.connectivity.Vpn;
 import com.android.server.net.NetworkPinner;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.testutils.ExceptionUtils;
-import com.android.testutils.HandlerUtilsKt;
+import com.android.testutils.HandlerUtils;
 import com.android.testutils.RecorderCallback.CallbackEntry;
 import com.android.testutils.TestableNetworkCallback;
 
@@ -518,12 +517,12 @@ public class ConnectivityServiceTest {
     }
 
     private void waitForIdle() {
-        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+        HandlerUtils.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
         waitForIdle(mCellNetworkAgent, TIMEOUT_MS);
         waitForIdle(mWiFiNetworkAgent, TIMEOUT_MS);
         waitForIdle(mEthernetNetworkAgent, TIMEOUT_MS);
-        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
-        HandlerUtilsKt.waitForIdle(ConnectivityThread.get(), TIMEOUT_MS);
+        HandlerUtils.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+        HandlerUtils.waitForIdle(ConnectivityThread.get(), TIMEOUT_MS);
     }
 
     private void waitForIdle(TestNetworkAgentWrapper agent, long timeoutMs) {
@@ -614,8 +613,8 @@ public class ConnectivityServiceTest {
             // Waits for the NetworkAgent to be registered, which includes the creation of the
             // NetworkMonitor.
             waitForIdle(TIMEOUT_MS);
-            HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
-            HandlerUtilsKt.waitForIdle(ConnectivityThread.get(), TIMEOUT_MS);
+            HandlerUtils.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+            HandlerUtils.waitForIdle(ConnectivityThread.get(), TIMEOUT_MS);
         }
 
         @Override
@@ -4028,7 +4027,6 @@ public class ConnectivityServiceTest {
     }
 
     @Test
-    @FlakyTest(bugId = 140305589)
     public void testPacketKeepalives() throws Exception {
         InetAddress myIPv4 = InetAddress.getByName("192.0.2.129");
         InetAddress notMyIPv4 = InetAddress.getByName("192.0.2.35");
@@ -4226,7 +4224,7 @@ public class ConnectivityServiceTest {
             callback.expectError(SocketKeepalive.ERROR_INVALID_IP_ADDRESS);
         }
 
-        // Sanity check before testing started keepalive.
+        // Basic check before testing started keepalive.
         try (SocketKeepalive ka = mCm.createSocketKeepalive(
                 myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
             ka.start(validKaInterval);
@@ -4291,6 +4289,32 @@ public class ConnectivityServiceTest {
         }
 
         // Reconnect.
+        myNet = connectKeepaliveNetwork(lp);
+        mWiFiNetworkAgent.setStartKeepaliveEvent(SocketKeepalive.SUCCESS);
+
+        // Check that a stop followed by network disconnects does not result in crash.
+        try (SocketKeepalive ka = mCm.createSocketKeepalive(
+                myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
+            ka.start(validKaInterval);
+            callback.expectStarted();
+            // Delay the response of keepalive events in networkAgent long enough to make sure
+            // the follow-up network disconnection will be processed first.
+            mWiFiNetworkAgent.setKeepaliveResponseDelay(3 * TIMEOUT_MS);
+            ka.stop();
+
+            // Make sure the stop has been processed. Wait for executor idle is needed to prevent
+            // flaky since the actual stop call to the service is delegated to executor thread.
+            waitForIdleSerialExecutor(executor, TIMEOUT_MS);
+            waitForIdle();
+
+            mWiFiNetworkAgent.disconnect();
+            mWiFiNetworkAgent.expectDisconnected();
+            callback.expectStopped();
+            callback.assertNoCallback();
+        }
+
+        // Reconnect.
+        waitForIdle();
         myNet = connectKeepaliveNetwork(lp);
         mWiFiNetworkAgent.setStartKeepaliveEvent(SocketKeepalive.SUCCESS);
 
@@ -7099,7 +7123,7 @@ public class ConnectivityServiceTest {
                 mConnectivityDiagnosticsCallback, wifiRequest, mContext.getPackageName());
 
         // Block until all other events are done processing.
-        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+        HandlerUtils.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
 
         verify(mIBinder).linkToDeath(any(ConnectivityDiagnosticsCallbackInfo.class), anyInt());
         verify(mConnectivityDiagnosticsCallback).asBinder();
@@ -7122,7 +7146,7 @@ public class ConnectivityServiceTest {
                 mConnectivityDiagnosticsCallback, wifiRequest, mContext.getPackageName());
 
         // Block until all other events are done processing.
-        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+        HandlerUtils.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
 
         verify(mIBinder).linkToDeath(any(ConnectivityDiagnosticsCallbackInfo.class), anyInt());
         verify(mConnectivityDiagnosticsCallback).asBinder();
@@ -7133,7 +7157,7 @@ public class ConnectivityServiceTest {
                 mConnectivityDiagnosticsCallback, wifiRequest, mContext.getPackageName());
 
         // Block until all other events are done processing.
-        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+        HandlerUtils.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
 
         assertTrue(mService.mConnectivityDiagnosticsCallbacks.containsKey(mIBinder));
     }
@@ -7285,7 +7309,7 @@ public class ConnectivityServiceTest {
                 mConnectivityDiagnosticsCallback, request, mContext.getPackageName());
 
         // Block until all other events are done processing.
-        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+        HandlerUtils.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
 
         verify(mConnectivityDiagnosticsCallback)
                 .onConnectivityReportAvailable(argThat(report -> {
@@ -7305,7 +7329,7 @@ public class ConnectivityServiceTest {
                 mConnectivityDiagnosticsCallback, request, mContext.getPackageName());
 
         // Block until all other events are done processing.
-        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+        HandlerUtils.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
 
         // Connect the cell agent verify that it notifies TestNetworkCallback that it is available
         final TestNetworkCallback callback = new TestNetworkCallback();
@@ -7322,7 +7346,7 @@ public class ConnectivityServiceTest {
         setUpConnectivityDiagnosticsCallback();
 
         // Block until all other events are done processing.
-        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+        HandlerUtils.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
 
         // Verify onConnectivityReport fired
         verify(mConnectivityDiagnosticsCallback).onConnectivityReportAvailable(
@@ -7343,7 +7367,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.notifyDataStallSuspected();
 
         // Block until all other events are done processing.
-        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+        HandlerUtils.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
 
         // Verify onDataStallSuspected fired
         verify(mConnectivityDiagnosticsCallback).onDataStallSuspected(
@@ -7364,7 +7388,7 @@ public class ConnectivityServiceTest {
         mService.reportNetworkConnectivity(n, hasConnectivity);
 
         // Block until all other events are done processing.
-        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+        HandlerUtils.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
 
         // Verify onNetworkConnectivityReported fired
         verify(mConnectivityDiagnosticsCallback)
@@ -7374,7 +7398,7 @@ public class ConnectivityServiceTest {
         mService.reportNetworkConnectivity(n, noConnectivity);
 
         // Block until all other events are done processing.
-        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+        HandlerUtils.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
 
         // Wait for onNetworkConnectivityReported to fire
         verify(mConnectivityDiagnosticsCallback)

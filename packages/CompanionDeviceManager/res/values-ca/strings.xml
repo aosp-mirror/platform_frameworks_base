@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4470785958457506021">"Aplicació Gestor de dispositius complementaris"</string>
+    <string name="app_label" msgid="4470785958457506021">"Gestor de dispositius complementaris"</string>
     <string name="chooser_title" msgid="4958797271463138976">"Enllaça amb &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="confirmation_title" msgid="5683126664999349196">"Enllaça &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; amb &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
 </resources>

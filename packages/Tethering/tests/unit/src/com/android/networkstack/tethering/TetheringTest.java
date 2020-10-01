@@ -40,7 +40,6 @@ import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_FAILED;
 import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_STARTED;
 import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_STOPPED;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
-import static android.net.shared.Inet4AddressUtils.intToInet4AddressHTH;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_INTERFACE_NAME;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_MODE;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_STATE;
@@ -49,6 +48,7 @@ import static android.net.wifi.WifiManager.IFACE_IP_MODE_TETHERED;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLED;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
+import static com.android.net.module.util.Inet4AddressUtils.intToInet4AddressHTH;
 import static com.android.networkstack.tethering.TetheringNotificationUpdater.DOWNSTREAM_NONE;
 import static com.android.networkstack.tethering.UpstreamNetworkMonitor.EVENT_ON_CAPABILITIES;
 
@@ -110,13 +110,14 @@ import android.net.TetheringRequestParcel;
 import android.net.dhcp.DhcpServerCallbacks;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.IDhcpServer;
+import android.net.ip.DadProxy;
 import android.net.ip.IpNeighborMonitor;
 import android.net.ip.IpServer;
 import android.net.ip.RouterAdvertisementDaemon;
 import android.net.util.InterfaceParams;
 import android.net.util.NetworkConstants;
 import android.net.util.SharedLog;
-import android.net.wifi.WifiConfiguration;
+import android.net.wifi.SoftApConfiguration;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
@@ -143,7 +144,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.StateMachine;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
-import com.android.testutils.MiscAssertsKt;
+import com.android.testutils.MiscAsserts;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -196,6 +197,7 @@ public class TetheringTest {
     @Mock private CarrierConfigManager mCarrierConfigManager;
     @Mock private UpstreamNetworkMonitor mUpstreamNetworkMonitor;
     @Mock private IPv6TetheringCoordinator mIPv6TetheringCoordinator;
+    @Mock private DadProxy mDadProxy;
     @Mock private RouterAdvertisementDaemon mRouterAdvertisementDaemon;
     @Mock private IpNeighborMonitor mIpNeighborMonitor;
     @Mock private IDhcpServer mDhcpServer;
@@ -280,6 +282,12 @@ public class TetheringTest {
 
     public class MockIpServerDependencies extends IpServer.Dependencies {
         @Override
+        public DadProxy getDadProxy(
+                Handler handler, InterfaceParams ifParams) {
+            return mDadProxy;
+        }
+
+        @Override
         public RouterAdvertisementDaemon getRouterAdvertisementDaemon(
                 InterfaceParams ifParams) {
             return mRouterAdvertisementDaemon;
@@ -337,11 +345,11 @@ public class TetheringTest {
     }
 
     public class MockTetheringDependencies extends TetheringDependencies {
-        StateMachine mUpstreamNetworkMonitorMasterSM;
+        StateMachine mUpstreamNetworkMonitorSM;
         ArrayList<IpServer> mIpv6CoordinatorNotifyList;
 
         public void reset() {
-            mUpstreamNetworkMonitorMasterSM = null;
+            mUpstreamNetworkMonitorSM = null;
             mIpv6CoordinatorNotifyList = null;
         }
 
@@ -368,7 +376,7 @@ public class TetheringTest {
         @Override
         public UpstreamNetworkMonitor getUpstreamNetworkMonitor(Context ctx,
                 StateMachine target, SharedLog log, int what) {
-            mUpstreamNetworkMonitorMasterSM = target;
+            mUpstreamNetworkMonitorSM = target;
             return mUpstreamNetworkMonitor;
         }
 
@@ -832,6 +840,7 @@ public class TetheringTest {
         verify(mNetd, times(1)).ipfwdAddInterfaceForward(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
 
         sendIPv6TetherUpdates(upstreamState);
+        verify(mDadProxy, never()).setUpstreamIface(notNull());
         verify(mRouterAdvertisementDaemon, never()).buildNewRa(any(), notNull());
         verify(mDhcpServer, timeout(DHCPSERVER_START_TIMEOUT_MS).times(1)).startWithCallbacks(
                 any(), any());
@@ -858,6 +867,8 @@ public class TetheringTest {
         verify(mNetd, times(1)).ipfwdAddInterfaceForward(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
 
         sendIPv6TetherUpdates(upstreamState);
+        // TODO: add interfaceParams to compare in verify.
+        verify(mDadProxy, times(1)).setUpstreamIface(notNull());
         verify(mRouterAdvertisementDaemon, times(1)).buildNewRa(any(), notNull());
         verify(mNetd, times(1)).tetherApplyDnsInterfaces();
     }
@@ -874,6 +885,7 @@ public class TetheringTest {
                 any(), any());
 
         sendIPv6TetherUpdates(upstreamState);
+        verify(mDadProxy, times(1)).setUpstreamIface(notNull());
         verify(mRouterAdvertisementDaemon, times(1)).buildNewRa(any(), notNull());
         verify(mNetd, times(1)).tetherApplyDnsInterfaces();
     }
@@ -891,6 +903,7 @@ public class TetheringTest {
         verify(mNetd, times(1)).ipfwdAddInterfaceForward(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
 
         sendIPv6TetherUpdates(upstreamState);
+        verify(mDadProxy, times(1)).setUpstreamIface(notNull());
         verify(mRouterAdvertisementDaemon, times(1)).buildNewRa(any(), notNull());
         verify(mNetd, times(1)).tetherApplyDnsInterfaces();
     }
@@ -911,8 +924,8 @@ public class TetheringTest {
         initTetheringUpstream(upstreamState);
 
         // Upstream LinkProperties changed: UpstreamNetworkMonitor sends EVENT_ON_LINKPROPERTIES.
-        mTetheringDependencies.mUpstreamNetworkMonitorMasterSM.sendMessage(
-                Tethering.TetherMasterSM.EVENT_UPSTREAM_CALLBACK,
+        mTetheringDependencies.mUpstreamNetworkMonitorSM.sendMessage(
+                Tethering.TetherMainSM.EVENT_UPSTREAM_CALLBACK,
                 UpstreamNetworkMonitor.EVENT_ON_LINKPROPERTIES,
                 0,
                 upstreamState);
@@ -983,12 +996,12 @@ public class TetheringTest {
     // TODO: Test with and without interfaceStatusChanged().
     @Test
     public void failingWifiTetheringLegacyApBroadcast() throws Exception {
-        when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
+        when(mWifiManager.startTetheredHotspot(any(SoftApConfiguration.class))).thenReturn(true);
 
         // Emulate pressing the WiFi tethering button.
         mTethering.startTethering(createTetheringRequestParcel(TETHERING_WIFI), null);
         mLooper.dispatchAll();
-        verify(mWifiManager, times(1)).startSoftAp(null);
+        verify(mWifiManager, times(1)).startTetheredHotspot(null);
         verifyNoMoreInteractions(mWifiManager);
         verifyNoMoreInteractions(mNetd);
 
@@ -1011,12 +1024,12 @@ public class TetheringTest {
     // TODO: Test with and without interfaceStatusChanged().
     @Test
     public void workingWifiTetheringEnrichedApBroadcast() throws Exception {
-        when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
+        when(mWifiManager.startTetheredHotspot(any(SoftApConfiguration.class))).thenReturn(true);
 
         // Emulate pressing the WiFi tethering button.
         mTethering.startTethering(createTetheringRequestParcel(TETHERING_WIFI), null);
         mLooper.dispatchAll();
-        verify(mWifiManager, times(1)).startSoftAp(null);
+        verify(mWifiManager, times(1)).startTetheredHotspot(null);
         verifyNoMoreInteractions(mWifiManager);
         verifyNoMoreInteractions(mNetd);
 
@@ -1087,13 +1100,13 @@ public class TetheringTest {
     // TODO: Test with and without interfaceStatusChanged().
     @Test
     public void failureEnablingIpForwarding() throws Exception {
-        when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
+        when(mWifiManager.startTetheredHotspot(any(SoftApConfiguration.class))).thenReturn(true);
         doThrow(new RemoteException()).when(mNetd).ipfwdEnableForwarding(TETHERING_NAME);
 
         // Emulate pressing the WiFi tethering button.
         mTethering.startTethering(createTetheringRequestParcel(TETHERING_WIFI), null);
         mLooper.dispatchAll();
-        verify(mWifiManager, times(1)).startSoftAp(null);
+        verify(mWifiManager, times(1)).startTetheredHotspot(null);
         verifyNoMoreInteractions(mWifiManager);
         verifyNoMoreInteractions(mNetd);
 
@@ -1126,7 +1139,7 @@ public class TetheringTest {
         verify(mNetd, times(1)).ipfwdEnableForwarding(TETHERING_NAME);
         // This never gets called because of the exception thrown above.
         verify(mNetd, times(0)).tetherStartWithConfiguration(any());
-        // When the master state machine transitions to an error state it tells
+        // When the main state machine transitions to an error state it tells
         // downstream interfaces, which causes us to tell Wi-Fi about the error
         // so it can take down AP mode.
         verify(mNetd, times(1)).tetherApplyDnsInterfaces();
@@ -1360,7 +1373,7 @@ public class TetheringTest {
         assertEquals(0, parcel.localOnlyList.length);
         assertEquals(0, parcel.erroredIfaceList.length);
         assertEquals(0, parcel.lastErrorList.length);
-        MiscAssertsKt.assertFieldCountEquals(5, TetherStatesParcel.class);
+        MiscAsserts.assertFieldCountEquals(5, TetherStatesParcel.class);
     }
 
     @Test
@@ -1380,7 +1393,7 @@ public class TetheringTest {
         // 2. Enable wifi tethering.
         UpstreamNetworkState upstreamState = buildMobileDualStackUpstreamState();
         initTetheringUpstream(upstreamState);
-        when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
+        when(mWifiManager.startTetheredHotspot(any(SoftApConfiguration.class))).thenReturn(true);
         mTethering.interfaceStatusChanged(TEST_WLAN_IFNAME, true);
         mLooper.dispatchAll();
         tetherState = callback.pollTetherStatesChanged();
@@ -1753,8 +1766,8 @@ public class TetheringTest {
 
     @Test
     public void testUpstreamNetworkChanged() {
-        final Tethering.TetherMasterSM stateMachine = (Tethering.TetherMasterSM)
-                mTetheringDependencies.mUpstreamNetworkMonitorMasterSM;
+        final Tethering.TetherMainSM stateMachine = (Tethering.TetherMainSM)
+                mTetheringDependencies.mUpstreamNetworkMonitorSM;
         final UpstreamNetworkState upstreamState = buildMobileIPv4UpstreamState();
         initTetheringUpstream(upstreamState);
         stateMachine.chooseUpstreamType(true);
@@ -1765,8 +1778,8 @@ public class TetheringTest {
 
     @Test
     public void testUpstreamCapabilitiesChanged() {
-        final Tethering.TetherMasterSM stateMachine = (Tethering.TetherMasterSM)
-                mTetheringDependencies.mUpstreamNetworkMonitorMasterSM;
+        final Tethering.TetherMainSM stateMachine = (Tethering.TetherMainSM)
+                mTetheringDependencies.mUpstreamNetworkMonitorSM;
         final UpstreamNetworkState upstreamState = buildMobileIPv4UpstreamState();
         initTetheringUpstream(upstreamState);
         stateMachine.chooseUpstreamType(true);
@@ -1891,8 +1904,8 @@ public class TetheringTest {
                 any(), any());
         reset(mNetd, mUsbManager);
         upstreamNetwork = buildV4WifiUpstreamState(ipv4Address, 30, wifiNetwork);
-        mTetheringDependencies.mUpstreamNetworkMonitorMasterSM.sendMessage(
-                Tethering.TetherMasterSM.EVENT_UPSTREAM_CALLBACK,
+        mTetheringDependencies.mUpstreamNetworkMonitorSM.sendMessage(
+                Tethering.TetherMainSM.EVENT_UPSTREAM_CALLBACK,
                 UpstreamNetworkMonitor.EVENT_ON_LINKPROPERTIES,
                 0,
                 upstreamNetwork);
@@ -1929,8 +1942,8 @@ public class TetheringTest {
 
         final UpstreamNetworkState upstreamNetwork = buildV4WifiUpstreamState(
                 upstreamAddress, 16, wifiNetwork);
-        mTetheringDependencies.mUpstreamNetworkMonitorMasterSM.sendMessage(
-                Tethering.TetherMasterSM.EVENT_UPSTREAM_CALLBACK,
+        mTetheringDependencies.mUpstreamNetworkMonitorSM.sendMessage(
+                Tethering.TetherMainSM.EVENT_UPSTREAM_CALLBACK,
                 UpstreamNetworkMonitor.EVENT_ON_LINKPROPERTIES,
                 0,
                 upstreamNetwork);

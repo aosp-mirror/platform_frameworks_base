@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright 2020, The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<com.android.systemui.statusbar.notification.row.PartialConversationInfo
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/notification_guts"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:focusable="true"
+    android:clipChildren="false"
+    android:clipToPadding="true"
+    android:orientation="vertical"
+    android:paddingStart="@*android:dimen/notification_content_margin_start">
+
+    <!-- Package Info -->
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/notification_guts_conversation_header_height"
+        android:gravity="center_vertical"
+        android:clipChildren="false"
+        android:clipToPadding="false">
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="@dimen/notification_guts_conversation_icon_size"
+            android:layout_height="@dimen/notification_guts_conversation_icon_size"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginEnd="15dp" />
+        <LinearLayout
+            android:id="@+id/names"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:orientation="vertical"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/notification_guts_conversation_icon_size"
+            android:layout_centerVertical="true"
+            android:gravity="center_vertical"
+            android:layout_alignEnd="@id/conversation_icon"
+            android:layout_toEndOf="@id/conversation_icon">
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:textDirection="locale"
+                style="@style/TextAppearance.NotificationImportanceChannel"/>
+            <TextView
+                android:id="@+id/delegate_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                style="@style/TextAppearance.NotificationImportanceHeader"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:ellipsize="end"
+                android:textDirection="locale"
+                android:text="@string/notification_delegate_header"
+                android:maxLines="1" />
+
+        </LinearLayout>
+
+        <!-- end aligned fields -->
+        <ImageButton
+            android:id="@+id/info"
+            android:layout_width="@dimen/notification_importance_toggle_size"
+            android:layout_height="@dimen/notification_importance_toggle_size"
+            android:layout_centerVertical="true"
+            android:background="@drawable/ripple_drawable"
+            android:contentDescription="@string/notification_more_settings"
+            android:src="@drawable/ic_settings"
+            android:layout_alignParentEnd="true"
+            android:tint="@color/notification_guts_link_icon_tint"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/inline_controls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingEnd="@*android:dimen/notification_content_margin_end"
+        android:layout_marginTop="@dimen/notification_guts_option_vertical_padding"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="vertical">
+
+        <com.android.systemui.statusbar.notification.row.ButtonLinearLayout
+            android:id="@+id/settings_link"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/notification_importance_button_padding"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/notification_guts_priority_button_bg"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:layout_centerVertical="true"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_height="match_parent"
+                    android:layout_width="wrap_content"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_info"
+                    android:layout_centerVertical="true"
+                    android:tint="?android:attr/textColorPrimary"
+                    android:layout_marginEnd="8dp"/>
+                <TextView
+                    android:id="@+id/non_configurable_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    style="@style/TextAppearance.NotificationImportanceChannelGroup" />
+            </LinearLayout>
+        </com.android.systemui.statusbar.notification.row.ButtonLinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/bottom_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:gravity="center_vertical"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            >
+            <TextView
+                android:id="@+id/turn_off_notifications"
+                android:text="@string/inline_turn_off_notifications"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:gravity="start|center_vertical"
+                android:minWidth="@dimen/notification_importance_toggle_size"
+                android:minHeight="@dimen/notification_importance_toggle_size"
+                android:maxWidth="200dp"
+                style="@style/TextAppearance.NotificationInfo.Button"/>
+            <TextView
+                android:id="@+id/done"
+                android:text="@string/inline_done_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:gravity="end|center_vertical"
+                android:minWidth="@dimen/notification_importance_toggle_size"
+                android:minHeight="@dimen/notification_importance_toggle_size"
+                android:maxWidth="125dp"
+                style="@style/TextAppearance.NotificationInfo.Button"/>
+        </RelativeLayout>
+
+    </LinearLayout>
+</com.android.systemui.statusbar.notification.row.PartialConversationInfo>

@@ -66,6 +66,7 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
 
     @Override
     public void handleSetListening(boolean listening) {
+        super.handleSetListening(listening);
         mSetting.setListening(listening);
     }
 

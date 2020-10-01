@@ -22,14 +22,16 @@
 
     <application>
         <activity android:name=".PluginSettings"
-            android:label="@string/plugin_label">
+                  android:label="@string/plugin_label"
+                  android:exported="false">
             <intent-filter>
                 <action android:name="com.android.systemui.action.PLUGIN_SETTINGS" />
             </intent-filter>
         </activity>
 
         <service android:name=".SampleOverlayPlugin"
-            android:label="@string/plugin_label">
+                 android:label="@string/plugin_label"
+                 android:exported="false">
             <intent-filter>
                 <action android:name="com.android.systemui.action.PLUGIN_OVERLAY" />
             </intent-filter>

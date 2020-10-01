@@ -230,9 +230,35 @@ message SystemMessage {
     // Package: android
     NOTE_TEST_HARNESS_MODE_ENABLED = 54;
 
+    // Inform the user that Serial Console is active.
+    // Package: android
+    NOTE_SERIAL_CONSOLE_ENABLED = 55;
+
+    // Inform the user that the current network may not support using a randomized MAC address.
+    NOTE_NETWORK_NO_MAC_RANDOMIZATION_SUPPORT = 56;
+
+    // Inform the user that EAP failure occurs
+    NOTE_WIFI_EAP_FAILURE = 57;
+
+    // Notify the user that their softap disabled because auto shutdown timeout expired.
+    // Package: android
+    NOTE_SOFTAP_AUTO_DISABLED = 58;
+
+    // Notify the user that their admin has changed location settings.
+    // Package: android
+    NOTE_LOCATION_CHANGED = 59;
+
+    // Notify user that a SIM is required to connect to Wifi network
+    // Package: android
+    NOTE_ID_WIFI_SIM_REQUIRED = 60;
+
     // Display the Android Debug Protocol status
     // Package: android
     NOTE_ADB_WIFI_ACTIVE = 62;
+
+    // Notify user there was a non-framework gnss location access during an emergency
+    // Package: android
+    NOTE_GNSS_NFW_LOCATION_ACCESS = 63;
 
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
@@ -302,5 +328,9 @@ message SystemMessage {
     // Notify the user that data or apps are being moved to external storage.
     // Package: com.android.systemui
     NOTE_STORAGE_MOVE = 0x534d4f56;
+
+    // Notify the user that the admin suspended personal apps on the device.
+    // Package: android
+    NOTE_PERSONAL_APPS_SUSPENDED = 1003;
   }
 }

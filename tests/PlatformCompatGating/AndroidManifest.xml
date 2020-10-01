@@ -2,6 +2,11 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.tests.gating">
+
+    <queries>
+        <package android:name="com.android.tests.gating.app_not_installed" />
+    </queries>
+
     <application android:label="GatingTest">
         <uses-library android:name="android.test.runner" />
     </application>

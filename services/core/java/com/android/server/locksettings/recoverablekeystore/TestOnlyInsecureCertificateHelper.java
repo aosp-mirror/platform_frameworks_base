@@ -97,7 +97,8 @@ public class TestOnlyInsecureCertificateHelper {
         if (credential == null) {
             return false;
         }
-        if (credentialType != LockPatternUtils.CREDENTIAL_TYPE_PASSWORD) {
+        if (credentialType != LockPatternUtils.CREDENTIAL_TYPE_PASSWORD
+                && credentialType != LockPatternUtils.CREDENTIAL_TYPE_PIN) {
             return false;
         }
         byte[] insecurePasswordPrefixBytes =

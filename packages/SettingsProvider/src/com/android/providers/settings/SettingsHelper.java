@@ -48,6 +48,8 @@ import java.util.Locale;
 public class SettingsHelper {
     private static final String TAG = "SettingsHelper";
     private static final String SILENT_RINGTONE = "_silent";
+    private static final String SETTINGS_REPLACED_KEY = "backup_skip_user_facing_data";
+    private static final String SETTING_ORIGINAL_KEY_SUFFIX = "_original";
     private static final float FLOAT_TOLERANCE = 0.01f;
 
     private Context mContext;
@@ -75,6 +77,10 @@ public class SettingsHelper {
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_VR_LISTENERS);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
         sBroadcastOnRestore.add(Settings.Global.BLUETOOTH_ON);
+        sBroadcastOnRestore.add(Settings.Secure.UI_NIGHT_MODE);
+        sBroadcastOnRestore.add(Settings.Secure.DARK_THEME_CUSTOM_START_TIME);
+        sBroadcastOnRestore.add(Settings.Secure.DARK_THEME_CUSTOM_END_TIME);
+        sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
     }
 
     private interface SettingsLookup {
@@ -118,6 +124,10 @@ public class SettingsHelper {
      */
     public void restoreValue(Context context, ContentResolver cr, ContentValues contentValues,
             Uri destination, String name, String value, int restoredFromSdkInt) {
+        if (isReplacedSystemSetting(name)) {
+            return;
+        }
+
         // Will we need a post-restore broadcast for this element?
         String oldValue = null;
         boolean sendBroadcast = false;
@@ -200,7 +210,33 @@ public class SettingsHelper {
             }
         }
         // Return the original value
-        return value;
+        return isReplacedSystemSetting(name) ? getRealValueForSystemSetting(name) : value;
+    }
+
+    /**
+     * The setting value might have been replaced temporarily. If that's the case, return the real
+     * value instead of the temporary one.
+     */
+    @VisibleForTesting
+    public String getRealValueForSystemSetting(String setting) {
+        // The real value irrespectively of the original setting's namespace is stored in
+        // Settings.Secure.
+        return Settings.Secure.getString(mContext.getContentResolver(),
+                setting + SETTING_ORIGINAL_KEY_SUFFIX);
+    }
+
+    @VisibleForTesting
+    public boolean isReplacedSystemSetting(String setting) {
+        // This list should not be modified.
+        if (!Settings.System.SCREEN_OFF_TIMEOUT.equals(setting)) {
+            return false;
+        }
+        // If this flag is set, values for the system settings from the list above have been
+        // temporarily replaced. We don't want to back up the temporary value or run restore for
+        // such settings.
+        // TODO(154822946): Remove this logic in the next release.
+        return Settings.Secure.getInt(mContext.getContentResolver(), SETTINGS_REPLACED_KEY,
+                /* def */ 0) != 0;
     }
 
     /**

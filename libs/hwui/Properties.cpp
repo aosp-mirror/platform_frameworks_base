@@ -16,19 +16,31 @@
 
 #include "Properties.h"
 #include "Debug.h"
-#include "DeviceInfo.h"
+#ifdef __ANDROID__
 #include "HWUIProperties.sysprop.h"
+#endif
 #include "SkTraceEventCommon.h"
 
 #include <algorithm>
 #include <cstdlib>
+#include <optional>
 
+#include <android-base/properties.h>
 #include <cutils/compiler.h>
-#include <cutils/properties.h>
 #include <log/log.h>
 
 namespace android {
 namespace uirenderer {
+
+#ifndef __ANDROID__ // Layoutlib does not compile HWUIProperties.sysprop as it depends on cutils properties
+std::optional<bool> use_vulkan() {
+    return base::GetBoolProperty("ro.hwui.use_vulkan", false);
+}
+
+std::optional<std::int32_t> render_ahead() {
+    return base::GetIntProperty("ro.hwui.render_ahead", 0);
+}
+#endif
 
 bool Properties::debugLayersUpdates = false;
 bool Properties::debugOverdraw = false;
@@ -67,64 +79,54 @@ bool Properties::isolatedProcess = false;
 int Properties::contextPriority = 0;
 int Properties::defaultRenderAhead = -1;
 
-static int property_get_int(const char* key, int defaultValue) {
-    char buf[PROPERTY_VALUE_MAX] = {
-            '\0',
-    };
-
-    if (property_get(key, buf, "") > 0) {
-        return atoi(buf);
-    }
-    return defaultValue;
-}
-
 bool Properties::load() {
-    char property[PROPERTY_VALUE_MAX];
     bool prevDebugLayersUpdates = debugLayersUpdates;
     bool prevDebugOverdraw = debugOverdraw;
 
     debugOverdraw = false;
-    if (property_get(PROPERTY_DEBUG_OVERDRAW, property, nullptr) > 0) {
-        INIT_LOGD("  Overdraw debug enabled: %s", property);
-        if (!strcmp(property, "show")) {
+    std::string debugOverdrawProperty = base::GetProperty(PROPERTY_DEBUG_OVERDRAW, "");
+    if (debugOverdrawProperty != "") {
+        INIT_LOGD("  Overdraw debug enabled: %s", debugOverdrawProperty);
+        if (debugOverdrawProperty == "show") {
             debugOverdraw = true;
             overdrawColorSet = OverdrawColorSet::Default;
-        } else if (!strcmp(property, "show_deuteranomaly")) {
+        } else if (debugOverdrawProperty == "show_deuteranomaly") {
             debugOverdraw = true;
             overdrawColorSet = OverdrawColorSet::Deuteranomaly;
         }
     }
 
     sProfileType = ProfileType::None;
-    if (property_get(PROPERTY_PROFILE, property, "") > 0) {
-        if (!strcmp(property, PROPERTY_PROFILE_VISUALIZE_BARS)) {
+    std::string profileProperty = base::GetProperty(PROPERTY_PROFILE, "");
+    if (profileProperty != "") {
+        if (profileProperty == PROPERTY_PROFILE_VISUALIZE_BARS) {
             sProfileType = ProfileType::Bars;
-        } else if (!strcmp(property, "true")) {
+        } else if (profileProperty == "true") {
             sProfileType = ProfileType::Console;
         }
     }
 
-    debugLayersUpdates = property_get_bool(PROPERTY_DEBUG_LAYERS_UPDATES, false);
+    debugLayersUpdates = base::GetBoolProperty(PROPERTY_DEBUG_LAYERS_UPDATES, false);
     INIT_LOGD("  Layers updates debug enabled: %d", debugLayersUpdates);
 
-    showDirtyRegions = property_get_bool(PROPERTY_DEBUG_SHOW_DIRTY_REGIONS, false);
+    showDirtyRegions = base::GetBoolProperty(PROPERTY_DEBUG_SHOW_DIRTY_REGIONS, false);
 
-    debugLevel = (DebugLevel)property_get_int(PROPERTY_DEBUG, kDebugDisabled);
+    debugLevel = (DebugLevel)base::GetIntProperty(PROPERTY_DEBUG, (int)kDebugDisabled);
 
-    skipEmptyFrames = property_get_bool(PROPERTY_SKIP_EMPTY_DAMAGE, true);
-    useBufferAge = property_get_bool(PROPERTY_USE_BUFFER_AGE, true);
-    enablePartialUpdates = property_get_bool(PROPERTY_ENABLE_PARTIAL_UPDATES, true);
+    skipEmptyFrames = base::GetBoolProperty(PROPERTY_SKIP_EMPTY_DAMAGE, true);
+    useBufferAge = base::GetBoolProperty(PROPERTY_USE_BUFFER_AGE, true);
+    enablePartialUpdates = base::GetBoolProperty(PROPERTY_ENABLE_PARTIAL_UPDATES, true);
 
-    filterOutTestOverhead = property_get_bool(PROPERTY_FILTER_TEST_OVERHEAD, false);
+    filterOutTestOverhead = base::GetBoolProperty(PROPERTY_FILTER_TEST_OVERHEAD, false);
 
-    skpCaptureEnabled = debuggingEnabled && property_get_bool(PROPERTY_CAPTURE_SKP_ENABLED, false);
+    skpCaptureEnabled = debuggingEnabled && base::GetBoolProperty(PROPERTY_CAPTURE_SKP_ENABLED, false);
 
     SkAndroidFrameworkTraceUtil::setEnableTracing(
-            property_get_bool(PROPERTY_SKIA_ATRACE_ENABLED, false));
+            base::GetBoolProperty(PROPERTY_SKIA_ATRACE_ENABLED, false));
 
-    runningInEmulator = property_get_bool(PROPERTY_QEMU_KERNEL, false);
+    runningInEmulator = base::GetBoolProperty(PROPERTY_QEMU_KERNEL, false);
 
-    defaultRenderAhead = std::max(-1, std::min(2, property_get_int(PROPERTY_RENDERAHEAD,
+    defaultRenderAhead = std::max(-1, std::min(2, base::GetIntProperty(PROPERTY_RENDERAHEAD,
             render_ahead().value_or(0))));
 
     return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw);
@@ -175,9 +177,8 @@ RenderPipelineType Properties::peekRenderPipelineType() {
         return sRenderPipelineType;
     }
     bool useVulkan = use_vulkan().value_or(false);
-    char prop[PROPERTY_VALUE_MAX];
-    property_get(PROPERTY_RENDERER, prop, useVulkan ? "skiavk" : "skiagl");
-    if (!strcmp(prop, "skiavk")) {
+    std::string rendererProperty = base::GetProperty(PROPERTY_RENDERER, useVulkan ? "skiavk" : "skiagl");
+    if (rendererProperty == "skiavk") {
         return RenderPipelineType::SkiaVulkan;
     }
     return RenderPipelineType::SkiaGL;
@@ -189,14 +190,14 @@ RenderPipelineType Properties::getRenderPipelineType() {
 }
 
 void Properties::overrideRenderPipelineType(RenderPipelineType type) {
-#if !defined(HWUI_GLES_WRAP_ENABLED)
     // If we're doing actual rendering then we can't change the renderer after it's been set.
     // Unit tests can freely change this as often as it wants, though, as there's no actual
     // GL rendering happening
     if (sRenderPipelineType != RenderPipelineType::NotInitialized) {
+        LOG_ALWAYS_FATAL_IF(sRenderPipelineType != type,
+                "Trying to change pipeline but it's already set");
         return;
     }
-#endif
     sRenderPipelineType = type;
 }
 

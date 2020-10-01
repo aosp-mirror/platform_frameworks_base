@@ -93,4 +93,14 @@
         android:gravity="center"
         android:orientation="vertical" />
 
+    <ImageButton
+        android:id="@+id/icon_button"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:minWidth="64dp"
+        android:minHeight="@dimen/min_tap_target_size"
+        android:layout_gravity="center"
+        android:background="?android:attr/selectableItemBackground"
+        android:visibility="gone">
+    </ImageButton>
 </LinearLayout>

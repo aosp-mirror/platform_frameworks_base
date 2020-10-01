@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.view.RemoteAnimationTarget;
 import android.view.IRecentsAnimationController;
@@ -33,16 +34,16 @@ oneway interface IRecentsAnimationRunner {
      * wallpaper not drawing in time, or the handler not finishing the animation within a predefined
      * amount of time.
      *
-     * @param deferredWithScreenshot If set to {@code true}, the contents of the task will be
-     *                               replaced with a screenshot, such that the runner's leash is
-     *                               still active. As soon as the runner doesn't need the leash
-     *                               anymore, it must call
-     *                               {@link IRecentsAnimationController#cleanupScreenshot).
+     * @param taskSnapshot If the snapshot is null, the animation will be cancelled and the leash
+     *                     will be inactive immediately. Otherwise, the contents of the task will be
+     *                     replaced with {@param taskSnapshot}, such that the runner's leash is
+     *                     still active. As soon as the runner doesn't need the leash anymore, it
+     *                     must call {@link IRecentsAnimationController#cleanupScreenshot).
      *
      * @see {@link RecentsAnimationController#cleanupScreenshot}
      */
     @UnsupportedAppUsage
-    void onAnimationCanceled(boolean deferredWithScreenshot) = 1;
+    void onAnimationCanceled(in @nullable ActivityManager.TaskSnapshot taskSnapshot) = 1;
 
     /**
      * Called when the system is ready for the handler to start animating all the visible tasks.
@@ -53,6 +54,12 @@ oneway interface IRecentsAnimationRunner {
      */
     @UnsupportedAppUsage
     void onAnimationStart(in IRecentsAnimationController controller,
-            in RemoteAnimationTarget[] apps, in Rect homeContentInsets,
-            in Rect minimizedHomeBounds) = 2;
+            in RemoteAnimationTarget[] apps, in RemoteAnimationTarget[] wallpapers,
+            in Rect homeContentInsets, in Rect minimizedHomeBounds) = 2;
+
+    /**
+     * Called when the task of an activity that has been started while the recents animation
+     * was running becomes ready for control.
+     */
+    void onTaskAppeared(in RemoteAnimationTarget app) = 3;
 }

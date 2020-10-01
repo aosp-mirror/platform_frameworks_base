@@ -40,6 +40,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
@@ -49,6 +50,7 @@ import android.util.Slog;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.Date;
 
 /**
  * Implementation of `cmd notification` in NotificationManagerService.
@@ -61,13 +63,23 @@ public class NotificationShellCmd extends ShellCommand {
             + "  disallow_listener COMPONENT [user_id (current user if not specified)]\n"
             + "  allow_assistant COMPONENT [user_id (current user if not specified)]\n"
             + "  remove_assistant COMPONENT [user_id (current user if not specified)]\n"
+            + "  set_dnd [on|none (same as on)|priority|alarms|all|off (same as all)]"
             + "  allow_dnd PACKAGE [user_id (current user if not specified)]\n"
             + "  disallow_dnd PACKAGE [user_id (current user if not specified)]\n"
             + "  suspend_package PACKAGE\n"
             + "  unsuspend_package PACKAGE\n"
             + "  reset_assistant_user_set [user_id (current user if not specified)]\n"
             + "  get_approved_assistant [user_id (current user if not specified)]\n"
-            + "  post [--help | flags] TAG TEXT";
+            + "  post [--help | flags] TAG TEXT\n"
+            + "  set_bubbles PACKAGE PREFERENCE (0=none 1=all 2=selected) "
+                    + "[user_id (current user if not specified)]\n"
+            + "  set_bubbles_channel PACKAGE CHANNEL_ID ALLOW "
+                    + "[user_id (current user if not specified)]\n"
+            + "  list\n"
+            + "  get <notification-key>\n"
+            + "  snooze --for <msec> <notification-key>\n"
+            + "  unsnooze <notification-key>\n"
+            ;
 
     private static final String NOTIFY_USAGE =
               "usage: cmd notification post [flags] <tag> <text>\n\n"
@@ -104,11 +116,16 @@ public class NotificationShellCmd extends ShellCommand {
     private final NotificationManagerService mDirectService;
     private final INotificationManager mBinderService;
     private final PackageManager mPm;
+    private NotificationChannel mChannel;
 
     public NotificationShellCmd(NotificationManagerService service) {
         mDirectService = service;
         mBinderService = service.getBinderService();
         mPm = mDirectService.getContext().getPackageManager();
+    }
+
+    protected boolean checkShellCommandPermission(int callingUid) {
+        return (callingUid == Process.ROOT_UID || callingUid == Process.SHELL_UID);
     }
 
     @Override
@@ -120,16 +137,30 @@ public class NotificationShellCmd extends ShellCommand {
         final int callingUid = Binder.getCallingUid();
         long identity = Binder.clearCallingIdentity();
         try {
-            String[] packages = mPm.getPackagesForUid(callingUid);
-            if (packages != null && packages.length > 0) {
-                callingPackage = packages[0];
+            if (callingUid == Process.ROOT_UID) {
+                callingPackage = NotificationManagerService.ROOT_PKG;
+            } else {
+                String[] packages = mPm.getPackagesForUid(callingUid);
+                if (packages != null && packages.length > 0) {
+                    callingPackage = packages[0];
+                }
             }
         } catch (Exception e) {
             Slog.e(TAG, "failed to get caller pkg", e);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+
         final PrintWriter pw = getOutPrintWriter();
+
+        if (!checkShellCommandPermission(callingUid)) {
+            Slog.e(TAG, "error: permission denied: callingUid="
+                    + callingUid + " callingPackage=" + callingPackage);
+            pw.println("error: permission denied: callingUid="
+                    + callingUid + " callingPackage=" + callingPackage);
+            return 255;
+        }
+
         try {
             switch (cmd.replace('-', '_')) {
                 case "set_dnd": {
@@ -267,10 +298,138 @@ public class NotificationShellCmd extends ShellCommand {
                     }
                     break;
                 }
+                case "set_bubbles": {
+                    // only use for testing
+                    String packageName = getNextArgRequired();
+                    int preference = Integer.parseInt(getNextArgRequired());
+                    if (preference > 3 || preference < 0) {
+                        pw.println("Invalid preference - must be between 0-3 "
+                                + "(0=none 1=all 2=selected)");
+                        return -1;
+                    }
+                    int userId = ActivityManager.getCurrentUser();
+                    if (peekNextArg() != null) {
+                        userId = Integer.parseInt(getNextArgRequired());
+                    }
+                    int appUid = UserHandle.getUid(userId, mPm.getPackageUid(packageName, 0));
+                    mBinderService.setBubblesAllowed(packageName, appUid, preference);
+                    break;
+                }
+                case "set_bubbles_channel": {
+                    // only use for testing
+                    String packageName = getNextArgRequired();
+                    String channelId = getNextArgRequired();
+                    boolean allow = Boolean.parseBoolean(getNextArgRequired());
+                    int userId = ActivityManager.getCurrentUser();
+                    if (peekNextArg() != null) {
+                        userId = Integer.parseInt(getNextArgRequired());
+                    }
+                    NotificationChannel channel = mBinderService.getNotificationChannel(
+                            callingPackage, userId, packageName, channelId);
+                    channel.setAllowBubbles(allow);
+                    int appUid = UserHandle.getUid(userId, mPm.getPackageUid(packageName, 0));
+                    mBinderService.updateNotificationChannelForPackage(packageName, appUid,
+                            channel);
+                    break;
+                }
                 case "post":
                 case "notify":
                     doNotify(pw, callingPackage, callingUid);
                     break;
+                case "list":
+                    for (String key : mDirectService.mNotificationsByKey.keySet()) {
+                        pw.println(key);
+                    }
+                    break;
+                case "get": {
+                    final String key = getNextArgRequired();
+                    final NotificationRecord nr = mDirectService.getNotificationRecord(key);
+                    if (nr != null) {
+                        nr.dump(pw, "", mDirectService.getContext(), false);
+                    } else {
+                        pw.println("error: no active notification matching key: " + key);
+                        return 1;
+                    }
+                    break;
+                }
+                case "snoozed": {
+                    final StringBuilder sb = new StringBuilder();
+                    final SnoozeHelper sh = mDirectService.mSnoozeHelper;
+                    for (NotificationRecord nr : sh.getSnoozed()) {
+                        final String pkg = nr.getSbn().getPackageName();
+                        final String key = nr.getKey();
+                        pw.println(key + " snoozed, time="
+                                + sh.getSnoozeTimeForUnpostedNotification(
+                                        nr.getUserId(), pkg, key)
+                                + " context="
+                                + sh.getSnoozeContextForUnpostedNotification(
+                                        nr.getUserId(), pkg, key));
+                    }
+                    break;
+                }
+                case "unsnooze": {
+                    boolean mute = false;
+                    String key = getNextArgRequired();
+                    if ("--mute".equals(key)) {
+                        mute = true;
+                        key = getNextArgRequired();
+                    }
+                    if (null != mDirectService.mSnoozeHelper.getNotification(key)) {
+                        pw.println("unsnoozing: " + key);
+                        mDirectService.unsnoozeNotificationInt(key, null, mute);
+                    } else {
+                        pw.println("error: no snoozed otification matching key: " + key);
+                        return 1;
+                    }
+                    break;
+                }
+                case "snooze": {
+                    String subflag = getNextArg();
+                    if (subflag == null) {
+                        subflag = "help";
+                    } else if (subflag.startsWith("--")) {
+                        subflag = subflag.substring(2);
+                    }
+                    String flagarg = getNextArg();
+                    String key = getNextArg();
+                    if (key == null) subflag = "help";
+                    String criterion = null;
+                    long duration = 0;
+                    switch (subflag) {
+                        case "context":
+                        case "condition":
+                        case "criterion":
+                            criterion = flagarg;
+                            break;
+                        case "until":
+                        case "for":
+                        case "duration":
+                            duration = Long.parseLong(flagarg);
+                            break;
+                        default:
+                            pw.println("usage: cmd notification snooze (--for <msec> | "
+                                    + "--context <snooze-criterion-id>) <key>");
+                            return 1;
+                    }
+                    if (null == mDirectService.getNotificationRecord(key)) {
+                        pw.println("error: no notification matching key: " + key);
+                        return 1;
+                    }
+                    if (duration > 0 || criterion != null) {
+                        if (duration > 0) {
+                            pw.println(String.format("snoozing <%s> until time: %s", key,
+                                    new Date(System.currentTimeMillis() + duration)));
+                        } else {
+                            pw.println(String.format("snoozing <%s> until criterion: %s", key,
+                                    criterion));
+                        }
+                        mDirectService.snoozeNotificationInt(key, duration, criterion, null);
+                    } else {
+                        pw.println("error: invalid value for --" + subflag + ": " + flagarg);
+                        return 1;
+                    }
+                    break;
+                }
                 default:
                     return handleDefaultCommands(cmd);
             }

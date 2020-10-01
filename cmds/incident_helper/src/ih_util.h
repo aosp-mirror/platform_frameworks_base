@@ -117,6 +117,7 @@ public:
 
 private:
     FILE* mFile;
+    char* mBuffer;
     std::string mStatus;
 };
 

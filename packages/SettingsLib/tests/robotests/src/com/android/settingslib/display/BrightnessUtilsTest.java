@@ -17,6 +17,7 @@
 package com.android.settingslib.display;
 
 import static com.android.settingslib.display.BrightnessUtils.GAMMA_SPACE_MAX;
+import static com.android.settingslib.display.BrightnessUtils.GAMMA_SPACE_MIN;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -27,26 +28,40 @@ import org.robolectric.RobolectricTestRunner;
 @RunWith(RobolectricTestRunner.class)
 public class BrightnessUtilsTest {
 
-    private static final int MIN = 1;
-    private static final int MAX = 255;
+    private static final int MIN_INT = 1;
+    private static final int MAX_INT = 255;
+    private static final float MIN_FLOAT = 0.0f;
+    private static final float MAX_FLOAT = 1.0f;
 
     @Test
-    public void linearToGamma_minValue_shouldReturn0() {
-        assertThat(BrightnessUtils.convertLinearToGamma(MIN, MIN, MAX)).isEqualTo(0);
+    public void linearToGamma_minValue_shouldReturnMin() {
+        assertThat(BrightnessUtils.convertLinearToGamma(MIN_INT, MIN_INT, MAX_INT))
+                .isEqualTo(GAMMA_SPACE_MIN);
+        assertThat(BrightnessUtils.convertLinearToGammaFloat(MIN_FLOAT, MIN_FLOAT, MAX_FLOAT))
+                .isEqualTo(GAMMA_SPACE_MIN);
     }
 
     @Test
     public void linearToGamma_maxValue_shouldReturnGammaSpaceMax() {
-        assertThat(BrightnessUtils.convertLinearToGamma(MAX, MIN, MAX)).isEqualTo(GAMMA_SPACE_MAX);
+        assertThat(BrightnessUtils.convertLinearToGamma(MAX_INT, MIN_INT, MAX_INT))
+                .isEqualTo(GAMMA_SPACE_MAX);
+        assertThat(BrightnessUtils.convertLinearToGammaFloat(MAX_FLOAT, MIN_FLOAT, MAX_FLOAT))
+                .isEqualTo(GAMMA_SPACE_MAX);
     }
 
     @Test
     public void gammaToLinear_minValue_shouldReturnMin() {
-        assertThat(BrightnessUtils.convertGammaToLinear(MIN, MIN, MAX)).isEqualTo(MIN);
+        assertThat(BrightnessUtils.convertGammaToLinear(GAMMA_SPACE_MIN, MIN_INT, MAX_INT))
+                .isEqualTo(MIN_INT);
+        assertThat(BrightnessUtils.convertGammaToLinearFloat(GAMMA_SPACE_MIN, MIN_FLOAT, MAX_FLOAT))
+                .isEqualTo(MIN_FLOAT);
     }
 
     @Test
     public void gammaToLinear_gammaSpaceValue_shouldReturnMax() {
-        assertThat(BrightnessUtils.convertGammaToLinear(GAMMA_SPACE_MAX, MIN, MAX)).isEqualTo(MAX);
+        assertThat(BrightnessUtils.convertGammaToLinear(GAMMA_SPACE_MAX, MIN_INT, MAX_INT))
+                .isEqualTo(MAX_INT);
+        assertThat(BrightnessUtils.convertGammaToLinearFloat(GAMMA_SPACE_MAX, MIN_FLOAT, MAX_FLOAT))
+                .isEqualTo(MAX_FLOAT);
     }
 }

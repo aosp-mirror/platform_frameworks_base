@@ -16,22 +16,6 @@
 
 package com.android.internal.app.procstats;
 
-import android.os.Parcel;
-import android.os.SystemClock;
-import android.os.UserHandle;
-import android.service.procstats.ProcessStatsProto;
-import android.service.procstats.ProcessStatsStateProto;
-import android.util.ArrayMap;
-import android.util.DebugUtils;
-import android.util.Log;
-import android.util.LongSparseArray;
-import android.util.Slog;
-import android.util.SparseLongArray;
-import android.util.TimeUtils;
-import android.util.proto.ProtoOutputStream;
-import android.util.proto.ProtoUtils;
-
-
 import static com.android.internal.app.procstats.ProcessStats.PSS_AVERAGE;
 import static com.android.internal.app.procstats.ProcessStats.PSS_COUNT;
 import static com.android.internal.app.procstats.ProcessStats.PSS_MAXIMUM;
@@ -60,6 +44,25 @@ import static com.android.internal.app.procstats.ProcessStats.STATE_SERVICE;
 import static com.android.internal.app.procstats.ProcessStats.STATE_SERVICE_RESTARTING;
 import static com.android.internal.app.procstats.ProcessStats.STATE_TOP;
 
+import android.os.Parcel;
+import android.os.SystemClock;
+import android.os.UserHandle;
+import android.service.procstats.ProcessStatsProto;
+import android.service.procstats.ProcessStatsStateProto;
+import android.text.TextUtils;
+import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.DebugUtils;
+import android.util.Log;
+import android.util.LongSparseArray;
+import android.util.Slog;
+import android.util.SparseArray;
+import android.util.SparseLongArray;
+import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoUtils;
+
+import com.android.internal.app.ProcessMap;
 import com.android.internal.app.procstats.ProcessStats.PackageState;
 import com.android.internal.app.procstats.ProcessStats.ProcessStateHolder;
 import com.android.internal.app.procstats.ProcessStats.TotalMemoryUseCollection;
@@ -77,7 +80,6 @@ public final class ProcessState {
         STATE_PERSISTENT,               // ActivityManager.PROCESS_STATE_PERSISTENT
         STATE_PERSISTENT,               // ActivityManager.PROCESS_STATE_PERSISTENT_UI
         STATE_TOP,                      // ActivityManager.PROCESS_STATE_TOP
-        STATE_IMPORTANT_FOREGROUND,     // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION
         STATE_IMPORTANT_FOREGROUND,     // ActivityManager.PROCESS_STATE_BOUND_TOP
         STATE_IMPORTANT_FOREGROUND,     // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
         STATE_IMPORTANT_FOREGROUND,     // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
@@ -1342,7 +1344,7 @@ public final class ProcessState {
         return sb.toString();
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId,
+    public void dumpDebug(ProtoOutputStream proto, long fieldId,
             String procName, int uid, long now) {
         final long token = proto.start(fieldId);
         proto.write(ProcessStatsProto.PROCESS, procName);
@@ -1417,6 +1419,147 @@ public final class ProcessState {
             proto.end(stateToken);
         }
 
+        proto.end(token);
+    }
+
+    /**
+     * Assume the atom already includes a UID field, write the process name only if
+     * it's different from the package name; and only write the suffix if possible.
+     */
+    static void writeCompressedProcessName(final ProtoOutputStream proto, final long fieldId,
+            final String procName, final String packageName, final boolean sharedUid) {
+        if (sharedUid) {
+            // This UID has multiple packages running, write the full process name here
+            proto.write(fieldId, procName);
+            return;
+        }
+        if (TextUtils.equals(procName, packageName)) {
+            // Same name, don't bother to write the process name here.
+            return;
+        }
+        if (procName.startsWith(packageName)) {
+            final int pkgLength = packageName.length();
+            if (procName.charAt(pkgLength) == ':') {
+                // Only write the suffix starting with ':'
+                proto.write(fieldId, procName.substring(pkgLength));
+                return;
+            }
+        }
+        // Write the full process name
+        proto.write(fieldId, procName);
+    }
+
+    /** Similar to {@code #dumpDebug}, but with a reduced/aggregated subset of states. */
+    public void dumpAggregatedProtoForStatsd(ProtoOutputStream proto, long fieldId,
+            String procName, int uid, long now,
+            final ProcessMap<ArraySet<PackageState>> procToPkgMap,
+            final SparseArray<ArraySet<String>> uidToPkgMap) {
+        // Group proc stats by aggregated type (only screen state + process state)
+        SparseLongArray durationByState = new SparseLongArray();
+        boolean didCurState = false;
+        for (int i = 0; i < mDurations.getKeyCount(); i++) {
+            final int key = mDurations.getKeyAt(i);
+            final int type = SparseMappingTable.getIdFromKey(key);
+            final int aggregatedType = DumpUtils.aggregateCurrentProcessState(type);
+
+            long time = mDurations.getValue(key);
+            if (mCurCombinedState == type) {
+                didCurState = true;
+                time += now - mStartTime;
+            }
+            int index = durationByState.indexOfKey(aggregatedType);
+            if (index >= 0) {
+                durationByState.put(aggregatedType, time + durationByState.valueAt(index));
+            } else {
+                durationByState.put(aggregatedType, time);
+            }
+        }
+        if (!didCurState && mCurCombinedState != STATE_NOTHING) {
+            final int aggregatedType = DumpUtils.aggregateCurrentProcessState(mCurCombinedState);
+            int index = durationByState.indexOfKey(aggregatedType);
+            if (index >= 0) {
+                durationByState.put(aggregatedType,
+                        (now - mStartTime) + durationByState.valueAt(index));
+            } else {
+                durationByState.put(aggregatedType, now - mStartTime);
+            }
+        }
+
+        // Now we have total durations, aggregate the RSS values
+        SparseLongArray meanRssByState = new SparseLongArray();
+        SparseLongArray maxRssByState = new SparseLongArray();
+        // compute weighted averages and max-of-max
+        for (int i = 0; i < mPssTable.getKeyCount(); i++) {
+            final int key = mPssTable.getKeyAt(i);
+            final int type = SparseMappingTable.getIdFromKey(key);
+            final int aggregatedType = DumpUtils.aggregateCurrentProcessState(type);
+            if (durationByState.indexOfKey(aggregatedType) < 0) {
+                // state without duration should not have stats!
+                continue;
+            }
+
+            long[] rssMeanAndMax = mPssTable.getRssMeanAndMax(key);
+
+            // compute mean * duration, then store sum of that in meanRssByState
+            long meanTimesDuration = rssMeanAndMax[0] * mDurations.getValueForId((byte) type);
+            if (meanRssByState.indexOfKey(aggregatedType) >= 0) {
+                meanRssByState.put(aggregatedType,
+                        meanTimesDuration + meanRssByState.get(aggregatedType));
+            } else {
+                meanRssByState.put(aggregatedType, meanTimesDuration);
+            }
+
+            // accumulate max-of-maxes in maxRssByState
+            if (maxRssByState.indexOfKey(aggregatedType) >= 0
+                    && maxRssByState.get(aggregatedType) < rssMeanAndMax[1]) {
+                maxRssByState.put(aggregatedType, rssMeanAndMax[1]);
+            } else if (maxRssByState.indexOfKey(aggregatedType) < 0) {
+                maxRssByState.put(aggregatedType, rssMeanAndMax[1]);
+            }
+        }
+
+        // divide the means by the durations to get the weighted mean-of-means
+        for (int i = 0; i < durationByState.size(); i++) {
+            int aggregatedKey = durationByState.keyAt(i);
+            if (meanRssByState.indexOfKey(aggregatedKey) < 0) {
+                // these data structures should be consistent
+                continue;
+            }
+            final long duration = durationByState.get(aggregatedKey);
+            meanRssByState.put(aggregatedKey,
+                    duration > 0 ? (meanRssByState.get(aggregatedKey) / duration)
+                            : meanRssByState.get(aggregatedKey));
+        }
+
+        // build the output
+        final long token = proto.start(fieldId);
+        writeCompressedProcessName(proto, ProcessStatsProto.PROCESS, procName, mPackage,
+                mMultiPackage || (uidToPkgMap.get(mUid).size() > 1));
+        proto.write(ProcessStatsProto.UID, uid);
+
+        for (int i = 0; i < durationByState.size(); i++) {
+            final long stateToken = proto.start(ProcessStatsProto.STATES);
+
+            final int aggregatedKey = durationByState.keyAt(i);
+
+            DumpUtils.printAggregatedProcStateTagProto(proto,
+                    ProcessStatsStateProto.SCREEN_STATE,
+                    ProcessStatsStateProto.PROCESS_STATE_AGGREGATED,
+                    aggregatedKey);
+            proto.write(ProcessStatsStateProto.DURATION_MS, durationByState.get(aggregatedKey));
+
+            ProtoUtils.toAggStatsProto(proto, ProcessStatsStateProto.RSS,
+                    0, /* do not output a minimum value */
+                    0, /* do not output an average value */
+                    0, /* do not output a max value */
+                    (int) meanRssByState.get(aggregatedKey),
+                    (int) maxRssByState.get(aggregatedKey));
+
+            proto.end(stateToken);
+        }
+
+        mStats.dumpFilteredAssociationStatesProtoForProc(proto, ProcessStatsProto.ASSOCS,
+                now, this, procToPkgMap, uidToPkgMap);
         proto.end(token);
     }
 }

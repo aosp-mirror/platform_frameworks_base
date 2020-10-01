@@ -16,7 +16,6 @@
 
 package com.android.server.backup;
 
-import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.util.Slog;
@@ -33,10 +32,13 @@ final class UserBackupManagerFilePersistedSettings {
     private static final String BACKUP_ENABLE_FILE = "backup_enabled";
 
     static boolean readBackupEnableState(int userId) {
-        return readBackupEnableState(UserBackupManagerFiles.getBaseStateDir(userId));
+        boolean enabled = readBackupEnableState(UserBackupManagerFiles.getBaseStateDir(userId));
+        Slog.d(TAG, "user:" + userId + " readBackupEnableState enabled:" + enabled);
+        return enabled;
     }
 
     static void writeBackupEnableState(int userId, boolean enable) {
+        Slog.d(TAG, "user:" + userId + " writeBackupEnableState enable:" + enable);
         writeBackupEnableState(UserBackupManagerFiles.getBaseStateDir(userId), enable);
     }
 
@@ -45,15 +47,17 @@ final class UserBackupManagerFilePersistedSettings {
         if (enableFile.exists()) {
             try (FileInputStream fin = new FileInputStream(enableFile)) {
                 int state = fin.read();
+                if (state != 0 && state != 1) {
+                    // TODO (b/148587496) handle instead of only logging
+                    Slog.e(TAG, "Unexpected enabled state:" + state);
+                }
                 return state != 0;
             } catch (IOException e) {
                 // can't read the file; fall through to assume disabled
                 Slog.e(TAG, "Cannot read enable state; assuming disabled");
             }
         } else {
-            if (DEBUG) {
-                Slog.i(TAG, "isBackupEnabled() => false due to absent settings file");
-            }
+            Slog.i(TAG, "isBackupEnabled() => false due to absent settings file");
         }
         return false;
     }
@@ -64,7 +68,11 @@ final class UserBackupManagerFilePersistedSettings {
         try (FileOutputStream fout = new FileOutputStream(stage)) {
             fout.write(enable ? 1 : 0);
             fout.close();
-            stage.renameTo(enableFile);
+            boolean renamed = stage.renameTo(enableFile);
+            if (!renamed) {
+                // TODO (b/148587496) handle instead of only logging
+                Slog.e(TAG, "Write enable failed as could not rename staging file to actual");
+            }
             // will be synced immediately by the try-with-resources call to close()
         } catch (IOException | RuntimeException e) {
             Slog.e(

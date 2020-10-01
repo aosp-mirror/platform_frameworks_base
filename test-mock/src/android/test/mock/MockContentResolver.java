@@ -16,6 +16,8 @@
 
 package android.test.mock;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -23,6 +25,7 @@ import android.content.IContentProvider;
 import android.database.ContentObserver;
 import android.net.Uri;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -130,17 +133,47 @@ public class MockContentResolver extends ContentResolver {
     }
 
     /**
-     * Overrides {@link android.content.ContentResolver#notifyChange(Uri, ContentObserver, boolean)
-     * ContentResolver.notifChange(Uri, ContentObserver, boolean)}. All parameters are ignored.
-     * The method hides providers linked to MockContentResolver from other observers in the system.
-     *
-     * @param uri (Ignored) The uri of the content provider.
-     * @param observer (Ignored) The observer that originated the change.
-     * @param syncToNetwork (Ignored) If true, attempt to sync the change to the network.
+     * Overrides the behavior from the parent class to completely ignore any
+     * content notifications sent to this object. This effectively hides clients
+     * from observers elsewhere in the system.
      */
     @Override
-    public void notifyChange(Uri uri,
-            ContentObserver observer,
+    public void notifyChange(@NonNull Uri uri, @Nullable ContentObserver observer) {
+    }
+
+    /**
+     * Overrides the behavior from the parent class to completely ignore any
+     * content notifications sent to this object. This effectively hides clients
+     * from observers elsewhere in the system.
+     *
+     * @deprecated callers should consider migrating to
+     *             {@link #notifyChange(Uri, ContentObserver, int)}, as it
+     *             offers support for many more options than just
+     *             {@link #NOTIFY_SYNC_TO_NETWORK}.
+     */
+    @Override
+    @Deprecated
+    public void notifyChange(@NonNull Uri uri, @Nullable ContentObserver observer,
             boolean syncToNetwork) {
+    }
+
+    /**
+     * Overrides the behavior from the parent class to completely ignore any
+     * content notifications sent to this object. This effectively hides clients
+     * from observers elsewhere in the system.
+     */
+    @Override
+    public void notifyChange(@NonNull Uri uri, @Nullable ContentObserver observer,
+            @NotifyFlags int flags) {
+    }
+
+    /**
+     * Overrides the behavior from the parent class to completely ignore any
+     * content notifications sent to this object. This effectively hides clients
+     * from observers elsewhere in the system.
+     */
+    @Override
+    public void notifyChange(@NonNull Collection<Uri> uris, @Nullable ContentObserver observer,
+            @NotifyFlags int flags) {
     }
 }

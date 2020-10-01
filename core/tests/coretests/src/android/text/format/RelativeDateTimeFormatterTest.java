@@ -16,11 +16,11 @@
 
 package android.text.format;
 
-import static android.text.format.DateUtilsBridge.FORMAT_ABBREV_ALL;
-import static android.text.format.DateUtilsBridge.FORMAT_ABBREV_RELATIVE;
-import static android.text.format.DateUtilsBridge.FORMAT_NO_YEAR;
-import static android.text.format.DateUtilsBridge.FORMAT_NUMERIC_DATE;
-import static android.text.format.DateUtilsBridge.FORMAT_SHOW_YEAR;
+import static android.text.format.DateUtils.FORMAT_ABBREV_ALL;
+import static android.text.format.DateUtils.FORMAT_ABBREV_RELATIVE;
+import static android.text.format.DateUtils.FORMAT_NO_YEAR;
+import static android.text.format.DateUtils.FORMAT_NUMERIC_DATE;
+import static android.text.format.DateUtils.FORMAT_SHOW_YEAR;
 import static android.text.format.RelativeDateTimeFormatter.DAY_IN_MILLIS;
 import static android.text.format.RelativeDateTimeFormatter.HOUR_IN_MILLIS;
 import static android.text.format.RelativeDateTimeFormatter.MINUTE_IN_MILLIS;

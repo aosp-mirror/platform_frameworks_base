@@ -21,6 +21,8 @@ import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 
 import android.view.MotionEvent;
 
+import java.util.Locale;
+
 /**
  * False touch if more than one finger touches the screen.
  *
@@ -57,5 +59,14 @@ class PointerCountClassifier extends FalsingClassifier {
             return mMaxPointerCount > MAX_ALLOWED_POINTERS_SWIPE_DOWN;
         }
         return mMaxPointerCount > MAX_ALLOWED_POINTERS;
+    }
+
+    @Override
+    String getReason() {
+        return String.format(
+                (Locale) null,
+                "{pointersObserved=%d, threshold=%d}",
+                mMaxPointerCount,
+                MAX_ALLOWED_POINTERS);
     }
 }

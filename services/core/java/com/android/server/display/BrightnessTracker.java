@@ -34,6 +34,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
+import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
@@ -94,8 +95,6 @@ public class BrightnessTracker {
 
     static final String TAG = "BrightnessTracker";
     static final boolean DEBUG = false;
-    @VisibleForTesting
-    static final boolean ENABLE_COLOR_SAMPLING = false;
 
     private static final String EVENTS_FILE = "brightness_events.xml";
     private static final String AMBIENT_BRIGHTNESS_STATS_FILE = "ambient_brightness_stats.xml";
@@ -127,6 +126,7 @@ public class BrightnessTracker {
     private static final int MSG_BRIGHTNESS_CHANGED = 1;
     private static final int MSG_STOP_SENSOR_LISTENER = 2;
     private static final int MSG_START_SENSOR_LISTENER = 3;
+    private static final int MSG_BRIGHTNESS_CONFIG_CHANGED = 4;
 
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
@@ -160,6 +160,7 @@ public class BrightnessTracker {
     private boolean mColorSamplingEnabled;
     private int mNoFramesToSample;
     private float mFrameRate;
+    private BrightnessConfiguration mBrightnessConfiguration;
     // End of block of members that should only be accessed on the mBgHandler thread.
 
     private @UserIdInt int mCurrentUserId = UserHandle.USER_NULL;
@@ -202,6 +203,14 @@ public class BrightnessTracker {
         }
         mCurrentUserId = ActivityManager.getCurrentUser();
         mBgHandler.obtainMessage(MSG_BACKGROUND_START, (Float) initialBrightness).sendToTarget();
+    }
+
+    /**
+     * Update tracker with new brightness configuration.
+     */
+    public void setBrightnessConfiguration(BrightnessConfiguration brightnessConfiguration) {
+        mBgHandler.obtainMessage(MSG_BRIGHTNESS_CONFIG_CHANGED,
+                brightnessConfiguration).sendToTarget();
     }
 
     private void backgroundStart(float initialBrightness) {
@@ -759,10 +768,11 @@ public class BrightnessTracker {
     }
 
     private void enableColorSampling() {
-        if (!ENABLE_COLOR_SAMPLING
-                || !mInjector.isBrightnessModeAutomatic(mContentResolver)
+        if (!mInjector.isBrightnessModeAutomatic(mContentResolver)
                 || !mInjector.isInteractive(mContext)
-                || mColorSamplingEnabled) {
+                || mColorSamplingEnabled
+                || mBrightnessConfiguration == null
+                || !mBrightnessConfiguration.shouldCollectColorSamples()) {
             return;
         }
 
@@ -980,6 +990,18 @@ public class BrightnessTracker {
                     stopSensorListener();
                     disableColorSampling();
                     break;
+                case MSG_BRIGHTNESS_CONFIG_CHANGED:
+                    mBrightnessConfiguration = (BrightnessConfiguration) msg.obj;
+                    boolean shouldCollectColorSamples =
+                            mBrightnessConfiguration != null
+                                    && mBrightnessConfiguration.shouldCollectColorSamples();
+                    if (shouldCollectColorSamples && !mColorSamplingEnabled) {
+                        enableColorSampling();
+                    } else if (!shouldCollectColorSamples && mColorSamplingEnabled) {
+                        disableColorSampling();
+                    }
+                    break;
+
             }
         }
     }

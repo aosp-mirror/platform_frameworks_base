@@ -16,11 +16,24 @@
 
 package com.android.systemui.screenshot;
 
+import static android.content.Intent.ACTION_CLOSE_SYSTEM_DIALOGS;
+
+import static com.android.internal.util.ScreenshotHelper.SCREENSHOT_MSG_PROCESS_COMPLETE;
+import static com.android.internal.util.ScreenshotHelper.SCREENSHOT_MSG_URI;
+
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.Insets;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
@@ -28,47 +41,82 @@ import android.os.UserManager;
 import android.util.Log;
 import android.view.WindowManager;
 
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.util.ScreenshotHelper;
+import com.android.systemui.shared.recents.utilities.BitmapUtil;
+
 import java.util.function.Consumer;
+
+import javax.inject.Inject;
 
 public class TakeScreenshotService extends Service {
     private static final String TAG = "TakeScreenshotService";
 
-    private static GlobalScreenshot mScreenshot;
+    private final GlobalScreenshot mScreenshot;
+    private final UserManager mUserManager;
+    private final UiEventLogger mUiEventLogger;
 
-    private Handler mHandler = new Handler() {
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction()) && mScreenshot != null) {
+                mScreenshot.dismissScreenshot("close system dialogs", true);
+            }
+        }
+    };
+
+    private Handler mHandler = new Handler(Looper.myLooper()) {
         @Override
         public void handleMessage(Message msg) {
             final Messenger callback = msg.replyTo;
-            Consumer<Uri> finisher = new Consumer<Uri>() {
-                @Override
-                public void accept(Uri uri) {
-                    Message reply = Message.obtain(null, 1, uri);
-                    try {
-                        callback.send(reply);
-                    } catch (RemoteException e) {
-                    }
+            Consumer<Uri> uriConsumer = uri -> {
+                Message reply = Message.obtain(null, SCREENSHOT_MSG_URI, uri);
+                try {
+                    callback.send(reply);
+                } catch (RemoteException e) {
+                }
+            };
+            Runnable onComplete = () -> {
+                Message reply = Message.obtain(null, SCREENSHOT_MSG_PROCESS_COMPLETE);
+                try {
+                    callback.send(reply);
+                } catch (RemoteException e) {
                 }
             };
 
             // If the storage for this user is locked, we have no place to store
             // the screenshot, so skip taking it instead of showing a misleading
             // animation and error notification.
-            if (!getSystemService(UserManager.class).isUserUnlocked()) {
+            if (!mUserManager.isUserUnlocked()) {
                 Log.w(TAG, "Skipping screenshot because storage is locked!");
-                post(() -> finisher.accept(null));
+                post(() -> uriConsumer.accept(null));
+                post(onComplete);
                 return;
             }
 
-            if (mScreenshot == null) {
-                mScreenshot = new GlobalScreenshot(TakeScreenshotService.this);
-            }
+            ScreenshotHelper.ScreenshotRequest screenshotRequest =
+                    (ScreenshotHelper.ScreenshotRequest) msg.obj;
+
+            mUiEventLogger.log(ScreenshotEvent.getScreenshotSource(screenshotRequest.getSource()));
 
             switch (msg.what) {
                 case WindowManager.TAKE_SCREENSHOT_FULLSCREEN:
-                    mScreenshot.takeScreenshot(finisher, msg.arg1 > 0, msg.arg2 > 0);
+                    mScreenshot.takeScreenshot(uriConsumer, onComplete);
                     break;
                 case WindowManager.TAKE_SCREENSHOT_SELECTED_REGION:
-                    mScreenshot.takeScreenshotPartial(finisher, msg.arg1 > 0, msg.arg2 > 0);
+                    mScreenshot.takeScreenshotPartial(uriConsumer, onComplete);
+                    break;
+                case WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE:
+                    Bitmap screenshot = BitmapUtil.bundleToHardwareBitmap(
+                            screenshotRequest.getBitmapBundle());
+                    Rect screenBounds = screenshotRequest.getBoundsInScreen();
+                    Insets insets = screenshotRequest.getInsets();
+                    int taskId = screenshotRequest.getTaskId();
+                    int userId = screenshotRequest.getUserId();
+                    ComponentName topComponent = screenshotRequest.getTopComponent();
+                    mScreenshot.handleImageAsScreenshot(screenshot, screenBounds, insets,
+                            taskId, userId, topComponent, uriConsumer, onComplete);
                     break;
                 default:
                     Log.d(TAG, "Invalid screenshot option: " + msg.what);
@@ -76,14 +124,28 @@ public class TakeScreenshotService extends Service {
         }
     };
 
+    @Inject
+    public TakeScreenshotService(GlobalScreenshot globalScreenshot, UserManager userManager,
+            UiEventLogger uiEventLogger) {
+        mScreenshot = globalScreenshot;
+        mUserManager = userManager;
+        mUiEventLogger = uiEventLogger;
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
+        // register broadcast receiver
+        IntentFilter filter = new IntentFilter(ACTION_CLOSE_SYSTEM_DIALOGS);
+        registerReceiver(mBroadcastReceiver, filter);
+
         return new Messenger(mHandler).getBinder();
+
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
         if (mScreenshot != null) mScreenshot.stopScreenshot();
+        unregisterReceiver(mBroadcastReceiver);
         return true;
     }
 }

@@ -15,6 +15,8 @@
 package com.android.systemui.statusbar;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -25,10 +27,12 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.view.WindowInsetsController.Appearance;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 
@@ -110,26 +114,61 @@ public class CommandQueueTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSetSystemUiVisibility() {
-        Rect r = new Rect();
-        mCommandQueue.setSystemUiVisibility(DEFAULT_DISPLAY, 1, 2, 3, 4, null, r, false);
-        waitForIdleSync();
-        verify(mCallbacks).setSystemUiVisibility(eq(DEFAULT_DISPLAY), eq(1), eq(2), eq(3), eq(4),
-                eq(null), eq(r), eq(false));
+    public void testOnSystemBarAppearanceChanged() {
+        doTestOnSystemBarAppearanceChanged(DEFAULT_DISPLAY, 1,
+                new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false);
     }
 
     @Test
-    public void testSetSystemUiVisibilityForSecondaryDisplay() {
-        Rect r = new Rect();
-        mCommandQueue.setSystemUiVisibility(SECONDARY_DISPLAY, 1, 2, 3, 4, null, r, false);
+    public void testOnSystemBarAppearanceChangedForSecondaryDisplay() {
+        doTestOnSystemBarAppearanceChanged(SECONDARY_DISPLAY, 1,
+                new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false);
+    }
+
+    private void doTestOnSystemBarAppearanceChanged(int displayId, @Appearance int appearance,
+            AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme) {
+        mCommandQueue.onSystemBarAppearanceChanged(displayId, appearance, appearanceRegions,
+                navbarColorManagedByIme);
         waitForIdleSync();
-        verify(mCallbacks).setSystemUiVisibility(eq(SECONDARY_DISPLAY), eq(1), eq(2), eq(3), eq(4),
-                eq(null), eq(r), eq(false));
+        verify(mCallbacks).onSystemBarAppearanceChanged(eq(displayId), eq(appearance),
+                eq(appearanceRegions), eq(navbarColorManagedByIme));
+    }
+
+    @Test
+    public void testShowTransient() {
+        int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
+        mCommandQueue.showTransient(DEFAULT_DISPLAY, types);
+        waitForIdleSync();
+        verify(mCallbacks).showTransient(eq(DEFAULT_DISPLAY), eq(types));
+    }
+
+    @Test
+    public void testShowTransientForSecondaryDisplay() {
+        int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
+        mCommandQueue.showTransient(SECONDARY_DISPLAY, types);
+        waitForIdleSync();
+        verify(mCallbacks).showTransient(eq(SECONDARY_DISPLAY), eq(types));
+    }
+
+    @Test
+    public void testAbortTransient() {
+        int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
+        mCommandQueue.abortTransient(DEFAULT_DISPLAY, types);
+        waitForIdleSync();
+        verify(mCallbacks).abortTransient(eq(DEFAULT_DISPLAY), eq(types));
+    }
+
+    @Test
+    public void testAbortTransientForSecondaryDisplay() {
+        int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
+        mCommandQueue.abortTransient(SECONDARY_DISPLAY, types);
+        waitForIdleSync();
+        verify(mCallbacks).abortTransient(eq(SECONDARY_DISPLAY), eq(types));
     }
 
     @Test
     public void testShowImeButton() {
-        mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, null, 1, 2, true);
+        mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, null, 1, 2, true, false);
         waitForIdleSync();
         verify(mCallbacks).setImeWindowStatus(
                 eq(DEFAULT_DISPLAY), eq(null), eq(1), eq(2), eq(true));
@@ -137,7 +176,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testShowImeButtonForSecondaryDisplay() {
-        mCommandQueue.setImeWindowStatus(SECONDARY_DISPLAY, null, 1, 2, true);
+        mCommandQueue.setImeWindowStatus(SECONDARY_DISPLAY, null, 1, 2, true, false);
         waitForIdleSync();
         verify(mCallbacks).setImeWindowStatus(
                 eq(SECONDARY_DISPLAY), eq(null), eq(1), eq(2), eq(true));
@@ -364,5 +403,57 @@ public class CommandQueueTest extends SysuiTestCase {
         mCommandQueue.onRecentsAnimationStateChanged(true);
         waitForIdleSync();
         verify(mCallbacks).onRecentsAnimationStateChanged(eq(true));
+    }
+
+    @Test
+    public void testShowAuthenticationDialog() {
+        Bundle bundle = new Bundle();
+        String packageName = "test";
+        final long operationId = 1;
+        final int sysUiSessionId = 2;
+        mCommandQueue.showAuthenticationDialog(bundle, null /* receiver */, 1, true, 3,
+                packageName, operationId, sysUiSessionId);
+        waitForIdleSync();
+        verify(mCallbacks).showAuthenticationDialog(eq(bundle), eq(null), eq(1), eq(true), eq(3),
+                eq(packageName), eq(operationId), eq(sysUiSessionId));
+    }
+
+    @Test
+    public void testOnBiometricAuthenticated() {
+        mCommandQueue.onBiometricAuthenticated();
+        waitForIdleSync();
+        verify(mCallbacks).onBiometricAuthenticated();
+    }
+
+    @Test
+    public void testOnBiometricHelp() {
+        String helpMessage = "test_help_message";
+        mCommandQueue.onBiometricHelp(helpMessage);
+        waitForIdleSync();
+        verify(mCallbacks).onBiometricHelp(eq(helpMessage));
+    }
+
+    @Test
+    public void testOnBiometricError() {
+        final int modality = 1;
+        final int error = 2;
+        final int vendorCode = 3;
+        mCommandQueue.onBiometricError(modality, error, vendorCode);
+        waitForIdleSync();
+        verify(mCallbacks).onBiometricError(eq(modality), eq(error), eq(vendorCode));
+    }
+
+    @Test
+    public void testHideAuthenticationDialog() {
+        mCommandQueue.hideAuthenticationDialog();
+        waitForIdleSync();
+        verify(mCallbacks).hideAuthenticationDialog();
+    }
+
+    @Test
+    public void testSuppressAmbientDisplay() {
+        mCommandQueue.suppressAmbientDisplay(true);
+        waitForIdleSync();
+        verify(mCallbacks).suppressAmbientDisplay(true);
     }
 }

@@ -16,7 +16,6 @@
 #include "renderstate/RenderState.h"
 
 #include "renderthread/RenderThread.h"
-#include "GpuMemoryTracker.h"
 
 namespace android {
 namespace uirenderer {
@@ -25,15 +24,10 @@ RenderState::RenderState(renderthread::RenderThread& thread) : mRenderThread(thr
     mThreadId = pthread_self();
 }
 
-void RenderState::onContextCreated() {
-    GpuMemoryTracker::onGpuContextCreated();
-}
-
 void RenderState::onContextDestroyed() {
     for(auto callback : mContextCallbacks) {
         callback->onContextDestroyed();
     }
-    GpuMemoryTracker::onGpuContextDestroyed();
 }
 
 void RenderState::postDecStrong(VirtualLightRefBase* object) {

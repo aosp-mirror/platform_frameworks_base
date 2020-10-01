@@ -16,8 +16,13 @@
 
 package android.util.proto;
 
+import android.annotation.IntDef;
+import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Base utility class for protobuf streams.
@@ -28,6 +33,71 @@ import android.annotation.Nullable;
  * @hide
  */
 public class ProtoStream {
+
+    /**
+     * A protobuf wire type.  All application-level types are represented using
+     * varint, fixed64, length-delimited and fixed32 wire types. The start-group
+     * and end-group types are unused in modern protobuf versions (proto2 and proto3),
+     * but are included here for completeness.
+     *
+     * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * Encoding</a>
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+        WIRE_TYPE_VARINT,
+        WIRE_TYPE_FIXED64,
+        WIRE_TYPE_LENGTH_DELIMITED,
+        WIRE_TYPE_START_GROUP,
+        WIRE_TYPE_END_GROUP,
+        WIRE_TYPE_FIXED32
+    })
+    public @interface WireType {}
+
+    /**
+     * Application-level protobuf field types, as would be used in a .proto file.
+     *
+     * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * Encoding</a>
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @LongDef({
+        FIELD_TYPE_UNKNOWN,
+        FIELD_TYPE_DOUBLE,
+        FIELD_TYPE_FLOAT,
+        FIELD_TYPE_INT64,
+        FIELD_TYPE_UINT64,
+        FIELD_TYPE_INT32,
+        FIELD_TYPE_FIXED64,
+        FIELD_TYPE_FIXED32,
+        FIELD_TYPE_BOOL,
+        FIELD_TYPE_STRING,
+        FIELD_TYPE_MESSAGE,
+        FIELD_TYPE_BYTES,
+        FIELD_TYPE_UINT32,
+        FIELD_TYPE_ENUM,
+        FIELD_TYPE_SFIXED32,
+        FIELD_TYPE_SFIXED64,
+        FIELD_TYPE_SINT32,
+        FIELD_TYPE_SINT64,
+    })
+    public @interface FieldType {}
+
+
+    /**
+     * Represents the cardinality of a protobuf field.
+     *
+     * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * Encoding</a>
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @LongDef({
+        FIELD_COUNT_UNKNOWN,
+        FIELD_COUNT_SINGLE,
+        FIELD_COUNT_REPEATED,
+        FIELD_COUNT_PACKED,
+    })
+    public @interface FieldCount {}
 
     /**
      * Number of bits to shift the field number to form a tag.
@@ -128,7 +198,7 @@ public class ProtoStream {
     public static final long FIELD_TYPE_MASK = 0x0ffL << FIELD_TYPE_SHIFT;
 
     /**
-     * Not a real wire type.
+     * Not a real field type.
      * @hide
      */
     public static final long FIELD_TYPE_UNKNOWN = 0;
@@ -378,7 +448,7 @@ public class ProtoStream {
     /**
      * Get the developer-usable name of a field type.
      */
-    public static @Nullable String getFieldTypeString(long fieldType) {
+    public static @Nullable String getFieldTypeString(@FieldType long fieldType) {
         int index = ((int) ((fieldType & FIELD_TYPE_MASK) >>> FIELD_TYPE_SHIFT)) - 1;
         if (index >= 0 && index < FIELD_TYPE_NAMES.length) {
             return FIELD_TYPE_NAMES[index];
@@ -405,7 +475,7 @@ public class ProtoStream {
     /**
      * Get the developer-usable name of a wire type.
      */
-    public static @Nullable String getWireTypeString(int wireType) {
+    public static @Nullable String getWireTypeString(@WireType int wireType) {
         switch (wireType) {
             case WIRE_TYPE_VARINT:
                 return "Varint";

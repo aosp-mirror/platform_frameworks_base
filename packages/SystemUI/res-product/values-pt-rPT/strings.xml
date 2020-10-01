@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="dock_alignment_slow_charging" product="default" msgid="6997633396534416792">"Realinhe o telemóvel para um carregamento mais rápido."</string>
+    <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Realinhe o telemóvel para carregar sem fios."</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"O dispositivo Android TV irá desligar-se brevemente. Prima um botão para o manter ligado."</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"O dispositivo irá desligar-se brevemente. Prima para o manter ligado."</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"Nenhum cartão SIM no tablet."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"Nenhum cartão SIM no telemóvel."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"Os códigos PIN não coincidem."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Tentou desbloquear incorretamente o tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem êxito, este tablet será reposto, o que eliminará todos os dados do mesmo."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Tentou desbloquear incorretamente o telemóvel <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem êxito, este telemóvel será reposto, o que eliminará todos os dados do mesmo."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="8710104080409538587">"Tentou desbloquear incorretamente o tablet <xliff:g id="NUMBER">%d</xliff:g> vezes. Este tablet será reposto, o que eliminará todos os dados do mesmo."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="6381835450014881813">"Tentou desbloquear incorretamente o telemóvel <xliff:g id="NUMBER">%d</xliff:g> vezes. Este telemóvel será reposto, o que eliminará todos os dados do mesmo."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="7325071812832605911">"Tentou desbloquear incorretamente o tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem êxito, este utilizador será removido, o que eliminará todos os dados do mesmo."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="8110939900089863103">"Tentou desbloquear incorretamente o telemóvel <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem êxito, este utilizador será removido, o que eliminará todos os dados do mesmo."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="8509811676952707883">"Tentou desbloquear incorretamente o tablet <xliff:g id="NUMBER">%d</xliff:g> vezes. Este utilizador será removido, o que eliminará todos os dados do mesmo."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3051962486994265014">"Tentou desbloquear incorretamente o telemóvel <xliff:g id="NUMBER">%d</xliff:g> vezes. Este utilizador será removido, o que eliminará todos os dados do mesmo."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="1049523640263353830">"Tentou desbloquear incorretamente o tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem êxito, o perfil de trabalho será removido, o que eliminará todos os dados do mesmo."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="3280816298678433681">"Tentou desbloquear incorretamente o telemóvel <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem êxito, o perfil de trabalho será removido, o que eliminará todos os dados do mesmo."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4417100487251371559">"Tentou desbloquear incorretamente o tablet <xliff:g id="NUMBER">%d</xliff:g> vezes. O perfil de trabalho será removido, o que eliminará todos os dados do mesmo."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Tentou desbloquear incorretamente o telemóvel <xliff:g id="NUMBER">%d</xliff:g> vezes. O perfil de trabalho será removido, o que eliminará todos os dados do mesmo."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Desenhou o padrão de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem êxito, ser-lhe-á pedido para desbloquear o tablet através de uma conta de email.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Desenhou o padrão de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem êxito, ser-lhe-á pedido para desbloquear o telemóvel através de uma conta de email.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
+    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Desbloqueie o telemóvel para obter mais opções."</string>
+    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Desbloqueie o tablet para obter mais opções."</string>
+    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Desbloqueie o dispositivo para obter mais opções."</string>
+</resources>

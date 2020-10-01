@@ -46,20 +46,23 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Slog;
-import android.util.StatsLog;
 import android.view.WindowManagerPolicyConstants.OnReason;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.statusbar.StatusBarManagerInternal;
+
+import java.io.PrintWriter;
 
 /**
  * Sends broadcasts about important power state changes.
@@ -91,20 +94,19 @@ public class Notifier {
     private static final int MSG_USER_ACTIVITY = 1;
     private static final int MSG_BROADCAST = 2;
     private static final int MSG_WIRELESS_CHARGING_STARTED = 3;
-    private static final int MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED = 4;
     private static final int MSG_PROFILE_TIMED_OUT = 5;
     private static final int MSG_WIRED_CHARGING_STARTED = 6;
 
-    private static final long[] WIRELESS_VIBRATION_TIME = {
+    private static final long[] CHARGING_VIBRATION_TIME = {
             40, 40, 40, 40, 40, 40, 40, 40, 40, // ramp-up sampling rate = 40ms
             40, 40, 40, 40, 40, 40, 40 // ramp-down sampling rate = 40ms
     };
-    private static final int[] WIRELESS_VIBRATION_AMPLITUDE = {
+    private static final int[] CHARGING_VIBRATION_AMPLITUDE = {
             1, 4, 11, 25, 44, 67, 91, 114, 123, // ramp-up amplitude (from 0 to 50%)
             103, 79, 55, 34, 17, 7, 2 // ramp-up amplitude
     };
-    private static final VibrationEffect WIRELESS_CHARGING_VIBRATION_EFFECT =
-            VibrationEffect.createWaveform(WIRELESS_VIBRATION_TIME, WIRELESS_VIBRATION_AMPLITUDE,
+    private static final VibrationEffect CHARGING_VIBRATION_EFFECT =
+            VibrationEffect.createWaveform(CHARGING_VIBRATION_TIME, CHARGING_VIBRATION_AMPLITUDE,
                     -1);
     private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -123,14 +125,18 @@ public class Notifier {
     @Nullable private final StatusBarManagerInternal mStatusBarManagerInternal;
     private final TrustManager mTrustManager;
     private final Vibrator mVibrator;
+    private final WakeLockLog mWakeLockLog;
 
     private final NotifierHandler mHandler;
     private final Intent mScreenOnIntent;
     private final Intent mScreenOffIntent;
-    private final Intent mScreenBrightnessBoostIntent;
 
     // True if the device should suspend when the screen is off due to proximity.
     private final boolean mSuspendWhenScreenOffDueToProximityConfig;
+
+    // True if the device should show the wireless charging animation when the device
+    // begins charging wirelessly
+    private final boolean mShowWirelessChargingAnimationConfig;
 
     // The current interactive state.  This is set as soon as an interactive state
     // transition begins so as to capture the reason that it happened.  At some point
@@ -181,20 +187,20 @@ public class Notifier {
         mScreenOffIntent.addFlags(
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND
                 | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
-        mScreenBrightnessBoostIntent =
-                new Intent(PowerManager.ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED);
-        mScreenBrightnessBoostIntent.addFlags(
-                Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
 
         mSuspendWhenScreenOffDueToProximityConfig = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_suspendWhenScreenOffDueToProximity);
+        mShowWirelessChargingAnimationConfig = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_showBuiltinWirelessChargingAnim);
+
+        mWakeLockLog = new WakeLockLog();
 
         // Initialize interactive state for battery stats.
         try {
             mBatteryStats.noteInteractive(true);
         } catch (RemoteException ex) { }
-        StatsLog.write(StatsLog.INTERACTIVE_STATE_CHANGED,
-                StatsLog.INTERACTIVE_STATE_CHANGED__STATE__ON);
+        FrameworkStatsLog.write(FrameworkStatsLog.INTERACTIVE_STATE_CHANGED,
+                FrameworkStatsLog.INTERACTIVE_STATE_CHANGED__STATE__ON);
     }
 
     /**
@@ -227,6 +233,8 @@ public class Notifier {
                 // Ignore
             }
         }
+
+        mWakeLockLog.onWakeLockAcquired(tag, ownerUid, flags);
     }
 
     public void onLongPartialWakeLockStart(String tag, int ownerUid, WorkSource workSource,
@@ -239,13 +247,15 @@ public class Notifier {
         try {
             if (workSource != null) {
                 mBatteryStats.noteLongPartialWakelockStartFromSource(tag, historyTag, workSource);
-                StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, workSource,
-                        tag, historyTag, StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
+                FrameworkStatsLog.write(FrameworkStatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
+                        workSource, tag, historyTag,
+                        FrameworkStatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
             } else {
                 mBatteryStats.noteLongPartialWakelockStart(tag, historyTag, ownerUid);
-                StatsLog.write_non_chained(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
-                        ownerUid, null, tag, historyTag,
-                        StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
+                FrameworkStatsLog.write_non_chained(
+                        FrameworkStatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, ownerUid, null, tag,
+                        historyTag,
+                        FrameworkStatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
             }
         } catch (RemoteException ex) {
             // Ignore
@@ -262,13 +272,15 @@ public class Notifier {
         try {
             if (workSource != null) {
                 mBatteryStats.noteLongPartialWakelockFinishFromSource(tag, historyTag, workSource);
-                StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, workSource,
-                        tag, historyTag, StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
+                FrameworkStatsLog.write(FrameworkStatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
+                        workSource, tag, historyTag,
+                        FrameworkStatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
             } else {
                 mBatteryStats.noteLongPartialWakelockFinish(tag, historyTag, ownerUid);
-                StatsLog.write_non_chained(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
-                        ownerUid, null, tag, historyTag,
-                        StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
+                FrameworkStatsLog.write_non_chained(
+                        FrameworkStatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, ownerUid, null, tag,
+                        historyTag,
+                        FrameworkStatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
             }
         } catch (RemoteException ex) {
             // Ignore
@@ -337,6 +349,7 @@ public class Notifier {
                 // Ignore
             }
         }
+        mWakeLockLog.onWakeLockReleased(tag, ownerUid);
     }
 
     private int getBatteryStatsWakeLockMonitorType(int flags) {
@@ -406,9 +419,9 @@ public class Notifier {
             try {
                 mBatteryStats.noteInteractive(interactive);
             } catch (RemoteException ex) { }
-            StatsLog.write(StatsLog.INTERACTIVE_STATE_CHANGED,
-                    interactive ? StatsLog.INTERACTIVE_STATE_CHANGED__STATE__ON :
-                            StatsLog.INTERACTIVE_STATE_CHANGED__STATE__OFF);
+            FrameworkStatsLog.write(FrameworkStatsLog.INTERACTIVE_STATE_CHANGED,
+                    interactive ? FrameworkStatsLog.INTERACTIVE_STATE_CHANGED__STATE__ON :
+                            FrameworkStatsLog.INTERACTIVE_STATE_CHANGED__STATE__OFF);
 
             // Handle early behaviors.
             mInteractive = interactive;
@@ -536,6 +549,7 @@ public class Notifier {
             case PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN:
                 return WindowManagerPolicy.OFF_BECAUSE_OF_ADMIN;
             case PowerManager.GO_TO_SLEEP_REASON_TIMEOUT:
+            case PowerManager.GO_TO_SLEEP_REASON_INATTENTIVE:
                 return WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT;
             default:
                 return WindowManagerPolicy.OFF_BECAUSE_OF_USER;
@@ -557,20 +571,6 @@ public class Notifier {
             default:
                 return WindowManagerPolicy.ON_BECAUSE_OF_UNKNOWN;
         }
-    }
-
-    /**
-     * Called when screen brightness boost begins or ends.
-     */
-    public void onScreenBrightnessBoostChanged() {
-        if (DEBUG) {
-            Slog.d(TAG, "onScreenBrightnessBoostChanged");
-        }
-
-        mSuspendBlocker.acquire();
-        Message msg = mHandler.obtainMessage(MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED);
-        msg.setAsynchronous(true);
-        mHandler.sendMessage(msg);
     }
 
     /**
@@ -616,6 +616,7 @@ public class Notifier {
         } catch (RemoteException ex) {
             // Ignore
         }
+        FrameworkStatsLog.write(FrameworkStatsLog.DISPLAY_WAKE_REPORTED, reason);
     }
 
     /**
@@ -659,6 +660,17 @@ public class Notifier {
         mHandler.sendMessage(msg);
     }
 
+    /**
+     * Dumps data for bugreports.
+     *
+     * @param pw The stream to print to.
+     */
+    public void dump(PrintWriter pw) {
+        if (mWakeLockLog != null) {
+            mWakeLockLog.dump(pw);
+        }
+    }
+
     private void updatePendingBroadcastLocked() {
         if (!mBroadcastInProgress
                 && mPendingInteractiveState != INTERACTIVE_STATE_UNKNOWN
@@ -684,6 +696,8 @@ public class Notifier {
             }
             mUserActivityPending = false;
         }
+        TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
+        tm.notifyUserActivity();
         mPolicy.userActivity();
     }
 
@@ -691,9 +705,20 @@ public class Notifier {
         final int powerState;
         synchronized (mLock) {
             if (mBroadcastedInteractiveState == INTERACTIVE_STATE_UNKNOWN) {
-                // Broadcasted power state is unknown.  Send wake up.
-                mPendingWakeUpBroadcast = false;
-                mBroadcastedInteractiveState = INTERACTIVE_STATE_AWAKE;
+                // Broadcasted power state is unknown.
+                // Send wake up or go to sleep.
+                switch (mPendingInteractiveState) {
+                    case INTERACTIVE_STATE_ASLEEP:
+                        mPendingGoToSleepBroadcast = false;
+                        mBroadcastedInteractiveState = INTERACTIVE_STATE_ASLEEP;
+                        break;
+
+                    case INTERACTIVE_STATE_AWAKE:
+                    default:
+                        mPendingWakeUpBroadcast = false;
+                        mBroadcastedInteractiveState = INTERACTIVE_STATE_AWAKE;
+                        break;
+                }
             } else if (mBroadcastedInteractiveState == INTERACTIVE_STATE_AWAKE) {
                 // Broadcasted power state is awake.  Send asleep if needed.
                 if (mPendingWakeUpBroadcast || mPendingGoToSleepBroadcast
@@ -728,22 +753,6 @@ public class Notifier {
             sendGoToSleepBroadcast();
         }
     }
-
-    private void sendBrightnessBoostChangedBroadcast() {
-        if (DEBUG) {
-            Slog.d(TAG, "Sending brightness boost changed broadcast.");
-        }
-
-        mContext.sendOrderedBroadcastAsUser(mScreenBrightnessBoostIntent, UserHandle.ALL, null,
-                mScreeBrightnessBoostChangedDone, mHandler, 0, null, null);
-    }
-
-    private final BroadcastReceiver mScreeBrightnessBoostChangedDone = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mSuspendBlocker.release();
-        }
-    };
 
     private void sendWakeUpBroadcast() {
         if (DEBUG) {
@@ -791,48 +800,50 @@ public class Notifier {
         }
     };
 
-    /**
-     * If enabled, plays a sound and/or vibration when wireless or non-wireless charging has started
-     */
-    private void playChargingStartedFeedback(@UserIdInt int userId) {
-        playChargingStartedVibration(userId);
+    private void playChargingStartedFeedback(@UserIdInt int userId, boolean wireless) {
+        if (!isChargingFeedbackEnabled(userId)) {
+            return;
+        }
+
+        // vibrate
+        final boolean vibrate = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.CHARGING_VIBRATION_ENABLED, 1, userId) != 0;
+        if (vibrate) {
+            mVibrator.vibrate(CHARGING_VIBRATION_EFFECT, VIBRATION_ATTRIBUTES);
+        }
+
+        // play sound
         final String soundPath = Settings.Global.getString(mContext.getContentResolver(),
-                Settings.Global.CHARGING_STARTED_SOUND);
-        if (isChargingFeedbackEnabled(userId) && soundPath != null) {
-            final Uri soundUri = Uri.parse("file://" + soundPath);
-            if (soundUri != null) {
-                final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
-                if (sfx != null) {
-                    sfx.setStreamType(AudioManager.STREAM_SYSTEM);
-                    sfx.play();
-                }
+                wireless ? Settings.Global.WIRELESS_CHARGING_STARTED_SOUND
+                        : Settings.Global.CHARGING_STARTED_SOUND);
+        final Uri soundUri = Uri.parse("file://" + soundPath);
+        if (soundUri != null) {
+            final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
+            if (sfx != null) {
+                sfx.setStreamType(AudioManager.STREAM_SYSTEM);
+                sfx.play();
             }
         }
     }
 
     private void showWirelessChargingStarted(int batteryLevel, @UserIdInt int userId) {
-        playChargingStartedFeedback(userId);
-        if (mStatusBarManagerInternal != null) {
+        // play sounds + haptics
+        playChargingStartedFeedback(userId, true /* wireless */);
+
+        // show animation
+        if (mShowWirelessChargingAnimationConfig && mStatusBarManagerInternal != null) {
             mStatusBarManagerInternal.showChargingAnimation(batteryLevel);
         }
         mSuspendBlocker.release();
     }
 
     private void showWiredChargingStarted(@UserIdInt int userId) {
-        playChargingStartedFeedback(userId);
+        playChargingStartedFeedback(userId, false /* wireless */);
         mSuspendBlocker.release();
     }
 
     private void lockProfile(@UserIdInt int userId) {
         mTrustManager.setDeviceLockedForUser(userId, true /*locked*/);
-    }
-
-    private void playChargingStartedVibration(@UserIdInt int userId) {
-        final boolean vibrateEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.CHARGING_VIBRATION_ENABLED, 1, userId) != 0;
-        if (vibrateEnabled && isChargingFeedbackEnabled(userId)) {
-            mVibrator.vibrate(WIRELESS_CHARGING_VIBRATION_EFFECT, VIBRATION_ATTRIBUTES);
-        }
     }
 
     private boolean isChargingFeedbackEnabled(@UserIdInt int userId) {
@@ -860,9 +871,6 @@ public class Notifier {
                     break;
                 case MSG_WIRELESS_CHARGING_STARTED:
                     showWirelessChargingStarted(msg.arg1, msg.arg2);
-                    break;
-                case MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED:
-                    sendBrightnessBoostChangedBroadcast();
                     break;
                 case MSG_PROFILE_TIMED_OUT:
                     lockProfile(msg.arg1);

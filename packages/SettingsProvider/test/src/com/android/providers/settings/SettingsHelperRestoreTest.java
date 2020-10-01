@@ -31,6 +31,7 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 /**
  * Tests for {@link SettingsHelper#restoreValue(Context, ContentResolver, ContentValues, Uri,
@@ -89,7 +90,7 @@ public class SettingsHelperRestoreTest {
         float restoreSettingValue = defaultSettingValue + 0.5f;
 
         mSettingsHelper.restoreValue(
-                mContext,
+                Mockito.mock(Context.class),
                 mContentResolver,
                 new ContentValues(2),
                 Settings.Secure.getUriFor(settingName),
@@ -132,7 +133,7 @@ public class SettingsHelperRestoreTest {
         Settings.Secure.putInt(mContentResolver, settingName, configuredSettingValue);
 
         mSettingsHelper.restoreValue(
-                mContext,
+                Mockito.mock(Context.class),
                 mContentResolver,
                 new ContentValues(2),
                 Settings.Secure.getUriFor(settingName),
@@ -154,7 +155,7 @@ public class SettingsHelperRestoreTest {
 
         int restoreSettingValue = 1;
         mSettingsHelper.restoreValue(
-                mContext,
+                Mockito.mock(Context.class),
                 mContentResolver,
                 new ContentValues(2),
                 Settings.Secure.getUriFor(settingName),

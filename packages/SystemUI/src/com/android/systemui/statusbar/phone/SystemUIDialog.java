@@ -20,24 +20,29 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserHandle;
+import android.view.Window;
+import android.view.WindowInsets.Type;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 
 /**
  * Base class for dialogs that should appear over panels and keyguard.
+ * The SystemUIDialog registers a listener for the screen off / close system dialogs broadcast,
+ * and dismisses itself when it receives the broadcast.
  */
 public class SystemUIDialog extends AlertDialog {
 
     private final Context mContext;
+    private final DismissReceiver mDismissReceiver;
 
     public SystemUIDialog(Context context) {
         this(context, R.style.Theme_SystemUI_Dialog);
@@ -52,7 +57,19 @@ public class SystemUIDialog extends AlertDialog {
         attrs.setTitle(getClass().getSimpleName());
         getWindow().setAttributes(attrs);
 
-        registerDismissListener(this);
+        mDismissReceiver = new DismissReceiver(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mDismissReceiver.register();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mDismissReceiver.unregister();
     }
 
     public void setShowForAllUsers(boolean show) {
@@ -78,34 +95,48 @@ public class SystemUIDialog extends AlertDialog {
     public static void setShowForAllUsers(Dialog dialog, boolean show) {
         if (show) {
             dialog.getWindow().getAttributes().privateFlags |=
-                    WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+                    WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         } else {
             dialog.getWindow().getAttributes().privateFlags &=
-                    ~WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+                    ~WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         }
     }
 
     public static void setWindowOnTop(Dialog dialog) {
-        if (Dependency.get(KeyguardMonitor.class).isShowing()) {
-            dialog.getWindow().setType(LayoutParams.TYPE_STATUS_BAR_PANEL);
-        } else {
-            dialog.getWindow().setType(LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
+        final Window window = dialog.getWindow();
+        window.setType(LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
+        if (Dependency.get(KeyguardStateController.class).isShowing()) {
+            window.getAttributes().setFitInsetsTypes(
+                    window.getAttributes().getFitInsetsTypes() & ~Type.statusBars());
         }
     }
 
     public static AlertDialog applyFlags(AlertDialog dialog) {
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
-        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+        final Window window = dialog.getWindow();
+        window.setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
+        window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        window.getAttributes().setFitInsetsTypes(
+                window.getAttributes().getFitInsetsTypes() & ~Type.statusBars());
         return dialog;
     }
 
+    /**
+     * Registers a listener that dismisses the given dialog when it receives
+     * the screen off / close system dialogs broadcast.
+     * <p>
+     * <strong>Note:</strong> Don't call dialog.setOnDismissListener() after
+     * calling this because it causes a leak of BroadcastReceiver.
+     *
+     * @param dialog The dialog to be associated with the listener.
+     */
     public static void registerDismissListener(Dialog dialog) {
         DismissReceiver dismissReceiver = new DismissReceiver(dialog);
+        dialog.setOnDismissListener(d -> dismissReceiver.unregister());
         dismissReceiver.register();
     }
 
-    private static class DismissReceiver extends BroadcastReceiver implements OnDismissListener {
+    private static class DismissReceiver extends BroadcastReceiver {
         private static final IntentFilter INTENT_FILTER = new IntentFilter();
         static {
             INTENT_FILTER.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
@@ -114,27 +145,28 @@ public class SystemUIDialog extends AlertDialog {
 
         private final Dialog mDialog;
         private boolean mRegistered;
+        private final BroadcastDispatcher mBroadcastDispatcher;
 
         DismissReceiver(Dialog dialog) {
             mDialog = dialog;
+            mBroadcastDispatcher = Dependency.get(BroadcastDispatcher.class);
         }
 
         void register() {
-            mDialog.getContext()
-                    .registerReceiverAsUser(this, UserHandle.CURRENT, INTENT_FILTER, null, null);
+            mBroadcastDispatcher.registerReceiver(this, INTENT_FILTER, null, UserHandle.CURRENT);
             mRegistered = true;
+        }
+
+        void unregister() {
+            if (mRegistered) {
+                mBroadcastDispatcher.unregisterReceiver(this);
+                mRegistered = false;
+            }
         }
 
         @Override
         public void onReceive(Context context, Intent intent) {
             mDialog.dismiss();
         }
-
-        @Override
-        public void onDismiss(DialogInterface dialog) {
-            if (mRegistered) {
-                mDialog.getContext().unregisterReceiver(this);
-                mRegistered = false;
-            }
-        }
-    }}
+    }
+}

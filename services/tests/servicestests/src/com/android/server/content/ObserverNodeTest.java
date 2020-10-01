@@ -16,30 +16,52 @@
 
 package com.android.server.content;
 
-import java.util.ArrayList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
+import android.content.ContentResolver;
 import android.database.ContentObserver;
+import android.database.IContentObserver;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.util.ArraySet;
 
-import com.android.server.content.ContentService.ObserverCall;
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.LocalServices;
+import com.android.server.content.ContentService.ObserverCollector;
 import com.android.server.content.ContentService.ObserverNode;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
+
+import java.util.Arrays;
 
 /**
  * atest FrameworksServicesTests:com.android.server.content.ObserverNodeTest
  */
-@SmallTest
-public class ObserverNodeTest extends AndroidTestCase {
-    static class TestObserver  extends ContentObserver {
+@RunWith(AndroidJUnit4.class)
+public class ObserverNodeTest {
+    static class TestObserver extends ContentObserver {
         public TestObserver() {
             super(new Handler(Looper.getMainLooper()));
         }
     }
 
+    @Test
     public void testUri() {
         final int myUserHandle = UserHandle.myUserId();
 
@@ -65,15 +87,15 @@ public class ObserverNodeTest extends AndroidTestCase {
                     0, 0, myUserHandle);
         }
 
-        ArrayList<ObserverCall> calls = new ArrayList<ObserverCall>();
-
         for (int i = nums.length - 1; i >=0; --i) {
-            root.collectObserversLocked(uris[i], 0, null, false, 0, myUserHandle, calls);
-            assertEquals(nums[i], calls.size());
-            calls.clear();
+            final ObserverCollector collector = mock(ObserverCollector.class);
+            root.collectObserversLocked(uris[i], 0, null, false, 0, myUserHandle, collector);
+            verify(collector, times(nums[i])).collect(
+                    any(), anyInt(), anyBoolean(), any(), anyInt(), anyInt());
         }
     }
 
+    @Test
     public void testUriNotNotify() {
         final int myUserHandle = UserHandle.myUserId();
 
@@ -95,12 +117,67 @@ public class ObserverNodeTest extends AndroidTestCase {
                     0, 0, myUserHandle);
         }
 
-        ArrayList<ObserverCall> calls = new ArrayList<ObserverCall>();
-
         for (int i = uris.length - 1; i >=0; --i) {
-            root.collectObserversLocked(uris[i], 0, null, false, 0, myUserHandle, calls);
-            assertEquals(nums[i], calls.size());
-            calls.clear();
+            final ObserverCollector collector = mock(ObserverCollector.class);
+            root.collectObserversLocked(uris[i], 0, null, false, 0, myUserHandle, collector);
+            verify(collector, times(nums[i])).collect(
+                    any(), anyInt(), anyBoolean(), any(), anyInt(), anyInt());
+        }
+    }
+
+    @Test
+    public void testCluster() throws Exception {
+        final int myUserHandle = UserHandle.myUserId();
+
+        // Assume everything is foreground during our test
+        final ActivityManagerInternal ami = mock(ActivityManagerInternal.class);
+        when(ami.getUidProcessState(anyInt()))
+                .thenReturn(ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        LocalServices.addService(ActivityManagerInternal.class, ami);
+
+        final IContentObserver observer = mock(IContentObserver.class);
+        when(observer.asBinder()).thenReturn(new Binder());
+
+        final ObserverNode root = new ObserverNode("");
+        root.addObserverLocked(Uri.parse("content://authority/"), observer,
+                true, root, 0, 1000, myUserHandle);
+
+        final ObserverCollector collector = new ObserverCollector();
+        root.collectObserversLocked(Uri.parse("content://authority/1"), 0, null, false,
+                0, myUserHandle, collector);
+        root.collectObserversLocked(Uri.parse("content://authority/1"), 0, null, false,
+                ContentResolver.NOTIFY_INSERT, myUserHandle, collector);
+        root.collectObserversLocked(Uri.parse("content://authority/2"), 0, null, false,
+                ContentResolver.NOTIFY_INSERT, myUserHandle, collector);
+        root.collectObserversLocked(Uri.parse("content://authority/2"), 0, null, false,
+                ContentResolver.NOTIFY_UPDATE, myUserHandle, collector);
+        collector.dispatch();
+
+        // We should only cluster when all other arguments are equal
+        verify(observer).onChangeEtc(eq(false), argThat(new UriSetMatcher(
+                        Uri.parse("content://authority/1"))),
+                eq(0), anyInt());
+        verify(observer).onChangeEtc(eq(false), argThat(new UriSetMatcher(
+                        Uri.parse("content://authority/1"),
+                        Uri.parse("content://authority/2"))),
+                eq(ContentResolver.NOTIFY_INSERT), anyInt());
+        verify(observer).onChangeEtc(eq(false), argThat(new UriSetMatcher(
+                        Uri.parse("content://authority/2"))),
+                eq(ContentResolver.NOTIFY_UPDATE), anyInt());
+    }
+
+    private static class UriSetMatcher implements ArgumentMatcher<Uri[]> {
+        private final ArraySet<Uri> uris;
+
+        public UriSetMatcher(Uri... uris) {
+            this.uris = new ArraySet<>(Arrays.asList(uris));
+        }
+
+        @Override
+        public boolean matches(Uri[] uris) {
+            final ArraySet<Uri> test = new ArraySet<>(Arrays.asList(uris));
+            return this.uris.equals(test);
         }
     }
 }

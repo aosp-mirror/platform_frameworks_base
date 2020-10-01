@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<WifiConfigStoreData>
+<int name="Version" value="3" />
+<SoftAp>
+<string name="SSID">HOTSPOT_SSID</string>
+<int name="ApBand" value="1" />
+<int name="Channel" value="0" />
+<boolean name="HiddenSSID" value="false" />
+<int name="SecurityType" value="1" />
+<string name="Passphrase">blahblahblah</string>
+<int name="MaxNumberOfClients" value="0" />
+<boolean name="ClientControlByUser" value="false" />
+<boolean name="AutoShutdownEnabled" value="true" />
+<long name="ShutdownTimeoutMillis" value="0" />
+<BlockedClientList>
+<string name="ClientMacAddress">00:11:22:33:44:55</string>
+</BlockedClientList>
+<AllowedClientList>
+<string name="ClientMacAddress">aa:bb:cc:dd:ee:ff</string>
+</AllowedClientList>
+</SoftAp>
+</WifiConfigStoreData>

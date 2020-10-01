@@ -40,10 +40,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * MediaExtractor facilitates extraction of demuxed, typically encoded,  media data
@@ -393,16 +395,27 @@ final public class MediaExtractor {
         }
         if (formatMap.containsKey("pssh")) {
             Map<UUID, byte[]> psshMap = getPsshInfo();
+            DrmInitData.SchemeInitData[] schemeInitDatas =
+                    psshMap.entrySet().stream().map(
+                            entry -> new DrmInitData.SchemeInitData(
+                                    entry.getKey(), /* mimeType= */ "cenc", entry.getValue()))
+                            .toArray(DrmInitData.SchemeInitData[]::new);
             final Map<UUID, DrmInitData.SchemeInitData> initDataMap =
-                new HashMap<UUID, DrmInitData.SchemeInitData>();
-            for (Map.Entry<UUID, byte[]> e: psshMap.entrySet()) {
-                UUID uuid = e.getKey();
-                byte[] data = e.getValue();
-                initDataMap.put(uuid, new DrmInitData.SchemeInitData("cenc", data));
-            }
+                    Arrays.stream(schemeInitDatas).collect(
+                            Collectors.toMap(initData -> initData.uuid, initData -> initData));
             return new DrmInitData() {
                 public SchemeInitData get(UUID schemeUuid) {
                     return initDataMap.get(schemeUuid);
+                }
+
+                @Override
+                public int getSchemeInitDataCount() {
+                    return schemeInitDatas.length;
+                }
+
+                @Override
+                public SchemeInitData getSchemeInitDataAt(int index) {
+                    return schemeInitDatas[index];
                 }
             };
         } else {
@@ -416,9 +429,23 @@ final public class MediaExtractor {
                 buf.rewind();
                 final byte[] data = new byte[buf.remaining()];
                 buf.get(data);
+                // Webm scheme init data is not uuid-specific.
+                DrmInitData.SchemeInitData webmSchemeInitData =
+                        new DrmInitData.SchemeInitData(
+                                DrmInitData.SchemeInitData.UUID_NIL, "webm", data);
                 return new DrmInitData() {
                     public SchemeInitData get(UUID schemeUuid) {
-                        return new DrmInitData.SchemeInitData("webm", data);
+                        return webmSchemeInitData;
+                    }
+
+                    @Override
+                    public int getSchemeInitDataCount() {
+                        return 1;
+                    }
+
+                    @Override
+                    public SchemeInitData getSchemeInitDataAt(int index) {
+                        return webmSchemeInitData;
                     }
                 };
             }

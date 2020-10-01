@@ -16,6 +16,8 @@
 
 package com.android.systemui.assist;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
+
 import android.provider.DeviceConfig;
 
 import androidx.annotation.Nullable;
@@ -37,25 +39,34 @@ public class DeviceConfigHelper {
     public DeviceConfigHelper() {}
 
     public long getLong(String name, long defaultValue) {
-        return DeviceConfig.getLong(DeviceConfig.NAMESPACE_SYSTEMUI, name, defaultValue);
+        return whitelistIpcs(() ->
+                DeviceConfig.getLong(DeviceConfig.NAMESPACE_SYSTEMUI, name, defaultValue));
     }
 
     public int getInt(String name, int defaultValue) {
-        return DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI, name, defaultValue);
+        return whitelistIpcs(() ->
+                DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI, name, defaultValue));
     }
 
     @Nullable
     public String getString(String name, @Nullable String defaultValue) {
-        return DeviceConfig.getString(DeviceConfig.NAMESPACE_SYSTEMUI, name, defaultValue);
+        return whitelistIpcs(() ->
+                DeviceConfig.getString(DeviceConfig.NAMESPACE_SYSTEMUI, name, defaultValue));
     }
 
     public boolean getBoolean(String name, boolean defaultValue) {
-        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI, name, defaultValue);
+        return whitelistIpcs(() ->
+                DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI, name, defaultValue));
     }
 
     public void addOnPropertiesChangedListener(
             Executor executor, DeviceConfig.OnPropertiesChangedListener listener) {
         DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI, executor, listener);
+    }
+
+    public void removeOnPropertiesChangedListener(
+            DeviceConfig.OnPropertiesChangedListener listener) {
+        DeviceConfig.removeOnPropertiesChangedListener(listener);
     }
 }

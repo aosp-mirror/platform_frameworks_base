@@ -18,9 +18,11 @@
 package android.app;
 
 import android.app.ITransientNotification;
+import android.app.ITransientNotificationCallback;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
+import android.app.NotificationHistory;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -44,19 +46,22 @@ interface INotificationManager
     void cancelAllNotifications(String pkg, int userId);
 
     void clearData(String pkg, int uid, boolean fromApp);
-    @UnsupportedAppUsage
-    void enqueueToast(String pkg, ITransientNotification callback, int duration, int displayId);
-    @UnsupportedAppUsage
-    void cancelToast(String pkg, ITransientNotification callback);
-    void finishToken(String pkg, ITransientNotification callback);
+    void enqueueTextToast(String pkg, IBinder token, CharSequence text, int duration, int displayId, @nullable ITransientNotificationCallback callback);
+    void enqueueToast(String pkg, IBinder token, ITransientNotification callback, int duration, int displayId);
+    void cancelToast(String pkg, IBinder token);
+    void finishToken(String pkg, IBinder token);
 
     void enqueueNotificationWithTag(String pkg, String opPkg, String tag, int id,
             in Notification notification, int userId);
     @UnsupportedAppUsage
-    void cancelNotificationWithTag(String pkg, String tag, int id, int userId);
+    void cancelNotificationWithTag(String pkg, String opPkg, String tag, int id, int userId);
 
     void setShowBadge(String pkg, int uid, boolean showBadge);
     boolean canShowBadge(String pkg, int uid);
+    boolean hasSentValidMsg(String pkg, int uid);
+    boolean isInInvalidMsgState(String pkg, int uid);
+    boolean hasUserDemotedInvalidMsgApp(String pkg, int uid);
+    void setInvalidMsgAppDemoted(String pkg, int uid, boolean isDemoted);
     void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled);
     /**
      * Updates the notification's enabled state. Additionally locks importance for all of the
@@ -77,22 +82,26 @@ interface INotificationManager
     boolean shouldHideSilentStatusIcons(String callingPkg);
     void setHideSilentStatusIcons(boolean hide);
 
-    void setBubblesAllowed(String pkg, int uid, boolean allowed);
+    void setBubblesAllowed(String pkg, int uid, int bubblePreference);
     boolean areBubblesAllowed(String pkg);
-    boolean areBubblesAllowedForPackage(String pkg, int uid);
-    boolean hasUserApprovedBubblesForPackage(String pkg, int uid);
+    int getBubblePreferenceForPackage(String pkg, int uid);
 
     void createNotificationChannelGroups(String pkg, in ParceledListSlice channelGroupList);
     void createNotificationChannels(String pkg, in ParceledListSlice channelsList);
     void createNotificationChannelsForPackage(String pkg, int uid, in ParceledListSlice channelsList);
+    ParceledListSlice getConversations(boolean onlyImportant);
+    ParceledListSlice getConversationsForPackage(String pkg, int uid);
     ParceledListSlice getNotificationChannelGroupsForPackage(String pkg, int uid, boolean includeDeleted);
     NotificationChannelGroup getNotificationChannelGroupForPackage(String groupId, String pkg, int uid);
     NotificationChannelGroup getPopulatedNotificationChannelGroupForPackage(String pkg, int uid, String groupId, boolean includeDeleted);
     void updateNotificationChannelGroupForPackage(String pkg, int uid, in NotificationChannelGroup group);
     void updateNotificationChannelForPackage(String pkg, int uid, in NotificationChannel channel);
     NotificationChannel getNotificationChannel(String callingPkg, int userId, String pkg, String channelId);
-    NotificationChannel getNotificationChannelForPackage(String pkg, int uid, String channelId, boolean includeDeleted);
+    NotificationChannel getConversationNotificationChannel(String callingPkg, int userId, String pkg, String channelId, boolean returnParentIfNoConversationChannel, String conversationId);
+    void createConversationNotificationChannelForPackage(String pkg, int uid, String triggeringKey, in NotificationChannel parentChannel, String conversationId);
+    NotificationChannel getNotificationChannelForPackage(String pkg, int uid, String channelId, String conversationId, boolean includeDeleted);
     void deleteNotificationChannel(String pkg, String channelId);
+    void deleteConversationNotificationChannels(String pkg, int uid, String conversationId);
     ParceledListSlice getNotificationChannels(String callingPkg, String targetPkg, int userId);
     ParceledListSlice getNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted);
     int getNumNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted);
@@ -107,6 +116,7 @@ interface INotificationManager
     int getAppsBypassingDndCount(int uid);
     ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int userId);
     boolean isPackagePaused(String pkg);
+    void deleteNotificationHistoryItem(String pkg, int uid, long postedTime);
 
     void silenceNotificationSound();
 
@@ -114,8 +124,14 @@ interface INotificationManager
     // INotificationListener method.
     @UnsupportedAppUsage
     StatusBarNotification[] getActiveNotifications(String callingPkg);
+    StatusBarNotification[] getActiveNotificationsWithAttribution(String callingPkg,
+            String callingAttributionTag);
     @UnsupportedAppUsage
-    StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count);
+    StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count, boolean includeSnoozed);
+    StatusBarNotification[] getHistoricalNotificationsWithAttribution(String callingPkg,
+            String callingAttributionTag, int count, boolean includeSnoozed);
+
+    NotificationHistory getNotificationHistory(String callingPkg, String callingAttributionTag);
 
     void registerListener(in INotificationListener listener, in ComponentName component, int userid);
     void unregisterListener(in INotificationListener listener, int userid);
@@ -152,6 +168,7 @@ interface INotificationManager
     void applyAdjustmentFromAssistant(in INotificationListener token, in Adjustment adjustment);
     void applyAdjustmentsFromAssistant(in INotificationListener token, in List<Adjustment> adjustments);
     void unsnoozeNotificationFromAssistant(in INotificationListener token, String key);
+    void unsnoozeNotificationFromSystemListener(in INotificationListener token, String key);
 
     ComponentName getEffectsSuppressor();
     boolean matchesCallFilter(in Bundle extras);

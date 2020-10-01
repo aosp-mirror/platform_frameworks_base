@@ -64,6 +64,10 @@ public class Bmgr {
 
     private static final String BMGR_NOT_RUNNING_ERR =
             "Error: Could not access the Backup Manager.  Is the system running?";
+    private static final String BMGR_NOT_ACTIVATED_FOR_USER =
+            "Error: Backup Manager is not activated for user ";
+    private static final String BMGR_ERR_NO_RESTORESESSION_FOR_USER =
+            "Error: Could not get restore session for user ";
     private static final String TRANSPORT_NOT_RUNNING_ERR =
             "Error: Could not access the backup transport.  Is the system running?";
     private static final String PM_NOT_RUNNING_ERR =
@@ -118,6 +122,11 @@ public class Bmgr {
         }
 
         if (!isBackupActive(userId)) {
+            return;
+        }
+
+        if ("autorestore".equals(op)) {
+            doAutoRestore(userId);
             return;
         }
 
@@ -190,19 +199,43 @@ public class Bmgr {
         showUsage();
     }
 
-    boolean isBackupActive(@UserIdInt int userId) {
+    private void handleRemoteException(RemoteException e) {
+        System.err.println(e.toString());
+        System.err.println(BMGR_NOT_RUNNING_ERR);
+    }
+
+    private boolean isBackupActive(@UserIdInt int userId) {
         try {
             if (!mBmgr.isBackupServiceActive(userId)) {
-                System.err.println(BMGR_NOT_RUNNING_ERR);
+                System.err.println(BMGR_NOT_ACTIVATED_FOR_USER + userId);
                 return false;
             }
         } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(BMGR_NOT_RUNNING_ERR);
+            handleRemoteException(e);
             return false;
         }
 
         return true;
+    }
+
+    private void doAutoRestore(int userId) {
+        String arg = nextArg();
+        if (arg == null) {
+            showUsage();
+            return;
+        }
+
+        try {
+            boolean enable = Boolean.parseBoolean(arg);
+            mBmgr.setAutoRestore(enable);
+            System.out.println(
+                    "Auto restore is now "
+                            + (enable ? "enabled" : "disabled")
+                            + " for user "
+                            + userId);
+        } catch (RemoteException e) {
+            handleRemoteException(e);
+        }
     }
 
     private String activatedToString(boolean activated) {
@@ -214,8 +247,7 @@ public class Bmgr {
             System.out.println("Backup Manager currently "
                     + activatedToString(mBmgr.isBackupServiceActive(userId)));
         } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(BMGR_NOT_RUNNING_ERR);
+            handleRemoteException(e);
         }
 
     }
@@ -230,8 +262,7 @@ public class Bmgr {
             System.out.println("Backup Manager currently "
                     + enableToString(isEnabled));
         } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(BMGR_NOT_RUNNING_ERR);
+            handleRemoteException(e);
         }
     }
 
@@ -250,8 +281,7 @@ public class Bmgr {
             showUsage();
             return;
         } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(BMGR_NOT_RUNNING_ERR);
+            handleRemoteException(e);
         }
     }
 
@@ -259,8 +289,7 @@ public class Bmgr {
         try {
             mBmgr.backupNowForUser(userId);
         } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(BMGR_NOT_RUNNING_ERR);
+            handleRemoteException(e);
         }
     }
 
@@ -274,8 +303,7 @@ public class Bmgr {
         try {
             mBmgr.dataChangedForUser(userId, pkg);
         } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(BMGR_NOT_RUNNING_ERR);
+            handleRemoteException(e);
         }
     }
 
@@ -292,8 +320,7 @@ public class Bmgr {
                 mBmgr.fullTransportBackupForUser(
                         userId, allPkgs.toArray(new String[allPkgs.size()]));
             } catch (RemoteException e) {
-                System.err.println(e.toString());
-                System.err.println(BMGR_NOT_RUNNING_ERR);
+                handleRemoteException(e);
             }
         }
     }
@@ -421,8 +448,7 @@ public class Bmgr {
             try {
                 filteredPackages = mBmgr.filterAppsEligibleForBackupForUser(userId, packages);
             } catch (RemoteException e) {
-                System.err.println(e.toString());
-                System.err.println(BMGR_NOT_RUNNING_ERR);
+                handleRemoteException(e);
             }
             backupNowPackages(userId, Arrays.asList(filteredPackages), nonIncrementalBackup,
                     monitorState);
@@ -455,8 +481,7 @@ public class Bmgr {
                 System.err.println("Unable to run backup");
             }
         } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(BMGR_NOT_RUNNING_ERR);
+            handleRemoteException(e);
         }
     }
 
@@ -506,8 +531,7 @@ public class Bmgr {
             try {
                 mBmgr.cancelBackupsForUser(userId);
             } catch (RemoteException e) {
-                System.err.println(e.toString());
-                System.err.println(BMGR_NOT_RUNNING_ERR);
+                handleRemoteException(e);
             }
             return;
         }
@@ -537,8 +561,7 @@ public class Bmgr {
             }
 
         } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(BMGR_NOT_RUNNING_ERR);
+            handleRemoteException(e);
         }
     }
 
@@ -569,8 +592,7 @@ public class Bmgr {
                         }
                     });
         } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(BMGR_NOT_RUNNING_ERR);
+            handleRemoteException(e);
             return;
         }
 
@@ -598,8 +620,7 @@ public class Bmgr {
             mBmgr.clearBackupDataForUser(userId, transport, pkg);
             System.out.println("Wiped backup data for " + pkg + " on " + transport);
         } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(BMGR_NOT_RUNNING_ERR);
+            handleRemoteException(e);
         }
     }
 
@@ -632,8 +653,7 @@ public class Bmgr {
             observer.waitForCompletion(30*1000L);
             System.out.println("Initialization result: " + observer.result);
         } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(BMGR_NOT_RUNNING_ERR);
+            handleRemoteException(e);
         }
     }
 
@@ -648,7 +668,7 @@ public class Bmgr {
         try {
             mRestore = mBmgr.beginRestoreSessionForUser(userId, null, null);
             if (mRestore == null) {
-                System.err.println(BMGR_NOT_RUNNING_ERR);
+                System.err.println(BMGR_ERR_NO_RESTORESESSION_FOR_USER + userId);
                 return;
             }
 
@@ -658,8 +678,7 @@ public class Bmgr {
 
             mRestore.endRestoreSession();
         } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(BMGR_NOT_RUNNING_ERR);
+            handleRemoteException(e);
         }
     }
 
@@ -686,8 +705,7 @@ public class Bmgr {
                 System.out.println(pad + t);
             }
         } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(BMGR_NOT_RUNNING_ERR);
+            handleRemoteException(e);
         }
     }
 
@@ -805,7 +823,7 @@ public class Bmgr {
             boolean didRestore = false;
             mRestore = mBmgr.beginRestoreSessionForUser(userId, null, null);
             if (mRestore == null) {
-                System.err.println(BMGR_NOT_RUNNING_ERR);
+                System.err.println(BMGR_ERR_NO_RESTORESESSION_FOR_USER + userId);
                 return;
             }
             RestoreSet[] sets = null;
@@ -851,8 +869,7 @@ public class Bmgr {
 
             System.out.println("done");
         } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(BMGR_NOT_RUNNING_ERR);
+            handleRemoteException(e);
         }
     }
 
@@ -865,8 +882,7 @@ public class Bmgr {
                 }
             }
         } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(BMGR_NOT_RUNNING_ERR);
+            handleRemoteException(e);
         }
     }
 
@@ -886,8 +902,7 @@ public class Bmgr {
                             + " for user "
                             + userId);
         } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(BMGR_NOT_RUNNING_ERR);
+            handleRemoteException(e);
         }
     }
 
@@ -928,6 +943,7 @@ public class Bmgr {
         System.err.println("       bmgr init TRANSPORT...");
         System.err.println("       bmgr activate BOOL");
         System.err.println("       bmgr activated");
+        System.err.println("       bmgr autorestore BOOL");
         System.err.println("");
         System.err.println("The '--user' option specifies the user on which the operation is run.");
         System.err.println("It must be the first argument before the operation.");
@@ -1002,6 +1018,9 @@ public class Bmgr {
         System.err.println("");
         System.err.println("The 'activated' command reports the current activated/deactivated");
         System.err.println("state of the backup mechanism.");
+        System.err.println("");
+        System.err.println("The 'autorestore' command enables or disables automatic restore when");
+        System.err.println("a new package is installed.");
     }
 
     private static class BackupMonitor extends IBackupManagerMonitor.Stub {

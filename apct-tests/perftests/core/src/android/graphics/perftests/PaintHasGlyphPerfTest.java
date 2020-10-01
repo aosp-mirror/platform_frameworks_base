@@ -19,7 +19,7 @@ package android.graphics.perftests;
 import android.graphics.Paint;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.perftests.utils.StubActivity;
+import android.perftests.utils.PerfTestActivity;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
@@ -58,7 +58,8 @@ public class PaintHasGlyphPerfTest {
     }
 
     @Rule
-    public ActivityTestRule<StubActivity> mActivityRule = new ActivityTestRule(StubActivity.class);
+    public ActivityTestRule<PerfTestActivity> mActivityRule =
+            new ActivityTestRule<>(PerfTestActivity.class);
 
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();

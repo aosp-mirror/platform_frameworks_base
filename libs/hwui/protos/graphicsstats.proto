@@ -29,6 +29,12 @@ message GraphicsStatsServiceDumpProto {
 }
 
 message GraphicsStatsProto {
+    enum PipelineType {
+        UNKNOWN = 0;
+        GL = 1;
+        VULKAN = 2;
+    }
+
     // The package name of the app
     optional string package_name = 1;
 
@@ -46,6 +52,12 @@ message GraphicsStatsProto {
 
     // The frame time histogram for the package
     repeated GraphicsStatsHistogramBucketProto histogram = 6;
+
+    // The gpu frame time histogram for the package
+    repeated GraphicsStatsHistogramBucketProto gpu_histogram = 7;
+
+    // HWUI renders pipeline type: GL or Vulkan
+    optional PipelineType pipeline = 8;
 }
 
 message GraphicsStatsJankSummaryProto {

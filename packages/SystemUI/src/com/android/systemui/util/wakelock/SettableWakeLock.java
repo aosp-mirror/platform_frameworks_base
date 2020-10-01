@@ -16,7 +16,7 @@
 
 package com.android.systemui.util.wakelock;
 
-import com.android.internal.util.Preconditions;
+import java.util.Objects;
 
 public class SettableWakeLock {
 
@@ -26,7 +26,7 @@ public class SettableWakeLock {
     private boolean mAcquired;
 
     public SettableWakeLock(WakeLock inner, String why) {
-        Preconditions.checkNotNull(inner, "inner wakelock required");
+        Objects.requireNonNull(inner, "inner wakelock required");
 
         mInner = inner;
         mWhy = why;

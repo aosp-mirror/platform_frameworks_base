@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
@@ -31,14 +31,14 @@ import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
 
-import static com.android.server.am.KeyguardControllerProto.AOD_SHOWING;
-import static com.android.server.am.KeyguardControllerProto.KEYGUARD_OCCLUDED_STATES;
-import static com.android.server.am.KeyguardControllerProto.KEYGUARD_SHOWING;
-import static com.android.server.am.KeyguardOccludedProto.DISPLAY_ID;
-import static com.android.server.am.KeyguardOccludedProto.KEYGUARD_OCCLUDED;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.KeyguardControllerProto.AOD_SHOWING;
+import static com.android.server.wm.KeyguardControllerProto.KEYGUARD_OCCLUDED_STATES;
+import static com.android.server.wm.KeyguardControllerProto.KEYGUARD_SHOWING;
+import static com.android.server.wm.KeyguardOccludedProto.DISPLAY_ID;
+import static com.android.server.wm.KeyguardOccludedProto.KEYGUARD_OCCLUDED;
 
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -69,12 +69,10 @@ class KeyguardController {
     private boolean mAodShowing;
     private boolean mKeyguardGoingAway;
     private boolean mDismissalRequested;
-    private int[] mSecondaryDisplayIdsShowing;
     private int mBeforeUnoccludeTransit;
-    private int mVisibilityTransactionDepth;
     private final SparseArray<KeyguardDisplayState> mDisplayStates = new SparseArray<>();
     private final ActivityTaskManagerService mService;
-    private RootActivityContainer mRootActivityContainer;
+    private RootWindowContainer mRootWindowContainer;
 
     KeyguardController(ActivityTaskManagerService service,
             ActivityStackSupervisor stackSupervisor) {
@@ -84,7 +82,7 @@ class KeyguardController {
 
     void setWindowManager(WindowManagerService windowManager) {
         mWindowManager = windowManager;
-        mRootActivityContainer = mService.mRootActivityContainer;
+        mRootWindowContainer = mService.mRootWindowContainer;
     }
 
     /**
@@ -135,13 +133,19 @@ class KeyguardController {
      * Update the Keyguard showing state.
      */
     void setKeyguardShown(boolean keyguardShowing, boolean aodShowing) {
-        // If keyguard is going away, but SystemUI aborted the transition, need to reset state.
-        final boolean keyguardChanged = keyguardShowing != mKeyguardShowing
-                || mKeyguardGoingAway && keyguardShowing;
         final boolean aodChanged = aodShowing != mAodShowing;
+        // If keyguard is going away, but SystemUI aborted the transition, need to reset state.
+        // Do not reset keyguardChanged status if this is aodChanged.
+        final boolean keyguardChanged = (keyguardShowing != mKeyguardShowing)
+                || (mKeyguardGoingAway && keyguardShowing && !aodChanged);
         if (!keyguardChanged && !aodChanged) {
             return;
         }
+        EventLogTags.writeWmSetKeyguardShown(
+                keyguardShowing ? 1 : 0,
+                aodShowing ? 1 : 0,
+                mKeyguardGoingAway ? 1 : 0,
+                "setKeyguardShown");
         mKeyguardShowing = keyguardShowing;
         mAodShowing = aodShowing;
         mWindowManager.setAodShowing(aodShowing);
@@ -161,7 +165,7 @@ class KeyguardController {
         // Update the sleep token first such that ensureActivitiesVisible has correct sleep token
         // state when evaluating visibilities.
         updateKeyguardSleepToken();
-        mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+        mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
     }
 
     /**
@@ -174,28 +178,29 @@ class KeyguardController {
         if (!mKeyguardShowing) {
             return;
         }
-        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "keyguardGoingAway");
-        mWindowManager.deferSurfaceLayout();
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "keyguardGoingAway");
+        mService.deferWindowLayout();
         try {
             setKeyguardGoingAway(true);
-            mRootActivityContainer.getDefaultDisplay().mDisplayContent
+            EventLogTags.writeWmSetKeyguardShown(
+                    1 /* keyguardShowing */,
+                    mAodShowing ? 1 : 0,
+                    1 /* keyguardGoingAway */,
+                    "keyguardGoingAway");
+            mRootWindowContainer.getDefaultDisplay().mDisplayContent
                     .prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY,
                             false /* alwaysKeepCurrent */, convertTransitFlags(flags),
                             false /* forceOverride */);
             updateKeyguardSleepToken();
 
             // Some stack visibility might change (e.g. docked stack)
-            mRootActivityContainer.resumeFocusedStacksTopActivities();
-            mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
-            mRootActivityContainer.addStartingWindowsForVisibleActivities(
-                    true /* taskSwitch */);
+            mRootWindowContainer.resumeFocusedStacksTopActivities();
+            mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+            mRootWindowContainer.addStartingWindowsForVisibleActivities();
             mWindowManager.executeAppTransition();
         } finally {
-            Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "keyguardGoingAway: surfaceLayout");
-            mWindowManager.continueSurfaceLayout();
-            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
-
-            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+            mService.continueWindowLayout();
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
@@ -247,24 +252,6 @@ class KeyguardController {
     }
 
     /**
-     * Starts a batch of visibility updates.
-     */
-    void beginActivityVisibilityUpdate() {
-        mVisibilityTransactionDepth++;
-    }
-
-    /**
-     * Ends a batch of visibility updates. After all batches are done, this method makes sure to
-     * update lockscreen occluded/dismiss state if needed.
-     */
-    void endActivityVisibilityUpdate() {
-        mVisibilityTransactionDepth--;
-        if (mVisibilityTransactionDepth == 0) {
-            visibilitiesUpdated();
-        }
-    }
-
-    /**
      * @return True if we may show an activity while Keyguard is showing because we are in the
      *         process of dismissing it anyways, false otherwise.
      */
@@ -287,11 +274,15 @@ class KeyguardController {
                 && !mWindowManager.isKeyguardSecure(mService.getCurrentUserId());
     }
 
-    private void visibilitiesUpdated() {
+    /**
+     * Makes sure to update lockscreen occluded/dismiss state if needed after completing all
+     * visibility updates ({@link ActivityStackSupervisor#endActivityVisibilityUpdate}).
+     */
+    void visibilitiesUpdated() {
         boolean requestDismissKeyguard = false;
-        for (int displayNdx = mRootActivityContainer.getChildCount() - 1;
+        for (int displayNdx = mRootWindowContainer.getChildCount() - 1;
              displayNdx >= 0; displayNdx--) {
-            final ActivityDisplay display = mRootActivityContainer.getChildAt(displayNdx);
+            final DisplayContent display = mRootWindowContainer.getChildAt(displayNdx);
             final KeyguardDisplayState state = getDisplay(display.mDisplayId);
             state.visibilitiesUpdated(this, display);
             requestDismissKeyguard |= state.mRequestDismissKeyguard;
@@ -316,19 +307,19 @@ class KeyguardController {
             return;
         }
 
-        mWindowManager.onKeyguardOccludedChanged(isDisplayOccluded(DEFAULT_DISPLAY));
+        mWindowManager.mPolicy.onKeyguardOccludedChangedLw(isDisplayOccluded(DEFAULT_DISPLAY));
         if (isKeyguardLocked()) {
-            mWindowManager.deferSurfaceLayout();
+            mService.deferWindowLayout();
             try {
-                mRootActivityContainer.getDefaultDisplay().mDisplayContent
+                mRootWindowContainer.getDefaultDisplay().mDisplayContent
                         .prepareAppTransition(resolveOccludeTransit(),
                                 false /* alwaysKeepCurrent */, 0 /* flags */,
                                 true /* forceOverride */);
                 updateKeyguardSleepToken(DEFAULT_DISPLAY);
-                mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+                mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
                 mWindowManager.executeAppTransition();
             } finally {
-                mWindowManager.continueSurfaceLayout();
+                mService.continueWindowLayout();
             }
         }
         dismissDockedStackIfNeeded();
@@ -351,12 +342,12 @@ class KeyguardController {
         // If we are about to unocclude the Keyguard, but we can dismiss it without security,
         // we immediately dismiss the Keyguard so the activity gets shown without a flicker.
         final DisplayContent dc =
-                mRootActivityContainer.getDefaultDisplay().mDisplayContent;
+                mRootWindowContainer.getDefaultDisplay().mDisplayContent;
         if (mKeyguardShowing && canDismissKeyguard()
                 && dc.mAppTransition.getAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE) {
             dc.prepareAppTransition(mBeforeUnoccludeTransit, false /* alwaysKeepCurrent */,
                     0 /* flags */, true /* forceOverride */);
-            mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+            mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
             mWindowManager.executeAppTransition();
         }
     }
@@ -369,13 +360,12 @@ class KeyguardController {
      * @return true if Keyguard can be currently dismissed without entering credentials.
      */
     boolean canDismissKeyguard() {
-        return mWindowManager.isKeyguardTrusted()
+        return mWindowManager.mPolicy.isKeyguardTrustedLw()
                 || !mWindowManager.isKeyguardSecure(mService.getCurrentUserId());
     }
 
     private int resolveOccludeTransit() {
-        final DisplayContent dc =
-                mService.mRootActivityContainer.getDefaultDisplay().mDisplayContent;
+        final DisplayContent dc = mRootWindowContainer.getDefaultDisplay().mDisplayContent;
         if (mBeforeUnoccludeTransit != TRANSIT_UNSET
                 && dc.mAppTransition.getAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE
                 // TODO(b/113840485): Handle app transition for individual display.
@@ -402,20 +392,19 @@ class KeyguardController {
             // show on top of the lock screen. In this can we want to dismiss the docked
             // stack since it will be complicated/risky to try to put the activity on top
             // of the lock screen in the right fullscreen configuration.
-            final ActivityStack stack =
-                    mRootActivityContainer.getDefaultDisplay().getSplitScreenPrimaryStack();
-            if (stack == null) {
+            final TaskDisplayArea taskDisplayArea = mRootWindowContainer
+                    .getDefaultTaskDisplayArea();
+            if (!taskDisplayArea.isSplitScreenModeActivated()) {
                 return;
             }
-            mStackSupervisor.moveTasksToFullscreenStackLocked(stack,
-                    stack.isFocusedStackOnDisplay());
+            taskDisplayArea.onSplitScreenModeDismissed();
         }
     }
 
     private void updateKeyguardSleepToken() {
-        for (int displayNdx = mRootActivityContainer.getChildCount() - 1;
+        for (int displayNdx = mRootWindowContainer.getChildCount() - 1;
              displayNdx >= 0; displayNdx--) {
-            final ActivityDisplay display = mRootActivityContainer.getChildAt(displayNdx);
+            final DisplayContent display = mRootWindowContainer.getChildAt(displayNdx);
             updateKeyguardSleepToken(display.mDisplayId);
         }
     }
@@ -478,7 +467,7 @@ class KeyguardController {
             }
         }
 
-        void visibilitiesUpdated(KeyguardController controller, ActivityDisplay display) {
+        void visibilitiesUpdated(KeyguardController controller, DisplayContent display) {
             final boolean lastOccluded = mOccluded;
             final ActivityRecord lastDismissActivity = mDismissingKeyguardActivity;
             mRequestDismissKeyguard = false;
@@ -489,7 +478,7 @@ class KeyguardController {
             if (stack != null) {
                 final ActivityRecord topDismissing = stack.getTopDismissingKeyguardActivity();
                 mOccluded = stack.topActivityOccludesKeyguard() || (topDismissing != null
-                        && stack.topRunningActivityLocked() == topDismissing
+                        && stack.topRunningActivity() == topDismissing
                         && controller.canShowWhileOccluded(
                                 true /* dismissKeyguard */,
                                 false /* showWhenLocked */));
@@ -504,7 +493,8 @@ class KeyguardController {
             }
             // TODO(b/123372519): isShowingDream can only works on default display.
             if (mDisplayId == DEFAULT_DISPLAY) {
-                mOccluded |= controller.mWindowManager.isShowingDream();
+                mOccluded |= mService.mRootWindowContainer.getDefaultDisplay().mDisplayContent
+                        .getDisplayPolicy().isShowingDreamLw();
             }
 
             if (lastOccluded != mOccluded) {
@@ -524,12 +514,15 @@ class KeyguardController {
          * Only the top non-pinned activity of the focusable stack on each display can control its
          * occlusion state.
          */
-        private ActivityStack getStackForControllingOccluding(ActivityDisplay display) {
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                if (stack != null && stack.isFocusableAndVisible()
-                        && !stack.inPinnedWindowingMode()) {
-                    return stack;
+        private ActivityStack getStackForControllingOccluding(DisplayContent display) {
+            for (int tdaNdx = display.getTaskDisplayAreaCount() - 1; tdaNdx >= 0; --tdaNdx) {
+                final TaskDisplayArea taskDisplayArea = display.getTaskDisplayAreaAt(tdaNdx);
+                for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
+                    final ActivityStack stack = taskDisplayArea.getStackAt(sNdx);
+                    if (stack != null && stack.isFocusableAndVisible()
+                            && !stack.inPinnedWindowingMode()) {
+                        return stack;
+                    }
                 }
             }
             return null;
@@ -546,7 +539,7 @@ class KeyguardController {
             pw.println(sb.toString());
         }
 
-        void writeToProto(ProtoOutputStream proto, long fieldId) {
+        void dumpDebug(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
             proto.write(DISPLAY_ID, mDisplayId);
             proto.write(KEYGUARD_OCCLUDED, mOccluded);
@@ -561,10 +554,10 @@ class KeyguardController {
         pw.println(prefix + "  mKeyguardGoingAway=" + mKeyguardGoingAway);
         dumpDisplayStates(pw, prefix);
         pw.println(prefix + "  mDismissalRequested=" + mDismissalRequested);
-        pw.println(prefix + "  mVisibilityTransactionDepth=" + mVisibilityTransactionDepth);
+        pw.println();
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(AOD_SHOWING, mAodShowing);
         proto.write(KEYGUARD_SHOWING, mKeyguardShowing);
@@ -580,7 +573,7 @@ class KeyguardController {
 
     private void writeDisplayStatesToProto(ProtoOutputStream proto, long fieldId) {
         for (int i = 0; i < mDisplayStates.size(); i++) {
-            mDisplayStates.valueAt(i).writeToProto(proto, fieldId);
+            mDisplayStates.valueAt(i).dumpDebug(proto, fieldId);
         }
     }
 }

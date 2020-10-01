@@ -16,12 +16,16 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,10 +37,15 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
+import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCallback;
+import com.android.systemui.statusbar.notification.row.RowContentBindParams;
+import com.android.systemui.statusbar.notification.row.RowContentBindStage;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import org.junit.Before;
@@ -46,6 +55,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -61,8 +71,8 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
     private NotificationGroupManager mGroupManager;
     private HeadsUpManager mHeadsUpManager;
     @Mock private NotificationEntryManager mNotificationEntryManager;
-    @Captor
-    private ArgumentCaptor<NotificationEntryListener> mListenerCaptor;
+    @Mock private RowContentBindStage mBindStage;
+    @Captor private ArgumentCaptor<NotificationEntryListener> mListenerCaptor;
     private NotificationEntryListener mNotificationEntryListener;
     private final HashMap<String, NotificationEntry> mPendingEntries = new HashMap<>();
     private final NotificationGroupTestHelper mGroupTestHelper =
@@ -71,16 +81,22 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
+        mDependency.injectMockDependency(BubbleController.class);
         mHeadsUpManager = new HeadsUpManager(mContext) {};
 
         when(mNotificationEntryManager.getPendingNotificationsIterator())
                 .thenReturn(mPendingEntries.values());
 
-        mGroupManager = new NotificationGroupManager(mock(StatusBarStateController.class));
+        mGroupManager = new NotificationGroupManager(
+                mock(StatusBarStateController.class),
+                () -> mock(PeopleNotificationIdentifier.class));
         mDependency.injectTestDependency(NotificationGroupManager.class, mGroupManager);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
 
-        mGroupAlertTransferHelper = new NotificationGroupAlertTransferHelper();
+        when(mBindStage.getStageParams(any())).thenReturn(new RowContentBindParams());
+
+        mGroupAlertTransferHelper = new NotificationGroupAlertTransferHelper(mBindStage);
         mGroupAlertTransferHelper.setHeadsUpManager(mHeadsUpManager);
 
         mGroupAlertTransferHelper.bind(mNotificationEntryManager, mGroupManager);
@@ -95,13 +111,17 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         mHeadsUpManager.showNotification(summaryEntry);
         NotificationEntry childEntry = mGroupTestHelper.createChildNotification();
 
+        RowContentBindParams params = new RowContentBindParams();
+        params.requireContentViews(FLAG_CONTENT_VIEW_HEADS_UP);
+        when(mBindStage.getStageParams(eq(childEntry))).thenReturn(params);
+
         // Summary will be suppressed because there is only one child.
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
 
         // A suppressed summary should transfer its alert state to the child.
-        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.key));
-        assertTrue(mHeadsUpManager.isAlerting(childEntry.key));
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
+        assertTrue(mHeadsUpManager.isAlerting(childEntry.getKey()));
     }
 
     @Test
@@ -118,14 +138,14 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(childEntry);
 
         // Add second child notification so that summary is no longer suppressed.
-        mPendingEntries.put(childEntry2.key, childEntry2);
+        mPendingEntries.put(childEntry2.getKey(), childEntry2);
         mNotificationEntryListener.onPendingEntryAdded(childEntry2);
         mGroupManager.onEntryAdded(childEntry2);
 
         // The alert state should transfer back to the summary as there is now more than one
         // child and the summary should no longer be suppressed.
-        assertTrue(mHeadsUpManager.isAlerting(summaryEntry.key));
-        assertFalse(mHeadsUpManager.isAlerting(childEntry.key));
+        assertTrue(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
+        assertFalse(mHeadsUpManager.isAlerting(childEntry.getKey()));
     }
 
     @Test
@@ -145,12 +165,12 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         mGroupAlertTransferHelper.onDozingChanged(true);
 
         // Add second child notification so that summary is no longer suppressed.
-        mPendingEntries.put(childEntry2.key, childEntry2);
+        mPendingEntries.put(childEntry2.getKey(), childEntry2);
         mNotificationEntryListener.onPendingEntryAdded(childEntry2);
         mGroupManager.onEntryAdded(childEntry2);
 
         // Dozing changed so no reason to re-alert summary.
-        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.key));
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
     }
 
     @Test
@@ -158,16 +178,16 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification();
         mHeadsUpManager.showNotification(summaryEntry);
         NotificationEntry childEntry = mGroupTestHelper.createChildNotification();
-        when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
-            .thenReturn(false);
+        RowContentBindParams params = new RowContentBindParams();
+        when(mBindStage.getStageParams(eq(childEntry))).thenReturn(params);
 
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
 
         // Alert is immediately removed from summary, but we do not show child yet either as its
         // content is not inflated.
-        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.key));
-        assertFalse(mHeadsUpManager.isAlerting(childEntry.key));
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
+        assertFalse(mHeadsUpManager.isAlerting(childEntry.getKey()));
         assertTrue(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));
     }
 
@@ -176,19 +196,20 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification();
         mHeadsUpManager.showNotification(summaryEntry);
         NotificationEntry childEntry = mGroupTestHelper.createChildNotification();
-        when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
-            .thenReturn(false);
+        RowContentBindParams params = new RowContentBindParams();
+        when(mBindStage.getStageParams(eq(childEntry))).thenReturn(params);
 
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
 
-        when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
-            .thenReturn(true);
-        mNotificationEntryListener.onEntryReinflated(childEntry);
+        // Child entry finishes its inflation.
+        ArgumentCaptor<BindCallback> callbackCaptor = ArgumentCaptor.forClass(BindCallback.class);
+        verify(mBindStage).requestRebind(eq(childEntry), callbackCaptor.capture());
+        callbackCaptor.getValue().onBindFinished(childEntry);
 
         // Alert is immediately removed from summary, and we show child as its content is inflated.
-        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.key));
-        assertTrue(mHeadsUpManager.isAlerting(childEntry.key));
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
+        assertTrue(mHeadsUpManager.isAlerting(childEntry.getKey()));
     }
 
     @Test
@@ -197,8 +218,9 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
                 mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
         NotificationEntry childEntry =
                 mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
-        when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
-            .thenReturn(false);
+        RowContentBindParams params = new RowContentBindParams();
+        when(mBindStage.getStageParams(eq(childEntry))).thenReturn(params);
+
         NotificationEntry childEntry2 =
                 mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
         mHeadsUpManager.showNotification(summaryEntry);
@@ -207,18 +229,17 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(childEntry);
 
         // Add second child notification so that summary is no longer suppressed.
-        mPendingEntries.put(childEntry2.key, childEntry2);
+        mPendingEntries.put(childEntry2.getKey(), childEntry2);
         mNotificationEntryListener.onPendingEntryAdded(childEntry2);
         mGroupManager.onEntryAdded(childEntry2);
 
         // Child entry finishes its inflation.
-        when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
-            .thenReturn(true);
-        mNotificationEntryListener.onEntryReinflated(childEntry);
+        ArgumentCaptor<BindCallback> callbackCaptor = ArgumentCaptor.forClass(BindCallback.class);
+        verify(mBindStage).requestRebind(eq(childEntry), callbackCaptor.capture());
+        callbackCaptor.getValue().onBindFinished(childEntry);
 
-        verify(childEntry.getRow(), times(1)).freeContentViewWhenSafe(mHeadsUpManager
-            .getContentFlag());
-        assertFalse(mHeadsUpManager.isAlerting(childEntry.key));
+        assertTrue((params.getContentViews() & FLAG_CONTENT_VIEW_HEADS_UP) == 0);
+        assertFalse(mHeadsUpManager.isAlerting(childEntry.getKey()));
     }
 
     @Test
@@ -227,14 +248,16 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
                 mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
         NotificationEntry childEntry =
                 mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
-        when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
-            .thenReturn(false);
+        RowContentBindParams params = new RowContentBindParams();
+        when(mBindStage.getStageParams(eq(childEntry))).thenReturn(params);
+
         mHeadsUpManager.showNotification(summaryEntry);
         // Trigger a transfer of alert state from summary to child.
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
 
-        mNotificationEntryListener.onEntryRemoved(childEntry, null, false);
+        mNotificationEntryListener.onEntryRemoved(
+                childEntry, null, false, UNDEFINED_DISMISS_REASON);
 
         assertFalse(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));
     }
@@ -245,18 +268,19 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
                 mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
         NotificationEntry childEntry =
                 mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
-        when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
-            .thenReturn(false);
+        RowContentBindParams params = new RowContentBindParams();
+        when(mBindStage.getStageParams(eq(childEntry))).thenReturn(params);
+
         mHeadsUpManager.showNotification(summaryEntry);
         // Trigger a transfer of alert state from summary to child.
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
 
         // Notify that entry changed groups.
-        StatusBarNotification oldNotification = childEntry.notification;
-        StatusBarNotification newSbn = spy(childEntry.notification.clone());
+        StatusBarNotification oldNotification = childEntry.getSbn();
+        StatusBarNotification newSbn = spy(childEntry.getSbn().clone());
         doReturn("other_group").when(newSbn).getGroupKey();
-        childEntry.notification = newSbn;
+        childEntry.setSbn(newSbn);
         mGroupManager.onEntryUpdated(childEntry, oldNotification);
 
         assertFalse(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));
@@ -267,18 +291,20 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         NotificationEntry summaryEntry =
                 mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
         NotificationEntry childEntry =
-                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
-        when(childEntry.getRow().isInflationFlagSet(mHeadsUpManager.getContentFlag()))
-            .thenReturn(false);
+                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY, 47);
+        RowContentBindParams params = new RowContentBindParams();
+        when(mBindStage.getStageParams(eq(childEntry))).thenReturn(params);
+
         mHeadsUpManager.showNotification(summaryEntry);
         // Trigger a transfer of alert state from summary to child.
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
 
         // Update that child to a summary.
-        StatusBarNotification oldNotification = childEntry.notification;
-        childEntry.notification = mGroupTestHelper.createSummaryNotification(
-                Notification.GROUP_ALERT_SUMMARY).notification;
+        StatusBarNotification oldNotification = childEntry.getSbn();
+        childEntry.setSbn(
+                mGroupTestHelper.createSummaryNotification(
+                        Notification.GROUP_ALERT_SUMMARY, 47).getSbn());
         mGroupManager.onEntryUpdated(childEntry, oldNotification);
 
         assertFalse(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));

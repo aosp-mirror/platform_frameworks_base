@@ -30,6 +30,8 @@ using ::android::ConfigDescription;
 using ::android::LocaleValue;
 using ::android::ResStringPool;
 
+using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
+
 namespace aapt {
 
 namespace {
@@ -379,25 +381,28 @@ bool DeserializeOverlayableItemFromPb(const pb::OverlayableItem& pb_overlayable,
   for (const int policy : pb_overlayable.policy()) {
     switch (policy) {
       case pb::OverlayableItem::PUBLIC:
-        out_overlayable->policies |= OverlayableItem::Policy::kPublic;
+        out_overlayable->policies |= PolicyFlags::PUBLIC;
         break;
       case pb::OverlayableItem::SYSTEM:
-        out_overlayable->policies |= OverlayableItem::Policy::kSystem;
+        out_overlayable->policies |= PolicyFlags::SYSTEM_PARTITION;
         break;
       case pb::OverlayableItem::VENDOR:
-        out_overlayable->policies |= OverlayableItem::Policy::kVendor;
+        out_overlayable->policies |= PolicyFlags::VENDOR_PARTITION;
         break;
       case pb::OverlayableItem::PRODUCT:
-        out_overlayable->policies |= OverlayableItem::Policy::kProduct;
+        out_overlayable->policies |= PolicyFlags::PRODUCT_PARTITION;
         break;
       case pb::OverlayableItem::SIGNATURE:
-        out_overlayable->policies |= OverlayableItem::Policy::kSignature;
+        out_overlayable->policies |= PolicyFlags::SIGNATURE;
         break;
       case pb::OverlayableItem::ODM:
-        out_overlayable->policies |= OverlayableItem::Policy::kOdm;
+        out_overlayable->policies |= PolicyFlags::ODM_PARTITION;
         break;
       case pb::OverlayableItem::OEM:
-        out_overlayable->policies |= OverlayableItem::Policy::kOem;
+        out_overlayable->policies |= PolicyFlags::OEM_PARTITION;
+        break;
+      case pb::OverlayableItem::ACTOR:
+        out_overlayable->policies |= PolicyFlags::ACTOR_SIGNATURE;
         break;
       default:
         *out_error = "unknown overlayable policy";
@@ -634,6 +639,7 @@ static bool DeserializeReferenceFromPb(const pb::Reference& pb_ref, Reference* o
                                        std::string* out_error) {
   out_ref->reference_type = DeserializeReferenceTypeFromPb(pb_ref.type());
   out_ref->private_reference = pb_ref.private_();
+  out_ref->is_dynamic = pb_ref.is_dynamic().value();
 
   if (pb_ref.id() != 0) {
     out_ref->id = ResourceId(pb_ref.id());
@@ -708,6 +714,8 @@ std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
             return {};
           }
           symbol.value = pb_symbol.value();
+          symbol.type = pb_symbol.type() != 0U ? pb_symbol.type()
+                                               : android::Res_value::TYPE_INT_DEC;
           attr->symbols.push_back(std::move(symbol));
         }
         value = std::move(attr);

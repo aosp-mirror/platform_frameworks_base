@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -30,6 +31,8 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.media.AudioManager;
+
+import com.android.settingslib.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -921,5 +924,17 @@ public class CachedBluetoothDeviceTest {
         assertThat(subCachedDevice.mRssi).isEqualTo(RSSI_1);
         assertThat(subCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_1);
         assertThat(subCachedDevice.mDevice).isEqualTo(mDevice);
+    }
+
+    @Test
+    public void getConnectionSummary_profileConnectedFail_showErrorMessage() {
+        final A2dpProfile profle = mock(A2dpProfile.class);
+        mCachedDevice.onProfileStateChanged(profle, BluetoothProfile.STATE_CONNECTED);
+        mCachedDevice.setProfileConnectedStatus(BluetoothProfile.A2DP, true);
+
+        when(profle.getConnectionStatus(mDevice)).thenReturn(BluetoothProfile.STATE_CONNECTED);
+
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
+                mContext.getString(R.string.profile_connect_timeout_subtext));
     }
 }

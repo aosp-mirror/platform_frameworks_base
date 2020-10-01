@@ -24,6 +24,7 @@ import android.security.keystore.recovery.KeyChainSnapshot;
 import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.security.keystore.recovery.RecoveryCertPath;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
+import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
 
 import java.util.Map;
@@ -42,23 +43,22 @@ interface ILockSettings {
     long getLong(in String key, in long defaultValue, in int userId);
     @UnsupportedAppUsage
     String getString(in String key, in String defaultValue, in int userId);
-    void setLockCredential(in byte[] credential, int type, in byte[] savedCredential, int requestedQuality, int userId, boolean allowUntrustedChange);
+    boolean setLockCredential(in LockscreenCredential credential, in LockscreenCredential savedCredential, int userId);
     void resetKeyStore(int userId);
-    VerifyCredentialResponse checkCredential(in byte[] credential, int type, int userId,
+    VerifyCredentialResponse checkCredential(in LockscreenCredential credential, int userId,
             in ICheckCredentialProgressCallback progressCallback);
-    VerifyCredentialResponse verifyCredential(in byte[] credential, int type, long challenge, int userId);
-    VerifyCredentialResponse verifyTiedProfileChallenge(in byte[] credential, int type, long challenge, int userId);
+    VerifyCredentialResponse verifyCredential(in LockscreenCredential credential, long challenge, int userId);
+    VerifyCredentialResponse verifyTiedProfileChallenge(in LockscreenCredential credential, long challenge, int userId);
     boolean checkVoldPassword(int userId);
-    @UnsupportedAppUsage
-    boolean havePattern(int userId);
-    @UnsupportedAppUsage
-    boolean havePassword(int userId);
-    byte[] getHashFactor(in byte[] currentCredential, int userId);
-    void setSeparateProfileChallengeEnabled(int userId, boolean enabled, in byte[] managedUserPassword);
+    int getCredentialType(int userId);
+    byte[] getHashFactor(in LockscreenCredential currentCredential, int userId);
+    void setSeparateProfileChallengeEnabled(int userId, boolean enabled, in LockscreenCredential managedUserPassword);
     boolean getSeparateProfileChallengeEnabled(int userId);
     void registerStrongAuthTracker(in IStrongAuthTracker tracker);
     void unregisterStrongAuthTracker(in IStrongAuthTracker tracker);
     void requireStrongAuth(int strongAuthReason, int userId);
+    void reportSuccessfulBiometricUnlock(boolean isStrongBiometric, int userId);
+    void scheduleNonStrongBiometricIdleTimeout(int userId);
     void systemReady();
     void userPresent(int userId);
     int getStrongAuthForUser(int userId);
@@ -90,4 +90,7 @@ interface ILockSettings {
             in byte[] recoveryKeyBlob,
             in List<WrappedApplicationKey> applicationKeys);
     void closeSession(in String sessionId);
+    boolean hasSecureLockScreen();
+    boolean tryUnlockWithCachedUnifiedChallenge(int userId);
+    void removeCachedUnifiedChallenge(int userId);
 }

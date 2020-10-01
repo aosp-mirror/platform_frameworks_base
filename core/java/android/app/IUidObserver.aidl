@@ -50,8 +50,9 @@ oneway interface IUidObserver {
      * @param procState The updated process state for the uid.
      * @param procStateSeq The sequence no. associated with process state change of the uid,
      *                     see UidRecord.procStateSeq for details.
+     * @param capability the updated process capability for the uid.
      */
-    void onUidStateChanged(int uid, int procState, long procStateSeq);
+    void onUidStateChanged(int uid, int procState, long procStateSeq, int capability);
 
     // =============== End of transactions used on native side as well ============================
 

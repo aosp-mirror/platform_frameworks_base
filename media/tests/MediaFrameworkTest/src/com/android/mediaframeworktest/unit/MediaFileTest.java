@@ -19,6 +19,7 @@ package com.android.mediaframeworktest.unit;
 import static android.media.MediaFile.getFormatCode;
 import static android.media.MediaFile.getMimeType;
 import static android.media.MediaFile.isAudioMimeType;
+import static android.media.MediaFile.isDocumentMimeType;
 import static android.media.MediaFile.isImageMimeType;
 import static android.media.MediaFile.isPlayListMimeType;
 import static android.media.MediaFile.isVideoMimeType;
@@ -88,7 +89,18 @@ public class MediaFileTest {
         assertTrue(isPlayListMimeType(mimeMap.guessMimeTypeFromExtension("wpl")));
         assertTrue(isPlayListMimeType(mimeMap.guessMimeTypeFromExtension("m3u")));
         assertTrue(isPlayListMimeType(mimeMap.guessMimeTypeFromExtension("m3u8")));
-        assertTrue(isPlayListMimeType(mimeMap.guessMimeTypeFromExtension("asf")));
+    }
+
+    @Test
+    public void testDocument() throws Exception {
+        assertTrue(isDocumentMimeType("text/csv"));
+        assertTrue(isDocumentMimeType("text/plain"));
+        assertTrue(isDocumentMimeType("application/pdf"));
+        assertTrue(isDocumentMimeType("application/msword"));
+        assertTrue(isDocumentMimeType("application/vnd.ms-excel.addin.macroEnabled.12"));
+        assertTrue(isDocumentMimeType("application/vnd.ms-powerpoint.addin.macroEnabled.12"));
+        assertTrue(isDocumentMimeType("application/vnd.ms-word.document.macroEnabled.12"));
+        assertFalse(isDocumentMimeType("audio/mpeg"));
     }
 
     @Test

@@ -26,6 +26,8 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.ViewDebug;
 
 import com.android.systemui.shared.recents.utilities.Utilities;
@@ -52,8 +54,10 @@ public class Task {
         void onTaskWindowingModeChanged();
     }
 
-    /* The Task Key represents the unique primary key for the task */
-    public static class TaskKey {
+    /**
+     * The Task Key represents the unique primary key for the task
+     */
+    public static class TaskKey implements Parcelable {
         @ViewDebug.ExportedProperty(category="recents")
         public final int id;
         @ViewDebug.ExportedProperty(category="recents")
@@ -156,6 +160,48 @@ public class Task {
 
         private void updateHashCode() {
             mHashCode = Objects.hash(id, windowingMode, userId);
+        }
+
+        public static final Parcelable.Creator<TaskKey> CREATOR =
+                new Parcelable.Creator<TaskKey>() {
+                    @Override
+                    public TaskKey createFromParcel(Parcel source) {
+                        return TaskKey.readFromParcel(source);
+                    }
+
+                    @Override
+                    public TaskKey[] newArray(int size) {
+                        return new TaskKey[size];
+                    }
+                };
+
+        @Override
+        public final void writeToParcel(Parcel parcel, int flags) {
+            parcel.writeInt(id);
+            parcel.writeInt(windowingMode);
+            parcel.writeTypedObject(baseIntent, flags);
+            parcel.writeInt(userId);
+            parcel.writeLong(lastActiveTime);
+            parcel.writeInt(displayId);
+            parcel.writeTypedObject(sourceComponent, flags);
+        }
+
+        private static TaskKey readFromParcel(Parcel parcel) {
+            int id = parcel.readInt();
+            int windowingMode = parcel.readInt();
+            Intent baseIntent = parcel.readTypedObject(Intent.CREATOR);
+            int userId = parcel.readInt();
+            long lastActiveTime = parcel.readLong();
+            int displayId = parcel.readInt();
+            ComponentName sourceComponent = parcel.readTypedObject(ComponentName.CREATOR);
+
+            return new TaskKey(id, windowingMode, baseIntent, sourceComponent, userId,
+                    lastActiveTime, displayId);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
         }
     }
 

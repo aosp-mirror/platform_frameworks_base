@@ -16,281 +16,265 @@
 
 package com.android.systemui.doze;
 
-import android.content.Context;
-import android.os.Build;
-import android.util.Log;
+import android.annotation.IntDef;
 import android.util.TimeUtils;
+
+import androidx.annotation.NonNull;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.Dumpable;
+import com.android.systemui.dump.DumpManager;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-public class DozeLog {
-    private static final String TAG = "DozeLog";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final boolean ENABLED = true;
-    private static final int SIZE = Build.IS_DEBUGGABLE ? 400 : 50;
-    static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
-    public static final int REASONS = 10;
+/**
+ * Logs doze events for debugging and triaging purposes. Logs are dumped in bugreports or on demand:
+ *      adb shell dumpsys activity service com.android.systemui/.SystemUIService \
+ *      dependency DumpController DozeLog,DozeStats
+ */
+@Singleton
+public class DozeLog implements Dumpable {
+    private final DozeLogger mLogger;
 
-    public static final int PULSE_REASON_NONE = -1;
-    public static final int PULSE_REASON_INTENT = 0;
-    public static final int PULSE_REASON_NOTIFICATION = 1;
-    public static final int PULSE_REASON_SENSOR_SIGMOTION = 2;
-    public static final int REASON_SENSOR_PICKUP = 3;
-    public static final int REASON_SENSOR_DOUBLE_TAP = 4;
-    public static final int PULSE_REASON_SENSOR_LONG_PRESS = 5;
-    public static final int PULSE_REASON_DOCKING = 6;
-    public static final int REASON_SENSOR_WAKE_UP = 7;
-    public static final int PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN = 8;
-    public static final int REASON_SENSOR_TAP = 9;
+    private boolean mPulsing;
+    private long mSince;
+    private SummaryStats mPickupPulseNearVibrationStats;
+    private SummaryStats mPickupPulseNotNearVibrationStats;
+    private SummaryStats mNotificationPulseStats;
+    private SummaryStats mScreenOnPulsingStats;
+    private SummaryStats mScreenOnNotPulsingStats;
+    private SummaryStats mEmergencyCallStats;
+    private SummaryStats[][] mProxStats; // [reason][near/far]
 
-    private static boolean sRegisterKeyguardCallback = true;
-
-    private static long[] sTimes;
-    private static String[] sMessages;
-    private static int sPosition;
-    private static int sCount;
-    private static boolean sPulsing;
-
-    private static long sSince;
-    private static SummaryStats sPickupPulseNearVibrationStats;
-    private static SummaryStats sPickupPulseNotNearVibrationStats;
-    private static SummaryStats sNotificationPulseStats;
-    private static SummaryStats sScreenOnPulsingStats;
-    private static SummaryStats sScreenOnNotPulsingStats;
-    private static SummaryStats sEmergencyCallStats;
-    private static SummaryStats[][] sProxStats; // [reason][near/far]
-
-    public static void tracePickupWakeUp(Context context, boolean withinVibrationThreshold) {
-        if (!ENABLED) return;
-        init(context);
-        log("pickupWakeUp withinVibrationThreshold=" + withinVibrationThreshold);
-        (withinVibrationThreshold ? sPickupPulseNearVibrationStats
-                : sPickupPulseNotNearVibrationStats).append();
-    }
-
-    public static void tracePulseStart(int reason) {
-        if (!ENABLED) return;
-        sPulsing = true;
-        log("pulseStart reason=" + reasonToString(reason));
-    }
-
-    public static void tracePulseFinish() {
-        if (!ENABLED) return;
-        sPulsing = false;
-        log("pulseFinish");
-    }
-
-    public static void traceNotificationPulse(Context context) {
-        if (!ENABLED) return;
-        init(context);
-        log("notificationPulse");
-        sNotificationPulseStats.append();
-    }
-
-    private static void init(Context context) {
-        synchronized (DozeLog.class) {
-            if (sMessages == null) {
-                sTimes = new long[SIZE];
-                sMessages = new String[SIZE];
-                sSince = System.currentTimeMillis();
-                sPickupPulseNearVibrationStats = new SummaryStats();
-                sPickupPulseNotNearVibrationStats = new SummaryStats();
-                sNotificationPulseStats = new SummaryStats();
-                sScreenOnPulsingStats = new SummaryStats();
-                sScreenOnNotPulsingStats = new SummaryStats();
-                sEmergencyCallStats = new SummaryStats();
-                sProxStats = new SummaryStats[REASONS][2];
-                for (int i = 0; i < REASONS; i++) {
-                    sProxStats[i][0] = new SummaryStats();
-                    sProxStats[i][1] = new SummaryStats();
-                }
-                log("init");
-                if (sRegisterKeyguardCallback) {
-                    KeyguardUpdateMonitor.getInstance(context).registerCallback(sKeyguardCallback);
-                }
-            }
+    @Inject
+    public DozeLog(
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            DumpManager dumpManager,
+            DozeLogger logger) {
+        mLogger = logger;
+        mSince = System.currentTimeMillis();
+        mPickupPulseNearVibrationStats = new SummaryStats();
+        mPickupPulseNotNearVibrationStats = new SummaryStats();
+        mNotificationPulseStats = new SummaryStats();
+        mScreenOnPulsingStats = new SummaryStats();
+        mScreenOnNotPulsingStats = new SummaryStats();
+        mEmergencyCallStats = new SummaryStats();
+        mProxStats = new SummaryStats[TOTAL_REASONS][2];
+        for (int i = 0; i < TOTAL_REASONS; i++) {
+            mProxStats[i][0] = new SummaryStats();
+            mProxStats[i][1] = new SummaryStats();
         }
+
+        if (keyguardUpdateMonitor != null) {
+            keyguardUpdateMonitor.registerCallback(mKeyguardCallback);
+        }
+
+        dumpManager.registerDumpable("DumpStats", this);
     }
 
-    public static void traceDozing(Context context, boolean dozing) {
-        if (!ENABLED) return;
-        sPulsing = false;
-        init(context);
-        log("dozing " + dozing);
+    /**
+     * Appends pickup wakeup event to the logs
+     */
+    public void tracePickupWakeUp(boolean withinVibrationThreshold) {
+        mLogger.logPickupWakeup(withinVibrationThreshold);
+        (withinVibrationThreshold ? mPickupPulseNearVibrationStats
+                : mPickupPulseNotNearVibrationStats).append();
     }
 
-    public static void traceFling(boolean expand, boolean aboveThreshold, boolean thresholdNeeded,
+    /**
+     * Appends pulse started event to the logs.
+     * @param reason why the pulse started
+     */
+    public void tracePulseStart(@Reason int reason) {
+        mLogger.logPulseStart(reason);
+        mPulsing = true;
+    }
+
+    /**
+     * Appends pulse finished event to the logs
+     */
+    public void tracePulseFinish() {
+        mLogger.logPulseFinish();
+        mPulsing = false;
+    }
+
+    /**
+     * Appends pulse event to the logs
+     */
+    public void traceNotificationPulse() {
+        mLogger.logNotificationPulse();
+        mNotificationPulseStats.append();
+    }
+
+    /**
+     * Appends dozing event to the logs
+     * @param dozing true if dozing, else false
+     */
+    public void traceDozing(boolean dozing) {
+        mLogger.logDozing(dozing);
+        mPulsing = false;
+    }
+
+    /**
+     * Appends fling event to the logs
+     */
+    public void traceFling(boolean expand, boolean aboveThreshold, boolean thresholdNeeded,
             boolean screenOnFromTouch) {
-        if (!ENABLED) return;
-        log("fling expand=" + expand + " aboveThreshold=" + aboveThreshold + " thresholdNeeded="
-                + thresholdNeeded + " screenOnFromTouch=" + screenOnFromTouch);
+        mLogger.logFling(expand, aboveThreshold, thresholdNeeded, screenOnFromTouch);
     }
 
-    public static void traceEmergencyCall() {
-        if (!ENABLED) return;
-        log("emergencyCall");
-        sEmergencyCallStats.append();
+    /**
+     * Appends emergency call event to the logs
+     */
+    public void traceEmergencyCall() {
+        mLogger.logEmergencyCall();
+        mEmergencyCallStats.append();
     }
 
-    public static void traceKeyguardBouncerChanged(boolean showing) {
-        if (!ENABLED) return;
-        log("bouncer " + showing);
+    /**
+     * Appends keyguard bouncer changed event to the logs
+     * @param showing true if the keyguard bouncer is showing, else false
+     */
+    public void traceKeyguardBouncerChanged(boolean showing) {
+        mLogger.logKeyguardBouncerChanged(showing);
     }
 
-    public static void traceScreenOn() {
-        if (!ENABLED) return;
-        log("screenOn pulsing=" + sPulsing);
-        (sPulsing ? sScreenOnPulsingStats : sScreenOnNotPulsingStats).append();
-        sPulsing = false;
+    /**
+     * Appends screen-on event to the logs
+     */
+    public void traceScreenOn() {
+        mLogger.logScreenOn(mPulsing);
+        (mPulsing ? mScreenOnPulsingStats : mScreenOnNotPulsingStats).append();
+        mPulsing = false;
     }
 
-    public static void traceScreenOff(int why) {
-        if (!ENABLED) return;
-        log("screenOff why=" + why);
+    /**
+     * Appends screen-off event to the logs
+     * @param why reason the screen is off
+     */
+    public void traceScreenOff(int why) {
+        mLogger.logScreenOff(why);
     }
 
-    public static void traceMissedTick(String delay) {
-        if (!ENABLED) return;
-        log("missedTick by=" + delay);
+    /**
+     * Appends missed tick event to the logs
+     * @param delay of the missed tick
+     */
+    public void traceMissedTick(String delay) {
+        mLogger.logMissedTick(delay);
     }
 
-    public static void traceTimeTickScheduled(long when, long triggerAt) {
-        if (!ENABLED) return;
-        log("timeTickScheduled at=" + FORMAT.format(new Date(when)) + " triggerAt="
-                + FORMAT.format(new Date(triggerAt)));
+    /**
+     * Appends time tick scheduled event to the logs
+     * @param when time tick scheduled at
+     * @param triggerAt time tick trigger at
+     */
+    public void traceTimeTickScheduled(long when, long triggerAt) {
+        mLogger.logTimeTickScheduled(when, triggerAt);
     }
 
-    public static void traceKeyguard(boolean showing) {
-        if (!ENABLED) return;
-        log("keyguard " + showing);
-        if (!showing) {
-            sPulsing = false;
-        }
+    /**
+     * Appends keyguard visibility change event to the logs
+     * @param showing whether the keyguard is now showing
+     */
+    public void traceKeyguard(boolean showing) {
+        mLogger.logKeyguardVisibilityChange(showing);
+        if (!showing) mPulsing = false;
     }
 
-    public static void traceState(DozeMachine.State state) {
-        if (!ENABLED) return;
-        log("state " + state);
+    /**
+     * Appends doze state changed event to the logs
+     * @param state new DozeMachine state
+     */
+    public void traceState(DozeMachine.State state) {
+        mLogger.logDozeStateChanged(state);
     }
 
     /**
      * Appends wake-display event to the logs.
      * @param wake if we're waking up or sleeping.
      */
-    public static void traceWakeDisplay(boolean wake) {
-        if (!ENABLED) return;
-        log("wakeDisplay " + wake);
+    public void traceWakeDisplay(boolean wake) {
+        mLogger.logWakeDisplay(wake);
     }
 
-    public static void traceProximityResult(Context context, boolean near, long millis,
-            int reason) {
-        if (!ENABLED) return;
-        init(context);
-        log("proximityResult reason=" + reasonToString(reason) + " near=" + near
-                + " millis=" + millis);
-        sProxStats[reason][near ? 0 : 1].append();
+    /**
+     * Appends proximity result event to the logs
+     * @param near true if near, else false
+     * @param reason why proximity result was triggered
+     */
+    public void traceProximityResult(boolean near, long millis, @Reason int reason) {
+        mLogger.logProximityResult(near, millis, reason);
+        mProxStats[reason][near ? 0 : 1].append();
     }
 
-    public static String reasonToString(int pulseReason) {
-        switch (pulseReason) {
-            case PULSE_REASON_INTENT: return "intent";
-            case PULSE_REASON_NOTIFICATION: return "notification";
-            case PULSE_REASON_SENSOR_SIGMOTION: return "sigmotion";
-            case REASON_SENSOR_PICKUP: return "pickup";
-            case REASON_SENSOR_DOUBLE_TAP: return "doubletap";
-            case PULSE_REASON_SENSOR_LONG_PRESS: return "longpress";
-            case PULSE_REASON_DOCKING: return "docking";
-            case PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN: return "wakelockscreen";
-            case REASON_SENSOR_WAKE_UP: return "wakeup";
-            case REASON_SENSOR_TAP: return "tap";
-            default: throw new IllegalArgumentException("bad reason: " + pulseReason);
-        }
-    }
-
-    public static void dump(PrintWriter pw) {
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         synchronized (DozeLog.class) {
-            if (sMessages == null) return;
-            pw.println("  Doze log:");
-            final int start = (sPosition - sCount + SIZE) % SIZE;
-            for (int i = 0; i < sCount; i++) {
-                final int j = (start + i) % SIZE;
-                pw.print("    ");
-                pw.print(FORMAT.format(new Date(sTimes[j])));
-                pw.print(' ');
-                pw.println(sMessages[j]);
-            }
             pw.print("  Doze summary stats (for ");
-            TimeUtils.formatDuration(System.currentTimeMillis() - sSince, pw);
+            TimeUtils.formatDuration(System.currentTimeMillis() - mSince, pw);
             pw.println("):");
-            sPickupPulseNearVibrationStats.dump(pw, "Pickup pulse (near vibration)");
-            sPickupPulseNotNearVibrationStats.dump(pw, "Pickup pulse (not near vibration)");
-            sNotificationPulseStats.dump(pw, "Notification pulse");
-            sScreenOnPulsingStats.dump(pw, "Screen on (pulsing)");
-            sScreenOnNotPulsingStats.dump(pw, "Screen on (not pulsing)");
-            sEmergencyCallStats.dump(pw, "Emergency call");
-            for (int i = 0; i < REASONS; i++) {
+            mPickupPulseNearVibrationStats.dump(pw, "Pickup pulse (near vibration)");
+            mPickupPulseNotNearVibrationStats.dump(pw, "Pickup pulse (not near vibration)");
+            mNotificationPulseStats.dump(pw, "Notification pulse");
+            mScreenOnPulsingStats.dump(pw, "Screen on (pulsing)");
+            mScreenOnNotPulsingStats.dump(pw, "Screen on (not pulsing)");
+            mEmergencyCallStats.dump(pw, "Emergency call");
+            for (int i = 0; i < TOTAL_REASONS; i++) {
                 final String reason = reasonToString(i);
-                sProxStats[i][0].dump(pw, "Proximity near (" + reason + ")");
-                sProxStats[i][1].dump(pw, "Proximity far (" + reason + ")");
+                mProxStats[i][0].dump(pw, "Proximity near (" + reason + ")");
+                mProxStats[i][1].dump(pw, "Proximity far (" + reason + ")");
             }
         }
     }
 
-    private static void log(String msg) {
-        synchronized (DozeLog.class) {
-            if (sMessages == null) return;
-            sTimes[sPosition] = System.currentTimeMillis();
-            sMessages[sPosition] = msg;
-            sPosition = (sPosition + 1) % SIZE;
-            sCount = Math.min(sCount + 1, SIZE);
-        }
-        if (DEBUG) Log.d(TAG, msg);
+    /**
+     * Appends pulse dropped event to logs
+     */
+    public void tracePulseDropped(boolean pulsePending, DozeMachine.State state, boolean blocked) {
+        mLogger.logPulseDropped(pulsePending, state, blocked);
     }
 
-    public static void tracePulseDropped(Context context, boolean pulsePending,
-            DozeMachine.State state, boolean blocked) {
-        if (!ENABLED) return;
-        init(context);
-        log("pulseDropped pulsePending=" + pulsePending + " state="
-                + state + " blocked=" + blocked);
+    /**
+     * Appends pulse dropped event to logs
+     * @param reason why the pulse was dropped
+     */
+    public void tracePulseDropped(String reason) {
+        mLogger.logPulseDropped(reason);
     }
 
-    public static void tracePulseDropped(Context context, String why) {
-        if (!ENABLED) return;
-        init(context);
-        log("pulseDropped why=" + why);
+    /**
+     * Appends pulse touch displayed by prox sensor event to logs
+     * @param disabled
+     */
+    public void tracePulseTouchDisabledByProx(boolean disabled) {
+        mLogger.logPulseTouchDisabledByProx(disabled);
     }
 
-    public static void tracePulseTouchDisabledByProx(Context context, boolean disabled) {
-        if (!ENABLED) return;
-        init(context);
-        log("pulseTouchDisabledByProx " + disabled);
+    /**
+     * Appends sensor triggered event to logs
+     * @param reason why the sensor was triggered
+     */
+    public void traceSensor(@Reason int reason) {
+        mLogger.logSensorTriggered(reason);
     }
 
-    public static void setRegisterKeyguardCallback(boolean registerKeyguardCallback) {
-        if (!ENABLED) return;
-        synchronized (DozeLog.class) {
-            if (sRegisterKeyguardCallback != registerKeyguardCallback && sMessages != null) {
-                throw new IllegalStateException("Cannot change setRegisterKeyguardCallback "
-                        + "after init()");
-            }
-            sRegisterKeyguardCallback = registerKeyguardCallback;
-        }
+    /**
+     * Appends doze suppressed event to the logs
+     * @param suppressedState The {@link DozeMachine.State} that was suppressed
+     */
+    public void traceDozeSuppressed(DozeMachine.State suppressedState) {
+        mLogger.logDozeSuppressed(suppressedState);
     }
 
-    public static void traceSensor(Context context, int reason) {
-        if (!ENABLED) return;
-        init(context);
-        log("sensor type=" + reasonToString(reason));
-    }
-
-    private static class SummaryStats {
+    private class SummaryStats {
         private int mCount;
 
         public void append() {
@@ -304,7 +288,7 @@ public class DozeLog {
             pw.print(": n=");
             pw.print(mCount);
             pw.print(" (");
-            final double perHr = (double) mCount / (System.currentTimeMillis() - sSince)
+            final double perHr = (double) mCount / (System.currentTimeMillis() - mSince)
                     * 1000 * 60 * 60;
             pw.print(perHr);
             pw.print("/hr)");
@@ -312,7 +296,7 @@ public class DozeLog {
         }
     }
 
-    private static final KeyguardUpdateMonitorCallback sKeyguardCallback =
+    private final KeyguardUpdateMonitorCallback mKeyguardCallback =
             new KeyguardUpdateMonitorCallback() {
         @Override
         public void onEmergencyCallAction() {
@@ -339,4 +323,43 @@ public class DozeLog {
             traceKeyguard(showing);
         }
     };
+
+    /**
+     * Converts the reason (integer) to a user-readable string
+     */
+    public static String reasonToString(@Reason int pulseReason) {
+        switch (pulseReason) {
+            case PULSE_REASON_INTENT: return "intent";
+            case PULSE_REASON_NOTIFICATION: return "notification";
+            case PULSE_REASON_SENSOR_SIGMOTION: return "sigmotion";
+            case REASON_SENSOR_PICKUP: return "pickup";
+            case REASON_SENSOR_DOUBLE_TAP: return "doubletap";
+            case PULSE_REASON_SENSOR_LONG_PRESS: return "longpress";
+            case PULSE_REASON_DOCKING: return "docking";
+            case PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN: return "wakelockscreen";
+            case REASON_SENSOR_WAKE_UP: return "wakeup";
+            case REASON_SENSOR_TAP: return "tap";
+            default: throw new IllegalArgumentException("invalid reason: " + pulseReason);
+        }
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({PULSE_REASON_NONE, PULSE_REASON_INTENT, PULSE_REASON_NOTIFICATION,
+            PULSE_REASON_SENSOR_SIGMOTION, REASON_SENSOR_PICKUP, REASON_SENSOR_DOUBLE_TAP,
+            PULSE_REASON_SENSOR_LONG_PRESS, PULSE_REASON_DOCKING, REASON_SENSOR_WAKE_UP,
+            PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN, REASON_SENSOR_TAP})
+    public @interface Reason {}
+    public static final int PULSE_REASON_NONE = -1;
+    public static final int PULSE_REASON_INTENT = 0;
+    public static final int PULSE_REASON_NOTIFICATION = 1;
+    public static final int PULSE_REASON_SENSOR_SIGMOTION = 2;
+    public static final int REASON_SENSOR_PICKUP = 3;
+    public static final int REASON_SENSOR_DOUBLE_TAP = 4;
+    public static final int PULSE_REASON_SENSOR_LONG_PRESS = 5;
+    public static final int PULSE_REASON_DOCKING = 6;
+    public static final int REASON_SENSOR_WAKE_UP = 7;
+    public static final int PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN = 8;
+    public static final int REASON_SENSOR_TAP = 9;
+
+    public static final int TOTAL_REASONS = 10;
 }

@@ -32,7 +32,7 @@ import java.io.UnsupportedEncodingException;
  * <p>
  * This API is not as convenient or type safe as the standard protobuf
  * classes. If possible, the best recommended library is to use protobuf lite.
- * However, in environements (such as the Android platform itself), a
+ * However, in environments (such as the Android platform itself), a
  * more memory efficient version is necessary.
  *
  * <p>Each write method takes an ID code from the protoc generated classes
@@ -59,10 +59,10 @@ import java.io.UnsupportedEncodingException;
  * cache the size, and then write the size-prefixed buffers.
  *
  * We are trying to avoid too much generated code here, but this class still
- * needs to have a somewhat sane API.  We can't have the multiple passes be
- * done by the calling code.  In addition, we want to avoid the memory high
- * water mark of duplicating all of the values into the traditional in-memory
- * Message objects. We need to find another way.
+ * needs to have API.  We can't have the multiple passes be done by the
+ * calling code.  In addition, we want to avoid the memory high water mark
+ * of duplicating all of the values into the traditional in-memory Message
+ * objects. We need to find another way.
  *
  * So what we do here is to let the calling code write the data into a
  * byte[] (actually a collection of them wrapped in the EncodedBuffer class),
@@ -201,7 +201,9 @@ public final class ProtoOutputStream extends ProtoStream {
     }
 
     /**
-     * Returns the uncompressed buffer size
+     * Returns the total size of the data that has been written, after full
+     * protobuf encoding has occurred.
+     *
      * @return the uncompressed buffer size
      */
     public int getRawSize() {
@@ -2271,9 +2273,12 @@ public final class ProtoOutputStream extends ProtoStream {
     }
 
     /**
-     * Write a field tag to the stream.
+     * Write an individual field tag by hand.
+     *
+     * See <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * Encoding</a> for details on the structure of how tags and data are written.
      */
-    public void writeTag(int id, int wireType) {
+    public void writeTag(int id, @WireType int wireType) {
         mBuffer.writeRawVarint32((id << FIELD_ID_SHIFT) | wireType);
     }
 
