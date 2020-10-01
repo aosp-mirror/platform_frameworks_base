@@ -13407,15 +13407,6 @@ public final class Settings {
                 "power_button_very_long_press";
 
         /**
-         * Global settings that shouldn't be persisted.
-         *
-         * @hide
-         */
-        public static final String[] TRANSIENT_SETTINGS = {
-                LOCATION_GLOBAL_KILL_SWITCH,
-        };
-
-        /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
          *

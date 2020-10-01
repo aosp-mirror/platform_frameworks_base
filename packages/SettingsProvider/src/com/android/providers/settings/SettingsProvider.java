@@ -328,10 +328,6 @@ public class SettingsProvider extends ContentProvider {
         return SettingsState.getUserIdFromKey(key);
     }
 
-    public static String settingTypeToString(int type) {
-        return SettingsState.settingTypeToString(type);
-    }
-
     public static String keyToString(int key) {
         return SettingsState.keyToString(key);
     }
@@ -373,8 +369,7 @@ public class SettingsProvider extends ContentProvider {
             }
 
             case Settings.CALL_METHOD_GET_SECURE: {
-                Setting setting = getSecureSetting(name, requestingUserId,
-                        /*enableOverride=*/ true);
+                Setting setting = getSecureSetting(name, requestingUserId);
                 return packageValueForCallResult(setting, isTrackingGeneration(args));
             }
 
@@ -581,7 +576,7 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private ArrayList<String> buildSettingsList(Cursor cursor) {
-        final ArrayList<String> lines = new ArrayList<String>();
+        final ArrayList<String> lines = new ArrayList<>();
         try {
             while (cursor != null && cursor.moveToNext()) {
                 lines.add(cursor.getString(1) + "=" + cursor.getString(2));
@@ -1381,10 +1376,6 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private Setting getSecureSetting(String name, int requestingUserId) {
-        return getSecureSetting(name, requestingUserId, /*enableOverride=*/ false);
-    }
-
-    private Setting getSecureSetting(String name, int requestingUserId, boolean enableOverride) {
         if (DEBUG) {
             Slog.v(LOG_TAG, "getSecureSetting(" + name + ", " + requestingUserId + ")");
         }
@@ -1412,14 +1403,6 @@ public class SettingsProvider extends ContentProvider {
             PackageInfo callingPkg = getCallingPackageInfo(owningUserId);
             synchronized (mLock) {
                 return getSsaidSettingLocked(callingPkg, owningUserId);
-            }
-        }
-        if (enableOverride) {
-            if (Secure.LOCATION_MODE.equals(name)) {
-                final Setting overridden = getLocationModeSetting(owningUserId);
-                if (overridden != null) {
-                    return overridden;
-                }
             }
         }
 
@@ -1509,35 +1492,6 @@ public class SettingsProvider extends ContentProvider {
             };
         }
         return null;
-    }
-
-    private Setting getLocationModeSetting(int owningUserId) {
-        synchronized (mLock) {
-            final Setting setting = getGlobalSetting(
-                    Global.LOCATION_GLOBAL_KILL_SWITCH);
-            if (!"1".equals(setting.getValue())) {
-                return null;
-            }
-            // Global kill-switch is enabled. Return an empty value.
-            final SettingsState settingsState = mSettingsRegistry.getSettingsLocked(
-                    SETTINGS_TYPE_SECURE, owningUserId);
-            return settingsState.new Setting(
-                    Secure.LOCATION_MODE,
-                    "", // value
-                    "", // tag
-                    "", // default value
-                    "", // package name
-                    false, // from system
-                    "0" // id
-            ) {
-                @Override
-                public boolean update(String value, boolean setDefault, String packageName,
-                        String tag, boolean forceNonSystemPackage, boolean overrideableByRestore) {
-                    Slog.wtf(LOG_TAG, "update shouldn't be called on this instance.");
-                    return false;
-                }
-            };
-        }
     }
 
     private boolean insertSecureSetting(String name, String value, String tag,
@@ -1808,12 +1762,8 @@ public class SettingsProvider extends ContentProvider {
 
     private boolean hasWriteSecureSettingsPermission() {
         // Write secure settings is a more protected permission. If caller has it we are good.
-        if (getContext().checkCallingOrSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
-                == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-
-        return false;
+        return getContext().checkCallingOrSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     private void validateSystemSettingValue(String name, String value) {
@@ -3174,12 +3124,6 @@ public class SettingsProvider extends ContentProvider {
             if (isGlobalSettingsKey(key) || isConfigSettingsKey(key)) {
                 final long token = Binder.clearCallingIdentity();
                 try {
-                    if (Global.LOCATION_GLOBAL_KILL_SWITCH.equals(name)
-                            && isGlobalSettingsKey(key)) {
-                        // When the global kill switch is updated, send the
-                        // change notification for the location setting.
-                        notifyLocationChangeForRunningUsers();
-                    }
                     notifySettingChangeForRunningUsers(key, name);
                 } finally {
                     Binder.restoreCallingIdentity(token);
@@ -3254,26 +3198,6 @@ public class SettingsProvider extends ContentProvider {
                     mHandler.obtainMessage(MyHandler.MSG_NOTIFY_URI_CHANGED,
                             userId, 0, uri).sendToTarget();
                 }
-            }
-        }
-
-        private void notifyLocationChangeForRunningUsers() {
-            final List<UserInfo> users = mUserManager.getAliveUsers();
-
-            for (int i = 0; i < users.size(); i++) {
-                final int userId = users.get(i).id;
-
-                if (!mUserManager.isUserRunning(UserHandle.of(userId))) {
-                    continue;
-                }
-
-                // Increment the generation first, so observers always see the new value
-                final int key = makeKey(SETTINGS_TYPE_SECURE, userId);
-                mGenerationRegistry.incrementGeneration(key);
-
-                final Uri uri = getNotificationUriFor(key, Secure.LOCATION_MODE);
-                mHandler.obtainMessage(MyHandler.MSG_NOTIFY_URI_CHANGED,
-                        userId, 0, uri).sendToTarget();
             }
         }
 
