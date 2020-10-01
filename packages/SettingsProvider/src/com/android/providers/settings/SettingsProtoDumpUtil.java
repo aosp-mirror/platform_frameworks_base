@@ -2343,6 +2343,18 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.QuickSettings.AUTO_ADDED_TILES);
         p.end(qsToken);
 
+        final long reduceBrightColorsToken = p.start(SecureSettingsProto.REDUCE_BRIGHT_COLORS);
+        dumpSetting(s, p,
+                Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
+                SecureSettingsProto.ReduceBrightColors.ACTIVATED);
+        dumpSetting(s, p,
+                Settings.Secure.REDUCE_BRIGHT_COLORS_LEVEL,
+                SecureSettingsProto.ReduceBrightColors.LEVEL);
+        dumpSetting(s, p,
+                Settings.Secure.REDUCE_BRIGHT_COLORS_PERSIST_ACROSS_REBOOTS,
+                SecureSettingsProto.ReduceBrightColors.PERSIST_ACROSS_REBOOTS);
+        p.end(reduceBrightColorsToken);
+
         final long rotationToken = p.start(SecureSettingsProto.ROTATION);
         dumpSetting(s, p,
                 Settings.Secure.SHOW_ROTATION_SUGGESTIONS,

@@ -452,6 +452,15 @@ message SecureSettingsProto {
     }
     optional QuickSettings qs = 45;
 
+    message ReduceBrightColors {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto activated = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto level = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto persist_across_reboots = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional ReduceBrightColors reduce_bright_colors = 87;
+
     message Rotation {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -625,5 +634,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 87;
+    // Next tag = 88;
 }
