@@ -46,7 +46,7 @@ import com.android.internal.location.ProviderProperties;
  */
 interface ILocationManager
 {
-    Location getLastLocation(String provider, String packageName, String attributionTag);
+    @nullable Location getLastLocation(String provider, String packageName, String attributionTag);
     @nullable ICancellationSignal getCurrentLocation(String provider, in LocationRequest request, in ILocationCallback callback, String packageName, String attributionTag, String listenerId);
 
     void registerLocationListener(String provider, in LocationRequest request, in ILocationListener listener, String packageName, String attributionTag, String listenerId);
