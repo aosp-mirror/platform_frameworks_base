@@ -18,8 +18,10 @@ package android.window;
 
 import android.view.SurfaceControl;
 
+import android.os.IBinder;
 import android.window.IDisplayAreaOrganizerController;
 import android.window.ITaskOrganizerController;
+import android.window.ITransitionPlayer;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -45,6 +47,30 @@ interface IWindowOrganizerController {
     int applySyncTransaction(in WindowContainerTransaction t,
             in IWindowContainerTransactionCallback callback);
 
+    /**
+     * Starts a transition.
+     * @param type The transition type.
+     * @param transitionToken A token associated with the transition to start. If null, a new
+     *                        transition will be created of the provided type.
+     * @param t Operations that are part of the transition.
+     * @return a token representing the transition. This will just be transitionToken if it was
+     *         non-null.
+     */
+    IBinder startTransition(int type, in @nullable IBinder transitionToken,
+            in @nullable WindowContainerTransaction t);
+
+    /**
+     * Finishes a transition. This must be called for all created transitions.
+     * @param transitionToken Which transition to finish
+     * @param t Changes to make before finishing but in the same SF Transaction. Can be null.
+     * @param callback Called when t is finished applying.
+     * @return An ID for the sync operation (see {@link #applySyncTransaction}. This will be
+     *         negative if no sync transaction was attached (null t or callback)
+     */
+    int finishTransition(in IBinder transitionToken,
+            in @nullable WindowContainerTransaction t,
+            in IWindowContainerTransactionCallback callback);
+
     /** @return An interface enabling the management of task organizers. */
     ITaskOrganizerController getTaskOrganizerController();
 
@@ -61,4 +87,10 @@ interface IWindowOrganizerController {
      * @return true if the screenshot was successful, false otherwise.
      */
     boolean takeScreenshot(in WindowContainerToken token, out SurfaceControl outSurfaceControl);
+
+    /**
+     * Registers a transition player with Core. There is only one of these at a time and calling
+     * this will replace the existing one if set.
+     */
+    void registerTransitionPlayer(in ITransitionPlayer player);
 }

@@ -1308,6 +1308,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
+        // TODO(b/169035022): move to a more-appropriate place.
+        mAtmService.getTransitionController().collect(this);
         if (prevDc.mOpeningApps.remove(this)) {
             // Transfer opening transition to new display.
             mDisplayContent.mOpeningApps.add(this);
@@ -2700,7 +2702,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // activities be updated, they may be seen by users.
                 ensureVisibility = true;
             } else if (mStackSupervisor.getKeyguardController().isKeyguardLocked()
-                    && stack.topActivityOccludesKeyguard()) {
+                    && mStackSupervisor.getKeyguardController().topActivityOccludesKeyguard(this)) {
                 // Ensure activity visibilities and update lockscreen occluded/dismiss state when
                 // finishing the top activity that occluded keyguard. So that, the
                 // ActivityStack#mTopActivityOccludesKeyguard can be updated and the activity below
@@ -3234,6 +3236,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mStackSupervisor.getActivityMetricsLogger().notifyActivityRemoved(this);
         waitingToShow = false;
 
+        // TODO(b/169035022): move to a more-appropriate place.
+        mAtmService.getTransitionController().collect(this);
         // Defer removal of this activity when either a child is animating, or app transition is on
         // going. App transition animation might be applied on the parent stack not on the activity,
         // but the actual frame buffer is associated with the activity, so we have to keep the
@@ -3244,6 +3248,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             delayed = true;
         } else if (getDisplayContent().mAppTransition.isTransitionSet()) {
             getDisplayContent().mClosingApps.add(this);
+            delayed = true;
+        } else if (mAtmService.getTransitionController().inTransition()) {
             delayed = true;
         }
 
@@ -4076,6 +4082,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mVisible;
     }
 
+    @Override
+    boolean isVisibleRequested() {
+        return mVisibleRequested;
+    }
+
     void setVisible(boolean visible) {
         if (visible != mVisible) {
             mVisible = visible;
@@ -4206,6 +4217,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             transferStartingWindowFromHiddenAboveTokenIfNeeded();
         }
 
+        // TODO(b/169035022): move to a more-appropriate place.
+        mAtmService.getTransitionController().collect(this);
+        if (!visible && mAtmService.getTransitionController().inTransition()) {
+            return;
+        }
         // If we are preparing an app transition, then delay changing
         // the visibility of this token until we execute that transition.
         // Note that we ignore display frozen since we want the opening / closing transition type
@@ -4631,15 +4647,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(this);
     }
 
-    private void updateVisibleIgnoringKeyguard(boolean behindFullscreenActivity) {
-        // Check whether activity should be visible without Keyguard influence
-        visibleIgnoringKeyguard = (!behindFullscreenActivity || mLaunchTaskBehind)
-                && okToShowLocked();
-    }
-
     /** @return {@code true} if this activity should be made visible. */
     private boolean shouldBeVisible(boolean behindFullscreenActivity, boolean ignoringKeyguard) {
-        updateVisibleIgnoringKeyguard(behindFullscreenActivity);
+        updateVisibilityIgnoringKeyguard(behindFullscreenActivity);
 
         if (ignoringKeyguard) {
             return visibleIgnoringKeyguard;
@@ -4673,20 +4683,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mStackSupervisor.getKeyguardController().checkKeyguardVisibility(this);
     }
 
-    void updateVisibility(boolean behindFullscreenActivity) {
-        updateVisibleIgnoringKeyguard(behindFullscreenActivity);
-        final Task task = getRootTask();
-        if (task == null || !visibleIgnoringKeyguard) {
-            return;
-        }
-        // Now check whether it's really visible depending on Keyguard state, and update
-        // {@link ActivityStack} internal states.
-        // Inform the method if this activity is the top activity of this stack, but exclude the
-        // case where this is the top activity in a pinned stack.
-        final boolean isTop = this == task.getTopNonFinishingActivity();
-        final boolean isTopNotPinnedStack = task.isAttached()
-                && task.getDisplayArea().isTopNotFinishNotPinnedStack(task);
-        task.updateKeyguardVisibility(this, isTop && isTopNotPinnedStack);
+    void updateVisibilityIgnoringKeyguard(boolean behindFullscreenActivity) {
+        visibleIgnoringKeyguard = (!behindFullscreenActivity || mLaunchTaskBehind)
+                && okToShowLocked();
     }
 
     boolean shouldBeVisible() {

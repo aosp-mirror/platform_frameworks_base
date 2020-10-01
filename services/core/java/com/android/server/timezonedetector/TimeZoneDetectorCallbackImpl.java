@@ -23,7 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
-import android.app.timezonedetector.TimeZoneConfiguration;
+import android.app.time.TimeZoneConfiguration;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -87,6 +87,7 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
         contentResolver.registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.AUTO_TIME_ZONE), true,
                 new ContentObserver(mHandler) {
+                    @Override
                     public void onChange(boolean selfChange) {
                         handleConfigChangeOnHandlerThread();
                     }
@@ -97,6 +98,7 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
                 Settings.Secure.getUriFor(Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED),
                 true,
                 new ContentObserver(mHandler) {
+                    @Override
                     public void onChange(boolean selfChange) {
                         handleConfigChangeOnHandlerThread();
                     }
@@ -157,7 +159,7 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
     }
 
     @Override
-    public void storeConfiguration(TimeZoneConfiguration configuration) {
+    public void storeConfiguration(@UserIdInt int userId, TimeZoneConfiguration configuration) {
         Objects.requireNonNull(configuration);
 
         // Avoid writing the auto detection enabled setting for devices that do not support auto
@@ -169,7 +171,6 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
             setAutoDetectionEnabled(autoDetectionEnabled);
 
             if (mGeoDetectionFeatureEnabled) {
-                final int userId = configuration.getUserId();
                 final boolean geoTzDetectionEnabled = configuration.isGeoDetectionEnabled();
                 setGeoDetectionEnabled(userId, geoTzDetectionEnabled);
             }

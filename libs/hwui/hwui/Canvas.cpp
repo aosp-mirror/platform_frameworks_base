@@ -73,7 +73,7 @@ void Canvas::drawTextDecorations(float x, float y, float length, const Paint& pa
 
 static void simplifyPaint(int color, Paint* paint) {
     paint->setColor(color);
-    paint->setShader((sk_sp<uirenderer::Shader>)nullptr);
+    paint->setShader(nullptr);
     paint->setColorFilter(nullptr);
     paint->setLooper(nullptr);
     paint->setStrokeWidth(4 + 0.04 * paint->getSkFont().getSize());

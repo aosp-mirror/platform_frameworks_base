@@ -20,11 +20,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -35,6 +37,7 @@ import com.android.systemui.BootCompleteCache;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.LocationController.LocationChangeCallback;
 
 import org.junit.Before;
@@ -52,10 +55,13 @@ public class LocationControllerImplTest extends SysuiTestCase {
     private TestableLooper mTestableLooper;
 
     @Mock private AppOpsController mAppOpsController;
+    @Mock private UserTracker mUserTracker;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        when(mUserTracker.getUserId()).thenReturn(UserHandle.USER_SYSTEM);
+        when(mUserTracker.getUserHandle()).thenReturn(UserHandle.SYSTEM);
 
         mTestableLooper = TestableLooper.get(this);
         mLocationController = spy(new LocationControllerImpl(mContext,
@@ -63,7 +69,8 @@ public class LocationControllerImplTest extends SysuiTestCase {
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 mock(BroadcastDispatcher.class),
-                mock(BootCompleteCache.class)));
+                mock(BootCompleteCache.class),
+                mUserTracker));
 
         mTestableLooper.processAllMessages();
     }

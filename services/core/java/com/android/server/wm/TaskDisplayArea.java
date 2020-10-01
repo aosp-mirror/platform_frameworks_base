@@ -1541,20 +1541,6 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         return stack == getTopStack();
     }
 
-    boolean isTopNotFinishNotPinnedStack(Task stack) {
-        for (int i = getStackCount() - 1; i >= 0; --i) {
-            final Task current = getStackAt(i);
-            final ActivityRecord topAct = current.getTopNonFinishingActivity();
-            if (topAct == null) {
-                continue;
-            }
-            if (!current.inPinnedWindowingMode()) {
-                return current == stack;
-            }
-        }
-        return false;
-    }
-
     ActivityRecord topRunningActivity() {
         return topRunningActivity(false /* considerKeyguardState */);
     }
@@ -1833,8 +1819,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
                         notifyClients);
             }
         } finally {
-            mAtmService.mStackSupervisor.endActivityVisibilityUpdate(starting, configChanges,
-                    preserveWindows, notifyClients);
+            mAtmService.mStackSupervisor.endActivityVisibilityUpdate();
         }
     }
 

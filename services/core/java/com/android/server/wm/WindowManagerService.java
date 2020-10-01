@@ -665,6 +665,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     // Whether the system should use BLAST for ViewRootImpl
     final boolean mUseBLAST;
+    // Whether to enable BLASTSyncEngine Transaction passing.
+    final boolean mUseBLASTSync = false;
 
     int mDockedStackCreateMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
     Rect mDockedStackCreateBounds;
@@ -2129,7 +2131,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.finishSeamlessRotation(false /* timeout */);
             }
 
-            if (win.useBLASTSync()) {
+            if (mUseBLASTSync && win.useBLASTSync()) {
                 result |= RELAYOUT_RES_BLAST_SYNC;
             }
 
@@ -2460,7 +2462,10 @@ public class WindowManagerService extends IWindowManager.Stub
         if (win.mAttrs.type == TYPE_APPLICATION_STARTING) {
             transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
         }
-        if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
+        if (mAtmService.getTransitionController().inTransition(win)) {
+            focusMayChange = true;
+            win.mAnimatingExit = true;
+        } else if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
             focusMayChange = true;
             win.mAnimatingExit = true;
         } else if (win.isAnimating(TRANSITION | PARENTS)) {
@@ -5125,6 +5130,10 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public boolean useBLAST() {
         return mUseBLAST;
+    }
+
+    public boolean useBLASTSync() {
+        return mUseBLASTSync;
     }
 
     @Override

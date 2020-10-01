@@ -974,8 +974,6 @@
     <!-- The start margin of quick scrub onboarding toast. -->
     <dimen name="recents_quick_scrub_onboarding_margin_start">8dp</dimen>
 
-    <dimen name="floating_dismiss_bottom_margin">50dp</dimen>
-
     <dimen name="default_gear_space">18dp</dimen>
     <dimen name="cell_overlay_padding">18dp</dimen>
 
@@ -1232,8 +1230,6 @@
     <dimen name="bubble_dismiss_target_padding_y">20dp</dimen>
     <dimen name="bubble_manage_menu_elevation">4dp</dimen>
 
-    <dimen name="dismiss_target_x_size">24dp</dimen>
-
     <!-- Bubbles user education views -->
     <dimen name="bubbles_manage_education_width">160dp</dimen>
     <!-- The inset from the top bound of the manage button to place the user education. -->
@@ -1380,4 +1376,5 @@
     <dimen name="media_output_dialog_header_back_icon_size">36dp</dimen>
     <dimen name="media_output_dialog_header_icon_padding">16dp</dimen>
     <dimen name="media_output_dialog_icon_corner_radius">16dp</dimen>
+    <dimen name="media_output_dialog_title_anim_y_delta">12.5dp</dimen>
 </resources>

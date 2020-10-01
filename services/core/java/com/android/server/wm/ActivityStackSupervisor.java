@@ -1830,7 +1830,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         for (int i = mStoppingActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord s = mStoppingActivities.get(i);
             final boolean animating = s.isAnimating(TRANSITION | PARENTS,
-                    ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
+                    ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)
+                    || mService.getTransitionController().inTransition(s);
             if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + s.nowVisible
                     + " animating=" + animating + " finishing=" + s.finishing);
             if (!animating || mService.mShuttingDown) {
@@ -2304,18 +2305,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     /** Starts a batch of visibility updates. */
     void beginActivityVisibilityUpdate() {
+        if (mVisibilityTransactionDepth == 0) {
+            getKeyguardController().updateVisibility();
+        }
         mVisibilityTransactionDepth++;
     }
 
     /** Ends a batch of visibility updates. */
-    void endActivityVisibilityUpdate(ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean notifyClients) {
-        if (mVisibilityTransactionDepth == 1) {
-            getKeyguardController().visibilitiesUpdated();
-            // commit visibility to activities
-            mRootWindowContainer.commitActivitiesVisible(starting, configChanges, preserveWindows,
-                    notifyClients);
-        }
+    void endActivityVisibilityUpdate() {
         mVisibilityTransactionDepth--;
     }
 

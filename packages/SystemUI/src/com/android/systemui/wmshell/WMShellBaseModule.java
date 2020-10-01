@@ -27,22 +27,25 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.pip.Pip;
-import com.android.systemui.pip.PipSurfaceTransactionHelper;
-import com.android.systemui.pip.PipUiEventLogger;
-import com.android.systemui.pip.phone.PipAppOpsListener;
-import com.android.systemui.pip.phone.PipMediaController;
-import com.android.systemui.pip.phone.PipTouchHandler;
 import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.util.DeviceConfigProxy;
-import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.animation.FlingAnimationUtils;
+import com.android.wm.shell.common.AnimationThread;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.FloatingContentCoordinator;
+import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.onehanded.OneHanded;
+import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
+import com.android.wm.shell.pip.PipUiEventLogger;
+import com.android.wm.shell.pip.phone.PipAppOpsListener;
+import com.android.wm.shell.pip.phone.PipMediaController;
+import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import dagger.BindsOptionalOf;
@@ -89,7 +92,7 @@ public abstract class WMShellBaseModule {
 
     @SysUISingleton
     @Provides
-    static PipAppOpsListener providesPipAppOpsListener(Context context,
+    static PipAppOpsListener providePipAppOpsListener(Context context,
             IActivityManager activityManager,
             PipTouchHandler pipTouchHandler) {
         return new PipAppOpsListener(context, activityManager, pipTouchHandler.getMotionHelper());
@@ -97,7 +100,7 @@ public abstract class WMShellBaseModule {
 
     @SysUISingleton
     @Provides
-    static PipMediaController providesPipMediaController(Context context,
+    static PipMediaController providePipMediaController(Context context,
             IActivityManager activityManager) {
         return new PipMediaController(context, activityManager);
     }
@@ -131,8 +134,10 @@ public abstract class WMShellBaseModule {
 
     @SysUISingleton
     @Provides
-    static ShellTaskOrganizer provideShellTaskOrganizer(SyncTransactionQueue syncQueue) {
-        ShellTaskOrganizer organizer = new ShellTaskOrganizer(syncQueue);
+    static ShellTaskOrganizer provideShellTaskOrganizer(SyncTransactionQueue syncQueue,
+            @Main Handler handler, TransactionPool transactionPool) {
+        ShellTaskOrganizer organizer = new ShellTaskOrganizer(syncQueue, transactionPool,
+                new HandlerExecutor(handler), AnimationThread.instance().getExecutor());
         organizer.registerOrganizer();
         return organizer;
     }

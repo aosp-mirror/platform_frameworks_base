@@ -16,8 +16,6 @@
 
 package com.android.server.location;
 
-import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
-import static android.app.AlarmManager.WINDOW_EXACT;
 import static android.app.AppOpsManager.OP_FINE_LOCATION;
 import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
 import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
@@ -41,7 +39,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.after;
@@ -55,8 +52,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import android.app.AlarmManager;
-import android.app.AlarmManager.OnAlarmListener;
 import android.content.Context;
 import android.location.ILocationCallback;
 import android.location.ILocationListener;
@@ -66,14 +61,11 @@ import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.LocationRequest;
 import android.location.util.identity.CallerIdentity;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.ICancellationSignal;
 import android.os.IRemoteCallback;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemClock;
-import android.os.WorkSource;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
@@ -127,8 +119,6 @@ public class LocationProviderManagerTest {
     @Mock
     private Context mContext;
     @Mock
-    private AlarmManager mAlarmManager;
-    @Mock
     private PowerManager mPowerManager;
     @Mock
     private PowerManager.WakeLock mWakeLock;
@@ -151,7 +141,6 @@ public class LocationProviderManagerTest {
         LocalServices.addService(LocationManagerInternal.class, mInternal);
 
         doReturn("android").when(mContext).getPackageName();
-        doReturn(mAlarmManager).when(mContext).getSystemService(AlarmManager.class);
         doReturn(mPowerManager).when(mContext).getSystemService(PowerManager.class);
         doReturn(mWakeLock).when(mPowerManager).newWakeLock(anyInt(), anyString());
 
@@ -505,19 +494,8 @@ public class LocationProviderManagerTest {
         ILocationListener listener = createMockLocationListener();
         LocationRequest request = new LocationRequest.Builder(0).setDurationMillis(5000).build();
         mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
-        long baseTimeMs = SystemClock.elapsedRealtime();
 
-        ArgumentCaptor<Long> timeoutCapture = ArgumentCaptor.forClass(Long.class);
-        ArgumentCaptor<OnAlarmListener> listenerCapture = ArgumentCaptor.forClass(
-                OnAlarmListener.class);
-        verify(mAlarmManager).set(eq(ELAPSED_REALTIME_WAKEUP), timeoutCapture.capture(),
-                eq(WINDOW_EXACT), eq(0L), listenerCapture.capture(), any(Handler.class),
-                any(WorkSource.class));
-
-        assertThat(timeoutCapture.getValue()).isAtLeast(baseTimeMs + 4000);
-        assertThat(timeoutCapture.getValue()).isAtMost(baseTimeMs + 5000);
-        listenerCapture.getValue().onAlarm();
-
+        mInjector.getAlarmHelper().incrementAlarmTime(5000);
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
         verify(listener, never()).onLocationChanged(any(Location.class),
                 nullable(IRemoteCallback.class));
@@ -684,13 +662,7 @@ public class LocationProviderManagerTest {
         LocationRequest locationRequest = new LocationRequest.Builder(0).build();
         mManager.getCurrentLocation(locationRequest, IDENTITY, PERMISSION_FINE, listener);
 
-        ArgumentCaptor<OnAlarmListener> listenerCapture = ArgumentCaptor.forClass(
-                OnAlarmListener.class);
-        verify(mAlarmManager).set(eq(ELAPSED_REALTIME_WAKEUP), anyLong(),
-                eq(WINDOW_EXACT), eq(0L), listenerCapture.capture(), any(Handler.class),
-                any(WorkSource.class));
-        listenerCapture.getValue().onAlarm();
-
+        mInjector.getAlarmHelper().incrementAlarmTime(60000);
         verify(listener, times(1)).onLocation(isNull());
     }
 
@@ -766,6 +738,40 @@ public class LocationProviderManagerTest {
 
         assertThat(mProvider.getRequest().isActive()).isFalse();
         assertThat(mProvider.getRequest().getLocationRequests()).isEmpty();
+    }
+
+    @Test
+    public void testProviderRequest_DelayedRequest() throws Exception {
+        mProvider.setProviderLocation(createLocation(NAME, mRandom));
+
+        ILocationListener listener1 = createMockLocationListener();
+        LocationRequest request1 = new LocationRequest.Builder(60000).build();
+        mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
+
+        verify(listener1).onLocationChanged(any(Location.class), nullable(IRemoteCallback.class));
+
+        assertThat(mProvider.getRequest().isActive()).isFalse();
+
+        mInjector.getAlarmHelper().incrementAlarmTime(60000);
+        assertThat(mProvider.getRequest().isActive()).isTrue();
+        assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(60000);
+    }
+
+    @Test
+    public void testProviderRequest_SpamRequesting() {
+        mProvider.setProviderLocation(createLocation(NAME, mRandom));
+
+        ILocationListener listener1 = createMockLocationListener();
+        LocationRequest request1 = new LocationRequest.Builder(60000).build();
+
+        mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
+        assertThat(mProvider.getRequest().isActive()).isFalse();
+        mManager.unregisterLocationRequest(listener1);
+        assertThat(mProvider.getRequest().isActive()).isFalse();
+        mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
+        assertThat(mProvider.getRequest().isActive()).isFalse();
+        mManager.unregisterLocationRequest(listener1);
+        assertThat(mProvider.getRequest().isActive()).isFalse();
     }
 
     @Test

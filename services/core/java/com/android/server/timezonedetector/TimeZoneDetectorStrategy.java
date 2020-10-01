@@ -17,9 +17,9 @@ package com.android.server.timezonedetector;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.time.TimeZoneConfiguration;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
-import android.app.timezonedetector.TimeZoneConfiguration;
 import android.util.IndentingPrintWriter;
 
 /**
@@ -96,7 +96,8 @@ public interface TimeZoneDetectorStrategy extends Dumpable, Dumpable.Container {
      * <p>This method returns {@code true} if the configuration was changed,
      * {@code false} otherwise.
      */
-    boolean updateConfiguration(@NonNull TimeZoneConfiguration configuration);
+    boolean updateConfiguration(
+            @UserIdInt int userId, @NonNull TimeZoneConfiguration configuration);
 
     /**
      * Suggests zero, one or more time zones for the device, or withdraws a previous suggestion if

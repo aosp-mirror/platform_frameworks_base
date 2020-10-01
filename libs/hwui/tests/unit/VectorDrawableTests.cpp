@@ -17,14 +17,9 @@
 #include <gtest/gtest.h>
 
 #include "PathParser.h"
-#include "GraphicsJNI.h"
-#include "SkGradientShader.h"
-#include "SkShader.h"
 #include "VectorDrawable.h"
 #include "utils/MathUtils.h"
 #include "utils/VectorDrawableUtils.h"
-#include <shader/Shader.h>
-#include <shader/LinearGradientShader.h>
 
 #include <functional>
 
@@ -400,21 +395,7 @@ TEST(VectorDrawable, drawPathWithoutIncrementingShaderRefCount) {
     bitmap.allocN32Pixels(5, 5, false);
     SkCanvas canvas(bitmap);
 
-    SkPoint pts[2];
-    pts[0].set(0, 0);
-    pts[1].set(0, 0);
-
-    std::vector<SkColor4f> colors(2);
-    colors[0] = SkColors::kBlack;
-    colors[1] = SkColors::kBlack;
-
-    sk_sp<LinearGradientShader> shader = sk_sp(new LinearGradientShader(pts,
-            colors,
-            SkColorSpace::MakeSRGB(),
-            nullptr,
-            SkTileMode::kClamp,
-            SkGradientShader::kInterpolateColorsInPremul_Flag,
-            nullptr));
+    sk_sp<SkShader> shader = SkShaders::Color(SK_ColorBLACK);
     // Initial ref count is 1
     EXPECT_TRUE(shader->unique());
 

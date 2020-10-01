@@ -572,7 +572,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
      */
     @VisibleForTesting
     @Nullable
-    public NetworkTimeSuggestion findLatestValidNetworkSuggestionForTests() {
+    public synchronized NetworkTimeSuggestion findLatestValidNetworkSuggestionForTests() {
         return findLatestValidNetworkSuggestion();
     }
 
@@ -590,7 +590,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
      */
     @VisibleForTesting
     @Nullable
-    public NetworkTimeSuggestion getLatestNetworkSuggestion() {
+    public synchronized NetworkTimeSuggestion getLatestNetworkSuggestion() {
         return mLastNetworkSuggestion.get();
     }
 

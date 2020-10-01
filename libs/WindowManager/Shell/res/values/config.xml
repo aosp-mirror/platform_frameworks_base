@@ -32,4 +32,8 @@
 
     <!-- Allow one handed to enable round corner -->
     <bool name="config_one_handed_enable_round_corner">true</bool>
+
+    <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows,
+     when the PIP menu is shown in center. -->
+    <string translatable="false" name="pip_menu_bounds">"596 280 1324 690"</string>
 </resources>

@@ -16,15 +16,16 @@
 
 package com.android.server.timezonedetector;
 
-import static android.app.timezonedetector.TimeZoneCapabilities.CAPABILITY_NOT_ALLOWED;
-import static android.app.timezonedetector.TimeZoneCapabilities.CAPABILITY_NOT_APPLICABLE;
-import static android.app.timezonedetector.TimeZoneCapabilities.CAPABILITY_NOT_SUPPORTED;
-import static android.app.timezonedetector.TimeZoneCapabilities.CAPABILITY_POSSESSED;
+import static android.app.time.TimeZoneCapabilities.CAPABILITY_NOT_ALLOWED;
+import static android.app.time.TimeZoneCapabilities.CAPABILITY_NOT_APPLICABLE;
+import static android.app.time.TimeZoneCapabilities.CAPABILITY_NOT_SUPPORTED;
+import static android.app.time.TimeZoneCapabilities.CAPABILITY_POSSESSED;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.app.timezonedetector.TimeZoneCapabilities;
-import android.app.timezonedetector.TimeZoneConfiguration;
+import android.app.time.TimeZoneCapabilities;
+import android.app.time.TimeZoneCapabilitiesAndConfig;
+import android.app.time.TimeZoneConfiguration;
 import android.os.UserHandle;
 
 import java.util.Objects;
@@ -32,7 +33,7 @@ import java.util.Objects;
 /**
  * Holds all configuration values that affect time zone behavior and some associated logic, e.g.
  * {@link #getAutoDetectionEnabledBehavior()}, {@link #getGeoDetectionEnabledBehavior()} and {@link
- * #createCapabilities()}.
+ * #createCapabilitiesAndConfig()}.
  */
 public final class ConfigurationInternal {
 
@@ -106,10 +107,15 @@ public final class ConfigurationInternal {
         return false;
     }
 
-    /** Creates a {@link TimeZoneCapabilities} object using the configuration values. */
-    public TimeZoneCapabilities createCapabilities() {
-        TimeZoneCapabilities.Builder builder = new TimeZoneCapabilities.Builder()
-                .setConfiguration(asConfiguration());
+    /** Creates a {@link TimeZoneCapabilitiesAndConfig} object using the configuration values. */
+    public TimeZoneCapabilitiesAndConfig createCapabilitiesAndConfig() {
+        return new TimeZoneCapabilitiesAndConfig(asCapabilities(), asConfiguration());
+    }
+
+    @NonNull
+    private TimeZoneCapabilities asCapabilities() {
+        UserHandle userHandle = UserHandle.of(mUserId);
+        TimeZoneCapabilities.Builder builder = new TimeZoneCapabilities.Builder(userHandle);
 
         boolean allowConfigDateTime = isUserConfigAllowed();
 
@@ -125,7 +131,7 @@ public final class ConfigurationInternal {
         } else {
             configureAutoDetectionEnabledCapability = CAPABILITY_POSSESSED;
         }
-        builder.setConfigureAutoDetectionEnabled(configureAutoDetectionEnabledCapability);
+        builder.setConfigureAutoDetectionEnabledCapability(configureAutoDetectionEnabledCapability);
 
         final int configureGeolocationDetectionEnabledCapability;
         if (!deviceHasTimeZoneDetection) {
@@ -137,7 +143,8 @@ public final class ConfigurationInternal {
         } else {
             configureGeolocationDetectionEnabledCapability = CAPABILITY_POSSESSED;
         }
-        builder.setConfigureGeoDetectionEnabled(configureGeolocationDetectionEnabledCapability);
+        builder.setConfigureGeoDetectionEnabledCapability(
+                configureGeolocationDetectionEnabledCapability);
 
         // The ability to make manual time zone suggestions can also be restricted by policy. With
         // the current logic above, this could lead to a situation where a device hardware does not
@@ -151,14 +158,14 @@ public final class ConfigurationInternal {
         } else {
             suggestManualTimeZoneCapability = CAPABILITY_POSSESSED;
         }
-        builder.setSuggestManualTimeZone(suggestManualTimeZoneCapability);
+        builder.setSuggestManualTimeZoneCapability(suggestManualTimeZoneCapability);
 
         return builder.build();
     }
 
     /** Returns a {@link TimeZoneConfiguration} from the configuration values. */
-    public TimeZoneConfiguration asConfiguration() {
-        return new TimeZoneConfiguration.Builder(mUserId)
+    private TimeZoneConfiguration asConfiguration() {
+        return new TimeZoneConfiguration.Builder()
                 .setAutoDetectionEnabled(getAutoDetectionEnabledSetting())
                 .setGeoDetectionEnabled(getGeoDetectionEnabledSetting())
                 .build();
@@ -171,10 +178,10 @@ public final class ConfigurationInternal {
      */
     public ConfigurationInternal merge(TimeZoneConfiguration newConfiguration) {
         Builder builder = new Builder(this);
-        if (newConfiguration.hasSetting(TimeZoneConfiguration.SETTING_AUTO_DETECTION_ENABLED)) {
+        if (newConfiguration.hasIsAutoDetectionEnabled()) {
             builder.setAutoDetectionEnabled(newConfiguration.isAutoDetectionEnabled());
         }
-        if (newConfiguration.hasSetting(TimeZoneConfiguration.SETTING_GEO_DETECTION_ENABLED)) {
+        if (newConfiguration.hasIsGeoDetectionEnabled()) {
             builder.setGeoDetectionEnabled(newConfiguration.isGeoDetectionEnabled());
         }
         return builder.build();

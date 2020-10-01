@@ -18,10 +18,8 @@ package com.android.systemui.privacy
 
 import android.app.ActivityManager
 import android.app.AppOpsManager
-import android.content.Intent
 import android.content.pm.UserInfo
 import android.os.UserHandle
-import android.os.UserManager
 import android.provider.DeviceConfig
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
@@ -30,8 +28,8 @@ import com.android.internal.config.sysui.SystemUiDeviceConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.appops.AppOpItem
 import com.android.systemui.appops.AppOpsController
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.DeviceConfigProxyFake
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -52,6 +50,7 @@ import org.mockito.ArgumentMatchers.anyList
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
@@ -84,9 +83,7 @@ class PrivacyItemControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var callback: PrivacyItemController.Callback
     @Mock
-    private lateinit var userManager: UserManager
-    @Mock
-    private lateinit var broadcastDispatcher: BroadcastDispatcher
+    private lateinit var userTracker: UserTracker
     @Mock
     private lateinit var dumpManager: DumpManager
     @Captor
@@ -103,9 +100,8 @@ class PrivacyItemControllerTest : SysuiTestCase() {
                 appOpsController,
                 executor,
                 executor,
-                broadcastDispatcher,
                 deviceConfigProxy,
-                userManager,
+                userTracker,
                 dumpManager
         )
     }
@@ -119,11 +115,7 @@ class PrivacyItemControllerTest : SysuiTestCase() {
         // Listen to everything by default
         changeAll(true)
 
-        doReturn(listOf(object : UserInfo() {
-            init {
-                id = CURRENT_USER_ID
-            }
-        })).`when`(userManager).getProfiles(anyInt())
+        `when`(userTracker.userProfiles).thenReturn(listOf(UserInfo(CURRENT_USER_ID, "", 0)))
 
         privacyItemController = PrivacyItemController()
     }
@@ -163,37 +155,26 @@ class PrivacyItemControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testRegisterReceiver_allUsers() {
+    fun testRegisterCallback() {
         privacyItemController.addCallback(callback)
         executor.runAllReady()
-        verify(broadcastDispatcher, atLeastOnce()).registerReceiver(
-                eq(privacyItemController.userSwitcherReceiver), any(), eq(null), eq(UserHandle.ALL))
-        verify(broadcastDispatcher, never())
-                .unregisterReceiver(eq(privacyItemController.userSwitcherReceiver))
+        verify(userTracker, atLeastOnce()).addCallback(
+                eq(privacyItemController.userTrackerCallback), any())
+        verify(userTracker, never()).removeCallback(eq(privacyItemController.userTrackerCallback))
     }
 
     @Test
-    fun testReceiver_ACTION_USER_FOREGROUND() {
-        privacyItemController.userSwitcherReceiver.onReceive(context,
-                Intent(Intent.ACTION_USER_SWITCHED))
+    fun testCallback_userChanged() {
+        privacyItemController.userTrackerCallback.onUserChanged(0, mContext)
         executor.runAllReady()
-        verify(userManager).getProfiles(anyInt())
+        verify(userTracker).userProfiles
     }
 
     @Test
-    fun testReceiver_ACTION_MANAGED_PROFILE_ADDED() {
-        privacyItemController.userSwitcherReceiver.onReceive(context,
-                Intent(Intent.ACTION_MANAGED_PROFILE_AVAILABLE))
+    fun testReceiver_profilesChanged() {
+        privacyItemController.userTrackerCallback.onProfilesChanged(emptyList())
         executor.runAllReady()
-        verify(userManager).getProfiles(anyInt())
-    }
-
-    @Test
-    fun testReceiver_ACTION_MANAGED_PROFILE_REMOVED() {
-        privacyItemController.userSwitcherReceiver.onReceive(context,
-                Intent(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE))
-        executor.runAllReady()
-        verify(userManager).getProfiles(anyInt())
+        verify(userTracker).userProfiles
     }
 
     @Test

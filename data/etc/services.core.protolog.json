@@ -205,6 +205,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-1844540996": {
+      "message": "  Initial targets: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "-1838803135": {
       "message": "Attempted to set windowing mode to a display that does not exist: %d",
       "level": "WARN",
@@ -343,11 +349,23 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "-1587921395": {
+      "message": "  Top targets: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "-1568331821": {
       "message": "Enabling listeners",
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
+    },
+    "-1567866547": {
+      "message": "Collecting in transition %d: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "-1554521902": {
       "message": "showInsets(ime) was requested by different window: %s ",
@@ -421,6 +439,12 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-1452274694": {
+      "message": "      CAN PROMOTE: promoting to parent %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "-1443029505": {
       "message": "SAFE MODE ENABLED (menu=%d s=%d dpad=%d trackball=%d)",
       "level": "INFO",
@@ -474,6 +498,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_SYNC_ENGINE",
       "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
+    },
+    "-1375751630": {
+      "message": "  --- Start combine pass ---",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "-1364754753": {
       "message": "Task vanished taskId=%d",
@@ -787,6 +817,12 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-855366859": {
+      "message": "        merging children in from %s: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "-853404763": {
       "message": "\twallpaper=%s",
       "level": "DEBUG",
@@ -871,6 +907,12 @@
       "group": "WM_DEBUG_FOCUS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-703543418": {
+      "message": "      check sibling %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "-694710814": {
       "message": "Pausing rotation during drag",
       "level": "DEBUG",
@@ -924,6 +966,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-622017164": {
+      "message": "Finish Transition: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
     },
     "-618015844": {
       "message": "performEnableScreen: mDisplayEnabled=%b mForceDisplayEnabled=%b mShowingBootMessages=%b mSystemBooted=%b mOnlyCore=%b. %s",
@@ -979,11 +1027,23 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowAnimator.java"
     },
+    "-532081937": {
+      "message": "  Commit activity becoming invisible: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "-519504830": {
       "message": "applyAnimation: anim=%s nextAppTransition=ANIM_CUSTOM transit=%s isEntrance=%b Callers=%s",
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/AppTransition.java"
+    },
+    "-509601642": {
+      "message": "    checking %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "-507657818": {
       "message": "Window %s is already added",
@@ -1026,6 +1086,12 @@
       "level": "WARN",
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
+    "-446752714": {
+      "message": "        SKIP: sibling contains top target %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "-445944810": {
       "message": "finish(%b): mCanceled=%b",
@@ -1152,6 +1218,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "-302335479": {
+      "message": "        remove from topTargets %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "-272719931": {
       "message": "startLockTaskModeLocked: %s",
@@ -1441,11 +1513,23 @@
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
     },
+    "182319432": {
+      "message": "        remove from targets %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "184362060": {
       "message": "screenshotTask(%d): mCanceled=%b",
       "level": "DEBUG",
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
+    },
+    "184610856": {
+      "message": "Start calculating TransitionInfo based on participants: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "186668272": {
       "message": "Now changing app %s",
@@ -1524,6 +1608,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
+    },
+    "259206414": {
+      "message": "Creating Transition: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
     },
     "269576220": {
       "message": "Resuming rotation after drag",
@@ -1657,6 +1747,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "430260320": {
+      "message": "        sibling is a top target with mode %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "435494046": {
       "message": "Attempted to add window to a display for which the application does not have access: %d.  Aborting.",
       "level": "WARN",
@@ -1710,6 +1806,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/AppTransition.java"
+    },
+    "528150092": {
+      "message": "        keep as target %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "531242746": {
       "message": "  THUMBNAIL %s: CREATE",
@@ -1903,6 +2005,12 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "744171317": {
+      "message": "      SKIP: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "745391677": {
       "message": "  CREATE SURFACE %s IN SESSION %s: pid=%d format=%d flags=0x%x \/ %s",
       "level": "INFO",
@@ -1920,6 +2028,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/TaskPositioner.java"
+    },
+    "793568608": {
+      "message": "        SKIP: sibling is visible but not part of transition",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "794570322": {
       "message": "Now closing app %s",
@@ -1956,6 +2070,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
+    "849147756": {
+      "message": "Finish collecting in transition %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "853091290": {
       "message": "Moved stack=%s behind stack=%s",
@@ -2041,6 +2161,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "996960396": {
+      "message": "Starting Transition %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "1000601037": {
       "message": "SyncSet{%x:%d} Set ready",
       "level": "VERBOSE",
@@ -2101,6 +2227,12 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "1115248873": {
+      "message": "Calling onTransitionReady: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "1115417974": {
       "message": "FORCED DISPLAY SIZE: %dx%d",
       "level": "INFO",
@@ -2124,6 +2256,12 @@
       "level": "WARN",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
+    "1186730970": {
+      "message": "          no common mode yet, so set it",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "1208313423": {
       "message": "addWindowToken: Attempted to add token: %s for non-exiting displayId=%d",
@@ -2292,6 +2430,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
+    },
+    "1469310004": {
+      "message": "          SKIP: common mode mismatch. was %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "1495525537": {
       "message": "createWallpaperAnimations()",
@@ -2508,6 +2652,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "1794249572": {
+      "message": "Requesting StartTransition: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
     },
     "1822843721": {
       "message": "Aborted starting %s: startingData=%s",
@@ -2824,6 +2974,9 @@
       "tag": "WindowManager"
     },
     "WM_DEBUG_WINDOW_ORGANIZER": {
+      "tag": "WindowManager"
+    },
+    "WM_DEBUG_WINDOW_TRANSITIONS": {
       "tag": "WindowManager"
     },
     "WM_ERROR": {

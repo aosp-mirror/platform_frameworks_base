@@ -40,6 +40,7 @@ import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.VrManager;
+import android.app.time.TimeManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -5088,6 +5089,14 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     public static final String TIME_ZONE_DETECTOR_SERVICE = "time_zone_detector";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an {@link TimeManager}.
+     * @hide
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String TIME_MANAGER = "time_manager";
 
     /**
      * Binder service name for {@link AppBindingService}.

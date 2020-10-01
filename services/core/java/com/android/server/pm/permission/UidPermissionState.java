@@ -22,35 +22,19 @@ import android.annotation.UserIdInt;
 import android.content.pm.PackageManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IntArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 /**
  * Permission state for a UID.
- * <p>
- * This class is also responsible for keeping track of the Linux GIDs per
- * user for a package or a shared user. The GIDs are computed as a set of
- * the GIDs for all granted permissions' GIDs on a per user basis.
  */
 public final class UidPermissionState {
-    /** The permission operation failed. */
-    public static final int PERMISSION_OPERATION_FAILURE = -1;
-
-    /** The permission operation succeeded and no gids changed. */
-    public static final int PERMISSION_OPERATION_SUCCESS = 0;
-
-    /** The permission operation succeeded and gids changed. */
-    public static final int PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED = 1;
-
-    private static final int[] NO_GIDS = {};
-
     @NonNull
     private final Object mLock = new Object();
 
@@ -59,11 +43,6 @@ public final class UidPermissionState {
     @GuardedBy("mLock")
     @Nullable
     private ArrayMap<String, PermissionState> mPermissions;
-
-    private boolean mPermissionReviewRequired;
-
-    @NonNull
-    private int[] mGlobalGids = NO_GIDS;
 
     public UidPermissionState() {}
 
@@ -80,12 +59,6 @@ public final class UidPermissionState {
                     mPermissions.put(name, new PermissionState(permissionState));
                 }
             }
-
-            mPermissionReviewRequired = other.mPermissionReviewRequired;
-
-            if (other.mGlobalGids != NO_GIDS) {
-                mGlobalGids = other.mGlobalGids.clone();
-            }
         }
     }
 
@@ -96,8 +69,6 @@ public final class UidPermissionState {
         synchronized (mLock) {
             mMissing = false;
             mPermissions = null;
-            mPermissionReviewRequired = false;
-            mGlobalGids = NO_GIDS;
             invalidateCache();
         }
     }
@@ -156,8 +127,8 @@ public final class UidPermissionState {
     /**
      * Gets the state for a permission or null if none.
      *
-     * @param name the permission name.
-     * @return the permission state.
+     * @param name the permission name
+     * @return the permission state
      */
     @Nullable
     public PermissionState getPermissionState(@NonNull String name) {
@@ -166,6 +137,22 @@ public final class UidPermissionState {
                 return null;
             }
             return mPermissions.get(name);
+        }
+    }
+
+    @NonNull
+    private PermissionState getOrCreatePermissionState(@NonNull BasePermission permission) {
+        synchronized (mLock) {
+            if (mPermissions == null) {
+                mPermissions = new ArrayMap<>();
+            }
+            final String name = permission.getName();
+            PermissionState permissionState = mPermissions.get(name);
+            if (permissionState == null) {
+                permissionState = new PermissionState(permission);
+                mPermissions.put(name, permissionState);
+            }
+            return permissionState;
         }
     }
 
@@ -186,19 +173,44 @@ public final class UidPermissionState {
 
     /**
      * Put a permission state.
+     *
+     * @param permission the permission
+     * @param granted whether the permission is granted
+     * @param flags the permission flags
      */
-    public void putPermissionState(@NonNull BasePermission permission, boolean isGranted,
-            int flags) {
+    public void putPermissionState(@NonNull BasePermission permission, boolean granted, int flags) {
         synchronized (mLock) {
-            ensureNoPermissionState(permission.name);
-            PermissionState permissionState = ensurePermissionState(permission);
-            if (isGranted) {
+            final String name = permission.getName();
+            if (mPermissions == null) {
+                mPermissions = new ArrayMap<>();
+            } else {
+                mPermissions.remove(name);
+            }
+            final PermissionState permissionState = new PermissionState(permission);
+            if (granted) {
                 permissionState.grant();
             }
             permissionState.updateFlags(flags, flags);
-            if ((flags & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
-                mPermissionReviewRequired = true;
+            mPermissions.put(name, permissionState);
+        }
+    }
+
+    /**
+     * Remove a permission state.
+     *
+     * @param name the permission name
+     * @return whether the permission state changed
+     */
+    public boolean removePermissionState(@NonNull String name) {
+        synchronized (mLock) {
+            if (mPermissions == null) {
+                return false;
             }
+            boolean changed = mPermissions.remove(name) != null;
+            if (changed && mPermissions.isEmpty()) {
+                mPermissions = null;
+            }
+            return changed;
         }
     }
 
@@ -209,13 +221,8 @@ public final class UidPermissionState {
      * @return whether the permission is granted
      */
     public boolean isPermissionGranted(@NonNull String name) {
-        synchronized (mLock) {
-            if (mPermissions == null) {
-                return false;
-            }
-            PermissionState permissionState = mPermissions.get(name);
-            return permissionState != null && permissionState.isGranted();
-        }
+        final PermissionState permissionState = getPermissionState(name);
+        return permissionState != null && permissionState.isGranted();
     }
 
     /**
@@ -246,61 +253,37 @@ public final class UidPermissionState {
     /**
      * Grant a permission.
      *
-     * @param permission the permission to grantt
-     * @return the operation result, which is either {@link #PERMISSION_OPERATION_SUCCESS},
-     *     or {@link #PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED}, or {@link
-     *     #PERMISSION_OPERATION_FAILURE}.
+     * @param permission the permission to grant
+     * @return whether the permission grant state changed
      */
-    public int grantPermission(@NonNull BasePermission permission) {
-        if (isPermissionGranted(permission.getName())) {
-            return PERMISSION_OPERATION_SUCCESS;
-        }
-
-        PermissionState permissionState = ensurePermissionState(permission);
-
-        if (!permissionState.grant()) {
-            return PERMISSION_OPERATION_FAILURE;
-        }
-
-        return permission.hasGids() ? PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED
-                : PERMISSION_OPERATION_SUCCESS;
+    public boolean grantPermission(@NonNull BasePermission permission) {
+        PermissionState permissionState = getOrCreatePermissionState(permission);
+        return permissionState.grant();
     }
 
     /**
      * Revoke a permission.
      *
      * @param permission the permission to revoke
-     * @return the operation result, which is either {@link #PERMISSION_OPERATION_SUCCESS},
-     *     or {@link #PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED}, or {@link
-     *     #PERMISSION_OPERATION_FAILURE}.
+     * @return whether the permission grant state changed
      */
-    public int revokePermission(@NonNull BasePermission permission) {
+    public boolean revokePermission(@NonNull BasePermission permission) {
         final String name = permission.getName();
-        if (!isPermissionGranted(name)) {
-            return PERMISSION_OPERATION_SUCCESS;
+        final PermissionState permissionState = getPermissionState(name);
+        if (permissionState == null) {
+            return false;
         }
-
-        PermissionState permissionState;
-        synchronized (mLock) {
-            permissionState = mPermissions.get(name);
+        final boolean changed = permissionState.revoke();
+        if (changed && permissionState.isDefault()) {
+            removePermissionState(name);
         }
-
-        if (!permissionState.revoke()) {
-            return PERMISSION_OPERATION_FAILURE;
-        }
-
-        if (permissionState.isDefault()) {
-            ensureNoPermissionState(name);
-        }
-
-        return permission.hasGids() ? PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED
-                : PERMISSION_OPERATION_SUCCESS;
+        return changed;
     }
 
     /**
      * Get the flags for a permission.
      *
-     * @param name the permission name.
+     * @param name the permission name
      * @return the permission flags
      */
     public int getPermissionFlags(@NonNull String name) {
@@ -324,76 +307,36 @@ public final class UidPermissionState {
         if (flagMask == 0) {
             return false;
         }
-
-        synchronized (mLock) {
-            final PermissionState permissionState = ensurePermissionState(permission);
-            final int oldFlags = permissionState.getFlags();
-
-            final boolean updated = permissionState.updateFlags(flagMask, flagValues);
-            if (updated) {
-                final int newFlags = permissionState.getFlags();
-                if ((oldFlags & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) == 0
-                        && (newFlags & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
-                    mPermissionReviewRequired = true;
-                } else if ((oldFlags & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0
-                        && (newFlags & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
-                    if (mPermissionReviewRequired && !hasPermissionRequiringReview()) {
-                        mPermissionReviewRequired = false;
-                    }
-                }
-            }
-            return updated;
+        final PermissionState permissionState = getOrCreatePermissionState(permission);
+        final boolean changed = permissionState.updateFlags(flagMask, flagValues);
+        if (changed && permissionState.isDefault()) {
+            removePermissionState(permission.name);
         }
+        return changed;
     }
 
     public boolean updatePermissionFlagsForAllPermissions(int flagMask, int flagValues) {
+        if (flagMask == 0) {
+            return false;
+        }
         synchronized (mLock) {
             if (mPermissions == null) {
                 return false;
             }
-            boolean changed = false;
-            final int permissionsSize = mPermissions.size();
-            for (int i = 0; i < permissionsSize; i++) {
+            boolean anyChanged = false;
+            for (int i = mPermissions.size() - 1; i >= 0; i--) {
                 final PermissionState permissionState = mPermissions.valueAt(i);
-                changed |= permissionState.updateFlags(flagMask, flagValues);
+                final boolean changed = permissionState.updateFlags(flagMask, flagValues);
+                if (changed && permissionState.isDefault()) {
+                    mPermissions.removeAt(i);
+                }
+                anyChanged |= changed;
             }
-            return changed;
-        }
-    }
-
-    @NonNull
-    private PermissionState ensurePermissionState(@NonNull BasePermission permission) {
-        final String name = permission.getName();
-        synchronized (mLock) {
-            if (mPermissions == null) {
-                mPermissions = new ArrayMap<>();
-            }
-            PermissionState permissionState = mPermissions.get(name);
-            if (permissionState == null) {
-                permissionState = new PermissionState(permission);
-                mPermissions.put(name, permissionState);
-            }
-            return permissionState;
-        }
-    }
-
-    private void ensureNoPermissionState(@NonNull String name) {
-        synchronized (mLock) {
-            if (mPermissions == null) {
-                return;
-            }
-            mPermissions.remove(name);
-            if (mPermissions.isEmpty()) {
-                mPermissions = null;
-            }
+            return anyChanged;
         }
     }
 
     public boolean isPermissionReviewRequired() {
-        return mPermissionReviewRequired;
-    }
-
-    private boolean hasPermissionRequiringReview() {
         synchronized (mLock) {
             final int permissionsSize = mPermissions.size();
             for (int i = 0; i < permissionsSize; i++) {
@@ -407,81 +350,31 @@ public final class UidPermissionState {
     }
 
     /**
-     * Gets the global gids, applicable to all users.
-     */
-    @NonNull
-    public int[] getGlobalGids() {
-        return mGlobalGids;
-    }
-
-    /**
-     * Sets the global gids, applicable to all users.
-     *
-     * @param globalGids The global gids.
-     */
-    public void setGlobalGids(@NonNull int[] globalGids) {
-        if (!ArrayUtils.isEmpty(globalGids)) {
-            mGlobalGids = Arrays.copyOf(globalGids, globalGids.length);
-        } else {
-            mGlobalGids = NO_GIDS;
-        }
-    }
-
-    /**
      * Compute the Linux GIDs from the permissions granted to a user.
      *
      * @param userId the user ID
      * @return the GIDs for the user
      */
     @NonNull
-    public int[] computeGids(@UserIdInt int userId) {
-        int[] gids = mGlobalGids;
-
+    public int[] computeGids(@NonNull int[] globalGids, @UserIdInt int userId) {
         synchronized (mLock) {
-            if (mPermissions != null) {
-                final int permissionCount = mPermissions.size();
-                for (int i = 0; i < permissionCount; i++) {
-                    PermissionState permissionState = mPermissions.valueAt(i);
-                    if (!permissionState.isGranted()) {
-                        continue;
-                    }
-                    final int[] permGids = permissionState.computeGids(userId);
-                    if (permGids != NO_GIDS) {
-                        gids = appendInts(gids, permGids);
-                    }
+            IntArray gids = IntArray.wrap(globalGids);
+            if (mPermissions == null) {
+                return gids.toArray();
+            }
+            final int permissionsSize = mPermissions.size();
+            for (int i = 0; i < permissionsSize; i++) {
+                PermissionState permissionState = mPermissions.valueAt(i);
+                if (!permissionState.isGranted()) {
+                    continue;
+                }
+                final int[] permissionGids = permissionState.computeGids(userId);
+                if (permissionGids.length != 0) {
+                    gids.addAll(permissionGids);
                 }
             }
+            return gids.toArray();
         }
-
-        return gids;
-    }
-
-    /**
-     * Compute the Linux GIDs from the permissions granted to specified users.
-     *
-     * @param userIds the user IDs
-     * @return the GIDs for the user
-     */
-    @NonNull
-    public int[] computeGids(@NonNull int[] userIds) {
-        int[] gids = mGlobalGids;
-
-        for (final int userId : userIds) {
-            final int[] userGids = computeGids(userId);
-            gids = appendInts(gids, userGids);
-        }
-
-        return gids;
-    }
-
-    // TODO: fix this to use arraycopy and append all ints in one go
-    private static int[] appendInts(int[] current, int[] added) {
-        if (current != null && added != null) {
-            for (int guid : added) {
-                current = ArrayUtils.appendInt(current, guid);
-            }
-        }
-        return current;
     }
 
     static void invalidateCache() {

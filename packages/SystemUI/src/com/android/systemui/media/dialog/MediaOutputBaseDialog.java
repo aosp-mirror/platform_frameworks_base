@@ -170,7 +170,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             mHeaderSubtitle.setText(subTitle);
             mHeaderTitle.setGravity(Gravity.NO_GRAVITY);
         }
-        if (!mAdapter.isDragging()) {
+        if (!mAdapter.isDragging() && !mAdapter.isAnimating()) {
             mAdapter.notifyDataSetChanged();
         }
         // Show when remote media session is available

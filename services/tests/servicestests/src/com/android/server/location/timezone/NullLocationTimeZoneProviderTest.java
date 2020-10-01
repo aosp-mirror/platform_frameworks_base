@@ -16,7 +16,7 @@
 package com.android.server.location.timezone;
 
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DISABLED;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_ENABLED;
+import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_ENABLED_INITIALIZING;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
 import static com.android.server.location.timezone.TestSupport.USER1_CONFIG_GEO_DETECTION_ENABLED;
 
@@ -76,15 +76,16 @@ public class NullLocationTimeZoneProviderTest {
 
         ConfigurationInternal config = USER1_CONFIG_GEO_DETECTION_ENABLED;
         Duration arbitraryInitializationTimeout = Duration.ofMinutes(5);
-        provider.enable(config, arbitraryInitializationTimeout);
+        Duration arbitraryInitializationTimeoutFuzz = Duration.ofMinutes(2);
+        provider.enable(config, arbitraryInitializationTimeout, arbitraryInitializationTimeoutFuzz);
 
-        // The StubbedProvider should enters enabled state, but immediately schedule a runnable to
-        // switch to perm failure.
+        // The NullProvider should enter the enabled state, but have schedule an immediate runnable
+        // to switch to perm failure.
         ProviderState currentState = provider.getCurrentState();
         assertSame(provider, currentState.provider);
-        assertEquals(PROVIDER_STATE_ENABLED, currentState.stateEnum);
+        assertEquals(PROVIDER_STATE_ENABLED_INITIALIZING, currentState.stateEnum);
         assertEquals(config, currentState.currentUserConfiguration);
-        mTestThreadingDomain.assertSingleImmediateQueueItem();
+        mTestThreadingDomain.assertNextQueueItemIsImmediate();
         // Entering enabled() does not trigger an onProviderStateChanged() as it is requested by the
         // controller.
         mTestController.assertProviderChangeNotTriggered();
@@ -114,6 +115,18 @@ public class NullLocationTimeZoneProviderTest {
         @Override
         void onConfigChanged() {
             // Not needed for provider testing.
+        }
+
+        @Override
+        boolean isUncertaintyTimeoutSet() {
+            // Not needed for provider testing.
+            return false;
+        }
+
+        @Override
+        long getUncertaintyTimeoutDelayMillis() {
+            // Not needed for provider testing.
+            return 0;
         }
 
         void onProviderStateChange(ProviderState providerState) {

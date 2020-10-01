@@ -16,7 +16,6 @@
 
 package com.android.systemui.controls.controller
 
-import android.app.ActivityManager
 import android.app.PendingIntent
 import android.app.backup.BackupManager
 import android.content.BroadcastReceiver
@@ -46,6 +45,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.globalactions.GlobalActionsDialog
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.io.FileDescriptor
 import java.io.PrintWriter
@@ -56,14 +56,15 @@ import javax.inject.Inject
 
 @SysUISingleton
 class ControlsControllerImpl @Inject constructor (
-        private val context: Context,
-        @Background private val executor: DelayableExecutor,
-        private val uiController: ControlsUiController,
-        private val bindingController: ControlsBindingController,
-        private val listingController: ControlsListingController,
-        private val broadcastDispatcher: BroadcastDispatcher,
-        optionalWrapper: Optional<ControlsFavoritePersistenceWrapper>,
-        dumpManager: DumpManager
+    private val context: Context,
+    @Background private val executor: DelayableExecutor,
+    private val uiController: ControlsUiController,
+    private val bindingController: ControlsBindingController,
+    private val listingController: ControlsListingController,
+    private val broadcastDispatcher: BroadcastDispatcher,
+    optionalWrapper: Optional<ControlsFavoritePersistenceWrapper>,
+    dumpManager: DumpManager,
+    userTracker: UserTracker
 ) : Dumpable, ControlsController {
 
     companion object {
@@ -85,7 +86,7 @@ class ControlsControllerImpl @Inject constructor (
     private var seedingInProgress = false
     private val seedingCallbacks = mutableListOf<Consumer<Boolean>>()
 
-    private var currentUser = UserHandle.of(ActivityManager.getCurrentUser())
+    private var currentUser = userTracker.userHandle
     override val currentUserId
         get() = currentUser.identifier
 

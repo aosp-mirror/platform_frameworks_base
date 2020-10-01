@@ -75,9 +75,6 @@ import com.android.systemui.navigationbar.NavigationBar;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.pip.Pip;
-import com.android.systemui.pip.PipAnimationController;
-import com.android.systemui.pip.phone.PipUtils;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.shared.recents.IOverviewProxy;
@@ -94,6 +91,9 @@ import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEvents;
+import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.pip.PipAnimationController;
+import com.android.wm.shell.pip.phone.PipUtils;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.FileDescriptor;
@@ -107,6 +107,7 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 
 import dagger.Lazy;
+
 
 /**
  * Class to send information from overview to launcher with a binder.

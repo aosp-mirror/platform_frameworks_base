@@ -33,7 +33,9 @@ import android.window.ITaskOrganizerController;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.common.TransactionPool;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -55,6 +57,8 @@ public class ShellTaskOrganizerTests {
 
     ShellTaskOrganizer mOrganizer;
     private final SyncTransactionQueue mSyncTransactionQueue = mock(SyncTransactionQueue.class);
+    private final TransactionPool mTransactionPool = mock(TransactionPool.class);
+    private final ShellExecutor mTestExecutor = mock(ShellExecutor.class);
 
     private class TrackingTaskListener implements ShellTaskOrganizer.TaskListener {
         final ArrayList<RunningTaskInfo> appeared = new ArrayList<>();
@@ -85,7 +89,8 @@ public class ShellTaskOrganizerTests {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mOrganizer = new ShellTaskOrganizer(mTaskOrganizerController, mSyncTransactionQueue);
+        mOrganizer = new ShellTaskOrganizer(mTaskOrganizerController, mSyncTransactionQueue,
+                mTransactionPool, mTestExecutor, mTestExecutor);
     }
 
     @Test

@@ -1465,6 +1465,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // intermediate orientation change, it is more stable to freeze the display.
                 return false;
             }
+            if (r.isState(RESUMED) && !r.getRootTask().mInResumeTopActivity) {
+                // If the activity is executing or has done the lifecycle callback, use normal
+                // rotation animation so the display info can be updated immediately (see
+                // updateDisplayAndOrientation). This prevents a compatibility issue such as
+                // calling setRequestedOrientation in Activity#onCreate and then get display info.
+                // If fixed rotation is applied, the display rotation will still be the old one,
+                // unless the client side gets the rotation again after the adjustments arrive.
+                return false;
+            }
         } else if (r != topRunningActivity()) {
             // If the transition has not started yet, the activity must be the top.
             return false;
@@ -2270,6 +2279,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @Override
     boolean isVisible() {
         return true;
+    }
+
+    @Override
+    boolean isVisibleRequested() {
+        return isVisible();
     }
 
     @Override
@@ -4432,6 +4446,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void executeAppTransition() {
+        mAtmService.getTransitionController().setReady();
         if (mAppTransition.isTransitionSet()) {
             ProtoLog.w(WM_DEBUG_APP_TRANSITIONS,
                     "Execute app transition: %s, displayId: %d Callers=%s",

@@ -24,8 +24,7 @@ Paint::Paint()
         , mWordSpacing(0)
         , mFontFeatureSettings()
         , mMinikinLocaleListId(0)
-        , mFamilyVariant(minikin::FamilyVariant::DEFAULT)
-        , mShader(nullptr) {
+        , mFamilyVariant(minikin::FamilyVariant::DEFAULT) {
     // SkPaint::antialiasing defaults to false, but
     // SkFont::edging defaults to kAntiAlias. To keep them
     // insync, we manually set the font to kAilas.
@@ -46,8 +45,7 @@ Paint::Paint(const Paint& paint)
         , mAlign(paint.mAlign)
         , mStrikeThru(paint.mStrikeThru)
         , mUnderline(paint.mUnderline)
-        , mDevKern(paint.mDevKern)
-        , mShader(paint.mShader){}
+        , mDevKern(paint.mDevKern) {}
 
 
 Paint::~Paint() {}
@@ -67,28 +65,7 @@ Paint& Paint::operator=(const Paint& other) {
     mStrikeThru = other.mStrikeThru;
     mUnderline = other.mUnderline;
     mDevKern = other.mDevKern;
-    mShader = other.mShader;
     return *this;
-}
-
-void Paint::setShader(sk_sp<uirenderer::Shader> shader) {
-    if (shader) {
-        // If there is an SkShader compatible shader, apply it
-        sk_sp<SkShader> skShader = shader->asSkShader();
-        if (skShader.get()) {
-            SkPaint::setShader(skShader);
-            SkPaint::setImageFilter(nullptr);
-        } else {
-            // ... otherwise the specified shader can only be represented as an ImageFilter
-            SkPaint::setShader(nullptr);
-            SkPaint::setImageFilter(shader->asSkImageFilter());
-        }
-    } else {
-        // No shader is provided at all, clear out both the SkShader and SkImageFilter slots
-        SkPaint::setShader(nullptr);
-        SkPaint::setImageFilter(nullptr);
-    }
-    mShader = shader;
 }
 
 bool operator==(const Paint& a, const Paint& b) {

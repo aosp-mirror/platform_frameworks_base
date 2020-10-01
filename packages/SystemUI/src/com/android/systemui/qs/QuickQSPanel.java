@@ -38,6 +38,7 @@ import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -70,9 +71,11 @@ public class QuickQSPanel extends QSPanel {
             BroadcastDispatcher broadcastDispatcher,
             QSLogger qsLogger,
             MediaHost mediaHost,
-            UiEventLogger uiEventLogger
+            UiEventLogger uiEventLogger,
+            UserTracker userTracker
     ) {
-        super(context, attrs, dumpManager, broadcastDispatcher, qsLogger, mediaHost, uiEventLogger);
+        super(context, attrs, dumpManager, broadcastDispatcher, qsLogger, mediaHost, uiEventLogger,
+                userTracker);
         sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
         applyBottomMargin((View) mRegularTileLayout);
     }

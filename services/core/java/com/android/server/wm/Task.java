@@ -597,10 +597,6 @@ class Task extends WindowContainer<WindowContainer> {
     private final AnimatingActivityRegistry mAnimatingActivityRegistry =
             new AnimatingActivityRegistry();
 
-    private boolean mTopActivityOccludesKeyguard;
-    private ActivityRecord mTopDismissingKeyguardActivity;
-    private ActivityRecord mTopTurnScreenOnActivity;
-
     private static final int TRANSLUCENT_TIMEOUT_MSG = FIRST_ACTIVITY_STACK_MSG + 1;
 
     private final Handler mHandler;
@@ -2376,6 +2372,7 @@ class Task extends WindowContainer<WindowContainer> {
     private void initializeChangeTransition(Rect startBounds) {
         mDisplayContent.prepareAppTransition(TRANSIT_TASK_CHANGE_WINDOWING_MODE,
                 false /* alwaysKeepCurrent */, 0, false /* forceOverride */);
+        mAtmService.getTransitionController().collect(this);
         mDisplayContent.mChangingContainers.add(this);
 
         mSurfaceFreezer.freeze(getPendingTransaction(), startBounds);
@@ -4766,6 +4763,16 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Override
+    boolean showSurfaceOnCreation() {
+        // Organized tasks handle their own surface visibility
+        final boolean willBeOrganized =
+                mAtmService.mTaskOrganizerController.isSupportedWindowingMode(getWindowingMode())
+                && isRootTask();
+        return !mAtmService.getTransitionController().isShellTransitionsEnabled()
+                || !willBeOrganized;
+    }
+
+    @Override
     protected void reparentSurfaceControl(SurfaceControl.Transaction t, SurfaceControl newParent) {
         /**
          * Avoid reparenting SurfaceControl of the organized tasks that are always on top, since
@@ -4785,7 +4792,9 @@ class Task extends WindowContainer<WindowContainer> {
             // hide it to allow the task organizer to show it when it is properly reparented. We
             // skip this for tasks created by the organizer because they can synchronously update
             // the leash before new children are added to the task.
-            if (!mCreatedByOrganizer && mTaskOrganizer != null && !prevHasBeenVisible) {
+            if (!mAtmService.getTransitionController().isShellTransitionsEnabled()
+                    && !mCreatedByOrganizer
+                    && mTaskOrganizer != null && !prevHasBeenVisible) {
                 getSyncTransaction().hide(getSurfaceControl());
                 commitPendingTransaction();
             }
@@ -5690,12 +5699,10 @@ class Task extends WindowContainer<WindowContainer> {
     // TODO: Should be re-worked based on the fact that each task as a stack in most cases.
     void ensureActivitiesVisible(@Nullable ActivityRecord starting, int configChanges,
             boolean preserveWindows, boolean notifyClients) {
-        mTopActivityOccludesKeyguard = false;
-        mTopDismissingKeyguardActivity = null;
-        mTopTurnScreenOnActivity = null;
         mStackSupervisor.beginActivityVisibilityUpdate();
         try {
-            mEnsureActivitiesVisibleHelper.processUpdate(starting);
+            mEnsureActivitiesVisibleHelper.process(starting, configChanges, preserveWindows,
+                    notifyClients);
 
             if (mTranslucentActivityWaiting != null &&
                     mUndrawnActivitiesBelowTopTranslucent.isEmpty()) {
@@ -5704,22 +5711,8 @@ class Task extends WindowContainer<WindowContainer> {
                 notifyActivityDrawnLocked(null);
             }
         } finally {
-            mStackSupervisor.endActivityVisibilityUpdate(starting, configChanges, preserveWindows,
-                    notifyClients);
+            mStackSupervisor.endActivityVisibilityUpdate();
         }
-    }
-
-    void commitActivitiesVisible(ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean notifyClients) {
-        mEnsureActivitiesVisibleHelper.processCommit(starting, configChanges, preserveWindows,
-                notifyClients);
-    }
-
-    /**
-     * @return true if the top visible activity wants to occlude the Keyguard, false otherwise
-     */
-    boolean topActivityOccludesKeyguard() {
-        return mTopActivityOccludesKeyguard;
     }
 
     /**
@@ -5738,44 +5731,6 @@ class Task extends WindowContainer<WindowContainer> {
     boolean isTopSplitScreenStack() {
         return inSplitScreenWindowingMode()
                 && this == getDisplayArea().getTopStackInWindowingMode(getWindowingMode());
-    }
-
-    /**
-     * @return the top most visible activity that wants to dismiss Keyguard
-     */
-    ActivityRecord getTopDismissingKeyguardActivity() {
-        return mTopDismissingKeyguardActivity;
-    }
-
-    /**
-     * @return the top most visible activity that wants to turn screen on
-     */
-    ActivityRecord getTopTurnScreenOnActivity() {
-        return mTopTurnScreenOnActivity;
-    }
-
-    /**
-     * Updates {@link #mTopActivityOccludesKeyguard}, {@link #mTopTurnScreenOnActivity} and
-     * {@link #mTopDismissingKeyguardActivity} if this task could be visible.
-     *
-     */
-    void updateKeyguardVisibility(ActivityRecord r, boolean isTop) {
-        final boolean showWhenLocked = r.canShowWhenLocked();
-        final boolean dismissKeyguard = r.containsDismissKeyguardWindow();
-        final boolean turnScreenOn = r.canTurnScreenOn();
-        if (dismissKeyguard && mTopDismissingKeyguardActivity == null) {
-            mTopDismissingKeyguardActivity = r;
-        }
-
-        if (turnScreenOn && mTopTurnScreenOnActivity == null) {
-            mTopTurnScreenOnActivity = r;
-        }
-
-        // Only the top activity may control occluded, as we can't occlude the Keyguard if the
-        // top app doesn't want to occlude it.
-        if (isTop) {
-            mTopActivityOccludesKeyguard |= showWhenLocked;
-        }
     }
 
     void checkTranslucentActivityWaiting(ActivityRecord top) {
@@ -6420,7 +6375,15 @@ class Task extends WindowContainer<WindowContainer> {
                         transit = TRANSIT_TASK_OPEN;
                     }
                 }
-                dc.prepareAppTransition(transit, keepCurTransition);
+                if (mAtmService.getTransitionController().isShellTransitionsEnabled()
+                        // TODO(shell-transitions): eventually all transitions.
+                        && transit == TRANSIT_TASK_OPEN) {
+                    Transition transition =
+                            mAtmService.getTransitionController().requestTransition(transit);
+                    transition.collect(task);
+                } else {
+                    dc.prepareAppTransition(transit, keepCurTransition);
+                }
                 mStackSupervisor.mNoAnimActivities.remove(r);
             }
             boolean doShow = true;

@@ -28,6 +28,9 @@ public interface Injector {
     /** Returns a UserInfoHelper. */
     UserInfoHelper getUserInfoHelper();
 
+    /** Returns an AlarmHelper. */
+    AlarmHelper getAlarmHelper();
+
     /** Returns an AppOpsHelper. */
     AppOpsHelper getAppOpsHelper();
 

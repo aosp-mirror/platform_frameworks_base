@@ -15,13 +15,13 @@
  */
 package com.android.systemui.tuner;
 
-import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -37,7 +37,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.qs.QSTileHost;
-import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.util.leak.LeakDetector;
 
@@ -81,7 +81,8 @@ public class TunerServiceImpl extends TunerService {
 
     private ContentResolver mContentResolver;
     private int mCurrentUser;
-    private CurrentUserTracker mUserTracker;
+    private UserTracker.Callback mCurrentUserTracker;
+    private UserTracker mUserTracker;
 
     /**
      */
@@ -91,11 +92,13 @@ public class TunerServiceImpl extends TunerService {
             @Main Handler mainHandler,
             LeakDetector leakDetector,
             DemoModeController demoModeController,
-            BroadcastDispatcher broadcastDispatcher) {
+            BroadcastDispatcher broadcastDispatcher,
+            UserTracker userTracker) {
         mContext = context;
         mContentResolver = mContext.getContentResolver();
         mLeakDetector = leakDetector;
         mDemoModeController = demoModeController;
+        mUserTracker = userTracker;
 
         for (UserInfo user : UserManager.get(mContext).getUsers()) {
             mCurrentUser = user.getUserHandle().getIdentifier();
@@ -104,21 +107,22 @@ public class TunerServiceImpl extends TunerService {
             }
         }
 
-        mCurrentUser = ActivityManager.getCurrentUser();
-        mUserTracker = new CurrentUserTracker(broadcastDispatcher) {
+        mCurrentUser = mUserTracker.getUserId();
+        mCurrentUserTracker = new UserTracker.Callback() {
             @Override
-            public void onUserSwitched(int newUserId) {
-                mCurrentUser = newUserId;
+            public void onUserChanged(int newUser, Context userContext) {
+                mCurrentUser = newUser;
                 reloadAll();
                 reregisterAll();
             }
         };
-        mUserTracker.startTracking();
+        mUserTracker.addCallback(mCurrentUserTracker,
+                new HandlerExecutor(mainHandler));
     }
 
     @Override
     public void destroy() {
-        mUserTracker.stopTracking();
+        mUserTracker.removeCallback(mCurrentUserTracker);
     }
 
     private void upgradeTuner(int oldVersion, int newVersion, Handler mainHandler) {
@@ -137,7 +141,7 @@ public class TunerServiceImpl extends TunerService {
             }
         }
         if (oldVersion < 2) {
-            setTunerEnabled(mContext, false);
+            setTunerEnabled(mContext, mUserTracker.getUserHandle(), false);
         }
         // 3 Removed because of a revert.
         if (oldVersion < 4) {
@@ -272,7 +276,7 @@ public class TunerServiceImpl extends TunerService {
         @Override
         public void onChange(boolean selfChange, java.util.Collection<Uri> uris,
                 int flags, int userId) {
-            if (userId == ActivityManager.getCurrentUser()) {
+            if (userId == mUserTracker.getUserId()) {
                 for (Uri u : uris) {
                     reloadSetting(u);
                 }

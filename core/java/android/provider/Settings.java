@@ -12329,6 +12329,15 @@ public final class Settings {
                 "angle_allowlist";
 
         /**
+         * Lists of ANGLE EGL features for debugging.
+         * Each list of features is separated by a comma, each feature in each list is separated by
+         * a colon.
+         * e.g. feature1:feature2:feature3,feature1:feature3:feature5
+         * @hide
+         */
+        public static final String ANGLE_EGL_FEATURES = "angle_egl_features";
+
+        /**
          * Show the "ANGLE In Use" dialog box to the user when ANGLE is the OpenGL driver.
          * The value is a boolean (1 or 0).
          * @hide

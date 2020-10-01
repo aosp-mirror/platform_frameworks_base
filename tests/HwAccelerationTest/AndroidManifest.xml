@@ -745,7 +745,7 @@
         </activity>
 
         <activity android:name="BlurActivity"
-                  android:label="Shaders/Blur"
+                  android:label="RenderEffect/Blur"
                   android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

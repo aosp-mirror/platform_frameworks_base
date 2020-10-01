@@ -20,6 +20,8 @@ import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -34,6 +36,7 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -57,6 +60,7 @@ import com.android.systemui.R;
 import com.android.systemui.R.dimen;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.TouchAnimator.Builder;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.MultiUserSwitch;
 import com.android.systemui.statusbar.phone.SettingsButton;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -75,6 +79,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     private final ActivityStarter mActivityStarter;
     private final UserInfoController mUserInfoController;
     private final DeviceProvisionedController mDeviceProvisionedController;
+    private final UserTracker mUserTracker;
     private SettingsButton mSettingsButton;
     protected View mSettingsContainer;
     private PageIndicator mPageIndicator;
@@ -115,11 +120,12 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     @Inject
     public QSFooterImpl(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
             ActivityStarter activityStarter, UserInfoController userInfoController,
-            DeviceProvisionedController deviceProvisionedController) {
+            DeviceProvisionedController deviceProvisionedController, UserTracker userTracker) {
         super(context, attrs);
         mActivityStarter = activityStarter;
         mUserInfoController = userInfoController;
         mDeviceProvisionedController = deviceProvisionedController;
+        mUserTracker = userTracker;
     }
 
     @VisibleForTesting
@@ -127,7 +133,8 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         this(context, attrs,
                 Dependency.get(ActivityStarter.class),
                 Dependency.get(UserInfoController.class),
-                Dependency.get(DeviceProvisionedController.class));
+                Dependency.get(DeviceProvisionedController.class),
+                Dependency.get(UserTracker.class));
     }
 
     @Override
@@ -150,6 +157,19 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         mActionsContainer = findViewById(R.id.qs_footer_actions_container);
         mEditContainer = findViewById(R.id.qs_footer_actions_edit_container);
         mBuildText = findViewById(R.id.build);
+        mBuildText.setOnLongClickListener(view -> {
+            CharSequence buildText = mBuildText.getText();
+            if (!TextUtils.isEmpty(buildText)) {
+                ClipboardManager service =
+                        mUserTracker.getUserContext().getSystemService(ClipboardManager.class);
+                String label = mContext.getString(R.string.build_number_clip_data_label);
+                service.setPrimaryClip(ClipData.newPlainText(label, buildText));
+                Toast.makeText(mContext, R.string.build_number_copy_toast, Toast.LENGTH_SHORT)
+                        .show();
+                return true;
+            }
+            return false;
+        });
 
         // RenderThread is doing more harm than good when touching the header (to expand quick
         // settings), so disable it for this view
@@ -176,6 +196,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
             mBuildText.setSelected(true);
             mShouldShowBuildText = true;
         } else {
+            mBuildText.setText(null);
             mShouldShowBuildText = false;
             mBuildText.setSelected(false);
         }
@@ -317,12 +338,14 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         mMultiUserSwitch.setClickable(mMultiUserSwitch.getVisibility() == View.VISIBLE);
         mEdit.setClickable(mEdit.getVisibility() == View.VISIBLE);
         mSettingsButton.setClickable(mSettingsButton.getVisibility() == View.VISIBLE);
+        mBuildText.setLongClickable(mBuildText.getVisibility() == View.VISIBLE);
     }
 
     private void updateVisibilities() {
         mSettingsContainer.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
-                TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
+                TunerService.isTunerEnabled(mContext, mUserTracker.getUserHandle()) ? View.VISIBLE
+                        : View.INVISIBLE);
         final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
         mMultiUserSwitch.setVisibility(showUserSwitcher() ? View.VISIBLE : View.INVISIBLE);
         mEditContainer.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
@@ -376,15 +399,16 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
                             : MetricsProto.MetricsEvent.ACTION_QS_COLLAPSED_SETTINGS_LAUNCH);
             if (mSettingsButton.isTunerClick()) {
                 mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
-                    if (TunerService.isTunerEnabled(mContext)) {
-                        TunerService.showResetRequest(mContext, () -> {
-                            // Relaunch settings so that the tuner disappears.
-                            startSettingsActivity();
-                        });
+                    if (TunerService.isTunerEnabled(mContext, mUserTracker.getUserHandle())) {
+                        TunerService.showResetRequest(mContext, mUserTracker.getUserHandle(),
+                                () -> {
+                                    // Relaunch settings so that the tuner disappears.
+                                    startSettingsActivity();
+                                });
                     } else {
                         Toast.makeText(getContext(), R.string.tuner_toast,
                                 Toast.LENGTH_LONG).show();
-                        TunerService.setTunerEnabled(mContext, true);
+                        TunerService.setTunerEnabled(mContext, mUserTracker.getUserHandle(), true);
                     }
                     startSettingsActivity();
 

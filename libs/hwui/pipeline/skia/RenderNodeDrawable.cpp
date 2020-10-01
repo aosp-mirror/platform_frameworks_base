@@ -172,10 +172,12 @@ static bool layerNeedsPaint(const LayerProperties& properties, float alphaMultip
                             SkPaint* paint) {
     paint->setFilterQuality(kLow_SkFilterQuality);
     if (alphaMultiplier < 1.0f || properties.alpha() < 255 ||
-        properties.xferMode() != SkBlendMode::kSrcOver || properties.getColorFilter() != nullptr) {
+        properties.xferMode() != SkBlendMode::kSrcOver || properties.getColorFilter() != nullptr ||
+        properties.getImageFilter() != nullptr) {
         paint->setAlpha(properties.alpha() * alphaMultiplier);
         paint->setBlendMode(properties.xferMode());
         paint->setColorFilter(sk_ref_sp(properties.getColorFilter()));
+        paint->setImageFilter(sk_ref_sp(properties.getImageFilter()));
         return true;
     }
     return false;

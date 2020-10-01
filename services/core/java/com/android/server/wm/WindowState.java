@@ -1683,6 +1683,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         || mControllableInsetProvider.isClientVisible());
     }
 
+    @Override
+    boolean isVisibleRequested() {
+        return isVisible();
+    }
+
     /**
      * Ensures that all the policy visibility bits are set.
      * @return {@code true} if all flags about visiblity are set
@@ -1771,7 +1776,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         final ActivityRecord atoken = mActivityRecord;
         if (atoken != null) {
-            return ((!isParentWindowHidden() && atoken.mVisibleRequested)
+            return ((!isParentWindowHidden() && atoken.isVisible())
                     || isAnimating(TRANSITION | PARENTS));
         }
         return !isParentWindowHidden() || isAnimating(TRANSITION | PARENTS);
@@ -5803,7 +5808,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         mNotifyBlastOnSurfacePlacement = true;
-        return mWinAnimator.finishDrawingLocked(null);
+        mWinAnimator.finishDrawingLocked(null);
+        // We always want to force a traversal after a finish draw for blast sync.
+        return true;
     }
 
     private void notifyBlastSyncTransaction() {
@@ -5812,6 +5819,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (!mNotifyBlastOnSurfacePlacement || mWaitingListener == null) {
             mNotifyBlastOnSurfacePlacement = false;
             return;
+        }
+
+        final Task task = getTask();
+        if (task != null) {
+            final SurfaceControl.Transaction t = task.getMainWindowSizeChangeTransaction();
+            if (t != null) {
+                mBLASTSyncTransaction.merge(t);
+            }
+            task.setMainWindowSizeChangeTransaction(null);
         }
 
         // If localSyncId is >0 then we are syncing with children and will

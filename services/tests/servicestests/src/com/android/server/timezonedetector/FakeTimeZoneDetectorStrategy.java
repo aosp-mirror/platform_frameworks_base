@@ -22,10 +22,11 @@ import static org.junit.Assert.fail;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.time.TimeZoneCapabilities;
+import android.app.time.TimeZoneCapabilitiesAndConfig;
+import android.app.time.TimeZoneConfiguration;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
-import android.app.timezonedetector.TimeZoneCapabilities;
-import android.app.timezonedetector.TimeZoneConfiguration;
 import android.util.IndentingPrintWriter;
 
 import java.util.ArrayList;
@@ -67,20 +68,25 @@ class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
     }
 
     @Override
-    public boolean updateConfiguration(@NonNull TimeZoneConfiguration requestedChanges) {
+    public boolean updateConfiguration(
+            @UserIdInt int userID, @NonNull TimeZoneConfiguration requestedChanges) {
         assertNotNull(mConfigurationInternal);
         assertNotNull(requestedChanges);
 
         // Simulate the real strategy's behavior: the new configuration will be updated to be the
         // old configuration merged with the new if the user has the capability to up the settings.
         // Then, if the configuration changed, the change listener is invoked.
-        TimeZoneCapabilities capabilities = mConfigurationInternal.createCapabilities();
-        TimeZoneConfiguration newConfiguration = capabilities.applyUpdate(requestedChanges);
+        TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
+                mConfigurationInternal.createCapabilitiesAndConfig();
+        TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
+        TimeZoneConfiguration configuration = capabilitiesAndConfig.getConfiguration();
+        TimeZoneConfiguration newConfiguration =
+                capabilities.tryApplyConfigChanges(configuration, requestedChanges);
         if (newConfiguration == null) {
             return false;
         }
 
-        if (!newConfiguration.equals(capabilities.getConfiguration())) {
+        if (!newConfiguration.equals(capabilitiesAndConfig.getConfiguration())) {
             mConfigurationInternal = mConfigurationInternal.merge(newConfiguration);
 
             // Note: Unlike the real strategy, the listeners is invoked synchronously.

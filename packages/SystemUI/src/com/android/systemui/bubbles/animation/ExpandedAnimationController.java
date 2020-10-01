@@ -32,8 +32,8 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.util.animation.PhysicsAnimator;
-import com.android.systemui.util.magnetictarget.MagnetizedObject;
+import com.android.wm.shell.animation.PhysicsAnimator;
+import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 
 import com.google.android.collect.Sets;
 

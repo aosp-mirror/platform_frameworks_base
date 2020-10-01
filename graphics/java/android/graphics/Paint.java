@@ -3111,7 +3111,7 @@ public class Paint {
     @CriticalNative
     private static native boolean nGetFillPath(long paintPtr, long src, long dst);
     @CriticalNative
-    private static native void nSetShader(long paintPtr, long shader);
+    private static native long nSetShader(long paintPtr, long shader);
     @CriticalNative
     private static native long nSetColorFilter(long paintPtr, long filter);
     @CriticalNative

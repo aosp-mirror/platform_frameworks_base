@@ -607,6 +607,12 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             for (int i = 0; i < childCount; i++) {
                 final View child = parent.getChildAt(i);
                 final ViewHolder holder = parent.getChildViewHolder(child);
+                // Do not draw background for the holder that's currently being dragged
+                if (holder == mCurrentDrag) {
+                    continue;
+                }
+                // Do not draw background for holders before the edit index (header and current
+                // tiles)
                 if (holder.getAdapterPosition() == 0 ||
                         holder.getAdapterPosition() < mEditIndex && !(child instanceof TextView)) {
                     continue;

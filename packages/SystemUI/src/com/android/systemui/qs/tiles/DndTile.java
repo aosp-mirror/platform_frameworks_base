@@ -19,7 +19,6 @@ package com.android.systemui.qs.tiles;
 import static android.provider.Settings.Global.ZEN_MODE_ALARMS;
 import static android.provider.Settings.Global.ZEN_MODE_OFF;
 
-import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -203,7 +202,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
                     break;
                 default:
                     Uri conditionId = ZenModeConfig.toTimeCondition(mContext, zenDuration,
-                            ActivityManager.getCurrentUser(), true).id;
+                            mHost.getUserId(), true).id;
                     mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                             conditionId, TAG);
             }

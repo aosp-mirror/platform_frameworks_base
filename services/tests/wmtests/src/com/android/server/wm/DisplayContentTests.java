@@ -1349,6 +1349,27 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testNoFixedRotationOnResumedScheduledApp() {
+        unblockDisplayRotation(mDisplayContent);
+        final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        app.setVisible(false);
+        app.setState(Task.ActivityState.RESUMED, "test");
+        mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_OPEN,
+                false /* alwaysKeepCurrent */);
+        mDisplayContent.mOpeningApps.add(app);
+        final int newOrientation = getRotatedOrientation(mDisplayContent);
+        app.setRequestedOrientation(newOrientation);
+
+        // The condition should reject using fixed rotation because the resumed client in real case
+        // might get display info immediately. And the fixed rotation adjustments haven't arrived
+        // client side so the info may be inconsistent with the requested orientation.
+        verify(mDisplayContent).handleTopActivityLaunchingInDifferentOrientation(eq(app),
+                eq(true) /* checkOpening */);
+        assertFalse(app.isFixedRotationTransforming());
+        assertFalse(mDisplayContent.hasTopFixedRotationLaunchingApp());
+    }
+
+    @Test
     public void testRecentsNotRotatingWithFixedRotation() {
         unblockDisplayRotation(mDisplayContent);
         final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();

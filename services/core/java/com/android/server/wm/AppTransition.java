@@ -2214,6 +2214,10 @@ public class AppTransition implements Dump {
      */
     boolean prepareAppTransitionLocked(@TransitionType int transit, boolean alwaysKeepCurrent,
             @TransitionFlags int flags, boolean forceOverride) {
+        if (mService.mAtmService.getTransitionController().adaptLegacyPrepare(
+                transit, flags, forceOverride)) {
+            return false;
+        }
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "Prepare app transition: transit=%s %s alwaysKeepCurrent=%b displayId=%d "
                         + "Callers=%s",
@@ -2255,7 +2259,7 @@ public class AppTransition implements Dump {
                 || transit == TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
     }
 
-    private static boolean isKeyguardTransit(int transit) {
+    static boolean isKeyguardTransit(int transit) {
         return isKeyguardGoingAwayTransit(transit) || transit == TRANSIT_KEYGUARD_OCCLUDE
                 || transit == TRANSIT_KEYGUARD_UNOCCLUDE;
     }

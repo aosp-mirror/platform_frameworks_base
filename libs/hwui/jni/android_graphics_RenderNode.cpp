@@ -215,6 +215,12 @@ static jboolean android_view_RenderNode_setAlpha(CRITICAL_JNI_PARAMS_COMMA jlong
     return SET_AND_DIRTY(setAlpha, alpha, RenderNode::ALPHA);
 }
 
+static jboolean android_view_RenderNode_setRenderEffect(CRITICAL_JNI_PARAMS_COMMA jlong renderNodePtr,
+        jlong renderEffectPtr) {
+    SkImageFilter* imageFilter = reinterpret_cast<SkImageFilter*>(renderEffectPtr);
+    return SET_AND_DIRTY(mutateLayerProperties().setImageFilter, imageFilter, RenderNode::GENERIC);
+}
+
 static jboolean android_view_RenderNode_setHasOverlappingRendering(CRITICAL_JNI_PARAMS_COMMA jlong renderNodePtr,
         bool hasOverlappingRendering) {
     return SET_AND_DIRTY(setHasOverlappingRendering, hasOverlappingRendering,
@@ -690,6 +696,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSetRevealClip",        "(JZFFF)Z", (void*) android_view_RenderNode_setRevealClip },
 
     { "nSetAlpha",             "(JF)Z",  (void*) android_view_RenderNode_setAlpha },
+    { "nSetRenderEffect",      "(JJ)V",  (void*) android_view_RenderNode_setRenderEffect },
     { "nSetHasOverlappingRendering", "(JZ)Z",
             (void*) android_view_RenderNode_setHasOverlappingRendering },
     { "nSetUsageHint",    "(JI)V", (void*) android_view_RenderNode_setUsageHint },
