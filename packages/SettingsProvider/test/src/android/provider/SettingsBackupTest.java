@@ -743,7 +743,8 @@ public class SettingsBackupTest {
                  Settings.Secure.NEARBY_SHARING_COMPONENT, // not user configurable
                  Settings.Secure.WINDOW_MAGNIFICATION,
                  Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER,
-                 Settings.Secure.SUPPRESS_DOZE);
+                 Settings.Secure.SUPPRESS_DOZE,
+                 Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED);
 
     @Test
     public void systemSettingsBackedUpOrDenied() {
