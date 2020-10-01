@@ -543,7 +543,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
         try {
             doReturn(false).when(stack).isTranslucent(any());
-            assertFalse(mStack.shouldBeVisible(null /* starting */));
+            assertTrue(mStack.shouldBeVisible(null /* starting */));
 
             mActivity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
                     mActivity.getConfiguration()));
