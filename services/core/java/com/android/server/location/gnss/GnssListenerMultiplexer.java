@@ -44,7 +44,6 @@ import com.android.server.location.util.SettingsHelper;
 import com.android.server.location.util.UserInfoHelper;
 import com.android.server.location.util.UserInfoHelper.UserListener;
 
-import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -361,11 +360,11 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
     }
 
     @Override
-    protected void dumpServiceState(PrintWriter pw) {
+    protected String getServiceState() {
         if (!isServiceSupported()) {
-            pw.print("unsupported");
+            return "unsupported";
         } else {
-            super.dumpServiceState(pw);
+            return super.getServiceState();
         }
     }
 }

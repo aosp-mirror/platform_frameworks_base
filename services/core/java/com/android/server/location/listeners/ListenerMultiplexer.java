@@ -555,7 +555,7 @@ public abstract class ListenerMultiplexer<TKey, TListener,
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mRegistrations) {
             pw.print("service: ");
-            dumpServiceState(pw);
+            pw.print(getServiceState());
             pw.println();
 
             if (!mRegistrations.isEmpty()) {
@@ -578,18 +578,17 @@ public abstract class ListenerMultiplexer<TKey, TListener,
 
     /**
      * May be overridden to provide additional details on service state when dumping the manager
-     * state.
+     * state. Invoked while holding the multiplexer's internal lock.
      */
-    protected void dumpServiceState(PrintWriter pw) {
+    protected String getServiceState() {
         if (mServiceRegistered) {
-            pw.print("registered");
             if (mMerged != null) {
-                pw.print(" [");
-                pw.print(mMerged);
-                pw.print("]");
+                return mMerged.toString();
+            } else {
+                return "registered";
             }
         } else {
-            pw.print("unregistered");
+            return "unregistered";
         }
     }
 
