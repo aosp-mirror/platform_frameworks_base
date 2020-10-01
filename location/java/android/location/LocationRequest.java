@@ -250,7 +250,7 @@ public final class LocationRequest implements Parcelable {
             boolean hiddenFromAppOps,
             boolean locationSettingsIgnored,
             boolean lowPower,
-            @Nullable WorkSource workSource) {
+            WorkSource workSource) {
         Preconditions.checkArgument(intervalMillis != PASSIVE_INTERVAL || quality == POWER_NONE);
         Preconditions.checkArgument(minUpdateIntervalMillis <= intervalMillis);
 
@@ -265,7 +265,7 @@ public final class LocationRequest implements Parcelable {
         mHideFromAppOps = hiddenFromAppOps;
         mLowPower = lowPower;
         mLocationSettingsIgnored = locationSettingsIgnored;
-        mWorkSource = workSource;
+        mWorkSource = Objects.requireNonNull(workSource);
     }
 
     /**
@@ -645,12 +645,15 @@ public final class LocationRequest implements Parcelable {
     @SystemApi
     @Deprecated
     public void setWorkSource(@Nullable WorkSource workSource) {
+        if (workSource == null) {
+            workSource = new WorkSource();
+        }
         mWorkSource = workSource;
     }
 
     /**
-     * Returns the work source used for power blame for this request. If null, the system is free to
-     * assign power blame as it deems most appropriate.
+     * Returns the work source used for power blame for this request. If empty, the system is free
+     * to assign power blame as it deems most appropriate.
      *
      * @return the work source used for power blame for this request
      *
@@ -658,7 +661,7 @@ public final class LocationRequest implements Parcelable {
      */
     @TestApi
     @SystemApi
-    public @Nullable WorkSource getWorkSource() {
+    public @NonNull WorkSource getWorkSource() {
         return mWorkSource;
     }
 
@@ -1062,9 +1065,9 @@ public final class LocationRequest implements Parcelable {
         }
 
         /**
-         * Sets the work source to use for power blame for this location request. Defaults to null,
-         * which implies the system is free to assign power blame as it determines best for this
-         * request (which usually means blaming the owner of the location listener).
+         * Sets the work source to use for power blame for this location request. Defaults to an
+         * empty WorkSource, which implies the system is free to assign power blame as it determines
+         * best for this request (which usually means blaming the owner of the location listener).
          *
          * <p>Permissions enforcement occurs when resulting location request is actually used, not
          * when this method is invoked.
@@ -1108,7 +1111,7 @@ public final class LocationRequest implements Parcelable {
                     mHiddenFromAppOps,
                     mLocationSettingsIgnored,
                     mLowPower,
-                    mWorkSource);
+                    new WorkSource(mWorkSource));
         }
     }
 }
