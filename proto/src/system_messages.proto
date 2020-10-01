@@ -252,6 +252,10 @@ message SystemMessage {
     // Package: android
     NOTE_ID_WIFI_SIM_REQUIRED = 60;
 
+    // TODO: remove this notification after feature development is done
+    // Inform the user a foreground service is restricted from BG-launch.
+    NOTE_FOREGROUND_SERVICE_BG_LAUNCH = 61;
+
     // Display the Android Debug Protocol status
     // Package: android
     NOTE_ADB_WIFI_ACTIVE = 62;
