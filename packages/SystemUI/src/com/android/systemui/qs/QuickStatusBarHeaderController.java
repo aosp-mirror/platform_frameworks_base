@@ -44,6 +44,7 @@ import com.android.systemui.privacy.PrivacyChipEvent;
 import com.android.systemui.privacy.PrivacyItem;
 import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.qs.carrier.QSCarrierGroupController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
@@ -83,6 +84,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private final StatusBarIconController mStatusBarIconController;
     private final CommandQueue mCommandQueue;
     private final DemoModeController mDemoModeController;
+    private final UserTracker mUserTracker;
     private final StatusIconContainer mIconContainer;
     private final StatusBarIconController.TintedIconManager mIconManager;
     private final DemoMode mDemoModeReceiver;
@@ -97,20 +99,29 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private final ZenModeController.Callback mZenModeControllerCallback = new Callback() {
         @Override
         public void onZenChanged(int zen) {
-            mView.updateStatusText(mRingerMode, mNextAlarm, isZenOverridingRinger());
+            mView.updateStatusText(mRingerMode, mNextAlarm, isZenOverridingRinger(),
+                    use24HourFormat());
         }
 
         @Override
         public void onConfigChanged(ZenModeConfig config) {
-            mView.updateStatusText(mRingerMode, mNextAlarm, isZenOverridingRinger());
+            mView.updateStatusText(mRingerMode, mNextAlarm, isZenOverridingRinger(),
+                    use24HourFormat());
         }
     };
+
+    private boolean use24HourFormat() {
+        return android.text.format.DateFormat.is24HourFormat(
+                mView.getContext(), mUserTracker.getUserId());
+
+    }
 
     private final NextAlarmChangeCallback mNextAlarmChangeCallback = new NextAlarmChangeCallback() {
         @Override
         public void onNextAlarmChanged(AlarmClockInfo nextAlarm) {
             mNextAlarm = nextAlarm;
-            mView.updateStatusText(mRingerMode, mNextAlarm, isZenOverridingRinger());
+            mView.updateStatusText(mRingerMode, mNextAlarm, isZenOverridingRinger(),
+                    use24HourFormat());
         }
     };
 
@@ -188,8 +199,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             PrivacyItemController privacyItemController, RingerModeTracker ringerModeTracker,
             ActivityStarter activityStarter, UiEventLogger uiEventLogger,
             QSTileHost qsTileHost, StatusBarIconController statusBarIconController,
-            CommandQueue commandQueue,
-            DemoModeController demoModeController,
+            CommandQueue commandQueue, DemoModeController demoModeController,
+            UserTracker userTracker,
             QSCarrierGroupController.Builder qsCarrierGroupControllerBuilder) {
         super(view);
         mZenModeController = zenModeController;
@@ -202,6 +213,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mStatusBarIconController = statusBarIconController;
         mCommandQueue = commandQueue;
         mDemoModeController = demoModeController;
+        mUserTracker = userTracker;
         mLifecycle = new LifecycleRegistry(mLifecycleOwner);
 
         mQSCarrierGroupController = qsCarrierGroupControllerBuilder
@@ -224,7 +236,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     protected void onViewAttached() {
         mRingerModeTracker.getRingerModeInternal().observe(mLifecycleOwner, ringer -> {
             mRingerMode = ringer;
-            mView.updateStatusText(mRingerMode, mNextAlarm, isZenOverridingRinger());
+            mView.updateStatusText(mRingerMode, mNextAlarm, isZenOverridingRinger(),
+                    use24HourFormat());
         });
 
         mClockView.setOnClickListener(mOnClickListener);
@@ -368,6 +381,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         private final StatusBarIconController mStatusBarIconController;
         private final CommandQueue mCommandQueue;
         private final DemoModeController mDemoModeController;
+        private final UserTracker mUserTracker;
         private final QSCarrierGroupController.Builder mQSCarrierGroupControllerBuilder;
         private QuickStatusBarHeader mView;
 
@@ -376,7 +390,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
                 PrivacyItemController privacyItemController, RingerModeTracker ringerModeTracker,
                 ActivityStarter activityStarter, UiEventLogger uiEventLogger, QSTileHost qsTileHost,
                 StatusBarIconController statusBarIconController, CommandQueue commandQueue,
-                DemoModeController demoModeController,
+                DemoModeController demoModeController, UserTracker userTracker,
                 QSCarrierGroupController.Builder qsCarrierGroupControllerBuilder) {
             mZenModeController = zenModeController;
             mNextAlarmController = nextAlarmController;
@@ -388,6 +402,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             mStatusBarIconController = statusBarIconController;
             mCommandQueue = commandQueue;
             mDemoModeController = demoModeController;
+            mUserTracker = userTracker;
             mQSCarrierGroupControllerBuilder = qsCarrierGroupControllerBuilder;
         }
 
@@ -401,7 +416,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             return new QuickStatusBarHeaderController(mView, mZenModeController,
                     mNextAlarmController, mPrivacyItemController, mRingerModeTracker,
                     mActivityStarter, mUiEventLogger, mQsTileHost, mStatusBarIconController,
-                    mCommandQueue, mDemoModeController, mQSCarrierGroupControllerBuilder);
+                    mCommandQueue, mDemoModeController, mUserTracker,
+                    mQSCarrierGroupControllerBuilder);
         }
     }
 }

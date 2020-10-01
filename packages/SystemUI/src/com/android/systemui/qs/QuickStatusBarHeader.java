@@ -17,10 +17,7 @@ package com.android.systemui.qs;
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
-
 import android.annotation.ColorInt;
-import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -58,16 +55,12 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.qs.QSDetail.Callback;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.policy.Clock;
 
 import java.util.Locale;
 import java.util.Objects;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * View that contains the top-most bits of the screen (primarily the status bar with date, time, and
@@ -103,7 +96,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     private OngoingPrivacyChip mPrivacyChip;
     private Space mSpace;
     private BatteryMeterView mBatteryRemainingIcon;
-    private UserTracker mUserTracker;
 
     // Used for RingerModeTracker
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
@@ -118,13 +110,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     private float mExpandedHeaderAlpha = 1.0f;
     private float mKeyguardExpansionFraction;
 
-    @Inject
-    public QuickStatusBarHeader(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            UserTracker userTracker) {
+    public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
         mDualToneHandler = new DualToneHandler(
                 new ContextThemeWrapper(context, R.style.QSHeaderTheme));
-        mUserTracker = userTracker;
     }
 
     @Override
@@ -182,9 +171,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
         return mHeaderQsPanel;
     }
 
-    void updateStatusText(int ringerMode, AlarmClockInfo nextAlarm, boolean zenOverridingRinger) {
+    void updateStatusText(int ringerMode, AlarmClockInfo nextAlarm, boolean zenOverridingRinger,
+            boolean use24HourFormat) {
         boolean changed = updateRingerStatus(ringerMode, zenOverridingRinger)
-                || updateAlarmStatus(nextAlarm);
+                || updateAlarmStatus(nextAlarm, use24HourFormat);
 
         if (changed) {
             boolean alarmVisible = mNextAlarmTextView.getVisibility() == View.VISIBLE;
@@ -218,14 +208,14 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
                 !Objects.equals(originalRingerText, mRingerModeTextView.getText());
     }
 
-    private boolean updateAlarmStatus(AlarmClockInfo nextAlarm) {
+    private boolean updateAlarmStatus(AlarmClockInfo nextAlarm, boolean use24HourFormat) {
         boolean isOriginalVisible = mNextAlarmTextView.getVisibility() == View.VISIBLE;
         CharSequence originalAlarmText = mNextAlarmTextView.getText();
 
         boolean alarmVisible = false;
         if (nextAlarm != null) {
             alarmVisible = true;
-            mNextAlarmTextView.setText(formatNextAlarm(nextAlarm));
+            mNextAlarmTextView.setText(formatNextAlarm(nextAlarm, use24HourFormat));
         }
         mNextAlarmIcon.setVisibility(alarmVisible ? View.VISIBLE : View.GONE);
         mNextAlarmTextView.setVisibility(alarmVisible ? View.VISIBLE : View.GONE);
@@ -470,12 +460,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
         mHeaderQsPanel.setCallback(qsPanelCallback);
     }
 
-    private String formatNextAlarm(AlarmManager.AlarmClockInfo info) {
+    private String formatNextAlarm(AlarmClockInfo info, boolean use24HourFormat) {
         if (info == null) {
             return "";
         }
-        String skeleton = android.text.format.DateFormat
-                .is24HourFormat(mContext, mUserTracker.getUserId()) ? "EHm" : "Ehma";
+        String skeleton = use24HourFormat ? "EHm" : "Ehma";
         String pattern = android.text.format.DateFormat
                 .getBestDateTimePattern(Locale.getDefault(), skeleton);
         return android.text.format.DateFormat.format(pattern, info.getTriggerTime()).toString();
