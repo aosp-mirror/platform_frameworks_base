@@ -828,8 +828,7 @@ interface ITelephony {
      *  as well as registering the MmTelFeature for callbacks using the IImsServiceFeatureCallback
      *  interface.
      */
-    void registerMmTelFeatureCallback(int slotId, in IImsServiceFeatureCallback callback,
-            boolean oneShot);
+    void registerMmTelFeatureCallback(int slotId, in IImsServiceFeatureCallback callback);
 
     /**
      * Unregister a callback that was previously registered through
