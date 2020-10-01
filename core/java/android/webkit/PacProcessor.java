@@ -44,24 +44,17 @@ public interface PacProcessor {
     }
 
     /**
-     * Returns PacProcessor instance associated with the {@link Network}.
-     * The host resolution is done on this {@link Network}.
+     * Create a new PacProcessor instance.
      *
-     * <p> There can only be one {@link PacProcessor} instance at a time for each {@link Network}.
-     * This method will create a new instance if one did not already exist, or
-     * if the previous instance was released with {@link #releasePacProcessor}.
+     * <p> The created instance needs to be released manually once it is no longer needed
+     * by calling {@link #releasePacProcessor} to prevent memory leaks.
      *
-     * <p> The {@link PacProcessor} instance needs to be released manually with
-     * {@link #releasePacProcessor} when the associated {@link Network} goes away.
-     *
-     * @param network a {@link Network} which this {@link PacProcessor}
-     * will use for host/address resolution.
-     * If {@code null} this method is equivalent to {@link #getInstance}.
-     * @return {@link PacProcessor} instance for the specified network.
+     * <p> The created instance is not tied to any particular {@link Network}.
+     * To associate {@link PacProcessor} with a {@link Network} use {@link #setNetwork} method.
      */
     @NonNull
-    static PacProcessor getInstanceForNetwork(@Nullable Network network) {
-        return WebViewFactory.getProvider().getPacProcessorForNetwork(network);
+    static PacProcessor createInstance() {
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     /**
@@ -90,6 +83,18 @@ public interface PacProcessor {
      * for the same network will create a new instance.
      */
     default void releasePacProcessor() {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    /**
+     * Associate {@link PacProcessor} instance with the {@link Network}.
+     * Once this method returns host resolution is done on the set {@link Network}.
+
+     * @param network a {@link Network} which this {@link PacProcessor}
+     * will use for host/address resolution. If {@code null} reset
+     * {@link PacProcessor} instance so it is not associated with any {@link Network}.
+     */
+    default void setNetwork(@Nullable Network network) {
         throw new UnsupportedOperationException("Not implemented");
     }
 
