@@ -86,4 +86,12 @@ public abstract class ActivityOptionsCompat {
         opts.setFreezeRecentTasksReordering();
         return opts;
     }
+
+    /**
+     * Sets the launch event time from launcher.
+     */
+    public static ActivityOptions setLauncherSourceInfo(ActivityOptions opts, long uptimeMillis) {
+        opts.setSourceInfo(ActivityOptions.SourceInfo.TYPE_LAUNCHER, uptimeMillis);
+        return opts;
+    }
 }
