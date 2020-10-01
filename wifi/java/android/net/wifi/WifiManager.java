@@ -932,6 +932,11 @@ public class WifiManager {
      * This can be as a result of adding/updating/deleting a network.
      * <br />
      * {@link #EXTRA_CHANGE_REASON} contains whether the configuration was added/changed/removed.
+     * {@link #EXTRA_WIFI_CONFIGURATION} is never set beginning in
+     * {@link android.os.Build.VERSION_CODES#R}.
+     * {@link #EXTRA_MULTIPLE_NETWORKS_CHANGED} is set for backwards compatibility reasons, but
+     * its value is always true beginning in {@link android.os.Build.VERSION_CODES#R}, even if only
+     * a single network changed.
      * <br />
      * The {@link android.Manifest.permission#ACCESS_WIFI_STATE ACCESS_WIFI_STATE} permission is
      * required to receive this broadcast.
@@ -945,7 +950,8 @@ public class WifiManager {
      * The lookup key for a {@link android.net.wifi.WifiConfiguration} object representing
      * the changed Wi-Fi configuration when the {@link #CONFIGURED_NETWORKS_CHANGED_ACTION}
      * broadcast is sent.
-     * @deprecated this extra is never set. Use {@link #getConfiguredNetworks} to get the full list
+     * @deprecated This extra is never set beginning in {@link android.os.Build.VERSION_CODES#R},
+     * regardless of the target SDK version. Use {@link #getConfiguredNetworks} to get the full list
      * of configured networks.
      * @hide
      */
@@ -955,7 +961,8 @@ public class WifiManager {
     /**
      * Multiple network configurations have changed.
      * @see #CONFIGURED_NETWORKS_CHANGED_ACTION
-     * @deprecated this extra's value is always true.
+     * @deprecated This extra's value is always true beginning in
+     * {@link android.os.Build.VERSION_CODES#R}, regardless of the target SDK version.
      * @hide
      */
     @Deprecated
