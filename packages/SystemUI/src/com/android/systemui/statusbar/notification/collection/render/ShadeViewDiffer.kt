@@ -172,14 +172,19 @@ class ShadeViewDiffer(
     private fun treeToMap(tree: NodeSpec): Map<NodeController, NodeSpec> {
         val map = mutableMapOf<NodeController, NodeSpec>()
 
-        registerNodes(tree, map)
+        try {
+            registerNodes(tree, map)
+        } catch (ex: DuplicateNodeException) {
+            logger.logDuplicateNodeInTree(tree, ex)
+            throw ex
+        }
 
         return map
     }
 
     private fun registerNodes(node: NodeSpec, map: MutableMap<NodeController, NodeSpec>) {
         if (map.containsKey(node.controller)) {
-            throw RuntimeException("Node ${node.controller.nodeLabel} appears more than once")
+            throw DuplicateNodeException("Node ${node.controller.nodeLabel} appears more than once")
         }
         map[node.controller] = node
 
@@ -190,6 +195,8 @@ class ShadeViewDiffer(
         }
     }
 }
+
+private class DuplicateNodeException(message: String) : RuntimeException(message)
 
 private class ShadeNode(
     val controller: NodeController
