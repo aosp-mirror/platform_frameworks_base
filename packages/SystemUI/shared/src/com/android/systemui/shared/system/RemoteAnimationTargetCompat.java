@@ -16,6 +16,7 @@
 
 package com.android.systemui.shared.system;
 
+import android.app.PictureInPictureParams;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -49,6 +50,7 @@ public class RemoteAnimationTargetCompat {
     public final Rect screenSpaceBounds;
     public final boolean isNotInRecents;
     public final Rect contentInsets;
+    public final PictureInPictureParams pictureInPictureParams;
 
     private final SurfaceControl mStartLeash;
 
@@ -66,6 +68,7 @@ public class RemoteAnimationTargetCompat {
         isNotInRecents = app.isNotInRecents;
         contentInsets = app.contentInsets;
         activityType = app.windowConfiguration.getActivityType();
+        pictureInPictureParams = app.pictureInPictureParams;
 
         mStartLeash = app.startLeash;
     }
