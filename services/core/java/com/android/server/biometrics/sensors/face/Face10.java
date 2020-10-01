@@ -48,6 +48,7 @@ import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AcquisitionClient;
@@ -278,14 +279,13 @@ class Face10 implements IHwBinder.DeathRecipient {
         }
     };
 
+    @VisibleForTesting
     Face10(@NonNull Context context, int sensorId,
             @BiometricManager.Authenticators.Types int strength,
-            @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
-        final boolean supportsSelfIllumination = context.getResources()
-                .getBoolean(R.bool.config_faceAuthSupportsSelfIllumination);
-        final int maxTemplatesAllowed = context.getResources()
-                .getInteger(R.integer.config_faceMaxTemplatesPerUser);
-        mFaceSensorProperties = new FaceSensorPropertiesInternal(sensorId, strength,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            boolean supportsSelfIllumination, int maxTemplatesAllowed) {
+        mFaceSensorProperties = new FaceSensorPropertiesInternal(sensorId,
+                Utils.authenticatorStrengthToPropertyStrength(strength),
                 maxTemplatesAllowed, false /* supportsFaceDetect */, supportsSelfIllumination);
         mContext = context;
         mSensorId = sensorId;
@@ -303,6 +303,14 @@ class Face10 implements IHwBinder.DeathRecipient {
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to register user switch observer");
         }
+    }
+
+    Face10(@NonNull Context context, int sensorId,
+            @BiometricManager.Authenticators.Types int strength,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
+        this(context, sensorId, strength, lockoutResetDispatcher,
+                context.getResources().getBoolean(R.bool.config_faceAuthSupportsSelfIllumination),
+                context.getResources().getInteger(R.integer.config_faceMaxTemplatesPerUser));
     }
 
     @Override
@@ -547,7 +555,8 @@ class Face10 implements IHwBinder.DeathRecipient {
 
     void scheduleRevokeChallenge(@NonNull IBinder token, @NonNull String owner) {
         mHandler.post(() -> {
-            if (!mCurrentChallengeOwner.getOwnerString().contentEquals(owner)) {
+            if (mCurrentChallengeOwner != null &&
+                    !mCurrentChallengeOwner.getOwnerString().contentEquals(owner)) {
                 Slog.e(TAG, "scheduleRevokeChallenge, package: " + owner
                         + " attempting to revoke challenge owned by: "
                         + mCurrentChallengeOwner.getOwnerString());
@@ -563,6 +572,13 @@ class Face10 implements IHwBinder.DeathRecipient {
                     if (client != clientMonitor) {
                         Slog.e(TAG, "scheduleRevokeChallenge, mismatched client."
                                 + "Expecting: " + client + ", received: " + clientMonitor);
+                        return;
+                    }
+
+                    if (mCurrentChallengeOwner == null) {
+                        // Can happen if revoke is incorrectly called, for example without a
+                        // preceding generateChallenge
+                        Slog.w(TAG, "Current challenge owner is null");
                         return;
                     }
 
