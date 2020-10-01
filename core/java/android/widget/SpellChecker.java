@@ -338,11 +338,13 @@ public class SpellChecker implements SpellCheckerSessionListener {
                         ((attributes & SuggestionsInfo.RESULT_ATTR_IN_THE_DICTIONARY) > 0);
                 final boolean looksLikeTypo =
                         ((attributes & SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_TYPO) > 0);
+                final boolean looksLikeGrammarError =
+                        ((attributes & SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_GRAMMAR_ERROR) > 0);
 
                 final SpellCheckSpan spellCheckSpan = mSpellCheckSpans[k];
                 //TODO: we need to change that rule for results from a sentence-level spell
                 // checker that will probably be in dictionary.
-                if (!isInDictionary && looksLikeTypo) {
+                if (!isInDictionary && (looksLikeTypo || looksLikeGrammarError)) {
                     createMisspelledSuggestionSpan(
                             editable, suggestionsInfo, spellCheckSpan, offset, length);
                 } else {
@@ -482,8 +484,16 @@ public class SpellChecker implements SpellCheckerSessionListener {
             suggestions = ArrayUtils.emptyArray(String.class);
         }
 
-        SuggestionSpan suggestionSpan = new SuggestionSpan(mTextView.getContext(), suggestions,
-                SuggestionSpan.FLAG_EASY_CORRECT | SuggestionSpan.FLAG_MISSPELLED);
+        final int suggestionsAttrs = suggestionsInfo.getSuggestionsAttributes();
+        int flags = SuggestionSpan.FLAG_EASY_CORRECT;
+        if ((suggestionsAttrs & SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_TYPO) != 0) {
+            flags |= SuggestionSpan.FLAG_MISSPELLED;
+        }
+        if ((suggestionsAttrs & SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_GRAMMAR_ERROR) != 0) {
+            flags |= SuggestionSpan.FLAG_GRAMMAR_ERROR;
+        }
+        SuggestionSpan suggestionSpan =
+                new SuggestionSpan(mTextView.getContext(), suggestions, flags);
         // TODO: Remove mIsSentenceSpellCheckSupported by extracting an interface
         // to share the logic of word level spell checker and sentence level spell checker
         if (mIsSentenceSpellCheckSupported) {

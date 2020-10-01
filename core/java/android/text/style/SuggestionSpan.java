@@ -71,6 +71,12 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     public static final int FLAG_AUTO_CORRECTION = 0x0004;
 
     /**
+     * Sets this flag if the suggestions apply to a grammar error. This type of suggestion is
+     * rendered differently to highlight the error.
+     */
+    public static final int FLAG_GRAMMAR_ERROR = 0x0008;
+
+    /**
      * This action is deprecated in {@link android.os.Build.VERSION_CODES#Q}.
      *
      * @deprecated For IMEs to receive this kind of user interaction signals, implement IMEs' own
@@ -136,6 +142,9 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     private float mAutoCorrectionUnderlineThickness;
     private int mAutoCorrectionUnderlineColor;
 
+    private float mGrammarErrorUnderlineThickness;
+    private int mGrammarErrorUnderlineColor;
+
     /**
      * @param context Context for the application
      * @param suggestions Suggestions for the string under the span
@@ -190,9 +199,11 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     private void initStyle(Context context) {
         if (context == null) {
             mMisspelledUnderlineThickness = 0;
+            mGrammarErrorUnderlineThickness = 0;
             mEasyCorrectUnderlineThickness = 0;
             mAutoCorrectionUnderlineThickness = 0;
             mMisspelledUnderlineColor = Color.BLACK;
+            mGrammarErrorUnderlineColor = Color.BLACK;
             mEasyCorrectUnderlineColor = Color.BLACK;
             mAutoCorrectionUnderlineColor = Color.BLACK;
             return;
@@ -204,6 +215,14 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         mMisspelledUnderlineThickness = typedArray.getDimension(
                 com.android.internal.R.styleable.SuggestionSpan_textUnderlineThickness, 0);
         mMisspelledUnderlineColor = typedArray.getColor(
+                com.android.internal.R.styleable.SuggestionSpan_textUnderlineColor, Color.BLACK);
+
+        defStyleAttr = com.android.internal.R.attr.textAppearanceGrammarErrorSuggestion;
+        typedArray = context.obtainStyledAttributes(
+                null, com.android.internal.R.styleable.SuggestionSpan, defStyleAttr, 0);
+        mGrammarErrorUnderlineThickness = typedArray.getDimension(
+                com.android.internal.R.styleable.SuggestionSpan_textUnderlineThickness, 0);
+        mGrammarErrorUnderlineColor = typedArray.getColor(
                 com.android.internal.R.styleable.SuggestionSpan_textUnderlineColor, Color.BLACK);
 
         defStyleAttr = com.android.internal.R.attr.textAppearanceEasyCorrectSuggestion;
@@ -235,6 +254,8 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         mMisspelledUnderlineThickness = src.readFloat();
         mAutoCorrectionUnderlineColor = src.readInt();
         mAutoCorrectionUnderlineThickness = src.readFloat();
+        mGrammarErrorUnderlineColor = src.readInt();
+        mGrammarErrorUnderlineThickness = src.readFloat();
     }
 
     /**
@@ -313,6 +334,8 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         dest.writeFloat(mMisspelledUnderlineThickness);
         dest.writeInt(mAutoCorrectionUnderlineColor);
         dest.writeFloat(mAutoCorrectionUnderlineThickness);
+        dest.writeInt(mGrammarErrorUnderlineColor);
+        dest.writeFloat(mGrammarErrorUnderlineThickness);
     }
 
     @Override
@@ -362,13 +385,19 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         final boolean misspelled = (mFlags & FLAG_MISSPELLED) != 0;
         final boolean easy = (mFlags & FLAG_EASY_CORRECT) != 0;
         final boolean autoCorrection = (mFlags & FLAG_AUTO_CORRECTION) != 0;
+        final boolean grammarError = (mFlags & FLAG_GRAMMAR_ERROR) != 0;
         if (easy) {
-            if (!misspelled) {
+            if (!misspelled && !grammarError) {
                 tp.setUnderlineText(mEasyCorrectUnderlineColor, mEasyCorrectUnderlineThickness);
             } else if (tp.underlineColor == 0) {
                 // Spans are rendered in an arbitrary order. Since misspelled is less prioritary
                 // than just easy, do not apply misspelled if an easy (or a mispelled) has been set
-                tp.setUnderlineText(mMisspelledUnderlineColor, mMisspelledUnderlineThickness);
+                if (grammarError) {
+                    tp.setUnderlineText(
+                            mGrammarErrorUnderlineColor, mGrammarErrorUnderlineThickness);
+                } else {
+                    tp.setUnderlineText(mMisspelledUnderlineColor, mMisspelledUnderlineThickness);
+                }
             }
         } else if (autoCorrection) {
             tp.setUnderlineText(mAutoCorrectionUnderlineColor, mAutoCorrectionUnderlineThickness);
@@ -384,11 +413,14 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         final boolean misspelled = (mFlags & FLAG_MISSPELLED) != 0;
         final boolean easy = (mFlags & FLAG_EASY_CORRECT) != 0;
         final boolean autoCorrection = (mFlags & FLAG_AUTO_CORRECTION) != 0;
+        final boolean grammarError = (mFlags & FLAG_GRAMMAR_ERROR) != 0;
         if (easy) {
-            if (!misspelled) {
-                return mEasyCorrectUnderlineColor;
-            } else {
+            if (grammarError) {
+                return mGrammarErrorUnderlineColor;
+            } else if (misspelled) {
                 return mMisspelledUnderlineColor;
+            } else {
+                return mEasyCorrectUnderlineColor;
             }
         } else if (autoCorrection) {
             return mAutoCorrectionUnderlineColor;

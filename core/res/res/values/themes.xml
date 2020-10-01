@@ -93,6 +93,7 @@ please see themes_device_defaults.xml.
         <item name="textAppearanceEasyCorrectSuggestion">@style/TextAppearance.EasyCorrectSuggestion</item>
         <item name="textAppearanceMisspelledSuggestion">@style/TextAppearance.MisspelledSuggestion</item>
         <item name="textAppearanceAutoCorrectionSuggestion">@style/TextAppearance.AutoCorrectionSuggestion</item>
+        <item name="textAppearanceGrammarErrorSuggestion">@style/TextAppearance.GrammarErrorSuggestion</item>
 
         <item name="textAppearanceButton">@style/TextAppearance.Widget.Button</item>
 

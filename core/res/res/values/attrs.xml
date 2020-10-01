@@ -199,6 +199,9 @@
         <!-- The underline color and thickness for auto correction suggestion -->
         <attr name="textAppearanceAutoCorrectionSuggestion" format="reference" />
 
+        <!-- The underline color and thickness for grammar error suggestion -->
+        <attr name="textAppearanceGrammarErrorSuggestion" format="reference" />
+
         <!--  The underline color -->
         <attr name="textUnderlineColor" format="reference|color" />
         <!--  The underline thickness -->

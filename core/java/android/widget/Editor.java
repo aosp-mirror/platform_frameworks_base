@@ -186,6 +186,9 @@ public class Editor {
     private static final int MENU_ITEM_ORDER_SECONDARY_ASSIST_ACTIONS_START = 50;
     private static final int MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START = 100;
 
+    private static final int FLAG_MISSPELLED_OR_GRAMMAR_ERROR =
+            SuggestionSpan.FLAG_MISSPELLED | SuggestionSpan.FLAG_GRAMMAR_ERROR;
+
     @IntDef({MagnifierHandleTrigger.SELECTION_START,
             MagnifierHandleTrigger.SELECTION_END,
             MagnifierHandleTrigger.INSERTION})
@@ -1552,7 +1555,7 @@ public class Editor {
             for (int i = 0; i < suggestionSpans.length; i++) {
                 int flags = suggestionSpans[i].getFlags();
                 if ((flags & SuggestionSpan.FLAG_EASY_CORRECT) != 0
-                        && (flags & SuggestionSpan.FLAG_MISSPELLED) == 0) {
+                        && (flags & FLAG_MISSPELLED_OR_GRAMMAR_ERROR) == 0) {
                     flags &= ~SuggestionSpan.FLAG_EASY_CORRECT;
                     suggestionSpans[i].setFlags(flags);
                 }
@@ -3064,8 +3067,9 @@ public class Editor {
 
             // Remove potential misspelled flags
             int suggestionSpanFlags = suggestionSpan.getFlags();
-            if ((suggestionSpanFlags & SuggestionSpan.FLAG_MISSPELLED) != 0) {
+            if ((suggestionSpanFlags & FLAG_MISSPELLED_OR_GRAMMAR_ERROR) != 0) {
                 suggestionSpanFlags &= ~SuggestionSpan.FLAG_MISSPELLED;
+                suggestionSpanFlags &= ~SuggestionSpan.FLAG_GRAMMAR_ERROR;
                 suggestionSpanFlags &= ~SuggestionSpan.FLAG_EASY_CORRECT;
                 suggestionSpan.setFlags(suggestionSpanFlags);
             }
@@ -3601,18 +3605,28 @@ public class Editor {
                 final int flag1 = span1.getFlags();
                 final int flag2 = span2.getFlags();
                 if (flag1 != flag2) {
-                    // The order here should match what is used in updateDrawState
-                    final boolean easy1 = (flag1 & SuggestionSpan.FLAG_EASY_CORRECT) != 0;
-                    final boolean easy2 = (flag2 & SuggestionSpan.FLAG_EASY_CORRECT) != 0;
-                    final boolean misspelled1 = (flag1 & SuggestionSpan.FLAG_MISSPELLED) != 0;
-                    final boolean misspelled2 = (flag2 & SuggestionSpan.FLAG_MISSPELLED) != 0;
-                    if (easy1 && !misspelled1) return -1;
-                    if (easy2 && !misspelled2) return 1;
-                    if (misspelled1) return -1;
-                    if (misspelled2) return 1;
+                    // Compare so that the order will be: easy -> misspelled -> grammarError
+                    int easy = compareFlag(SuggestionSpan.FLAG_EASY_CORRECT, flag1, flag2);
+                    if (easy != 0) return easy;
+                    int misspelled = compareFlag(SuggestionSpan.FLAG_MISSPELLED, flag1, flag2);
+                    if (misspelled != 0) return misspelled;
+                    int grammarError = compareFlag(SuggestionSpan.FLAG_GRAMMAR_ERROR, flag1, flag2);
+                    if (grammarError != 0) return grammarError;
                 }
 
                 return mSpansLengths.get(span1).intValue() - mSpansLengths.get(span2).intValue();
+            }
+
+            /*
+             * Returns -1 if flags1 has flagToCompare but flags2 does not.
+             * Returns 1 if flags2 has flagToCompare but flags1 does not.
+             * Otherwise, returns 0.
+             */
+            private int compareFlag(int flagToCompare, int flags1, int flags2) {
+                boolean hasFlag1 = (flags1 & flagToCompare) != 0;
+                boolean hasFlag2 = (flags2 & flagToCompare) != 0;
+                if (hasFlag1 == hasFlag2) return 0;
+                return hasFlag1 ? -1 : 1;
             }
         }
 
@@ -3632,8 +3646,9 @@ public class Editor {
                 mSpansLengths.put(suggestionSpan, Integer.valueOf(end - start));
             }
 
-            // The suggestions are sorted according to their types (easy correction first, then
-            // misspelled) and to the length of the text that they cover (shorter first).
+            // The suggestions are sorted according to their types (easy correction first,
+            // misspelled second, then grammar error) and to the length of the text that they cover
+            // (shorter first).
             Arrays.sort(suggestionSpans, mSuggestionSpanComparator);
             mSpansLengths.clear();
 
@@ -3661,7 +3676,7 @@ public class Editor {
                 final int spanEnd = spannable.getSpanEnd(suggestionSpan);
 
                 if (misspelledSpanInfo != null
-                        && (suggestionSpan.getFlags() & SuggestionSpan.FLAG_MISSPELLED) != 0) {
+                        && (suggestionSpan.getFlags() & FLAG_MISSPELLED_OR_GRAMMAR_ERROR) != 0) {
                     misspelledSpanInfo.mSuggestionSpan = suggestionSpan;
                     misspelledSpanInfo.mSpanStart = spanStart;
                     misspelledSpanInfo.mSpanEnd = spanEnd;
