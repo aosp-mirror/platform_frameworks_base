@@ -238,7 +238,8 @@ public class AppSearchDocumentTest {
                 .setSchema("schemaType1")
                 .setCreationTimestampMs(5L)
                 .setScore(1)
-                .setTtlMs(1L);
+                .setTtlMs(1L)
+                .setNamespace("");
         HashMap<String, PropertyProto.Builder> propertyProtoMap = new HashMap<>();
         propertyProtoMap.put("longKey1",
                 PropertyProto.newBuilder().setName("longKey1").addInt64Values(1L));

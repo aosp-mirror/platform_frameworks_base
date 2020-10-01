@@ -47,6 +47,10 @@ import java.util.Objects;
 public class AppSearchDocument {
     private static final String TAG = "AppSearchDocument";
 
+    /** The default empty namespace.*/
+    // TODO(adorokhine): Allow namespace to be specified in the document.
+    public static final String DEFAULT_NAMESPACE = "";
+
     /**
      * The maximum number of elements in a repeatable field. Will reject the request if exceed
      * this limit.
@@ -450,7 +454,7 @@ public class AppSearchDocument {
          */
         public Builder(@NonNull String uri, @NonNull String schemaType) {
             mBuilderTypeInstance = (BuilderType) this;
-            mProtoBuilder.setUri(uri).setSchema(schemaType);
+            mProtoBuilder.setUri(uri).setSchema(schemaType).setNamespace(DEFAULT_NAMESPACE);
             // Set current timestamp for creation timestamp by default.
             setCreationTimestampMillis(System.currentTimeMillis());
         }
