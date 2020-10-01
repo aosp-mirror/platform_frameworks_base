@@ -704,18 +704,20 @@ public class WebView extends AbsoluteLayout
         return mProvider.restoreState(inState);
     }
 
-    /**
-     * Loads the given URL with the specified additional HTTP headers.
+   /**
+     * Loads the given URL with additional HTTP headers, specified as a map from
+     * name to value. Note that if this map contains any of the headers that are
+     * set by default by this WebView, such as those controlling caching, accept
+     * types or the User-Agent, their values may be overridden by this WebView's
+     * defaults.
+     * <p>
+     * Some older WebView implementations require {@code additionalHttpHeaders}
+     * to be mutable.
      * <p>
      * Also see compatibility note on {@link #evaluateJavascript}.
      *
      * @param url the URL of the resource to load
-     * @param additionalHttpHeaders the additional headers to be used in the
-     *            HTTP request for this URL, specified as a map from name to
-     *            value. Note that if this map contains any of the headers
-     *            that are set by default by this WebView, such as those
-     *            controlling caching, accept types or the User-Agent, their
-     *            values may be overridden by this WebView's defaults.
+     * @param additionalHttpHeaders map with additional headers
      */
     public void loadUrl(@NonNull String url, @NonNull Map<String, String> additionalHttpHeaders) {
         checkThread();
