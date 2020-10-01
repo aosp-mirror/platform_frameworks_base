@@ -20,6 +20,7 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
 import static android.Manifest.permission.RESET_FINGERPRINT_LOCKOUT;
+import static android.Manifest.permission.TEST_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
@@ -34,6 +35,8 @@ import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.SensorProps;
+import android.hardware.biometrics.ITestService;
+import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
@@ -88,11 +91,74 @@ public class FingerprintService extends SystemService {
     private final GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
     private final LockPatternUtils mLockPatternUtils;
     @NonNull private List<ServiceProvider> mServiceProviders;
+    @Nullable private TestService mTestService;
+
+    private final class TestService extends ITestService.Stub {
+
+        @Override
+        public List<SensorPropertiesInternal> getSensorPropertiesInternal(
+                String opPackageName) {
+            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+            return null;
+        }
+
+        @Override
+        public void enableTestHal(int sensorId, boolean enableTestHal) {
+            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+        }
+
+        @Override
+        public void enrollStart(int sensorId, int userId) {
+            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+        }
+
+        @Override
+        public void enrollFinish(int sensorId, int userId) {
+            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+        }
+
+        @Override
+        public void authenticateSuccess(int sensorId, int userId)  {
+            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+        }
+
+        @Override
+        public void authenticateReject(int sensorId, int userId)  {
+            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+        }
+
+        @Override
+        public void notifyAcquired(int sensorId, int userId)  {
+            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+        }
+
+        @Override
+        public void notifyError(int sensorId, int userId)  {
+            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+        }
+
+        @Override
+        public void internalCleanup(int sensorId, int userId)  {
+            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+        }
+    }
 
     /**
      * Receives the incoming binder calls from FingerprintManager.
      */
     private final class FingerprintServiceWrapper extends IFingerprintService.Stub {
+        @Override
+        public ITestService getTestService(String opPackageName) {
+            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+
+            synchronized (this) {
+                if (mTestService == null) {
+                    mTestService = new TestService();
+                }
+            }
+            return mTestService;
+        }
+
         @Override // Binder call
         public List<FingerprintSensorPropertiesInternal> getSensorPropertiesInternal(
                 String opPackageName) {

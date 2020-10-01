@@ -16,14 +16,17 @@
 
 package android.hardware.biometrics;
 
+import static android.Manifest.permission.TEST_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.WRITE_DEVICE_CONFIG;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.os.RemoteException;
 import android.security.keystore.KeyGenParameterSpec;
@@ -193,6 +196,17 @@ public class BiometricManager {
     public BiometricManager(Context context, IAuthService service) {
         mContext = context;
         mService = service;
+    }
+
+    /**
+     * Retrieves a test session for BiometricManager/BiometricPrompt.
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    @RequiresPermission(TEST_BIOMETRIC)
+    public BiometricTestSession getTestSession() {
+        return null; // TODO(169459906)
     }
 
     /**
