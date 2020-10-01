@@ -432,13 +432,23 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"muuta ääniasetuksia"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Antaa sovelluksen muokata yleisiä ääniasetuksia, kuten äänenvoimakkuutta ja käytettävää kaiutinta."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"tallentaa ääntä"</string>
-    <string name="permdesc_recordAudio" msgid="3976213377904701093">"Tämä sovellus voi tallentaa mikrofonilla ääntä koska tahansa."</string>
+    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
+    <skip />
+    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
+    <skip />
+    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="176788115994050692">"lähettää komentoja SIM-kortille"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Antaa sovelluksen lähettää komentoja SIM-kortille. Tämä ei ole turvallista."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"tunnistaa liikkumisen"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Sovellus voi tunnistaa liikkumisesi."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ota kuvia ja videoita"</string>
-    <string name="permdesc_camera" msgid="1354600178048761499">"Tämä sovellus voi ottaa kameralla kuvia ja videoita koska tahansa."</string>
+    <!-- no translation found for permdesc_camera (5240801376168647151) -->
+    <skip />
+    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
+    <skip />
+    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
+    <skip />
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Salli sovellukselle tai palvelulle pääsy järjestelmän kameroihin, jotta se voi ottaa kuvia ja nauhoittaa videoita"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Tämä oikeutettu tai järjestelmäsovellus voi ottaa järjestelmän kameralla kuvia ja videoita koska tahansa. Sovelluksella on oltava myös android.permission.CAMERA-lupa"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Salli sovelluksen tai palvelun vastaanottaa vastakutsuja kameralaitteiden avaamisesta tai sulkemisesta."</string>
@@ -1622,12 +1632,10 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Nostetaanko äänenvoimakkuus suositellun tason yläpuolelle?\n\nPitkäkestoinen kova äänenvoimakkuus saattaa heikentää kuuloa."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Käytetäänkö esteettömyyden pikanäppäintä?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kun pikanäppäin on käytössä, voit käynnistää esteettömyystoiminnon pitämällä molempia äänenvoimakkuuspainikkeita painettuna kolmen sekunnin ajan."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (3135860819356676426) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Laitetaanko esteettömyysominaisuuksien pikavalinta päälle?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Molempien äänenvoimakkuuspainikkeiden painaminen muutaman sekunnin ajan laittaa esteettömyysominaisuudet päälle. Tämä voi muuttaa laitteesi toimintaa.\n\nNykyiset ominaisuudet:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nVoit muuttaa valittuja ominaisuuksia kohdassa Asetukset &gt; Esteettömyys."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <!-- no translation found for accessibility_shortcut_single_service_warning_title (1909518473488345266) -->
-    <skip />
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Laitetaanko pikavalinta (<xliff:g id="SERVICE">%1$s</xliff:g>) päälle?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Molempien äänenvoimakkuuspainikkeiden pitkään painaminen laittaa päälle esteettömyysominaisuuden <xliff:g id="SERVICE">%1$s</xliff:g>. Tämä voi muuttaa laitteesi toimintaa.\n\nVoit muuttaa tätä pikanäppäintä kohdassa Asetukset &gt; Esteettömyys."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Laita päälle"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Älä laita päälle"</string>

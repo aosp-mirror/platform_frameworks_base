@@ -432,13 +432,23 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"менува аудио поставки"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Овозможува апликацијата да ги менува глобалните аудио поставки, како што се јачината на звукот и кој звучник се користи за излез."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"снимај аудио"</string>
-    <string name="permdesc_recordAudio" msgid="3976213377904701093">"Апликацијава може да снима аудио со микрофонот во секое време."</string>
+    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
+    <skip />
+    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
+    <skip />
+    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="176788115994050692">"испраќање наредби до SIM-картичката"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Овозможува апликацијата да испраќа наредби до SIM картичката. Ова е многу опасно."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"препознавајте ја физичката активност"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Апликацијава може да ја препознава вашата физичка активност."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"снимај слики и видеа"</string>
-    <string name="permdesc_camera" msgid="1354600178048761499">"Апликацијава може да фотографира и да снима видеа со камерата во секое време."</string>
+    <!-- no translation found for permdesc_camera (5240801376168647151) -->
+    <skip />
+    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
+    <skip />
+    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
+    <skip />
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Дозволете апликацијата или услугата да пристапува до системските камери за да фотографира и да снима видеа"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Оваа привилегирана или системска апликација може да фотографира и да снима видеа со системската камера во секое време. Потребно е апликацијата да ја има и дозволата android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Дозволете апликацијатa или услугата да прима повратни повици за отворањето или затворањето на уредите со камера."</string>
@@ -988,7 +998,7 @@
     <string name="searchview_description_search" msgid="1045552007537359343">"Пребарај"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"Пребарај барање"</string>
     <string name="searchview_description_clear" msgid="1989371719192982900">"Исчисти барање"</string>
-    <string name="searchview_description_submit" msgid="6771060386117334686">"Поднеси барање"</string>
+    <string name="searchview_description_submit" msgid="6771060386117334686">"Испрати барање"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"Гласовно пребарување"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Овозможи „Истражувај со допир“?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> сака да овозможи „Истражувај со допир“. Кога е вклучено „Истражувај со допир“, може да се слушнат или да се видат описи на она што е под вашиот прст или да се прават движења за комуницирање со таблетот."</string>
@@ -1439,7 +1449,7 @@
     <string name="upload_file" msgid="8651942222301634271">"Избери датотека"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Не е избрана датотека"</string>
     <string name="reset" msgid="3865826612628171429">"Ресетирај"</string>
-    <string name="submit" msgid="862795280643405865">"Поднеси"</string>
+    <string name="submit" msgid="862795280643405865">"Испрати"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Апликацијата за возење работи"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Допрете за да излезете од апликацијата за возење."</string>
     <string name="back_button_label" msgid="4078224038025043387">"Назад"</string>
@@ -1622,12 +1632,10 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Да го зголемиме звукот над препорачаното ниво?\n\nСлушањето звуци со голема јачина подолги периоди може да ви го оштети сетилото за слух."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Да се користи кратенка за „Пристапност“?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Кога е вклучена кратенката, ако ги притиснете двете копчиња за јачина на звук во времетраење од 3 секунди, ќе се стартува функција за пристапност."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (3135860819356676426) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Да се вклучи кратенка за функциите за пристапност?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Ако ги задржите притиснати двете копчиња за јачина на звук неколку секунди, ќе се вклучат функциите за пристапност. Ова може да го промени начинот на функционирање на уредот.\n\nТековни функции:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nМоже да ги промените избраните функции во „Поставки &gt; Пристапност“."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <!-- no translation found for accessibility_shortcut_single_service_warning_title (1909518473488345266) -->
-    <skip />
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Да се вклучи кратенка за <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ако ги задржите притиснати двете копчиња за јачина на звук неколку секунди, ќе се вклучи функцијата за пристапност <xliff:g id="SERVICE">%1$s</xliff:g>. Ова може да го промени начинот на функционирање на уредот.\n\nМоже да ја измените кратенкава да биде за друга функција во „Поставки &gt; Пристапност“."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Вклучи"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Не вклучувај"</string>
