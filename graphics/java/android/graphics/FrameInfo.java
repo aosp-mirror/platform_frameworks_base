@@ -52,6 +52,7 @@ public final class FrameInfo {
     public static final long FLAG_SURFACE_CANVAS = 1 << 2;
 
     // An invalid vsync id to be used when FRAME_TIMELINE_VSYNC_ID is unknown
+    // Needs to be in sync with android::ISurfaceComposer::INVALID_VSYNC_ID in native code
     public static final long INVALID_VSYNC_ID = -1;
 
     @LongDef(flag = true, value = {
