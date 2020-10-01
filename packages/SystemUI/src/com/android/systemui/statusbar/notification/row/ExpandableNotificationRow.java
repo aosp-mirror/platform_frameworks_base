@@ -1478,8 +1478,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    private void updateIconVisibilities() {
-        // The shelficon is never hidden for children in groups
+    /** Refreshes the visibility of notification icons */
+    public void updateIconVisibilities() {
+        // The shelf icon is never hidden for children in groups
         boolean visible = !isChildInGroup() && mShelfIconVisible;
         for (NotificationContentView l : mLayouts) {
             l.setShelfIconVisible(visible);

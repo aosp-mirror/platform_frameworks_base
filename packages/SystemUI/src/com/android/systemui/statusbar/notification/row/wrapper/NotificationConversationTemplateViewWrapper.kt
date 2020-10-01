@@ -147,6 +147,8 @@ class NotificationConversationTemplateViewWrapper constructor(
                 // hiding the conversationIcon will already do that via its listener.
                 return
             }
+        } else {
+            conversationIconView.isForceHidden = false
         }
         super.setShelfIconVisible(visible)
     }
