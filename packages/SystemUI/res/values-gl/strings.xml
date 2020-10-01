@@ -246,7 +246,7 @@
     <string name="accessibility_remove_notification" msgid="1641455251495815527">"Eliminar notificación."</string>
     <string name="accessibility_gps_enabled" msgid="4061313248217660858">"GPS activado"</string>
     <string name="accessibility_gps_acquiring" msgid="896207402196024040">"Obtendo GPS."</string>
-    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter activado"</string>
+    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Teletipo activado"</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Timbre en vibración"</string>
     <string name="accessibility_ringer_silent" msgid="8994620163934249882">"Timbre silenciado"</string>
     <!-- no translation found for accessibility_casting (8708751252897282313) -->
