@@ -15,4 +15,4 @@
  */
 package android.hardware.fingerprint;
 
-parcelable FingerprintSensorProperties;
+parcelable FingerprintSensorPropertiesInternal;

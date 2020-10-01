@@ -30,6 +30,7 @@ import android.content.res.TypedArray;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -109,13 +110,13 @@ public class UdfpsControllerTest extends SysuiTestCase {
     public void setUp() {
         setUpResources();
         when(mLayoutInflater.inflate(R.layout.udfps_view, null, false)).thenReturn(mUdfpsView);
-        final List<FingerprintSensorProperties> props = new ArrayList<>();
-        props.add(new FingerprintSensorProperties(TEST_UDFPS_SENSOR_ID,
+        final List<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
+        props.add(new FingerprintSensorPropertiesInternal(TEST_UDFPS_SENSOR_ID,
                 SensorProperties.STRENGTH_STRONG,
                 5 /* maxEnrollmentsPerUser */,
                 FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
                 true /* resetLockoutRequiresHardwareAuthToken */));
-        when(mFingerprintManager.getSensorProperties()).thenReturn(props);
+        when(mFingerprintManager.getSensorPropertiesInternal()).thenReturn(props);
         mSystemSettings = new FakeSettings();
         mFgExecutor = new FakeExecutor(new FakeSystemClock());
         mUdfpsController = new UdfpsController(

@@ -17,66 +17,71 @@
 package android.hardware.biometrics;
 
 import android.annotation.IntDef;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * The base class containing all sensor-agnostic information. This is a superset of the
- * {@link android.hardware.biometrics.common.CommonProps}, and provides backwards-compatible
- * behavior with the older generation of HIDL (non-AIDL) interfaces.
+ * The base class containing all modality-agnostic information.
  * @hide
  */
-public class SensorProperties implements Parcelable {
-
+public class SensorProperties {
+    /**
+     * A sensor that meets the requirements for Class 1 biometrics as defined in the CDD. This does
+     * not correspond to a public BiometricManager.Authenticators constant. Sensors of this strength
+     * are not available to applications via the public API surface.
+     * @hide
+     */
     public static final int STRENGTH_CONVENIENCE = 0;
+
+    /**
+     * A sensor that meets the requirements for Class 2 biometrics as defined in the CDD.
+     * Corresponds to BiometricManager.Authenticators.BIOMETRIC_WEAK.
+     * @hide
+     */
     public static final int STRENGTH_WEAK = 1;
+
+    /**
+     * A sensor that meets the requirements for Class 3 biometrics as defined in the CDD.
+     * Corresponds to BiometricManager.Authenticators.BIOMETRIC_STRONG.
+     *
+     * Notably, this is the only strength that allows generation of HardwareAuthToken(s).
+     * @hide
+     */
     public static final int STRENGTH_STRONG = 2;
 
+    /**
+     * @hide
+     */
     @IntDef({STRENGTH_CONVENIENCE, STRENGTH_WEAK, STRENGTH_STRONG})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Strength {}
 
-    public final int sensorId;
-    @Strength public final int sensorStrength;
-    public final int maxEnrollmentsPerUser;
+    private final int mSensorId;
+    @Strength private final int mSensorStrength;
 
-    protected SensorProperties(int sensorId, @Strength int sensorStrength,
-            int maxEnrollmentsPerUser) {
-        this.sensorId = sensorId;
-        this.sensorStrength = sensorStrength;
-        this.maxEnrollmentsPerUser = maxEnrollmentsPerUser;
+    /**
+     * @hide
+     */
+    public SensorProperties(int sensorId, @Strength int sensorStrength) {
+        mSensorId = sensorId;
+        mSensorStrength = sensorStrength;
     }
 
-    protected SensorProperties(Parcel in) {
-        sensorId = in.readInt();
-        sensorStrength = in.readInt();
-        maxEnrollmentsPerUser = in.readInt();
+    /**
+     * @return The sensor's unique identifier.
+     * @hide
+     */
+    public int getSensorId() {
+        return mSensorId;
     }
 
-    public static final Creator<SensorProperties> CREATOR = new Creator<SensorProperties>() {
-        @Override
-        public SensorProperties createFromParcel(Parcel in) {
-            return new SensorProperties(in);
-        }
-
-        @Override
-        public SensorProperties[] newArray(int size) {
-            return new SensorProperties[size];
-        }
-    };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(sensorId);
-        dest.writeInt(sensorStrength);
-        dest.writeInt(maxEnrollmentsPerUser);
+    /**
+     * @return The sensor's strength.
+     * @hide
+     */
+    @Strength
+    public int getSensorStrength() {
+        return mSensorStrength;
     }
 }

@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
-import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
@@ -49,8 +49,8 @@ import java.util.List;
  * }
  *
  * For operations that are supported by some providers but not others, clients are required
- * to check (e.g. via {@link FingerprintManager#getSensorProperties()}) to ensure that the code
- * path isn't taken. ServiceProviders will provide a no-op for unsupported operations to
+ * to check (e.g. via {@link FingerprintManager#getSensorPropertiesInternal()}) to ensure that the
+ * code path isn't taken. ServiceProviders will provide a no-op for unsupported operations to
  * fail safely.
  */
 @SuppressWarnings("deprecation")
@@ -60,7 +60,7 @@ public interface ServiceProvider {
      */
     boolean containsSensor(int sensorId);
 
-    @NonNull List<FingerprintSensorProperties> getSensorProperties();
+    @NonNull List<FingerprintSensorPropertiesInternal> getSensorProperties();
 
     void scheduleResetLockout(int sensorId, int userId, @Nullable byte[] hardwareAuthToken);
 

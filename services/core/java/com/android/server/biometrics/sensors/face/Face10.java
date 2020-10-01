@@ -31,7 +31,7 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
 import android.hardware.face.Face;
-import android.hardware.face.FaceSensorProperties;
+import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
 import android.os.Build;
@@ -87,7 +87,7 @@ class Face10 implements IHwBinder.DeathRecipient {
     static final String NOTIFICATION_TAG = "FaceService";
     static final int NOTIFICATION_ID = 1;
 
-    @NonNull private final FaceSensorProperties mFaceSensorProperties;
+    @NonNull private final FaceSensorPropertiesInternal mFaceSensorProperties;
     @NonNull private final Context mContext;
     @NonNull private final BiometricScheduler mScheduler;
     @NonNull private final Handler mHandler;
@@ -285,8 +285,8 @@ class Face10 implements IHwBinder.DeathRecipient {
                 .getBoolean(R.bool.config_faceAuthSupportsSelfIllumination);
         final int maxTemplatesAllowed = context.getResources()
                 .getInteger(R.integer.config_faceMaxTemplatesPerUser);
-        mFaceSensorProperties = new FaceSensorProperties(sensorId, false /* supportsFaceDetect */,
-                supportsSelfIllumination, maxTemplatesAllowed);
+        mFaceSensorProperties = new FaceSensorPropertiesInternal(sensorId, strength,
+                maxTemplatesAllowed, false /* supportsFaceDetect */, supportsSelfIllumination);
         mContext = context;
         mSensorId = sensorId;
         mScheduler = new BiometricScheduler(TAG, null /* gestureAvailabilityTracker */);
@@ -672,7 +672,8 @@ class Face10 implements IHwBinder.DeathRecipient {
         return daemon != null;
     }
 
-    @NonNull FaceSensorProperties getFaceSensorProperties() {
+    @NonNull
+    FaceSensorPropertiesInternal getFaceSensorProperties() {
         return mFaceSensorProperties;
     }
 

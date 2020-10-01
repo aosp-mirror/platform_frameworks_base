@@ -33,7 +33,7 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.fingerprint.Fingerprint;
-import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
@@ -87,9 +87,11 @@ public class FingerprintService extends SystemService {
      */
     private final class FingerprintServiceWrapper extends IFingerprintService.Stub {
         @Override // Binder call
-        public List<FingerprintSensorProperties> getSensorProperties(String opPackageName) {
+        public List<FingerprintSensorPropertiesInternal> getSensorPropertiesInternal(
+                String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
-            final List<FingerprintSensorProperties> properties =
+
+            final List<FingerprintSensorPropertiesInternal> properties =
                     FingerprintService.this.getSensorProperties();
 
             Slog.d(TAG, "Retrieved sensor properties for: " + opPackageName
@@ -347,7 +349,8 @@ public class FingerprintService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 for (ServiceProvider provider : mServiceProviders) {
-                    for (FingerprintSensorProperties props : provider.getSensorProperties()) {
+                    for (FingerprintSensorPropertiesInternal props :
+                            provider.getSensorProperties()) {
                         if (args.length > 0 && "--proto".equals(args[0])) {
                             provider.dumpProto(props.sensorId, fd);
                         } else {
@@ -566,7 +569,7 @@ public class FingerprintService extends SystemService {
      */
     @Nullable
     private Pair<Integer, ServiceProvider> getSingleProvider() {
-        final List<FingerprintSensorProperties> properties = getSensorProperties();
+        final List<FingerprintSensorPropertiesInternal> properties = getSensorProperties();
         if (properties.size() != 1) {
             return null;
         }
@@ -585,8 +588,8 @@ public class FingerprintService extends SystemService {
     }
 
     @NonNull
-    private List<FingerprintSensorProperties> getSensorProperties() {
-        final List<FingerprintSensorProperties> properties = new ArrayList<>();
+    private List<FingerprintSensorPropertiesInternal> getSensorProperties() {
+        final List<FingerprintSensorPropertiesInternal> properties = new ArrayList<>();
 
         for (ServiceProvider provider : mServiceProviders) {
             properties.addAll(provider.getSensorProperties());
