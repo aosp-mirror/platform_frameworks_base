@@ -1245,7 +1245,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
      * of the old SurfaceControl alive.
      */
     private SurfaceControl createSurfaceControls(ViewRootImpl viewRoot) {
-        final String name = "SurfaceView - " + viewRoot.getTitle().toString();
+        final String name = "SurfaceView[" + viewRoot.getTitle().toString() + "]";
 
         SurfaceControl.Builder builder = new SurfaceControl.Builder(mSurfaceSession)
                 .setName(name)
@@ -1270,7 +1270,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     .setBLASTLayer()
                     .setCallsite("SurfaceView.updateSurface")
                     .build();
-            mBlastBufferQueue = new BLASTBufferQueue(
+            mBlastBufferQueue = new BLASTBufferQueue(name,
                     mBlastSurfaceControl, mSurfaceWidth, mSurfaceHeight, true /* TODO */);
         } else {
             previousSurfaceControl = mSurfaceControl;

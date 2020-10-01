@@ -29,10 +29,21 @@
 
 namespace android {
 
-static jlong nativeCreate(JNIEnv* env, jclass clazz, jlong surfaceControl, jlong width, jlong height,
-                          jboolean enableTripleBuffering) {
-    sp<BLASTBufferQueue> queue = new BLASTBufferQueue(
-            reinterpret_cast<SurfaceControl*>(surfaceControl), width, height, enableTripleBuffering);
+static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName, jlong surfaceControl,
+                          jlong width, jlong height, jboolean enableTripleBuffering) {
+    String8 str8;
+    if (jName) {
+        const jchar* str16 = env->GetStringCritical(jName, nullptr);
+        if (str16) {
+            str8 = String8(reinterpret_cast<const char16_t*>(str16), env->GetStringLength(jName));
+            env->ReleaseStringCritical(jName, str16);
+            str16 = nullptr;
+        }
+    }
+    std::string name = str8.string();
+    sp<BLASTBufferQueue> queue =
+            new BLASTBufferQueue(name, reinterpret_cast<SurfaceControl*>(surfaceControl), width,
+                                 height, enableTripleBuffering);
     queue->incStrong((void*)nativeCreate);
     return reinterpret_cast<jlong>(queue.get());
 }
@@ -59,18 +70,12 @@ static void nativeUpdate(JNIEnv*env, jclass clazz, jlong ptr, jlong surfaceContr
 }
 
 static const JNINativeMethod gMethods[] = {
-    /* name, signature, funcPtr */
-    { "nativeCreate", "(JJJZ)J",
-            (void*)nativeCreate },
-    {  "nativeGetSurface", "(J)Landroid/view/Surface;",
-       (void*)nativeGetSurface },
-    { "nativeDestroy", "(J)V",
-            (void*)nativeDestroy },
-    { "nativeSetNextTransaction", "(JJ)V",
-      (void*)nativeSetNextTransaction },
-    { "nativeUpdate", "(JJJJ)V",
-      (void*)nativeUpdate }
-};
+        /* name, signature, funcPtr */
+        {"nativeCreate", "(Ljava/lang/String;JJJZ)J", (void*)nativeCreate},
+        {"nativeGetSurface", "(J)Landroid/view/Surface;", (void*)nativeGetSurface},
+        {"nativeDestroy", "(J)V", (void*)nativeDestroy},
+        {"nativeSetNextTransaction", "(JJ)V", (void*)nativeSetNextTransaction},
+        {"nativeUpdate", "(JJJJ)V", (void*)nativeUpdate}};
 
 int register_android_graphics_BLASTBufferQueue(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/graphics/BLASTBufferQueue",
