@@ -22,9 +22,11 @@ import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.PictureInPictureParams;
 import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -87,7 +89,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         }
         // If there is an animation running (ie. from a shelf offset), then ensure that we calculate
         // the bounds for the next orientation using the destination bounds of the animation
-        // TODO: Techincally this should account for movement animation bounds as well
+        // TODO: Technically this should account for movement animation bounds as well
         Rect currentBounds = mPipTaskOrganizer.getCurrentOrAnimatingBounds();
         final boolean changed = mPipBoundsHandler.onDisplayRotationChanged(mContext,
                 mTmpNormalBounds, currentBounds, mTmpInsetBounds, displayId, fromRotation,
@@ -351,16 +353,18 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
      */
     @Override
     public void setShelfHeight(boolean visible, int height) {
-        mHandler.post(() -> {
-            final int shelfHeight = visible ? height : 0;
-            final boolean changed = mPipBoundsHandler.setShelfHeight(visible, shelfHeight);
-            if (changed) {
-                mTouchHandler.onShelfVisibilityChanged(visible, shelfHeight);
-                updateMovementBounds(mPipTaskOrganizer.getLastReportedBounds(),
-                        false /* fromRotation */, false /* fromImeAdjustment */,
-                        true /* fromShelfAdjustment */, null /* windowContainerTransaction */);
-            }
-        });
+        mHandler.post(() -> setShelfHeightLocked(visible, height));
+    }
+
+    private void setShelfHeightLocked(boolean visible, int height) {
+        final int shelfHeight = visible ? height : 0;
+        final boolean changed = mPipBoundsHandler.setShelfHeight(visible, shelfHeight);
+        if (changed) {
+            mTouchHandler.onShelfVisibilityChanged(visible, shelfHeight);
+            updateMovementBounds(mPipTaskOrganizer.getLastReportedBounds(),
+                    false /* fromRotation */, false /* fromImeAdjustment */,
+                    true /* fromShelfAdjustment */, null /* windowContainerTransaction */);
+        }
     }
 
     @Override
@@ -371,6 +375,21 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     @Override
     public void setPinnedStackAnimationListener(Consumer<Boolean> callback) {
         mHandler.post(() -> mPinnedStackAnimationRecentsCallback = callback);
+    }
+
+    @Override
+    public Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
+            PictureInPictureParams pictureInPictureParams,
+            int launcherRotation, int shelfHeight) {
+        setShelfHeightLocked(shelfHeight > 0 /* visible */, shelfHeight);
+        mPipBoundsHandler.onDisplayRotationChangedNotInPip(mContext, launcherRotation);
+        return mPipTaskOrganizer.startSwipePipToHome(componentName, activityInfo,
+                pictureInPictureParams);
+    }
+
+    @Override
+    public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds) {
+        mPipTaskOrganizer.stopSwipePipToHome(componentName, destinationBounds);
     }
 
     @Override
