@@ -16,57 +16,181 @@
 
 package com.android.systemui;
 
+import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.TestCase.fail;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.UserIdInt;
+import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.widget.RemoteViews;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.messages.nano.SystemMessageProto;
+import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.util.time.FakeSystemClock;
+
+import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class ForegroundServiceControllerTest extends SysuiTestCase {
-    @UserIdInt private static final int USERID_ONE = 10; // UserManagerService.MIN_USER_ID;
-    @UserIdInt private static final int USERID_TWO = USERID_ONE + 1;
-
     private ForegroundServiceController mFsc;
     private ForegroundServiceNotificationListener mListener;
     private NotificationEntryListener mEntryListener;
+    private final FakeSystemClock mClock = new FakeSystemClock();
+    @Mock private NotificationEntryManager mEntryManager;
+    @Mock private AppOpsController mAppOpsController;
+    @Mock private Handler mMainHandler;
+    @Mock private NotifPipeline mNotifPipeline;
 
     @Before
     public void setUp() throws Exception {
-        mFsc = new ForegroundServiceController();
-        NotificationEntryManager notificationEntryManager = mock(NotificationEntryManager.class);
+        // allow the TestLooper to be asserted as the main thread these tests
+        allowTestableLooperAsMainThread();
+
+        MockitoAnnotations.initMocks(this);
+        mFsc = new ForegroundServiceController(
+                mEntryManager, mAppOpsController, mMainHandler);
         mListener = new ForegroundServiceNotificationListener(
-                mContext, mFsc, notificationEntryManager);
+                mContext, mFsc, mEntryManager, mNotifPipeline,
+                mock(ForegroundServiceLifetimeExtender.class), mClock);
         ArgumentCaptor<NotificationEntryListener> entryListenerCaptor =
                 ArgumentCaptor.forClass(NotificationEntryListener.class);
-        verify(notificationEntryManager).addNotificationEntryListener(
+        verify(mEntryManager).addNotificationEntryListener(
                 entryListenerCaptor.capture());
         mEntryListener = entryListenerCaptor.getValue();
+    }
+
+    @Test
+    public void testAppOpsChangedCalledFromBgThread() {
+        try {
+            // WHEN onAppOpChanged is called from a different thread than the MainLooper
+            disallowTestableLooperAsMainThread();
+            NotificationEntry entry = createFgEntry();
+            mFsc.onAppOpChanged(
+                    AppOpsManager.OP_CAMERA,
+                    entry.getSbn().getUid(),
+                    entry.getSbn().getPackageName(),
+                    true);
+
+            // This test is run on the TestableLooper, which is not the MainLooper, so
+            // we expect an exception to be thrown
+            fail("onAppOpChanged shouldn't be allowed to be called from a bg thread.");
+        } catch (IllegalStateException e) {
+            // THEN expect an exception
+        }
+    }
+
+    @Test
+    public void testAppOps_appOpChangedBeforeNotificationExists() {
+        // GIVEN app op exists, but notification doesn't exist in NEM yet
+        NotificationEntry entry = createFgEntry();
+        mFsc.onAppOpChanged(
+                AppOpsManager.OP_CAMERA,
+                entry.getSbn().getUid(),
+                entry.getSbn().getPackageName(),
+                true);
+        assertFalse(entry.mActiveAppOps.contains(AppOpsManager.OP_CAMERA));
+
+        // WHEN the notification is added
+        mEntryListener.onPendingEntryAdded(entry);
+
+        // THEN the app op is added to the entry
+        Assert.assertTrue(entry.mActiveAppOps.contains(AppOpsManager.OP_CAMERA));
+    }
+
+    @Test
+    public void testAppOps_appOpAddedToForegroundNotif() {
+        // GIVEN a notification associated with a foreground service
+        NotificationEntry entry = addFgEntry();
+        when(mEntryManager.getPendingOrActiveNotif(entry.getKey())).thenReturn(entry);
+
+        // WHEN we are notified of a new app op for this notification
+        mFsc.onAppOpChanged(
+                AppOpsManager.OP_CAMERA,
+                entry.getSbn().getUid(),
+                entry.getSbn().getPackageName(),
+                true);
+
+        // THEN the app op is added to the entry
+        Assert.assertTrue(entry.mActiveAppOps.contains(AppOpsManager.OP_CAMERA));
+
+        // THEN notification views are updated since the notification is visible
+        verify(mEntryManager, times(1)).updateNotifications(anyString());
+    }
+
+    @Test
+    public void testAppOpsAlreadyAdded() {
+        // GIVEN a foreground service associated notification that already has the correct app op
+        NotificationEntry entry = addFgEntry();
+        entry.mActiveAppOps.add(AppOpsManager.OP_CAMERA);
+        when(mEntryManager.getPendingOrActiveNotif(entry.getKey())).thenReturn(entry);
+
+        // WHEN we are notified of the same app op for this notification
+        mFsc.onAppOpChanged(
+                AppOpsManager.OP_CAMERA,
+                entry.getSbn().getUid(),
+                entry.getSbn().getPackageName(),
+                true);
+
+        // THEN the app op still exists in the notification entry
+        Assert.assertTrue(entry.mActiveAppOps.contains(AppOpsManager.OP_CAMERA));
+
+        // THEN notification views aren't updated since nothing changed
+        verify(mEntryManager, never()).updateNotifications(anyString());
+    }
+
+    @Test
+    public void testAppOps_appOpNotAddedToUnrelatedNotif() {
+        // GIVEN no notification entries correspond to the newly updated appOp
+        NotificationEntry entry = addFgEntry();
+        when(mEntryManager.getPendingOrActiveNotif(entry.getKey())).thenReturn(null);
+
+        // WHEN a new app op is detected
+        mFsc.onAppOpChanged(
+                AppOpsManager.OP_CAMERA,
+                entry.getSbn().getUid(),
+                entry.getSbn().getPackageName(),
+                true);
+
+        // THEN we won't see appOps on the entry
+        Assert.assertFalse(entry.mActiveAppOps.contains(AppOpsManager.OP_CAMERA));
+
+        // THEN notification views aren't updated since nothing changed
+        verify(mEntryManager, never()).updateNotifications(anyString());
     }
 
     @Test
@@ -282,68 +406,84 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testStdLayoutBasic() {
-        final String PKG1 = "com.example.app0";
-
-        StatusBarNotification sbn_user1_app1 = makeMockFgSBN(USERID_ONE, PKG1, 0, true);
-        sbn_user1_app1.getNotification().flags = 0;
-        StatusBarNotification sbn_user1_app1_fg = makeMockFgSBN(USERID_ONE, PKG1, 1, true);
-        entryAdded(sbn_user1_app1, NotificationManager.IMPORTANCE_MIN); // not fg
-        assertTrue(mFsc.isSystemAlertWarningNeeded(USERID_ONE, PKG1)); // should be required!
-        entryAdded(sbn_user1_app1_fg, NotificationManager.IMPORTANCE_MIN);
-        assertFalse(mFsc.isSystemAlertWarningNeeded(USERID_ONE, PKG1)); // app1 has got it covered
-        assertFalse(mFsc.isSystemAlertWarningNeeded(USERID_TWO, "otherpkg"));
-        // let's take out the non-fg notification and see what happens.
-        entryRemoved(sbn_user1_app1);
-        // still covered by sbn_user1_app1_fg
-        assertFalse(mFsc.isSystemAlertWarningNeeded(USERID_ONE, PKG1));
-        assertFalse(mFsc.isSystemAlertWarningNeeded(USERID_TWO, "anyPkg"));
-
-        // let's attempt to downgrade the notification from FLAG_FOREGROUND and see what we get
-        StatusBarNotification sbn_user1_app1_fg_sneaky = makeMockFgSBN(USERID_ONE, PKG1, 1, true);
-        sbn_user1_app1_fg_sneaky.getNotification().flags = 0;
-        entryUpdated(sbn_user1_app1_fg_sneaky, NotificationManager.IMPORTANCE_MIN);
-        assertTrue(mFsc.isSystemAlertWarningNeeded(USERID_ONE, PKG1)); // should be required!
-        assertFalse(mFsc.isSystemAlertWarningNeeded(USERID_TWO, "anything"));
-        // ok, ok, we'll put it back
-        sbn_user1_app1_fg_sneaky.getNotification().flags = Notification.FLAG_FOREGROUND_SERVICE;
-        entryUpdated(sbn_user1_app1_fg, NotificationManager.IMPORTANCE_MIN);
-        assertFalse(mFsc.isSystemAlertWarningNeeded(USERID_ONE, PKG1));
-        assertFalse(mFsc.isSystemAlertWarningNeeded(USERID_TWO, "whatever"));
-
-        entryRemoved(sbn_user1_app1_fg_sneaky);
-        assertTrue(mFsc.isSystemAlertWarningNeeded(USERID_ONE, PKG1)); // should be required!
-        assertFalse(mFsc.isSystemAlertWarningNeeded(USERID_TWO, "a"));
-
-        // let's try a custom layout
-        sbn_user1_app1_fg_sneaky = makeMockFgSBN(USERID_ONE, PKG1, 1, false);
-        entryUpdated(sbn_user1_app1_fg_sneaky, NotificationManager.IMPORTANCE_MIN);
-        assertTrue(mFsc.isSystemAlertWarningNeeded(USERID_ONE, PKG1)); // should be required!
-        assertFalse(mFsc.isSystemAlertWarningNeeded(USERID_TWO, "anything"));
-        // now let's test an upgrade (non fg to fg)
-        entryAdded(sbn_user1_app1, NotificationManager.IMPORTANCE_MIN);
-        assertTrue(mFsc.isSystemAlertWarningNeeded(USERID_ONE, PKG1));
-        assertFalse(mFsc.isSystemAlertWarningNeeded(USERID_TWO, "b"));
-        sbn_user1_app1.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
-        entryUpdated(sbn_user1_app1,
-                NotificationManager.IMPORTANCE_MIN); // this is now a fg notification
-
-        assertFalse(mFsc.isSystemAlertWarningNeeded(USERID_TWO, PKG1));
-        assertFalse(mFsc.isSystemAlertWarningNeeded(USERID_ONE, PKG1));
-
-        // remove it, make sure we're out of compliance again
-        entryRemoved(sbn_user1_app1); // was fg, should return true
-        entryRemoved(sbn_user1_app1);
-        assertFalse(mFsc.isSystemAlertWarningNeeded(USERID_TWO, PKG1));
-        assertTrue(mFsc.isSystemAlertWarningNeeded(USERID_ONE, PKG1));
+    public void testNoNotifsNorAppOps_noSystemAlertWarningRequired() {
+        // no notifications nor app op signals that this package/userId requires system alert
+        // warning
+        assertFalse(mFsc.isSystemAlertWarningNeeded(USERID_ONE, "any"));
     }
 
-    private StatusBarNotification makeMockSBN(int userid, String pkg, int id, String tag,
+    @Test
+    public void testCustomLayouts_systemAlertWarningRequired() {
+        // GIVEN a notification with a custom layout
+        final String pkg = "com.example.app0";
+        StatusBarNotification customLayoutNotif = makeMockSBN(USERID_ONE, pkg, 0,
+                false);
+
+        // WHEN the custom layout entry is added
+        entryAdded(customLayoutNotif, NotificationManager.IMPORTANCE_MIN);
+
+        // THEN a system alert warning is required since there aren't any notifications that can
+        // display the app ops
+        assertTrue(mFsc.isSystemAlertWarningNeeded(USERID_ONE, pkg));
+    }
+
+    @Test
+    public void testStandardLayoutExists_noSystemAlertWarningRequired() {
+        // GIVEN two notifications (one with a custom layout, the other with a standard layout)
+        final String pkg = "com.example.app0";
+        StatusBarNotification customLayoutNotif = makeMockSBN(USERID_ONE, pkg, 0,
+                false);
+        StatusBarNotification standardLayoutNotif = makeMockSBN(USERID_ONE, pkg, 1, true);
+
+        // WHEN the entries are added
+        entryAdded(customLayoutNotif, NotificationManager.IMPORTANCE_MIN);
+        entryAdded(standardLayoutNotif, NotificationManager.IMPORTANCE_MIN);
+
+        // THEN no system alert warning is required, since there is at least one notification
+        // with a standard layout that can display the app ops on the notification
+        assertFalse(mFsc.isSystemAlertWarningNeeded(USERID_ONE, pkg));
+    }
+
+    @Test
+    public void testStandardLayoutRemoved_systemAlertWarningRequired() {
+        // GIVEN two notifications (one with a custom layout, the other with a standard layout)
+        final String pkg = "com.example.app0";
+        StatusBarNotification customLayoutNotif = makeMockSBN(USERID_ONE, pkg, 0,
+                false);
+        StatusBarNotification standardLayoutNotif = makeMockSBN(USERID_ONE, pkg, 1, true);
+
+        // WHEN the entries are added and then the standard layout notification is removed
+        entryAdded(customLayoutNotif, NotificationManager.IMPORTANCE_MIN);
+        entryAdded(standardLayoutNotif, NotificationManager.IMPORTANCE_MIN);
+        entryRemoved(standardLayoutNotif);
+
+        // THEN a system alert warning is required since there aren't any notifications that can
+        // display the app ops
+        assertTrue(mFsc.isSystemAlertWarningNeeded(USERID_ONE, pkg));
+    }
+
+    @Test
+    public void testStandardLayoutUpdatedToCustomLayout_systemAlertWarningRequired() {
+        // GIVEN a standard layout notification and then an updated version with a customLayout
+        final String pkg = "com.example.app0";
+        StatusBarNotification standardLayoutNotif = makeMockSBN(USERID_ONE, pkg, 1, true);
+        StatusBarNotification updatedToCustomLayoutNotif = makeMockSBN(USERID_ONE, pkg, 1, false);
+
+        // WHEN the entries is added and then updated to a custom layout
+        entryAdded(standardLayoutNotif, NotificationManager.IMPORTANCE_MIN);
+        entryUpdated(updatedToCustomLayoutNotif, NotificationManager.IMPORTANCE_MIN);
+
+        // THEN a system alert warning is required since there aren't any notifications that can
+        // display the app ops
+        assertTrue(mFsc.isSystemAlertWarningNeeded(USERID_ONE, pkg));
+    }
+
+    private StatusBarNotification makeMockSBN(int userId, String pkg, int id, String tag,
             int flags) {
         final Notification n = mock(Notification.class);
         n.extras = new Bundle();
         n.flags = flags;
-        return makeMockSBN(userid, pkg, id, tag, n);
+        return makeMockSBN(userId, pkg, id, tag, n);
     }
 
     private StatusBarNotification makeMockSBN(int userid, String pkg, int id, String tag,
@@ -359,10 +499,9 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
         return sbn;
     }
 
-    private StatusBarNotification makeMockFgSBN(int userid, String pkg, int id,
+    private StatusBarNotification makeMockSBN(int uid, String pkg, int id,
             boolean usesStdLayout) {
-        StatusBarNotification sbn =
-                makeMockSBN(userid, pkg, id, "foo", Notification.FLAG_FOREGROUND_SERVICE);
+        StatusBarNotification sbn = makeMockSBN(uid, pkg, id, "foo", 0);
         if (usesStdLayout) {
             sbn.getNotification().contentView = null;
             sbn.getNotification().headsUpContentView = null;
@@ -373,8 +512,22 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
         return sbn;
     }
 
-    private StatusBarNotification makeMockFgSBN(int userid, String pkg) {
-        return makeMockSBN(userid, pkg, 1000, "foo", Notification.FLAG_FOREGROUND_SERVICE);
+    private StatusBarNotification makeMockFgSBN(int uid, String pkg, int id,
+            boolean usesStdLayout) {
+        StatusBarNotification sbn =
+                makeMockSBN(uid, pkg, id, "foo", Notification.FLAG_FOREGROUND_SERVICE);
+        if (usesStdLayout) {
+            sbn.getNotification().contentView = null;
+            sbn.getNotification().headsUpContentView = null;
+            sbn.getNotification().bigContentView = null;
+        } else {
+            sbn.getNotification().contentView = mock(RemoteViews.class);
+        }
+        return sbn;
+    }
+
+    private StatusBarNotification makeMockFgSBN(int uid, String pkg) {
+        return makeMockSBN(uid, pkg, 1000, "foo", Notification.FLAG_FOREGROUND_SERVICE);
     }
 
     private StatusBarNotification makeMockDisclosure(int userid, String[] pkgs) {
@@ -391,20 +544,46 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
         return sbn;
     }
 
+    private NotificationEntry addFgEntry() {
+        NotificationEntry entry = createFgEntry();
+        mEntryListener.onPendingEntryAdded(entry);
+        return entry;
+    }
+
+    private NotificationEntry createFgEntry() {
+        return new NotificationEntryBuilder()
+                .setSbn(makeMockFgSBN(0, TEST_PACKAGE_NAME, 1000, true))
+                .setImportance(NotificationManager.IMPORTANCE_DEFAULT)
+                .build();
+    }
+
     private void entryRemoved(StatusBarNotification notification) {
-        mEntryListener.onEntryRemoved(new NotificationEntry(notification),
-                null, false);
+        mEntryListener.onEntryRemoved(
+                new NotificationEntryBuilder()
+                        .setSbn(notification)
+                        .build(),
+                null,
+                false,
+                REASON_APP_CANCEL);
     }
 
     private void entryAdded(StatusBarNotification notification, int importance) {
-        NotificationEntry entry = new NotificationEntry(notification);
-        entry.importance = importance;
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setSbn(notification)
+                .setImportance(importance)
+                .build();
         mEntryListener.onPendingEntryAdded(entry);
     }
 
     private void entryUpdated(StatusBarNotification notification, int importance) {
-        NotificationEntry entry = new NotificationEntry(notification);
-        entry.importance = importance;
-        mEntryListener.onPostEntryUpdated(entry);
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setSbn(notification)
+                .setImportance(importance)
+                .build();
+        mEntryListener.onPreEntryUpdated(entry);
     }
+
+    @UserIdInt private static final int USERID_ONE = 10; // UserManagerService.MIN_USER_ID;
+    @UserIdInt private static final int USERID_TWO = USERID_ONE + 1;
+    private static final String TEST_PACKAGE_NAME = "test";
 }

@@ -19,17 +19,21 @@ package com.android.systemui.statusbar;
 import android.app.Notification;
 import android.app.RemoteInput;
 import android.content.Context;
+import android.net.Uri;
 import android.os.SystemProperties;
+import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.Pair;
 
 import com.android.internal.util.Preconditions;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Keeps track of the currently active {@link RemoteInputView}s.
@@ -43,9 +47,12 @@ public class RemoteInputController {
     private final ArrayMap<String, Object> mSpinning = new ArrayMap<>();
     private final ArrayList<Callback> mCallbacks = new ArrayList<>(3);
     private final Delegate mDelegate;
+    private final RemoteInputUriController mRemoteInputUriController;
 
-    public RemoteInputController(Delegate delegate) {
+    public RemoteInputController(Delegate delegate,
+            RemoteInputUriController remoteInputUriController) {
         mDelegate = delegate;
+        mRemoteInputUriController = remoteInputUriController;
     }
 
     /**
@@ -102,8 +109,8 @@ public class RemoteInputController {
      * @param token a token identifying the view that is managing the remote input
      */
     public void addRemoteInput(NotificationEntry entry, Object token) {
-        Preconditions.checkNotNull(entry);
-        Preconditions.checkNotNull(token);
+        Objects.requireNonNull(entry);
+        Objects.requireNonNull(token);
 
         boolean found = pruneWeakThenRemoveAndContains(
                 entry /* contains */, null /* remove */, token /* removeToken */);
@@ -123,7 +130,7 @@ public class RemoteInputController {
      *              entry. If null, the entry is removed regardless.
      */
     public void removeRemoteInput(NotificationEntry entry, Object token) {
-        Preconditions.checkNotNull(entry);
+        Objects.requireNonNull(entry);
 
         pruneWeakThenRemoveAndContains(null /* contains */, entry /* remove */, token);
 
@@ -137,8 +144,8 @@ public class RemoteInputController {
      * @param token the token of the view managing the remote input.
      */
     public void addSpinning(String key, Object token) {
-        Preconditions.checkNotNull(key);
-        Preconditions.checkNotNull(token);
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(token);
 
         mSpinning.put(key, token);
     }
@@ -152,7 +159,7 @@ public class RemoteInputController {
      *              entry. If null, the entry is removed regardless.
      */
     public void removeSpinning(String key, Object token) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
 
         if (token == null || mSpinning.get(key) == token) {
             mSpinning.remove(key);
@@ -231,7 +238,7 @@ public class RemoteInputController {
 
 
     public void addCallback(Callback callback) {
-        Preconditions.checkNotNull(callback);
+        Objects.requireNonNull(callback);
         mCallbacks.add(callback);
     }
 
@@ -270,6 +277,14 @@ public class RemoteInputController {
 
     public void lockScrollTo(NotificationEntry entry) {
         mDelegate.lockScrollTo(entry);
+    }
+
+    /**
+     * Create a temporary grant which allows the app that submitted the notification access to the
+     * specified URI.
+     */
+    public void grantInlineReplyUriPermission(StatusBarNotification sbn, Uri data) {
+        mRemoteInputUriController.grantInlineReplyUriPermission(sbn, data);
     }
 
     public interface Callback {

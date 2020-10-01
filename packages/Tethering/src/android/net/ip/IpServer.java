@@ -19,12 +19,13 @@ package android.net.ip;
 import static android.net.RouteInfo.RTN_UNICAST;
 import static android.net.TetheringManager.TetheringRequest.checkStaticAddressConfiguration;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
-import static android.net.shared.Inet4AddressUtils.intToInet4AddressHTH;
 import static android.net.util.NetworkConstants.RFC7421_PREFIX_LENGTH;
 import static android.net.util.NetworkConstants.asByte;
 import static android.net.util.PrefixUtils.asIpPrefix;
 import static android.net.util.TetheringMessageBase.BASE_IPSERVER;
 import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
+
+import static com.android.net.module.util.Inet4AddressUtils.intToInet4AddressHTH;
 
 import android.net.INetd;
 import android.net.INetworkStackStatusCallback;
@@ -50,6 +51,7 @@ import android.net.util.InterfaceParams;
 import android.net.util.InterfaceSet;
 import android.net.util.PrefixUtils;
 import android.net.util.SharedLog;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -159,6 +161,15 @@ public class IpServer extends StateMachine {
 
     /** Capture IpServer dependencies, for injection. */
     public abstract static class Dependencies {
+        /**
+         * Create a DadProxy instance to be used by IpServer.
+         * To support multiple tethered interfaces concurrently DAD Proxy
+         * needs to be supported per IpServer instead of per upstream.
+         */
+        public DadProxy getDadProxy(Handler handler, InterfaceParams ifParams) {
+            return new DadProxy(handler, ifParams);
+        }
+
         /** Create an IpNeighborMonitor to be used by this IpServer */
         public IpNeighborMonitor getIpNeighborMonitor(Handler handler, SharedLog log,
                 IpNeighborMonitor.NeighborEventConsumer consumer) {
@@ -196,15 +207,19 @@ public class IpServer extends StateMachine {
     public static final int CMD_TETHER_UNREQUESTED          = BASE_IPSERVER + 2;
     // notification that this interface is down
     public static final int CMD_INTERFACE_DOWN              = BASE_IPSERVER + 3;
-    // notification from the master SM that it had trouble enabling IP Forwarding
+    // notification from the {@link Tethering.TetherMainSM} that it had trouble enabling IP
+    // Forwarding
     public static final int CMD_IP_FORWARDING_ENABLE_ERROR  = BASE_IPSERVER + 4;
-    // notification from the master SM that it had trouble disabling IP Forwarding
+    // notification from the {@link Tethering.TetherMainSM} SM that it had trouble disabling IP
+    // Forwarding
     public static final int CMD_IP_FORWARDING_DISABLE_ERROR = BASE_IPSERVER + 5;
-    // notification from the master SM that it had trouble starting tethering
+    // notification from the {@link Tethering.TetherMainSM} SM that it had trouble starting
+    // tethering
     public static final int CMD_START_TETHERING_ERROR       = BASE_IPSERVER + 6;
-    // notification from the master SM that it had trouble stopping tethering
+    // notification from the {@link Tethering.TetherMainSM} that it had trouble stopping tethering
     public static final int CMD_STOP_TETHERING_ERROR        = BASE_IPSERVER + 7;
-    // notification from the master SM that it had trouble setting the DNS forwarders
+    // notification from the {@link Tethering.TetherMainSM} that it had trouble setting the DNS
+    // forwarders
     public static final int CMD_SET_DNS_FORWARDERS_ERROR    = BASE_IPSERVER + 8;
     // the upstream connection has changed
     public static final int CMD_TETHER_CONNECTION_CHANGED   = BASE_IPSERVER + 9;
@@ -251,6 +266,7 @@ public class IpServer extends StateMachine {
     // Advertisements (otherwise, we do not add them to mLinkProperties at all).
     private LinkProperties mLastIPv6LinkProperties;
     private RouterAdvertisementDaemon mRaDaemon;
+    private DadProxy mDadProxy;
 
     // To be accessed only on the handler thread
     private int mDhcpServerStartIndex = 0;
@@ -422,9 +438,13 @@ public class IpServer extends StateMachine {
             getHandler().post(() -> {
                 // We are on the handler thread: mDhcpServerStartIndex can be read safely.
                 if (mStartIndex != mDhcpServerStartIndex) {
-                    // This start request is obsolete. When the |server| binder token goes out of
-                    // scope, the garbage collector will finalize it, which causes the network stack
-                    // process garbage collector to collect the server itself.
+                     // This start request is obsolete. Explicitly stop the DHCP server to shut
+                     // down its thread. When the |server| binder token goes out of scope, the
+                     // garbage collector will finalize it, which causes the network stack process
+                     // garbage collector to collect the server itself.
+                    try {
+                        server.stop(null);
+                    } catch (RemoteException e) { }
                     return;
                 }
 
@@ -665,6 +685,13 @@ public class IpServer extends StateMachine {
             return false;
         }
 
+        // TODO: use ShimUtils instead of explicitly checking the version here.
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R || "S".equals(Build.VERSION.CODENAME)
+                    || "T".equals(Build.VERSION.CODENAME)) {
+            // DAD Proxy starts forwarding packets after IPv6 upstream is present.
+            mDadProxy = mDeps.getDadProxy(getHandler(), mInterfaceParams);
+        }
+
         return true;
     }
 
@@ -675,6 +702,11 @@ public class IpServer extends StateMachine {
         if (mRaDaemon != null) {
             mRaDaemon.stop();
             mRaDaemon = null;
+        }
+
+        if (mDadProxy != null) {
+            mDadProxy.stop();
+            mDadProxy = null;
         }
     }
 
@@ -693,11 +725,16 @@ public class IpServer extends StateMachine {
         }
 
         RaParams params = null;
-        int upstreamIfindex = 0;
+        String upstreamIface = null;
+        InterfaceParams upstreamIfaceParams = null;
+        int upstreamIfIndex = 0;
 
         if (v6only != null) {
-            final String upstreamIface = v6only.getInterfaceName();
-
+            upstreamIface = v6only.getInterfaceName();
+            upstreamIfaceParams = mDeps.getInterfaceParams(upstreamIface);
+            if (upstreamIfaceParams != null) {
+                upstreamIfIndex = upstreamIfaceParams.index;
+            }
             params = new RaParams();
             params.mtu = v6only.getMtu();
             params.hasDefaultRoute = v6only.hasIpv6DefaultRoute();
@@ -717,15 +754,13 @@ public class IpServer extends StateMachine {
                 }
             }
 
-            upstreamIfindex = mDeps.getIfindex(upstreamIface);
-
             // Add upstream index to name mapping for the tether stats usage in the coordinator.
             // Although this mapping could be added by both class Tethering and IpServer, adding
             // mapping from IpServer guarantees that the mapping is added before the adding
             // forwarding rules. That is because there are different state machines in both
             // classes. It is hard to guarantee the link property update order between multiple
             // state machines.
-            mBpfCoordinator.addUpstreamNameToLookupTable(upstreamIfindex, upstreamIface);
+            mBpfCoordinator.addUpstreamNameToLookupTable(upstreamIfIndex, upstreamIface);
         }
 
         // If v6only is null, we pass in null to setRaParams(), which handles
@@ -734,8 +769,11 @@ public class IpServer extends StateMachine {
         setRaParams(params);
         mLastIPv6LinkProperties = v6only;
 
-        updateIpv6ForwardingRules(mLastIPv6UpstreamIfindex, upstreamIfindex, null);
-        mLastIPv6UpstreamIfindex = upstreamIfindex;
+        updateIpv6ForwardingRules(mLastIPv6UpstreamIfindex, upstreamIfIndex, null);
+        mLastIPv6UpstreamIfindex = upstreamIfIndex;
+        if (mDadProxy != null) {
+            mDadProxy.setUpstreamIface(upstreamIfaceParams);
+        }
     }
 
     private void removeRoutesFromLocalNetwork(@NonNull final List<RouteInfo> toBeRemoved) {
@@ -1315,7 +1353,7 @@ public class IpServer extends StateMachine {
 
     /**
      * This state is terminal for the per interface state machine.  At this
-     * point, the master state machine should have removed this interface
+     * point, the tethering main state machine should have removed this interface
      * specific state machine from its list of possible recipients of
      * tethering requests.  The state machine itself will hang around until
      * the garbage collector finds it.

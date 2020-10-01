@@ -16,6 +16,7 @@
 
 package com.android.server.location;
 
+import android.annotation.IntDef;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
@@ -26,8 +27,16 @@ import android.hardware.location.IContextHubClientCallback;
 import android.hardware.location.NanoAppMessage;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 
 /**
@@ -37,6 +46,11 @@ import java.util.function.Consumer;
  */
 /* package */ class ContextHubClientManager {
     private static final String TAG = "ContextHubClientManager";
+
+    /*
+     * The DateFormat for printing RegistrationRecord.
+     */
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd HH:mm:ss.SSS");
 
     /*
      * The maximum host endpoint ID value that a client can be assigned.
@@ -71,6 +85,79 @@ import java.util.function.Consumer;
      */
     private int mNextHostEndPointId = 0;
 
+    /*
+     * The list of previous registration records.
+     */
+    private static final int NUM_CLIENT_RECORDS = 20;
+    private final ConcurrentLinkedEvictingDeque<RegistrationRecord> mRegistrationRecordDeque =
+            new ConcurrentLinkedEvictingDeque<>(NUM_CLIENT_RECORDS);
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "ACTION_" }, value = {
+            ACTION_REGISTERED,
+            ACTION_UNREGISTERED,
+            ACTION_CANCELLED,
+    })
+    public @interface Action {}
+    public static final int ACTION_REGISTERED = 0;
+    public static final int ACTION_UNREGISTERED = 1;
+    public static final int ACTION_CANCELLED = 2;
+
+    /**
+     * Helper class to make a ConcurrentLinkedDeque fixed-size, evicting old entries when full.
+     */
+    private class ConcurrentLinkedEvictingDeque<E> extends ConcurrentLinkedDeque<E> {
+        private int mSize;
+
+        ConcurrentLinkedEvictingDeque(int size) {
+            mSize = size;
+        }
+
+        @Override
+        public boolean add(E elem) {
+            synchronized (this) {
+                if (size() == mSize) {
+                    poll();
+                }
+
+                return super.add(elem);
+            }
+        }
+    }
+
+    /**
+     * A container class to store a record of ContextHubClient registration.
+     */
+    private class RegistrationRecord {
+        private final String mBroker;
+        private final int mAction;
+        private final long mTimestamp;
+
+        RegistrationRecord(String broker, @Action int action) {
+            mBroker = broker;
+            mAction = action;
+            mTimestamp = System.currentTimeMillis();
+        }
+
+        void dump(ProtoOutputStream proto) {
+            proto.write(ClientManagerProto.RegistrationRecord.TIMESTAMP_MS, mTimestamp);
+            proto.write(ClientManagerProto.RegistrationRecord.ACTION, mAction);
+            proto.write(ClientManagerProto.RegistrationRecord.BROKER, mBroker);
+        }
+
+        @Override
+        public String toString() {
+            String out = "";
+            out += DATE_FORMAT.format(new Date(mTimestamp)) + " ";
+            out += mAction == ACTION_REGISTERED ? "+ " : "- ";
+            out += mBroker;
+            if (mAction == ACTION_CANCELLED) {
+                out += " (cancelled)";
+            }
+            return out;
+        }
+    }
+
     /* package */ ContextHubClientManager(
             Context context, IContexthub contextHubProxy) {
         mContext = context;
@@ -96,6 +183,8 @@ import java.util.function.Consumer;
                     mContext, mContextHubProxy, this /* clientManager */, contextHubInfo,
                     hostEndPointId, clientCallback);
             mHostEndPointIdToClientMap.put(hostEndPointId, broker);
+            mRegistrationRecordDeque.add(
+                    new RegistrationRecord(broker.toString(), ACTION_REGISTERED));
         }
 
         try {
@@ -136,6 +225,8 @@ import java.util.function.Consumer;
                         hostEndPointId, pendingIntent, nanoAppId);
                 mHostEndPointIdToClientMap.put(hostEndPointId, broker);
                 registerString = "Registered";
+                mRegistrationRecordDeque.add(
+                        new RegistrationRecord(broker.toString(), ACTION_REGISTERED));
             }
         }
 
@@ -178,6 +269,13 @@ import java.util.function.Consumer;
      * @param hostEndPointId the host endpoint ID of the client that has died
      */
     /* package */ void unregisterClient(short hostEndPointId) {
+        ContextHubClientBroker broker = mHostEndPointIdToClientMap.get(hostEndPointId);
+        if (broker != null) {
+            @Action int action =
+                    broker.isPendingIntentCancelled() ? ACTION_CANCELLED : ACTION_UNREGISTERED;
+            mRegistrationRecordDeque.add(new RegistrationRecord(broker.toString(), action));
+        }
+
         if (mHostEndPointIdToClientMap.remove(hostEndPointId) != null) {
             Log.d(TAG, "Unregistered client with host endpoint ID " + hostEndPointId);
         } else {
@@ -284,5 +382,43 @@ import java.util.function.Consumer;
         }
 
         return null;
+    }
+
+    /**
+     * Dump debugging info as ClientManagerProto
+     *
+     * If the output belongs to a sub message, the caller is responsible for wrapping this function
+     * between {@link ProtoOutputStream#start(long)} and {@link ProtoOutputStream#end(long)}.
+     *
+     * @param proto the ProtoOutputStream to write to
+     */
+    void dump(ProtoOutputStream proto) {
+        for (ContextHubClientBroker broker : mHostEndPointIdToClientMap.values()) {
+            long token = proto.start(ClientManagerProto.CLIENT_BROKERS);
+            broker.dump(proto);
+            proto.end(token);
+        }
+        Iterator<RegistrationRecord> it = mRegistrationRecordDeque.descendingIterator();
+        while (it.hasNext()) {
+            long token = proto.start(ClientManagerProto.REGISTRATION_RECORDS);
+            it.next().dump(proto);
+            proto.end(token);
+        }
+    }
+
+    @Override
+    public String toString() {
+        String out = "";
+        for (ContextHubClientBroker broker : mHostEndPointIdToClientMap.values()) {
+            out += broker + "\n";
+        }
+
+        out += "\nRegistration history:\n";
+        Iterator<RegistrationRecord> it = mRegistrationRecordDeque.descendingIterator();
+        while (it.hasNext()) {
+            out += it.next() + "\n";
+        }
+
+        return out;
     }
 }

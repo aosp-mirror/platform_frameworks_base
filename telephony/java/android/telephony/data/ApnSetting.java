@@ -300,42 +300,44 @@ public class ApnSetting implements Parcelable {
     private static final Map<Integer, String> MVNO_TYPE_INT_MAP;
 
     static {
-        APN_TYPE_STRING_MAP = new ArrayMap<String, Integer>();
-        APN_TYPE_STRING_MAP.put("*", TYPE_ALL);
-        APN_TYPE_STRING_MAP.put("default", TYPE_DEFAULT);
-        APN_TYPE_STRING_MAP.put("mms", TYPE_MMS);
-        APN_TYPE_STRING_MAP.put("supl", TYPE_SUPL);
-        APN_TYPE_STRING_MAP.put("dun", TYPE_DUN);
-        APN_TYPE_STRING_MAP.put("hipri", TYPE_HIPRI);
-        APN_TYPE_STRING_MAP.put("fota", TYPE_FOTA);
-        APN_TYPE_STRING_MAP.put("ims", TYPE_IMS);
-        APN_TYPE_STRING_MAP.put("cbs", TYPE_CBS);
-        APN_TYPE_STRING_MAP.put("ia", TYPE_IA);
-        APN_TYPE_STRING_MAP.put("emergency", TYPE_EMERGENCY);
-        APN_TYPE_STRING_MAP.put("mcx", TYPE_MCX);
-        APN_TYPE_STRING_MAP.put("xcap", TYPE_XCAP);
-        APN_TYPE_INT_MAP = new ArrayMap<Integer, String>();
-        APN_TYPE_INT_MAP.put(TYPE_DEFAULT, "default");
-        APN_TYPE_INT_MAP.put(TYPE_MMS, "mms");
-        APN_TYPE_INT_MAP.put(TYPE_SUPL, "supl");
-        APN_TYPE_INT_MAP.put(TYPE_DUN, "dun");
-        APN_TYPE_INT_MAP.put(TYPE_HIPRI, "hipri");
-        APN_TYPE_INT_MAP.put(TYPE_FOTA, "fota");
-        APN_TYPE_INT_MAP.put(TYPE_IMS, "ims");
-        APN_TYPE_INT_MAP.put(TYPE_CBS, "cbs");
-        APN_TYPE_INT_MAP.put(TYPE_IA, "ia");
-        APN_TYPE_INT_MAP.put(TYPE_EMERGENCY, "emergency");
-        APN_TYPE_INT_MAP.put(TYPE_MCX, "mcx");
-        APN_TYPE_INT_MAP.put(TYPE_XCAP, "xcap");
+        APN_TYPE_STRING_MAP = new ArrayMap<>();
+        APN_TYPE_STRING_MAP.put(TYPE_ALL_STRING, TYPE_ALL);
+        APN_TYPE_STRING_MAP.put(TYPE_DEFAULT_STRING, TYPE_DEFAULT);
+        APN_TYPE_STRING_MAP.put(TYPE_MMS_STRING, TYPE_MMS);
+        APN_TYPE_STRING_MAP.put(TYPE_SUPL_STRING, TYPE_SUPL);
+        APN_TYPE_STRING_MAP.put(TYPE_DUN_STRING, TYPE_DUN);
+        APN_TYPE_STRING_MAP.put(TYPE_HIPRI_STRING, TYPE_HIPRI);
+        APN_TYPE_STRING_MAP.put(TYPE_FOTA_STRING, TYPE_FOTA);
+        APN_TYPE_STRING_MAP.put(TYPE_IMS_STRING, TYPE_IMS);
+        APN_TYPE_STRING_MAP.put(TYPE_CBS_STRING, TYPE_CBS);
+        APN_TYPE_STRING_MAP.put(TYPE_IA_STRING, TYPE_IA);
+        APN_TYPE_STRING_MAP.put(TYPE_EMERGENCY_STRING, TYPE_EMERGENCY);
+        APN_TYPE_STRING_MAP.put(TYPE_MCX_STRING, TYPE_MCX);
+        APN_TYPE_STRING_MAP.put(TYPE_XCAP_STRING, TYPE_XCAP);
 
-        PROTOCOL_STRING_MAP = new ArrayMap<String, Integer>();
+        APN_TYPE_INT_MAP = new ArrayMap<>();
+        APN_TYPE_INT_MAP.put(TYPE_DEFAULT, TYPE_DEFAULT_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_MMS, TYPE_MMS_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_SUPL, TYPE_SUPL_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_DUN, TYPE_DUN_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_HIPRI, TYPE_HIPRI_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_FOTA, TYPE_FOTA_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_IMS, TYPE_IMS_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_CBS, TYPE_CBS_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_IA, TYPE_IA_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_EMERGENCY, TYPE_EMERGENCY_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_MCX, TYPE_MCX_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_XCAP, TYPE_XCAP_STRING);
+
+        PROTOCOL_STRING_MAP = new ArrayMap<>();
         PROTOCOL_STRING_MAP.put("IP", PROTOCOL_IP);
         PROTOCOL_STRING_MAP.put("IPV6", PROTOCOL_IPV6);
         PROTOCOL_STRING_MAP.put("IPV4V6", PROTOCOL_IPV4V6);
         PROTOCOL_STRING_MAP.put("PPP", PROTOCOL_PPP);
         PROTOCOL_STRING_MAP.put("NON-IP", PROTOCOL_NON_IP);
         PROTOCOL_STRING_MAP.put("UNSTRUCTURED", PROTOCOL_UNSTRUCTURED);
-        PROTOCOL_INT_MAP = new ArrayMap<Integer, String>();
+
+        PROTOCOL_INT_MAP = new ArrayMap<>();
         PROTOCOL_INT_MAP.put(PROTOCOL_IP, "IP");
         PROTOCOL_INT_MAP.put(PROTOCOL_IPV6, "IPV6");
         PROTOCOL_INT_MAP.put(PROTOCOL_IPV4V6, "IPV4V6");
@@ -343,12 +345,13 @@ public class ApnSetting implements Parcelable {
         PROTOCOL_INT_MAP.put(PROTOCOL_NON_IP, "NON-IP");
         PROTOCOL_INT_MAP.put(PROTOCOL_UNSTRUCTURED, "UNSTRUCTURED");
 
-        MVNO_TYPE_STRING_MAP = new ArrayMap<String, Integer>();
+        MVNO_TYPE_STRING_MAP = new ArrayMap<>();
         MVNO_TYPE_STRING_MAP.put("spn", MVNO_TYPE_SPN);
         MVNO_TYPE_STRING_MAP.put("imsi", MVNO_TYPE_IMSI);
         MVNO_TYPE_STRING_MAP.put("gid", MVNO_TYPE_GID);
         MVNO_TYPE_STRING_MAP.put("iccid", MVNO_TYPE_ICCID);
-        MVNO_TYPE_INT_MAP = new ArrayMap<Integer, String>();
+
+        MVNO_TYPE_INT_MAP = new ArrayMap<>();
         MVNO_TYPE_INT_MAP.put(MVNO_TYPE_SPN, "spn");
         MVNO_TYPE_INT_MAP.put(MVNO_TYPE_IMSI, "imsi");
         MVNO_TYPE_INT_MAP.put(MVNO_TYPE_GID, "gid");
@@ -1211,12 +1214,16 @@ public class ApnSetting implements Parcelable {
         return false;
     }
 
-    // TODO - if we have this function we should also have hashCode.
-    // Also should handle changes in type order and perhaps case-insensitivity.
+    @Override
+    public int hashCode() {
+        return Objects.hash(mApnName, mProxyAddress, mProxyPort, mMmsc, mMmsProxyAddress,
+                mMmsProxyPort, mUser, mPassword, mAuthType, mApnTypeBitmask, mId, mOperatorNumeric,
+                mProtocol, mRoamingProtocol, mMtu, mCarrierEnabled, mNetworkTypeBitmask, mProfileId,
+                mPersistent, mMaxConns, mWaitTime, mMaxConnsTime, mMvnoType, mMvnoMatchData,
+                mApnSetId, mCarrierId, mSkip464Xlat);
+    }
 
-    /**
-     * @hide
-     */
+    @Override
     public boolean equals(Object o) {
         if (o instanceof ApnSetting == false) {
             return false;
@@ -1640,7 +1647,7 @@ public class ApnSetting implements Parcelable {
      *
      * <pre><code>
      * // Create an MMS proxy address with a hostname. A network might not be
-     * // available, so supply a dummy (0.0.0.0) IPv4 address to avoid DNS lookup.
+     * // available, so supply a placeholder (0.0.0.0) IPv4 address to avoid DNS lookup.
      * String host = "mms.example.com";
      * byte[] ipAddress = new byte[4];
      * InetAddress mmsProxy;
@@ -1825,7 +1832,8 @@ public class ApnSetting implements Parcelable {
          * {@link java.net.InetAddress#getAllByName getAllByName()} require DNS for hostname
          * resolution. To avoid this requirement when setting a hostname, call
          * {@link java.net.InetAddress#getByAddress(java.lang.String, byte[])} with both the
-         * hostname and a dummy IP address. See {@link ApnSetting.Builder above} for an example.
+         * hostname and a placeholder IP address. See {@link ApnSetting.Builder above} for an
+         * example.
          *
          * @param proxy the proxy address to set for the APN
          * @deprecated use {@link #setProxyAddress(String)} instead.
@@ -1879,7 +1887,8 @@ public class ApnSetting implements Parcelable {
          * {@link java.net.InetAddress#getAllByName getAllByName()} require DNS for hostname
          * resolution. To avoid this requirement when setting a hostname, call
          * {@link java.net.InetAddress#getByAddress(java.lang.String, byte[])} with both the
-         * hostname and a dummy IP address. See {@link ApnSetting.Builder above} for an example.
+         * hostname and a placeholder IP address. See {@link ApnSetting.Builder above} for an
+         * example.
          *
          * @param mmsProxy the MMS proxy address to set for the APN
          * @deprecated use {@link #setMmsProxyAddress(String)} instead.
@@ -2052,7 +2061,7 @@ public class ApnSetting implements Parcelable {
         /**
          * Sets skip464xlat flag for this APN.
          *
-         * @param skip464xlat skip464xlat for this APN
+         * @param skip464xlat skip464xlat for this APN.
          * @hide
          */
         public Builder setSkip464Xlat(@Skip464XlatStatus int skip464xlat) {

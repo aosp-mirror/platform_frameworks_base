@@ -369,10 +369,22 @@ public abstract class WebSettings {
     public abstract boolean getDisplayZoomControls();
 
     /**
-     * Enables or disables file access within WebView. File access is enabled by
-     * default.  Note that this enables or disables file system access only.
-     * Assets and resources are still accessible using file:///android_asset and
-     * file:///android_res.
+     * Enables or disables file access within WebView.
+     * Note that this enables or disables file system access only. Assets and resources
+     * are still accessible using file:///android_asset and file:///android_res.
+     * <p class="note">
+     * <b>Note:</b> Apps should not open {@code file://} URLs from any external source in
+     * WebView, don't enable this if your app accepts arbitrary URLs from external sources.
+     * It's recommended to always use
+     * <a href="{@docRoot}reference/androidx/webkit/WebViewAssetLoader">
+     * androidx.webkit.WebViewAssetLoader</a> to access files including assets and resources over
+     * {@code http(s)://} schemes, instead of {@code file://} URLs. To prevent possible security
+     * issues targeting {@link android.os.Build.VERSION_CODES#Q} and earlier, you should explicitly
+     * set this value to {@code false}.
+     * <p>
+     * The default value is {@code true} for apps targeting
+     * {@link android.os.Build.VERSION_CODES#Q} and below, and {@code false} when targeting
+     * {@link android.os.Build.VERSION_CODES#R} and above.
      */
     public abstract void setAllowFileAccess(boolean allow);
 
@@ -971,48 +983,63 @@ public abstract class WebSettings {
     public abstract void setJavaScriptEnabled(boolean flag);
 
     /**
-     * Sets whether JavaScript running in the context of a file scheme URL
-     * should be allowed to access content from any origin. This includes
-     * access to content from other file scheme URLs. See
-     * {@link #setAllowFileAccessFromFileURLs}. To enable the most restrictive,
-     * and therefore secure policy, this setting should be disabled.
-     * Note that this setting affects only JavaScript access to file scheme
-     * resources. Other access to such resources, for example, from image HTML
-     * elements, is unaffected. To prevent possible violation of same domain policy
-     * when targeting {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and earlier,
-     * you should explicitly set this value to {@code false}.
+     * Sets whether cross-origin requests in the context of a file scheme URL should be allowed to
+     * access content from <i>any</i> origin. This includes access to content from other file
+     * scheme URLs or web contexts. Note that some access such as image HTML elements doesn't
+     * follow same-origin rules and isn't affected by this setting.
+     * <p>
+     * <b>Don't</b> enable this setting if you open files that may be created or altered by
+     * external sources. Enabling this setting allows malicious scripts loaded in a {@code file://}
+     * context to launch cross-site scripting attacks, either accessing arbitrary local files
+     * including WebView cookies, app private data or even credentials used on arbitrary web sites.
+     * <p class="note">
+     * Loading content via {@code file://} URLs is generally discouraged. See the note in
+     * {@link #setAllowFileAccess}.
      * <p>
      * The default value is {@code true} for apps targeting
-     * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
-     * and {@code false} when targeting {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
-     * and above.
+     * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below, and {@code false}
+     * when targeting {@link android.os.Build.VERSION_CODES#JELLY_BEAN} and above. To prevent
+     * possible violation of same domain policy when targeting
+     * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and earlier, you should
+     * explicitly set this value to {@code false}.
      *
-     * @param flag whether JavaScript running in the context of a file scheme
-     *             URL should be allowed to access content from any origin
+     * @param flag whether JavaScript running in the context of a file scheme URL should be allowed
+     *             to access content from any origin
+     * @deprecated This setting is not secure, please use
+     *             <a href="{@docRoot}reference/androidx/webkit/WebViewAssetLoader.html">
+     *             androidx.webkit.WebViewAssetLoader</a> to load file content securely.
      */
+    @Deprecated
     public abstract void setAllowUniversalAccessFromFileURLs(boolean flag);
 
     /**
-     * Sets whether JavaScript running in the context of a file scheme URL
-     * should be allowed to access content from other file scheme URLs. To
-     * enable the most restrictive, and therefore secure, policy this setting
-     * should be disabled. Note that the value of this setting is ignored if
-     * the value of {@link #getAllowUniversalAccessFromFileURLs} is {@code true}.
-     * Note too, that this setting affects only JavaScript access to file scheme
-     * resources. Other access to such resources, for example, from image HTML
-     * elements, is unaffected. To prevent possible violation of same domain policy
-     * when targeting {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and earlier,
-     * you should explicitly set this value to {@code false}.
+     * Sets whether cross-origin requests in the context of a file scheme URL should be allowed to
+     * access content from other file scheme URLs. Note that some accesses such as image HTML
+     * elements don't follow same-origin rules and aren't affected by this setting.
      * <p>
-     * The default value is {@code true} for apps targeting
-     * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
-     * and {@code false} when targeting {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
-     * and above.
+     * <b>Don't</b> enable this setting if you open files that may be created or altered by
+     * external sources. Enabling this setting allows malicious scripts loaded in a {@code file://}
+     * context to access arbitrary local files including WebView cookies and app private data.
+     * <p class="note">
+     * Loading content via {@code file://} URLs is generally discouraged. See the note in
+     * {@link #setAllowFileAccess}.
+     * <p>
+     * Note that the value of this setting is ignored if the value of
+     * {@link #getAllowUniversalAccessFromFileURLs} is {@code true}. The default value is
+     * {@code true} for apps targeting {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1}
+     * and below, and {@code false} when targeting {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
+     * and above. To prevent possible violation of same domain policy when targeting
+     * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and earlier, you should
+     * explicitly set this value to {@code false}.
      *
      * @param flag whether JavaScript running in the context of a file scheme
      *             URL should be allowed to access content from other file
      *             scheme URLs
+     * @deprecated This setting is not secure, please use
+     *             <a href="{@docRoot}reference/androidx/webkit/WebViewAssetLoader.html">
+     *             androidx.webkit.WebViewAssetLoader</a> to load file content securely.
      */
+    @Deprecated
     public abstract void setAllowFileAccessFromFileURLs(boolean flag);
 
     /**
@@ -1091,6 +1118,10 @@ public abstract class WebSettings {
      * {@link #setAppCachePath}.
      *
      * @param flag {@code true} if the WebView should enable Application Caches
+     * @deprecated The Application Cache API is deprecated and this method will
+     *             become a no-op on all Android versions once support is
+     *             removed in Chromium. Consider using Service Workers instead.
+     *             See https://web.dev/appcache-removal/ for more information.
      */
     public abstract void setAppCacheEnabled(boolean flag);
 
@@ -1103,6 +1134,10 @@ public abstract class WebSettings {
      * @param appCachePath a String path to the directory containing
      *                     Application Caches files.
      * @see #setAppCacheEnabled
+     * @deprecated The Application Cache API is deprecated and this method will
+     *             become a no-op on all Android versions once support is
+     *             removed in Chromium. Consider using Service Workers instead.
+     *             See https://web.dev/appcache-removal/ for more information.
      */
     public abstract void setAppCachePath(String appCachePath);
 
@@ -1115,7 +1150,7 @@ public abstract class WebSettings {
      * It is recommended to leave the maximum size set to the default value.
      *
      * @param appCacheMaxSize the maximum size in bytes
-     * @deprecated In future quota will be managed automatically.
+     * @deprecated Quota is managed automatically; this method is a no-op.
      */
     @Deprecated
     public abstract void setAppCacheMaxSize(long appCacheMaxSize);

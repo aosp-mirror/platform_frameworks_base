@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="2976453378311251765">"MM#2 – karta SIM nieobsługiwana"</string>
-    <string name="mmcc_illegal_ms" msgid="2519618694918727742">"MM#3 – niedozwolona karta SIM"</string>
-    <string name="mmcc_illegal_me" msgid="7030488670186895244">"MM#6 – telefon niedozwolony"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="3526528316378889524">"MM#2 – karta SIM nieobsługiwana"</string>
+    <string name="mmcc_illegal_ms" msgid="4618730283812066268">"MM#3 – niedozwolona karta SIM"</string>
+    <string name="mmcc_illegal_me" msgid="8522039751358990401">"MM#6 – telefon niedozwolony"</string>
 </resources>

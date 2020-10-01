@@ -307,7 +307,7 @@ public class AppTimeLimitController {
                 }
             } else {
                 if (mActives > mObserved.length) {
-                    // Try to get to a sane state and log the issue
+                    // Try to get to a valid state and log the issue
                     mActives = mObserved.length;
                     final UserData user = mUserRef.get();
                     if (user == null) return;
@@ -334,7 +334,7 @@ public class AppTimeLimitController {
                 cancelCheckTimeoutLocked(this);
             } else {
                 if (mActives < 0) {
-                    // Try to get to a sane state and log the issue
+                    // Try to get to a valid state and log the issue
                     mActives = 0;
                     final UserData user = mUserRef.get();
                     if (user == null) return;

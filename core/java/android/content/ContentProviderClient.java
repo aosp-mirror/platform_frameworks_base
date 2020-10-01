@@ -41,7 +41,6 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 
 import dalvik.system.CloseGuard;
 
@@ -49,6 +48,7 @@ import libcore.io.IoUtils;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -80,6 +80,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     private final IContentProvider mContentProvider;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final String mPackageName;
+    private final @Nullable String mAttributionTag;
     private final String mAuthority;
     private final boolean mStable;
 
@@ -103,6 +104,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
         mContentResolver = contentResolver;
         mContentProvider = contentProvider;
         mPackageName = contentResolver.mPackageName;
+        mAttributionTag = contentResolver.mAttributionTag;
 
         mAuthority = authority;
         mStable = stable;
@@ -182,7 +184,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     public @Nullable Cursor query(@NonNull Uri uri, @Nullable String[] projection,
             Bundle queryArgs, @Nullable CancellationSignal cancellationSignal)
                     throws RemoteException {
-        Preconditions.checkNotNull(uri, "url");
+        Objects.requireNonNull(uri, "url");
 
         beforeRemote();
         try {
@@ -193,7 +195,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
                 cancellationSignal.setRemote(remoteCancellationSignal);
             }
             final Cursor cursor = mContentProvider.query(
-                    mPackageName, uri, projection, queryArgs, remoteCancellationSignal);
+                    mPackageName, mAttributionTag, uri, projection, queryArgs,
+                    remoteCancellationSignal);
             if (cursor == null) {
                 return null;
             }
@@ -211,7 +214,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     /** See {@link ContentProvider#getType ContentProvider.getType} */
     @Override
     public @Nullable String getType(@NonNull Uri url) throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
+        Objects.requireNonNull(url, "url");
 
         beforeRemote();
         try {
@@ -230,8 +233,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     @Override
     public @Nullable String[] getStreamTypes(@NonNull Uri url, @NonNull String mimeTypeFilter)
             throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
-        Preconditions.checkNotNull(mimeTypeFilter, "mimeTypeFilter");
+        Objects.requireNonNull(url, "url");
+        Objects.requireNonNull(mimeTypeFilter, "mimeTypeFilter");
 
         beforeRemote();
         try {
@@ -249,11 +252,11 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     /** See {@link ContentProvider#canonicalize} */
     @Override
     public final @Nullable Uri canonicalize(@NonNull Uri url) throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
+        Objects.requireNonNull(url, "url");
 
         beforeRemote();
         try {
-            return mContentProvider.canonicalize(mPackageName, url);
+            return mContentProvider.canonicalize(mPackageName, mAttributionTag, url);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -267,11 +270,11 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     /** See {@link ContentProvider#uncanonicalize} */
     @Override
     public final @Nullable Uri uncanonicalize(@NonNull Uri url) throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
+        Objects.requireNonNull(url, "url");
 
         beforeRemote();
         try {
-            return mContentProvider.uncanonicalize(mPackageName, url);
+            return mContentProvider.uncanonicalize(mPackageName, mAttributionTag, url);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -284,9 +287,9 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
 
     /** See {@link ContentProvider#refresh} */
     @Override
-    public boolean refresh(Uri url, @Nullable Bundle args,
+    public boolean refresh(Uri url, @Nullable Bundle extras,
             @Nullable CancellationSignal cancellationSignal) throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
+        Objects.requireNonNull(url, "url");
 
         beforeRemote();
         try {
@@ -296,7 +299,28 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
                 remoteCancellationSignal = mContentProvider.createCancellationSignal();
                 cancellationSignal.setRemote(remoteCancellationSignal);
             }
-            return mContentProvider.refresh(mPackageName, url, args, remoteCancellationSignal);
+            return mContentProvider.refresh(mPackageName, mAttributionTag, url, extras,
+                    remoteCancellationSignal);
+        } catch (DeadObjectException e) {
+            if (!mStable) {
+                mContentResolver.unstableProviderDied(mContentProvider);
+            }
+            throw e;
+        } finally {
+            afterRemote();
+        }
+    }
+
+    /** {@hide} */
+    @Override
+    public int checkUriPermission(@NonNull Uri uri, int uid, @Intent.AccessUriMode int modeFlags)
+            throws RemoteException {
+        Objects.requireNonNull(uri, "uri");
+
+        beforeRemote();
+        try {
+            return mContentProvider.checkUriPermission(mPackageName, mAttributionTag, uri, uid,
+                    modeFlags);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -308,14 +332,21 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     }
 
     /** See {@link ContentProvider#insert ContentProvider.insert} */
-    @Override
     public @Nullable Uri insert(@NonNull Uri url, @Nullable ContentValues initialValues)
             throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
+        return insert(url, initialValues, null);
+    }
+
+    /** See {@link ContentProvider#insert ContentProvider.insert} */
+    @Override
+    public @Nullable Uri insert(@NonNull Uri url, @Nullable ContentValues initialValues,
+            @Nullable Bundle extras) throws RemoteException {
+        Objects.requireNonNull(url, "url");
 
         beforeRemote();
         try {
-            return mContentProvider.insert(mPackageName, url, initialValues);
+            return mContentProvider.insert(mPackageName, mAttributionTag, url, initialValues,
+                    extras);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -330,12 +361,12 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     @Override
     public int bulkInsert(@NonNull Uri url, @NonNull ContentValues[] initialValues)
             throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
-        Preconditions.checkNotNull(initialValues, "initialValues");
+        Objects.requireNonNull(url, "url");
+        Objects.requireNonNull(initialValues, "initialValues");
 
         beforeRemote();
         try {
-            return mContentProvider.bulkInsert(mPackageName, url, initialValues);
+            return mContentProvider.bulkInsert(mPackageName, mAttributionTag, url, initialValues);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -347,14 +378,19 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     }
 
     /** See {@link ContentProvider#delete ContentProvider.delete} */
-    @Override
     public int delete(@NonNull Uri url, @Nullable String selection,
             @Nullable String[] selectionArgs) throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
+        return delete(url, ContentResolver.createSqlQueryBundle(selection, selectionArgs));
+    }
+
+    /** See {@link ContentProvider#delete ContentProvider.delete} */
+    @Override
+    public int delete(@NonNull Uri url, @Nullable Bundle extras) throws RemoteException {
+        Objects.requireNonNull(url, "url");
 
         beforeRemote();
         try {
-            return mContentProvider.delete(mPackageName, url, selection, selectionArgs);
+            return mContentProvider.delete(mPackageName, mAttributionTag, url, extras);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -366,14 +402,20 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     }
 
     /** See {@link ContentProvider#update ContentProvider.update} */
-    @Override
     public int update(@NonNull Uri url, @Nullable ContentValues values, @Nullable String selection,
             @Nullable String[] selectionArgs) throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
+        return update(url, values, ContentResolver.createSqlQueryBundle(selection, selectionArgs));
+    }
+
+    /** See {@link ContentProvider#update ContentProvider.update} */
+    @Override
+    public int update(@NonNull Uri url, @Nullable ContentValues values, @Nullable Bundle extras)
+            throws RemoteException {
+        Objects.requireNonNull(url, "url");
 
         beforeRemote();
         try {
-            return mContentProvider.update(mPackageName, url, values, selection, selectionArgs);
+            return mContentProvider.update(mPackageName, mAttributionTag, url, values, extras);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -406,8 +448,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     @Override
     public @Nullable ParcelFileDescriptor openFile(@NonNull Uri url, @NonNull String mode,
             @Nullable CancellationSignal signal) throws RemoteException, FileNotFoundException {
-        Preconditions.checkNotNull(url, "url");
-        Preconditions.checkNotNull(mode, "mode");
+        Objects.requireNonNull(url, "url");
+        Objects.requireNonNull(mode, "mode");
 
         beforeRemote();
         try {
@@ -417,7 +459,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
                 remoteSignal = mContentProvider.createCancellationSignal();
                 signal.setRemote(remoteSignal);
             }
-            return mContentProvider.openFile(mPackageName, url, mode, remoteSignal, null);
+            return mContentProvider.openFile(mPackageName, mAttributionTag, url, mode,
+                    remoteSignal, null);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -450,8 +493,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     @Override
     public @Nullable AssetFileDescriptor openAssetFile(@NonNull Uri url, @NonNull String mode,
             @Nullable CancellationSignal signal) throws RemoteException, FileNotFoundException {
-        Preconditions.checkNotNull(url, "url");
-        Preconditions.checkNotNull(mode, "mode");
+        Objects.requireNonNull(url, "url");
+        Objects.requireNonNull(mode, "mode");
 
         beforeRemote();
         try {
@@ -461,7 +504,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
                 remoteSignal = mContentProvider.createCancellationSignal();
                 signal.setRemote(remoteSignal);
             }
-            return mContentProvider.openAssetFile(mPackageName, url, mode, remoteSignal);
+            return mContentProvider.openAssetFile(mPackageName, mAttributionTag, url, mode,
+                    remoteSignal);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -490,8 +534,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     public final @Nullable AssetFileDescriptor openTypedAssetFile(@NonNull Uri uri,
             @NonNull String mimeTypeFilter, @Nullable Bundle opts,
             @Nullable CancellationSignal signal) throws RemoteException, FileNotFoundException {
-        Preconditions.checkNotNull(uri, "uri");
-        Preconditions.checkNotNull(mimeTypeFilter, "mimeTypeFilter");
+        Objects.requireNonNull(uri, "uri");
+        Objects.requireNonNull(mimeTypeFilter, "mimeTypeFilter");
 
         beforeRemote();
         try {
@@ -502,7 +546,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
                 signal.setRemote(remoteSignal);
             }
             return mContentProvider.openTypedAssetFile(
-                    mPackageName, uri, mimeTypeFilter, opts, remoteSignal);
+                    mPackageName, mAttributionTag, uri, mimeTypeFilter, opts, remoteSignal);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -525,11 +569,12 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     public @NonNull ContentProviderResult[] applyBatch(@NonNull String authority,
             @NonNull ArrayList<ContentProviderOperation> operations)
             throws RemoteException, OperationApplicationException {
-        Preconditions.checkNotNull(operations, "operations");
+        Objects.requireNonNull(operations, "operations");
 
         beforeRemote();
         try {
-            return mContentProvider.applyBatch(mPackageName, authority, operations);
+            return mContentProvider.applyBatch(mPackageName, mAttributionTag, authority,
+                    operations);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -550,12 +595,13 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     @Override
     public @Nullable Bundle call(@NonNull String authority, @NonNull String method,
             @Nullable String arg, @Nullable Bundle extras) throws RemoteException {
-        Preconditions.checkNotNull(authority, "authority");
-        Preconditions.checkNotNull(method, "method");
+        Objects.requireNonNull(authority, "authority");
+        Objects.requireNonNull(method, "method");
 
         beforeRemote();
         try {
-            return mContentProvider.call(mPackageName, authority, method, arg, extras);
+            return mContentProvider.call(mPackageName, mAttributionTag, authority, method, arg,
+                    extras);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);

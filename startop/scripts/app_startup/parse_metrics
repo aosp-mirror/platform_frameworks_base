@@ -1,0 +1,215 @@
+#!/bin/bash
+#
+# Copyright 2019, The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+usage() {
+    cat <<EOF
+Usage: launch_application package activity | parse_metrics --package <name> --timestamp <timestamp> [OPTIONS]...
+
+  Reads from stdin the result of 'am start' metrics. May also parse logcat
+  for additional metrics.
+
+  Output form:
+
+    MetricName_unit=numeric_value
+    MetricName2_unit=numeric_value2
+
+  This may block until all desired metrics are parsed from logcat.
+  To get a list of metrics without doing real parsing, use --simulate.
+
+  To add package-specific metrics, add a script called 'metrics/\$full_package_name'
+  that exposes additional metrics in same way as above.
+
+  (required)
+    -p, --package <name>        package of the app that is being used
+    -ts, --timestamp <name>     logcat timestamp [only looks at logcat entries after this timestamp].
+
+  (optional)
+    -s, --simulate              prints dummy values instead of real metrics
+    -a, --activity <name>       activity to use (default: inferred)
+    -h, --help                  usage information (this)
+    -v, --verbose               enable extra verbose printing
+    -t, --timeout <sec>         how many seconds to timeout when trying to wait for logcat to change
+    -rfd, --reportfullydrawn    wait for report fully drawn (default: off)
+EOF
+}
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$DIR/lib/common"
+
+report_fully_drawn="n"
+package=""
+activity=""
+timeout=5
+simulate="n"
+parse_arguments() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      -p|--package)
+        package="$2"
+        shift
+        ;;
+      -a|--activity)
+        activity="$2"
+        shift
+        ;;
+      -v|--verbose)
+        export verbose="y"
+        ;;
+      -t|--timeout)
+        timeout="$2"
+        shift
+        ;;
+      -ts|--timestamp)
+        timestamp="$2"
+        shift
+        ;;
+      -s|--simulate)
+        simulate="y"
+        ;;
+      -rfd|--reportfullydrawn)
+        report_fully_drawn="y"
+        ;;
+
+
+      *)
+        echo "Invalid argument: $1" >&2
+        exit 1
+    esac
+    shift
+  done
+}
+
+# Main entry point
+if [[ $# -eq 0 ]]; then
+  usage
+  exit 1
+else
+  parse_arguments "$@"
+
+  # if we do not have have package exit early with an error
+  [[ "$package" == "" ]] && echo "--package not specified" 1>&2 && exit 64
+
+  # ignore timestamp for --simulate. it's optional.
+  if [[ $simulate == y ]]; then
+    timestamp=0
+  fi
+
+  # if we do not have timestamp, exit early with an error
+  [[ "$timestamp" == "" ]] && echo "--timestamp not specified" 1>&2 && exit 64
+
+  if [[ "$activity" == "" ]] && [[ "$simulate" != "y" ]]; then
+    activity="$(get_activity_name "$package")"
+    if [[ "$activity" == "" ]]; then
+      echo "Activity name could not be found, invalid package name?" 1>&2
+      exit 64
+    else
+      verbose_print "Activity name inferred: " "$activity"
+    fi
+  fi
+fi
+
+parse_metric_from_logcat() {
+  local metric_name="$1"
+  local pattern="$2"
+  local re_pattern="$3"
+  local retcode
+  local result
+  local sec
+  local ms
+
+  # parse logcat for 'Displayed...' and that other one...
+
+  # 05-06 14:34:08.854 29460 29481 I ActivityTaskManager: Displayed com.google.android.dialer/.extensions.GoogleDialtactsActivity: +361ms
+  verbose_print "parse_metric_from_logcat: $re_pattern"
+
+
+  echo -ne "$metric_name="
+
+  if [[ $simulate == y ]]; then
+    echo "-1"
+    return 0
+  fi
+
+  result="$(logcat_extract_pattern "$timeout" "$timestamp" "$pattern" "$re_pattern")"
+  retcode=$?
+
+  if [[ $retcode -ne 0 ]]; then
+    # Timed out before finding the pattern. Could also mean the pattern is wrong.
+    echo "Parse $re_pattern from logcat TIMED OUT after $timeout seconds." >&2
+    echo "-$?"
+    return $retcode
+  fi
+
+  # "10s123ms" -> "10s123"
+  result=${result/ms/}
+  if [[ $result =~ s ]]; then
+    ms=${result/*s/}
+    sec=${result/s*/}
+  else
+    sec=0
+    ms=$result
+  fi
+  ((result=sec*1000+ms))
+
+  echo "$result"
+  return $retcode
+}
+
+
+total_time="-1"
+if [[ $simulate != y ]]; then
+  verbose_print 'logcat timestamp NOW: ' $(logcat_save_timestamp)
+
+  # parse stdin for 'am start' result
+  while read -t "$timeout" -r input_line; do
+    verbose_print 'stdin:' "$input_line"
+    if [[ $input_line == *TotalTime:* ]]; then
+      total_time="$(echo "$input_line" | sed 's/TotalTime: \([[:digit:]]\+\)/\1/g')"
+      # but keep reading the rest from stdin until <EOF>
+    fi
+  done
+fi
+
+echo "TotalTime_ms=$total_time"
+
+# parse logcat for 'Displayed...' and that other one...
+
+# 05-06 14:34:08.854 29460 29481 I ActivityTaskManager: Displayed com.google.android.dialer/.extensions.GoogleDialtactsActivity: +361ms
+pattern="ActivityTaskManager: Displayed ${package}"
+re_pattern='.*Displayed[[:blank:]]\+'"${package}"'[/][^[:blank:]]\+[[:blank:]]+\([[:digit:]]\+ms\|[[:digit:]]\+s[[:digit:]]\+ms\).*'
+
+parse_metric_from_logcat "Displayed_ms" "$pattern" "$re_pattern"
+
+# Only track ReportFullyDrawn with --reportfullydrawn/-rfd flags
+if [[ $report_fully_drawn == y ]]; then
+  # 01-16 17:31:44.550 11172 11204 I ActivityTaskManager: Fully drawn com.google.android.GoogleCamera/com.android.camera.CameraLauncher: +10s897ms
+  pattern="ActivityTaskManager: Fully drawn ${package}"
+  #re_pattern='.*Fully drawn[[:blank:]]\+'"${package}"'[/][^[:blank:]]\+[[:blank:]]+\([[:digit:]]\+\).*'
+  re_pattern='.*Fully drawn[[:blank:]]\+'"${package}"'[/][^[:blank:]]\+[[:blank:]]+\([[:digit:]]\+ms\|[[:digit:]]\+s[[:digit:]]\+ms\).*'
+
+  parse_metric_from_logcat "Fully_drawn_ms" "$pattern" "$re_pattern"
+fi
+
+# also call into package-specific scripts if there are additional metrics
+if [[ -x "$DIR/metrics/$package" ]]; then
+  source "$DIR/metrics/$package" "$timestamp"
+else
+  verbose_print parse_metrics: no per-package metrics script found at "$DIR/metrics/$package"
+fi

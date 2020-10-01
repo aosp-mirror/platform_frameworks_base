@@ -31,6 +31,8 @@ mainDexList:= \
 
 LOCAL_DEX_PREOPT := false
 
+LOCAL_EMMA_INSTRUMENT := false
+
 LOCAL_DX_FLAGS := --multi-dex --main-dex-list=$(mainDexList) --minimal-main-dex
 
 include $(BUILD_PACKAGE)

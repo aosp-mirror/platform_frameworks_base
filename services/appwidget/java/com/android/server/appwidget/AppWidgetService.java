@@ -44,6 +44,7 @@ public class AppWidgetService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == PHASE_ACTIVITY_MANAGER_READY) {
             mImpl.setSafeMode(isSafeMode());
+            mImpl.systemServicesReady();
         }
     }
 

@@ -26,7 +26,7 @@ namespace uirenderer {
 
 class Outline {
 public:
-    enum class Type { None = 0, Empty = 1, ConvexPath = 2, RoundRect = 3 };
+    enum class Type { None = 0, Empty = 1, Path = 2, RoundRect = 3 };
 
     Outline() : mShouldClip(false), mType(Type::None), mRadius(0), mAlpha(0.0f) {}
 
@@ -57,12 +57,12 @@ public:
         }
     }
 
-    void setConvexPath(const SkPath* outline, float alpha) {
+    void setPath(const SkPath* outline, float alpha) {
         if (!outline) {
             setEmpty();
             return;
         }
-        mType = Type::ConvexPath;
+        mType = Type::Path;
         mPath = *outline;
         mBounds.set(outline->getBounds());
         mAlpha = alpha;

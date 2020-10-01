@@ -61,14 +61,6 @@ public class RecentsAnimationControllerCompat {
         }
     }
 
-    public void setSplitScreenMinimized(boolean minimized) {
-        try {
-            mAnimationController.setSplitScreenMinimized(minimized);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to set minimize dock", e);
-        }
-    }
-
     public void hideCurrentInputMethod() {
         try {
             mAnimationController.hideCurrentInputMethod();
@@ -91,15 +83,6 @@ public class RecentsAnimationControllerCompat {
         }
     }
 
-    @Deprecated
-    public void setCancelWithDeferredScreenshot(boolean screenshot) {
-        try {
-            mAnimationController.setCancelWithDeferredScreenshot(screenshot);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to set cancel with deferred screenshot", e);
-        }
-    }
-
     public void setDeferCancelUntilNextTransition(boolean defer, boolean screenshot) {
         try {
             mAnimationController.setDeferCancelUntilNextTransition(defer, screenshot);
@@ -113,6 +96,29 @@ public class RecentsAnimationControllerCompat {
             mAnimationController.cleanupScreenshot();
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to clean up screenshot of recents animation", e);
+        }
+    }
+
+    /**
+     * @see {{@link IRecentsAnimationController#setWillFinishToHome(boolean)}}.
+     */
+    public void setWillFinishToHome(boolean willFinishToHome) {
+        try {
+            mAnimationController.setWillFinishToHome(willFinishToHome);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to set overview reached state", e);
+        }
+    }
+
+    /**
+     * @see IRecentsAnimationController#removeTask
+     */
+    public boolean removeTask(int taskId) {
+        try {
+            return mAnimationController.removeTask(taskId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to remove remote animation target", e);
+            return false;
         }
     }
 }

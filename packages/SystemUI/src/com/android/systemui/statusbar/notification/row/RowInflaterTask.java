@@ -27,6 +27,8 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
+import javax.inject.Inject;
+
 /**
  * An inflater task that asynchronously inflates a ExpandableNotificationRow
  */
@@ -39,6 +41,10 @@ public class RowInflaterTask implements InflationTask, AsyncLayoutInflater.OnInf
     private NotificationEntry mEntry;
     private boolean mCancelled;
     private Throwable mInflateOrigin;
+
+    @Inject
+    public RowInflaterTask() {
+    }
 
     /**
      * Inflates a new notificationView. This should not be called twice on this object

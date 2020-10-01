@@ -23,6 +23,10 @@ public interface NotificationManagerInternal {
     NotificationChannel getNotificationChannel(String pkg, int uid, String channelId);
     void enqueueNotification(String pkg, String basePkg, int callingUid, int callingPid,
             String tag, int id, Notification notification, int userId);
+    void cancelNotification(String pkg, String basePkg, int callingUid, int callingPid,
+            String tag, int id, int userId);
 
     void removeForegroundServiceFlagFromNotification(String pkg, int notificationId, int userId);
+
+    void onConversationRemoved(String pkg, int uid, String conversationId);
 }

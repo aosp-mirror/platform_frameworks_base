@@ -352,16 +352,18 @@ public class DynamicSystemInstallationService extends Service
             if (powerManager != null) {
                 powerManager.reboot("dynsystem");
             }
-        } else {
-            Log.e(TAG, "Failed to enable DynamicSystem because of native runtime error.");
-            mNM.cancel(NOTIFICATION_ID);
-
-            Toast.makeText(this,
-                    getString(R.string.toast_failed_to_reboot_to_dynsystem),
-                    Toast.LENGTH_LONG).show();
-
-            mDynSystem.remove();
+            return;
         }
+
+        Log.e(TAG, "Failed to enable DynamicSystem because of native runtime error.");
+
+        Toast.makeText(this,
+                getString(R.string.toast_failed_to_reboot_to_dynsystem),
+                Toast.LENGTH_LONG).show();
+
+        postStatus(STATUS_NOT_STARTED, CAUSE_ERROR_EXCEPTION, null);
+        resetTaskAndStop();
+        mDynSystem.remove();
     }
 
     private void executeRebootToNormalCommand() {

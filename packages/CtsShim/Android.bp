@@ -45,6 +45,7 @@ android_app_import {
     presigned: true,
 
     apex_available: [
+        "//apex_available:platform",
         "com.android.apex.cts.shim.v1",
         "com.android.apex.cts.shim.v2",
         "com.android.apex.cts.shim.v2_legacy",
@@ -82,6 +83,7 @@ android_app_import {
     presigned: true,
 
     apex_available: [
+        "//apex_available:platform",
         "com.android.apex.cts.shim.v1",
         "com.android.apex.cts.shim.v2",
         "com.android.apex.cts.shim.v2_legacy",

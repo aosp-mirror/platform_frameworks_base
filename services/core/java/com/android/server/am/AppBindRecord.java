@@ -62,7 +62,7 @@ final class AppBindRecord {
             + " " + service.shortInstanceName + ":" + client.processName + "}";
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(AppBindRecordProto.SERVICE_NAME, service.shortInstanceName);
         proto.write(AppBindRecordProto.CLIENT_PROC_NAME, client.processName);

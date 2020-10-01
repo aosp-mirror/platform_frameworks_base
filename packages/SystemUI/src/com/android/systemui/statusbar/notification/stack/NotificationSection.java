@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_MEDIA_CONTROLS;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -26,13 +28,14 @@ import android.view.animation.Interpolator;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor;
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
+import com.android.systemui.statusbar.notification.row.ExpandableView;
 
 /**
  * Represents the bounds of a section of the notification shade and handles animation when the
  * bounds change.
  */
-class NotificationSection {
+public class NotificationSection {
+    private @PriorityBucket int mBucket;
     private View mOwningView;
     private Rect mBounds = new Rect();
     private Rect mCurrentBounds = new Rect(-1, -1, -1, -1);
@@ -40,11 +43,12 @@ class NotificationSection {
     private Rect mEndAnimationRect = new Rect();
     private ObjectAnimator mTopAnimator = null;
     private ObjectAnimator mBottomAnimator = null;
-    private ActivatableNotificationView mFirstVisibleChild;
-    private ActivatableNotificationView mLastVisibleChild;
+    private ExpandableView mFirstVisibleChild;
+    private ExpandableView mLastVisibleChild;
 
-    NotificationSection(View owningView) {
+    NotificationSection(View owningView, @PriorityBucket int bucket) {
         mOwningView = owningView;
+        mBucket = bucket;
     }
 
     public void cancelAnimators() {
@@ -70,6 +74,11 @@ class NotificationSection {
 
     public boolean areBoundsAnimating() {
         return mBottomAnimator != null || mTopAnimator != null;
+    }
+
+    @PriorityBucket
+    public int getBucket() {
+        return mBucket;
     }
 
     public void startBackgroundAnimation(boolean animateTop, boolean animateBottom) {
@@ -191,20 +200,24 @@ class NotificationSection {
         mOwningView.invalidate();
     }
 
-    public ActivatableNotificationView getFirstVisibleChild() {
+    public ExpandableView getFirstVisibleChild() {
         return mFirstVisibleChild;
     }
 
-    public ActivatableNotificationView getLastVisibleChild() {
+    public ExpandableView getLastVisibleChild() {
         return mLastVisibleChild;
     }
 
-    public void setFirstVisibleChild(ActivatableNotificationView child) {
+    public boolean setFirstVisibleChild(ExpandableView child) {
+        boolean changed = mFirstVisibleChild != child;
         mFirstVisibleChild = child;
+        return changed;
     }
 
-    public void setLastVisibleChild(ActivatableNotificationView child) {
+    public boolean setLastVisibleChild(ExpandableView child) {
+        boolean changed = mLastVisibleChild != child;
         mLastVisibleChild = child;
+        return changed;
     }
 
     public void resetCurrentBounds() {
@@ -240,7 +253,7 @@ class NotificationSection {
             boolean shiftBackgroundWithFirst) {
         int top = minTopPosition;
         int bottom = minTopPosition;
-        ActivatableNotificationView firstView = getFirstVisibleChild();
+        ExpandableView firstView = getFirstVisibleChild();
         if (firstView != null) {
             // Round Y up to avoid seeing the background during animation
             int finalTranslationY = (int) Math.ceil(ViewState.getFinalTranslationY(firstView));
@@ -265,7 +278,7 @@ class NotificationSection {
             }
         }
         top = Math.max(minTopPosition, top);
-        ActivatableNotificationView lastView = getLastVisibleChild();
+        ExpandableView lastView = getLastVisibleChild();
         if (lastView != null) {
             float finalTranslationY = ViewState.getFinalTranslationY(lastView);
             int finalHeight = ExpandableViewState.getFinalActualHeight(lastView);
@@ -292,4 +305,7 @@ class NotificationSection {
         return bottom;
     }
 
+    public boolean needsBackground() {
+        return mFirstVisibleChild != null && mBucket != BUCKET_MEDIA_CONTROLS;
+    }
 }

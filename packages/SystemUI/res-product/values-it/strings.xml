@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="dock_alignment_slow_charging" product="default" msgid="6997633396534416792">"Riallinea il telefono per ricaricarlo più velocemente"</string>
+    <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Riallinea il telefono per caricarlo in modalità wireless"</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Presto il dispositivo Android TV si spegnerà. Premi un pulsante per tenerlo acceso."</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Presto il dispositivo si spegnerà. Premi per tenerlo acceso."</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"Nessuna scheda SIM presente nel tablet."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"Nessuna scheda SIM presente nel telefono."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"I codici PIN non corrispondono"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Hai tentato di sbloccare il tablet senza riuscirci per <xliff:g id="NUMBER_0">%1$d</xliff:g> volte. Dopo altri <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativi falliti, il tablet verrà ripristinato e verranno quindi eliminati tutti i relativi dati."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Hai tentato di sbloccare il telefono senza riuscirci per <xliff:g id="NUMBER_0">%1$d</xliff:g> volte. Dopo altri <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativi falliti, il telefono verrà ripristinato e verranno quindi eliminati tutti i relativi dati."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="8710104080409538587">"Hai tentato di sbloccare il tablet senza riuscirci per <xliff:g id="NUMBER">%d</xliff:g> volte. Il tablet verrà ripristinato e verranno quindi eliminati tutti i relativi dati."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="6381835450014881813">"Hai tentato di sbloccare il telefono senza riuscirci per <xliff:g id="NUMBER">%d</xliff:g> volte. Il telefono verrà ripristinato e verranno quindi eliminati tutti i relativi dati."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="7325071812832605911">"Hai tentato di sbloccare il tablet senza riuscirci per <xliff:g id="NUMBER_0">%1$d</xliff:g> volte. Dopo altri <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativi falliti, questo utente verrà rimosso e verranno quindi eliminati tutti i dati associati."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="8110939900089863103">"Hai tentato di sbloccare il telefono senza riuscirci per <xliff:g id="NUMBER_0">%1$d</xliff:g> volte. Dopo altri <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativi falliti, questo utente verrà rimosso e verranno quindi eliminati tutti i dati associati."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="8509811676952707883">"Hai tentato di sbloccare il tablet senza riuscirci per <xliff:g id="NUMBER">%d</xliff:g> volte. Questo utente verrà rimosso e verranno quindi eliminati tutti i dati associati."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3051962486994265014">"Hai tentato di sbloccare il telefono senza riuscirci per <xliff:g id="NUMBER">%d</xliff:g> volte. Questo utente verrà rimosso e verranno quindi eliminati tutti i dati associati."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="1049523640263353830">"Hai tentato di sbloccare il tablet senza riuscirci per <xliff:g id="NUMBER_0">%1$d</xliff:g> volte. Dopo altri <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativi falliti, il profilo di lavoro verrà rimosso e verranno quindi eliminati tutti i dati associati."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="3280816298678433681">"Hai tentato di sbloccare il telefono senza riuscirci per <xliff:g id="NUMBER_0">%1$d</xliff:g> volte. Dopo altri <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativi falliti, il profilo di lavoro verrà rimosso e verranno quindi eliminati tutti i dati associati."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4417100487251371559">"Hai tentato di sbloccare il tablet senza riuscirci per <xliff:g id="NUMBER">%d</xliff:g> volte. Il profilo di lavoro verrà rimosso e verranno quindi eliminati tutti i dati associati."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Hai tentato di sbloccare il telefono senza riuscirci per <xliff:g id="NUMBER">%d</xliff:g> volte. Il profilo di lavoro verrà rimosso e verranno quindi eliminati tutti i dati associati."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"<xliff:g id="NUMBER_0">%1$d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il tablet con un account email.\n\n Riprova tra <xliff:g id="NUMBER_2">%3$d</xliff:g> secondi."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"<xliff:g id="NUMBER_0">%1$d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il telefono con un account email.\n\n Riprova tra <xliff:g id="NUMBER_2">%3$d</xliff:g> secondi."</string>
+    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Sblocca il telefono per visualizzare altre opzioni"</string>
+    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Sblocca il tablet per visualizzare altre opzioni"</string>
+    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Sblocca il dispositivo per visualizzare altre opzioni"</string>
+</resources>

@@ -15,7 +15,9 @@
  */
 
 #include "AnimatedImageDrawable.h"
+#ifdef __ANDROID__ // Layoutlib does not support AnimatedImageThread
 #include "AnimatedImageThread.h"
+#endif
 
 #include "utils/TraceUtils.h"
 
@@ -64,7 +66,7 @@ bool AnimatedImageDrawable::nextSnapshotReady() const {
 // Only called on the RenderThread while UI thread is locked.
 bool AnimatedImageDrawable::isDirty(nsecs_t* outDelay) {
     *outDelay = 0;
-    const nsecs_t currentTime = systemTime(CLOCK_MONOTONIC);
+    const nsecs_t currentTime = systemTime(SYSTEM_TIME_MONOTONIC);
     const nsecs_t lastWallTime = mLastWallTime;
 
     mLastWallTime = currentTime;
@@ -160,8 +162,10 @@ void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
     } else if (starting) {
         // The image has animated, and now is being reset. Queue up the first
         // frame, but keep showing the current frame until the first is ready.
+#ifdef __ANDROID__ // Layoutlib does not support AnimatedImageThread
         auto& thread = uirenderer::AnimatedImageThread::getInstance();
         mNextSnapshot = thread.reset(sk_ref_sp(this));
+#endif
     }
 
     bool finalFrame = false;
@@ -187,8 +191,10 @@ void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
     }
 
     if (mRunning && !mNextSnapshot.valid()) {
+#ifdef __ANDROID__ // Layoutlib does not support AnimatedImageThread
         auto& thread = uirenderer::AnimatedImageThread::getInstance();
         mNextSnapshot = thread.decodeNextFrame(sk_ref_sp(this));
+#endif
     }
 
     if (!drawDirectly) {
@@ -244,7 +250,7 @@ int AnimatedImageDrawable::drawStaging(SkCanvas* canvas) {
 
     bool update = false;
     {
-        const nsecs_t currentTime = systemTime(CLOCK_MONOTONIC);
+        const nsecs_t currentTime = systemTime(SYSTEM_TIME_MONOTONIC);
         std::unique_lock lock{mSwapLock};
         // mLastWallTime starts off at 0. If it is still 0, just update it to
         // the current time and avoid updating

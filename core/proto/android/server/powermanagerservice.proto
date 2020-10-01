@@ -172,6 +172,8 @@ message PowerManagerServiceDumpProto {
     repeated SuspendBlockerProto suspend_blockers = 48;
     optional WirelessChargerDetectorProto wireless_charger_detector = 49;
     optional BatterySaverStateMachineProto battery_saver_state_machine = 50;
+    // Attentive timeout in ms. The timeout is disabled if it is set to -1.
+    optional sint32 attentive_timeout_ms = 51;
 }
 
 // A com.android.server.power.PowerManagerService.SuspendBlockerImpl object.
@@ -223,9 +225,10 @@ message PowerServiceSettingsAndConfigurationDumpProto {
     message ScreenBrightnessSettingLimitsProto {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        optional int32 setting_minimum = 1;
-        optional int32 setting_maximum = 2;
-        optional int32 setting_default = 3;
+        reserved 1, 2, 3; // setting_minimum, setting_maximum, setting_default
+        optional float setting_minimum_float = 4;
+        optional float setting_maximum_float = 5;
+        optional float setting_default_float = 6;
     }
 
     // True to decouple auto-suspend mode from the display state.
@@ -310,6 +313,12 @@ message PowerServiceSettingsAndConfigurationDumpProto {
     optional bool is_vr_mode_enabled = 35;
     // True if Sidekick is controlling the display and we shouldn't change its power mode.
     optional bool draw_wake_lock_override_from_sidekick = 36;
+    // The attentive timeout setting value in milliseconds. Default value is -1.
+    optional sint32 attentive_timeout_setting_ms = 37;
+    // The attentive timeout config value in milliseconds.
+    optional sint32 attentive_timeout_config_ms = 38;
+    // The attentive warning duration config value in milliseconds.
+    optional sint32 attentive_warning_duration_config_ms = 39;
 }
 
 message BatterySaverStateMachineProto {
@@ -358,6 +367,15 @@ message BatterySaverStateMachineProto {
     // Whether battery level is low or not.
     optional bool is_battery_level_low = 8;
 
+    // Denotes which threshold should be used for automatic Battery Saver triggering.
+    enum AutomaticTriggerEnum {
+        TRIGGER_PERCENTAGE = 0;
+        TRIGGER_DYNAMIC = 1;
+    }
+    // The value of Global.AUTOMATIC_POWER_SAVE_MODE. This is a cached value, so it could
+    // be slightly different from what's in GlobalSettingsProto.DynamicPowerSavings.
+    optional AutomaticTriggerEnum setting_automatic_trigger = 19;
+
     // The value of Global.LOW_POWER_MODE. This is a cached value, so it could
     // be slightly different from what's in GlobalSettingsProto.LowPowerMode.
     optional bool setting_battery_saver_enabled = 9;
@@ -382,5 +400,18 @@ message BatterySaverStateMachineProto {
     // using elapsed realtime as the timebase.
     optional int64 last_adaptive_battery_saver_changed_externally_elapsed = 17;
 
-    // Next tag: 19
+    // The default disable threshold for Dynamic Power Savings enabled battery saver.
+    optional int32 default_dynamic_disable_threshold = 20;
+
+    // When to disable battery saver again if it was enabled due to an external suggestion.
+    // Corresponds to Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD. This is a cached value,
+    // so it could be slightly different from what's in GlobalSettingsProto.DynamicPowerSavings.
+    optional int32 dynamic_disable_threshold = 21;
+
+    // Whether we've received a suggestion that battery saver should be on from an external app.
+    // Corresponds to Global.DYNAMIC_POWER_SAVINGS_ENABLED. This is a cached value, so it could
+    // be slightly different from what's in GlobalSettingsProto.DynamicPowerSavings.
+    optional bool dynamic_battery_saver_enabled = 22;
+
+    // Next tag: 23
 }

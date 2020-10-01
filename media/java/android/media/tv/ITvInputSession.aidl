@@ -56,6 +56,6 @@ oneway interface ITvInputSession {
     void timeShiftEnablePositionTracking(boolean enable);
 
     // For the recording session
-    void startRecording(in Uri programUri);
+    void startRecording(in Uri programUri, in Bundle params);
     void stopRecording();
 }

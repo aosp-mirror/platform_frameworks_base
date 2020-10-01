@@ -15,6 +15,7 @@
 */
 package com.android.server.notification;
 
+import android.app.NotificationChannel;
 import android.content.Context;
 import android.util.Slog;
 
@@ -26,8 +27,10 @@ public class NotificationChannelExtractor implements NotificationSignalExtractor
     private static final boolean DBG = false;
 
     private RankingConfig mConfig;
+    private Context mContext;
 
     public void initialize(Context ctx, NotificationUsageStats usageStats) {
+        mContext = ctx;
         if (DBG) Slog.d(TAG, "Initializing  " + getClass().getSimpleName() + ".");
     }
 
@@ -41,9 +44,11 @@ public class NotificationChannelExtractor implements NotificationSignalExtractor
             if (DBG) Slog.d(TAG, "missing config");
             return null;
         }
-
-        record.updateNotificationChannel(mConfig.getNotificationChannel(record.sbn.getPackageName(),
-                record.sbn.getUid(), record.getChannel().getId(), false));
+        NotificationChannel updatedChannel = mConfig.getConversationNotificationChannel(
+                record.getSbn().getPackageName(),
+                record.getSbn().getUid(), record.getChannel().getId(),
+                record.getSbn().getShortcutId(), true, false);
+        record.updateNotificationChannel(updatedChannel);
 
         return null;
     }

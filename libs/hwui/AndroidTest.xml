@@ -28,9 +28,11 @@
     <test class="com.android.tradefed.testtype.GoogleBenchmarkTest" >
         <option name="native-benchmark-device-path" value="/data/benchmarktest" />
         <option name="benchmark-module-name" value="hwuimicro" />
+        <option name="file-exclusion-filter-regex" value=".*\.config$" />
     </test>
     <test class="com.android.tradefed.testtype.GoogleBenchmarkTest" >
         <option name="native-benchmark-device-path" value="/data/benchmarktest" />
         <option name="benchmark-module-name" value="hwuimacro" />
+        <option name="file-exclusion-filter-regex" value=".*\.config$" />
     </test>
 </configuration>

@@ -1,7 +1,97 @@
+// Copyright (C) 2020 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    default_visibility: ["//visibility:private"],
+}
+
+// *-current.txt files for use by modules in other directories like cts
+filegroup {
+    name: "frameworks-base-api-current.txt",
+    srcs: ["current.txt"],
+    visibility: ["//visibility:public"],
+}
+
+filegroup {
+    name: "frameworks-base-api-system-current.txt",
+    srcs: ["system-current.txt"],
+    visibility: ["//visibility:public"],
+}
+
+filegroup {
+    name: "frameworks-base-api-system-removed.txt",
+    srcs: ["system-removed.txt"],
+    visibility: ["//visibility:public"],
+}
+
 genrule {
     name: "current-api-xml",
     tools: ["metalava"],
     srcs: ["current.txt"],
     out: ["current.api"],
     cmd: "$(location metalava) --no-banner -convert2xmlnostrip $(in) $(out)",
+    visibility: ["//visibility:public"],
+}
+
+genrule {
+    name: "frameworks-base-api-current-merged.txt",
+    srcs: [
+        ":conscrypt.module.public.api{.public.api.txt}",
+        ":framework-media{.public.api.txt}",
+        ":framework-mediaprovider{.public.api.txt}",
+        ":framework-permission{.public.api.txt}",
+        ":framework-sdkextensions{.public.api.txt}",
+        ":framework-statsd{.public.api.txt}",
+        ":framework-tethering{.public.api.txt}",
+        ":framework-wifi{.public.api.txt}",
+        ":non-updatable-current.txt",
+    ],
+    out: ["current.txt"],
+    tools: ["metalava"],
+    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+}
+
+genrule {
+    name: "frameworks-base-api-system-current-merged.txt",
+    srcs: [
+        ":framework-media{.system.api.txt}",
+        ":framework-mediaprovider{.system.api.txt}",
+        ":framework-permission{.system.api.txt}",
+        ":framework-sdkextensions{.system.api.txt}",
+        ":framework-statsd{.system.api.txt}",
+        ":framework-tethering{.system.api.txt}",
+        ":framework-wifi{.system.api.txt}",
+        ":non-updatable-system-current.txt",
+    ],
+    out: ["system-current.txt"],
+    tools: ["metalava"],
+    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
+}
+
+genrule {
+    name: "frameworks-base-api-module-lib-current-merged.txt",
+    srcs: [
+        ":framework-media{.module-lib.api.txt}",
+        ":framework-mediaprovider{.module-lib.api.txt}",
+        ":framework-permission{.module-lib.api.txt}",
+        ":framework-sdkextensions{.module-lib.api.txt}",
+        ":framework-statsd{.module-lib.api.txt}",
+        ":framework-tethering{.module-lib.api.txt}",
+        ":framework-wifi{.module-lib.api.txt}",
+        ":non-updatable-module-lib-current.txt",
+    ],
+    out: ["module-lib-current.txt"],
+    tools: ["metalava"],
+    cmd: "$(location metalava) --no-banner --format=v2 $(in) --api $(out)",
 }

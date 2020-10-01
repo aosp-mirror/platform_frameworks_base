@@ -48,6 +48,8 @@ import java.util.Set;
  * you have no control over this shrinking -- if you set a capacity and then remove an
  * item, it may reduce the capacity to better match the current size.  In the future an
  * explicit call to set the capacity should turn off this aggressive shrinking behavior.</p>
+ *
+ * <p>This structure is <b>NOT</b> thread-safe.</p>
  */
 public final class ArrayMap<K, V> implements Map<K, V> {
     private static final boolean DEBUG = false;
@@ -103,15 +105,21 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     static Object[] mTwiceBaseCache;
     @UnsupportedAppUsage(maxTargetSdk = 28) // Allocations are an implementation detail.
     static int mTwiceBaseCacheSize;
+    /**
+     * Separate locks for each cache since each can be accessed independently of the other without
+     * risk of a deadlock.
+     */
+    private static final Object sBaseCacheLock = new Object();
+    private static final Object sTwiceBaseCacheLock = new Object();
 
-    final boolean mIdentityHashCode;
+    private final boolean mIdentityHashCode;
     @UnsupportedAppUsage(maxTargetSdk = 28) // Hashes are an implementation detail. Use public key/value API.
     int[] mHashes;
     @UnsupportedAppUsage(maxTargetSdk = 28) // Storage is an implementation detail. Use public key/value API.
     Object[] mArray;
     @UnsupportedAppUsage(maxTargetSdk = 28) // Use size()
     int mSize;
-    MapCollections<K, V> mCollections;
+    private MapCollections<K, V> mCollections;
 
     private static int binarySearchHashes(int[] hashes, int N, int hash) {
         try {
@@ -209,31 +217,57 @@ public final class ArrayMap<K, V> implements Map<K, V> {
             throw new UnsupportedOperationException("ArrayMap is immutable");
         }
         if (size == (BASE_SIZE*2)) {
-            synchronized (ArrayMap.class) {
+            synchronized (sTwiceBaseCacheLock) {
                 if (mTwiceBaseCache != null) {
                     final Object[] array = mTwiceBaseCache;
                     mArray = array;
-                    mTwiceBaseCache = (Object[])array[0];
-                    mHashes = (int[])array[1];
-                    array[0] = array[1] = null;
-                    mTwiceBaseCacheSize--;
-                    if (DEBUG) Log.d(TAG, "Retrieving 2x cache " + mHashes
-                            + " now have " + mTwiceBaseCacheSize + " entries");
-                    return;
+                    try {
+                        mTwiceBaseCache = (Object[]) array[0];
+                        mHashes = (int[]) array[1];
+                        if (mHashes != null) {
+                            array[0] = array[1] = null;
+                            mTwiceBaseCacheSize--;
+                            if (DEBUG) {
+                                Log.d(TAG, "Retrieving 2x cache " + mHashes
+                                        + " now have " + mTwiceBaseCacheSize + " entries");
+                            }
+                            return;
+                        }
+                    } catch (ClassCastException e) {
+                    }
+                    // Whoops!  Someone trampled the array (probably due to not protecting
+                    // their access with a lock).  Our cache is corrupt; report and give up.
+                    Slog.wtf(TAG, "Found corrupt ArrayMap cache: [0]=" + array[0]
+                            + " [1]=" + array[1]);
+                    mTwiceBaseCache = null;
+                    mTwiceBaseCacheSize = 0;
                 }
             }
         } else if (size == BASE_SIZE) {
-            synchronized (ArrayMap.class) {
+            synchronized (sBaseCacheLock) {
                 if (mBaseCache != null) {
                     final Object[] array = mBaseCache;
                     mArray = array;
-                    mBaseCache = (Object[])array[0];
-                    mHashes = (int[])array[1];
-                    array[0] = array[1] = null;
-                    mBaseCacheSize--;
-                    if (DEBUG) Log.d(TAG, "Retrieving 1x cache " + mHashes
-                            + " now have " + mBaseCacheSize + " entries");
-                    return;
+                    try {
+                        mBaseCache = (Object[]) array[0];
+                        mHashes = (int[]) array[1];
+                        if (mHashes != null) {
+                            array[0] = array[1] = null;
+                            mBaseCacheSize--;
+                            if (DEBUG) {
+                                Log.d(TAG, "Retrieving 1x cache " + mHashes
+                                        + " now have " + mBaseCacheSize + " entries");
+                            }
+                            return;
+                        }
+                    } catch (ClassCastException e) {
+                    }
+                    // Whoops!  Someone trampled the array (probably due to not protecting
+                    // their access with a lock).  Our cache is corrupt; report and give up.
+                    Slog.wtf(TAG, "Found corrupt ArrayMap cache: [0]=" + array[0]
+                            + " [1]=" + array[1]);
+                    mBaseCache = null;
+                    mBaseCacheSize = 0;
                 }
             }
         }
@@ -242,10 +276,14 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         mArray = new Object[size<<1];
     }
 
+    /**
+     * Make sure <b>NOT</b> to call this method with arrays that can still be modified. In other
+     * words, don't pass mHashes or mArray in directly.
+     */
     @UnsupportedAppUsage(maxTargetSdk = 28) // Allocations are an implementation detail.
     private static void freeArrays(final int[] hashes, final Object[] array, final int size) {
         if (hashes.length == (BASE_SIZE*2)) {
-            synchronized (ArrayMap.class) {
+            synchronized (sTwiceBaseCacheLock) {
                 if (mTwiceBaseCacheSize < CACHE_SIZE) {
                     array[0] = mTwiceBaseCache;
                     array[1] = hashes;
@@ -259,7 +297,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
                 }
             }
         } else if (hashes.length == BASE_SIZE) {
-            synchronized (ArrayMap.class) {
+            synchronized (sBaseCacheLock) {
                 if (mBaseCacheSize < CACHE_SIZE) {
                     array[0] = mBaseCache;
                     array[1] = hashes;

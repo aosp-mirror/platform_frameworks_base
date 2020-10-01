@@ -32,5 +32,12 @@
      int32 system_ui_visibility = 8;
      bool is_translucent = 9;
      string top_activity_component = 10;
-     float scale = 11;
+     // deprecated because original width and height are stored now instead of the scale.
+     float legacy_scale = 11 [deprecated=true];
+     int64 id = 12;
+     int32 rotation = 13;
+     // The task width when the snapshot was taken
+     int32 task_width = 14;
+     // The task height when the snapshot was taken
+     int32 task_height = 15;
  }

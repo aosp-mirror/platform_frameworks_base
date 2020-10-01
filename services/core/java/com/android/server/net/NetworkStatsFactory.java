@@ -59,7 +59,7 @@ public class NetworkStatsFactory {
     private static final String TAG = "NetworkStatsFactory";
 
     private static final boolean USE_NATIVE_PARSING = true;
-    private static final boolean SANITY_CHECK_NATIVE = false;
+    private static final boolean VALIDATE_NATIVE_STATS = false;
 
     /** Path to {@code /proc/net/xt_qtaguid/iface_stat_all}. */
     private final File mStatsXtIfaceAll;
@@ -347,7 +347,7 @@ public class NetworkStatsFactory {
                             INTERFACES_ALL, TAG_ALL, mUseBpfStats) != 0) {
                         throw new IOException("Failed to parse network stats");
                     }
-                    if (SANITY_CHECK_NATIVE) {
+                    if (VALIDATE_NATIVE_STATS) {
                         final NetworkStats javaStats = javaReadNetworkStatsDetail(mStatsXtUid,
                                 UID_ALL, INTERFACES_ALL, TAG_ALL);
                         assertEquals(javaStats, stats);

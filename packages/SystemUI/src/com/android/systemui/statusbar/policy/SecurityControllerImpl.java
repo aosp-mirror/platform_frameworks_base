@@ -15,8 +15,6 @@
  */
 package com.android.systemui.statusbar.policy;
 
-import static com.android.systemui.Dependency.BG_HANDLER_NAME;
-
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -33,14 +31,12 @@ import android.net.IConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.security.KeyChain;
-import android.security.KeyChain.KeyChainConnection;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
@@ -50,14 +46,16 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.settings.CurrentUserTracker;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
@@ -86,7 +84,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     private final DevicePolicyManager mDevicePolicyManager;
     private final PackageManager mPackageManager;
     private final UserManager mUserManager;
-    private final Handler mBgHandler;
+    private final Executor mBgExecutor;
 
     @GuardedBy("mCallbacks")
     private final ArrayList<SecurityControllerCallback> mCallbacks = new ArrayList<>();
@@ -102,15 +100,14 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     /**
      */
     @Inject
-    public SecurityControllerImpl(Context context, @Named(BG_HANDLER_NAME) Handler bgHandler) {
-        this(context, bgHandler, null);
-    }
-
-    public SecurityControllerImpl(Context context, Handler bgHandler,
-            SecurityControllerCallback callback) {
-        super(context);
+    public SecurityControllerImpl(
+            Context context,
+            @Background Handler bgHandler,
+            BroadcastDispatcher broadcastDispatcher,
+            @Background Executor bgExecutor
+    ) {
+        super(broadcastDispatcher);
         mContext = context;
-        mBgHandler = bgHandler;
         mDevicePolicyManager = (DevicePolicyManager)
                 context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         mConnectivityManager = (ConnectivityManager)
@@ -118,15 +115,14 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         mConnectivityManagerService = IConnectivityManager.Stub.asInterface(
                 ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
         mPackageManager = context.getPackageManager();
-        mUserManager = (UserManager)
-                context.getSystemService(Context.USER_SERVICE);
-
-        addCallback(callback);
+        mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        mBgExecutor = bgExecutor;
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(KeyChain.ACTION_TRUST_STORE_CHANGED);
-        context.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null,
-                bgHandler);
+        filter.addAction(Intent.ACTION_USER_UNLOCKED);
+        broadcastDispatcher.registerReceiverWithHandler(mBroadcastReceiver, filter, bgHandler,
+                UserHandle.ALL);
 
         // TODO: re-register network callback on user change.
         mConnectivityManager.registerNetworkCallback(REQUEST, mNetworkCallback);
@@ -208,6 +204,11 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     @Override
     public boolean hasWorkProfile() {
         return getWorkProfileUserId(mCurrentUserId) != UserHandle.USER_NULL;
+    }
+
+    @Override
+    public boolean isProfileOwnerOfOrganizationOwnedDevice() {
+        return mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile();
     }
 
     @Override
@@ -300,14 +301,27 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         } else {
             mVpnUserId = mCurrentUserId;
         }
-        refreshCACerts();
         fireCallbacks();
     }
 
-    private void refreshCACerts() {
-        new CACertLoader().execute(mCurrentUserId);
-        int workProfileId = getWorkProfileUserId(mCurrentUserId);
-        if (workProfileId != UserHandle.USER_NULL) new CACertLoader().execute(workProfileId);
+    private void refreshCACerts(int userId) {
+        mBgExecutor.execute(() -> {
+            Pair<Integer, Boolean> idWithCert = null;
+            try (KeyChain.KeyChainConnection conn = KeyChain.bindAsUser(mContext,
+                    UserHandle.of(userId))) {
+                boolean hasCACerts = !(conn.getService().getUserCaAliases().getList().isEmpty());
+                idWithCert = new Pair<Integer, Boolean>(userId, hasCACerts);
+            } catch (RemoteException | InterruptedException | AssertionError e) {
+                Log.i(TAG, "failed to get CA certs", e);
+                idWithCert = new Pair<Integer, Boolean>(userId, null);
+            } finally {
+                if (DEBUG) Log.d(TAG, "Refreshing CA Certs " + idWithCert);
+                if (idWithCert != null && idWithCert.second != null) {
+                    mHasCACerts.put(idWithCert.first, idWithCert.second);
+                    fireCallbacks();
+                }
+            }
+        });
     }
 
     private String getNameForVpnConfig(VpnConfig cfg, UserHandle user) {
@@ -403,35 +417,11 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             if (KeyChain.ACTION_TRUST_STORE_CHANGED.equals(intent.getAction())) {
-                refreshCACerts();
+                refreshCACerts(getSendingUserId());
+            } else if (Intent.ACTION_USER_UNLOCKED.equals(intent.getAction())) {
+                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+                if (userId != UserHandle.USER_NULL) refreshCACerts(userId);
             }
         }
     };
-
-    protected class CACertLoader extends AsyncTask<Integer, Void, Pair<Integer, Boolean> > {
-
-        @Override
-        protected Pair<Integer, Boolean> doInBackground(Integer... userId) {
-            try (KeyChainConnection conn = KeyChain.bindAsUser(mContext,
-                                                               UserHandle.of(userId[0]))) {
-                boolean hasCACerts = !(conn.getService().getUserCaAliases().getList().isEmpty());
-                return new Pair<Integer, Boolean>(userId[0], hasCACerts);
-            } catch (RemoteException | InterruptedException | AssertionError e) {
-                Log.i(TAG, "failed to get CA certs", e);
-                mBgHandler.postDelayed(
-                        () -> new CACertLoader().execute(userId[0]),
-                        CA_CERT_LOADING_RETRY_TIME_IN_MS);
-                return new Pair<Integer, Boolean>(userId[0], null);
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Pair<Integer, Boolean> result) {
-            if (DEBUG) Log.d(TAG, "onPostExecute " + result);
-            if (result.second != null) {
-                mHasCACerts.put(result.first, result.second);
-                fireCallbacks();
-            }
-        }
-    }
 }

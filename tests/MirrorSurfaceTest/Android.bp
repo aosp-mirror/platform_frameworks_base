@@ -1,0 +1,6 @@
+android_test {
+    name: "MirrorSurfaceTest",
+    srcs: ["src/**/*.java"],
+    platform_apis: true,
+    certificate: "platform",
+}

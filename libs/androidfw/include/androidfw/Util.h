@@ -19,11 +19,18 @@
 
 #include <cstdlib>
 #include <memory>
+#include <sstream>
 #include <vector>
 
 #include "android-base/macros.h"
 
 #include "androidfw/StringPiece.h"
+
+#ifdef __ANDROID__
+#define ANDROID_LOG(x) LOG(x)
+#else
+#define ANDROID_LOG(x) std::stringstream()
+#endif
 
 namespace android {
 namespace util {

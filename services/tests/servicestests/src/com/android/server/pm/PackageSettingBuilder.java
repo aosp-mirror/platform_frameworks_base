@@ -16,13 +16,17 @@
 
 package com.android.server.pm;
 
+import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
+import android.util.ArraySet;
 import android.util.SparseArray;
 
-import java.io.File;
-import java.util.List;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
-class PackageSettingBuilder {
+import java.io.File;
+import java.util.Map;
+
+public class PackageSettingBuilder {
     private String mName;
     private String mRealName;
     private String mCodePath;
@@ -34,16 +38,29 @@ class PackageSettingBuilder {
     private long mPVersionCode;
     private int mPkgFlags;
     private int mPrivateFlags;
-    private String mParentPackageName;
-    private List<String> mChildPackageNames;
     private int mSharedUserId;
     private String[] mUsesStaticLibraries;
     private long[] mUsesStaticLibrariesVersions;
+    private Map<String, ArraySet<String>> mMimeGroups;
     private String mVolumeUuid;
     private SparseArray<PackageUserState> mUserStates = new SparseArray<>();
+    private AndroidPackage mPkg;
+    private int mAppId;
+    private InstallSource mInstallSource;
+    private PackageParser.SigningDetails mSigningDetails;
+
+    public PackageSettingBuilder setPackage(AndroidPackage pkg) {
+        this.mPkg = pkg;
+        return this;
+    }
 
     public PackageSettingBuilder setName(String name) {
         this.mName = name;
+        return this;
+    }
+
+    public PackageSettingBuilder setAppId(int appId) {
+        this.mAppId = appId;
         return this;
     }
 
@@ -98,16 +115,6 @@ class PackageSettingBuilder {
         return this;
     }
 
-    public PackageSettingBuilder setParentPackageName(String parentPackageName) {
-        this.mParentPackageName = parentPackageName;
-        return this;
-    }
-
-    public PackageSettingBuilder setChildPackageNames(List<String> childPackageNames) {
-        this.mChildPackageNames = childPackageNames;
-        return this;
-    }
-
     public PackageSettingBuilder setSharedUserId(int sharedUserId) {
         this.mSharedUserId = sharedUserId;
         return this;
@@ -124,6 +131,11 @@ class PackageSettingBuilder {
         return this;
     }
 
+    public PackageSettingBuilder setMimeGroups(Map<String, ArraySet<String>> mimeGroups) {
+        this.mMimeGroups = mimeGroups;
+        return this;
+    }
+
     public PackageSettingBuilder setVolumeUuid(String volumeUuid) {
         this.mVolumeUuid = volumeUuid;
         return this;
@@ -137,14 +149,32 @@ class PackageSettingBuilder {
         return this;
     }
 
+    public PackageSettingBuilder setInstallSource(InstallSource installSource) {
+        mInstallSource = installSource;
+        return this;
+    }
+
+    public PackageSettingBuilder setSigningDetails(
+            PackageParser.SigningDetails signingDetails) {
+        mSigningDetails = signingDetails;
+        return this;
+    }
+
     public PackageSetting build() {
         final PackageSetting packageSetting = new PackageSetting(mName, mRealName,
                 new File(mCodePath), new File(mResourcePath),
                 mLegacyNativeLibraryPathString, mPrimaryCpuAbiString, mSecondaryCpuAbiString,
-                mCpuAbiOverrideString, mPVersionCode, mPkgFlags, mPrivateFlags, mParentPackageName,
-                mChildPackageNames, mSharedUserId, mUsesStaticLibraries,
-                mUsesStaticLibrariesVersions);
+                mCpuAbiOverrideString, mPVersionCode, mPkgFlags, mPrivateFlags, mSharedUserId,
+                mUsesStaticLibraries, mUsesStaticLibrariesVersions, mMimeGroups);
+        packageSetting.signatures = mSigningDetails != null
+                ? new PackageSignatures(mSigningDetails)
+                : new PackageSignatures();
+        packageSetting.pkg = mPkg;
+        packageSetting.appId = mAppId;
         packageSetting.volumeUuid = this.mVolumeUuid;
+        if (mInstallSource != null) {
+            packageSetting.installSource = mInstallSource;
+        }
         for (int i = 0; i < mUserStates.size(); i++) {
             packageSetting.setUserState(mUserStates.keyAt(i), mUserStates.valueAt(i));
         }

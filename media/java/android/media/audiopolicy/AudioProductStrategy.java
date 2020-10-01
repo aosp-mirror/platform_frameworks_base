@@ -82,6 +82,38 @@ public final class AudioProductStrategy implements Parcelable {
 
     /**
      * @hide
+     * Return the AudioProductStrategy object for the given strategy ID.
+     * @param id the ID of the strategy to find
+     * @return an AudioProductStrategy on which getId() would return id, null if no such strategy
+     *     exists.
+     */
+    public static @Nullable AudioProductStrategy getAudioProductStrategyWithId(int id) {
+        synchronized (sLock) {
+            if (sAudioProductStrategies == null) {
+                sAudioProductStrategies = initializeAudioProductStrategies();
+            }
+            for (AudioProductStrategy strategy : sAudioProductStrategies) {
+                if (strategy.getId() == id) {
+                    return strategy;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @hide
+     * Create an invalid AudioProductStrategy instance for testing
+     * @param id the ID for the invalid strategy, always use a different one than in use
+     * @return an invalid instance that cannot successfully be used for volume groups or routing
+     */
+    @SystemApi
+    public static @NonNull AudioProductStrategy createInvalidAudioProductStrategy(int id) {
+        return new AudioProductStrategy("dummy strategy", id, new AudioAttributesGroup[0]);
+    }
+
+    /**
+     * @hide
      * @param streamType to match against AudioProductStrategy
      * @return the AudioAttributes for the first strategy found with the associated stream type
      *          If no match is found, returns AudioAttributes with unknown content_type and usage
@@ -121,7 +153,9 @@ public final class AudioProductStrategy implements Parcelable {
                             + "DO NOT USE STREAM TO CONTROL THE VOLUME");
                     return AudioSystem.STREAM_MUSIC;
                 }
-                return streamType;
+                if (streamType < AudioSystem.getNumStreamTypes()) {
+                    return streamType;
+                }
             }
         }
         return AudioSystem.STREAM_MUSIC;
@@ -222,6 +256,7 @@ public final class AudioProductStrategy implements Parcelable {
      * @return true if the {@link AudioProductStrategy} supports the given {@link AudioAttributes},
      *         false otherwise.
      */
+    @SystemApi
     public boolean supportsAudioAttributes(@NonNull AudioAttributes aa) {
         Preconditions.checkNotNull(aa, "AudioAttributes must not be null");
         for (final AudioAttributesGroup aag : mAudioAttributesGroups) {
@@ -324,6 +359,7 @@ public final class AudioProductStrategy implements Parcelable {
     /**
      * To avoid duplicating the logic in java and native, we shall make use of
      * native API native_get_product_strategies_from_audio_attributes
+     * Keep in sync with frameworks/av/media/libaudioclient/AudioProductStrategy::attributesMatches
      * @param refAttr {@link AudioAttributes} to be taken as the reference
      * @param attr {@link AudioAttributes} of the requester.
      */

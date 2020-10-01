@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.annotation.NonNull;
 import android.os.Bundle;
 
 /**
@@ -37,36 +38,32 @@ public interface LocationListener {
     /**
      * Called when the location has changed.
      *
-     * <p> There are no restrictions on the use of the supplied Location object.
-     *
-     * @param location The new location, as a Location object.
+     * @param location the updated location
      */
-    void onLocationChanged(Location location);
+    void onLocationChanged(@NonNull Location location);
 
     /**
-     * This callback will never be invoked and providers can be considers as always in the
-     * {@link LocationProvider#AVAILABLE} state.
+     * This callback will never be invoked on Android Q and above, and providers can be considered
+     * as always in the {@link LocationProvider#AVAILABLE} state.
      *
-     * @deprecated This callback will never be invoked.
+     * @deprecated This callback will never be invoked on Android Q and above.
      */
     @Deprecated
-    void onStatusChanged(String provider, int status, Bundle extras);
+    default void onStatusChanged(String provider, int status, Bundle extras) {}
 
     /**
      * Called when the provider is enabled by the user.
      *
-     * @param provider the name of the location provider associated with this
-     * update.
+     * @param provider the name of the location provider that has become enabled
      */
-    void onProviderEnabled(String provider);
+    default void onProviderEnabled(@NonNull String provider) {}
 
     /**
      * Called when the provider is disabled by the user. If requestLocationUpdates
      * is called on an already disabled provider, this method is called
      * immediately.
      *
-     * @param provider the name of the location provider associated with this
-     * update.
+     * @param provider the name of the location provider that has become disabled
      */
-    void onProviderDisabled(String provider);
+    default void onProviderDisabled(@NonNull String provider) {}
 }

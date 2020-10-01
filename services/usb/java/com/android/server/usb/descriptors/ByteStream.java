@@ -185,12 +185,14 @@ public final class ByteStream {
             // Positive offsets only
             throw new IllegalArgumentException();
         }
-        // do arithmetic and comparison in long to ovoid potention integer overflow
+        // do arithmetic and comparison in long to avoid potential integer overflow
         long longNewIndex = (long) mIndex + (long) numBytes;
-        if (longNewIndex < (long) mBytes.length) {
+        if (longNewIndex <= (long) mBytes.length) {
             mReadCount += numBytes;
             mIndex += numBytes;
         } else {
+            // Position the stream to the end so available() will return 0
+            mIndex = mBytes.length;
             throw new IndexOutOfBoundsException();
         }
     }
@@ -210,6 +212,7 @@ public final class ByteStream {
             mReadCount -= numBytes;
             mIndex -= numBytes;
         } else {
+            mIndex = 0;
             throw new IndexOutOfBoundsException();
         }
     }

@@ -16,9 +16,12 @@
 
 package com.android.server.biometrics.iris;
 
+import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
+
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.iris.IIrisService;
 
 import com.android.server.biometrics.AuthenticationClient;
 import com.android.server.biometrics.BiometricServiceBase;
@@ -42,6 +45,17 @@ public class IrisService extends BiometricServiceBase {
     private static final String TAG = "IrisService";
 
     /**
+     * Receives the incoming binder calls from IrisManager.
+     */
+    private final class IrisServiceWrapper extends IIrisService.Stub {
+        @Override // Binder call
+        public void initConfiguredStrength(int strength) {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+            initConfiguredStrengthInternal(strength);
+        }
+    }
+
+    /**
      * Initializes the system service.
      * <p>
      * Subclasses must define a single argument constructor that accepts the context
@@ -57,6 +71,7 @@ public class IrisService extends BiometricServiceBase {
     @Override
     public void onStart() {
         super.onStart();
+        publishBinderService(Context.IRIS_SERVICE, new IrisServiceWrapper());
     }
 
     @Override

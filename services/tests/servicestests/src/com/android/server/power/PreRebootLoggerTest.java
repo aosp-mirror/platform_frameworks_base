@@ -23,6 +23,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.pm.PackageInstaller;
+import android.content.pm.PackageInstaller.SessionInfo;
+import android.content.pm.PackageManager;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 
@@ -36,12 +39,15 @@ import com.google.common.io.Files;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Tests for {@link PreRebootLogger}
@@ -49,7 +55,11 @@ import java.io.File;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class PreRebootLoggerTest {
+    @Rule public final MockitoRule mocks = MockitoJUnit.rule();
     @Mock Context mContext;
+    @Mock PackageManager mPackageManager;
+    @Mock PackageInstaller mPackageInstaller;
+    @Mock List<SessionInfo> mSessions;
     private MockContentResolver mContentResolver;
     private File mDumpDir;
 
@@ -64,29 +74,53 @@ public class PreRebootLoggerTest {
     }
 
     @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
+    public void enableAdbConfig() {
         mContentResolver = new MockContentResolver(getInstrumentation().getTargetContext());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
+        Settings.Global.putInt(mContentResolver, Settings.Global.ADB_ENABLED, 1);
+    }
 
+    @Before
+    public void prepareActiveStagedSessions() {
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        when(mPackageManager.getPackageInstaller()).thenReturn(mPackageInstaller);
+        when(mPackageInstaller.getActiveStagedSessions()).thenReturn(mSessions);
+        when(mSessions.isEmpty()).thenReturn(false);
+    }
+
+    @Before
+    public void setupDumpDir() {
         mDumpDir = Files.createTempDir();
-        mDumpDir.mkdir();
         mDumpDir.deleteOnExit();
     }
 
     @Test
-    public void log_adbEnabled_dumpsInformationProperly() {
-        Settings.Global.putInt(mContentResolver, Settings.Global.ADB_ENABLED, 1);
-
+    public void log_dumpsInformationProperly() {
         PreRebootLogger.log(mContext, mDumpDir);
 
         assertThat(mDumpDir.list()).asList().containsExactly("system", "package", "rollback");
     }
 
     @Test
+    public void dump_exceedTimeout_wontBlockCurrentThread() {
+        PreRebootLogger.dump(mDumpDir, 1 /* maxWaitTime */);
+
+        assertThat(mDumpDir.listFiles()).asList().containsNoneOf("system", "package", "rollback");
+    }
+
+    @Test
+    public void log_noActiveStagedSession_wipesDumpedInformation() {
+        PreRebootLogger.log(mContext, mDumpDir);
+        when(mSessions.isEmpty()).thenReturn(true);
+
+        PreRebootLogger.log(mContext, mDumpDir);
+
+        assertThat(mDumpDir.listFiles()).isEmpty();
+    }
+
+    @Test
     public void log_adbDisabled_wipesDumpedInformation() {
-        Settings.Global.putInt(mContentResolver, Settings.Global.ADB_ENABLED, 1);
         PreRebootLogger.log(mContext, mDumpDir);
         Settings.Global.putInt(mContentResolver, Settings.Global.ADB_ENABLED, 0);
 

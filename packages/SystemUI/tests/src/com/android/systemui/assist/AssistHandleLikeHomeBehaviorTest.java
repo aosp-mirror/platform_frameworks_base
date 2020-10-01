@@ -30,8 +30,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.system.QuickStepContract;
 
 import org.junit.Before;
@@ -50,7 +50,7 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
 
     @Mock private StatusBarStateController mMockStatusBarStateController;
     @Mock private WakefulnessLifecycle mMockWakefulnessLifecycle;
-    @Mock private OverviewProxyService mMockOverviewProxyService;
+    @Mock private SysUiState mMockSysUiState;
     @Mock private AssistHandleCallbacks mMockAssistHandleCallbacks;
 
     @Before
@@ -59,7 +59,7 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         mAssistHandleLikeHomeBehavior = new AssistHandleLikeHomeBehavior(
                 () -> mMockStatusBarStateController,
                 () -> mMockWakefulnessLifecycle,
-                () -> mMockOverviewProxyService);
+                () -> mMockSysUiState);
     }
 
     @Test
@@ -75,9 +75,8 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
                 any(StatusBarStateController.StateListener.class));
         verify(mMockWakefulnessLifecycle).getWakefulness();
         verify(mMockWakefulnessLifecycle).addObserver(any(WakefulnessLifecycle.Observer.class));
-        verify(mMockOverviewProxyService).addCallback(any(
-                OverviewProxyService.OverviewProxyListener.class));
-        verifyNoMoreInteractions(mMockWakefulnessLifecycle, mMockOverviewProxyService);
+        verify(mMockSysUiState).addCallback(any(SysUiState.SysUiStateCallback.class));
+        verifyNoMoreInteractions(mMockWakefulnessLifecycle, mMockSysUiState);
     }
 
     @Test
@@ -133,15 +132,15 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
         ArgumentCaptor<WakefulnessLifecycle.Observer> observer =
                 ArgumentCaptor.forClass(WakefulnessLifecycle.Observer.class);
-        ArgumentCaptor<OverviewProxyService.OverviewProxyListener> overviewProxyListener =
-                ArgumentCaptor.forClass(OverviewProxyService.OverviewProxyListener.class);
+        ArgumentCaptor<SysUiState.SysUiStateCallback> sysUiStateCallback =
+                ArgumentCaptor.forClass(SysUiState.SysUiStateCallback.class);
         verify(mMockStatusBarStateController).addCallback(stateListener.capture());
         verify(mMockWakefulnessLifecycle).addObserver(observer.capture());
-        verify(mMockOverviewProxyService).addCallback(overviewProxyListener.capture());
+        verify(mMockSysUiState).addCallback(sysUiStateCallback.capture());
         reset(
                 mMockStatusBarStateController,
                 mMockWakefulnessLifecycle,
-                mMockOverviewProxyService,
+                mMockSysUiState,
                 mMockAssistHandleCallbacks);
 
         // Act
@@ -150,11 +149,11 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         // Assert
         verify(mMockStatusBarStateController).removeCallback(eq(stateListener.getValue()));
         verify(mMockWakefulnessLifecycle).removeObserver(eq(observer.getValue()));
-        verify(mMockOverviewProxyService).removeCallback(eq(overviewProxyListener.getValue()));
+        verify(mMockSysUiState).removeCallback(eq(sysUiStateCallback.getValue()));
         verifyNoMoreInteractions(
                 mMockStatusBarStateController,
                 mMockWakefulnessLifecycle,
-                mMockOverviewProxyService,
+                mMockSysUiState,
                 mMockAssistHandleCallbacks);
     }
 
@@ -165,7 +164,7 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         reset(
                 mMockStatusBarStateController,
                 mMockWakefulnessLifecycle,
-                mMockOverviewProxyService,
+                mMockSysUiState,
                 mMockAssistHandleCallbacks);
 
         // Act
@@ -175,7 +174,7 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         verifyNoMoreInteractions(
                 mMockStatusBarStateController,
                 mMockWakefulnessLifecycle,
-                mMockOverviewProxyService,
+                mMockSysUiState,
                 mMockAssistHandleCallbacks);
     }
 
@@ -186,7 +185,7 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         reset(
                 mMockStatusBarStateController,
                 mMockWakefulnessLifecycle,
-                mMockOverviewProxyService,
+                mMockSysUiState,
                 mMockAssistHandleCallbacks);
 
         // Act
@@ -196,7 +195,7 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         verifyNoMoreInteractions(
                 mMockStatusBarStateController,
                 mMockWakefulnessLifecycle,
-                mMockOverviewProxyService,
+                mMockSysUiState,
                 mMockAssistHandleCallbacks);
     }
 
@@ -216,7 +215,7 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         reset(
                 mMockStatusBarStateController,
                 mMockWakefulnessLifecycle,
-                mMockOverviewProxyService,
+                mMockSysUiState,
                 mMockAssistHandleCallbacks);
 
         // Act
@@ -227,7 +226,7 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         verifyNoMoreInteractions(
                 mMockStatusBarStateController,
                 mMockWakefulnessLifecycle,
-                mMockOverviewProxyService,
+                mMockSysUiState,
                 mMockAssistHandleCallbacks);
 
         // Arrange
@@ -242,7 +241,7 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         verifyNoMoreInteractions(
                 mMockStatusBarStateController,
                 mMockWakefulnessLifecycle,
-                mMockOverviewProxyService,
+                mMockSysUiState,
                 mMockAssistHandleCallbacks);
 
         // Act
@@ -253,7 +252,7 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         verifyNoMoreInteractions(
                 mMockStatusBarStateController,
                 mMockWakefulnessLifecycle,
-                mMockOverviewProxyService,
+                mMockSysUiState,
                 mMockAssistHandleCallbacks);
     }
 
@@ -273,7 +272,7 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         reset(
                 mMockStatusBarStateController,
                 mMockWakefulnessLifecycle,
-                mMockOverviewProxyService,
+                mMockSysUiState,
                 mMockAssistHandleCallbacks);
 
         // Act
@@ -284,7 +283,7 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         verifyNoMoreInteractions(
                 mMockStatusBarStateController,
                 mMockWakefulnessLifecycle,
-                mMockOverviewProxyService,
+                mMockSysUiState,
                 mMockAssistHandleCallbacks);
 
         // Arrange
@@ -299,7 +298,7 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         verifyNoMoreInteractions(
                 mMockStatusBarStateController,
                 mMockWakefulnessLifecycle,
-                mMockOverviewProxyService,
+                mMockSysUiState,
                 mMockAssistHandleCallbacks);
     }
 
@@ -309,14 +308,14 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         when(mMockStatusBarStateController.isDozing()).thenReturn(false);
         when(mMockWakefulnessLifecycle.getWakefulness())
                 .thenReturn(WakefulnessLifecycle.WAKEFULNESS_AWAKE);
-        ArgumentCaptor<OverviewProxyService.OverviewProxyListener> sysUiStateCallback =
-                ArgumentCaptor.forClass(OverviewProxyService.OverviewProxyListener.class);
+        ArgumentCaptor<SysUiState.SysUiStateCallback> sysUiStateCallback =
+                ArgumentCaptor.forClass(SysUiState.SysUiStateCallback.class);
         mAssistHandleLikeHomeBehavior.onModeActivated(mContext, mMockAssistHandleCallbacks);
-        verify(mMockOverviewProxyService).addCallback(sysUiStateCallback.capture());
+        verify(mMockSysUiState).addCallback(sysUiStateCallback.capture());
         reset(
                 mMockStatusBarStateController,
                 mMockWakefulnessLifecycle,
-                mMockOverviewProxyService,
+                mMockSysUiState,
                 mMockAssistHandleCallbacks);
 
         // Act
@@ -328,7 +327,7 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         verifyNoMoreInteractions(
                 mMockStatusBarStateController,
                 mMockWakefulnessLifecycle,
-                mMockOverviewProxyService,
+                mMockSysUiState,
                 mMockAssistHandleCallbacks);
     }
 
@@ -338,16 +337,16 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         when(mMockStatusBarStateController.isDozing()).thenReturn(false);
         when(mMockWakefulnessLifecycle.getWakefulness())
                 .thenReturn(WakefulnessLifecycle.WAKEFULNESS_AWAKE);
-        ArgumentCaptor<OverviewProxyService.OverviewProxyListener> sysUiStateCallback =
-                ArgumentCaptor.forClass(OverviewProxyService.OverviewProxyListener.class);
+        ArgumentCaptor<SysUiState.SysUiStateCallback> sysUiStateCallback =
+                ArgumentCaptor.forClass(SysUiState.SysUiStateCallback.class);
         mAssistHandleLikeHomeBehavior.onModeActivated(mContext, mMockAssistHandleCallbacks);
-        verify(mMockOverviewProxyService).addCallback(sysUiStateCallback.capture());
+        verify(mMockSysUiState).addCallback(sysUiStateCallback.capture());
         sysUiStateCallback.getValue().onSystemUiStateChanged(
                 QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN);
         reset(
                 mMockStatusBarStateController,
                 mMockWakefulnessLifecycle,
-                mMockOverviewProxyService,
+                mMockSysUiState,
                 mMockAssistHandleCallbacks);
 
         // Act
@@ -359,7 +358,7 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         verifyNoMoreInteractions(
                 mMockStatusBarStateController,
                 mMockWakefulnessLifecycle,
-                mMockOverviewProxyService,
+                mMockSysUiState,
                 mMockAssistHandleCallbacks);
     }
 }

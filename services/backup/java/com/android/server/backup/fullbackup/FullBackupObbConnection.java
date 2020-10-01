@@ -32,13 +32,13 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.backup.IObbBackupService;
-import com.android.internal.util.Preconditions;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.utils.FullBackupUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Objects;
 
 /**
  * Full backup/restore to a file/socket.
@@ -52,7 +52,7 @@ public class FullBackupObbConnection implements ServiceConnection {
     public FullBackupObbConnection(UserBackupManagerService backupManagerService) {
         this.backupManagerService = backupManagerService;
         mService = null;
-        mAgentTimeoutParameters = Preconditions.checkNotNull(
+        mAgentTimeoutParameters = Objects.requireNonNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
     }

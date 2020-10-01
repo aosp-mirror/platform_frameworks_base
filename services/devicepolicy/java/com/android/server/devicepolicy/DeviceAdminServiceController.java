@@ -31,10 +31,9 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.am.PersistentConnection;
 import com.android.server.appbinding.AppBindingUtils;
-
-import java.io.PrintWriter;
 
 /**
  * Manages connections to persistent services in owner packages.
@@ -180,21 +179,24 @@ public class DeviceAdminServiceController {
         }
     }
 
-    public void dump(String prefix, PrintWriter pw) {
+    /** dump content */
+    public void dump(IndentingPrintWriter pw) {
         synchronized (mLock) {
             if (mConnections.size() == 0) {
                 return;
             }
-            pw.println();
-            pw.print(prefix); pw.println("Owner Services:");
+            pw.println("Owner Services:");
+            pw.increaseIndent();
             for (int i = 0; i < mConnections.size(); i++) {
                 final int userId = mConnections.keyAt(i);
-                pw.print(prefix); pw.print("  "); pw.print("User: "); pw.println(userId);
+                pw.print("User: "); pw.println(userId);
 
                 final DevicePolicyServiceConnection con = mConnections.valueAt(i);
-                con.dump(prefix + "    ", pw);
+                pw.increaseIndent();
+                con.dump("", pw);
+                pw.decreaseIndent();
             }
-            pw.println();
+            pw.decreaseIndent();
         }
     }
 }

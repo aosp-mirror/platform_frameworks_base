@@ -27,75 +27,61 @@
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
 #include "pipeline/skia/SkiaVulkanPipeline.h"
 #include "renderstate/RenderState.h"
-#include "utils/FatVector.h"
 #include "utils/TimeUtils.h"
 #include "utils/TraceUtils.h"
-
-#ifdef HWUI_GLES_WRAP_ENABLED
-#include "debug/GlesDriver.h"
-#endif
 
 #include <GrContextOptions.h>
 #include <gl/GrGLInterface.h>
 
-#include <gui/DisplayEventReceiver.h>
 #include <sys/resource.h>
 #include <utils/Condition.h>
 #include <utils/Log.h>
 #include <utils/Mutex.h>
 #include <thread>
 
+#include <ui/FatVector.h>
+
 namespace android {
 namespace uirenderer {
 namespace renderthread {
-
-// Number of events to read at a time from the DisplayEventReceiver pipe.
-// The value should be large enough that we can quickly drain the pipe
-// using just a few large reads.
-static const size_t EVENT_BUFFER_SIZE = 100;
 
 static bool gHasRenderThreadInstance = false;
 
 static JVMAttachHook gOnStartHook = nullptr;
 
-class DisplayEventReceiverWrapper : public VsyncSource {
+void RenderThread::frameCallback(int64_t frameTimeNanos, void* data) {
+    RenderThread* rt = reinterpret_cast<RenderThread*>(data);
+    rt->mVsyncRequested = false;
+    if (rt->timeLord().vsyncReceived(frameTimeNanos) && !rt->mFrameCallbackTaskPending) {
+        ATRACE_NAME("queue mFrameCallbackTask");
+        rt->mFrameCallbackTaskPending = true;
+        nsecs_t runAt = (frameTimeNanos + rt->mDispatchFrameDelay);
+        rt->queue().postAt(runAt, [=]() { rt->dispatchFrameCallbacks(); });
+    }
+}
+
+void RenderThread::refreshRateCallback(int64_t vsyncPeriod, void* data) {
+    ATRACE_NAME("refreshRateCallback");
+    RenderThread* rt = reinterpret_cast<RenderThread*>(data);
+    DeviceInfo::get()->onRefreshRateChanged(vsyncPeriod);
+    rt->setupFrameInterval();
+}
+
+class ChoreographerSource : public VsyncSource {
 public:
-    DisplayEventReceiverWrapper(std::unique_ptr<DisplayEventReceiver>&& receiver,
-            const std::function<void()>& onDisplayConfigChanged)
-            : mDisplayEventReceiver(std::move(receiver))
-            , mOnDisplayConfigChanged(onDisplayConfigChanged) {}
+    ChoreographerSource(RenderThread* renderThread) : mRenderThread(renderThread) {}
 
     virtual void requestNextVsync() override {
-        status_t status = mDisplayEventReceiver->requestNextVsync();
-        LOG_ALWAYS_FATAL_IF(status != NO_ERROR, "requestNextVsync failed with status: %d", status);
+        AChoreographer_postFrameCallback64(mRenderThread->mChoreographer,
+                                           RenderThread::frameCallback, mRenderThread);
     }
 
-    virtual nsecs_t latestVsyncEvent() override {
-        DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
-        nsecs_t latest = 0;
-        ssize_t n;
-        while ((n = mDisplayEventReceiver->getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
-            for (ssize_t i = 0; i < n; i++) {
-                const DisplayEventReceiver::Event& ev = buf[i];
-                switch (ev.header.type) {
-                    case DisplayEventReceiver::DISPLAY_EVENT_VSYNC:
-                        latest = ev.header.timestamp;
-                        break;
-                    case DisplayEventReceiver::DISPLAY_EVENT_CONFIG_CHANGED:
-                        mOnDisplayConfigChanged();
-                        break;
-                }
-            }
-        }
-        if (n < 0) {
-            ALOGW("Failed to get events from display event receiver, status=%d", status_t(n));
-        }
-        return latest;
+    virtual void drainPendingEvents() override {
+        AChoreographer_handlePendingEvents(mRenderThread->mChoreographer, mRenderThread);
     }
 
 private:
-    std::unique_ptr<DisplayEventReceiver> mDisplayEventReceiver;
-    std::function<void()> mOnDisplayConfigChanged;
+    RenderThread* mRenderThread;
 };
 
 class DummyVsyncSource : public VsyncSource {
@@ -103,11 +89,14 @@ public:
     DummyVsyncSource(RenderThread* renderThread) : mRenderThread(renderThread) {}
 
     virtual void requestNextVsync() override {
-        mRenderThread->queue().postDelayed(16_ms,
-                                           [this]() { mRenderThread->drainDisplayEventQueue(); });
+        mRenderThread->queue().postDelayed(16_ms, [this]() {
+            RenderThread::frameCallback(systemTime(SYSTEM_TIME_MONOTONIC), mRenderThread);
+        });
     }
 
-    virtual nsecs_t latestVsyncEvent() override { return systemTime(CLOCK_MONOTONIC); }
+    virtual void drainPendingEvents() override {
+        RenderThread::frameCallback(systemTime(SYSTEM_TIME_MONOTONIC), mRenderThread);
+    }
 
 private:
     RenderThread* mRenderThread;
@@ -149,29 +138,24 @@ RenderThread::RenderThread()
 }
 
 RenderThread::~RenderThread() {
+    // Note that if this fatal assertion is removed then member variables must
+    // be properly destroyed.
     LOG_ALWAYS_FATAL("Can't destroy the render thread");
 }
 
-void RenderThread::initializeDisplayEventReceiver() {
-    LOG_ALWAYS_FATAL_IF(mVsyncSource, "Initializing a second DisplayEventReceiver?");
+void RenderThread::initializeChoreographer() {
+    LOG_ALWAYS_FATAL_IF(mVsyncSource, "Initializing a second Choreographer?");
 
     if (!Properties::isolatedProcess) {
-        auto receiver = std::make_unique<DisplayEventReceiver>(
-            ISurfaceComposer::eVsyncSourceApp,
-            ISurfaceComposer::eConfigChangedDispatch);
-        status_t status = receiver->initCheck();
-        LOG_ALWAYS_FATAL_IF(status != NO_ERROR,
-                            "Initialization of DisplayEventReceiver "
-                            "failed with status: %d",
-                            status);
+        mChoreographer = AChoreographer_create();
+        LOG_ALWAYS_FATAL_IF(mChoreographer == nullptr, "Initialization of Choreographer failed");
+        AChoreographer_registerRefreshRateCallback(mChoreographer,
+                                                   RenderThread::refreshRateCallback, this);
 
         // Register the FD
-        mLooper->addFd(receiver->getFd(), 0, Looper::EVENT_INPUT,
-                       RenderThread::displayEventReceiverCallback, this);
-        mVsyncSource = new DisplayEventReceiverWrapper(std::move(receiver), [this] {
-            DeviceInfo::get()->onDisplayConfigChanged();
-            setupFrameInterval();
-        });
+        mLooper->addFd(AChoreographer_getFd(mChoreographer), 0, Looper::EVENT_INPUT,
+                       RenderThread::choreographerCallback, this);
+        mVsyncSource = new ChoreographerSource(this);
     } else {
         mVsyncSource = new DummyVsyncSource(this);
     }
@@ -179,16 +163,15 @@ void RenderThread::initializeDisplayEventReceiver() {
 
 void RenderThread::initThreadLocals() {
     setupFrameInterval();
-    initializeDisplayEventReceiver();
+    initializeChoreographer();
     mEglManager = new EglManager();
     mRenderState = new RenderState(*this);
     mVkManager = new VulkanManager();
-    mCacheManager = new CacheManager(DeviceInfo::get()->displayInfo());
+    mCacheManager = new CacheManager();
 }
 
 void RenderThread::setupFrameInterval() {
-    auto& displayInfo = DeviceInfo::get()->displayInfo();
-    nsecs_t frameIntervalNanos = static_cast<nsecs_t>(1000000000 / displayInfo.fps);
+    nsecs_t frameIntervalNanos = DeviceInfo::getVsyncPeriod();
     mTimeLord.setFrameInterval(frameIntervalNanos);
     mDispatchFrameDelay = static_cast<nsecs_t>(frameIntervalNanos * .25f);
 }
@@ -199,12 +182,7 @@ void RenderThread::requireGlContext() {
     }
     mEglManager->initialize();
 
-#ifdef HWUI_GLES_WRAP_ENABLED
-    debug::GlesDriver* driver = debug::GlesDriver::get();
-    sk_sp<const GrGLInterface> glInterface(driver->getSkiaInterface());
-#else
     sk_sp<const GrGLInterface> glInterface(GrGLCreateNativeInterface());
-#endif
     LOG_ALWAYS_FATAL_IF(!glInterface.get());
 
     GrContextOptions options;
@@ -293,12 +271,11 @@ void RenderThread::setGrContext(sk_sp<GrContext> context) {
     }
     mGrContext = std::move(context);
     if (mGrContext) {
-        mRenderState->onContextCreated();
         DeviceInfo::setMaxTextureSize(mGrContext->maxRenderTargetSize());
     }
 }
 
-int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {
+int RenderThread::choreographerCallback(int fd, int events, void* data) {
     if (events & (Looper::EVENT_ERROR | Looper::EVENT_HANGUP)) {
         ALOGE("Display event receiver pipe was closed or an error occurred.  "
               "events=0x%x",
@@ -312,24 +289,10 @@ int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {
               events);
         return 1;  // keep the callback
     }
+    RenderThread* rt = reinterpret_cast<RenderThread*>(data);
+    AChoreographer_handlePendingEvents(rt->mChoreographer, data);
 
-    reinterpret_cast<RenderThread*>(data)->drainDisplayEventQueue();
-
-    return 1;  // keep the callback
-}
-
-void RenderThread::drainDisplayEventQueue() {
-    ATRACE_CALL();
-    nsecs_t vsyncEvent = mVsyncSource->latestVsyncEvent();
-    if (vsyncEvent > 0) {
-        mVsyncRequested = false;
-        if (mTimeLord.vsyncReceived(vsyncEvent) && !mFrameCallbackTaskPending) {
-            ATRACE_NAME("queue mFrameCallbackTask");
-            mFrameCallbackTaskPending = true;
-            nsecs_t runAt = (vsyncEvent + mDispatchFrameDelay);
-            queue().postAt(runAt, [this]() { dispatchFrameCallbacks(); });
-        }
-    }
+    return 1;
 }
 
 void RenderThread::dispatchFrameCallbacks() {
@@ -370,7 +333,7 @@ bool RenderThread::threadLoop() {
         processQueue();
 
         if (mPendingRegistrationFrameCallbacks.size() && !mFrameCallbackTaskPending) {
-            drainDisplayEventQueue();
+            mVsyncSource->drainPendingEvents();
             mFrameCallbacks.insert(mPendingRegistrationFrameCallbacks.begin(),
                                    mPendingRegistrationFrameCallbacks.end());
             mPendingRegistrationFrameCallbacks.clear();

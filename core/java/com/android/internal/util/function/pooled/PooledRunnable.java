@@ -16,6 +16,8 @@
 
 package com.android.internal.util.function.pooled;
 
+import android.os.TraceNameSupplier;
+
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 
 /**
@@ -24,7 +26,8 @@ import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
  * @see PooledLambda
  * @hide
  */
-public interface PooledRunnable extends PooledLambda, Runnable, ThrowingRunnable {
+public interface PooledRunnable
+        extends PooledLambda, Runnable, ThrowingRunnable, TraceNameSupplier {
     /** @inheritDoc */
     PooledRunnable recycleOnUse();
 }

@@ -32,9 +32,12 @@ java_defaults {
         "android.hardware.tetheroffload.config-V1.0-java",
         "android.hardware.tetheroffload.control-V1.0-java",
         "net-utils-framework-common",
+        "net-utils-device-common",
     ],
     libs: [
+        "framework-statsd.stubs.module_lib",
         "framework-tethering.impl",
+        "framework-wifi",
         "unsupportedappusage",
     ],
     plugins: ["java_api_finder"],
@@ -97,7 +100,7 @@ java_defaults {
         "res",
     ],
     libs: [
-        "framework-tethering.impl",
+        "framework-tethering",
     ],
     jarjar_rules: "jarjar-rules.txt",
     optimize: {

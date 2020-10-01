@@ -71,7 +71,7 @@ public class UserLifecycleStressTest {
             throws IOException, RemoteException, InterruptedException {
         for (int i = 0; i < NUM_ITERATIONS_STOP_USER; i++) {
             final UserInfo userInfo = mUserManager.createProfileForUser("TestUser",
-                    UserInfo.FLAG_MANAGED_PROFILE, mActivityManager.getCurrentUser());
+                    UserManager.USER_TYPE_PROFILE_MANAGED, 0, mActivityManager.getCurrentUser());
             assertNotNull(userInfo);
             try {
                 assertTrue(

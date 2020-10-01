@@ -31,7 +31,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 
@@ -47,10 +47,12 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.After;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.function.Function;
 
 /**
  * Tests for the {@link DisplayContent#assignChildLayers(SurfaceControl.Transaction)} method.
@@ -60,6 +62,7 @@ import java.util.LinkedList;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class ZOrderingTests extends WindowTestsBase {
 
     private static class LayerRecordingTransaction extends SurfaceControl.Transaction {
@@ -131,7 +134,8 @@ public class ZOrderingTests extends WindowTestsBase {
         }
     }
 
-    private static class HierarchyRecordingBuilderFactory implements SurfaceBuilderFactory {
+    private static class HierarchyRecordingBuilderFactory implements Function<SurfaceSession,
+                SurfaceControl.Builder> {
         private LayerRecordingTransaction mTransaction;
 
         HierarchyRecordingBuilderFactory(LayerRecordingTransaction transaction) {
@@ -139,7 +143,7 @@ public class ZOrderingTests extends WindowTestsBase {
         }
 
         @Override
-        public SurfaceControl.Builder make(SurfaceSession s) {
+        public SurfaceControl.Builder apply(SurfaceSession s) {
             final LayerRecordingTransaction transaction = mTransaction;
             return new HierarchyRecorder(s, transaction);
         }
@@ -153,7 +157,7 @@ public class ZOrderingTests extends WindowTestsBase {
         // which is after construction of the DisplayContent, meaning the HierarchyRecorder
         // would miss construction of the top-level layers.
         mTransaction = new LayerRecordingTransaction();
-        mWm.mSurfaceBuilderFactory = new HierarchyRecordingBuilderFactory(mTransaction);
+        mWm.mSurfaceControlFactory = new HierarchyRecordingBuilderFactory(mTransaction);
         mWm.mTransactionFactory = () -> mTransaction;
     }
 
@@ -372,7 +376,8 @@ public class ZOrderingTests extends WindowTestsBase {
         final WindowState navBarPanel =
                 createWindow(null, TYPE_NAVIGATION_BAR_PANEL, mDisplayContent, "NavBarPanel");
         final WindowState statusBarPanel =
-                createWindow(null, TYPE_STATUS_BAR_PANEL, mDisplayContent, "StatusBarPanel");
+                createWindow(null, TYPE_STATUS_BAR_ADDITIONAL, mDisplayContent,
+                        "StatusBarAdditional");
         final WindowState statusBarSubPanel =
                 createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, mDisplayContent, "StatusBarSubPanel");
         mDisplayContent.assignChildLayers(mTransaction);

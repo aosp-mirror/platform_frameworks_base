@@ -18,6 +18,7 @@
 
 #include "DisplayList.h"
 #include "hwui/Canvas.h"
+#include "hwui/Paint.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #include "tests/common/TestUtils.h"
 
@@ -93,7 +94,7 @@ void BM_DisplayListCanvas_record_simpleBitmapView(benchmark::State& benchState) 
     std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(100, 100));
     delete canvas->finishRecording();
 
-    SkPaint rectPaint;
+    Paint rectPaint;
     sk_sp<Bitmap> iconBitmap(TestUtils::createBitmap(80, 80));
 
     while (benchState.KeepRunning()) {

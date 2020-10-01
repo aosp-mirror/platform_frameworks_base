@@ -46,6 +46,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowInsets.Type;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -184,12 +185,13 @@ public class ImmersiveModeConfirmation {
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT);
-        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        lp.setFitInsetsTypes(lp.getFitInsetsTypes() & ~Type.statusBars());
+        lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         lp.setTitle("ImmersiveModeConfirmation");
         lp.windowAnimations = com.android.internal.R.style.Animation_ImmersiveModeConfirmation;
         lp.token = getWindowToken();
@@ -273,7 +275,7 @@ public class ImmersiveModeConfirmation {
             super.onAttachedToWindow();
 
             DisplayMetrics metrics = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            mContext.getDisplay().getMetrics(metrics);
             float density = metrics.density;
 
             getViewTreeObserver().addOnComputeInternalInsetsListener(mInsetsListener);

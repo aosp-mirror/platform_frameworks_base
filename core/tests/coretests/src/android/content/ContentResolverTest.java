@@ -16,8 +16,11 @@
 
 package android.content;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -31,6 +34,7 @@ import android.graphics.Paint;
 import android.net.Uri;
 import android.os.MemoryFile;
 import android.os.ParcelFileDescriptor;
+import android.os.SystemClock;
 import android.util.Size;
 
 import androidx.test.InstrumentationRegistry;
@@ -82,22 +86,23 @@ public class ContentResolverTest {
 
         final AssetFileDescriptor afd = new AssetFileDescriptor(
                 new ParcelFileDescriptor(mImage.getFileDescriptor()), 0, mSize, null);
-        when(mProvider.openTypedAssetFile(any(), any(), any(), any(), any())).thenReturn(afd);
+        when(mProvider.openTypedAssetFile(any(), any(), any(), any(), any(), any())).thenReturn(
+                afd);
     }
 
-    private static void assertImageAspectAndContents(Bitmap bitmap) {
+    private static void assertImageAspectAndContents(int width, int height, Bitmap bitmap) {
         // And correct aspect ratio
-        final int before = (100 * 1280) / 960;
+        final int before = (100 * width) / height;
         final int after = (100 * bitmap.getWidth()) / bitmap.getHeight();
         assertEquals(before, after);
 
         // And scaled correctly
         final int halfX = bitmap.getWidth() / 2;
         final int halfY = bitmap.getHeight() / 2;
-        assertEquals(Color.BLUE, bitmap.getPixel(halfX - 10, halfY - 10));
-        assertEquals(Color.RED, bitmap.getPixel(halfX + 10, halfY - 10));
-        assertEquals(Color.RED, bitmap.getPixel(halfX - 10, halfY + 10));
-        assertEquals(Color.RED, bitmap.getPixel(halfX + 10, halfY + 10));
+        assertEquals(Color.BLUE, bitmap.getPixel(halfX - 5, halfY - 5));
+        assertEquals(Color.RED, bitmap.getPixel(halfX + 5, halfY - 5));
+        assertEquals(Color.RED, bitmap.getPixel(halfX - 5, halfY + 5));
+        assertEquals(Color.RED, bitmap.getPixel(halfX + 5, halfY + 5));
     }
 
     @Test
@@ -112,7 +117,7 @@ public class ContentResolverTest {
         assertEquals(1280, res.getWidth());
         assertEquals(960, res.getHeight());
 
-        assertImageAspectAndContents(res);
+        assertImageAspectAndContents(1280, 960, res);
     }
 
     @Test
@@ -127,7 +132,7 @@ public class ContentResolverTest {
         assertTrue(res.getWidth() <= 640);
         assertTrue(res.getHeight() <= 480);
 
-        assertImageAspectAndContents(res);
+        assertImageAspectAndContents(1280, 960, res);
     }
 
     @Test
@@ -142,7 +147,7 @@ public class ContentResolverTest {
         assertTrue(res.getWidth() <= 640);
         assertTrue(res.getHeight() <= 480);
 
-        assertImageAspectAndContents(res);
+        assertImageAspectAndContents(1280, 960, res);
     }
 
     @Test
@@ -157,7 +162,23 @@ public class ContentResolverTest {
         assertEquals(32, res.getWidth());
         assertEquals(24, res.getHeight());
 
-        assertImageAspectAndContents(res);
+        assertImageAspectAndContents(32, 24, res);
+    }
+
+    @Test
+    public void testLoadThumbnail_Large() throws Exception {
+        // Test very large and extreme ratio image
+        initImage(1080, 30000);
+
+        Bitmap res = ContentResolver.loadThumbnail(mClient,
+                Uri.parse("content://com.example/"), new Size(1080, 540), null,
+                ImageDecoder.ALLOCATOR_SOFTWARE);
+
+        // Size should be much smaller
+        assertTrue(res.getWidth() <= 2160);
+        assertTrue(res.getHeight() <= 1080);
+
+        assertImageAspectAndContents(1080, 30000, res);
     }
 
     @Test
@@ -173,5 +194,71 @@ public class ContentResolverTest {
     private static void assertTranslate(Uri uri) {
         assertEquals(uri, ContentResolver
                 .translateDeprecatedDataPath(ContentResolver.translateDeprecatedDataPath(uri)));
+    }
+
+    @Test
+    public void testGetType_localProvider() {
+        // This provider is running in the same process as the test and is already registered with
+        // the ContentResolver when the application starts, see
+        // ActivityThread#installContentProviders. This allows ContentResolver to follow a
+        // streamlined code path.
+        String type = mResolver.getType(Uri.parse("content://android.content.FakeProviderLocal"));
+        assertEquals("fake/local", type);
+    }
+
+    @Test
+    public void testGetType_remoteProvider() {
+        // This provider is running in a different process, which will need to be started
+        // in order to acquire the provider
+        String type = mResolver.getType(Uri.parse("content://android.content.FakeProviderRemote"));
+        assertEquals("fake/remote", type);
+    }
+
+    @Test
+    public void testGetType_slowProvider() {
+        // This provider is running in a different process and is intentionally slow to start.
+        // We are trying to confirm that it does not cause an ANR
+        long start = SystemClock.uptimeMillis();
+        String type = mResolver.getType(Uri.parse("content://android.content.SlowProvider"));
+        long end = SystemClock.uptimeMillis();
+        assertEquals("slow", type);
+        assertThat(end).isLessThan(start + 5000);
+    }
+
+    @Test
+    public void testGetType_unknownProvider() {
+        // This provider does not exist.
+        // We are trying to confirm that getType returns null and does not cause an ANR
+        long start = SystemClock.uptimeMillis();
+        String type = mResolver.getType(Uri.parse("content://android.content.NonexistentProvider"));
+        long end = SystemClock.uptimeMillis();
+        assertThat(type).isNull();
+        assertThat(end).isLessThan(start + 5000);
+    }
+
+    @Test
+    public void testGetType_providerException() {
+        String type =
+                mResolver.getType(Uri.parse("content://android.content.FakeProviderRemote/error"));
+        assertThat(type).isNull();
+    }
+
+    @Test
+    public void testCanonicalize() {
+        Uri canonical = mResolver.canonicalize(
+                Uri.parse("content://android.content.FakeProviderRemote/something"));
+        assertThat(canonical).isEqualTo(
+                Uri.parse("content://android.content.FakeProviderRemote/canonical"));
+    }
+
+    @Test
+    public void testCanonicalize_providerException() {
+        try {
+            mResolver.canonicalize(
+                    Uri.parse("content://android.content.FakeProviderRemote/error"));
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // Expected
+        }
     }
 }

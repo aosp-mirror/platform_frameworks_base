@@ -19,52 +19,60 @@ package com.android.systemui.statusbar;
 import static com.android.systemui.statusbar.RemoteInputController.processForRemoteInput;
 import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
 import static com.android.systemui.statusbar.phone.StatusBar.DEBUG;
-import static com.android.systemui.statusbar.phone.StatusBar.ENABLE_CHILD_NOTIFICATIONS;
 
+import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
-import com.android.systemui.Dependency;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 
 import java.util.ArrayList;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import java.util.List;
 
 /**
  * This class handles listening to notification updates and passing them along to
  * NotificationPresenter to be displayed to the user.
  */
 @SuppressLint("OverrideAbstract")
-@Singleton
 public class NotificationListener extends NotificationListenerWithPlugins {
     private static final String TAG = "NotificationListener";
 
-    // Dependencies:
-    private final NotificationRemoteInputManager mRemoteInputManager =
-            Dependency.get(NotificationRemoteInputManager.class);
-    private final NotificationEntryManager mEntryManager =
-            Dependency.get(NotificationEntryManager.class);
-    private final NotificationGroupManager mGroupManager =
-            Dependency.get(NotificationGroupManager.class);
-
-    private final ArrayList<NotificationSettingsListener> mSettingsListeners = new ArrayList<>();
     private final Context mContext;
+    private final NotificationManager mNotificationManager;
+    private final Handler mMainHandler;
+    private final List<NotificationHandler> mNotificationHandlers = new ArrayList<>();
+    private final ArrayList<NotificationSettingsListener> mSettingsListeners = new ArrayList<>();
 
-    @Inject
-    public NotificationListener(Context context) {
+    /**
+     * Injected constructor. See {@link StatusBarModule}.
+     */
+    public NotificationListener(
+            Context context,
+            NotificationManager notificationManager,
+            @Main Handler mainHandler) {
         mContext = context;
+        mNotificationManager = notificationManager;
+        mMainHandler = mainHandler;
     }
 
+    /** Registers a listener that's notified when notifications are added/removed/etc. */
+    public void addNotificationHandler(NotificationHandler handler) {
+        if (mNotificationHandlers.contains(handler)) {
+            throw new IllegalArgumentException("Listener is already added");
+        }
+        mNotificationHandlers.add(handler);
+    }
+
+    /** Registers a listener that's notified when any notification-related settings change. */
     public void addNotificationSettingsListener(NotificationSettingsListener listener) {
         mSettingsListeners.add(listener);
     }
@@ -79,13 +87,29 @@ public class NotificationListener extends NotificationListenerWithPlugins {
             return;
         }
         final RankingMap currentRanking = getCurrentRanking();
-        Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
+        mMainHandler.post(() -> {
+            // There's currently a race condition between the calls to getActiveNotifications() and
+            // getCurrentRanking(). It's possible for the ranking that we store here to not contain
+            // entries for every notification in getActiveNotifications(). To prevent downstream
+            // crashes, we temporarily fill in these missing rankings with stubs.
+            // See b/146011844 for long-term fix
+            final List<Ranking> newRankings = new ArrayList<>();
             for (StatusBarNotification sbn : notifications) {
-                mEntryManager.addNotification(sbn, currentRanking);
+                newRankings.add(getRankingOrTemporaryStandIn(currentRanking, sbn.getKey()));
+            }
+            final RankingMap completeMap = new RankingMap(newRankings.toArray(new Ranking[0]));
+
+            for (StatusBarNotification sbn : notifications) {
+                for (NotificationHandler listener : mNotificationHandlers) {
+                    listener.onNotificationPosted(sbn, completeMap);
+                }
+            }
+            for (NotificationHandler listener : mNotificationHandlers) {
+                listener.onNotificationsInitialized();
             }
         });
-        NotificationManager noMan = mContext.getSystemService(NotificationManager.class);
-        onSilentStatusBarIconsVisibilityChanged(noMan.shouldHideSilentStatusBarIcons());
+        onSilentStatusBarIconsVisibilityChanged(
+                mNotificationManager.shouldHideSilentStatusBarIcons());
     }
 
     @Override
@@ -93,34 +117,11 @@ public class NotificationListener extends NotificationListenerWithPlugins {
             final RankingMap rankingMap) {
         if (DEBUG) Log.d(TAG, "onNotificationPosted: " + sbn);
         if (sbn != null && !onPluginNotificationPosted(sbn, rankingMap)) {
-            Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
+            mMainHandler.post(() -> {
                 processForRemoteInput(sbn.getNotification(), mContext);
-                String key = sbn.getKey();
-                boolean isUpdate =
-                        mEntryManager.getNotificationData().get(key) != null;
-                // In case we don't allow child notifications, we ignore children of
-                // notifications that have a summary, since` we're not going to show them
-                // anyway. This is true also when the summary is canceled,
-                // because children are automatically canceled by NoMan in that case.
-                if (!ENABLE_CHILD_NOTIFICATIONS
-                        && mGroupManager.isChildInGroupWithSummary(sbn)) {
-                    if (DEBUG) {
-                        Log.d(TAG, "Ignoring group child due to existing summary: " + sbn);
-                    }
 
-                    // Remove existing notification to avoid stale data.
-                    if (isUpdate) {
-                        mEntryManager.removeNotification(key, rankingMap, UNDEFINED_DISMISS_REASON);
-                    } else {
-                        mEntryManager.getNotificationData()
-                                .updateRanking(rankingMap);
-                    }
-                    return;
-                }
-                if (isUpdate) {
-                    mEntryManager.updateNotification(sbn, rankingMap);
-                } else {
-                    mEntryManager.addNotification(sbn, rankingMap);
+                for (NotificationHandler handler : mNotificationHandlers) {
+                    handler.onNotificationPosted(sbn, rankingMap);
                 }
             });
         }
@@ -131,9 +132,10 @@ public class NotificationListener extends NotificationListenerWithPlugins {
             int reason) {
         if (DEBUG) Log.d(TAG, "onNotificationRemoved: " + sbn + " reason: " + reason);
         if (sbn != null && !onPluginNotificationRemoved(sbn, rankingMap)) {
-            final String key = sbn.getKey();
-            Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
-                mEntryManager.removeNotification(key, rankingMap, reason);
+            mMainHandler.post(() -> {
+                for (NotificationHandler handler : mNotificationHandlers) {
+                    handler.onNotificationRemoved(sbn, rankingMap, reason);
+                }
             });
         }
     }
@@ -148,8 +150,10 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         if (DEBUG) Log.d(TAG, "onRankingUpdate");
         if (rankingMap != null) {
             RankingMap r = onPluginRankingUpdate(rankingMap);
-            Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
-                mEntryManager.updateNotificationRanking(r);
+            mMainHandler.post(() -> {
+                for (NotificationHandler handler : mNotificationHandlers) {
+                    handler.onNotificationRankingUpdate(r);
+                }
             });
         }
     }
@@ -158,6 +162,15 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     public void onSilentStatusBarIconsVisibilityChanged(boolean hideSilentStatusIcons) {
         for (NotificationSettingsListener listener : mSettingsListeners) {
             listener.onStatusBarIconsBehaviorChanged(hideSilentStatusIcons);
+        }
+    }
+
+    public final void unsnoozeNotification(@NonNull String key) {
+        if (!isBound()) return;
+        try {
+            getNotificationInterface().unsnoozeNotificationFromSystemListener(mWrapper, key);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
         }
     }
 
@@ -171,8 +184,53 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         }
     }
 
+    private static Ranking getRankingOrTemporaryStandIn(RankingMap rankingMap, String key) {
+        Ranking ranking = new Ranking();
+        if (!rankingMap.getRanking(key, ranking)) {
+            ranking.populate(
+                    key,
+                    0,
+                    false,
+                    0,
+                    0,
+                    0,
+                    null,
+                    null,
+                    null,
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    false,
+                    0,
+                    false,
+                    0,
+                    false,
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    false,
+                    false,
+                    false,
+                    null,
+                    false
+            );
+        }
+        return ranking;
+    }
+
     public interface NotificationSettingsListener {
 
         default void onStatusBarIconsBehaviorChanged(boolean hideSilentStatusIcons) { }
+    }
+
+    /** Interface for listening to add/remove events that we receive from NotificationManager. */
+    public interface NotificationHandler {
+        void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap);
+        void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap);
+        void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap, int reason);
+        void onNotificationRankingUpdate(RankingMap rankingMap);
+
+        /**
+         * Called after the listener has connected to NoMan and posted any current notifications.
+         */
+        void onNotificationsInitialized();
     }
 }

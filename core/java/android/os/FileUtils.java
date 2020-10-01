@@ -743,6 +743,8 @@ public final class FileUtils {
      *            {@link MessageDigest#getInstance(String)}.
      * @hide
      */
+    @TestApi
+    @NonNull
     public static byte[] digest(@NonNull File file, @NonNull String algorithm)
             throws IOException, NoSuchAlgorithmException {
         try (FileInputStream in = new FileInputStream(file)) {
@@ -757,6 +759,8 @@ public final class FileUtils {
      *            {@link MessageDigest#getInstance(String)}.
      * @hide
      */
+    @TestApi
+    @NonNull
     public static byte[] digest(@NonNull InputStream in, @NonNull String algorithm)
             throws IOException, NoSuchAlgorithmException {
         // TODO: implement kernel optimizations
@@ -1302,7 +1306,7 @@ public final class FileUtils {
 
     /** {@hide} */
     public static int translateModeStringToPosix(String mode) {
-        // Sanity check for invalid chars
+        // Quick check for invalid chars
         for (int i = 0; i < mode.length(); i++) {
             switch (mode.charAt(i)) {
                 case 'r':

@@ -90,13 +90,11 @@ public class HapticFeedbackConstants {
 
     /**
      * The user has started a gesture (e.g. on the soft keyboard).
-     * @hide
      */
     public static final int GESTURE_START = 12;
 
     /**
      * The user has finished a gesture (e.g. on the soft keyboard).
-     * @hide
      */
     public static final int GESTURE_END = 13;
 
@@ -115,13 +113,11 @@ public class HapticFeedbackConstants {
     /**
      * A haptic effect to signal the confirmation or successful completion of a user
      * interaction.
-     * @hide
      */
     public static final int CONFIRM = 16;
 
     /**
      * A haptic effect to signal the rejection or failure of a user interaction.
-     * @hide
      */
     public static final int REJECT = 17;
 

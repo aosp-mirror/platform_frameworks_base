@@ -34,7 +34,7 @@ public interface QS extends FragmentBase {
 
     String ACTION = "com.android.systemui.action.PLUGIN_QS";
 
-    int VERSION = 7;
+    int VERSION = 8;
 
     String TAG = "QS";
 
@@ -67,15 +67,12 @@ public interface QS extends FragmentBase {
     }
 
     /**
-     * We need this to handle nested scrolling for QS..
-     * Normally we would do this with requestDisallowInterceptTouchEvent, but when both the
-     * scroll containers are using the same touch slop, they try to start scrolling at the
-     * same time and NotificationPanelView wins, this lets QS win.
-     *
-     * TODO: Do this using NestedScroll capabilities.
+     * Should touches from the notification panel be disallowed?
+     * The notification panel might grab any touches rom QS at any time to collapse the shade.
+     * We should disallow that in case we are showing the detail panel.
      */
-    default boolean onInterceptTouchEvent(MotionEvent event) {
-        return isCustomizing();
+    default boolean disallowPanelTouches() {
+        return isShowingDetail();
     }
 
     @ProvidesInterface(version = HeightListener.VERSION)

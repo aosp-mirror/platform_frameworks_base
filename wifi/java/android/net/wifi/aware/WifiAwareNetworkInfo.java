@@ -137,7 +137,7 @@ public final class WifiAwareNetworkInfo implements TransportInfo, Parcelable {
                         ipv6Addr = Inet6Address.getByAddress(null, addr, ni);
                     } catch (UnknownHostException e) {
                         e.printStackTrace();
-                        return null;
+                        return new WifiAwareNetworkInfo(null);
                     }
                     return new WifiAwareNetworkInfo(ipv6Addr, port, transportProtocol);
                 }

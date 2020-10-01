@@ -18,7 +18,8 @@ package com.android.server.devicepolicy;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
-import java.io.PrintWriter;
+import com.android.internal.util.IndentingPrintWriter;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -134,24 +135,22 @@ public class DevicePolicyConstants {
         return new DevicePolicyConstants(settings);
     }
 
-    public void dump(String prefix, PrintWriter pw) {
-        pw.print(prefix);
+    /** Dump constants */
+    public void dump(IndentingPrintWriter pw) {
         pw.println("Constants:");
 
-        pw.print(prefix);
-        pw.print("  DAS_DIED_SERVICE_RECONNECT_BACKOFF_SEC: ");
+        pw.increaseIndent();
+        pw.print("DAS_DIED_SERVICE_RECONNECT_BACKOFF_SEC: ");
         pw.println(DAS_DIED_SERVICE_RECONNECT_BACKOFF_SEC);
 
-        pw.print(prefix);
-        pw.print("  DAS_DIED_SERVICE_RECONNECT_BACKOFF_INCREASE: ");
+        pw.print("DAS_DIED_SERVICE_RECONNECT_BACKOFF_INCREASE: ");
         pw.println(DAS_DIED_SERVICE_RECONNECT_BACKOFF_INCREASE);
 
-        pw.print(prefix);
-        pw.print("  DAS_DIED_SERVICE_RECONNECT_MAX_BACKOFF_SEC: ");
+        pw.print("DAS_DIED_SERVICE_RECONNECT_MAX_BACKOFF_SEC: ");
         pw.println(DAS_DIED_SERVICE_RECONNECT_MAX_BACKOFF_SEC);
 
-        pw.print(prefix);
-        pw.print("  DAS_DIED_SERVICE_STABLE_CONNECTION_THRESHOLD_SEC: ");
+        pw.print("DAS_DIED_SERVICE_STABLE_CONNECTION_THRESHOLD_SEC: ");
         pw.println(DAS_DIED_SERVICE_STABLE_CONNECTION_THRESHOLD_SEC);
+        pw.decreaseIndent();
     }
 }

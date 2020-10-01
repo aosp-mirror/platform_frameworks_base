@@ -16,6 +16,7 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.media.session.MediaSession;
 
 import java.lang.annotation.Retention;
@@ -60,6 +61,7 @@ public abstract class VolumeProvider {
 
     private final int mControlType;
     private final int mMaxVolume;
+    private final String mControlId;
     private int mCurrentVolume;
     private Callback mCallback;
 
@@ -73,10 +75,28 @@ public abstract class VolumeProvider {
      * @param maxVolume The maximum allowed volume.
      * @param currentVolume The current volume on the output.
      */
+
     public VolumeProvider(@ControlType int volumeControl, int maxVolume, int currentVolume) {
+        this(volumeControl, maxVolume, currentVolume, null);
+    }
+
+    /**
+     * Create a new volume provider for handling volume events. You must specify
+     * the type of volume control, the maximum volume that can be used, and the
+     * current volume on the output.
+     *
+     * @param volumeControl The method for controlling volume that is used by
+     *            this provider.
+     * @param maxVolume The maximum allowed volume.
+     * @param currentVolume The current volume on the output.
+     * @param volumeControlId The volume control ID of this provider.
+     */
+    public VolumeProvider(@ControlType int volumeControl, int maxVolume, int currentVolume,
+            @Nullable String volumeControlId) {
         mControlType = volumeControl;
         mMaxVolume = maxVolume;
         mCurrentVolume = currentVolume;
+        mControlId = volumeControlId;
     }
 
     /**
@@ -119,6 +139,17 @@ public abstract class VolumeProvider {
         if (mCallback != null) {
             mCallback.onVolumeChanged(this);
         }
+    }
+
+    /**
+     * Gets the volume control ID. It can be used to identify which volume provider is
+     * used by the session.
+     *
+     * @return the volume control ID or {@code null} if it isn't set.
+     */
+    @Nullable
+    public final String getVolumeControlId() {
+        return mControlId;
     }
 
     /**

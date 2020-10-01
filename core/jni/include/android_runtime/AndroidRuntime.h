@@ -19,15 +19,14 @@
 #ifndef _RUNTIME_ANDROID_RUNTIME_H
 #define _RUNTIME_ANDROID_RUNTIME_H
 
-#include <utils/Errors.h>
 #include <binder/IBinder.h>
-#include <utils/String8.h>
+#include <jni.h>
+#include <pthread.h>
+#include <utils/Errors.h>
 #include <utils/String16.h>
+#include <utils/String8.h>
 #include <utils/Vector.h>
 #include <utils/threads.h>
-#include <pthread.h>
-#include <jni.h>
-
 
 namespace android {
 
@@ -105,7 +104,7 @@ public:
         void* arg);
 
     /** return a pointer to the VM running in this process */
-    static JavaVM* getJavaVM() { return mJavaVM; }
+    static JavaVM* getJavaVM();
 
     /** return a pointer to the JNIEnv pointer for this thread */
     static JNIEnv* getJNIEnv();
@@ -154,6 +153,6 @@ private:
     static int javaThreadShell(void* args);
 };
 
-}
+} // namespace android
 
 #endif

@@ -24,7 +24,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Loader;
 import android.content.pm.ServiceInfo;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -260,11 +259,6 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>>
             onLocationChanged(lastLocation);
         }
 
-        // Jumpstart location with a single forced update
-        Criteria oneTimeCriteria = new Criteria();
-        oneTimeCriteria.setAccuracy(Criteria.ACCURACY_FINE);
-        mLocationManager.requestSingleUpdate(oneTimeCriteria, this, Looper.getMainLooper());
-
         // The contract is that if we already have a valid,
         // result the we have to deliver it immediately.
         (new Handler(Looper.getMainLooper())).post(new Runnable() {
@@ -418,7 +412,7 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>>
     }
 
     @Override
-    public void onLocationChanged(Location location) {
+    public void onLocationChanged(@Nullable Location location) {
         synchronized(mLocationLock) {
             // We expect the user to not move too fast while printing. Hence prefer more accurate
             // updates over more recent ones for LOCATION_UPDATE_MS. We add a 10% fudge factor here

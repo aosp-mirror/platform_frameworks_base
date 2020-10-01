@@ -24,6 +24,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.proto.ProtoOutputStream;
 
+import java.io.ByteArrayOutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ public final class ZenPolicy implements Parcelable {
     private ArrayList<Integer> mVisualEffects;
     private @PeopleType int mPriorityMessages = PEOPLE_TYPE_UNSET;
     private @PeopleType int mPriorityCalls = PEOPLE_TYPE_UNSET;
+    private @ConversationSenders int mConversationSenders = CONVERSATION_SENDERS_UNSET;
 
     /** @hide */
     @IntDef(prefix = { "PRIORITY_CATEGORY_" }, value = {
@@ -52,6 +54,7 @@ public final class ZenPolicy implements Parcelable {
             PRIORITY_CATEGORY_ALARMS,
             PRIORITY_CATEGORY_MEDIA,
             PRIORITY_CATEGORY_SYSTEM,
+            PRIORITY_CATEGORY_CONVERSATIONS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PriorityCategory {}
@@ -72,6 +75,8 @@ public final class ZenPolicy implements Parcelable {
     public static final int PRIORITY_CATEGORY_MEDIA = 6;
     /** @hide */
     public static final int PRIORITY_CATEGORY_SYSTEM = 7;
+    /** @hide */
+    public static final int PRIORITY_CATEGORY_CONVERSATIONS = 8;
 
     /** @hide */
     @IntDef(prefix = { "VISUAL_EFFECT_" }, value = {
@@ -138,6 +143,37 @@ public final class ZenPolicy implements Parcelable {
      */
     public static final int PEOPLE_TYPE_NONE = 4;
 
+
+    /** @hide */
+    @IntDef(prefix = { "CONVERSATION_SENDERS_" }, value = {
+            CONVERSATION_SENDERS_UNSET,
+            CONVERSATION_SENDERS_ANYONE,
+            CONVERSATION_SENDERS_IMPORTANT,
+            CONVERSATION_SENDERS_NONE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ConversationSenders {}
+
+    /**
+     * Used to indicate no preference for the type of conversations that can bypass dnd.
+     */
+    public static final int CONVERSATION_SENDERS_UNSET = 0;
+
+    /**
+     * Used to indicate all conversations can bypass dnd.
+     */
+    public static final int CONVERSATION_SENDERS_ANYONE = 1;
+
+    /**
+     * Used to indicate important conversations can bypass dnd.
+     */
+    public static final int CONVERSATION_SENDERS_IMPORTANT = 2;
+
+    /**
+     * Used to indicate no conversations can bypass dnd.
+     */
+    public static final int CONVERSATION_SENDERS_NONE = 3;
+
     /** @hide */
     @IntDef(prefix = { "STATE_" }, value = {
             STATE_UNSET,
@@ -165,8 +201,17 @@ public final class ZenPolicy implements Parcelable {
 
     /** @hide */
     public ZenPolicy() {
-        mPriorityCategories = new ArrayList<>(Collections.nCopies(8, 0));
+        mPriorityCategories = new ArrayList<>(Collections.nCopies(9, 0));
         mVisualEffects = new ArrayList<>(Collections.nCopies(7, 0));
+    }
+
+    /**
+     * Conversation type that can bypass DND.
+     * @return {@link #CONVERSATION_SENDERS_UNSET}, {@link #CONVERSATION_SENDERS_ANYONE},
+     * {@link #CONVERSATION_SENDERS_IMPORTANT}, {@link #CONVERSATION_SENDERS_NONE}.
+     */
+    public @PeopleType int getPriorityConversationSenders() {
+        return mConversationSenders;
     }
 
     /**
@@ -185,6 +230,16 @@ public final class ZenPolicy implements Parcelable {
      */
     public @PeopleType int getPriorityCallSenders() {
         return mPriorityCalls;
+    }
+
+    /**
+     * Whether this policy wants to allow conversation notifications
+     * (see {@link NotificationChannel#getConversationId()}) to play sounds and visually appear
+     * or to intercept them when DND is active.
+     * @return {@link #STATE_UNSET}, {@link #STATE_ALLOW} or {@link #STATE_DISALLOW}
+     */
+    public @State int getPriorityCategoryConversations() {
+        return mPriorityCategories.get(PRIORITY_CATEGORY_CONVERSATIONS);
     }
 
     /**
@@ -392,6 +447,7 @@ public final class ZenPolicy implements Parcelable {
             }
             mZenPolicy.mPriorityMessages = PEOPLE_TYPE_ANYONE;
             mZenPolicy.mPriorityCalls = PEOPLE_TYPE_ANYONE;
+            mZenPolicy.mConversationSenders = CONVERSATION_SENDERS_ANYONE;
             return this;
         }
 
@@ -408,6 +464,7 @@ public final class ZenPolicy implements Parcelable {
             }
             mZenPolicy.mPriorityMessages = PEOPLE_TYPE_NONE;
             mZenPolicy.mPriorityCalls = PEOPLE_TYPE_NONE;
+            mZenPolicy.mConversationSenders = CONVERSATION_SENDERS_NONE;
             return this;
         }
 
@@ -443,6 +500,8 @@ public final class ZenPolicy implements Parcelable {
                 mZenPolicy.mPriorityMessages = STATE_UNSET;
             } else if (category == PRIORITY_CATEGORY_CALLS) {
                 mZenPolicy.mPriorityCalls = STATE_UNSET;
+            } else if (category == PRIORITY_CATEGORY_CONVERSATIONS) {
+                mZenPolicy.mConversationSenders = STATE_UNSET;
             }
 
             return this;
@@ -475,6 +534,31 @@ public final class ZenPolicy implements Parcelable {
         public @NonNull Builder allowEvents(boolean allow) {
             mZenPolicy.mPriorityCategories.set(PRIORITY_CATEGORY_EVENTS,
                     allow ? STATE_ALLOW : STATE_DISALLOW);
+            return this;
+        }
+
+        /**
+         * Whether to allow conversation notifications
+         * (see {@link NotificationChannel#setConversationId(String, String)})
+         * that match audienceType to play sounds and visually appear or to intercept
+         * them when DND is active.
+         * @param audienceType callers that are allowed to bypass DND
+         */
+        public @NonNull  Builder allowConversations(@ConversationSenders int audienceType) {
+            if (audienceType == STATE_UNSET) {
+                return unsetPriorityCategory(PRIORITY_CATEGORY_CONVERSATIONS);
+            }
+
+            if (audienceType == CONVERSATION_SENDERS_NONE) {
+                mZenPolicy.mPriorityCategories.set(PRIORITY_CATEGORY_CONVERSATIONS, STATE_DISALLOW);
+            } else if (audienceType == CONVERSATION_SENDERS_ANYONE
+                    || audienceType == CONVERSATION_SENDERS_IMPORTANT) {
+                mZenPolicy.mPriorityCategories.set(PRIORITY_CATEGORY_CONVERSATIONS, STATE_ALLOW);
+            } else {
+                return this;
+            }
+
+            mZenPolicy.mConversationSenders = audienceType;
             return this;
         }
 
@@ -536,7 +620,6 @@ public final class ZenPolicy implements Parcelable {
                     allow ? STATE_ALLOW : STATE_DISALLOW);
             return this;
         }
-
 
         /**
          * Whether to allow notifications with category {@link Notification#CATEGORY_ALARM}
@@ -712,6 +795,7 @@ public final class ZenPolicy implements Parcelable {
         dest.writeList(mVisualEffects);
         dest.writeInt(mPriorityCalls);
         dest.writeInt(mPriorityMessages);
+        dest.writeInt(mConversationSenders);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<ZenPolicy> CREATOR =
@@ -723,6 +807,7 @@ public final class ZenPolicy implements Parcelable {
             policy.mVisualEffects = source.readArrayList(Integer.class.getClassLoader());
             policy.mPriorityCalls = source.readInt();
             policy.mPriorityMessages = source.readInt();
+            policy.mConversationSenders = source.readInt();
             return policy;
         }
 
@@ -738,8 +823,10 @@ public final class ZenPolicy implements Parcelable {
                 .append('{')
                 .append("priorityCategories=[").append(priorityCategoriesToString())
                 .append("], visualEffects=[").append(visualEffectsToString())
-                .append("], priorityCalls=").append(peopleTypeToString(mPriorityCalls))
-                .append(", priorityMessages=").append(peopleTypeToString(mPriorityMessages))
+                .append("], priorityCallsSenders=").append(peopleTypeToString(mPriorityCalls))
+                .append(", priorityMessagesSenders=").append(peopleTypeToString(mPriorityMessages))
+                .append(", priorityConversationSenders=").append(
+                        conversationTypeToString(mConversationSenders))
                 .append('}')
                 .toString();
     }
@@ -811,6 +898,8 @@ public final class ZenPolicy implements Parcelable {
                 return "media";
             case PRIORITY_CATEGORY_SYSTEM:
                 return "system";
+            case PRIORITY_CATEGORY_CONVERSATIONS:
+                return "convs";
         }
         return null;
     }
@@ -843,6 +932,23 @@ public final class ZenPolicy implements Parcelable {
         return "invalidPeopleType{" + peopleType + "}";
     }
 
+    /**
+     * @hide
+     */
+    public static String conversationTypeToString(@ConversationSenders int conversationType) {
+        switch (conversationType) {
+            case CONVERSATION_SENDERS_ANYONE:
+                return "anyone";
+            case CONVERSATION_SENDERS_IMPORTANT:
+                return "important";
+            case CONVERSATION_SENDERS_NONE:
+                return "none";
+            case CONVERSATION_SENDERS_UNSET:
+                return "unset";
+        }
+        return "invalidConversationType{" + conversationType + "}";
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof ZenPolicy)) return false;
@@ -852,12 +958,14 @@ public final class ZenPolicy implements Parcelable {
         return Objects.equals(other.mPriorityCategories, mPriorityCategories)
                 && Objects.equals(other.mVisualEffects, mVisualEffects)
                 && other.mPriorityCalls == mPriorityCalls
-                && other.mPriorityMessages == mPriorityMessages;
+                && other.mPriorityMessages == mPriorityMessages
+                && other.mConversationSenders == mConversationSenders;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mPriorityCategories, mVisualEffects, mPriorityCalls, mPriorityMessages);
+        return Objects.hash(mPriorityCategories, mVisualEffects, mPriorityCalls, mPriorityMessages,
+                mConversationSenders);
     }
 
     private @ZenPolicy.State int getZenPolicyPriorityCategoryState(@PriorityCategory int
@@ -879,6 +987,8 @@ public final class ZenPolicy implements Parcelable {
                 return getPriorityCategoryMedia();
             case PRIORITY_CATEGORY_SYSTEM:
                 return getPriorityCategorySystem();
+            case PRIORITY_CATEGORY_CONVERSATIONS:
+                return getPriorityCategoryConversations();
         }
         return -1;
     }
@@ -953,6 +1063,9 @@ public final class ZenPolicy implements Parcelable {
                 } else if (category == PRIORITY_CATEGORY_CALLS
                         && mPriorityCalls < policyToApply.mPriorityCalls) {
                     mPriorityCalls = policyToApply.mPriorityCalls;
+                } else if (category == PRIORITY_CATEGORY_CONVERSATIONS
+                        && mConversationSenders < policyToApply.mConversationSenders) {
+                    mConversationSenders = policyToApply.mConversationSenders;
                 }
             }
         }
@@ -973,7 +1086,7 @@ public final class ZenPolicy implements Parcelable {
     /**
      * @hide
      */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
 
         proto.write(ZenPolicyProto.REMINDERS, getPriorityCategoryReminders());
@@ -996,6 +1109,40 @@ public final class ZenPolicy implements Parcelable {
         proto.write(ZenPolicyProto.PRIORITY_MESSAGES, getPriorityMessageSenders());
         proto.write(ZenPolicyProto.PRIORITY_CALLS, getPriorityCallSenders());
         proto.end(token);
+    }
+
+    /**
+     * Converts a policy to a statsd proto.
+     * @hides
+     */
+    public byte[] toProto() {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        ProtoOutputStream proto = new ProtoOutputStream(bytes);
+
+        proto.write(DNDPolicyProto.CALLS, getPriorityCategoryCalls());
+        proto.write(DNDPolicyProto.REPEAT_CALLERS, getPriorityCategoryRepeatCallers());
+        proto.write(DNDPolicyProto.MESSAGES, getPriorityCategoryMessages());
+        proto.write(DNDPolicyProto.CONVERSATIONS, getPriorityCategoryConversations());
+        proto.write(DNDPolicyProto.REMINDERS, getPriorityCategoryReminders());
+        proto.write(DNDPolicyProto.EVENTS, getPriorityCategoryEvents());
+        proto.write(DNDPolicyProto.ALARMS, getPriorityCategoryAlarms());
+        proto.write(DNDPolicyProto.MEDIA, getPriorityCategoryMedia());
+        proto.write(DNDPolicyProto.SYSTEM, getPriorityCategorySystem());
+
+        proto.write(DNDPolicyProto.FULLSCREEN, getVisualEffectFullScreenIntent());
+        proto.write(DNDPolicyProto.LIGHTS, getVisualEffectLights());
+        proto.write(DNDPolicyProto.PEEK, getVisualEffectPeek());
+        proto.write(DNDPolicyProto.STATUS_BAR, getVisualEffectStatusBar());
+        proto.write(DNDPolicyProto.BADGE, getVisualEffectBadge());
+        proto.write(DNDPolicyProto.AMBIENT, getVisualEffectAmbient());
+        proto.write(DNDPolicyProto.NOTIFICATION_LIST, getVisualEffectNotificationList());
+
+        proto.write(DNDPolicyProto.ALLOW_CALLS_FROM, getPriorityCallSenders());
+        proto.write(DNDPolicyProto.ALLOW_MESSAGES_FROM, getPriorityMessageSenders());
+        proto.write(DNDPolicyProto.ALLOW_CONVERSATIONS_FROM, getPriorityConversationSenders());
+
+        proto.flush();
+        return bytes.toByteArray();
     }
 
     /**

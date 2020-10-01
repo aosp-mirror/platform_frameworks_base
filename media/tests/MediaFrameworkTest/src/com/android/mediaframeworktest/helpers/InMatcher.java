@@ -36,7 +36,7 @@ public class InMatcher<T> extends BaseMatcher<T> {
     protected Collection<T> mValues;
 
     public InMatcher(Collection<T> values) {
-        Preconditions.checkNotNull("values", values);
+        Objects.requireNonNull(values, "values");
         mValues = values;
     }
 

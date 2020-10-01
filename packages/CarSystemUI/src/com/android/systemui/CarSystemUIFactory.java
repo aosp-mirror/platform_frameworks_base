@@ -17,63 +17,44 @@
 package com.android.systemui;
 
 import android.content.Context;
+import android.content.res.Resources;
 
-import com.android.internal.widget.LockPatternUtils;
-import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.car.CarServiceProvider;
-import com.android.systemui.statusbar.car.CarFacetButtonController;
-import com.android.systemui.statusbar.car.CarStatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.volume.CarVolumeDialogComponent;
-import com.android.systemui.volume.VolumeDialogComponent;
+import com.android.systemui.dagger.SystemUIRootComponent;
 
-import javax.inject.Singleton;
-
-import dagger.Component;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Class factory to provide car specific SystemUI components.
  */
 public class CarSystemUIFactory extends SystemUIFactory {
 
-    private CarDependencyComponent mCarDependencyComponent;
-    private CarServiceProvider mCarServiceProvider;
-
     @Override
     protected SystemUIRootComponent buildSystemUIRootComponent(Context context) {
-        mCarDependencyComponent = DaggerCarSystemUIFactory_CarDependencyComponent.builder()
-                .contextHolder(new ContextHolder(context))
-                .build();
         return DaggerCarSystemUIRootComponent.builder()
-                .dependencyProvider(new com.android.systemui.DependencyProvider())
                 .contextHolder(new ContextHolder(context))
                 .build();
     }
 
-    /** Gets a {@link CarServiceProvider}. */
-    public CarServiceProvider getCarServiceProvider(Context context) {
-        if (mCarServiceProvider == null) {
-            mCarServiceProvider = new CarServiceProvider(context);
+    @Override
+    public String[] getSystemUIServiceComponents(Resources resources) {
+        Set<String> names = new HashSet<>();
+
+        for (String s : super.getSystemUIServiceComponents(resources)) {
+            names.add(s);
         }
-        return mCarServiceProvider;
-    }
 
-    public CarDependencyComponent getCarDependencyComponent() {
-        return mCarDependencyComponent;
-    }
+        for (String s : resources.getStringArray(R.array.config_systemUIServiceComponentsExclude)) {
+            names.remove(s);
+        }
 
-    public StatusBarKeyguardViewManager createStatusBarKeyguardViewManager(Context context,
-            ViewMediatorCallback viewMediatorCallback, LockPatternUtils lockPatternUtils) {
-        return new CarStatusBarKeyguardViewManager(context, viewMediatorCallback, lockPatternUtils);
-    }
+        for (String s : resources.getStringArray(R.array.config_systemUIServiceComponentsInclude)) {
+            names.add(s);
+        }
 
-    public VolumeDialogComponent createVolumeDialogComponent(SystemUI systemUi, Context context) {
-        return new CarVolumeDialogComponent(systemUi, context);
-    }
+        String[] finalNames = new String[names.size()];
+        names.toArray(finalNames);
 
-    @Singleton
-    @Component(modules = ContextHolder.class)
-    public interface CarDependencyComponent {
-        CarFacetButtonController getCarFacetButtonController();
+        return finalNames;
     }
 }

@@ -16,7 +16,7 @@
 
 package com.android.server.power;
 
-import static android.provider.Settings.System.ADAPTIVE_SLEEP;
+import static android.provider.DeviceConfig.NAMESPACE_ATTENTION_MANAGER_SERVICE;
 
 import android.Manifest;
 import android.app.ActivityManager;
@@ -33,12 +33,13 @@ import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.attention.AttentionService;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -57,6 +58,22 @@ public class AttentionDetector {
 
     private static final String TAG = "AttentionDetector";
     private static final boolean DEBUG = false;
+
+    /**
+     * DeviceConfig flag name, describes how much in advance to start checking attention before the
+     * dim event.
+     */
+    static final String KEY_PRE_DIM_CHECK_DURATION_MILLIS = "pre_dim_check_duration_millis";
+
+    /** Default value in absence of {@link DeviceConfig} override. */
+    static final long DEFAULT_PRE_DIM_CHECK_DURATION_MILLIS = 2_000;
+
+    /** DeviceConfig flag name, describes how long to run the check beyond the screen dim event. */
+    static final String KEY_POST_DIM_CHECK_DURATION_MILLIS =
+            "post_dim_check_duration_millis";
+
+    /** Default value in absence of {@link DeviceConfig} override. */
+    static final long DEFAULT_POST_DIM_CHECK_DURATION_MILLIS = 0;
 
     private Context mContext;
 
@@ -90,11 +107,6 @@ public class AttentionDetector {
     protected int mRequestId;
 
     /**
-     * {@link android.service.attention.AttentionService} API timeout.
-     */
-    private long mMaxAttentionApiTimeoutMillis;
-
-    /**
      * Last known user activity.
      */
     private long mLastUserActivityTime;
@@ -124,6 +136,9 @@ public class AttentionDetector {
     @VisibleForTesting
     AttentionCallbackInternalImpl mCallback;
 
+    /** Keep the last used post dim timeout for the dumpsys. */
+    private long mLastPostDimTimeout;
+
     public AttentionDetector(Runnable onUserAttention, Object lock) {
         mOnUserAttention = onUserAttention;
         mLock = lock;
@@ -136,8 +151,8 @@ public class AttentionDetector {
 
     @VisibleForTesting
     void updateEnabledFromSettings(Context context) {
-        mIsSettingEnabled = Settings.System.getIntForUser(context.getContentResolver(),
-                Settings.System.ADAPTIVE_SLEEP, 0, UserHandle.USER_CURRENT) == 1;
+        mIsSettingEnabled = Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.ADAPTIVE_SLEEP, 0, UserHandle.USER_CURRENT) == 1;
     }
 
     public void systemReady(Context context) {
@@ -149,18 +164,16 @@ public class AttentionDetector {
         mWindowManager = LocalServices.getService(WindowManagerInternal.class);
         mMaximumExtensionMillis = context.getResources().getInteger(
                 com.android.internal.R.integer.config_attentionMaximumExtension);
-        mMaxAttentionApiTimeoutMillis = context.getResources().getInteger(
-                com.android.internal.R.integer.config_attentionApiTimeout);
 
         try {
             final UserSwitchObserver observer = new UserSwitchObserver();
             ActivityManager.getService().registerUserSwitchObserver(observer, TAG);
         } catch (RemoteException e) {
-             // Shouldn't happen since in-process.
+            // Shouldn't happen since in-process.
         }
 
-        context.getContentResolver().registerContentObserver(Settings.System.getUriFor(
-                Settings.System.ADAPTIVE_SLEEP),
+        context.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
+                Settings.Secure.ADAPTIVE_SLEEP),
                 false, new ContentObserver(new Handler(context.getMainLooper())) {
                     @Override
                     public void onChange(boolean selfChange) {
@@ -169,21 +182,20 @@ public class AttentionDetector {
                 }, UserHandle.USER_ALL);
     }
 
-    public long updateUserActivity(long nextScreenDimming) {
+    /** To be called in {@link PowerManagerService#updateUserActivitySummaryLocked}. */
+    public long updateUserActivity(long nextScreenDimming, long dimDurationMillis) {
         if (nextScreenDimming == mLastActedOnNextScreenDimming
                 || !mIsSettingEnabled
-                || !isAttentionServiceSupported()
                 || mWindowManager.isKeyguardShowingAndNotOccluded()) {
             return nextScreenDimming;
         }
 
-        if (!serviceHasSufficientPermissions()) {
-            Settings.System.putInt(mContentResolver, ADAPTIVE_SLEEP, 0);
+        if (!isAttentionServiceSupported() || !serviceHasSufficientPermissions()) {
             return nextScreenDimming;
         }
 
         final long now = SystemClock.uptimeMillis();
-        final long whenToCheck = nextScreenDimming - getAttentionTimeout();
+        final long whenToCheck = nextScreenDimming - getPreDimCheckDurationMillis();
         final long whenToStopExtending = mLastUserActivityTime + mMaximumExtensionMillis;
         if (now < whenToCheck) {
             if (DEBUG) {
@@ -212,7 +224,9 @@ public class AttentionDetector {
         mLastActedOnNextScreenDimming = nextScreenDimming;
         mCallback = new AttentionCallbackInternalImpl(mRequestId);
         Slog.v(TAG, "Checking user attention, ID: " + mRequestId);
-        final boolean sent = mAttentionManager.checkAttention(getAttentionTimeout(), mCallback);
+        final boolean sent = mAttentionManager.checkAttention(
+                getPreDimCheckDurationMillis() + getPostDimCheckDurationMillis(dimDurationMillis),
+                mCallback);
         if (!sent) {
             mRequested.set(false);
         }
@@ -267,13 +281,9 @@ public class AttentionDetector {
     private void resetConsecutiveExtensionCount() {
         final long previousCount = mConsecutiveTimeoutExtendedCount.getAndSet(0);
         if (previousCount > 0) {
-            StatsLog.write(StatsLog.SCREEN_TIMEOUT_EXTENSION_REPORTED, previousCount);
+            FrameworkStatsLog.write(FrameworkStatsLog.SCREEN_TIMEOUT_EXTENSION_REPORTED,
+                    previousCount);
         }
-    }
-
-    @VisibleForTesting
-    long getAttentionTimeout() {
-        return mMaxAttentionApiTimeoutMillis;
     }
 
     /**
@@ -300,10 +310,42 @@ public class AttentionDetector {
         pw.println("AttentionDetector:");
         pw.println(" mIsSettingEnabled=" + mIsSettingEnabled);
         pw.println(" mMaximumExtensionMillis=" + mMaximumExtensionMillis);
-        pw.println(" mMaxAttentionApiTimeoutMillis=" + mMaxAttentionApiTimeoutMillis);
+        pw.println(" preDimCheckDurationMillis=" + getPreDimCheckDurationMillis());
+        pw.println(" postDimCheckDurationMillis=" + mLastPostDimTimeout);
         pw.println(" mLastUserActivityTime(excludingAttention)=" + mLastUserActivityTime);
         pw.println(" mAttentionServiceSupported=" + isAttentionServiceSupported());
         pw.println(" mRequested=" + mRequested);
+    }
+
+    /** How long to check <b>before</b> the screen dims, capped at the dim duration. */
+    @VisibleForTesting
+    protected long getPreDimCheckDurationMillis() {
+        final long millis = DeviceConfig.getLong(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                KEY_PRE_DIM_CHECK_DURATION_MILLIS,
+                DEFAULT_PRE_DIM_CHECK_DURATION_MILLIS);
+
+        if (millis < 0 || millis > 13_000) {
+            Slog.w(TAG, "Bad flag value supplied for: " + KEY_PRE_DIM_CHECK_DURATION_MILLIS);
+            return DEFAULT_PRE_DIM_CHECK_DURATION_MILLIS;
+        }
+
+        return millis;
+    }
+
+    /** How long to check <b>after</b> the screen dims, capped at the dim duration. */
+    @VisibleForTesting
+    protected long getPostDimCheckDurationMillis(long dimDurationMillis) {
+        final long millis = DeviceConfig.getLong(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                KEY_POST_DIM_CHECK_DURATION_MILLIS,
+                DEFAULT_POST_DIM_CHECK_DURATION_MILLIS);
+
+        if (millis < 0 || millis > 10_000) {
+            Slog.w(TAG, "Bad flag value supplied for: " + KEY_POST_DIM_CHECK_DURATION_MILLIS);
+            return DEFAULT_POST_DIM_CHECK_DURATION_MILLIS;
+        }
+
+        mLastPostDimTimeout = Math.min(millis, dimDurationMillis);
+        return mLastPostDimTimeout;
     }
 
     @VisibleForTesting

@@ -16,6 +16,7 @@
 
 package android.hardware.display;
 
+import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -49,26 +50,50 @@ public final class BrightnessConfiguration implements Parcelable {
     private static final String TAG_BRIGHTNESS_POINT = "brightness-point";
     private static final String TAG_BRIGHTNESS_CORRECTIONS = "brightness-corrections";
     private static final String TAG_BRIGHTNESS_CORRECTION = "brightness-correction";
+    private static final String TAG_BRIGHTNESS_PARAMS = "brightness-params";
     private static final String ATTR_LUX = "lux";
     private static final String ATTR_NITS = "nits";
     private static final String ATTR_DESCRIPTION = "description";
     private static final String ATTR_PACKAGE_NAME = "package-name";
     private static final String ATTR_CATEGORY = "category";
+    private static final String ATTR_COLLECT_COLOR = "collect-color";
+    private static final String ATTR_MODEL_TIMEOUT = "model-timeout";
+    private static final String ATTR_MODEL_LOWER_BOUND = "model-lower-bound";
+    private static final String ATTR_MODEL_UPPER_BOUND = "model-upper-bound";
+    /**
+     * Returned from {@link #getShortTermModelTimeoutMillis()} if no timeout has been set.
+     * In this case the device will use the default timeout available in the
+     * {@link BrightnessConfiguration} returned from
+     * {@link DisplayManager#getDefaultBrightnessConfiguration()}.
+     */
+    public static final long SHORT_TERM_TIMEOUT_UNSET = -1;
 
     private final float[] mLux;
     private final float[] mNits;
     private final Map<String, BrightnessCorrection> mCorrectionsByPackageName;
     private final Map<Integer, BrightnessCorrection> mCorrectionsByCategory;
     private final String mDescription;
+    private final boolean mShouldCollectColorSamples;
+    private final long mShortTermModelTimeout;
+    private final float mShortTermModelLowerLuxMultiplier;
+    private final float mShortTermModelUpperLuxMultiplier;
 
     private BrightnessConfiguration(float[] lux, float[] nits,
             Map<String, BrightnessCorrection> correctionsByPackageName,
-            Map<Integer, BrightnessCorrection> correctionsByCategory, String description) {
+            Map<Integer, BrightnessCorrection> correctionsByCategory, String description,
+            boolean shouldCollectColorSamples,
+            long shortTermModelTimeout,
+            float shortTermModelLowerLuxMultiplier,
+            float shortTermModelUpperLuxMultiplier) {
         mLux = lux;
         mNits = nits;
         mCorrectionsByPackageName = correctionsByPackageName;
         mCorrectionsByCategory = correctionsByCategory;
         mDescription = description;
+        mShouldCollectColorSamples = shouldCollectColorSamples;
+        mShortTermModelTimeout = shortTermModelTimeout;
+        mShortTermModelLowerLuxMultiplier = shortTermModelLowerLuxMultiplier;
+        mShortTermModelUpperLuxMultiplier = shortTermModelUpperLuxMultiplier;
     }
 
     /**
@@ -119,6 +144,50 @@ public final class BrightnessConfiguration implements Parcelable {
         return mDescription;
     }
 
+    /**
+     * Returns whether color samples should be collected in
+     * {@link BrightnessChangeEvent#colorValueBuckets}.
+     */
+    public boolean shouldCollectColorSamples() {
+        return mShouldCollectColorSamples;
+    }
+
+    /**
+     * Returns the timeout for the short term model in milliseconds.
+     *
+     * If the screen is inactive for this timeout then the short term model
+     * will check the lux range defined by {@link #getShortTermModelLowerLuxMultiplier()} and
+     * {@link #getShortTermModelUpperLuxMultiplier()} to decide whether to keep any adjustment
+     * the user has made to adaptive brightness.
+     */
+    public long getShortTermModelTimeoutMillis() {
+        return mShortTermModelTimeout;
+    }
+
+    /**
+     * Returns the multiplier used to calculate the upper bound for which
+     * a users adaptive brightness is considered valid.
+     *
+     * For example if a user changes the brightness when the ambient light level
+     * is 100 lux, the adjustment will be kept if the current ambient light level
+     * is {@code <= 100 + (100 * getShortTermModelUpperLuxMultiplier())}.
+     */
+    public float getShortTermModelUpperLuxMultiplier() {
+        return mShortTermModelUpperLuxMultiplier;
+    }
+
+    /**
+     * Returns the multiplier used to calculate the lower bound for which
+     * a users adaptive brightness is considered valid.
+     *
+     * For example if a user changes the brightness when the ambient light level
+     * is 100 lux, the adjustment will be kept if the current ambient light level
+     * is {@code >= 100 - (100 * getShortTermModelLowerLuxMultiplier())}.
+     */
+    public float getShortTermModelLowerLuxMultiplier() {
+        return mShortTermModelLowerLuxMultiplier;
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeFloatArray(mLux);
@@ -138,6 +207,10 @@ public final class BrightnessConfiguration implements Parcelable {
             correction.writeToParcel(dest, flags);
         }
         dest.writeString(mDescription);
+        dest.writeBoolean(mShouldCollectColorSamples);
+        dest.writeLong(mShortTermModelTimeout);
+        dest.writeFloat(mShortTermModelLowerLuxMultiplier);
+        dest.writeFloat(mShortTermModelUpperLuxMultiplier);
     }
 
     @Override
@@ -167,6 +240,16 @@ public final class BrightnessConfiguration implements Parcelable {
         if (mDescription != null) {
             sb.append(mDescription);
         }
+        sb.append(", shouldCollectColorSamples = " + mShouldCollectColorSamples);
+        if (mShortTermModelTimeout >= 0) {
+            sb.append(", shortTermModelTimeout = " + mShortTermModelTimeout);
+        }
+        if (!Float.isNaN(mShortTermModelLowerLuxMultiplier)) {
+            sb.append(", shortTermModelLowerLuxMultiplier = " + mShortTermModelLowerLuxMultiplier);
+        }
+        if (!Float.isNaN(mShortTermModelLowerLuxMultiplier)) {
+            sb.append(", shortTermModelUpperLuxMultiplier = " + mShortTermModelUpperLuxMultiplier);
+        }
         sb.append("'}");
         return sb.toString();
     }
@@ -181,6 +264,10 @@ public final class BrightnessConfiguration implements Parcelable {
         if (mDescription != null) {
             result = result * 31 + mDescription.hashCode();
         }
+        result = result * 31 + Boolean.hashCode(mShouldCollectColorSamples);
+        result = result * 31 + Long.hashCode(mShortTermModelTimeout);
+        result = result * 31 + Float.hashCode(mShortTermModelLowerLuxMultiplier);
+        result = result * 31 + Float.hashCode(mShortTermModelUpperLuxMultiplier);
         return result;
     }
 
@@ -196,7 +283,20 @@ public final class BrightnessConfiguration implements Parcelable {
         return Arrays.equals(mLux, other.mLux) && Arrays.equals(mNits, other.mNits)
                 && mCorrectionsByPackageName.equals(other.mCorrectionsByPackageName)
                 && mCorrectionsByCategory.equals(other.mCorrectionsByCategory)
-                && Objects.equals(mDescription, other.mDescription);
+                && Objects.equals(mDescription, other.mDescription)
+                && mShouldCollectColorSamples == other.mShouldCollectColorSamples
+                && mShortTermModelTimeout == other.mShortTermModelTimeout
+                && checkFloatEquals(mShortTermModelLowerLuxMultiplier,
+                    other.mShortTermModelLowerLuxMultiplier)
+                && checkFloatEquals(mShortTermModelUpperLuxMultiplier,
+                    other.mShortTermModelUpperLuxMultiplier);
+    }
+
+    private boolean checkFloatEquals(float one, float two) {
+        if (Float.isNaN(one) && Float.isNaN(two)) {
+            return true;
+        }
+        return one == two;
     }
 
     public static final @android.annotation.NonNull Creator<BrightnessConfiguration> CREATOR =
@@ -224,6 +324,11 @@ public final class BrightnessConfiguration implements Parcelable {
 
             final String description = in.readString();
             builder.setDescription(description);
+            final boolean shouldCollectColorSamples = in.readBoolean();
+            builder.setShouldCollectColorSamples(shouldCollectColorSamples);
+            builder.setShortTermModelTimeoutMillis(in.readLong());
+            builder.setShortTermModelLowerLuxMultiplier(in.readFloat());
+            builder.setShortTermModelUpperLuxMultiplier(in.readFloat());
             return builder.build();
         }
 
@@ -252,6 +357,7 @@ public final class BrightnessConfiguration implements Parcelable {
             serializer.endTag(null, TAG_BRIGHTNESS_POINT);
         }
         serializer.endTag(null, TAG_BRIGHTNESS_CURVE);
+
         serializer.startTag(null, TAG_BRIGHTNESS_CORRECTIONS);
         for (Map.Entry<String, BrightnessCorrection> entry :
                 mCorrectionsByPackageName.entrySet()) {
@@ -271,6 +377,24 @@ public final class BrightnessConfiguration implements Parcelable {
             serializer.endTag(null, TAG_BRIGHTNESS_CORRECTION);
         }
         serializer.endTag(null, TAG_BRIGHTNESS_CORRECTIONS);
+
+        serializer.startTag(null, TAG_BRIGHTNESS_PARAMS);
+        if (mShouldCollectColorSamples) {
+            serializer.attribute(null, ATTR_COLLECT_COLOR, Boolean.toString(true));
+        }
+        if (mShortTermModelTimeout >= 0) {
+            serializer.attribute(null, ATTR_MODEL_TIMEOUT,
+                    Long.toString(mShortTermModelTimeout));
+        }
+        if (!Float.isNaN(mShortTermModelLowerLuxMultiplier)) {
+            serializer.attribute(null, ATTR_MODEL_LOWER_BOUND,
+                    Float.toString(mShortTermModelLowerLuxMultiplier));
+        }
+        if (!Float.isNaN(mShortTermModelUpperLuxMultiplier)) {
+            serializer.attribute(null, ATTR_MODEL_UPPER_BOUND,
+                    Float.toString(mShortTermModelUpperLuxMultiplier));
+        }
+        serializer.endTag(null, TAG_BRIGHTNESS_PARAMS);
     }
 
     /**
@@ -293,6 +417,10 @@ public final class BrightnessConfiguration implements Parcelable {
         List<Float> nitsList = new ArrayList<>();
         Map<String, BrightnessCorrection> correctionsByPackageName = new HashMap<>();
         Map<Integer, BrightnessCorrection> correctionsByCategory = new HashMap<>();
+        boolean shouldCollectColorSamples = false;
+        long shortTermModelTimeout = SHORT_TERM_TIMEOUT_UNSET;
+        float shortTermModelLowerLuxMultiplier = Float.NaN;
+        float shortTermModelUpperLuxMultiplier = Float.NaN;
         final int configDepth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, configDepth)) {
             if (TAG_BRIGHTNESS_CURVE.equals(parser.getName())) {
@@ -307,8 +435,7 @@ public final class BrightnessConfiguration implements Parcelable {
                     luxList.add(lux);
                     nitsList.add(nits);
                 }
-            }
-            if (TAG_BRIGHTNESS_CORRECTIONS.equals(parser.getName())) {
+            } else if (TAG_BRIGHTNESS_CORRECTIONS.equals(parser.getName())) {
                 final int correctionsDepth = parser.getDepth();
                 while (XmlUtils.nextElementWithin(parser, correctionsDepth)) {
                     if (!TAG_BRIGHTNESS_CORRECTION.equals(parser.getName())) {
@@ -328,6 +455,15 @@ public final class BrightnessConfiguration implements Parcelable {
                         }
                     }
                 }
+            } else if (TAG_BRIGHTNESS_PARAMS.equals(parser.getName())) {
+                shouldCollectColorSamples =
+                        Boolean.parseBoolean(parser.getAttributeValue(null, ATTR_COLLECT_COLOR));
+                Long timeout = loadLongFromXml(parser, ATTR_MODEL_TIMEOUT);
+                if (timeout != null) {
+                    shortTermModelTimeout = timeout;
+                }
+                shortTermModelLowerLuxMultiplier = loadFloatFromXml(parser, ATTR_MODEL_LOWER_BOUND);
+                shortTermModelUpperLuxMultiplier = loadFloatFromXml(parser, ATTR_MODEL_UPPER_BOUND);
             }
         }
         final int n = luxList.size();
@@ -350,6 +486,10 @@ public final class BrightnessConfiguration implements Parcelable {
             final BrightnessCorrection correction = entry.getValue();
             builder.addCorrectionByCategory(category, correction);
         }
+        builder.setShouldCollectColorSamples(shouldCollectColorSamples);
+        builder.setShortTermModelTimeoutMillis(shortTermModelTimeout);
+        builder.setShortTermModelLowerLuxMultiplier(shortTermModelLowerLuxMultiplier);
+        builder.setShortTermModelUpperLuxMultiplier(shortTermModelUpperLuxMultiplier);
         return builder.build();
     }
 
@@ -360,6 +500,16 @@ public final class BrightnessConfiguration implements Parcelable {
         } catch (NullPointerException | NumberFormatException e) {
             return Float.NaN;
         }
+    }
+
+    private static Long loadLongFromXml(XmlPullParser parser, String attribute) {
+        final String string = parser.getAttributeValue(null, attribute);
+        try {
+            return Long.parseLong(string);
+        } catch (NullPointerException | NumberFormatException e) {
+            // Ignoring
+        }
+        return null;
     }
 
     /**
@@ -374,6 +524,10 @@ public final class BrightnessConfiguration implements Parcelable {
         private Map<String, BrightnessCorrection> mCorrectionsByPackageName;
         private Map<Integer, BrightnessCorrection> mCorrectionsByCategory;
         private String mDescription;
+        private boolean mShouldCollectColorSamples;
+        private long mShortTermModelTimeout = SHORT_TERM_TIMEOUT_UNSET;
+        private float mShortTermModelLowerLuxMultiplier = Float.NaN;
+        private float mShortTermModelUpperLuxMultiplier = Float.NaN;
 
         /**
          * Constructs the builder with the control points for the brightness curve.
@@ -387,8 +541,8 @@ public final class BrightnessConfiguration implements Parcelable {
          * @throws IllegalArgumentException if the nit levels are not monotonically increasing.
          */
         public Builder(float[] lux, float[] nits) {
-            Preconditions.checkNotNull(lux);
-            Preconditions.checkNotNull(nits);
+            Objects.requireNonNull(lux);
+            Objects.requireNonNull(nits);
             if (lux.length == 0 || nits.length == 0) {
                 throw new IllegalArgumentException("Lux and nits arrays must not be empty");
             }
@@ -498,6 +652,73 @@ public final class BrightnessConfiguration implements Parcelable {
         }
 
         /**
+         * Control whether screen color samples should be returned in
+         * {@link BrightnessChangeEvent#colorValueBuckets} if supported by the device.
+         *
+         * @param shouldCollectColorSamples true if color samples should be collected.
+         * @return
+         */
+        @NonNull
+        public Builder setShouldCollectColorSamples(boolean shouldCollectColorSamples) {
+            mShouldCollectColorSamples = shouldCollectColorSamples;
+            return this;
+        }
+
+        /**
+         * Sets the timeout for the short term model in milliseconds.
+         *
+         * If the screen is inactive for this timeout then the short term model
+         * will check the lux range defined by {@link #setShortTermModelLowerLuxMultiplier(float))}
+         * and {@link #setShortTermModelUpperLuxMultiplier(float)} to decide whether to keep any
+         * adjustment the user has made to adaptive brightness.
+         */
+        @NonNull
+        public Builder setShortTermModelTimeoutMillis(long shortTermModelTimeoutMillis) {
+            mShortTermModelTimeout = shortTermModelTimeoutMillis;
+            return this;
+        }
+
+        /**
+         * Sets the multiplier used to calculate the upper bound for which
+         * a users adaptive brightness is considered valid.
+         *
+         * For example if a user changes the brightness when the ambient light level
+         * is 100 lux, the adjustment will be kept if the current ambient light level
+         * is {@code <= 100 + (100 * shortTermModelUpperLuxMultiplier)}.
+         *
+         * @throws IllegalArgumentException if shortTermModelUpperLuxMultiplier is negative.
+         */
+        @NonNull
+        public Builder setShortTermModelUpperLuxMultiplier(
+                @FloatRange(from = 0.0f) float shortTermModelUpperLuxMultiplier) {
+            if (shortTermModelUpperLuxMultiplier < 0.0f) {
+                throw new IllegalArgumentException("Negative lux multiplier");
+            }
+            mShortTermModelUpperLuxMultiplier = shortTermModelUpperLuxMultiplier;
+            return this;
+        }
+
+        /**
+         * Returns the multiplier used to calculate the lower bound for which
+         * a users adaptive brightness is considered valid.
+         *
+         * For example if a user changes the brightness when the ambient light level
+         * is 100 lux, the adjustment will be kept if the current ambient light level
+         * is {@code >= 100 - (100 * shortTermModelLowerLuxMultiplier)}.
+         *
+         * @throws IllegalArgumentException if shortTermModelUpperLuxMultiplier is negative.
+         */
+        @NonNull
+        public Builder setShortTermModelLowerLuxMultiplier(
+                @FloatRange(from = 0.0f) float shortTermModelLowerLuxMultiplier) {
+            if (shortTermModelLowerLuxMultiplier < 0.0f) {
+                throw new IllegalArgumentException("Negative lux multiplier");
+            }
+            mShortTermModelLowerLuxMultiplier = shortTermModelLowerLuxMultiplier;
+            return this;
+        }
+
+        /**
          * Builds the {@link BrightnessConfiguration}.
          */
         @NonNull
@@ -506,7 +727,9 @@ public final class BrightnessConfiguration implements Parcelable {
                 throw new IllegalStateException("A curve must be set!");
             }
             return new BrightnessConfiguration(mCurveLux, mCurveNits, mCorrectionsByPackageName,
-                    mCorrectionsByCategory, mDescription);
+                    mCorrectionsByCategory, mDescription, mShouldCollectColorSamples,
+                    mShortTermModelTimeout, mShortTermModelLowerLuxMultiplier,
+                    mShortTermModelUpperLuxMultiplier);
         }
 
         private static void checkMonotonic(float[] vals, boolean strictlyIncreasing, String name) {

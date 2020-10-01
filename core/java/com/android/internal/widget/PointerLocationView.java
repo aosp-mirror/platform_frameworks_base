@@ -98,7 +98,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
         public void clearTrace() {
             mTraceCount = 0;
         }
-        
+
         public void addTrace(float x, float y, boolean current) {
             int traceCapacity = mTraceX.length;
             if (mTraceCount == traceCapacity) {
@@ -371,7 +371,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 }
                 if (haveLast) {
                     canvas.drawLine(lastX, lastY, x, y, mPathPaint);
-                    final Paint paint = ps.mTraceCurrent[i] ? mCurrentPointPaint : mPaint;
+                    final Paint paint = ps.mTraceCurrent[i - 1] ? mCurrentPointPaint : mPaint;
                     canvas.drawPoint(lastX, lastY, paint);
                     drawn = true;
                 }

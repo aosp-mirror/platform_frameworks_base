@@ -1,0 +1,5 @@
+<...>-2965  (-----) [001] .... 10000.746629: mm_filemap_add_to_page_cache: dev 253:6 ino 1 page=00000000679ee1ec pfn=1299913 ofs=192512
+<...>-2965  (-----) [001] .... 10010.746664: mm_filemap_add_to_page_cache: dev 253:6 ino 2 page=0000000006cd2fb7 pfn=1296251 ofs=196608
+<...>-2965  (-----) [001] .... 10020.746677: mm_filemap_add_to_page_cache: dev 253:6 ino 3 page=00000000af82f3d6 pfn=1419330 ofs=200704
+<...>-2965  (-----) [001] .... 10030.746693: mm_filemap_add_to_page_cache: dev 253:6 ino 4 page=000000002840f054 pfn=1304928 ofs=204800
+<...>-2965  (-----) [001] .... 10040.746706: mm_filemap_add_to_page_cache: dev 253:6 ino 5 page=000000004a59da17 pfn=1288069 ofs=208896

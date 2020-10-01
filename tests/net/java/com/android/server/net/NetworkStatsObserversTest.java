@@ -53,7 +53,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.net.NetworkStatsServiceTest.LatchedHandler;
-import com.android.testutils.HandlerUtilsKt;
+import com.android.testutils.HandlerUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -440,7 +440,7 @@ public class NetworkStatsObserversTest {
     }
 
     private void waitForObserverToIdle() {
-        HandlerUtilsKt.waitForIdle(mObserverHandlerThread, WAIT_TIMEOUT_MS);
-        HandlerUtilsKt.waitForIdle(mHandler, WAIT_TIMEOUT_MS);
+        HandlerUtils.waitForIdle(mObserverHandlerThread, WAIT_TIMEOUT_MS);
+        HandlerUtils.waitForIdle(mHandler, WAIT_TIMEOUT_MS);
     }
 }

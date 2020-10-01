@@ -17,23 +17,24 @@
 package com.android.internal.policy;
 
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
+import static android.provider.Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR;
+import static android.view.View.SYSTEM_UI_LAYOUT_FLAGS;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.SearchManager;
@@ -45,6 +46,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
@@ -68,11 +70,13 @@ import android.transition.TransitionSet;
 import android.util.AndroidRuntimeException;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.IRotationWatcher.Stub;
+import android.view.IScrollCaptureController;
 import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -83,6 +87,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.ScrollCaptureCallback;
 import android.view.SearchEvent;
 import android.view.SurfaceHolder.Callback2;
 import android.view.View;
@@ -112,7 +117,6 @@ import com.android.internal.view.menu.MenuHelper;
 import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.MenuView;
 import com.android.internal.widget.DecorContentParent;
-import com.android.internal.widget.SwipeDismissLayout;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -129,6 +133,24 @@ import java.util.List;
 public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private final static String TAG = "PhoneWindow";
+
+    /**
+     * @see Window#setDecorFitsSystemWindows
+     */
+    private static final OnContentApplyWindowInsetsListener sDefaultContentInsetsApplier =
+            (view, insets) -> {
+                if ((view.getWindowSystemUiVisibility() & SYSTEM_UI_LAYOUT_FLAGS) != 0) {
+                    return new Pair<>(Insets.NONE, insets);
+                }
+                Insets insetsToApply = insets.getSystemWindowInsets();
+                return new Pair<>(insetsToApply,
+                        insets.inset(insetsToApply).consumeSystemWindowInsets());
+            };
+
+    /* If true, shadows drawn around the window will be rendered by the system compositor. If
+     * false, shadows will be drawn by the client by setting an elevation on the root view and
+     * the contents will be inset by the shadow radius. */
+    public final boolean mRenderShadowsInCompositor;
 
     private static final boolean DEBUG = false;
 
@@ -310,6 +332,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     /** @see ViewRootImpl#mActivityConfigCallback */
     private ActivityConfigCallback mActivityConfigCallback;
 
+    boolean mDecorFitsSystemWindows = true;
+
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService("window"));
@@ -321,6 +345,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     public PhoneWindow(Context context) {
         super(context);
         mLayoutInflater = LayoutInflater.from(context);
+        mRenderShadowsInCompositor = Settings.Global.getInt(context.getContentResolver(),
+                DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 1) != 0;
     }
 
     /**
@@ -376,15 +402,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if ((features & (1 << FEATURE_ACTION_BAR)) != 0 && featureId == FEATURE_NO_TITLE) {
             // Remove the action bar feature if we have no title. No title dominates.
             removeFeature(FEATURE_ACTION_BAR);
-        }
-
-        if ((features & (1 << FEATURE_ACTION_BAR)) != 0 && featureId == FEATURE_SWIPE_TO_DISMISS) {
-            throw new AndroidRuntimeException(
-                    "You cannot combine swipe dismissal and the action bar.");
-        }
-        if ((features & (1 << FEATURE_SWIPE_TO_DISMISS)) != 0 && featureId == FEATURE_ACTION_BAR) {
-            throw new AndroidRuntimeException(
-                    "You cannot combine swipe dismissal and the action bar.");
         }
 
         if (featureId == FEATURE_INDETERMINATE_PROGRESS &&
@@ -1815,13 +1832,18 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     private ViewRootImpl getViewRootImpl() {
-        if (mDecor != null) {
-            ViewRootImpl viewRootImpl = mDecor.getViewRootImpl();
-            if (viewRootImpl != null) {
-                return viewRootImpl;
-            }
+        ViewRootImpl viewRootImpl = getViewRootImplOrNull();
+        if (viewRootImpl != null) {
+            return viewRootImpl;
         }
         throw new IllegalStateException("view not added");
+    }
+
+    private ViewRootImpl getViewRootImplOrNull() {
+        if (mDecor == null) {
+            return null;
+        }
+        return mDecor.getViewRootImpl();
     }
 
     /**
@@ -2104,6 +2126,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     /** Notify when decor view is attached to window and {@link ViewRootImpl} is available. */
     void onViewRootImplSet(ViewRootImpl viewRoot) {
         viewRoot.setActivityConfigCallback(mActivityConfigCallback);
+        applyDecorFitsSystemWindows();
     }
 
     static private final String FOCUSED_ID_TAG = "android:focusedViewId";
@@ -2322,7 +2345,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (applicationContext == null) {
                 context = getContext();
             } else {
-                context = new DecorContext(applicationContext, getContext());
+                context = new DecorContext(applicationContext, this);
                 if (mTheme != -1) {
                     context.setTheme(mTheme);
                 }
@@ -2356,6 +2379,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             setFlags(0, flagsToUpdate);
         } else {
             setFlags(FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR, flagsToUpdate);
+            getAttributes().setFitInsetsSides(0);
+            getAttributes().setFitInsetsTypes(0);
         }
 
         if (a.getBoolean(R.styleable.Window_windowNoTitle, false)) {
@@ -2373,10 +2398,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             requestFeature(FEATURE_ACTION_MODE_OVERLAY);
         }
 
-        if (a.getBoolean(R.styleable.Window_windowSwipeToDismiss, false)) {
-            requestFeature(FEATURE_SWIPE_TO_DISMISS);
-        }
-
         if (a.getBoolean(R.styleable.Window_windowFullscreen, false)) {
             setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN & (~getForcedWindowFlags()));
         }
@@ -2391,10 +2412,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 false)) {
             setFlags(FLAG_TRANSLUCENT_NAVIGATION, FLAG_TRANSLUCENT_NAVIGATION
                     & (~getForcedWindowFlags()));
-        }
-
-        if (a.getBoolean(R.styleable.Window_windowOverscan, false)) {
-            setFlags(FLAG_LAYOUT_IN_OVERSCAN, FLAG_LAYOUT_IN_OVERSCAN&(~getForcedWindowFlags()));
         }
 
         if (a.getBoolean(R.styleable.Window_windowShowWallpaper, false)) {
@@ -2442,19 +2459,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         final Context context = getContext();
         final int targetSdk = context.getApplicationInfo().targetSdkVersion;
-        final boolean targetPreHoneycomb = targetSdk < android.os.Build.VERSION_CODES.HONEYCOMB;
-        final boolean targetPreIcs = targetSdk < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
         final boolean targetPreL = targetSdk < android.os.Build.VERSION_CODES.LOLLIPOP;
         final boolean targetPreQ = targetSdk < Build.VERSION_CODES.Q;
-        final boolean targetHcNeedsOptions = context.getResources().getBoolean(
-                R.bool.target_honeycomb_needs_options_menu);
-        final boolean noActionBar = !hasFeature(FEATURE_ACTION_BAR) || hasFeature(FEATURE_NO_TITLE);
-
-        if (targetPreHoneycomb || (targetPreIcs && targetHcNeedsOptions && noActionBar)) {
-            setNeedsMenuKey(WindowManager.LayoutParams.NEEDS_MENU_SET_TRUE);
-        } else {
-            setNeedsMenuKey(WindowManager.LayoutParams.NEEDS_MENU_SET_FALSE);
-        }
 
         if (!mForcedStatusBarColor) {
             mStatusBarColor = a.getColor(R.styleable.Window_statusBarColor, 0xFF000000);
@@ -2497,7 +2503,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (a.hasValue(R.styleable.Window_windowLayoutInDisplayCutoutMode)) {
             int mode = a.getInt(R.styleable.Window_windowLayoutInDisplayCutoutMode, -1);
             if (mode < LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
-                    || mode > LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER) {
+                    || mode > LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
                 throw new UnsupportedOperationException("Unknown windowLayoutInDisplayCutoutMode: "
                         + a.getString(R.styleable.Window_windowLayoutInDisplayCutoutMode));
             }
@@ -2565,10 +2571,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         int layoutResource;
         int features = getLocalFeatures();
         // System.out.println("Features: 0x" + Integer.toHexString(features));
-        if ((features & (1 << FEATURE_SWIPE_TO_DISMISS)) != 0) {
-            layoutResource = R.layout.screen_swipe_dismiss;
-            setCloseOnSwipeEnabled(true);
-        } else if ((features & ((1 << FEATURE_LEFT_ICON) | (1 << FEATURE_RIGHT_ICON))) != 0) {
+        if ((features & ((1 << FEATURE_LEFT_ICON) | (1 << FEATURE_RIGHT_ICON))) != 0) {
             if (mIsFloating) {
                 TypedValue res = new TypedValue();
                 getContext().getTheme().resolveAttribute(
@@ -2638,10 +2641,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
         }
 
-        if ((features & (1 << FEATURE_SWIPE_TO_DISMISS)) != 0) {
-            registerSwipeCallbacks(contentParent);
-        }
-
         // Remaining setup -- of background and title -- that only applies
         // to top-level windows.
         if (getContainer() == null) {
@@ -2694,7 +2693,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mContentParent = generateLayout(mDecor);
 
             // Set up decor part of UI to ignore fitsSystemWindows if appropriate.
-            mDecor.makeOptionalFitsSystemWindows();
+            mDecor.makeFrameworkOptionalFitsSystemWindows();
 
             final DecorContentParent decorContentParent = (DecorContentParent) mDecor.findViewById(
                     R.id.decor_content_parent);
@@ -3047,63 +3046,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         return (mRightIconView = (ImageView)findViewById(R.id.right_icon));
     }
 
-    private void registerSwipeCallbacks(ViewGroup contentParent) {
-        if (!(contentParent instanceof SwipeDismissLayout)) {
-            Log.w(TAG, "contentParent is not a SwipeDismissLayout: " + contentParent);
-            return;
-        }
-        SwipeDismissLayout swipeDismiss = (SwipeDismissLayout) contentParent;
-        swipeDismiss.setOnDismissedListener(new SwipeDismissLayout.OnDismissedListener() {
-            @Override
-            public void onDismissed(SwipeDismissLayout layout) {
-                dispatchOnWindowSwipeDismissed();
-                dispatchOnWindowDismissed(false /*finishTask*/, true /*suppressWindowTransition*/);
-            }
-        });
-        swipeDismiss.setOnSwipeProgressChangedListener(
-                new SwipeDismissLayout.OnSwipeProgressChangedListener() {
-                    @Override
-                    public void onSwipeProgressChanged(
-                            SwipeDismissLayout layout, float alpha, float translate) {
-                        WindowManager.LayoutParams newParams = getAttributes();
-                        newParams.x = (int) translate;
-                        newParams.alpha = alpha;
-                        setAttributes(newParams);
-
-                        int flags = 0;
-                        if (newParams.x == 0) {
-                            flags = FLAG_FULLSCREEN;
-                        } else {
-                            flags = FLAG_LAYOUT_NO_LIMITS;
-                        }
-                        setFlags(flags, FLAG_FULLSCREEN | FLAG_LAYOUT_NO_LIMITS);
-                    }
-
-                    @Override
-                    public void onSwipeCancelled(SwipeDismissLayout layout) {
-                        WindowManager.LayoutParams newParams = getAttributes();
-                        // Swipe changes only affect the x-translation and alpha, check to see if
-                        // those values have changed first before resetting them.
-                        if (newParams.x != 0 || newParams.alpha != 1) {
-                            newParams.x = 0;
-                            newParams.alpha = 1;
-                            setAttributes(newParams);
-                            setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN | FLAG_LAYOUT_NO_LIMITS);
-                        }
-                    }
-                });
-    }
-
-    /** @hide */
-    @Override
-    public void setCloseOnSwipeEnabled(boolean closeOnSwipeEnabled) {
-        if (hasFeature(Window.FEATURE_SWIPE_TO_DISMISS) // swipe-to-dismiss feature is requested
-                && mContentParent instanceof SwipeDismissLayout) { // check casting mContentParent
-            ((SwipeDismissLayout) mContentParent).setDismissable(closeOnSwipeEnabled);
-        }
-        super.setCloseOnSwipeEnabled(closeOnSwipeEnabled);
-    }
-
     /**
      * Helper method for calling the {@link Callback#onPanelClosed(int, Menu)}
      * callback. This method will grab whatever extra state is needed for the
@@ -3192,8 +3134,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // On TVs, if the app doesn't implement search, we want to launch assist.
             Bundle args = new Bundle();
             args.putInt(Intent.EXTRA_ASSIST_INPUT_DEVICE_ID, event.getDeviceId());
-            return ((SearchManager)getContext().getSystemService(Context.SEARCH_SERVICE))
-                    .launchLegacyAssist(null, getContext().getUserId(), args);
+            ((SearchManager) getContext().getSystemService(Context.SEARCH_SERVICE))
+                    .launchAssist(args);
+            return true;
         }
         return result;
     }
@@ -3829,6 +3772,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mDecor != null) {
             mDecor.updateColorViews(null, false /* animate */);
         }
+        final WindowControllerCallback callback = getWindowControllerCallback();
+        if (callback != null) {
+            getWindowControllerCallback().updateStatusBarColor(color);
+        }
     }
 
     @Override
@@ -3842,6 +3789,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mForcedNavigationBarColor = true;
         if (mDecor != null) {
             mDecor.updateColorViews(null, false /* animate */);
+        }
+        final WindowControllerCallback callback = getWindowControllerCallback();
+        if (callback != null) {
+            getWindowControllerCallback().updateNavigationBarColor(color);
         }
     }
 
@@ -3938,5 +3889,63 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @NonNull
     public List<Rect> getSystemGestureExclusionRects() {
         return getViewRootImpl().getRootSystemGestureExclusionRects();
+    }
+
+    @Override
+    public void setDecorFitsSystemWindows(boolean decorFitsSystemWindows) {
+        mDecorFitsSystemWindows = decorFitsSystemWindows;
+        applyDecorFitsSystemWindows();
+    }
+
+    private void applyDecorFitsSystemWindows() {
+        ViewRootImpl impl = getViewRootImplOrNull();
+        if (impl != null) {
+            impl.setOnContentApplyWindowInsetsListener(mDecorFitsSystemWindows
+                    ? sDefaultContentInsetsApplier
+                    : null);
+        }
+    }
+
+    /**
+     * System request to begin scroll capture.
+     *
+     * @param controller the controller to receive responses
+     * @hide
+     */
+    @Override
+    public void requestScrollCapture(IScrollCaptureController controller) {
+        getViewRootImpl().dispatchScrollCaptureRequest(controller);
+    }
+
+    /**
+     * Registers a handler providing scrolling capture support for window content.
+     *
+     * @param callback the callback to add
+     */
+    @Override
+    public void addScrollCaptureCallback(@NonNull ScrollCaptureCallback callback) {
+        getViewRootImpl().addScrollCaptureCallback(callback);
+    }
+
+    /**
+     * Unregisters the given {@link ScrollCaptureCallback}.
+     *
+     * @param callback the callback to remove
+     */
+    @Override
+    public void removeScrollCaptureCallback(@NonNull ScrollCaptureCallback callback) {
+        getViewRootImpl().removeScrollCaptureCallback(callback);
+    }
+
+    @Override
+    @Nullable
+    public View getStatusBarBackgroundView() {
+        return mDecor != null ? mDecor.getStatusBarBackgroundView() : null;
+    }
+
+    @Override
+    @Nullable
+    public View getNavigationBarBackgroundView() {
+        return mDecor != null ? mDecor.getNavigationBarBackgroundView() : null;
     }
 }

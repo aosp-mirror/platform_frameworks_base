@@ -36,5 +36,8 @@ oneway interface IRoleController {
     void isApplicationQualifiedForRole(in String roleName, in String packageName,
             in RemoteCallback callback);
 
+    void isApplicationVisibleForRole(in String roleName, in String packageName,
+            in RemoteCallback callback);
+
     void isRoleVisible(in String roleName, in RemoteCallback callback);
 }

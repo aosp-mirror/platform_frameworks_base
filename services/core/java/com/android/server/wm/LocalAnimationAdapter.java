@@ -24,6 +24,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
+import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import java.io.PrintWriter;
@@ -49,15 +50,10 @@ class LocalAnimationAdapter implements AnimationAdapter {
     }
 
     @Override
-    public int getBackgroundColor() {
-        return mSpec.getBackgroundColor();
-    }
-
-    @Override
     public void startAnimation(SurfaceControl animationLeash, Transaction t,
-            OnAnimationFinishedCallback finishCallback) {
+            @AnimationType int type, OnAnimationFinishedCallback finishCallback) {
         mAnimator.startAnimation(mSpec, animationLeash, t,
-                () -> finishCallback.onAnimationFinished(this));
+                () -> finishCallback.onAnimationFinished(type, this));
     }
 
     @Override
@@ -81,9 +77,9 @@ class LocalAnimationAdapter implements AnimationAdapter {
     }
 
     @Override
-    public void writeToProto(ProtoOutputStream proto) {
+    public void dumpDebug(ProtoOutputStream proto) {
         final long token = proto.start(LOCAL);
-        mSpec.writeToProto(proto, ANIMATION_SPEC);
+        mSpec.dumpDebug(proto, ANIMATION_SPEC);
         proto.end(token);
     }
 
@@ -97,13 +93,6 @@ class LocalAnimationAdapter implements AnimationAdapter {
          */
         default boolean getShowWallpaper() {
             return false;
-        }
-
-        /**
-         * @see AnimationAdapter#getBackgroundColor
-         */
-        default int getBackgroundColor() {
-            return 0;
         }
 
         /**
@@ -141,14 +130,24 @@ class LocalAnimationAdapter implements AnimationAdapter {
          */
         default boolean needsEarlyWakeup() { return false; }
 
+        /**
+         * @return The fraction of the animation, returns 1 if duration is 0.
+         *
+         * @param currentPlayTime The current play time.
+         */
+        default float getFraction(float currentPlayTime) {
+            final float duration = getDuration();
+            return duration > 0 ? currentPlayTime / duration : 1.0f;
+        }
+
         void dump(PrintWriter pw, String prefix);
 
-        default void writeToProto(ProtoOutputStream proto, long fieldId) {
+        default void dumpDebug(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
-            writeToProtoInner(proto);
+            dumpDebugInner(proto);
             proto.end(token);
         }
 
-        void writeToProtoInner(ProtoOutputStream proto);
+        void dumpDebugInner(ProtoOutputStream proto);
     }
 }

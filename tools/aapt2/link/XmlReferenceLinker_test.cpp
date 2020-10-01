@@ -47,6 +47,8 @@ class XmlReferenceLinkerTest : public ::testing::Test {
                                             test::AttributeBuilder()
                                                 .SetTypeMask(android::ResTable_map::TYPE_STRING)
                                                 .Build())
+                           .AddPublicSymbol("android:attr/angle", ResourceId(0x01010004),
+                                            test::AttributeBuilder().Build())
 
                            // Add one real symbol that was introduces in v21
                            .AddPublicSymbol("android:attr/colorAccent", ResourceId(0x01010435),
@@ -75,7 +77,7 @@ class XmlReferenceLinkerTest : public ::testing::Test {
   }
 
  protected:
-  std::unique_ptr<IAaptContext> context_;
+  std::unique_ptr<test::Context> context_;
 };
 
 TEST_F(XmlReferenceLinkerTest, LinkBasicAttributes) {
@@ -252,6 +254,65 @@ TEST_F(XmlReferenceLinkerTest, LinkViewWithLocalPackageAndAliasOfTheSameName) {
   Reference* ref = ValueCast<Reference>(xml_attr->compiled_value.get());
   ASSERT_THAT(ref, NotNull());
   EXPECT_EQ(make_value(ResourceId(0x7f030000)), ref->id);
+}
+
+
+TEST_F(XmlReferenceLinkerTest, AddAngleOnGradientForAndroidQ) {
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"(
+    <gradient />)");
+
+  XmlReferenceLinker linker;
+  ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
+
+  xml::Element* gradient_el = doc->root.get();
+  ASSERT_THAT(gradient_el, NotNull());
+
+  xml::Attribute* xml_attr = gradient_el->FindAttribute(xml::kSchemaAndroid, "angle");
+  ASSERT_THAT(xml_attr, NotNull());
+  ASSERT_TRUE(xml_attr->compiled_attribute);
+  EXPECT_EQ(make_value(ResourceId(0x01010004)), xml_attr->compiled_attribute.value().id);
+
+  BinaryPrimitive* value = ValueCast<BinaryPrimitive>(xml_attr->compiled_value.get());
+  ASSERT_THAT(value, NotNull());
+  EXPECT_EQ(value->value.dataType, android::Res_value::TYPE_INT_DEC);
+  EXPECT_EQ(value->value.data, 0U);
+}
+
+TEST_F(XmlReferenceLinkerTest, DoNotOverwriteAngleOnGradientForAndroidQ) {
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"(
+  <gradient xmlns:android="http://schemas.android.com/apk/res/android"
+      android:angle="90"/>)");
+
+  XmlReferenceLinker linker;
+  ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
+
+  xml::Element* gradient_el = doc->root.get();
+  ASSERT_THAT(gradient_el, NotNull());
+
+  xml::Attribute* xml_attr = gradient_el->FindAttribute(xml::kSchemaAndroid, "angle");
+  ASSERT_THAT(xml_attr, NotNull());
+  ASSERT_TRUE(xml_attr->compiled_attribute);
+  EXPECT_EQ(make_value(ResourceId(0x01010004)), xml_attr->compiled_attribute.value().id);
+
+  BinaryPrimitive* value = ValueCast<BinaryPrimitive>(xml_attr->compiled_value.get());
+  ASSERT_THAT(value, NotNull());
+  EXPECT_EQ(value->value.dataType, android::Res_value::TYPE_INT_DEC);
+  EXPECT_EQ(value->value.data, 90U);
+}
+
+TEST_F(XmlReferenceLinkerTest, DoNotOverwriteAngleOnGradientForPostAndroidQ) {
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"(
+  <gradient xmlns:android="http://schemas.android.com/apk/res/android" />)");
+  context_->SetMinSdkVersion(30);
+
+  XmlReferenceLinker linker;
+  ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
+
+  xml::Element* gradient_el = doc->root.get();
+  ASSERT_THAT(gradient_el, NotNull());
+
+  xml::Attribute* xml_attr = gradient_el->FindAttribute(xml::kSchemaAndroid, "angle");
+  ASSERT_THAT(xml_attr, IsNull());
 }
 
 }  // namespace aapt

@@ -28,7 +28,6 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 import com.android.server.pm.ShortcutService.FileOutputStreamWithPath;
 
 import libcore.io.IoUtils;
@@ -38,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Deque;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -149,15 +149,16 @@ public class ShortcutBitmapSaver {
         shortcut.setIconResourceId(0);
         shortcut.setIconResName(null);
         shortcut.setBitmapPath(null);
+        shortcut.setIconUri(null);
         shortcut.clearFlags(ShortcutInfo.FLAG_HAS_ICON_FILE |
                 ShortcutInfo.FLAG_ADAPTIVE_BITMAP | ShortcutInfo.FLAG_HAS_ICON_RES |
-                ShortcutInfo.FLAG_ICON_FILE_PENDING_SAVE);
+                ShortcutInfo.FLAG_ICON_FILE_PENDING_SAVE | ShortcutInfo.FLAG_HAS_ICON_URI);
     }
 
     public void saveBitmapLocked(ShortcutInfo shortcut,
             int maxDimension, CompressFormat format, int quality) {
         final Icon icon = shortcut.getIcon();
-        Preconditions.checkNotNull(icon);
+        Objects.requireNonNull(icon);
 
         final Bitmap original = icon.getBitmap();
         if (original == null) {

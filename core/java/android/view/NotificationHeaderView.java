@@ -17,7 +17,6 @@
 package android.view;
 
 import android.annotation.Nullable;
-import android.app.AppOpsManager;
 import android.app.Notification;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -27,13 +26,14 @@ import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
 import com.android.internal.widget.CachingIconView;
+import com.android.internal.widget.NotificationExpandButton;
 
 import java.util.ArrayList;
 
@@ -54,16 +54,11 @@ public class NotificationHeaderView extends ViewGroup {
     private OnClickListener mExpandClickListener;
     private OnClickListener mAppOpsListener;
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
-    private ImageView mExpandButton;
+    private LinearLayout mTransferChip;
+    private NotificationExpandButton mExpandButton;
     private CachingIconView mIcon;
     private View mProfileBadge;
-    private View mOverlayIcon;
-    private View mCameraIcon;
-    private View mMicIcon;
     private View mAppOps;
-    private View mAudiblyAlertedIcon;
-    private int mIconColor;
-    private int mOriginalNotificationColor;
     private boolean mExpanded;
     private boolean mShowExpandButtonAtEnd;
     private boolean mShowWorkBadgeAtEnd;
@@ -116,14 +111,11 @@ public class NotificationHeaderView extends ViewGroup {
         mAppName = findViewById(com.android.internal.R.id.app_name_text);
         mHeaderText = findViewById(com.android.internal.R.id.header_text);
         mSecondaryHeaderText = findViewById(com.android.internal.R.id.header_text_secondary);
+        mTransferChip = findViewById(com.android.internal.R.id.media_seamless);
         mExpandButton = findViewById(com.android.internal.R.id.expand_button);
         mIcon = findViewById(com.android.internal.R.id.icon);
         mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
-        mCameraIcon = findViewById(com.android.internal.R.id.camera);
-        mMicIcon = findViewById(com.android.internal.R.id.mic);
-        mOverlayIcon = findViewById(com.android.internal.R.id.overlay);
         mAppOps = findViewById(com.android.internal.R.id.app_ops);
-        mAudiblyAlertedIcon = findViewById(com.android.internal.R.id.alerted_icon);
     }
 
     @Override
@@ -148,9 +140,11 @@ public class NotificationHeaderView extends ViewGroup {
             int childHeightSpec = getChildMeasureSpec(wrapContentHeightSpec,
                     lp.topMargin + lp.bottomMargin, lp.height);
             child.measure(childWidthSpec, childHeightSpec);
+            // Icons that should go at the end
             if ((child == mExpandButton && mShowExpandButtonAtEnd)
                     || child == mProfileBadge
-                    || child == mAppOps) {
+                    || child == mAppOps
+                    || child == mTransferChip) {
                 iconWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
             } else {
                 totalWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
@@ -211,9 +205,11 @@ public class NotificationHeaderView extends ViewGroup {
             int layoutRight;
             int top = (int) (getPaddingTop() + (ownHeight - childHeight) / 2.0f);
             int bottom = top + childHeight;
+            // Icons that should go at the end
             if ((child == mExpandButton && mShowExpandButtonAtEnd)
                     || child == mProfileBadge
-                    || child == mAppOps) {
+                    || child == mAppOps
+                    || child == mTransferChip) {
                 if (end == getMeasuredWidth()) {
                     layoutRight = end - mContentEndMargin;
                 } else {
@@ -294,10 +290,6 @@ public class NotificationHeaderView extends ViewGroup {
      */
     public void setAppOpsOnClickListener(OnClickListener l) {
         mAppOpsListener = l;
-        mAppOps.setOnClickListener(mAppOpsListener);
-        mCameraIcon.setOnClickListener(mAppOpsListener);
-        mMicIcon.setOnClickListener(mAppOpsListener);
-        mOverlayIcon.setOnClickListener(mAppOpsListener);
         updateTouchListener();
     }
 
@@ -308,49 +300,18 @@ public class NotificationHeaderView extends ViewGroup {
         updateTouchListener();
     }
 
-    @RemotableViewMethod
-    public void setOriginalIconColor(int color) {
-        mIconColor = color;
-    }
-
     public int getOriginalIconColor() {
-        return mIconColor;
-    }
-
-    @RemotableViewMethod
-    public void setOriginalNotificationColor(int color) {
-        mOriginalNotificationColor = color;
+        return mIcon.getOriginalIconColor();
     }
 
     public int getOriginalNotificationColor() {
-        return mOriginalNotificationColor;
+        return mExpandButton.getOriginalNotificationColor();
     }
 
     @RemotableViewMethod
     public void setExpanded(boolean expanded) {
         mExpanded = expanded;
         updateExpandButton();
-    }
-
-    /**
-     * Shows or hides 'app op in use' icons based on app usage.
-     */
-    public void showAppOpsIcons(ArraySet<Integer> appOps) {
-        if (mOverlayIcon == null || mCameraIcon == null || mMicIcon == null || appOps == null) {
-            return;
-        }
-
-        mOverlayIcon.setVisibility(appOps.contains(AppOpsManager.OP_SYSTEM_ALERT_WINDOW)
-                ? View.VISIBLE : View.GONE);
-        mCameraIcon.setVisibility(appOps.contains(AppOpsManager.OP_CAMERA)
-                ? View.VISIBLE : View.GONE);
-        mMicIcon.setVisibility(appOps.contains(AppOpsManager.OP_RECORD_AUDIO)
-                ? View.VISIBLE : View.GONE);
-    }
-
-    /** Updates icon visibility based on the noisiness of the notification. */
-    public void setRecentlyAudiblyAlerted(boolean audiblyAlerted) {
-        mAudiblyAlertedIcon.setVisibility(audiblyAlerted ? View.VISIBLE : View.GONE);
     }
 
     private void updateExpandButton() {
@@ -364,7 +325,7 @@ public class NotificationHeaderView extends ViewGroup {
             contentDescriptionId = R.string.expand_button_content_description_collapsed;
         }
         mExpandButton.setImageDrawable(getContext().getDrawable(drawableId));
-        mExpandButton.setColorFilter(mOriginalNotificationColor);
+        mExpandButton.setColorFilter(getOriginalNotificationColor());
         mExpandButton.setContentDescription(mContext.getText(contentDescriptionId));
     }
 
@@ -433,6 +394,7 @@ public class NotificationHeaderView extends ViewGroup {
             addRectAroundView(mIcon);
             mExpandButtonRect = addRectAroundView(mExpandButton);
             mAppOpsRect = addRectAroundView(mAppOps);
+            setTouchDelegate(new TouchDelegate(mAppOpsRect, mAppOps));
             addWidthRect();
             mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         }

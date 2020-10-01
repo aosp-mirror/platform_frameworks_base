@@ -25,8 +25,10 @@ import com.android.ims.internal.IImsRcsFeature;
  * {@hide}
  */
 interface IImsServiceController {
-    IImsMMTelFeature createEmergencyMMTelFeature(int slotId, in IImsFeatureStatusCallback c);
-    IImsMMTelFeature createMMTelFeature(int slotId, in IImsFeatureStatusCallback c);
-    IImsRcsFeature createRcsFeature(int slotId, in IImsFeatureStatusCallback c);
-    void removeImsFeature(int slotId, int featureType, in IImsFeatureStatusCallback c);
+    IImsMMTelFeature createEmergencyMMTelFeature(int slotId);
+    IImsMMTelFeature createMMTelFeature(int slotId);
+    IImsRcsFeature createRcsFeature(int slotId);
+    void removeImsFeature(int slotId, int featureType);
+    void addFeatureStatusCallback(int slotId, int featureType, in IImsFeatureStatusCallback c);
+    void removeFeatureStatusCallback(int slotId, int featureType, in IImsFeatureStatusCallback c);
 }

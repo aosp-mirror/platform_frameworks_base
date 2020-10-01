@@ -41,7 +41,9 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.RemoteInputUriController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -72,6 +74,8 @@ public class SmartReplyControllerTest extends SysuiTestCase {
     @Mock private NotificationEntryManager mNotificationEntryManager;
     @Mock private IStatusBarService mIStatusBarService;
     @Mock private StatusBarStateController mStatusBarStateController;
+    @Mock private RemoteInputUriController mRemoteInputUriController;
+    @Mock private NotificationClickNotifier mClickNotifier;
 
     @Before
     public void setUp() {
@@ -80,15 +84,18 @@ public class SmartReplyControllerTest extends SysuiTestCase {
                 mNotificationEntryManager);
 
         mSmartReplyController = new SmartReplyController(mNotificationEntryManager,
-                mIStatusBarService);
+                mIStatusBarService, mClickNotifier);
         mDependency.injectTestDependency(SmartReplyController.class,
                 mSmartReplyController);
 
         mRemoteInputManager = new NotificationRemoteInputManager(mContext,
                 mock(NotificationLockscreenUserManager.class), mSmartReplyController,
-                mNotificationEntryManager, () -> mock(ShadeController.class),
+                mNotificationEntryManager, () -> mock(StatusBar.class),
                 mStatusBarStateController,
-                Handler.createAsync(Looper.myLooper()));
+                Handler.createAsync(Looper.myLooper()),
+                mRemoteInputUriController,
+                mClickNotifier,
+                mock(ActionClickLogger.class));
         mRemoteInputManager.setUpWithCallback(mCallback, mDelegate);
         mNotification = new Notification.Builder(mContext, "")
                 .setSmallIcon(R.drawable.ic_person)
@@ -97,7 +104,9 @@ public class SmartReplyControllerTest extends SysuiTestCase {
 
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
                 0, mNotification, new UserHandle(ActivityManager.getCurrentUser()), null, 0);
-        mEntry = new NotificationEntry(mSbn);
+        mEntry = new NotificationEntryBuilder()
+                .setSbn(mSbn)
+                .build();
     }
 
     @Test

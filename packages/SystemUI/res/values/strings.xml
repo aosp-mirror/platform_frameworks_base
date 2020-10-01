@@ -118,13 +118,19 @@
     <string name="status_bar_use_physical_keyboard">Physical keyboard</string>
 
     <!-- Prompt for the USB device permission dialog [CHAR LIMIT=80] -->
-    <string name="usb_device_permission_prompt">Allow <xliff:g id="application">%1$s</xliff:g> to access <xliff:g id="usb_device">%2$s</xliff:g>?</string>
+    <string name="usb_device_permission_prompt">Allow <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> to access <xliff:g id="usb_device" example="USB Headphones">%2$s</xliff:g>?</string>
+
+    <!-- Checkbox label for USB device dialogs with warning text for USB device dialogs.  [CHAR LIMIT=200]-->
+    <string name="usb_device_permission_prompt_warn">Allow <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> to access <xliff:g id="usb_device" example="USB Headphones">%2$s</xliff:g>?\nThis app has not been granted record permission but could capture audio through this USB device.</string>
 
     <!-- Prompt for the USB accessory permission dialog [CHAR LIMIT=80] -->
-    <string name="usb_accessory_permission_prompt">Allow <xliff:g id="application">%1$s</xliff:g> to access <xliff:g id="usb_accessory">%2$s</xliff:g>?</string>
+    <string name="usb_accessory_permission_prompt">Allow <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> to access <xliff:g id="usb_accessory"  example="USB Dock">%2$s</xliff:g>?</string>
 
     <!-- Prompt for the USB device confirm dialog [CHAR LIMIT=80] -->
     <string name="usb_device_confirm_prompt">Open <xliff:g id="application">%1$s</xliff:g> to handle <xliff:g id="usb_device">%2$s</xliff:g>?</string>
+
+    <!-- Prompt for the USB device confirm dialog with warning text for USB device dialogs.  [CHAR LIMIT=200] -->
+    <string name="usb_device_confirm_prompt_warn">Open <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> to handle <xliff:g id="usb_device" example="USB Headphones">%2$s</xliff:g>?\nThis app has not been granted record permission but could capture audio through this USB device.</string>
 
     <!-- Prompt for the USB accessory confirm dialog [CHAR LIMIT=80] -->
     <string name="usb_accessory_confirm_prompt">Open <xliff:g id="application">%1$s</xliff:g> to handle <xliff:g id="usb_accessory">%2$s</xliff:g>?</string>
@@ -206,6 +212,10 @@
     <!-- Power menu item for taking a screenshot [CHAR LIMIT=20]-->
     <string name="global_action_screenshot">Screenshot</string>
 
+    <!-- text to show in place of RemoteInput images when they cannot be shown.
+         [CHAR LIMIT=50] -->
+    <string name="remote_input_image_insertion_text">sent an image</string>
+
     <!-- Notification ticker displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=30] -->
     <string name="screenshot_saving_ticker">Saving screenshot\u2026</string>
     <!-- Notification title displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=50] -->
@@ -223,17 +233,41 @@
     <!-- Notification text displayed when we fail to take a screenshot. [CHAR LIMIT=100] -->
     <string name="screenshot_failed_to_capture_text">Taking screenshots isn\'t allowed by the app or
         your organization</string>
+    <!-- Content description indicating that tapping a button will dismiss the screenshots UI [CHAR LIMIT=NONE] -->
+    <string name="screenshot_dismiss_ui_description">Dismiss screenshot</string>
+    <!-- Content description indicating that the view is a preview of the screenshot that was just taken [CHAR LIMIT=NONE] -->
+    <string name="screenshot_preview_description">Screenshot preview</string>
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
-    <string name="screenrecord_name">Screen Recording</string>
+    <string name="screenrecord_name">Screen Recorder</string>
+    <!-- Processing screen recoding video in the background [CHAR LIMIT=30]-->
+    <string name="screenrecord_background_processing_label">Processing screen recording</string>
     <!-- Description of the screen recording notification channel [CHAR LIMIT=NONE]-->
     <string name="screenrecord_channel_description">Ongoing notification for a screen record session</string>
-    <!-- Label for the button to begin screen recording [CHAR LIMIT=NONE]-->
-    <string name="screenrecord_start_label">Start Recording</string>
-    <!-- Label for the checkbox to enable microphone input during screen recording [CHAR LIMIT=NONE]-->
-    <string name="screenrecord_mic_label">Record voiceover</string>
+    <!-- Title for the screen prompting the user to begin recording their screen [CHAR LIMIT=NONE]-->
+    <string name="screenrecord_start_label">Start Recording?</string>
+    <!-- Message reminding the user that sensitive information may be captured during a screen recording [CHAR_LIMIT=NONE]-->
+    <string name="screenrecord_description">While recording, Android System can capture any sensitive information that\u2019s visible on your screen or played on your device. This includes passwords, payment info, photos, messages, and audio.</string>
+    <!-- Label for a switch to enable recording audio [CHAR LIMIT=NONE]-->
+    <string name="screenrecord_audio_label">Record audio</string>
+    <!-- Label for the option to record audio from the device [CHAR LIMIT=NONE]-->
+    <string name="screenrecord_device_audio_label">Device audio</string>
+    <!-- Description of what audio may be captured from the device [CHAR LIMIT=NONE]-->
+    <string name="screenrecord_device_audio_description">Sound from your device, like music, calls, and ringtones</string>
+    <!-- Label for the option to enable microphone input during screen recording [CHAR LIMIT=NONE]-->
+    <string name="screenrecord_mic_label">Microphone</string>
+    <!-- Label for an option to record audio from both device and microphone [CHAR LIMIT=NONE]-->
+    <string name="screenrecord_device_audio_and_mic_label">Device audio and microphone</string>
+    <!-- Button to start a screen recording [CHAR LIMIT=50]-->
+    <string name="screenrecord_start">Start</string>
+    <!-- Notification text displayed when we are recording the screen [CHAR LIMIT=100]-->
+    <string name="screenrecord_ongoing_screen_only">Recording screen</string>
+    <!-- Notification text displayed when we are recording both the screen and audio [CHAR LIMIT=100]-->
+    <string name="screenrecord_ongoing_screen_and_audio">Recording screen and audio</string>
     <!-- Label for the checkbox to enable showing location of touches during screen recording [CHAR LIMIT=NONE]-->
-    <string name="screenrecord_taps_label">Show taps</string>
+    <string name="screenrecord_taps_label">Show touches on screen</string>
+    <!-- Label for notification that the user can tap to stop and save the screen recording [CHAR LIMIT=NONE] -->
+    <string name="screenrecord_stop_text">Tap to stop</string>
     <!-- Label for notification action to stop and save the screen recording [CHAR LIMIT=35] -->
     <string name="screenrecord_stop_label">Stop</string>
     <!-- Label for notification action to pause screen recording [CHAR LIMIT=35] -->
@@ -256,6 +290,8 @@
     <string name="screenrecord_delete_error">Error deleting screen recording</string>
     <!-- A toast message shown when the screen recording cannot be started due to insufficient permissions [CHAR LIMIT=NONE] -->
     <string name="screenrecord_permission_error">Failed to get permissions</string>
+    <!-- A toast message shown when the screen recording cannot be started due to a generic error [CHAR LIMIT=NONE] -->
+    <string name="screenrecord_start_error">Error starting screen recording</string>
 
     <!-- Title for the USB function chooser in UsbPreferenceActivity. [CHAR LIMIT=30] -->
     <string name="usb_preference_title">USB file transfer options</string>
@@ -312,7 +348,7 @@
     <!-- Button name on BiometricPrompt shown when a biometric is detected but not authenticated. Tapping the button resumes authentication [CHAR LIMIT=30] -->
     <string name="biometric_dialog_try_again">Try again</string>
     <!-- Content description for empty spaces that are not taken by the biometric dialog. Clicking on these areas will cancel authentication and dismiss the biometric dialog [CHAR LIMIT=NONE] -->
-    <string name="biometric_dialog_empty_space_description">Empty region, tap to cancel authentication</string>
+    <string name="biometric_dialog_empty_space_description">Tap to cancel authentication</string>
     <!-- Content description for the face icon when the device is not authenticating anymore [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_face_icon_description_idle">Please try again</string>
     <!-- Content description for the face icon when the device is authenticating [CHAR LIMIT=NONE] -->
@@ -323,6 +359,56 @@
     <string name="biometric_dialog_face_icon_description_confirmed">Confirmed</string>
     <!-- Message shown when a biometric is authenticated, waiting for the user to confirm authentication [CHAR LIMIT=40]-->
     <string name="biometric_dialog_tap_confirm">Tap Confirm to complete</string>
+    <!-- Talkback string when a biometric is authenticated [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_authenticated">Authenticated</string>
+
+    <!-- Button text shown on BiometricPrompt giving the user the option to use an alternate form of authentication (Pin) [CHAR LIMIT=30] -->
+    <string name="biometric_dialog_use_pin">Use PIN</string>
+    <!-- Button text shown on BiometricPrompt giving the user the option to use an alternate form of authentication (Pattern) [CHAR LIMIT=30] -->
+    <string name="biometric_dialog_use_pattern">Use pattern</string>
+    <!-- Button text shown on BiometricPrompt giving the user the option to use an alternate form of authentication (Pass) [CHAR LIMIT=30] -->
+    <string name="biometric_dialog_use_password">Use password</string>
+    <!-- Error string shown when the user enters an incorrect PIN [CHAR LIMIT=40]-->
+    <string name="biometric_dialog_wrong_pin">Wrong PIN</string>
+    <!-- Error string shown when the user enters an incorrect pattern [CHAR LIMIT=40]-->
+    <string name="biometric_dialog_wrong_pattern">Wrong pattern</string>
+    <!-- Error string shown when the user enters an incorrect password [CHAR LIMIT=40]-->
+    <string name="biometric_dialog_wrong_password">Wrong password</string>
+    <!-- Error string shown when the user enters too many incorrect attempts [CHAR LIMIT=120]-->
+    <string name="biometric_dialog_credential_too_many_attempts">Too many incorrect attempts.\nTry again in <xliff:g id="number">%d</xliff:g> seconds.</string>
+
+    <!-- Error string shown when the user enters an incorrect PIN/pattern/password and it counts towards the max attempts before the data on the device is wiped. [CHAR LIMIT=NONE]-->
+    <string name="biometric_dialog_credential_attempts_before_wipe">Try again. Attempt <xliff:g id="attempts" example="1">%1$d</xliff:g> of <xliff:g id="max_attempts" example="3">%2$d</xliff:g>.</string>
+
+    <!-- Title of a dialog shown when the user only has one attempt left to provide the correct PIN/pattern/password before the device, one of its users, or a work profile is wiped. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title">Your data will be deleted</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct lock pattern before the device is wiped. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device">If you enter an incorrect pattern on the next attempt, this device\u2019s data will be deleted.</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct PIN before the device is wiped. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device">If you enter an incorrect PIN on the next attempt, this device\u2019s data will be deleted.</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct password before the device is wiped. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device">If you enter an incorrect password on the next attempt, this device\u2019s data will be deleted.</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct lock pattern before the user is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user">If you enter an incorrect pattern on the next attempt, this user will be deleted.</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct PIN before the user is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user">If you enter an incorrect PIN on the next attempt, this user will be deleted.</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct password before the user is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user">If you enter an incorrect password on the next attempt, this user will be deleted.</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct pattern before the work profile is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile">If you enter an incorrect pattern on the next attempt, your work profile and its data will be deleted.</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct PIN before the work profile is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile">If you enter an incorrect PIN on the next attempt, your work profile and its data will be deleted.</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct password before the work profile is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile">If you enter an incorrect password on the next attempt, your work profile and its data will be deleted.</string>
+
+    <!-- Content of a dialog shown when the user has failed to provide the device lock too many times and the device is wiped. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_failed_attempts_now_wiping_device">Too many incorrect attempts. This device\u2019s data will be deleted.</string>
+    <!-- Content of a dialog shown when the user has failed to provide the user lock too many times and the user is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_failed_attempts_now_wiping_user">Too many incorrect attempts. This user will be deleted.</string>
+    <!-- Content of a dialog shown when the user has failed to provide the work lock too many times and the work profile is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile">Too many incorrect attempts. This work profile and its data will be deleted.</string>
+    <!-- Button label to dismiss the dialog telling the user the device, user, or work profile has been wiped. [CHAR LIMIT=40] -->
+    <string name="biometric_dialog_now_wiping_dialog_dismiss">Dismiss</string>
 
     <!-- Message shown when the system-provided fingerprint dialog is shown, asking for authentication -->
     <string name="fingerprint_dialog_touch_sensor">Touch the fingerprint sensor</string>
@@ -559,6 +645,9 @@
 
     <!-- Content description to tell the user a notification has been removed from the notification shade -->
     <string name="accessibility_notification_dismissed">Notification dismissed.</string>
+
+    <!-- Content description to tell the user a bubble has been dismissed. -->
+    <string name="accessibility_bubble_dismissed">Bubble dismissed.</string>
 
     <!-- Content description for the notification shade panel (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_notification_shade">Notification shade.</string>
@@ -879,6 +968,8 @@
     <string name="quick_settings_notifications_label">Notifications</string>
     <!-- QuickSettings: Flashlight [CHAR LIMIT=NONE] -->
     <string name="quick_settings_flashlight_label">Flashlight</string>
+    <!-- QuickSettings: Flashlight, used when it's not available due to camera in use [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_flashlight_camera_in_use">Camera in use</string>
     <!-- QuickSettings: Cellular detail panel title [CHAR LIMIT=NONE] -->
     <string name="quick_settings_cellular_detail_title">Mobile data</string>
     <!-- QuickSettings: Cellular detail panel, data usage title [CHAR LIMIT=NONE] -->
@@ -916,6 +1007,10 @@
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset">On at sunset</string>
     <!-- QuickSettings: Secondary text for when the Dark Mode will be on until sunrise. [CHAR LIMIT=20] -->
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise">Until sunrise</string>
+    <!-- QuickSettings: Secondary text for when the Dark theme will be enabled at some user-selected time. [CHAR LIMIT=20] -->
+    <string name="quick_settings_dark_mode_secondary_label_on_at">On at <xliff:g id="time" example="10 pm">%s</xliff:g></string>
+    <!-- QuickSettings: Secondary text for when the Dark theme or some other tile will be on until some user-selected time. [CHAR LIMIT=20] -->
+    <string name="quick_settings_dark_mode_secondary_label_until">Until <xliff:g id="time" example="7 am">%s</xliff:g></string>
 
     <!-- QuickSettings: NFC tile [CHAR LIMIT=NONE] -->
     <string name="quick_settings_nfc_label">NFC</string>
@@ -923,6 +1018,16 @@
     <string name="quick_settings_nfc_off">NFC is disabled</string>
     <!-- QuickSettings: NFC (on) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_nfc_on">NFC is enabled</string>
+
+    <!-- QuickSettings: Screen record tile [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_screen_record_label">Screen Record</string>
+    <!-- QuickSettings: Text to prompt the user to begin a new recording [CHAR LIMIT=20] -->
+    <string name="quick_settings_screen_record_start">Start</string>
+    <!-- QuickSettings: Text to prompt the user to stop an ongoing recording [CHAR LIMIT=20] -->
+    <string name="quick_settings_screen_record_stop">Stop</string>
+
+    <!-- Default name for the media device shown in the output switcher when the name is not available [CHAR LIMIT=30] -->
+    <string name="media_seamless_remote_device">Device</string>
 
     <!-- Recents: Text that shows above the navigation bar after launching a few apps. [CHAR LIMIT=NONE] -->
     <string name="recents_swipe_up_onboarding">Swipe up to switch apps</string>
@@ -986,17 +1091,11 @@
     <!-- Message shown when face authentication fails and the pin pad is visible. [CHAR LIMIT=60] -->
     <string name="keyguard_retry">Swipe up to try again</string>
 
-    <!-- Indication when device is slow charging due to misalignment on the dock. [CHAR LIMIT=60] -->
-    <string name="dock_alignment_slow_charging" product="default">Realign phone for faster charging</string>
+    <!-- Text on keyguard screen and in Quick Settings footer indicating that the user's device belongs to their organization. [CHAR LIMIT=60] -->
+    <string name="do_disclosure_generic">This device belongs to your organization</string>
 
-    <!-- Indication when device is not charging due to bad placement on the dock. [CHAR LIMIT=60] -->
-    <string name="dock_alignment_not_charging" product="default">Realign phone to charge wirelessly</string>
-
-    <!-- Text on keyguard screen and in Quick Settings footer indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=60] -->
-    <string name="do_disclosure_generic">This device is managed by your organization</string>
-
-    <!-- Text on keyguard screen and in Quick Settings footer indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=40] -->
-    <string name="do_disclosure_with_name">This device is managed by <xliff:g id="organization_name" example="Foo, Inc.">%s</xliff:g></string>
+    <!-- Text on keyguard screen and in Quick Settings footer indicating that user's device belongs to their organization. [CHAR LIMIT=40] -->
+    <string name="do_disclosure_with_name">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%s</xliff:g></string>
 
     <!-- Shows when people have clicked on the phone icon [CHAR LIMIT=60] -->
     <string name="phone_hint">Swipe from icon for phone</string>
@@ -1059,15 +1158,6 @@
 
     <!-- Name for a freshly added user [CHAR LIMIT=30] -->
     <string name="user_new_user_name">New user</string>
-
-    <!-- Name for the guest user [CHAR LIMIT=35] -->
-    <string name="guest_nickname">Guest</string>
-
-    <!-- Label for adding a new guest in the user switcher [CHAR LIMIT=35] -->
-    <string name="guest_new_guest">Add guest</string>
-
-    <!-- Label for exiting and removing the  guest session in the user switcher [CHAR LIMIT=35] -->
-    <string name="guest_exit_guest">Remove guest</string>
 
     <!-- Title of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
     <string name="guest_exit_guest_dialog_title">Remove guest?</string>
@@ -1142,13 +1232,16 @@
     <string name="battery_saver_notification_action_text">Turn off Battery Saver</string>
 
     <!-- Media projection permission dialog warning text. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_dialog_text">While recording or casting, <xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> can capture any sensitive information that is displayed on your screen or played from your device, including sensitive information such as audio, passwords, payment info, photos and messages.</string>
+    <string name="media_projection_dialog_text"><xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.</string>
 
     <!-- Media projection permission dialog warning text for system services. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_dialog_service_text">While recording or casting, the service providing this function can capture any sensitive information that is displayed on your screen or played from your device, including sensitive information such as audio, passwords, payment info, photos and messages.</string>
+    <string name="media_projection_dialog_service_text">The service providing this function will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.</string>
+
+    <!-- Media projection permission dialog warning title for system services. [CHAR LIMIT=NONE] -->
+    <string name="media_projection_dialog_service_title">Start recording or casting?</string>
 
     <!-- Media projection permission dialog warning title. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_dialog_title">Exposing sensitive info during casting/recording </string>
+    <string name="media_projection_dialog_title">Start recording or casting with <xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g>?</string>
 
     <!-- Media projection permission dialog permanent grant check box. [CHAR LIMIT=NONE] -->
     <string name="media_projection_remember_text">Don\'t show again</string>
@@ -1159,8 +1252,20 @@
     <!-- The text for the manage notifications link. [CHAR LIMIT=40] -->
     <string name="manage_notifications_text">Manage</string>
 
+    <!-- The text for the notification history link. [CHAR LIMIT=40] -->
+    <string name="manage_notifications_history_text">History</string>
+
+    <!-- Section title for notifications that have recently appeared. [CHAR LIMIT=40] -->
+    <string name="notification_section_header_incoming">New</string>
+
     <!-- Section title for notifications that do not vibrate or make noise. [CHAR LIMIT=40] -->
-    <string name="notification_section_header_gentle">Silent notifications</string>
+    <string name="notification_section_header_gentle">Silent</string>
+
+    <!-- Section title for notifications that vibrate or make noise. [CHAR LIMIT=40] -->
+    <string name="notification_section_header_alerting">Notifications</string>
+
+    <!-- Section title for conversational notifications. [CHAR LIMIT=40] -->
+    <string name="notification_section_header_conversations">Conversations</string>
 
     <!-- Content description for accessibility: Tapping this button will dismiss all gentle notifications [CHAR LIMIT=NONE] -->
     <string name="accessibility_notification_section_header_gentle_clear_all">Clear all silent notifications</string>
@@ -1183,29 +1288,29 @@
     <!-- Footer vpn present text [CHAR LIMIT=50] -->
     <string name="branded_vpn_footer">Network may be monitored</string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a device owner that can monitor the network traffic [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_management_monitoring">Your organization manages this device and may monitor network traffic</string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the organization can monitor network traffic on that device. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_management_monitoring">Your organization owns this device and may monitor network traffic</string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a device owner that can monitor the network traffic [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_named_management_monitoring"><xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> manages this device and may monitor network traffic</string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the organization can monitor network traffic on that device. The placeholder is the organization's name. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_named_management_monitoring"><xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> owns this device and may monitor network traffic</string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a device owner and is connected to a VPN [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_management_named_vpn">Device is managed by your organization and connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the device is connected to a VPN. The placeholder is the VPN name. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_management_named_vpn">This device belongs to your organization and is connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a device owner and is connected to a VPN [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_named_management_named_vpn">Device is managed by <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> and connected to <xliff:g id="vpn_app" example="Foo VPN App">%2$s</xliff:g></string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the device is connected to a VPN. The first placeholder is the organization name, and the second placeholder is the VPN name. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_named_management_named_vpn">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> and is connected to <xliff:g id="vpn_app" example="Foo VPN App">%2$s</xliff:g></string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a device owner [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_management">Device is managed by your organization</string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_management">This device belongs to your organization</string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a device owner [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_named_management">Device is managed by <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g></string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization. The placeholder is the organization's name. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_named_management">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g></string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a device owner and is connected to two VPNs, one in the current user, one in the managed profile [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_management_vpns">Device is managed by your organization and connected to VPNs</string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the device is connected to multiple VPNs. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_management_vpns">This device belongs to your organization and is connected to VPNs</string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a device owner and is connected to two VPNs, one in the current user, one in the managed profile [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_named_management_vpns">Device is managed by <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> and connected to VPNs</string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the device is connected to multiple VPNs. The placeholder is the organization's name. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_named_management_vpns">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> and is connected to VPNs</string>
 
     <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a managed profile which can be monitored by the profile owner [CHAR LIMIT=100] -->
     <string name="quick_settings_disclosure_managed_profile_monitoring">Your organization may monitor network traffic in your work profile</string>
@@ -1216,17 +1321,17 @@
     <!-- Disclosure at the bottom of Quick Settings that indicates that a certificate authorithy is installed on this device and the traffic might be monitored [CHAR LIMIT=100] -->
     <string name="quick_settings_disclosure_monitoring">Network may be monitored</string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to two VPNs, one in the current user, one in the managed profile [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_vpns">Device connected to VPNs</string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to multiple VPNs. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_vpns">This device is connected to VPNs</string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to a VPN in the work profile [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_managed_profile_named_vpn">Work profile connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to a VPN in the work profile. The placeholder is the VPN name. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_managed_profile_named_vpn">Your work profile is connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to a VPN in the personal profile (as opposed to the work profile) [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_personal_profile_named_vpn">Personal profile connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to a VPN in the personal profile (instead of the work profile). The placeholder is the VPN name. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_personal_profile_named_vpn">Your personal profile is connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to a VPN [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_named_vpn">Device connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to a VPN. The placeholder is the VPN name. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_named_vpn">This device is connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
 
     <!-- Monitoring dialog title for device owned devices [CHAR LIMIT=35] -->
     <string name="monitoring_title_device_owned">Device management</string>
@@ -1256,11 +1361,11 @@
     <!-- Monitoring dialog label for button opening a page with more information on the admin's abilities [CHAR LIMIT=30] -->
     <string name="monitoring_button_view_policies">View Policies</string>
 
-    <!-- Monitoring dialog: Description of the device owner by name. [CHAR LIMIT=NONE]-->
-    <string name="monitoring_description_named_management">Your device is managed by <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g>.\n\nYour admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your admin.</string>
+    <!-- Dialog that a user can access via Quick Settings. The dialog describes what the IT admin can monitor (and the changes they can make) on the user's device. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_named_management">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g>.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your IT admin.</string>
 
-    <!-- Monitoring dialog: Description of a device owner. [CHAR LIMIT=NONE]-->
-    <string name="monitoring_description_management">Your device is managed by your organization.\n\nYour admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your admin.</string>
+    <!-- Dialog that a user can access via Quick Settings. The dialog describes what the IT admin can monitor (and the changes they can make) on the user's device. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_management">This device belongs to your organization.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your IT admin.</string>
 
     <!-- Monitoring dialog: Description of a CA Certificate. [CHAR LIMIT=NONE]-->
     <string name="monitoring_description_management_ca_certificate">Your organization installed a certificate authority on this device. Your secure network traffic may be monitored or modified.</string>
@@ -1359,6 +1464,9 @@
     <!-- Indication on the keyguard that appears when the user disables trust agents until the next time they unlock manually. [CHAR LIMIT=NONE] -->
     <string name="keyguard_indication_trust_disabled">Device will stay locked until you manually unlock</string>
 
+    <!-- Indication on the keyguard that appears when trust agents unlocks the device and device is plugged in. [CHAR LIMIT=NONE] -->
+    <string name="keyguard_indication_trust_unlocked_plugged_in"><xliff:g id="keyguard_indication" example="Kept unlocked by TrustAgent">%1$s</xliff:g>\n<xliff:g id="power_indication" example="Charging Slowly">%2$s</xliff:g></string>
+
     <!-- Title of notification educating the user about enabling notifications on the lockscreen. [CHAR LIMIT=40] -->
     <string name="hidden_notifications_title">Get notifications faster</string>
 
@@ -1404,7 +1512,7 @@
     <string name="accessibility_output_chooser">Switch output device</string>
 
     <!-- Screen pinning dialog title. -->
-    <string name="screen_pinning_title">Screen is pinned</string>
+    <string name="screen_pinning_title">App is pinned</string>
     <!-- Screen pinning dialog description. -->
     <string name="screen_pinning_description">This keeps it in view until you unpin. Touch &amp; hold Back and Overview to unpin.</string>
     <string name="screen_pinning_description_recents_invisible">This keeps it in view until you unpin. Touch &amp; hold Back and Home to unpin.</string>
@@ -1412,20 +1520,24 @@
     <!-- Screen pinning dialog description. -->
     <string name="screen_pinning_description_accessible">This keeps it in view until you unpin. Touch &amp; hold Overview to unpin.</string>
     <string name="screen_pinning_description_recents_invisible_accessible">This keeps it in view until you unpin. Touch &amp; hold Home to unpin.</string>
+    <!-- Screen pinning security warning: personal data, email, contacts may be exposed while screen is pinned. [CHAR LIMIT=NONE] -->
+    <string name="screen_pinning_exposes_personal_data">Personal data may be accessible (such as contacts and email content).</string>
+    <!-- Screen pinning security warning: a pinned app can still launch other apps. [CHAR LIMIT=NONE] -->
+    <string name="screen_pinning_can_open_other_apps">Pinned app may open other apps.</string>
     <!-- Notify use that they are in Lock-to-app -->
-    <string name="screen_pinning_toast">To unpin this screen, touch &amp; hold Back and Overview
+    <string name="screen_pinning_toast">To unpin this app, touch &amp; hold Back and Overview
         buttons</string>
-    <string name="screen_pinning_toast_recents_invisible">To unpin this screen, touch &amp; hold Back
+    <string name="screen_pinning_toast_recents_invisible">To unpin this app, touch &amp; hold Back
         and Home buttons</string>
     <!-- Notify (in toast) user how to unpin screen in gesture navigation mode [CHAR LIMIT=NONE] -->
-    <string name="screen_pinning_toast_gesture_nav">To unpin this screen, swipe up &amp; hold</string>
+    <string name="screen_pinning_toast_gesture_nav">To unpin this app, swipe up &amp; hold</string>
     <!-- Screen pinning positive response. -->
     <string name="screen_pinning_positive">Got it</string>
     <!-- Screen pinning negative response. -->
     <string name="screen_pinning_negative">No thanks</string>
     <!-- Enter/Exiting screen pinning indication. -->
-    <string name="screen_pinning_start">Screen pinned</string>
-    <string name="screen_pinning_exit">Screen unpinned</string>
+    <string name="screen_pinning_start">App pinned</string>
+    <string name="screen_pinning_exit">App unpinned</string>
 
 
     <!-- Hide quick settings tile confirmation title -->
@@ -1721,13 +1833,43 @@
     <string name="notification_silence_title">Silent</string>
 
     <!-- [CHAR LIMIT=100] Notification Importance title -->
-    <string name="notification_alert_title">Alerting</string>
+    <string name="notification_alert_title">Default</string>
+
+    <!-- [CHAR LIMIT=100] Notification Importance title -->
+    <string name="notification_bubble_title">Bubble</string>
 
     <!-- [CHAR LIMIT=150] Notification Importance title: low importance level summary -->
-    <string name="notification_channel_summary_low">Helps you focus without sound or vibration.</string>
+    <string name="notification_channel_summary_low">No sound or vibration</string>
+
+    <!-- [CHAR LIMIT=150] Notification Importance title: low importance level summary -->
+    <string name="notification_conversation_summary_low">No sound or vibration and appears lower in conversation section</string>
 
     <!-- [CHAR LIMIT=150] Notification Importance title: normal importance level summary -->
-    <string name="notification_channel_summary_default">Gets your attention with sound or vibration.</string>
+    <string name="notification_channel_summary_default">May ring or vibrate based on phone settings</string>
+
+    <!-- [CHAR LIMIT=150] Conversation Notification Importance title: normal conversation level, with bubbling summary -->
+    <string name="notification_channel_summary_default_with_bubbles">May ring or vibrate based on phone settings. Conversations from <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> bubble by default.</string>
+
+    <!-- [CHAR LIMIT=150] Notification Importance title: bubble level summary -->
+    <string name="notification_channel_summary_bubble">Keeps your attention with a floating shortcut to this content.</string>
+
+    <!-- [CHAR LIMIT=150] Notification Importance title: important conversation level summary -->
+    <string name="notification_channel_summary_priority">Shows at top of conversation section, appears as floating bubble, displays profile picture on lock screen</string>
+
+    <!--[CHAR LIMIT=30] Linkable text to Settings app -->
+    <string name="notification_conversation_channel_settings">Settings</string>
+
+    <!-- [CHAR LIMIT=150] Notification Importance title: important conversation level -->
+    <string name="notification_priority_title">Priority</string>
+
+    <!-- Text shown in notification guts for conversation notifications that don't implement the full feature -->
+    <string name="no_shortcut"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> doesn\u2019t support conversation features</string>
+
+    <!-- [CHAR LIMIT=NONE] Empty overflow title -->
+    <string name="bubble_overflow_empty_title">No recent bubbles</string>
+
+    <!-- [CHAR LIMIT=NONE] Empty overflow subtitle -->
+    <string name="bubble_overflow_empty_subtitle">Recent bubbles and dismissed bubbles will appear here</string>
 
     <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
     <string name="notification_unblockable_desc">These notifications can\'t be modified.</string>
@@ -1781,6 +1923,29 @@
     <string name="notification_done">Done</string>
     <!-- Notification: inline controls: undo block button -->
     <string name="inline_undo">Undo</string>
+    <!-- Notification: Conversation: control panel, label for button that demotes notification from conversation to normal notification -->
+    <string name="demote">Mark this notification as not a conversation</string>
+
+    <!-- [CHAR LIMIT=100] This conversation is marked as important -->
+    <string name="notification_conversation_favorite">Important conversation</string>
+
+    <!-- [CHAR LIMIT=100] This conversation is not marked as important -->
+    <string name="notification_conversation_unfavorite">Not an important conversation</string>
+
+    <!-- [CHAR LIMIT=100] This conversation is silenced (will not make sound or vibrate)-->
+    <string name="notification_conversation_mute">Silenced</string>
+
+    <!-- [CHAR LIMIT=100] This conversation is alerting (may make sound and/or vibrate)-->
+    <string name="notification_conversation_unmute">Alerting</string>
+
+    <!-- [CHAR LIMIT=100] Show notification as bubble -->
+    <string name="notification_conversation_bubble">Show bubble</string>
+
+    <!-- [CHAR LIMIT=100] Turn off bubbles for notification -->
+    <string name="notification_conversation_unbubble">Remove bubbles</string>
+
+    <!-- [CHAR LIMIT=100] Add this conversation to home screen -->
+    <string name="notification_conversation_home_screen">Add to home screen</string>
 
     <!-- Notification: Menu row: Content description for menu items. [CHAR LIMIT=NONE] -->
     <string name="notification_menu_accessibility"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> <xliff:g id="menu_description" example="notification controls">%2$s</xliff:g></string>
@@ -1792,7 +1957,10 @@
     <string name="notification_menu_snooze_description">notification snooze options</string>
 
     <!-- Notification: Menu row: Label for the snooze action shown in local context menu. [CHAR LIMIT=NONE] -->
-    <string name="notification_menu_snooze_action">Snooze</string>
+    <string name="notification_menu_snooze_action">Remind me</string>
+
+    <!-- Notification: Menu row: Label for the snooze action shown in local context menu. [CHAR LIMIT=NONE] -->
+    <string name="notification_menu_settings_action">Settings</string>
 
     <!-- Notification: Snooze panel: Snooze undo button label. [CHAR LIMIT=50]-->
     <string name="snooze_undo">UNDO</string>
@@ -1960,6 +2128,9 @@
 
     <!-- Label for feature switch [CHAR LIMIT=30] -->
     <string name="switch_bar_off">Off</string>
+
+    <!-- The tile in quick settings is unavailable. [CHAR LIMIT=32] -->
+    <string name="tile_unavailable">Unavailable</string>
 
     <!-- SysUI Tuner: Button that leads to the navigation bar customization screen [CHAR LIMIT=60] -->
     <string name="nav_bar">Navigation bar</string>
@@ -2221,6 +2392,9 @@
     <!-- Button to skip to the prev media on picture-in-picture (PIP) [CHAR LIMIT=30] -->
     <string name="pip_skip_to_prev">Skip to previous</string>
 
+    <!-- Accessibility action for resizing PIP [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_pip_resize">Resize</string>
+
     <!-- Tuner string -->
     <string name="change_theme_reboot" translatable="false">Changing the theme requires a restart.</string>
     <!-- Tuner string -->
@@ -2434,27 +2608,6 @@
          app for debugging. Will not be seen by users. [CHAR LIMIT=20] -->
     <string name="heap_dump_tile_name">Dump SysUI Heap</string>
 
-    <!-- Content description for ongoing privacy chip. Use with a single app [CHAR LIMIT=NONE]-->
-    <string name="ongoing_privacy_chip_content_single_app"><xliff:g id="app" example="Example App">%1$s</xliff:g> is using your <xliff:g id="types_list" example="camera, location">%2$s</xliff:g>.</string>
-
-    <!-- Content description for ongoing privacy chip. Use with multiple apps [CHAR LIMIT=NONE]-->
-    <string name="ongoing_privacy_chip_content_multiple_apps">Applications are using your <xliff:g id="types_list" example="camera, location">%s</xliff:g>.</string>
-
-    <!-- Separator for types. Include spaces before and after if needed [CHAR LIMIT=10] -->
-    <string name="ongoing_privacy_dialog_separator">,\u0020</string>
-
-    <!-- Separator for types, before last type. Include spaces before and after if needed [CHAR LIMIT=10] -->
-    <string name="ongoing_privacy_dialog_last_separator">\u0020and\u0020</string>
-
-    <!-- Text for camera app op [CHAR LIMIT=20]-->
-    <string name="privacy_type_camera">camera</string>
-
-    <!-- Text for location app op [CHAR LIMIT=20]-->
-    <string name="privacy_type_location">location</string>
-
-    <!-- Text for microphone app op [CHAR LIMIT=20]-->
-    <string name="privacy_type_microphone">microphone</string>
-
     <!-- Text for the quick setting tile for sensor privacy [CHAR LIMIT=30] -->
     <string name="sensor_privacy_mode">Sensors off</string>
 
@@ -2467,23 +2620,15 @@
     <!-- Description of the restart button in the hint of size compatibility mode. [CHAR LIMIT=NONE] -->
     <string name="restart_button_description">Tap to restart this app and go full screen.</string>
 
-    <!-- Text used for content description of deep link button in the header of expanded bubble
-         view. [CHAR_LIMIT=NONE] -->
-    <string name="bubbles_deep_link_button_description">Open <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
     <!-- Text used for content description of settings button in the header of expanded bubble
          view. [CHAR_LIMIT=NONE] -->
     <string name="bubbles_settings_button_description">Settings for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> bubbles</string>
-    <!-- Text for asking the user whether bubbles (floating app content) should be enabled for an
-         app. [CHAR LIMIT=NONE] -->
-    <string name="bubbles_prompt">Allow bubbles from <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+    <!-- Content description for button that shows bubble overflow on click [CHAR LIMIT=NONE] -->
+    <string name="bubble_overflow_button_content_description">Overflow</string>
+    <!-- Action to add overflow bubble back to stack. [CHAR LIMIT=NONE] -->
+    <string name="bubble_accessibility_action_add_back">Add back to stack</string>
     <!-- The text for the manage bubbles link. [CHAR LIMIT=NONE] -->
     <string name="manage_bubbles_text">Manage</string>
-    <!-- Text used for button allowing user to opt out of bubbles [CHAR LIMIT=20] -->
-    <string name="no_bubbles">Deny</string>
-    <!-- Text used for button allowing user to approve / enable bubbles [CHAR LIMIT=20] -->
-    <string name="yes_bubbles">Allow</string>
-    <!-- Text used for the button allowing users to postpone their decision to allow or deny bubbles [CHAR LIMIT=40] -->
-    <string name="ask_me_later_bubbles">Ask me later</string>
     <!-- Content description when a bubble is focused. [CHAR LIMIT=NONE] -->
     <string name="bubble_content_description_single"><xliff:g id="notification_title" example="some title">%1$s</xliff:g> from <xliff:g id="app_name" example="YouTube">%2$s</xliff:g></string>
     <!-- Content description when the stack of bubbles is focused. [CHAR LIMIT=NONE] -->
@@ -2498,8 +2643,22 @@
     <string name="bubble_accessibility_action_move_bottom_left">Move bottom left</string>
     <!-- Action in accessibility menu to move the stack of bubbles to the bottom right of the screen. [CHAR LIMIT=30]-->
     <string name="bubble_accessibility_action_move_bottom_right">Move bottom right</string>
-    <!-- Text used for the bubble dismiss area. Bubbles dragged to, or flung towards, this area will go away. [CHAR LIMIT=20] -->
-    <string name="bubble_dismiss_text">Dismiss</string>
+    <!-- Text used for the bubble dismiss area. Bubbles dragged to, or flung towards, this area will go away. [CHAR LIMIT=30] -->
+    <string name="bubble_dismiss_text">Dismiss bubble</string>
+    <!-- Button text to stop a conversation from bubbling [CHAR LIMIT=60]-->
+    <string name="bubbles_dont_bubble_conversation">Don\u2019t bubble conversation</string>
+    <!-- Title text for the bubbles feature education cling shown when a bubble is on screen for the first time. [CHAR LIMIT=60]-->
+    <string name="bubbles_user_education_title">Chat using bubbles</string>
+    <!-- Descriptive text for the bubble feature education cling shown when a bubble is on screen for the first time. [CHAR LIMIT=NONE] -->
+    <string name="bubbles_user_education_description">New conversations appear as floating icons, or bubbles. Tap to open bubble. Drag to move it.</string>
+    <!-- Title text for the bubble "manage" button tool tip highlighting where users can go to control bubble settings. [CHAR LIMIT=60]-->
+    <string name="bubbles_user_education_manage_title">Control bubbles anytime</string>
+    <!-- Descriptive text for the bubble "manage" button tool tip highlighting where users can go to control bubble settings. [CHAR LIMIT=80]-->
+    <string name="bubbles_user_education_manage">Tap Manage to turn off bubbles from this app</string>
+    <!-- Button text for dismissing the bubble "manage" button tool tip  [CHAR LIMIT=20]-->
+    <string name="bubbles_user_education_got_it">Got it</string>
+    <!-- Label for the button that takes the user to the notification settings for the given app. -->
+    <string name="bubbles_app_settings"><xliff:g id="notification_title" example="Android Messages">%1$s</xliff:g> settings</string>
 
     <!-- Notification content text when the system navigation mode changes as a result of changing the default launcher [CHAR LIMIT=NONE] -->
     <string name="notification_content_system_nav_changed">System navigation updated. To make changes, go to Settings.</string>
@@ -2507,4 +2666,162 @@
     <!-- Notification content text when switching to a default launcher that supports gesture navigation [CHAR LIMIT=NONE] -->
     <string name="notification_content_gesture_nav_available">Go to Settings to update system navigation</string>
 
+    <!-- Title of the overlay warning the user to interact with the device or it will go to sleep. [CHAR LIMIT=25] -->
+    <string name="inattentive_sleep_warning_title">Standby</string>
+
+    <!-- Priority conversation onboarding screen -->
+    <!--  title of priority onboarding [CHAR LIMIT=75]  -->
+    <string name="priority_onboarding_title">Conversation set to priority</string>
+    <!--  Text explaining that the following actions are the behaviors of priority conversations.
+    E.g. priority conversations will show at the top of the conversation section [CHAR LIMIT=75]  -->
+    <string name="priority_onboarding_behavior">Priority conversations will:</string>
+    <!--  Text explaining that priority conversations show at the top of the conversation section [CHAR LIMIT=75]  -->
+    <string name="priority_onboarding_show_at_top_text">Show at top of conversation section</string>
+    <!--  Text explaining that priority conversations show an avatar on the lock screen [CHAR LIMIT=75]  -->
+    <string name="priority_onboarding_show_avatar_text">Show profile picture on lock screen</string>
+    <!--  Text explaining that priority conversations will appear as a bubble [CHAR LIMIT=75]  -->
+    <string name="priority_onboarding_appear_as_bubble_text">Appear as a floating bubble on top of apps</string>
+    <!--  Text explaining that priority conversations can interrupt DnD settings [CHAR LIMIT=75]  -->
+    <string name="priority_onboarding_ignores_dnd_text">Interrupt Do Not Disturb</string>
+    <!--  Title for the affirmative button [CHAR LIMIT=50]  -->
+    <string name="priority_onboarding_done_button_title">Got it</string>
+    <!--  Title for the settings button button [CHAR LIMIT=50]  -->
+    <string name="priority_onboarding_settings_button_title">Settings</string>
+
+    <!-- Window Magnification strings -->
+    <!-- Title for Magnification Overlay Window [CHAR LIMIT=NONE] -->
+    <string name="magnification_overlay_title">Magnification Overlay Window</string>
+    <!-- Title for Magnification Window [CHAR LIMIT=NONE] -->
+    <string name="magnification_window_title">Magnification Window</string>
+    <!-- Title for Magnification Controls Window [CHAR LIMIT=NONE] -->
+    <string name="magnification_controls_title">Magnification Window Controls</string>
+
+    <!-- Device Controls strings -->
+    <!-- Device Controls empty state, title [CHAR LIMIT=30] -->
+    <string name="quick_controls_title">Device controls</string>
+    <!-- Device Controls empty state, subtitle [CHAR LIMIT=100] -->
+    <string name="quick_controls_subtitle">Add controls for your connected devices</string>
+
+    <!-- Device Controls setup, title [CHAR LIMIT=50] -->
+    <string name="quick_controls_setup_title">Set up device controls</string>
+    <!-- Device Controls setup, subtitle [CHAR LIMIT=100] -->
+    <string name="quick_controls_setup_subtitle">Hold the Power button to access your controls</string>
+
+    <!-- Controls management providers screen title [CHAR LIMIT=60]-->
+    <string name="controls_providers_title">Choose app to add controls</string>
+    <!-- Number of favorites for controls management screen [CHAR LIMIT=NONE]-->
+    <plurals name="controls_number_of_favorites">
+        <item quantity="one"><xliff:g id="number" example="1">%s</xliff:g> control added.</item>
+        <item quantity="other"><xliff:g id="number" example="3">%s</xliff:g> controls added.</item>
+    </plurals>
+
+    <!-- Removed control in management screen [CHAR LIMIT=20] -->
+    <string name="controls_removed">Removed</string>
+
+    <!-- a11y state description for a control that is currently favorited [CHAR LIMIT=NONE] -->
+    <string name="accessibility_control_favorite">Favorited</string>
+    <!-- a11y state description for a control that is currently favorited with its position [CHAR LIMIT=NONE] -->
+    <string name="accessibility_control_favorite_position">Favorited, position <xliff:g id="number" example="1">%d</xliff:g></string>
+    <!-- a11y state description for a control that is currently not favorited [CHAR LIMIT=NONE] -->
+    <string name="accessibility_control_not_favorite">Unfavorited</string>
+    <!-- a11y action to favorite a control. It will read as "Double-tap to favorite" in screen readers [CHAR LIMIT=NONE] -->
+    <string name="accessibility_control_change_favorite">favorite</string>
+    <!-- a11y action to unfavorite a control. It will read as "Double-tap to unfavorite" in screen readers [CHAR LIMIT=NONE] -->
+    <string name="accessibility_control_change_unfavorite">unfavorite</string>
+    <!-- a11y action to move a control to the position specified by the parameter [CHAR LIMIT=NONE] -->
+    <string name="accessibility_control_move">Move to position <xliff:g id="number" example="1">%d</xliff:g></string>
+
+    <!-- Controls management controls screen default title [CHAR LIMIT=30] -->
+    <string name="controls_favorite_default_title">Controls</string>
+    <!-- Controls management controls screen subtitle [CHAR LIMIT=NONE] -->
+    <string name="controls_favorite_subtitle">Choose controls to access from the power menu</string>
+    <!-- Controls management editing screen, user direction for rearranging controls [CHAR LIMIT=NONE] -->
+    <string name="controls_favorite_rearrange">Hold &amp; drag to rearrange controls</string>
+
+    <!-- Controls management editing screen, text to indicate that all the favorites have been removed [CHAR LIMIT=NONE] -->
+    <string name="controls_favorite_removed">All controls removed</string>
+
+    <!-- Controls management favorites screen, See other apps with changes made [CHAR LIMIT=NONE] -->
+    <string name="controls_favorite_toast_no_changes">Changes not saved</string>
+
+    <!-- Controls management favorites screen. See other apps button [CHAR LIMIT=30] -->
+    <string name="controls_favorite_see_other_apps">See other apps</string>
+
+    <!-- Controls management controls screen error on load message [CHAR LIMIT=NONE] -->
+    <string name="controls_favorite_load_error">Controls could not be loaded. Check the <xliff:g id="app" example="System UI">%s</xliff:g> app to make sure that the app settings haven\u2019t changed.</string>
+    <!-- Controls management controls screen no controls found on load message [CHAR LIMIT=NONE] -->
+    <string name="controls_favorite_load_none">Compatible controls unavailable</string>
+    <!-- Controls management controls screen header for Other zone [CHAR LIMIT=60] -->
+    <string name="controls_favorite_other_zone_header">Other</string>
+
+    <!-- Controls dialog title [CHAR LIMIT=40] -->
+    <string name="controls_dialog_title">Add to device controls</string>
+    <!-- Controls dialog add to favorites [CHAR LIMIT=40] -->
+    <string name="controls_dialog_ok">Add</string>
+    <!-- Controls dialog message. Indicates app that suggested this control [CHAR LIMIT=NONE] -->
+    <string name="controls_dialog_message">Suggested by <xliff:g id="app" example="System UI">%s</xliff:g></string>
+    <!-- Controls dialog confirmation [CHAR LIMIT=30] -->
+    <string name="controls_dialog_confirmation">Controls updated</string>
+
+    <!-- Controls PIN entry dialog, switch to alphanumeric keyboard [CHAR LIMIT=100] -->
+    <string name="controls_pin_use_alphanumeric">PIN contains letters or symbols</string>
+    <!-- Controls PIN entry dialog, title [CHAR LIMIT=30] -->
+    <string name="controls_pin_verify">Verify <xliff:g id="device" example="Backdoor lock">%s</xliff:g></string>
+    <!-- Controls PIN entry dialog, title when 1st attempt failed [CHAR LIMIT=30] -->
+    <string name="controls_pin_wrong">Wrong PIN</string>
+    <!-- Controls PIN entry dialog, waiting to verify [CHAR LIMIT=30] -->
+    <string name="controls_pin_verifying">Verifying\u2026</string>
+    <!-- Controls PIN entry dialog, text hint [CHAR LIMIT=30] -->
+    <string name="controls_pin_instructions">Enter PIN</string>
+    <!-- Controls PIN entry dialog, text hint, retry [CHAR LIMIT=30] -->
+    <string name="controls_pin_instructions_retry">Try another PIN</string>
+    <!-- Controls confirmation dialog, waiting to confirm [CHAR LIMIT=30] -->
+    <string name="controls_confirmation_confirming">Confirming\u2026</string>
+    <!-- Controls confirmation dialog, user prompt [CHAR LIMIT=NONE] -->
+    <string name="controls_confirmation_message">Confirm change for <xliff:g id="device" example="Backdoor lock">%s</xliff:g></string>
+
+    <!-- Tooltip to show in management screen when there are multiple structures [CHAR_LIMIT=50] -->
+    <string name="controls_structure_tooltip">Swipe to see more</string>
+
+    <!-- Message to tell the user to wait while systemui attempts to load a set of
+         recommended controls [CHAR_LIMIT=60] -->
+    <string name="controls_seeding_in_progress">Loading recommendations</string>
+
+    <!-- Title for media controls [CHAR_LIMIT=50] -->
+    <string name="controls_media_title">Media</string>
+    <!-- Explanation for closing controls associated with a specific media session [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_close_session">Hide the current session.</string>
+    <!-- Label for a button that will hide media controls [CHAR_LIMIT=30] -->
+    <string name="controls_media_dismiss_button">Hide</string>
+    <!-- Label for button to resume media playback [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_resume">Resume</string>
+    <!-- Label for button to go to media control settings screen [CHAR_LIMIT=30] -->
+    <string name="controls_media_settings_button">Settings</string>
+
+    <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
+    <string name="controls_error_timeout">Inactive, check app</string>
+    <!-- Error message indicating that an unspecified error occurred while getting the status, and
+         a retry will be attempted [CHAR LIMIT=30] -->
+    <string name="controls_error_retryable">Error, retrying\u2026</string>
+    <!-- Error message indicating that the control is no longer available in the application [CHAR LIMIT=30] -->
+    <string name="controls_error_removed">Not found</string>
+    <!-- Title for dialog indicating that the control is no longer available in the application [CHAR LIMIT=30] -->
+    <string name="controls_error_removed_title">Control is unavailable</string>
+    <!-- Message body for dialog indicating that the control is no longer available in the application [CHAR LIMIT=NONE] -->
+    <string name="controls_error_removed_message">Couldn\u2019t access <xliff:g id="device" example="Backdoor lock">%1$s</xliff:g>. Check the <xliff:g id="application" example="Google Home">%2$s</xliff:g> app to make sure the control is still available and that the app settings haven\u2019t changed.</string>
+    <!-- Text for button to open the corresponding application [CHAR_LIMIT=20] -->
+    <string name="controls_open_app">Open app</string>
+    <!-- Error message indicating that an unspecified error occurred while getting the status [CHAR LIMIT=30] -->
+    <string name="controls_error_generic">Can\u2019t load status</string>
+    <!-- Error message indicating that a control action failed [CHAR_LIMIT=30] -->
+    <string name="controls_error_failed">Error, try again</string>
+    <!-- Stateless control message informing the user that a routine has started [CHAR_LIMIT=30] -->
+    <string name="controls_in_progress">In progress</string>
+    <!-- Tooltip informing user where the recently added controls are [CHAR_LIMIT=100] -->
+    <string name="controls_added_tooltip">Hold Power button to see new controls</string>
+
+    <!-- Controls menu, add [CHAR_LIMIT=30] -->
+    <string name="controls_menu_add">Add controls</string>
+    <!-- Controls menu, edit [CHAR_LIMIT=30] -->
+    <string name="controls_menu_edit">Edit controls</string>
 </resources>

@@ -17,11 +17,19 @@
 android_app {
     name: "startop_test_app",
     srcs: [
-        "src/EmptyActivity.java",
-        "src/LayoutInflationActivity.java",
+        "src/ApplicationBenchmarks.java",
         "src/ComplexLayoutInflationActivity.java",
+        "src/CPUIntensiveBenchmarkActivity.java",
+        "src/CPUIntensiveBenchmarks.java",
+        "src/EmptyActivity.java",
         "src/FrameLayoutInflationActivity.java",
+        "src/InitCheckOverheadBenchmarkActivity.java",
+        "src/InitCheckOverheadBenchmarks.java",
+        "src/LayoutInflationActivity.java",
+        "src/NonInteractiveMicrobenchmarkActivity.java",
+        "src/InteractiveMicrobenchmarkActivity.java",
+        "src/SystemServerBenchmarks.java",
         "src/TextViewInflationActivity.java",
     ],
-    platform_apis: true,
+    sdk_version: "26", // Android O (8.0) and higher
 }

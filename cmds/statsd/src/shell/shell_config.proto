@@ -28,6 +28,9 @@ message PulledAtomSubscription {
 
     /* gap between two pulls in milliseconds */
     optional int32 freq_millis = 2;
+
+    /* Packages that the pull is requested from */
+    repeated string packages = 3;
 }
 
 message ShellSubscription {

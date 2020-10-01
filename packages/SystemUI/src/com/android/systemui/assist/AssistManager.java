@@ -2,6 +2,7 @@ package com.android.systemui.assist;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED;
 
 import android.annotation.NonNull;
@@ -44,8 +45,8 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.R;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.assist.ui.DefaultUiController;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -53,6 +54,8 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 /**
  * Class to manage everything related to assist in SystemUI.
@@ -84,11 +87,6 @@ public class AssistManager {
         void onGestureCompletion(float velocity);
 
         /**
-         * Called with the Bundle from VoiceInteractionSessionListener.onSetUiHints.
-         */
-        void processBundle(Bundle hints);
-
-        /**
          * Hides any SysUI for the assistant, but _does not_ close the assistant itself.
          */
         void hide();
@@ -111,7 +109,7 @@ public class AssistManager {
     protected static final String CONSTRAINED_KEY = "should_constrain";
 
     public static final int INVOCATION_TYPE_GESTURE = 1;
-    public static final int INVOCATION_TYPE_ACTIVE_EDGE = 2;
+    public static final int INVOCATION_TYPE_OTHER = 2;
     public static final int INVOCATION_TYPE_VOICE = 3;
     public static final int INVOCATION_TYPE_QUICK_SEARCH_BAR = 4;
     public static final int INVOCATION_HOME_BUTTON_LONG_PRESS = 5;
@@ -131,10 +129,12 @@ public class AssistManager {
     private final PhoneStateMonitor mPhoneStateMonitor;
     private final AssistHandleBehaviorController mHandleController;
     private final UiController mUiController;
-    protected final OverviewProxyService mOverviewProxyService;
+    protected final Lazy<SysUiState> mSysUiState;
+    protected final AssistLogger mAssistLogger;
 
     private AssistOrbContainer mView;
     private final DeviceProvisionedController mDeviceProvisionedController;
+    private final CommandQueue mCommandQueue;
     protected final AssistUtils mAssistUtils;
     private final boolean mShouldEnableOrb;
 
@@ -193,15 +193,22 @@ public class AssistManager {
             Context context,
             AssistUtils assistUtils,
             AssistHandleBehaviorController handleController,
+            CommandQueue commandQueue,
+            PhoneStateMonitor phoneStateMonitor,
+            OverviewProxyService overviewProxyService,
             ConfigurationController configurationController,
-            OverviewProxyService overviewProxyService) {
+            Lazy<SysUiState> sysUiState,
+            DefaultUiController defaultUiController,
+            AssistLogger assistLogger) {
         mContext = context;
         mDeviceProvisionedController = controller;
+        mCommandQueue = commandQueue;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mAssistUtils = assistUtils;
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
-        mPhoneStateMonitor = new PhoneStateMonitor(context);
+        mPhoneStateMonitor = phoneStateMonitor;
         mHandleController = handleController;
+        mAssistLogger = assistLogger;
 
         configurationController.addCallback(mConfigurationListener);
 
@@ -212,10 +219,11 @@ public class AssistManager {
         mConfigurationListener.onConfigChanged(context.getResources().getConfiguration());
         mShouldEnableOrb = !ActivityManager.isLowRamDeviceStatic();
 
-        mUiController = new DefaultUiController(mContext);
+        mUiController = defaultUiController;
 
-        mOverviewProxyService = overviewProxyService;
-        mOverviewProxyService.addCallback(new OverviewProxyService.OverviewProxyListener() {
+        mSysUiState = sysUiState;
+
+        overviewProxyService.addCallback(new OverviewProxyService.OverviewProxyListener() {
             @Override
             public void onAssistantProgress(float progress) {
                 // Progress goes from 0 to 1 to indicate how close the assist gesture is to
@@ -238,6 +246,8 @@ public class AssistManager {
                         if (VERBOSE) {
                             Log.v(TAG, "Voice open");
                         }
+                        mAssistLogger.reportAssistantSessionEvent(
+                                AssistantSessionEvent.ASSISTANT_SESSION_UPDATE);
                     }
 
                     @Override
@@ -245,6 +255,8 @@ public class AssistManager {
                         if (VERBOSE) {
                             Log.v(TAG, "Voice closed");
                         }
+                        mAssistLogger.reportAssistantSessionEvent(
+                                AssistantSessionEvent.ASSISTANT_SESSION_CLOSE);
                     }
 
                     @Override
@@ -257,10 +269,11 @@ public class AssistManager {
                         if (SHOW_ASSIST_HANDLES_ACTION.equals(action)) {
                             requestAssistHandles();
                         } else if (SET_ASSIST_GESTURE_CONSTRAINED_ACTION.equals(action)) {
-                            mOverviewProxyService.setSystemUiStateFlag(
-                                    SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED,
-                                    hints.getBoolean(CONSTRAINED_KEY, false),
-                                    DEFAULT_DISPLAY);
+                            mSysUiState.get()
+                                    .setFlag(
+                                            SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED,
+                                            hints.getBoolean(CONSTRAINED_KEY, false))
+                                    .commitUpdate(DEFAULT_DISPLAY);
                         }
                     }
                 });
@@ -287,14 +300,19 @@ public class AssistManager {
         if (args == null) {
             args = new Bundle();
         }
-        int invocationType = args.getInt(INVOCATION_TYPE_KEY, 0);
-        if (invocationType == INVOCATION_TYPE_GESTURE) {
+        int legacyInvocationType = args.getInt(INVOCATION_TYPE_KEY, 0);
+        if (legacyInvocationType == INVOCATION_TYPE_GESTURE) {
             mHandleController.onAssistantGesturePerformed();
         }
-        int phoneState = mPhoneStateMonitor.getPhoneState();
-        args.putInt(INVOCATION_PHONE_STATE_KEY, phoneState);
+        int legacyDeviceState = mPhoneStateMonitor.getPhoneState();
+        args.putInt(INVOCATION_PHONE_STATE_KEY, legacyDeviceState);
         args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.elapsedRealtime());
-        logStartAssist(invocationType, phoneState);
+        mAssistLogger.reportAssistantInvocationEventFromLegacy(
+                legacyInvocationType,
+                /* isInvocationComplete = */ true,
+                assistComponent,
+                legacyDeviceState);
+        logStartAssistLegacy(legacyInvocationType, legacyDeviceState);
         startAssistInternal(args, assistComponent, isService);
     }
 
@@ -359,7 +377,7 @@ public class AssistManager {
         }
 
         // Close Recent Apps if needed
-        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).animateCollapsePanels(
+        mCommandQueue.animateCollapsePanels(
                 CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL | CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
                 false /* force */);
 
@@ -408,7 +426,8 @@ public class AssistManager {
     }
 
     public boolean canVoiceAssistBeLaunchedFromKeyguard() {
-        return mAssistUtils.activeServiceSupportsLaunchFromKeyguard();
+        // TODO(b/140051519)
+        return whitelistIpcs(() -> mAssistUtils.activeServiceSupportsLaunchFromKeyguard());
     }
 
     public ComponentName getVoiceInteractorComponentName() {
@@ -476,7 +495,12 @@ public class AssistManager {
     }
 
     public void onLockscreenShown() {
-        mAssistUtils.onLockscreenShown();
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                mAssistUtils.onLockscreenShown();
+            }
+        });
     }
 
     public long getAssistHandleShowAndGoRemainingDurationMs() {
@@ -488,7 +512,7 @@ public class AssistManager {
         return toLoggingSubType(invocationType, mPhoneStateMonitor.getPhoneState());
     }
 
-    protected void logStartAssist(int invocationType, int phoneState) {
+    protected void logStartAssistLegacy(int invocationType, int phoneState) {
         MetricsLogger.action(
                 new LogMaker(MetricsEvent.ASSISTANT)
                         .setType(MetricsEvent.TYPE_OPEN)

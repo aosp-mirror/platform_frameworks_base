@@ -29,6 +29,7 @@
 
 #include <gtest/gtest.h>
 #include <memory>
+#include <unordered_map>
 
 namespace android {
 namespace uirenderer {

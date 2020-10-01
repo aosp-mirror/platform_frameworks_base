@@ -18,7 +18,6 @@
 #define ANDROID_HWUI_PROPERTIES_H
 
 #include <cutils/compiler.h>
-#include <cutils/properties.h>
 
 /**
  * This file contains the list of system properties used to configure libhwui.

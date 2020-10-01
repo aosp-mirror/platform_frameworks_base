@@ -20,6 +20,8 @@ import android.util.ArrayMap;
 
 import com.android.internal.util.ArrayUtils;
 
+import java.util.Map;
+
 public class PackageKeySetData {
 
     static final long KEYSET_UNASSIGNED = -1;
@@ -90,16 +92,13 @@ public class PackageKeySetData {
     /*
      * Replace defined keysets with new ones.
      */
-    protected void setAliases(ArrayMap<String, Long> newAliases) {
+    protected void setAliases(Map<String, Long> newAliases) {
 
         /* remove old aliases */
         removeAllDefinedKeySets();
 
         /* add new ones */
-        final int newAliasSize = newAliases.size();
-        for (int i = 0; i < newAliasSize; i++) {
-            mKeySetAliases.put(newAliases.keyAt(i), newAliases.valueAt(i));;
-        }
+        mKeySetAliases.putAll(newAliases);
     }
 
     protected void addDefinedKeySet(long ks, String alias) {

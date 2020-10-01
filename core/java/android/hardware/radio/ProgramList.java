@@ -352,6 +352,8 @@ public final class ProgramList implements AutoCloseable {
         /**
          * Checks, if non-tunable entries that define tree structure on the
          * program list (i.e. DAB ensembles) should be included.
+         *
+         * @see {@link ProgramSelector.Identifier#isCategory()}
          */
         public boolean areCategoriesIncluded() {
             return mIncludeCategories;
@@ -366,6 +368,34 @@ public final class ProgramList implements AutoCloseable {
          */
         public boolean areModificationsExcluded() {
             return mExcludeModifications;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mIdentifierTypes, mIdentifiers, mIncludeCategories,
+                    mExcludeModifications);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof Filter)) return false;
+            Filter other = (Filter) obj;
+
+            if (mIncludeCategories != other.mIncludeCategories) return false;
+            if (mExcludeModifications != other.mExcludeModifications) return false;
+            if (!Objects.equals(mIdentifierTypes, other.mIdentifierTypes)) return false;
+            if (!Objects.equals(mIdentifiers, other.mIdentifiers)) return false;
+            return true;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "Filter [mIdentifierTypes=" + mIdentifierTypes
+                    + ", mIdentifiers=" + mIdentifiers
+                    + ", mIncludeCategories=" + mIncludeCategories
+                    + ", mExcludeModifications=" + mExcludeModifications + "]";
         }
     }
 
@@ -433,6 +463,25 @@ public final class ProgramList implements AutoCloseable {
 
         public @NonNull Set<ProgramSelector.Identifier> getRemoved() {
             return mRemoved;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof Chunk)) return false;
+            Chunk other = (Chunk) obj;
+
+            if (mPurge != other.mPurge) return false;
+            if (mComplete != other.mComplete) return false;
+            if (!Objects.equals(mModified, other.mModified)) return false;
+            if (!Objects.equals(mRemoved, other.mRemoved)) return false;
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "Chunk [mPurge=" + mPurge + ", mComplete=" + mComplete
+                    + ", mModified=" + mModified + ", mRemoved=" + mRemoved + "]";
         }
     }
 }

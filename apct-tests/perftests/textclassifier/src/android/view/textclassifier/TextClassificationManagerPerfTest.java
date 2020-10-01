@@ -18,57 +18,82 @@ package android.view.textclassifier;
 import android.content.Context;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.perftests.utils.SettingsHelper;
-import android.provider.Settings;
+import android.provider.DeviceConfig;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 
 import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 
 @LargeTest
 public class TextClassificationManagerPerfTest {
+    private static final String WRITE_DEVICE_CONFIG_PERMISSION =
+            "android.permission.WRITE_DEVICE_CONFIG";
 
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
+    private String mOriginalSystemTextclassifierStatus;
+
+    @BeforeClass
+    public static void setUpClass() {
+        InstrumentationRegistry.getInstrumentation().getUiAutomation()
+                .adoptShellPermissionIdentity(
+                        WRITE_DEVICE_CONFIG_PERMISSION);
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        InstrumentationRegistry
+                .getInstrumentation()
+                .getUiAutomation()
+                .dropShellPermissionIdentity();
+    }
+
+    @Before
+    public void setUp() {
+        // Saves config original value.
+        mOriginalSystemTextclassifierStatus = DeviceConfig.getProperty(
+                DeviceConfig.NAMESPACE_TEXTCLASSIFIER, "system_textclassifier_enabled");
+    }
+
     @After
     public void tearDown() {
-        SettingsHelper.delete(
-                SettingsHelper.NAMESPACE_GLOBAL, Settings.Global.TEXT_CLASSIFIER_CONSTANTS);
+        // Restores config original value.
+        enableSystemTextclassifier(mOriginalSystemTextclassifierStatus);
     }
 
     @Test
     public void testGetTextClassifier_systemTextClassifierDisabled() {
         Context context = InstrumentationRegistry.getTargetContext();
-        SettingsHelper.set(
-                SettingsHelper.NAMESPACE_GLOBAL,
-                Settings.Global.TEXT_CLASSIFIER_CONSTANTS,
-                "system_textclassifier_enabled=false");
+        enableSystemTextclassifier(String.valueOf(false));
         TextClassificationManager textClassificationManager =
                 context.getSystemService(TextClassificationManager.class);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             textClassificationManager.getTextClassifier();
-            textClassificationManager.invalidateForTesting();
         }
     }
 
     @Test
     public void testGetTextClassifier_systemTextClassifierEnabled() {
         Context context = InstrumentationRegistry.getTargetContext();
-        SettingsHelper.set(
-                SettingsHelper.NAMESPACE_GLOBAL,
-                Settings.Global.TEXT_CLASSIFIER_CONSTANTS,
-                "system_textclassifier_enabled=true");
+        enableSystemTextclassifier(String.valueOf(true));
         TextClassificationManager textClassificationManager =
                 context.getSystemService(TextClassificationManager.class);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             textClassificationManager.getTextClassifier();
-            textClassificationManager.invalidateForTesting();
         }
+    }
+
+    private void enableSystemTextclassifier(String enabled) {
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                "system_textclassifier_enabled", enabled, /* makeDefault */ false);
     }
 }

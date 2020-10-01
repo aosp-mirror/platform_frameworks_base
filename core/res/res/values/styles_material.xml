@@ -491,6 +491,10 @@ please see styles_device_defaults.xml.
         <item name="textColor">#66000000</item>
     </style>
 
+    <style name="TextAppearance.Material.Notification.Conversation.AppName" parent="TextAppearance.Material.Notification.Title">
+        <item name="android:textSize">16sp</item>
+    </style>
+
     <style name="TextAppearance.Material.ListItem" parent="TextAppearance.Material.Subhead" />
     <style name="TextAppearance.Material.ListItemSecondary" parent="TextAppearance.Material.Body1" />
 
@@ -504,7 +508,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Notification.MessagingText" parent="Widget.Material.Notification.Text">
         <item name="layout_width">wrap_content</item>
         <item name="layout_height">wrap_content</item>
-        <item name="ellipsize">end</item>z
+        <item name="ellipsize">end</item>
     </style>
 
     <style name="Widget.Material.Notification.MessagingName" parent="Widget.Material.Light.TextView">

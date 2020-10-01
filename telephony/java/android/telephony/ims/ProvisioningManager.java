@@ -25,13 +25,12 @@ import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.WorkerThread;
-import android.content.Context;
 import android.os.Binder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.ims.aidl.IImsConfigCallback;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
@@ -852,6 +851,19 @@ public class ProvisioningManager {
     public static final int KEY_RTT_ENABLED = 66;
 
     /**
+     * An obfuscated string defined by the carrier to indicate VoWiFi entitlement status.
+     *
+     * <p>Implementation note: how to generate the value and how it affects VoWiFi service
+     * should follow carrier requirements. For example, set an empty string could result in
+     * VoWiFi being disabled by IMS service, and set to a specific string could enable.
+     *
+     * <p>Value is in String format.
+     * @see #setProvisioningStringValue(int, String)
+     * @see #getProvisioningStringValue(int)
+     */
+    public static final int KEY_VOICE_OVER_WIFI_ENTITLEMENT_ID = 67;
+
+    /**
      * Callback for IMS provisioning changes.
      */
     public static class Callback {
@@ -1199,7 +1211,10 @@ public class ProvisioningManager {
 
     private static ITelephony getITelephony() {
         ITelephony binder = ITelephony.Stub.asInterface(
-                ServiceManager.getService(Context.TELEPHONY_SERVICE));
+                TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getTelephonyServiceRegisterer()
+                        .get());
         if (binder == null) {
             throw new RuntimeException("Could not find Telephony Service.");
         }

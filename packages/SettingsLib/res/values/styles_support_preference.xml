@@ -26,7 +26,7 @@
         <item name="allowDividerAbove">true</item>
     </style>
 
-    <style name="PreferenceThemeOverlay.SettingsBase" parent="@style/PreferenceThemeOverlay.v14.Material">
+    <style name="PreferenceThemeOverlay.SettingsBase" parent="@style/PreferenceThemeOverlay">
         <item name="footerPreferenceStyle">@style/Preference.FooterPreference.SettingsBase</item>
     </style>
 

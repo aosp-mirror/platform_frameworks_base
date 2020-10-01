@@ -21,7 +21,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.telephony.cdma.CdmaCellLocation;
 import android.telephony.gsm.GsmCellLocation;
 
@@ -30,14 +29,19 @@ import com.android.internal.telephony.PhoneConstants;
 
 /**
  * Abstract class that represents the location of the device.  {@more}
+ *
+ * @deprecated use {@link android.telephony.CellIdentity CellIdentity}.
  */
+@Deprecated
 public abstract class CellLocation {
 
     /**
-     * This method will not do anything.
+     * Request an updated CellLocation for callers targeting SDK 30 or older.
      *
-     * Whenever location changes, a callback will automatically be be sent to
-     * all registrants of {@link PhoneStateListener#LISTEN_CELL_LOCATION}.
+     * Whenever Android is aware of location changes, a callback will automatically be sent to
+     * all registrants of {@link PhoneStateListener#LISTEN_CELL_LOCATION}. This API requests an
+     * additional location update for cases where power saving might cause location updates to be
+     * missed.
      *
      * <p>This method is a no-op for callers targeting SDK level 31 or greater.
      * <p>This method is a no-op for callers that target SDK level 29 or 30 and lack
@@ -45,14 +49,7 @@ public abstract class CellLocation {
      * <p>This method is a no-op for callers that target SDK level 28 or below and lack
      * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
      *
-     * Callers wishing to request a single location update should use
-     * {@link TelephonyManager#requestCellInfoUpdate}.
-     *
-     * @deprecated this method has undesirable side-effects, and it calls into the OS without
-     * access to a {@link android.content.Context Context}, meaning that certain safety checks and
-     * attribution are error-prone. Given that this method has numerous downsides, and given that
-     * there are long-available superior alternatives, callers are strongly discouraged from using
-     * this method.
+     * @deprecated use {@link TelephonyManager#requestCellInfoUpdate}.
      */
     @Deprecated
     public static void requestLocationUpdate() {
@@ -61,7 +58,11 @@ public abstract class CellLocation {
         if (appContext == null) return; // should never happen
 
         try {
-            ITelephony phone = ITelephony.Stub.asInterface(ServiceManager.getService("phone"));
+            ITelephony phone = ITelephony.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getTelephonyServiceRegisterer()
+                            .get());
             if (phone != null) {
                 phone.updateServiceLocationWithPackageName(appContext.getOpPackageName());
             }
@@ -73,8 +74,7 @@ public abstract class CellLocation {
     /**
      * Create a new CellLocation from a intent notifier Bundle
      *
-     * This method is used by PhoneStateIntentReceiver and maybe by
-     * external applications.
+     * This method maybe used by external applications.
      *
      * @param bundle Bundle from intent notifier
      * @return newly created CellLocation

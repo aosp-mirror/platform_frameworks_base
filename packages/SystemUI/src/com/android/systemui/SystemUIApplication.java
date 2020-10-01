@@ -24,43 +24,40 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.TimingsTraceLog;
 
-import com.android.systemui.plugins.OverlayPlugin;
-import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.StatusBarWindowController;
+import com.android.systemui.dagger.ContextComponentHelper;
+import com.android.systemui.dagger.SystemUIRootComponent;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.NotificationChannels;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Application class for SystemUI.
  */
-public class SystemUIApplication extends Application implements SysUiServiceProvider {
+public class SystemUIApplication extends Application implements
+        SystemUIAppComponentFactory.ContextInitializer {
 
     public static final String TAG = "SystemUIService";
     private static final boolean DEBUG = false;
+
+    private ContextComponentHelper mComponentHelper;
+    private BootCompleteCacheImpl mBootCompleteCache;
 
     /**
      * Hold a reference on the stuff we start.
      */
     private SystemUI[] mServices;
     private boolean mServicesStarted;
-    private boolean mBootCompleted;
-    private final Map<Class<?>, Object> mComponents = new HashMap<>();
-    private ContextAvailableCallback mContextAvailableCallback;
+    private SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;
+    private SystemUIRootComponent mRootComponent;
 
     public SystemUIApplication() {
         super();
@@ -77,6 +74,9 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
                 Trace.TRACE_TAG_APP);
         log.traceBegin("DependencyInjection");
         mContextAvailableCallback.onContextAvailable(this);
+        mRootComponent = SystemUIFactory.getInstance().getRootComponent();
+        mComponentHelper = mRootComponent.getContextComponentHelper();
+        mBootCompleteCache = mRootComponent.provideBootCacheImpl();
         log.traceEnd();
 
         // Set the application theme that is inherited by all services. Note that setting the
@@ -90,19 +90,17 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
             registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    if (mBootCompleted) return;
+                    if (mBootCompleteCache.isBootComplete()) return;
 
                     if (DEBUG) Log.v(TAG, "BOOT_COMPLETED received");
                     unregisterReceiver(this);
-                    mBootCompleted = true;
+                    mBootCompleteCache.setBootComplete();
                     if (mServicesStarted) {
                         final int N = mServices.length;
                         for (int i = 0; i < N; i++) {
                             mServices[i].onBootCompleted();
                         }
                     }
-
-
                 }
             }, bootCompletedFilter);
 
@@ -111,7 +109,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
-                        if (!mBootCompleted) return;
+                        if (!mBootCompleteCache.isBootComplete()) return;
                         // Update names of SystemUi notification channels
                         NotificationChannels.createAll(context);
                     }
@@ -141,7 +139,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
      */
 
     public void startServicesIfNeeded() {
-        String[] names = getResources().getStringArray(R.array.config_systemUIServiceComponents);
+        String[] names = SystemUIFactory.getInstance().getSystemUIServiceComponents(getResources());
         startServicesIfNeeded(/* metricsPrefix= */ "StartServices", names);
     }
 
@@ -152,8 +150,8 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
      * <p>This method must only be called from the main thread.</p>
      */
     void startSecondaryUserServicesIfNeeded() {
-        String[] names =
-                  getResources().getStringArray(R.array.config_systemUIServiceComponentsPerUser);
+        String[] names = SystemUIFactory.getInstance().getSystemUIServiceComponentsPerUser(
+                getResources());
         startServicesIfNeeded(/* metricsPrefix= */ "StartSecondaryServices", names);
     }
 
@@ -163,48 +161,45 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
         }
         mServices = new SystemUI[services.length];
 
-        if (!mBootCompleted) {
+        if (!mBootCompleteCache.isBootComplete()) {
             // check to see if maybe it was already completed long before we began
             // see ActivityManagerService.finishBooting()
             if ("1".equals(SystemProperties.get("sys.boot_completed"))) {
-                mBootCompleted = true;
+                mBootCompleteCache.setBootComplete();
                 if (DEBUG) {
                     Log.v(TAG, "BOOT_COMPLETED was already sent");
                 }
             }
         }
 
+        final DumpManager dumpManager = mRootComponent.createDumpManager();
+
         Log.v(TAG, "Starting SystemUI services for user " +
                 Process.myUserHandle().getIdentifier() + ".");
-
         TimingsTraceLog log = new TimingsTraceLog("SystemUIBootTiming",
                 Trace.TRACE_TAG_APP);
         log.traceBegin(metricsPrefix);
-
         final int N = services.length;
         for (int i = 0; i < N; i++) {
             String clsName = services[i];
             if (DEBUG) Log.d(TAG, "loading: " + clsName);
             log.traceBegin(metricsPrefix + clsName);
             long ti = System.currentTimeMillis();
-            Class cls;
             try {
-                cls = Class.forName(clsName);
-                Object o = cls.newInstance();
-                if (o instanceof SystemUI.Injector) {
-                    o = ((SystemUI.Injector) o).apply(this);
+                SystemUI obj = mComponentHelper.resolveSystemUI(clsName);
+                if (obj == null) {
+                    Constructor constructor = Class.forName(clsName).getConstructor(Context.class);
+                    obj = (SystemUI) constructor.newInstance(this);
                 }
-                mServices[i] = (SystemUI) o;
-            } catch(ClassNotFoundException ex){
-                throw new RuntimeException(ex);
-            } catch (IllegalAccessException ex) {
-                throw new RuntimeException(ex);
-            } catch (InstantiationException ex) {
+                mServices[i] = obj;
+            } catch (ClassNotFoundException
+                    | NoSuchMethodException
+                    | IllegalAccessException
+                    | InstantiationException
+                    | InvocationTargetException ex) {
                 throw new RuntimeException(ex);
             }
 
-            mServices[i].mContext = this;
-            mServices[i].mComponents = mComponents;
             if (DEBUG) Log.d(TAG, "running: " + mServices[i]);
             mServices[i].start();
             log.traceEnd();
@@ -212,73 +207,16 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
             // Warn if initialization of component takes too long
             ti = System.currentTimeMillis() - ti;
             if (ti > 1000) {
-                Log.w(TAG, "Initialization of " + cls.getName() + " took " + ti + " ms");
+                Log.w(TAG, "Initialization of " + clsName + " took " + ti + " ms");
             }
-            if (mBootCompleted) {
+            if (mBootCompleteCache.isBootComplete()) {
                 mServices[i].onBootCompleted();
             }
+
+            dumpManager.registerDumpable(mServices[i].getClass().getName(), mServices[i]);
         }
-        Dependency.get(InitController.class).executePostInitTasks();
+        mRootComponent.getInitController().executePostInitTasks();
         log.traceEnd();
-        final Handler mainHandler = new Handler(Looper.getMainLooper());
-        Dependency.get(PluginManager.class).addPluginListener(
-                new PluginListener<OverlayPlugin>() {
-                    private ArraySet<OverlayPlugin> mOverlays = new ArraySet<>();
-
-                    @Override
-                    public void onPluginConnected(OverlayPlugin plugin, Context pluginContext) {
-                        mainHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                StatusBar statusBar = getComponent(StatusBar.class);
-                                if (statusBar != null) {
-                                    plugin.setup(statusBar.getStatusBarWindow(),
-                                            statusBar.getNavigationBarView(), new Callback(plugin),
-                                            DozeParameters.getInstance(getBaseContext()));
-                                }
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onPluginDisconnected(OverlayPlugin plugin) {
-                        mainHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mOverlays.remove(plugin);
-                                Dependency.get(StatusBarWindowController.class).setForcePluginOpen(
-                                        mOverlays.size() != 0);
-                            }
-                        });
-                    }
-
-                    class Callback implements OverlayPlugin.Callback {
-                        private final OverlayPlugin mPlugin;
-
-                        Callback(OverlayPlugin plugin) {
-                            mPlugin = plugin;
-                        }
-
-                        @Override
-                        public void onHoldStatusBarOpenChange() {
-                            if (mPlugin.holdStatusBarOpen()) {
-                                mOverlays.add(mPlugin);
-                            } else {
-                                mOverlays.remove(mPlugin);
-                            }
-                            mainHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Dependency.get(StatusBarWindowController.class)
-                                            .setStateListener(b -> mOverlays.forEach(
-                                                    o -> o.setCollapseDesired(b)));
-                                    Dependency.get(StatusBarWindowController.class)
-                                            .setForcePluginOpen(mOverlays.size() != 0);
-                                }
-                            });
-                        }
-                    }
-                }, OverlayPlugin.class, true /* Allow multiple plugins */);
 
         mServicesStarted = true;
     }
@@ -286,11 +224,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         if (mServicesStarted) {
-            SystemUIFactory
-                    .getInstance()
-                    .getRootComponent()
-                    .getConfigurationController()
-                    .onConfigurationChanged(newConfig);
+            mRootComponent.getConfigurationController().onConfigurationChanged(newConfig);
             int len = mServices.length;
             for (int i = 0; i < len; i++) {
                 if (mServices[i] != null) {
@@ -300,20 +234,14 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> T getComponent(Class<T> interfaceType) {
-        return (T) mComponents.get(interfaceType);
-    }
-
     public SystemUI[] getServices() {
         return mServices;
     }
 
-    void setContextAvailableCallback(ContextAvailableCallback callback) {
+    @Override
+    public void setContextAvailableCallback(
+            SystemUIAppComponentFactory.ContextAvailableCallback callback) {
         mContextAvailableCallback = callback;
     }
 
-    interface ContextAvailableCallback {
-        void onContextAvailable(Context context);
-    }
 }

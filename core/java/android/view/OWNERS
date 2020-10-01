@@ -1,0 +1,15 @@
+# Display
+per-file Display.java = michaelwr@google.com, santoscordon@google.com
+per-file DisplayInfo.java = michaelwr@google.com, santoscordon@google.com
+
+# Haptics
+per-file HapticFeedbackConstants.java = michaelwr@google.com, santoscordon@google.com
+
+# Input
+per-file IInputMonitorHost.aidl = michaelwr@google.com, svv@google.com
+per-file Input*.java = michaelwr@google.com, svv@google.com
+per-file Input*.aidl = michaelwr@google.com, svv@google.com
+per-file KeyEvent.java = michaelwr@google.com, svv@google.com
+per-file MotionEvent.java = michaelwr@google.com, svv@google.com
+per-file PointerIcon.java = michaelwr@google.com, svv@google.com
+per-file SimulatedDpad.java = michaelwr@google.com, svv@google.com

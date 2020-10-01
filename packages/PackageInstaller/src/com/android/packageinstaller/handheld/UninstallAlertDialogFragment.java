@@ -16,7 +16,6 @@
 
 package com.android.packageinstaller.handheld;
 
-import static android.os.storage.StorageManager.convert;
 import static android.text.format.Formatter.formatFileSize;
 
 import android.annotation.NonNull;
@@ -34,8 +33,6 @@ import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.storage.StorageManager;
-import android.os.storage.StorageVolume;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,29 +61,18 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
      * @return The number of bytes.
      */
     private long getAppDataSizeForUser(@NonNull String pkg, @NonNull UserHandle user) {
-        StorageManager storageManager = getContext().getSystemService(StorageManager.class);
         StorageStatsManager storageStatsManager =
                 getContext().getSystemService(StorageStatsManager.class);
-
-        List<StorageVolume> volumes = storageManager.getStorageVolumes();
-        long appDataSize = 0;
-
-        int numVolumes = volumes.size();
-        for (int i = 0; i < numVolumes; i++) {
-            StorageStats stats;
-            try {
-                stats = storageStatsManager.queryStatsForPackage(convert(volumes.get(i).getUuid()),
-                        pkg, user);
-            } catch (PackageManager.NameNotFoundException | IOException e) {
-                Log.e(LOG_TAG, "Cannot determine amount of app data for " + pkg + " on "
-                        + volumes.get(i) + " (user " + user + ")", e);
-                continue;
-            }
-
-            appDataSize += stats.getDataBytes();
+        try {
+            StorageStats stats = storageStatsManager.queryStatsForPackage(
+                    getContext().getPackageManager().getApplicationInfo(pkg, 0).storageUuid,
+                    pkg, user);
+            return stats.getDataBytes();
+        } catch (PackageManager.NameNotFoundException | IOException e) {
+            Log.e(LOG_TAG, "Cannot determine amount of app data for " + pkg, e);
         }
 
-        return appDataSize;
+        return 0;
     }
 
     /**

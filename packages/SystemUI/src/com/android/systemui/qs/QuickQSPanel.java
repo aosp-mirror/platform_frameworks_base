@@ -26,13 +26,18 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dependency;
-import com.android.systemui.DumpController;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dump.DumpManager;
+import com.android.systemui.media.MediaHierarchyManager;
+import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -49,39 +54,77 @@ public class QuickQSPanel extends QSPanel {
 
     public static final String NUM_QUICK_TILES = "sysui_qqs_count";
     private static final String TAG = "QuickQSPanel";
+    // Start it at 6 so a non-zero value can be obtained statically.
+    private static int sDefaultMaxTiles = 6;
 
     private boolean mDisabledByPolicy;
-    private static int mDefaultMaxTiles;
     private int mMaxTiles;
     protected QSPanel mFullPanel;
 
+
     @Inject
-    public QuickQSPanel(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            DumpController dumpController) {
-        super(context, attrs, dumpController);
-        if (mFooter != null) {
-            removeView(mFooter.getView());
-        }
-        if (mTileLayout != null) {
-            for (int i = 0; i < mRecords.size(); i++) {
-                mTileLayout.removeTile(mRecords.get(i));
-            }
-            removeView((View) mTileLayout);
-        }
-        mDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
-        mTileLayout = new HeaderTileLayout(context);
-        mTileLayout.setListening(mListening);
-        addView((View) mTileLayout, 0 /* Between brightness and footer */);
-        super.setPadding(0, 0, 0, 0);
+    public QuickQSPanel(
+            @Named(VIEW_CONTEXT) Context context,
+            AttributeSet attrs,
+            DumpManager dumpManager,
+            BroadcastDispatcher broadcastDispatcher,
+            QSLogger qsLogger,
+            MediaHost mediaHost,
+            UiEventLogger uiEventLogger
+    ) {
+        super(context, attrs, dumpManager, broadcastDispatcher, qsLogger, mediaHost, uiEventLogger);
+        sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
+        applyBottomMargin((View) mRegularTileLayout);
+    }
+
+    private void applyBottomMargin(View view) {
+        int margin = getResources().getDimensionPixelSize(R.dimen.qs_header_tile_margin_bottom);
+        MarginLayoutParams layoutParams = (MarginLayoutParams) view.getLayoutParams();
+        layoutParams.bottomMargin = margin;
+        view.setLayoutParams(layoutParams);
     }
 
     @Override
-    public void setPadding(int left, int top, int right, int bottom) {
-        // Always have no padding.
+    protected void addSecurityFooter() {
+        // No footer needed
     }
 
     @Override
-    protected void addDivider() {
+    protected void addViewsAboveTiles() {
+        // Nothing to add above the tiles
+    }
+
+    @Override
+    protected TileLayout createRegularTileLayout() {
+        return new QuickQSPanel.HeaderTileLayout(mContext, mUiEventLogger);
+    }
+
+    @Override
+    protected QSTileLayout createHorizontalTileLayout() {
+        return new DoubleLineTileLayout(mContext, mUiEventLogger);
+    }
+
+    @Override
+    protected void initMediaHostState() {
+        mMediaHost.setExpansion(0.0f);
+        mMediaHost.setShowsOnlyActiveMedia(true);
+        mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
+    }
+
+    @Override
+    protected boolean needsDynamicRowsAndColumns() {
+        return false; // QQS always have the same layout
+    }
+
+    @Override
+    protected boolean displayMediaMarginsOnMedia() {
+        // Margins should be on the container to visually center the view
+        return false;
+    }
+
+    @Override
+    protected void updatePadding() {
+        // QS Panel is setting a top padding by default, which we don't need.
     }
 
     @Override
@@ -94,6 +137,11 @@ public class QuickQSPanel extends QSPanel {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         Dependency.get(TunerService.class).removeTunable(mNumTiles);
+    }
+
+    @Override
+    protected String getDumpableTag() {
+        return TAG;
     }
 
     public void setQSPanelAndHeader(QSPanel fullPanel, View header) {
@@ -154,12 +202,31 @@ public class QuickQSPanel extends QSPanel {
     private final Tunable mNumTiles = new Tunable() {
         @Override
         public void onTuningChanged(String key, String newValue) {
-            setMaxTiles(getNumQuickTiles(mContext));
+            setMaxTiles(parseNumTiles(newValue));
         }
     };
 
-    public static int getNumQuickTiles(Context context) {
-        return Dependency.get(TunerService.class).getValue(NUM_QUICK_TILES, mDefaultMaxTiles);
+    public int getNumQuickTiles() {
+        return mMaxTiles;
+    }
+
+    /**
+     * Parses the String setting into the number of tiles. Defaults to {@code mDefaultMaxTiles}
+     *
+     * @param numTilesValue value of the setting to parse
+     * @return parsed value of numTilesValue OR {@code mDefaultMaxTiles} on error
+     */
+    public static int parseNumTiles(String numTilesValue) {
+        try {
+            return Integer.parseInt(numTilesValue);
+        } catch (NumberFormatException e) {
+            // Couldn't read an int from the new setting value. Use default.
+            return sDefaultMaxTiles;
+        }
+    }
+
+    public static int getDefaultMaxTiles() {
+        return sDefaultMaxTiles;
     }
 
     void setDisabledByPolicy(boolean disabled) {
@@ -186,17 +253,34 @@ public class QuickQSPanel extends QSPanel {
         super.setVisibility(visibility);
     }
 
+    @Override
+    protected QSEvent openPanelEvent() {
+        return QSEvent.QQS_PANEL_EXPANDED;
+    }
+
+    @Override
+    protected QSEvent closePanelEvent() {
+        return QSEvent.QQS_PANEL_COLLAPSED;
+    }
+
+    @Override
+    protected QSEvent tileVisibleEvent() {
+        return QSEvent.QQS_TILE_VISIBLE;
+    }
+
     private static class HeaderTileLayout extends TileLayout {
 
-        private boolean mListening;
+        private final UiEventLogger mUiEventLogger;
+
         private Rect mClippingBounds = new Rect();
 
-        public HeaderTileLayout(Context context) {
+        public HeaderTileLayout(Context context, UiEventLogger uiEventLogger) {
             super(context);
+            mUiEventLogger = uiEventLogger;
             setClipChildren(false);
             setClipToPadding(false);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
-                    LayoutParams.MATCH_PARENT);
+                    LayoutParams.WRAP_CONTENT);
             lp.gravity = Gravity.CENTER_HORIZONTAL;
             setLayoutParams(lp);
         }
@@ -209,6 +293,7 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         public void onFinishInflate(){
+            super.onFinishInflate();
             updateResources();
         }
 
@@ -266,7 +351,14 @@ public class QuickQSPanel extends QSPanel {
             } else{
                 mColumns = mCellWidth == 0 ? 1 :
                         Math.min(maxTiles, availableWidth / mCellWidth );
-                mCellMarginHorizontal = (availableWidth - mColumns * mCellWidth) / (mColumns - 1);
+                // If we can only fit one column, use mCellMarginHorizontal to center it.
+                if (mColumns == 1) {
+                    mCellMarginHorizontal = (availableWidth - mCellWidth) / 2;
+                } else {
+                    mCellMarginHorizontal =
+                            (availableWidth - mColumns * mCellWidth) / (mColumns - 1);
+                }
+
             }
             return mColumns != prevNumColumns;
         }
@@ -304,7 +396,24 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         protected int getColumnStart(int column) {
+            if (mColumns == 1) {
+                // Only one column/tile. Use the margin to center the tile.
+                return getPaddingStart() + mCellMarginHorizontal;
+            }
             return getPaddingStart() + column *  (mCellWidth + mCellMarginHorizontal);
+        }
+
+        @Override
+        public void setListening(boolean listening) {
+            boolean startedListening = !mListening && listening;
+            super.setListening(listening);
+            if (startedListening) {
+                for (int i = 0; i < getNumVisibleTiles(); i++) {
+                    QSTile tile = mRecords.get(i).tile;
+                    mUiEventLogger.logWithInstanceId(QSEvent.QQS_TILE_VISIBLE, 0,
+                            tile.getMetricsSpec(), tile.getInstanceId());
+                }
+            }
         }
     }
 }

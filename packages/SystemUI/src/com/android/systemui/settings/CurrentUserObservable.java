@@ -16,10 +16,10 @@
 
 package com.android.systemui.settings;
 
-import android.content.Context;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+
+import com.android.systemui.broadcast.BroadcastDispatcher;
 
 /**
  * A class that has an observable for the current user.
@@ -38,12 +38,12 @@ public class CurrentUserObservable {
         @Override
         protected void onInactive() {
             super.onInactive();
-            mTracker.startTracking();
+            mTracker.stopTracking();
         }
     };
 
-    public CurrentUserObservable(Context context) {
-        mTracker = new CurrentUserTracker(context) {
+    public CurrentUserObservable(BroadcastDispatcher broadcastDispatcher) {
+        mTracker = new CurrentUserTracker(broadcastDispatcher) {
             @Override
             public void onUserSwitched(int newUserId) {
                 mCurrentUser.setValue(newUserId);

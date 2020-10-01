@@ -140,10 +140,10 @@ public class InvocationLightsView extends View
             float rightStart = mGuide.getRegionWidth(PerimeterPathGuide.Region.BOTTOM)
                     + (cornerLengthNormalized - arcOffsetNormalized) * (1 - progress);
 
-            setLight(0, leftStart, lightLength);
-            setLight(1, leftStart + lightLength, lightLength);
-            setLight(2, rightStart - (lightLength * 2), lightLength);
-            setLight(3, rightStart - lightLength, lightLength);
+            setLight(0, leftStart, leftStart + lightLength);
+            setLight(1, leftStart + lightLength, leftStart + lightLength * 2);
+            setLight(2, rightStart - (lightLength * 2), rightStart - lightLength);
+            setLight(3, rightStart - lightLength, rightStart);
             setVisibility(View.VISIBLE);
         }
         invalidate();
@@ -155,7 +155,7 @@ public class InvocationLightsView extends View
     public void hide() {
         setVisibility(GONE);
         for (EdgeLight light : mAssistInvocationLights) {
-            light.setLength(0);
+            light.setEndpoints(0, 0);
         }
         attemptUnregisterNavBarListener();
     }
@@ -235,12 +235,11 @@ public class InvocationLightsView extends View
         }
     }
 
-    protected void setLight(int index, float offset, float length) {
+    protected void setLight(int index, float start, float end) {
         if (index < 0 || index >= 4) {
             Log.w(TAG, "invalid invocation light index: " + index);
         }
-        mAssistInvocationLights.get(index).setOffset(offset);
-        mAssistInvocationLights.get(index).setLength(length);
+        mAssistInvocationLights.get(index).setEndpoints(start, end);
     }
 
     /**
@@ -260,17 +259,22 @@ public class InvocationLightsView extends View
         if (mUseNavBarColor) {
             @ColorInt int invocationColor = (int) ArgbEvaluator.getInstance().evaluate(
                     darkIntensity, mLightColor, mDarkColor);
+            boolean changed = true;
             for (EdgeLight light : mAssistInvocationLights) {
-                light.setColor(invocationColor);
+                changed &= light.setColor(invocationColor);
             }
-            invalidate();
+            if (changed) {
+                invalidate();
+            }
         }
     }
 
     private void renderLight(EdgeLight light, Canvas canvas) {
-        mGuide.strokeSegment(mPath, light.getOffset(), light.getOffset() + light.getLength());
-        mPaint.setColor(light.getColor());
-        canvas.drawPath(mPath, mPaint);
+        if (light.getLength() > 0) {
+            mGuide.strokeSegment(mPath, light.getStart(), light.getStart() + light.getLength());
+            mPaint.setColor(light.getColor());
+            canvas.drawPath(mPath, mPaint);
+        }
     }
 
     private void attemptRegisterNavBarListener() {

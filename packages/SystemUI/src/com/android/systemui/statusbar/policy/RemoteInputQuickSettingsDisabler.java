@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -40,13 +39,13 @@ public class RemoteInputQuickSettingsDisabler
     @VisibleForTesting boolean mRemoteInputActive;
     @VisibleForTesting boolean misLandscape;
     private int mLastOrientation;
-    @VisibleForTesting CommandQueue mCommandQueue;
+    private final CommandQueue mCommandQueue;
 
     @Inject
     public RemoteInputQuickSettingsDisabler(Context context,
-            ConfigurationController configController) {
+            ConfigurationController configController, CommandQueue commandQueue) {
         mContext = context;
-        mCommandQueue = SysUiServiceProvider.getComponent(context, CommandQueue.class);
+        mCommandQueue = commandQueue;
         mLastOrientation = mContext.getResources().getConfiguration().orientation;
         configController.addCallback(this);
     }

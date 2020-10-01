@@ -19,11 +19,15 @@ package com.android.server.wm;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
+import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_DISABLED;
+import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_ENABLED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.atMost;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
@@ -31,9 +35,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.same;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
-import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_DEFAULT;
-import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_DISABLED;
-import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -55,6 +56,7 @@ import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.view.Surface;
+import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -66,6 +68,7 @@ import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -118,6 +121,12 @@ public class DisplayRotationTests {
         sMockWm = mock(WindowManagerService.class);
         sMockWm.mPowerManagerInternal = mock(PowerManagerInternal.class);
         sMockWm.mPolicy = mock(WindowManagerPolicy.class);
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        // Make sure the fake settings are cleared after the last test method.
+        FakeSettingsProvider.clearSettingsProvider();
     }
 
     @Before
@@ -236,15 +245,55 @@ public class DisplayRotationTests {
     }
 
     @Test
-    public void testReturnsUserRotation_UserRotationLocked_CompatibleAppRequest()
+    public void testReturnsLandscape_UserRotationLockedSeascape_AppRequestsLandscape()
             throws Exception {
         mBuilder.build();
-        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false, false);
+        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false /* isCar */,
+                false /* isTv */);
+
+        freezeRotation(Surface.ROTATION_180);
+
+        assertEquals(Surface.ROTATION_0, mTarget.rotationForOrientation(
+                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, Surface.ROTATION_90));
+    }
+
+    @Test
+    public void testReturnsSeascape_UserRotationLockedSeascape_AppRequestsSeascape()
+            throws Exception {
+        mBuilder.build();
+        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false /* isCar */,
+                false /* isTv */);
 
         freezeRotation(Surface.ROTATION_180);
 
         assertEquals(Surface.ROTATION_180, mTarget.rotationForOrientation(
-                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, Surface.ROTATION_90));
+                ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE, Surface.ROTATION_90));
+    }
+
+    @Test
+    public void testReturnsPortrait_UserRotationLockedPortrait_AppRequestsPortrait()
+            throws Exception {
+        mBuilder.build();
+        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false /* isCar */,
+                false /* isTv */);
+
+        freezeRotation(Surface.ROTATION_270);
+
+        assertEquals(Surface.ROTATION_270, mTarget.rotationForOrientation(
+                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, Surface.ROTATION_0));
+    }
+
+    @Test
+    public void testReturnsUpsideDown_UserRotationLockedUpsideDown_AppRequestsUpsideDown()
+            throws Exception {
+        mBuilder.build();
+        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false /* isCar */,
+                false /* isTv */);
+
+        freezeRotation(Surface.ROTATION_90);
+
+        assertEquals(Surface.ROTATION_90, mTarget.rotationForOrientation(
+                ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT, Surface.ROTATION_0));
     }
 
     @Test
@@ -584,6 +633,33 @@ public class DisplayRotationTests {
                 SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_0));
     }
 
+    @Test
+    public void testShouldRotateSeamlessly() throws Exception {
+        mBuilder.build();
+
+        final WindowState win = mock(WindowState.class);
+        win.mToken = win.mActivityRecord = mock(ActivityRecord.class);
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams();
+        attrs.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
+
+        doReturn(attrs).when(win).getAttrs();
+        doReturn(true).when(mMockDisplayPolicy).navigationBarCanMove();
+        doReturn(win).when(mMockDisplayPolicy).getTopFullscreenOpaqueWindow();
+        mMockDisplayContent.mCurrentFocus = win;
+        mTarget.mUpsideDownRotation = Surface.ROTATION_180;
+
+        doReturn(true).when(win.mActivityRecord).matchParentBounds();
+        // The focused fullscreen opaque window without override bounds should be able to be
+        // rotated seamlessly.
+        assertTrue(mTarget.shouldRotateSeamlessly(
+                Surface.ROTATION_0, Surface.ROTATION_90, false /* forceUpdate */));
+
+        doReturn(false).when(win.mActivityRecord).matchParentBounds();
+        // No seamless rotation if the window may be positioned with offset after rotation.
+        assertFalse(mTarget.shouldRotateSeamlessly(
+                Surface.ROTATION_0, Surface.ROTATION_90, false /* forceUpdate */));
+    }
+
     // ========================
     // Non-rotation API Tests
     // ========================
@@ -784,6 +860,8 @@ public class DisplayRotationTests {
             mMockDisplayContent.isDefaultDisplay = mIsDefaultDisplay;
             when(mMockDisplayContent.calculateDisplayCutoutForRotation(anyInt()))
                     .thenReturn(WmDisplayCutout.NO_CUTOUT);
+            when(mMockDisplayContent.getDefaultTaskDisplayArea())
+                    .thenReturn(mock(TaskDisplayArea.class));
 
             mMockDisplayPolicy = mock(DisplayPolicy.class);
 

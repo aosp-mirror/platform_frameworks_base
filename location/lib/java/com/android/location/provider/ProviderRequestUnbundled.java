@@ -34,6 +34,7 @@ import java.util.List;
  * of this package for more information.
  */
 public final class ProviderRequestUnbundled {
+
     private final ProviderRequest mRequest;
 
     /** @hide */

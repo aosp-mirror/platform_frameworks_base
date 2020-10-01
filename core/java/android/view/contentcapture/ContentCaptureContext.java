@@ -15,7 +15,7 @@
  */
 package android.view.contentcapture;
 
-import static android.view.contentcapture.ContentCaptureSession.NO_SESSION_ID;
+import static android.view.contentcapture.ContentCaptureManager.NO_SESSION_ID;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;

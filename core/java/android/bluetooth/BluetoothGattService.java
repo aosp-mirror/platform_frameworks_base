@@ -44,7 +44,7 @@ public class BluetoothGattService implements Parcelable {
 
 
     /**
-     * The remote device his service is associated with.
+     * The remote device this service is associated with.
      * This applies to client applications only.
      *
      * @hide

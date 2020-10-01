@@ -1,0 +1,2 @@
+# Keep all symbols in android.media.
+-keep class android.media.* {*;}

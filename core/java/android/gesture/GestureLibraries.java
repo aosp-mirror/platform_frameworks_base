@@ -16,14 +16,16 @@
 
 package android.gesture;
 
+import android.annotation.NonNull;
 import android.annotation.RawRes;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import static android.gesture.GestureConstants.*;
 import android.content.Context;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -41,6 +43,11 @@ public final class GestureLibraries {
         return new FileGestureLibrary(path);
     }
 
+    @NonNull
+    public static GestureLibrary fromFileDescriptor(@NonNull ParcelFileDescriptor pfd) {
+        return new FileGestureLibrary(pfd.getFileDescriptor());
+    }
+
     public static GestureLibrary fromPrivateFile(Context context, String name) {
         return fromFile(context.getFileStreamPath(name));
     }
@@ -50,55 +57,83 @@ public final class GestureLibraries {
     }
 
     private static class FileGestureLibrary extends GestureLibrary {
+        // Either a file or an fd is used
         private final File mPath;
+        private final FileDescriptor mFd;
 
         public FileGestureLibrary(File path) {
             mPath = path;
+            mFd = null;
         }
 
+        public FileGestureLibrary(FileDescriptor fd) {
+            mPath = null;
+            mFd = fd;
+        }
+
+        /**
+         * <p>If this GestureLibrary was created using a FileDescriptor,
+         * this method will always return false.
+         */
         @Override
         public boolean isReadOnly() {
-            return !mPath.canWrite();
+            if (mPath != null) {
+                return !mPath.canWrite();
+            }
+            return false;
         }
 
         public boolean save() {
             if (!mStore.hasChanged()) return true;
+            boolean result = false;
 
-            final File file = mPath;
+            if (mPath != null) {
+                final File file = mPath;
 
-            final File parentFile = file.getParentFile();
-            if (!parentFile.exists()) {
-                if (!parentFile.mkdirs()) {
-                    return false;
+                final File parentFile = file.getParentFile();
+                if (!parentFile.exists()) {
+                    if (!parentFile.mkdirs()) {
+                        return false;
+                    }
+                }
+
+                try {
+                    //noinspection ResultOfMethodCallIgnored
+                    file.createNewFile();
+                    mStore.save(new FileOutputStream(file), true);
+                    result = true;
+                } catch (IOException e) {
+                    Log.d(LOG_TAG, "Could not save the gesture library in " + mPath, e);
+                }
+            } else {
+                try {
+                    mStore.save(new FileOutputStream(mFd), true);
+                    result = true;
+                } catch (IOException e) {
+                    Log.d(LOG_TAG, "Could not save the gesture library", e);
                 }
             }
-
-            boolean result = false;
-            try {
-                //noinspection ResultOfMethodCallIgnored
-                file.createNewFile();
-                mStore.save(new FileOutputStream(file), true);
-                result = true;
-            } catch (FileNotFoundException e) {
-                Log.d(LOG_TAG, "Could not save the gesture library in " + mPath, e);
-            } catch (IOException e) {
-                Log.d(LOG_TAG, "Could not save the gesture library in " + mPath, e);
-            }
-
             return result;
         }
 
         public boolean load() {
             boolean result = false;
-            final File file = mPath;
-            if (file.exists() && file.canRead()) {
+            if (mPath != null) {
+                final File file = mPath;
+                if (file.exists() && file.canRead()) {
+                    try {
+                        mStore.load(new FileInputStream(file), true);
+                        result = true;
+                    } catch (IOException e) {
+                        Log.d(LOG_TAG, "Could not load the gesture library from " + mPath, e);
+                    }
+                }
+            } else {
                 try {
-                    mStore.load(new FileInputStream(file), true);
+                    mStore.load(new FileInputStream(mFd), true);
                     result = true;
-                } catch (FileNotFoundException e) {
-                    Log.d(LOG_TAG, "Could not load the gesture library from " + mPath, e);
                 } catch (IOException e) {
-                    Log.d(LOG_TAG, "Could not load the gesture library from " + mPath, e);
+                    Log.d(LOG_TAG, "Could not load the gesture library", e);
                 }
             }
 

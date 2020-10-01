@@ -36,6 +36,7 @@ import android.os.Parcelable;
 import android.sysprop.DisplayProperties;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.AccessibilityClickableSpan;
+import android.text.style.AccessibilityReplacementSpan;
 import android.text.style.AccessibilityURLSpan;
 import android.text.style.AlignmentSpan;
 import android.text.style.BackgroundColorSpan;
@@ -735,7 +736,9 @@ public class TextUtils {
     /** @hide */
     public static final int LINE_HEIGHT_SPAN = 28;
     /** @hide */
-    public static final int LAST_SPAN = LINE_HEIGHT_SPAN;
+    public static final int ACCESSIBILITY_REPLACEMENT_SPAN = 29;
+    /** @hide */
+    public static final int LAST_SPAN = ACCESSIBILITY_REPLACEMENT_SPAN;
 
     /**
      * Flatten a CharSequence and whatever styles can be copied across processes
@@ -745,7 +748,7 @@ public class TextUtils {
             int parcelableFlags) {
         if (cs instanceof Spanned) {
             p.writeInt(0);
-            p.writeString(cs.toString());
+            p.writeString8(cs.toString());
 
             Spanned sp = (Spanned) cs;
             Object[] os = sp.getSpans(0, cs.length(), Object.class);
@@ -782,9 +785,9 @@ public class TextUtils {
         } else {
             p.writeInt(1);
             if (cs != null) {
-                p.writeString(cs.toString());
+                p.writeString8(cs.toString());
             } else {
-                p.writeString(null);
+                p.writeString8(null);
             }
         }
     }
@@ -804,7 +807,7 @@ public class TextUtils {
         public CharSequence createFromParcel(Parcel p) {
             int kind = p.readInt();
 
-            String string = p.readString();
+            String string = p.readString8();
             if (string == null) {
                 return null;
             }
@@ -860,7 +863,7 @@ public class TextUtils {
 
                 case LEADING_MARGIN_SPAN:
                     readSpan(p, sp, new LeadingMarginSpan.Standard(p));
-                break;
+                    break;
 
                 case URL_SPAN:
                     readSpan(p, sp, new URLSpan(p));
@@ -933,7 +936,11 @@ public class TextUtils {
                 case LINE_HEIGHT_SPAN:
                     readSpan(p, sp, new LineHeightSpan.Standard(p));
                     break;
-                    
+
+                case ACCESSIBILITY_REPLACEMENT_SPAN:
+                    readSpan(p, sp, new AccessibilityReplacementSpan(p));
+                    break;
+
                 default:
                     throw new RuntimeException("bogus span encoding " + kind);
                 }

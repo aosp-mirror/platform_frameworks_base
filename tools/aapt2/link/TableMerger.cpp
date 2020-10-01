@@ -172,28 +172,32 @@ static bool MergeEntry(IAaptContext* context, const Source& src,
 //
 // Styleables and Styles don't simply overlay each other, their definitions merge and accumulate.
 // If both values are Styleables/Styles, we just merge them into the existing value.
-static ResourceTable::CollisionResult ResolveMergeCollision(Value* existing, Value* incoming,
-                                                            StringPool* pool) {
+static ResourceTable::CollisionResult ResolveMergeCollision(
+    bool override_styles_instead_of_overlaying, Value* existing, Value* incoming,
+    StringPool* pool) {
   if (Styleable* existing_styleable = ValueCast<Styleable>(existing)) {
     if (Styleable* incoming_styleable = ValueCast<Styleable>(incoming)) {
       // Styleables get merged.
       existing_styleable->MergeWith(incoming_styleable);
       return ResourceTable::CollisionResult::kKeepOriginal;
     }
-  } else if (Style* existing_style = ValueCast<Style>(existing)) {
-    if (Style* incoming_style = ValueCast<Style>(incoming)) {
-      // Styles get merged.
-      existing_style->MergeWith(incoming_style, pool);
-      return ResourceTable::CollisionResult::kKeepOriginal;
+  } else if (!override_styles_instead_of_overlaying) {
+    if (Style* existing_style = ValueCast<Style>(existing)) {
+      if (Style* incoming_style = ValueCast<Style>(incoming)) {
+        // Styles get merged.
+        existing_style->MergeWith(incoming_style, pool);
+        return ResourceTable::CollisionResult::kKeepOriginal;
+      }
     }
   }
   // Delegate to the default handler.
-  return ResourceTable::ResolveValueCollision(existing, incoming, true /* overlay */);
+  return ResourceTable::ResolveValueCollision(existing, incoming);
 }
 
 static ResourceTable::CollisionResult MergeConfigValue(IAaptContext* context,
                                                        const ResourceNameRef& res_name,
                                                        bool overlay,
+                                                       bool override_styles_instead_of_overlaying,
                                                        ResourceConfigValue* dst_config_value,
                                                        ResourceConfigValue* src_config_value,
                                                        StringPool* pool) {
@@ -204,13 +208,18 @@ static ResourceTable::CollisionResult MergeConfigValue(IAaptContext* context,
 
   CollisionResult collision_result;
   if (overlay) {
-    collision_result = ResolveMergeCollision(dst_value, src_value, pool);
+    collision_result =
+        ResolveMergeCollision(override_styles_instead_of_overlaying, dst_value, src_value, pool);
   } else {
-    collision_result = ResourceTable::ResolveValueCollision(dst_value, src_value,
-                                                            false /* overlay */);
+    collision_result = ResourceTable::ResolveValueCollision(dst_value, src_value);
   }
 
   if (collision_result == CollisionResult::kConflict) {
+    if (overlay) {
+      return CollisionResult::kTakeNew;
+    }
+
+    // Error!
     context->GetDiagnostics()->Error(DiagMessage(src_value->GetSource())
                                      << "resource '" << res_name << "' has a conflicting value for "
                                      << "configuration (" << src_config_value->config << ")");
@@ -268,9 +277,9 @@ bool TableMerger::DoMerge(const Source& src, ResourceTablePackage* src_package, 
         ResourceConfigValue* dst_config_value = dst_entry->FindValue(
             src_config_value->config, src_config_value->product);
         if (dst_config_value) {
-          CollisionResult collision_result =
-              MergeConfigValue(context_, res_name, overlay, dst_config_value,
-                               src_config_value.get(), &master_table_->string_pool);
+          CollisionResult collision_result = MergeConfigValue(
+              context_, res_name, overlay, options_.override_styles_instead_of_overlaying,
+              dst_config_value, src_config_value.get(), &master_table_->string_pool);
           if (collision_result == CollisionResult::kConflict) {
             error = true;
             continue;

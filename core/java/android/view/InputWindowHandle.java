@@ -38,10 +38,8 @@ public final class InputWindowHandle {
     // The input application handle.
     public final InputApplicationHandle inputApplicationHandle;
 
-    // The client window.
-    public final IWindow clientWindow;
-
-    // The token associated with the window.
+    // The token associates input data with a window and its input channel. The client input
+    // channel and the server input channel will both contain this token.
     public IBinder token;
 
     // The window name.
@@ -84,9 +82,6 @@ public final class InputWindowHandle {
     // Input event dispatching is paused.
     public boolean paused;
 
-    // Window layer.
-    public int layer;
-
     // Id of process and user that owns the window.
     public int ownerPid;
     public int ownerUid;
@@ -109,10 +104,10 @@ public final class InputWindowHandle {
      * bounds of a parent window. That is the window should receive touch events outside its
      * window but be limited to its stack bounds, such as in the case of split screen.
      */
-    public WeakReference<IBinder> touchableRegionCropHandle = new WeakReference<>(null);
+    public WeakReference<SurfaceControl> touchableRegionSurfaceControl = new WeakReference<>(null);
 
     /**
-     * Replace {@link touchableRegion} with the bounds of {@link touchableRegionCropHandle}. If
+     * Replace {@link touchableRegion} with the bounds of {@link touchableRegionSurfaceControl}. If
      * the handle is {@code null}, the bounds of the surface associated with this window is used
      * as the touchable region.
      */
@@ -120,17 +115,14 @@ public final class InputWindowHandle {
 
     private native void nativeDispose();
 
-    public InputWindowHandle(InputApplicationHandle inputApplicationHandle,
-            IWindow clientWindow, int displayId) {
+    public InputWindowHandle(InputApplicationHandle inputApplicationHandle, int displayId) {
         this.inputApplicationHandle = inputApplicationHandle;
-        this.clientWindow = clientWindow;
         this.displayId = displayId;
     }
 
     @Override
     public String toString() {
         return new StringBuilder(name != null ? name : "")
-                .append(", layer=").append(layer)
                 .append(", frame=[").append(frameLeft).append(",").append(frameTop).append(",")
                         .append(frameRight).append(",").append(frameBottom).append("]")
                 .append(", touchableRegion=").append(touchableRegion)
@@ -164,8 +156,6 @@ public final class InputWindowHandle {
      * Crop the window touchable region to the bounds of the surface provided.
      */
     public void setTouchableRegionCrop(@Nullable SurfaceControl bounds) {
-        if (bounds != null) {
-            touchableRegionCropHandle = new WeakReference<>(bounds.getHandle());
-        }
+        touchableRegionSurfaceControl = new WeakReference<>(bounds);
     }
 }

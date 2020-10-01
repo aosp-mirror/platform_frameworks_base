@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -24,10 +25,12 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import android.net.ConnectivityManager;
+import android.net.TetheringManager;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
+import android.os.UserManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -38,11 +41,14 @@ import com.android.systemui.SysuiTestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.Executor;
 
 @SmallTest
@@ -51,13 +57,19 @@ import java.util.concurrent.Executor;
 public class HotspotControllerImplTest extends SysuiTestCase {
 
     @Mock
-    private ConnectivityManager mConnectivityManager;
+    private TetheringManager mTetheringManager;
     @Mock
     private WifiManager mWifiManager;
+    @Mock
+    private UserManager mUserManager;
     @Mock
     private HotspotController.Callback mCallback1;
     @Mock
     private HotspotController.Callback mCallback2;
+    @Mock
+    private TetheringManager.TetheringInterfaceRegexps mTetheringInterfaceRegexps;
+    @Captor
+    private ArgumentCaptor<TetheringManager.TetheringEventCallback> mTetheringCallbackCaptor;
     private HotspotControllerImpl mController;
     private TestableLooper mLooper;
 
@@ -66,8 +78,13 @@ public class HotspotControllerImplTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mLooper = TestableLooper.get(this);
 
-        mContext.addMockSystemService(ConnectivityManager.class, mConnectivityManager);
         mContext.addMockSystemService(WifiManager.class, mWifiManager);
+        mContext.addMockSystemService(TetheringManager.class, mTetheringManager);
+        mContext.addMockSystemService(UserManager.class, mUserManager);
+
+        when(mUserManager.isUserAdmin(anyInt())).thenReturn(true);
+        when(mTetheringInterfaceRegexps.getTetherableWifiRegexs()).thenReturn(
+                Collections.singletonList("test"));
 
         doAnswer((InvocationOnMock invocation) -> {
             ((WifiManager.SoftApCallback) invocation.getArgument(1))
@@ -76,7 +93,11 @@ public class HotspotControllerImplTest extends SysuiTestCase {
         }).when(mWifiManager).registerSoftApCallback(any(Executor.class),
                 any(WifiManager.SoftApCallback.class));
 
-        mController = new HotspotControllerImpl(mContext, new Handler(mLooper.getLooper()));
+        Handler handler = new Handler(mLooper.getLooper());
+
+        mController = new HotspotControllerImpl(mContext, handler, handler);
+        verify(mTetheringManager)
+                .registerTetheringEventCallback(any(), mTetheringCallbackCaptor.capture());
     }
 
     @Test
@@ -117,4 +138,39 @@ public class HotspotControllerImplTest extends SysuiTestCase {
         verify(mWifiManager, never()).unregisterSoftApCallback(any());
     }
 
+    @Test
+    public void testHotspotSupported_default() {
+        assertTrue(mController.isHotspotSupported());
+    }
+
+    @Test
+    public void testHotspotSupported_rightConditions() {
+        mTetheringCallbackCaptor.getValue().onTetheringSupported(true);
+
+        assertTrue(mController.isHotspotSupported());
+
+        mTetheringCallbackCaptor.getValue()
+                .onTetherableInterfaceRegexpsChanged(mTetheringInterfaceRegexps);
+
+        assertTrue(mController.isHotspotSupported());
+    }
+
+    @Test
+    public void testHotspotSupported_callbackCalledOnChange_tetheringSupported() {
+        mController.addCallback(mCallback1);
+        mTetheringCallbackCaptor.getValue().onTetheringSupported(false);
+
+        verify(mCallback1).onHotspotAvailabilityChanged(false);
+    }
+
+    @Test
+    public void testHotspotSupported_callbackCalledOnChange_tetherableInterfaces() {
+        when(mTetheringInterfaceRegexps.getTetherableWifiRegexs())
+                .thenReturn(Collections.emptyList());
+        mController.addCallback(mCallback1);
+        mTetheringCallbackCaptor.getValue()
+                .onTetherableInterfaceRegexpsChanged(mTetheringInterfaceRegexps);
+
+        verify(mCallback1).onHotspotAvailabilityChanged(false);
+    }
 }

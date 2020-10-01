@@ -27,5 +27,6 @@ oneway interface IAppWidgetHost {
     void providerChanged(int appWidgetId, in AppWidgetProviderInfo info);
     void providersChanged();
     void viewDataChanged(int appWidgetId, int viewId);
+    void appWidgetRemoved(int appWidgetId);
 }
 

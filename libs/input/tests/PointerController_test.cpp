@@ -178,9 +178,6 @@ void PointerControllerTest::ensureDisplayViewportIsSet() {
     viewport.deviceWidth = 400;
     viewport.deviceHeight = 300;
     mPointerController->setDisplayViewport(viewport);
-
-    // The first call to setDisplayViewport should trigger the loading of the necessary resources.
-    EXPECT_TRUE(mPolicy->allResourcesAreLoaded());
 }
 
 void PointerControllerTest::loopThread() {
@@ -208,6 +205,7 @@ TEST_F(PointerControllerTest, useDefaultCursorTypeByDefault) {
 
 TEST_F(PointerControllerTest, updatePointerIcon) {
     ensureDisplayViewportIsSet();
+    mPointerController->setPresentation(PointerController::Presentation::POINTER);
     mPointerController->unfade(PointerController::Transition::IMMEDIATE);
 
     int32_t type = CURSOR_TYPE_ADDITIONAL;
@@ -247,8 +245,6 @@ TEST_F(PointerControllerTest, setCustomPointerIcon) {
 
 TEST_F(PointerControllerTest, doesNotGetResourcesBeforeSettingViewport) {
     mPointerController->setPresentation(PointerController::Presentation::POINTER);
-    mPointerController->setSpots(nullptr, nullptr, BitSet32(), -1);
-    mPointerController->clearSpots();
     mPointerController->setPosition(1.0f, 1.0f);
     mPointerController->move(1.0f, 1.0f);
     mPointerController->unfade(PointerController::Transition::IMMEDIATE);

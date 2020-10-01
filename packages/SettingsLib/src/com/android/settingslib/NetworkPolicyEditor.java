@@ -216,7 +216,7 @@ public class NetworkPolicyEditor {
     private static NetworkTemplate buildUnquotedNetworkTemplate(NetworkTemplate template) {
         if (template == null) return null;
         final String networkId = template.getNetworkId();
-        final String strippedNetworkId = WifiInfo.removeDoubleQuotes(networkId);
+        final String strippedNetworkId = WifiInfo.sanitizeSsid(networkId);
         if (!TextUtils.equals(strippedNetworkId, networkId)) {
             return new NetworkTemplate(
                     template.getMatchRule(), template.getSubscriberId(), strippedNetworkId);

@@ -19,6 +19,12 @@ package com.android.server.job.controllers;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
+import static com.android.server.job.JobSchedulerService.FREQUENT_INDEX;
+import static com.android.server.job.JobSchedulerService.NEVER_INDEX;
+import static com.android.server.job.JobSchedulerService.RARE_INDEX;
+import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
+import static com.android.server.job.JobSchedulerService.WORKING_INDEX;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_BACKGROUND_NOT_RESTRICTED;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_BATTERY_NOT_LOW;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_CHARGING;
@@ -34,13 +40,16 @@ import static com.android.server.job.controllers.JobStatus.CONSTRAINT_WITHIN_QUO
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import android.app.job.JobInfo;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.pm.PackageManagerInternal;
+import android.net.Uri;
 import android.os.SystemClock;
 import android.provider.MediaStore;
+import android.util.SparseIntArray;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -52,6 +61,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
@@ -61,7 +71,14 @@ import java.time.ZoneOffset;
 @RunWith(AndroidJUnit4.class)
 public class JobStatusTest {
     private static final double DELTA = 0.00001;
+    private static final String TEST_PACKAGE = "job.test.package";
+    private static final ComponentName TEST_JOB_COMPONENT = new ComponentName(TEST_PACKAGE, "test");
 
+    private static final Uri IMAGES_MEDIA_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+    private static final Uri VIDEO_MEDIA_URI = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+
+    @Mock
+    private JobSchedulerInternal mJobSchedulerInternal;
     private MockitoSession mMockingSession;
 
     @Before
@@ -71,7 +88,7 @@ public class JobStatusTest {
                 .strictness(Strictness.LENIENT)
                 .mockStatic(LocalServices.class)
                 .startMocking();
-        doReturn(mock(JobSchedulerInternal.class))
+        doReturn(mJobSchedulerInternal)
                 .when(() -> LocalServices.getService(JobSchedulerInternal.class));
         doReturn(mock(PackageManagerInternal.class))
                 .when(() -> LocalServices.getService(PackageManagerInternal.class));
@@ -82,7 +99,7 @@ public class JobStatusTest {
         JobSchedulerService.sSystemClock =
                 Clock.fixed(Clock.systemUTC().instant(), ZoneOffset.UTC);
         JobSchedulerService.sUptimeMillisClock =
-                Clock.fixed(SystemClock.uptimeMillisClock().instant(), ZoneOffset.UTC);
+                Clock.fixed(SystemClock.uptimeClock().instant(), ZoneOffset.UTC);
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(SystemClock.elapsedRealtimeClock().instant(), ZoneOffset.UTC);
     }
@@ -92,6 +109,96 @@ public class JobStatusTest {
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
         }
+    }
+
+    private static void assertEffectiveBucketForMediaExemption(JobStatus jobStatus,
+            boolean exemptionGranted) {
+        final SparseIntArray effectiveBucket = new SparseIntArray();
+        effectiveBucket.put(ACTIVE_INDEX, ACTIVE_INDEX);
+        effectiveBucket.put(WORKING_INDEX, WORKING_INDEX);
+        effectiveBucket.put(FREQUENT_INDEX, exemptionGranted ? WORKING_INDEX : FREQUENT_INDEX);
+        effectiveBucket.put(RARE_INDEX, exemptionGranted ? WORKING_INDEX : RARE_INDEX);
+        effectiveBucket.put(NEVER_INDEX, NEVER_INDEX);
+        effectiveBucket.put(RESTRICTED_INDEX, RESTRICTED_INDEX);
+        for (int i = 0; i < effectiveBucket.size(); i++) {
+            jobStatus.setStandbyBucket(effectiveBucket.keyAt(i));
+            assertEquals(effectiveBucket.valueAt(i), jobStatus.getEffectiveStandbyBucket());
+        }
+    }
+
+    @Test
+    public void testMediaBackupExemption_lateConstraint() {
+        final JobInfo triggerContentJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
+                .setOverrideDeadline(12)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build();
+        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
+        assertEffectiveBucketForMediaExemption(createJobStatus(triggerContentJob), false);
+    }
+
+    @Test
+    public void testMediaBackupExemption_noConnectivityConstraint() {
+        final JobInfo triggerContentJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
+                .build();
+        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
+        assertEffectiveBucketForMediaExemption(createJobStatus(triggerContentJob), false);
+    }
+
+    @Test
+    public void testMediaBackupExemption_noContentTriggerConstraint() {
+        final JobInfo networkJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build();
+        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
+        assertEffectiveBucketForMediaExemption(createJobStatus(networkJob), false);
+    }
+
+    @Test
+    public void testMediaBackupExemption_wrongSourcePackage() {
+        final JobInfo networkContentJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build();
+        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn("not.test.package");
+        assertEffectiveBucketForMediaExemption(createJobStatus(networkContentJob), false);
+    }
+
+    @Test
+    public void testMediaBackupExemption_nonEligibleUri() {
+        final Uri nonEligibleUri = MediaStore.AUTHORITY_URI.buildUpon()
+                .appendPath("any_path").build();
+        final JobInfo networkContentJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(nonEligibleUri, 0))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build();
+        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
+        assertEffectiveBucketForMediaExemption(createJobStatus(networkContentJob), false);
+    }
+
+    @Test
+    public void testMediaBackupExemptionGranted() {
+        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
+        final JobInfo imageUriJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build();
+        assertEffectiveBucketForMediaExemption(createJobStatus(imageUriJob), true);
+
+        final JobInfo videoUriJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(VIDEO_MEDIA_URI, 0))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build();
+        assertEffectiveBucketForMediaExemption(createJobStatus(videoUriJob), true);
+
+        final JobInfo bothUriJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(VIDEO_MEDIA_URI, 0))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build();
+        assertEffectiveBucketForMediaExemption(createJobStatus(bothUriJob), true);
     }
 
     @Test
@@ -573,7 +680,7 @@ public class JobStatusTest {
             long latestRunTimeElapsedMillis) {
         final JobInfo job = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY).build();
-        return new JobStatus(job, 0, null, -1, 0, 0, null, earliestRunTimeElapsedMillis,
+        return new JobStatus(job, 0, null, -1, 0, null, earliestRunTimeElapsedMillis,
                 latestRunTimeElapsedMillis, 0, 0, null, 0);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,29 +17,32 @@
 package com.android.internal.app;
 
 import android.animation.ObjectAnimator;
-import android.animation.TimeAnimator;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
-import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
-import android.graphics.Matrix;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.animation.PathInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.android.internal.R;
@@ -50,23 +53,16 @@ import org.json.JSONObject;
  * @hide
  */
 public class PlatLogoActivity extends Activity {
-    ImageView mZeroView, mOneView;
-    BackslashDrawable mBackslash;
-    int mClicks;
+    private static final boolean WRITE_SETTINGS = true;
 
-    static final Paint sPaint = new Paint();
-    static {
-        sPaint.setStyle(Paint.Style.STROKE);
-        sPaint.setStrokeWidth(4f);
-        sPaint.setStrokeCap(Paint.Cap.SQUARE);
-    }
+    private static final String R_EGG_UNLOCK_SETTING = "egg_mode_r";
+
+    private static final int UNLOCK_TRIES = 3;
+
+    BigDialView mDialView;
 
     @Override
     protected void onPause() {
-        if (mBackslash != null) {
-            mBackslash.stopAnimating();
-        }
-        mClicks = 0;
         super.onPause();
     }
 
@@ -80,114 +76,46 @@ public class PlatLogoActivity extends Activity {
         getWindow().setNavigationBarColor(0);
         getWindow().setStatusBarColor(0);
 
-        getActionBar().hide();
+        final ActionBar ab = getActionBar();
+        if (ab != null) ab.hide();
 
-        setContentView(R.layout.platlogo_layout);
-
-        mBackslash = new BackslashDrawable((int) (50 * dp));
-
-        mOneView = findViewById(R.id.one);
-        mOneView.setImageDrawable(new OneDrawable());
-        mZeroView = findViewById(R.id.zero);
-        mZeroView.setImageDrawable(new ZeroDrawable());
-
-        final ViewGroup root = (ViewGroup) mOneView.getParent();
-        root.setClipChildren(false);
-        root.setBackground(mBackslash);
-        root.getBackground().setAlpha(0x20);
-
-        View.OnTouchListener tl = new View.OnTouchListener() {
-            float mOffsetX, mOffsetY;
-            long mClickTime;
-            ObjectAnimator mRotAnim;
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                measureTouchPressure(event);
-                switch (event.getActionMasked()) {
-                    case MotionEvent.ACTION_DOWN:
-                        v.animate().scaleX(1.1f).scaleY(1.1f);
-                        v.getParent().bringChildToFront(v);
-                        mOffsetX = event.getRawX() - v.getX();
-                        mOffsetY = event.getRawY() - v.getY();
-                        long now = System.currentTimeMillis();
-                        if (now - mClickTime < 350) {
-                            mRotAnim = ObjectAnimator.ofFloat(v, View.ROTATION,
-                                    v.getRotation(), v.getRotation() + 3600);
-                            mRotAnim.setDuration(10000);
-                            mRotAnim.start();
-                            mClickTime = 0;
-                        } else {
-                            mClickTime = now;
-                        }
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        v.setX(event.getRawX() - mOffsetX);
-                        v.setY(event.getRawY() - mOffsetY);
-                        v.performHapticFeedback(HapticFeedbackConstants.TEXT_HANDLE_MOVE);
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        v.performClick();
-                        // fall through
-                    case MotionEvent.ACTION_CANCEL:
-                        v.animate().scaleX(1f).scaleY(1f);
-                        if (mRotAnim != null) mRotAnim.cancel();
-                        testOverlap();
-                        break;
-                }
-                return true;
-            }
-        };
-
-        findViewById(R.id.one).setOnTouchListener(tl);
-        findViewById(R.id.zero).setOnTouchListener(tl);
-        findViewById(R.id.text).setOnTouchListener(tl);
-    }
-
-    private void testOverlap() {
-        final float width = mZeroView.getWidth();
-        final float targetX = mZeroView.getX() + width * .2f;
-        final float targetY = mZeroView.getY() + width * .3f;
-        if (Math.hypot(targetX - mOneView.getX(), targetY - mOneView.getY()) < width * .2f
-                && Math.abs(mOneView.getRotation() % 360 - 315) < 15) {
-            mOneView.animate().x(mZeroView.getX() + width * .2f);
-            mOneView.animate().y(mZeroView.getY() + width * .3f);
-            mOneView.setRotation(mOneView.getRotation() % 360);
-            mOneView.animate().rotation(315);
-            mOneView.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
-
-            mBackslash.startAnimating();
-
-            mClicks++;
-            if (mClicks >= 7) {
-                launchNextStage();
-            }
+        mDialView = new BigDialView(this, null);
+        if (Settings.System.getLong(getContentResolver(),
+                R_EGG_UNLOCK_SETTING, 0) == 0) {
+            mDialView.setUnlockTries(UNLOCK_TRIES);
         } else {
-            mBackslash.stopAnimating();
+            mDialView.setUnlockTries(0);
         }
+
+        final FrameLayout layout = new FrameLayout(this);
+        layout.setBackgroundColor(0xFFFF0000);
+        layout.addView(mDialView, FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT);
+        setContentView(layout);
     }
 
-    private void launchNextStage() {
+    private void launchNextStage(boolean locked) {
         final ContentResolver cr = getContentResolver();
 
-        if (Settings.System.getLong(cr, "egg_mode" /* Settings.System.EGG_MODE */, 0) == 0) {
-            // For posterity: the moment this user unlocked the easter egg
-            try {
+        try {
+            if (WRITE_SETTINGS) {
                 Settings.System.putLong(cr,
-                        "egg_mode", // Settings.System.EGG_MODE,
-                        System.currentTimeMillis());
-            } catch (RuntimeException e) {
-                Log.e("com.android.internal.app.PlatLogoActivity", "Can't write settings", e);
+                        R_EGG_UNLOCK_SETTING,
+                        locked ? 0 : System.currentTimeMillis());
             }
+        } catch (RuntimeException e) {
+            Log.e("com.android.internal.app.PlatLogoActivity", "Can't write settings", e);
         }
+
         try {
             startActivity(new Intent(Intent.ACTION_MAIN)
                     .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            | Intent.FLAG_ACTIVITY_CLEAR_TASK)
                     .addCategory("com.android.internal.category.PLATLOGO"));
         } catch (ActivityNotFoundException ex) {
             Log.e("com.android.internal.app.PlatLogoActivity", "No more eggs.");
         }
-        finish();
+        //finish(); // no longer finish upon unlock; it's fun to frob the dial
     }
 
     static final String TOUCH_STATS = "touch.stats";
@@ -223,7 +151,10 @@ public class PlatLogoActivity extends Activity {
             if (mPressureMax >= 0) {
                 touchData.put("min", mPressureMin);
                 touchData.put("max", mPressureMax);
-                Settings.System.putString(getContentResolver(), TOUCH_STATS, touchData.toString());
+                if (WRITE_SETTINGS) {
+                    Settings.System.putString(getContentResolver(), TOUCH_STATS,
+                            touchData.toString());
+                }
             }
         } catch (Exception e) {
             Log.e("com.android.internal.app.PlatLogoActivity", "Can't write touch settings", e);
@@ -242,149 +173,274 @@ public class PlatLogoActivity extends Activity {
         super.onStop();
     }
 
-    static class ZeroDrawable extends Drawable {
-        int mTintColor;
+    class BigDialView extends ImageView {
+        private static final int COLOR_GREEN = 0xff3ddc84;
+        private static final int COLOR_BLUE = 0xff4285f4;
+        private static final int COLOR_NAVY = 0xff073042;
+        private static final int COLOR_ORANGE = 0xfff86734;
+        private static final int COLOR_CHARTREUSE = 0xffeff7cf;
+        private static final int COLOR_LIGHTBLUE = 0xffd7effe;
 
-        @Override
-        public void draw(Canvas canvas) {
-            sPaint.setColor(mTintColor | 0xFF000000);
+        private static final int STEPS = 11;
+        private static final float VALUE_CHANGE_MAX = 1f / STEPS;
 
-            canvas.save();
-            canvas.scale(canvas.getWidth() / 24f, canvas.getHeight() / 24f);
+        private BigDialDrawable mDialDrawable;
+        private boolean mWasLocked;
 
-            canvas.drawCircle(12f, 12f, 10f, sPaint);
-            canvas.restore();
+        BigDialView(Context context, @Nullable AttributeSet attrs) {
+            super(context, attrs);
+            init();
+        }
+
+        BigDialView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+            super(context, attrs, defStyleAttr);
+            init();
+        }
+
+        BigDialView(Context context, @Nullable AttributeSet attrs, int defStyleAttr,
+                int defStyleRes) {
+            super(context, attrs, defStyleAttr, defStyleRes);
+            init();
+        }
+
+        private void init() {
+            mDialDrawable = new BigDialDrawable();
+            setImageDrawable(mDialDrawable);
         }
 
         @Override
-        public void setAlpha(int alpha) { }
+        public void onDraw(Canvas c) {
+            super.onDraw(c);
+        }
 
-        @Override
-        public void setColorFilter(ColorFilter colorFilter) { }
-
-        @Override
-        public void setTintList(ColorStateList tint) {
-            mTintColor = tint.getDefaultColor();
+        double toPositiveDegrees(double rad) {
+            return (Math.toDegrees(rad) + 360 - 90) % 360;
         }
 
         @Override
-        public int getOpacity() {
-            return PixelFormat.TRANSLUCENT;
-        }
-    }
-
-    static class OneDrawable extends Drawable {
-        int mTintColor;
-
-        @Override
-        public void draw(Canvas canvas) {
-            sPaint.setColor(mTintColor | 0xFF000000);
-
-            canvas.save();
-            canvas.scale(canvas.getWidth() / 24f, canvas.getHeight() / 24f);
-
-            final Path p = new Path();
-            p.moveTo(12f, 21.83f);
-            p.rLineTo(0f, -19.67f);
-            p.rLineTo(-5f, 0f);
-            canvas.drawPath(p, sPaint);
-            canvas.restore();
-        }
-
-        @Override
-        public void setAlpha(int alpha) { }
-
-        @Override
-        public void setColorFilter(ColorFilter colorFilter) { }
-
-        @Override
-        public void setTintList(ColorStateList tint) {
-            mTintColor = tint.getDefaultColor();
-        }
-
-        @Override
-        public int getOpacity() {
-            return PixelFormat.TRANSLUCENT;
-        }
-    }
-
-    private static class BackslashDrawable extends Drawable implements TimeAnimator.TimeListener {
-        Bitmap mTile;
-        Paint mPaint = new Paint();
-        BitmapShader mShader;
-        TimeAnimator mAnimator = new TimeAnimator();
-        Matrix mMatrix = new Matrix();
-
-        public void draw(Canvas canvas) {
-            canvas.drawPaint(mPaint);
-        }
-
-        BackslashDrawable(int width) {
-            mTile = Bitmap.createBitmap(width, width, Bitmap.Config.ALPHA_8);
-            mAnimator.setTimeListener(this);
-
-            final Canvas tileCanvas = new Canvas(mTile);
-            final float w = tileCanvas.getWidth();
-            final float h = tileCanvas.getHeight();
-
-            final Path path = new Path();
-            path.moveTo(0, 0);
-            path.lineTo(w / 2, 0);
-            path.lineTo(w, h / 2);
-            path.lineTo(w, h);
-            path.close();
-
-            path.moveTo(0, h / 2);
-            path.lineTo(w / 2, h);
-            path.lineTo(0, h);
-            path.close();
-
-            final Paint slashPaint = new Paint();
-            slashPaint.setAntiAlias(true);
-            slashPaint.setStyle(Paint.Style.FILL);
-            slashPaint.setColor(0xFF000000);
-            tileCanvas.drawPath(path, slashPaint);
-
-            //mPaint.setColor(0xFF0000FF);
-            mShader = new BitmapShader(mTile, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
-            mPaint.setShader(mShader);
-        }
-
-        public void startAnimating() {
-            if (!mAnimator.isStarted()) {
-                mAnimator.start();
+        public boolean onTouchEvent(MotionEvent ev) {
+            switch (ev.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    mWasLocked = mDialDrawable.isLocked();
+                    // pass through
+                case MotionEvent.ACTION_MOVE:
+                    float x = ev.getX();
+                    float y = ev.getY();
+                    float cx = (getLeft() + getRight()) / 2f;
+                    float cy = (getTop() + getBottom()) / 2f;
+                    float angle = (float) toPositiveDegrees(Math.atan2(x - cx, y - cy));
+                    final int oldLevel = mDialDrawable.getUserLevel();
+                    mDialDrawable.touchAngle(angle);
+                    final int newLevel = mDialDrawable.getUserLevel();
+                    if (oldLevel != newLevel) {
+                        performHapticFeedback(newLevel == STEPS
+                                ? HapticFeedbackConstants.CONFIRM
+                                : HapticFeedbackConstants.CLOCK_TICK);
+                    }
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    if (mWasLocked != mDialDrawable.isLocked()) {
+                        launchNextStage(mDialDrawable.isLocked());
+                    }
+                    return true;
             }
+            return false;
         }
 
-        public void stopAnimating() {
-            if (mAnimator.isStarted()) {
-                mAnimator.cancel();
+        @Override
+        public boolean performClick() {
+            if (mDialDrawable.getUserLevel() < STEPS - 1) {
+                mDialDrawable.setUserLevel(mDialDrawable.getUserLevel() + 1);
+                performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
             }
+            return true;
         }
 
-        @Override
-        public void setAlpha(int alpha) {
-            mPaint.setAlpha(alpha);
+        void setUnlockTries(int tries) {
+            mDialDrawable.setUnlockTries(tries);
         }
 
-        @Override
-        public void setColorFilter(ColorFilter colorFilter) {
-            mPaint.setColorFilter(colorFilter);
-        }
+        private class BigDialDrawable extends Drawable {
+            public final int STEPS = 10;
+            private int mUnlockTries = 0;
+            final Paint mPaint = new Paint();
+            final Drawable mEleven;
+            private boolean mNightMode;
+            private float mValue = 0f;
+            float mElevenAnim = 0f;
+            ObjectAnimator mElevenShowAnimator = ObjectAnimator.ofFloat(this, "elevenAnim", 0f,
+                    1f).setDuration(300);
+            ObjectAnimator mElevenHideAnimator = ObjectAnimator.ofFloat(this, "elevenAnim", 1f,
+                    0f).setDuration(500);
 
-        @Override
-        public int getOpacity() {
-            return PixelFormat.TRANSLUCENT;
-        }
+            BigDialDrawable() {
+                mNightMode = getContext().getResources().getConfiguration().isNightModeActive();
+                mEleven = getContext().getDrawable(R.drawable.ic_number11);
+                mElevenShowAnimator.setInterpolator(new PathInterpolator(0.4f, 0f, 0.2f, 1f));
+                mElevenHideAnimator.setInterpolator(new PathInterpolator(0.8f, 0.2f, 0.6f, 1f));
+            }
 
-        @Override
-        public void onTimeUpdate(TimeAnimator animation, long totalTime, long deltaTime) {
-            if (mShader != null) {
-                mMatrix.postTranslate(deltaTime / 4f, 0);
-                mShader.setLocalMatrix(mMatrix);
+            public void setUnlockTries(int count) {
+                if (mUnlockTries != count) {
+                    mUnlockTries = count;
+                    setValue(getValue());
+                    invalidateSelf();
+                }
+            }
+
+            boolean isLocked() {
+                return mUnlockTries > 0;
+            }
+
+            public void setValue(float v) {
+                // until the dial is "unlocked", you can't turn it all the way to 11
+                final float max = isLocked() ? 1f - 1f / STEPS : 1f;
+                mValue = v < 0f ? 0f : v > max ? max : v;
                 invalidateSelf();
+            }
+
+            public float getValue() {
+                return mValue;
+            }
+
+            public int getUserLevel() {
+                return Math.round(getValue() * STEPS - 0.25f);
+            }
+
+            public void setUserLevel(int i) {
+                setValue(getValue() + ((float) i) / STEPS);
+            }
+
+            public float getElevenAnim() {
+                return mElevenAnim;
+            }
+
+            public void setElevenAnim(float f) {
+                if (mElevenAnim != f) {
+                    mElevenAnim = f;
+                    invalidateSelf();
+                }
+            }
+
+            @Override
+            public void draw(@NonNull Canvas canvas) {
+                final Rect bounds = getBounds();
+                final int w = bounds.width();
+                final int h = bounds.height();
+                final float w2 = w / 2f;
+                final float h2 = h / 2f;
+                final float radius = w / 4f;
+
+                canvas.drawColor(mNightMode ? COLOR_NAVY : COLOR_LIGHTBLUE);
+
+                canvas.save();
+                canvas.rotate(45, w2, h2);
+                canvas.clipRect(w2, h2 - radius, Math.min(w, h), h2 + radius);
+                final int gradientColor = mNightMode ? 0x60000020 : (0x10FFFFFF & COLOR_NAVY);
+                mPaint.setShader(
+                        new LinearGradient(w2, h2, Math.min(w, h), h2, gradientColor,
+                                0x00FFFFFF & gradientColor, Shader.TileMode.CLAMP));
+                mPaint.setColor(Color.BLACK);
+                canvas.drawPaint(mPaint);
+                mPaint.setShader(null);
+                canvas.restore();
+
+                mPaint.setStyle(Paint.Style.FILL);
+                mPaint.setColor(COLOR_GREEN);
+
+                canvas.drawCircle(w2, h2, radius, mPaint);
+
+                mPaint.setColor(mNightMode ? COLOR_LIGHTBLUE : COLOR_NAVY);
+                final float cx = w * 0.85f;
+                for (int i = 0; i < STEPS; i++) {
+                    final float f = (float) i / STEPS;
+                    canvas.save();
+                    final float angle = valueToAngle(f);
+                    canvas.rotate(-angle, w2, h2);
+                    canvas.drawCircle(cx, h2, (i <= getUserLevel()) ? 20 : 5, mPaint);
+                    canvas.restore();
+                }
+
+                if (mElevenAnim > 0f) {
+                    final int color = COLOR_ORANGE;
+                    final int size2 = (int) ((0.5 + 0.5f * mElevenAnim) * w / 14);
+                    final float cx11 = cx + size2 / 4f;
+                    mEleven.setBounds((int) cx11 - size2, (int) h2 - size2,
+                            (int) cx11 + size2, (int) h2 + size2);
+                    final int alpha = 0xFFFFFF | ((int) clamp(0xFF * 2 * mElevenAnim, 0, 0xFF)
+                            << 24);
+                    mEleven.setTint(alpha & color);
+                    mEleven.draw(canvas);
+                }
+
+                // don't want to use the rounded value here since the quantization will be visible
+                final float angle = valueToAngle(mValue);
+
+                // it's easier to draw at far-right and rotate backwards
+                canvas.rotate(-angle, w2, h2);
+                mPaint.setColor(Color.WHITE);
+                final float dimple = w2 / 12f;
+                canvas.drawCircle(w - radius - dimple * 2, h2, dimple, mPaint);
+            }
+
+            float clamp(float x, float a, float b) {
+                return x < a ? a : x > b ? b : x;
+            }
+
+            float angleToValue(float a) {
+                return 1f - clamp(a / (360 - 45), 0f, 1f);
+            }
+
+            // rotation: min is at 4:30, max is at 3:00
+            float valueToAngle(float v) {
+                return (1f - v) * (360 - 45);
+            }
+
+            public void touchAngle(float a) {
+                final int oldUserLevel = getUserLevel();
+                final float newValue = angleToValue(a);
+                // this is how we prevent the knob from snapping from max back to min, or from
+                // jumping around wherever the user presses. The new value must be pretty close
+                // to the
+                // previous one.
+                if (Math.abs(newValue - getValue()) < VALUE_CHANGE_MAX) {
+                    setValue(newValue);
+
+                    if (isLocked() && oldUserLevel != STEPS - 1 && getUserLevel() == STEPS - 1) {
+                        mUnlockTries--;
+                    } else if (!isLocked() && getUserLevel() == 0) {
+                        mUnlockTries = UNLOCK_TRIES;
+                    }
+
+                    if (!isLocked()) {
+                        if (getUserLevel() == STEPS && mElevenAnim != 1f
+                                && !mElevenShowAnimator.isRunning()) {
+                            mElevenHideAnimator.cancel();
+                            mElevenShowAnimator.start();
+                        } else if (getUserLevel() != STEPS && mElevenAnim == 1f
+                                && !mElevenHideAnimator.isRunning()) {
+                            mElevenShowAnimator.cancel();
+                            mElevenHideAnimator.start();
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void setAlpha(int i) {
+            }
+
+            @Override
+            public void setColorFilter(@Nullable ColorFilter colorFilter) {
+            }
+
+            @Override
+            public int getOpacity() {
+                return PixelFormat.TRANSLUCENT;
             }
         }
     }
 }
+
+
 

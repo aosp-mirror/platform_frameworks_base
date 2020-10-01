@@ -22,18 +22,12 @@
 #include "Readback.h"
 #include "Rect.h"
 #include "WebViewFunctorManager.h"
-#include "pipeline/skia/SkiaOpenGLPipeline.h"
-#include "pipeline/skia/VectorDrawableAtlas.h"
-#include "renderstate/RenderState.h"
 #include "renderthread/CanvasContext.h"
-#include "renderthread/EglManager.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
 #include "utils/Macros.h"
 #include "utils/TimeUtils.h"
 #include "utils/TraceUtils.h"
-
-#include <ui/GraphicBuffer.h>
 
 namespace android {
 namespace uirenderer {
@@ -82,9 +76,11 @@ void RenderProxy::setName(const char* name) {
     mRenderThread.queue().runSync([this, name]() { mContext->setName(std::string(name)); });
 }
 
-void RenderProxy::setSurface(const sp<Surface>& surface, bool enableTimeout) {
-    mRenderThread.queue().post([this, surf = surface, enableTimeout]() mutable {
-        mContext->setSurface(std::move(surf), enableTimeout);
+void RenderProxy::setSurface(ANativeWindow* window, bool enableTimeout) {
+    ANativeWindow_acquire(window);
+    mRenderThread.queue().post([this, win = window, enableTimeout]() mutable {
+        mContext->setSurface(win, enableTimeout);
+        ANativeWindow_release(win);
     });
 }
 
@@ -318,11 +314,11 @@ void RenderProxy::setRenderAheadDepth(int renderAhead) {
             [context = mContext, renderAhead] { context->setRenderAheadDepth(renderAhead); });
 }
 
-int RenderProxy::copySurfaceInto(sp<Surface>& surface, int left, int top, int right, int bottom,
+int RenderProxy::copySurfaceInto(ANativeWindow* window, int left, int top, int right, int bottom,
                                  SkBitmap* bitmap) {
     auto& thread = RenderThread::getInstance();
     return static_cast<int>(thread.queue().runSync([&]() -> auto {
-        return thread.readback().copySurfaceInto(*surface, Rect(left, top, right, bottom), bitmap);
+        return thread.readback().copySurfaceInto(window, Rect(left, top, right, bottom), bitmap);
     }));
 }
 
@@ -340,7 +336,7 @@ void RenderProxy::prepareToDraw(Bitmap& bitmap) {
     };
     nsecs_t lastVsync = renderThread->timeLord().latestVsync();
     nsecs_t estimatedNextVsync = lastVsync + renderThread->timeLord().frameIntervalNanos();
-    nsecs_t timeToNextVsync = estimatedNextVsync - systemTime(CLOCK_MONOTONIC);
+    nsecs_t timeToNextVsync = estimatedNextVsync - systemTime(SYSTEM_TIME_MONOTONIC);
     // We expect the UI thread to take 4ms and for RT to be active from VSYNC+4ms to
     // VSYNC+12ms or so, so aim for the gap during which RT is expected to
     // be idle
@@ -367,27 +363,6 @@ int RenderProxy::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
 
 void RenderProxy::disableVsync() {
     Properties::disableVsync = true;
-}
-
-void RenderProxy::repackVectorDrawableAtlas() {
-    RenderThread& thread = RenderThread::getInstance();
-    thread.queue().post([&thread]() {
-        // The context may be null if trimMemory executed, but then the atlas was deleted too.
-        if (thread.getGrContext() != nullptr) {
-            thread.cacheManager().acquireVectorDrawableAtlas()->repackIfNeeded(
-                    thread.getGrContext());
-        }
-    });
-}
-
-void RenderProxy::releaseVDAtlasEntries() {
-    RenderThread& thread = RenderThread::getInstance();
-    thread.queue().post([&thread]() {
-        // The context may be null if trimMemory executed, but then the atlas was deleted too.
-        if (thread.getGrContext() != nullptr) {
-            thread.cacheManager().acquireVectorDrawableAtlas()->delayedReleaseEntries();
-        }
-    });
 }
 
 void RenderProxy::preload() {

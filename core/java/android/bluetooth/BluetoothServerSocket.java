@@ -110,7 +110,7 @@ public final class BluetoothServerSocket implements Closeable {
      * @param auth require the remote device to be authenticated
      * @param encrypt require the connection to be encrypted
      * @param port remote port
-     * @param mitm enforce man-in-the-middle protection for authentication.
+     * @param mitm enforce person-in-the-middle protection for authentication.
      * @param min16DigitPin enforce a minimum length of 16 digits for a sec mode 2 connection
      * @throws IOException On error, for example Bluetooth not available, or insufficient
      * privileges

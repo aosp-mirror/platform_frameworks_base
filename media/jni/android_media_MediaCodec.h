@@ -21,11 +21,16 @@
 
 #include "jni.h"
 
-#include <media/MediaAnalyticsItem.h>
+#include <C2Buffer.h>
+#include <binder/MemoryHeapBase.h>
+#include <media/MediaCodecBuffer.h>
+#include <media/MediaMetricsItem.h>
 #include <media/hardware/CryptoAPI.h>
 #include <media/stagefright/foundation/ABase.h>
 #include <media/stagefright/foundation/AHandler.h>
 #include <utils/Errors.h>
+
+class C2Buffer;
 
 namespace android {
 
@@ -39,6 +44,7 @@ struct MediaCodec;
 struct PersistentSurface;
 class Surface;
 namespace hardware {
+class HidlMemory;
 namespace cas {
 namespace native {
 namespace V1_0 {
@@ -55,6 +61,7 @@ struct JMediaCodec : public AHandler {
 
     void registerSelf();
     void release();
+    void releaseAsync();
 
     status_t enableOnFrameRenderedListener(jboolean enable);
 
@@ -97,6 +104,26 @@ struct JMediaCodec : public AHandler {
             uint32_t flags,
             AString *errorDetailMsg);
 
+    status_t queueBuffer(
+            size_t index, const std::shared_ptr<C2Buffer> &buffer,
+            int64_t timeUs, uint32_t flags, const sp<AMessage> &tunings,
+            AString *errorDetailMsg);
+
+    status_t queueEncryptedLinearBlock(
+            size_t index,
+            const sp<hardware::HidlMemory> &buffer,
+            size_t offset,
+            const CryptoPlugin::SubSample *subSamples,
+            size_t numSubSamples,
+            const uint8_t key[16],
+            const uint8_t iv[16],
+            CryptoPlugin::Mode mode,
+            const CryptoPlugin::Pattern &pattern,
+            int64_t presentationTimeUs,
+            uint32_t flags,
+            const sp<AMessage> &tunings,
+            AString *errorDetailMsg);
+
     status_t dequeueInputBuffer(size_t *index, int64_t timeoutUs);
 
     status_t dequeueOutputBuffer(
@@ -120,17 +147,22 @@ struct JMediaCodec : public AHandler {
     status_t getImage(
             JNIEnv *env, bool input, size_t index, jobject *image) const;
 
+    status_t getOutputFrame(
+            JNIEnv *env, jobject frame, size_t index) const;
+
     status_t getName(JNIEnv *env, jstring *name) const;
 
     status_t getCodecInfo(JNIEnv *env, jobject *codecInfo) const;
 
-    status_t getMetrics(JNIEnv *env, MediaAnalyticsItem * &reply) const;
+    status_t getMetrics(JNIEnv *env, mediametrics::Item * &reply) const;
 
     status_t setParameters(const sp<AMessage> &params);
 
     void setVideoScalingMode(int mode);
 
     void selectAudioPresentation(const int32_t presentationId, const int32_t programId);
+
+    bool hasCryptoOrDescrambler() { return mHasCryptoOrDescrambler; }
 
 protected:
     virtual ~JMediaCodec();
@@ -141,24 +173,20 @@ private:
     enum {
         kWhatCallbackNotify,
         kWhatFrameRendered,
+        kWhatAsyncReleaseComplete,
     };
 
     jclass mClass;
     jweak mObject;
     sp<Surface> mSurfaceTextureClient;
 
-    // java objects cached
-    jclass mByteBufferClass;
-    jobject mNativeByteOrderObj;
-    jmethodID mByteBufferOrderMethodID;
-    jmethodID mByteBufferPositionMethodID;
-    jmethodID mByteBufferLimitMethodID;
-    jmethodID mByteBufferAsReadOnlyBufferMethodID;
-
     sp<ALooper> mLooper;
     sp<MediaCodec> mCodec;
     AString mNameAtCreation;
+    bool mGraphicOutput{false};
+    bool mHasCryptoOrDescrambler{false};
     std::once_flag mReleaseFlag;
+    std::once_flag mAsyncReleaseFlag;
 
     sp<AMessage> mCallbackNotification;
     sp<AMessage> mOnFrameRenderedNotification;
@@ -170,8 +198,6 @@ private:
             JNIEnv *env, bool readOnly, bool clearBuffer, const sp<T> &buffer,
             jobject *buf) const;
 
-    void cacheJavaObjects(JNIEnv *env);
-    void deleteJavaObjects(JNIEnv *env);
     void handleCallback(const sp<AMessage> &msg);
     void handleFrameRenderedNotification(const sp<AMessage> &msg);
 

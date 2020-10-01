@@ -16,6 +16,20 @@
 
 package android.text.format;
 
+import static android.text.format.DateUtils.FORMAT_12HOUR;
+import static android.text.format.DateUtils.FORMAT_24HOUR;
+import static android.text.format.DateUtils.FORMAT_ABBREV_ALL;
+import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
+import static android.text.format.DateUtils.FORMAT_ABBREV_TIME;
+import static android.text.format.DateUtils.FORMAT_ABBREV_WEEKDAY;
+import static android.text.format.DateUtils.FORMAT_NO_MONTH_DAY;
+import static android.text.format.DateUtils.FORMAT_NO_YEAR;
+import static android.text.format.DateUtils.FORMAT_NUMERIC_DATE;
+import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
+import static android.text.format.DateUtils.FORMAT_SHOW_TIME;
+import static android.text.format.DateUtils.FORMAT_SHOW_WEEKDAY;
+import static android.text.format.DateUtils.FORMAT_SHOW_YEAR;
+
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
 import android.icu.util.Calendar;
@@ -33,24 +47,6 @@ import com.android.internal.annotations.VisibleForTesting;
  */
 @VisibleForTesting(visibility = PACKAGE)
 public final class DateUtilsBridge {
-    // These are all public API in DateUtils. There are others, but they're either for use with
-    // other methods (like FORMAT_ABBREV_RELATIVE), don't internationalize (like FORMAT_CAP_AMPM),
-    // or have never been implemented anyway.
-    public static final int FORMAT_SHOW_TIME = 0x00001;
-    public static final int FORMAT_SHOW_WEEKDAY = 0x00002;
-    public static final int FORMAT_SHOW_YEAR = 0x00004;
-    public static final int FORMAT_NO_YEAR = 0x00008;
-    public static final int FORMAT_SHOW_DATE = 0x00010;
-    public static final int FORMAT_NO_MONTH_DAY = 0x00020;
-    public static final int FORMAT_12HOUR = 0x00040;
-    public static final int FORMAT_24HOUR = 0x00080;
-    public static final int FORMAT_UTC = 0x02000;
-    public static final int FORMAT_ABBREV_TIME = 0x04000;
-    public static final int FORMAT_ABBREV_WEEKDAY = 0x08000;
-    public static final int FORMAT_ABBREV_MONTH = 0x10000;
-    public static final int FORMAT_NUMERIC_DATE = 0x20000;
-    public static final int FORMAT_ABBREV_RELATIVE = 0x40000;
-    public static final int FORMAT_ABBREV_ALL = 0x80000;
 
     /**
      * Creates an immutable ICU timezone backed by the specified libcore timezone data. At the time

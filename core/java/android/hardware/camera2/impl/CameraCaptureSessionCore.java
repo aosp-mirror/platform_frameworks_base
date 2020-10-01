@@ -61,4 +61,14 @@ public interface CameraCaptureSessionCore {
      */
     boolean isAborting();
 
+    /**
+     * Close the capture session without draining the pending requests.
+     *
+     * <p>This is usually used when switching to offline session mode. Depending
+     * on the client input, some of the pending requests will be flushed and some
+     * will remain for further processing. In either case, the regular drain logic
+     * needs to be skipped.</p>
+     *
+     */
+    void closeWithoutDraining();
 }

@@ -21,6 +21,6 @@ import android.app.PendingIntent;
 /** @hide */
 interface IFindDeviceCallback {
     @UnsupportedAppUsage
-    void onSuccess(in PendingIntent launcher);
-    void onFailure(in CharSequence reason);
+    oneway void onSuccess(in PendingIntent launcher);
+    oneway void onFailure(in CharSequence reason);
 }

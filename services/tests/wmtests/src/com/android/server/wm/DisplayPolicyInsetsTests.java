@@ -32,9 +32,11 @@ import androidx.test.filters.SmallTest;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
+import org.junit.runner.RunWith;
 
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class DisplayPolicyInsetsTests extends DisplayPolicyTestsBase {
 
     @Rule
@@ -172,6 +174,6 @@ public class DisplayPolicyInsetsTests extends DisplayPolicyTestsBase {
     }
 
     private static DisplayInfo displayInfoForRotation(int rotation, boolean withDisplayCutout) {
-        return displayInfoAndCutoutForRotation(rotation, withDisplayCutout).first;
+        return displayInfoAndCutoutForRotation(rotation, withDisplayCutout, false).first;
     }
 }

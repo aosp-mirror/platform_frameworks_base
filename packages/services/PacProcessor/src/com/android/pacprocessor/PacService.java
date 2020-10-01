@@ -17,6 +17,7 @@ package com.android.pacprocessor;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
@@ -30,19 +31,24 @@ import java.net.URL;
 
 public class PacService extends Service {
     private static final String TAG = "PacService";
+    private static final boolean sUseWebViewPacProcessor = Resources.getSystem().getBoolean(
+            com.android.internal.R.bool.config_useWebViewPacProcessor);
 
-    private PacNative mPacNative = PacNative.getInstance();
+    private final LibpacInterface mLibpac = sUseWebViewPacProcessor
+            ? PacWebView.getInstance()
+            : PacNative.getInstance();
+
     private ProxyServiceStub mStub = new ProxyServiceStub();
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mPacNative.startPacSupport();
+        mLibpac.startPacSupport();
     }
 
     @Override
     public void onDestroy() {
-        mPacNative.stopPacSupport();
+        mLibpac.stopPacSupport();
         super.onDestroy();
     }
 
@@ -52,7 +58,6 @@ public class PacService extends Service {
     }
 
     private class ProxyServiceStub extends IProxyService.Stub {
-
         @Override
         public String resolvePacFile(String host, String url) throws RemoteException {
             try {
@@ -69,7 +74,7 @@ public class PacService extends Service {
                         throw new IllegalArgumentException("Invalid host was passed");
                     }
                 }
-                return mPacNative.makeProxyRequest(url, host);
+                return mLibpac.makeProxyRequest(url, host);
             } catch (MalformedURLException e) {
                 throw new IllegalArgumentException("Invalid URL was passed");
             }
@@ -81,7 +86,7 @@ public class PacService extends Service {
                 Log.e(TAG, "Only system user is allowed to call setPacFile");
                 throw new SecurityException();
             }
-            mPacNative.setCurrentProxyScript(script);
+            mLibpac.setCurrentProxyScript(script);
         }
     }
 }

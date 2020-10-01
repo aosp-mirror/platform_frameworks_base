@@ -91,6 +91,7 @@ enum {
 };
 
 const std::string& kAndroidNamespace = "http://schemas.android.com/apk/res/android";
+constexpr int kCurrentDevelopmentVersion = 10000;
 
 /** Retrieves the attribute of the element with the specified attribute resource id. */
 static xml::Attribute* FindAttribute(xml::Element *el, uint32_t resd_id) {
@@ -291,7 +292,10 @@ class ManifestExtractor {
             }
           }
         }
-        return &attr->value;
+
+        if (!attr->value.empty()) {
+          return &attr->value;
+        }
       }
       return nullptr;
     }
@@ -322,7 +326,7 @@ class ManifestExtractor {
     ConfigDescription config;
     config.orientation = android::ResTable_config::ORIENTATION_PORT;
     config.density = android::ResTable_config::DENSITY_MEDIUM;
-    config.sdkVersion = 10000; // Very high.
+    config.sdkVersion = kCurrentDevelopmentVersion; // Very high.
     config.screenWidthDp = 320;
     config.screenHeightDp = 480;
     config.smallestScreenWidthDp = 320;
@@ -425,6 +429,8 @@ class Manifest : public ManifestExtractor::Element {
   const std::string* split = nullptr;
   const std::string* platformVersionName = nullptr;
   const std::string* platformVersionCode = nullptr;
+  const int32_t* platformVersionNameInt = nullptr;
+  const int32_t* platformVersionCodeInt = nullptr;
   const int32_t* compilesdkVersion = nullptr;
   const std::string* compilesdkVersionCodename = nullptr;
   const int32_t* installLocation = nullptr;
@@ -440,6 +446,10 @@ class Manifest : public ManifestExtractor::Element {
                                                            "platformBuildVersionName"));
     platformVersionCode = GetAttributeString(FindAttribute(manifest, {},
                                                            "platformBuildVersionCode"));
+    platformVersionNameInt = GetAttributeInteger(FindAttribute(manifest, {},
+                                                               "platformBuildVersionName"));
+    platformVersionCodeInt = GetAttributeInteger(FindAttribute(manifest, {},
+                                                               "platformBuildVersionCode"));
 
     // Extract the compile sdk info
     compilesdkVersion = GetAttributeInteger(FindAttribute(manifest, COMPILE_SDK_VERSION_ATTR));
@@ -459,9 +469,13 @@ class Manifest : public ManifestExtractor::Element {
     }
     if (platformVersionName) {
       printer->Print(StringPrintf(" platformBuildVersionName='%s'", platformVersionName->data()));
+    } else if (platformVersionNameInt) {
+      printer->Print(StringPrintf(" platformBuildVersionName='%d'", *platformVersionNameInt));
     }
     if (platformVersionCode) {
       printer->Print(StringPrintf(" platformBuildVersionCode='%s'", platformVersionCode->data()));
+    } else if (platformVersionCodeInt) {
+      printer->Print(StringPrintf(" platformBuildVersionCode='%d'", *platformVersionCodeInt));
     }
     if (compilesdkVersion) {
       printer->Print(StringPrintf(" compileSdkVersion='%d'", *compilesdkVersion));
@@ -609,6 +623,8 @@ class UsesSdkBadging : public ManifestExtractor::Element {
     }
     if (target_sdk) {
       extractor()->RaiseTargetSdk(*target_sdk);
+    } else if (target_sdk_name) {
+      extractor()->RaiseTargetSdk(kCurrentDevelopmentVersion);
     }
   }
 

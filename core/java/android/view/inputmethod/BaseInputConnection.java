@@ -54,7 +54,7 @@ public class BaseInputConnection implements InputConnection {
     /** @hide */
     protected final InputMethodManager mIMM;
     final View mTargetView;
-    final boolean mDummyMode;
+    final boolean mFallbackMode;
 
     private Object[] mDefaultComposingSpans;
 
@@ -64,14 +64,14 @@ public class BaseInputConnection implements InputConnection {
     BaseInputConnection(InputMethodManager mgr, boolean fullEditor) {
         mIMM = mgr;
         mTargetView = null;
-        mDummyMode = !fullEditor;
+        mFallbackMode = !fullEditor;
     }
 
     public BaseInputConnection(View targetView, boolean fullEditor) {
         mIMM = (InputMethodManager)targetView.getContext().getSystemService(
                 Context.INPUT_METHOD_SERVICE);
         mTargetView = targetView;
-        mDummyMode = !fullEditor;
+        mFallbackMode = !fullEditor;
     }
 
     public static final void removeComposingSpans(Spannable text) {
@@ -189,7 +189,7 @@ public class BaseInputConnection implements InputConnection {
 
     /**
      * Default implementation replaces any existing composing text with
-     * the given text.  In addition, only if dummy mode, a key event is
+     * the given text.  In addition, only if fallback mode, a key event is
      * sent for the new text and the current editable buffer cleared.
      */
     public boolean commitText(CharSequence text, int newCursorPosition) {
@@ -211,6 +211,10 @@ public class BaseInputConnection implements InputConnection {
      *        If this is greater than the number of existing characters between the cursor and
      *        the end of the text, then this method does not fail but deletes all the characters in
      *        that range.
+     *
+     * @return {@code true} when selected text is deleted, {@code false} when either the
+     *         selection is invalid or not yet attached (i.e. selection start or end is -1),
+     *         or the editable text is {@code null}.
      */
     public boolean deleteSurroundingText(int beforeLength, int afterLength) {
         if (DEBUG) Log.v(TAG, "deleteSurroundingText " + beforeLength
@@ -227,6 +231,12 @@ public class BaseInputConnection implements InputConnection {
             int tmp = a;
             a = b;
             b = tmp;
+        }
+
+        // Skip when the selection is not yet attached.
+        if (a == -1 || b == -1) {
+            endBatchEdit();
+            return false;
         }
 
         // Ignore the composing text.
@@ -247,8 +257,12 @@ public class BaseInputConnection implements InputConnection {
         if (beforeLength > 0) {
             int start = a - beforeLength;
             if (start < 0) start = 0;
-            content.delete(start, a);
-            deleted = a - start;
+
+            final int numDeleteBefore = a - start;
+            if (a >= 0 && numDeleteBefore > 0) {
+                content.delete(start, a);
+                deleted = numDeleteBefore;
+            }
         }
 
         if (afterLength > 0) {
@@ -257,7 +271,10 @@ public class BaseInputConnection implements InputConnection {
             int end = b + afterLength;
             if (end > content.length()) end = content.length();
 
-            content.delete(b, end);
+            final int numDeleteAfter = end - b;
+            if (b >= 0 && numDeleteAfter > 0) {
+                content.delete(b, end);
+            }
         }
 
         endBatchEdit();
@@ -428,7 +445,7 @@ public class BaseInputConnection implements InputConnection {
 
     /**
      * The default implementation removes the composing state from the
-     * current editable text.  In addition, only if dummy mode, a key event is
+     * current editable text.  In addition, only if fallback mode, a key event is
      * sent for the new text and the current editable buffer cleared.
      */
     public boolean finishComposingText() {
@@ -437,7 +454,7 @@ public class BaseInputConnection implements InputConnection {
         if (content != null) {
             beginBatchEdit();
             removeComposingSpans(content);
-            // Note: sendCurrentText does nothing unless mDummyMode is set
+            // Note: sendCurrentText does nothing unless mFallbackMode is set
             sendCurrentText();
             endBatchEdit();
         }
@@ -447,10 +464,10 @@ public class BaseInputConnection implements InputConnection {
     /**
      * The default implementation uses TextUtils.getCapsMode to get the
      * cursor caps mode for the current selection position in the editable
-     * text, unless in dummy mode in which case 0 is always returned.
+     * text, unless in fallback mode in which case 0 is always returned.
      */
     public int getCursorCapsMode(int reqModes) {
-        if (mDummyMode) return 0;
+        if (mFallbackMode) return 0;
 
         final Editable content = getEditable();
         if (content == null) return 0;
@@ -647,7 +664,7 @@ public class BaseInputConnection implements InputConnection {
             content.setSpan(COMPOSING, a, b,
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE | Spanned.SPAN_COMPOSING);
 
-            // Note: sendCurrentText does nothing unless mDummyMode is set
+            // Note: sendCurrentText does nothing unless mFallbackMode is set
             sendCurrentText();
             endBatchEdit();
         }
@@ -698,7 +715,7 @@ public class BaseInputConnection implements InputConnection {
     }
 
     private void sendCurrentText() {
-        if (!mDummyMode) {
+        if (!mFallbackMode) {
             return;
         }
 
@@ -741,8 +758,9 @@ public class BaseInputConnection implements InputConnection {
             Context context;
             if (mTargetView != null) {
                 context = mTargetView.getContext();
-            } else if (mIMM.mServedView != null) {
-                context = mIMM.mServedView.getContext();
+            } else if (mIMM.mCurRootView != null) {
+                final View servedView = mIMM.mCurRootView.getImeFocusController().getServedView();
+                context = servedView != null ? servedView.getContext() : null;
             } else {
                 context = null;
             }

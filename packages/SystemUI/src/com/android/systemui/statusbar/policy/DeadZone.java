@@ -198,7 +198,7 @@ public class DeadZone {
         can.drawARGB((int) (frac * 0xFF), 0xDD, 0xEE, 0xAA);
 
         if (DEBUG && size > mSizeMin)
-            // crazy aggressive redrawing here, for debugging only
+            // Very aggressive redrawing here, for debugging only
             mNavigationBarView.postInvalidateDelayed(100);
     }
 }

@@ -88,6 +88,7 @@ final class FillUi {
         void requestHideFillUi();
         void startIntentSender(IntentSender intentSender);
         void dispatchUnhandledKey(KeyEvent keyEvent);
+        void cancelSession();
     }
 
     private final @NonNull Point mTempPoint = new Point();
@@ -129,9 +130,9 @@ final class FillUi {
     }
 
     FillUi(@NonNull Context context, @NonNull FillResponse response,
-           @NonNull AutofillId focusedViewId, @NonNull @Nullable String filterText,
-           @NonNull OverlayControl overlayControl, @NonNull CharSequence serviceLabel,
-           @NonNull Drawable serviceIcon, boolean nightMode, @NonNull Callback callback) {
+            @NonNull AutofillId focusedViewId, @Nullable String filterText,
+            @NonNull OverlayControl overlayControl, @NonNull CharSequence serviceLabel,
+            @NonNull Drawable serviceIcon, boolean nightMode, @NonNull Callback callback) {
         if (sVerbose) Slog.v(TAG, "nightMode: " + nightMode);
         mThemeId = nightMode ? THEME_ID_DARK : THEME_ID_LIGHT;
         mCallback = callback;
@@ -164,7 +165,7 @@ final class FillUi {
         // In full screen we only initialize size once assuming screen size never changes
         if (mFullScreen) {
             final Point outPoint = mTempPoint;
-            mContext.getDisplay().getSize(outPoint);
+            mContext.getDisplayNoVerify().getSize(outPoint);
             // full with of screen and half height of screen
             mContentWidth = LayoutParams.MATCH_PARENT;
             mContentHeight = outPoint.y / 2;
@@ -263,6 +264,7 @@ final class FillUi {
                 mHeader = headerPresentation.applyWithTheme(mContext, null, clickBlocker, mThemeId);
                 final LinearLayout headerContainer =
                         decor.findViewById(R.id.autofill_dataset_header);
+                applyCancelAction(mHeader, response.getCancelIds());
                 if (sVerbose) Slog.v(TAG, "adding header");
                 headerContainer.addView(mHeader);
                 headerContainer.setVisibility(View.VISIBLE);
@@ -279,6 +281,7 @@ final class FillUi {
                     }
                     mFooter = footerPresentation.applyWithTheme(
                             mContext, null, clickBlocker, mThemeId);
+                    applyCancelAction(mFooter, response.getCancelIds());
                     // Footer not supported on some platform e.g. TV
                     if (sVerbose) Slog.v(TAG, "adding footer");
                     footerContainer.addView(mFooter);
@@ -310,6 +313,8 @@ final class FillUi {
                         Slog.e(TAG, "Error inflating remote views", e);
                         continue;
                     }
+                    // TODO: Extract the shared filtering logic here and in FillUi to a common
+                    //  method.
                     final DatasetFieldFilter filter = dataset.getFilter(index);
                     Pattern filterPattern = null;
                     String valueText = null;
@@ -330,6 +335,7 @@ final class FillUi {
                         }
                     }
 
+                    applyCancelAction(view, response.getCancelIds());
                     items.add(new ViewItem(dataset, filterPattern, filterable, valueText, view));
                 }
             }
@@ -352,6 +358,37 @@ final class FillUi {
 
             applyNewFilterText();
             mWindow = new AnchoredWindow(decor, overlayControl);
+        }
+    }
+
+    private void applyCancelAction(View rootView, int[] ids) {
+        if (ids == null) {
+            return;
+        }
+
+        if (sDebug) Slog.d(TAG, "fill UI has " + ids.length + " actions");
+        if (!(rootView instanceof ViewGroup)) {
+            Slog.w(TAG, "cannot apply actions because fill UI root is not a "
+                    + "ViewGroup: " + rootView);
+            return;
+        }
+
+        // Apply click actions.
+        final ViewGroup root = (ViewGroup) rootView;
+        for (int i = 0; i < ids.length; i++) {
+            final int id = ids[i];
+            final View child = root.findViewById(id);
+            if (child == null) {
+                Slog.w(TAG, "Ignoring cancel action for view " + id
+                        + " because it's not on " + root);
+                continue;
+            }
+            child.setOnClickListener((v) -> {
+                if (sVerbose) {
+                    Slog.v(TAG, " Cancelling session after " + v + " clicked");
+                }
+                mCallback.cancelSession();
+            });
         }
     }
 
@@ -522,7 +559,7 @@ final class FillUi {
     }
 
     private static void resolveMaxWindowSize(Context context, Point outPoint) {
-        context.getDisplay().getSize(outPoint);
+        context.getDisplayNoVerify().getSize(outPoint);
         final TypedValue typedValue = sTempTypedValue;
         context.getTheme().resolveAttribute(R.attr.autofillDatasetPickerMaxWidth,
                 typedValue, true);
@@ -567,6 +604,7 @@ final class FillUi {
          * Returns whether this item matches the value input by the user so it can be included
          * in the filtered datasets.
          */
+        // TODO: Extract the shared filtering logic here and in FillUi to a common method.
         public boolean matches(CharSequence filterText) {
             if (TextUtils.isEmpty(filterText)) {
                 // Always show item when the user input is empty

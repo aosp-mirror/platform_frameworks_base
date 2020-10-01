@@ -35,7 +35,7 @@ class SnapshotStartingData extends StartingData {
     }
 
     @Override
-    StartingSurface createStartingSurface(AppWindowToken atoken) {
-        return mService.mTaskSnapshotController.createStartingSurface(atoken, mSnapshot);
+    StartingSurface createStartingSurface(ActivityRecord activity) {
+        return mService.mTaskSnapshotController.createStartingSurface(activity, mSnapshot);
     }
 }

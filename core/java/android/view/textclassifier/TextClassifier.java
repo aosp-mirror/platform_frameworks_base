@@ -46,6 +46,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -60,17 +61,32 @@ import java.util.Set;
 public interface TextClassifier {
 
     /** @hide */
-    String DEFAULT_LOG_TAG = "androidtc";
+    String LOG_TAG = "androidtc";
 
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {LOCAL, SYSTEM})
+    @IntDef(value = {LOCAL, SYSTEM, DEFAULT_SYSTEM})
     @interface TextClassifierType {}  // TODO: Expose as system APIs.
     /** Specifies a TextClassifier that runs locally in the app's process. @hide */
     int LOCAL = 0;
     /** Specifies a TextClassifier that runs in the system process and serves all apps. @hide */
     int SYSTEM = 1;
+    /** Specifies the default TextClassifier that runs in the system process. @hide */
+    int DEFAULT_SYSTEM = 2;
+
+    /** @hide */
+    static String typeToString(@TextClassifierType int type) {
+        switch (type) {
+            case LOCAL:
+                return "Local";
+            case SYSTEM:
+                return "System";
+            case DEFAULT_SYSTEM:
+                return "Default system";
+        }
+        return "Unknown";
+    }
 
     /** The TextClassifier failed to run. */
     String TYPE_UNKNOWN = "";
@@ -193,7 +209,7 @@ public interface TextClassifier {
     @WorkerThread
     @NonNull
     default TextSelection suggestSelection(@NonNull TextSelection.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         return new TextSelection.Builder(request.getStartIndex(), request.getEndIndex()).build();
     }
@@ -252,7 +268,7 @@ public interface TextClassifier {
     @WorkerThread
     @NonNull
     default TextClassification classifyText(@NonNull TextClassification.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         return TextClassification.EMPTY;
     }
@@ -313,7 +329,7 @@ public interface TextClassifier {
     @WorkerThread
     @NonNull
     default TextLinks generateLinks(@NonNull TextLinks.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         return new TextLinks.Builder(request.getText().toString()).build();
     }
@@ -346,7 +362,7 @@ public interface TextClassifier {
     @WorkerThread
     @NonNull
     default TextLanguage detectLanguage(@NonNull TextLanguage.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         return TextLanguage.EMPTY;
     }
@@ -358,7 +374,7 @@ public interface TextClassifier {
     @NonNull
     default ConversationActions suggestConversationActions(
             @NonNull ConversationActions.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         return new ConversationActions(Collections.emptyList(), null);
     }
@@ -427,9 +443,9 @@ public interface TextClassifier {
                 List<String> excludedEntityTypes,
                 List<String> hints,
                 boolean includeTypesFromTextClassifier) {
-            mIncludedTypes = Preconditions.checkNotNull(includedEntityTypes);
-            mExcludedTypes = Preconditions.checkNotNull(excludedEntityTypes);
-            mHints = Preconditions.checkNotNull(hints);
+            mIncludedTypes = Objects.requireNonNull(includedEntityTypes);
+            mExcludedTypes = Objects.requireNonNull(excludedEntityTypes);
+            mHints = Objects.requireNonNull(hints);
             mIncludeTypesFromTextClassifier = includeTypesFromTextClassifier;
         }
 
@@ -666,8 +682,10 @@ public interface TextClassifier {
             Preconditions.checkArgument(endIndex > startIndex);
         }
 
-        static void checkTextLength(CharSequence text, int maxLength) {
-            Preconditions.checkArgumentInRange(text.length(), 0, maxLength, "text.length()");
+        /** Returns if the length of the text is within the range. */
+        static boolean checkTextLength(CharSequence text, int maxLength) {
+            int textLength = text.length();
+            return textLength >= 0 && textLength <= maxLength;
         }
 
         /**
@@ -771,7 +789,7 @@ public interface TextClassifier {
 
         static void checkMainThread() {
             if (Looper.myLooper() == Looper.getMainLooper()) {
-                Log.w(DEFAULT_LOG_TAG, "TextClassifier called on main thread");
+                Log.w(LOG_TAG, "TextClassifier called on main thread");
             }
         }
     }

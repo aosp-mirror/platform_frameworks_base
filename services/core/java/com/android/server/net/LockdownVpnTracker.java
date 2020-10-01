@@ -16,7 +16,6 @@
 
 package com.android.server.net;
 
-import static android.Manifest.permission.NETWORK_STACK;
 import static android.provider.Settings.ACTION_VPN_SETTINGS;
 
 import android.annotation.NonNull;
@@ -24,10 +23,8 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -41,6 +38,7 @@ import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
@@ -63,7 +61,7 @@ public class LockdownVpnTracker {
     /** Number of VPN attempts before waiting for user intervention. */
     private static final int MAX_ERROR_COUNT = 4;
 
-    private static final String ACTION_LOCKDOWN_RESET = "com.android.server.action.LOCKDOWN_RESET";
+    public static final String ACTION_LOCKDOWN_RESET = "com.android.server.action.LOCKDOWN_RESET";
 
     @NonNull private final Context mContext;
     @NonNull private final ConnectivityService mConnService;
@@ -103,13 +101,6 @@ public class LockdownVpnTracker {
         resetIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         mResetIntent = PendingIntent.getBroadcast(mContext, 0, resetIntent, 0);
     }
-
-    private BroadcastReceiver mResetReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            reset();
-        }
-    };
 
     /**
      * Watch for state changes to both active egress network, kicking off a VPN
@@ -200,9 +191,6 @@ public class LockdownVpnTracker {
 
         mVpn.setEnableTeardown(false);
         mVpn.setLockdown(true);
-
-        final IntentFilter resetFilter = new IntentFilter(ACTION_LOCKDOWN_RESET);
-        mContext.registerReceiver(mResetReceiver, resetFilter, NETWORK_STACK, mHandler);
         handleStateChangedLocked();
     }
 
@@ -222,10 +210,14 @@ public class LockdownVpnTracker {
         mVpn.setLockdown(false);
         hideNotification();
 
-        mContext.unregisterReceiver(mResetReceiver);
         mVpn.setEnableTeardown(true);
     }
 
+    /**
+     * Reset VPN lockdown tracker. Called by ConnectivityService when receiving
+     * {@link #ACTION_LOCKDOWN_RESET} pending intent.
+     */
+    @GuardedBy("mConnService.mVpns")
     public void reset() {
         Slog.d(TAG, "reset()");
         synchronized (mStateLock) {

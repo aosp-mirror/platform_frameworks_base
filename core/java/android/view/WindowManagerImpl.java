@@ -16,14 +16,27 @@
 
 package android.view;
 
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
+
 import android.annotation.NonNull;
+import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.graphics.Insets;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 
 import java.util.List;
@@ -57,7 +70,8 @@ import java.util.List;
 public final class WindowManagerImpl implements WindowManager {
     @UnsupportedAppUsage
     private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();
-    private final Context mContext;
+    @VisibleForTesting
+    public final Context mContext;
     private final Window mParentWindow;
 
     private IBinder mDefaultToken;
@@ -92,7 +106,8 @@ public final class WindowManagerImpl implements WindowManager {
     @Override
     public void addView(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
         applyDefaultToken(params);
-        mGlobal.addView(view, params, mContext.getDisplay(), mParentWindow);
+        mGlobal.addView(view, params, mContext.getDisplayNoVerify(), mParentWindow,
+                mContext.getUserId());
     }
 
     @Override
@@ -146,7 +161,7 @@ public final class WindowManagerImpl implements WindowManager {
 
     @Override
     public Display getDefaultDisplay() {
-        return mContext.getDisplay();
+        return mContext.getDisplayNoVerify();
     }
 
     @Override
@@ -200,5 +215,79 @@ public final class WindowManagerImpl implements WindowManager {
         } catch (RemoteException e) {
         }
         return false;
+    }
+
+    @Override
+    public WindowMetrics getCurrentWindowMetrics() {
+        final Context context = mParentWindow != null ? mParentWindow.getContext() : mContext;
+        final Rect bounds = getCurrentBounds(context);
+
+        return new WindowMetrics(bounds, computeWindowInsets(bounds));
+    }
+
+    private static Rect getCurrentBounds(Context context) {
+        synchronized (ResourcesManager.getInstance()) {
+            return context.getResources().getConfiguration().windowConfiguration.getBounds();
+        }
+    }
+
+    @Override
+    public WindowMetrics getMaximumWindowMetrics() {
+        final Rect maxBounds = getMaximumBounds();
+        return new WindowMetrics(maxBounds, computeWindowInsets(maxBounds));
+    }
+
+    private Rect getMaximumBounds() {
+        // TODO(b/128338354): Current maximum bound is display size, but it should be displayArea
+        //  bound after displayArea feature is finished.
+        final Display display = mContext.getDisplayNoVerify();
+        final Point displaySize = new Point();
+        display.getRealSize(displaySize);
+        return new Rect(0, 0, displaySize.x, displaySize.y);
+    }
+
+    // TODO(b/150095967): Set window type to LayoutParams
+    private WindowInsets computeWindowInsets(Rect bounds) {
+        // Initialize params which used for obtaining all system insets.
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+        params.flags = FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
+        params.token = (mParentWindow != null) ? mParentWindow.getContext().getActivityToken()
+                : mContext.getActivityToken();
+        params.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+        params.setFitInsetsTypes(0);
+        params.setFitInsetsSides(0);
+
+        return getWindowInsetsFromServer(params, bounds);
+    }
+
+    private WindowInsets getWindowInsetsFromServer(WindowManager.LayoutParams attrs, Rect bounds) {
+        try {
+            final Rect systemWindowInsets = new Rect();
+            final Rect stableInsets = new Rect();
+            final DisplayCutout.ParcelableWrapper displayCutout =
+                    new DisplayCutout.ParcelableWrapper();
+            final InsetsState insetsState = new InsetsState();
+            final boolean alwaysConsumeSystemBars = WindowManagerGlobal.getWindowManagerService()
+                    .getWindowInsets(attrs, mContext.getDisplayId(), systemWindowInsets,
+                    stableInsets, displayCutout, insetsState);
+            final boolean isScreenRound =
+                    mContext.getResources().getConfiguration().isScreenRound();
+            if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL) {
+                return insetsState.calculateInsets(bounds, null /* ignoringVisibilityState*/,
+                        isScreenRound, alwaysConsumeSystemBars, displayCutout.get(),
+                        SOFT_INPUT_ADJUST_NOTHING, attrs.flags,
+                        SYSTEM_UI_FLAG_VISIBLE, null /* typeSideMap */);
+            } else {
+                return new WindowInsets.Builder()
+                        .setAlwaysConsumeSystemBars(alwaysConsumeSystemBars)
+                        .setRound(isScreenRound)
+                        .setSystemWindowInsets(Insets.of(systemWindowInsets))
+                        .setStableInsets(Insets.of(stableInsets))
+                        .setDisplayCutout(displayCutout.get()).build();
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

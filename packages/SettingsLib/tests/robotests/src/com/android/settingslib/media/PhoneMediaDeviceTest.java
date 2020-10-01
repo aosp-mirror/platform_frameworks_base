@@ -16,18 +16,23 @@
 
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
+import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
+import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
+
+import static com.android.settingslib.media.PhoneMediaDevice.PHONE_ID;
+import static com.android.settingslib.media.PhoneMediaDevice.USB_HEADSET_ID;
+import static com.android.settingslib.media.PhoneMediaDevice.WIRED_HEADSET_ID;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.when;
 
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.media.MediaRoute2Info;
 
 import com.android.settingslib.R;
-import com.android.settingslib.bluetooth.A2dpProfile;
-import com.android.settingslib.bluetooth.HearingAidProfile;
-import com.android.settingslib.bluetooth.LocalBluetoothManager;
-import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,15 +46,7 @@ import org.robolectric.RuntimeEnvironment;
 public class PhoneMediaDeviceTest {
 
     @Mock
-    private LocalBluetoothProfileManager mLocalProfileManager;
-    @Mock
-    private LocalBluetoothManager mLocalBluetoothManager;
-    @Mock
-    private HearingAidProfile mHapProfile;
-    @Mock
-    private A2dpProfile mA2dpProfile;
-    @Mock
-    private BluetoothDevice mDevice;
+    private MediaRoute2Info mInfo;
 
     private Context mContext;
     private PhoneMediaDevice mPhoneMediaDevice;
@@ -59,68 +56,8 @@ public class PhoneMediaDeviceTest {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
 
-        when(mLocalBluetoothManager.getProfileManager()).thenReturn(mLocalProfileManager);
-        when(mLocalProfileManager.getA2dpProfile()).thenReturn(mA2dpProfile);
-        when(mLocalProfileManager.getHearingAidProfile()).thenReturn(mHapProfile);
-        when(mA2dpProfile.getActiveDevice()).thenReturn(mDevice);
-
-        mPhoneMediaDevice = new PhoneMediaDevice(mContext, mLocalBluetoothManager);
-    }
-
-    @Test
-    public void connect_phoneDeviceSetActiveSuccess_isConnectedReturnTrue() {
-        when(mA2dpProfile.setActiveDevice(null)).thenReturn(true);
-        when(mHapProfile.setActiveDevice(null)).thenReturn(true);
-
-        assertThat(mPhoneMediaDevice.connect()).isTrue();
-    }
-
-    @Test
-    public void connect_a2dpProfileSetActiveFail_isConnectedReturnFalse() {
-        when(mA2dpProfile.setActiveDevice(null)).thenReturn(false);
-        when(mHapProfile.setActiveDevice(null)).thenReturn(true);
-
-        assertThat(mPhoneMediaDevice.connect()).isFalse();
-    }
-
-    @Test
-    public void connect_hearingAidProfileSetActiveFail_isConnectedReturnFalse() {
-        when(mA2dpProfile.setActiveDevice(null)).thenReturn(true);
-        when(mHapProfile.setActiveDevice(null)).thenReturn(false);
-
-        assertThat(mPhoneMediaDevice.connect()).isFalse();
-    }
-
-    @Test
-    public void connect_hearingAidAndA2dpProfileSetActiveFail_isConnectedReturnFalse() {
-        when(mA2dpProfile.setActiveDevice(null)).thenReturn(false);
-        when(mHapProfile.setActiveDevice(null)).thenReturn(false);
-
-        assertThat(mPhoneMediaDevice.connect()).isFalse();
-    }
-
-    @Test
-    public void connect_hearingAidProfileIsNullAndA2dpProfileNotNull_isConnectedReturnTrue() {
-        when(mLocalProfileManager.getHearingAidProfile()).thenReturn(null);
-
-        when(mA2dpProfile.setActiveDevice(null)).thenReturn(true);
-        assertThat(mPhoneMediaDevice.connect()).isTrue();
-    }
-
-    @Test
-    public void connect_hearingAidProfileNotNullAndA2dpProfileIsNull_isConnectedReturnTrue() {
-        when(mLocalProfileManager.getA2dpProfile()).thenReturn(null);
-
-        when(mHapProfile.setActiveDevice(null)).thenReturn(true);
-        assertThat(mPhoneMediaDevice.connect()).isTrue();
-    }
-
-    @Test
-    public void connect_hearingAidProfileAndA2dpProfileIsNull_isConnectedReturnFalse() {
-        when(mLocalProfileManager.getA2dpProfile()).thenReturn(null);
-        when(mLocalProfileManager.getHearingAidProfile()).thenReturn(null);
-
-        assertThat(mPhoneMediaDevice.connect()).isFalse();
+        mPhoneMediaDevice =
+                new PhoneMediaDevice(mContext, null, mInfo, null);
     }
 
     @Test
@@ -136,5 +73,59 @@ public class PhoneMediaDeviceTest {
         mPhoneMediaDevice.updateSummary(false);
 
         assertThat(mPhoneMediaDevice.getSummary()).isEmpty();
+    }
+
+    @Test
+    public void getDrawableResId_returnCorrectResId() {
+        when(mInfo.getType()).thenReturn(TYPE_WIRED_HEADPHONES);
+
+        assertThat(mPhoneMediaDevice.getDrawableResId()).isEqualTo(R.drawable.ic_headphone);
+
+        when(mInfo.getType()).thenReturn(TYPE_WIRED_HEADSET);
+
+        assertThat(mPhoneMediaDevice.getDrawableResId()).isEqualTo(R.drawable.ic_headphone);
+
+        when(mInfo.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
+
+        assertThat(mPhoneMediaDevice.getDrawableResId()).isEqualTo(R.drawable.ic_smartphone);
+    }
+
+    @Test
+    public void getName_returnCorrectName() {
+        final String deviceName = "test_name";
+
+        when(mInfo.getType()).thenReturn(TYPE_WIRED_HEADPHONES);
+        when(mInfo.getName()).thenReturn(deviceName);
+
+        assertThat(mPhoneMediaDevice.getName())
+                .isEqualTo(mContext.getString(R.string.media_transfer_wired_usb_device_name));
+
+        when(mInfo.getType()).thenReturn(TYPE_USB_DEVICE);
+
+        assertThat(mPhoneMediaDevice.getName())
+                .isEqualTo(mContext.getString(R.string.media_transfer_wired_usb_device_name));
+
+        when(mInfo.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
+
+        assertThat(mPhoneMediaDevice.getName())
+                .isEqualTo(mContext.getString(R.string.media_transfer_this_device_name));
+    }
+
+    @Test
+    public void getId_returnCorrectId() {
+        when(mInfo.getType()).thenReturn(TYPE_WIRED_HEADPHONES);
+
+        assertThat(mPhoneMediaDevice.getId())
+                .isEqualTo(WIRED_HEADSET_ID);
+
+        when(mInfo.getType()).thenReturn(TYPE_USB_DEVICE);
+
+        assertThat(mPhoneMediaDevice.getId())
+                .isEqualTo(USB_HEADSET_ID);
+
+        when(mInfo.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
+
+        assertThat(mPhoneMediaDevice.getId())
+                .isEqualTo(PHONE_ID);
     }
 }

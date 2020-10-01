@@ -7,6 +7,7 @@ filegroup {
 
 java_library_static {
     name: "services.accessibility",
+    defaults: ["services_defaults"],
     srcs: [":services.accessibility-sources"],
     libs: ["services.core"],
 }

@@ -359,13 +359,13 @@
              to {@link android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN}. -->
         <attr name="windowFullscreen" format="boolean" />
         <!-- Flag indicating whether this window should extend into overscan region.  Corresponds
-             to {@link android.view.WindowManager.LayoutParams#FLAG_LAYOUT_IN_OVERSCAN}. -->
+             to {@link android.view.WindowManager.LayoutParams#FLAG_LAYOUT_IN_OVERSCAN}.
+             @deprecated Overscan areas aren't set by any Android product anymore as of Android 11.
+             -->
         <attr name="windowOverscan" format="boolean" />
         <!-- Flag indicating whether this is a floating window. -->
         <attr name="windowIsFloating" format="boolean" />
-        <!-- Flag indicating whether this is a translucent window. If this attribute is unset (but
-             not if set to false), the window might still be considered translucent, if
-             windowSwipeToDismiss is set to true. -->
+        <!-- Flag indicating whether this is a translucent window. -->
         <attr name="windowIsTranslucent" format="boolean" />
         <!-- Flag indicating that this window's background should be the
              user's current wallpaper.  Corresponds
@@ -492,7 +492,9 @@
         <!-- Flag to indicate that a window can be swiped away to be dismissed.
              Corresponds to {@link android.view.Window#FEATURE_SWIPE_TO_DISMISS}. It will also
              dynamically change translucency of the window, if the windowIsTranslucent is not set.
-             If windowIsTranslucent is set (to either true or false) it will obey that setting. -->
+             If windowIsTranslucent is set (to either true or false) it will obey that setting.
+             @deprecated Swipe-to-dismiss isn't functional anymore.
+             -->
         <attr name="windowSwipeToDismiss" format="boolean" />
 
         <!-- Flag indicating whether this window requests that content changes be performed
@@ -1961,7 +1963,6 @@
         <attr name="windowCloseOnTouchOutside" />
         <attr name="windowTranslucentStatus" />
         <attr name="windowTranslucentNavigation" />
-        <attr name="windowSwipeToDismiss" />
         <attr name="windowContentTransitions" />
         <attr name="windowActivityTransitions" />
         <attr name="windowContentTransitionManager" />
@@ -2216,6 +2217,16 @@
             Corresponds to <code>LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER</code>.
             -->
             <enum name="never" value="2" />
+            <!-- <p>
+            The window is always allowed to extend into the <code>DisplayCutout</code> areas on the
+            all edges of the screen.
+            <p>
+            The window must make sure that no important content overlaps with the
+            <code>DisplayCutout</code>.
+            <p>
+            Corresponds to <code>LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS</code>.
+            -->
+            <enum name="always" value="3" />
         </attr>
     </declare-styleable>
 
@@ -2497,7 +2508,39 @@
             <flag name="noExcludeDescendants" value="0x8" />
         </attr>
 
-        <attr name="__removed6" />
+        <!-- Hints the Android System whether the view node associated with this View should be
+             use for content capture purposes. -->
+        <attr name="importantForContentCapture">
+            <!-- Let the Android System use its heuristics to determine if the view is important for content capture. -->
+            <flag name="auto" value="0" />
+            <!-- Hint the Android System that this view is important for content capture,
+                  and its children (if any) will be traversed.. -->
+            <flag name="yes" value="0x1" />
+            <!-- Hint the Android System that this view is *not* important for content capture,
+                  but its children (if any) will be traversed.. -->
+            <flag name="no" value="0x2" />
+            <!-- Hint the Android System that this view is important for content capture,
+                 but its children (if any) will not be traversed. -->
+            <flag name="yesExcludeDescendants" value="0x4" />
+            <!-- Hint the Android System that this view is *not* important for content capture,
+                 and its children (if any) will not be traversed. -->
+            <flag name="noExcludeDescendants" value="0x8" />
+        </attr>
+
+        <!-- Hints the Android System whether the this View should be considered a scroll capture target. -->
+        <attr name="scrollCaptureHint">
+            <!-- Let the Android System  determine if the view can be a scroll capture target. -->
+            <flag name="auto" value="0" />
+            <!-- Hint the Android System that this view is a likely target. If capable, it will
+                 be ranked above other views without this flag. -->
+            <flag name="include" value="0x1" />
+            <!-- Hint the Android System that this view should never be considered a scroll capture
+                 target. -->
+            <flag name="exclude" value="0x2" />
+            <!-- Hint the Android System that this view's children should not be examined and should
+                 be excluded as a scroll capture target. -->
+            <flag name="excludeDescendants" value="0x4" />
+        </attr>
 
         <!-- Boolean that controls whether a view can take focus while in touch mode.
              If this is true for a view, that view can gain focus when clicked on, and can keep
@@ -3451,6 +3494,8 @@
              device -->
         <attr name="isVrOnly" format="boolean"/>
         <attr name="__removed2" format="boolean" />
+        <!-- Specifies whether the IME supports showing inline suggestions. -->
+        <attr name="supportsInlineSuggestions" format="boolean" />
     </declare-styleable>
 
     <!-- This is the subtype of InputMethod. Subtype can describe locales (for example, en_US and
@@ -3684,6 +3729,10 @@
             <flag name="flagRequestFingerprintGestures" value="0x00000200" />
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK}. -->
             <flag name="flagRequestShortcutWarningDialogSpokenFeedback" value="0x00000400" />
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_SERVICE_HANDLES_DOUBLE_TAP}. -->
+            <flag name="flagServiceHandlesDoubleTap" value="0x00000800" />
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_MULTI_FINGER_GESTURES}. -->
+            <flag name="flagRequestMultiFingerGestures" value="0x00001000" />
         </attr>
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. This setting cannot be changed at runtime. -->
@@ -3732,10 +3781,39 @@
              </p>
          -->
         <attr name="canRequestFingerprintGestures" format="boolean" />
+        <!-- Attribute whether the accessibility service wants to be able to take screenshot. -->
+        <attr name="canTakeScreenshot" format="boolean" />
+
+        <!-- Animated image of the accessibility service purpose or behavior, to help users
+             understand how the service can help them.-->
+        <attr name="animatedImageDrawable" format="reference"/>
+        <!-- Html description of the accessibility service, to help users understand
+             how the service can help them.-->
+        <attr name="htmlDescription" format="reference"/>
+
         <!-- Short description of the accessibility service purpose or behavior.-->
         <attr name="description" />
         <!-- Brief summary of the accessibility service purpose or behavior. -->
         <attr name="summary" />
+    </declare-styleable>
+
+    <!-- Use <code>accessibility-shortcut-target</code> as the root tag of the XML resource that
+         describes an activity, which is referenced from the
+         <code>android.accessibilityshortcut.target</code> meta-data entry. -->
+    <declare-styleable name="AccessibilityShortcutTarget">
+        <!-- Short description of the target of accessibility shortcut purpose or behavior.-->
+        <attr name="description" />
+        <!-- Brief summary of the target of accessibility shortcut purpose or behavior. -->
+        <attr name="summary" />
+        <!-- Animated image of the target of accessibility shortcut purpose or behavior, to help
+             users understand how the target of accessibility shortcut can help them.-->
+        <attr name="animatedImageDrawable" format="reference"/>
+        <!-- Html description of the target of accessibility shortcut purpose or behavior, to help
+             users understand how the target of accessibility shortcut can help them. -->
+        <attr name="htmlDescription" format="reference"/>
+        <!-- Component name of an activity that allows the user to modify the settings for this
+             target of accessibility shortcut. -->
+        <attr name="settingsActivity" />
     </declare-styleable>
 
     <!-- Use <code>print-service</code> as the root tag of the XML resource that
@@ -8141,6 +8219,9 @@
         <!-- Fully qualified class name of an activity that allows the user to modify
              the settings for this service. -->
         <attr name="settingsActivity" />
+
+        <!-- Specifies whether the AutofillService supports inline suggestions-->
+        <attr name="supportsInlineSuggestions" format="boolean" />
     </declare-styleable>
 
     <!-- Use <code>compatibility-package</code> as a child tag of <code>autofill-service</code>
@@ -8274,6 +8355,31 @@
         <attr name="errorColor" format="color|reference" />
         <!-- The success color -->
         <attr name="successColor" format="color|reference"/>
+    </declare-styleable>
+
+    <!-- =============================== -->
+    <!-- QuickAccessWallet attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+
+    <!-- Use <code>quickaccesswallet-service</code> as the root tag of the XML resource
+         that describes a {@link android.service.quickaccesswallet.QuickAccessWalletService},
+         which is referenced from its
+         {@link android.service.quickaccesswallet.QuickAccessWalletService#SERVICE_META_DATA}
+         meta-data entry.
+    -->
+    <declare-styleable name="QuickAccessWalletService">
+        <!-- Fully qualified class name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity" format="string"/>
+        <!-- Fully qualified class name of an activity that allows the user to view
+             their entire wallet -->
+        <attr name="targetActivity" format="string"/>
+        <!-- Text shown on the empty state button if no cards are provided -->
+        <attr name="shortcutLongLabel"/>
+        <!-- Text shown on the button that takes users to the wallet application -->
+        <attr name="shortcutShortLabel"/>
+
     </declare-styleable>
 
     <!-- Use <code>recognition-service</code> as the root tag of the XML resource that
@@ -9124,4 +9230,7 @@
     </declare-styleable>
 
     <attr name="autoSizePresetSizes" />
+
+    <attr name="iconfactoryIconSize" format="dimension"/>
+    <attr name="iconfactoryBadgeSize" format="dimension"/>
 </resources>

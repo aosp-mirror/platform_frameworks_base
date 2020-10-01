@@ -29,6 +29,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -94,12 +95,14 @@ public class KernelCpuThreadReaderSettingsObserver extends ContentObserver {
                 KernelCpuThreadReader.create(
                         NUM_BUCKETS_DEFAULT, UidPredicate.fromString(COLLECTED_UIDS_DEFAULT));
         mKernelCpuThreadReaderDiff =
-                new KernelCpuThreadReaderDiff(
-                        mKernelCpuThreadReader, MINIMUM_TOTAL_CPU_USAGE_MILLIS_DEFAULT);
+                mKernelCpuThreadReader == null
+                        ? null
+                        : new KernelCpuThreadReaderDiff(
+                                mKernelCpuThreadReader, MINIMUM_TOTAL_CPU_USAGE_MILLIS_DEFAULT);
     }
 
     @Override
-    public void onChange(boolean selfChange, Uri uri, int userId) {
+    public void onChange(boolean selfChange, Collection<Uri> uris, int flags, int userId) {
         updateReader();
     }
 

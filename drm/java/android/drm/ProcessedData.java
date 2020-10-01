@@ -23,7 +23,9 @@ package android.drm;
  *
  * In a license acquisition scenario this class holds the rights information in binary form.
  *
+ * @deprecated Please use {@link android.media.MediaDrm}
  */
+@Deprecated
 public class ProcessedData {
     private final byte[] mData;
     private String mAccountId = "_NO_USER";

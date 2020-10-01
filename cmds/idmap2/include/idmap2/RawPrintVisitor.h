@@ -34,22 +34,25 @@ class RawPrintVisitor : public Visitor {
  public:
   explicit RawPrintVisitor(std::ostream& stream) : stream_(stream), offset_(0) {
   }
-  virtual void visit(const Idmap& idmap);
-  virtual void visit(const IdmapHeader& header);
-  virtual void visit(const IdmapData& data);
-  virtual void visit(const IdmapData::Header& header);
-  virtual void visit(const IdmapData::TypeEntry& type_entry);
+  ~RawPrintVisitor() override = default;
+  void visit(const Idmap& idmap) override;
+  void visit(const IdmapHeader& header) override;
+  void visit(const IdmapData& data) override;
+  void visit(const IdmapData::Header& header) override;
 
  private:
+  void print(uint8_t value, const char* fmt, ...);
   void print(uint16_t value, const char* fmt, ...);
   void print(uint32_t value, const char* fmt, ...);
-  void print(const std::string& value, const char* fmt, ...);
+  void print(const std::string& value, size_t encoded_size, const char* fmt, ...);
+  void print_raw(uint32_t length, const char* fmt, ...);
 
   std::ostream& stream_;
   std::unique_ptr<const ApkAssets> target_apk_;
+  std::unique_ptr<const ApkAssets> overlay_apk_;
   AssetManager2 target_am_;
+  AssetManager2 overlay_am_;
   size_t offset_;
-  PackageId last_seen_package_id_;
 };
 
 }  // namespace idmap2

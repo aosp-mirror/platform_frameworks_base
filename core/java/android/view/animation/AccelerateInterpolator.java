@@ -20,12 +20,12 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
+import android.graphics.animation.HasNativeInterpolator;
+import android.graphics.animation.NativeInterpolator;
+import android.graphics.animation.NativeInterpolatorFactory;
 import android.util.AttributeSet;
 
 import com.android.internal.R;
-import com.android.internal.view.animation.HasNativeInterpolator;
-import com.android.internal.view.animation.NativeInterpolatorFactory;
-import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
 
 /**
  * An interpolator where the rate of change starts out slowly and
@@ -33,7 +33,7 @@ import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
  *
  */
 @HasNativeInterpolator
-public class AccelerateInterpolator extends BaseInterpolator implements NativeInterpolatorFactory {
+public class AccelerateInterpolator extends BaseInterpolator implements NativeInterpolator {
     private final float mFactor;
     private final double mDoubleFactor;
 
@@ -85,6 +85,6 @@ public class AccelerateInterpolator extends BaseInterpolator implements NativeIn
     /** @hide */
     @Override
     public long createNativeInterpolator() {
-        return NativeInterpolatorFactoryHelper.createAccelerateInterpolator(mFactor);
+        return NativeInterpolatorFactory.createAccelerateInterpolator(mFactor);
     }
 }

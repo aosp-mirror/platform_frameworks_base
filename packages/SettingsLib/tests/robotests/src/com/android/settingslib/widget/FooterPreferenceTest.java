@@ -37,28 +37,29 @@ import org.robolectric.RuntimeEnvironment;
 public class FooterPreferenceTest {
 
     private Context mContext;
+    private FooterPreference mFooterPreference;
 
     @Before
     public void setUp() {
         mContext = RuntimeEnvironment.application;
-    }
-
-    @Test
-    public void createNewPreference_shouldSetKeyAndOrder() {
-        final FooterPreference preference = new FooterPreference(mContext);
-
-        assertThat(preference.getKey()).isEqualTo(FooterPreference.KEY_FOOTER);
-        assertThat(preference.getOrder()).isEqualTo(FooterPreference.ORDER_FOOTER);
+        mFooterPreference = new FooterPreference(mContext);
     }
 
     @Test
     public void bindPreference_shouldLinkifyContent() {
-        final FooterPreference preference = new FooterPreference(mContext);
         final PreferenceViewHolder holder = PreferenceViewHolder.createInstanceForTests(
                 LayoutInflater.from(mContext).inflate(R.layout.preference_footer, null));
 
-        preference.onBindViewHolder(holder);
+        mFooterPreference.onBindViewHolder(holder);
+
         assertThat(((TextView) holder.findViewById(android.R.id.title)).getMovementMethod())
                 .isInstanceOf(LinkMovementMethod.class);
+    }
+
+    @Test
+    public void setSummary_summarySet_shouldSetAsTitle() {
+        mFooterPreference.setSummary("summary");
+
+        assertThat(mFooterPreference.getTitle()).isEqualTo("summary");
     }
 }

@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="531930017979728896">"SIM이 프로비저닝되지 않음 MM#2"</string>
-    <string name="mmcc_illegal_ms" msgid="97745044956236881">"SIM이 허용되지 않음 MM#3"</string>
-    <string name="mmcc_illegal_me" msgid="5766888847785331904">"전화가 허용되지 않음 MM#6"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="604133804161351810">"SIM이 프로비저닝되지 않음 MM#2"</string>
+    <string name="mmcc_illegal_ms" msgid="4073997279280371621">"SIM이 허용되지 않음 MM#3"</string>
+    <string name="mmcc_illegal_me" msgid="4936539345546223576">"전화가 허용되지 않음 MM#6"</string>
 </resources>

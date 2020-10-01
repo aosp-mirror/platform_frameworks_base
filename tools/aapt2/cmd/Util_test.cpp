@@ -383,12 +383,32 @@ TEST (UtilTest, AdjustSplitConstraintsForMinSdk) {
   EXPECT_NE(*adjusted_contraints[1].configs.begin(), ConfigDescription::DefaultConfig());
 }
 
-TEST(UtilTest, RegularExperssions) {
+TEST (UtilTest, RegularExperssionsSimple) {
   std::string valid(".bc$");
   std::regex expression = GetRegularExpression(valid);
   EXPECT_TRUE(std::regex_search("file.abc", expression));
   EXPECT_TRUE(std::regex_search("file.123bc", expression));
   EXPECT_FALSE(std::regex_search("abc.zip", expression));
+}
+
+TEST (UtilTest, RegularExpressionComplex) {
+  std::string valid("\\.(d|D)(e|E)(x|X)$");
+  std::regex expression = GetRegularExpression(valid);
+  EXPECT_TRUE(std::regex_search("file.dex", expression));
+  EXPECT_TRUE(std::regex_search("file.DEX", expression));
+  EXPECT_TRUE(std::regex_search("file.dEx", expression));
+  EXPECT_FALSE(std::regex_search("file.dexx", expression));
+  EXPECT_FALSE(std::regex_search("dex.file", expression));
+  EXPECT_FALSE(std::regex_search("file.adex", expression));
+}
+
+TEST (UtilTest, RegularExpressionNonEnglish) {
+  std::string valid("\\.(k|K)(o|O)(ń|Ń)(c|C)(ó|Ó)(w|W)(k|K)(a|A)$");
+  std::regex expression = GetRegularExpression(valid);
+  EXPECT_TRUE(std::regex_search("file.końcówka", expression));
+  EXPECT_TRUE(std::regex_search("file.KOŃCÓWKA", expression));
+  EXPECT_TRUE(std::regex_search("file.kOńcÓwkA", expression));
+  EXPECT_FALSE(std::regex_search("file.koncowka", expression));
 }
 
 }  // namespace aapt

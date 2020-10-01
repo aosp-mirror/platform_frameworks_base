@@ -27,6 +27,7 @@ import static android.app.usage.UsageEvents.Event.FLUSH_TO_DISK;
 import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_START;
 import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_STOP;
 import static android.app.usage.UsageEvents.Event.ROLLOVER_FOREGROUND_SERVICE;
+import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
 
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -35,6 +36,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 /**
@@ -48,6 +50,11 @@ public final class UsageStats implements Parcelable {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public String mPackageName;
+
+    /**
+     * {@hide}
+     */
+    public int mPackageToken = -1;
 
     /**
      * {@hide}
@@ -139,6 +146,11 @@ public final class UsageStats implements Parcelable {
      * {@hide}
      */
     public ArrayMap<String, ArrayMap<String, Integer>> mChooserCounts = new ArrayMap<>();
+
+    /**
+     * {@hide}
+     */
+    public SparseArray<SparseIntArray> mChooserCountsObfuscated = new SparseArray<>();
 
     /**
      * {@hide}
@@ -567,6 +579,18 @@ public final class UsageStats implements Parcelable {
                 }
                 if (anyForegroundServiceStarted()) {
                     incrementServiceTimeUsed(timeStamp);
+                }
+                break;
+            case USER_INTERACTION:
+                if (hasForegroundActivity()) {
+                    incrementTimeUsed(timeStamp);
+                } else {
+                    mLastTimeUsed = timeStamp;
+                }
+                if (hasVisibleActivity()) {
+                    incrementTimeVisible(timeStamp);
+                } else {
+                    mLastTimeVisible = timeStamp;
                 }
                 break;
             default:

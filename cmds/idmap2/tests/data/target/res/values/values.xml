@@ -36,6 +36,7 @@
     <string name="policy_signature">policy_signature</string>
     <string name="policy_system">policy_system</string>
     <string name="policy_system_vendor">policy_system_vendor</string>
+    <string name="policy_actor">policy_actor</string>
 
     <string name="other">other</string>
 </resources>

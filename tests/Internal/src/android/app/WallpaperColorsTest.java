@@ -87,6 +87,14 @@ public class WallpaperColorsTest {
                 + "HINT_FROM_BITMAP.", fromBitmap);
     }
 
+    @Test
+    public void darkMainColorSupportsDarkTheme() {
+        final Color color = Color.valueOf(Color.BLACK);
+        WallpaperColors colors = new WallpaperColors(color, null, null);
+        Assert.assertTrue("Dark theme should be supported by dark main colors.",
+                (colors.getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_THEME) != 0);
+    }
+
     /**
      * WallpaperColors should not recycle bitmaps that it didn't create.
      */

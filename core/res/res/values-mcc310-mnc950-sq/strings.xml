@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="94675382531896663">"Karta SIM nuk është dhënë MM#2"</string>
-    <string name="mmcc_illegal_ms" msgid="2418195136279399212">"Karta SIM nuk lejohet MM#3"</string>
-    <string name="mmcc_illegal_me" msgid="8920048244573695129">"Telefoni nuk lejohet MM#6"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="615419724607901560">"Karta SIM nuk është dhënë MM#2"</string>
+    <string name="mmcc_illegal_ms" msgid="7801541624846497489">"Karta SIM nuk lejohet MM#3"</string>
+    <string name="mmcc_illegal_me" msgid="7066936962628406316">"Telefoni nuk lejohet MM#6"</string>
 </resources>

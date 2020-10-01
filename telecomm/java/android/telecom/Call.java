@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -461,15 +462,15 @@ public final class Call {
 
         /**
          * Call supports adding participants to the call via
-         * {@link #addConferenceParticipants(List)}.
-         * @hide
+         * {@link #addConferenceParticipants(List)}. Once participants are added, the call becomes
+         * an adhoc conference call ({@link #PROPERTY_IS_ADHOC_CONFERENCE}).
          */
         public static final int CAPABILITY_ADD_PARTICIPANT = 0x02000000;
 
         /**
          * When set for a call, indicates that this {@code Call} can be transferred to another
          * number.
-         * Call supports the blind and assured call transfer feature.
+         * Call supports the confirmed and unconfirmed call transfer feature.
          *
          * @hide
          */
@@ -598,8 +599,11 @@ public final class Call {
 
         /**
          * Indicates that the call is an adhoc conference call. This property can be set for both
-         * incoming and outgoing calls.
-         * @hide
+         * incoming and outgoing calls. An adhoc conference call is formed using
+         * {@link #addConferenceParticipants(List)},
+         * {@link TelecomManager#addNewIncomingConference(PhoneAccountHandle, Bundle)}, or
+         * {@link TelecomManager#startConference(List, Bundle)}, rather than by merging existing
+         * call using {@link #conference(Call)}.
          */
         public static final int PROPERTY_IS_ADHOC_CONFERENCE = 0x00002000;
 
@@ -1592,8 +1596,8 @@ public final class Call {
      * Instructs this {@code Call} to be transferred to another number.
      *
      * @param targetNumber The address to which the call will be transferred.
-     * @param isConfirmationRequired if {@code true} it will initiate ASSURED transfer,
-     * if {@code false}, it will initiate BLIND transfer.
+     * @param isConfirmationRequired if {@code true} it will initiate a confirmed transfer,
+     * if {@code false}, it will initiate an unconfirmed transfer.
      *
      * @hide
      */
@@ -1635,13 +1639,21 @@ public final class Call {
 
     /**
      * Instructs Telecom to put the call into the background audio processing state.
-     *
+     * <p>
      * This method can be called either when the call is in {@link #STATE_RINGING} or
      * {@link #STATE_ACTIVE}. After Telecom acknowledges the request by setting the call's state to
      * {@link #STATE_AUDIO_PROCESSING}, your app may setup the audio paths with the audio stack in
      * order to capture and play audio on the call stream.
-     *
+     * <p>
      * This method can only be called by the default dialer app.
+     * <p>
+     * Apps built with SDK version {@link android.os.Build.VERSION_CODES#R} or later which are using
+     * the microphone as part of audio processing should specify the foreground service type using
+     * the attribute {@link android.R.attr#foregroundServiceType} in the {@link InCallService}
+     * service element of the app's manifest file.
+     * The {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_MICROPHONE} attribute should be specified.
+     * @see <a href="https://developer.android.com/preview/privacy/foreground-service-types">
+     * the Android Developer Site</a> for more information.
      * @hide
      */
     @SystemApi
@@ -1766,7 +1778,6 @@ public final class Call {
      * See {@link Details#CAPABILITY_ADD_PARTICIPANT}.
      *
      * @param participants participants to be pulled to existing call.
-     * @hide
      */
     public void addConferenceParticipants(@NonNull List<Uri> participants) {
         mInCallAdapter.addConferenceParticipants(mTelecomCallId, participants);

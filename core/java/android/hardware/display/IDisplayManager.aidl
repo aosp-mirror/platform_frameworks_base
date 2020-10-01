@@ -22,6 +22,7 @@ import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.Curve;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
+import android.hardware.display.VirtualDisplayConfig;
 import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplayStatus;
 import android.media.projection.IMediaProjection;
@@ -71,9 +72,9 @@ interface IDisplayManager {
 
     // Requires CAPTURE_VIDEO_OUTPUT, CAPTURE_SECURE_VIDEO_OUTPUT, or an appropriate
     // MediaProjection token for certain combinations of flags.
-    int createVirtualDisplay(in IVirtualDisplayCallback callback,
-            in IMediaProjection projectionToken, String packageName, String name,
-            int width, int height, int densityDpi, in Surface surface, int flags, String uniqueId);
+    int createVirtualDisplay(in VirtualDisplayConfig virtualDisplayConfig,
+            in IVirtualDisplayCallback callback, in IMediaProjection projectionToken,
+            String packageName);
 
     // No permissions required, but must be same Uid as the creator.
     void resizeVirtualDisplay(in IVirtualDisplayCallback token,
@@ -111,8 +112,11 @@ interface IDisplayManager {
     // Gets the default brightness configuration if configured.
     BrightnessConfiguration getDefaultBrightnessConfiguration();
 
+    // Gets the last requested minimal post processing settings for display with displayId.
+    boolean isMinimalPostProcessingRequested(int displayId);
+
     // Temporarily sets the display brightness.
-    void setTemporaryBrightness(int brightness);
+    void setTemporaryBrightness(float brightness);
 
     // Temporarily sets the auto brightness adjustment factor.
     void setTemporaryAutoBrightnessAdjustment(float adjustment);

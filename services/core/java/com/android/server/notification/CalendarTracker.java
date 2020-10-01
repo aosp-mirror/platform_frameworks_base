@@ -21,6 +21,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.provider.CalendarContract.Attendees;
 import android.provider.CalendarContract.Calendars;
@@ -102,6 +103,8 @@ public class CalendarTracker {
             while (cursor != null && cursor.moveToNext()) {
                 rt.add(cursor.getLong(0));
             }
+        } catch (SQLiteException e) {
+            Slog.w(TAG, "error querying calendar content provider", e);
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -118,11 +121,12 @@ public class CalendarTracker {
         ContentUris.appendId(uriBuilder, time);
         ContentUris.appendId(uriBuilder, time + EVENT_CHECK_LOOKAHEAD);
         final Uri uri = uriBuilder.build();
-        final Cursor cursor = mUserContext.getContentResolver().query(uri, INSTANCE_PROJECTION,
-                null, null, INSTANCE_ORDER_BY);
+        Cursor cursor = null;
         final CheckEventResult result = new CheckEventResult();
         result.recheckAt = time + EVENT_CHECK_LOOKAHEAD;
         try {
+            cursor = mUserContext.getContentResolver().query(uri, INSTANCE_PROJECTION,
+                    null, null, INSTANCE_ORDER_BY);
             final ArraySet<Long> calendars = getCalendarsWithAccess();
             while (cursor != null && cursor.moveToNext()) {
                 final long begin = cursor.getLong(0);
@@ -183,9 +187,10 @@ public class CalendarTracker {
             selection = null;
             selectionArgs = null;
         }
-        final Cursor cursor = mUserContext.getContentResolver().query(Attendees.CONTENT_URI,
-                ATTENDEE_PROJECTION, selection, selectionArgs, null);
+        Cursor cursor = null;
         try {
+            cursor = mUserContext.getContentResolver().query(Attendees.CONTENT_URI,
+                    ATTENDEE_PROJECTION, selection, selectionArgs, null);
             if (cursor == null || cursor.getCount() == 0) {
                 if (DEBUG) Log.d(TAG, "No attendees found");
                 return true;
@@ -205,6 +210,9 @@ public class CalendarTracker {
                 rt |= eventMeets;
             }
             return rt;
+        } catch (SQLiteException e) {
+            Slog.w(TAG, "error querying attendees content provider", e);
+            return false;
         } finally {
             if (cursor != null) {
                 cursor.close();

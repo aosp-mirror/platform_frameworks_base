@@ -1,0 +1,518 @@
+# tracer: nop
+#
+# entries-in-buffer/entries-written: 411983/411983   #P:8
+#
+#                                      _-----=> irqs-off
+#                                     / _----=> need-resched
+#                                    | / _---=> hardirq/softirq
+#                                    || / _--=> preempt-depth
+#                                    ||| /     delay
+#           TASK-PID    TGID   CPU#  ||||    TIMESTAMP  FUNCTION
+#              | |        |      |   ||||       |         |
+           <...>-14603 (-----) [000] ...1 14592.893157: tracing_mark_write: trace_event_clock_sync: parent_ts=14592.892578
+           <...>-14603 (-----) [000] ...1 14592.893172: tracing_mark_write: trace_event_clock_sync: realtime_ts=1557129597951
+           <...>-18150 (-----) [004] d..2 14594.182110: sched_switch: prev_comm=kworker/u16:18 prev_pid=18150 prev_prio=120 prev_state=D ==> next_comm=kworker/u16:16 next_pid=23269 next_prio=120
+  kworker/u16:16-23269 (23269) [004] d.h3 14594.182228: sched_blocked_reason: pid=18150 iowait=0 caller=a6xx_oob_set+0x194/0x3dc
+  kworker/u16:16-23269 (23269) [004] d..2 14594.182248: sched_switch: prev_comm=kworker/u16:16 prev_pid=23269 prev_prio=120 prev_state=D ==> next_comm=kworker/u16:18 next_pid=18150 next_prio=120
+           <...>-18150 (-----) [004] d..2 14594.182312: sched_switch: prev_comm=kworker/u16:18 prev_pid=18150 prev_prio=120 prev_state=D ==> next_comm=swapper/4 next_pid=0 next_prio=120
+           <...>-18150 (-----) [004] d..2 14594.182488: sched_switch: prev_comm=kworker/u16:18 prev_pid=18150 prev_prio=120 prev_state=D ==> next_comm=swapper/4 next_pid=0 next_prio=120
+  kworker/u16:16-23269 (23269) [005] d..2 14594.182610: sched_switch: prev_comm=kworker/u16:16 prev_pid=23269 prev_prio=120 prev_state=S ==> next_comm=swapper/5 next_pid=0 next_prio=120
+           <...>-18150 (-----) [004] d..2 14594.182626: sched_switch: prev_comm=kworker/u16:18 prev_pid=18150 prev_prio=120 prev_state=D ==> next_comm=swapper/4 next_pid=0 next_prio=120
+           <...>-18150 (-----) [004] d..2 14594.182755: sched_switch: prev_comm=kworker/u16:18 prev_pid=18150 prev_prio=120 prev_state=D ==> next_comm=swapper/4 next_pid=0 next_prio=120
+           <...>-18150 (-----) [004] d..2 14594.182975: sched_switch: prev_comm=kworker/u16:18 prev_pid=18150 prev_prio=120 prev_state=D ==> next_comm=swapper/4 next_pid=0 next_prio=120
+           <...>-18150 (-----) [004] d..2 14594.183209: sched_switch: prev_comm=kworker/u16:18 prev_pid=18150 prev_prio=120 prev_state=D ==> next_comm=swapper/4 next_pid=0 next_prio=120
+           <...>-18150 (-----) [004] d..2 14594.183371: sched_switch: prev_comm=kworker/u16:18 prev_pid=18150 prev_prio=120 prev_state=D ==> next_comm=swapper/4 next_pid=0 next_prio=120
+           <...>-18150 (-----) [004] d..2 14594.184286: sched_switch: prev_comm=kworker/u16:18 prev_pid=18150 prev_prio=120 prev_state=S ==> next_comm=swapper/4 next_pid=0 next_prio=120
+  kworker/u16:16-23269 (23269) [005] d..2 14594.184495: sched_switch: prev_comm=kworker/u16:16 prev_pid=23269 prev_prio=120 prev_state=S ==> next_comm=swapper/5 next_pid=0 next_prio=120
+           <...>-18150 (-----) [004] d..2 14594.184498: sched_switch: prev_comm=kworker/u16:18 prev_pid=18150 prev_prio=120 prev_state=S ==> next_comm=swapper/4 next_pid=0 next_prio=120
+     ksoftirqd/4-47    (   47) [004] d..2 14594.185678: sched_switch: prev_comm=ksoftirqd/4 prev_pid=47 prev_prio=120 prev_state=S ==> next_comm=swapper/4 next_pid=0 next_prio=120
+     kworker/6:2-10610 (10610) [006] d..2 14594.186012: sched_switch: prev_comm=kworker/6:2 prev_pid=10610 prev_prio=120 prev_state=S ==> next_comm=swapper/6 next_pid=0 next_prio=120
+           <...>-656   (-----) [001] .... 14594.219464: binder_set_priority: proc=625 thread=656 old=110 => new=120 desired=120
+           <...>-1803  (-----) [000] d..2 14594.219595: sched_switch: prev_comm=ndroid.systemui prev_pid=1803 prev_prio=120 prev_state=S ==> next_comm=swapper/0 next_pid=0 next_prio=120
+           <...>-3359  (-----) [001] ...1 14594.219856: tracing_mark_write: S|1368|launching: com.google.android.dialer|0
+           <...>-3359  (-----) [001] ...1 14594.219863: tracing_mark_write: B|1368|MetricsLogger:launchObserverNotifyActivityLaunched
+           <...>-3359  (-----) [001] ...1 14594.219869: tracing_mark_write: B|1368|MetricsLogger:convertActivityRecordToProto
+           <...>-1398  (-----) [006] ...1 14594.220160: tracing_mark_write: B|1368|updateInputWindows
+           <...>-3359  (-----) [001] .... 14594.220230: binder_set_priority: proc=1368 thread=3359 old=110 => new=120 desired=120
+           <...>-1398  (-----) [006] ...1 14594.220588: tracing_mark_write: B|1368|android.os.Handler: com.android.server.wm.AppWindowToken$1
+           <...>-1398  (-----) [006] ...1 14594.220722: tracing_mark_write: B|1368|ResourcesManager#getResources
+           <...>-1052  (-----) [002] d..2 14594.220884: sched_switch: prev_comm=statsd.writer prev_pid=1052 prev_prio=120 prev_state=S ==> next_comm=UiThreadHelper next_pid=2045 next_prio=118
+           <...>-1398  (-----) [006] ...1 14594.220926: tracing_mark_write: B|1368|Theme::ApplyStyle
+           <...>-1398  (-----) [006] ...1 14594.220929: tracing_mark_write: B|1368|AssetManager::GetBag
+           <...>-2007  (-----) [007] ...1 14594.220996: tracing_mark_write: B|2007|Choreographer#doFrame
+           <...>-2007  (-----) [007] ...1 14594.221005: tracing_mark_write: B|2007|animation
+           <...>-1398  (-----) [006] ...1 14594.221015: tracing_mark_write: B|1368|ResourcesManager#getResources
+           <...>-2045  (-----) [002] ...2 14594.221035: binder_set_priority: proc=1368 thread=1903 old=120 => new=118 desired=118
+           <...>-2045  (-----) [002] d..2 14594.221065: sched_switch: prev_comm=UiThreadHelper prev_pid=2045 prev_prio=118 prev_state=S ==> next_comm=Binder:1368_4 next_pid=1903 next_prio=118
+           <...>-1398  (-----) [006] ...1 14594.221080: tracing_mark_write: B|1368|AssetManager::SetApkAssets
+           <...>-2007  (-----) [007] ...1 14594.221110: tracing_mark_write: B|2007|traversal
+           <...>-656   (-----) [000] ...1 14594.221137: tracing_mark_write: B|625|requestNextVsync
+           <...>-656   (-----) [000] ...1 14594.221141: tracing_mark_write: B|625|resetIdleTimer
+           <...>-2007  (-----) [007] ...1 14594.221146: tracing_mark_write: B|2007|draw
+           <...>-2007  (-----) [007] ...1 14594.221160: tracing_mark_write: B|2007|Record View#draw()
+           <...>-660   (-----) [005] d..2 14594.221285: sched_switch: prev_comm=app prev_pid=660 prev_prio=97 prev_state=S ==> next_comm=RenderThread next_pid=2738 next_prio=110
+           <...>-658   (-----) [004] d..2 14594.221327: sched_switch: prev_comm=DispSync prev_pid=658 prev_prio=97 prev_state=S ==> next_comm=android.display next_pid=1397 next_prio=117
+           <...>-2738  (-----) [005] ...1 14594.221342: tracing_mark_write: B|2007|notifyFramePending
+           <...>-2738  (-----) [005] ...1 14594.221362: tracing_mark_write: B|2007|DrawFrame
+           <...>-2738  (-----) [005] ...1 14594.221369: tracing_mark_write: B|2007|query
+           <...>-2007  (-----) [007] d..2 14594.221369: sched_switch: prev_comm=s.nexuslauncher prev_pid=2007 prev_prio=110 prev_state=S ==> next_comm=swapper/7 next_pid=0 next_prio=120
+           <...>-1903  (-----) [002] .... 14594.221397: binder_set_priority: proc=1368 thread=1903 old=118 => new=120 desired=120
+           <...>-2738  (-----) [005] ...2 14594.221400: binder_set_priority: proc=625 thread=656 old=120 => new=110 desired=110
+           <...>-2738  (-----) [005] d..2 14594.221430: sched_switch: prev_comm=RenderThread prev_pid=2738 prev_prio=110 prev_state=S ==> next_comm=Binder:625_1 next_pid=656 next_prio=110
+           <...>-1368  (-----) [003] ...1 14594.221431: tracing_mark_write: B|1368|Lock contention on GC thread flip lock (owner tid: 0)
+           <...>-656   (-----) [005] ...1 14594.221460: tracing_mark_write: B|625|query
+           <...>-656   (-----) [005] .... 14594.221528: binder_set_priority: proc=625 thread=656 old=110 => new=120 desired=120
+           <...>-2738  (-----) [007] ...1 14594.221552: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [007] ...2 14594.221563: binder_set_priority: proc=625 thread=656 old=120 => new=110 desired=110
+           <...>-2738  (-----) [007] d..2 14594.221600: sched_switch: prev_comm=RenderThread prev_pid=2738 prev_prio=110 prev_state=S ==> next_comm=Binder:625_1 next_pid=656 next_prio=110
+           <...>-1368  (-----) [003] d..2 14594.221623: sched_switch: prev_comm=system_server prev_pid=1368 prev_prio=118 prev_state=S ==> next_comm=swapper/3 next_pid=0 next_prio=120
+           <...>-656   (-----) [007] ...1 14594.221628: tracing_mark_write: B|625|query
+           <...>-23031 (-----) [001] d..2 14594.221643: sched_switch: prev_comm=UiAutomation prev_pid=23031 prev_prio=120 prev_state=S ==> next_comm=swapper/1 next_pid=0 next_prio=120
+           <...>-2738  (-----) [007] ...1 14594.221664: tracing_mark_write: B|2007|syncFrameState
+           <...>-2738  (-----) [007] ...1 14594.221697: tracing_mark_write: B|2007|prepareTree
+           <...>-23008 (-----) [005] d..2 14594.221706: sched_switch: prev_comm=hub.uiautomator prev_pid=23008 prev_prio=120 prev_state=S ==> next_comm=swapper/5 next_pid=0 next_prio=120
+           <...>-656   (-----) [000] .... 14594.221737: binder_set_priority: proc=625 thread=656 old=110 => new=120 desired=120
+           <...>-1803  (-----) [003] d..2 14594.221747: sched_switch: prev_comm=ndroid.systemui prev_pid=1803 prev_prio=120 prev_state=S ==> next_comm=swapper/3 next_pid=0 next_prio=120
+           <...>-1397  (-----) [004] d..2 14594.221806: sched_switch: prev_comm=android.display prev_pid=1397 prev_prio=117 prev_state=S ==> next_comm=Binder:2007_A next_pid=4180 next_prio=120
+           <...>-1398  (-----) [006] d..2 14594.221816: sched_switch: prev_comm=android.anim prev_pid=1398 prev_prio=110 prev_state=R ==> next_comm=s.nexuslauncher next_pid=2007 next_prio=110
+           <...>-2738  (-----) [007] ...1 14594.221824: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [007] ...1 14594.221830: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [007] ...1 14594.221834: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [007] ...1 14594.221841: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [007] ...1 14594.221843: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [007] ...1 14594.221846: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [007] ...1 14594.221850: tracing_mark_write: B|2007|dequeueBuffer
+           <...>-2738  (-----) [007] ...2 14594.221864: binder_set_priority: proc=625 thread=656 old=120 => new=110 desired=110
+           <...>-2738  (-----) [007] d..2 14594.221985: sched_switch: prev_comm=RenderThread prev_pid=2738 prev_prio=110 prev_state=R+ ==> next_comm=crtc_event:97 next_pid=303 next_prio=83
+           <...>-2007  (-----) [006] ...1 14594.221989: tracing_mark_write: B|2007|topResumedActivityChangeItem
+           <...>-303   (-----) [007] d..2 14594.222016: sched_switch: prev_comm=crtc_event:97 prev_pid=303 prev_prio=83 prev_state=S ==> next_comm=rcu_preempt next_pid=7 next_prio=120
+     rcu_preempt-7     (    7) [007] d..2 14594.222035: sched_switch: prev_comm=rcu_preempt prev_pid=7 prev_prio=120 prev_state=S ==> next_comm=RenderThread next_pid=2738 next_prio=110
+     migration/4-46    (   46) [004] d..2 14594.222037: sched_switch: prev_comm=migration/4 prev_pid=46 prev_prio=0 prev_state=S ==> next_comm=Binder:625_1 next_pid=656 next_prio=110
+           <...>-2738  (-----) [007] d..2 14594.222039: sched_switch: prev_comm=RenderThread prev_pid=2738 prev_prio=110 prev_state=S ==> next_comm=kworker/u16:18 next_pid=18150 next_prio=120
+           <...>-656   (-----) [004] ...1 14594.222100: tracing_mark_write: B|625|dequeueBuffer
+           <...>-656   (-----) [004] ...1 14594.222114: tracing_mark_write: B|625|com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity#1: 2
+           <...>-2007  (-----) [006] ...2 14594.222131: binder_set_priority: proc=1368 thread=1903 old=120 => new=110 desired=110
+           <...>-2007  (-----) [006] d..2 14594.222143: sched_switch: prev_comm=s.nexuslauncher prev_pid=2007 prev_prio=110 prev_state=S ==> next_comm=UiThreadHelper next_pid=2045 next_prio=118
+           <...>-2613  (-----) [001] d..2 14594.222158: sched_switch: prev_comm=ogle.android.as prev_pid=2613 prev_prio=120 prev_state=S ==> next_comm=swapper/1 next_pid=0 next_prio=120
+           <...>-18150 (-----) [007] d..2 14594.222193: sched_switch: prev_comm=kworker/u16:18 prev_pid=18150 prev_prio=120 prev_state=S ==> next_comm=swapper/7 next_pid=0 next_prio=120
+           <...>-656   (-----) [004] .... 14594.222220: binder_set_priority: proc=625 thread=656 old=110 => new=120 desired=120
+           <...>-2738  (-----) [007] ...1 14594.222267: tracing_mark_write: B|2007|HWC release fence 36027 has signaled
+           <...>-656   (-----) [007] ...1 14594.223842: tracing_mark_write: B|625|queueBuffer
+           <...>-656   (-----) [007] ...1 14594.223845: tracing_mark_write: B|625|com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity#1: 2
+           <...>-656   (-----) [007] ...1 14594.223871: tracing_mark_write: B|625|requestNextVsync
+           <...>-656   (-----) [007] ...1 14594.223873: tracing_mark_write: B|625|resetIdleTimer
+           <...>-656   (-----) [007] ...1 14594.223881: tracing_mark_write: B|625|addAndGetFrameTimestamps
+           <...>-1395  (-----) [001] d..2 14594.223909: sched_switch: prev_comm=android.ui prev_pid=1395 prev_prio=118 prev_state=S ==> next_comm=swapper/1 next_pid=0 next_prio=120
+           <...>-2738  (-----) [007] ...1 14594.223959: tracing_mark_write: B|2007|Trace GPU completion fence 36027
+           <...>-11799 (-----) [006] ...1 14594.224006: tracing_mark_write: B|2007|waiting for GPU completion 36027
+           <...>-11799 (-----) [006] ...1 14594.224009: tracing_mark_write: B|2007|waitForever
+           <...>-2613  (-----) [004] d..2 14594.224014: sched_switch: prev_comm=ogle.android.as prev_pid=2613 prev_prio=120 prev_state=S ==> next_comm=Binder:1803_6 next_pid=2173 next_prio=120
+           <...>-11799 (-----) [006] d..1 14594.224014: fence_enable_signal: driver=kgsl-timeline timeline=kgsl-3d0_13-s.nexuslauncher(200 context=27 seqno=78002
+           <...>-11799 (-----) [006] d..2 14594.224021: sched_switch: prev_comm=GPU completion prev_pid=11799 prev_prio=110 prev_state=S ==> next_comm=rcuop/6 next_pid=68 next_prio=120
+         rcuop/6-68    (   68) [006] d..2 14594.224044: sched_switch: prev_comm=rcuop/6 prev_pid=68 prev_prio=120 prev_state=S ==> next_comm=swapper/6 next_pid=0 next_prio=120
+           <...>-259   (-----) [006] d..2 14594.224132: sched_switch: prev_comm=kgsl_worker_thr prev_pid=259 prev_prio=97 prev_state=S ==> next_comm=Binder:2007_A next_pid=4180 next_prio=120
+           <...>-3206  (-----) [001] d..2 14594.224167: sched_switch: prev_comm=aiai-vc-0 prev_pid=3206 prev_prio=139 prev_state=R ==> next_comm=ndroid.systemui next_pid=1803 next_prio=120
+    lowpool[847]-14589 ( 2446) [005] d..1 14594.224300: mm_filemap_delete_from_page_cache: dev 0:1 ino 3d0034 page=000000008247d586 pfn=676904 ofs=0
+           <...>-1803  (-----) [001] d..2 14594.224302: sched_switch: prev_comm=ndroid.systemui prev_pid=1803 prev_prio=120 prev_state=S ==> next_comm=aiai-vc-0 next_pid=3206 next_prio=139
+           <...>-3206  (-----) [001] d..2 14594.224433: sched_switch: prev_comm=aiai-vc-0 prev_pid=3206 prev_prio=139 prev_state=S ==> next_comm=swapper/1 next_pid=0 next_prio=120
+           <...>-1903  (-----) [003] ...1 14594.224490: tracing_mark_write: B|1368|dispatchingStartProcess:com.google.android.dialer
+           <...>-1903  (-----) [003] ...1 14594.224659: tracing_mark_write: B|1368|wmLayout
+           <...>-1903  (-----) [003] ...1 14594.224666: tracing_mark_write: B|1368|performSurfacePlacement
+           <...>-1903  (-----) [003] ...1 14594.224683: tracing_mark_write: B|1368|applySurfaceChanges
+           <...>-1903  (-----) [003] ...1 14594.224688: tracing_mark_write: B|1368|openSurfaceTransaction
+           <...>-2738  (-----) [007] ...1 14594.224711: tracing_mark_write: B|2007|query
+           <...>-1903  (-----) [003] ...1 14594.224714: tracing_mark_write: B|1368|performLayout
+           <...>-2738  (-----) [007] ...1 14594.224714: tracing_mark_write: B|2007|query
+           <...>-1903  (-----) [003] ...1 14594.224723: tracing_mark_write: B|1368|applyPostLayoutPolicy
+           <...>-2738  (-----) [007] d..2 14594.224752: sched_switch: prev_comm=RenderThread prev_pid=2738 prev_prio=110 prev_state=S ==> next_comm=Binder:625_1 next_pid=656 next_prio=110
+           <...>-656   (-----) [007] .... 14594.224766: binder_set_priority: proc=625 thread=656 old=110 => new=120 desired=120
+           <...>-1398  (-----) [002] ...1 14594.224801: tracing_mark_write: B|1368|Theme::ApplyStyle
+           <...>-1398  (-----) [002] ...1 14594.224805: tracing_mark_write: B|1368|AssetManager::GetBag
+           <...>-1398  (-----) [002] ...1 14594.224820: tracing_mark_write: B|1368|AssetManager::GetBag
+           <...>-1398  (-----) [002] ...1 14594.224826: tracing_mark_write: B|1368|AssetManager::GetBag
+           <...>-1398  (-----) [002] ...1 14594.224833: tracing_mark_write: B|1368|AssetManager::GetBag
+           <...>-1398  (-----) [002] ...1 14594.224838: tracing_mark_write: B|1368|AssetManager::GetBag
+           <...>-1398  (-----) [002] ...1 14594.224846: tracing_mark_write: B|1368|AssetManager::GetBag
+           <...>-1398  (-----) [002] ...1 14594.224853: tracing_mark_write: B|1368|AssetManager::GetBag
+           <...>-1398  (-----) [002] ...1 14594.224859: tracing_mark_write: B|1368|AssetManager::GetBag
+           <...>-1398  (-----) [002] ...1 14594.224864: tracing_mark_write: B|1368|AssetManager::GetBag
+           <...>-18150 (-----) [006] d..2 14594.228407: sched_switch: prev_comm=kworker/u16:18 prev_pid=18150 prev_prio=120 prev_state=R+ ==> next_comm=mmc-cmdqd/0 next_pid=440 next_prio=98
+           <...>-2738  (-----) [007] d..2 14594.228411: sched_switch: prev_comm=RenderThread prev_pid=2738 prev_prio=110 prev_state=R+ ==> next_comm=kworker/7:0H next_pid=76 next_prio=100
+           <...>-1409  (-----) [004] ...1 14594.228417: tracing_mark_write: B|1368|Start proc: com.google.android.dialer
+           <...>-440   (-----) [006] d..2 14594.228418: sched_switch: prev_comm=mmc-cmdqd/0 prev_pid=440 prev_prio=98 prev_state=D ==> next_comm=kworker/u16:18 next_pid=18150 next_prio=120
+           <...>-76    (-----) [007] d..2 14594.228430: sched_switch: prev_comm=kworker/7:0H prev_pid=76 prev_prio=100 prev_state=R+ ==> next_comm=mmc-cmdqd/0 next_pid=440 next_prio=98
+           <...>-440   (-----) [007] d..2 14594.228434: sched_switch: prev_comm=mmc-cmdqd/0 prev_pid=440 prev_prio=98 prev_state=D ==> next_comm=kworker/7:0H next_pid=76 next_prio=100
+           <...>-18150 (-----) [006] d..3 14594.228442: sched_blocked_reason: pid=1398 iowait=1 caller=wait_on_page_bit_common+0x2a8/0x5f8
+           <...>-76    (-----) [007] d..2 14594.228442: sched_switch: prev_comm=kworker/7:0H prev_pid=76 prev_prio=100 prev_state=S ==> next_comm=RenderThread next_pid=2738 next_prio=110
+           <...>-2738  (-----) [007] ...2 14594.228446: binder_set_priority: proc=625 thread=656 old=120 => new=110 desired=110
+           <...>-18150 (-----) [006] d..2 14594.228447: sched_switch: prev_comm=kworker/u16:18 prev_pid=18150 prev_prio=120 prev_state=R+ ==> next_comm=android.anim next_pid=1398 next_prio=110
+           <...>-2738  (-----) [007] d..2 14594.228479: sched_switch: prev_comm=RenderThread prev_pid=2738 prev_prio=110 prev_state=S ==> next_comm=Binder:625_1 next_pid=656 next_prio=110
+           <...>-1409  (-----) [004] d..2 14594.228499: sched_switch: prev_comm=ActivityManager prev_pid=1409 prev_prio=118 prev_state=D ==> next_comm=Binder:965_2 next_pid=1041 next_prio=120
+           <...>-625   (-----) [003] ...1 14594.229271: tracing_mark_write: B|625|handleTransaction
+           <...>-1773  (-----) [004] .... 14594.229285: binder_set_priority: proc=625 thread=1773 old=110 => new=120 desired=120
+           <...>-440   (-----) [007] d..2 14594.229301: sched_switch: prev_comm=mmc-cmdqd/0 prev_pid=440 prev_prio=98 prev_state=D ==> next_comm=RenderThread next_pid=2738 next_prio=110
+           <...>-2738  (-----) [007] ...1 14594.229318: tracing_mark_write: B|2007|HWC release fence 36028 has signaled
+           <...>-2738  (-----) [007] ...1 14594.229331: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [007] ...1 14594.229337: tracing_mark_write: B|2007|eglBeginFrame
+           <...>-2738  (-----) [007] ...1 14594.229352: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [007] ...1 14594.229354: tracing_mark_write: B|2007|query
+           <...>-791   (-----) [000] d..2 14594.229357: sched_switch: prev_comm=main prev_pid=791 prev_prio=120 prev_state=S ==> next_comm=swapper/0 next_pid=0 next_prio=120
+           <...>-625   (-----) [003] ...1 14594.229440: tracing_mark_write: B|625|doTransaction
+           <...>-13916 (-----) [002] d..2 14594.229482: sched_switch: prev_comm=HeapTaskDaemon prev_pid=13916 prev_prio=124 prev_state=D|K ==> next_comm=swapper/2 next_pid=0 next_prio=120
+           <...>-13917 (-----) [001] d..2 14594.229492: sched_blocked_reason: pid=13916 iowait=0 caller=__rwsem_down_write_failed_common+0x3e8/0x754
+           <...>-625   (-----) [003] ...1 14594.229492: tracing_mark_write: B|625|doTransaction
+           <...>-625   (-----) [003] ...1 14594.229507: tracing_mark_write: B|625|doTransaction
+           <...>-13917 (-----) [001] d..2 14594.229523: sched_switch: prev_comm=ReferenceQueueD prev_pid=13917 prev_prio=124 prev_state=D ==> next_comm=swapper/1 next_pid=0 next_prio=120
+           <...>-13916 (-----) [002] d..2 14594.229535: sched_blocked_reason: pid=13917 iowait=0 caller=do_page_fault+0x550/0x5fc
+           <...>-625   (-----) [003] ...1 14594.229538: tracing_mark_write: B|625|doTransaction
+           <...>-2738  (-----) [007] ...1 14594.229543: tracing_mark_write: B|2007|flush commands
+           <...>-13916 (-----) [002] .... 14594.229562: sched_process_exit: comm=HeapTaskDaemon pid=13916 prio=124
+           <...>-625   (-----) [003] ...1 14594.229567: tracing_mark_write: B|625|doTransaction
+           <...>-625   (-----) [003] ...1 14594.229588: tracing_mark_write: B|625|doTransaction
+           <...>-625   (-----) [003] ...1 14594.229628: tracing_mark_write: B|625|doTransaction
+           <...>-625   (-----) [003] ...1 14594.229652: tracing_mark_write: B|625|doTransaction
+           <...>-13916 (-----) [002] d..2 14594.229676: sched_switch: prev_comm=HeapTaskDaemon prev_pid=13916 prev_prio=124 prev_state=x ==> next_comm=swapper/2 next_pid=0 next_prio=120
+           <...>-625   (-----) [003] ...1 14594.229676: tracing_mark_write: B|625|doTransaction
+           <...>-2007  (-----) [006] d..2 14594.229688: sched_switch: prev_comm=s.nexuslauncher prev_pid=2007 prev_prio=110 prev_state=S ==> next_comm=swapper/6 next_pid=0 next_prio=120
+           <...>-625   (-----) [003] ...1 14594.229703: tracing_mark_write: B|625|doTransaction
+           <...>-625   (-----) [003] ...1 14594.229725: tracing_mark_write: B|625|doTransaction
+           <...>-625   (-----) [003] ...1 14594.229750: tracing_mark_write: B|625|doTransaction
+           <...>-625   (-----) [003] ...1 14594.229772: tracing_mark_write: B|625|doTransaction
+           <...>-625   (-----) [003] ...1 14594.229792: tracing_mark_write: B|625|doTransaction
+           <...>-791   (-----) [000] d..2 14594.229811: sched_switch: prev_comm=main prev_pid=791 prev_prio=120 prev_state=S ==> next_comm=swapper/0 next_pid=0 next_prio=120
+           <...>-625   (-----) [003] ...1 14594.229824: tracing_mark_write: B|625|doTransaction
+           <...>-2738  (-----) [007] ...1 14594.229827: tracing_mark_write: B|2007|eglSwapBuffersWithDamageKHR
+           <...>-13917 (-----) [001] d..2 14594.229836: sched_switch: prev_comm=ReferenceQueueD prev_pid=13917 prev_prio=124 prev_state=D ==> next_comm=swapper/1 next_pid=0 next_prio=120
+           <...>-2738  (-----) [007] ...1 14594.229837: tracing_mark_write: B|2007|setSurfaceDamage
+           <...>-625   (-----) [003] ...1 14594.229850: tracing_mark_write: B|625|doTransaction
+           <...>-13918 (-----) [002] d..2 14594.229856: sched_blocked_reason: pid=13917 iowait=0 caller=SyS_madvise+0xd34/0xd3c
+           <...>-5281  (-----) [001] d..2 14594.229932: sched_switch: prev_comm=writer prev_pid=5281 prev_prio=96 prev_state=D ==> next_comm=swapper/1 next_pid=0 next_prio=120
+           <...>-89    (-----) [006] d..2 14594.229951: sched_switch: prev_comm=lpass_smem_glin prev_pid=89 prev_prio=98 prev_state=S ==> next_comm=swapper/6 next_pid=0 next_prio=120
+           <...>-625   (-----) [003] ...1 14594.229982: tracing_mark_write: B|625|handleMessageInvalidate
+           <...>-625   (-----) [003] ...1 14594.229984: tracing_mark_write: B|625|handlePageFlip
+           <...>-625   (-----) [003] ...1 14594.230013: tracing_mark_write: B|625|latchBuffer
+           <...>-13917 (-----) [000] .... 14594.230015: sched_process_exit: comm=ReferenceQueueD pid=13917 prio=124
+           <...>-625   (-----) [003] ...1 14594.230020: tracing_mark_write: B|625|query
+           <...>-625   (-----) [003] ...1 14594.230028: tracing_mark_write: B|625|updateTexImage
+           <...>-625   (-----) [003] ...1 14594.230035: tracing_mark_write: B|625|acquireBuffer
+           <...>-625   (-----) [003] ...1 14594.230044: tracing_mark_write: B|625|com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity#1: 2
+           <...>-2738  (-----) [007] d..2 14594.230057: sched_switch: prev_comm=RenderThread prev_pid=2738 prev_prio=110 prev_state=D ==> next_comm=smem_native_lpa next_pid=88 next_prio=120
+           <...>-14607 (-----) [000] d..2 14594.259609: sched_blocked_reason: pid=14624 iowait=0 caller=__rwsem_down_write_failed_common+0x3e8/0x754
+           <...>-2738  (-----) [005] d..2 14594.259620: sched_switch: prev_comm=RenderThread prev_pid=2738 prev_prio=120 prev_state=S ==> next_comm=Binder:625_4 next_pid=1773 next_prio=120
+           <...>-1773  (-----) [005] ...1 14594.259649: tracing_mark_write: B|625|query
+           <...>-2738  (-----) [005] ...1 14594.259714: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [005] d..2 14594.259743: sched_switch: prev_comm=RenderThread prev_pid=2738 prev_prio=120 prev_state=S ==> next_comm=Binder:625_4 next_pid=1773 next_prio=120
+           <...>-1773  (-----) [005] ...1 14594.259757: tracing_mark_write: B|625|query
+           <...>-2738  (-----) [005] ...1 14594.259810: tracing_mark_write: B|2007|syncFrameState
+           <...>-2738  (-----) [005] ...1 14594.259856: tracing_mark_write: B|2007|prepareTree
+  Binder:14607_1-14624 (14607) [002] ...1 14594.259863: tracing_mark_write: B|14607|AttachCurrentThread
+  Binder:14607_1-14624 (14607) [002] ...1 14594.259869: tracing_mark_write: B|14607|Thread::Attach
+  Binder:14607_1-14624 (14607) [002] ...1 14594.259873: tracing_mark_write: B|14607|Thread birth
+  Binder:14607_1-14624 (14607) [002] ...1 14594.259916: tracing_mark_write: B|14607|Thread::Init
+  Binder:14607_1-14624 (14607) [002] ...1 14594.259920: tracing_mark_write: B|14607|InitStackHwm
+           <...>-14607 (-----) [000] d..2 14594.259932: sched_switch: prev_comm=.android.dialer prev_pid=14607 prev_prio=120 prev_state=D ==> next_comm=swapper/0 next_pid=0 next_prio=120
+  Binder:14607_1-14624 (14607) [002] d..2 14594.259941: sched_blocked_reason: pid=14607 iowait=0 caller=do_page_fault+0x550/0x5fc
+           <...>-3198  (-----) [001] ...1 14594.259942: tracing_mark_write: B|2007|Update SurfaceView position
+  Binder:14607_1-14624 (14607) [002] ...1 14594.259963: tracing_mark_write: B|14607|InitTlsEntryPoints
+  Binder:14607_1-14624 (14607) [002] ...1 14594.259974: tracing_mark_write: B|14607|InitInterpreterTls
+           <...>-14607 (-----) [000] d..2 14594.260005: sched_blocked_reason: pid=14624 iowait=0 caller=__rwsem_down_write_failed_common+0x3e8/0x754
+           <...>-3198  (-----) [001] d..2 14594.260007: sched_switch: prev_comm=hwuiTask1 prev_pid=3198 prev_prio=118 prev_state=S ==> next_comm=swapper/1 next_pid=0 next_prio=120
+           <...>-14607 (-----) [000] d..2 14594.260024: sched_switch: prev_comm=.android.dialer prev_pid=14607 prev_prio=120 prev_state=D ==> next_comm=swapper/0 next_pid=0 next_prio=120
+  Binder:14607_1-14624 (14607) [002] d..2 14594.260038: sched_blocked_reason: pid=14607 iowait=0 caller=do_page_fault+0x550/0x5fc
+           <...>-14607 (-----) [000] d..2 14594.260064: sched_blocked_reason: pid=14624 iowait=0 caller=__rwsem_down_write_failed_common+0x3e8/0x754
+  Binder:14607_1-14624 (14607) [002] ...1 14594.260101: tracing_mark_write: B|14607|ThreadList::Register
+           <...>-2738  (-----) [005] ...1 14594.260128: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [005] ...1 14594.260140: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [005] ...1 14594.260148: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [005] ...1 14594.260155: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [005] ...1 14594.260161: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [005] ...1 14594.260167: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [005] ...1 14594.260173: tracing_mark_write: B|2007|dequeueBuffer
+           <...>-2007  (-----) [001] d..2 14594.260201: sched_switch: prev_comm=s.nexuslauncher prev_pid=2007 prev_prio=120 prev_state=S ==> next_comm=swapper/1 next_pid=0 next_prio=120
+           <...>-2738  (-----) [005] d..2 14594.260214: sched_switch: prev_comm=RenderThread prev_pid=2738 prev_prio=120 prev_state=S ==> next_comm=Binder:625_4 next_pid=1773 next_prio=120
+           <...>-1773  (-----) [005] ...1 14594.260236: tracing_mark_write: B|625|dequeueBuffer
+           <...>-1773  (-----) [005] ...1 14594.260249: tracing_mark_write: B|625|com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity#1: 2
+           <...>-14607 (-----) [000] d..2 14594.260334: sched_switch: prev_comm=.android.dialer prev_pid=14607 prev_prio=120 prev_state=D ==> next_comm=swapper/0 next_pid=0 next_prio=120
+  Binder:14607_1-14624 (14607) [002] d..2 14594.260343: sched_blocked_reason: pid=14607 iowait=0 caller=do_page_fault+0x550/0x5fc
+           <...>-14607 (-----) [000] d..2 14594.260376: sched_blocked_reason: pid=14624 iowait=0 caller=__rwsem_down_write_failed_common+0x3e8/0x754
+           <...>-14607 (-----) [000] d..2 14594.260387: sched_switch: prev_comm=.android.dialer prev_pid=14607 prev_prio=120 prev_state=D ==> next_comm=swapper/0 next_pid=0 next_prio=120
+           <...>-2738  (-----) [005] ...1 14594.260401: tracing_mark_write: B|2007|HWC release fence 36030 has signaled
+  Binder:14607_1-14624 (14607) [002] d..2 14594.260407: sched_blocked_reason: pid=14607 iowait=0 caller=do_page_fault+0x550/0x5fc
+           <...>-2738  (-----) [005] ...1 14594.260419: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [005] ...1 14594.260427: tracing_mark_write: B|2007|eglBeginFrame
+           <...>-2738  (-----) [005] ...1 14594.260445: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [005] ...1 14594.260450: tracing_mark_write: B|2007|query
+  Binder:14607_1-14624 (14607) [002] .... 14594.260472: task_newtask: pid=14625 comm=Binder:14607_1 clone_flags=3d0f00 oom_score_adj=-1000
+           <...>-14607 (-----) [000] d..2 14594.260517: sched_switch: prev_comm=.android.dialer prev_pid=14607 prev_prio=120 prev_state=D ==> next_comm=swapper/0 next_pid=0 next_prio=120
+  Binder:14607_2-14625 (14607) [001] d..2 14594.260525: sched_blocked_reason: pid=14607 iowait=0 caller=do_page_fault+0x550/0x5fc
+           <...>-14607 (-----) [000] d..2 14594.260555: sched_blocked_reason: pid=14625 iowait=0 caller=__rwsem_down_write_failed_common+0x3e8/0x754
+           <...>-14607 (-----) [000] ...1 14594.260569: tracing_mark_write: B|14607|ActivityThreadMain
+           <...>-14607 (-----) [000] d..2 14594.260581: sched_switch: prev_comm=.android.dialer prev_pid=14607 prev_prio=120 prev_state=D ==> next_comm=swapper/0 next_pid=0 next_prio=120
+  Binder:14607_2-14625 (14607) [001] d..2 14594.260588: sched_blocked_reason: pid=14607 iowait=0 caller=do_page_fault+0x550/0x5fc
+           <...>-14607 (-----) [000] d..2 14594.260611: sched_blocked_reason: pid=14625 iowait=0 caller=__rwsem_down_write_failed_common+0x3e8/0x754
+           <...>-14607 (-----) [000] d..2 14594.260623: sched_switch: prev_comm=.android.dialer prev_pid=14607 prev_prio=120 prev_state=D ==> next_comm=swapper/0 next_pid=0 next_prio=120
+  Binder:14607_2-14625 (14607) [001] d..2 14594.260636: sched_blocked_reason: pid=14607 iowait=0 caller=do_page_fault+0x550/0x5fc
+           <...>-14607 (-----) [000] d..2 14594.260663: sched_blocked_reason: pid=14625 iowait=0 caller=__rwsem_down_write_failed_common+0x3e8/0x754
+           <...>-14607 (-----) [000] d..2 14594.260674: sched_switch: prev_comm=.android.dialer prev_pid=14607 prev_prio=120 prev_state=D ==> next_comm=swapper/0 next_pid=0 next_prio=120
+  Binder:14607_2-14625 (14607) [001] d..2 14594.260694: sched_blocked_reason: pid=14607 iowait=0 caller=do_page_fault+0x550/0x5fc
+           <...>-14607 (-----) [000] d..2 14594.260724: sched_blocked_reason: pid=14625 iowait=0 caller=__rwsem_down_write_failed_common+0x3e8/0x754
+           <...>-2738  (-----) [005] ...1 14594.260734: tracing_mark_write: B|2007|flush commands
+           <...>-14607 (-----) [000] d..2 14594.260735: sched_switch: prev_comm=.android.dialer prev_pid=14607 prev_prio=120 prev_state=D ==> next_comm=swapper/0 next_pid=0 next_prio=120
+  Binder:14607_2-14625 (14607) [001] d..2 14594.260753: sched_blocked_reason: pid=14607 iowait=0 caller=do_page_fault+0x550/0x5fc
+  Binder:14607_2-14625 (14607) [001] ...1 14594.260925: tracing_mark_write: B|14607|AttachCurrentThread
+  Binder:14607_2-14625 (14607) [001] ...1 14594.260930: tracing_mark_write: B|14607|Thread::Attach
+  Binder:14607_2-14625 (14607) [001] ...1 14594.260933: tracing_mark_write: B|14607|Thread birth
+  Binder:14607_2-14625 (14607) [001] ...1 14594.260973: tracing_mark_write: B|14607|Thread::Init
+  Binder:14607_2-14625 (14607) [001] ...1 14594.260977: tracing_mark_write: B|14607|InitStackHwm
+           <...>-14607 (-----) [000] d..2 14594.260990: sched_switch: prev_comm=.android.dialer prev_pid=14607 prev_prio=120 prev_state=D ==> next_comm=swapper/0 next_pid=0 next_prio=120
+  Binder:14607_2-14625 (14607) [001] d..2 14594.260998: sched_blocked_reason: pid=14607 iowait=0 caller=do_page_fault+0x550/0x5fc
+  Binder:14607_2-14625 (14607) [001] ...1 14594.261023: tracing_mark_write: B|14607|InitTlsEntryPoints
+  Binder:14607_2-14625 (14607) [001] ...1 14594.261034: tracing_mark_write: B|14607|InitInterpreterTls
+           <...>-14607 (-----) [000] d..2 14594.261064: sched_blocked_reason: pid=14625 iowait=0 caller=__rwsem_down_write_failed_common+0x3e8/0x754
+           <...>-14607 (-----) [000] d..2 14594.261075: sched_switch: prev_comm=.android.dialer prev_pid=14607 prev_prio=120 prev_state=D ==> next_comm=swapper/0 next_pid=0 next_prio=120
+  Binder:14607_2-14625 (14607) [001] d..2 14594.261094: sched_blocked_reason: pid=14607 iowait=0 caller=do_page_fault+0x550/0x5fc
+           <...>-14607 (-----) [000] d..2 14594.261120: sched_blocked_reason: pid=14625 iowait=0 caller=__rwsem_down_write_failed_common+0x3e8/0x754
+           <...>-14607 (-----) [000] d..2 14594.261132: sched_switch: prev_comm=.android.dialer prev_pid=14607 prev_prio=120 prev_state=D ==> next_comm=swapper/0 next_pid=0 next_prio=120
+  Binder:14607_2-14625 (14607) [001] d..2 14594.261146: sched_blocked_reason: pid=14607 iowait=0 caller=do_page_fault+0x550/0x5fc
+  Binder:14607_2-14625 (14607) [001] ...1 14594.261167: tracing_mark_write: B|14607|ThreadList::Register
+           <...>-14607 (-----) [000] d..2 14594.261209: sched_blocked_reason: pid=14625 iowait=0 caller=__rwsem_down_write_failed_common+0x3e8/0x754
+           <...>-2738  (-----) [005] ...1 14594.261212: tracing_mark_write: B|2007|waitOnFences
+           <...>-14607 (-----) [000] d..2 14594.261220: sched_switch: prev_comm=.android.dialer prev_pid=14607 prev_prio=120 prev_state=D ==> next_comm=swapper/0 next_pid=0 next_prio=120
+           <...>-2738  (-----) [005] ...1 14594.261232: tracing_mark_write: B|2007|eglSwapBuffersWithDamageKHR
+           <...>-2738  (-----) [005] ...1 14594.261244: tracing_mark_write: B|2007|setSurfaceDamage
+  Binder:14607_2-14625 (14607) [001] d..2 14594.261246: sched_blocked_reason: pid=14607 iowait=0 caller=do_page_fault+0x550/0x5fc
+           <...>-14607 (-----) [000] ...1 14594.261326: tracing_mark_write: B|14607|VerifyClass com.android.org.conscrypt.TrustedCertificateStore$PreloadHolder
+           <...>-2738  (-----) [005] .... 14594.261621: fence_init: driver=kgsl-timeline timeline=kgsl-3d0_13-s.nexuslauncher(200 context=27 seqno=78005
+           <...>-625   (-----) [003] ...1 14594.263903: tracing_mark_write: B|625|resetIdleTimer
+           <...>-625   (-----) [003] ...1 14594.263912: tracing_mark_write: B|625|rebuildLayerStacks
+           <...>-625   (-----) [003] ...1 14594.263915: tracing_mark_write: B|625|rebuildLayerStacks VR Dirty
+           <...>-625   (-----) [003] ...1 14594.263919: tracing_mark_write: B|625|computeVisibleRegions
+           <...>-1398  (-----) [006] d..2 14594.263966: sched_switch: prev_comm=android.anim prev_pid=1398 prev_prio=110 prev_state=S ==> next_comm=Binder:625_4 next_pid=1773 next_prio=120
+           <...>-1695  (-----) [001] d..2 14594.264086: sched_switch: prev_comm=InputDispatcher prev_pid=1695 prev_prio=112 prev_state=S ==> next_comm=Binder:1368_14 next_pid=3253 next_prio=120
+           <...>-625   (-----) [003] ...1 14594.264293: tracing_mark_write: B|625|calculateWorkingSet
+           <...>-625   (-----) [003] ...1 14594.264500: tracing_mark_write: B|625|prepare
+           <...>-625   (-----) [003] ...1 14594.264513: tracing_mark_write: B|625|HIDL::IComposerClient::executeCommands_2_2::client
+           <...>-625   (-----) [003] ...2 14594.264584: binder_set_priority: proc=627 thread=627 old=97 => new=98 desired=98
+           <...>-625   (-----) [003] d..2 14594.264617: sched_switch: prev_comm=surfaceflinger prev_pid=625 prev_prio=98 prev_state=S ==> next_comm=logd.writer next_pid=588 next_prio=130
+           <...>-588   (-----) [003] d..2 14594.264851: sched_switch: prev_comm=logd.writer prev_pid=588 prev_prio=130 prev_state=S ==> next_comm=swapper/3 next_pid=0 next_prio=120
+     rcu_preempt-7     (    7) [007] d..2 14594.265273: sched_switch: prev_comm=rcu_preempt prev_pid=7 prev_prio=120 prev_state=S ==> next_comm=kworker/u16:3 next_pid=18008 next_prio=120
+           <...>-18008 (-----) [007] d..2 14594.265404: sched_switch: prev_comm=kworker/u16:3 prev_pid=18008 prev_prio=120 prev_state=D ==> next_comm=swapper/7 next_pid=0 next_prio=120
+           <...>-18008 (-----) [007] d..2 14594.265471: sched_switch: prev_comm=kworker/u16:3 prev_pid=18008 prev_prio=120 prev_state=S ==> next_comm=swapper/7 next_pid=0 next_prio=120
+           <...>-625   (-----) [003] ...1 14594.265496: tracing_mark_write: B|625|doComposition
+           <...>-625   (-----) [003] ...1 14594.265507: tracing_mark_write: B|625|doComposeSurfaces
+           <...>-625   (-----) [003] ...1 14594.265552: tracing_mark_write: B|625|acquireBuffer
+           <...>-625   (-----) [003] ...1 14594.265563: tracing_mark_write: B|625|postFramebuffer
+           <...>-625   (-----) [003] ...1 14594.265567: tracing_mark_write: B|625|presentAndGetReleaseFences
+           <...>-625   (-----) [003] d..1 14594.265601: fence_enable_signal: driver=sde_fence:crtc97:91650 timeline=crtc97 context=3 seqno=91650
+           <...>-625   (-----) [003] ...1 14594.265735: tracing_mark_write: B|625|logLayerStats
+           <...>-625   (-----) [003] ...1 14594.265744: tracing_mark_write: B|625|postComposition
+           <...>-625   (-----) [003] ...1 14594.265749: tracing_mark_write: B|625|releaseBuffer
+           <...>-625   (-----) [003] ...1 14594.265753: tracing_mark_write: B|625|com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity#1: 1
+           <...>-625   (-----) [003] ...1 14594.265791: tracing_mark_write: B|625|releaseBuffer
+           <...>-440   (-----) [007] d..2 14594.342366: sched_switch: prev_comm=mmc-cmdqd/0 prev_pid=440 prev_prio=98 prev_state=D ==> next_comm=kworker/u17:2 next_pid=1778 next_prio=100
+           <...>-2007  (-----) [006] ...1 14594.342375: tracing_mark_write: B|2007|input
+           <...>-2007  (-----) [006] ...1 14594.342399: tracing_mark_write: B|2007|animation
+           <...>-625   (-----) [003] ...1 14594.342447: tracing_mark_write: B|625|doTransaction
+           <...>-625   (-----) [003] ...1 14594.342489: tracing_mark_write: B|625|doTransaction
+   kworker/u17:2-1778  ( 1778) [007] d..3 14594.342532: sched_blocked_reason: pid=14607 iowait=1 caller=wait_on_page_bit_common+0x2a8/0x5f8
+   kworker/u17:2-1778  ( 1778) [007] d..2 14594.342544: sched_switch: prev_comm=kworker/u17:2 prev_pid=1778 prev_prio=100 prev_state=S ==> next_comm=kworker/u16:2 next_pid=27544 next_prio=120
+           <...>-1773  (-----) [000] ...1 14594.342575: tracing_mark_write: B|625|requestNextVsync
+           <...>-1773  (-----) [000] ...1 14594.342579: tracing_mark_write: B|625|resetIdleTimer
+           <...>-27544 (-----) [007] d..2 14594.342589: sched_switch: prev_comm=kworker/u16:2 prev_pid=27544 prev_prio=120 prev_state=S ==> next_comm=swapper/7 next_pid=0 next_prio=120
+           <...>-656   (-----) [002] d.h3 14594.342604: sched_blocked_reason: pid=1233 iowait=0 caller=geni_i2c_xfer+0x4d8/0x1398
+           <...>-1803  (-----) [001] d..2 14594.342605: sched_switch: prev_comm=ndroid.systemui prev_pid=1803 prev_prio=120 prev_state=S ==> next_comm=swapper/1 next_pid=0 next_prio=120
+           <...>-625   (-----) [003] ...1 14594.342632: tracing_mark_write: B|625|handleMessageInvalidate
+           <...>-625   (-----) [003] ...1 14594.342634: tracing_mark_write: B|625|handlePageFlip
+           <...>-2738  (-----) [007] ...1 14594.342641: tracing_mark_write: B|2007|notifyFramePending
+           <...>-658   (-----) [002] d..2 14594.342653: sched_switch: prev_comm=DispSync prev_pid=658 prev_prio=97 prev_state=S ==> next_comm=Binder:625_1 next_pid=656 next_prio=120
+           <...>-656   (-----) [002] ...1 14594.342656: tracing_mark_write: B|625|requestNextVsync
+           <...>-2738  (-----) [007] d..2 14594.342658: sched_switch: prev_comm=RenderThread prev_pid=2738 prev_prio=110 prev_state=S ==> next_comm=swapper/7 next_pid=0 next_prio=120
+           <...>-656   (-----) [002] ...1 14594.342660: tracing_mark_write: B|625|resetIdleTimer
+           <...>-660   (-----) [005] d..2 14594.342663: sched_switch: prev_comm=app prev_pid=660 prev_prio=97 prev_state=S ==> next_comm=swapper/5 next_pid=0 next_prio=120
+           <...>-625   (-----) [003] ...1 14594.342665: tracing_mark_write: B|625|latchBuffer
+           <...>-625   (-----) [003] ...1 14594.342673: tracing_mark_write: B|625|query
+           <...>-625   (-----) [003] ...1 14594.342682: tracing_mark_write: B|625|updateTexImage
+           <...>-625   (-----) [003] ...1 14594.342693: tracing_mark_write: B|625|acquireBuffer
+           <...>-625   (-----) [003] ...1 14594.342703: tracing_mark_write: B|625|com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity#1: 1
+           <...>-660   (-----) [005] d..2 14594.342709: sched_switch: prev_comm=app prev_pid=660 prev_prio=97 prev_state=S ==> next_comm=swapper/5 next_pid=0 next_prio=120
+           <...>-2007  (-----) [006] ...1 14594.342733: tracing_mark_write: B|2007|traversal
+           <...>-2007  (-----) [006] ...1 14594.342776: tracing_mark_write: B|2007|draw
+           <...>-2007  (-----) [006] ...1 14594.342791: tracing_mark_write: B|2007|Record View#draw()
+           <...>-625   (-----) [003] ...1 14594.342849: tracing_mark_write: B|625|updateInputFlinger
+           <...>-2007  (-----) [006] d..2 14594.342903: sched_switch: prev_comm=s.nexuslauncher prev_pid=2007 prev_prio=110 prev_state=S ==> next_comm=kworker/6:2H next_pid=24261 next_prio=100
+           <...>-2738  (-----) [007] ...1 14594.342910: tracing_mark_write: B|2007|DrawFrame
+           <...>-2738  (-----) [007] d..2 14594.342917: sched_switch: prev_comm=RenderThread prev_pid=2738 prev_prio=110 prev_state=R+ ==> next_comm=mmc-cmdqd/0 next_pid=440 next_prio=98
+           <...>-24261 (-----) [006] d..2 14594.342918: sched_switch: prev_comm=kworker/6:2H prev_pid=24261 prev_prio=100 prev_state=S ==> next_comm=.android.dialer next_pid=14607 next_prio=110
+           <...>-440   (-----) [007] d..2 14594.342926: sched_switch: prev_comm=mmc-cmdqd/0 prev_pid=440 prev_prio=98 prev_state=D ==> next_comm=RenderThread next_pid=2738 next_prio=110
+           <...>-2738  (-----) [007] ...1 14594.342927: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [007] ...2 14594.342959: binder_set_priority: proc=625 thread=656 old=120 => new=110 desired=110
+           <...>-2738  (-----) [007] d..2 14594.342975: sched_switch: prev_comm=RenderThread prev_pid=2738 prev_prio=110 prev_state=R+ ==> next_comm=Binder:625_1 next_pid=656 next_prio=110
+           <...>-656   (-----) [007] ...1 14594.343021: tracing_mark_write: B|625|query
+           <...>-656   (-----) [007] .... 14594.343033: binder_set_priority: proc=625 thread=656 old=110 => new=120 desired=120
+           <...>-2738  (-----) [007] ...1 14594.343070: tracing_mark_write: B|2007|query
+           <...>-1233  (-----) [004] d..2 14594.343074: sched_switch: prev_comm=sound trigger c prev_pid=1233 prev_prio=120 prev_state=R+ ==> next_comm=irq/144-1436400 next_pid=2522 next_prio=49
+           <...>-2738  (-----) [007] ...2 14594.343078: binder_set_priority: proc=625 thread=656 old=120 => new=110 desired=110
+           <...>-625   (-----) [003] ...1 14594.343084: tracing_mark_write: B|625|onMessageReceived
+           <...>-625   (-----) [003] ...1 14594.343087: tracing_mark_write: B|625|handleMessageRefresh
+           <...>-625   (-----) [003] ...1 14594.343090: tracing_mark_write: B|625|preComposition
+           <...>-2738  (-----) [007] d..2 14594.343090: sched_switch: prev_comm=RenderThread prev_pid=2738 prev_prio=110 prev_state=R+ ==> next_comm=Binder:625_1 next_pid=656 next_prio=110
+           <...>-625   (-----) [003] ...1 14594.343122: tracing_mark_write: B|625|rebuildLayerStacks
+           <...>-625   (-----) [003] ...1 14594.343124: tracing_mark_write: B|625|rebuildLayerStacks VR Dirty
+           <...>-89    (-----) [007] d..2 14594.343126: sched_switch: prev_comm=lpass_smem_glin prev_pid=89 prev_prio=98 prev_state=S ==> next_comm=Binder:625_1 next_pid=656 next_prio=110
+           <...>-625   (-----) [003] ...1 14594.343129: tracing_mark_write: B|625|computeVisibleRegions
+           <...>-656   (-----) [007] ...1 14594.343136: tracing_mark_write: B|625|query
+           <...>-14607 (-----) [006] ...2 14594.343141: binder_set_priority: proc=1368 thread=3253 old=120 => new=110 desired=110
+                      <...>-2965  (-----) [001] .... 14596.746610: mm_filemap_add_to_page_cache: dev 253:6 ino a359 page=000000002ae8fcff pfn=1522884 ofs=188416
+          <idle>-0     (-----) [002] d..2 14596.746619: sched_switch: prev_comm=swapper/2 prev_pid=0 prev_prio=120 prev_state=R ==> next_comm=mmc-cmdqd/0 next_pid=440 next_prio=98
+           <...>-2965  (-----) [001] .... 14596.746629: mm_filemap_add_to_page_cache: dev 253:6 ino a359 page=00000000679ee1ec pfn=1299913 ofs=192512
+           <...>-2965  (-----) [001] .... 14596.746664: mm_filemap_add_to_page_cache: dev 253:6 ino a359 page=0000000006cd2fb7 pfn=1296251 ofs=196608
+           <...>-2965  (-----) [001] .... 14596.746677: mm_filemap_add_to_page_cache: dev 253:6 ino a359 page=00000000af82f3d6 pfn=1419330 ofs=200704
+           <...>-2965  (-----) [001] .... 14596.746693: mm_filemap_add_to_page_cache: dev 253:6 ino a359 page=000000002840f054 pfn=1304928 ofs=204800
+           <...>-2965  (-----) [001] .... 14596.746706: mm_filemap_add_to_page_cache: dev 253:6 ino a359 page=000000004a59da17 pfn=1288069 ofs=208896
+           <...>-2965  (-----) [001] .... 14596.746717: mm_filemap_add_to_page_cache: dev 253:6 ino a359 page=0000000023a80dca pfn=1419686 ofs=212992
+           <...>-2965  (-----) [001] .... 14596.746730: mm_filemap_add_to_page_cache: dev 253:6 ino a359 page=000000001cf89eab pfn=1315372 ofs=217088
+           <...>-2965  (-----) [001] .... 14596.746743: mm_filemap_add_to_page_cache: dev 253:6 ino a359 page=000000005b4c6cb6 pfn=1380698 ofs=221184
+           <...>-2965  (-----) [001] .... 14596.746760: mm_filemap_add_to_page_cache: dev 253:6 ino a359 page=00000000f8304ae7 pfn=1206753 ofs=225280
+           <...>-2965  (-----) [001] .... 14596.746773: mm_filemap_add_to_page_cache: dev 253:6 ino a359 page=00000000cb912305 pfn=1325465 ofs=229376
+           <...>-2965  (-----) [001] .... 14596.746785: mm_filemap_add_to_page_cache: dev 253:6 ino a359 page=00000000f16f3774 pfn=1408056 ofs=233472
+           <...>-2965  (-----) [001] .... 14596.746801: mm_filemap_add_to_page_cache: dev 253:6 ino a359 page=0000000056d4c926 pfn=1418352 ofs=237568
+           <...>-2965  (-----) [001] .... 14596.746815: mm_filemap_add_to_page_cache: dev 253:6 ino a359 page=00000000f3eeb42c pfn=1320957 ofs=241664
+           <...>-440   (-----) [002] d..2 14596.746916: sched_switch: prev_comm=mmc-cmdqd/0 prev_pid=440 prev_prio=98 prev_state=D ==> next_comm=swapper/2 next_pid=0 next_prio=120
+
+           <...>-656   (-----) [007] .... 14594.343145: binder_set_priority: proc=625 thread=656 old=110 => new=120 desired=120
+           <...>-14607 (-----) [006] d..2 14594.343164: sched_switch: prev_comm=.android.dialer prev_pid=14607 prev_prio=110 prev_state=S ==> next_comm=swapper/6 next_pid=0 next_prio=120
+           <...>-5281  (-----) [002] d..2 14594.343177: sched_switch: prev_comm=writer prev_pid=5281 prev_prio=96 prev_state=S ==> next_comm=RenderThread next_pid=2738 next_prio=110
+ irq/144-1436400-2522  ( 2522) [004] d..2 14594.343223: sched_switch: prev_comm=irq/144-1436400 prev_pid=2522 prev_prio=49 prev_state=D ==> next_comm=sound trigger c next_pid=1233 next_prio=120
+           <...>-88    (-----) [006] d..2 14594.343240: sched_switch: prev_comm=smem_native_lpa prev_pid=88 prev_prio=98 prev_state=S ==> next_comm=swapper/6 next_pid=0 next_prio=120
+           <...>-1238  (-----) [001] d..2 14594.343243: sched_switch: prev_comm=FastMixer prev_pid=1238 prev_prio=96 prev_state=S ==> next_comm=swapper/1 next_pid=0 next_prio=120
+           <...>-2738  (-----) [002] ...1 14594.343244: tracing_mark_write: B|2007|syncFrameState
+           <...>-2738  (-----) [002] ...1 14594.343293: tracing_mark_write: B|2007|prepareTree
+           <...>-1695  (-----) [001] d..2 14594.343318: sched_switch: prev_comm=InputDispatcher prev_pid=1695 prev_prio=112 prev_state=R+ ==> next_comm=FastMixer next_pid=1238 next_prio=96
+           <...>-5281  (-----) [005] d..2 14594.343322: sched_switch: prev_comm=writer prev_pid=5281 prev_prio=96 prev_state=S ==> next_comm=Binder:1368_14 next_pid=3253 next_prio=110
+           <...>-1238  (-----) [001] d..2 14594.343442: sched_switch: prev_comm=FastMixer prev_pid=1238 prev_prio=96 prev_state=S ==> next_comm=InputDispatcher next_pid=1695 next_prio=112
+           <...>-1695  (-----) [001] d..2 14594.343467: sched_switch: prev_comm=InputDispatcher prev_pid=1695 prev_prio=112 prev_state=S ==> next_comm=swapper/1 next_pid=0 next_prio=120
+           <...>-5281  (-----) [000] d..2 14594.343484: sched_switch: prev_comm=writer prev_pid=5281 prev_prio=96 prev_state=S ==> next_comm=swapper/0 next_pid=0 next_prio=120
+           <...>-625   (-----) [003] ...1 14594.343519: tracing_mark_write: B|625|calculateWorkingSet
+           <...>-2738  (-----) [002] ...1 14594.343568: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [002] ...1 14594.343577: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [002] ...1 14594.343586: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [002] ...1 14594.343591: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [002] ...1 14594.343597: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [002] ...1 14594.343602: tracing_mark_write: B|2007|query
+           <...>-2738  (-----) [002] ...1 14594.343609: tracing_mark_write: B|2007|dequeueBuffer
+           <...>-2007  (-----) [006] d..2 14594.343612: sched_switch: prev_comm=s.nexuslauncher prev_pid=2007 prev_prio=110 prev_state=S ==> next_comm=swapper/6 next_pid=0 next_prio=120
+           <...>-2738  (-----) [002] ...2 14594.343633: binder_set_priority: proc=625 thread=656 old=120 => new=110 desired=110
+           <...>-2738  (-----) [002] d..2 14594.343683: sched_switch: prev_comm=RenderThread prev_pid=2738 prev_prio=110 prev_state=R+ ==> next_comm=Binder:625_1 next_pid=656 next_prio=110
+           <...>-625   (-----) [003] ...1 14594.343704: tracing_mark_write: B|625|prepare
+           <...>-656   (-----) [002] ...1 14594.343707: tracing_mark_write: B|625|dequeueBuffer
+           <...>-625   (-----) [004] ...1 14594.812869: tracing_mark_write: B|625|com.google.android.dialer/com.google.android.dialer.extensions.GoogleDialtactsActivity#0: 2
+           <...>-2048  (-----) [000] d..2 14594.812895: sched_switch: prev_comm=RenderThread prev_pid=2048 prev_prio=120 prev_state=R+ ==> next_comm=Binder:625_3 next_pid=1431 next_prio=120
+           <...>-1431  (-----) [000] ...1 14594.812911: tracing_mark_write: B|625|query
+           <...>-625   (-----) [004] ...1 14594.812914: tracing_mark_write: B|625|latchBuffer
+           <...>-625   (-----) [004] ...1 14594.812919: tracing_mark_write: B|625|query
+           <...>-625   (-----) [004] ...1 14594.812925: tracing_mark_write: B|625|updateTexImage
+           <...>-625   (-----) [004] ...1 14594.812928: tracing_mark_write: B|625|acquireBuffer
+           <...>-625   (-----) [004] ...1 14594.812934: tracing_mark_write: B|625|StatusBar#0: 1
+           <...>-2048  (-----) [000] ...1 14594.812962: tracing_mark_write: B|1803|syncFrameState
+           <...>-656   (-----) [002] ...1 14594.813044: tracing_mark_write: B|625|setTransactionState
+           <...>-14607 (-----) [007] ...2 14594.813083: binder_set_priority: proc=10691 thread=18733 old=120 => new=110 desired=110
+           <...>-14607 (-----) [007] d..2 14594.813114: sched_switch: prev_comm=.android.dialer prev_pid=14607 prev_prio=110 prev_state=S ==> next_comm=kworker/7:1 next_pid=7092 next_prio=120
+           <...>-14655 (-----) [006] d..2 14594.813128: sched_switch: prev_comm=DialerExecutors prev_pid=14655 prev_prio=130 prev_state=R ==> next_comm=lpass_smem_glin next_pid=89 next_prio=98
+           <...>-89    (-----) [006] d..2 14594.813163: sched_switch: prev_comm=lpass_smem_glin prev_pid=89 prev_prio=98 prev_state=S ==> next_comm=DialerExecutors next_pid=14655 next_prio=130
+           <...>-656   (-----) [002] ...1 14594.813218: tracing_mark_write: B|625|requestNextVsync
+           <...>-656   (-----) [002] ...1 14594.813222: tracing_mark_write: B|625|resetIdleTimer
+     kworker/7:1-7092  ( 7092) [007] d..2 14594.813239: sched_switch: prev_comm=kworker/7:1 prev_pid=7092 prev_prio=120 prev_state=R+ ==> next_comm=smem_native_lpa next_pid=88 next_prio=98
+           <...>-5281  (-----) [001] d..2 14594.813245: sched_switch: prev_comm=writer prev_pid=5281 prev_prio=96 prev_state=S ==> next_comm=Binder:10691_B next_pid=18733 next_prio=110
+           <...>-88    (-----) [007] d..2 14594.813248: sched_switch: prev_comm=smem_native_lpa prev_pid=88 prev_prio=98 prev_state=R ==> next_comm=kgsl_worker_thr next_pid=259 next_prio=97
+           <...>-2048  (-----) [000] d..2 14594.813249: sched_switch: prev_comm=RenderThread prev_pid=2048 prev_prio=120 prev_state=R+ ==> next_comm=FastMixer next_pid=1238 next_prio=96
+           <...>-14655 (-----) [006] d..2 14594.813263: sched_switch: prev_comm=DialerExecutors prev_pid=14655 prev_prio=130 prev_state=R+ ==> next_comm=smem_native_lpa next_pid=88 next_prio=98
+           <...>-661   (-----) [002] d..2 14594.813265: sched_switch: prev_comm=sf prev_pid=661 prev_prio=97 prev_state=S ==> next_comm=Binder:625_1 next_pid=656 next_prio=116
+           <...>-259   (-----) [007] d..2 14594.813265: sched_switch: prev_comm=kgsl_worker_thr prev_pid=259 prev_prio=97 prev_state=S ==> next_comm=kworker/7:1 next_pid=7092 next_prio=120
+     kworker/7:1-7092  ( 7092) [007] d..2 14594.813271: sched_switch: prev_comm=kworker/7:1 prev_pid=7092 prev_prio=120 prev_state=S ==> next_comm=system next_pid=108 next_prio=120
+           <...>-108   (-----) [007] .... 14594.813275: ion_heap_shrink: heap_name=system, len=9469952, total_allocated=189620224
+           <...>-88    (-----) [006] d..2 14594.813294: sched_switch: prev_comm=smem_native_lpa prev_pid=88 prev_prio=98 prev_state=S ==> next_comm=DialerExecutors next_pid=14655 next_prio=130
+           <...>-625   (-----) [004] ...1 14594.813310: tracing_mark_write: B|625|updateInputFlinger
+           <...>-1238  (-----) [000] d..2 14594.813312: sched_switch: prev_comm=FastMixer prev_pid=1238 prev_prio=96 prev_state=S ==> next_comm=RenderThread next_pid=2048 next_prio=120
+           <...>-661   (-----) [002] d..2 14594.813317: sched_switch: prev_comm=sf prev_pid=661 prev_prio=97 prev_state=S ==> next_comm=Binder:625_1 next_pid=656 next_prio=116
+           <...>-14640 (-----) [005] d..2 14594.813319: sched_switch: prev_comm=DialerExecutors prev_pid=14640 prev_prio=130 prev_state=R ==> next_comm=DispSync next_pid=658 next_prio=97
+           <...>-656   (-----) [002] ...1 14594.813336: tracing_mark_write: B|625|~GraphicBuffer
+           <...>-658   (-----) [005] d..2 14594.813345: sched_switch: prev_comm=DispSync prev_pid=658 prev_prio=97 prev_state=S ==> next_comm=DialerExecutors next_pid=14640 next_prio=130
+           <...>-656   (-----) [002] ...1 14594.813345: tracing_mark_write: B|625|~GraphicBuffer
+           <...>-656   (-----) [002] ...1 14594.813353: tracing_mark_write: B|625|~GraphicBuffer
+           <...>-2048  (-----) [000] d..2 14594.813358: sched_switch: prev_comm=RenderThread prev_pid=2048 prev_prio=120 prev_state=R+ ==> next_comm=FastMixer next_pid=1238 next_prio=96
+           <...>-656   (-----) [002] ...1 14594.813364: tracing_mark_write: B|625|~GraphicBuffer
+           <...>-5281  (-----) [001] d..2 14594.813369: sched_switch: prev_comm=writer prev_pid=5281 prev_prio=96 prev_state=S ==> next_comm=Binder:10691_B next_pid=18733 next_prio=110
+           <...>-656   (-----) [002] ...1 14594.813372: tracing_mark_write: B|625|~GraphicBuffer
+           <...>-656   (-----) [002] ...1 14594.813380: tracing_mark_write: B|625|~GraphicBuffer
+           <...>-656   (-----) [002] ...1 14594.813391: tracing_mark_write: B|625|~GraphicBuffer
+           <...>-656   (-----) [002] ...1 14594.813398: tracing_mark_write: B|625|~GraphicBuffer
+           <...>-656   (-----) [002] ...1 14594.813408: tracing_mark_write: B|625|~GraphicBuffer
+           <...>-656   (-----) [002] ...1 14594.813416: tracing_mark_write: B|625|~GraphicBuffer
+           <...>-656   (-----) [002] ...1 14594.813424: tracing_mark_write: B|625|~GraphicBuffer
+           <...>-656   (-----) [002] ...1 14594.813432: tracing_mark_write: B|625|~GraphicBuffer
+           <...>-656   (-----) [002] .n.1 14594.813443: tracing_mark_write: B|625|~GraphicBuffer
+           <...>-1238  (-----) [000] d..2 14594.813464: sched_switch: prev_comm=FastMixer prev_pid=1238 prev_prio=96 prev_state=S ==> next_comm=RenderThread next_pid=2048 next_prio=120
+           <...>-5281  (-----) [002] d..2 14594.813525: sched_switch: prev_comm=writer prev_pid=5281 prev_prio=96 prev_state=S ==> next_comm=Binder:625_1 next_pid=656 next_prio=116
+           <...>-656   (-----) [002] ...1 14594.813544: tracing_mark_write: B|625|~GraphicBuffer
+           <...>-656   (-----) [002] ...1 14594.813557: tracing_mark_write: B|625|~GraphicBuffer
+           <...>-2048  (-----) [000] d..2 14594.813594: sched_switch: prev_comm=RenderThread prev_pid=2048 prev_prio=120 prev_state=R+ ==> next_comm=Binder:1368_15 next_pid=3359 next_prio=120
+           <...>-18733 (-----) [001] ...2 14594.813635: binder_set_priority: proc=1368 thread=3514 old=120 => new=110 desired=110
+           <...>-656   (-----) [002] .... 14594.813637: binder_set_priority: proc=625 thread=656 old=116 => new=120 desired=120
+           <...>-108   (-----) [007] d..2 14594.813646: sched_switch: prev_comm=system prev_pid=108 prev_prio=120 prev_state=R+ ==> next_comm=android.anim next_pid=1398 next_prio=116
+           <...>-625   (-----) [004] ...1 14594.813646: tracing_mark_write: B|625|onMessageReceived
+           <...>-625   (-----) [004] ...1 14594.813649: tracing_mark_write: B|625|handleMessageRefresh
+           <...>-625   (-----) [004] ...1 14594.813651: tracing_mark_write: B|625|preComposition
+           <...>-625   (-----) [004] ...1 14594.813693: tracing_mark_write: B|625|rebuildLayerStacks
+           <...>-625   (-----) [004] ...1 14594.813696: tracing_mark_write: B|625|rebuildLayerStacks VR Dirty
+           <...>-625   (-----) [004] ...1 14594.813701: tracing_mark_write: B|625|computeVisibleRegions
+           <...>-1398  (-----) [007] d..2 14594.813718: sched_switch: prev_comm=android.anim prev_pid=1398 prev_prio=116 prev_state=S ==> next_comm=system next_pid=108 next_prio=120
+           <...>-108   (-----) [007] d..2 14594.813739: sched_switch: prev_comm=system prev_pid=108 prev_prio=120 prev_state=R+ ==> next_comm=android.anim next_pid=1398 next_prio=116
+           <...>-1695  (-----) [002] d..2 14594.813970: sched_switch: prev_comm=InputDispatcher prev_pid=1695 prev_prio=112 prev_state=S ==> next_comm=system next_pid=108 next_prio=120
+           <...>-1398  (-----) [007] ...1 14594.814029: tracing_mark_write: B|1368|wmLayout
+           <...>-1398  (-----) [007] ...1 14594.814033: tracing_mark_write: B|1368|performSurfacePlacement
+           <...>-1398  (-----) [007] ...1 14594.814040: tracing_mark_write: B|1368|applySurfaceChanges
+           <...>-1398  (-----) [007] ...1 14594.814043: tracing_mark_write: B|1368|openSurfaceTransaction
+           <...>-1398  (-----) [007] ...1 14594.814063: tracing_mark_write: B|1368|performLayout
+           <...>-625   (-----) [004] ...1 14594.814119: tracing_mark_write: B|625|calculateWorkingSet
+           <...>-1398  (-----) [007] ...1 14594.814241: tracing_mark_write: B|1368|layoutInputConsumer
+           <...>-2048  (-----) [000] ...1 14594.814260: tracing_mark_write: B|1803|prepareTree
+           <...>-1398  (-----) [007] ...1 14594.814263: tracing_mark_write: B|1368|applyPostLayoutPolicy
+           <...>-2048  (-----) [000] d..2 14594.814408: sched_switch: prev_comm=RenderThread prev_pid=2048 prev_prio=120 prev_state=R ==> next_comm=Binder:1368_15 next_pid=3359 next_prio=120
+           <...>-625   (-----) [004] ...1 14594.814411: tracing_mark_write: B|625|prepare
+           <...>-625   (-----) [004] ...1 14594.814428: tracing_mark_write: B|625|HIDL::IComposerClient::executeCommands_2_2::client
+           <...>-2048  (-----) [000] d..2 14594.814533: sched_switch: prev_comm=RenderThread prev_pid=2048 prev_prio=120 prev_state=R+ ==> next_comm=ndroid.systemui next_pid=1803 next_prio=120
+           <...>-1803  (-----) [000] d..2 14594.814558: sched_switch: prev_comm=ndroid.systemui prev_pid=1803 prev_prio=120 prev_state=S ==> next_comm=RenderThread next_pid=2048 next_prio=120
+           <...>-2048  (-----) [000] d..2 14594.814572: sched_switch: prev_comm=RenderThread prev_pid=2048 prev_prio=120 prev_state=R+ ==> next_comm=ndroid.systemui next_pid=1803 next_prio=120
+           <...>-625   (-----) [004] ...2 14594.814589: binder_set_priority: proc=627 thread=627 old=97 => new=98 desired=98
+           <...>-108   (-----) [002] d..2 14594.814650: sched_switch: prev_comm=system prev_pid=108 prev_prio=120 prev_state=R+ ==> next_comm=composer@2.2-se next_pid=627 next_prio=98
+           <...>-625   (-----) [004] d..2 14594.814664: sched_switch: prev_comm=surfaceflinger prev_pid=625 prev_prio=98 prev_state=S ==> next_comm=ashmemd next_pid=854 next_prio=129
+           <...>-1398  (-----) [007] ...1 14594.814723: tracing_mark_write: B|1368|applyWindowSurfaceChanges
+           <...>-854   (-----) [004] .... 14594.814746: binder_set_priority: proc=854 thread=854 old=129 => new=120 desired=120
+           <...>-854   (-----) [004] d..2 14594.814757: sched_switch: prev_comm=ashmemd prev_pid=854 prev_prio=120 prev_state=R+ ==> next_comm=highpool[0] next_pid=3493 next_prio=129
+           <...>-1803  (-----) [000] d..2 14594.814763: sched_switch: prev_comm=ndroid.systemui prev_pid=1803 prev_prio=120 prev_state=S ==> next_comm=RenderThread next_pid=2048 next_prio=120
+           <...>-18733 (-----) [001] d..1 14594.814819: mm_filemap_delete_from_page_cache: dev 0:1 ino 3ce5e7 page=0000000083f10c7a pfn=1298474 ofs=0
+           <...>-2048  (-----) [000] ...1 14594.814842: tracing_mark_write: B|1803|dequeueBuffer
+           <...>-1398  (-----) [007] ...1 14594.814850: tracing_mark_write: F|1368|launching: com.google.android.dialer|0
+           <...>-1398  (-----) [007] ...1 14594.814855: tracing_mark_write: B|1368|MetricsLogger:launchObserverNotifyActivityLaunchFinished
+           <...>-1398  (-----) [007] ...1 14594.814857: tracing_mark_write: B|1368|MetricsLogger:convertActivityRecordToProto
+           <...>-2048  (-----) [000] d..2 14594.814905: sched_switch: prev_comm=RenderThread prev_pid=2048 prev_prio=120 prev_state=R+ ==> next_comm=Binder:625_1 next_pid=656 next_prio=120
+           <...>-1410  (-----) [006] .... 14592.997816: mm_filemap_add_to_page_cache: dev 253:6 ino b785 page=00000000615a8f24 pfn=1134764 ofs=0
+           <...>-1410  (-----) [006] .... 14592.997831: mm_filemap_add_to_page_cache: dev 253:6 ino b785 page=000000008768a58f pfn=1134751 ofs=4096
+
+           <...>-18733 (-----) [001] .... 14594.814914: binder_set_priority: proc=10691 thread=18733 old=110 => new=120 desired=120
+           <...>-14655 (-----) [006] d..2 14594.814932: sched_switch: prev_comm=DialerExecutors prev_pid=14655 prev_prio=130 prev_state=R ==> next_comm=.android.dialer next_pid=14607 next_prio=110
+           <...>-656   (-----) [000] ...1 14594.814948: tracing_mark_write: B|625|dequeueBuffer
+           <...>-3514  (-----) [001] .... 14594.814954: binder_set_priority: proc=1368 thread=3514 old=110 => new=120 desired=120
+           <...>-656   (-----) [000] ...1 14594.814963: tracing_mark_write: B|625|NavigationBar0#0: 2
+           <...>-14607 (-----) [006] ...2 14594.815022: binder_set_priority: proc=1368 thread=3514 old=120 => new=110 desired=110
+           <...>-1398  (-----) [007] ...1 14594.815039: tracing_mark_write: B|1368|prepareSurfaces
+           <...>-14607 (-----) [006] d..2 14594.815041: sched_switch: prev_comm=.android.dialer prev_pid=14607 prev_prio=110 prev_state=S ==> next_comm=DialerExecutors next_pid=14655 next_prio=130
+           <...>-3493  (-----) [004] d..2 14594.815057: sched_switch: prev_comm=highpool[0] prev_pid=3493 prev_prio=129 prev_state=R ==> next_comm=Binder:1368_18 next_pid=3514 next_prio=110
+           <...>-2048  (-----) [000] ...1 14594.815088: tracing_mark_write: B|1803|HWC release fence 45750 has signaled
+           <...>-2048  (-----) [000] ...1 14594.815119: tracing_mark_write: B|1803|eglBeginFrame
+           <...>-14655 (-----) [006] d..2 14594.815190: sched_switch: prev_comm=DialerExecutors prev_pid=14655 prev_prio=130 prev_state=R ==> next_comm=crtc_commit:97 next_pid=301 next_prio=83
+           <...>-3514  (-----) [004] .... 14594.815193: binder_set_priority: proc=1368 thread=3514 old=110 => new=120 desired=120
+           <...>-1398  (-----) [007] ...1 14594.815322: tracing_mark_write: B|1368|closeSurfaceTransaction
+           <...>-3493  (-----) [004] .... 14594.815353: mm_filemap_add_to_page_cache: dev 253:6 ino 113b page=0000000069e2b98a pfn=628464 ofs=2723840
+           <...>-1398  (-----) [007] ...2 14594.815393: binder_set_priority: proc=625 thread=656 old=120 => new=116 desired=116
+       rcu_sched-8     (    8) [007] d..2 14594.815449: sched_switch: prev_comm=rcu_sched prev_pid=8 prev_prio=120 prev_state=S ==> next_comm=Binder:625_1 next_pid=656 next_prio=116

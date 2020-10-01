@@ -296,16 +296,16 @@ public class EntitlementManager {
      * Reference TetheringManager.TETHERING_{@code *} for each tether type.
      *
      * @param config an object that encapsulates the various tethering configuration elements.
-     * Note: this method is only called from TetherMaster on the handler thread.
+     * Note: this method is only called from @{link Tethering.TetherMainSM} on the handler thread.
      * If there are new callers from different threads, the logic should move to
-     * masterHandler to avoid race conditions.
+     * @{link Tethering.TetherMainSM} handler to avoid race conditions.
      */
     public void reevaluateSimCardProvisioning(final TetheringConfiguration config) {
         if (DBG) mLog.i("reevaluateSimCardProvisioning");
 
         if (!mHandler.getLooper().isCurrentThread()) {
             // Except for test, this log should not appear in normal flow.
-            mLog.log("reevaluateSimCardProvisioning() don't run in TetherMaster thread");
+            mLog.log("reevaluateSimCardProvisioning() don't run in TetherMainSM thread");
         }
         mEntitlementCacheValue.clear();
         mCurrentEntitlementResults.clear();

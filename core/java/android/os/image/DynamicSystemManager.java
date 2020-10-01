@@ -155,6 +155,19 @@ public class DynamicSystemManager {
         }
     }
     /**
+     * Complete the current partition installation.
+     *
+     * @return true if the partition installation completes without error.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    public boolean closePartition() {
+        try {
+            return mService.closePartition();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
+    /**
      * Finish a previously started installation. Installations without a cooresponding
      * finishInstallation() will be cleaned up during device boot.
      */

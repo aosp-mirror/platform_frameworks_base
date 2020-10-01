@@ -240,6 +240,16 @@ class DumpXmlTreeCommand : public DumpApkCommand {
   std::vector<std::string> files_;
 };
 
+class DumpOverlayableCommand : public DumpApkCommand {
+ public:
+  explicit DumpOverlayableCommand(text::Printer* printer, IDiagnostics* diag)
+      : DumpApkCommand("overlayable", printer, diag) {
+    SetDescription("Print the <overlayable> resources of an APK.");
+  }
+
+  int Dump(LoadedApk* apk) override;
+};
+
 /** The default dump command. Performs no action because a subcommand is required. */
 class DumpCommand : public Command {
  public:
@@ -255,8 +265,8 @@ class DumpCommand : public Command {
     AddOptionalSubcommand(util::make_unique<DumpTableCommand>(printer, diag_));
     AddOptionalSubcommand(util::make_unique<DumpXmlStringsCommand>(printer, diag_));
     AddOptionalSubcommand(util::make_unique<DumpXmlTreeCommand>(printer, diag_));
+    AddOptionalSubcommand(util::make_unique<DumpOverlayableCommand>(printer, diag_));
     AddOptionalSubcommand(util::make_unique<DumpBadgerCommand>(printer), /* hidden */ true);
-    // TODO(b/120609160): Add aapt2 overlayable dump command
   }
 
   int Action(const std::vector<std::string>& args) override {

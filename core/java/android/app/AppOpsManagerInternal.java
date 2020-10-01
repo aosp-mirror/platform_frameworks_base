@@ -16,10 +16,14 @@
 
 package android.app;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 
+import com.android.internal.app.IAppOpsCallback;
+import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.QuadFunction;
-import com.android.internal.util.function.TriFunction;
 
 /**
  * App ops service local interface.
@@ -60,12 +64,18 @@ public abstract class AppOpsManagerInternal {
          *
          * @param code The op code to note.
          * @param uid The UID for which to note.
-         * @param packageName The package for which to note.
+         * @param packageName The package for which to note. {@code null} for system package.
+         * @param featureId Id of the feature in the package
+         * @param shouldCollectAsyncNotedOp If an {@link AsyncNotedAppOp} should be collected
+         * @param message The message in the async noted op
          * @param superImpl The super implementation.
          * @return The app op note result.
          */
-        int noteOperation(int code, int uid, String packageName,
-                TriFunction<Integer, Integer, String, Integer> superImpl);
+        int noteOperation(int code, int uid, @Nullable String packageName,
+                @Nullable String featureId, boolean shouldCollectAsyncNotedOp,
+                @Nullable String message, boolean shouldCollectMessage,
+                @NonNull HeptFunction<Integer, Integer, String, String, Boolean, String, Boolean,
+                        Integer> superImpl);
     }
 
     /**
@@ -76,10 +86,24 @@ public abstract class AppOpsManagerInternal {
     public abstract void setDeviceAndProfileOwners(SparseIntArray owners);
 
     /**
-     * Set all {@link #setMode (package) modes} for this uid to the default value.
-     *
-     * @param code The app-op
-     * @param uid The uid
+     * Update if the list of AppWidget becomes visible/invisible.
+     * @param uidPackageNames uid to packageName map.
+     * @param visible true for visible, false for invisible.
      */
-    public abstract void setAllPkgModesToDefault(int code, int uid);
+    public abstract void updateAppWidgetVisibility(SparseArray<String> uidPackageNames,
+            boolean visible);
+
+    /**
+     * Like {@link AppOpsManager#setUidMode}, but allows ignoring our own callback and not updating
+     * the REVOKED_COMPAT flag.
+     */
+    public abstract void setUidModeFromPermissionPolicy(int code, int uid, int mode,
+            @Nullable IAppOpsCallback callback);
+
+    /**
+     * Like {@link AppOpsManager#setMode}, but allows ignoring our own callback and not updating the
+     * REVOKED_COMPAT flag.
+     */
+    public abstract void setModeFromPermissionPolicy(int code, int uid, @NonNull String packageName,
+            int mode, @Nullable IAppOpsCallback callback);
 }

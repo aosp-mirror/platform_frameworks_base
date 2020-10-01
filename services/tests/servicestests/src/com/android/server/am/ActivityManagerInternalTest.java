@@ -18,13 +18,17 @@ package com.android.server.am;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 
 import android.app.ActivityManagerInternal;
 import android.os.SystemClock;
 
 import androidx.test.filters.MediumTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -43,6 +47,8 @@ public class ActivityManagerInternalTest {
     private static final long TEST_PROC_STATE_SEQ2 = 1112;
     private static final long TEST_PROC_STATE_SEQ3 = 1113;
 
+    @Rule public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();
+
     @Mock private ActivityManagerService.Injector mMockInjector;
 
     private ActivityManagerService mAms;
@@ -52,7 +58,11 @@ public class ActivityManagerInternalTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mAms = new ActivityManagerService(mMockInjector);
+        doReturn(InstrumentationRegistry.getInstrumentation().getContext()).when(mMockInjector)
+                .getContext();
+        doReturn(mServiceThreadRule.getThread().getThreadHandler()).when(mMockInjector)
+                .getUiHandler(any());
+        mAms = new ActivityManagerService(mMockInjector, mServiceThreadRule.getThread());
         mAmi = mAms.new LocalService();
     }
 

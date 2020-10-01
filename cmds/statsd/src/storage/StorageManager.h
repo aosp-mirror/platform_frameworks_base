@@ -52,13 +52,22 @@ public:
     /**
      * Writes train info.
      */
-    static bool writeTrainInfo(int64_t trainVersionCode, const std::string& trainName,
-                               int32_t status, const std::vector<int64_t>& experimentIds);
+    static bool writeTrainInfo(const InstallTrainInfo& trainInfo);
 
     /**
      * Reads train info.
      */
-    static bool readTrainInfo(InstallTrainInfo& trainInfo);
+    static bool readTrainInfo(const std::string& trainName, InstallTrainInfo& trainInfo);
+
+    /**
+     * Reads train info assuming lock is obtained.
+     */
+    static bool readTrainInfoLocked(const std::string& trainName, InstallTrainInfo& trainInfo);
+
+    /**
+     * Reads all train info and returns a vector of train info.
+     */
+    static vector<InstallTrainInfo> readAllTrainInfo();
 
     /**
      * Reads the file content to the buffer.
@@ -124,7 +133,7 @@ public:
      * Trims files in the provided directory to limit the total size, number of
      * files, accumulation of outdated files.
      */
-    static void trimToFit(const char* dir);
+    static void trimToFit(const char* dir, bool parseTimestampOnly = false);
 
     /**
      * Returns true if there already exists identical configuration on device.

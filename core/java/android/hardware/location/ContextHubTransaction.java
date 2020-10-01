@@ -22,10 +22,9 @@ import android.annotation.SystemApi;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -291,8 +290,8 @@ public class ContextHubTransaction<T> {
             @NonNull ContextHubTransaction.OnCompleteListener<T> listener,
             @NonNull @CallbackExecutor Executor executor) {
         synchronized (this) {
-            Preconditions.checkNotNull(listener, "OnCompleteListener cannot be null");
-            Preconditions.checkNotNull(executor, "Executor cannot be null");
+            Objects.requireNonNull(listener, "OnCompleteListener cannot be null");
+            Objects.requireNonNull(executor, "Executor cannot be null");
             if (mListener != null) {
                 throw new IllegalStateException(
                         "Cannot set ContextHubTransaction listener multiple times");
@@ -340,7 +339,7 @@ public class ContextHubTransaction<T> {
      */
     /* package */ void setResponse(ContextHubTransaction.Response<T> response) {
         synchronized (this) {
-            Preconditions.checkNotNull(response, "Response cannot be null");
+            Objects.requireNonNull(response, "Response cannot be null");
             if (mIsResponseSet) {
                 throw new IllegalStateException(
                         "Cannot set response of ContextHubTransaction multiple times");

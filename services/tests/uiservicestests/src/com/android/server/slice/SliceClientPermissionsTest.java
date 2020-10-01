@@ -227,6 +227,23 @@ public class SliceClientPermissionsTest extends UiServiceTestCase {
         assertEquivalent(client, deser);
     }
 
+    @Test(expected = XmlPullParserException.class)
+    public void testReadEmptyFile_ThrowException() throws XmlPullParserException, IOException {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        XmlSerializer serializer = XmlPullParserFactory.newInstance().newSerializer();
+        serializer.setOutput(output, Encoding.UTF_8.name());
+        // create empty xml document
+        serializer.startDocument(null, true);
+        serializer.endDocument();
+        serializer.flush();
+
+        ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
+        XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
+        parser.setInput(input, Encoding.UTF_8.name());
+        SliceClientPermissions.createFrom(parser, mock(DirtyTracker.class));
+        // Should throw exception since the xml is empty
+    }
+
     private void assertEquivalent(SliceClientPermissions o1, SliceClientPermissions o2) {
         assertEquals(o1.getPkg(), o2.getPkg());
         ArrayList<SliceAuthority> a1 = new ArrayList<>(o1.getAuthorities());

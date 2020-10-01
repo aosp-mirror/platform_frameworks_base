@@ -16,12 +16,16 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.WindowConfiguration.ActivityType;
-import android.app.WindowConfiguration.WindowingMode;
+import android.os.UserHandle;
 import android.util.ArraySet;
 
-import java.util.ArrayList;
+import com.android.internal.util.function.pooled.PooledConsumer;
+import com.android.internal.util.function.pooled.PooledLambda;
+
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -33,15 +37,23 @@ import java.util.TreeSet;
 class RunningTasks {
 
     // Comparator to sort by last active time (descending)
-    private static final Comparator<TaskRecord> LAST_ACTIVE_TIME_COMPARATOR =
+    private static final Comparator<Task> LAST_ACTIVE_TIME_COMPARATOR =
             (o1, o2) -> Long.signum(o2.lastActiveTime - o1.lastActiveTime);
 
-    private final TreeSet<TaskRecord> mTmpSortedSet = new TreeSet<>(LAST_ACTIVE_TIME_COMPARATOR);
-    private final ArrayList<TaskRecord> mTmpStackTasks = new ArrayList<>();
+    private final TreeSet<Task> mTmpSortedSet = new TreeSet<>(LAST_ACTIVE_TIME_COMPARATOR);
 
-    void getTasks(int maxNum, List<RunningTaskInfo> list, @ActivityType int ignoreActivityType,
-            @WindowingMode int ignoreWindowingMode, ArrayList<ActivityDisplay> activityDisplays,
-            int callingUid, boolean allowed, boolean crossUser, ArraySet<Integer> profileIds) {
+    private int mCallingUid;
+    private int mUserId;
+    private boolean mCrossUser;
+    private ArraySet<Integer> mProfileIds;
+    private boolean mAllowed;
+    private boolean mFilterOnlyVisibleRecents;
+    private ActivityStack mTopDisplayFocusStack;
+    private RecentTasks mRecentTasks;
+
+    void getTasks(int maxNum, List<RunningTaskInfo> list, boolean filterOnlyVisibleRecents,
+            RootWindowContainer root, int callingUid, boolean allowed, boolean crossUser,
+            ArraySet<Integer> profileIds) {
         // Return early if there are no tasks to fetch
         if (maxNum <= 0) {
             return;
@@ -49,37 +61,72 @@ class RunningTasks {
 
         // Gather all of the tasks across all of the tasks, and add them to the sorted set
         mTmpSortedSet.clear();
-        final int numDisplays = activityDisplays.size();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final ActivityDisplay display = activityDisplays.get(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                mTmpStackTasks.clear();
-                stack.getRunningTasks(mTmpStackTasks, ignoreActivityType, ignoreWindowingMode,
-                        callingUid, allowed, crossUser, profileIds);
-                mTmpSortedSet.addAll(mTmpStackTasks);
-            }
-        }
+        mCallingUid = callingUid;
+        mUserId = UserHandle.getUserId(callingUid);
+        mCrossUser = crossUser;
+        mProfileIds = profileIds;
+        mAllowed = allowed;
+        mFilterOnlyVisibleRecents = filterOnlyVisibleRecents;
+        mTopDisplayFocusStack = root.getTopDisplayFocusedStack();
+        mRecentTasks = root.mService.getRecentTasks();
+
+        final PooledConsumer c = PooledLambda.obtainConsumer(RunningTasks::processTask, this,
+                PooledLambda.__(Task.class));
+        root.forAllLeafTasks(c, false);
+        c.recycle();
 
         // Take the first {@param maxNum} tasks and create running task infos for them
-        final Iterator<TaskRecord> iter = mTmpSortedSet.iterator();
+        final Iterator<Task> iter = mTmpSortedSet.iterator();
         while (iter.hasNext()) {
             if (maxNum == 0) {
                 break;
             }
 
-            final TaskRecord task = iter.next();
+            final Task task = iter.next();
             list.add(createRunningTaskInfo(task));
             maxNum--;
         }
     }
 
-    /**
-     * Constructs a {@link RunningTaskInfo} from a given {@param task}.
-     */
-    private RunningTaskInfo createRunningTaskInfo(TaskRecord task) {
-        final RunningTaskInfo rti = new RunningTaskInfo();
-        task.fillTaskInfo(rti);
+    private void processTask(Task task) {
+        if (task.getTopNonFinishingActivity() == null) {
+            // Skip if there are no activities in the task
+            return;
+        }
+        if (task.effectiveUid != mCallingUid) {
+            if (task.mUserId != mUserId && !mCrossUser && !mProfileIds.contains(task.mUserId)) {
+                // Skip if the caller does not have cross user permission or cannot access
+                // the task's profile
+                return;
+            }
+            if (!mAllowed && !task.isActivityTypeHome()) {
+                // Skip if the caller isn't allowed to fetch this task, except for the home
+                // task which we always return.
+                return;
+            }
+        }
+        if (mFilterOnlyVisibleRecents
+                && task.getActivityType() != ACTIVITY_TYPE_HOME
+                && task.getActivityType() != ACTIVITY_TYPE_RECENTS
+                && !mRecentTasks.isVisibleRecentTask(task)) {
+            // Skip if this task wouldn't be visibile (ever) from recents, with an exception for the
+            // home & recent tasks
+            return;
+        }
+
+        final ActivityStack stack = task.getStack();
+        if (stack == mTopDisplayFocusStack && stack.getTopMostTask() == task) {
+            // For the focused stack top task, update the last stack active time so that it can be
+            // used to determine the order of the tasks (it may not be set for newly created tasks)
+            task.touchActiveTime();
+        }
+
+        mTmpSortedSet.add(task);
+    }
+
+    /** Constructs a {@link RunningTaskInfo} from a given {@param task}. */
+    private RunningTaskInfo createRunningTaskInfo(Task task) {
+        final RunningTaskInfo rti = task.getTaskInfo();
         // Fill in some deprecated values
         rti.id = rti.taskId;
         return rti;

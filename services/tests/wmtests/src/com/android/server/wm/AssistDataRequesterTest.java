@@ -22,6 +22,8 @@ import static android.app.AppOpsManager.OP_ASSIST_SCREENSHOT;
 import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
 import static android.graphics.Bitmap.Config.ARGB_8888;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -71,7 +73,7 @@ import java.util.concurrent.TimeUnit;
  */
 @MediumTest
 @Presubmit
-public class AssistDataRequesterTest extends ActivityTestsBase {
+public class AssistDataRequesterTest {
 
     private static final String TAG = AssistDataRequesterTest.class.getSimpleName();
 
@@ -111,8 +113,9 @@ public class AssistDataRequesterTest extends ActivityTestsBase {
         mHandler = new Handler(Looper.getMainLooper());
         mCallbacksLock = new Object();
         mCallbacks = new Callbacks();
-        mDataRequester = new AssistDataRequester(mContext, mWm, mAppOpsManager, mCallbacks,
-                mCallbacksLock, OP_ASSIST_STRUCTURE, OP_ASSIST_SCREENSHOT);
+        mDataRequester = new AssistDataRequester(getInstrumentation().getTargetContext(), mWm,
+                mAppOpsManager, mCallbacks, mCallbacksLock, OP_ASSIST_STRUCTURE,
+                OP_ASSIST_SCREENSHOT);
         mDataRequester.mActivityTaskManager = mAtm;
         // Gate the continuation of the assist data callbacks until we are ready within the tests
         mGate = new CountDownLatch(1);

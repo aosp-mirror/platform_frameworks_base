@@ -26,6 +26,7 @@ import static android.net.NetworkStatsHistory.DataStreamUtils.writeVarLongArray;
 import static android.net.NetworkStatsHistory.Entry.UNKNOWN;
 import static android.net.NetworkStatsHistory.ParcelUtils.readLongArray;
 import static android.net.NetworkStatsHistory.ParcelUtils.writeLongArray;
+import static android.net.NetworkUtils.multiplySafeByRational;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
 import static com.android.internal.util.ArrayUtils.total;
@@ -364,11 +365,12 @@ public class NetworkStatsHistory implements Parcelable {
             if (overlap <= 0) continue;
 
             // integer math each time is faster than floating point
-            final long fracRxBytes = rxBytes * overlap / duration;
-            final long fracRxPackets = rxPackets * overlap / duration;
-            final long fracTxBytes = txBytes * overlap / duration;
-            final long fracTxPackets = txPackets * overlap / duration;
-            final long fracOperations = operations * overlap / duration;
+            final long fracRxBytes = multiplySafeByRational(rxBytes, overlap, duration);
+            final long fracRxPackets = multiplySafeByRational(rxPackets, overlap, duration);
+            final long fracTxBytes = multiplySafeByRational(txBytes, overlap, duration);
+            final long fracTxPackets = multiplySafeByRational(txPackets, overlap, duration);
+            final long fracOperations = multiplySafeByRational(operations, overlap, duration);
+
 
             addLong(activeTime, i, overlap);
             addLong(this.rxBytes, i, fracRxBytes); rxBytes -= fracRxBytes;
@@ -568,12 +570,24 @@ public class NetworkStatsHistory implements Parcelable {
             if (overlap <= 0) continue;
 
             // integer math each time is faster than floating point
-            if (activeTime != null) entry.activeTime += activeTime[i] * overlap / bucketSpan;
-            if (rxBytes != null) entry.rxBytes += rxBytes[i] * overlap / bucketSpan;
-            if (rxPackets != null) entry.rxPackets += rxPackets[i] * overlap / bucketSpan;
-            if (txBytes != null) entry.txBytes += txBytes[i] * overlap / bucketSpan;
-            if (txPackets != null) entry.txPackets += txPackets[i] * overlap / bucketSpan;
-            if (operations != null) entry.operations += operations[i] * overlap / bucketSpan;
+            if (activeTime != null) {
+                entry.activeTime += multiplySafeByRational(activeTime[i], overlap, bucketSpan);
+            }
+            if (rxBytes != null) {
+                entry.rxBytes += multiplySafeByRational(rxBytes[i], overlap, bucketSpan);
+            }
+            if (rxPackets != null) {
+                entry.rxPackets += multiplySafeByRational(rxPackets[i], overlap, bucketSpan);
+            }
+            if (txBytes != null) {
+                entry.txBytes += multiplySafeByRational(txBytes[i], overlap, bucketSpan);
+            }
+            if (txPackets != null) {
+                entry.txPackets += multiplySafeByRational(txPackets[i], overlap, bucketSpan);
+            }
+            if (operations != null) {
+                entry.operations += multiplySafeByRational(operations[i], overlap, bucketSpan);
+            }
         }
         return entry;
     }
@@ -684,7 +698,7 @@ public class NetworkStatsHistory implements Parcelable {
         }
     }
 
-    public void writeToProto(ProtoOutputStream proto, long tag) {
+    public void dumpDebug(ProtoOutputStream proto, long tag) {
         final long start = proto.start(tag);
 
         proto.write(NetworkStatsHistoryProto.BUCKET_DURATION_MS, bucketDuration);
@@ -693,11 +707,11 @@ public class NetworkStatsHistory implements Parcelable {
             final long startBucket = proto.start(NetworkStatsHistoryProto.BUCKETS);
 
             proto.write(NetworkStatsHistoryBucketProto.BUCKET_START_MS, bucketStart[i]);
-            writeToProto(proto, NetworkStatsHistoryBucketProto.RX_BYTES, rxBytes, i);
-            writeToProto(proto, NetworkStatsHistoryBucketProto.RX_PACKETS, rxPackets, i);
-            writeToProto(proto, NetworkStatsHistoryBucketProto.TX_BYTES, txBytes, i);
-            writeToProto(proto, NetworkStatsHistoryBucketProto.TX_PACKETS, txPackets, i);
-            writeToProto(proto, NetworkStatsHistoryBucketProto.OPERATIONS, operations, i);
+            dumpDebug(proto, NetworkStatsHistoryBucketProto.RX_BYTES, rxBytes, i);
+            dumpDebug(proto, NetworkStatsHistoryBucketProto.RX_PACKETS, rxPackets, i);
+            dumpDebug(proto, NetworkStatsHistoryBucketProto.TX_BYTES, txBytes, i);
+            dumpDebug(proto, NetworkStatsHistoryBucketProto.TX_PACKETS, txPackets, i);
+            dumpDebug(proto, NetworkStatsHistoryBucketProto.OPERATIONS, operations, i);
 
             proto.end(startBucket);
         }
@@ -705,7 +719,7 @@ public class NetworkStatsHistory implements Parcelable {
         proto.end(start);
     }
 
-    private static void writeToProto(ProtoOutputStream proto, long tag, long[] array, int index) {
+    private static void dumpDebug(ProtoOutputStream proto, long tag, long[] array, int index) {
         if (array != null) {
             proto.write(tag, array[index]);
         }

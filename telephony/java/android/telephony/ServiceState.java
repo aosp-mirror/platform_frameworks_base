@@ -397,8 +397,8 @@ public class ServiceState implements Parcelable {
      * @return newly created ServiceState
      * @hide
      */
-    @SystemApi
     @NonNull
+    @UnsupportedAppUsage
     public static ServiceState newFromBundle(@NonNull Bundle m) {
         ServiceState ret;
         ret = new ServiceState();
@@ -1033,6 +1033,26 @@ public class ServiceState implements Parcelable {
     }
 
     /**
+     * Convert frequency range into string
+     *
+     * @param range The cellular frequency range
+     * @return Frequency range in string format
+     *
+     * @hide
+     */
+    public static @NonNull String frequencyRangeToString(@FrequencyRange int range) {
+        switch (range) {
+            case FREQUENCY_RANGE_UNKNOWN: return "UNKNOWN";
+            case FREQUENCY_RANGE_LOW: return "LOW";
+            case FREQUENCY_RANGE_MID: return "MID";
+            case FREQUENCY_RANGE_HIGH: return "HIGH";
+            case FREQUENCY_RANGE_MMWAVE: return "MMWAVE";
+            default:
+                return Integer.toString(range);
+        }
+    }
+
+    /**
      * Convert RIL Service State to String
      *
      * @param serviceState
@@ -1316,7 +1336,7 @@ public class ServiceState implements Parcelable {
      * @hide
      *
      */
-    @SystemApi
+    @UnsupportedAppUsage
     public void fillInNotifierBundle(@NonNull Bundle m) {
         m.putParcelable(EXTRA_SERVICE_STATE, this);
         // serviceState already consists of below entries.
@@ -1636,7 +1656,6 @@ public class ServiceState implements Parcelable {
      * @return Current data network type
      * @hide
      */
-    @SystemApi
     @TestApi
     public @NetworkType int getDataNetworkType() {
         final NetworkRegistrationInfo iwlanRegInfo = getNetworkRegistrationInfo(
@@ -2008,11 +2027,12 @@ public class ServiceState implements Parcelable {
     /**
      * The current registered raw data network operator name in long alphanumeric format.
      *
+     * The long format can be up to 16 characters long.
+     *
      * @return long raw name of operator, null if unregistered or unknown
      * @hide
      */
     @Nullable
-    @SystemApi
     public String getOperatorAlphaLongRaw() {
         return mOperatorAlphaLongRaw;
     }
@@ -2027,11 +2047,12 @@ public class ServiceState implements Parcelable {
     /**
      * The current registered raw data network operator name in short alphanumeric format.
      *
+     * The short format can be up to 8 characters long.
+     *
      * @return short raw name of operator, null if unregistered or unknown
      * @hide
      */
     @Nullable
-    @SystemApi
     public String getOperatorAlphaShortRaw() {
         return mOperatorAlphaShortRaw;
     }

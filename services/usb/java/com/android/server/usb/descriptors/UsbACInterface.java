@@ -100,8 +100,14 @@ public abstract class UsbACInterface extends UsbDescriptor {
         switch (subtype) {
             case ACI_HEADER:
             {
+                if (UsbDescriptorParser.DEBUG) {
+                    Log.d(TAG, " ---> ACI_HEADER");
+                }
                 int acInterfaceSpec = stream.unpackUsbShort();
                 parser.setACInterfaceSpec(acInterfaceSpec);
+                if (UsbDescriptorParser.DEBUG) {
+                    Log.d(TAG, "  acInterfaceSpec:0x" + Integer.toHexString(acInterfaceSpec));
+                }
                 if (acInterfaceSpec == UsbDeviceDescriptor.USBSPEC_2_0) {
                     return new Usb20ACHeader(length, type, subtype, subClass, acInterfaceSpec);
                 } else {
@@ -111,7 +117,13 @@ public abstract class UsbACInterface extends UsbDescriptor {
 
             case ACI_INPUT_TERMINAL:
             {
+                if (UsbDescriptorParser.DEBUG) {
+                    Log.d(TAG, " ---> ACI_INPUT_TERMINAL");
+                }
                 int acInterfaceSpec = parser.getACInterfaceSpec();
+                if (UsbDescriptorParser.DEBUG) {
+                    Log.d(TAG, "  acInterfaceSpec:0x" + Integer.toHexString(acInterfaceSpec));
+                }
                 if (acInterfaceSpec == UsbDeviceDescriptor.USBSPEC_2_0) {
                     return new Usb20ACInputTerminal(length, type, subtype, subClass);
                 } else {
@@ -121,7 +133,13 @@ public abstract class UsbACInterface extends UsbDescriptor {
 
             case ACI_OUTPUT_TERMINAL:
             {
+                if (UsbDescriptorParser.DEBUG) {
+                    Log.d(TAG, " ---> ACI_OUTPUT_TERMINAL");
+                }
                 int acInterfaceSpec = parser.getACInterfaceSpec();
+                if (UsbDescriptorParser.DEBUG) {
+                    Log.d(TAG, "  acInterfaceSpec:0x" + Integer.toHexString(acInterfaceSpec));
+                }
                 if (acInterfaceSpec == UsbDeviceDescriptor.USBSPEC_2_0) {
                     return new Usb20ACOutputTerminal(length, type, subtype, subClass);
                 } else {
@@ -130,14 +148,26 @@ public abstract class UsbACInterface extends UsbDescriptor {
             }
 
             case ACI_SELECTOR_UNIT:
+                if (UsbDescriptorParser.DEBUG) {
+                    Log.d(TAG, " ---> ACI_SELECTOR_UNIT");
+                }
                 return new UsbACSelectorUnit(length, type, subtype, subClass);
 
             case ACI_FEATURE_UNIT:
+                if (UsbDescriptorParser.DEBUG) {
+                    Log.d(TAG, " ---> ACI_FEATURE_UNIT");
+                }
                 return new UsbACFeatureUnit(length, type, subtype, subClass);
 
             case ACI_MIXER_UNIT:
             {
+                if (UsbDescriptorParser.DEBUG) {
+                    Log.d(TAG, " ---> ACI_MIXER_UNIT");
+                }
                 int acInterfaceSpec = parser.getACInterfaceSpec();
+                if (UsbDescriptorParser.DEBUG) {
+                    Log.d(TAG, "  acInterfaceSpec:0x" + Integer.toHexString(acInterfaceSpec));
+                }
                 if (acInterfaceSpec == UsbDeviceDescriptor.USBSPEC_2_0) {
                     return new Usb20ACMixerUnit(length, type, subtype, subClass);
                 } else {
@@ -215,14 +245,23 @@ public abstract class UsbACInterface extends UsbDescriptor {
         int subClass = interfaceDesc.getUsbSubclass();
         switch (subClass) {
             case AUDIO_AUDIOCONTROL:
+                if (UsbDescriptorParser.DEBUG) {
+                    Log.d(TAG, "  AUDIO_AUDIOCONTROL");
+                }
                 return allocAudioControlDescriptor(
                         parser, stream, length, type, subtype, subClass);
 
             case AUDIO_AUDIOSTREAMING:
+                if (UsbDescriptorParser.DEBUG) {
+                    Log.d(TAG, "  AUDIO_AUDIOSTREAMING");
+                }
                 return allocAudioStreamingDescriptor(
                         parser, stream, length, type, subtype, subClass);
 
             case AUDIO_MIDISTREAMING:
+                if (UsbDescriptorParser.DEBUG) {
+                    Log.d(TAG, "  AUDIO_MIDISTREAMING");
+                }
                 return allocMidiStreamingDescriptor(length, type, subtype, subClass);
 
             default:

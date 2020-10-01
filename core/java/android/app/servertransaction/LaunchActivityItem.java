@@ -33,6 +33,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.os.Trace;
+import android.view.DisplayAdjustments.FixedRotationAdjustments;
 
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
@@ -64,6 +65,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     private boolean mIsForward;
     private ProfilerInfo mProfilerInfo;
     private IBinder mAssistToken;
+    private FixedRotationAdjustments mFixedRotationAdjustments;
 
     @Override
     public void preExecute(ClientTransactionHandler client, IBinder token) {
@@ -79,7 +81,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         ActivityClientRecord r = new ActivityClientRecord(token, mIntent, mIdent, mInfo,
                 mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor, mState, mPersistentState,
                 mPendingResults, mPendingNewIntents, mIsForward,
-                mProfilerInfo, client, mAssistToken);
+                mProfilerInfo, client, mAssistToken, mFixedRotationAdjustments);
         client.handleLaunchActivity(r, pendingActions, null /* customIntent */);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -101,14 +103,14 @@ public class LaunchActivityItem extends ClientTransactionItem {
             String referrer, IVoiceInteractor voiceInteractor, int procState, Bundle state,
             PersistableBundle persistentState, List<ResultInfo> pendingResults,
             List<ReferrerIntent> pendingNewIntents, boolean isForward, ProfilerInfo profilerInfo,
-            IBinder assistToken) {
+            IBinder assistToken, FixedRotationAdjustments fixedRotationAdjustments) {
         LaunchActivityItem instance = ObjectPool.obtain(LaunchActivityItem.class);
         if (instance == null) {
             instance = new LaunchActivityItem();
         }
         setValues(instance, intent, ident, info, curConfig, overrideConfig, compatInfo, referrer,
                 voiceInteractor, procState, state, persistentState, pendingResults,
-                pendingNewIntents, isForward, profilerInfo, assistToken);
+                pendingNewIntents, isForward, profilerInfo, assistToken, fixedRotationAdjustments);
 
         return instance;
     }
@@ -116,7 +118,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     @Override
     public void recycle() {
         setValues(this, null, 0, null, null, null, null, null, null, 0, null, null, null, null,
-                false, null, null);
+                false, null, null, null);
         ObjectPool.recycle(this);
     }
 
@@ -142,6 +144,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         dest.writeBoolean(mIsForward);
         dest.writeTypedObject(mProfilerInfo, flags);
         dest.writeStrongBinder(mAssistToken);
+        dest.writeTypedObject(mFixedRotationAdjustments, flags);
     }
 
     /** Read from Parcel. */
@@ -156,7 +159,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 in.createTypedArrayList(ResultInfo.CREATOR),
                 in.createTypedArrayList(ReferrerIntent.CREATOR), in.readBoolean(),
                 in.readTypedObject(ProfilerInfo.CREATOR),
-                in.readStrongBinder());
+                in.readStrongBinder(),
+                in.readTypedObject(FixedRotationAdjustments.CREATOR));
     }
 
     public static final @android.annotation.NonNull Creator<LaunchActivityItem> CREATOR =
@@ -186,13 +190,14 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 && Objects.equals(mOverrideConfig, other.mOverrideConfig)
                 && Objects.equals(mCompatInfo, other.mCompatInfo)
                 && Objects.equals(mReferrer, other.mReferrer)
-                && mProcState == other.mProcState && areBundlesEqual(mState, other.mState)
-                && areBundlesEqual(mPersistentState, other.mPersistentState)
+                && mProcState == other.mProcState && areBundlesEqualRoughly(mState, other.mState)
+                && areBundlesEqualRoughly(mPersistentState, other.mPersistentState)
                 && Objects.equals(mPendingResults, other.mPendingResults)
                 && Objects.equals(mPendingNewIntents, other.mPendingNewIntents)
                 && mIsForward == other.mIsForward
                 && Objects.equals(mProfilerInfo, other.mProfilerInfo)
-                && Objects.equals(mAssistToken, other.mAssistToken);
+                && Objects.equals(mAssistToken, other.mAssistToken)
+                && Objects.equals(mFixedRotationAdjustments, other.mFixedRotationAdjustments);
     }
 
     @Override
@@ -205,13 +210,14 @@ public class LaunchActivityItem extends ClientTransactionItem {
         result = 31 * result + Objects.hashCode(mCompatInfo);
         result = 31 * result + Objects.hashCode(mReferrer);
         result = 31 * result + Objects.hashCode(mProcState);
-        result = 31 * result + (mState != null ? mState.size() : 0);
-        result = 31 * result + (mPersistentState != null ? mPersistentState.size() : 0);
+        result = 31 * result + getRoughBundleHashCode(mState);
+        result = 31 * result + getRoughBundleHashCode(mPersistentState);
         result = 31 * result + Objects.hashCode(mPendingResults);
         result = 31 * result + Objects.hashCode(mPendingNewIntents);
         result = 31 * result + (mIsForward ? 1 : 0);
         result = 31 * result + Objects.hashCode(mProfilerInfo);
         result = 31 * result + Objects.hashCode(mAssistToken);
+        result = 31 * result + Objects.hashCode(mFixedRotationAdjustments);
         return result;
     }
 
@@ -225,25 +231,19 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 && Objects.equals(mInfo.getComponentName(), other.getComponentName());
     }
 
-    private static boolean areBundlesEqual(BaseBundle extras, BaseBundle newExtras) {
-        if (extras == null || newExtras == null) {
-            return extras == newExtras;
-        }
+    /**
+     * This method may be used to compare a parceled item with another unparceled item, and the
+     * parceled bundle may contain customized class that will raise BadParcelableException when
+     * unparceling if a customized class loader is not set to the bundle. So the hash code is
+     * simply determined by the bundle is empty or not.
+     */
+    private static int getRoughBundleHashCode(BaseBundle bundle) {
+        return (bundle == null || bundle.isDefinitelyEmpty()) ? 0 : 1;
+    }
 
-        if (extras.size() != newExtras.size()) {
-            return false;
-        }
-
-        for (String key : extras.keySet()) {
-            if (key != null) {
-                final Object value = extras.get(key);
-                final Object newValue = newExtras.get(key);
-                if (!Objects.equals(value, newValue)) {
-                    return false;
-                }
-            }
-        }
-        return true;
+    /** Compares the bundles without unparceling them (avoid BadParcelableException). */
+    private static boolean areBundlesEqualRoughly(BaseBundle a, BaseBundle b) {
+        return getRoughBundleHashCode(a) == getRoughBundleHashCode(b);
     }
 
     @Override
@@ -253,7 +253,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 + ",referrer=" + mReferrer + ",procState=" + mProcState + ",state=" + mState
                 + ",persistentState=" + mPersistentState + ",pendingResults=" + mPendingResults
                 + ",pendingNewIntents=" + mPendingNewIntents + ",profilerInfo=" + mProfilerInfo
-                + " assistToken=" + mAssistToken
+                + ",assistToken=" + mAssistToken + ",rotationAdj=" + mFixedRotationAdjustments
                 + "}";
     }
 
@@ -263,7 +263,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
             CompatibilityInfo compatInfo, String referrer, IVoiceInteractor voiceInteractor,
             int procState, Bundle state, PersistableBundle persistentState,
             List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
-            boolean isForward, ProfilerInfo profilerInfo, IBinder assistToken) {
+            boolean isForward, ProfilerInfo profilerInfo, IBinder assistToken,
+            FixedRotationAdjustments fixedRotationAdjustments) {
         instance.mIntent = intent;
         instance.mIdent = ident;
         instance.mInfo = info;
@@ -280,5 +281,6 @@ public class LaunchActivityItem extends ClientTransactionItem {
         instance.mIsForward = isForward;
         instance.mProfilerInfo = profilerInfo;
         instance.mAssistToken = assistToken;
+        instance.mFixedRotationAdjustments = fixedRotationAdjustments;
     }
 }

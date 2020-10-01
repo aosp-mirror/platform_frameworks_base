@@ -85,6 +85,12 @@ public abstract class SocketKeepalive implements AutoCloseable {
     public static final int ERROR_INVALID_SOCKET = -25;
     /** The target socket is not idle. */
     public static final int ERROR_SOCKET_NOT_IDLE = -26;
+    /**
+     * The stop reason is uninitialized. This should only be internally used as initial state
+     * of stop reason, instead of propagating to application.
+     * @hide
+     */
+    public static final int ERROR_STOP_REASON_UNINITIALIZED = -27;
 
     /** The device does not support this request. */
     public static final int ERROR_UNSUPPORTED = -30;

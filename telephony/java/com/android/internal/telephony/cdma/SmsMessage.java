@@ -479,7 +479,7 @@ public class SmsMessage extends SmsMessageBase {
             length = dis.readUnsignedByte();
             addr.numberOfDigits = length;
 
-            // sanity check on the length
+            // Correctness check on the length
             if (length > pdu.length) {
                 throw new RuntimeException(
                         "createFromPdu: Invalid pdu, addr.numberOfDigits " + length
@@ -496,7 +496,7 @@ public class SmsMessage extends SmsMessageBase {
 
             //encoded BearerData:
             bearerDataLength = dis.readInt();
-            // sanity check on the length
+            // Correctness check on the length
             if (bearerDataLength > pdu.length) {
                 throw new RuntimeException(
                         "createFromPdu: Invalid pdu, bearerDataLength " + bearerDataLength

@@ -1,0 +1,24 @@
+{
+    "presubmit": [
+        {
+            "name": "CtsProviderTestCases",
+            "options": [
+                {
+                    "exclude-filter": "android.provider.cts.SettingsPanelTest"
+                }
+            ]
+        },
+        {
+            "name": "CalendarProviderTests"
+        },
+        {
+            "name": "ContactsProviderTests"
+        },
+        {
+            "name": "MediaProviderTests"
+        },
+        {
+            "name": "SettingsProviderTest"
+        }
+    ]
+}

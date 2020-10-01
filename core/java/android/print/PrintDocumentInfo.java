@@ -32,7 +32,7 @@ import java.lang.annotation.RetentionPolicy;
  * purposes. This meta-data is used by the platform and print services,
  * components that interact with printers. For example, this class
  * contains the number of pages contained in the document it describes and
- * this number of pages is shown to the user allowing him/her to select
+ * this number of pages is shown to the user allowing them to select
  * the range to print. Also a print service may optimize the printing
  * process based on the content type, such as document or photo.
  * <p>

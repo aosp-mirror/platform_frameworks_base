@@ -37,11 +37,11 @@
 extern "C" {
 #endif
 
+#define AMIDI_API __attribute__((visibility("default")))
+
 typedef struct AMidiDevice AMidiDevice;
 typedef struct AMidiInputPort AMidiInputPort;
 typedef struct AMidiOutputPort AMidiOutputPort;
-
-#define AMIDI_API __attribute__((visibility("default")))
 
 /*
  * Message Op Codes. Used to parse MIDI data packets
@@ -60,6 +60,8 @@ enum {
     AMIDI_DEVICE_TYPE_VIRTUAL = 2,  /* A software object implementing MidiDeviceService */
     AMIDI_DEVICE_TYPE_BLUETOOTH = 3 /* A MIDI device connected via BlueTooth */
 };
+
+#if __ANDROID_API__ >= 29
 
 /*
  * Device API
@@ -246,6 +248,8 @@ media_status_t AMIDI_API AMidiInputPort_sendFlush(const AMidiInputPort *inputPor
  * @param inputPort Identifies the input (sending) port to close.
  */
 void AMIDI_API AMidiInputPort_close(const AMidiInputPort *inputPort) __INTRODUCED_IN(29);
+
+#endif /* __ANDROID_API__ >= 29 */
 
 #ifdef __cplusplus
 }

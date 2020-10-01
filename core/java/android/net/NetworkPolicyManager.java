@@ -84,7 +84,7 @@ public class NetworkPolicyManager {
      * The RULE_xxx_ALL rules applies to all networks (metered or non-metered), but on
      * metered networks, the RULE_xxx_METERED rules should be checked first. For example,
      * if the device is on Battery Saver Mode and Data Saver Mode simulatenously, and a uid
-     * is whitelisted for the former but not the latter, its status would be
+     * is allowlisted for the former but not the latter, its status would be
      * RULE_REJECT_METERED | RULE_ALLOW_ALL, meaning it could have access to non-metered
      * networks but not to metered networks.
      *

@@ -701,6 +701,12 @@ please see themes_device_defaults.xml.
         <item name="windowNoDisplay">true</item>
     </style>
 
+    <style name="Theme.Dream">
+        <item name="windowBackground">@color/black</item>
+        <item name="windowDisablePreview">true</item>
+        <item name="windowActivityTransitions">true</item>
+    </style>
+
     <!-- Default theme for dialog windows and activities (on API level 10 and lower),
          which is used by the
          {@link android.app.Dialog} class.  This changes the window to be
@@ -892,5 +898,4 @@ please see themes_device_defaults.xml.
         <item name="windowContentTransitions">false</item>
         <item name="windowActivityTransitions">false</item>
     </style>
-
 </resources>

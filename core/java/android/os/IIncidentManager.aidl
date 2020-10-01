@@ -17,6 +17,7 @@
 package android.os;
 
 import android.os.IIncidentReportStatusListener;
+import android.os.IIncidentDumpCallback;
 import android.os.IncidentManager;
 import android.os.IncidentReportArgs;
 
@@ -50,6 +51,19 @@ interface IIncidentManager {
      */
     oneway void reportIncidentToDumpstate(FileDescriptor stream,
             @nullable IIncidentReportStatusListener listener);
+
+    /**
+     * Register a section callback with the given id and name. The callback function
+     * will be invoked when an incident report with all sections or sections matching
+     * the given id is being taken.
+     */
+    oneway void registerSection(int id, String name, IIncidentDumpCallback callback);
+
+    /**
+     * Unregister a section callback associated with the given id. The section must be
+     * previously registered with registerSection(int, String, IIncidentDumpCallback).
+     */
+    oneway void unregisterSection(int id);
 
     /**
      * Tell the incident daemon that the android system server is up and running.

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="dock_alignment_slow_charging" product="default" msgid="6997633396534416792">"Sulygiuokite telefoną iš naujo, kad gal. sparčiau įkrauti"</string>
+    <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Sulygiuokite telefoną iš naujo, kad gal. įkrauti be laidų"</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"„Android TV“ įrenginys netrukus išsijungs. Paspauskite mygtuką, kad jis liktų įjungtas."</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Įrenginys netrukus išsijungs. Paspauskite, kad jis liktų įjungtas."</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"Planšetiniame kompiuteryje nėra SIM kortelės."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"Telefone nėra SIM kortelės."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"PIN kodai nesutampa"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. nesėkmingai bandėte atrakinti planšetinį kompiuterį. Po dar <xliff:g id="NUMBER_1">%2$d</xliff:g> nesėkm. band. šis planšetinis kompiuteris bus nustatytas iš naujo ir visi jo duomenys bus ištrinti."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. nesėkmingai bandėte atrakinti telefoną. Po dar <xliff:g id="NUMBER_1">%2$d</xliff:g> nesėkm. band. šis telefonas bus nustatytas iš naujo ir visi jo duomenys bus ištrinti."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="8710104080409538587">"<xliff:g id="NUMBER">%d</xliff:g> kart. nesėkmingai bandėte atrakinti planšetinį kompiuterį. Šis planšetinis kompiuteris bus nustatytas iš naujo ir visi jo duomenys bus ištrinti."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="6381835450014881813">"<xliff:g id="NUMBER">%d</xliff:g> kart. nesėkmingai bandėte atrakinti telefoną. Šis telefonas bus nustatytas iš naujo ir visi jo duomenys bus ištrinti."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="7325071812832605911">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. nesėkmingai bandėte atrakinti planšetinį kompiuterį. Po dar <xliff:g id="NUMBER_1">%2$d</xliff:g> nesėkm. band. šis naudotojas bus pašalintas ir visi naudotojo duomenys bus ištrinti."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="8110939900089863103">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. nesėkmingai bandėte atrakinti telefoną. Po dar <xliff:g id="NUMBER_1">%2$d</xliff:g> nesėkm. band. šis naudotojas bus pašalintas ir visi naudotojo duomenys bus ištrinti."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="8509811676952707883">"<xliff:g id="NUMBER">%d</xliff:g> kart. nesėkmingai bandėte atrakinti planšetinį kompiuterį. Šis naudotojas bus pašalintas ir visi naudotojo duomenys bus ištrinti."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3051962486994265014">"<xliff:g id="NUMBER">%d</xliff:g> kart. nesėkmingai bandėte atrakinti telefoną. Šis naudotojas bus pašalintas ir visi naudotojo duomenys bus ištrinti."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="1049523640263353830">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. nesėkmingai bandėte atrakinti planšetinį kompiuterį. Po dar <xliff:g id="NUMBER_1">%2$d</xliff:g> nesėkm. band. darbo profilis bus pašalintas ir visi profilio duomenys bus ištrinti."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="3280816298678433681">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. nesėkmingai bandėte atrakinti telefoną. Po dar <xliff:g id="NUMBER_1">%2$d</xliff:g> nesėkm. band. darbo profilis bus pašalintas ir visi profilio duomenys bus ištrinti."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4417100487251371559">"<xliff:g id="NUMBER">%d</xliff:g> kart. nesėkmingai bandėte atrakinti planšetinį kompiuterį. Darbo profilis bus pašalintas ir visi profilio duomenys bus ištrinti."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"<xliff:g id="NUMBER">%d</xliff:g> kart. nesėkmingai bandėte atrakinti telefoną. Darbo profilis bus pašalintas ir visi profilio duomenys bus ištrinti."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. netinkamai nupiešėte atrakinimo piešinį. Po dar <xliff:g id="NUMBER_1">%2$d</xliff:g> nesėkm. band. būsite paprašyti atrakinti planšetinį kompiuterį naudodami el. pašto paskyrą.\n\n Bandykite dar kartą po <xliff:g id="NUMBER_2">%3$d</xliff:g> sek."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. netinkamai nupiešėte atrakinimo piešinį. Po dar <xliff:g id="NUMBER_1">%2$d</xliff:g> nesėkm. band. būsite paprašyti atrakinti telefoną naudodami el. pašto paskyrą.\n\n Bandykite dar kartą po <xliff:g id="NUMBER_2">%3$d</xliff:g> sek."</string>
+    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Atrakinkite telefoną, kad galėtumėte naudoti daugiau parinkčių"</string>
+    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Atrakinkite planšetinį kompiuterį, kad galėtumėte naudoti daugiau parinkčių"</string>
+    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Atrakinkite įrenginį, kad galėtumėte naudoti daugiau parinkčių"</string>
+</resources>

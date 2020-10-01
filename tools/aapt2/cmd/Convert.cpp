@@ -243,6 +243,12 @@ class Context : public IAaptContext {
     return 0u;
   }
 
+  const std::set<std::string>& GetSplitNameDependencies() override {
+    UNIMPLEMENTED(FATAL) << "Split Name Dependencies should not be necessary";
+    static std::set<std::string> empty;
+    return empty;
+  }
+
   bool verbose_ = false;
   std::string package_;
 

@@ -26,6 +26,7 @@ import static com.android.server.backup.UserBackupManagerService.SETTINGS_PACKAG
 import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_RESTORE_STEP;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_SESSION_TIMEOUT;
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.Nullable;
 import android.app.ApplicationThreadConstants;
@@ -51,8 +52,8 @@ import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
-import com.android.internal.util.Preconditions;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -76,6 +77,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
@@ -86,7 +89,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     private final TransportClient mTransportClient;
 
     // Where per-transport saved state goes
-    File mStateDir;
+    private File mStateDir;
 
     // Restore observer; may be null
     private IRestoreObserver mObserver;
@@ -153,13 +156,23 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     // Key/value: bookkeeping about staged data and files for agent access
     private File mBackupDataName;
     private File mStageName;
-    private File mSavedStateName;
     private File mNewStateName;
-    ParcelFileDescriptor mBackupData;
-    ParcelFileDescriptor mNewState;
+    private ParcelFileDescriptor mBackupData;
+    private ParcelFileDescriptor mNewState;
 
     private final int mEphemeralOpToken;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
+
+    @VisibleForTesting
+    PerformUnifiedRestoreTask(UserBackupManagerService backupManagerService) {
+        mListener = null;
+        mAgentTimeoutParameters = null;
+        mTransportClient = null;
+        mTransportManager = null;
+        mEphemeralOpToken = 0;
+        mUserId = 0;
+        this.backupManagerService = backupManagerService;
+    }
 
     // This task can assume that the wakelock is properly held for it and doesn't have to worry
     // about releasing it.
@@ -191,7 +204,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         mFinished = false;
         mDidLaunch = false;
         mListener = listener;
-        mAgentTimeoutParameters = Preconditions.checkNotNull(
+        mAgentTimeoutParameters = Objects.requireNonNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
 
@@ -223,7 +236,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 try {
                     PackageManager pm = backupManagerService.getPackageManager();
                     PackageInfo info = pm.getPackageInfoAsUser(filterSet[i], 0, mUserId);
-                    if ("android".equals(info.packageName)) {
+                    if (PLATFORM_PACKAGE_NAME.equals(info.packageName)) {
                         hasSystem = true;
                         continue;
                     }
@@ -242,7 +255,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             if (hasSystem) {
                 try {
                     mAcceptSet.add(0, backupManagerService.getPackageManager().getPackageInfoAsUser(
-                                    "android", 0, mUserId));
+                                    PLATFORM_PACKAGE_NAME, 0, mUserId));
                 } catch (NameNotFoundException e) {
                     // won't happen; we know a priori that it's valid
                 }
@@ -256,6 +269,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 }
             }
         }
+
+        mAcceptSet = backupManagerService.filterUserFacingPackages(mAcceptSet);
 
         if (MORE_DEBUG) {
             Slog.v(TAG, "Restore; accept set size is " + mAcceptSet.size());
@@ -666,7 +681,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     }
 
     // Guts of a key/value restore operation
-    void initiateOneRestore(PackageInfo app, long appVersionCode) {
+    private void initiateOneRestore(PackageInfo app, long appVersionCode) {
         final String packageName = app.packageName;
 
         if (DEBUG) {
@@ -677,13 +692,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         mBackupDataName = new File(backupManagerService.getDataDir(), packageName + ".restore");
         mStageName = new File(backupManagerService.getDataDir(), packageName + ".stage");
         mNewStateName = new File(mStateDir, packageName + ".new");
-        mSavedStateName = new File(mStateDir, packageName);
 
-        // don't stage the 'android' package where the wallpaper data lives.  this is
-        // an optimization: we know there's no widget data hosted/published by that
-        // package, and this way we avoid doing a spurious copy of MB-sized wallpaper
-        // data following the download.
-        boolean staging = !packageName.equals("android");
+        boolean staging = shouldStageBackupData(packageName);
         ParcelFileDescriptor stage;
         File downloadFile = (staging) ? mStageName : mBackupDataName;
         boolean startedAgentRestore = false;
@@ -725,27 +735,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
                 BackupDataInput in = new BackupDataInput(stage.getFileDescriptor());
                 BackupDataOutput out = new BackupDataOutput(mBackupData.getFileDescriptor());
-                byte[] buffer = new byte[8192]; // will grow when needed
-                while (in.readNextHeader()) {
-                    final String key = in.getKey();
-                    final int size = in.getDataSize();
-
-                    // is this a special key?
-                    if (key.equals(KEY_WIDGET_STATE)) {
-                        if (DEBUG) {
-                            Slog.i(TAG, "Restoring widget state for " + packageName);
-                        }
-                        mWidgetData = new byte[size];
-                        in.readEntityData(mWidgetData, 0, size);
-                    } else {
-                        if (size > buffer.length) {
-                            buffer = new byte[size];
-                        }
-                        in.readEntityData(buffer, 0, size);
-                        out.writeEntityHeader(key, size);
-                        out.writeEntityData(buffer, size);
-                    }
-                }
+                filterExcludedKeys(packageName, in, out);
 
                 mBackupData.close();
             }
@@ -768,8 +758,9 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             backupManagerService.prepareOperationTimeout(
                     mEphemeralOpToken, restoreAgentTimeoutMillis, this, OP_TYPE_RESTORE_WAIT);
             startedAgentRestore = true;
-            mAgent.doRestore(mBackupData, appVersionCode, mNewState,
-                    mEphemeralOpToken, backupManagerService.getBackupManagerBinder());
+            mAgent.doRestoreWithExcludedKeys(mBackupData, appVersionCode, mNewState,
+                    mEphemeralOpToken, backupManagerService.getBackupManagerBinder(),
+                    new ArrayList<>(getExcludedKeysForPackage(packageName)));
         } catch (Exception e) {
             Slog.e(TAG, "Unable to call app for restore: " + packageName, e);
             EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
@@ -781,6 +772,56 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             // are no more packages to be restored that will be handled by the
             // next step.
             executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
+        }
+    }
+
+    @VisibleForTesting
+    boolean shouldStageBackupData(String packageName) {
+        // Backup data is staged for 2 reasons:
+        // 1. We might need to exclude keys from the data before passing it to the agent
+        // 2. Widget metadata needs to be separated from the rest to be handled separately
+        // But 'android' package doesn't contain widget metadata so we want to skip staging for it
+        // when there are no keys to be excluded either.
+        return !packageName.equals(PLATFORM_PACKAGE_NAME) ||
+                !getExcludedKeysForPackage(PLATFORM_PACKAGE_NAME).isEmpty();
+    }
+
+    @VisibleForTesting
+    Set<String> getExcludedKeysForPackage(String packageName) {
+        return backupManagerService.getExcludedRestoreKeys(packageName);
+    }
+
+    @VisibleForTesting
+    void filterExcludedKeys(String packageName, BackupDataInput in, BackupDataOutput out)
+            throws Exception {
+        Set<String> excludedKeysForPackage = getExcludedKeysForPackage(packageName);
+
+        byte[] buffer = new byte[8192]; // will grow when needed
+        while (in.readNextHeader()) {
+            final String key = in.getKey();
+            final int size = in.getDataSize();
+
+            if (excludedKeysForPackage != null && excludedKeysForPackage.contains(key)) {
+                Slog.i(TAG, "Skipping blocked key " + key);
+                in.skipEntityData();
+                continue;
+            }
+
+            // is this a special key?
+            if (key.equals(KEY_WIDGET_STATE)) {
+                if (DEBUG) {
+                    Slog.i(TAG, "Restoring widget state for " + packageName);
+                }
+                mWidgetData = new byte[size];
+                in.readEntityData(mWidgetData, 0, size);
+            } else {
+                if (size > buffer.length) {
+                    buffer = new byte[size];
+                }
+                in.readEntityData(buffer, 0, size);
+                out.writeEntityHeader(key, size);
+                out.writeEntityData(buffer, size);
+            }
         }
     }
 
@@ -870,7 +911,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     mCurrentPackage.packageName);
 
             mEngine = new FullRestoreEngine(backupManagerService, this, null,
-                    mMonitor, mCurrentPackage, false, false, mEphemeralOpToken, false);
+                    mMonitor, mCurrentPackage, false, mEphemeralOpToken, false);
             mEngineThread = new FullRestoreEngineThread(mEngine, mEnginePipes[0]);
 
             ParcelFileDescriptor eWriteEnd = mEnginePipes[1];
@@ -1160,7 +1201,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         // the following from a discard of the newly-written state to the
         // "correct" operation of renaming into the canonical state blob.
         mNewStateName.delete();                      // TODO: remove; see above comment
-        //mNewStateName.renameTo(mSavedStateName);   // TODO: replace with this
 
         // If this wasn't the PM pseudopackage, tear down the agent side
         if (mCurrentPackage.applicationInfo != null) {

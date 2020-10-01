@@ -166,19 +166,20 @@ class AudioPlayerStateMonitor {
      * Cleans up the sorted list of audio playback client UIDs with given {@param
      * mediaButtonSessionUid}.
      * <p>UIDs whose audio playback are inactive and have started before the media button session's
-     * audio playback cannot be the lastly played media app. So they won't needed anymore.
+     * audio playback cannot be the lastly played media app. So they won't be needed anymore.
      *
      * @param mediaButtonSessionUid UID of the media button session.
      */
     public void cleanUpAudioPlaybackUids(int mediaButtonSessionUid) {
         synchronized (mLock) {
-            int userId = UserHandle.getUserId(mediaButtonSessionUid);
+            int userId = UserHandle.getUserHandleForUid(mediaButtonSessionUid).getIdentifier();
             for (int i = mSortedAudioPlaybackClientUids.size() - 1; i >= 0; i--) {
                 if (mSortedAudioPlaybackClientUids.get(i) == mediaButtonSessionUid) {
                     break;
                 }
                 int uid = mSortedAudioPlaybackClientUids.get(i);
-                if (userId == UserHandle.getUserId(uid) && !isPlaybackActive(uid)) {
+                if (userId == UserHandle.getUserHandleForUid(uid).getIdentifier()
+                        && !isPlaybackActive(uid)) {
                     // Clean up unnecessary UIDs.
                     // It doesn't need to be managed profile aware because it's just to prevent
                     // the list from increasing indefinitely. The media button session updating

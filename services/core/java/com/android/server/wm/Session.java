@@ -24,11 +24,14 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 
+import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.Nullable;
 import android.content.ClipData;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
@@ -39,6 +42,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.view.DisplayCutout;
@@ -47,18 +51,18 @@ import android.view.IWindowId;
 import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
+import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
 
 import com.android.internal.os.logging.MetricsLoggerWrapper;
+import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.BiConsumer;
 
 /**
@@ -74,9 +78,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     SurfaceSession mSurfaceSession;
     private int mNumWindow = 0;
     // Set of visible application overlay window surfaces connected to this session.
-    private final Set<WindowSurfaceController> mAppOverlaySurfaces = new HashSet<>();
+    private final ArraySet<WindowSurfaceController> mAppOverlaySurfaces = new ArraySet<>();
     // Set of visible alert window surfaces connected to this session.
-    private final Set<WindowSurfaceController> mAlertWindowSurfaces = new HashSet<>();
+    private final ArraySet<WindowSurfaceController> mAlertWindowSurfaces = new ArraySet<>();
     private final DragDropController mDragDropController;
     final boolean mCanAddInternalSystemWindow;
     final boolean mCanHideNonSystemOverlayWindows;
@@ -87,6 +91,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private float mLastReportedAnimatorScale;
     private String mPackageName;
     private String mRelayoutTag;
+    private final InsetsSourceControl[] mDummyControls =  new InsetsSourceControl[0];
 
     public Session(WindowManagerService service, IWindowSessionCallback callback) {
         mService = service;
@@ -153,12 +158,24 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public int addToDisplay(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, Rect outFrame, Rect outContentInsets,
-            Rect outStableInsets, Rect outOutsets,
+            Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
-            InsetsState outInsetsState) {
+            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
         return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId, outFrame,
-                outContentInsets, outStableInsets, outOutsets, outDisplayCutout, outInputChannel,
-                outInsetsState);
+                outContentInsets, outStableInsets, outDisplayCutout, outInputChannel,
+                outInsetsState, outActiveControls, UserHandle.getUserId(mUid));
+    }
+
+
+    @Override
+    public int addToDisplayAsUser(IWindow window, int seq, WindowManager.LayoutParams attrs,
+            int viewVisibility, int displayId, int userId, Rect outFrame,
+            Rect outContentInsets, Rect outStableInsets,
+            DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
+            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
+        return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId, outFrame,
+                outContentInsets, outStableInsets, outDisplayCutout, outInputChannel,
+                outInsetsState, outActiveControls, userId);
     }
 
     @Override
@@ -166,9 +183,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             int viewVisibility, int displayId, Rect outContentInsets, Rect outStableInsets,
             InsetsState outInsetsState) {
         return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId,
-                new Rect() /* outFrame */, outContentInsets, outStableInsets, null /* outOutsets */,
+                new Rect() /* outFrame */, outContentInsets, outStableInsets,
                 new DisplayCutout.ParcelableWrapper() /* cutout */, null /* outInputChannel */,
-                outInsetsState);
+                outInsetsState, mDummyControls, UserHandle.getUserId(mUid));
     }
 
     @Override
@@ -184,18 +201,21 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public int relayout(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, long frameNumber,
-            Rect outFrame, Rect outOverscanInsets, Rect outContentInsets, Rect outVisibleInsets,
-            Rect outStableInsets, Rect outsets, Rect outBackdropFrame,
+            Rect outFrame, Rect outContentInsets, Rect outVisibleInsets,
+            Rect outStableInsets, Rect outBackdropFrame,
             DisplayCutout.ParcelableWrapper cutout, MergedConfiguration mergedConfiguration,
-            SurfaceControl outSurfaceControl, InsetsState outInsetsState) {
+            SurfaceControl outSurfaceControl, InsetsState outInsetsState,
+            InsetsSourceControl[] outActiveControls, Point outSurfaceSize,
+            SurfaceControl outBLASTSurfaceControl) {
         if (false) Slog.d(TAG_WM, ">>>>>> ENTERED relayout from "
                 + Binder.getCallingPid());
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mRelayoutTag);
         int res = mService.relayoutWindow(this, window, seq, attrs,
                 requestedWidth, requestedHeight, viewFlags, flags, frameNumber,
-                outFrame, outOverscanInsets, outContentInsets, outVisibleInsets,
-                outStableInsets, outsets, outBackdropFrame, cutout,
-                mergedConfiguration, outSurfaceControl, outInsetsState);
+                outFrame, outContentInsets, outVisibleInsets,
+                outStableInsets, outBackdropFrame, cutout,
+                mergedConfiguration, outSurfaceControl, outInsetsState, outActiveControls,
+                outSurfaceSize, outBLASTSurfaceControl);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         if (false) Slog.d(TAG_WM, "<<<<<< EXITING relayout to "
                 + Binder.getCallingPid());
@@ -225,24 +245,20 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void finishDrawing(IWindow window) {
-        if (WindowManagerService.localLOGV) Slog.v(
-            TAG_WM, "IWindow finishDrawing called for " + window);
-        mService.finishDrawingWindow(this, window);
+    public void finishDrawing(IWindow window,
+            @Nullable SurfaceControl.Transaction postDrawTransaction) {
+        if (DEBUG) Slog.v(TAG_WM, "IWindow finishDrawing called for " + window);
+        mService.finishDrawingWindow(this, window, postDrawTransaction);
     }
 
     @Override
     public void setInTouchMode(boolean mode) {
-        synchronized (mService.mGlobalLock) {
-            mService.mInTouchMode = mode;
-        }
+        mService.setInTouchMode(mode);
     }
 
     @Override
     public boolean getInTouchMode() {
-        synchronized (mService.mGlobalLock) {
-            return mService.mInTouchMode;
-        }
+        return mService.getInTouchMode();
     }
 
     @Override
@@ -261,11 +277,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public IBinder performDrag(IWindow window, int flags, SurfaceControl surface, int touchSource,
             float touchX, float touchY, float thumbCenterX, float thumbCenterY, ClipData data) {
-        final int callerPid = Binder.getCallingPid();
-        final int callerUid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         try {
-            return mDragDropController.performDrag(mSurfaceSession, callerPid, callerUid, window,
+            return mDragDropController.performDrag(mSurfaceSession, mPid, mUid, window,
                     flags, surface, touchSource, touchX, touchY, thumbCenterX, thumbCenterY, data);
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -353,6 +367,31 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+    }
+
+    @Override
+    public void setWallpaperZoomOut(IBinder window, float zoom) {
+        if (Float.compare(0f, zoom) > 0 || Float.compare(1f, zoom) < 0 || Float.isNaN(zoom)) {
+            throw new IllegalArgumentException("Zoom must be a valid float between 0 and 1: "
+                    + zoom);
+        }
+        synchronized (mService.mGlobalLock) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                actionOnWallpaper(window, (wpController, windowState) ->
+                        wpController.setWallpaperZoomOut(windowState, zoom));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    @Override
+    public void setShouldZoomOutWallpaper(IBinder window, boolean shouldZoom) {
+        synchronized (mService.mGlobalLock) {
+            actionOnWallpaper(window, (wpController, windowState) ->
+                    wpController.setShouldZoomOutWallpaper(windowState, shouldZoom));
         }
     }
 
@@ -448,10 +487,10 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void updateTapExcludeRegion(IWindow window, int regionId, Region region) {
+    public void updateTapExcludeRegion(IWindow window, Region region) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            mService.updateTapExcludeRegion(window, regionId, region);
+            mService.updateTapExcludeRegion(window, region);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -463,7 +502,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             final WindowState windowState = mService.windowForClientLocked(this, window,
                     false /* throwOnError */);
             if (windowState != null) {
-                windowState.getDisplayContent().getInsetsStateController().onInsetsModified(
+                windowState.updateRequestedInsetsState(state);
+                windowState.getDisplayContent().getInsetsPolicy().onInsetsModified(
                         windowState, state);
             }
         }
@@ -473,11 +513,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         mPackageName = packageName;
         mRelayoutTag = "relayoutWindow: " + mPackageName;
         if (mSurfaceSession == null) {
-            if (WindowManagerService.localLOGV) Slog.v(
-                TAG_WM, "First window added to " + this + ", creating SurfaceSession");
+            if (DEBUG) {
+                Slog.v(TAG_WM, "First window added to " + this + ", creating SurfaceSession");
+            }
             mSurfaceSession = new SurfaceSession();
-            if (SHOW_TRANSACTIONS) Slog.i(
-                    TAG_WM, "  NEW SURFACE SESSION " + mSurfaceSession);
+            ProtoLog.i(WM_SHOW_TRANSACTIONS, "  NEW SURFACE SESSION %s", mSurfaceSession);
             mService.mSessions.add(this);
             if (mLastReportedAnimatorScale != mService.getCurrentAnimatorScale()) {
                 mService.dispatchNewAnimatorScaleLocked(this);
@@ -564,9 +604,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             return;
         }
 
-        if (WindowManagerService.localLOGV) Slog.v(TAG_WM, "Last window removed from " + this
-                + ", destroying " + mSurfaceSession);
-        if (SHOW_TRANSACTIONS) Slog.i(TAG_WM, "  KILL SURFACE SESSION " + mSurfaceSession);
+        if (DEBUG) {
+            Slog.v(TAG_WM, "Last window removed from " + this
+                    + ", destroying " + mSurfaceSession);
+        }
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "  KILL SURFACE SESSION %s", mSurfaceSession);
         try {
             mSurfaceSession.kill();
         } catch (Exception e) {
@@ -607,7 +649,49 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         return mStringName;
     }
 
-    boolean hasAlertWindowSurfaces() {
-        return !mAlertWindowSurfaces.isEmpty();
+    /** @return {@code true} if there is an alert window surface on the given display. */
+    boolean hasAlertWindowSurfaces(DisplayContent displayContent) {
+        for (int i = mAlertWindowSurfaces.size() - 1; i >= 0; i--) {
+            final WindowSurfaceController surfaceController = mAlertWindowSurfaces.valueAt(i);
+            if (surfaceController.mAnimator.mWin.getDisplayContent() == displayContent) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void grantInputChannel(int displayId, SurfaceControl surface,
+            IWindow window, IBinder hostInputToken, int flags, int type,
+            InputChannel outInputChannel) {
+        if (hostInputToken == null && !mCanAddInternalSystemWindow) {
+            // Callers without INTERNAL_SYSTEM_WINDOW permission cannot grant input channel to
+            // embedded windows without providing a host window input token
+            throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
+        }
+
+        if (!mCanAddInternalSystemWindow && type != 0) {
+            Slog.w(TAG_WM, "Requires INTERNAL_SYSTEM_WINDOW permission if assign type to"
+                    + " input");
+        }
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mService.grantInputChannel(mUid, mPid, displayId, surface, window, hostInputToken,
+                    flags, mCanAddInternalSystemWindow ? type : 0, outInputChannel);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void updateInputChannel(IBinder channelToken, int displayId, SurfaceControl surface,
+            int flags, Region region) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mService.updateInputChannel(channelToken, displayId, surface, flags, region);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 }

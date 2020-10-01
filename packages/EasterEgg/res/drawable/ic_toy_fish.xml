@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2020 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:pathData="M14.8492,8.9498C15.7483,9.8489 16.132,11.201 15.9095,12.7581C15.6871,14.3155 14.8589,16.0111 13.435,17.435C12.0111,18.8589 10.3155,19.6871 8.7581,19.9096C7.201,20.132 5.8488,19.7484 4.9497,18.8493C4.0506,17.9501 3.667,16.598 3.8894,15.0409C4.1119,13.4835 4.9401,11.7879 6.364,10.364C7.7879,8.9401 9.4835,8.1119 11.0409,7.8895C12.598,7.667 13.9501,8.0506 14.8492,8.9498Z"
+      android:strokeWidth="2"
+      android:fillColor="#00000000"
+      android:strokeColor="#FF4080"/>
+  <path
+      android:pathData="M7,15m-1,0a1,1 0,1 1,2 0a1,1 0,1 1,-2 0"
+      android:fillColor="#FF4080"/>
+  <path
+      android:pathData="M14.5,8L17.5,3C17.5,3 18,4.5 19,6C20,7.5 21.5,8.5 21.5,8.5L16.5,10"
+      android:strokeLineJoin="round"
+      android:strokeWidth="2"
+      android:fillColor="#00000000"
+      android:strokeColor="#FF4080"/>
+  <path
+      android:pathData="M8.5,4.5L6.5,10L10,7.5L8.5,4.5Z"
+      android:strokeLineJoin="round"
+      android:strokeWidth="2"
+      android:fillColor="#FF4080"
+      android:strokeColor="#FF4080"/>
+</vector>

@@ -15,8 +15,6 @@
  */
 #pragma once
 
-#include <utils/String16.h>
-#include <unordered_map>
 #include <utils/RefBase.h>
 #include "StatsPuller.h"
 #include "logd/LogEvent.h"

@@ -18,6 +18,7 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
+import android.annotation.NonNull;
 import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
 import android.os.IBinder;
@@ -36,6 +37,13 @@ public class MoveToDisplayItem extends ClientTransactionItem {
     private Configuration mConfiguration;
 
     @Override
+    public void preExecute(ClientTransactionHandler client, IBinder token) {
+        // Notify the client of an upcoming change in the token configuration. This ensures that
+        // batches of config change items only process the newest configuration.
+        client.updatePendingActivityConfiguration(token, mConfiguration);
+    }
+
+    @Override
     public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityMovedToDisplay");
@@ -49,7 +57,12 @@ public class MoveToDisplayItem extends ClientTransactionItem {
     private MoveToDisplayItem() {}
 
     /** Obtain an instance initialized with provided params. */
-    public static MoveToDisplayItem obtain(int targetDisplayId, Configuration configuration) {
+    public static MoveToDisplayItem obtain(int targetDisplayId,
+            @NonNull Configuration configuration) {
+        if (configuration == null) {
+            throw new IllegalArgumentException("Configuration must not be null");
+        }
+
         MoveToDisplayItem instance = ObjectPool.obtain(MoveToDisplayItem.class);
         if (instance == null) {
             instance = new MoveToDisplayItem();
@@ -63,7 +76,7 @@ public class MoveToDisplayItem extends ClientTransactionItem {
     @Override
     public void recycle() {
         mTargetDisplayId = 0;
-        mConfiguration = null;
+        mConfiguration = Configuration.EMPTY;
         ObjectPool.recycle(this);
     }
 

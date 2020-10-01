@@ -20,7 +20,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="8dp"
-    android:orientation="horizontal" >
+    android:clickable="true"
+    android:orientation="horizontal"
+    android:foreground="?android:attr/selectableItemBackground" >
 
     <!-- This is where an icon would go *if we wanted one* **wink** -->
     <Space

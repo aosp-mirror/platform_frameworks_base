@@ -267,8 +267,7 @@ bool ResourceEntry::HasDefaultValue() const {
 // A DECL will override a USE without error. Two DECLs must match in their format for there to be
 // no error.
 ResourceTable::CollisionResult ResourceTable::ResolveValueCollision(Value* existing,
-                                                                    Value* incoming,
-                                                                    bool overlay) {
+                                                                    Value* incoming) {
   Attribute* existing_attr = ValueCast<Attribute>(existing);
   Attribute* incoming_attr = ValueCast<Attribute>(incoming);
   if (!incoming_attr) {
@@ -282,7 +281,7 @@ ResourceTable::CollisionResult ResourceTable::ResolveValueCollision(Value* exist
     }
     // The existing and incoming values are strong, this is an error
     // if the values are not both attributes.
-    return overlay ? CollisionResult::kTakeNew : CollisionResult::kConflict;
+    return CollisionResult::kConflict;
   }
 
   if (!existing_attr) {
@@ -293,7 +292,7 @@ ResourceTable::CollisionResult ResourceTable::ResolveValueCollision(Value* exist
     }
     // The existing value is not an attribute and it is strong,
     // so the incoming attribute value is an error.
-    return overlay ? CollisionResult::kTakeNew : CollisionResult::kConflict;
+    return CollisionResult::kConflict;
   }
 
   CHECK(incoming_attr != nullptr && existing_attr != nullptr);
@@ -324,9 +323,8 @@ ResourceTable::CollisionResult ResourceTable::ResolveValueCollision(Value* exist
   return CollisionResult::kConflict;
 }
 
-ResourceTable::CollisionResult ResourceTable::IgnoreCollision(Value* /* existing */,
-                                                              Value* /* incoming */,
-                                                              bool /* overlay */) {
+ResourceTable::CollisionResult ResourceTable::IgnoreCollision(Value* /** existing **/,
+                                                              Value* /** incoming **/) {
   return CollisionResult::kKeepBoth;
 }
 
@@ -400,7 +398,7 @@ bool ResourceTable::AddResourceImpl(const ResourceNameRef& name, const ResourceI
 
   // Check for package names appearing twice with two different package ids
   ResourceTablePackage* package = FindOrCreatePackage(name.package);
-  if (res_id.is_valid_dynamic() && package->id && package->id.value() != res_id.package_id()) {
+  if (res_id.is_valid() && package->id && package->id.value() != res_id.package_id()) {
     diag->Error(DiagMessage(source)
                     << "trying to add resource '" << name << "' with ID " << res_id
                     << " but package '" << package->name << "' already has ID "
@@ -409,9 +407,9 @@ bool ResourceTable::AddResourceImpl(const ResourceNameRef& name, const ResourceI
   }
 
   // Whether or not to error on duplicate resources
-  bool check_id = validate_resources_ && res_id.is_valid_dynamic();
+  bool check_id = validate_resources_ && res_id.is_valid();
   // Whether or not to create a duplicate resource if the id does not match
-  bool use_id = !validate_resources_ && res_id.is_valid_dynamic();
+  bool use_id = !validate_resources_ && res_id.is_valid();
 
   ResourceTableType* type = package->FindOrCreateType(name.type, use_id ? res_id.type_id()
                                                                         : Maybe<uint8_t>());
@@ -442,7 +440,7 @@ bool ResourceTable::AddResourceImpl(const ResourceNameRef& name, const ResourceI
     // Resource does not exist, add it now.
     config_value->value = std::move(value);
   } else {
-    switch (conflict_resolver(config_value->value.get(), value.get(), false /* overlay */)) {
+    switch (conflict_resolver(config_value->value.get(), value.get())) {
       case CollisionResult::kKeepBoth:
         // Insert the value ignoring for duplicate configurations
         entry->values.push_back(util::make_unique<ResourceConfigValue>(config, product));
@@ -465,7 +463,7 @@ bool ResourceTable::AddResourceImpl(const ResourceNameRef& name, const ResourceI
     }
   }
 
-  if (res_id.is_valid_dynamic()) {
+  if (res_id.is_valid()) {
     package->id = res_id.package_id();
     type->id = res_id.type_id();
     entry->id = res_id.entry_id();
@@ -506,7 +504,7 @@ bool ResourceTable::SetVisibilityImpl(const ResourceNameRef& name, const Visibil
 
   // Check for package names appearing twice with two different package ids
   ResourceTablePackage* package = FindOrCreatePackage(name.package);
-  if (res_id.is_valid_dynamic() && package->id && package->id.value() != res_id.package_id()) {
+  if (res_id.is_valid() && package->id && package->id.value() != res_id.package_id()) {
     diag->Error(DiagMessage(source)
                     << "trying to add resource '" << name << "' with ID " << res_id
                     << " but package '" << package->name << "' already has ID "
@@ -515,9 +513,9 @@ bool ResourceTable::SetVisibilityImpl(const ResourceNameRef& name, const Visibil
   }
 
   // Whether or not to error on duplicate resources
-  bool check_id = validate_resources_ && res_id.is_valid_dynamic();
+  bool check_id = validate_resources_ && res_id.is_valid();
   // Whether or not to create a duplicate resource if the id does not match
-  bool use_id = !validate_resources_ && res_id.is_valid_dynamic();
+  bool use_id = !validate_resources_ && res_id.is_valid();
 
   ResourceTableType* type = package->FindOrCreateType(name.type, use_id ? res_id.type_id()
                                                                         : Maybe<uint8_t>());
@@ -543,7 +541,7 @@ bool ResourceTable::SetVisibilityImpl(const ResourceNameRef& name, const Visibil
     return false;
   }
 
-  if (res_id.is_valid_dynamic()) {
+  if (res_id.is_valid()) {
     package->id = res_id.package_id();
     type->id = res_id.type_id();
     entry->id = res_id.entry_id();

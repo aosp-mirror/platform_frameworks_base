@@ -39,6 +39,7 @@ import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Slog;
 
@@ -62,15 +63,19 @@ public class GpuService extends SystemService {
     public static final String TAG = "GpuService";
     public static final boolean DEBUG = false;
 
-    private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
+    private static final String PROD_DRIVER_PROPERTY = "ro.gfx.driver.0";
+    private static final String DEV_DRIVER_PROPERTY = "ro.gfx.driver.1";
     private static final String GAME_DRIVER_WHITELIST_FILENAME = "whitelist.txt";
     private static final int BASE64_FLAGS = Base64.NO_PADDING | Base64.NO_WRAP;
 
     private final Context mContext;
-    private final String mDriverPackageName;
+    private final String mProdDriverPackageName;
+    private final String mDevDriverPackageName;
     private final PackageManager mPackageManager;
     private final Object mLock = new Object();
     private final Object mDeviceConfigLock = new Object();
+    private final boolean mHasProdDriver;
+    private final boolean mHasDevDriver;
     private ContentResolver mContentResolver;
     private long mGameDriverVersionCode;
     private SettingsObserver mSettingsObserver;
@@ -82,10 +87,13 @@ public class GpuService extends SystemService {
         super(context);
 
         mContext = context;
-        mDriverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
+        mProdDriverPackageName = SystemProperties.get(PROD_DRIVER_PROPERTY);
         mGameDriverVersionCode = -1;
+        mDevDriverPackageName = SystemProperties.get(DEV_DRIVER_PROPERTY);
         mPackageManager = context.getPackageManager();
-        if (mDriverPackageName != null && !mDriverPackageName.isEmpty()) {
+        mHasProdDriver = !TextUtils.isEmpty(mProdDriverPackageName);
+        mHasDevDriver = !TextUtils.isEmpty(mDevDriverPackageName);
+        if (mHasDevDriver || mHasProdDriver) {
             final IntentFilter packageFilter = new IntentFilter();
             packageFilter.addAction(ACTION_PACKAGE_ADDED);
             packageFilter.addAction(ACTION_PACKAGE_CHANGED);
@@ -104,7 +112,7 @@ public class GpuService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == PHASE_BOOT_COMPLETED) {
             mContentResolver = mContext.getContentResolver();
-            if (mDriverPackageName == null || mDriverPackageName.isEmpty()) {
+            if (!mHasProdDriver && !mHasDevDriver) {
                 return;
             }
             mSettingsObserver = new SettingsObserver();
@@ -112,6 +120,7 @@ public class GpuService extends SystemService {
             fetchGameDriverPackageProperties();
             processBlacklists();
             setBlacklist();
+            fetchDeveloperDriverPackageProperties();
         }
     }
 
@@ -166,18 +175,22 @@ public class GpuService extends SystemService {
                 return;
             }
             final String packageName = data.getSchemeSpecificPart();
-            if (!packageName.equals(mDriverPackageName)) {
+            final boolean isProdDriver = packageName.equals(mProdDriverPackageName);
+            final boolean isDevDriver = packageName.equals(mDevDriverPackageName);
+            if (!isProdDriver && !isDevDriver) {
                 return;
             }
-
-            final boolean replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
 
             switch (intent.getAction()) {
                 case ACTION_PACKAGE_ADDED:
                 case ACTION_PACKAGE_CHANGED:
                 case ACTION_PACKAGE_REMOVED:
-                    fetchGameDriverPackageProperties();
-                    setBlacklist();
+                    if (isProdDriver) {
+                        fetchGameDriverPackageProperties();
+                        setBlacklist();
+                    } else if (isDevDriver) {
+                        fetchDeveloperDriverPackageProperties();
+                    }
                     break;
                 default:
                     // do nothing
@@ -208,11 +221,11 @@ public class GpuService extends SystemService {
     private void fetchGameDriverPackageProperties() {
         final ApplicationInfo driverInfo;
         try {
-            driverInfo = mPackageManager.getApplicationInfo(mDriverPackageName,
+            driverInfo = mPackageManager.getApplicationInfo(mProdDriverPackageName,
                                                             PackageManager.MATCH_SYSTEM_ONLY);
         } catch (PackageManager.NameNotFoundException e) {
             if (DEBUG) {
-                Slog.e(TAG, "driver package '" + mDriverPackageName + "' not installed");
+                Slog.e(TAG, "driver package '" + mProdDriverPackageName + "' not installed");
             }
             return;
         }
@@ -232,14 +245,14 @@ public class GpuService extends SystemService {
         mGameDriverVersionCode = driverInfo.longVersionCode;
 
         try {
-            final Context driverContext = mContext.createPackageContext(mDriverPackageName,
+            final Context driverContext = mContext.createPackageContext(mProdDriverPackageName,
                                                                         Context.CONTEXT_RESTRICTED);
 
             assetToSettingsGlobal(mContext, driverContext, GAME_DRIVER_WHITELIST_FILENAME,
                     Settings.Global.GAME_DRIVER_WHITELIST, ",");
         } catch (PackageManager.NameNotFoundException e) {
             if (DEBUG) {
-                Slog.w(TAG, "driver package '" + mDriverPackageName + "' not installed");
+                Slog.w(TAG, "driver package '" + mProdDriverPackageName + "' not installed");
             }
         }
     }
@@ -291,4 +304,40 @@ public class GpuService extends SystemService {
             }
         }
     }
+
+    private void fetchDeveloperDriverPackageProperties() {
+        final ApplicationInfo driverInfo;
+        try {
+            driverInfo = mPackageManager.getApplicationInfo(mDevDriverPackageName,
+                                                            PackageManager.MATCH_SYSTEM_ONLY);
+        } catch (PackageManager.NameNotFoundException e) {
+            if (DEBUG) {
+                Slog.e(TAG, "driver package '" + mDevDriverPackageName + "' not installed");
+            }
+            return;
+        }
+
+        // O drivers are restricted to the sphal linker namespace, so don't try to use
+        // packages unless they declare they're compatible with that restriction.
+        if (driverInfo.targetSdkVersion < Build.VERSION_CODES.O) {
+            if (DEBUG) {
+                Slog.w(TAG, "Driver package is not known to be compatible with O");
+            }
+            return;
+        }
+
+        setUpdatableDriverPath(driverInfo);
+    }
+
+    private void setUpdatableDriverPath(ApplicationInfo ai) {
+        if (ai.primaryCpuAbi == null) {
+            nSetUpdatableDriverPath("");
+            return;
+        }
+        final StringBuilder sb = new StringBuilder();
+        sb.append(ai.sourceDir).append("!/lib/");
+        nSetUpdatableDriverPath(sb.toString());
+    }
+
+    private static native void nSetUpdatableDriverPath(String driverPath);
 }

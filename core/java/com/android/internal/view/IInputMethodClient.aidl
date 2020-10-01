@@ -28,6 +28,7 @@ oneway interface IInputMethodClient {
     void onBindMethod(in InputBindResult res);
     void onUnbindMethod(int sequence, int unbindReason);
     void setActive(boolean active, boolean fullscreen);
+    void scheduleStartInputIfNecessary(boolean fullscreen);
     void reportFullscreenMode(boolean fullscreen);
     void reportPreRendered(in EditorInfo info);
     void applyImeVisibility(boolean setVisible);

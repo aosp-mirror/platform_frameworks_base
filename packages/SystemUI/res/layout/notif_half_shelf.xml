@@ -46,7 +46,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:orientation="horizontal" >
+                android:orientation="horizontal"
+                android:clickable="true"
+                android:foreground="?android:attr/selectableItemBackground" >
 
                 <ImageView
                     android:id="@+id/icon"

@@ -27,10 +27,11 @@ function _eval()
     local red="\e[31m"
     local green="\e[32m"
     local reset="\e[0m"
+    local output
 
     _log "${green}[ RUN      ]${reset} ${label}"
-    local output="$(eval "$cmd")"
-    if [[ -z "${output}" ]]; then
+    output="$(eval "$cmd" 2>&1)"
+    if [[ $? -eq 0 ]]; then
         _log "${green}[       OK ]${reset} ${label}"
         return 0
     else

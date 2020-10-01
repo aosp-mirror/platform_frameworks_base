@@ -18,6 +18,9 @@ package com.android.internal.app;
 
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 
+import static com.android.internal.app.ResolverActivity.EXTRA_CALLING_USER;
+import static com.android.internal.app.ResolverActivity.EXTRA_SELECTED_PROFILE;
+
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.app.Activity;
@@ -26,6 +29,8 @@ import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
@@ -37,6 +42,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.Slog;
 import android.widget.Toast;
 
@@ -48,6 +54,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * This is used in conjunction with
@@ -69,14 +78,25 @@ public class IntentForwarderActivity extends Activity  {
 
     private static final String TEL_SCHEME = "tel";
 
+    private static final ComponentName RESOLVER_COMPONENT_NAME =
+            new ComponentName("android", ResolverActivity.class.getName());
+
     private Injector mInjector;
 
     private MetricsLogger mMetricsLogger;
+    protected ExecutorService mExecutorService;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mExecutorService.shutdown();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mInjector = createInjector();
+        mExecutorService = Executors.newSingleThreadExecutor();
 
         Intent intentReceived = getIntent();
         String className = intentReceived.getComponent().getClassName();
@@ -106,51 +126,145 @@ public class IntentForwarderActivity extends Activity  {
             finish();
             return;
         }
+        if (Intent.ACTION_CHOOSER.equals(intentReceived.getAction())) {
+            launchChooserActivityWithCorrectTab(intentReceived, className);
+            return;
+        }
 
         final int callingUserId = getUserId();
-        final Intent newIntent = canForward(intentReceived, targetUserId);
-        if (newIntent != null) {
-            if (Intent.ACTION_CHOOSER.equals(newIntent.getAction())) {
-                Intent innerIntent = newIntent.getParcelableExtra(Intent.EXTRA_INTENT);
-                // At this point, innerIntent is not null. Otherwise, canForward would have returned
-                // false.
-                innerIntent.prepareToLeaveUser(callingUserId);
-                innerIntent.fixUris(callingUserId);
-            } else {
-                newIntent.prepareToLeaveUser(callingUserId);
-            }
+        final Intent newIntent = canForward(intentReceived, getUserId(), targetUserId,
+                mInjector.getIPackageManager(), getContentResolver());
 
-            final ResolveInfo ri = mInjector.resolveActivityAsUser(newIntent, MATCH_DEFAULT_ONLY,
-                    targetUserId);
-            try {
-                startActivityAsCaller(newIntent, null, null, false, targetUserId);
-            } catch (RuntimeException e) {
-                int launchedFromUid = -1;
-                String launchedFromPackage = "?";
-                try {
-                    launchedFromUid = ActivityTaskManager.getService().getLaunchedFromUid(
-                            getActivityToken());
-                    launchedFromPackage = ActivityTaskManager.getService().getLaunchedFromPackage(
-                            getActivityToken());
-                } catch (RemoteException ignored) {
-                }
-
-                Slog.wtf(TAG, "Unable to launch as UID " + launchedFromUid + " package "
-                        + launchedFromPackage + ", while running in "
-                        + ActivityThread.currentProcessName(), e);
-            }
-
-            if (shouldShowDisclosure(ri, intentReceived)) {
-                mInjector.showToast(userMessageId, Toast.LENGTH_LONG);
-            }
-        } else {
+        if (newIntent == null) {
             Slog.wtf(TAG, "the intent: " + intentReceived + " cannot be forwarded from user "
                     + callingUserId + " to user " + targetUserId);
+            finish();
+            return;
         }
+
+        newIntent.prepareToLeaveUser(callingUserId);
+        final CompletableFuture<ResolveInfo> targetResolveInfoFuture =
+                mInjector.resolveActivityAsUser(newIntent, MATCH_DEFAULT_ONLY, targetUserId);
+        targetResolveInfoFuture
+                .thenApplyAsync(targetResolveInfo -> {
+                    if (isResolverActivityResolveInfo(targetResolveInfo)) {
+                        launchResolverActivityWithCorrectTab(intentReceived, className, newIntent,
+                                callingUserId, targetUserId);
+                        return targetResolveInfo;
+                    }
+                    startActivityAsCaller(newIntent, targetUserId);
+                    return targetResolveInfo;
+                }, mExecutorService)
+                .thenAcceptAsync(result -> {
+                    maybeShowDisclosure(intentReceived, result, userMessageId);
+                    finish();
+                }, getApplicationContext().getMainExecutor());
+    }
+
+    private boolean isIntentForwarderResolveInfo(ResolveInfo resolveInfo) {
+        if (resolveInfo == null) {
+            return false;
+        }
+        ActivityInfo activityInfo = resolveInfo.activityInfo;
+        if (activityInfo == null) {
+            return false;
+        }
+        if (!"android".equals(activityInfo.packageName)) {
+            return false;
+        }
+        return activityInfo.name.equals(FORWARD_INTENT_TO_PARENT)
+                || activityInfo.name.equals(FORWARD_INTENT_TO_MANAGED_PROFILE);
+    }
+
+    private boolean isResolverActivityResolveInfo(@Nullable ResolveInfo resolveInfo) {
+        return resolveInfo != null
+                && resolveInfo.activityInfo != null
+                && RESOLVER_COMPONENT_NAME.equals(resolveInfo.activityInfo.getComponentName());
+    }
+
+    private void maybeShowDisclosure(
+            Intent intentReceived, ResolveInfo resolveInfo, int messageId) {
+        if (shouldShowDisclosure(resolveInfo, intentReceived)) {
+            mInjector.showToast(messageId, Toast.LENGTH_LONG);
+        }
+    }
+
+    private void startActivityAsCaller(Intent newIntent, int userId) {
+        try {
+            startActivityAsCaller(
+                    newIntent,
+                    /* options= */ null,
+                    /* permissionToken= */ null,
+                    /* ignoreTargetSecurity= */ false,
+                    userId);
+        } catch (RuntimeException e) {
+            int launchedFromUid = -1;
+            String launchedFromPackage = "?";
+            try {
+                launchedFromUid = ActivityTaskManager.getService().getLaunchedFromUid(
+                        getActivityToken());
+                launchedFromPackage = ActivityTaskManager.getService()
+                        .getLaunchedFromPackage(getActivityToken());
+            } catch (RemoteException ignored) {
+            }
+
+            Slog.wtf(TAG, "Unable to launch as UID " + launchedFromUid + " package "
+                    + launchedFromPackage + ", while running in "
+                    + ActivityThread.currentProcessName(), e);
+        }
+    }
+
+    private void launchChooserActivityWithCorrectTab(Intent intentReceived, String className) {
+        // When showing the sharesheet, instead of forwarding to the other profile,
+        // we launch the sharesheet in the current user and select the other tab.
+        // This fixes b/152866292 where the user can not go back to the original profile
+        // when cross-profile intents are disabled.
+        int selectedProfile = findSelectedProfile(className);
+        sanitizeIntent(intentReceived);
+        intentReceived.putExtra(EXTRA_SELECTED_PROFILE, selectedProfile);
+        Intent innerIntent = intentReceived.getParcelableExtra(Intent.EXTRA_INTENT);
+        if (innerIntent == null) {
+            Slog.wtf(TAG, "Cannot start a chooser intent with no extra " + Intent.EXTRA_INTENT);
+            return;
+        }
+        sanitizeIntent(innerIntent);
+        startActivityAsCaller(intentReceived, null, null, false, getUserId());
         finish();
     }
 
+    private void launchResolverActivityWithCorrectTab(Intent intentReceived, String className,
+            Intent newIntent, int callingUserId, int targetUserId) {
+        // When showing the intent resolver, instead of forwarding to the other profile,
+        // we launch it in the current user and select the other tab. This fixes b/155874820.
+        //
+        // In the case when there are 0 targets in the current profile and >1 apps in the other
+        // profile, the package manager launches the intent resolver in the other profile.
+        // If that's the case, we launch the resolver in the target user instead (other profile).
+        ResolveInfo callingResolveInfo = mInjector.resolveActivityAsUser(
+                newIntent, MATCH_DEFAULT_ONLY, callingUserId).join();
+        int userId = isIntentForwarderResolveInfo(callingResolveInfo)
+                ? targetUserId : callingUserId;
+        int selectedProfile = findSelectedProfile(className);
+        sanitizeIntent(intentReceived);
+        intentReceived.putExtra(EXTRA_SELECTED_PROFILE, selectedProfile);
+        intentReceived.putExtra(EXTRA_CALLING_USER, UserHandle.of(callingUserId));
+        startActivityAsCaller(intentReceived, null, null, false, userId);
+        finish();
+    }
+
+    private int findSelectedProfile(String className) {
+        if (className.equals(FORWARD_INTENT_TO_PARENT)) {
+            return ChooserActivity.PROFILE_PERSONAL;
+        } else if (className.equals(FORWARD_INTENT_TO_MANAGED_PROFILE)) {
+            return ChooserActivity.PROFILE_WORK;
+        }
+        return -1;
+    }
+
     private boolean shouldShowDisclosure(@Nullable ResolveInfo ri, Intent intent) {
+        if (!isDeviceProvisioned()) {
+            return false;
+        }
         if (ri == null || ri.activityInfo == null) {
             return true;
         }
@@ -159,6 +273,11 @@ public class IntentForwarderActivity extends Activity  {
             return false;
         }
         return !isTargetResolverOrChooserActivity(ri.activityInfo);
+    }
+
+    private boolean isDeviceProvisioned() {
+        return Settings.Global.getInt(getContentResolver(),
+                Settings.Global.DEVICE_PROVISIONED, /* def= */ 0) != 0;
     }
 
     private boolean isTextMessageIntent(Intent intent) {
@@ -191,7 +310,8 @@ public class IntentForwarderActivity extends Activity  {
      * Check whether the intent can be forwarded to target user. Return the intent used for
      * forwarding if it can be forwarded, {@code null} otherwise.
      */
-    Intent canForward(Intent incomingIntent, int targetUserId)  {
+    static Intent canForward(Intent incomingIntent, int sourceUserId, int targetUserId,
+            IPackageManager packageManager, ContentResolver contentResolver)  {
         Intent forwardIntent = new Intent(incomingIntent);
         forwardIntent.addFlags(
                 Intent.FLAG_ACTIVITY_FORWARD_RESULT | Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
@@ -199,32 +319,16 @@ public class IntentForwarderActivity extends Activity  {
 
         Intent intentToCheck = forwardIntent;
         if (Intent.ACTION_CHOOSER.equals(forwardIntent.getAction())) {
-            // The EXTRA_INITIAL_INTENTS may not be allowed to be forwarded.
-            if (forwardIntent.hasExtra(Intent.EXTRA_INITIAL_INTENTS)) {
-                Slog.wtf(TAG, "An chooser intent with extra initial intents cannot be forwarded to"
-                        + " a different user");
-                return null;
-            }
-            if (forwardIntent.hasExtra(Intent.EXTRA_REPLACEMENT_EXTRAS)) {
-                Slog.wtf(TAG, "A chooser intent with replacement extras cannot be forwarded to a"
-                        + " different user");
-                return null;
-            }
-            intentToCheck = forwardIntent.getParcelableExtra(Intent.EXTRA_INTENT);
-            if (intentToCheck == null) {
-                Slog.wtf(TAG, "Cannot forward a chooser intent with no extra "
-                        + Intent.EXTRA_INTENT);
-                return null;
-            }
+            return null;
         }
         if (forwardIntent.getSelector() != null) {
             intentToCheck = forwardIntent.getSelector();
         }
-        String resolvedType = intentToCheck.resolveTypeIfNeeded(getContentResolver());
+        String resolvedType = intentToCheck.resolveTypeIfNeeded(contentResolver);
         sanitizeIntent(intentToCheck);
         try {
-            if (mInjector.getIPackageManager().
-                    canForwardTo(intentToCheck, resolvedType, getUserId(), targetUserId)) {
+            if (packageManager.canForwardTo(
+                    intentToCheck, resolvedType, sourceUserId, targetUserId)) {
                 return forwardIntent;
             }
         } catch (RemoteException e) {
@@ -267,7 +371,7 @@ public class IntentForwarderActivity extends Activity  {
     /**
      * Sanitize the intent in place.
      */
-    private void sanitizeIntent(Intent intent) {
+    private static void sanitizeIntent(Intent intent) {
         // Apps should not be allowed to target a specific package/ component in the target user.
         intent.setPackage(null);
         intent.setComponent(null);
@@ -303,8 +407,11 @@ public class IntentForwarderActivity extends Activity  {
         }
 
         @Override
-        public ResolveInfo resolveActivityAsUser(Intent intent, int flags, int userId) {
-            return getPackageManager().resolveActivityAsUser(intent, flags, userId);
+        @Nullable
+        public CompletableFuture<ResolveInfo> resolveActivityAsUser(
+                Intent intent, int flags, int userId) {
+            return CompletableFuture.supplyAsync(
+                    () -> getPackageManager().resolveActivityAsUser(intent, flags, userId));
         }
 
         @Override
@@ -320,7 +427,7 @@ public class IntentForwarderActivity extends Activity  {
 
         PackageManager getPackageManager();
 
-        ResolveInfo resolveActivityAsUser(Intent intent, int flags, int userId);
+        CompletableFuture<ResolveInfo> resolveActivityAsUser(Intent intent, int flags, int userId);
 
         void showToast(@StringRes int messageId, int duration);
     }

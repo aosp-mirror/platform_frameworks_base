@@ -1,0 +1,30 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.stats.sysui;
+
+// Enum used in NotificationReported and NotificationChannelModified atoms
+enum NotificationImportance {  // Constants from NotificationManager.java
+  IMPORTANCE_UNSPECIFIED = -1000;  // Should not occur for real notifications.
+  IMPORTANCE_NONE = 0;  // No importance: does not show in the shade.
+  IMPORTANCE_MIN = 1;  // Minimum to show in the shade.
+  IMPORTANCE_LOW = 2;  // Shows in shade, maybe status bar, no buzz/beep.
+  IMPORTANCE_DEFAULT = 3;  // Shows everywhere, makes noise, no heads-up.
+  IMPORTANCE_HIGH = 4;  // Shows everywhere, makes noise, heads-up, may full-screen.
+  IMPORTANCE_IMPORTANT_CONVERSATION = 5;  // High + isImportantConversation().
+}

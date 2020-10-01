@@ -45,6 +45,7 @@ import android.telephony.TelephonyManager;
 import android.util.Slog;
 
 import com.android.internal.telephony.IMms;
+import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
 
 import java.util.List;
@@ -128,13 +129,15 @@ public class MmsServiceBroker extends SystemService {
 
         @Override
         public void sendMessage(int subId, String callingPkg, Uri contentUri, String locationUrl,
-                Bundle configOverrides, PendingIntent sentIntent) throws RemoteException {
+                Bundle configOverrides, PendingIntent sentIntent, long messageId)
+                throws RemoteException {
             returnPendingIntentWithError(sentIntent);
         }
 
         @Override
         public void downloadMessage(int subId, String callingPkg, String locationUrl,
-                Uri contentUri, Bundle configOverrides, PendingIntent downloadedIntent)
+                Uri contentUri, Bundle configOverrides, PendingIntent downloadedIntent,
+                long messageId)
                 throws RemoteException {
             returnPendingIntentWithError(downloadedIntent);
         }
@@ -329,7 +332,8 @@ public class MmsServiceBroker extends SystemService {
 
         @Override
         public void sendMessage(int subId, String callingPkg, Uri contentUri,
-                String locationUrl, Bundle configOverrides, PendingIntent sentIntent)
+                String locationUrl, Bundle configOverrides, PendingIntent sentIntent,
+                long messageId)
                 throws RemoteException {
             Slog.d(TAG, "sendMessage() by " + callingPkg);
             mContext.enforceCallingPermission(Manifest.permission.SEND_SMS, "Send MMS message");
@@ -343,13 +347,13 @@ public class MmsServiceBroker extends SystemService {
                     Intent.FLAG_GRANT_READ_URI_PERMISSION,
                     subId);
             getServiceGuarded().sendMessage(subId, callingPkg, contentUri, locationUrl,
-                    configOverrides, sentIntent);
+                    configOverrides, sentIntent, messageId);
         }
 
         @Override
         public void downloadMessage(int subId, String callingPkg, String locationUrl,
                 Uri contentUri, Bundle configOverrides,
-                PendingIntent downloadedIntent) throws RemoteException {
+                PendingIntent downloadedIntent, long messageId) throws RemoteException {
             Slog.d(TAG, "downloadMessage() by " + callingPkg);
             mContext.enforceCallingPermission(Manifest.permission.RECEIVE_MMS,
                     "Download MMS message");
@@ -364,7 +368,7 @@ public class MmsServiceBroker extends SystemService {
                     subId);
 
             getServiceGuarded().downloadMessage(subId, callingPkg, locationUrl, contentUri,
-                    configOverrides, downloadedIntent);
+                    configOverrides, downloadedIntent, messageId);
         }
 
         @Override
@@ -509,9 +513,11 @@ public class MmsServiceBroker extends SystemService {
 
             long token = Binder.clearCallingIdentity();
             try {
-                LocalServices.getService(UriGrantsManagerInternal.class)
-                        .grantUriPermissionFromIntent(callingUid, PHONE_PACKAGE_NAME,
-                                grantIntent, UserHandle.USER_SYSTEM);
+                final UriGrantsManagerInternal ugm = LocalServices
+                        .getService(UriGrantsManagerInternal.class);
+                final NeededUriGrants needed = ugm.checkGrantUriPermissionFromIntent(
+                        grantIntent, callingUid, PHONE_PACKAGE_NAME, UserHandle.USER_SYSTEM);
+                ugm.grantUriPermissionUncheckedFromIntent(needed, null);
 
                 // Grant permission for the carrier app.
                 Intent intent = new Intent(action);
@@ -521,9 +527,10 @@ public class MmsServiceBroker extends SystemService {
                         .getCarrierPackageNamesForIntentAndPhone(
                                 intent, getPhoneIdFromSubId(subId));
                 if (carrierPackages != null && carrierPackages.size() == 1) {
-                    LocalServices.getService(UriGrantsManagerInternal.class)
-                            .grantUriPermissionFromIntent(callingUid, carrierPackages.get(0),
-                                    grantIntent, UserHandle.USER_SYSTEM);
+                    final NeededUriGrants carrierNeeded = ugm.checkGrantUriPermissionFromIntent(
+                            grantIntent, callingUid, carrierPackages.get(0),
+                            UserHandle.USER_SYSTEM);
+                    ugm.grantUriPermissionUncheckedFromIntent(carrierNeeded, null);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);

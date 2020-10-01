@@ -35,10 +35,12 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/prctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <string>
 #include <time.h>
+#include <wait.h>
 
 namespace android {
 namespace os {
@@ -51,6 +53,8 @@ using namespace android::util;
  *      frameworks/base/core/proto/android/os/incident.proto
  */
 const int FIELD_ID_METADATA = 2;
+// Args for exec gzip
+static const char* GZIP[] = {"/system/bin/gzip", NULL};
 
 IncidentMetadata_Destination privacy_policy_to_dest(uint8_t privacyPolicy) {
     switch (privacyPolicy) {
@@ -142,7 +146,8 @@ ReportRequest::ReportRequest(const IncidentReportArgs& a,
          mListener(listener),
          mFd(fd),
          mIsStreaming(fd >= 0),
-         mStatus(NO_ERROR) {
+         mStatus(OK),
+         mZipPid(-1) {
 }
 
 ReportRequest::~ReportRequest() {
@@ -153,7 +158,14 @@ ReportRequest::~ReportRequest() {
 }
 
 bool ReportRequest::ok() {
-    return mFd >= 0 && mStatus == NO_ERROR;
+    if (mStatus != OK) {
+        return false;
+    }
+    if (!args.gzip()) {
+        return mFd >= 0;
+    }
+    // Send a blank signal to check if mZipPid is alive
+    return mZipPid > 0 && kill(mZipPid, 0) == 0;
 }
 
 bool ReportRequest::containsSection(int sectionId) const {
@@ -161,10 +173,45 @@ bool ReportRequest::containsSection(int sectionId) const {
 }
 
 void ReportRequest::closeFd() {
-    if (mIsStreaming && mFd >= 0) {
+    if (!mIsStreaming) {
+        return;
+    }
+    if (mFd >= 0) {
         close(mFd);
         mFd = -1;
     }
+    if (mZipPid > 0) {
+        mZipPipe.close();
+        // Gzip may take some time.
+        status_t err = wait_child(mZipPid, /* timeout_ms= */ 10 * 1000);
+        if (err != 0) {
+            ALOGW("[ReportRequest] abnormal child process: %s", strerror(-err));
+        }
+    }
+}
+
+int ReportRequest::getFd() {
+    return mZipPid > 0 ? mZipPipe.writeFd().get() : mFd;
+}
+
+status_t ReportRequest::initGzipIfNecessary() {
+    if (!mIsStreaming || !args.gzip()) {
+        return OK;
+    }
+    if (!mZipPipe.init()) {
+        ALOGE("[ReportRequest] Failed to setup pipe for gzip");
+        mStatus = -errno;
+        return mStatus;
+    }
+    int status = 0;
+    pid_t pid = fork_execute_cmd((char* const*)GZIP, mZipPipe.readFd().release(), mFd, &status);
+    if (pid < 0 || status != 0) {
+        mStatus = status;
+        return mStatus;
+    }
+    mZipPid = pid;
+    mFd = -1;
+    return OK;
 }
 
 // ================================================================================
@@ -364,7 +411,6 @@ void ReportWriter::startSection(int sectionId) {
     mSectionBufferSuccess = false;
     mHadError = false;
     mSectionErrors.clear();
-    
 }
 
 void ReportWriter::setSectionStats(const FdBuffer& buffer) {
@@ -470,10 +516,13 @@ status_t ReportWriter::writeSection(const FdBuffer& buffer) {
 
 
 // ================================================================================
-Reporter::Reporter(const sp<WorkDirectory>& workDirectory, const sp<ReportBatch>& batch)
+Reporter::Reporter(const sp<WorkDirectory>& workDirectory,
+                   const sp<ReportBatch>& batch,
+                   const vector<BringYourOwnSection*>& registeredSections)
         :mWorkDirectory(workDirectory),
          mWriter(batch),
-         mBatch(batch) {
+         mBatch(batch),
+         mRegisteredSections(registeredSections) {
 }
 
 Reporter::~Reporter() {
@@ -560,6 +609,13 @@ void Reporter::runReport(size_t* reportByteSize) {
         reportId = (spec.tv_sec) * 1000 + spec.tv_nsec;
     }
 
+    mBatch->forEachStreamingRequest([](const sp<ReportRequest>& request) {
+        status_t err = request->initGzipIfNecessary();
+        if (err != 0) {
+            ALOGW("Error forking gzip: %s", strerror(err));
+        }
+    });
+
     // Write the incident report headers - each request gets its own headers.  It's different
     // from the other top-level fields in IncidentReport that are the sections where the rest
     // is all shared data (although with their own individual privacy filtering).
@@ -580,50 +636,15 @@ void Reporter::runReport(size_t* reportByteSize) {
     // For each of the report fields, see if we need it, and if so, execute the command
     // and report to those that care that we're doing it.
     for (const Section** section = SECTION_LIST; *section; section++) {
-        const int sectionId = (*section)->id;
-
-        // If nobody wants this section, skip it.
-        if (!mBatch->containsSection(sectionId)) {
-            continue;
-        }
-
-        ALOGD("Start incident report section %d '%s'", sectionId, (*section)->name.string());
-        IncidentMetadata::SectionStats* sectionMetadata = metadata.add_sections();
-
-        // Notify listener of starting
-        mBatch->forEachListener(sectionId, [sectionId](const auto& listener) {
-            listener->onReportSectionStatus(
-                    sectionId, IIncidentReportStatusListener::STATUS_STARTING);
-        });
-
-        // Go get the data and write it into the file descriptors.
-        mWriter.startSection(sectionId);
-        err = (*section)->Execute(&mWriter);
-        mWriter.endSection(sectionMetadata);
-
-        // Sections returning errors are fatal. Most errors should not be fatal.
-        if (err != NO_ERROR) {
-            mWriter.error((*section), err, "Section failed. Stopping report.");
+        if (execute_section(*section, &metadata, reportByteSize) != NO_ERROR) {
             goto DONE;
         }
+    }
 
-        // The returned max data size is used for throttling too many incident reports.
-        (*reportByteSize) += sectionMetadata->report_size_bytes();
-
-        // For any requests that failed during this section, remove them now.  We do this
-        // before calling back about section finished, so listeners do not erroniously get the
-        // impression that the section succeeded.  But we do it here instead of inside
-        // writeSection so that the callback is done from a known context and not from the
-        // bowels of a section, where changing the batch could cause odd errors.
-        cancel_and_remove_failed_requests();
-
-        // Notify listener of finishing
-        mBatch->forEachListener(sectionId, [sectionId](const auto& listener) {
-                listener->onReportSectionStatus(
-                        sectionId, IIncidentReportStatusListener::STATUS_FINISHED);
-        });
-
-        ALOGD("Finish incident report section %d '%s'", sectionId, (*section)->name.string());
+    for (const Section* section : mRegisteredSections) {
+        if (execute_section(section, &metadata, reportByteSize) != NO_ERROR) {
+            goto DONE;
+        }
     }
 
 DONE:
@@ -677,8 +698,57 @@ DONE:
             listener->onReportFailed();
         });
     }
-
+    clear_buffer_pool();
     ALOGI("Done taking incident report err=%s", strerror(-err));
+}
+
+status_t Reporter::execute_section(const Section* section, IncidentMetadata* metadata,
+        size_t* reportByteSize) {
+    const int sectionId = section->id;
+
+    // If nobody wants this section, skip it.
+    if (!mBatch->containsSection(sectionId)) {
+        return NO_ERROR;
+    }
+
+    ALOGD("Start incident report section %d '%s'", sectionId, section->name.string());
+    IncidentMetadata::SectionStats* sectionMetadata = metadata->add_sections();
+
+    // Notify listener of starting
+    mBatch->forEachListener(sectionId, [sectionId](const auto& listener) {
+        listener->onReportSectionStatus(
+                sectionId, IIncidentReportStatusListener::STATUS_STARTING);
+    });
+
+    // Go get the data and write it into the file descriptors.
+    mWriter.startSection(sectionId);
+    status_t err = section->Execute(&mWriter);
+    mWriter.endSection(sectionMetadata);
+
+    // Sections returning errors are fatal. Most errors should not be fatal.
+    if (err != NO_ERROR) {
+        mWriter.error(section, err, "Section failed. Stopping report.");
+        return err;
+    }
+
+    // The returned max data size is used for throttling too many incident reports.
+    (*reportByteSize) += sectionMetadata->report_size_bytes();
+
+    // For any requests that failed during this section, remove them now.  We do this
+    // before calling back about section finished, so listeners do not erroniously get the
+    // impression that the section succeeded.  But we do it here instead of inside
+    // writeSection so that the callback is done from a known context and not from the
+    // bowels of a section, where changing the batch could cause odd errors.
+    cancel_and_remove_failed_requests();
+
+    // Notify listener of finishing
+    mBatch->forEachListener(sectionId, [sectionId](const auto& listener) {
+            listener->onReportSectionStatus(
+                    sectionId, IIncidentReportStatusListener::STATUS_FINISHED);
+    });
+
+    ALOGD("Finish incident report section %d '%s'", sectionId, section->name.string());
+    return NO_ERROR;
 }
 
 void Reporter::cancel_and_remove_failed_requests() {

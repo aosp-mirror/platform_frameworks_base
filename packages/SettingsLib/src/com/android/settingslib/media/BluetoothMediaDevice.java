@@ -19,8 +19,8 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
-import android.util.Pair;
+import android.media.MediaRoute2Info;
+import android.media.MediaRouter2Manager;
 
 import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.BluetoothUtils;
@@ -35,8 +35,9 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     private CachedBluetoothDevice mCachedDevice;
 
-    BluetoothMediaDevice(Context context, CachedBluetoothDevice device) {
-        super(context, MediaDeviceType.TYPE_BLUETOOTH_DEVICE);
+    BluetoothMediaDevice(Context context, CachedBluetoothDevice device,
+            MediaRouter2Manager routerManager, MediaRoute2Info info, String packageName) {
+        super(context, routerManager, info, packageName);
         mCachedDevice = device;
         initDeviceRecord();
     }
@@ -55,28 +56,23 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     @Override
     public Drawable getIcon() {
-        final Pair<Drawable, String> pair = BluetoothUtils
-                .getBtRainbowDrawableWithDescription(mContext, mCachedDevice);
-        return pair.first;
+        final Drawable drawable = getIconWithoutBackground();
+        if (!isFastPairDevice()) {
+            setColorFilter(drawable);
+        }
+        return BluetoothUtils.buildAdvancedDrawable(mContext, drawable);
+    }
+
+    @Override
+    public Drawable getIconWithoutBackground() {
+        return isFastPairDevice()
+                ? BluetoothUtils.getBtDrawableWithDescription(mContext, mCachedDevice).first
+                : mContext.getDrawable(R.drawable.ic_headphone);
     }
 
     @Override
     public String getId() {
         return MediaDeviceUtils.getId(mCachedDevice);
-    }
-
-    @Override
-    public boolean connect() {
-        //TODO(b/117129183): add callback to notify LocalMediaManager connection state.
-        final boolean isConnected = mCachedDevice.setActive();
-        setConnectedRecord();
-        Log.d(TAG, "connect() device : " + getName() + ", is selected : " + isConnected);
-        return isConnected;
-    }
-
-    @Override
-    public void disconnect() {
-        //TODO(b/117129183): disconnected last select device
     }
 
     /**
@@ -98,6 +94,13 @@ public class BluetoothMediaDevice extends MediaDevice {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean isFastPairDevice() {
+        return mCachedDevice != null
+                && BluetoothUtils.getBooleanMetaData(
+                mCachedDevice.getDevice(), BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET);
     }
 
     @Override

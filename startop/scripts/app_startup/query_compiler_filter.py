@@ -31,13 +31,15 @@
 #
 
 import argparse
-import sys
+import os
 import re
+import sys
 
 # TODO: refactor this with a common library file with analyze_metrics.py
-import app_startup_runner
-from app_startup_runner import _debug_print
-from app_startup_runner import execute_arbitrary_command
+DIR = os.path.abspath(os.path.dirname(__file__))
+sys.path.append(os.path.dirname(DIR))
+import lib.cmd_utils as cmd_utils
+import lib.print_utils as print_utils
 
 from typing import List, NamedTuple, Iterable
 
@@ -74,7 +76,11 @@ Dexopt state:
       x86: [status=quicken] [reason=install]
 """ %(package, package, package, package)
 
-  code, res = execute_arbitrary_command(['adb', 'shell', 'dumpsys', 'package', package], simulate=False, timeout=5)
+  code, res = cmd_utils.execute_arbitrary_command(['adb', 'shell', 'dumpsys',
+                                                   'package', package],
+                                                  simulate=False,
+                                                  timeout=5,
+                                                  shell=False)
   if code:
     return res
   else:
@@ -115,7 +121,7 @@ def parse_tab_subtree(label: str, str_lines: List[str], separator=' ', indent=-1
       line = str_lines[line_num]
       current_indent = get_indent_level(line)
 
-      _debug_print("INDENT=%d, LINE=%s" %(current_indent, line))
+      print_utils.debug_print("INDENT=%d, LINE=%s" %(current_indent, line))
 
       current_label = line.lstrip()
 
@@ -135,7 +141,7 @@ def parse_tab_subtree(label: str, str_lines: List[str], separator=' ', indent=-1
       break
 
   new_remainder = str_lines[line_num::]
-  _debug_print("NEW REMAINDER: ", new_remainder)
+  print_utils.debug_print("NEW REMAINDER: ", new_remainder)
 
   parse_tree = ParseTree(label, children)
   return ParseResult(new_remainder, parse_tree)
@@ -159,7 +165,7 @@ def parse_dexopt_state(dumpsys_tree: ParseTree) -> DexoptState:
 def find_first_compiler_filter(dexopt_state: DexoptState, package: str, instruction_set: str) -> str:
   lst = find_all_compiler_filters(dexopt_state, package)
 
-  _debug_print("all compiler filters: ", lst)
+  print_utils.debug_print("all compiler filters: ", lst)
 
   for compiler_filter_info in lst:
     if not instruction_set:
@@ -180,10 +186,10 @@ def find_all_compiler_filters(dexopt_state: DexoptState, package: str) -> List[C
   if not package_tree:
     raise AssertionError("Could not find any package subtree for package %s" %(package))
 
-  _debug_print("package tree: ", package_tree)
+  print_utils.debug_print("package tree: ", package_tree)
 
   for path_tree in find_parse_children(package_tree, "path: "):
-    _debug_print("path tree: ", path_tree)
+    print_utils.debug_print("path tree: ", path_tree)
 
     matchre = re.compile("([^:]+):\s+\[status=([^\]]+)\]\s+\[reason=([^\]]+)\]")
 
@@ -198,16 +204,16 @@ def find_all_compiler_filters(dexopt_state: DexoptState, package: str) -> List[C
 
 def main() -> int:
   opts = parse_options()
-  app_startup_runner._debug = opts.debug
+  cmd_utils._debug = opts.debug
   if _DEBUG_FORCE is not None:
-    app_startup_runner._debug = _DEBUG_FORCE
-  _debug_print("parsed options: ", opts)
+    cmd_utils._debug = _DEBUG_FORCE
+  print_utils.debug_print("parsed options: ", opts)
 
   # Note: This can often 'fail' if the package isn't actually installed.
   package_dumpsys = remote_dumpsys_package(opts.package, opts.simulate)
-  _debug_print("package dumpsys: ", package_dumpsys)
+  print_utils.debug_print("package dumpsys: ", package_dumpsys)
   dumpsys_parse_tree = parse_tab_tree(package_dumpsys, package_dumpsys)
-  _debug_print("parse tree: ", dumpsys_parse_tree)
+  print_utils.debug_print("parse tree: ", dumpsys_parse_tree)
   dexopt_state = parse_dexopt_state(dumpsys_parse_tree)
 
   filter = find_first_compiler_filter(dexopt_state, opts.package, opts.instruction_set)

@@ -65,18 +65,17 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         } else {
             mClientChannel = channels[1];
         }
-        mService.mInputManager.registerInputChannel(mServerChannel, null);
+        mService.mInputManager.registerInputChannel(mServerChannel);
 
         mApplicationHandle = new InputApplicationHandle(new Binder());
         mApplicationHandle.name = name;
         mApplicationHandle.dispatchingTimeoutNanos =
                 WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
 
-        mWindowHandle = new InputWindowHandle(mApplicationHandle, null, displayId);
+        mWindowHandle = new InputWindowHandle(mApplicationHandle, displayId);
         mWindowHandle.name = name;
         mWindowHandle.token = mServerChannel.getToken();
         mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
-        mWindowHandle.layer = getLayerLw(mWindowHandle.layoutParamsType);
         mWindowHandle.layoutParamsFlags = 0;
         mWindowHandle.dispatchingTimeoutNanos =
                 WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
@@ -90,8 +89,10 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         mWindowHandle.inputFeatures = 0;
         mWindowHandle.scaleFactor = 1.0f;
 
-        mInputSurface = mService.makeSurfaceBuilder(mService.mRoot.getDisplayContent(displayId)
-                .getSession()).setContainerLayer().setName("Input Consumer " + name)
+        mInputSurface = mService.makeSurfaceBuilder(mService.mRoot.getDisplayContent(displayId).getSession())
+                .setContainerLayer()
+                .setName("Input Consumer " + name)
+                .setCallsite("InputConsumerImpl")
                 .build();
     }
 
@@ -150,16 +151,15 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         t.setLayer(mInputSurface, layer);
     }
 
-    private int getLayerLw(int windowType) {
-        return mService.mPolicy.getWindowLayerFromTypeLw(windowType)
-                * WindowManagerService.TYPE_LAYER_MULTIPLIER
-                + WindowManagerService.TYPE_LAYER_OFFSET;
+    void reparent(SurfaceControl.Transaction t, WindowContainer wc) {
+        t.reparent(mInputSurface, wc.getSurfaceControl());
     }
 
-    void disposeChannelsLw() {
+    void disposeChannelsLw(SurfaceControl.Transaction t) {
         mService.mInputManager.unregisterInputChannel(mServerChannel);
         mClientChannel.dispose();
         mServerChannel.dispose();
+        t.remove(mInputSurface);
         unlinkFromDeathRecipient();
     }
 

@@ -16,15 +16,11 @@
 
 package android.location;
 
-import android.annotation.NonNull;
 import android.annotation.SystemApi;
 
 /**
  * A container of supported GNSS chipset capabilities.
- *
- * @hide
  */
-@SystemApi
 public final class GnssCapabilities {
     /**
      * Bit mask indicating GNSS chipset supports low power mode.
@@ -82,6 +78,12 @@ public final class GnssCapabilities {
      */
     public static final long MEASUREMENT_CORRECTIONS_REFLECTING_PLANE           = 1L << 8;
 
+    /**
+     * Bit mask indicating GNSS chipset supports GNSS antenna info.
+     * @hide
+     */
+    public static final long ANTENNA_INFO                                       = 1L << 9;
+
     /** @hide */
     public static final long INVALID_CAPABILITIES = -1;
 
@@ -99,7 +101,10 @@ public final class GnssCapabilities {
 
     /**
      * Returns {@code true} if GNSS chipset supports low power mode, {@code false} otherwise.
+     *
+     * @hide
      */
+    @SystemApi
     public boolean hasLowPowerMode() {
         return hasCapability(LOW_POWER_MODE);
     }
@@ -107,28 +112,40 @@ public final class GnssCapabilities {
     /**
      * Returns {@code true} if GNSS chipset supports blacklisting satellites, {@code false}
      * otherwise.
+     *
+     * @hide
      */
+    @SystemApi
     public boolean hasSatelliteBlacklist() {
         return hasCapability(SATELLITE_BLACKLIST);
     }
 
     /**
      * Returns {@code true} if GNSS chipset supports geofencing, {@code false} otherwise.
+     *
+     * @hide
      */
+    @SystemApi
     public boolean hasGeofencing() {
         return hasCapability(GEOFENCING);
     }
 
     /**
      * Returns {@code true} if GNSS chipset supports measurements, {@code false} otherwise.
+     *
+     * @hide
      */
+    @SystemApi
     public boolean hasMeasurements() {
         return hasCapability(MEASUREMENTS);
     }
 
     /**
      * Returns {@code true} if GNSS chipset supports navigation messages, {@code false} otherwise.
+     *
+     * @hide
      */
+    @SystemApi
     public boolean hasNavMessages() {
         return hasCapability(NAV_MESSAGES);
     }
@@ -136,7 +153,10 @@ public final class GnssCapabilities {
     /**
      * Returns {@code true} if GNSS chipset supports measurement corrections, {@code false}
      * otherwise.
+     *
+     * @hide
      */
+    @SystemApi
     public boolean hasMeasurementCorrections() {
         return hasCapability(MEASUREMENT_CORRECTIONS);
     }
@@ -144,7 +164,10 @@ public final class GnssCapabilities {
     /**
      * Returns {@code true} if GNSS chipset supports line-of-sight satellite identification
      * measurement corrections, {@code false} otherwise.
+     *
+     * @hide
      */
+    @SystemApi
     public boolean hasMeasurementCorrectionsLosSats() {
         return hasCapability(MEASUREMENT_CORRECTIONS_LOS_SATS);
     }
@@ -152,7 +175,10 @@ public final class GnssCapabilities {
     /**
      * Returns {@code true} if GNSS chipset supports per satellite excess-path-length measurement
      * corrections, {@code false} otherwise.
+     *
+     * @hide
      */
+    @SystemApi
     public boolean hasMeasurementCorrectionsExcessPathLength() {
         return hasCapability(MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH);
     }
@@ -160,30 +186,19 @@ public final class GnssCapabilities {
     /**
      * Returns {@code true} if GNSS chipset supports reflecting planes measurement corrections,
      * {@code false} otherwise.
+     *
+     * @hide
      */
+    @SystemApi
     public boolean hasMeasurementCorrectionsReflectingPane() {
         return hasCapability(MEASUREMENT_CORRECTIONS_REFLECTING_PLANE);
     }
 
-    @NonNull
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("GnssCapabilities: ( ");
-        if (hasLowPowerMode()) sb.append("LOW_POWER_MODE ");
-        if (hasSatelliteBlacklist()) sb.append("SATELLITE_BLACKLIST ");
-        if (hasGeofencing()) sb.append("GEOFENCING ");
-        if (hasMeasurements()) sb.append("MEASUREMENTS ");
-        if (hasNavMessages()) sb.append("NAV_MESSAGES ");
-        if (hasMeasurementCorrections()) sb.append("MEASUREMENT_CORRECTIONS ");
-        if (hasMeasurementCorrectionsLosSats()) sb.append("MEASUREMENT_CORRECTIONS_LOS_SATS ");
-        if (hasMeasurementCorrectionsExcessPathLength()) {
-            sb.append("MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH ");
-        }
-        if (hasMeasurementCorrectionsReflectingPane()) {
-            sb.append("MEASUREMENT_CORRECTIONS_REFLECTING_PLANE ");
-        }
-        sb.append(")");
-        return sb.toString();
+    /**
+     * Returns {@code true} if GNSS chipset supports antenna info, {@code false} otherwise.
+     */
+    public boolean hasGnssAntennaInfo() {
+        return hasCapability(ANTENNA_INFO);
     }
 
     private boolean hasCapability(long capability) {

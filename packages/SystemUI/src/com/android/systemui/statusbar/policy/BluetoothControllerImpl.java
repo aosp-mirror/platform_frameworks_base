@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static com.android.systemui.Dependency.BG_LOOPER_NAME;
-
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
@@ -36,6 +34,8 @@ import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -46,7 +46,6 @@ import java.util.List;
 import java.util.WeakHashMap;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
@@ -70,16 +69,17 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     private boolean mAudioProfileOnly;
     private boolean mIsActive;
 
-    private final H mHandler = new H(Looper.getMainLooper());
+    private final H mHandler;
     private int mState;
 
     /**
      */
     @Inject
-    public BluetoothControllerImpl(Context context, @Named(BG_LOOPER_NAME) Looper bgLooper,
-            @Nullable LocalBluetoothManager localBluetoothManager) {
+    public BluetoothControllerImpl(Context context, @Background Looper bgLooper,
+            @Main Looper mainLooper, @Nullable LocalBluetoothManager localBluetoothManager) {
         mLocalBluetoothManager = localBluetoothManager;
         mBgHandler = new Handler(bgLooper);
+        mHandler = new H(mainLooper);
         if (mLocalBluetoothManager != null) {
             mLocalBluetoothManager.getEventManager().registerCallback(this);
             mLocalBluetoothManager.getProfileManager().addServiceListener(this);
@@ -277,7 +277,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         boolean otherProfileConnected = false;
 
         for (CachedBluetoothDevice device : getDevices()) {
-            for (LocalBluetoothProfile profile : device.getProfileListCopy()) {
+            for (LocalBluetoothProfile profile : device.getProfiles()) {
                 int profileId = profile.getProfileId();
                 boolean isConnected = device.isConnectedProfile(profile);
                 if (profileId == BluetoothProfile.HEADSET
@@ -344,6 +344,18 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         if (DEBUG) {
             Log.d(TAG, "ConnectionStateChanged=" + cachedDevice.getAddress() + " "
                     + stateToString(state));
+        }
+        mCachedState.remove(cachedDevice);
+        updateConnected();
+        mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
+    }
+
+    @Override
+    public void onProfileConnectionStateChanged(CachedBluetoothDevice cachedDevice,
+            int state, int bluetoothProfile) {
+        if (DEBUG) {
+            Log.d(TAG, "ProfileConnectionStateChanged=" + cachedDevice.getAddress() + " "
+                    + stateToString(state) + " profileId=" + bluetoothProfile);
         }
         mCachedState.remove(cachedDevice);
         updateConnected();

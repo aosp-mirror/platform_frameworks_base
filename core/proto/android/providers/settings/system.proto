@@ -161,6 +161,8 @@ message SystemSettingsProto {
         optional SettingProto brightness_for_vr = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto brightness_mode = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto auto_brightness_adj = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto brightness_float = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto brightness_for_vr_float = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Screen screen = 22;
 

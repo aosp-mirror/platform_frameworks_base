@@ -20,7 +20,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Printer;
 
 /**
@@ -79,10 +78,6 @@ public class ComponentInfo extends PackageItemInfo {
      */
     public boolean directBootAware = false;
 
-    /** @removed */
-    @Deprecated
-    public boolean encryptionAware = false;
-
     public ComponentInfo() {
     }
 
@@ -94,7 +89,7 @@ public class ComponentInfo extends PackageItemInfo {
         descriptionRes = orig.descriptionRes;
         enabled = orig.enabled;
         exported = orig.exported;
-        encryptionAware = directBootAware = orig.directBootAware;
+        directBootAware = orig.directBootAware;
     }
 
     /** @hide */
@@ -201,14 +196,9 @@ public class ComponentInfo extends PackageItemInfo {
 
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         super.writeToParcel(dest, parcelableFlags);
-        if ((parcelableFlags & Parcelable.PARCELABLE_ELIDE_DUPLICATES) != 0) {
-            dest.writeInt(0);
-        } else {
-            dest.writeInt(1);
-            applicationInfo.writeToParcel(dest, parcelableFlags);
-        }
-        dest.writeString(processName);
-        dest.writeString(splitName);
+        applicationInfo.writeToParcel(dest, parcelableFlags);
+        dest.writeString8(processName);
+        dest.writeString8(splitName);
         dest.writeInt(descriptionRes);
         dest.writeInt(enabled ? 1 : 0);
         dest.writeInt(exported ? 1 : 0);
@@ -217,16 +207,13 @@ public class ComponentInfo extends PackageItemInfo {
     
     protected ComponentInfo(Parcel source) {
         super(source);
-        final boolean hasApplicationInfo = (source.readInt() != 0);
-        if (hasApplicationInfo) {
-            applicationInfo = ApplicationInfo.CREATOR.createFromParcel(source);
-        }
-        processName = source.readString();
-        splitName = source.readString();
+        applicationInfo = ApplicationInfo.CREATOR.createFromParcel(source);
+        processName = source.readString8();
+        splitName = source.readString8();
         descriptionRes = source.readInt();
         enabled = (source.readInt() != 0);
         exported = (source.readInt() != 0);
-        encryptionAware = directBootAware = (source.readInt() != 0);
+        directBootAware = (source.readInt() != 0);
     }
 
     /**

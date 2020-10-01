@@ -20,8 +20,6 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import android.annotation.SystemApi.Client;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -43,6 +41,5 @@ import java.lang.annotation.Target;
  */
 @Retention(SOURCE)
 @Target({METHOD, PARAMETER, FIELD})
-@SystemApi(client = Client.MODULE_LIBRARIES)
 public @interface Nullable {
 }

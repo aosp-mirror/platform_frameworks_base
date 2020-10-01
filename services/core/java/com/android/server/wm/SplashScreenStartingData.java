@@ -52,9 +52,9 @@ class SplashScreenStartingData extends StartingData {
     }
 
     @Override
-    StartingSurface createStartingSurface(AppWindowToken atoken) {
-        return mService.mPolicy.addSplashScreen(atoken.token, mPkg, mTheme, mCompatInfo,
+    StartingSurface createStartingSurface(ActivityRecord activity) {
+        return mService.mPolicy.addSplashScreen(activity.token, mPkg, mTheme, mCompatInfo,
                 mNonLocalizedLabel, mLabelRes, mIcon, mLogo, mWindowFlags,
-                mMergedOverrideConfiguration, atoken.getDisplayContent().getDisplayId());
+                mMergedOverrideConfiguration, activity.getDisplayContent().getDisplayId());
     }
 }

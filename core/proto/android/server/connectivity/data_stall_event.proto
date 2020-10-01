@@ -32,6 +32,7 @@ enum ApBand {
     AP_BAND_UNKNOWN = 0;
     AP_BAND_2GHZ = 1;
     AP_BAND_5GHZ = 2;
+    AP_BAND_6GHZ = 3;
 }
 
 // Refer to definition in TelephonyManager.java.

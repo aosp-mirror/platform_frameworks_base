@@ -791,6 +791,10 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * Allows this receiver to select the alias for a private key and certificate pair for
      * authentication. If this method returns null, the default {@link android.app.Activity} will be
      * shown that lets the user pick a private key and certificate pair.
+     * If this method returns {@link KeyChain#KEY_ALIAS_SELECTION_DENIED},
+     * the default {@link android.app.Activity} will not be shown and the user will not be allowed
+     * to pick anything. And the app, that called {@link KeyChain#choosePrivateKeyAlias}, will
+     * receive {@code null} back.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
@@ -920,10 +924,10 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
-     * @param newUser The {@link UserHandle} of the user that has just been added.
+     * @param addedUser The {@link UserHandle} of the user that has just been added.
      */
     public void onUserAdded(@NonNull Context context, @NonNull Intent intent,
-            @NonNull UserHandle newUser) {
+            @NonNull UserHandle addedUser) {
     }
 
     /**

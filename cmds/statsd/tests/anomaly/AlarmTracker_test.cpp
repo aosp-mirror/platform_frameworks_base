@@ -15,12 +15,14 @@
 #include "src/anomaly/AlarmTracker.h"
 
 #include <gtest/gtest.h>
+#include <log/log_time.h>
 #include <stdio.h>
 #include <vector>
 
 using namespace testing;
 using android::sp;
 using std::set;
+using std::shared_ptr;
 using std::unordered_map;
 using std::vector;
 
@@ -34,8 +36,9 @@ const ConfigKey kConfigKey(0, 12345);
 
 TEST(AlarmTrackerTest, TestTriggerTimestamp) {
     sp<AlarmMonitor> subscriberAlarmMonitor =
-        new AlarmMonitor(100, [](const sp<IStatsCompanionService>&, int64_t){},
-                         [](const sp<IStatsCompanionService>&){});
+        new AlarmMonitor(100,
+                         [](const shared_ptr<IStatsCompanionService>&, int64_t){},
+                         [](const shared_ptr<IStatsCompanionService>&){});
     Alarm alarm;
     alarm.set_offset_millis(15 * MS_PER_SEC);
     alarm.set_period_millis(60 * 60 * MS_PER_SEC);  // 1hr
@@ -56,7 +59,7 @@ TEST(AlarmTrackerTest, TestTriggerTimestamp) {
     currentTimeSec = startMillis / MS_PER_SEC + 7000;
     nextAlarmTime = startMillis / MS_PER_SEC + 15 + 2 * 60 * 60;
     firedAlarmSet = subscriberAlarmMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
-    EXPECT_EQ(firedAlarmSet.size(), 1u);
+    ASSERT_EQ(firedAlarmSet.size(), 1u);
     tracker.informAlarmsFired(currentTimeSec * NS_PER_SEC, firedAlarmSet);
     EXPECT_TRUE(firedAlarmSet.empty());
     EXPECT_EQ(tracker.mAlarmSec, nextAlarmTime);

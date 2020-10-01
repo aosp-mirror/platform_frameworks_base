@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <android-base/unique_fd.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <stdio.h>
@@ -39,47 +40,19 @@ TEST(StorageManagerTest, TrainInfoReadWriteTest) {
 
     bool result;
 
-    result = StorageManager::writeTrainInfo(trainInfo.trainVersionCode, trainInfo.trainName,
-                                            trainInfo.status, trainInfo.experimentIds);
+    result = StorageManager::writeTrainInfo(trainInfo);
 
     EXPECT_TRUE(result);
 
     InstallTrainInfo trainInfoResult;
-    result = StorageManager::readTrainInfo(trainInfoResult);
+    result = StorageManager::readTrainInfo(trainInfo.trainName, trainInfoResult);
     EXPECT_TRUE(result);
 
     EXPECT_EQ(trainInfo.trainVersionCode, trainInfoResult.trainVersionCode);
-    EXPECT_EQ(trainInfo.trainName.size(), trainInfoResult.trainName.size());
+    ASSERT_EQ(trainInfo.trainName.size(), trainInfoResult.trainName.size());
     EXPECT_EQ(trainInfo.trainName, trainInfoResult.trainName);
     EXPECT_EQ(trainInfo.status, trainInfoResult.status);
-    EXPECT_EQ(trainInfo.experimentIds.size(), trainInfoResult.experimentIds.size());
-    EXPECT_EQ(trainInfo.experimentIds, trainInfoResult.experimentIds);
-}
-
-TEST(StorageManagerTest, TrainInfoReadWriteEmptyTrainNameTest) {
-    InstallTrainInfo trainInfo;
-    trainInfo.trainVersionCode = 12345;
-    trainInfo.trainName = "";
-    trainInfo.status = 1;
-    const char* expIds = "test_ids";
-    trainInfo.experimentIds.assign(expIds, expIds + strlen(expIds));
-
-    bool result;
-
-    result = StorageManager::writeTrainInfo(trainInfo.trainVersionCode, trainInfo.trainName,
-                                            trainInfo.status, trainInfo.experimentIds);
-
-    EXPECT_TRUE(result);
-
-    InstallTrainInfo trainInfoResult;
-    result = StorageManager::readTrainInfo(trainInfoResult);
-    EXPECT_TRUE(result);
-
-    EXPECT_EQ(trainInfo.trainVersionCode, trainInfoResult.trainVersionCode);
-    EXPECT_EQ(trainInfo.trainName.size(), trainInfoResult.trainName.size());
-    EXPECT_EQ(trainInfo.trainName, trainInfoResult.trainName);
-    EXPECT_EQ(trainInfo.status, trainInfoResult.status);
-    EXPECT_EQ(trainInfo.experimentIds.size(), trainInfoResult.experimentIds.size());
+    ASSERT_EQ(trainInfo.experimentIds.size(), trainInfoResult.experimentIds.size());
     EXPECT_EQ(trainInfo.experimentIds, trainInfoResult.experimentIds);
 }
 
@@ -93,20 +66,19 @@ TEST(StorageManagerTest, TrainInfoReadWriteTrainNameSizeOneTest) {
 
     bool result;
 
-    result = StorageManager::writeTrainInfo(trainInfo.trainVersionCode, trainInfo.trainName,
-                                            trainInfo.status, trainInfo.experimentIds);
+    result = StorageManager::writeTrainInfo(trainInfo);
 
     EXPECT_TRUE(result);
 
     InstallTrainInfo trainInfoResult;
-    result = StorageManager::readTrainInfo(trainInfoResult);
+    result = StorageManager::readTrainInfo(trainInfo.trainName, trainInfoResult);
     EXPECT_TRUE(result);
 
     EXPECT_EQ(trainInfo.trainVersionCode, trainInfoResult.trainVersionCode);
-    EXPECT_EQ(trainInfo.trainName.size(), trainInfoResult.trainName.size());
+    ASSERT_EQ(trainInfo.trainName.size(), trainInfoResult.trainName.size());
     EXPECT_EQ(trainInfo.trainName, trainInfoResult.trainName);
     EXPECT_EQ(trainInfo.status, trainInfoResult.status);
-    EXPECT_EQ(trainInfo.experimentIds.size(), trainInfoResult.experimentIds.size());
+    ASSERT_EQ(trainInfo.experimentIds.size(), trainInfoResult.experimentIds.size());
     EXPECT_EQ(trainInfo.experimentIds, trainInfoResult.experimentIds);
 }
 

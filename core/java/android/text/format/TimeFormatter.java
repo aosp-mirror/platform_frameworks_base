@@ -21,10 +21,10 @@
 package android.text.format;
 
 import android.content.res.Resources;
+import android.icu.text.DateFormatSymbols;
+import android.icu.text.DecimalFormatSymbols;
 
 import com.android.i18n.timezone.ZoneInfoData;
-
-import libcore.icu.LocaleData;
 
 import java.nio.CharBuffer;
 import java.time.Instant;
@@ -52,15 +52,17 @@ class TimeFormatter {
     private static final int DAYSPERNYEAR = 365;
 
     /**
-     * The Locale for which the cached LocaleData and formats have been loaded.
+     * The Locale for which the cached symbols and formats have been loaded.
      */
     private static Locale sLocale;
-    private static LocaleData sLocaleData;
+    private static DateFormatSymbols sDateFormatSymbols;
+    private static DecimalFormatSymbols sDecimalFormatSymbols;
     private static String sTimeOnlyFormat;
     private static String sDateOnlyFormat;
     private static String sDateTimeFormat;
 
-    private final LocaleData localeData;
+    private final DateFormatSymbols dateFormatSymbols;
+    private final DecimalFormatSymbols decimalFormatSymbols;
     private final String dateTimeFormat;
     private final String timeOnlyFormat;
     private final String dateOnlyFormat;
@@ -74,7 +76,8 @@ class TimeFormatter {
 
             if (sLocale == null || !(locale.equals(sLocale))) {
                 sLocale = locale;
-                sLocaleData = LocaleData.get(locale);
+                sDateFormatSymbols = DateFormat.getIcuDateFormatSymbols(locale);
+                sDecimalFormatSymbols = DecimalFormatSymbols.getInstance(locale);
 
                 Resources r = Resources.getSystem();
                 sTimeOnlyFormat = r.getString(com.android.internal.R.string.time_of_day);
@@ -82,10 +85,11 @@ class TimeFormatter {
                 sDateTimeFormat = r.getString(com.android.internal.R.string.date_and_time);
             }
 
+            this.dateFormatSymbols = sDateFormatSymbols;
+            this.decimalFormatSymbols = sDecimalFormatSymbols;
             this.dateTimeFormat = sDateTimeFormat;
             this.timeOnlyFormat = sTimeOnlyFormat;
             this.dateOnlyFormat = sDateOnlyFormat;
-            localeData = sLocaleData;
         }
     }
 
@@ -167,12 +171,12 @@ class TimeFormatter {
     }
 
     private String localizeDigits(String s) {
-        if (localeData.zeroDigit == '0') {
+        if (decimalFormatSymbols.getZeroDigit() == '0') {
             return s;
         }
 
         int length = s.length();
-        int offsetToLocalizedDigits = localeData.zeroDigit - '0';
+        int offsetToLocalizedDigits = decimalFormatSymbols.getZeroDigit() - '0';
         StringBuilder result = new StringBuilder(length);
         for (int i = 0; i < length; ++i) {
             char ch = s.charAt(i);
@@ -215,35 +219,44 @@ class TimeFormatter {
             char currentChar = formatBuffer.get(formatBuffer.position());
             switch (currentChar) {
                 case 'A':
-                    modifyAndAppend((wallTime.getWeekDay() < 0
-                                    || wallTime.getWeekDay() >= DAYSPERWEEK)
-                                    ? "?" : localeData.longWeekdayNames[wallTime.getWeekDay() + 1],
+                    modifyAndAppend(
+                        (wallTime.getWeekDay() < 0 || wallTime.getWeekDay() >= DAYSPERWEEK)
+                            ? "?"
+                            : dateFormatSymbols.getWeekdays(DateFormatSymbols.FORMAT,
+                                DateFormatSymbols.WIDE)[wallTime.getWeekDay() + 1],
                             modifier);
                     return false;
                 case 'a':
-                    modifyAndAppend((wallTime.getWeekDay() < 0
-                                    || wallTime.getWeekDay() >= DAYSPERWEEK)
-                                    ? "?" : localeData.shortWeekdayNames[wallTime.getWeekDay() + 1],
+                    modifyAndAppend(
+                        (wallTime.getWeekDay() < 0 || wallTime.getWeekDay() >= DAYSPERWEEK)
+                            ? "?"
+                            : dateFormatSymbols.getWeekdays(DateFormatSymbols.FORMAT,
+                                DateFormatSymbols.ABBREVIATED)[wallTime.getWeekDay() + 1],
                             modifier);
                     return false;
                 case 'B':
                     if (modifier == '-') {
-                        modifyAndAppend((wallTime.getMonth() < 0
-                                        || wallTime.getMonth() >= MONSPERYEAR)
-                                        ? "?"
-                                        : localeData.longStandAloneMonthNames[wallTime.getMonth()],
+                        modifyAndAppend(
+                            (wallTime.getMonth() < 0 || wallTime.getMonth() >= MONSPERYEAR)
+                                ? "?"
+                                : dateFormatSymbols.getMonths(DateFormatSymbols.STANDALONE,
+                                    DateFormatSymbols.WIDE)[wallTime.getMonth()],
                                 modifier);
                     } else {
-                        modifyAndAppend((wallTime.getMonth() < 0
-                                        || wallTime.getMonth() >= MONSPERYEAR)
-                                        ? "?" : localeData.longMonthNames[wallTime.getMonth()],
+                        modifyAndAppend(
+                            (wallTime.getMonth() < 0 || wallTime.getMonth() >= MONSPERYEAR)
+                                ? "?"
+                                : dateFormatSymbols.getMonths(DateFormatSymbols.FORMAT,
+                                    DateFormatSymbols.WIDE)[wallTime.getMonth()],
                                 modifier);
                     }
                     return false;
                 case 'b':
                 case 'h':
                     modifyAndAppend((wallTime.getMonth() < 0 || wallTime.getMonth() >= MONSPERYEAR)
-                                    ? "?" : localeData.shortMonthNames[wallTime.getMonth()],
+                            ? "?"
+                            : dateFormatSymbols.getMonths(DateFormatSymbols.FORMAT,
+                                DateFormatSymbols.ABBREVIATED)[wallTime.getMonth()],
                             modifier);
                     return false;
                 case 'C':
@@ -310,12 +323,14 @@ class TimeFormatter {
                     outputBuilder.append('\n');
                     return false;
                 case 'p':
-                    modifyAndAppend((wallTime.getHour() >= (HOURSPERDAY / 2)) ? localeData.amPm[1]
-                            : localeData.amPm[0], modifier);
+                    modifyAndAppend((wallTime.getHour() >= (HOURSPERDAY / 2))
+                            ? dateFormatSymbols.getAmPmStrings()[1]
+                            : dateFormatSymbols.getAmPmStrings()[0], modifier);
                     return false;
                 case 'P':
-                    modifyAndAppend((wallTime.getHour() >= (HOURSPERDAY / 2)) ? localeData.amPm[1]
-                            : localeData.amPm[0], FORCE_LOWER_CASE);
+                    modifyAndAppend((wallTime.getHour() >= (HOURSPERDAY / 2))
+                            ? dateFormatSymbols.getAmPmStrings()[1]
+                            : dateFormatSymbols.getAmPmStrings()[0], FORCE_LOWER_CASE);
                     return false;
                 case 'R':
                     formatInternal("%H:%M", wallTime, zoneInfoData);

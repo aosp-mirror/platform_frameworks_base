@@ -37,7 +37,9 @@ import java.util.Arrays;
  * agent or plugin, they can be either null, or an empty string, or any other don't-care
  * string value.
  *
+ * @deprecated Please use {@link android.media.MediaDrm}
  */
+@Deprecated
 public class DrmRights {
     private byte[] mData;
     private String mMimeType;

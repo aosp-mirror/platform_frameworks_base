@@ -1,0 +1,52 @@
+syntax = "proto2";
+
+package android_backup_crypto;
+
+option java_package = "com.android.server.backup.encryption.protos";
+option java_outer_classname = "WrappedKeyProto";
+
+// Metadata associated with a tertiary key.
+message KeyMetadata {
+  // Type of Cipher algorithm the key is used for.
+  enum Type {
+    UNKNOWN = 0;
+    // No padding. Uses 12-byte nonce. Tag length 16 bytes.
+    AES_256_GCM = 1;
+  }
+
+  // What kind of Cipher algorithm the key is used for. We assume at the moment
+  // that this will always be AES_256_GCM and throw if this is not the case.
+  // Provided here for forwards compatibility in case at some point we need to
+  // change Cipher algorithm.
+  optional Type type = 1;
+}
+
+// An encrypted tertiary key.
+message WrappedKey {
+  // The Cipher with which the key was encrypted.
+  enum WrapAlgorithm {
+    UNKNOWN = 0;
+    // No padding. Uses 16-byte nonce (see nonce field). Tag length 16 bytes.
+    // The nonce is 16-bytes as this is wrapped with a key in AndroidKeyStore.
+    // AndroidKeyStore requires that it generates the IV, and it generates a
+    // 16-byte IV for you. You CANNOT provide your own IV.
+    AES_256_GCM = 1;
+  }
+
+  // Cipher algorithm used to wrap the key. We assume at the moment that this
+  // is always AES_256_GC and throw if this is not the case. Provided here for
+  // forwards compatibility if at some point we need to change Cipher algorithm.
+  optional WrapAlgorithm wrap_algorithm = 1;
+
+  // The nonce used to initialize the Cipher in AES/256/GCM mode.
+  optional bytes nonce = 2;
+
+  // The encrypted bytes of the key material.
+  optional bytes key = 3;
+
+  // Associated key metadata.
+  optional KeyMetadata metadata = 4;
+
+  // Deprecated field; Do not use
+  reserved 5;
+}

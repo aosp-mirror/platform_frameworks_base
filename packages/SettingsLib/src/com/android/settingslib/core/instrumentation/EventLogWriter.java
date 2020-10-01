@@ -30,16 +30,22 @@ import com.android.internal.logging.nano.MetricsProto;
 public class EventLogWriter implements LogWriter {
 
     @Override
-    public void visible(Context context, int source, int category) {
+    public void visible(Context context, int source, int category, int latency) {
         final LogMaker logMaker = new LogMaker(category)
                 .setType(MetricsProto.MetricsEvent.TYPE_OPEN)
-                .addTaggedData(MetricsProto.MetricsEvent.FIELD_CONTEXT, source);
+                .addTaggedData(MetricsProto.MetricsEvent.FIELD_CONTEXT, source)
+                .addTaggedData(MetricsProto.MetricsEvent.FIELD_SETTINGS_PREFERENCE_CHANGE_INT_VALUE,
+                        latency);
         MetricsLogger.action(logMaker);
     }
 
     @Override
-    public void hidden(Context context, int category) {
-        MetricsLogger.hidden(context, category);
+    public void hidden(Context context, int category, int visibleTime) {
+        final LogMaker logMaker = new LogMaker(category)
+                .setType(MetricsProto.MetricsEvent.TYPE_CLOSE)
+                .addTaggedData(MetricsProto.MetricsEvent.FIELD_SETTINGS_PREFERENCE_CHANGE_INT_VALUE,
+                        visibleTime);
+        MetricsLogger.action(logMaker);
     }
 
     @Override

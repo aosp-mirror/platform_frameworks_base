@@ -1843,7 +1843,7 @@ public class ViewPager extends ViewGroup {
             case MotionEvent.ACTION_MOVE: {
                 /*
                  * mIsBeingDragged == false, otherwise the shortcut would have caught it. Check
-                 * whether the user has moved far enough from his original down touch.
+                 * whether the user has moved far enough from their original down touch.
                  */
 
                 /*

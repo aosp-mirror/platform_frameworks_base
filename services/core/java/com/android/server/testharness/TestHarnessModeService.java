@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.debug.AdbManagerInternal;
+import android.debug.AdbTransportType;
 import android.location.LocationManager;
 import android.os.BatteryManager;
 import android.os.Binder;
@@ -161,11 +162,19 @@ public class TestHarnessModeService extends SystemService {
     private void configureSettings() {
         ContentResolver cr = getContext().getContentResolver();
 
+        // Stop ADB before we enable it, otherwise on userdebug/eng builds, the keys won't have
+        // registered with adbd, and it will prompt the user to confirm the keys.
+        Settings.Global.putInt(cr, Settings.Global.ADB_ENABLED, 0);
+        AdbManagerInternal adbManager = LocalServices.getService(AdbManagerInternal.class);
+        if (adbManager.isAdbEnabled(AdbTransportType.USB)) {
+            adbManager.stopAdbdForTransport(AdbTransportType.USB);
+        }
+
         // Disable the TTL for ADB keys before enabling ADB
         Settings.Global.putLong(cr, Settings.Global.ADB_ALLOWED_CONNECTION_TIME, 0);
         Settings.Global.putInt(cr, Settings.Global.ADB_ENABLED, 1);
         Settings.Global.putInt(cr, Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 1);
-        Settings.Global.putInt(cr, Settings.Global.PACKAGE_VERIFIER_ENABLE, 0);
+        Settings.Global.putInt(cr, Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, 0);
         Settings.Global.putInt(
                 cr,
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
@@ -176,8 +185,12 @@ public class TestHarnessModeService extends SystemService {
     private void setUpAdbFiles(PersistentData persistentData) {
         AdbManagerInternal adbManager = LocalServices.getService(AdbManagerInternal.class);
 
-        writeBytesToFile(persistentData.mAdbKeys, adbManager.getAdbKeysFile().toPath());
-        writeBytesToFile(persistentData.mAdbTempKeys, adbManager.getAdbTempKeysFile().toPath());
+        if (adbManager.getAdbKeysFile() != null) {
+            writeBytesToFile(persistentData.mAdbKeys, adbManager.getAdbKeysFile().toPath());
+        }
+        if (adbManager.getAdbTempKeysFile() != null) {
+            writeBytesToFile(persistentData.mAdbTempKeys, adbManager.getAdbTempKeysFile().toPath());
+        }
     }
 
     private void configureUser() {
@@ -310,12 +323,6 @@ public class TestHarnessModeService extends SystemService {
             AdbManagerInternal adbManager = LocalServices.getService(AdbManagerInternal.class);
             File adbKeys = adbManager.getAdbKeysFile();
             File adbTempKeys = adbManager.getAdbTempKeysFile();
-            if (adbKeys == null && adbTempKeys == null) {
-                // This should only be accessible on eng builds that haven't yet set up ADB keys
-                getErrPrintWriter()
-                    .println("No ADB keys stored; not enabling test harness mode");
-                return 1;
-            }
 
             try {
                 byte[] adbKeysBytes = getBytesFromFile(adbKeys);

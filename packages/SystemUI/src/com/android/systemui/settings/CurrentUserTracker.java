@@ -21,8 +21,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.UserHandle;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +35,8 @@ public abstract class CurrentUserTracker {
 
     private Consumer<Integer> mCallback = this::onUserSwitched;
 
-    public CurrentUserTracker(Context context) {
-        this(UserReceiver.getInstance(context));
+    public CurrentUserTracker(BroadcastDispatcher broadcastDispatcher) {
+        this(UserReceiver.getInstance(broadcastDispatcher));
     }
 
     @VisibleForTesting
@@ -60,20 +62,20 @@ public abstract class CurrentUserTracker {
     static class UserReceiver extends BroadcastReceiver {
         private static UserReceiver sInstance;
 
-        private Context mAppContext;
         private boolean mReceiverRegistered;
         private int mCurrentUserId;
+        private final BroadcastDispatcher mBroadcastDispatcher;
 
         private List<Consumer<Integer>> mCallbacks = new ArrayList<>();
 
         @VisibleForTesting
-        UserReceiver(Context context) {
-            mAppContext = context.getApplicationContext();
+        UserReceiver(BroadcastDispatcher broadcastDispatcher) {
+            mBroadcastDispatcher = broadcastDispatcher;
         }
 
-        static UserReceiver getInstance(Context context) {
+        static UserReceiver getInstance(BroadcastDispatcher broadcastDispatcher) {
             if (sInstance == null) {
-                sInstance = new UserReceiver(context);
+                sInstance = new UserReceiver(broadcastDispatcher);
             }
             return sInstance;
         }
@@ -96,7 +98,8 @@ public abstract class CurrentUserTracker {
             if (!mReceiverRegistered) {
                 mCurrentUserId = ActivityManager.getCurrentUser();
                 IntentFilter filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
-                mAppContext.registerReceiver(this, filter);
+                mBroadcastDispatcher.registerReceiver(this, filter, null,
+                        UserHandle.ALL);
                 mReceiverRegistered = true;
             }
         }
@@ -105,7 +108,7 @@ public abstract class CurrentUserTracker {
             if (mCallbacks.contains(callback)) {
                 mCallbacks.remove(callback);
                 if (mCallbacks.size() == 0 && mReceiverRegistered) {
-                    mAppContext.unregisterReceiver(this);
+                    mBroadcastDispatcher.unregisterReceiver(this);
                     mReceiverRegistered = false;
                 }
             }

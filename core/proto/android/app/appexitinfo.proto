@@ -1,0 +1,47 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+option java_multiple_files = true;
+
+package android.app;
+
+import "frameworks/base/core/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/app/appexit_enums.proto";
+
+/**
+ * An android.app.ApplicationExitInfo object.
+ */
+message ApplicationExitInfoProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 pid = 1;
+    optional int32 real_uid = 2;
+    optional int32 package_uid = 3;
+    optional int32 defining_uid = 4;
+    optional string process_name = 5;
+    optional int32 connection_group = 6;
+    optional AppExitReasonCode reason = 7;
+    optional AppExitSubReasonCode sub_reason = 8;
+    optional int32 status = 9;
+    optional Importance importance = 10;
+    optional int64 pss = 11;
+    optional int64 rss = 12;
+    optional int64 timestamp = 13;
+    optional string description = 14 [(.android.privacy).dest = DEST_EXPLICIT];
+    optional bytes state = 15;
+    optional string trace_file = 16;
+}

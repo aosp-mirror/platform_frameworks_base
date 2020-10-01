@@ -85,9 +85,9 @@ const static TestData sTestDataSet[] = {
              outPath->rCubicTo(8.0, 8.0, 8.0, 8.0, 8.0, 8.0);
              outPath->cubicTo(16.0, 16.0, 9.0, 9.0, 9.0, 9.0);
              outPath->rCubicTo(0.0, 0.0, 9.0, 9.0, 9.0, 9.0);
-             outPath->arcTo(10.0, 10.0, 0.0, SkPath::kLarge_ArcSize, SkPath::kCW_Direction, 10.0,
+             outPath->arcTo(10.0, 10.0, 0.0, SkPath::kLarge_ArcSize, SkPathDirection::kCW, 10.0,
                             10.0);
-             outPath->arcTo(10.0, 10.0, 0.0, SkPath::kLarge_ArcSize, SkPath::kCW_Direction, 20.0,
+             outPath->arcTo(10.0, 10.0, 0.0, SkPath::kLarge_ArcSize, SkPathDirection::kCW, 20.0,
                             20.0);
          }},
 
@@ -159,7 +159,7 @@ const static TestData sTestDataSet[] = {
          },
          [](SkPath* outPath) {
              outPath->moveTo(300.0, 70.0);
-             outPath->arcTo(230.0, 230.0, 0.0, SkPath::kLarge_ArcSize, SkPath::kCCW_Direction,
+             outPath->arcTo(230.0, 230.0, 0.0, SkPath::kLarge_ArcSize, SkPathDirection::kCCW,
                             301.0, 70.0);
              outPath->close();
              outPath->moveTo(300.0, 70.0);
@@ -395,7 +395,7 @@ TEST(VectorDrawable, drawPathWithoutIncrementingShaderRefCount) {
     bitmap.allocN32Pixels(5, 5, false);
     SkCanvas canvas(bitmap);
 
-    sk_sp<SkShader> shader = SkShader::MakeColorShader(SK_ColorBLACK);
+    sk_sp<SkShader> shader = SkShaders::Color(SK_ColorBLACK);
     // Initial ref count is 1
     EXPECT_TRUE(shader->unique());
 

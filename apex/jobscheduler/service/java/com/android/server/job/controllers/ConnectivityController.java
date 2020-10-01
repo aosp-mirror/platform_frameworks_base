@@ -1,0 +1,702 @@
+/*
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License
+ */
+
+package com.android.server.job.controllers;
+
+import static android.net.NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
+
+import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
+
+import android.app.job.JobInfo;
+import android.net.ConnectivityManager;
+import android.net.ConnectivityManager.NetworkCallback;
+import android.net.INetworkPolicyListener;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.net.NetworkPolicyManager;
+import android.net.NetworkRequest;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.os.UserHandle;
+import android.text.format.DateUtils;
+import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.DataUnit;
+import android.util.Log;
+import android.util.Slog;
+import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.LocalServices;
+import com.android.server.job.JobSchedulerService;
+import com.android.server.job.JobSchedulerService.Constants;
+import com.android.server.job.StateControllerProto;
+import com.android.server.net.NetworkPolicyManagerInternal;
+
+import java.util.Objects;
+import java.util.function.Predicate;
+
+/**
+ * Handles changes in connectivity.
+ * <p>
+ * Each app can have a different default networks or different connectivity
+ * status due to user-requested network policies, so we need to check
+ * constraints on a per-UID basis.
+ *
+ * Test: atest com.android.server.job.controllers.ConnectivityControllerTest
+ */
+public final class ConnectivityController extends RestrictingController implements
+        ConnectivityManager.OnNetworkActiveListener {
+    private static final String TAG = "JobScheduler.Connectivity";
+    private static final boolean DEBUG = JobSchedulerService.DEBUG
+            || Log.isLoggable(TAG, Log.DEBUG);
+
+    private final ConnectivityManager mConnManager;
+    private final NetworkPolicyManager mNetPolicyManager;
+    private final NetworkPolicyManagerInternal mNetPolicyManagerInternal;
+
+    /** List of tracked jobs keyed by source UID. */
+    @GuardedBy("mLock")
+    private final SparseArray<ArraySet<JobStatus>> mTrackedJobs = new SparseArray<>();
+
+    /**
+     * Keep track of all the UID's jobs that the controller has requested that NetworkPolicyManager
+     * grant an exception to in the app standby chain.
+     */
+    @GuardedBy("mLock")
+    private final SparseArray<ArraySet<JobStatus>> mRequestedWhitelistJobs = new SparseArray<>();
+
+    /** List of currently available networks. */
+    @GuardedBy("mLock")
+    private final ArraySet<Network> mAvailableNetworks = new ArraySet<>();
+
+    private static final int MSG_DATA_SAVER_TOGGLED = 0;
+    private static final int MSG_UID_RULES_CHANGES = 1;
+    private static final int MSG_REEVALUATE_JOBS = 2;
+
+    private final Handler mHandler;
+
+    public ConnectivityController(JobSchedulerService service) {
+        super(service);
+        mHandler = new CcHandler(mContext.getMainLooper());
+
+        mConnManager = mContext.getSystemService(ConnectivityManager.class);
+        mNetPolicyManager = mContext.getSystemService(NetworkPolicyManager.class);
+        mNetPolicyManagerInternal = LocalServices.getService(NetworkPolicyManagerInternal.class);
+
+        // We're interested in all network changes; internally we match these
+        // network changes against the active network for each UID with jobs.
+        final NetworkRequest request = new NetworkRequest.Builder().clearCapabilities().build();
+        mConnManager.registerNetworkCallback(request, mNetworkCallback);
+
+        mNetPolicyManager.registerListener(mNetPolicyListener);
+    }
+
+    @GuardedBy("mLock")
+    @Override
+    public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
+        if (jobStatus.hasConnectivityConstraint()) {
+            updateConstraintsSatisfied(jobStatus);
+            ArraySet<JobStatus> jobs = mTrackedJobs.get(jobStatus.getSourceUid());
+            if (jobs == null) {
+                jobs = new ArraySet<>();
+                mTrackedJobs.put(jobStatus.getSourceUid(), jobs);
+            }
+            jobs.add(jobStatus);
+            jobStatus.setTrackingController(JobStatus.TRACKING_CONNECTIVITY);
+        }
+    }
+
+    @GuardedBy("mLock")
+    @Override
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
+            boolean forUpdate) {
+        if (jobStatus.clearTrackingController(JobStatus.TRACKING_CONNECTIVITY)) {
+            ArraySet<JobStatus> jobs = mTrackedJobs.get(jobStatus.getSourceUid());
+            if (jobs != null) {
+                jobs.remove(jobStatus);
+            }
+            maybeRevokeStandbyExceptionLocked(jobStatus);
+        }
+    }
+
+    @Override
+    public void startTrackingRestrictedJobLocked(JobStatus jobStatus) {
+        // Don't need to start tracking the job. If the job needed network, it would already be
+        // tracked.
+        if (jobStatus.hasConnectivityConstraint()) {
+            updateConstraintsSatisfied(jobStatus);
+        }
+    }
+
+    @Override
+    public void stopTrackingRestrictedJobLocked(JobStatus jobStatus) {
+        // Shouldn't stop tracking the job here. If the job was tracked, it still needs network,
+        // even after being unrestricted.
+        if (jobStatus.hasConnectivityConstraint()) {
+            updateConstraintsSatisfied(jobStatus);
+        }
+    }
+
+    /**
+     * Returns true if the job's requested network is available. This DOES NOT necessarily mean
+     * that the UID has been granted access to the network.
+     */
+    public boolean isNetworkAvailable(JobStatus job) {
+        synchronized (mLock) {
+            for (int i = 0; i < mAvailableNetworks.size(); ++i) {
+                final Network network = mAvailableNetworks.valueAt(i);
+                final NetworkCapabilities capabilities = mConnManager.getNetworkCapabilities(
+                        network);
+                final boolean satisfied = isSatisfied(job, network, capabilities, mConstants);
+                if (DEBUG) {
+                    Slog.v(TAG, "isNetworkAvailable(" + job + ") with network " + network
+                            + " and capabilities " + capabilities + ". Satisfied=" + satisfied);
+                }
+                if (satisfied) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Request that NetworkPolicyManager grant an exception to the uid from its standby policy
+     * chain.
+     */
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    void requestStandbyExceptionLocked(JobStatus job) {
+        final int uid = job.getSourceUid();
+        // Need to call this before adding the job.
+        final boolean isExceptionRequested = isStandbyExceptionRequestedLocked(uid);
+        ArraySet<JobStatus> jobs = mRequestedWhitelistJobs.get(uid);
+        if (jobs == null) {
+            jobs = new ArraySet<JobStatus>();
+            mRequestedWhitelistJobs.put(uid, jobs);
+        }
+        if (!jobs.add(job) || isExceptionRequested) {
+            if (DEBUG) {
+                Slog.i(TAG, "requestStandbyExceptionLocked found exception already requested.");
+            }
+            return;
+        }
+        if (DEBUG) Slog.i(TAG, "Requesting standby exception for UID: " + uid);
+        mNetPolicyManagerInternal.setAppIdleWhitelist(uid, true);
+    }
+
+    /** Returns whether a standby exception has been requested for the UID. */
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    boolean isStandbyExceptionRequestedLocked(final int uid) {
+        ArraySet jobs = mRequestedWhitelistJobs.get(uid);
+        return jobs != null && jobs.size() > 0;
+    }
+
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    boolean wouldBeReadyWithConnectivityLocked(JobStatus jobStatus) {
+        final boolean networkAvailable = isNetworkAvailable(jobStatus);
+        if (DEBUG) {
+            Slog.v(TAG, "wouldBeReadyWithConnectivityLocked: " + jobStatus.toShortString()
+                    + " networkAvailable=" + networkAvailable);
+        }
+        // If the network isn't available, then requesting an exception won't help.
+
+        return networkAvailable && wouldBeReadyWithConstraintLocked(jobStatus,
+                JobStatus.CONSTRAINT_CONNECTIVITY);
+    }
+
+    /**
+     * Tell NetworkPolicyManager not to block a UID's network connection if that's the only
+     * thing stopping a job from running.
+     */
+    @GuardedBy("mLock")
+    @Override
+    public void evaluateStateLocked(JobStatus jobStatus) {
+        if (!jobStatus.hasConnectivityConstraint()) {
+            return;
+        }
+
+        // Always check the full job readiness stat in case the component has been disabled.
+        if (wouldBeReadyWithConnectivityLocked(jobStatus)) {
+            if (DEBUG) {
+                Slog.i(TAG, "evaluateStateLocked finds job " + jobStatus + " would be ready.");
+            }
+            requestStandbyExceptionLocked(jobStatus);
+        } else {
+            if (DEBUG) {
+                Slog.i(TAG, "evaluateStateLocked finds job " + jobStatus + " would not be ready.");
+            }
+            maybeRevokeStandbyExceptionLocked(jobStatus);
+        }
+    }
+
+    @GuardedBy("mLock")
+    @Override
+    public void reevaluateStateLocked(final int uid) {
+        // Check if we still need a connectivity exception in case the JobService was disabled.
+        ArraySet<JobStatus> jobs = mTrackedJobs.get(uid);
+        if (jobs == null) {
+            return;
+        }
+        for (int i = jobs.size() - 1; i >= 0; i--) {
+            evaluateStateLocked(jobs.valueAt(i));
+        }
+    }
+
+    /** Cancel the requested standby exception if none of the jobs would be ready to run anyway. */
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    void maybeRevokeStandbyExceptionLocked(final JobStatus job) {
+        final int uid = job.getSourceUid();
+        if (!isStandbyExceptionRequestedLocked(uid)) {
+            return;
+        }
+        ArraySet<JobStatus> jobs = mRequestedWhitelistJobs.get(uid);
+        if (jobs == null) {
+            Slog.wtf(TAG,
+                    "maybeRevokeStandbyExceptionLocked found null jobs array even though a "
+                            + "standby exception has been requested.");
+            return;
+        }
+        if (!jobs.remove(job) || jobs.size() > 0) {
+            if (DEBUG) {
+                Slog.i(TAG,
+                        "maybeRevokeStandbyExceptionLocked not revoking because there are still "
+                                + jobs.size() + " jobs left.");
+            }
+            return;
+        }
+        // No more jobs that need an exception.
+        revokeStandbyExceptionLocked(uid);
+    }
+
+    /**
+     * Tell NetworkPolicyManager to revoke any exception it granted from its standby policy chain
+     * for the uid.
+     */
+    @GuardedBy("mLock")
+    private void revokeStandbyExceptionLocked(final int uid) {
+        if (DEBUG) Slog.i(TAG, "Revoking standby exception for UID: " + uid);
+        mNetPolicyManagerInternal.setAppIdleWhitelist(uid, false);
+        mRequestedWhitelistJobs.remove(uid);
+    }
+
+    @GuardedBy("mLock")
+    @Override
+    public void onAppRemovedLocked(String pkgName, int uid) {
+        mTrackedJobs.delete(uid);
+    }
+
+    /**
+     * Test to see if running the given job on the given network is insane.
+     * <p>
+     * For example, if a job is trying to send 10MB over a 128Kbps EDGE
+     * connection, it would take 10.4 minutes, and has no chance of succeeding
+     * before the job times out, so we'd be insane to try running it.
+     */
+    private boolean isInsane(JobStatus jobStatus, Network network,
+            NetworkCapabilities capabilities, Constants constants) {
+        final long maxJobExecutionTimeMs = mService.getMaxJobExecutionTimeMs(jobStatus);
+
+        final long downloadBytes = jobStatus.getEstimatedNetworkDownloadBytes();
+        if (downloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+            final long bandwidth = capabilities.getLinkDownstreamBandwidthKbps();
+            // If we don't know the bandwidth, all we can do is hope the job finishes in time.
+            if (bandwidth != LINK_BANDWIDTH_UNSPECIFIED) {
+                // Divide by 8 to convert bits to bytes.
+                final long estimatedMillis = ((downloadBytes * DateUtils.SECOND_IN_MILLIS)
+                        / (DataUnit.KIBIBYTES.toBytes(bandwidth) / 8));
+                if (estimatedMillis > maxJobExecutionTimeMs) {
+                    // If we'd never finish before the timeout, we'd be insane!
+                    Slog.w(TAG, "Estimated " + downloadBytes + " download bytes over " + bandwidth
+                            + " kbps network would take " + estimatedMillis + "ms and job has "
+                            + maxJobExecutionTimeMs + "ms to run; that's insane!");
+                    return true;
+                }
+            }
+        }
+
+        final long uploadBytes = jobStatus.getEstimatedNetworkUploadBytes();
+        if (uploadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+            final long bandwidth = capabilities.getLinkUpstreamBandwidthKbps();
+            // If we don't know the bandwidth, all we can do is hope the job finishes in time.
+            if (bandwidth != LINK_BANDWIDTH_UNSPECIFIED) {
+                // Divide by 8 to convert bits to bytes.
+                final long estimatedMillis = ((uploadBytes * DateUtils.SECOND_IN_MILLIS)
+                        / (DataUnit.KIBIBYTES.toBytes(bandwidth) / 8));
+                if (estimatedMillis > maxJobExecutionTimeMs) {
+                    // If we'd never finish before the timeout, we'd be insane!
+                    Slog.w(TAG, "Estimated " + uploadBytes + " upload bytes over " + bandwidth
+                            + " kbps network would take " + estimatedMillis + "ms and job has "
+                            + maxJobExecutionTimeMs + "ms to run; that's insane!");
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean isCongestionDelayed(JobStatus jobStatus, Network network,
+            NetworkCapabilities capabilities, Constants constants) {
+        // If network is congested, and job is less than 50% through the
+        // developer-requested window, then we're okay delaying the job.
+        if (!capabilities.hasCapability(NET_CAPABILITY_NOT_CONGESTED)) {
+            return jobStatus.getFractionRunTime() < constants.CONN_CONGESTION_DELAY_FRAC;
+        } else {
+            return false;
+        }
+    }
+
+    private static boolean isStrictSatisfied(JobStatus jobStatus, Network network,
+            NetworkCapabilities capabilities, Constants constants) {
+        final NetworkCapabilities required;
+        // A restricted job that's out of quota MUST use an unmetered network.
+        if (jobStatus.getEffectiveStandbyBucket() == RESTRICTED_INDEX
+                && !jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA)) {
+            required = new NetworkCapabilities(
+                    jobStatus.getJob().getRequiredNetwork().networkCapabilities)
+                    .addCapability(NET_CAPABILITY_NOT_METERED);
+        } else {
+            required = jobStatus.getJob().getRequiredNetwork().networkCapabilities;
+        }
+
+        return required.satisfiedByNetworkCapabilities(capabilities);
+    }
+
+    private static boolean isRelaxedSatisfied(JobStatus jobStatus, Network network,
+            NetworkCapabilities capabilities, Constants constants) {
+        // Only consider doing this for unrestricted prefetching jobs
+        if (!jobStatus.getJob().isPrefetch() || jobStatus.getStandbyBucket() == RESTRICTED_INDEX) {
+            return false;
+        }
+
+        // See if we match after relaxing any unmetered request
+        final NetworkCapabilities relaxed = new NetworkCapabilities(
+                jobStatus.getJob().getRequiredNetwork().networkCapabilities)
+                        .removeCapability(NET_CAPABILITY_NOT_METERED);
+        if (relaxed.satisfiedByNetworkCapabilities(capabilities)) {
+            // TODO: treat this as "maybe" response; need to check quotas
+            return jobStatus.getFractionRunTime() > constants.CONN_PREFETCH_RELAX_FRAC;
+        } else {
+            return false;
+        }
+    }
+
+    @VisibleForTesting
+    boolean isSatisfied(JobStatus jobStatus, Network network,
+            NetworkCapabilities capabilities, Constants constants) {
+        // Zeroth, we gotta have a network to think about being satisfied
+        if (network == null || capabilities == null) return false;
+
+        // First, are we insane?
+        if (isInsane(jobStatus, network, capabilities, constants)) return false;
+
+        // Second, is the network congested?
+        if (isCongestionDelayed(jobStatus, network, capabilities, constants)) return false;
+
+        // Third, is the network a strict match?
+        if (isStrictSatisfied(jobStatus, network, capabilities, constants)) return true;
+
+        // Third, is the network a relaxed match?
+        if (isRelaxedSatisfied(jobStatus, network, capabilities, constants)) return true;
+
+        return false;
+    }
+
+    private boolean updateConstraintsSatisfied(JobStatus jobStatus) {
+        final Network network = mConnManager.getActiveNetworkForUid(jobStatus.getSourceUid());
+        final NetworkCapabilities capabilities = mConnManager.getNetworkCapabilities(network);
+        return updateConstraintsSatisfied(jobStatus, network, capabilities);
+    }
+
+    private boolean updateConstraintsSatisfied(JobStatus jobStatus, Network network,
+            NetworkCapabilities capabilities) {
+        // TODO: consider matching against non-active networks
+
+        final boolean ignoreBlocked = (jobStatus.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
+        final NetworkInfo info = mConnManager.getNetworkInfoForUid(network,
+                jobStatus.getSourceUid(), ignoreBlocked);
+
+        final boolean connected = (info != null) && info.isConnected();
+        final boolean satisfied = isSatisfied(jobStatus, network, capabilities, mConstants);
+
+        final boolean changed = jobStatus
+                .setConnectivityConstraintSatisfied(connected && satisfied);
+
+        // Pass along the evaluated network for job to use; prevents race
+        // conditions as default routes change over time, and opens the door to
+        // using non-default routes.
+        jobStatus.network = network;
+
+        if (DEBUG) {
+            Slog.i(TAG, "Connectivity " + (changed ? "CHANGED" : "unchanged")
+                    + " for " + jobStatus + ": connected=" + connected
+                    + " satisfied=" + satisfied);
+        }
+        return changed;
+    }
+
+    /**
+     * Update any jobs tracked by this controller that match given filters.
+     *
+     * @param filterUid     only update jobs belonging to this UID, or {@code -1} to
+     *                      update all tracked jobs.
+     * @param filterNetwork only update jobs that would use this
+     *                      {@link Network}, or {@code null} to update all tracked jobs.
+     */
+    private void updateTrackedJobs(int filterUid, Network filterNetwork) {
+        synchronized (mLock) {
+            // Since this is a really hot codepath, temporarily cache any
+            // answers that we get from ConnectivityManager.
+            final ArrayMap<Network, NetworkCapabilities> networkToCapabilities = new ArrayMap<>();
+
+            boolean changed = false;
+            if (filterUid == -1) {
+                for (int i = mTrackedJobs.size() - 1; i >= 0; i--) {
+                    changed |= updateTrackedJobsLocked(mTrackedJobs.valueAt(i),
+                            filterNetwork, networkToCapabilities);
+                }
+            } else {
+                changed = updateTrackedJobsLocked(mTrackedJobs.get(filterUid),
+                        filterNetwork, networkToCapabilities);
+            }
+            if (changed) {
+                mStateChangedListener.onControllerStateChanged();
+            }
+        }
+    }
+
+    private boolean updateTrackedJobsLocked(ArraySet<JobStatus> jobs, Network filterNetwork,
+            ArrayMap<Network, NetworkCapabilities> networkToCapabilities) {
+        if (jobs == null || jobs.size() == 0) {
+            return false;
+        }
+
+        final Network network = mConnManager.getActiveNetworkForUid(jobs.valueAt(0).getSourceUid());
+        NetworkCapabilities capabilities = networkToCapabilities.get(network);
+        if (capabilities == null) {
+            capabilities = mConnManager.getNetworkCapabilities(network);
+            networkToCapabilities.put(network, capabilities);
+        }
+        final boolean networkMatch = (filterNetwork == null
+                || Objects.equals(filterNetwork, network));
+
+        boolean changed = false;
+        for (int i = jobs.size() - 1; i >= 0; i--) {
+            final JobStatus js = jobs.valueAt(i);
+
+            // Update either when we have a network match, or when the
+            // job hasn't yet been evaluated against the currently
+            // active network; typically when we just lost a network.
+            if (networkMatch || !Objects.equals(js.network, network)) {
+                changed |= updateConstraintsSatisfied(js, network, capabilities);
+            }
+        }
+        return changed;
+    }
+
+    /**
+     * We know the network has just come up. We want to run any jobs that are ready.
+     */
+    @Override
+    public void onNetworkActive() {
+        synchronized (mLock) {
+            for (int i = mTrackedJobs.size()-1; i >= 0; i--) {
+                final ArraySet<JobStatus> jobs = mTrackedJobs.valueAt(i);
+                for (int j = jobs.size() - 1; j >= 0; j--) {
+                    final JobStatus js = jobs.valueAt(j);
+                    if (js.isReady()) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "Running " + js + " due to network activity.");
+                        }
+                        mStateChangedListener.onRunJobNow(js);
+                    }
+                }
+            }
+        }
+    }
+
+    private final NetworkCallback mNetworkCallback = new NetworkCallback() {
+        @Override
+        public void onAvailable(Network network) {
+            if (DEBUG) Slog.v(TAG, "onAvailable: " + network);
+            synchronized (mLock) {
+                mAvailableNetworks.add(network);
+            }
+        }
+
+        @Override
+        public void onCapabilitiesChanged(Network network, NetworkCapabilities capabilities) {
+            if (DEBUG) {
+                Slog.v(TAG, "onCapabilitiesChanged: " + network);
+            }
+            updateTrackedJobs(-1, network);
+        }
+
+        @Override
+        public void onLost(Network network) {
+            if (DEBUG) {
+                Slog.v(TAG, "onLost: " + network);
+            }
+            synchronized (mLock) {
+                mAvailableNetworks.remove(network);
+            }
+            updateTrackedJobs(-1, network);
+        }
+    };
+
+    private final INetworkPolicyListener mNetPolicyListener = new NetworkPolicyManager.Listener() {
+        @Override
+        public void onRestrictBackgroundChanged(boolean restrictBackground) {
+            if (DEBUG) {
+                Slog.v(TAG, "onRestrictBackgroundChanged: " + restrictBackground);
+            }
+            mHandler.obtainMessage(MSG_DATA_SAVER_TOGGLED).sendToTarget();
+        }
+
+        @Override
+        public void onUidRulesChanged(int uid, int uidRules) {
+            if (DEBUG) {
+                Slog.v(TAG, "onUidRulesChanged: " + uid);
+            }
+            mHandler.obtainMessage(MSG_UID_RULES_CHANGES, uid, 0).sendToTarget();
+        }
+    };
+
+    private class CcHandler extends Handler {
+        CcHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            synchronized (mLock) {
+                switch (msg.what) {
+                    case MSG_DATA_SAVER_TOGGLED:
+                        updateTrackedJobs(-1, null);
+                        break;
+                    case MSG_UID_RULES_CHANGES:
+                        updateTrackedJobs(msg.arg1, null);
+                        break;
+                    case MSG_REEVALUATE_JOBS:
+                        updateTrackedJobs(-1, null);
+                        break;
+                }
+            }
+        }
+    };
+
+    @GuardedBy("mLock")
+    @Override
+    public void dumpControllerStateLocked(IndentingPrintWriter pw,
+            Predicate<JobStatus> predicate) {
+
+        if (mRequestedWhitelistJobs.size() > 0) {
+            pw.print("Requested standby exceptions:");
+            for (int i = 0; i < mRequestedWhitelistJobs.size(); i++) {
+                pw.print(" ");
+                pw.print(mRequestedWhitelistJobs.keyAt(i));
+                pw.print(" (");
+                pw.print(mRequestedWhitelistJobs.valueAt(i).size());
+                pw.print(" jobs)");
+            }
+            pw.println();
+        }
+        if (mAvailableNetworks.size() > 0) {
+            pw.println("Available networks:");
+            pw.increaseIndent();
+            for (int i = 0; i < mAvailableNetworks.size(); i++) {
+                pw.println(mAvailableNetworks.valueAt(i));
+            }
+            pw.decreaseIndent();
+        } else {
+            pw.println("No available networks");
+        }
+        for (int i = 0; i < mTrackedJobs.size(); i++) {
+            final ArraySet<JobStatus> jobs = mTrackedJobs.valueAt(i);
+            for (int j = 0; j < jobs.size(); j++) {
+                final JobStatus js = jobs.valueAt(j);
+                if (!predicate.test(js)) {
+                    continue;
+                }
+                pw.print("#");
+                js.printUniqueId(pw);
+                pw.print(" from ");
+                UserHandle.formatUid(pw, js.getSourceUid());
+                pw.print(": ");
+                pw.print(js.getJob().getRequiredNetwork());
+                pw.println();
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    @Override
+    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId,
+            Predicate<JobStatus> predicate) {
+        final long token = proto.start(fieldId);
+        final long mToken = proto.start(StateControllerProto.CONNECTIVITY);
+
+        for (int i = 0; i < mRequestedWhitelistJobs.size(); i++) {
+            proto.write(
+                    StateControllerProto.ConnectivityController.REQUESTED_STANDBY_EXCEPTION_UIDS,
+                    mRequestedWhitelistJobs.keyAt(i));
+        }
+        for (int i = 0; i < mAvailableNetworks.size(); i++) {
+            Network network = mAvailableNetworks.valueAt(i);
+            if (network != null) {
+                network.dumpDebug(proto,
+                        StateControllerProto.ConnectivityController.AVAILABLE_NETWORKS);
+            }
+        }
+        for (int i = 0; i < mTrackedJobs.size(); i++) {
+            final ArraySet<JobStatus> jobs = mTrackedJobs.valueAt(i);
+            for (int j = 0; j < jobs.size(); j++) {
+                final JobStatus js = jobs.valueAt(j);
+                if (!predicate.test(js)) {
+                    continue;
+                }
+                final long jsToken = proto.start(
+                        StateControllerProto.ConnectivityController.TRACKED_JOBS);
+                js.writeToShortProto(proto,
+                        StateControllerProto.ConnectivityController.TrackedJob.INFO);
+                proto.write(StateControllerProto.ConnectivityController.TrackedJob.SOURCE_UID,
+                        js.getSourceUid());
+                NetworkRequest rn = js.getJob().getRequiredNetwork();
+                if (rn != null) {
+                    rn.dumpDebug(proto,
+                            StateControllerProto.ConnectivityController.TrackedJob
+                                    .REQUIRED_NETWORK);
+                }
+                proto.end(jsToken);
+            }
+        }
+
+        proto.end(mToken);
+        proto.end(token);
+    }
+}

@@ -34,6 +34,7 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import android.content.Context;
 import android.os.Handler;
 import android.os.IPowerManager;
+import android.os.IThermalService;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
@@ -44,6 +45,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.accessibility.KeyEventDispatcher.KeyEventFilter;
+import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.policy.WindowManagerPolicy;
 
 import org.hamcrest.Description;
@@ -72,6 +74,7 @@ public class KeyEventDispatcherTest {
     private KeyEventFilter mKeyEventFilter1;
     private KeyEventFilter mKeyEventFilter2;
     private IPowerManager mMockPowerManagerService;
+    private IThermalService mMockThermalService;
     private MessageCapturingHandler mMessageCapturingHandler;
     private ArgumentCaptor<Integer> mFilter1SequenceCaptor = ArgumentCaptor.forClass(Integer.class);
     private ArgumentCaptor<Integer> mFilter2SequenceCaptor = ArgumentCaptor.forClass(Integer.class);
@@ -81,10 +84,12 @@ public class KeyEventDispatcherTest {
         Looper looper = InstrumentationRegistry.getContext().getMainLooper();
         mInputEventsHandler = new MessageCapturingHandler(looper, null);
         mMockPowerManagerService = mock(IPowerManager.class);
+        mMockThermalService = mock(IThermalService.class);
         // TODO: It would be better to mock PowerManager rather than its binder, but the class is
         // final.
         PowerManager powerManager =
-                new PowerManager(mock(Context.class), mMockPowerManagerService, new Handler(looper));
+                new PowerManager(mock(Context.class), mMockPowerManagerService, mMockThermalService,
+                        new Handler(looper));
         mMessageCapturingHandler = new MessageCapturingHandler(looper, null);
         mKeyEventDispatcher = new KeyEventDispatcher(mInputEventsHandler, SEND_FRAMEWORK_KEY_EVENT,
                 mLock, powerManager, mMessageCapturingHandler);

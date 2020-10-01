@@ -16,42 +16,48 @@
 
 #pragma once
 
-#include <android/os/IStatsCompanionService.h>
-#include <android/os/IStatsPullerCallback.h>
-#include <binder/IServiceManager.h>
+#include <aidl/android/os/IPullAtomCallback.h>
+#include <aidl/android/os/IStatsCompanionService.h>
 #include <utils/RefBase.h>
-#include <utils/threads.h>
+
 #include <list>
-#include <string>
-#include <unordered_map>
 #include <vector>
+
 #include "PullDataReceiver.h"
+#include "PullUidProvider.h"
 #include "StatsPuller.h"
 #include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
+#include "packages/UidMap.h"
+
+using aidl::android::os::IPullAtomCallback;
+using aidl::android::os::IStatsCompanionService;
+using std::shared_ptr;
 
 namespace android {
 namespace os {
 namespace statsd {
 
-typedef struct {
-    // The field numbers of the fields that need to be summed when merging
-    // isolated uid with host uid.
-    std::vector<int> additiveFields;
-    // Minimum time before this puller does actual pull again.
-    // Pullers can cause significant impact to system health and battery.
-    // So that we don't pull too frequently.
-    // If a pull request comes before cooldown, a cached version from previous pull
-    // will be returned.
-    int64_t coolDownNs = 1 * NS_PER_SEC;
-    // The actual puller
-    sp<StatsPuller> puller;
-    // Max time allowed to pull this atom.
-    // We cannot reliably kill a pull thread. So we don't terminate the puller.
-    // The data is discarded if the pull takes longer than this and mHasGoodData
-    // marked as false.
-    int64_t pullTimeoutNs = StatsdStats::kPullMaxDelayNs;
-} PullAtomInfo;
+typedef struct PullerKey {
+    // The uid of the process that registers this puller.
+    const int uid = -1;
+    // The atom that this puller is for.
+    const int atomTag;
+
+    bool operator<(const PullerKey& that) const {
+        if (uid < that.uid) {
+            return true;
+        }
+        if (uid > that.uid) {
+            return false;
+        }
+        return atomTag < that.atomTag;
+    };
+
+    bool operator==(const PullerKey& that) const {
+        return uid == that.uid && atomTag == that.atomTag;
+    };
+} PullerKey;
 
 class StatsPullerManager : public virtual RefBase {
 public:
@@ -60,13 +66,24 @@ public:
     virtual ~StatsPullerManager() {
     }
 
+
     // Registers a receiver for tagId. It will be pulled on the nextPullTimeNs
     // and then every intervalNs thereafter.
-    virtual void RegisterReceiver(int tagId, wp<PullDataReceiver> receiver, int64_t nextPullTimeNs,
+    virtual void RegisterReceiver(int tagId, const ConfigKey& configKey,
+                                  wp<PullDataReceiver> receiver, int64_t nextPullTimeNs,
                                   int64_t intervalNs);
 
     // Stop listening on a tagId.
-    virtual void UnRegisterReceiver(int tagId, wp<PullDataReceiver> receiver);
+    virtual void UnRegisterReceiver(int tagId, const ConfigKey& configKey,
+                                    wp<PullDataReceiver> receiver);
+
+    // Registers a pull uid provider for the config key. When pulling atoms, it will be used to
+    // determine which uids to pull from.
+    virtual void RegisterPullUidProvider(const ConfigKey& configKey, wp<PullUidProvider> provider);
+
+    // Unregister a pull uid provider.
+    virtual void UnregisterPullUidProvider(const ConfigKey& configKey,
+                                           wp<PullUidProvider> provider);
 
     // Verify if we know how to pull for this matcher
     bool PullerForMatcherExists(int tagId) const;
@@ -80,9 +97,16 @@ public:
     // Returns false when
     //   1) the pull fails
     //   2) pull takes longer than mPullTimeoutNs (intrinsic to puller)
+    //   3) Either a PullUidProvider was not registered for the config, or the there was no puller
+    //      registered for any of the uids for this atom.
     // If the metric wants to make any change to the data, like timestamps, they
     // should make a copy as this data may be shared with multiple metrics.
-    virtual bool Pull(int tagId, vector<std::shared_ptr<LogEvent>>* data);
+    virtual bool Pull(int tagId, const ConfigKey& configKey, const int64_t eventTimeNs,
+                      vector<std::shared_ptr<LogEvent>>* data, bool useUids = true);
+
+    // Same as above, but directly specify the allowed uids to pull from.
+    virtual bool Pull(int tagId, const vector<int32_t>& uids, const int64_t eventTimeNs,
+                      vector<std::shared_ptr<LogEvent>>* data, bool useUids = true);
 
     // Clear pull data cache immediately.
     int ForceClearPullerCache();
@@ -90,17 +114,31 @@ public:
     // Clear pull data cache if it is beyond respective cool down time.
     int ClearPullerCacheIfNecessary(int64_t timestampNs);
 
-    void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService);
+    void SetStatsCompanionService(shared_ptr<IStatsCompanionService> statsCompanionService);
 
-    void RegisterPullerCallback(int32_t atomTag,
-                                const sp<IStatsPullerCallback>& callback);
+    void RegisterPullAtomCallback(const int uid, const int32_t atomTag, const int64_t coolDownNs,
+                                  const int64_t timeoutNs, const vector<int32_t>& additiveFields,
+                                  const shared_ptr<IPullAtomCallback>& callback,
+                                  bool useUid = true);
 
-    void UnregisterPullerCallback(int32_t atomTag);
+    void UnregisterPullAtomCallback(const int uid, const int32_t atomTag, bool useUids = true);
 
-    static std::map<int, PullAtomInfo> kAllPullAtomInfo;
+    std::map<const PullerKey, sp<StatsPuller>> kAllPullAtomInfo;
 
 private:
-    sp<IStatsCompanionService> mStatsCompanionService = nullptr;
+    const static int64_t kMinCoolDownNs = NS_PER_SEC;
+    const static int64_t kMaxTimeoutNs = 10 * NS_PER_SEC;
+    shared_ptr<IStatsCompanionService> mStatsCompanionService = nullptr;
+
+    // A struct containing an atom id and a Config Key
+    typedef struct ReceiverKey {
+        const int atomTag;
+        const ConfigKey configKey;
+
+        inline bool operator<(const ReceiverKey& that) const {
+            return atomTag == that.atomTag ? configKey < that.configKey : atomTag < that.atomTag;
+        }
+    } ReceiverKey;
 
     typedef struct {
         int64_t nextPullTimeNs;
@@ -108,15 +146,33 @@ private:
         wp<PullDataReceiver> receiver;
     } ReceiverInfo;
 
-    // mapping from simple matcher tagId to receivers
-    std::map<int, std::list<ReceiverInfo>> mReceivers;
+    // mapping from Receiver Key to receivers
+    std::map<ReceiverKey, std::list<ReceiverInfo>> mReceivers;
+
+    // mapping from Config Key to the PullUidProvider for that config
+    std::map<ConfigKey, wp<PullUidProvider>> mPullUidProviders;
+
+    bool PullLocked(int tagId, const ConfigKey& configKey, const int64_t eventTimeNs,
+                    vector<std::shared_ptr<LogEvent>>* data, bool useUids = true);
+
+    bool PullLocked(int tagId, const vector<int32_t>& uids, const int64_t eventTimeNs,
+                    vector<std::shared_ptr<LogEvent>>* data, bool useUids);
 
     // locks for data receiver and StatsCompanionService changes
-    Mutex mLock;
+    std::mutex mLock;
 
     void updateAlarmLocked();
 
     int64_t mNextPullTimeNs;
+
+    // Death recipient that is triggered when the process holding the IPullAtomCallback has died.
+    ::ndk::ScopedAIBinder_DeathRecipient mPullAtomCallbackDeathRecipient;
+
+    /**
+     * Death recipient callback that is called when a pull atom callback dies.
+     * The cookie is a pointer to a PullAtomCallbackDeathCookie.
+     */
+    static void pullAtomCallbackDied(void* cookie);
 
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents);
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm);
@@ -125,6 +181,8 @@ private:
     FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents);
     FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm);
     FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_WithActivation);
+
+    FRIEND_TEST(StatsLogProcessorTest, TestPullUidProviderSetOnConfigUpdate);
 };
 
 }  // namespace statsd

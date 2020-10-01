@@ -25,6 +25,9 @@
 #include <SkColorSpace.h>
 #include <SkImageInfo.h>
 
+struct ANativeWindow_Buffer;
+struct AHardwareBuffer_Desc;
+
 namespace android {
 namespace uirenderer {
 namespace Color {
@@ -89,10 +92,34 @@ static constexpr float EOCF_sRGB(float srgb) {
     return srgb <= 0.04045f ? srgb / 12.92f : powf((srgb + 0.055f) / 1.055f, 2.4f);
 }
 
+#ifdef __ANDROID__ // Layoutlib does not support hardware buffers or native windows
+ANDROID_API SkImageInfo ANativeWindowToImageInfo(const ANativeWindow_Buffer& buffer,
+                                                 sk_sp<SkColorSpace> colorSpace);
+
+SkImageInfo BufferDescriptionToImageInfo(const AHardwareBuffer_Desc& bufferDesc,
+                                         sk_sp<SkColorSpace> colorSpace);
+#endif
+
 android::PixelFormat ColorTypeToPixelFormat(SkColorType colorType);
 ANDROID_API SkColorType PixelFormatToColorType(android::PixelFormat format);
 
 ANDROID_API sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace);
+
+/**
+ * Return the android_dataspace corresponding to colorSpace.
+ *
+ * Note: This currently only returns android_dataspaces with corresponding
+ * ADataSpaces. The NDK relies on this, so if you need to update it to return
+ * an android_dataspace *without* an ADataSpace, the NDK methods need to be
+ * updated.
+ *
+ * @param colorSpace May be null, in which case this will return
+ *                   HAL_DATASPACE_UNKNOWN.
+ * @param colorType Some SkColorSpaces are associated with more than one
+ *                  android_dataspace. In that case, the SkColorType is used to
+ *                  determine which one to return.
+ */
+ANDROID_API android_dataspace ColorSpaceToADataSpace(SkColorSpace*, SkColorType);
 
 struct Lab {
     float L;

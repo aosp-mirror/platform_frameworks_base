@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.UriGrantsManager;
 import android.content.ClipData;

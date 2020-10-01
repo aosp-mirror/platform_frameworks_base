@@ -22,11 +22,10 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A {@link KeyChainSnapshot} is protected with a key derived from the user's lock screen. This
@@ -220,8 +219,8 @@ public final class KeyChainProtectionParams implements Parcelable {
             if (mInstance.mUserSecretType == null) {
                 mInstance.mUserSecretType = TYPE_LOCKSCREEN;
             }
-            Preconditions.checkNotNull(mInstance.mLockScreenUiFormat);
-            Preconditions.checkNotNull(mInstance.mKeyDerivationParams);
+            Objects.requireNonNull(mInstance.mLockScreenUiFormat);
+            Objects.requireNonNull(mInstance.mKeyDerivationParams);
             if (mInstance.mSecret == null) {
                 mInstance.mSecret = new byte[]{};
             }

@@ -24,6 +24,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
+import android.annotation.RawRes;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -36,6 +37,7 @@ import android.content.pm.ResolveInfo;
 import android.os.UserHandle;
 import android.test.AndroidTestCase;
 
+import java.io.InputStream;
 import java.util.List;
 
 public abstract class DpmTestBase extends AndroidTestCase {
@@ -79,6 +81,23 @@ public abstract class DpmTestBase extends AndroidTestCase {
 
     public MockSystemServices getServices() {
         return mServices;
+    }
+
+    protected void sendBroadcastWithUser(DevicePolicyManagerServiceTestable dpms, String action,
+            int userHandle) throws Exception {
+        final Intent intent = new Intent(action);
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, userHandle);
+        getServices().injectBroadcast(getContext(), intent, userHandle);
+        flushTasks(dpms);
+    }
+
+    protected void flushTasks(DevicePolicyManagerServiceTestable dpms) throws Exception {
+        dpms.mHandler.runWithScissors(() -> { }, 0 /*now*/);
+        dpms.mBackgroundHandler.runWithScissors(() -> { }, 0 /*now*/);
+
+        // We can't let exceptions happen on the background thread. Throw them here if they happen
+        // so they still cause the test to fail despite being suppressed.
+        getServices().rethrowBackgroundBroadcastExceptions();
     }
 
     protected interface DpmRunnable {
@@ -178,7 +197,7 @@ public abstract class DpmTestBase extends AndroidTestCase {
      * @param copyFromAdmin package information for {@code admin} will be built based on this
      *    component's information.
      */
-    private void setUpPackageManagerForFakeAdmin(ComponentName admin, int packageUid,
+    protected void setUpPackageManagerForFakeAdmin(ComponentName admin, int packageUid,
             Integer enabledSetting, Integer appTargetSdk, ComponentName copyFromAdmin)
             throws Exception {
 
@@ -255,5 +274,9 @@ public abstract class DpmTestBase extends AndroidTestCase {
                 anyString(), anyLong())).thenAnswer(
                 invocation -> invocation.getArguments()[1]
         );
+    }
+
+    protected InputStream getRawStream(@RawRes int id) {
+        return mRealTestContext.getResources().openRawResource(id);
     }
 }

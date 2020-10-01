@@ -51,7 +51,7 @@ interface IContentService {
      *     hold the INTERACT_ACROSS_USERS_FULL permission.  Pseudousers USER_ALL
      *     USER_CURRENT are properly interpreted.
      */
-    void notifyChange(in Uri uri, IContentObserver observer,
+    void notifyChange(in Uri[] uris, IContentObserver observer,
             boolean observerWantsSelfNotifications, int flags,
             int userHandle, int targetSdkVersion, String callingPackage);
 

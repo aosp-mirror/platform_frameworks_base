@@ -20,9 +20,5 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources>
-
-    <!-- Whether QuickSettings is in a phone landscape -->
-    <bool name="quick_settings_wide">true</bool>
-
-    <integer name="quick_settings_num_columns">4</integer>
+    <integer name="quick_settings_num_columns">6</integer>
 </resources>

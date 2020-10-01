@@ -25,11 +25,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * This class represents events that are sent by components to the {@link TextClassifier} to report
@@ -86,11 +86,13 @@ public abstract class TextClassifierEvent implements Parcelable {
             TYPE_ACTIONS_SHOWN, TYPE_LINK_CLICKED, TYPE_OVERTYPE, TYPE_COPY_ACTION,
             TYPE_PASTE_ACTION, TYPE_CUT_ACTION, TYPE_SHARE_ACTION, TYPE_SMART_ACTION,
             TYPE_SELECTION_DRAG, TYPE_SELECTION_DESTROYED, TYPE_OTHER_ACTION, TYPE_SELECT_ALL,
-            TYPE_SELECTION_RESET, TYPE_MANUAL_REPLY, TYPE_ACTIONS_GENERATED})
+            TYPE_SELECTION_RESET, TYPE_MANUAL_REPLY, TYPE_ACTIONS_GENERATED, TYPE_LINKS_GENERATED})
     public @interface Type {
         // For custom event types, use range 1,000,000+.
     }
 
+    // All these event type constants are required to match with those defined in
+    // textclassifier_enums.proto.
     /** User started a new selection. */
     public static final int TYPE_SELECTION_STARTED = 1;
     /** User modified an existing selection. */
@@ -131,6 +133,8 @@ public abstract class TextClassifierEvent implements Parcelable {
     public static final int TYPE_MANUAL_REPLY = 19;
     /** TextClassifier generated some actions */
     public static final int TYPE_ACTIONS_GENERATED = 20;
+    /** Some text links were generated.*/
+    public static final int TYPE_LINKS_GENERATED = 21;
 
     @Category
     private final int mEventCategory;
@@ -365,7 +369,8 @@ public abstract class TextClassifierEvent implements Parcelable {
         out.append(this.getClass().getSimpleName());
         out.append("{");
         out.append("mEventCategory=").append(mEventCategory);
-        out.append(", mEventTypes=").append(Arrays.toString(mEntityTypes));
+        out.append(", mEventType=").append(mEventType);
+        out.append(", mEntityTypes=").append(Arrays.toString(mEntityTypes));
         out.append(", mEventContext=").append(mEventContext);
         out.append(", mResultId=").append(mResultId);
         out.append(", mEventIndex=").append(mEventIndex);
@@ -373,9 +378,17 @@ public abstract class TextClassifierEvent implements Parcelable {
         out.append(", mScores=").append(Arrays.toString(mScores));
         out.append(", mModelName=").append(mModelName);
         out.append(", mActionIndices=").append(Arrays.toString(mActionIndices));
+        toString(out);
         out.append("}");
         return out.toString();
     }
+
+    /**
+     * Overrides this to append extra fields to the output of {@link #toString()}.
+     * <p>
+     * Extra fields should be  formatted like this: ", {field_name}={field_value}".
+     */
+    void toString(StringBuilder out) {}
 
     /**
      * Returns a {@link SelectionEvent} equivalent of this event; or {@code null} if it can not be
@@ -536,7 +549,7 @@ public abstract class TextClassifierEvent implements Parcelable {
          */
         @NonNull
         public T setEntityTypes(@NonNull String... entityTypes) {
-            Preconditions.checkNotNull(entityTypes);
+            Objects.requireNonNull(entityTypes);
             mEntityTypes = new String[entityTypes.length];
             System.arraycopy(entityTypes, 0, mEntityTypes, 0, entityTypes.length);
             return self();
@@ -574,7 +587,7 @@ public abstract class TextClassifierEvent implements Parcelable {
          */
         @NonNull
         public T setScores(@NonNull float... scores) {
-            Preconditions.checkNotNull(scores);
+            Objects.requireNonNull(scores);
             mScores = new float[scores.length];
             System.arraycopy(scores, 0, mScores, 0, scores.length);
             return self();
@@ -639,7 +652,7 @@ public abstract class TextClassifierEvent implements Parcelable {
          */
         @NonNull
         public T setExtras(@NonNull Bundle extras) {
-            mExtras = Preconditions.checkNotNull(extras);
+            mExtras = Objects.requireNonNull(extras);
             return self();
         }
 
@@ -809,6 +822,16 @@ public abstract class TextClassifierEvent implements Parcelable {
          */
         public int getRelativeSuggestedWordEndIndex() {
             return mRelativeSuggestedWordEndIndex;
+        }
+
+        @Override
+        void toString(StringBuilder out) {
+            out.append(", getRelativeWordStartIndex=").append(mRelativeWordStartIndex);
+            out.append(", getRelativeWordEndIndex=").append(mRelativeWordEndIndex);
+            out.append(", getRelativeSuggestedWordStartIndex=")
+                    .append(mRelativeSuggestedWordStartIndex);
+            out.append(", getRelativeSuggestedWordEndIndex=")
+                    .append(mRelativeSuggestedWordEndIndex);
         }
 
         /**

@@ -41,6 +41,7 @@ import android.print.test.services.PrintServiceCallbacks;
 import android.print.test.services.PrinterDiscoverySessionCallbacks;
 import android.print.test.services.StubbablePrinterDiscoverySession;
 import android.printservice.recommendation.IRecommendationsChangeListener;
+import android.support.test.uiautomator.UiDevice;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.filters.MediumTest;
@@ -70,6 +71,10 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     private ComponentName mBadComponentName;
 
     private IPrintManager mIPrintManager;
+
+    public static UiDevice getUiDevice() {
+        return UiDevice.getInstance(getInstrumentation());
+    }
 
     /**
      * Create a new IPrintManagerParametersTest and setup basic fields.

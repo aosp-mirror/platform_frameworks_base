@@ -20,9 +20,10 @@ import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
 import android.graphics.Matrix;
+import android.os.IBinder;
 import android.view.DisplayInfo;
-import android.view.Surface;
 import android.view.Surface.Rotation;
+import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
 import com.android.server.wm.utils.CoordinateTransforms;
@@ -35,7 +36,7 @@ import java.io.StringWriter;
  *
  * Works by transforming the {@link WindowState} back into the old display rotation.
  *
- * Uses {@link android.view.SurfaceControl#deferTransactionUntil(Surface, long)} instead of
+ * Uses {@link Transaction#deferTransactionUntil(SurfaceControl, IBinder, long)} instead of
  * latching on the buffer size to allow for seamless 180 degree rotations.
  */
 public class SeamlessRotator {
@@ -44,32 +45,45 @@ public class SeamlessRotator {
     private final float[] mFloat9 = new float[9];
     private final int mOldRotation;
     private final int mNewRotation;
+    /* If the seamless rotator is used to rotate part of the hierarchy, then provide a transform
+     * hint based on the display orientation if the entire display was rotated. When the display
+     * orientation matches the hierarchy orientation, the fixed transform hint will be removed.
+     * This will prevent allocating different buffer sizes by the graphic producers when the
+     * orientation of a layer changes.
+     */
+    private final boolean mApplyFixedTransformHint;
+    private final int mFixedTransformHint;
 
-    public SeamlessRotator(@Rotation int oldRotation, @Rotation int newRotation, DisplayInfo info) {
+
+    public SeamlessRotator(@Rotation int oldRotation, @Rotation int newRotation, DisplayInfo info,
+            boolean applyFixedTransformationHint) {
         mOldRotation = oldRotation;
         mNewRotation = newRotation;
-
+        mApplyFixedTransformHint = applyFixedTransformationHint;
+        mFixedTransformHint = oldRotation;
         final boolean flipped = info.rotation == ROTATION_90 || info.rotation == ROTATION_270;
-        final int h = flipped ? info.logicalWidth : info.logicalHeight;
-        final int w = flipped ? info.logicalHeight : info.logicalWidth;
-
+        final int pH = flipped ? info.logicalWidth : info.logicalHeight;
+        final int pW = flipped ? info.logicalHeight : info.logicalWidth;
+        // Initialize transform matrix by physical size.
         final Matrix tmp = new Matrix();
-        CoordinateTransforms.transformLogicalToPhysicalCoordinates(oldRotation, w, h, mTransform);
-        CoordinateTransforms.transformPhysicalToLogicalCoordinates(newRotation, w, h, tmp);
+        CoordinateTransforms.transformLogicalToPhysicalCoordinates(oldRotation, pW, pH, mTransform);
+        CoordinateTransforms.transformPhysicalToLogicalCoordinates(newRotation, pW, pH, tmp);
         mTransform.postConcat(tmp);
     }
 
     /**
-     * Applies a transform to the {@link WindowState} surface that undoes the effect of the global
-     * display rotation.
+     * Applies a transform to the {@link WindowContainer} surface that undoes the effect of the
+     * global display rotation.
      */
-    public void unrotate(Transaction transaction, WindowState win) {
+    public void unrotate(Transaction transaction, WindowContainer win) {
         transaction.setMatrix(win.getSurfaceControl(), mTransform, mFloat9);
-
         // WindowState sets the position of the window so transform the position and update it.
         final float[] winSurfacePos = {win.mLastSurfacePosition.x, win.mLastSurfacePosition.y};
         mTransform.mapPoints(winSurfacePos);
         transaction.setPosition(win.getSurfaceControl(), winSurfacePos[0], winSurfacePos[1]);
+        if (mApplyFixedTransformHint) {
+            transaction.setFixedTransformHint(win.mSurfaceControl, mFixedTransformHint);
+        }
     }
 
     /**
@@ -94,15 +108,23 @@ public class SeamlessRotator {
      * it.
      */
     public void finish(WindowState win, boolean timeout) {
-        mTransform.reset();
         final Transaction t = win.getPendingTransaction();
-        t.setMatrix(win.mSurfaceControl, mTransform, mFloat9);
-        t.setPosition(win.mSurfaceControl, win.mLastSurfacePosition.x, win.mLastSurfacePosition.y);
+        finish(t, win);
         if (win.mWinAnimator.mSurfaceController != null && !timeout) {
             t.deferTransactionUntil(win.mSurfaceControl,
-                    win.mWinAnimator.mSurfaceController.getHandle(), win.getFrameNumber());
+                    win.getClientViewRootSurface(), win.getFrameNumber());
             t.deferTransactionUntil(win.mWinAnimator.mSurfaceController.mSurfaceControl,
-                    win.mWinAnimator.mSurfaceController.getHandle(), win.getFrameNumber());
+                    win.getClientViewRootSurface(), win.getFrameNumber());
+        }
+    }
+
+    /** Removes the transform and restore to the original last position. */
+    void finish(Transaction t, WindowContainer win) {
+        mTransform.reset();
+        t.setMatrix(win.mSurfaceControl, mTransform, mFloat9);
+        t.setPosition(win.mSurfaceControl, win.mLastSurfacePosition.x, win.mLastSurfacePosition.y);
+        if (mApplyFixedTransformHint) {
+            t.unsetFixedTransformHint(win.mSurfaceControl);
         }
     }
 

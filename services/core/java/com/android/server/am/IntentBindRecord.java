@@ -108,10 +108,10 @@ final class IntentBindRecord {
         return stringName = sb.toString();
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         if (intent != null) {
-            intent.getIntent().writeToProto(proto,
+            intent.getIntent().dumpDebug(proto,
                     IntentBindRecordProto.INTENT, false, true, false, false);
         }
         if (binder != null) {
@@ -128,7 +128,7 @@ final class IntentBindRecord {
         for (int i=0; i<N; i++) {
             AppBindRecord a = apps.valueAt(i);
             if (a != null) {
-                a.writeToProto(proto, IntentBindRecordProto.APPS);
+                a.dumpDebug(proto, IntentBindRecordProto.APPS);
             }
         }
         proto.end(token);

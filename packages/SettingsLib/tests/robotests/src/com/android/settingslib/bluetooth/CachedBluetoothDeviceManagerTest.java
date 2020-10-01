@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 
 import org.junit.Before;
@@ -50,8 +49,6 @@ public class CachedBluetoothDeviceManagerTest {
     private final static String DEVICE_ADDRESS_1 = "AA:BB:CC:DD:EE:11";
     private final static String DEVICE_ADDRESS_2 = "AA:BB:CC:DD:EE:22";
     private final static String DEVICE_ADDRESS_3 = "AA:BB:CC:DD:EE:33";
-    private final static String DEVICE_SUMMARY_1 = "summary 1";
-    private final static String DEVICE_SUMMARY_2 = "summary 2";
     private final static long HISYNCID1 = 10;
     private final static long HISYNCID2 = 11;
     private final BluetoothClass DEVICE_CLASS_1 =
@@ -188,6 +185,25 @@ public class CachedBluetoothDeviceManagerTest {
         Collection<CachedBluetoothDevice> devices = mCachedDeviceManager.getCachedDevicesCopy();
         assertThat(devices).contains(cachedDevice1);
         assertThat(devices).contains(cachedDevice2);
+    }
+
+    /**
+     * Test to verify addDevice(), the duplicated device should not added.
+     */
+    @Test
+    public void addDevice_addDuplicatedDevice_duplicateDeviceShouldNotAdded() {
+        final CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
+        assertThat(cachedDevice1).isNotNull();
+        final CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
+        assertThat(cachedDevice2).isNotNull();
+        final CachedBluetoothDevice cachedDevice3 = mCachedDeviceManager.addDevice(mDevice2);
+        assertThat(cachedDevice3).isNotNull();
+        final CachedBluetoothDevice cachedDevice4 = mCachedDeviceManager.addDevice(mDevice2);
+        assertThat(cachedDevice4).isNotNull();
+
+        final Collection<CachedBluetoothDevice> devices =
+                mCachedDeviceManager.getCachedDevicesCopy();
+        assertThat(devices.size()).isEqualTo(2);
     }
 
     /**
@@ -381,125 +397,5 @@ public class CachedBluetoothDeviceManagerTest {
 
         when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_NONE);
         assertThat(mCachedDeviceManager.onDeviceDisappeared(cachedDevice1)).isTrue();
-    }
-
-    /**
-     * Test to verify onActiveDeviceChanged().
-     */
-    @Test
-    public void onActiveDeviceChanged_connectedDevices_activeDeviceChanged() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
-        assertThat(cachedDevice1).isNotNull();
-        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
-        assertThat(cachedDevice2).isNotNull();
-
-        when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
-        when(mDevice2.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
-
-        // Connect both devices for A2DP and HFP
-        cachedDevice1.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
-        cachedDevice2.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
-        cachedDevice1.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_CONNECTED);
-        cachedDevice2.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_CONNECTED);
-
-        // Verify that both devices are connected and none is Active
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
-
-        // The first device is active for A2DP, the second device is active for HFP
-        mCachedDeviceManager.onActiveDeviceChanged(cachedDevice1, BluetoothProfile.A2DP);
-        mCachedDeviceManager.onActiveDeviceChanged(cachedDevice2, BluetoothProfile.HEADSET);
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.A2DP)).isTrue();
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.HEADSET)).isTrue();
-
-        // The first device is active for A2DP and HFP
-        mCachedDeviceManager.onActiveDeviceChanged(cachedDevice1, BluetoothProfile.HEADSET);
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.A2DP)).isTrue();
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.HEADSET)).isTrue();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
-
-        // The second device is active for A2DP and HFP
-        mCachedDeviceManager.onActiveDeviceChanged(cachedDevice2, BluetoothProfile.A2DP);
-        mCachedDeviceManager.onActiveDeviceChanged(cachedDevice2, BluetoothProfile.HEADSET);
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.A2DP)).isTrue();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.HEADSET)).isTrue();
-
-        // No active device for A2DP
-        mCachedDeviceManager.onActiveDeviceChanged(null, BluetoothProfile.A2DP);
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.HEADSET)).isTrue();
-
-        // No active device for HFP
-        mCachedDeviceManager.onActiveDeviceChanged(null, BluetoothProfile.HEADSET);
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
-    }
-
-    /**
-     * Test to verify onActiveDeviceChanged() with A2DP and Hearing Aid.
-     */
-    @Test
-    public void onActiveDeviceChanged_withA2dpAndHearingAid() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
-        assertThat(cachedDevice1).isNotNull();
-        CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
-        assertThat(cachedDevice2).isNotNull();
-
-        when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
-        when(mDevice2.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
-
-        // Connect device1 for A2DP and HFP and device2 for Hearing Aid
-        cachedDevice1.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
-        cachedDevice1.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_CONNECTED);
-        cachedDevice2.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
-
-        // Verify that both devices are connected and none is Active
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.HEARING_AID)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.HEARING_AID)).isFalse();
-
-        // The first device is active for A2DP and HFP
-        mCachedDeviceManager.onActiveDeviceChanged(cachedDevice1, BluetoothProfile.A2DP);
-        mCachedDeviceManager.onActiveDeviceChanged(cachedDevice1, BluetoothProfile.HEADSET);
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.A2DP)).isTrue();
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.HEADSET)).isTrue();
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.HEARING_AID)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.HEARING_AID)).isFalse();
-
-        // The second device is active for Hearing Aid and the first device is not active
-        mCachedDeviceManager.onActiveDeviceChanged(null, BluetoothProfile.A2DP);
-        mCachedDeviceManager.onActiveDeviceChanged(null, BluetoothProfile.HEADSET);
-        mCachedDeviceManager.onActiveDeviceChanged(cachedDevice2, BluetoothProfile.HEARING_AID);
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.HEARING_AID)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.HEARING_AID)).isTrue();
-
-        // No active device for Hearing Aid
-        mCachedDeviceManager.onActiveDeviceChanged(null, BluetoothProfile.HEARING_AID);
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
-        assertThat(cachedDevice1.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
-        assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.HEARING_AID)).isFalse();
     }
 }

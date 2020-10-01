@@ -19,13 +19,17 @@ package com.android.server.testing.shadows;
 import static android.content.pm.PackageManager.NameNotFoundException;
 
 import android.app.ApplicationPackageManager;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.content.pm.ResolveInfo;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.Resetter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +43,7 @@ public class ShadowApplicationPackageManager
     private static final Map<String, PackageInfo> sPackageInfos = new ArrayMap<>();
     private static final List<PackageInfo> sInstalledPackages = new ArrayList<>();
     private static final Map<String, Integer> sPackageUids = new ArrayMap<>();
+    private static final Map<Integer, Map<String, Integer>> sUserPackageUids = new ArrayMap<>();
 
     /**
      * Registers the package {@code packageName} to be returned when invoking {@link
@@ -58,6 +63,19 @@ public class ShadowApplicationPackageManager
         sPackageUids.put(packageName, packageUid);
     }
 
+    /**
+     * Sets the package uid {@code packageUid} for the package {@code packageName} to be returned
+     * when invoking {@link ApplicationPackageManager#getPackageUidAsUser(String, int, int)}.
+     */
+    public static void setPackageUidAsUser(String packageName, int packageUid, int userId) {
+        final Map<String, Integer> userPackageUids =
+                sUserPackageUids.containsKey(userId)
+                        ? sUserPackageUids.get(userId)
+                        : new HashMap<>();
+        userPackageUids.put(packageName, packageUid);
+        sUserPackageUids.put(userId, userPackageUids);
+    }
+
     @Override
     protected PackageInfo getPackageInfoAsUser(String packageName, int flags, int userId)
             throws NameNotFoundException {
@@ -75,10 +93,21 @@ public class ShadowApplicationPackageManager
     @Override
     protected int getPackageUidAsUser(String packageName, int flags, int userId)
             throws NameNotFoundException {
+        if (sUserPackageUids.containsKey(userId)
+                && sUserPackageUids.get(userId).containsKey(packageName)) {
+            return sUserPackageUids.get(userId).get(packageName);
+        }
         if (!sPackageUids.containsKey(packageName)) {
             throw new NameNotFoundException(packageName);
         }
         return sPackageUids.get(packageName);
+    }
+
+    @Override
+    protected List<ResolveInfo> queryBroadcastReceiversAsUser(
+            Intent intent, int flags, UserHandle userHandle) {
+        // Currently does not handle multi-user.
+        return queryBroadcastReceivers(intent, flags);
     }
 
     /** Clear package state. */

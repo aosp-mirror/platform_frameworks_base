@@ -19,9 +19,7 @@
 
 #include "SubscriberReporter.h"
 
-using android::IBinder;
 using std::lock_guard;
-using std::unordered_map;
 
 namespace android {
 namespace os {
@@ -29,18 +27,66 @@ namespace statsd {
 
 using std::vector;
 
+struct BroadcastSubscriberDeathCookie {
+    BroadcastSubscriberDeathCookie(const ConfigKey& configKey, int64_t subscriberId,
+                                   const shared_ptr<IPendingIntentRef>& pir):
+        mConfigKey(configKey),
+        mSubscriberId(subscriberId),
+        mPir(pir) {}
+
+    ConfigKey mConfigKey;
+    int64_t mSubscriberId;
+    shared_ptr<IPendingIntentRef> mPir;
+};
+
+void SubscriberReporter::broadcastSubscriberDied(void* cookie) {
+    auto cookie_ = static_cast<BroadcastSubscriberDeathCookie*>(cookie);
+    ConfigKey& configKey = cookie_->mConfigKey;
+    int64_t subscriberId = cookie_->mSubscriberId;
+    shared_ptr<IPendingIntentRef>& pir = cookie_->mPir;
+
+    SubscriberReporter& thiz = getInstance();
+
+    // Erase the mapping from a (config_key, subscriberId) to a pir if the
+    // mapping exists.
+    lock_guard<mutex> lock(thiz.mLock);
+    auto subscriberMapIt = thiz.mIntentMap.find(configKey);
+    if (subscriberMapIt != thiz.mIntentMap.end()) {
+        auto subscriberMap = subscriberMapIt->second;
+        auto pirIt = subscriberMap.find(subscriberId);
+        if (pirIt != subscriberMap.end() && pirIt->second == pir) {
+            subscriberMap.erase(subscriberId);
+            if (subscriberMap.empty()) {
+                thiz.mIntentMap.erase(configKey);
+            }
+        }
+    }
+
+    // The death recipient corresponding to this specific pir can never be
+    // triggered again, so free up resources.
+    delete cookie_;
+}
+
+SubscriberReporter::SubscriberReporter() :
+    mBroadcastSubscriberDeathRecipient(AIBinder_DeathRecipient_new(broadcastSubscriberDied)) {
+}
+
 void SubscriberReporter::setBroadcastSubscriber(const ConfigKey& configKey,
                                                 int64_t subscriberId,
-                                                const sp<IBinder>& intentSender) {
+                                                const shared_ptr<IPendingIntentRef>& pir) {
     VLOG("SubscriberReporter::setBroadcastSubscriber called.");
-    lock_guard<std::mutex> lock(mLock);
-    mIntentMap[configKey][subscriberId] = intentSender;
+    {
+        lock_guard<mutex> lock(mLock);
+        mIntentMap[configKey][subscriberId] = pir;
+    }
+    AIBinder_linkToDeath(pir->asBinder().get(), mBroadcastSubscriberDeathRecipient.get(),
+                         new BroadcastSubscriberDeathCookie(configKey, subscriberId, pir));
 }
 
 void SubscriberReporter::unsetBroadcastSubscriber(const ConfigKey& configKey,
                                                   int64_t subscriberId) {
     VLOG("SubscriberReporter::unsetBroadcastSubscriber called.");
-    lock_guard<std::mutex> lock(mLock);
+    lock_guard<mutex> lock(mLock);
     auto subscriberMapIt = mIntentMap.find(configKey);
     if (subscriberMapIt != mIntentMap.end()) {
         subscriberMapIt->second.erase(subscriberId);
@@ -48,12 +94,6 @@ void SubscriberReporter::unsetBroadcastSubscriber(const ConfigKey& configKey,
             mIntentMap.erase(configKey);
         }
     }
-}
-
-void SubscriberReporter::removeConfig(const ConfigKey& configKey) {
-    VLOG("SubscriberReporter::removeConfig called.");
-    lock_guard<std::mutex> lock(mLock);
-    mIntentMap.erase(configKey);
 }
 
 void SubscriberReporter::alertBroadcastSubscriber(const ConfigKey& configKey,
@@ -68,7 +108,7 @@ void SubscriberReporter::alertBroadcastSubscriber(const ConfigKey& configKey,
     //  config id - the name of this config (for this particular uid)
 
     VLOG("SubscriberReporter::alertBroadcastSubscriber called.");
-    lock_guard<std::mutex> lock(mLock);
+    lock_guard<mutex> lock(mLock);
 
     if (!subscription.has_broadcast_subscriber_details()
             || !subscription.broadcast_subscriber_details().has_subscriber_id()) {
@@ -77,10 +117,10 @@ void SubscriberReporter::alertBroadcastSubscriber(const ConfigKey& configKey,
     }
     int64_t subscriberId = subscription.broadcast_subscriber_details().subscriber_id();
 
-    vector<String16> cookies;
+    vector<string> cookies;
     cookies.reserve(subscription.broadcast_subscriber_details().cookie_size());
     for (auto& cookie : subscription.broadcast_subscriber_details().cookie()) {
-        cookies.push_back(String16(cookie.c_str()));
+        cookies.push_back(cookie);
     }
 
     auto it1 = mIntentMap.find(configKey);
@@ -97,79 +137,33 @@ void SubscriberReporter::alertBroadcastSubscriber(const ConfigKey& configKey,
     sendBroadcastLocked(it2->second, configKey, subscription, cookies, dimKey);
 }
 
-void SubscriberReporter::sendBroadcastLocked(const sp<IBinder>& intentSender,
+void SubscriberReporter::sendBroadcastLocked(const shared_ptr<IPendingIntentRef>& pir,
                                              const ConfigKey& configKey,
                                              const Subscription& subscription,
-                                             const vector<String16>& cookies,
+                                             const vector<string>& cookies,
                                              const MetricDimensionKey& dimKey) const {
     VLOG("SubscriberReporter::sendBroadcastLocked called.");
-    if (mStatsCompanionService == nullptr) {
-        ALOGW("Failed to send subscriber broadcast: could not access StatsCompanionService.");
-        return;
-    }
-    mStatsCompanionService->sendSubscriberBroadcast(
-            intentSender,
+    pir->sendSubscriberBroadcast(
             configKey.GetUid(),
             configKey.GetId(),
             subscription.id(),
             subscription.rule_id(),
             cookies,
-            getStatsDimensionsValue(dimKey.getDimensionKeyInWhat()));
+            dimKey.getDimensionKeyInWhat().toStatsDimensionsValueParcel());
 }
 
-void getStatsDimensionsValueHelper(const vector<FieldValue>& dims, size_t* index, int depth,
-                                   int prefix, vector<StatsDimensionsValue>* output) {
-    size_t count = dims.size();
-    while (*index < count) {
-        const auto& dim = dims[*index];
-        const int valueDepth = dim.mField.getDepth();
-        const int valuePrefix = dim.mField.getPrefix(depth);
-        if (valueDepth > 2) {
-            ALOGE("Depth > 2 not supported");
-            return;
-        }
-        if (depth == valueDepth && valuePrefix == prefix) {
-            switch (dim.mValue.getType()) {
-                case INT:
-                    output->push_back(StatsDimensionsValue(dim.mField.getPosAtDepth(depth),
-                                                           dim.mValue.int_value));
-                    break;
-                case LONG:
-                    output->push_back(StatsDimensionsValue(dim.mField.getPosAtDepth(depth),
-                                                           dim.mValue.long_value));
-                    break;
-                case FLOAT:
-                    output->push_back(StatsDimensionsValue(dim.mField.getPosAtDepth(depth),
-                                                           dim.mValue.float_value));
-                    break;
-                case STRING:
-                    output->push_back(StatsDimensionsValue(dim.mField.getPosAtDepth(depth),
-                                                           String16(dim.mValue.str_value.c_str())));
-                    break;
-                default:
-                    break;
-            }
-            (*index)++;
-        } else if (valueDepth > depth && valuePrefix == prefix) {
-            vector<StatsDimensionsValue> childOutput;
-            getStatsDimensionsValueHelper(dims, index, depth + 1, dim.mField.getPrefix(depth + 1),
-                                          &childOutput);
-            output->push_back(StatsDimensionsValue(dim.mField.getPosAtDepth(depth), childOutput));
-        } else {
-            return;
-        }
+shared_ptr<IPendingIntentRef> SubscriberReporter::getBroadcastSubscriber(const ConfigKey& configKey,
+                                                                         int64_t subscriberId) {
+    lock_guard<mutex> lock(mLock);
+    auto subscriberMapIt = mIntentMap.find(configKey);
+    if (subscriberMapIt == mIntentMap.end()) {
+        return nullptr;
     }
-}
-
-StatsDimensionsValue SubscriberReporter::getStatsDimensionsValue(const HashableDimensionKey& dim) {
-    if (dim.getValues().size() == 0) {
-        return StatsDimensionsValue();
+    auto pirMapIt = subscriberMapIt->second.find(subscriberId);
+    if (pirMapIt == subscriberMapIt->second.end()) {
+        return nullptr;
     }
-
-    vector<StatsDimensionsValue> fields;
-    size_t index = 0;
-    getStatsDimensionsValueHelper(dim.getValues(), &index, 0, 0, &fields);
-    return StatsDimensionsValue(dim.getValues()[0].mField.getTag(), fields);
+    return pirMapIt->second;
 }
 
 }  // namespace statsd

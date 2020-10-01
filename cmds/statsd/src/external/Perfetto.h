@@ -16,10 +16,6 @@
 
 #pragma once
 
-#include <android/os/StatsLogEventWrapper.h>
-
-using android::os::StatsLogEventWrapper;
-
 namespace android {
 namespace os {
 namespace statsd {

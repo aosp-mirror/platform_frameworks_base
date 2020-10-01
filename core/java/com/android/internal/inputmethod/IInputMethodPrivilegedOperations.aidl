@@ -41,5 +41,5 @@ interface IInputMethodPrivilegedOperations {
     boolean shouldOfferSwitchingToNextInputMethod();
     void notifyUserAction();
     void reportPreRendered(in EditorInfo info);
-    void applyImeVisibility(boolean setVisible);
+    void applyImeVisibility(IBinder showOrHideInputToken, boolean setVisible);
 }

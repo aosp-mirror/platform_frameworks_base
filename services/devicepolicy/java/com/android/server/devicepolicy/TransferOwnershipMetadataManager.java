@@ -39,6 +39,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 /**
  * Handles reading and writing of the owner transfer metadata file.
@@ -185,8 +186,8 @@ class TransferOwnershipMetadataManager {
                 @NonNull int userId, @NonNull String adminType) {
             this.sourceComponent = sourceComponent;
             this.targetComponent = targetComponent;
-            Preconditions.checkNotNull(sourceComponent);
-            Preconditions.checkNotNull(targetComponent);
+            Objects.requireNonNull(sourceComponent);
+            Objects.requireNonNull(targetComponent);
             Preconditions.checkStringNotEmpty(adminType);
             this.userId = userId;
             this.adminType = adminType;
@@ -199,7 +200,7 @@ class TransferOwnershipMetadataManager {
         }
 
         private static ComponentName unflattenComponentUnchecked(String flatComponent) {
-            Preconditions.checkNotNull(flatComponent);
+            Objects.requireNonNull(flatComponent);
             return ComponentName.unflattenFromString(flatComponent);
         }
 

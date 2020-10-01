@@ -20,10 +20,9 @@
 #include <nativehelper/JNIHelp.h>
 
 #include "android_os_Parcel.h"
-#include "android/graphics/GraphicsJNI.h"
-#include "android/graphics/GraphicBuffer.h"
 
 #include <android/hardware_buffer.h>
+#include <android_runtime/android_graphics_GraphicBuffer.h>
 #include <android_runtime/android_hardware_HardwareBuffer.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
@@ -98,7 +97,8 @@ static jlong android_hardware_HardwareBuffer_create(JNIEnv* env, jobject clazz,
 }
 
 static jlong android_hardware_HardwareBuffer_createFromGraphicBuffer(JNIEnv* env, jobject clazz, jobject graphicBuffer) {
-    sp<GraphicBuffer> buffer(graphicBufferForJavaObject(env, graphicBuffer));
+    sp<GraphicBuffer> buffer(android_graphics_GraphicBuffer_getNativeGraphicsBuffer(env,
+                                                                                    graphicBuffer));
     GraphicBufferWrapper* wrapper = new GraphicBufferWrapper(buffer);
     return reinterpret_cast<jlong>(wrapper);
 }

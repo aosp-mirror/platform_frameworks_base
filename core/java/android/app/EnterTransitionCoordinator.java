@@ -66,8 +66,9 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private final boolean mIsCrossTask;
     private Drawable mReplacedBackground;
     private ArrayList<String> mPendingExitNames;
+    private Runnable mOnTransitionComplete;
 
-    public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
+    EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
             ArrayList<String> sharedElementNames, boolean isReturning, boolean isCrossTask) {
         super(activity.getWindow(), sharedElementNames,
                 getListener(activity, isReturning && !isCrossTask), isReturning);
@@ -566,6 +567,14 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         return transition;
     }
 
+    public void runAfterTransitionsComplete(Runnable onTransitionComplete) {
+        if (!isTransitionRunning()) {
+            onTransitionsComplete();
+        } else {
+            mOnTransitionComplete = onTransitionComplete;
+        }
+    }
+
     @Override
     protected void onTransitionsComplete() {
         moveSharedElementsFromOverlay();
@@ -577,6 +586,10 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             if (window != null && mReplacedBackground == decorView.getBackground()) {
                 window.setBackgroundDrawable(null);
             }
+        }
+        if (mOnTransitionComplete != null) {
+            mOnTransitionComplete.run();
+            mOnTransitionComplete = null;
         }
     }
 
@@ -671,6 +684,10 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         if (mBackgroundAnimator != null) {
             mBackgroundAnimator.cancel();
             mBackgroundAnimator = null;
+        }
+        if (mOnTransitionComplete != null) {
+            mOnTransitionComplete.run();
+            mOnTransitionComplete = null;
         }
         super.clearState();
     }

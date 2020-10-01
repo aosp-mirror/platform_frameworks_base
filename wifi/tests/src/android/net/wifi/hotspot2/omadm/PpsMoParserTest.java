@@ -135,6 +135,9 @@ public class PpsMoParserTest {
         homeSp.setOtherHomePartners(new String[] {"other.fqdn.com"});
         config.setHomeSp(homeSp);
 
+        config.setAaaServerTrustedNames(
+                new String[] {"trusted.fqdn.com", "another-trusted.fqdn.com"});
+
         // Credential configuration.
         Credential credential = new Credential();
         credential.setCreationTimeInMillis(format.parse("2016-01-01T10:00:00Z").getTime());

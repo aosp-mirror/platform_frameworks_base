@@ -15,6 +15,8 @@
  */
 package com.android.internal.telephony.util;
 
+import static android.telephony.Annotation.DataState;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -26,10 +28,13 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.telephony.TelephonyManager;
 
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
@@ -143,5 +148,31 @@ public final class TelephonyUtils {
             ret.remove(key);
         }
         return ret;
+    }
+
+    /** Wait for latch to trigger */
+    public static void waitUntilReady(CountDownLatch latch, long timeoutMs) {
+        try {
+            latch.await(timeoutMs, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ignored) {
+        }
+    }
+
+    /**
+     * Convert data state to string
+     *
+     * @return The data state in string format.
+     */
+    public static String dataStateToString(@DataState int state) {
+        switch (state) {
+            case TelephonyManager.DATA_DISCONNECTED: return "DISCONNECTED";
+            case TelephonyManager.DATA_CONNECTING: return "CONNECTING";
+            case TelephonyManager.DATA_CONNECTED: return "CONNECTED";
+            case TelephonyManager.DATA_SUSPENDED: return "SUSPENDED";
+            case TelephonyManager.DATA_DISCONNECTING: return "DISCONNECTING";
+            case TelephonyManager.DATA_UNKNOWN: return "UNKNOWN";
+        }
+        // This is the error case. The well-defined value for UNKNOWN is -1.
+        return "UNKNOWN(" + state + ")";
     }
 }

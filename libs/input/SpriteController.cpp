@@ -360,12 +360,7 @@ void SpriteController::SpriteImpl::setIcon(const SpriteIcon& icon) {
 
     uint32_t dirty;
     if (icon.isValid()) {
-        SkBitmap* bitmapCopy = &mLocked.state.icon.bitmap;
-        if (bitmapCopy->tryAllocPixels(icon.bitmap.info().makeColorType(kN32_SkColorType))) {
-            icon.bitmap.readPixels(bitmapCopy->info(), bitmapCopy->getPixels(),
-                    bitmapCopy->rowBytes(), 0, 0);
-        }
-
+        mLocked.state.icon.bitmap = icon.bitmap.copy(ANDROID_BITMAP_FORMAT_RGBA_8888);
         if (!mLocked.state.icon.isValid()
                 || mLocked.state.icon.hotSpotX != icon.hotSpotX
                 || mLocked.state.icon.hotSpotY != icon.hotSpotY) {

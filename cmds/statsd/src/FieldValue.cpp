@@ -18,7 +18,6 @@
 #include "Log.h"
 #include "FieldValue.h"
 #include "HashableDimensionKey.h"
-#include "atoms_info.h"
 #include "math.h"
 
 namespace android {
@@ -116,28 +115,13 @@ void translateFieldMatcher(const FieldMatcher& matcher, std::vector<Matcher>* ou
 }
 
 bool isAttributionUidField(const FieldValue& value) {
-    int field = value.mField.getField() & 0xff007f;
-    if (field == 0x10001 && value.mValue.getType() == INT) {
-        return true;
-    }
-    return false;
+    return isAttributionUidField(value.mField, value.mValue);
 }
 
 int32_t getUidIfExists(const FieldValue& value) {
-    bool isUid = false;
-    // the field is uid field if the field is the uid field in attribution node or marked as
-    // is_uid in atoms.proto
-    if (isAttributionUidField(value)) {
-        isUid = true;
-    } else {
-        auto it = android::util::AtomsInfo::kAtomsWithUidField.find(value.mField.getTag());
-        if (it != android::util::AtomsInfo::kAtomsWithUidField.end()) {
-            int uidField = it->second;  // uidField is the field number in proto
-            isUid = value.mField.getDepth() == 0 && value.mField.getPosAtDepth(0) == uidField &&
-                    value.mValue.getType() == INT;
-        }
-    }
-
+    // the field is uid field if the field is the uid field in attribution node
+    // or annotated as such in the atom
+    bool isUid = isAttributionUidField(value) || isUidField(value);
     return isUid ? value.mValue.int_value : -1;
 }
 
@@ -147,6 +131,10 @@ bool isAttributionUidField(const Field& field, const Value& value) {
         return true;
     }
     return false;
+}
+
+bool isUidField(const FieldValue& fieldValue) {
+    return fieldValue.mAnnotations.isUidField();
 }
 
 Value::Value(const Value& from) {
@@ -436,6 +424,25 @@ bool equalDimensions(const std::vector<Matcher>& dimension_a,
         }
     }
     return eq;
+}
+
+bool subsetDimensions(const std::vector<Matcher>& dimension_a,
+                      const std::vector<Matcher>& dimension_b) {
+    if (dimension_a.size() > dimension_b.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < dimension_a.size(); ++i) {
+        bool found = false;
+        for (size_t j = 0; j < dimension_b.size(); ++j) {
+            if (dimension_a[i] == dimension_b[j]) {
+                found = true;
+            }
+        }
+        if (!found) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool HasPositionANY(const FieldMatcher& matcher) {

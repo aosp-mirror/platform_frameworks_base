@@ -96,6 +96,8 @@ public class WifiDebuggingSecondaryUserActivity extends AlertActivity
         IntentFilter filter = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         registerReceiver(mWifiChangeReceiver, filter);
+        // Close quick shade
+        sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
     }
 
     @Override

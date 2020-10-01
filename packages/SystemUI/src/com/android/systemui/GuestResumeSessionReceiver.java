@@ -32,6 +32,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.WindowManagerGlobal;
 
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 /**
@@ -45,10 +46,14 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
 
     private Dialog mNewSessionDialog;
 
-    public void register(Context context) {
+    /**
+     * Register this receiver with the {@link BroadcastDispatcher}
+     *
+     * @param broadcastDispatcher to register the receiver.
+     */
+    public void register(BroadcastDispatcher broadcastDispatcher) {
         IntentFilter f = new IntentFilter(Intent.ACTION_USER_SWITCHED);
-        context.registerReceiverAsUser(this, UserHandle.SYSTEM,
-                f, null /* permission */, null /* scheduler */);
+        broadcastDispatcher.registerReceiver(this, f, null /* handler */, UserHandle.SYSTEM);
     }
 
     @Override

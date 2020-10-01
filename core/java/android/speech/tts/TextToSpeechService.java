@@ -1259,6 +1259,7 @@ public abstract class TextToSpeechService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         if (TextToSpeech.Engine.INTENT_ACTION_TTS_SERVICE.equals(intent.getAction())) {
+            Binder.allowBlocking(mBinder.asBinder());
             return mBinder;
         }
         return null;

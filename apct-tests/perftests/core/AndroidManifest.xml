@@ -5,12 +5,15 @@
     <permission android:name="com.android.perftests.core.TestPermission" />
     <uses-permission android:name="com.android.perftests.core.TestPermission" />
 
-    <uses-permission
-        android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES" />
+    <uses-permission android:name="android.permission.DELETE_PACKAGES" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.INSTALL_PACKAGES"/>
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
 
     <application>
         <uses-library android:name="android.test.runner" />
-        <activity android:name="android.perftests.utils.StubActivity">
+        <activity android:name="android.perftests.utils.PerfTestActivity">
           <intent-filter>
             <action android:name="com.android.perftests.core.PERFTEST" />
           </intent-filter>

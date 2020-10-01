@@ -17,6 +17,7 @@
 package com.android.server.backup;
 
 import static com.android.server.backup.BackupManagerService.DEBUG_SCHEDULING;
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.app.AlarmManager;
 import android.app.job.JobInfo;
@@ -43,7 +44,7 @@ import java.util.Random;
 public class KeyValueBackupJob extends JobService {
     private static final String TAG = "KeyValueBackupJob";
     private static ComponentName sKeyValueJobService =
-            new ComponentName("android", KeyValueBackupJob.class.getName());
+            new ComponentName(PLATFORM_PACKAGE_NAME, KeyValueBackupJob.class.getName());
 
     private static final String USER_ID_EXTRA_KEY = "userId";
 
@@ -143,7 +144,7 @@ public class KeyValueBackupJob extends JobService {
         }
 
         // Time to run a key/value backup!
-        Trampoline service = BackupManagerService.getInstance();
+        BackupManagerService service = BackupManagerService.getInstance();
         try {
             service.backupNowForUser(userId);
         } catch (RemoteException e) {}

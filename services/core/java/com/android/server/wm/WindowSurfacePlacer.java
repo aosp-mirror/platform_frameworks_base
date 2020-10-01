@@ -23,9 +23,7 @@ import static com.android.server.wm.WindowManagerService.H.REPORT_WINDOWS_CHANGE
 import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
 
 import android.os.Debug;
-import android.os.Trace;
 import android.util.Slog;
-import android.util.SparseIntArray;
 
 import java.io.PrintWriter;
 
@@ -50,34 +48,57 @@ class WindowSurfacePlacer {
 
     private boolean mTraversalScheduled;
     private int mDeferDepth = 0;
+    /** The number of layout requests when deferring. */
+    private int mDeferredRequests;
 
-    private final SparseIntArray mTempTransitionReasons = new SparseIntArray();
-
-    private final Runnable mPerformSurfacePlacement;
-
-    public WindowSurfacePlacer(WindowManagerService service) {
-        mService = service;
-        mPerformSurfacePlacement = () -> {
+    private class Traverser implements Runnable {
+        @Override
+        public void run() {
             synchronized (mService.mGlobalLock) {
                 performSurfacePlacement();
             }
-        };
+        }
+    }
+
+    private final Traverser mPerformSurfacePlacement = new Traverser();
+
+    WindowSurfacePlacer(WindowManagerService service) {
+        mService = service;
     }
 
     /**
-     * See {@link WindowManagerService#deferSurfaceLayout()}
+     * Starts deferring layout passes. Useful when doing multiple changes but to optimize
+     * performance, only one layout pass should be done. This can be called multiple times, and
+     * layouting will be resumed once the last caller has called {@link #continueLayout}.
      */
     void deferLayout() {
         mDeferDepth++;
     }
 
     /**
-     * See {@link WindowManagerService#continueSurfaceLayout()}
+     * Resumes layout passes after deferring them. If there is a deferred direct invocation of
+     * {@link #performSurfacePlacement} ({@link #mDeferredRequests} > 0), when the defer is
+     * done, it will continue to perform layout.
+     *
+     * @param hasChanges Something has changed. That means whether to call
+     *                   {@link #performSurfacePlacement} when {@link #mDeferDepth} becomes zero.
+     * @see #deferLayout
      */
-    void continueLayout() {
+    void continueLayout(boolean hasChanges) {
         mDeferDepth--;
-        if (mDeferDepth <= 0) {
+        if (mDeferDepth > 0) {
+            return;
+        }
+
+        if (hasChanges || mDeferredRequests > 0) {
+            if (DEBUG) {
+                Slog.i(TAG, "continueLayout hasChanges=" + hasChanges
+                        + " deferredRequests=" + mDeferredRequests + " " + Debug.getCallers(2, 3));
+            }
             performSurfacePlacement();
+            mDeferredRequests = 0;
+        } else if (DEBUG) {
+            Slog.i(TAG, "Cancel continueLayout " + Debug.getCallers(2, 3));
         }
     }
 
@@ -97,6 +118,7 @@ class WindowSurfacePlacer {
 
     final void performSurfacePlacement(boolean force) {
         if (mDeferDepth > 0 && !force) {
+            mDeferredRequests++;
             return;
         }
         int loopCount = 6;
@@ -133,12 +155,9 @@ class WindowSurfacePlacer {
             return;
         }
 
-        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "wmLayout");
         mInLayout = true;
 
-        boolean recoveringMemory = false;
         if (!mService.mForceRemoves.isEmpty()) {
-            recoveringMemory = true;
             // Wait a little bit for things to settle down, and off we go.
             while (!mService.mForceRemoves.isEmpty()) {
                 final WindowState ws = mService.mForceRemoves.remove(0);
@@ -156,7 +175,7 @@ class WindowSurfacePlacer {
         }
 
         try {
-            mService.mRoot.performSurfacePlacement(recoveringMemory);
+            mService.mRoot.performSurfacePlacement();
 
             mInLayout = false;
 
@@ -179,8 +198,6 @@ class WindowSurfacePlacer {
             mInLayout = false;
             Slog.wtf(TAG, "Unhandled exception while laying out windows", e);
         }
-
-        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     void debugLayoutRepeats(final String msg, int pendingLayoutChanges) {
@@ -195,10 +212,19 @@ class WindowSurfacePlacer {
     }
 
     void requestTraversal() {
-        if (!mTraversalScheduled) {
-            mTraversalScheduled = true;
-            mService.mAnimationHandler.post(mPerformSurfacePlacement);
+        if (mTraversalScheduled) {
+            return;
         }
+
+        // Set as scheduled even the request will be deferred because mDeferredRequests is also
+        // increased, then the end of deferring will perform the request.
+        mTraversalScheduled = true;
+        if (mDeferDepth > 0) {
+            mDeferredRequests++;
+            if (DEBUG) Slog.i(TAG, "Defer requestTraversal " + Debug.getCallers(3));
+            return;
+        }
+        mService.mAnimationHandler.post(mPerformSurfacePlacement);
     }
 
     public void dump(PrintWriter pw, String prefix) {

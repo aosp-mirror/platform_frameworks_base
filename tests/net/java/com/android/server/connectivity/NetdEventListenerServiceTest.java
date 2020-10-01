@@ -19,7 +19,7 @@ package com.android.server.connectivity;
 import static android.net.metrics.INetdEventListener.EVENT_GETADDRINFO;
 import static android.net.metrics.INetdEventListener.EVENT_GETHOSTBYNAME;
 
-import static com.android.testutils.MiscAssertsKt.assertStringContains;
+import static com.android.testutils.MiscAsserts.assertStringContains;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;

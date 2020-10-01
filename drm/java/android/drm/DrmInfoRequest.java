@@ -24,7 +24,9 @@ import java.util.Iterator;
  * class is passed to the {@link DrmManagerClient#acquireDrmInfo acquireDrmInfo()} method to get an
  * instance of a {@link DrmInfo}.
  *
+ * @deprecated Please use {@link android.media.MediaDrm}
  */
+@Deprecated
 public class DrmInfoRequest {
     // Changes in following constants should be in sync with DrmInfoRequest.h
     /**

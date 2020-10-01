@@ -18,6 +18,8 @@
         <option name="test-file-name" value="PrintSpoolerOutOfProcessTests.apk" />
     </target_preparer>
 
+    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.DeviceInteractionHelperInstaller" />
+
     <option name="test-suite-tag" value="apct" />
     <option name="test-tag" value="PrintSpoolerOutOfProcessTests" />
     <option name="config-descriptor:metadata" key="component" value="print" />

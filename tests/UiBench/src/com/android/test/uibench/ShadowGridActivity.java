@@ -16,13 +16,15 @@
 package com.android.test.uibench;
 
 import android.os.Bundle;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.ListFragment;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 
-public class ShadowGridActivity extends AppCompatActivity {
+import androidx.fragment.app.ListFragment;
+
+import com.android.test.uibench.listview.CompatListActivity;
+
+public class ShadowGridActivity extends CompatListActivity {
     public static class NoDividerListFragment extends ListFragment {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -31,18 +33,14 @@ public class ShadowGridActivity extends AppCompatActivity {
         }
     };
 
+    @Override
+    protected ListAdapter createListAdapter() {
+        return new ArrayAdapter<>(this, R.layout.card_row, R.id.card_text,
+                TextUtils.buildSimpleStringList());
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        FragmentManager fm = getSupportFragmentManager();
-        if (fm.findFragmentById(android.R.id.content) == null) {
-            ListFragment listFragment = new NoDividerListFragment();
-
-            listFragment.setListAdapter(new ArrayAdapter<>(this,
-                    R.layout.card_row, R.id.card_text, TextUtils.buildSimpleStringList()));
-            fm.beginTransaction().add(android.R.id.content, listFragment).commit();
-        }
+    protected ListFragment createListFragment() {
+        return new NoDividerListFragment();
     }
 }

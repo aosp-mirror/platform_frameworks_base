@@ -247,7 +247,7 @@ class SoundEffectsHelper {
         }
 
         Resource res = mResources.get(mEffects[effect]);
-        if (res.mSampleId != EFFECT_NOT_IN_SOUND_POOL && res.mLoaded) {
+        if (mSoundPool != null && res.mSampleId != EFFECT_NOT_IN_SOUND_POOL && res.mLoaded) {
             mSoundPool.play(res.mSampleId, volFloat, volFloat, 0, 0, 1.0f);
         } else {
             MediaPlayer mediaPlayer = new MediaPlayer();
@@ -436,11 +436,12 @@ class SoundEffectsHelper {
                     onUnloadSoundEffects();
                     break;
                 case MSG_PLAY_EFFECT:
+                    final int effect = msg.arg1, volume = msg.arg2;
                     onLoadSoundEffects(new OnEffectsLoadCompleteHandler() {
                         @Override
                         public void run(boolean success) {
                             if (success) {
-                                onPlaySoundEffect(msg.arg1 /*effect*/, msg.arg2 /*volume*/);
+                                onPlaySoundEffect(effect, volume);
                             }
                         }
                     });
@@ -511,7 +512,9 @@ class SoundEffectsHelper {
         }
 
         void onComplete(boolean success) {
-            mSoundPool.setOnLoadCompleteListener(null);
+            if (mSoundPool != null) {
+                mSoundPool.setOnLoadCompleteListener(null);
+            }
             for (OnEffectsLoadCompleteHandler handler : mLoadCompleteHandlers) {
                 handler.run(success);
             }

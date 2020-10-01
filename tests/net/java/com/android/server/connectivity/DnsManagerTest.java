@@ -26,9 +26,9 @@ import static android.provider.Settings.Global.PRIVATE_DNS_DEFAULT_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 
-import static com.android.testutils.MiscAssertsKt.assertContainsExactly;
-import static com.android.testutils.MiscAssertsKt.assertContainsStringsExactly;
-import static com.android.testutils.MiscAssertsKt.assertFieldCountEquals;
+import static com.android.testutils.MiscAsserts.assertContainsExactly;
+import static com.android.testutils.MiscAsserts.assertContainsStringsExactly;
+import static com.android.testutils.MiscAsserts.assertFieldCountEquals;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

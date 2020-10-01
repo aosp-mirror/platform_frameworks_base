@@ -1,0 +1,15 @@
+LIBINCIDENT {
+    global:
+        AIncidentReportArgs_init; # apex # introduced=30
+        AIncidentReportArgs_clone; # apex # introduced=30
+        AIncidentReportArgs_delete; # apex # introduced=30
+        AIncidentReportArgs_setAll; # apex # introduced=30
+        AIncidentReportArgs_setPrivacyPolicy; # apex # introduced=30
+        AIncidentReportArgs_addSection; # apex # introduced=30
+        AIncidentReportArgs_setReceiverPackage; # apex # introduced=30
+        AIncidentReportArgs_setReceiverClass; # apex # introduced=30
+        AIncidentReportArgs_addHeader; # apex # introduced=30
+        AIncidentReportArgs_takeReport; # apex # introduced=30
+    local:
+        *;
+};

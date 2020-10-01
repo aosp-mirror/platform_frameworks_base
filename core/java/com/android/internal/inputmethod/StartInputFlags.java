@@ -30,7 +30,6 @@ import java.lang.annotation.Retention;
 @IntDef(flag = true, value = {
         StartInputFlags.VIEW_HAS_FOCUS,
         StartInputFlags.IS_TEXT_EDITOR,
-        StartInputFlags.FIRST_WINDOW_FOCUS_GAIN,
         StartInputFlags.INITIAL_CONNECTION})
 public @interface StartInputFlags {
     /**
@@ -44,13 +43,8 @@ public @interface StartInputFlags {
     int IS_TEXT_EDITOR = 2;
 
     /**
-     * This is the first time the window has gotten focus.
-     */
-    int FIRST_WINDOW_FOCUS_GAIN = 4;
-
-    /**
      * An internal concept to distinguish "start" and "restart". This concept doesn't look well
      * documented hence we probably need to revisit this though.
      */
-    int INITIAL_CONNECTION = 8;
+    int INITIAL_CONNECTION = 4;
 }

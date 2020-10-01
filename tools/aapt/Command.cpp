@@ -787,7 +787,9 @@ int doDump(Bundle* bundle)
 
     // The dynamicRefTable can be null if there are no resources for this asset cookie.
     // This fine.
-    const DynamicRefTable* dynamicRefTable = res.getDynamicRefTableForCookie(assetsCookie);
+    auto noop_destructor = [](const DynamicRefTable* /*ref_table */) { };
+    auto dynamicRefTable = std::shared_ptr<const DynamicRefTable>(
+        res.getDynamicRefTableForCookie(assetsCookie), noop_destructor);
 
     Asset* asset = NULL;
 

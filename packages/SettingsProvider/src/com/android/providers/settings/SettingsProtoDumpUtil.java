@@ -18,7 +18,9 @@ package com.android.providers.settings;
 
 import android.annotation.NonNull;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.providers.settings.ConfigSettingsProto;
 import android.providers.settings.GlobalSettingsProto;
 import android.providers.settings.SecureSettingsProto;
 import android.providers.settings.SettingProto;
@@ -28,9 +30,62 @@ import android.providers.settings.UserSettingsProto;
 import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /** @hide */
 class SettingsProtoDumpUtil {
+    private static final Map<String, Long> NAMESPACE_TO_FIELD_MAP = createNamespaceMap();
+
     private SettingsProtoDumpUtil() {}
+
+    private static Map<String, Long> createNamespaceMap() {
+        Map<String, Long> namespaceToFieldMap = new HashMap<>();
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                ConfigSettingsProto.ACTIVITY_MANAGER_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
+                ConfigSettingsProto.ACTIVITY_MANAGER_NATIVE_BOOT_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_APP_COMPAT,
+                ConfigSettingsProto.APP_COMPAT_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_AUTOFILL,
+                ConfigSettingsProto.AUTOFILL_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_BLOBSTORE,
+                ConfigSettingsProto.BLOBSTORE_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_CONNECTIVITY,
+                ConfigSettingsProto.CONNECTIVITY_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                ConfigSettingsProto.CONTENT_CAPTURE_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_GAME_DRIVER,
+                ConfigSettingsProto.GAME_DRIVER_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,
+                ConfigSettingsProto.INPUT_NATIVE_BOOT_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_NETD_NATIVE,
+                ConfigSettingsProto.NETD_NATIVE_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_PRIVACY,
+                ConfigSettingsProto.PRIVACY_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_ROLLBACK,
+                ConfigSettingsProto.ROLLBACK_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_ROLLBACK_BOOT,
+                ConfigSettingsProto.ROLLBACK_BOOT_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_RUNTIME,
+                ConfigSettingsProto.RUNTIME_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_RUNTIME_NATIVE,
+                ConfigSettingsProto.RUNTIME_NATIVE_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
+                ConfigSettingsProto.RUNTIME_NATIVE_BOOT_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                ConfigSettingsProto.STORAGE_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_SYSTEMUI,
+                ConfigSettingsProto.SYSTEMUI_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_TELEPHONY,
+                ConfigSettingsProto.TELEPHONY_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                ConfigSettingsProto.TEXTCLASSIFIER_SETTINGS);
+        return Collections.unmodifiableMap(namespaceToFieldMap);
+    }
 
     static void dumpProtoLocked(SettingsProvider.SettingsRegistry settingsRegistry,
             ProtoOutputStream proto) {
@@ -38,14 +93,16 @@ class SettingsProtoDumpUtil {
         SettingsState configSettings = settingsRegistry.getSettingsLocked(
                 SettingsProvider.SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM);
         if (configSettings != null) {
-            // TODO(b/113100523): dump configuration settings after they are added
+            dumpProtoConfigSettingsLocked(
+                    proto, SettingsServiceDumpProto.CONFIG_SETTINGS, configSettings);
         }
 
         // Global settings
         SettingsState globalSettings = settingsRegistry.getSettingsLocked(
                 SettingsProvider.SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
         if (globalSettings != null) {
-            dumpProtoGlobalSettingsLocked(proto, SettingsServiceDumpProto.GLOBAL_SETTINGS, globalSettings);
+            dumpProtoGlobalSettingsLocked(
+                    proto, SettingsServiceDumpProto.GLOBAL_SETTINGS, globalSettings);
         }
 
         // Per-user settings
@@ -211,9 +268,6 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS,
                 GlobalSettingsProto.Backup.BACKUP_AGENT_TIMEOUT_PARAMETERS);
-        dumpSetting(s, p,
-                Settings.Global.BACKUP_MULTI_USER_ENABLED,
-                GlobalSettingsProto.Backup.BACKUP_MULTI_USER_ENABLED);
         p.end(backupToken);
 
         final long batteryToken = p.start(GlobalSettingsProto.BATTERY);
@@ -321,6 +375,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.BUGREPORT_IN_POWER_MENU,
                 GlobalSettingsProto.BUGREPORT_IN_POWER_MENU);
+        dumpSetting(s, p,
+                Settings.Global.CACHED_APPS_FREEZER_ENABLED,
+                GlobalSettingsProto.CACHED_APPS_FREEZER_ENABLED);
         dumpSetting(s, p,
                 Settings.Global.CALL_AUTO_RETRY,
                 GlobalSettingsProto.CALL_AUTO_RETRY);
@@ -491,6 +548,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS,
                 GlobalSettingsProto.Development.FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS);
+        dumpSetting(s, p,
+                Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM,
+                GlobalSettingsProto.Development.ENABLE_SIZECOMPAT_FREEFORM);
         p.end(developmentToken);
 
         final long deviceToken = p.start(GlobalSettingsProto.DEVICE);
@@ -633,6 +693,9 @@ class SettingsProtoDumpUtil {
         dumpRepeatedSetting(s, p,
                 Settings.Global.ERROR_LOGCAT_PREFIX,
                 GlobalSettingsProto.ERROR_LOGCAT_LINES);
+        dumpRepeatedSetting(s, p,
+                Settings.Global.MAX_ERROR_BYTES_PREFIX,
+                GlobalSettingsProto.MAX_ERROR_BYTES);
 
         final long euiccToken = p.start(GlobalSettingsProto.EUICC);
         dumpSetting(s, p,
@@ -641,9 +704,6 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.EUICC_FACTORY_RESET_TIMEOUT_MILLIS,
                 GlobalSettingsProto.Euicc.FACTORY_RESET_TIMEOUT_MILLIS);
-        dumpSetting(s, p,
-                Settings.Global.EUICC_UNSUPPORTED_COUNTRIES,
-                GlobalSettingsProto.Euicc.UNSUPPORTED_COUNTRIES);
         p.end(euiccToken);
 
         dumpSetting(s, p,
@@ -1015,9 +1075,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE,
                 GlobalSettingsProto.Network.RECOMMENDATIONS_PACKAGE);
         dumpSetting(s, p,
-                Settings.Global.NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS,
-                GlobalSettingsProto.Network.RECOMMENDATION_REQUEST_TIMEOUT_MS);
-        dumpSetting(s, p,
                 Settings.Global.NETWORK_WATCHLIST_ENABLED,
                 GlobalSettingsProto.Network.WATCHLIST_ENABLED);
         dumpSetting(s, p,
@@ -1110,9 +1167,6 @@ class SettingsProtoDumpUtil {
                 GlobalSettingsProto.PAC_CHANGE_DELAY);
 
         final long pkgVerifierToken = p.start(GlobalSettingsProto.PACKAGE_VERIFIER);
-        dumpSetting(s, p,
-                Settings.Global.PACKAGE_VERIFIER_ENABLE,
-                GlobalSettingsProto.PackageVerifier.ENABLED);
         dumpSetting(s, p,
                 Settings.Global.PACKAGE_VERIFIER_TIMEOUT,
                 GlobalSettingsProto.PackageVerifier.TIMEOUT);
@@ -1297,6 +1351,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.CHARGING_STARTED_SOUND,
                 GlobalSettingsProto.Sounds.CHARGING_STARTED);
+        dumpSetting(s, p,
+                Settings.Global.WIRELESS_CHARGING_STARTED_SOUND,
+                GlobalSettingsProto.Sounds.WIRELESS_CHARGING_STARTED);
         p.end(soundsToken);
 
         final long soundTriggerToken = p.start(GlobalSettingsProto.SOUND_TRIGGER);
@@ -1488,9 +1545,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
                 GlobalSettingsProto.Wifi.NETWORKS_AVAILABLE_NOTIFICATION_ON);
         dumpSetting(s, p,
-                Settings.Global.WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON,
-                GlobalSettingsProto.Wifi.CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON);
-        dumpSetting(s, p,
                 Settings.Global.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
                 GlobalSettingsProto.Wifi.NETWORKS_AVAILABLE_REPEAT_DELAY);
         dumpSetting(s, p,
@@ -1515,9 +1569,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.WIFI_WAKEUP_ENABLED,
                 GlobalSettingsProto.Wifi.WAKEUP_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.WIFI_SAVED_STATE,
-                GlobalSettingsProto.Wifi.SAVED_STATE);
-        dumpSetting(s, p,
                 Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS,
                 GlobalSettingsProto.Wifi.SUPPLICANT_SCAN_INTERVAL_MS);
         dumpSetting(s, p,
@@ -1536,9 +1587,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED,
                 GlobalSettingsProto.Wifi.WATCHDOG_POOR_NETWORK_TEST_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED,
-                GlobalSettingsProto.Wifi.SUSPEND_OPTIMIZATIONS_ENABLED);
-        dumpSetting(s, p,
                 Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED,
                 GlobalSettingsProto.Wifi.VERBOSE_LOGGING_ENABLED);
         dumpSetting(s, p,
@@ -1556,9 +1604,6 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.WIFI_P2P_DEVICE_NAME,
                 GlobalSettingsProto.Wifi.P2P_DEVICE_NAME);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_REENABLE_DELAY_MS,
-                GlobalSettingsProto.Wifi.REENABLE_DELAY_MS);
         dumpSetting(s, p,
                 Settings.Global.WIFI_EPHEMERAL_OUT_OF_RANGE_TIMEOUT_MS,
                 GlobalSettingsProto.Wifi.EPHEMERAL_OUT_OF_RANGE_TIMEOUT_MS);
@@ -1604,6 +1649,33 @@ class SettingsProtoDumpUtil {
         // Please insert new settings using the same order as in GlobalSettingsProto.
 
         // Settings.Global.INSTALL_NON_MARKET_APPS intentionally excluded since it's deprecated.
+    }
+
+    private static void dumpProtoConfigSettingsLocked(
+            @NonNull ProtoOutputStream p, long fieldId, @NonNull SettingsState s) {
+        Map<String, List<String>> namespaceMap = new HashMap<>();
+        final long token = p.start(fieldId);
+        s.dumpHistoricalOperations(p, ConfigSettingsProto.HISTORICAL_OPERATIONS);
+        for (String name : s.getSettingNamesLocked()) {
+            String namespace = name.substring(0, name.indexOf('/'));
+            if (NAMESPACE_TO_FIELD_MAP.containsKey(namespace)) {
+                dumpSetting(s, p, name, NAMESPACE_TO_FIELD_MAP.get(namespace));
+            } else {
+                if (!namespaceMap.containsKey(namespace)) {
+                    namespaceMap.put(namespace, new ArrayList<>());
+                }
+                namespaceMap.get(namespace).add(name);
+            }
+        }
+        for (String namespace : namespaceMap.keySet()) {
+            final long namespacesToken = p.start(ConfigSettingsProto.EXTRA_NAMESPACES);
+            p.write(ConfigSettingsProto.NamespaceProto.NAMESPACE, namespace);
+            for (String name : namespaceMap.get(namespace)) {
+                dumpSetting(s, p, name, ConfigSettingsProto.NamespaceProto.SETTINGS);
+            }
+            p.end(namespacesToken);
+        }
+        p.end(token);
     }
 
     /** Dumps settings that use a common prefix into a repeated field. */
@@ -1713,9 +1785,6 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON,
                 SecureSettingsProto.Accessibility.LARGE_POINTER_ICON);
         dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED,
-                SecureSettingsProto.Accessibility.SHORTCUT_ENABLED);
-        dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN,
                 SecureSettingsProto.Accessibility.SHORTCUT_ON_LOCK_SCREEN);
         dumpSetting(s, p,
@@ -1742,7 +1811,19 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS,
                 SecureSettingsProto.Accessibility.INTERACTIVE_UI_TIMEOUT_MS);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
+                SecureSettingsProto.Accessibility.ACCESSIBILITY_MAGNIFICATION_MODE);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+                SecureSettingsProto.Accessibility.BUTTON_TARGETS);
         p.end(accessibilityToken);
+
+        final long adaptiveSleepToken = p.start(SecureSettingsProto.ADAPTIVE_SLEEP);
+        dumpSetting(s, p,
+                Settings.Secure.ADAPTIVE_SLEEP,
+                SecureSettingsProto.AdaptiveSleep.ENABLED);
+        p.end(adaptiveSleepToken);
 
         dumpSetting(s, p,
                 Settings.Secure.ALLOWED_GEOLOCATION_ORIGINS,
@@ -1895,6 +1976,13 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS,
                 SecureSettingsProto.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS);
+
+        final long controlsToken = p.start(SecureSettingsProto.CONTROLS);
+        dumpSetting(s, p,
+                Settings.Secure.CONTROLS_ENABLED,
+                SecureSettingsProto.Controls.ENABLED);
+        p.end(controlsToken);
+
         dumpSetting(s, p,
                 Settings.Secure.DEVICE_PAIRED,
                 SecureSettingsProto.DEVICE_PAIRED);
@@ -1927,6 +2015,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.DOZE_TAP_SCREEN_GESTURE,
                 SecureSettingsProto.Doze.PULSE_ON_TAP);
+        dumpSetting(s, p,
+                Settings.Secure.SUPPRESS_DOZE,
+                SecureSettingsProto.Doze.SUPPRESS);
         p.end(dozeToken);
 
         dumpSetting(s, p,
@@ -2039,9 +2130,6 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.LOCATION_CHANGER,
                 SecureSettingsProto.Location.CHANGER);
-        dumpSetting(s, p,
-                Settings.Secure.LOCATION_PERMISSIONS_UPGRADE_TO_Q_MODE,
-                SecureSettingsProto.Location.PERMISSIONS_UPGRADE_TO_Q_MODE);
         p.end(locationToken);
 
         final long locationAccessCheckToken = p.start(SecureSettingsProto.LOCATION_ACCESS_CHECK);
@@ -2116,6 +2204,15 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.NAVIGATION_MODE,
                 SecureSettingsProto.NAVIGATION_MODE);
 
+        final long gestureNavToken = p.start(SecureSettingsProto.GESTURE_NAVIGATION);
+        dumpSetting(s, p,
+                Settings.Secure.BACK_GESTURE_INSET_SCALE_LEFT,
+                SecureSettingsProto.GestureNavigation.BACK_GESTURE_INSET_SCALE_LEFT);
+        dumpSetting(s, p,
+                Settings.Secure.BACK_GESTURE_INSET_SCALE_RIGHT,
+                SecureSettingsProto.GestureNavigation.BACK_GESTURE_INSET_SCALE_RIGHT);
+        p.end(gestureNavToken);
+
         final long nfcPaymentToken = p.start(SecureSettingsProto.NFC_PAYMENT);
         dumpSetting(s, p,
                 Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT,
@@ -2173,15 +2270,6 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.Notification.IN_CALL_NOTIFICATION_ENABLED);
         p.end(notificationToken);
 
-        final long packageVerifierToken = p.start(SecureSettingsProto.PACKAGE_VERIFIER);
-        dumpSetting(s, p,
-                Settings.Secure.PACKAGE_VERIFIER_USER_CONSENT,
-                SecureSettingsProto.PackageVerifier.USER_CONSENT);
-        dumpSetting(s, p,
-                Settings.Secure.PACKAGE_VERIFIER_STATE,
-                SecureSettingsProto.PackageVerifier.STATE);
-        p.end(packageVerifierToken);
-
         final long parentalControlToken = p.start(SecureSettingsProto.PARENTAL_CONTROL);
         dumpSetting(s, p,
                 Settings.Secure.PARENTAL_CONTROL_ENABLED,
@@ -2193,6 +2281,12 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.PARENTAL_CONTROL_REDIRECT_URL,
                 SecureSettingsProto.ParentalControl.REDIRECT_URL);
         p.end(parentalControlToken);
+
+        final long powerMenuPrivacyToken = p.start(SecureSettingsProto.POWER_MENU_PRIVACY);
+        dumpSetting(s, p,
+                Settings.Secure.POWER_MENU_LOCKED_SHOW_CONTENT,
+                SecureSettingsProto.PowerMenuPrivacy.SHOW);
+        p.end(powerMenuPrivacyToken);
 
         final long printServiceToken = p.start(SecureSettingsProto.PRINT_SERVICE);
         dumpSetting(s, p,
@@ -2658,6 +2752,12 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
                 SystemSettingsProto.Screen.AUTO_BRIGHTNESS_ADJ);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_BRIGHTNESS_FLOAT,
+                SystemSettingsProto.Screen.BRIGHTNESS_FLOAT);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_BRIGHTNESS_FOR_VR_FLOAT,
+                SystemSettingsProto.Screen.BRIGHTNESS_FOR_VR_FLOAT);
         p.end(screenToken);
 
         dumpSetting(s, p,

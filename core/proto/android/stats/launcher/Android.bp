@@ -25,3 +25,16 @@ java_library {
         "*.proto",
     ],
 }
+
+java_library {
+    name: "launcherprotoslite",
+    proto: {
+        type: "lite",
+        include_dirs: ["external/protobuf/src"],
+    },
+
+    sdk_version: "current",
+    srcs: [
+        "*.proto",
+    ],
+}

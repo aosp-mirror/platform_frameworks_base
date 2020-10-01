@@ -16,6 +16,8 @@
 
 package com.android.systemui.bubbles;
 
+import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
@@ -37,8 +39,10 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bubbles.BubbleData.TimeSource;
-import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 
 import com.google.common.collect.ImmutableList;
 
@@ -71,6 +75,8 @@ public class BubbleDataTest extends SysuiTestCase {
     private NotificationEntry mEntryB2;
     private NotificationEntry mEntryB3;
     private NotificationEntry mEntryC1;
+    private NotificationEntry mEntryInterruptive;
+    private NotificationEntry mEntryDismissed;
 
     private Bubble mBubbleA1;
     private Bubble mBubbleA2;
@@ -79,6 +85,8 @@ public class BubbleDataTest extends SysuiTestCase {
     private Bubble mBubbleB2;
     private Bubble mBubbleB3;
     private Bubble mBubbleC1;
+    private Bubble mBubbleInterruptive;
+    private Bubble mBubbleDismissed;
 
     private BubbleData mBubbleData;
 
@@ -96,9 +104,18 @@ public class BubbleDataTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<BubbleData.Update> mUpdateCaptor;
 
+    @Mock
+    private BubbleController.NotificationSuppressionChangedListener mSuppressionListener;
+
+    @Mock
+    private BubbleController.PendingIntentCanceledListener mPendingIntentCanceledListener;
+
     @Before
     public void setUp() throws Exception {
-        mNotificationTestHelper = new NotificationTestHelper(mContext);
+        mNotificationTestHelper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
         MockitoAnnotations.initMocks(this);
 
         mEntryA1 = createBubbleEntry(1, "a1", "package.a");
@@ -109,13 +126,24 @@ public class BubbleDataTest extends SysuiTestCase {
         mEntryB3 = createBubbleEntry(1, "b3", "package.b");
         mEntryC1 = createBubbleEntry(1, "c1", "package.c");
 
-        mBubbleA1 = new Bubble(mContext, mEntryA1);
-        mBubbleA2 = new Bubble(mContext, mEntryA2);
-        mBubbleA3 = new Bubble(mContext, mEntryA3);
-        mBubbleB1 = new Bubble(mContext, mEntryB1);
-        mBubbleB2 = new Bubble(mContext, mEntryB2);
-        mBubbleB3 = new Bubble(mContext, mEntryB3);
-        mBubbleC1 = new Bubble(mContext, mEntryC1);
+        mEntryInterruptive = createBubbleEntry(1, "interruptive", "package.d");
+        modifyRanking(mEntryInterruptive)
+                .setVisuallyInterruptive(true)
+                .build();
+        mBubbleInterruptive = new Bubble(mEntryInterruptive, mSuppressionListener, null);
+
+        ExpandableNotificationRow row = mNotificationTestHelper.createBubble();
+        mEntryDismissed = createBubbleEntry(1, "dismissed", "package.d");
+        mEntryDismissed.setRow(row);
+        mBubbleDismissed = new Bubble(mEntryDismissed, mSuppressionListener, null);
+
+        mBubbleA1 = new Bubble(mEntryA1, mSuppressionListener, mPendingIntentCanceledListener);
+        mBubbleA2 = new Bubble(mEntryA2, mSuppressionListener, mPendingIntentCanceledListener);
+        mBubbleA3 = new Bubble(mEntryA3, mSuppressionListener, mPendingIntentCanceledListener);
+        mBubbleB1 = new Bubble(mEntryB1, mSuppressionListener, mPendingIntentCanceledListener);
+        mBubbleB2 = new Bubble(mEntryB2, mSuppressionListener, mPendingIntentCanceledListener);
+        mBubbleB3 = new Bubble(mEntryB3, mSuppressionListener, mPendingIntentCanceledListener);
+        mBubbleC1 = new Bubble(mEntryC1, mSuppressionListener, mPendingIntentCanceledListener);
 
         mBubbleData = new BubbleData(getContext());
 
@@ -152,21 +180,94 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
+        mBubbleData.dismissBubbleWithKey(
+                mEntryA1.getKey(), BubbleController.DISMISS_USER_GESTURE);
 
         // Verify
         verifyUpdateReceived();
         assertBubbleRemoved(mBubbleA1, BubbleController.DISMISS_USER_GESTURE);
     }
 
-    // COLLAPSED / ADD
+    @Test
+    public void ifSuppress_hideFlyout() {
+        // Setup
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryUpdated(mBubbleC1, /* suppressFlyout */ true, /* showInShade */
+                true);
+
+        // Verify
+        verifyUpdateReceived();
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.addedBubble.showFlyout()).isFalse();
+    }
+
+    @Test
+    public void ifInterruptiveAndNotSuppressed_thenShowFlyout() {
+        // Setup
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryUpdated(mBubbleInterruptive,
+                false /* suppressFlyout */, true  /* showInShade */);
+
+        // Verify
+        verifyUpdateReceived();
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.addedBubble.showFlyout()).isTrue();
+    }
+
+    @Test
+    public void sameUpdate_InShade_thenHideFlyout() {
+        // Setup
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryUpdated(mBubbleC1, false /* suppressFlyout */,
+                true /* showInShade */);
+        verifyUpdateReceived();
+
+        mBubbleData.notificationEntryUpdated(mBubbleC1, false /* suppressFlyout */,
+                true /* showInShade */);
+        verifyUpdateReceived();
+
+        // Verify
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.updatedBubble.showFlyout()).isFalse();
+    }
+
+    @Test
+    public void sameUpdate_NotInShade_NotVisuallyInterruptive_dontShowFlyout() {
+        // Setup
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryUpdated(mBubbleDismissed, false /* suppressFlyout */,
+                true /* showInShade */);
+        verifyUpdateReceived();
+
+        // Suppress the notif / make it look dismissed
+        mBubbleDismissed.setSuppressNotification(true);
+
+        mBubbleData.notificationEntryUpdated(mBubbleDismissed, false /* suppressFlyout */,
+                true /* showInShade */);
+        verifyUpdateReceived();
+
+        // Verify
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.updatedBubble.showFlyout()).isFalse();
+    }
+
+    //
+    // Overflow
+    //
 
     /**
-     * Verifies that the number of bubbles is not allowed to exceed the maximum. The limit is
-     * enforced by expiring the bubble which was least recently updated (lowest timestamp).
+     * Verifies that when the bubble stack reaches its maximum, the oldest bubble is overflowed.
      */
     @Test
-    public void test_collapsed_addBubble_atMaxBubbles_expiresOldest() {
+    public void testOverflow_add_stackAtMaxBubbles_overflowsOldest() {
         // Setup
         sendUpdatedEntryAtTime(mEntryA1, 1000);
         sendUpdatedEntryAtTime(mEntryA2, 2000);
@@ -175,23 +276,83 @@ public class BubbleDataTest extends SysuiTestCase {
         sendUpdatedEntryAtTime(mEntryB2, 5000);
         mBubbleData.setListener(mListener);
 
-        // Test
         sendUpdatedEntryAtTime(mEntryC1, 6000);
         verifyUpdateReceived();
         assertBubbleRemoved(mBubbleA1, BubbleController.DISMISS_AGED);
+        assertOverflowChangedTo(ImmutableList.of(mBubbleA1));
+
+        Bubble bubbleA1 = mBubbleData.getOrCreateBubble(mEntryA1, null /* persistedBubble */);
+        bubbleA1.markUpdatedAt(7000L);
+        mBubbleData.notificationEntryUpdated(bubbleA1, false /* suppressFlyout*/,
+                true /* showInShade */);
+        verifyUpdateReceived();
+        assertBubbleRemoved(mBubbleA2, BubbleController.DISMISS_AGED);
+        assertOverflowChangedTo(ImmutableList.of(mBubbleA2));
     }
 
     /**
-     * Verifies that new bubbles insert to the left when collapsed, carrying along grouped bubbles.
-     * <p>
-     * Placement within the list is based on lastUpdate (post time of the notification), descending
-     * order (with most recent first).
-     *
-     * @see #test_expanded_addBubble_sortAndGrouping_newGroup()
-     * @see #test_expanded_addBubble_sortAndGrouping_existingGroup()
+     * Verifies that once the number of overflowed bubbles reaches its maximum, the oldest
+     * overflow bubble is removed.
      */
     @Test
-    public void test_collapsed_addBubble_sortAndGrouping() {
+    public void testOverflow_maxReached_bubbleRemoved() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        sendUpdatedEntryAtTime(mEntryA3, 3000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.setMaxOverflowBubbles(1);
+        mBubbleData.dismissBubbleWithKey(
+                mEntryA1.getKey(), BubbleController.DISMISS_USER_GESTURE);
+        verifyUpdateReceived();
+        assertOverflowChangedTo(ImmutableList.of(mBubbleA1));
+
+        // Overflow max of 1 is reached; A1 is oldest, so it gets removed
+        mBubbleData.dismissBubbleWithKey(
+                mEntryA2.getKey(), BubbleController.DISMISS_USER_GESTURE);
+        verifyUpdateReceived();
+        assertOverflowChangedTo(ImmutableList.of(mBubbleA2));
+    }
+
+    /**
+     * Verifies that overflow bubbles are canceled on notif entry removal.
+     */
+    @Test
+    public void testOverflow_notifCanceled_removesOverflowBubble() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        sendUpdatedEntryAtTime(mEntryA3, 3000);
+        sendUpdatedEntryAtTime(mEntryB1, 4000);
+        sendUpdatedEntryAtTime(mEntryB2, 5000);
+        sendUpdatedEntryAtTime(mEntryB3, 6000); // [A2, A3, B1, B2, B3], overflow: [A1]
+        sendUpdatedEntryAtTime(mEntryC1, 7000); // [A3, B1, B2, B3, C1], overflow: [A2, A1]
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(),
+                BubbleController.DISMISS_NOTIF_CANCEL);
+        verifyUpdateReceived();
+        assertOverflowChangedTo(ImmutableList.of(mBubbleA2));
+
+        // Test
+        mBubbleData.dismissBubbleWithKey(mEntryA2.getKey(),
+                BubbleController.DISMISS_GROUP_CANCELLED);
+        verifyUpdateReceived();
+        assertOverflowChangedTo(ImmutableList.of());
+    }
+
+    // COLLAPSED / ADD
+
+    /**
+     * Verifies that new bubbles insert to the left when collapsed.
+     * <p>
+     * Placement within the list is based on {@link Bubble#getLastActivity()}, descending
+     * order (with most recent first).
+     */
+    @Test
+    public void test_collapsed_addBubble() {
         // Setup
         mBubbleData.setListener(mListener);
 
@@ -210,41 +371,7 @@ public class BubbleDataTest extends SysuiTestCase {
 
         sendUpdatedEntryAtTime(mEntryA2, 4000);
         verifyUpdateReceived();
-        assertOrderChangedTo(mBubbleA2, mBubbleA1, mBubbleB2, mBubbleB1);
-    }
-
-    /**
-     * Verifies that new bubbles insert to the left when collapsed, carrying along grouped bubbles.
-     * Additionally, any bubble which is ongoing is considered "newer" than any non-ongoing bubble.
-     * <p>
-     * Because of the ongoing bubble, the new bubble cannot be placed in the first position. This
-     * causes the 'B' group to remain last, despite having a new button added.
-     *
-     * @see #test_expanded_addBubble_sortAndGrouping_newGroup()
-     * @see #test_expanded_addBubble_sortAndGrouping_existingGroup()
-     */
-    @Test
-    public void test_collapsed_addBubble_sortAndGrouping_withOngoing() {
-        // Setup
-        mBubbleData.setListener(mListener);
-
-        // Test
-        setOngoing(mEntryA1, true);
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        verifyUpdateReceived();
-        assertOrderNotChanged();
-
-        sendUpdatedEntryAtTime(mEntryB1, 2000);
-        verifyUpdateReceived();
-        assertOrderNotChanged();
-
-        sendUpdatedEntryAtTime(mEntryB2, 3000);
-        verifyUpdateReceived();
-        assertOrderChangedTo(mBubbleA1, mBubbleB2, mBubbleB1);
-
-        sendUpdatedEntryAtTime(mEntryA2, 4000);
-        verifyUpdateReceived();
-        assertOrderChangedTo(mBubbleA1, mBubbleA2, mBubbleB2, mBubbleB1);
+        assertOrderChangedTo(mBubbleA2, mBubbleB2, mBubbleB1, mBubbleA1);
     }
 
     /**
@@ -252,7 +379,6 @@ public class BubbleDataTest extends SysuiTestCase {
      * the collapsed state.
      *
      * @see #test_collapsed_updateBubble_selectionChanges()
-     * @see #test_collapsed_updateBubble_noSelectionChanges_withOngoing()
      */
     @Test
     public void test_collapsed_addBubble_selectionChanges() {
@@ -277,57 +403,27 @@ public class BubbleDataTest extends SysuiTestCase {
         assertSelectionChangedTo(mBubbleA2);
     }
 
-    /**
-     * Verifies that while collapsed, the selection will not change if the selected bubble is
-     * ongoing. It remains the top bubble and as such remains selected.
-     *
-     * @see #test_collapsed_addBubble_selectionChanges()
-     */
-    @Test
-    public void test_collapsed_addBubble_noSelectionChanges_withOngoing() {
-        // Setup
-        setOngoing(mEntryA1, true);
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleA1);
-        mBubbleData.setListener(mListener);
-
-        // Test
-        sendUpdatedEntryAtTime(mEntryB1, 2000);
-        verifyUpdateReceived();
-        assertSelectionNotChanged();
-
-        sendUpdatedEntryAtTime(mEntryB2, 3000);
-        verifyUpdateReceived();
-        assertSelectionNotChanged();
-
-        sendUpdatedEntryAtTime(mEntryA2, 4000);
-        verifyUpdateReceived();
-        assertSelectionNotChanged();
-
-        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleA1); // selection unchanged
-    }
-
     // COLLAPSED / REMOVE
 
     /**
-     * Verifies that groups may reorder when bubbles are removed, while the stack is in the
-     * collapsed state.
+     * Verifies order of bubbles after a removal.
      */
     @Test
-    public void test_collapsed_removeBubble_sortAndGrouping() {
+    public void test_collapsed_removeBubble_sort() {
         // Setup
         sendUpdatedEntryAtTime(mEntryA1, 1000);
         sendUpdatedEntryAtTime(mEntryB1, 2000);
         sendUpdatedEntryAtTime(mEntryB2, 3000);
-        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A2, A1, B2, B1]
+        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A2, B2, B1, A1]
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(mEntryA2, BubbleController.DISMISS_USER_GESTURE);
+        mBubbleData.dismissBubbleWithKey(
+                mEntryA2.getKey(), BubbleController.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
+        // TODO: this should fail if things work as I expect them to?
         assertOrderChangedTo(mBubbleB2, mBubbleB1, mBubbleA1);
     }
-
 
     /**
      * Verifies that onOrderChanged is not called when a bubble is removed if the removal does not
@@ -339,33 +435,14 @@ public class BubbleDataTest extends SysuiTestCase {
         sendUpdatedEntryAtTime(mEntryA1, 1000);
         sendUpdatedEntryAtTime(mEntryB1, 2000);
         sendUpdatedEntryAtTime(mEntryB2, 3000);
-        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A2, A1, B2, B1]
+        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A2, B2, B1, A1]
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(mEntryB1, BubbleController.DISMISS_USER_GESTURE);
+        mBubbleData.dismissBubbleWithKey(
+                mEntryA1.getKey(), BubbleController.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
         assertOrderNotChanged();
-    }
-
-    /**
-     * Verifies that bubble ordering reverts to normal when an ongoing bubble is removed. A group
-     * which has a newer bubble may move to the front after the ongoing bubble is removed.
-     */
-    @Test
-    public void test_collapsed_removeBubble_sortAndGrouping_withOngoing() {
-        // Setup
-        setOngoing(mEntryA1, true);
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        sendUpdatedEntryAtTime(mEntryA2, 2000);
-        sendUpdatedEntryAtTime(mEntryB1, 3000);
-        sendUpdatedEntryAtTime(mEntryB2, 4000); // [A1*, A2, B2, B1]
-        mBubbleData.setListener(mListener);
-
-        // Test
-        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_NOTIF_CANCEL);
-        verifyUpdateReceived();
-        assertOrderChangedTo(mBubbleB2, mBubbleB1, mBubbleA2);
     }
 
     /**
@@ -378,11 +455,12 @@ public class BubbleDataTest extends SysuiTestCase {
         sendUpdatedEntryAtTime(mEntryA1, 1000);
         sendUpdatedEntryAtTime(mEntryB1, 2000);
         sendUpdatedEntryAtTime(mEntryB2, 3000);
-        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A2, A1, B2, B1]
+        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A2, B2, B1, A1]
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(mEntryA2, BubbleController.DISMISS_NOTIF_CANCEL);
+        mBubbleData.dismissBubbleWithKey(
+                mEntryA2.getKey(), BubbleController.DISMISS_NOTIF_CANCEL);
         verifyUpdateReceived();
         assertSelectionChangedTo(mBubbleB2);
     }
@@ -390,26 +468,26 @@ public class BubbleDataTest extends SysuiTestCase {
     // COLLAPSED / UPDATE
 
     /**
-     * Verifies that bubble and group ordering may change with updates while the stack is in the
+     * Verifies that bubble ordering changes with updates while the stack is in the
      * collapsed state.
      */
     @Test
-    public void test_collapsed_updateBubble_orderAndGrouping() {
+    public void test_collapsed_updateBubble() {
         // Setup
         sendUpdatedEntryAtTime(mEntryA1, 1000);
         sendUpdatedEntryAtTime(mEntryB1, 2000);
         sendUpdatedEntryAtTime(mEntryB2, 3000);
-        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A2, A1, B2, B1]
+        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A2, B2, B1, A1]
         mBubbleData.setListener(mListener);
 
         // Test
         sendUpdatedEntryAtTime(mEntryB1, 5000);
         verifyUpdateReceived();
-        assertOrderChangedTo(mBubbleB1, mBubbleB2, mBubbleA2, mBubbleA1);
+        assertOrderChangedTo(mBubbleB1, mBubbleA2, mBubbleB2, mBubbleA1);
 
         sendUpdatedEntryAtTime(mEntryA1, 6000);
         verifyUpdateReceived();
-        assertOrderChangedTo(mBubbleA1, mBubbleA2, mBubbleB1, mBubbleB2);
+        assertOrderChangedTo(mBubbleA1, mBubbleB1, mBubbleA2, mBubbleB2);
     }
 
     /**
@@ -421,7 +499,7 @@ public class BubbleDataTest extends SysuiTestCase {
         sendUpdatedEntryAtTime(mEntryA1, 1000);
         sendUpdatedEntryAtTime(mEntryB1, 2000);
         sendUpdatedEntryAtTime(mEntryB2, 3000);
-        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A2, A1, B2, B1]
+        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A2, B2, B1, A1]
         mBubbleData.setListener(mListener);
 
         // Test
@@ -432,26 +510,6 @@ public class BubbleDataTest extends SysuiTestCase {
         sendUpdatedEntryAtTime(mEntryA1, 6000);
         verifyUpdateReceived();
         assertSelectionChangedTo(mBubbleA1);
-    }
-
-    /**
-     * Verifies that selection does not change in response to updates when collapsed, if the
-     * selected bubble is ongoing.
-     */
-    @Test
-    public void test_collapsed_updateBubble_noSelectionChanges_withOngoing() {
-        // Setup
-        setOngoing(mEntryA1, true);
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        sendUpdatedEntryAtTime(mEntryB1, 2000);
-        sendUpdatedEntryAtTime(mEntryB2, 3000);
-        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A1*, A2, B2, B1]
-        mBubbleData.setListener(mListener);
-
-        // Test
-        sendUpdatedEntryAtTime(mEntryB2, 5000); // [A1*, A2, B2, B1]
-        verifyUpdateReceived();
-        assertSelectionNotChanged();
     }
 
     /**
@@ -466,6 +524,9 @@ public class BubbleDataTest extends SysuiTestCase {
         verifyZeroInteractions(mListener);
     }
 
+    /**
+     * Verifies that removing the last bubble clears the selected bubble and collapses the stack.
+     */
     @Test
     public void test_collapsed_removeLastBubble_clearsSelectedBubble() {
         // Setup
@@ -473,32 +534,32 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
+        mBubbleData.dismissBubbleWithKey(
+                mEntryA1.getKey(), BubbleController.DISMISS_USER_GESTURE);
 
         // Verify the selection was cleared.
         verifyUpdateReceived();
-        assertSelectionCleared();
+        assertThat(mBubbleData.isExpanded()).isFalse();
+        assertThat(mBubbleData.getSelectedBubble()).isNull();
     }
 
-    // EXPANDED / ADD
+    // EXPANDED / ADD / UPDATE
 
     /**
-     * Verifies that bubbles added as part of a new group insert before existing groups while
-     * expanded.
+     * Verifies that bubbles are added at the front of the stack.
      * <p>
-     * Placement within the list is based on lastUpdate (post time of the notification), descending
+     * Placement within the list is based on {@link Bubble#getLastActivity()}, descending
      * order (with most recent first).
      *
-     * @see #test_collapsed_addBubble_sortAndGrouping()
-     * @see #test_expanded_addBubble_sortAndGrouping_existingGroup()
+     * @see #test_collapsed_addBubble()
      */
     @Test
-    public void test_expanded_addBubble_sortAndGrouping_newGroup() {
+    public void test_expanded_addBubble() {
         // Setup
         sendUpdatedEntryAtTime(mEntryA1, 1000);
         sendUpdatedEntryAtTime(mEntryA2, 2000);
         sendUpdatedEntryAtTime(mEntryB1, 3000); // [B1, A2, A1]
-        changeExpandedStateAtTime(true, 4000L);
+        changeExpandedStateAtTime(true, 4000L); // B1 marked updated at 4000L
         mBubbleData.setListener(mListener);
 
         // Test
@@ -508,61 +569,11 @@ public class BubbleDataTest extends SysuiTestCase {
     }
 
     /**
-     * Verifies that bubbles added as part of a new group insert before existing groups while
-     * expanded, but not before any groups with ongoing bubbles.
-     *
-     * @see #test_collapsed_addBubble_sortAndGrouping_withOngoing()
-     * @see #test_expanded_addBubble_sortAndGrouping_existingGroup()
-     */
-    @Test
-    public void test_expanded_addBubble_sortAndGrouping_newGroup_withOngoing() {
-        // Setup
-        setOngoing(mEntryA1, true);
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        sendUpdatedEntryAtTime(mEntryA2, 2000);
-        sendUpdatedEntryAtTime(mEntryB1, 3000); // [A1*, A2, B1]
-        changeExpandedStateAtTime(true, 4000L);
-        mBubbleData.setListener(mListener);
-
-        // Test
-        sendUpdatedEntryAtTime(mEntryC1, 4000);
-        verifyUpdateReceived();
-        assertOrderChangedTo(mBubbleA1, mBubbleA2, mBubbleC1, mBubbleB1);
-    }
-
-    /**
-     * Verifies that bubbles added as part of an existing group insert to the beginning of that
-     * group. The order of groups within the list must not change while in the expanded state.
-     *
-     * @see #test_collapsed_addBubble_sortAndGrouping()
-     * @see #test_expanded_addBubble_sortAndGrouping_newGroup()
-     */
-    @Test
-    public void test_expanded_addBubble_sortAndGrouping_existingGroup() {
-        // Setup
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        sendUpdatedEntryAtTime(mEntryA2, 2000);
-        sendUpdatedEntryAtTime(mEntryB1, 3000); // [B1, A2, A1]
-        changeExpandedStateAtTime(true, 4000L);
-        mBubbleData.setListener(mListener);
-
-        // Test
-        sendUpdatedEntryAtTime(mEntryA3, 4000);
-        verifyUpdateReceived();
-        assertOrderChangedTo(mBubbleB1, mBubbleA3, mBubbleA2, mBubbleA1);
-    }
-
-    // EXPANDED / UPDATE
-
-    /**
      * Verifies that updates to bubbles while expanded do not result in any change to sorting
-     * or grouping of bubbles or sorting of groups.
-     *
-     * @see #test_collapsed_addBubble_sortAndGrouping()
-     * @see #test_expanded_addBubble_sortAndGrouping_existingGroup()
+     * of bubbles.
      */
     @Test
-    public void test_expanded_updateBubble_sortAndGrouping_noChanges() {
+    public void test_expanded_updateBubble_noChanges() {
         // Setup
         sendUpdatedEntryAtTime(mEntryA1, 1000);
         sendUpdatedEntryAtTime(mEntryA2, 2000);
@@ -581,7 +592,6 @@ public class BubbleDataTest extends SysuiTestCase {
      * Verifies that updates to bubbles while expanded do not result in any change to selection.
      *
      * @see #test_collapsed_addBubble_selectionChanges()
-     * @see #test_collapsed_updateBubble_noSelectionChanges_withOngoing()
      */
     @Test
     public void test_expanded_updateBubble_noSelectionChanges() {
@@ -610,26 +620,25 @@ public class BubbleDataTest extends SysuiTestCase {
     // EXPANDED / REMOVE
 
     /**
-     * Verifies that removing a bubble while expanded does not result in reordering of groups
-     * or any of the remaining bubbles.
+     * Verifies that removing a bubble while expanded does not result in reordering of bubbles.
      *
-     * @see #test_collapsed_addBubble_sortAndGrouping()
-     * @see #test_expanded_addBubble_sortAndGrouping_existingGroup()
+     * @see #test_collapsed_addBubble()
      */
     @Test
-    public void test_expanded_removeBubble_sortAndGrouping() {
+    public void test_expanded_removeBubble() {
         // Setup
         sendUpdatedEntryAtTime(mEntryA1, 1000);
         sendUpdatedEntryAtTime(mEntryB1, 2000);
         sendUpdatedEntryAtTime(mEntryA2, 3000);
-        sendUpdatedEntryAtTime(mEntryB2, 4000); // [B2, B1, A2, A1]
+        sendUpdatedEntryAtTime(mEntryB2, 4000); // [B2, A2, B1, A1]
         changeExpandedStateAtTime(true, 5000L);
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(mEntryB2, BubbleController.DISMISS_USER_GESTURE);
+        mBubbleData.dismissBubbleWithKey(
+                mEntryB2.getKey(), BubbleController.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
-        assertOrderChangedTo(mBubbleB1, mBubbleA2, mBubbleA1);
+        assertOrderChangedTo(mBubbleA2, mBubbleB1, mBubbleA1);
     }
 
     /**
@@ -637,8 +646,7 @@ public class BubbleDataTest extends SysuiTestCase {
      * selected. The replacement selection is the bubble which appears at the same index as the
      * previous one, or the previous index if this was the last position.
      *
-     * @see #test_collapsed_addBubble_sortAndGrouping()
-     * @see #test_expanded_addBubble_sortAndGrouping_existingGroup()
+     * @see #test_collapsed_addBubble()
      */
     @Test
     public void test_expanded_removeBubble_selectionChanges_whenSelectedRemoved() {
@@ -648,17 +656,19 @@ public class BubbleDataTest extends SysuiTestCase {
         sendUpdatedEntryAtTime(mEntryA2, 3000);
         sendUpdatedEntryAtTime(mEntryB2, 4000);
         changeExpandedStateAtTime(true, 5000L);
-        mBubbleData.setSelectedBubble(mBubbleA2);  // [B2, B1, ^A2, A1]
+        mBubbleData.setSelectedBubble(mBubbleA2);  // [B2, A2^, B1, A1]
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(mEntryA2, BubbleController.DISMISS_USER_GESTURE);
-        verifyUpdateReceived();
-        assertSelectionChangedTo(mBubbleA1);
-
-        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
+        mBubbleData.dismissBubbleWithKey(
+                mEntryA2.getKey(), BubbleController.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
         assertSelectionChangedTo(mBubbleB1);
+
+        mBubbleData.dismissBubbleWithKey(
+                mEntryB1.getKey(), BubbleController.DISMISS_USER_GESTURE);
+        verifyUpdateReceived();
+        assertSelectionChangedTo(mBubbleA1);
     }
 
     @Test
@@ -686,10 +696,8 @@ public class BubbleDataTest extends SysuiTestCase {
      * expanded.
      * <p>
      * When the stack transitions to the collapsed state, the selected bubble is brought to the top.
-     * Bubbles within the same group should move up with it.
      * <p>
-     * When the stack transitions back to the expanded state, the previous ordering is restored, as
-     * long as no changes have been made (adds, removes or updates) while in the collapsed state.
+     * When the stack transitions back to the expanded state, this new order is kept as is.
      */
     @Test
     public void test_expansionChanges() {
@@ -698,13 +706,13 @@ public class BubbleDataTest extends SysuiTestCase {
         sendUpdatedEntryAtTime(mEntryB1, 2000);
         sendUpdatedEntryAtTime(mEntryA2, 3000);
         sendUpdatedEntryAtTime(mEntryB2, 4000);
-        changeExpandedStateAtTime(true, 5000L); // [B2=4000, B1=2000, A2=3000, A1=1000]
-        sendUpdatedEntryAtTime(mEntryB1, 6000); // [B2=4000, B1=6000*, A2=3000, A1=1000]
+        changeExpandedStateAtTime(true, 5000L); // [B2=4000, A2=3000, B1=2000, A1=1000]
+        sendUpdatedEntryAtTime(mEntryB1, 6000); // [B2=4000, A2=3000, B1=6000, A1=1000]
         setCurrentTime(7000);
         mBubbleData.setSelectedBubble(mBubbleA2);
         mBubbleData.setListener(mListener);
         assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleB2, mBubbleB1, mBubbleA2, mBubbleA1));
+                ImmutableList.of(mBubbleB2, mBubbleA2, mBubbleB1, mBubbleA1));
 
         // Test
 
@@ -712,26 +720,17 @@ public class BubbleDataTest extends SysuiTestCase {
         // stack is expanded. When next collapsed, sorting will be applied and saved, just prior
         // to moving the selected bubble to the top (first).
         //
-        // In this case, the expected re-expand state will be: [B1, B2, A2*, A1]
-        //
-        // That state is restored as long as no changes occur (add/remove/update) while in
-        // the collapsed state.
+        // In this case, the expected re-expand state will be: [A2^, B1, B2, A1]
         //
         // collapse -> selected bubble (A2) moves first.
         changeExpandedStateAtTime(false, 8000L);
         verifyUpdateReceived();
-        assertOrderChangedTo(mBubbleA2, mBubbleA1, mBubbleB1, mBubbleB2);
-
-        // expand -> "original" order/grouping restored
-        changeExpandedStateAtTime(true, 10000L);
-        verifyUpdateReceived();
-        assertOrderChangedTo(mBubbleB1, mBubbleB2, mBubbleA2, mBubbleA1);
+        assertOrderChangedTo(mBubbleA2, mBubbleB1, mBubbleB2, mBubbleA1);
     }
 
     /**
      * When a change occurs while collapsed (any update, add, remove), the previous expanded
-     * order and grouping becomes invalidated, and the order and grouping when next expanded will
-     * remain the same as collapsed.
+     * order becomes invalidated, the stack is resorted and will reflect that when next expanded.
      */
     @Test
     public void test_expansionChanges_withUpdatesWhileCollapsed() {
@@ -740,10 +739,10 @@ public class BubbleDataTest extends SysuiTestCase {
         sendUpdatedEntryAtTime(mEntryB1, 2000);
         sendUpdatedEntryAtTime(mEntryA2, 3000);
         sendUpdatedEntryAtTime(mEntryB2, 4000);
-        changeExpandedStateAtTime(true, 5000L); // [B2=4000, B1=2000, A2=3000, A1=1000]
-        sendUpdatedEntryAtTime(mEntryB1, 6000); // [B2=4000, B1=*6000, A2=3000, A1=1000]
+        changeExpandedStateAtTime(true, 5000L); // [B2=4000, A2=3000,  B1=2000, A1=1000]
+        sendUpdatedEntryAtTime(mEntryB1, 6000); // [B2=4000, A2=3000,  B1=6000, A1=1000]
         setCurrentTime(7000);
-        mBubbleData.setSelectedBubble(mBubbleA2); // [B2, B1, ^A2, A1]
+        mBubbleData.setSelectedBubble(mBubbleA2); // [B2, A2^, B1, A1]
         mBubbleData.setListener(mListener);
 
         // Test
@@ -752,7 +751,7 @@ public class BubbleDataTest extends SysuiTestCase {
         // stack is expanded. When next collapsed, sorting will be applied and saved, just prior
         // to moving the selected bubble to the top (first).
         //
-        // In this case, the expected re-expand state will be: [B1, B2, A2*, A1]
+        // In this case, the expected re-expand state will be: [A2^, B1, B2, A1]
         //
         // That state is restored as long as no changes occur (add/remove/update) while in
         // the collapsed state.
@@ -760,11 +759,12 @@ public class BubbleDataTest extends SysuiTestCase {
         // collapse -> selected bubble (A2) moves first.
         changeExpandedStateAtTime(false, 8000L);
         verifyUpdateReceived();
-        assertOrderChangedTo(mBubbleA2, mBubbleA1, mBubbleB1, mBubbleB2);
+        assertOrderChangedTo(mBubbleA2, mBubbleB1, mBubbleB2, mBubbleA1);
 
         // An update occurs, which causes sorting, and this invalidates the previously saved order.
-        sendUpdatedEntryAtTime(mEntryA2, 9000);
+        sendUpdatedEntryAtTime(mEntryA1, 9000);
         verifyUpdateReceived();
+        assertOrderChangedTo(mBubbleA1, mBubbleA2, mBubbleB1, mBubbleB2);
 
         // No order changes when expanding because the new sorted order remains.
         changeExpandedStateAtTime(true, 10000L);
@@ -780,7 +780,8 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
+        mBubbleData.dismissBubbleWithKey(
+                mEntryA1.getKey(), BubbleController.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
         assertExpandedChangedTo(false);
     }
@@ -835,21 +836,18 @@ public class BubbleDataTest extends SysuiTestCase {
         assertThat(update.expanded).named("expanded").isEqualTo(expected);
     }
 
+    private void assertOverflowChangedTo(ImmutableList<Bubble> bubbles) {
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.overflowBubbles).isEqualTo(bubbles);
+    }
+
 
     private NotificationEntry createBubbleEntry(int userId, String notifKey, String packageName) {
         return createBubbleEntry(userId, notifKey, packageName, 1000);
     }
 
     private void setPostTime(NotificationEntry entry, long postTime) {
-        when(entry.notification.getPostTime()).thenReturn(postTime);
-    }
-
-    private void setOngoing(NotificationEntry entry, boolean ongoing) {
-        if (ongoing) {
-            entry.notification.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
-        } else {
-            entry.notification.getNotification().flags &= ~Notification.FLAG_FOREGROUND_SERVICE;
-        }
+        when(entry.getSbn().getPostTime()).thenReturn(postTime);
     }
 
     /**
@@ -860,10 +858,9 @@ public class BubbleDataTest extends SysuiTestCase {
     private NotificationEntry createBubbleEntry(int userId, String notifKey, String packageName,
             long postTime) {
         // BubbleMetadata
-        Notification.BubbleMetadata bubbleMetadata = new Notification.BubbleMetadata.Builder()
-                .setIntent(mExpandIntent)
+        Notification.BubbleMetadata bubbleMetadata = new Notification.BubbleMetadata.Builder(
+                mExpandIntent, Icon.createWithResource("", 0))
                 .setDeleteIntent(mDeleteIntent)
-                .setIcon(Icon.createWithResource("", 0))
                 .build();
         // Notification -> BubbleMetadata
         Notification notification = mNotificationTestHelper.createNotification(false,
@@ -878,7 +875,7 @@ public class BubbleDataTest extends SysuiTestCase {
         when(sbn.getNotification()).thenReturn(notification);
 
         // NotificationEntry -> StatusBarNotification -> Notification -> BubbleMetadata
-        return new NotificationEntry(sbn);
+        return new NotificationEntryBuilder().setSbn(sbn).build();
     }
 
     private void setCurrentTime(long time) {
@@ -887,7 +884,11 @@ public class BubbleDataTest extends SysuiTestCase {
 
     private void sendUpdatedEntryAtTime(NotificationEntry entry, long postTime) {
         setPostTime(entry, postTime);
-        mBubbleData.notificationEntryUpdated(entry, /* suppressFlyout=*/ false);
+        // BubbleController calls this:
+        Bubble b = mBubbleData.getOrCreateBubble(entry, null /* persistedBubble */);
+        // And then this
+        mBubbleData.notificationEntryUpdated(b, false /* suppressFlyout*/,
+                true /* showInShade */);
     }
 
     private void changeExpandedStateAtTime(boolean shouldBeExpanded, long time) {

@@ -113,7 +113,7 @@ import javax.net.ssl.TrustManagerFactory;
  *     <li>
  *      <p>
  *      Send the certificate request to the trusted Certificate Authority for signature. 
- *      One may choose to act as her own CA and sign the certificate request using a PKI 
+ *      One may choose to act as their own CA and sign the certificate request using a PKI
  *      tool, such as OpenSSL.
  *      </p>
  *     </li>

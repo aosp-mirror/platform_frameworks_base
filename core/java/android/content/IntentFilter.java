@@ -17,6 +17,7 @@
 package android.content;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.Uri;
@@ -40,8 +41,11 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 /**
  * Structured description of Intent values to be matched.  An IntentFilter can
@@ -153,7 +157,9 @@ public class IntentFilter implements Parcelable {
     private static final String AUTH_STR = "auth";
     private static final String SSP_STR = "ssp";
     private static final String SCHEME_STR = "scheme";
+    private static final String STATIC_TYPE_STR = "staticType";
     private static final String TYPE_STR = "type";
+    private static final String GROUP_STR = "group";
     private static final String CAT_STR = "cat";
     private static final String NAME_STR = "name";
     private static final String ACTION_STR = "action";
@@ -270,6 +276,14 @@ public class IntentFilter implements Parcelable {
      */
     public static final String SCHEME_HTTPS = "https";
 
+    /**
+     * The value to indicate a wildcard for incoming match arguments.
+     * @hide
+     */
+    public static final String WILDCARD = "*";
+    /** @hide */
+    public static final String WILDCARD_PATH = "/" + WILDCARD;
+
     private int mPriority;
     @UnsupportedAppUsage
     private int mOrder;
@@ -280,8 +294,11 @@ public class IntentFilter implements Parcelable {
     private ArrayList<PatternMatcher> mDataSchemeSpecificParts = null;
     private ArrayList<AuthorityEntry> mDataAuthorities = null;
     private ArrayList<PatternMatcher> mDataPaths = null;
+    private ArrayList<String> mStaticDataTypes = null;
     private ArrayList<String> mDataTypes = null;
-    private boolean mHasPartialTypes = false;
+    private ArrayList<String> mMimeGroups = null;
+    private boolean mHasStaticPartialTypes = false;
+    private boolean mHasDynamicPartialTypes = false;
 
     private static final int STATE_VERIFY_AUTO         = 0x00000001;
     private static final int STATE_NEED_VERIFY         = 0x00000010;
@@ -454,6 +471,9 @@ public class IntentFilter implements Parcelable {
         if (o.mCategories != null) {
             mCategories = new ArrayList<String>(o.mCategories);
         }
+        if (o.mStaticDataTypes != null) {
+            mStaticDataTypes = new ArrayList<String>(o.mStaticDataTypes);
+        }
         if (o.mDataTypes != null) {
             mDataTypes = new ArrayList<String>(o.mDataTypes);
         }
@@ -469,7 +489,11 @@ public class IntentFilter implements Parcelable {
         if (o.mDataPaths != null) {
             mDataPaths = new ArrayList<PatternMatcher>(o.mDataPaths);
         }
-        mHasPartialTypes = o.mHasPartialTypes;
+        if (o.mMimeGroups != null) {
+            mMimeGroups = new ArrayList<String>(o.mMimeGroups);
+        }
+        mHasStaticPartialTypes = o.mHasStaticPartialTypes;
+        mHasDynamicPartialTypes = o.mHasDynamicPartialTypes;
         mVerifyState = o.mVerifyState;
         mInstantAppVisibility = o.mInstantAppVisibility;
     }
@@ -744,6 +768,31 @@ public class IntentFilter implements Parcelable {
      * @return True if the action is listed in the filter.
      */
     public final boolean matchAction(String action) {
+        return matchAction(action, false /*wildcardSupported*/, null /*ignoreActions*/);
+    }
+
+    /**
+     * Variant of {@link #matchAction(String)} that allows a wildcard for the provided action.
+     * @param wildcardSupported if true, will allow action to use wildcards
+     * @param ignoreActions if not null, the set of actions to should not be considered valid while
+     *                      calculating the match
+     */
+    private boolean matchAction(String action, boolean wildcardSupported,
+            @Nullable Collection<String> ignoreActions) {
+        if (wildcardSupported && WILDCARD.equals(action)) {
+            if (ignoreActions == null) {
+                return !mActions.isEmpty();
+            }
+            for (int i = mActions.size() - 1; i >= 0; i--) {
+                if (!ignoreActions.contains(mActions.get(i))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (ignoreActions != null && ignoreActions.contains(action)) {
+            return false;
+        }
         return hasAction(action);
     }
 
@@ -776,25 +825,108 @@ public class IntentFilter implements Parcelable {
      */
     public final void addDataType(String type)
         throws MalformedMimeTypeException {
+        processMimeType(type, (internalType, isPartial) -> {
+            if (mDataTypes == null) {
+                mDataTypes = new ArrayList<>();
+            }
+            if (mStaticDataTypes == null) {
+                mStaticDataTypes = new ArrayList<>();
+            }
+
+            if (mDataTypes.contains(internalType)) {
+                return;
+            }
+
+            mDataTypes.add(internalType.intern());
+            mStaticDataTypes.add(internalType.intern());
+            mHasStaticPartialTypes = mHasStaticPartialTypes || isPartial;
+        });
+    }
+
+    /**
+     * Add a new Intent data type <em>from MIME group</em> to match against.  If any types are
+     * included in the filter, then an Intent's data must be <em>either</em>
+     * one of these types <em>or</em> a matching scheme.  If no data types
+     * are included, then an Intent will only match if it specifies no data.
+     *
+     * <p><em>Note: MIME type matching in the Android framework is
+     * case-sensitive, unlike formal RFC MIME types.  As a result,
+     * you should always write your MIME types with lower case letters,
+     * and any MIME types you receive from outside of Android should be
+     * converted to lower case before supplying them here.</em></p>
+     *
+     * <p>Throws {@link MalformedMimeTypeException} if the given MIME type is
+     * not syntactically correct.
+     *
+     * @param type Name of the data type to match, such as "vnd.android.cursor.dir/person".
+     *
+     * @see #clearDynamicDataTypes()
+     * @hide
+     */
+    public final void addDynamicDataType(String type)
+            throws MalformedMimeTypeException {
+        processMimeType(type, (internalType, isPartial) -> {
+            if (mDataTypes == null) {
+                mDataTypes = new ArrayList<>();
+            }
+
+            if (!mDataTypes.contains(internalType)) {
+                mDataTypes.add(internalType.intern());
+
+                mHasDynamicPartialTypes = mHasDynamicPartialTypes || isPartial;
+            }
+        });
+    }
+
+    /**
+     * Process mime type - convert to representation used internally and check if type is partial,
+     * and then call provided action
+     */
+    private void processMimeType(String type, BiConsumer<String, Boolean> action)
+            throws MalformedMimeTypeException {
         final int slashpos = type.indexOf('/');
         final int typelen = type.length();
-        if (slashpos > 0 && typelen >= slashpos+2) {
-            if (mDataTypes == null) mDataTypes = new ArrayList<String>();
-            if (typelen == slashpos+2 && type.charAt(slashpos+1) == '*') {
-                String str = type.substring(0, slashpos);
-                if (!mDataTypes.contains(str)) {
-                    mDataTypes.add(str.intern());
-                }
-                mHasPartialTypes = true;
-            } else {
-                if (!mDataTypes.contains(type)) {
-                    mDataTypes.add(type.intern());
-                }
-            }
+        if (slashpos <= 0 || typelen < slashpos + 2) {
+            throw new MalformedMimeTypeException(type);
+        }
+
+        String internalType = type;
+        boolean isPartialType = false;
+        if (typelen == slashpos + 2 && type.charAt(slashpos + 1) == '*') {
+            internalType = type.substring(0, slashpos);
+            isPartialType = true;
+        }
+
+        action.accept(internalType, isPartialType);
+    }
+
+    /**
+     * Remove all previously added Intent data types from IntentFilter.
+     *
+     * @see #addDynamicDataType(String)
+     * @hide
+     */
+    public final void clearDynamicDataTypes() {
+        if (mDataTypes == null) {
             return;
         }
 
-        throw new MalformedMimeTypeException(type);
+        if (mStaticDataTypes != null) {
+            mDataTypes.clear();
+            mDataTypes.addAll(mStaticDataTypes);
+        } else {
+            mDataTypes = null;
+        }
+
+        mHasDynamicPartialTypes = false;
+    }
+
+    /**
+     * Return the number of static data types in the filter.
+     * @hide
+     */
+    public int countStaticDataTypes() {
+        return mStaticDataTypes != null ? mStaticDataTypes.size() : 0;
     }
 
     /**
@@ -813,6 +945,16 @@ public class IntentFilter implements Parcelable {
     @UnsupportedAppUsage
     public final boolean hasExactDataType(String type) {
         return mDataTypes != null && mDataTypes.contains(type);
+    }
+
+    /** @hide */
+    public final boolean hasExactDynamicDataType(String type) {
+        return hasExactDataType(type) && !hasExactStaticDataType(type);
+    }
+
+    /** @hide */
+    public final boolean hasExactStaticDataType(String type) {
+        return mStaticDataTypes != null && mStaticDataTypes.contains(type);
     }
 
     /**
@@ -834,6 +976,44 @@ public class IntentFilter implements Parcelable {
      */
     public final Iterator<String> typesIterator() {
         return mDataTypes != null ? mDataTypes.iterator() : null;
+    }
+
+    /**
+     * Return copy of filter's data types.
+     * @hide
+     */
+    public final List<String> dataTypes() {
+        return mDataTypes != null ? new ArrayList<>(mDataTypes) : null;
+    }
+
+    /** @hide */
+    public final void addMimeGroup(String name) {
+        if (mMimeGroups == null) {
+            mMimeGroups = new ArrayList<>();
+        }
+        if (!mMimeGroups.contains(name)) {
+            mMimeGroups.add(name);
+        }
+    }
+
+    /** @hide */
+    public final boolean hasMimeGroup(String name) {
+        return mMimeGroups != null && mMimeGroups.contains(name);
+    }
+
+    /** @hide */
+    public final String getMimeGroup(int index) {
+        return mMimeGroups.get(index);
+    }
+
+    /** @hide */
+    public final int countMimeGroups() {
+        return mMimeGroups != null ? mMimeGroups.size() : 0;
+    }
+
+    /** @hide */
+    public final Iterator<String> mimeGroupsIterator() {
+        return mMimeGroups != null ? mMimeGroups.iterator() : null;
     }
 
     /**
@@ -924,7 +1104,7 @@ public class IntentFilter implements Parcelable {
             dest.writeInt(mPort);
         }
 
-        void writeToProto(ProtoOutputStream proto, long fieldId) {
+        void dumpDebug(ProtoOutputStream proto, long fieldId) {
             long token = proto.start(fieldId);
             // The original host information is already contained in host and wild, no output now.
             proto.write(AuthorityEntryProto.HOST, mHost);
@@ -975,22 +1155,41 @@ public class IntentFilter implements Parcelable {
          * {@link IntentFilter#MATCH_CATEGORY_HOST}.
          */
         public int match(Uri data) {
+            return match(data, false);
+        }
+
+        /**
+         * Variant of {@link #match(Uri)} that supports wildcards on the scheme, host and
+         * path of the provided {@link Uri}
+         *
+         * @param wildcardSupported if true, will allow parameters to use wildcards
+         * @hide
+         */
+        public int match(Uri data, boolean wildcardSupported) {
             String host = data.getHost();
             if (host == null) {
-                return NO_MATCH_DATA;
+                if (wildcardSupported && mWild) {
+                    // special case, if no host is provided, but the Authority is wildcard, match
+                    return MATCH_CATEGORY_HOST;
+                } else {
+                    return NO_MATCH_DATA;
+                }
             }
             if (false) Log.v("IntentFilter",
                     "Match host " + host + ": " + mHost);
-            if (mWild) {
-                if (host.length() < mHost.length()) {
+            if (!wildcardSupported || !WILDCARD.equals(host)) {
+                if (mWild) {
+                    if (host.length() < mHost.length()) {
+                        return NO_MATCH_DATA;
+                    }
+                    host = host.substring(host.length() - mHost.length());
+                }
+                if (host.compareToIgnoreCase(mHost) != 0) {
                     return NO_MATCH_DATA;
                 }
-                host = host.substring(host.length()-mHost.length());
             }
-            if (host.compareToIgnoreCase(mHost) != 0) {
-                return NO_MATCH_DATA;
-            }
-            if (mPort >= 0) {
+            // if we're dealing with wildcard support, we ignore ports
+            if (!wildcardSupported && mPort >= 0) {
                 if (mPort != data.getPort()) {
                     return NO_MATCH_DATA;
                 }
@@ -1062,8 +1261,20 @@ public class IntentFilter implements Parcelable {
      *         filter.
      */
     public final boolean hasDataSchemeSpecificPart(String data) {
+        return hasDataSchemeSpecificPart(data, false);
+    }
+
+    /**
+     * Variant of {@link #hasDataSchemeSpecificPart(String)} that supports wildcards on the provided
+     * ssp.
+     * @param supportWildcards if true, will allow parameters to use wildcards
+     */
+    private boolean hasDataSchemeSpecificPart(String data, boolean supportWildcards) {
         if (mDataSchemeSpecificParts == null) {
             return false;
+        }
+        if (supportWildcards && WILDCARD.equals(data) && mDataSchemeSpecificParts.size() > 0) {
+            return true;
         }
         final int numDataSchemeSpecificParts = mDataSchemeSpecificParts.size();
         for (int i = 0; i < numDataSchemeSpecificParts; i++) {
@@ -1243,8 +1454,20 @@ public class IntentFilter implements Parcelable {
      *         filter.
      */
     public final boolean hasDataPath(String data) {
+        return hasDataPath(data, false);
+    }
+
+    /**
+     * Variant of {@link #hasDataPath(String)} that supports wildcards on the provided scheme, host,
+     * and path.
+     * @param wildcardSupported if true, will allow parameters to use wildcards
+     */
+    private boolean hasDataPath(String data, boolean wildcardSupported) {
         if (mDataPaths == null) {
             return false;
+        }
+        if (wildcardSupported && WILDCARD_PATH.equals(data)) {
+            return true;
         }
         final int numDataPaths = mDataPaths.size();
         for (int i = 0; i < numDataPaths; i++) {
@@ -1290,13 +1513,24 @@ public class IntentFilter implements Parcelable {
      * {@link #MATCH_CATEGORY_PORT}, {@link #NO_MATCH_DATA}.
      */
     public final int matchDataAuthority(Uri data) {
-        if (mDataAuthorities == null || data == null) {
+        return matchDataAuthority(data, false);
+    }
+
+    /**
+     * Variant of {@link #matchDataAuthority(Uri)} that allows wildcard matching of the provided
+     * authority.
+     *
+     * @param wildcardSupported if true, will allow parameters to use wildcards
+     * @hide
+     */
+    public final int matchDataAuthority(Uri data, boolean wildcardSupported) {
+        if (data == null || mDataAuthorities == null) {
             return NO_MATCH_DATA;
         }
         final int numDataAuthorities = mDataAuthorities.size();
         for (int i = 0; i < numDataAuthorities; i++) {
             final AuthorityEntry ae = mDataAuthorities.get(i);
-            int match = ae.match(data);
+            int match = ae.match(data, wildcardSupported);
             if (match >= 0) {
                 return match;
             }
@@ -1343,18 +1577,29 @@ public class IntentFilter implements Parcelable {
      * @see #match
      */
     public final int matchData(String type, String scheme, Uri data) {
-        final ArrayList<String> types = mDataTypes;
+        return matchData(type, scheme, data, false);
+    }
+
+    /**
+     * Variant of {@link #matchData(String, String, Uri)} that allows wildcard matching
+     * of the provided type, scheme, host and path parameters.
+     * @param wildcardSupported if true, will allow parameters to use wildcards
+     */
+    private int matchData(String type, String scheme, Uri data, boolean wildcardSupported) {
+        final boolean wildcardWithMimegroups = wildcardSupported && countMimeGroups() != 0;
+        final List<String> types = mDataTypes;
         final ArrayList<String> schemes = mDataSchemes;
 
         int match = MATCH_CATEGORY_EMPTY;
 
-        if (types == null && schemes == null) {
+        if (!wildcardWithMimegroups && types == null && schemes == null) {
             return ((type == null && data == null)
                 ? (MATCH_CATEGORY_EMPTY+MATCH_ADJUSTMENT_NORMAL) : NO_MATCH_DATA);
         }
 
         if (schemes != null) {
-            if (schemes.contains(scheme != null ? scheme : "")) {
+            if (schemes.contains(scheme != null ? scheme : "")
+                    || wildcardSupported && WILDCARD.equals(scheme)) {
                 match = MATCH_CATEGORY_SCHEME;
             } else {
                 return NO_MATCH_DATA;
@@ -1362,19 +1607,19 @@ public class IntentFilter implements Parcelable {
 
             final ArrayList<PatternMatcher> schemeSpecificParts = mDataSchemeSpecificParts;
             if (schemeSpecificParts != null && data != null) {
-                match = hasDataSchemeSpecificPart(data.getSchemeSpecificPart())
+                match = hasDataSchemeSpecificPart(data.getSchemeSpecificPart(), wildcardSupported)
                         ? MATCH_CATEGORY_SCHEME_SPECIFIC_PART : NO_MATCH_DATA;
             }
             if (match != MATCH_CATEGORY_SCHEME_SPECIFIC_PART) {
                 // If there isn't any matching ssp, we need to match an authority.
                 final ArrayList<AuthorityEntry> authorities = mDataAuthorities;
                 if (authorities != null) {
-                    int authMatch = matchDataAuthority(data);
+                    int authMatch = matchDataAuthority(data, wildcardSupported);
                     if (authMatch >= 0) {
                         final ArrayList<PatternMatcher> paths = mDataPaths;
                         if (paths == null) {
                             match = authMatch;
-                        } else if (hasDataPath(data.getPath())) {
+                        } else if (hasDataPath(data.getPath(), wildcardSupported)) {
                             match = MATCH_CATEGORY_PATH;
                         } else {
                             return NO_MATCH_DATA;
@@ -1396,12 +1641,15 @@ public class IntentFilter implements Parcelable {
             // to force everyone to say they handle content: or file: URIs.
             if (scheme != null && !"".equals(scheme)
                     && !"content".equals(scheme)
-                    && !"file".equals(scheme)) {
+                    && !"file".equals(scheme)
+                    && !(wildcardSupported && WILDCARD.equals(scheme))) {
                 return NO_MATCH_DATA;
             }
         }
 
-        if (types != null) {
+        if (wildcardWithMimegroups) {
+            return MATCH_CATEGORY_TYPE;
+        } else if (types != null) {
             if (findMimeType(type)) {
                 match = MATCH_CATEGORY_TYPE;
             } else {
@@ -1556,13 +1804,30 @@ public class IntentFilter implements Parcelable {
      */
     public final int match(String action, String type, String scheme,
             Uri data, Set<String> categories, String logTag) {
-        if (action != null && !matchAction(action)) {
+        return match(action, type, scheme, data, categories, logTag, false /*supportWildcards*/,
+                null /*ignoreActions*/);
+    }
+
+    /**
+     * Variant of {@link #match(ContentResolver, Intent, boolean, String)} that supports wildcards
+     * in the action, type, scheme, host and path.
+     * @param supportWildcards if true, will allow supported parameters to use wildcards to match
+     *                         this filter
+     * @param ignoreActions a collection of actions that, if not null should be ignored and not used
+     *                      if provided as the matching action or the set of actions defined by this
+     *                      filter
+     * @hide
+     */
+    public final int match(String action, String type, String scheme,
+            Uri data, Set<String> categories, String logTag, boolean supportWildcards,
+            @Nullable Collection<String> ignoreActions) {
+        if (action != null && !matchAction(action, supportWildcards, ignoreActions)) {
             if (false) Log.v(
                 logTag, "No matching action " + action + " for " + this);
             return NO_MATCH_ACTION;
         }
 
-        int dataMatch = matchData(type, scheme, data);
+        int dataMatch = matchData(type, scheme, data, supportWildcards);
         if (dataMatch < 0) {
             if (false) {
                 if (dataMatch == NO_MATCH_TYPE) {
@@ -1617,13 +1882,12 @@ public class IntentFilter implements Parcelable {
             serializer.attribute(null, NAME_STR, mCategories.get(i));
             serializer.endTag(null, CAT_STR);
         }
-        N = countDataTypes();
+        writeDataTypesToXml(serializer);
+        N = countMimeGroups();
         for (int i=0; i<N; i++) {
-            serializer.startTag(null, TYPE_STR);
-            String type = mDataTypes.get(i);
-            if (type.indexOf('/') < 0) type = type + "/*";
-            serializer.attribute(null, NAME_STR, type);
-            serializer.endTag(null, TYPE_STR);
+            serializer.startTag(null, GROUP_STR);
+            serializer.attribute(null, NAME_STR, mMimeGroups.get(i));
+            serializer.endTag(null, GROUP_STR);
         }
         N = countDataSchemes();
         for (int i=0; i<N; i++) {
@@ -1683,6 +1947,46 @@ public class IntentFilter implements Parcelable {
         }
     }
 
+    /**
+     * Write data types (both static and dynamic) to XML.
+     * In implementation we rely on two facts:
+     * - {@link #mStaticDataTypes} is subsequence of {@link #mDataTypes}
+     * - both {@link #mStaticDataTypes} and {@link #mDataTypes} does not contain duplicates
+     */
+    private void writeDataTypesToXml(XmlSerializer serializer) throws IOException {
+        if (mStaticDataTypes == null) {
+            return;
+        }
+
+        int i = 0;
+        for (String staticType: mStaticDataTypes) {
+            while (!mDataTypes.get(i).equals(staticType)) {
+                writeDataTypeToXml(serializer, mDataTypes.get(i), TYPE_STR);
+                i++;
+            }
+
+            writeDataTypeToXml(serializer, staticType, STATIC_TYPE_STR);
+            i++;
+        }
+
+        while (i < mDataTypes.size()) {
+            writeDataTypeToXml(serializer, mDataTypes.get(i), TYPE_STR);
+            i++;
+        }
+    }
+
+    private void writeDataTypeToXml(XmlSerializer serializer, String type, String tag)
+            throws IOException {
+        serializer.startTag(null, tag);
+
+        if (type.indexOf('/') < 0) {
+            type = type + "/*";
+        }
+
+        serializer.attribute(null, NAME_STR, type);
+        serializer.endTag(null, tag);
+    }
+
     public void readFromXml(XmlPullParser parser) throws XmlPullParserException,
             IOException {
         String autoVerify = parser.getAttributeValue(null, AUTO_VERIFY_STR);
@@ -1709,13 +2013,26 @@ public class IntentFilter implements Parcelable {
                 if (name != null) {
                     addCategory(name);
                 }
-            } else if (tagName.equals(TYPE_STR)) {
+            } else if (tagName.equals(STATIC_TYPE_STR)) {
                 String name = parser.getAttributeValue(null, NAME_STR);
                 if (name != null) {
                     try {
                         addDataType(name);
                     } catch (MalformedMimeTypeException e) {
                     }
+                }
+            } else if (tagName.equals(TYPE_STR)) {
+                String name = parser.getAttributeValue(null, NAME_STR);
+                if (name != null) {
+                    try {
+                        addDynamicDataType(name);
+                    } catch (MalformedMimeTypeException e) {
+                    }
+                }
+            } else if (tagName.equals(GROUP_STR)) {
+                String name = parser.getAttributeValue(null, NAME_STR);
+                if (name != null) {
+                    addMimeGroup(name);
                 }
             } else if (tagName.equals(SCHEME_STR)) {
                 String name = parser.getAttributeValue(null, NAME_STR);
@@ -1758,7 +2075,7 @@ public class IntentFilter implements Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         if (mActions.size() > 0) {
             Iterator<String> it = mActions.iterator();
@@ -1781,19 +2098,19 @@ public class IntentFilter implements Parcelable {
         if (mDataSchemeSpecificParts != null) {
             Iterator<PatternMatcher> it = mDataSchemeSpecificParts.iterator();
             while (it.hasNext()) {
-                it.next().writeToProto(proto, IntentFilterProto.DATA_SCHEME_SPECS);
+                it.next().dumpDebug(proto, IntentFilterProto.DATA_SCHEME_SPECS);
             }
         }
         if (mDataAuthorities != null) {
             Iterator<AuthorityEntry> it = mDataAuthorities.iterator();
             while (it.hasNext()) {
-                it.next().writeToProto(proto, IntentFilterProto.DATA_AUTHORITIES);
+                it.next().dumpDebug(proto, IntentFilterProto.DATA_AUTHORITIES);
             }
         }
         if (mDataPaths != null) {
             Iterator<PatternMatcher> it = mDataPaths.iterator();
             while (it.hasNext()) {
-                it.next().writeToProto(proto, IntentFilterProto.DATA_PATHS);
+                it.next().dumpDebug(proto, IntentFilterProto.DATA_PATHS);
             }
         }
         if (mDataTypes != null) {
@@ -1802,9 +2119,15 @@ public class IntentFilter implements Parcelable {
                 proto.write(IntentFilterProto.DATA_TYPES, it.next());
             }
         }
-        if (mPriority != 0 || mHasPartialTypes) {
+        if (mMimeGroups != null) {
+            Iterator<String> it = mMimeGroups.iterator();
+            while (it.hasNext()) {
+                proto.write(IntentFilterProto.MIME_GROUPS, it.next());
+            }
+        }
+        if (mPriority != 0 || hasPartialTypes()) {
             proto.write(IntentFilterProto.PRIORITY, mPriority);
-            proto.write(IntentFilterProto.HAS_PARTIAL_TYPES, mHasPartialTypes);
+            proto.write(IntentFilterProto.HAS_PARTIAL_TYPES, hasPartialTypes());
         }
         proto.write(IntentFilterProto.GET_AUTO_VERIFY, getAutoVerify());
         proto.end(token);
@@ -1871,20 +2194,45 @@ public class IntentFilter implements Parcelable {
                 du.println(sb.toString());
             }
         }
-        if (mDataTypes != null) {
-            Iterator<String> it = mDataTypes.iterator();
+        if (mStaticDataTypes != null) {
+            Iterator<String> it = mStaticDataTypes.iterator();
             while (it.hasNext()) {
                 sb.setLength(0);
-                sb.append(prefix); sb.append("Type: \"");
-                        sb.append(it.next()); sb.append("\"");
+                sb.append(prefix); sb.append("StaticType: \"");
+                sb.append(it.next()); sb.append("\"");
                 du.println(sb.toString());
             }
         }
-        if (mPriority != 0 || mOrder != 0 || mHasPartialTypes) {
+        if (mDataTypes != null) {
+            Iterator<String> it = mDataTypes.iterator();
+            while (it.hasNext()) {
+                String dataType = it.next();
+                if (hasExactStaticDataType(dataType)) {
+                    continue;
+                }
+
+                sb.setLength(0);
+                sb.append(prefix); sb.append("Type: \"");
+                sb.append(dataType); sb.append("\"");
+                du.println(sb.toString());
+            }
+        }
+        if (mMimeGroups != null) {
+            Iterator<String> it = mMimeGroups.iterator();
+            while (it.hasNext()) {
+                sb.setLength(0);
+                sb.append(prefix); sb.append("MimeGroup: \"");
+                sb.append(it.next()); sb.append("\"");
+                du.println(sb.toString());
+            }
+        }
+        if (mPriority != 0 || mOrder != 0 || hasPartialTypes()) {
             sb.setLength(0);
-            sb.append(prefix); sb.append("mPriority="); sb.append(mPriority);
-                    sb.append(", mOrder="); sb.append(mOrder);
-                    sb.append(", mHasPartialTypes="); sb.append(mHasPartialTypes);
+            sb.append(prefix);
+            sb.append("mPriority="); sb.append(mPriority);
+            sb.append(", mOrder="); sb.append(mOrder);
+            sb.append(", mHasStaticPartialTypes="); sb.append(mHasStaticPartialTypes);
+            sb.append(", mHasDynamicPartialTypes="); sb.append(mHasDynamicPartialTypes);
             du.println(sb.toString());
         }
         if (getAutoVerify()) {
@@ -1923,9 +2271,21 @@ public class IntentFilter implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+        if (mStaticDataTypes != null) {
+            dest.writeInt(1);
+            dest.writeStringList(mStaticDataTypes);
+        } else {
+            dest.writeInt(0);
+        }
         if (mDataTypes != null) {
             dest.writeInt(1);
             dest.writeStringList(mDataTypes);
+        } else {
+            dest.writeInt(0);
+        }
+        if (mMimeGroups != null) {
+            dest.writeInt(1);
+            dest.writeStringList(mMimeGroups);
         } else {
             dest.writeInt(0);
         }
@@ -1957,7 +2317,8 @@ public class IntentFilter implements Parcelable {
             dest.writeInt(0);
         }
         dest.writeInt(mPriority);
-        dest.writeInt(mHasPartialTypes ? 1 : 0);
+        dest.writeInt(mHasStaticPartialTypes ? 1 : 0);
+        dest.writeInt(mHasDynamicPartialTypes ? 1 : 0);
         dest.writeInt(getAutoVerify() ? 1 : 0);
         dest.writeInt(mInstantAppVisibility);
         dest.writeInt(mOrder);
@@ -2002,8 +2363,16 @@ public class IntentFilter implements Parcelable {
             source.readStringList(mDataSchemes);
         }
         if (source.readInt() != 0) {
+            mStaticDataTypes = new ArrayList<String>();
+            source.readStringList(mStaticDataTypes);
+        }
+        if (source.readInt() != 0) {
             mDataTypes = new ArrayList<String>();
             source.readStringList(mDataTypes);
+        }
+        if (source.readInt() != 0) {
+            mMimeGroups = new ArrayList<String>();
+            source.readStringList(mMimeGroups);
         }
         int N = source.readInt();
         if (N > 0) {
@@ -2027,10 +2396,15 @@ public class IntentFilter implements Parcelable {
             }
         }
         mPriority = source.readInt();
-        mHasPartialTypes = source.readInt() > 0;
+        mHasStaticPartialTypes = source.readInt() > 0;
+        mHasDynamicPartialTypes = source.readInt() > 0;
         setAutoVerify(source.readInt() > 0);
         setVisibilityToInstantApp(source.readInt());
         mOrder = source.readInt();
+    }
+
+    private boolean hasPartialTypes() {
+        return mHasStaticPartialTypes || mHasDynamicPartialTypes;
     }
 
     private final boolean findMimeType(String type) {
@@ -2051,13 +2425,13 @@ public class IntentFilter implements Parcelable {
         }
 
         // Deal with this IntentFilter wanting to match every Intent type.
-        if (mHasPartialTypes && t.contains("*")) {
+        if (hasPartialTypes() && t.contains("*")) {
             return true;
         }
 
         final int slashpos = type.indexOf('/');
         if (slashpos > 0) {
-            if (mHasPartialTypes && t.contains(type.substring(0, slashpos))) {
+            if (hasPartialTypes() && t.contains(type.substring(0, slashpos))) {
                 return true;
             }
             if (typeLength == slashpos+2 && type.charAt(slashpos+1) == '*') {

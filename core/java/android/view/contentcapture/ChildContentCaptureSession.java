@@ -17,6 +17,7 @@ package android.view.contentcapture;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Insets;
 import android.view.autofill.AutofillId;
 import android.view.contentcapture.ViewNode.ViewStructureImpl;
 
@@ -84,8 +85,23 @@ final class ChildContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
+    void internalNotifyViewInsetsChanged(@NonNull Insets viewInsets) {
+        getMainCaptureSession().notifyViewInsetsChanged(mId, viewInsets);
+    }
+
+    @Override
     public void internalNotifyViewTreeEvent(boolean started) {
         getMainCaptureSession().notifyViewTreeEvent(mId, started);
+    }
+
+    @Override
+    void internalNotifySessionResumed() {
+        getMainCaptureSession().notifySessionResumed();
+    }
+
+    @Override
+    void internalNotifySessionPaused() {
+        getMainCaptureSession().notifySessionPaused();
     }
 
     @Override

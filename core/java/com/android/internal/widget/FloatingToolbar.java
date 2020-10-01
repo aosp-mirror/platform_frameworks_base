@@ -155,7 +155,7 @@ public final class FloatingToolbar {
         // TODO(b/65172902): Pass context in constructor when DecorView (and other callers)
         // supports multi-display.
         mContext = applyDefaultTheme(window.getContext());
-        mWindow = Preconditions.checkNotNull(window);
+        mWindow = Objects.requireNonNull(window);
         mPopup = new FloatingToolbarPopup(mContext, window.getDecorView());
     }
 
@@ -165,7 +165,7 @@ public final class FloatingToolbar {
      * toolbar.
      */
     public FloatingToolbar setMenu(Menu menu) {
-        mMenu = Preconditions.checkNotNull(menu);
+        mMenu = Objects.requireNonNull(menu);
         return this;
     }
 
@@ -189,7 +189,7 @@ public final class FloatingToolbar {
      * toolbar.
      */
     public FloatingToolbar setContentRect(Rect rect) {
-        mContentRect.set(Preconditions.checkNotNull(rect));
+        mContentRect.set(Objects.requireNonNull(rect));
         return this;
     }
 
@@ -457,8 +457,8 @@ public final class FloatingToolbar {
          *      from.
          */
         public FloatingToolbarPopup(Context context, View parent) {
-            mParent = Preconditions.checkNotNull(parent);
-            mContext = Preconditions.checkNotNull(context);
+            mParent = Objects.requireNonNull(parent);
+            mContext = Objects.requireNonNull(context);
             mContentContainer = createContentContainer(context);
             mPopupWindow = createPopupWindow(mContentContainer);
             mMarginHorizontal = parent.getResources()
@@ -578,7 +578,7 @@ public final class FloatingToolbar {
          * The specified coordinates may be adjusted to make sure the popup is entirely on-screen.
          */
         public void show(Rect contentRectOnScreen) {
-            Preconditions.checkNotNull(contentRectOnScreen);
+            Objects.requireNonNull(contentRectOnScreen);
 
             if (isShowing()) {
                 return;
@@ -650,7 +650,7 @@ public final class FloatingToolbar {
          * This is a no-op if this popup is not showing.
          */
         public void updateCoordinates(Rect contentRectOnScreen) {
-            Preconditions.checkNotNull(contentRectOnScreen);
+            Objects.requireNonNull(contentRectOnScreen);
 
             if (!isShowing() || !mPopupWindow.isShowing()) {
                 return;
@@ -1134,11 +1134,11 @@ public final class FloatingToolbar {
          * Sets the touchable region of this popup to be the area occupied by its content.
          */
         private void setContentAreaAsTouchableSurface() {
-            Preconditions.checkNotNull(mMainPanelSize);
+            Objects.requireNonNull(mMainPanelSize);
             final int width;
             final int height;
             if (mIsOverflowOpen) {
-                Preconditions.checkNotNull(mOverflowPanelSize);
+                Objects.requireNonNull(mOverflowPanelSize);
                 width = mOverflowPanelSize.getWidth();
                 height = mOverflowPanelSize.getHeight();
             } else {
@@ -1183,7 +1183,7 @@ public final class FloatingToolbar {
          */
         public List<MenuItem> layoutMainPanelItems(
                 List<MenuItem> menuItems, final int toolbarWidth) {
-            Preconditions.checkNotNull(menuItems);
+            Objects.requireNonNull(menuItems);
 
             int availableWidth = toolbarWidth;
 
@@ -1555,7 +1555,7 @@ public final class FloatingToolbar {
             private final FloatingToolbarPopup mPopup;
 
             OverflowPanel(FloatingToolbarPopup popup) {
-                super(Preconditions.checkNotNull(popup).mContext);
+                super(Objects.requireNonNull(popup).mContext);
                 this.mPopup = popup;
                 setScrollBarDefaultDelayBeforeFade(ViewConfiguration.getScrollDefaultDelay() * 3);
                 setScrollIndicators(View.SCROLL_INDICATOR_TOP | View.SCROLL_INDICATOR_BOTTOM);
@@ -1616,7 +1616,7 @@ public final class FloatingToolbar {
             private final Context mContext;
 
             public OverflowPanelViewHelper(Context context, int iconTextSpacing) {
-                mContext = Preconditions.checkNotNull(context);
+                mContext = Objects.requireNonNull(context);
                 mIconTextSpacing = iconTextSpacing;
                 mSidePadding = context.getResources()
                         .getDimensionPixelSize(R.dimen.floating_toolbar_overflow_side_padding);
@@ -1624,7 +1624,7 @@ public final class FloatingToolbar {
             }
 
             public View getView(MenuItem menuItem, int minimumWidth, View convertView) {
-                Preconditions.checkNotNull(menuItem);
+                Objects.requireNonNull(menuItem);
                 if (convertView != null) {
                     updateMenuItemButton(
                             convertView, menuItem, mIconTextSpacing, shouldShowIcon(menuItem));

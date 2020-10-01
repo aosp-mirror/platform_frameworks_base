@@ -17,8 +17,10 @@
 package com.android.server.display;
 
 import android.animation.ValueAnimator;
-import android.util.IntProperty;
+import android.util.FloatProperty;
 import android.view.Choreographer;
+
+import com.android.internal.BrightnessSynchronizer;
 
 /**
  * A custom animator that progressively updates a property value at
@@ -26,12 +28,12 @@ import android.view.Choreographer;
  */
 final class RampAnimator<T> {
     private final T mObject;
-    private final IntProperty<T> mProperty;
+    private final FloatProperty<T> mProperty;
     private final Choreographer mChoreographer;
 
-    private int mCurrentValue;
-    private int mTargetValue;
-    private int mRate;
+    private float mCurrentValue;
+    private float mTargetValue;
+    private float mRate;
 
     private boolean mAnimating;
     private float mAnimatedValue; // higher precision copy of mCurrentValue
@@ -41,7 +43,7 @@ final class RampAnimator<T> {
 
     private Listener mListener;
 
-    public RampAnimator(T object, IntProperty<T> property) {
+    public RampAnimator(T object, FloatProperty<T> property) {
         mObject = object;
         mProperty = property;
         mChoreographer = Choreographer.getInstance();
@@ -57,7 +59,8 @@ final class RampAnimator<T> {
      * @param rate The convergence rate in units per second, or 0 to set the value immediately.
      * @return True if the target differs from the previous target.
      */
-    public boolean animateTo(int target, int rate) {
+    public boolean animateTo(float target, float rate) {
+
         // Immediately jump to the target the first time.
         if (mFirstTime || rate <= 0) {
             if (mFirstTime || target != mCurrentValue) {
@@ -152,14 +155,12 @@ final class RampAnimator<T> {
                     mAnimatedValue = Math.max(mAnimatedValue - amount, mTargetValue);
                 }
             }
-            final int oldCurrentValue = mCurrentValue;
-            mCurrentValue = Math.round(mAnimatedValue);
-
-            if (oldCurrentValue != mCurrentValue) {
+            final float oldCurrentValue = mCurrentValue;
+            mCurrentValue = mAnimatedValue;
+            if (!BrightnessSynchronizer.floatEquals(oldCurrentValue, mCurrentValue)) {
                 mProperty.setValue(mObject, mCurrentValue);
             }
-
-            if (mTargetValue != mCurrentValue) {
+            if (!BrightnessSynchronizer.floatEquals(mTargetValue, mCurrentValue)) {
                 postAnimationCallback();
             } else {
                 mAnimating = false;

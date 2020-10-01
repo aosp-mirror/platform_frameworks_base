@@ -16,11 +16,15 @@
 
 package com.android.settingslib;
 
+import static com.android.settingslib.HelpUtils.MENU_HELP;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +39,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.provider.Settings;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import org.junit.Before;
@@ -170,5 +175,35 @@ public class HelpUtilsTest {
 
         verify(item).setVisible(true);
         verify(item).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+    }
+
+    @Test
+    public void prepareHelpMenuItem_noItem_addItem() {
+        final Menu item = mock(Menu.class);
+        when(item.findItem(MENU_HELP)).thenReturn(null);
+        when(item.add(0, MENU_HELP, 0,
+                com.android.settingslib.widget.R.string.help_feedback_label)).thenReturn(
+                mock(MenuItem.class));
+
+        HelpUtils.prepareHelpMenuItem(mActivity, item, TEST_HELP_URL, "backup_url");
+        HelpUtils.prepareHelpMenuItem(mActivity, item, 0, "backup_url");
+
+        verify(item, times(2)).add(0, MENU_HELP, 0,
+                com.android.settingslib.widget.R.string.help_feedback_label);
+    }
+
+    @Test
+    public void prepareHelpMenuItem_hasItem_notAddItem() {
+        final Menu item = mock(Menu.class);
+        when(item.findItem(MENU_HELP)).thenReturn(mock(MenuItem.class));
+        when(item.add(0, MENU_HELP, 0,
+                com.android.settingslib.widget.R.string.help_feedback_label)).thenReturn(
+                mock(MenuItem.class));
+
+        HelpUtils.prepareHelpMenuItem(mActivity, item, TEST_HELP_URL, "backup_url");
+        HelpUtils.prepareHelpMenuItem(mActivity, item, 0, "backup_url");
+
+        verify(item, never()).add(0, MENU_HELP, 0,
+                com.android.settingslib.widget.R.string.help_feedback_label);
     }
 }

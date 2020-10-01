@@ -23,7 +23,7 @@ import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.view.WindowManagerPolicyConstants;
 
-import com.android.internal.telephony.IccCardConstants;
+import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 
 import java.util.TimeZone;
@@ -43,7 +43,7 @@ public class KeyguardUpdateMonitorCallback {
      *
      * @param status current battery status
      */
-    public void onRefreshBatteryInfo(KeyguardUpdateMonitor.BatteryStatus status) { }
+    public void onRefreshBatteryInfo(BatteryStatus status) { }
 
     /**
      * Called once per minute or when the time changes.
@@ -136,7 +136,7 @@ public class KeyguardUpdateMonitorCallback {
      * @param slotId
      * @param simState
      */
-    public void onSimStateChanged(int subId, int slotId, IccCardConstants.State simState) { }
+    public void onSimStateChanged(int subId, int slotId, int simState) { }
 
     /**
      * Called when the user's info changed.
@@ -147,14 +147,6 @@ public class KeyguardUpdateMonitorCallback {
      * Called when a user got unlocked.
      */
     public void onUserUnlocked() { }
-
-    /**
-     * Called when boot completed.
-     *
-     * Note, this callback will only be received if boot complete occurs after registering with
-     * KeyguardUpdateMonitor.
-     */
-    public void onBootCompleted() { }
 
     /**
      * Called when the emergency call button is pressed.
@@ -247,7 +239,8 @@ public class KeyguardUpdateMonitorCallback {
      * @param userId the user id for which the biometric sample was authenticated
      * @param biometricSourceType
      */
-    public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType) { }
+    public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType,
+            boolean isStrongBiometric) { }
 
     /**
      * Called when biometric authentication provides help string (e.g. "Try again")
@@ -318,5 +311,10 @@ public class KeyguardUpdateMonitorCallback {
      * Called when authenticated biometrics are cleared.
      */
     public void onBiometricsCleared() { }
+
+    /**
+     * Called when the secondary lock screen requirement changes.
+     */
+    public void onSecondaryLockscreenRequirementChanged(int userId) { }
 
 }

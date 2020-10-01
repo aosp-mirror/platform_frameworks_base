@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.os.Build.VERSION_CODES.Q;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -26,7 +27,9 @@ import static com.android.server.wm.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.wm.ActivityStack.ActivityState.STARTED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RELEASE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
@@ -38,17 +41,23 @@ import static com.android.server.wm.ActivityTaskManagerService.INSTRUMENTATION_K
 import static com.android.server.wm.ActivityTaskManagerService.KEY_DISPATCHING_TIMEOUT_MS;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
+import android.Manifest;
 import android.annotation.NonNull;
-import android.app.Activity;
+import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
 import android.app.servertransaction.ConfigurationChangeItem;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.ArraySet;
@@ -66,6 +75,7 @@ import com.android.server.wm.ActivityTaskManagerService.HotPath;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Activity Manager (AM) package manages the lifecycle of processes in the system through
@@ -159,10 +169,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // Thread currently set for VR scheduling
     int mVrThreadTid;
 
+    // Whether this process has ever started a service with the BIND_INPUT_METHOD permission.
+    private volatile boolean mHasImeService;
+
     // all activities running in the process
     private final ArrayList<ActivityRecord> mActivities = new ArrayList<>();
     // any tasks this process had run root activities in
-    private final ArrayList<TaskRecord> mRecentTasks = new ArrayList<>();
+    private final ArrayList<Task> mRecentTasks = new ArrayList<>();
     // The most recent top-most activity that was resumed in the process for pre-Q app.
     private ActivityRecord mPreQTopResumedActivity = null;
     // The last time an activity was launched in the process
@@ -172,9 +185,22 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private long mLastActivityFinishTime;
 
     // Last configuration that was reported to the process.
-    private final Configuration mLastReportedConfiguration;
+    private final Configuration mLastReportedConfiguration = new Configuration();
+    // Configuration that is waiting to be dispatched to the process.
+    private Configuration mPendingConfiguration;
+    private final Configuration mNewOverrideConfig = new Configuration();
     // Registered display id as a listener to override config change
     private int mDisplayId;
+    private ActivityRecord mConfigActivityRecord;
+    // Whether the activity config override is allowed for this process.
+    private volatile boolean mIsActivityConfigOverrideAllowed = true;
+    /**
+     * Activities that hosts some UI drawn by the current process. The activities live
+     * in another process. This is used to check if the process is currently showing anything
+     * visible to the user.
+     */
+    @Nullable
+    private final ArrayList<ActivityRecord> mHostActivities = new ArrayList<>();
 
     /** Whether our process is currently running a {@link RecentsAnimation} */
     private boolean mRunningRecentsAnimation;
@@ -182,7 +208,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /** Whether our process is currently running a {@link IRemoteAnimationRunner} */
     private boolean mRunningRemoteAnimation;
 
-    public WindowProcessController(ActivityTaskManagerService atm, ApplicationInfo info,
+    public WindowProcessController(@NonNull ActivityTaskManagerService atm, ApplicationInfo info,
             String name, int uid, int userId, Object owner, WindowProcessListener listener) {
         mInfo = info;
         mName = name;
@@ -191,11 +217,17 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mOwner = owner;
         mListener = listener;
         mAtm = atm;
-        mLastReportedConfiguration = new Configuration();
         mDisplayId = INVALID_DISPLAY;
-        if (atm != null) {
-            onConfigurationChanged(atm.getGlobalConfiguration());
+
+        boolean isSysUiPackage = info.packageName.equals(
+                mAtm.getSysUiServiceComponentLocked().getPackageName());
+        if (isSysUiPackage || mUid == Process.SYSTEM_UID) {
+            // This is a system owned process and should not use an activity config.
+            // TODO(b/151161907): Remove after support for display-independent (raw) SysUi configs.
+            mIsActivityConfigOverrideAllowed = false;
         }
+
+        onConfigurationChanged(atm.getGlobalConfiguration());
     }
 
     public void setPid(int pid) {
@@ -210,6 +242,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     public void setThread(IApplicationThread thread) {
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             mThread = thread;
+            // In general this is called from attaching application, so the last configuration
+            // has been sent to client by {@link android.app.IApplicationThread#bindApplication}.
+            // If this process is system server, it is fine because system is booting and a new
+            // configuration will update when display is ready.
+            if (thread != null) {
+                setLastReportedConfiguration(getConfiguration());
+            }
         }
     }
 
@@ -322,6 +361,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return mDisplayId != INVALID_DISPLAY;
     }
 
+    /** @return {@code true} if the process registered to an activity as a config listener. */
+    @VisibleForTesting
+    boolean registeredForActivityConfigChanges() {
+        return mConfigActivityRecord != null;
+    }
+
     void postPendingUiCleanMsg(boolean pendingUiClean) {
         if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
@@ -387,6 +432,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     void setLastActivityLaunchTime(long launchTime) {
         if (launchTime <= mLastActivityLaunchTime) {
+            if (launchTime < mLastActivityLaunchTime) {
+                Slog.w(TAG,
+                        "Tried to set launchTime (" + launchTime + ") < mLastActivityLaunchTime ("
+                                + mLastActivityLaunchTime + ")");
+            }
             return;
         }
         mLastActivityLaunchTime = launchTime;
@@ -406,6 +456,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     boolean areBackgroundActivityStartsAllowed() {
         // allow if the whitelisting flag was explicitly set
         if (mAllowBackgroundActivityStarts) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "[WindowProcessController(" + mPid
+                        + ")] Activity start allowed: mAllowBackgroundActivityStarts = true");
+            }
             return true;
         }
         // allow if any activity in the caller has either started or finished very recently, and
@@ -417,19 +471,43 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             // let app to be able to start background activity even it's in grace period.
             if (mLastActivityLaunchTime > mAtm.getLastStopAppSwitchesTime()
                     || mLastActivityFinishTime > mAtm.getLastStopAppSwitchesTime()) {
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "[WindowProcessController(" + mPid
+                            + ")] Activity start allowed: within "
+                            + ACTIVITY_BG_START_GRACE_PERIOD_MS + "ms grace period");
+                }
                 return true;
             }
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "[WindowProcessController(" + mPid + ")] Activity start within "
+                        + ACTIVITY_BG_START_GRACE_PERIOD_MS
+                        + "ms grace period but also within stop app switch window");
+            }
+
         }
         // allow if the proc is instrumenting with background activity starts privs
         if (mInstrumentingWithBackgroundActivityStartPrivileges) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "[WindowProcessController(" + mPid
+                        + ")] Activity start allowed: process instrumenting with background "
+                        + "activity starts privileges");
+            }
             return true;
         }
         // allow if the caller has an activity in any foreground task
         if (hasActivityInVisibleTask()) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "[WindowProcessController(" + mPid
+                        + ")] Activity start allowed: process has activity in foreground task");
+            }
             return true;
         }
         // allow if the caller is bound by a UID that's currently foreground
         if (isBoundByForegroundUid()) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "[WindowProcessController(" + mPid
+                        + ")] Activity start allowed: process bound by foreground uid");
+            }
             return true;
         }
         return false;
@@ -478,7 +556,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     @Override
     protected ConfigurationContainer getParent() {
-        return null;
+        // Returning RootWindowContainer as the parent, so that this process controller always
+        // has full configuration and overrides (e.g. from display) are always added on top of
+        // global config.
+        return mAtm.mRootWindowContainer;
     }
 
     @HotPath(caller = HotPath.PROCESS_CHANGE)
@@ -502,10 +583,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
         mActivities.add(r);
+        updateActivityConfigurationListener();
     }
 
     void removeActivity(ActivityRecord r) {
         mActivities.remove(r);
+        updateActivityConfigurationListener();
     }
 
     void makeFinishingForProcessRemoved() {
@@ -516,6 +599,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     void clearActivities() {
         mActivities.clear();
+        updateActivityConfigurationListener();
     }
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
@@ -530,7 +614,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             for (int i = mActivities.size() - 1; i >= 0; --i) {
                 final ActivityRecord r = mActivities.get(i);
-                if (r.visible) {
+                if (r.mVisibleRequested) {
                     return true;
                 }
             }
@@ -547,12 +631,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     private boolean hasActivityInVisibleTask() {
         for (int i = mActivities.size() - 1; i >= 0; --i) {
-            TaskRecord task = mActivities.get(i).getTaskRecord();
+            Task task = mActivities.get(i).getTask();
             if (task == null) {
                 continue;
             }
-            ActivityRecord topActivity = task.getTopActivity();
-            if (topActivity != null && topActivity.visible) {
+            ActivityRecord topActivity = task.getTopNonFinishingActivity();
+            if (topActivity != null && topActivity.mVisibleRequested) {
                 return true;
             }
         }
@@ -572,21 +656,21 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return true;
         }
 
-        final ActivityDisplay display = activity.getDisplay();
+        final DisplayContent display = activity.getDisplay();
         if (display == null) {
             // No need to update if the activity hasn't attach to any display.
             return false;
         }
 
         boolean canUpdate = false;
-        final ActivityDisplay topDisplay =
+        final DisplayContent topDisplay =
                 mPreQTopResumedActivity != null ? mPreQTopResumedActivity.getDisplay() : null;
         // Update the topmost activity if current top activity is
         // - not on any display OR
         // - no longer visible OR
         // - not focusable (in PiP mode for instance)
         if (topDisplay == null
-                || !mPreQTopResumedActivity.visible
+                || !mPreQTopResumedActivity.mVisibleRequested
                 || !mPreQTopResumedActivity.isFocusable()) {
             canUpdate = true;
         }
@@ -598,18 +682,18 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
         // Compare the z-order of ActivityStacks if both activities landed on same display.
         if (display == topDisplay
-                && mPreQTopResumedActivity.getActivityStack().mTaskStack.compareTo(
-                activity.getActivityStack().mTaskStack) <= 0) {
+                && mPreQTopResumedActivity.getRootTask().compareTo(
+                        activity.getRootTask()) <= 0) {
             canUpdate = true;
         }
 
         if (canUpdate) {
             // Make sure the previous top activity in the process no longer be resumed.
             if (mPreQTopResumedActivity != null && mPreQTopResumedActivity.isState(RESUMED)) {
-                final ActivityStack stack = mPreQTopResumedActivity.getActivityStack();
+                final ActivityStack stack = mPreQTopResumedActivity.getRootTask();
                 if (stack != null) {
                     stack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
-                            null /* resuming */, false /* pauseImmediately */);
+                            activity);
                 }
             }
             mPreQTopResumedActivity = activity;
@@ -632,8 +716,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         for (int i = 0; i < activities.size(); i++) {
             final ActivityRecord r = activities.get(i);
             if (!r.finishing && r.isInStackLocked()) {
-                r.getActivityStack().finishActivityLocked(r, Activity.RESULT_CANCELED,
-                        null, "finish-heavy", true);
+                r.finishIfPossible("finish-heavy", true /* oomAdj */);
             }
         }
     }
@@ -646,6 +729,23 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 if (r.isInterestingToUserLocked()) {
                     return true;
                 }
+            }
+            if (isEmbedded()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return {@code true} if this process is rendering content on to a window shown by
+     * another process.
+     */
+    private boolean isEmbedded() {
+        for (int i = mHostActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord r = mHostActivities.get(i);
+            if (r.isInterestingToUserLocked()) {
+                return true;
             }
         }
         return false;
@@ -693,6 +793,16 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return false;
     }
 
+    boolean hasResumedActivity() {
+        for (int i = mActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord activity = mActivities.get(i);
+            if (activity.isState(RESUMED)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     void updateIntentForHeavyWeightActivity(Intent intent) {
         if (mActivities.isEmpty()) {
@@ -700,18 +810,18 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
         ActivityRecord hist = mActivities.get(0);
         intent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_APP, hist.packageName);
-        intent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_TASK, hist.getTaskRecord().taskId);
+        intent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_TASK, hist.getTask().mTaskId);
     }
 
-    boolean shouldKillProcessForRemovedTask(TaskRecord tr) {
+    boolean shouldKillProcessForRemovedTask(Task task) {
         for (int k = 0; k < mActivities.size(); k++) {
             final ActivityRecord activity = mActivities.get(k);
             if (!activity.stopped) {
                 // Don't kill process(es) that has an activity not stopped.
                 return false;
             }
-            final TaskRecord otherTask = activity.getTaskRecord();
-            if (tr.taskId != otherTask.taskId && otherTask.inRecents) {
+            final Task otherTask = activity.getTask();
+            if (task.mTaskId != otherTask.mTaskId && otherTask.inRecents) {
                 // Don't kill process(es) that has an activity in a different task that is
                 // also in recents.
                 return false;
@@ -720,11 +830,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return true;
     }
 
-    ArraySet<TaskRecord> getReleaseSomeActivitiesTasks() {
+    void releaseSomeActivities(String reason) {
         // Examine all activities currently running in the process.
-        TaskRecord firstTask = null;
-        // Tasks is non-null only if two or more tasks are found.
-        ArraySet<TaskRecord> tasks = null;
+        // Candidate activities that can be destroyed.
+        ArrayList<ActivityRecord> candidates = null;
         if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Trying to release some activities in " + this);
         for (int i = 0; i < mActivities.size(); i++) {
             final ActivityRecord r = mActivities.get(i);
@@ -733,33 +842,74 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             // down before we try to prune more activities.
             if (r.finishing || r.isState(DESTROYING, DESTROYED)) {
                 if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Abort release; already destroying: " + r);
-                return null;
+                return;
             }
-            // Don't consider any activies that are currently not in a state where they
+            // Don't consider any activities that are currently not in a state where they
             // can be destroyed.
-            if (r.visible || !r.stopped || !r.haveState
-                    || r.isState(RESUMED, PAUSING, PAUSED, STOPPING)) {
+            if (r.mVisibleRequested || !r.stopped || !r.hasSavedState() || !r.isDestroyable()
+                    || r.isState(STARTED, RESUMED, PAUSING, PAUSED, STOPPING)) {
                 if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Not releasing in-use activity: " + r);
                 continue;
             }
 
-            final TaskRecord task = r.getTaskRecord();
-            if (task != null) {
-                if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Collecting release task " + task
-                        + " from " + r);
-                if (firstTask == null) {
-                    firstTask = task;
-                } else if (firstTask != task) {
-                    if (tasks == null) {
-                        tasks = new ArraySet<>();
-                        tasks.add(firstTask);
-                    }
-                    tasks.add(task);
+            if (r.getParent() != null) {
+                if (candidates == null) {
+                    candidates = new ArrayList<>();
                 }
+                candidates.add(r);
             }
         }
 
-        return tasks;
+        if (candidates != null) {
+            // Sort based on z-order in hierarchy.
+            candidates.sort(WindowContainer::compareTo);
+            // Release some older activities
+            int maxRelease = Math.max(candidates.size(), 1);
+            do {
+                final ActivityRecord r = candidates.remove(0);
+                if (DEBUG_RELEASE) Slog.v(TAG_RELEASE, "Destroying " + r
+                        + " in state " + r.getState() + " for reason " + reason);
+                r.destroyImmediately(true /*removeFromApp*/, reason);
+                --maxRelease;
+            } while (maxRelease > 0);
+        }
+    }
+
+    /**
+     * Returns display UI context list which there is any app window shows or starting activities
+     * int this process.
+     */
+    public void getDisplayContextsWithErrorDialogs(List<Context> displayContexts) {
+        if (displayContexts == null) {
+            return;
+        }
+        synchronized (mAtm.mGlobalLock) {
+            final RootWindowContainer root = mAtm.mWindowManager.mRoot;
+            root.getDisplayContextsWithNonToastVisibleWindows(mPid, displayContexts);
+
+            for (int i = mActivities.size() - 1; i >= 0; --i) {
+                final ActivityRecord r = mActivities.get(i);
+                final int displayId = r.getDisplayId();
+                final Context c = root.getDisplayUiContext(displayId);
+
+                if (r.mVisibleRequested && !displayContexts.contains(c)) {
+                    displayContexts.add(c);
+                }
+            }
+        }
+    }
+
+    /** Adds an activity that hosts UI drawn by the current process. */
+    void addHostActivity(ActivityRecord r) {
+        if (mHostActivities.contains(r)) {
+            return;
+        }
+        mHostActivities.add(r);
+    }
+
+    /** Removes an activity that hosts UI drawn by the current process. */
+    void removeHostActivity(ActivityRecord r) {
+        mHostActivities.remove(r);
     }
 
     public interface ComputeOomAdjCallback {
@@ -771,6 +921,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public int computeOomAdjFromActivities(int minTaskLayer, ComputeOomAdjCallback callback) {
+        // Since there could be more than one activities in a process record, we don't need to
+        // compute the OomAdj with each of them, just need to find out the activity with the
+        // "best" state, the order would be visible, pausing, stopping...
+        ActivityStack.ActivityState best = DESTROYED;
+        boolean finishing = true;
+        boolean visible = false;
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             final int activitiesSize = mActivities.size();
             for (int j = 0; j < activitiesSize; j++) {
@@ -785,24 +941,39 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                         continue;
                     }
                 }
-                if (r.visible) {
-                    callback.onVisibleActivity();
-                    final TaskRecord task = r.getTaskRecord();
+                if (r.mVisibleRequested) {
+                    final Task task = r.getTask();
                     if (task != null && minTaskLayer > 0) {
                         final int layer = task.mLayerRank;
                         if (layer >= 0 && minTaskLayer > layer) {
                             minTaskLayer = layer;
                         }
                     }
-                    break;
-                } else if (r.isState(PAUSING, PAUSED)) {
-                    callback.onPausedActivity();
-                } else if (r.isState(STOPPING)) {
-                    callback.onStoppingActivity(r.finishing);
+                    visible = true;
+                    // continue the loop, in case there are multiple visible activities in
+                    // this process, we'd find out the one with the minimal layer, thus it'll
+                    // get a higher adj score.
                 } else {
-                    callback.onOtherActivity();
+                    if (best != PAUSING && best != PAUSED) {
+                        if (r.isState(PAUSING, PAUSED)) {
+                            best = PAUSING;
+                        } else if (r.isState(STOPPING)) {
+                            best = STOPPING;
+                            // Not "finishing" if any of activity isn't finishing.
+                            finishing &= r.finishing;
+                        }
+                    }
                 }
             }
+        }
+        if (visible) {
+            callback.onVisibleActivity();
+        } else if (best == PAUSING) {
+            callback.onPausedActivity();
+        } else if (best == STOPPING) {
+            callback.onStoppingActivity(finishing);
+        } else {
+            callback.onOtherActivity();
         }
 
         return minTaskLayer;
@@ -836,8 +1007,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     void updateProcessInfo(boolean updateServiceConnectionActivities, boolean activityChange,
-            boolean updateOomAdj) {
+            boolean updateOomAdj, boolean addPendingTopUid) {
         if (mListener == null) return;
+        if (addPendingTopUid) {
+            mAtm.mAmInternal.addPendingTopUid(mUid, mPid);
+        }
         // Posting on handler so WM lock isn't held when we call into AM.
         final Message m = PooledLambda.obtainMessage(WindowProcessListener::updateProcessInfo,
                 mListener, updateServiceConnectionActivities, activityChange, updateOomAdj);
@@ -895,6 +1069,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             // to track as a separate apk in the process.
             packageName = info.packageName;
         }
+        // update ActivityManagerService.PendingStartActivityUids list.
+        if (topProcessState == ActivityManager.PROCESS_STATE_TOP) {
+            mAtm.mAmInternal.addPendingTopUid(mUid, mPid);
+        }
         // Posting the message at the front of queue so WM lock isn't held when we call into AM,
         // and the process state of starting activity can be updated quicker which will give it a
         // higher scheduling group.
@@ -904,36 +1082,83 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mAtm.mH.sendMessageAtFrontOfQueue(m);
     }
 
-    public void appDied() {
+    void appDied(String reason) {
         if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
         final Message m = PooledLambda.obtainMessage(
-                WindowProcessListener::appDied, mListener);
+                WindowProcessListener::appDied, mListener, reason);
         mAtm.mH.sendMessage(m);
     }
 
-    void registerDisplayConfigurationListenerLocked(ActivityDisplay activityDisplay) {
-        if (activityDisplay == null) {
+    void registerDisplayConfigurationListener(DisplayContent displayContent) {
+        if (displayContent == null) {
             return;
         }
-        // A process can only register to one display to listener to the override configuration
+        // A process can only register to one display to listen to the override configuration
         // change. Unregister existing listener if it has one before register the new one.
-        unregisterDisplayConfigurationListenerLocked();
-        mDisplayId = activityDisplay.mDisplayId;
-        activityDisplay.registerConfigurationChangeListener(this);
+        unregisterDisplayConfigurationListener();
+        unregisterActivityConfigurationListener();
+        mDisplayId = displayContent.mDisplayId;
+        displayContent.registerConfigurationChangeListener(this);
     }
 
     @VisibleForTesting
-    void unregisterDisplayConfigurationListenerLocked() {
+    void unregisterDisplayConfigurationListener() {
         if (mDisplayId == INVALID_DISPLAY) {
             return;
         }
-        final ActivityDisplay activityDisplay =
-                mAtm.mRootActivityContainer.getActivityDisplay(mDisplayId);
-        if (activityDisplay != null) {
-            activityDisplay.unregisterConfigurationChangeListener(this);
+        final DisplayContent displayContent =
+                mAtm.mRootWindowContainer.getDisplayContent(mDisplayId);
+        if (displayContent != null) {
+            displayContent.unregisterConfigurationChangeListener(this);
         }
         mDisplayId = INVALID_DISPLAY;
+        onMergedOverrideConfigurationChanged(Configuration.EMPTY);
+    }
+
+    private void registerActivityConfigurationListener(ActivityRecord activityRecord) {
+        if (activityRecord == null || activityRecord.containsListener(this)) {
+            return;
+        }
+        // A process can only register to one activityRecord to listen to the override configuration
+        // change. Unregister existing listener if it has one before register the new one.
+        unregisterDisplayConfigurationListener();
+        unregisterActivityConfigurationListener();
+        mConfigActivityRecord = activityRecord;
+        activityRecord.registerConfigurationChangeListener(this);
+    }
+
+    private void unregisterActivityConfigurationListener() {
+        if (mConfigActivityRecord == null) {
+            return;
+        }
+        mConfigActivityRecord.unregisterConfigurationChangeListener(this);
+        mConfigActivityRecord = null;
+        onMergedOverrideConfigurationChanged(Configuration.EMPTY);
+    }
+
+    /**
+     * Check if activity configuration override for the activity process needs an update and perform
+     * if needed. By default we try to override the process configuration to match the top activity
+     * config to increase app compatibility with multi-window and multi-display. The process will
+     * always track the configuration of the non-finishing activity last added to the process.
+     */
+    private void updateActivityConfigurationListener() {
+        if (!mIsActivityConfigOverrideAllowed) {
+            return;
+        }
+
+        for (int i = mActivities.size() - 1; i >= 0; i--) {
+            final ActivityRecord activityRecord = mActivities.get(i);
+            if (!activityRecord.finishing) {
+                // Eligible activity is found, update listener.
+                registerActivityConfigurationListener(activityRecord);
+                return;
+            }
+        }
+
+        // No eligible activities found, let's remove the configuration listener.
+        unregisterActivityConfigurationListener();
     }
 
     @Override
@@ -943,26 +1168,57 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     @Override
-    public void onRequestedOverrideConfigurationChanged(Configuration newOverrideConfig) {
-        super.onRequestedOverrideConfigurationChanged(newOverrideConfig);
-        updateConfiguration();
+    public void onMergedOverrideConfigurationChanged(Configuration mergedOverrideConfig) {
+        // Make sure that we don't accidentally override the activity type.
+        mNewOverrideConfig.setTo(mergedOverrideConfig);
+        mNewOverrideConfig.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
+        super.onRequestedOverrideConfigurationChanged(mNewOverrideConfig);
     }
 
     private void updateConfiguration() {
         final Configuration config = getConfiguration();
         if (mLastReportedConfiguration.diff(config) == 0) {
             // Nothing changed.
+            if (Build.IS_DEBUGGABLE && mHasImeService) {
+                // TODO (b/135719017): Temporary log for debugging IME service.
+                Slog.w(TAG_CONFIGURATION, "Current config: " + config
+                        + " unchanged for IME proc " + mName);
+            }
             return;
         }
 
+        if (mListener.isCached()) {
+            // This process is in a cached state. We will delay delivering the config change to the
+            // process until the process is no longer cached.
+            if (mPendingConfiguration == null) {
+                mPendingConfiguration = new Configuration(config);
+            } else {
+                mPendingConfiguration.setTo(config);
+            }
+            return;
+        }
+
+        dispatchConfigurationChange(config);
+    }
+
+    private void dispatchConfigurationChange(Configuration config) {
+        if (mThread == null) {
+            if (Build.IS_DEBUGGABLE && mHasImeService) {
+                // TODO (b/135719017): Temporary log for debugging IME service.
+                Slog.w(TAG_CONFIGURATION, "Unable to send config for IME proc " + mName
+                        + ": no app thread");
+            }
+            return;
+        }
+        if (DEBUG_CONFIGURATION) {
+            Slog.v(TAG_CONFIGURATION, "Sending to proc " + mName + " new config " + config);
+        }
+        if (Build.IS_DEBUGGABLE && mHasImeService) {
+            // TODO (b/135719017): Temporary log for debugging IME service.
+            Slog.v(TAG_CONFIGURATION, "Sending to IME proc " + mName + " new config " + config);
+        }
+
         try {
-            if (mThread == null) {
-                return;
-            }
-            if (DEBUG_CONFIGURATION) {
-                Slog.v(TAG_CONFIGURATION, "Sending to proc " + mName
-                        + " new config " + config);
-            }
             config.seq = mAtm.increaseConfigurationSeqLocked();
             mAtm.getLifecycleManager().scheduleTransaction(mThread,
                     ConfigurationChangeItem.obtain(config));
@@ -985,11 +1241,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return (mListener != null) ? mListener.getCpuTime() : 0;
     }
 
-    void addRecentTask(TaskRecord task) {
+    void addRecentTask(Task task) {
         mRecentTasks.add(task);
     }
 
-    void removeRecentTask(TaskRecord task) {
+    void removeRecentTask(Task task) {
         mRecentTasks.remove(task);
     }
 
@@ -1008,6 +1264,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     public void appEarlyNotResponding(String annotation, Runnable killAppCallback) {
+        Runnable targetRunnable = null;
         synchronized (mAtm.mGlobalLock) {
             if (mAtm.mController == null) {
                 return;
@@ -1017,12 +1274,15 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 // 0 == continue, -1 = kill process immediately
                 int res = mAtm.mController.appEarlyNotResponding(mName, mPid, annotation);
                 if (res < 0 && mPid != MY_PID) {
-                    killAppCallback.run();
+                    targetRunnable = killAppCallback;
                 }
             } catch (RemoteException e) {
                 mAtm.mController = null;
                 Watchdog.getInstance().setActivityController(null);
             }
+        }
+        if (targetRunnable != null) {
+            targetRunnable.run();
         }
     }
 
@@ -1051,10 +1311,58 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
         }
         if (targetRunnable != null) {
+            // Execute runnable outside WM lock since the runnable will hold AM lock
             targetRunnable.run();
             return true;
         }
         return false;
+    }
+
+    /**
+     * Called to notify WindowProcessController of a change in the process's cached state.
+     *
+     * @param isCached whether or not the process is cached.
+     */
+    @HotPath(caller = HotPath.OOM_ADJUSTMENT)
+    public void onProcCachedStateChanged(boolean isCached) {
+        if (!isCached) {
+            synchronized (mAtm.mGlobalLockWithoutBoost) {
+                if (mPendingConfiguration != null) {
+                    final Configuration config = mPendingConfiguration;
+                    mPendingConfiguration = null;
+                    dispatchConfigurationChange(config);
+                }
+            }
+        }
+    }
+
+    /**
+     * Called to notify {@link WindowProcessController} of a started service.
+     *
+     * @param serviceInfo information describing the started service.
+     */
+    public void onServiceStarted(ServiceInfo serviceInfo) {
+        String permission = serviceInfo.permission;
+        if (permission == null) {
+            return;
+        }
+
+        // TODO: Audit remaining services for disabling activity override (Wallpaper, Dream, etc).
+        switch (permission) {
+            case Manifest.permission.BIND_INPUT_METHOD:
+                mHasImeService = true;
+                // Fall-through
+            case Manifest.permission.BIND_ACCESSIBILITY_SERVICE:
+            case Manifest.permission.BIND_VOICE_INTERACTION:
+                // We want to avoid overriding the config of these services with that of the
+                // activity as it could lead to incorrect display metrics. For ex, IME services
+                // expect their config to match the config of the display with the IME window
+                // showing.
+                mIsActivityConfigOverrideAllowed = false;
+                break;
+            default:
+                break;
+        }
     }
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
@@ -1132,9 +1440,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         pw.println(prefix + " mLastReportedConfiguration=" + mLastReportedConfiguration);
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         if (mListener != null) {
-            mListener.writeToProto(proto, fieldId);
+            mListener.dumpDebug(proto, fieldId);
         }
     }
 }

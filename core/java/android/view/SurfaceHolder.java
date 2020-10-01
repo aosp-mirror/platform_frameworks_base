@@ -16,7 +16,10 @@
 
 package android.view;
 
+import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.graphics.Canvas;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 
 /**
@@ -76,7 +79,7 @@ public interface SurfaceHolder {
          *
          * @param holder The SurfaceHolder whose surface is being created.
          */
-        public void surfaceCreated(SurfaceHolder holder);
+        void surfaceCreated(@NonNull SurfaceHolder holder);
 
         /**
          * This is called immediately after any structural changes (format or
@@ -85,12 +88,12 @@ public interface SurfaceHolder {
          * once, after {@link #surfaceCreated}.
          *
          * @param holder The SurfaceHolder whose surface has changed.
-         * @param format The new PixelFormat of the surface.
+         * @param format The new {@link PixelFormat} of the surface.
          * @param width The new width of the surface.
          * @param height The new height of the surface.
          */
-        public void surfaceChanged(SurfaceHolder holder, int format, int width,
-                int height);
+        void surfaceChanged(@NonNull SurfaceHolder holder, @PixelFormat.Format int format,
+                @IntRange(from = 0) int width, @IntRange(from = 0) int height);
 
         /**
          * This is called immediately before a surface is being destroyed. After
@@ -101,7 +104,7 @@ public interface SurfaceHolder {
          *
          * @param holder The SurfaceHolder whose surface is being destroyed.
          */
-        public void surfaceDestroyed(SurfaceHolder holder);
+        void surfaceDestroyed(@NonNull SurfaceHolder holder);
     }
 
     /**
@@ -122,7 +125,7 @@ public interface SurfaceHolder {
          *
          * @param holder The SurfaceHolder whose surface has changed.
          */
-        void surfaceRedrawNeeded(SurfaceHolder holder);
+        void surfaceRedrawNeeded(@NonNull SurfaceHolder holder);
 
         /**
          * An alternative to surfaceRedrawNeeded where it is not required to block
@@ -140,7 +143,8 @@ public interface SurfaceHolder {
          * from any thread.
          *
          */
-        default void surfaceRedrawNeededAsync(SurfaceHolder holder, Runnable drawingFinished) {
+        default void surfaceRedrawNeededAsync(@NonNull SurfaceHolder holder,
+                @NonNull Runnable drawingFinished) {
             surfaceRedrawNeeded(holder);
             drawingFinished.run();
         }

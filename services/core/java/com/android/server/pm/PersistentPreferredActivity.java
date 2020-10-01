@@ -16,31 +16,34 @@
 
 package com.android.server.pm;
 
+import android.content.ComponentName;
+import android.content.IntentFilter;
+import android.util.Log;
+
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
-import android.content.ComponentName;
-import android.content.IntentFilter;
-import android.util.Log;
-
 import java.io.IOException;
 
 class PersistentPreferredActivity extends IntentFilter {
     private static final String ATTR_NAME = "name"; // component name
     private static final String ATTR_FILTER = "filter"; // filter
+    private static final String ATTR_SET_BY_DPM = "set-by-dpm"; // set by DPM
 
     private static final String TAG = "PersistentPreferredActivity";
 
     private static final boolean DEBUG_FILTERS = false;
 
     final ComponentName mComponent;
+    final boolean mIsSetByDpm;
 
-    PersistentPreferredActivity(IntentFilter filter, ComponentName activity) {
+    PersistentPreferredActivity(IntentFilter filter, ComponentName activity, boolean isSetByDpm) {
         super(filter);
         mComponent = activity;
+        mIsSetByDpm = isSetByDpm;
     }
 
     PersistentPreferredActivity(XmlPullParser parser) throws XmlPullParserException, IOException {
@@ -52,6 +55,8 @@ class PersistentPreferredActivity extends IntentFilter {
                             "Bad activity name " + shortComponent +
                             " at " + parser.getPositionDescription());
         }
+        mIsSetByDpm = Boolean.parseBoolean(parser.getAttributeValue(null, ATTR_SET_BY_DPM));
+
         int outerDepth = parser.getDepth();
         String tagName = parser.getName();
         int type;
@@ -83,6 +88,7 @@ class PersistentPreferredActivity extends IntentFilter {
 
     public void writeToXml(XmlSerializer serializer) throws IOException {
         serializer.attribute(null, ATTR_NAME, mComponent.flattenToShortString());
+        serializer.attribute(null, ATTR_SET_BY_DPM, Boolean.toString(mIsSetByDpm));
         serializer.startTag(null, ATTR_FILTER);
             super.writeToXml(serializer);
         serializer.endTag(null, ATTR_FILTER);
@@ -91,6 +97,7 @@ class PersistentPreferredActivity extends IntentFilter {
     @Override
     public String toString() {
         return "PersistentPreferredActivity{0x" + Integer.toHexString(System.identityHashCode(this))
-                + " " + mComponent.flattenToShortString() + "}";
+                + " " + mComponent.flattenToShortString()
+                + ", mIsSetByDpm=" + mIsSetByDpm + "}";
     }
 }

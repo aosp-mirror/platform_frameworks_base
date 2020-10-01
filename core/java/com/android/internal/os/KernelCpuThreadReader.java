@@ -25,6 +25,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
 import java.io.IOException;
+import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -276,7 +277,7 @@ public class KernelCpuThreadReader {
                 }
                 threadCpuUsages.add(threadCpuUsage);
             }
-        } catch (IOException e) {
+        } catch (IOException | DirectoryIteratorException e) {
             // Expected when a process finishes
             return null;
         }

@@ -38,7 +38,8 @@ interface IAugmentedAutofillManagerClient {
     /**
      * Autofills the activity with the contents of the values.
      */
-    void autofill(int sessionId, in List<AutofillId> ids, in List<AutofillValue> values);
+    void autofill(int sessionId, in List<AutofillId> ids, in List<AutofillValue> values,
+            boolean hideHighlight);
 
     /**
       * Requests showing the fill UI.
@@ -50,4 +51,10 @@ interface IAugmentedAutofillManagerClient {
       * Requests hiding the fill UI.
       */
     void requestHideFillUi(int sessionId, in AutofillId id);
+
+    /**
+      * Requests to start a new autofill flow. Returns true if the autofill request is made to
+      * {@link AutofillManager#requestAutofill(View)}.
+      */
+    boolean requestAutofill(int sessionId, in AutofillId id);
 }

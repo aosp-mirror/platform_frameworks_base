@@ -123,14 +123,17 @@ static string build_uri(const string& pkg, const string& cls, const string& id) 
 
 // ================================================================================
 ReportHandler::ReportHandler(const sp<WorkDirectory>& workDirectory,
-            const sp<Broadcaster>& broadcaster, const sp<Looper>& handlerLooper,
-            const sp<Throttler>& throttler)
+                             const sp<Broadcaster>& broadcaster,
+                             const sp<Looper>& handlerLooper,
+                             const sp<Throttler>& throttler,
+                             const vector<BringYourOwnSection*>& registeredSections)
         :mLock(),
          mWorkDirectory(workDirectory),
          mBroadcaster(broadcaster),
          mHandlerLooper(handlerLooper),
          mBacklogDelay(DEFAULT_DELAY_NS),
          mThrottler(throttler),
+         mRegisteredSections(registeredSections),
          mBatch(new ReportBatch()) {
 }
 
@@ -149,6 +152,7 @@ void ReportHandler::handleMessage(const Message& message) {
 }
 
 void ReportHandler::schedulePersistedReport(const IncidentReportArgs& args) {
+    unique_lock<mutex> lock(mLock);
     mBatch->addPersistedReport(args);
     mHandlerLooper->removeMessages(this, WHAT_TAKE_REPORT);
     mHandlerLooper->sendMessage(this, Message(WHAT_TAKE_REPORT));
@@ -156,6 +160,7 @@ void ReportHandler::schedulePersistedReport(const IncidentReportArgs& args) {
 
 void ReportHandler::scheduleStreamingReport(const IncidentReportArgs& args,
         const sp<IIncidentReportStatusListener>& listener, int streamFd) {
+    unique_lock<mutex> lock(mLock);
     mBatch->addStreamingReport(args, listener, streamFd);
     mHandlerLooper->removeMessages(this, WHAT_TAKE_REPORT);
     mHandlerLooper->sendMessage(this, Message(WHAT_TAKE_REPORT));
@@ -185,7 +190,7 @@ void ReportHandler::take_report() {
         return;
     }
 
-    sp<Reporter> reporter = new Reporter(mWorkDirectory, batch);
+    sp<Reporter> reporter = new Reporter(mWorkDirectory, batch, mRegisteredSections);
 
     // Take the report, which might take a while. More requests might queue
     // up while we're doing this, and we'll handle them in their next batch.
@@ -237,7 +242,7 @@ IncidentService::IncidentService(const sp<Looper>& handlerLooper) {
     mWorkDirectory = new WorkDirectory();
     mBroadcaster = new Broadcaster(mWorkDirectory);
     mHandler = new ReportHandler(mWorkDirectory, mBroadcaster, handlerLooper,
-            mThrottler);
+            mThrottler, mRegisteredSections);
     mBroadcaster->setHandler(mHandler);
 }
 
@@ -327,6 +332,11 @@ Status IncidentService::reportIncidentToDumpstate(unique_fd stream,
             incidentArgs.addSection(id);
         }
     }
+    for (const Section* section : mRegisteredSections) {
+        if (!section_requires_specific_mention(section->id)) {
+            incidentArgs.addSection(section->id);
+        }
+    }
 
     // The ReportRequest takes ownership of the fd, so we need to dup it.
     int fd = dup(stream.get());
@@ -337,6 +347,46 @@ Status IncidentService::reportIncidentToDumpstate(unique_fd stream,
     mHandler->scheduleStreamingReport(incidentArgs, listener, fd);
 
     return Status::ok();
+}
+
+Status IncidentService::registerSection(const int id, const String16& name16,
+        const sp<IIncidentDumpCallback>& callback) {
+    const String8 name = String8(name16);
+    const uid_t callingUid = IPCThreadState::self()->getCallingUid();
+    ALOGI("Uid %d registers section %d '%s'", callingUid, id, name.c_str());
+    if (callback == nullptr) {
+        return Status::fromExceptionCode(Status::EX_NULL_POINTER);
+    }
+    for (int i = 0; i < mRegisteredSections.size(); i++) {
+        if (mRegisteredSections.at(i)->id == id) {
+            if (mRegisteredSections.at(i)->uid != callingUid) {
+                ALOGW("Error registering section %d: calling uid does not match", id);
+                return Status::fromExceptionCode(Status::EX_SECURITY);
+            }
+            mRegisteredSections.at(i) = new BringYourOwnSection(id, name.c_str(), callingUid, callback);
+            return Status::ok();
+        }
+    }
+    mRegisteredSections.push_back(new BringYourOwnSection(id, name.c_str(), callingUid, callback));
+    return Status::ok();
+}
+
+Status IncidentService::unregisterSection(const int id) {
+    uid_t callingUid = IPCThreadState::self()->getCallingUid();
+    ALOGI("Uid %d unregisters section %d", callingUid, id);
+
+    for (auto it = mRegisteredSections.begin(); it != mRegisteredSections.end(); it++) {
+        if ((*it)->id == id) {
+            if ((*it)->uid != callingUid) {
+                ALOGW("Error unregistering section %d: calling uid does not match", id);
+                return Status::fromExceptionCode(Status::EX_SECURITY);
+            }
+            mRegisteredSections.erase(it);
+            return Status::ok();
+        }
+    }
+    ALOGW("Section %d not found", id);
+    return Status::fromExceptionCode(Status::EX_ILLEGAL_STATE);
 }
 
 Status IncidentService::systemRunning() {

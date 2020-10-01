@@ -85,7 +85,7 @@ public class JobStoreTest {
         JobSchedulerService.sSystemClock =
                 Clock.fixed(Clock.systemUTC().instant(), ZoneOffset.UTC);
         JobSchedulerService.sUptimeMillisClock =
-                Clock.fixed(SystemClock.uptimeMillisClock().instant(), ZoneOffset.UTC);
+                Clock.fixed(SystemClock.uptimeClock().instant(), ZoneOffset.UTC);
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(SystemClock.elapsedRealtimeClock().instant(), ZoneOffset.UTC);
     }
@@ -273,7 +273,7 @@ public class JobStoreTest {
                 invalidLateRuntimeElapsedMillis - TWO_HOURS;  // Early is (late - period).
         final Pair<Long, Long> persistedExecutionTimesUTC = new Pair<>(rtcNow, rtcNow + ONE_HOUR);
         final JobStatus js = new JobStatus(b.build(), SOME_UID, "somePackage",
-                0 /* sourceUserId */, 0, 0, "someTag",
+                0 /* sourceUserId */, 0, "someTag",
                 invalidEarlyRuntimeElapsedMillis, invalidLateRuntimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
                 persistedExecutionTimesUTC, 0 /* innerFlagg */);
@@ -505,7 +505,7 @@ public class JobStoreTest {
                 first.getTransientExtras().toString(), second.getTransientExtras().toString());
 
         // Since people can forget to add tests here for new fields, do one last
-        // sanity check based on bits-on-wire equality.
+        // validity check based on bits-on-wire equality.
         final byte[] firstBytes = marshall(first);
         final byte[] secondBytes = marshall(second);
         if (!Arrays.equals(firstBytes, secondBytes)) {

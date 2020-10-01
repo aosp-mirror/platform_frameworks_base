@@ -24,6 +24,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
+import android.hardware.camera2.ICameraOfflineSession;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.CaptureResultExtras;
 import android.hardware.camera2.impl.PhysicalCaptureResultInfo;
@@ -129,7 +130,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         public CameraLooper(int cameraId) {
             mCameraId = cameraId;
 
-            mThread = new Thread(this);
+            mThread = new Thread(this, "LegacyCameraLooper");
             mThread.start();
         }
 
@@ -540,7 +541,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     }
 
     @Override
-    public void endConfigure(int operatingMode, CameraMetadataNative sessionParams) {
+    public int[] endConfigure(int operatingMode, CameraMetadataNative sessionParams) {
         if (DEBUG) {
             Log.d(TAG, "endConfigure called.");
         }
@@ -575,6 +576,8 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
             mConfiguring = false;
         }
         mLegacyDevice.configureOutputs(surfaces);
+
+        return new int[0]; // Offline mode is not supported
     }
 
     @Override
@@ -764,6 +767,34 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         }
 
         // LEGACY doesn't support actual teardown, so just a no-op
+    }
+
+    @Override
+    public void setCameraAudioRestriction(int mode) {
+        if (mLegacyDevice.isClosed()) {
+            String err = "Cannot set camera audio restriction, device has been closed.";
+            Log.e(TAG, err);
+            throw new ServiceSpecificException(ICameraService.ERROR_DISCONNECTED, err);
+        }
+
+        mLegacyDevice.setAudioRestriction(mode);
+    }
+
+    @Override
+    public int getGlobalAudioRestriction() {
+        if (mLegacyDevice.isClosed()) {
+            String err = "Cannot set camera audio restriction, device has been closed.";
+            Log.e(TAG, err);
+            throw new ServiceSpecificException(ICameraService.ERROR_DISCONNECTED, err);
+        }
+
+        return mLegacyDevice.getAudioRestriction();
+    }
+
+    @Override
+    public ICameraOfflineSession switchToOffline(ICameraDeviceCallbacks cbs,
+            int[] offlineOutputIds) {
+        throw new UnsupportedOperationException("Legacy device does not support offline mode");
     }
 
     @Override

@@ -33,7 +33,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.util.ArraySet;
 import android.view.inputmethod.InputMethodInfo;
-import android.view.inputmethod.InputMethodSystemProperty;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -61,17 +60,11 @@ public class OverlayPackagesProvider {
 
     @VisibleForTesting
     interface Injector {
-        boolean isPerProfileImeEnabled();
         @NonNull
         List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId);
     }
 
     private static final class DefaultInjector implements Injector {
-        @Override
-        public boolean isPerProfileImeEnabled() {
-            return InputMethodSystemProperty.PER_PROFILE_IME_ENABLED;
-        }
-
         @NonNull
         @Override
         public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
@@ -108,13 +101,7 @@ public class OverlayPackagesProvider {
         // Newly installed system apps are uninstalled when they are not required and are either
         // disallowed or have a launcher icon.
         nonRequiredApps.removeAll(getRequiredApps(provisioningAction, admin.getPackageName()));
-        if (mInjector.isPerProfileImeEnabled()) {
-            nonRequiredApps.removeAll(getSystemInputMethods(userId));
-        } else if (ACTION_PROVISION_MANAGED_DEVICE.equals(provisioningAction)
-                || ACTION_PROVISION_MANAGED_USER.equals(provisioningAction)) {
-            // Don't delete the system input method packages in case of Device owner provisioning.
-            nonRequiredApps.removeAll(getSystemInputMethods(userId));
-        }
+        nonRequiredApps.removeAll(getSystemInputMethods(userId));
         nonRequiredApps.addAll(getDisallowedApps(provisioningAction));
         return nonRequiredApps;
     }
