@@ -78,6 +78,7 @@ android_test {
         "libbinder",
         "libc++",
         "libcutils",
+        "libicing",
         "liblog",
         "liblzma",
         "libnativehelper",
