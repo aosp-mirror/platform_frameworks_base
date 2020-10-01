@@ -432,13 +432,23 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"તમારી ઑડિઓ સેટિંગ્સ બદલો"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"એપ્લિકેશનને વૈશ્વિક ઑડિઓ સેટિંગ્સને સંશોધિત કરવાની મંજૂરી આપે છે, જેમ કે વૉલ્યૂમ અને આઉટપુટ માટે કયા સ્પીકરનો ઉપયોગ કરવો."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ઑડિઓ રેકોર્ડ કરવાની"</string>
-    <string name="permdesc_recordAudio" msgid="3976213377904701093">"આ ઍપ્લિકેશન, માઇક્રોફોનનો ઉપયોગ કરીને કોઈપણ સમયે ઑડિઓ રેકોર્ડ કરી શકે છે."</string>
+    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
+    <skip />
+    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
+    <skip />
+    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="176788115994050692">"સિમ ને આદેશો મોકલો"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"એપ્લિકેશનને સિમ પરા આદેશો મોકલવાની મંજૂરી આપે છે. આ ખૂબ જ ખતરનાક છે."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"શારીરિક પ્રવૃત્તિને ઓળખો"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"આ ઍપ તમારી શારીરિક પ્રવૃત્તિને ઓળખી શકે છે."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ચિત્રો અને વિડિઓઝ લો"</string>
-    <string name="permdesc_camera" msgid="1354600178048761499">"આ ઍપ્લિકેશન, કૅમેરાનો ઉપયોગ કરીને કોઈપણ સમયે ચિત્રો લઈ અને વિડિઓઝ રેકોર્ડ કરી શકે છે."</string>
+    <!-- no translation found for permdesc_camera (5240801376168647151) -->
+    <skip />
+    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
+    <skip />
+    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
+    <skip />
     <string name="permlab_systemCamera" msgid="3642917457796210580">"ઍપ્લિકેશન અથવા સેવા ઍક્સેસને સિસ્ટમ કૅમેરાનો ઉપયોગ કરીને ફોટા અને વીડિયો લેવાની મંજૂરી આપો"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"આ વિશેષાધિકૃત અથવા સિસ્ટમ ઍપ કોઈપણ સમયે સિસ્ટમ કૅમેરાનો ઉપયોગ કરીને ફોટા લઈ અને વીડિયો રેકૉર્ડ કરી શકે છે. ઍપ દ્વારા આયોજિત કરવા માટે android.permission.CAMERAની પરવાનગી પણ જરૂરી છે"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"કૅમેરા ડિવાઇસ ચાલુ કે બંધ થવા વિશે કૉલબૅક પ્રાપ્ત કરવાની ઍપ્લિકેશન કે સેવાને મંજૂરી આપો."</string>
@@ -1622,12 +1632,10 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ભલામણ કરેલ સ્તરની ઉપર વૉલ્યૂમ વધાર્યો?\n\nલાંબા સમય સુધી ઊંચા અવાજે સાંભળવું તમારી શ્રવણક્ષમતાને નુકસાન પહોંચાડી શકે છે."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ઍક્સેસિબિલિટી શૉર્ટકટનો ઉપયોગ કરીએ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"જ્યારે શૉર્ટકટ ચાલુ હોય, ત્યારે બન્ને વૉલ્યૂમ બટનને 3 સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધા શરૂ થઈ જશે."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (3135860819356676426) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ઍક્સેસિબિલિટી સુવિધાઓ માટે શૉર્ટકટ ચાલુ કરીએ?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"બન્ને વૉલ્યૂમ કીને થોડી સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધાઓ ચાલુ થઈ જાય છે. આનાથી તમારા ડિવાઇસની કામ કરવાની રીત બદલાઈ શકે છે.\n\nવર્તમાન સુવિધાઓ:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nતમે સેટિંગ &gt; ઍક્સેસિબિલિટીમાં જઈને પસંદ કરેલી સુવિધાઓને બદલી શકો છો."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <!-- no translation found for accessibility_shortcut_single_service_warning_title (1909518473488345266) -->
-    <skip />
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> શૉર્ટકટ ચાલુ કરીએ?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"બન્ને વૉલ્યૂમ કીને થોડી સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધા એવી <xliff:g id="SERVICE">%1$s</xliff:g> ચાલુ થઈ જાય છે. આનાથી તમારા ડિવાઇસની કામ કરવાની રીત બદલાઈ શકે છે.\n\nતમે સેટિંગ &gt; ઍક્સેસિબિલિટીમાં જઈને આ શૉર્ટકટને બીજી સુવિધામાં બદલી શકો છો."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ચાલુ કરો"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ચાલુ કરશો નહીં"</string>
