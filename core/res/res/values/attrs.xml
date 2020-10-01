@@ -9180,21 +9180,32 @@
         <attr name="fontVariationSettings" format="string" />
     </declare-styleable>
 
-    <!-- Attributes that are read when parsing a &lt;fontfamily&gt; tag. -->
+    <!-- Attributes that are read when parsing a &lt;fontfamily&gt; tag.
+         {@deprecated Use Jetpack Core library instead.}
+     -->
     <declare-styleable name="FontFamily">
-        <!-- The authority of the Font Provider to be used for the request. -->
+        <!-- The authority of the Font Provider to be used for the request.
+             {@deprecated Use app:fontProviderAuthority with Jetpack Core library instead for
+              consistent behavior across all devices.}
+         -->
         <attr name="fontProviderAuthority" format="string" />
         <!-- The package for the Font Provider to be used for the request. This is used to verify
-        the identity of the provider. -->
+        the identity of the provider.
+             {@deprecated Use app:fontProviderPackage with Jetpack Core library instead.}
+         -->
         <attr name="fontProviderPackage" format="string" />
         <!-- The query to be sent over to the provider. Refer to your font provider's documentation
-        on the format of this string. -->
+        on the format of this string.
+             {@deprecated Use app:fontProviderQuery with Jetpack Core library instead.}
+         -->
         <attr name="fontProviderQuery" format="string" />
         <!-- The sets of hashes for the certificates the provider should be signed with. This is
         used to verify the identity of the provider, and is only required if the provider is not
         part of the system image. This value may point to one list or a list of lists, where each
         individual list represents one collection of signature hashes. Refer to your font provider's
-        documentation for these values. -->
+        documentation for these values.
+             {@deprecated Use app:fontProviderCerts with Jetpack Core library instead.}
+         -->
         <attr name="fontProviderCerts" format="reference" />
     </declare-styleable>
 
