@@ -118,7 +118,7 @@ static jlong Font_Builder_build(JNIEnv* env, jobject clazz, jlong builderPtr, jo
             std::make_shared<MinikinFontSkia>(std::move(face), fontPtr, fontSize,
                                               std::string_view(fontPath.c_str(), fontPath.size()),
                                               ttcIndex, builder->axes);
-    minikin::Font font = minikin::Font::Builder(minikinFont).setWeight(weight)
+    std::shared_ptr<minikin::Font> font = minikin::Font::Builder(minikinFont).setWeight(weight)
                     .setSlant(static_cast<minikin::FontStyle::Slant>(italic)).build();
     return reinterpret_cast<jlong>(new FontWrapper(std::move(font)));
 }
@@ -127,7 +127,7 @@ static jlong Font_Builder_build(JNIEnv* env, jobject clazz, jlong builderPtr, jo
 static jlong Font_Builder_clone(JNIEnv* env, jobject clazz, jlong fontPtr, jlong builderPtr,
                                 jint weight, jboolean italic, jint ttcIndex) {
     FontWrapper* font = reinterpret_cast<FontWrapper*>(fontPtr);
-    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->font.typeface().get());
+    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->font->typeface().get());
     std::unique_ptr<NativeFontBuilder> builder(toBuilder(builderPtr));
 
     // Reconstruct SkTypeface with different arguments from existing SkTypeface.
@@ -148,8 +148,10 @@ static jlong Font_Builder_clone(JNIEnv* env, jobject clazz, jlong fontPtr, jlong
         minikinSkia->getFilePath(),
         minikinSkia->GetFontIndex(),
         builder->axes);
-    minikin::Font newFont = minikin::Font::Builder(newMinikinFont).setWeight(weight)
-              .setSlant(static_cast<minikin::FontStyle::Slant>(italic)).build();
+    std::shared_ptr<minikin::Font> newFont = minikin::Font::Builder(newMinikinFont)
+              .setWeight(weight)
+              .setSlant(static_cast<minikin::FontStyle::Slant>(italic))
+              .build();
     return reinterpret_cast<jlong>(new FontWrapper(std::move(newFont)));
 }
 
@@ -164,7 +166,7 @@ static jlong Font_Builder_getReleaseNativeFont(CRITICAL_JNI_PARAMS) {
 static jfloat Font_getGlyphBounds(JNIEnv* env, jobject, jlong fontHandle, jint glyphId,
                                   jlong paintHandle, jobject rect) {
     FontWrapper* font = reinterpret_cast<FontWrapper*>(fontHandle);
-    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->font.typeface().get());
+    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->font->typeface().get());
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
 
     SkFont* skFont = &paint->getSkFont();
@@ -184,7 +186,7 @@ static jfloat Font_getGlyphBounds(JNIEnv* env, jobject, jlong fontHandle, jint g
 static jfloat Font_getFontMetrics(JNIEnv* env, jobject, jlong fontHandle, jlong paintHandle,
                                   jobject metricsObj) {
     FontWrapper* font = reinterpret_cast<FontWrapper*>(fontHandle);
-    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->font.typeface().get());
+    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->font->typeface().get());
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
 
     SkFont* skFont = &paint->getSkFont();
@@ -200,11 +202,11 @@ static jfloat Font_getFontMetrics(JNIEnv* env, jobject, jlong fontHandle, jlong 
 
 // Critical Native
 static jlong Font_getFontInfo(CRITICAL_JNI_PARAMS_COMMA jlong fontHandle) {
-    FontWrapper* font = reinterpret_cast<FontWrapper*>(fontHandle);
-    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->font.typeface().get());
+    const minikin::Font* font = reinterpret_cast<minikin::Font*>(fontHandle);
+    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->typeface().get());
 
-    uint64_t result = font->font.style().weight();
-    result |= font->font.style().slant() == minikin::FontStyle::Slant::ITALIC ? 0x10000 : 0x00000;
+    uint64_t result = font->style().weight();
+    result |= font->style().slant() == minikin::FontStyle::Slant::ITALIC ? 0x10000 : 0x00000;
     result |= ((static_cast<uint64_t>(minikinSkia->GetFontIndex())) << 32);
     result |= ((static_cast<uint64_t>(minikinSkia->GetAxes().size())) << 48);
     return result;
@@ -212,11 +214,17 @@ static jlong Font_getFontInfo(CRITICAL_JNI_PARAMS_COMMA jlong fontHandle) {
 
 // Critical Native
 static jlong Font_getAxisInfo(CRITICAL_JNI_PARAMS_COMMA jlong fontHandle, jint index) {
-    FontWrapper* font = reinterpret_cast<FontWrapper*>(fontHandle);
-    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->font.typeface().get());
+    const minikin::Font* font = reinterpret_cast<minikin::Font*>(fontHandle);
+    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->typeface().get());
     const minikin::FontVariation& var = minikinSkia->GetAxes().at(index);
     uint32_t floatBinary = *reinterpret_cast<const uint32_t*>(&var.value);
     return (static_cast<uint64_t>(var.axisTag) << 32) | static_cast<uint64_t>(floatBinary);
+}
+
+// Critical Native
+static jlong Font_getNativeFontPtr(CRITICAL_JNI_PARAMS_COMMA jlong fontHandle) {
+    FontWrapper* font = reinterpret_cast<FontWrapper*>(fontHandle);
+    return reinterpret_cast<jlong>(font->font.get());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -234,8 +242,8 @@ static void unrefBuffer(jlong nativePtr) {
 
 // Critical Native
 static jlong FontBufferHelper_refFontBuffer(CRITICAL_JNI_PARAMS_COMMA jlong fontHandle) {
-    FontWrapper* font = reinterpret_cast<FontWrapper*>(fontHandle);
-    return reinterpret_cast<jlong>(new FontBufferWrapper(font->font.typeface()));
+    const minikin::Font* font = reinterpret_cast<minikin::Font*>(fontHandle);
+    return reinterpret_cast<jlong>(new FontBufferWrapper(font->typeface()));
 }
 
 // Fast Native
@@ -266,6 +274,7 @@ static const JNINativeMethod gFontMethods[] = {
     { "nGetFontMetrics", "(JJLandroid/graphics/Paint$FontMetrics;)F", (void*) Font_getFontMetrics },
     { "nGetFontInfo", "(J)J", (void*) Font_getFontInfo },
     { "nGetAxisInfo", "(JI)J", (void*) Font_getAxisInfo },
+    { "nGetNativeFontPtr", "(J)J", (void*) Font_getNativeFontPtr },
 };
 
 static const JNINativeMethod gFontBufferHelperMethods[] = {
