@@ -1014,6 +1014,18 @@
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"सेटिंग"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"स्क्रीन को बड़ा करके दिखाने वाली विंडो"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"स्क्रीन को बड़ा करके दिखाने वाली विंडो के नियंत्रण"</string>
+    <!-- no translation found for accessibility_control_zoom_in (1189272315480097417) -->
+    <skip />
+    <!-- no translation found for accessibility_control_zoom_out (69578832020304084) -->
+    <skip />
+    <!-- no translation found for accessibility_control_move_up (6622825494014720136) -->
+    <skip />
+    <!-- no translation found for accessibility_control_move_down (5390922476900974512) -->
+    <skip />
+    <!-- no translation found for accessibility_control_move_left (8156206978511401995) -->
+    <skip />
+    <!-- no translation found for accessibility_control_move_right (8926821093629582888) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"डिवाइस कंट्रोल"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"कनेक्ट किए गए डिवाइस के लिए कंट्रोल जोड़ें"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"डिवाइस कंट्रोल सेट अप करें"</string>
@@ -1077,4 +1089,8 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (डिसकनेक्ट किया गया)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"कनेक्ट नहीं किया जा सका. फिर से कोशिश करें."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"नया डिवाइस जोड़ें"</string>
+    <!-- no translation found for build_number_clip_data_label (3623176728412560914) -->
+    <skip />
+    <!-- no translation found for build_number_copy_toast (877720921605503046) -->
+    <skip />
 </resources>

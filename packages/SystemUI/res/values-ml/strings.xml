@@ -1012,6 +1012,18 @@
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ക്രമീകരണം"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"മാഗ്നിഫിക്കേഷൻ വിൻഡോ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"മാഗ്നിഫിക്കേഷൻ വിൻഡോ നിയന്ത്രണങ്ങൾ"</string>
+    <!-- no translation found for accessibility_control_zoom_in (1189272315480097417) -->
+    <skip />
+    <!-- no translation found for accessibility_control_zoom_out (69578832020304084) -->
+    <skip />
+    <!-- no translation found for accessibility_control_move_up (6622825494014720136) -->
+    <skip />
+    <!-- no translation found for accessibility_control_move_down (5390922476900974512) -->
+    <skip />
+    <!-- no translation found for accessibility_control_move_left (8156206978511401995) -->
+    <skip />
+    <!-- no translation found for accessibility_control_move_right (8926821093629582888) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"ഉപകരണ നിയന്ത്രണങ്ങൾ"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"കണക്റ്റ് ചെയ്ത ഉപകരണങ്ങൾക്ക് നിയന്ത്രണങ്ങൾ ചേർക്കുക"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ഉപകരണ നിയന്ത്രണങ്ങൾ സജ്ജീകരിക്കുക"</string>
@@ -1075,4 +1087,8 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (വിച്ഛേദിച്ചു)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"കണക്റ്റ് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"പുതിയ ഉപകരണവുമായി ജോടിയാക്കുക"</string>
+    <!-- no translation found for build_number_clip_data_label (3623176728412560914) -->
+    <skip />
+    <!-- no translation found for build_number_copy_toast (877720921605503046) -->
+    <skip />
 </resources>
