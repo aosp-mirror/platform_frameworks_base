@@ -7978,6 +7978,91 @@ public class AppOpsManager {
             throw e.rethrowFromSystemServer();
         }
     }
+    /**
+     * Report that an application has started executing a long-running operation on behalf of
+     * another application when handling an IPC. This function will verify that the calling uid and
+     * proxied package name match, and if not, return {@link #MODE_IGNORED}.
+     *
+     * @param op The op to note
+     * @param proxiedUid The uid to note the op for {@code null}
+     * @param proxiedUid The package name the uid belongs to
+     * @param proxiedAttributionTag The proxied {@link Context#createAttributionContext
+     * attribution tag} or {@code null} for default attribution
+     * @param message A message describing the reason the op was noted
+     *
+     * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or {@link #MODE_IGNORED}
+     * if it is not allowed and should be silently ignored (without causing the app to crash).
+     *
+     * @throws SecurityException If the proxy or proxied app has been configured to crash on this
+     * op.
+     */
+    public int startProxyOp(@NonNull String op, int proxiedUid, @NonNull String proxiedPackageName,
+            @Nullable String proxiedAttributionTag, @Nullable String message) {
+        final int mode = startProxyOpNoThrow(op, proxiedUid, proxiedPackageName,
+                proxiedAttributionTag, message);
+        if (mode == MODE_ERRORED) {
+            throw new SecurityException("Proxy package " + mContext.getOpPackageName()
+                    + " from uid " + Process.myUid() + " or calling package " + proxiedPackageName
+                    + " from uid " + proxiedUid + " not allowed to perform "
+                    + sOpNames[strOpToOp(op)]);
+        }
+        return mode;
+    }
+
+    /**
+     *Like {@link #startProxyOp(String, int, String, String, String)} but instead
+     * of throwing a {@link SecurityException} it returns {@link #MODE_ERRORED}.
+     *
+     * @param op The op to note
+     * @param proxiedUid The uid to note the op for {@code null}
+     * @param proxiedUid The package name the uid belongs to
+     * @param proxiedAttributionTag The proxied {@link Context#createAttributionContext
+     * attribution tag} or {@code null} for default attribution
+     * @param message A message describing the reason the op was noted*
+     * <p>This API requires package with the {@code proxiedPackageName} to belong to
+     * {@code proxiedUid}.
+     *
+     * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or {@link #MODE_IGNORED}
+     * if it is not allowed and should be silently ignored (without causing the app to crash).
+     */
+    public int startProxyOpNoThrow(@NonNull String op, int proxiedUid,
+            @NonNull String proxiedPackageName, @Nullable String proxiedAttributionTag,
+            @Nullable String message) {
+        try {
+            int opInt = strOpToOp(op);
+
+            collectNoteOpCallsForValidation(opInt);
+            int collectionMode = getNotedOpCollectionMode(proxiedUid, proxiedPackageName, opInt);
+            boolean shouldCollectMessage = Process.myUid() == Process.SYSTEM_UID;
+            if (collectionMode == COLLECT_ASYNC) {
+                if (message == null) {
+                    // Set stack trace as default message
+                    message = getFormattedStackTrace();
+                    shouldCollectMessage = true;
+                }
+            }
+
+            int mode = mService.startProxyOperation(getClientId(), opInt, proxiedUid,
+                    proxiedPackageName, proxiedAttributionTag, Process.myUid(),
+                    mContext.getOpPackageName(), mContext.getAttributionTag(), false,
+                    collectionMode == COLLECT_ASYNC, message, shouldCollectMessage);
+
+            if (mode == MODE_ALLOWED) {
+                if (collectionMode == COLLECT_SELF) {
+                    collectNotedOpForSelf(opInt, proxiedAttributionTag);
+                } else if (collectionMode == COLLECT_SYNC
+                        // Only collect app-ops when the proxy is trusted
+                        && mContext.checkPermission(Manifest.permission.UPDATE_APP_OPS_STATS, -1,
+                        Process.myUid()) == PackageManager.PERMISSION_GRANTED) {
+                    collectNotedOpSync(opInt, proxiedAttributionTag);
+                }
+            }
+
+            return mode;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     /**
      * @deprecated Use {@link #finishOp(String, int, String, String)} instead
@@ -8028,6 +8113,28 @@ public class AppOpsManager {
             @Nullable String attributionTag) {
         try {
             mService.finishOperation(getClientId(), op, uid, packageName, attributionTag);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     *  Report that an application is no longer performing an operation that had previously
+     * been started with {@link #startProxyOp(String, int, String, String, String)}. There is no
+     * validation of input or result; the parameters supplied here must be the exact same ones
+     * previously passed in when starting the operation.
+     * @param op The operation which was started
+     * @param proxiedUid The uid the op was started on behalf of
+     * @param proxiedPackageName The package the op was started on behalf of
+     * @param proxiedAttributionTag The proxied {@link Context#createAttributionContext
+     * attribution tag} or {@code null} for default attribution
+     */
+    public void finishProxyOp(@NonNull String op, int proxiedUid,
+            @NonNull String proxiedPackageName, @Nullable String proxiedAttributionTag) {
+        try {
+            mService.finishProxyOperation(getClientId(), strOpToOp(op), proxiedUid,
+                    proxiedPackageName, proxiedAttributionTag, Process.myUid(),
+                    mContext.getOpPackageName(), mContext.getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
