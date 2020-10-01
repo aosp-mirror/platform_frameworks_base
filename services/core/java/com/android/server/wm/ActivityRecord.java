@@ -7864,6 +7864,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Rect insets = new Rect();
         mainWindow.getContentInsets(insets);
         InsetUtils.addInsets(insets, getLetterboxInsets());
+
         return new RemoteAnimationTarget(task.mTaskId, record.getMode(),
                 record.mAdapter.mCapturedLeash, !fillsParent(),
                 new Rect(), insets,
@@ -7871,7 +7872,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 record.mAdapter.mStackBounds, task.getWindowConfiguration(),
                 false /*isNotInRecents*/,
                 record.mThumbnailAdapter != null ? record.mThumbnailAdapter.mCapturedLeash : null,
-                record.mStartBounds);
+                record.mStartBounds, task.getPictureInPictureParams());
     }
 
     @Override

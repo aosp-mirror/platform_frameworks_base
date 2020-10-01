@@ -33,6 +33,7 @@ import static android.view.RemoteAnimationTargetProto.TASK_ID;
 import static android.view.RemoteAnimationTargetProto.WINDOW_CONFIGURATION;
 
 import android.annotation.IntDef;
+import android.app.PictureInPictureParams;
 import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Point;
@@ -185,11 +186,20 @@ public class RemoteAnimationTarget implements Parcelable {
     @UnsupportedAppUsage
     public boolean isNotInRecents;
 
+    /**
+     * {@link PictureInPictureParams} to allow launcher to determine if an app should
+     * automatically enter PiP on swiping up to home.
+     *
+     * TODO: add this to proto dump
+     */
+    public PictureInPictureParams pictureInPictureParams;
+
     public RemoteAnimationTarget(int taskId, int mode, SurfaceControl leash, boolean isTranslucent,
             Rect clipRect, Rect contentInsets, int prefixOrderIndex, Point position,
             Rect localBounds, Rect screenSpaceBounds,
             WindowConfiguration windowConfig, boolean isNotInRecents,
-            SurfaceControl startLeash, Rect startBounds) {
+            SurfaceControl startLeash, Rect startBounds,
+            PictureInPictureParams pictureInPictureParams) {
         this.mode = mode;
         this.taskId = taskId;
         this.leash = leash;
@@ -205,6 +215,7 @@ public class RemoteAnimationTarget implements Parcelable {
         this.isNotInRecents = isNotInRecents;
         this.startLeash = startLeash;
         this.startBounds = startBounds == null ? null : new Rect(startBounds);
+        this.pictureInPictureParams = pictureInPictureParams;
     }
 
     public RemoteAnimationTarget(Parcel in) {
@@ -223,6 +234,7 @@ public class RemoteAnimationTarget implements Parcelable {
         isNotInRecents = in.readBoolean();
         startLeash = in.readParcelable(null);
         startBounds = in.readParcelable(null);
+        pictureInPictureParams = in.readParcelable(null);
     }
 
     @Override
@@ -247,6 +259,7 @@ public class RemoteAnimationTarget implements Parcelable {
         dest.writeBoolean(isNotInRecents);
         dest.writeParcelable(startLeash, 0 /* flags */);
         dest.writeParcelable(startBounds, 0 /* flags */);
+        dest.writeParcelable(pictureInPictureParams, 0 /* flags */);
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -263,6 +276,7 @@ public class RemoteAnimationTarget implements Parcelable {
         pw.println();
         pw.print(prefix); pw.print("windowConfiguration="); pw.println(windowConfiguration);
         pw.print(prefix); pw.print("leash="); pw.println(leash);
+        pw.print(prefix); pw.print("pictureInPictureParams="); pw.println(pictureInPictureParams);
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
