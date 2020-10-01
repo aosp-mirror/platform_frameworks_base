@@ -280,6 +280,7 @@ import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
 import android.permission.IPermissionManager;
+import android.provider.ContactsContract;
 import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
@@ -25398,6 +25399,32 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             return mInstantAppRegistry.getInstantAppAndroidIdLPw(packageName, userId);
         }
+    }
+
+    @Override
+    public void grantImplicitAccess(int recipientUid, String visibleAuthority) {
+        // This API is exposed temporarily to only the contacts provider. (b/158688602)
+        final int callingUid = Binder.getCallingUid();
+        ProviderInfo contactsProvider = resolveContentProviderInternal(
+                        ContactsContract.AUTHORITY, 0, UserHandle.getUserId(callingUid));
+        if (contactsProvider == null || contactsProvider.applicationInfo == null
+                || !UserHandle.isSameApp(contactsProvider.applicationInfo.uid, callingUid)) {
+            throw new SecurityException(callingUid + " is not allow to call grantImplicitAccess");
+        }
+        final int userId = UserHandle.getUserId(recipientUid);
+        final long token = Binder.clearCallingIdentity();
+        final ProviderInfo providerInfo;
+        try {
+            providerInfo = resolveContentProvider(visibleAuthority, 0 /*flags*/, userId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        if (providerInfo == null) {
+            return;
+        }
+        int visibleUid = providerInfo.applicationInfo.uid;
+        mPmInternal.grantImplicitAccess(userId, null /*Intent*/, UserHandle.getAppId(recipientUid),
+                visibleUid, false);
     }
 
     boolean canHaveOatDir(String packageName) {
