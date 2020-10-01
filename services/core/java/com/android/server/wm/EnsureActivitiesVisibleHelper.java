@@ -63,26 +63,8 @@ class EnsureActivitiesVisibleHelper {
     }
 
     /**
-     * Update visibility to activities.
-     * @see Task#ensureActivitiesVisible(ActivityRecord, int, boolean)
-     * @see RootWindowContainer#ensureActivitiesVisible(ActivityRecord, int, boolean)
-     * @param starting The top most activity in the task.
-     *                 The activity is either starting or resuming.
-     *                 Caller should ensure starting activity is visible.
-     *
-     */
-    void processUpdate(@Nullable ActivityRecord starting) {
-        reset(starting, 0 /* configChanges */, false /* preserveWindows */,
-                false /* notifyClients */);
-        if (DEBUG_VISIBILITY) {
-            Slog.v(TAG_VISIBILITY, "ensureActivitiesVisible processUpdate behind " + mTop);
-        }
-
-        mTask.forAllActivities(this::updateActivityVisibility);
-    }
-
-    /**
-     * Commit visibility with an option to also update the configuration of visible activities.
+     * Update and commit visibility with an option to also update the configuration of visible
+     * activities.
      * @see Task#ensureActivitiesVisible(ActivityRecord, int, boolean)
      * @see RootWindowContainer#ensureActivitiesVisible(ActivityRecord, int, boolean)
      * @param starting The top most activity in the task.
@@ -95,12 +77,13 @@ class EnsureActivitiesVisibleHelper {
      * @param notifyClients Flag indicating whether the configuration and visibility changes shoulc
      *                      be sent to the clients.
      */
-    void processCommit(ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean notifyClients) {
+    void process(@Nullable ActivityRecord starting, int configChanges, boolean preserveWindows,
+            boolean notifyClients) {
         reset(starting, configChanges, preserveWindows, notifyClients);
 
         if (DEBUG_VISIBILITY) {
-            Slog.v(TAG_VISIBILITY, "ensureActivitiesVisible processCommit behind " + mTop);
+            Slog.v(TAG_VISIBILITY, "ensureActivitiesVisible behind " + mTop
+                    + " configChanges=0x" + Integer.toHexString(configChanges));
         }
         if (mTop != null) {
             mTask.checkTranslucentActivityWaiting(mTop);
@@ -114,25 +97,20 @@ class EnsureActivitiesVisibleHelper {
                 && (starting == null || !starting.isDescendantOf(mTask));
 
         mTask.forAllActivities(a -> {
-            commitActivityVisibility(a, starting, resumeTopActivity);
+            setActivityVisibilityState(a, starting, resumeTopActivity);
         });
     }
 
-    private boolean isAboveTop(boolean isTop) {
-        if (mAboveTop && !isTop) {
-            return true;
-        }
-        mAboveTop = false;
-        return false;
-    }
-
-    private void updateActivityVisibility(ActivityRecord r) {
+    private void setActivityVisibilityState(ActivityRecord r, ActivityRecord starting,
+            final boolean resumeTopActivity) {
         final boolean isTop = r == mTop;
-        if (isAboveTop(isTop)) {
+        if (mAboveTop && !isTop) {
             return;
         }
+        mAboveTop = false;
 
-        r.updateVisibility(mBehindFullscreenActivity);
+        r.updateVisibilityIgnoringKeyguard(mBehindFullscreenActivity);
+        final boolean reallyVisible = r.shouldBeVisibleUnchecked();
 
         // Check whether activity should be visible without Keyguard influence
         if (r.visibleIgnoringKeyguard) {
@@ -147,6 +125,55 @@ class EnsureActivitiesVisibleHelper {
             } else {
                 mBehindFullscreenActivity = false;
             }
+        }
+
+        if (reallyVisible) {
+            if (r.finishing) {
+                return;
+            }
+            if (DEBUG_VISIBILITY) {
+                Slog.v(TAG_VISIBILITY, "Make visible? " + r
+                        + " finishing=" + r.finishing + " state=" + r.getState());
+            }
+            // First: if this is not the current activity being started, make
+            // sure it matches the current configuration.
+            if (r != mStarting && mNotifyClients) {
+                r.ensureActivityConfiguration(0 /* globalChanges */, mPreserveWindows,
+                        true /* ignoreVisibility */);
+            }
+
+            if (!r.attachedToProcess()) {
+                makeVisibleAndRestartIfNeeded(mStarting, mConfigChanges, isTop,
+                        resumeTopActivity && isTop, r);
+            } else if (r.mVisibleRequested) {
+                // If this activity is already visible, then there is nothing to do here.
+                if (DEBUG_VISIBILITY) {
+                    Slog.v(TAG_VISIBILITY, "Skipping: already visible at " + r);
+                }
+
+                if (r.mClientVisibilityDeferred && mNotifyClients) {
+                    r.makeActiveIfNeeded(r.mClientVisibilityDeferred ? null : starting);
+                    r.mClientVisibilityDeferred = false;
+                }
+
+                r.handleAlreadyVisible();
+                if (mNotifyClients) {
+                    r.makeActiveIfNeeded(mStarting);
+                }
+            } else {
+                r.makeVisibleIfNeeded(mStarting, mNotifyClients);
+            }
+            // Aggregate current change flags.
+            mConfigChanges |= r.configChangeFlags;
+        } else {
+            if (DEBUG_VISIBILITY) {
+                Slog.v(TAG_VISIBILITY, "Make invisible? " + r
+                        + " finishing=" + r.finishing + " state=" + r.getState()
+                        + " stackShouldBeVisible=" + mContainerShouldBeVisible
+                        + " behindFullscreenActivity=" + mBehindFullscreenActivity
+                        + " mLaunchTaskBehind=" + r.mLaunchTaskBehind);
+            }
+            r.makeInvisible();
         }
 
         if (!mBehindFullscreenActivity && mTask.isActivityTypeHome() && r.isRootOfTask()) {
@@ -164,60 +191,6 @@ class EnsureActivitiesVisibleHelper {
         }
     }
 
-    private void commitActivityVisibility(ActivityRecord r, ActivityRecord starting,
-            final boolean resumeTopActivity) {
-        final boolean isTop = r == mTop;
-        if (isAboveTop(isTop)) {
-            return;
-        }
-
-        final boolean reallyVisible = r.shouldBeVisibleUnchecked();
-
-        if (reallyVisible) {
-            if (r.finishing) {
-                return;
-            }
-            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Make visible? " + r
-                    + " finishing=" + r.finishing + " state=" + r.getState());
-            // First: if this is not the current activity being started, make
-            // sure it matches the current configuration.
-            if (r != mStarting && mNotifyClients) {
-                r.ensureActivityConfiguration(0 /* globalChanges */, mPreserveWindows,
-                        true /* ignoreVisibility */);
-            }
-
-            if (!r.attachedToProcess()) {
-                makeVisibleAndRestartIfNeeded(mStarting, mConfigChanges, isTop,
-                        resumeTopActivity && isTop, r);
-            } else if (r.mVisibleRequested) {
-                // If this activity is already visible, then there is nothing to do here.
-                if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
-                        "Skipping: already visible at " + r);
-
-                if (r.mClientVisibilityDeferred && mNotifyClients) {
-                    r.makeActiveIfNeeded(r.mClientVisibilityDeferred ? null : starting);
-                    r.mClientVisibilityDeferred = false;
-                }
-
-                r.handleAlreadyVisible();
-                if (mNotifyClients) {
-                    r.makeActiveIfNeeded(mStarting);
-                }
-            } else {
-                r.makeVisibleIfNeeded(mStarting, mNotifyClients);
-            }
-            // Aggregate current change flags.
-            mConfigChanges |= r.configChangeFlags;
-        } else {
-            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Make invisible? " + r
-                    + " finishing=" + r.finishing + " state=" + r.getState()
-                    + " stackShouldBeVisible=" + mContainerShouldBeVisible
-                    + " behindFullscreenActivity=" + mBehindFullscreenActivity
-                    + " mLaunchTaskBehind=" + r.mLaunchTaskBehind);
-            r.makeInvisible();
-        }
-    }
-
     private void makeVisibleAndRestartIfNeeded(ActivityRecord starting, int configChanges,
             boolean isTop, boolean andResume, ActivityRecord r) {
         // We need to make sure the app is running if it's the top, or it is just made visible from
@@ -230,12 +203,16 @@ class EnsureActivitiesVisibleHelper {
 
         // This activity needs to be visible, but isn't even running...
         // get it started and resume if no other stack in this stack is resumed.
-        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Start and freeze screen for " + r);
+        if (DEBUG_VISIBILITY) {
+            Slog.v(TAG_VISIBILITY, "Start and freeze screen for " + r);
+        }
         if (r != starting) {
             r.startFreezingScreenLocked(configChanges);
         }
         if (!r.mVisibleRequested || r.mLaunchTaskBehind) {
-            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Starting and making visible: " + r);
+            if (DEBUG_VISIBILITY) {
+                Slog.v(TAG_VISIBILITY, "Starting and making visible: " + r);
+            }
             r.setVisibility(true);
         }
         if (r != starting) {

@@ -90,9 +90,9 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.util.InjectionInflationController;
-import com.android.systemui.wmshell.WindowManagerShellWrapper;
+import com.android.wm.shell.WindowManagerShellWrapper;
+import com.android.wm.shell.common.FloatingContentCoordinator;
 
 import org.junit.Before;
 import org.junit.Ignore;

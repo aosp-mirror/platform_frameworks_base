@@ -20,7 +20,6 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import android.annotation.ColorInt;
-import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.Intent;
@@ -76,6 +75,7 @@ import com.android.systemui.privacy.PrivacyItem;
 import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.qs.carrier.QSCarrierGroup;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
@@ -156,6 +156,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private RingerModeTracker mRingerModeTracker;
     private DemoModeController mDemoModeController;
     private DemoMode mDemoModeReceiver;
+    private UserTracker mUserTracker;
     private boolean mAllIndicatorsEnabled;
     private boolean mMicCameraIndicatorsEnabled;
 
@@ -212,7 +213,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             StatusBarIconController statusBarIconController,
             ActivityStarter activityStarter, PrivacyItemController privacyItemController,
             CommandQueue commandQueue, RingerModeTracker ringerModeTracker,
-            UiEventLogger uiEventLogger, DemoModeController demoModeController) {
+            UiEventLogger uiEventLogger, DemoModeController demoModeController,
+            UserTracker userTracker) {
         super(context, attrs);
         mAlarmController = nextAlarmController;
         mZenController = zenModeController;
@@ -225,6 +227,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mRingerModeTracker = ringerModeTracker;
         mUiEventLogger = uiEventLogger;
         mDemoModeController = demoModeController;
+        mUserTracker = userTracker;
     }
 
     @Override
@@ -723,7 +726,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             return "";
         }
         String skeleton = android.text.format.DateFormat
-                .is24HourFormat(mContext, ActivityManager.getCurrentUser()) ? "EHm" : "Ehma";
+                .is24HourFormat(mContext, mUserTracker.getUserId()) ? "EHm" : "Ehma";
         String pattern = android.text.format.DateFormat
                 .getBestDateTimePattern(Locale.getDefault(), skeleton);
         return android.text.format.DateFormat.format(pattern, info.getTriggerTime()).toString();

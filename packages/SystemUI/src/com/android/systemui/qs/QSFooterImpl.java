@@ -57,6 +57,7 @@ import com.android.systemui.R;
 import com.android.systemui.R.dimen;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.TouchAnimator.Builder;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.MultiUserSwitch;
 import com.android.systemui.statusbar.phone.SettingsButton;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -75,6 +76,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     private final ActivityStarter mActivityStarter;
     private final UserInfoController mUserInfoController;
     private final DeviceProvisionedController mDeviceProvisionedController;
+    private final UserTracker mUserTracker;
     private SettingsButton mSettingsButton;
     protected View mSettingsContainer;
     private PageIndicator mPageIndicator;
@@ -115,11 +117,12 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     @Inject
     public QSFooterImpl(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
             ActivityStarter activityStarter, UserInfoController userInfoController,
-            DeviceProvisionedController deviceProvisionedController) {
+            DeviceProvisionedController deviceProvisionedController, UserTracker userTracker) {
         super(context, attrs);
         mActivityStarter = activityStarter;
         mUserInfoController = userInfoController;
         mDeviceProvisionedController = deviceProvisionedController;
+        mUserTracker = userTracker;
     }
 
     @VisibleForTesting
@@ -127,7 +130,8 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         this(context, attrs,
                 Dependency.get(ActivityStarter.class),
                 Dependency.get(UserInfoController.class),
-                Dependency.get(DeviceProvisionedController.class));
+                Dependency.get(DeviceProvisionedController.class),
+                Dependency.get(UserTracker.class));
     }
 
     @Override
@@ -322,7 +326,8 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     private void updateVisibilities() {
         mSettingsContainer.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
-                TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
+                TunerService.isTunerEnabled(mContext, mUserTracker.getUserHandle()) ? View.VISIBLE
+                        : View.INVISIBLE);
         final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
         mMultiUserSwitch.setVisibility(showUserSwitcher() ? View.VISIBLE : View.INVISIBLE);
         mEditContainer.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
@@ -376,15 +381,16 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
                             : MetricsProto.MetricsEvent.ACTION_QS_COLLAPSED_SETTINGS_LAUNCH);
             if (mSettingsButton.isTunerClick()) {
                 mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
-                    if (TunerService.isTunerEnabled(mContext)) {
-                        TunerService.showResetRequest(mContext, () -> {
-                            // Relaunch settings so that the tuner disappears.
-                            startSettingsActivity();
-                        });
+                    if (TunerService.isTunerEnabled(mContext, mUserTracker.getUserHandle())) {
+                        TunerService.showResetRequest(mContext, mUserTracker.getUserHandle(),
+                                () -> {
+                                    // Relaunch settings so that the tuner disappears.
+                                    startSettingsActivity();
+                                });
                     } else {
                         Toast.makeText(getContext(), R.string.tuner_toast,
                                 Toast.LENGTH_LONG).show();
-                        TunerService.setTunerEnabled(mContext, true);
+                        TunerService.setTunerEnabled(mContext, mUserTracker.getUserHandle(), true);
                     }
                     startSettingsActivity();
 

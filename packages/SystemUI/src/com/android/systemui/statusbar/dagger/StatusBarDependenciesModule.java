@@ -39,6 +39,7 @@ import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.DynamicChildBindController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
@@ -192,8 +193,11 @@ public interface StatusBarDependenciesModule {
      */
     @Provides
     @SysUISingleton
-    static CommandQueue provideCommandQueue(Context context, ProtoTracer protoTracer) {
-        return new CommandQueue(context, protoTracer);
+    static CommandQueue provideCommandQueue(
+            Context context,
+            ProtoTracer protoTracer,
+            CommandRegistry registry) {
+        return new CommandQueue(context, protoTracer, registry);
     }
 
     /**

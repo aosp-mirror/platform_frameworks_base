@@ -25740,7 +25740,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // This API is exposed temporarily to only the contacts provider. (b/158688602)
         final int callingUid = Binder.getCallingUid();
         ProviderInfo contactsProvider = resolveContentProviderInternal(
-                        ContactsContract.AUTHORITY, 0, UserHandle.USER_SYSTEM);
+                        ContactsContract.AUTHORITY, 0, UserHandle.getUserId(callingUid));
         if (contactsProvider == null || contactsProvider.applicationInfo == null
                 || !UserHandle.isSameApp(contactsProvider.applicationInfo.uid, callingUid)) {
             throw new SecurityException(callingUid + " is not allow to call grantImplicitAccess");

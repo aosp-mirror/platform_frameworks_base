@@ -40,8 +40,8 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.util.FloatingContentCoordinator;
-import com.android.systemui.wmshell.WindowManagerShellWrapper;
+import com.android.wm.shell.WindowManagerShellWrapper;
+import com.android.wm.shell.common.FloatingContentCoordinator;
 
 import dagger.Module;
 import dagger.Provides;

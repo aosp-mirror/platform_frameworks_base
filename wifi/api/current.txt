@@ -332,6 +332,7 @@ package android.net.wifi {
     method public boolean isEasyConnectSupported();
     method public boolean isEnhancedOpenSupported();
     method public boolean isEnhancedPowerReportingSupported();
+    method public boolean isMultiStaConcurrencySupported();
     method public boolean isP2pSupported();
     method public boolean isPreferredNetworkOffloadSupported();
     method @Deprecated public boolean isScanAlwaysAvailable();

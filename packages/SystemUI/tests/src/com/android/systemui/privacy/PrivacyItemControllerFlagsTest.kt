@@ -16,15 +16,14 @@
 
 package com.android.systemui.privacy
 
-import android.os.UserManager
 import android.provider.DeviceConfig
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.appops.AppOpsController
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.DeviceConfigProxyFake
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -62,11 +61,9 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     @Mock
     private lateinit var callback: PrivacyItemController.Callback
     @Mock
-    private lateinit var userManager: UserManager
-    @Mock
-    private lateinit var broadcastDispatcher: BroadcastDispatcher
-    @Mock
     private lateinit var dumpManager: DumpManager
+    @Mock
+    private lateinit var userTracker: UserTracker
 
     private lateinit var privacyItemController: PrivacyItemController
     private lateinit var executor: FakeExecutor
@@ -77,9 +74,8 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
                 appOpsController,
                 executor,
                 executor,
-                broadcastDispatcher,
                 deviceConfigProxy,
-                userManager,
+                userTracker,
                 dumpManager
         )
     }

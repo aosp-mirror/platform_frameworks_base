@@ -36,11 +36,11 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.pip.Pip;
 import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import org.junit.Before;

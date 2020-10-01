@@ -17,7 +17,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.frameworks.mockingservicestests">
 
-    <uses-sdk android:targetSdkVersion="30" />
+    <uses-sdk android:targetSdkVersion="31" />
 
     <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE"/>
     <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG"/>

@@ -584,29 +584,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     // process is not in foreground.
                     return MODE_IGNORED;
                 }
-            } else if (mode == MODE_ALLOWED) {
-                switch (op) {
-                    case OP_CAMERA:
-                        if (mActivityManagerInternal != null
-                                && mActivityManagerInternal.isPendingTopUid(uid)) {
-                            return MODE_ALLOWED;
-                        } else if ((capability & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0) {
-                            return MODE_ALLOWED;
-                        } else {
-                            return MODE_IGNORED;
-                        }
-                    case OP_RECORD_AUDIO:
-                        if (mActivityManagerInternal != null
-                                && mActivityManagerInternal.isPendingTopUid(uid)) {
-                            return MODE_ALLOWED;
-                        } else if ((capability & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0) {
-                            return MODE_ALLOWED;
-                        } else {
-                            return MODE_IGNORED;
-                        }
-                    default:
-                        return MODE_ALLOWED;
-                }
             }
             return mode;
         }

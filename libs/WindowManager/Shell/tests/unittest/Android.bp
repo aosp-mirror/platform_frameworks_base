@@ -23,19 +23,29 @@ android_test {
         "androidx.test.runner",
         "androidx.test.rules",
         "androidx.test.ext.junit",
+        "androidx.dynamicanimation_dynamicanimation",
+        "dagger2",
+        "kotlinx-coroutines-android",
+        "kotlinx-coroutines-core",
         "mockito-target-extended-minus-junit4",
         "truth-prebuilt",
         "testables",
     ],
+
     libs: [
         "android.test.mock",
         "android.test.base",
         "android.test.runner",
     ],
+
     jni_libs: [
         "libdexmakerjvmtiagent",
         "libstaticjvmtiagent",
     ],
+
+    kotlincflags: ["-Xjvm-default=enable"],
+
+    plugins: ["dagger2-compiler"],
 
     optimize: {
         enabled: false,

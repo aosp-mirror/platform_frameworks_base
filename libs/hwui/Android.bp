@@ -327,6 +327,7 @@ cc_defaults {
         "jni/PathMeasure.cpp",
         "jni/Picture.cpp",
         "jni/Shader.cpp",
+        "jni/RenderEffect.cpp",
         "jni/Typeface.cpp",
         "jni/Utils.cpp",
         "jni/YuvToJpegEncoder.cpp",
@@ -334,6 +335,7 @@ cc_defaults {
         "jni/fonts/FontFamily.cpp",
         "jni/text/LineBreaker.cpp",
         "jni/text/MeasuredText.cpp",
+        "jni/text/TextShaper.cpp",
     ],
 
     header_libs: [ "android_graphics_jni_headers" ],

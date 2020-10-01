@@ -501,8 +501,13 @@ class MediaDataManager(
                 } else {
                     null
                 }
+                val mediaActionIcon = if (action.getIcon()?.getType() == Icon.TYPE_RESOURCE) {
+                    Icon.createWithResource(packageContext, action.getIcon()!!.getResId())
+                } else {
+                    action.getIcon()
+                }
                 val mediaAction = MediaAction(
-                        action.getIcon().loadDrawable(packageContext),
+                        mediaActionIcon,
                         runnable,
                         action.title)
                 actionIcons.add(mediaAction)
@@ -572,7 +577,7 @@ class MediaDataManager(
         val source = ImageDecoder.createSource(context.getContentResolver(), uri)
         return try {
             ImageDecoder.decodeBitmap(source) {
-                decoder, info, source -> decoder.isMutableRequired = true
+                decoder, info, source -> decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
             }
         } catch (e: IOException) {
             Log.e(TAG, "Unable to load bitmap", e)
@@ -612,7 +617,7 @@ class MediaDataManager(
 
     private fun getResumeMediaAction(action: Runnable): MediaAction {
         return MediaAction(
-            context.getDrawable(R.drawable.lb_ic_play),
+            Icon.createWithResource(context, R.drawable.lb_ic_play),
             action,
             context.getString(R.string.controls_media_resume)
         )

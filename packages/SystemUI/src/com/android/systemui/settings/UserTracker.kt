@@ -40,6 +40,11 @@ interface UserTracker : UserContentResolverProvider, UserContextProvider {
     val userHandle: UserHandle
 
     /**
+     * [UserInfo] for current user
+     */
+    val userInfo: UserInfo
+
+    /**
      * List of profiles associated with the current user.
      */
     val userProfiles: List<UserInfo>

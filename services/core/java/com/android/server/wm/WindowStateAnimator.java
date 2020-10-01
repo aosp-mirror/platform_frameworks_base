@@ -135,9 +135,6 @@ class WindowStateAnimator {
     float mAlpha = 0;
     float mLastAlpha = 0;
 
-    Rect mTmpClipRect = new Rect();
-    Rect mLastClipRect = new Rect();
-    Rect mLastFinalClipRect = new Rect();
     Rect mTmpStackBounds = new Rect();
     private Rect mTmpAnimatingBounds = new Rect();
     private Rect mTmpSourceBounds = new Rect();
@@ -352,7 +349,7 @@ class WindowStateAnimator {
         return result;
     }
 
-    void preserveSurfaceLocked() {
+    void preserveSurfaceLocked(SurfaceControl.Transaction t) {
         if (mDestroyPreservedSurfaceUponRedraw) {
             // This could happen when switching the surface mode very fast. For example,
             // we preserved a surface when dragResizing changed to true. Then before the
@@ -379,7 +376,7 @@ class WindowStateAnimator {
             // Our SurfaceControl is always at layer 0 within the parent Surface managed by
             // window-state. We want this old Surface to stay on top of the new one
             // until we do the swap, so we place it at a positive layer.
-            mSurfaceController.mSurfaceControl.setLayer(PRESERVED_SURFACE_LAYER);
+            t.setLayer(mSurfaceController.getClientViewRootSurface(), PRESERVED_SURFACE_LAYER);
         }
         mDestroyPreservedSurfaceUponRedraw = true;
         mSurfaceDestroyDeferred = true;
@@ -456,7 +453,8 @@ class WindowStateAnimator {
             flags |= SurfaceControl.SKIP_SCREENSHOT;
         }
 
-        calculateSurfaceBounds(w, attrs, mTmpSize);
+        w.calculateSurfaceBounds(attrs, mTmpSize);
+
         final int width = mTmpSize.width();
         final int height = mTmpSize.height();
 
@@ -467,9 +465,6 @@ class WindowStateAnimator {
                     + " x=" + mTmpSize.left + " y=" + mTmpSize.top
                     + " format=" + attrs.format + " flags=" + flags);
         }
-
-        // We may abort, so initialize to defaults.
-        mLastClipRect.set(0, 0, 0, 0);
 
         // Set up surface control with initial size.
         try {
@@ -530,40 +525,6 @@ class WindowStateAnimator {
 
         if (DEBUG) Slog.v(TAG, "Created surface " + this);
         return mSurfaceController;
-    }
-
-    private void calculateSurfaceBounds(WindowState w, LayoutParams attrs, Rect outSize) {
-        outSize.setEmpty();
-        if ((attrs.flags & FLAG_SCALED) != 0) {
-            // For a scaled surface, we always want the requested size.
-            outSize.right = w.mRequestedWidth;
-            outSize.bottom = w.mRequestedHeight;
-        } else {
-            // When we're doing a drag-resizing, request a surface that's fullscreen size,
-            // so that we don't need to reallocate during the process. This also prevents
-            // buffer drops due to size mismatch.
-            if (w.isDragResizing()) {
-                final DisplayInfo displayInfo = w.getDisplayInfo();
-                outSize.right = displayInfo.logicalWidth;
-                outSize.bottom = displayInfo.logicalHeight;
-            } else {
-                w.getCompatFrameSize(outSize);
-            }
-        }
-
-        // Something is wrong and SurfaceFlinger will not like this, try to revert to reasonable
-        // values. This doesn't necessarily mean that there is an error in the system. The sizes
-        // might be incorrect, because it is before the first layout or draw.
-        if (outSize.width() < 1) {
-            outSize.right = 1;
-        }
-        if (outSize.height() < 1) {
-            outSize.bottom = 1;
-        }
-
-        // Adjust for surface insets.
-        outSize.inset(-attrs.surfaceInsets.left, -attrs.surfaceInsets.top,
-                -attrs.surfaceInsets.right, -attrs.surfaceInsets.bottom);
     }
 
     boolean hasSurface() {
@@ -674,78 +635,12 @@ class WindowStateAnimator {
         mDsDy = mWin.mGlobalScale;
     }
 
-    /**
-     * Calculate the window-space crop rect and fill clipRect.
-     * @return true if clipRect has been filled otherwise, no window space crop should be applied.
-     */
-    private boolean calculateCrop(Rect clipRect) {
-        final WindowState w = mWin;
-        final DisplayContent displayContent = w.getDisplayContent();
-        clipRect.setEmpty();
-
-        if (displayContent == null) {
-            return false;
-        }
-
-        if (w.getWindowConfiguration().tasksAreFloating()
-                || WindowConfiguration.isSplitScreenWindowingMode(w.getWindowingMode())) {
-            return false;
-        }
-
-        // During forced seamless rotation, the surface bounds get updated with the crop in the
-        // new rotation, which is not compatible with showing the surface in the old rotation.
-        // To work around that we disable cropping for such windows, as it is not necessary anyways.
-        if (w.mForceSeamlesslyRotate) {
-            return false;
-        }
-
-        // If we're animating, the wallpaper should only
-        // be updated at the end of the animation.
-        if (w.mAttrs.type == TYPE_WALLPAPER) {
-            return false;
-        }
-
-        if (DEBUG_WINDOW_CROP) Slog.d(TAG,
-                "Updating crop win=" + w + " mLastCrop=" + mLastClipRect);
-
-        w.calculatePolicyCrop(mSystemDecorRect);
-
-        if (DEBUG_WINDOW_CROP) Slog.d(TAG, "Applying decor to crop win=" + w + " mDecorFrame="
-                + w.getDecorFrame() + " mSystemDecorRect=" + mSystemDecorRect);
-
-        // We use the clip rect as provided by the tranformation for non-fullscreen windows to
-        // avoid premature clipping with the system decor rect.
-        clipRect.set(mSystemDecorRect);
-        if (DEBUG_WINDOW_CROP) Slog.d(TAG, "win=" + w + " Initial clip rect: " + clipRect);
-
-        w.expandForSurfaceInsets(clipRect);
-
-        // The clip rect was generated assuming (0,0) as the window origin,
-        // so we need to translate to match the actual surface coordinates.
-        clipRect.offset(w.mAttrs.surfaceInsets.left, w.mAttrs.surfaceInsets.top);
-
-        if (DEBUG_WINDOW_CROP) Slog.d(TAG,
-                "win=" + w + " Clip rect after stack adjustment=" + clipRect);
-
-        w.transformClipRectFromScreenToSurfaceSpace(clipRect);
-
-        return true;
-    }
-
-    private void applyCrop(Rect clipRect, boolean recoveringMemory) {
-        if (DEBUG_WINDOW_CROP) Slog.d(TAG, "applyCrop: win=" + mWin
-                + " clipRect=" + clipRect);
-        if (clipRect != null) {
-            if (!clipRect.equals(mLastClipRect)) {
-                mLastClipRect.set(clipRect);
-                mSurfaceController.setCropInTransaction(clipRect, recoveringMemory);
-            }
-        } else {
-            mSurfaceController.clearCropInTransaction(recoveringMemory);
-        }
-    }
-
     private boolean shouldConsumeMainWindowSizeTransaction() {
+      // If we use BLASTSync we always consume the transaction when finishing
+      // the sync.
+      if (mService.useBLASTSync()) {
+          return false;
+      }
       // We only consume the transaction when the client is calling relayout
       // because this is the only time we know the frameNumber will be valid
       // due to the client renderer being paused. Put otherwise, only when
@@ -771,29 +666,6 @@ class WindowStateAnimator {
         final LayoutParams attrs = mWin.getAttrs();
         final Task task = w.getTask();
 
-        calculateSurfaceBounds(w, attrs, mTmpSize);
-
-        // Once relayout has been called at least once, we need to make sure
-        // we only resize the client surface during calls to relayout. For
-        // clients which use indeterminate measure specs (MATCH_PARENT),
-        // we may try and change their window size without a call to relayout.
-        // However, this would be unsafe, as the client may be in the middle
-        // of producing a frame at the old size, having just completed layout
-        // to find the surface size changed underneath it.
-        final boolean relayout = !w.mRelayoutCalled || w.mInRelayout;
-        if (relayout) {
-            mSurfaceController.setBufferSizeInTransaction(
-                    mTmpSize.width(), mTmpSize.height(), recoveringMemory);
-        }
-        // If we are undergoing seamless rotation, the surface has already
-        // been set up to persist at it's old location. We need to freeze
-        // updates until a resize occurs.
-
-        Rect clipRect = null;
-        if (calculateCrop(mTmpClipRect)) {
-            clipRect = mTmpClipRect;
-        }
-
         if (shouldConsumeMainWindowSizeTransaction()) {
             task.getMainWindowSizeChangeTask().getSurfaceControl().deferTransactionUntil(
                     mWin.getClientViewRootSurface(), mWin.getFrameNumber());
@@ -807,6 +679,11 @@ class WindowStateAnimator {
         float surfaceHeight = mSurfaceController.getHeight();
 
         final Rect insets = attrs.surfaceInsets;
+
+        // getFrameNumber is only valid in the call-stack of relayoutWindow
+        // as this is the only-time we know the client renderer
+        // is paused.
+        final boolean relayout = !w.mRelayoutCalled || w.mInRelayout;
 
         if (!w.mSeamlesslyRotated) {
             // Used to offset the WSA when stack position changes before a resize.
@@ -830,12 +707,6 @@ class WindowStateAnimator {
                     }
                      xOffset = -mTmpPos.x;
                     yOffset = -mTmpPos.y;
-                     // Crop also needs to be extended so the bottom isn't cut off when the WSA
-                    // position is moved.
-                    if (clipRect != null) {
-                        clipRect.right += mTmpPos.x;
-                        clipRect.bottom += mTmpPos.y;
-                    }
                 }
             }
             if (!mIsWallpaper) {
@@ -850,7 +721,6 @@ class WindowStateAnimator {
             // Wallpaper is already updated above when calling setWallpaperPositionAndScale so
             // we only need to consider the non-wallpaper case here.
             if (!mIsWallpaper) {
-                applyCrop(clipRect, recoveringMemory);
                 mSurfaceController.setMatrixInTransaction(
                     mDsDx * w.mHScale,
                     mDtDx * w.mVScale,
@@ -1052,7 +922,6 @@ class WindowStateAnimator {
                 mDtDy * mWin.mTmpMatrixArray[MSKEW_X] * mWin.mHScale,
                 mDsDy * mWin.mTmpMatrixArray[MSCALE_Y] * mWin.mVScale,
                 recoveringMemory);
-        applyCrop(null, recoveringMemory);
     }
 
     /**
@@ -1243,7 +1112,6 @@ class WindowStateAnimator {
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        mLastClipRect.dumpDebug(proto, LAST_CLIP_RECT);
         if (mSurfaceController != null) {
             mSurfaceController.dumpDebug(proto, SURFACE);
         }
@@ -1264,11 +1132,7 @@ class WindowStateAnimator {
             pw.print(prefix); pw.print(" mLastHidden="); pw.println(mLastHidden);
             pw.print(prefix); pw.print("mEnterAnimationPending=" + mEnterAnimationPending);
             pw.print(prefix); pw.print("mSystemDecorRect="); mSystemDecorRect.printShortString(pw);
-            pw.print(" mLastClipRect="); mLastClipRect.printShortString(pw);
 
-            if (!mLastFinalClipRect.isEmpty()) {
-                pw.print(" mLastFinalClipRect="); mLastFinalClipRect.printShortString(pw);
-            }
             pw.println();
         }
 

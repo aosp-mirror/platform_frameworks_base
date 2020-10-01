@@ -16,7 +16,6 @@
 
 package com.android.systemui.controls.controller
 
-import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
 import android.os.IBinder
@@ -30,6 +29,7 @@ import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Lazy
 import java.util.concurrent.atomic.AtomicBoolean
@@ -40,7 +40,8 @@ import javax.inject.Inject
 open class ControlsBindingControllerImpl @Inject constructor(
     private val context: Context,
     @Background private val backgroundExecutor: DelayableExecutor,
-    private val lazyController: Lazy<ControlsController>
+    private val lazyController: Lazy<ControlsController>,
+    userTracker: UserTracker
 ) : ControlsBindingController {
 
     companion object {
@@ -56,7 +57,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
         }
     }
 
-    private var currentUser = UserHandle.of(ActivityManager.getCurrentUser())
+    private var currentUser = userTracker.userHandle
 
     override val currentUserId: Int
         get() = currentUser.identifier

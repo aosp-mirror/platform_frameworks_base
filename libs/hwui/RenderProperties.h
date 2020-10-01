@@ -27,6 +27,7 @@
 #include "utils/PaintUtils.h"
 
 #include <SkBlendMode.h>
+#include <SkImageFilter.h>
 #include <SkCamera.h>
 #include <SkColor.h>
 #include <SkMatrix.h>
@@ -93,6 +94,10 @@ public:
 
     SkColorFilter* getColorFilter() const { return mColorFilter.get(); }
 
+    bool setImageFilter(SkImageFilter* imageFilter);
+
+    SkImageFilter* getImageFilter() const { return mImageFilter.get(); }
+
     // Sets alpha, xfermode, and colorfilter from an SkPaint
     // paint may be NULL, in which case defaults will be set
     bool setFromPaint(const SkPaint* paint);
@@ -118,6 +123,7 @@ private:
     uint8_t mAlpha;
     SkBlendMode mMode;
     sk_sp<SkColorFilter> mColorFilter;
+    sk_sp<SkImageFilter> mImageFilter;
 };
 
 /*
@@ -541,6 +547,7 @@ public:
     bool promotedToLayer() const {
         return mLayerProperties.mType == LayerType::None && fitsOnLayer() &&
                (mComputedFields.mNeedLayerForFunctors ||
+                mLayerProperties.mImageFilter != nullptr ||
                 (!MathUtils::isZero(mPrimitiveFields.mAlpha) && mPrimitiveFields.mAlpha < 1 &&
                  mPrimitiveFields.mHasOverlappingRendering));
     }

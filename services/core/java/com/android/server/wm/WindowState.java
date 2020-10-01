@@ -4950,93 +4950,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * Calculate the window crop according to system decor policy. In general this is
-     * the system decor rect (see #calculateSystemDecorRect), but we also have some
-     * special cases. This rectangle is in screen space.
-     */
-    void calculatePolicyCrop(Rect policyCrop) {
-        final DisplayContent displayContent = getDisplayContent();
-
-        if (!displayContent.isDefaultDisplay && !displayContent.supportsSystemDecorations()) {
-            // On a different display there is no system decor. Crop the window
-            // by the screen boundaries.
-            final DisplayInfo displayInfo = getDisplayInfo();
-            policyCrop.set(0, 0, mWindowFrames.mCompatFrame.width(),
-                    mWindowFrames.mCompatFrame.height());
-            policyCrop.intersect(-mWindowFrames.mCompatFrame.left, -mWindowFrames.mCompatFrame.top,
-                    displayInfo.logicalWidth - mWindowFrames.mCompatFrame.left,
-                    displayInfo.logicalHeight - mWindowFrames.mCompatFrame.top);
-        } else if (skipDecorCrop()) {
-            // Windows without policy decor aren't cropped.
-            policyCrop.set(0, 0, mWindowFrames.mCompatFrame.width(),
-                    mWindowFrames.mCompatFrame.height());
-        } else {
-            // Crop to the system decor specified by policy.
-            calculateSystemDecorRect(policyCrop);
-        }
-    }
-
-    /**
-     * The system decor rect is the region of the window which is not covered
-     * by system decorations.
-     */
-    private void calculateSystemDecorRect(Rect systemDecorRect) {
-        final Rect decorRect = mWindowFrames.mDecorFrame;
-        final int width = mWindowFrames.mFrame.width();
-        final int height = mWindowFrames.mFrame.height();
-
-        final int left = mWindowFrames.mFrame.left;
-        final int top = mWindowFrames.mFrame.top;
-
-        // Initialize the decor rect to the entire frame.
-        if (isDockedResizing()) {
-            // If we are resizing with the divider, the task bounds might be smaller than the
-            // stack bounds. The system decor is used to clip to the task bounds, which we don't
-            // want in this case in order to avoid holes.
-            //
-            // We take care to not shrink the width, for surfaces which are larger than
-            // the display region. Of course this area will not eventually be visible
-            // but if we truncate the width now, we will calculate incorrectly
-            // when adjusting to the stack bounds.
-            final DisplayInfo displayInfo = getDisplayContent().getDisplayInfo();
-            systemDecorRect.set(0, 0,
-                    Math.max(width, displayInfo.logicalWidth),
-                    Math.max(height, displayInfo.logicalHeight));
-        } else {
-            systemDecorRect.set(0, 0, width, height);
-        }
-
-        // If a freeform window is animating from a position where it would be cutoff, it would be
-        // cutoff during the animation. We don't want that, so for the duration of the animation
-        // we ignore the decor cropping and depend on layering to position windows correctly.
-
-        // We also ignore cropping when the window is currently being drag resized in split screen
-        // to prevent issues with the crop for screenshot.
-        final boolean cropToDecor =
-                !(inFreeformWindowingMode() && isAnimatingLw()) && !isDockedResizing();
-        if (cropToDecor) {
-            // Intersect with the decor rect, offsetted by window position.
-            systemDecorRect.intersect(decorRect.left - left, decorRect.top - top,
-                    decorRect.right - left, decorRect.bottom - top);
-        }
-
-        // If size compatibility is being applied to the window, the
-        // surface is scaled relative to the screen.  Also apply this
-        // scaling to the crop rect.  We aren't using the standard rect
-        // scale function because we want to round things to make the crop
-        // always round to a larger rect to ensure we don't crop too
-        // much and hide part of the window that should be seen.
-        if (mInvGlobalScale != 1.0f && inSizeCompatMode()) {
-            final float scale = mInvGlobalScale;
-            systemDecorRect.left = (int) (systemDecorRect.left * scale - 0.5f);
-            systemDecorRect.top = (int) (systemDecorRect.top * scale - 0.5f);
-            systemDecorRect.right = (int) ((systemDecorRect.right + 1) * scale - 0.5f);
-            systemDecorRect.bottom = (int) ((systemDecorRect.bottom + 1) * scale - 0.5f);
-        }
-
-    }
-
-    /**
      * Expand the given rectangle by this windows surface insets. This
      * takes you from the 'window size' to the 'surface size'.
      * The surface insets are positive in each direction, so we inset by
@@ -5093,9 +5006,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // on the new one. This prevents blinking when we change elevation of freeform and
             // pinned windows.
             if (!mWinAnimator.tryChangeFormatInPlaceLocked()) {
-                mWinAnimator.preserveSurfaceLocked();
+                mWinAnimator.preserveSurfaceLocked(getPendingTransaction());
                 result |= RELAYOUT_RES_SURFACE_CHANGED
                         | RELAYOUT_RES_FIRST_TIME;
+                scheduleAnimation();
             }
         }
 
@@ -5111,9 +5025,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // to preserve and destroy windows which are attached to another, they
             // will keep their surface and its size may change over time.
             if (mHasSurface && !isChildWindow()) {
-                mWinAnimator.preserveSurfaceLocked();
+                mWinAnimator.preserveSurfaceLocked(getPendingTransaction());
                 result |= RELAYOUT_RES_SURFACE_CHANGED |
                     RELAYOUT_RES_FIRST_TIME;
+                scheduleAnimation();
             }
         }
         final boolean freeformResizing = isDragResizing()
@@ -5888,7 +5803,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         mNotifyBlastOnSurfacePlacement = true;
-        return mWinAnimator.finishDrawingLocked(null);
+        mWinAnimator.finishDrawingLocked(null);
+        // We always want to force a traversal after a finish draw for blast sync.
+        return true;
     }
 
     private void notifyBlastSyncTransaction() {
@@ -5897,6 +5814,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (!mNotifyBlastOnSurfacePlacement || mWaitingListener == null) {
             mNotifyBlastOnSurfacePlacement = false;
             return;
+        }
+
+        final Task task = getTask();
+        if (task != null) {
+            final SurfaceControl.Transaction t = task.getMainWindowSizeChangeTransaction();
+            if (t != null) {
+                mBLASTSyncTransaction.merge(t);
+            }
+            task.setMainWindowSizeChangeTransaction(null);
         }
 
         // If localSyncId is >0 then we are syncing with children and will
@@ -5936,5 +5862,38 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void requestRedrawForSync() {
         mRedrawForSyncReported = false;
+    }
+
+    void calculateSurfaceBounds(WindowManager.LayoutParams attrs, Rect outSize) {
+        outSize.setEmpty();
+        if ((attrs.flags & FLAG_SCALED) != 0) {
+            // For a scaled surface, we always want the requested size.
+            outSize.right = mRequestedWidth;
+            outSize.bottom = mRequestedHeight;
+        } else {
+            // When we're doing a drag-resizing, request a surface that's fullscreen size,
+            // so that we don't need to reallocate during the process. This also prevents
+            // buffer drops due to size mismatch.
+            if (isDragResizing()) {
+                final DisplayInfo displayInfo = getDisplayInfo();
+                outSize.right = displayInfo.logicalWidth;
+                outSize.bottom = displayInfo.logicalHeight;
+            } else {
+                getCompatFrameSize(outSize);
+            }
+        }
+
+        // This doesn't necessarily mean that there is an error in the system. The sizes might be
+        // incorrect, because it is before the first layout or draw.
+        if (outSize.width() < 1) {
+            outSize.right = 1;
+        }
+        if (outSize.height() < 1) {
+            outSize.bottom = 1;
+        }
+
+        // Adjust for surface insets.
+        outSize.inset(-attrs.surfaceInsets.left, -attrs.surfaceInsets.top,
+                -attrs.surfaceInsets.right, -attrs.surfaceInsets.bottom);
     }
 }

@@ -61,6 +61,7 @@ public class WifiInfoTest {
         writeWifiInfo.txBad = TEST_TX_BAD;
         writeWifiInfo.rxSuccess = TEST_RX_SUCCESS;
         writeWifiInfo.setTrusted(true);
+        writeWifiInfo.setOemPaid(true);
         writeWifiInfo.setOsuAp(true);
         writeWifiInfo.setFQDN(TEST_FQDN);
         writeWifiInfo.setProviderFriendlyName(TEST_PROVIDER_NAME);
@@ -81,6 +82,7 @@ public class WifiInfoTest {
         assertEquals(TEST_TX_BAD, readWifiInfo.txBad);
         assertEquals(TEST_RX_SUCCESS, readWifiInfo.rxSuccess);
         assertTrue(readWifiInfo.isTrusted());
+        assertTrue(readWifiInfo.isOemPaid());
         assertTrue(readWifiInfo.isOsuAp());
         assertTrue(readWifiInfo.isPasspointAp());
         assertEquals(TEST_PACKAGE_NAME, readWifiInfo.getRequestingPackageName());

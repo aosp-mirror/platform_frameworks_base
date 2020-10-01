@@ -30,6 +30,10 @@ import "frameworks/base/core/proto/android/view/windowlayoutparams.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
 import "frameworks/base/core/proto/android/typedef.proto";
 
+import "frameworks/base/core/proto/android/view/surfacecontrol.proto";
+import "frameworks/base/core/proto/android/view/insetssource.proto";
+import "frameworks/base/core/proto/android/view/insetssourcecontrol.proto";
+
 package com.android.server.wm;
 
 option java_multiple_files = true;
@@ -47,6 +51,7 @@ message WindowManagerServiceDumpProto {
     optional int32 rotation = 7 [(.android.typedef) = "android.view.Surface.Rotation"];
     optional int32 last_orientation = 8 [(.android.typedef) = "android.content.pm.ActivityInfo.ScreenOrientation"];
     optional int32 focused_display_id = 9;
+    optional bool hard_keyboard_available = 10;
 }
 
 /* represents RootWindowContainer object */
@@ -195,6 +200,14 @@ message DisplayContentProto {
     optional .com.android.server.wm.IdentifierProto resumed_activity = 24;
     repeated TaskProto tasks = 25 [deprecated=true];
     optional bool display_ready = 26;
+
+    optional WindowStateProto input_method_target = 27;
+    optional WindowStateProto input_method_input_target = 28;
+    optional WindowStateProto input_method_control_target = 29;
+    optional WindowStateProto current_focus = 30;
+    optional InsetsSourceProviderProto insets_source_provider = 31;
+    optional ImeInsetsSourceProviderProto ime_insets_source_provider = 32;
+    optional bool can_show_ime = 33;
 }
 
 /* represents DisplayArea object */
@@ -226,6 +239,8 @@ message DisplayFramesProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional .android.graphics.RectProto stable_bounds = 1;
+    optional .android.graphics.RectProto dock = 2;
+    optional .android.graphics.RectProto current = 3;
 }
 
 /* represents DockedStackDividerController */
@@ -487,4 +502,31 @@ message WindowFramesProto {
     optional .android.graphics.RectProto visible_insets = 13;
     optional .android.graphics.RectProto stable_insets = 14;
     optional .android.graphics.RectProto outsets = 15;
+}
+
+message InsetsSourceProviderProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional .android.view.InsetsSourceProto source = 1;
+    optional .android.graphics.RectProto frame = 2;
+    optional .android.view.InsetsSourceControlProto fake_control = 3;
+    optional .android.view.InsetsSourceControlProto control = 4;
+    optional WindowStateProto control_target = 5;
+    optional WindowStateProto pending_control_target = 6;
+    optional WindowStateProto fake_control_target = 7;
+    optional .android.view.SurfaceControlProto captured_leash = 8;
+    optional .android.graphics.RectProto ime_overridden_frame = 9;
+    optional bool is_leash_ready_for_dispatching = 10;
+    optional bool client_visible = 11;
+    optional bool server_visible = 12;
+    optional bool seamless_rotating = 13;
+    optional int64 finish_seamless_rotate_frame_number = 14;
+    optional bool controllable = 15;
+}
+
+message ImeInsetsSourceProviderProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional WindowStateProto ime_target_from_ime = 1;
+    optional bool is_ime_layout_drawn = 2;
 }

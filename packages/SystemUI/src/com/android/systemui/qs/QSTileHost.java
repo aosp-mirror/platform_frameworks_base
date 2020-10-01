@@ -14,7 +14,6 @@
 
 package com.android.systemui.qs;
 
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -49,6 +48,7 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.external.TileLifecycleManager;
 import com.android.systemui.qs.external.TileServices;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -99,6 +99,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private int mCurrentUser;
     private final Optional<StatusBar> mStatusBarOptional;
     private Context mUserContext;
+    private UserTracker mUserTracker;
 
     @Inject
     public QSTileHost(Context context,
@@ -113,7 +114,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             BroadcastDispatcher broadcastDispatcher,
             Optional<StatusBar> statusBarOptional,
             QSLogger qsLogger,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            UserTracker userTracker) {
         mIconController = iconController;
         mContext = context;
         mUserContext = context;
@@ -125,12 +127,13 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mBroadcastDispatcher = broadcastDispatcher;
 
         mInstanceIdSequence = new InstanceIdSequence(MAX_QS_INSTANCE_ID);
-        mServices = new TileServices(this, bgLooper, mBroadcastDispatcher);
+        mServices = new TileServices(this, bgLooper, mBroadcastDispatcher, userTracker);
         mStatusBarOptional = statusBarOptional;
 
         mQsFactories.add(defaultFactory);
         pluginManager.addPluginListener(this, QSFactory.class, true);
         mDumpManager.registerDumpable(TAG, this);
+        mUserTracker = userTracker;
 
         mainHandler.post(() -> {
             // This is technically a hack to avoid circular dependency of
@@ -230,6 +233,11 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     }
 
     @Override
+    public int getUserId() {
+        return mCurrentUser;
+    }
+
+    @Override
     public TileServices getTileServices() {
         return mServices;
     }
@@ -248,9 +256,9 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             newValue = mContext.getResources().getString(R.string.quick_settings_tiles_retail_mode);
         }
         final List<String> tileSpecs = loadTileSpecs(mContext, newValue);
-        int currentUser = ActivityManager.getCurrentUser();
+        int currentUser = mUserTracker.getUserId();
         if (currentUser != mCurrentUser) {
-            mUserContext = mContext.createContextAsUser(UserHandle.of(currentUser), 0);
+            mUserContext = mUserTracker.getUserContext();
             if (mAutoTiles != null) {
                 mAutoTiles.changeUser(UserHandle.of(currentUser));
             }

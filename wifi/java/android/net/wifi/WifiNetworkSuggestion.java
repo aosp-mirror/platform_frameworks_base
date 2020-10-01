@@ -24,7 +24,9 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.net.MacAddress;
+import android.net.NetworkCapabilities;
 import android.net.wifi.hotspot2.PasspointConfiguration;
+import android.net.wifi.util.SdkLevelUtil;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.TelephonyManager;
@@ -150,6 +152,11 @@ public final class WifiNetworkSuggestion implements Parcelable {
         private boolean mIsNetworkUntrusted;
 
         /**
+         * Whether this network will be brought up as OEM paid (OEM_PAID capability bit added).
+         */
+        private boolean mIsNetworkOemPaid;
+
+        /**
          * Whether this network will use enhanced MAC randomization.
          */
         private boolean mIsEnhancedMacRandomizationEnabled;
@@ -175,6 +182,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             mWapiPskPassphrase = null;
             mWapiEnterpriseConfig = null;
             mIsNetworkUntrusted = false;
+            mIsNetworkOemPaid = false;
             mPriorityGroup = 0;
             mIsEnhancedMacRandomizationEnabled = false;
         }
@@ -543,7 +551,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
 
         /**
          * Specifies whether the system will bring up the network (if selected) as untrusted. An
-         * untrusted network has its {@link android.net.NetworkCapabilities#NET_CAPABILITY_TRUSTED}
+         * untrusted network has its {@link NetworkCapabilities#NET_CAPABILITY_TRUSTED}
          * capability removed. The Wi-Fi network selection process may use this information to
          * influence priority of the suggested network for Wi-Fi network selection (most likely to
          * reduce it). The connectivity service may use this information to influence the overall
@@ -559,6 +567,41 @@ public final class WifiNetworkSuggestion implements Parcelable {
          */
         public @NonNull Builder setUntrusted(boolean isUntrusted) {
             mIsNetworkUntrusted = isUntrusted;
+            return this;
+        }
+
+        /**
+         * Specifies whether the system will bring up the network (if selected) as OEM paid. An
+         * OEM paid network has {@link NetworkCapabilities#NET_CAPABILITY_OEM_PAID} capability
+         * added.
+         * Note:
+         * <li>The connectivity service may use this information to influence the overall
+         * network configuration of the device. This network is typically only available to system
+         * apps.
+         * <li>On devices which support only 1 concurrent connection (indicated via
+         * {@link WifiManager#isMultiStaConcurrencySupported()}, Wi-Fi network selection process may
+         * use this information to influence priority of the suggested network for Wi-Fi network
+         * selection (most likely to reduce it).
+         * <li>On devices which support more than 1 concurrent connections (indicated via
+         * {@link WifiManager#isMultiStaConcurrencySupported()}, these OEM paid networks will be
+         * brought up as a secondary concurrent connection (primary connection will be used
+         * for networks available to the user and all apps.
+         * <p>
+         * <li> An OEM paid network's credentials may not be shared with the user using
+         * {@link #setCredentialSharedWithUser(boolean)}.</li>
+         * <li> If not set, defaults to false (i.e. network is not OEM paid).</li>
+         *
+         * @param isOemPaid Boolean indicating whether the network should be brought up as OEM paid
+         *                  (if true) or not OEM paid (if false).
+         * @return Instance of {@link Builder} to enable chaining of the builder method.
+         * @hide
+         */
+        @SystemApi
+        public @NonNull Builder setOemPaid(boolean isOemPaid) {
+            if (!SdkLevelUtil.isAtLeastS()) {
+                throw new UnsupportedOperationException();
+            }
+            mIsNetworkOemPaid = isOemPaid;
             return this;
         }
 
@@ -628,6 +671,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             wifiConfiguration.meteredOverride = mMeteredOverride;
             wifiConfiguration.carrierId = mCarrierId;
             wifiConfiguration.trusted = !mIsNetworkUntrusted;
+            wifiConfiguration.oemPaid = mIsNetworkOemPaid;
             wifiConfiguration.macRandomizationSetting = mIsEnhancedMacRandomizationEnabled
                     ? WifiConfiguration.RANDOMIZATION_ENHANCED
                     : WifiConfiguration.RANDOMIZATION_PERSISTENT;
@@ -659,6 +703,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             wifiConfiguration.priority = mPriority;
             wifiConfiguration.meteredOverride = mMeteredOverride;
             wifiConfiguration.trusted = !mIsNetworkUntrusted;
+            wifiConfiguration.oemPaid = mIsNetworkOemPaid;
             mPasspointConfiguration.setCarrierId(mCarrierId);
             mPasspointConfiguration.setMeteredOverride(wifiConfiguration.meteredOverride);
             wifiConfiguration.macRandomizationSetting = mIsEnhancedMacRandomizationEnabled
@@ -764,7 +809,15 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 if (mIsSharedWithUserSet && mIsSharedWithUser) {
                     throw new IllegalStateException("Should not be both"
                             + "setCredentialSharedWithUser and +"
-                            + "setIsNetworkAsUntrusted to true");
+                            + "setUntrusted to true");
+                }
+                mIsSharedWithUser = false;
+            }
+            if (mIsNetworkOemPaid) {
+                if (mIsSharedWithUserSet && mIsSharedWithUser) {
+                    throw new IllegalStateException("Should not be both"
+                            + "setCredentialSharedWithUser and +"
+                            + "setOemPaid to true");
                 }
                 mIsSharedWithUser = false;
             }
@@ -931,6 +984,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 .append(", isCredentialSharedWithUser=").append(isUserAllowedToManuallyConnect)
                 .append(", isInitialAutoJoinEnabled=").append(isInitialAutoJoinEnabled)
                 .append(", isUnTrusted=").append(!wifiConfiguration.trusted)
+                .append(", isOemPaid=").append(wifiConfiguration.oemPaid)
                 .append(", priorityGroup=").append(priorityGroup)
                 .append(" ]");
         return sb.toString();
@@ -1023,6 +1077,18 @@ public final class WifiNetworkSuggestion implements Parcelable {
     /** @see Builder#setUntrusted(boolean)  */
     public boolean isUntrusted() {
         return !wifiConfiguration.trusted;
+    }
+
+    /**
+     * @see Builder#setOemPaid(boolean)
+     * @hide
+     */
+    @SystemApi
+    public boolean isOemPaid() {
+        if (!SdkLevelUtil.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        return wifiConfiguration.oemPaid;
     }
 
     /**

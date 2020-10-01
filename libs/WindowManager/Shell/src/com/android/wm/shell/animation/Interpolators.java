@@ -24,6 +24,16 @@ import android.view.animation.PathInterpolator;
  */
 public class Interpolators {
     /**
+     * Interpolator for alpha in animation.
+     */
+    public static final Interpolator ALPHA_IN = new PathInterpolator(0.4f, 0f, 1f, 1f);
+
+    /**
+     * Interpolator for alpha out animation.
+     */
+    public static final Interpolator ALPHA_OUT = new PathInterpolator(0f, 0f, 0.8f, 1f);
+
+    /**
      * Interpolator for fast out linear in animation.
      */
     public static final Interpolator FAST_OUT_LINEAR_IN = new PathInterpolator(0.4f, 0f, 1f, 1f);

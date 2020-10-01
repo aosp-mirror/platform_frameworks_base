@@ -1244,7 +1244,18 @@
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_recordAudio"
         android:description="@string/permdesc_recordAudio"
+        android:backgroundPermission="android.permission.RECORD_BACKGROUND_AUDIO"
         android:protectionLevel="dangerous|instant" />
+
+    <!-- Allows an application to record audio while in the background.
+         <p>Protection level: dangerous
+    -->
+    <permission android:name="android.permission.RECORD_BACKGROUND_AUDIO"
+        android:permissionGroup="android.permission-group.UNDEFINED"
+        android:label="@string/permlab_recordBackgroundAudio"
+        android:description="@string/permdesc_recordBackgroundAudio"
+        android:permissionFlags="hardRestricted|installerExemptIgnored"
+        android:protectionLevel="dangerous" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for activity recognition                        -->
@@ -1313,7 +1324,18 @@
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_camera"
         android:description="@string/permdesc_camera"
+        android:backgroundPermission="android.permission.BACKGROUND_CAMERA"
         android:protectionLevel="dangerous|instant" />
+
+    <!-- Required to be able to access the camera device in the background.
+         <p>Protection level: dangerous
+    -->
+    <permission android:name="android.permission.BACKGROUND_CAMERA"
+            android:permissionGroup="android.permission-group.UNDEFINED"
+            android:label="@string/permlab_backgroundCamera"
+            android:description="@string/permdesc_backgroundCamera"
+            android:permissionFlags="hardRestricted|installerExemptIgnored"
+            android:protectionLevel="dangerous" />
 
     <!-- @SystemApi Required in addition to android.permission.CAMERA to be able to access
            system only camera devices.
@@ -2687,6 +2709,14 @@
     <permission android:name="android.permission.SUGGEST_MANUAL_TIME_AND_ZONE"
         android:protectionLevel="signature" />
 
+    <!-- Allows applications like settings to manage configuration associated with automatic time
+         and time zone detection.
+         <p>Not for use by third-party applications.
+         @hide
+    -->
+    <permission android:name="android.permission.MANAGE_TIME_AND_ZONE_DETECTION"
+        android:protectionLevel="signature|privileged" />
+
     <!-- ==================================================== -->
     <!-- Permissions related to changing status bar   -->
     <!-- ==================================================== -->
@@ -3546,6 +3576,13 @@
          android:protectionLevel="signature" />
     <uses-permission android:name="android.permission.MEDIA_RESOURCE_OVERRIDE_PID" />
 
+    <!-- This permission is required by Media Resource Observer Service when
+         accessing its registerObserver Api.
+         <p>Protection level: signature|privileged
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.REGISTER_MEDIA_RESOURCE_OBSERVER"
+         android:protectionLevel="signature|privileged" />
 
     <!-- Must be required by a {@link android.media.routing.MediaRouteService}
          to ensure that only the system can interact with it.

@@ -7663,6 +7663,8 @@ public final class Settings {
          * @hide
          */
         @UnsupportedAppUsage
+        @TestApi
+        @SuppressLint("NoSettingsProvider")
         public static final String SELECTED_SPELL_CHECKER = "selected_spell_checker";
 
         /**
@@ -7673,6 +7675,8 @@ public final class Settings {
          * @hide
          */
         @UnsupportedAppUsage
+        @TestApi
+        @SuppressLint("NoSettingsProvider")
         public static final String SELECTED_SPELL_CHECKER_SUBTYPE =
                 "selected_spell_checker_subtype";
 
@@ -12323,6 +12327,15 @@ public final class Settings {
          */
         public static final String GLOBAL_SETTINGS_ANGLE_ALLOWLIST =
                 "angle_allowlist";
+
+        /**
+         * Lists of ANGLE EGL features for debugging.
+         * Each list of features is separated by a comma, each feature in each list is separated by
+         * a colon.
+         * e.g. feature1:feature2:feature3,feature1:feature3:feature5
+         * @hide
+         */
+        public static final String ANGLE_EGL_FEATURES = "angle_egl_features";
 
         /**
          * Show the "ANGLE In Use" dialog box to the user when ANGLE is the OpenGL driver.
