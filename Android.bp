@@ -598,6 +598,12 @@ java_library {
         "//frameworks/base/apex/jobscheduler/framework",
         "//frameworks/base/packages/Tethering/tests/unit",
     ],
+    errorprone: {
+        javacflags: [
+            "-Xep:AndroidFrameworkCompatChange:ERROR",
+            "-Xep:AndroidFrameworkUid:ERROR",
+        ],
+    },
 }
 
 // This "framework" module is NOT installed to the device. It's
