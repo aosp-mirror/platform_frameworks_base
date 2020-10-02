@@ -42,17 +42,17 @@ public class CompatChangeCheckerTest {
                         "public class Example {",
                         "  void test(int targetSdkVersion) {",
                         "    // BUG: Diagnostic contains:",
-                        "    if (targetSdkVersion < Build.VERSION_CODES.R) { }",
+                        "    if (targetSdkVersion < Build.VERSION_CODES.S) { }",
                         "    // BUG: Diagnostic contains:",
-                        "    if (targetSdkVersion <= Build.VERSION_CODES.R) { }",
+                        "    if (targetSdkVersion <= Build.VERSION_CODES.S) { }",
                         "    // BUG: Diagnostic contains:",
-                        "    if (targetSdkVersion > Build.VERSION_CODES.R) { }",
+                        "    if (targetSdkVersion > Build.VERSION_CODES.S) { }",
                         "    // BUG: Diagnostic contains:",
-                        "    if (targetSdkVersion >= Build.VERSION_CODES.R) { }",
+                        "    if (targetSdkVersion >= Build.VERSION_CODES.S) { }",
                         "    // BUG: Diagnostic contains:",
-                        "    if (targetSdkVersion == Build.VERSION_CODES.R) { }",
+                        "    if (targetSdkVersion == Build.VERSION_CODES.S) { }",
                         "    // BUG: Diagnostic contains:",
-                        "    if (targetSdkVersion != Build.VERSION_CODES.R) { }",
+                        "    if (targetSdkVersion != Build.VERSION_CODES.S) { }",
                         "  }",
                         "}")
                 .doTest();
@@ -63,18 +63,29 @@ public class CompatChangeCheckerTest {
         compilationHelper
                 .addSourceFile("/android/os/Build.java")
                 .addSourceLines("Example.java",
-                        "import static android.os.Build.VERSION_CODES.R;",
+                        "import android.os.Build;",
+                        "import static android.os.Build.VERSION_CODES.S;",
                         "public class Example {",
                         "  void test(int targetSdkVersion) {",
                         "    // BUG: Diagnostic contains:",
-                        "    boolean indirect = R > targetSdkVersion;",
+                        "    boolean indirect = S >= targetSdkVersion;",
+                        "    // BUG: Diagnostic contains:",
+                        "    if (targetSdkVersion > Build.VERSION_CODES.R) { }",
+                        "    if (targetSdkVersion >= Build.VERSION_CODES.R) { }",
+                        "    if (targetSdkVersion < Build.VERSION_CODES.R) { }",
+                        "    if (targetSdkVersion <= Build.VERSION_CODES.R) { }",
+                        "    // BUG: Diagnostic contains:",
+                        "    if (Build.VERSION_CODES.R < targetSdkVersion) { }",
+                        "    if (Build.VERSION_CODES.R <= targetSdkVersion) { }",
+                        "    if (Build.VERSION_CODES.R > targetSdkVersion) { }",
+                        "    if (Build.VERSION_CODES.R >= targetSdkVersion) { }",
                         "  }",
                         "}")
                 .doTest();
     }
 
     @Test
-    public void testLegacyIgnored() {
+    public void testIgnored() {
         compilationHelper
                 .addSourceFile("/android/os/Build.java")
                 .addSourceLines("Example.java",
@@ -82,6 +93,8 @@ public class CompatChangeCheckerTest {
                         "public class Example {",
                         "  void test(int targetSdkVersion) {",
                         "    if (targetSdkVersion < Build.VERSION_CODES.DONUT) { }",
+                        "    String result = \"test\" + Build.VERSION_CODES.S;",
+                        "    if (targetSdkVersion != Build.VERSION_CODES.CUR_DEVELOPMENT) { }",
                         "  }",
                         "}")
                 .doTest();

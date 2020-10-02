@@ -166,7 +166,7 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
 
         // Now fetch app icon and raster with no badging even in work profile
         Bitmap appIcon = mSelectableTargetInfoCommunicator.makePresentationGetter(info)
-                .getIconBitmap(UserHandle.getUserHandleForUid(UserHandle.myUserId()));
+                .getIconBitmap(android.os.Process.myUserHandle());
 
         // Raster target drawable with appIcon as a badge
         SimpleIconFactory sif = SimpleIconFactory.obtain(mContext);
