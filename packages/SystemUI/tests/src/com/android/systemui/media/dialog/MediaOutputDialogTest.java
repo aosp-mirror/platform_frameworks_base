@@ -36,6 +36,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.ShadeController;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,6 +72,11 @@ public class MediaOutputDialogTest extends SysuiTestCase {
 
         when(mLocalMediaManager.getCurrentConnectedDevice()).thenReturn(mMediaDevice);
         when(mMediaDevice.getFeatures()).thenReturn(mFeatures);
+    }
+
+    @After
+    public void tearDown() {
+        mMediaOutputDialog.dismissDialog();
     }
 
     @Test
