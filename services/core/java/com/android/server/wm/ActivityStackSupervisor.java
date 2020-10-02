@@ -44,15 +44,14 @@ import static android.os.Process.INVALID_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_IDLE;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STACK;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STATES;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_IDLE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_PAUSE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RECENTS;
@@ -66,7 +65,6 @@ import static com.android.server.wm.ActivityTaskManagerService.H.FIRST_SUPERVISO
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
 import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
-import static com.android.server.wm.RootWindowContainer.TAG_STATES;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.Task.ActivityState.PAUSED;
@@ -135,6 +133,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -721,9 +720,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             // While there are activities pausing we skipping starting any new activities until
             // pauses are complete. NOTE: that we also do this for activities that are starting in
             // the paused state because they will first be resumed then paused on the client side.
-            if (DEBUG_SWITCH || DEBUG_PAUSE || DEBUG_STATES) Slog.v(TAG_PAUSE,
-                    "realStartActivityLocked: Skipping start of r=" + r
-                    + " some activities pausing...");
+            ProtoLog.v(WM_DEBUG_STATES,
+                    "realStartActivityLocked: Skipping start of r=%s some activities pausing...",
+                    r);
             return false;
         }
 
@@ -919,8 +918,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             // This activity is not starting in the resumed state... which should look like we asked
             // it to pause+stop (but remain visible), and it has done so and reported back the
             // current icicle and other state.
-            if (DEBUG_STATES) Slog.v(TAG_STATES,
-                    "Moving to PAUSED: " + r + " (starting in paused state)");
+            ProtoLog.v(WM_DEBUG_STATES, "Moving to PAUSED: %s "
+                    + "(starting in paused state)", r);
             r.setState(PAUSED, "realStartActivityLocked");
             mRootWindowContainer.executeAppTransitionForAllDisplay();
         }
@@ -1071,11 +1070,11 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     /** Check if caller is allowed to launch activities on specified display. */
     boolean isCallerAllowedToLaunchOnDisplay(int callingPid, int callingUid, int launchDisplayId,
             ActivityInfo aInfo) {
-        if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check: displayId=" + launchDisplayId
-                + " callingPid=" + callingPid + " callingUid=" + callingUid);
+        ProtoLog.d(WM_DEBUG_TASKS, "Launch on display check: displayId=%d callingPid=%d "
+                + "callingUid=%d", launchDisplayId, callingPid, callingUid);
 
         if (callingPid == -1 && callingUid == -1) {
-            if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check: no caller info, skip check");
+            ProtoLog.d(WM_DEBUG_TASKS, "Launch on display check: no caller info, skip check");
             return true;
         }
 
@@ -1091,8 +1090,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final int startAnyPerm = mService.checkPermission(INTERNAL_SYSTEM_WINDOW, callingPid,
                 callingUid);
         if (startAnyPerm == PERMISSION_GRANTED) {
-            if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
-                    + " allow launch any on display");
+            ProtoLog.d(WM_DEBUG_TASKS, "Launch on display check: allow launch any on display");
             return true;
         }
 
@@ -1104,36 +1102,36 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             // Limit launching on untrusted displays because their contents can be read from Surface
             // by apps that created them.
             if ((aInfo.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) == 0) {
-                if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
-                        + " disallow launch on virtual display for not-embedded activity.");
+                ProtoLog.d(WM_DEBUG_TASKS, "Launch on display check: disallow launch on "
+                        + "virtual display for not-embedded activity.");
                 return false;
             }
             // Check if the caller is allowed to embed activities from other apps.
             if (mService.checkPermission(ACTIVITY_EMBEDDING, callingPid, callingUid)
                     == PERMISSION_DENIED && !uidPresentOnDisplay) {
-                if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
-                        + " disallow activity embedding without permission.");
+                ProtoLog.d(WM_DEBUG_TASKS, "Launch on display check: disallow activity "
+                        + "embedding without permission.");
                 return false;
             }
         }
 
         if (!displayContent.isPrivate()) {
             // Anyone can launch on a public display.
-            if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
-                    + " allow launch on public display");
+            ProtoLog.d(WM_DEBUG_TASKS, "Launch on display check: allow launch on public "
+                    + "display");
             return true;
         }
 
         // Check if the caller is the owner of the display.
         if (display.getOwnerUid() == callingUid) {
-            if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
-                    + " allow launch for owner of the display");
+            ProtoLog.d(WM_DEBUG_TASKS, "Launch on display check: allow launch for owner of the"
+                    + " display");
             return true;
         }
 
         if (uidPresentOnDisplay) {
-            if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
-                    + " allow launch for caller present on the display");
+            ProtoLog.d(WM_DEBUG_TASKS, "Launch on display check: allow launch for caller "
+                    + "present on the display");
             return true;
         }
 
@@ -1832,8 +1830,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             final boolean animating = s.isAnimating(TRANSITION | PARENTS,
                     ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)
                     || mService.getTransitionController().inTransition(s);
-            if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + s.nowVisible
-                    + " animating=" + animating + " finishing=" + s.finishing);
+            ProtoLog.v(WM_DEBUG_STATES, "Stopping %s: nowVisible=%b animating=%b "
+                    + "finishing=%s", s, s.nowVisible, animating, s.finishing);
             if (!animating || mService.mShuttingDown) {
                 if (!processPausingActivities && s.isState(PAUSING)) {
                     // Defer processing pausing activities in this iteration and reschedule
@@ -1843,7 +1841,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     continue;
                 }
 
-                if (DEBUG_STATES) Slog.v(TAG, "Ready to stop: " + s);
+                ProtoLog.v(WM_DEBUG_STATES, "Ready to stop: %s", s);
                 if (readyToStopActivities == null) {
                     readyToStopActivities = new ArrayList<>();
                 }
@@ -2077,7 +2075,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         msg.obj = r;
         r.topResumedStateLossTime = SystemClock.uptimeMillis();
         mHandler.sendMessageDelayed(msg, TOP_RESUMED_STATE_LOSS_TIMEOUT);
-        if (DEBUG_STATES) Slog.v(TAG_STATES, "Waiting for top state to be released by " + r);
+        ProtoLog.v(WM_DEBUG_STATES, "Waiting for top state to be released by %s", r);
     }
 
     /**
@@ -2085,10 +2083,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
      * activity if needed.
      */
     void handleTopResumedStateReleased(boolean timeout) {
-        if (DEBUG_STATES) {
-            Slog.v(TAG_STATES, "Top resumed state released "
-                    + (timeout ? " (due to timeout)" : " (transition complete)"));
-        }
+        ProtoLog.v(WM_DEBUG_STATES, "Top resumed state released %s",
+                    (timeout ? "(due to timeout)" : "(transition complete)"));
+
         mHandler.removeMessages(TOP_RESUMED_STATE_LOSS_TIMEOUT_MSG);
         if (!mTopResumedActivityWaitingForPrev) {
             // Top resumed activity state loss already handled.
