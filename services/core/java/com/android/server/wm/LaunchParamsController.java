@@ -144,11 +144,11 @@ class LaunchParamsController {
                         mTmpParams.mPreferredTaskDisplayArea, true /* onTop */);
             }
 
-            if (mTmpParams.hasWindowingMode()
-                    && mTmpParams.mWindowingMode != task.getRootTask().getWindowingMode()) {
+            if (mTmpParams.hasWindowingMode() && task.isRootTask()
+                    && mTmpParams.mWindowingMode != task.getWindowingMode()) {
                 final int activityType = activity != null
                         ? activity.getActivityType() : task.getActivityType();
-                task.getRootTask().setWindowingMode(task.getDisplayArea().validateWindowingMode(
+                task.setWindowingMode(task.getDisplayArea().validateWindowingMode(
                         mTmpParams.mWindowingMode, activity, task, activityType));
             }
 
