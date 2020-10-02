@@ -55,8 +55,6 @@ public class WindowManagerWrapper {
             WindowManager.TRANSIT_WALLPAPER_INTRA_CLOSE;
     public static final int TRANSIT_TASK_OPEN_BEHIND = WindowManager.TRANSIT_TASK_OPEN_BEHIND;
     public static final int TRANSIT_ACTIVITY_RELAUNCH = WindowManager.TRANSIT_ACTIVITY_RELAUNCH;
-    public static final int TRANSIT_DOCK_TASK_FROM_RECENTS =
-            WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
     public static final int TRANSIT_KEYGUARD_GOING_AWAY = WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
     public static final int TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER =
             WindowManager.TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
