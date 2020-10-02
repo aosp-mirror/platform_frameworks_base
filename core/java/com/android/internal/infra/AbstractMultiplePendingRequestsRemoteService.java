@@ -25,6 +25,7 @@ import android.util.Slog;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Base class representing a remote service that can queue multiple pending requests while not
@@ -39,7 +40,7 @@ public abstract class AbstractMultiplePendingRequestsRemoteService<S
 
     private final int mInitialCapacity;
 
-    protected ArrayList<BasePendingRequest<S, I>> mPendingRequests;
+    protected @NonNull List<BasePendingRequest<S, I>> mPendingRequests;
 
     public AbstractMultiplePendingRequestsRemoteService(@NonNull Context context,
             @NonNull String serviceInterface, @NonNull ComponentName componentName, int userId,
@@ -48,35 +49,36 @@ public abstract class AbstractMultiplePendingRequestsRemoteService<S
         super(context, serviceInterface, componentName, userId, callback, handler, bindingFlags,
                 verbose);
         mInitialCapacity = initialCapacity;
+        mPendingRequests = new ArrayList<>(mInitialCapacity);
     }
 
     @Override // from AbstractRemoteService
     void handlePendingRequests() {
-        if (mPendingRequests != null) {
+        synchronized (mPendingRequests) {
             final int size = mPendingRequests.size();
             if (mVerbose) Slog.v(mTag, "Sending " + size + " pending requests");
             for (int i = 0; i < size; i++) {
                 mPendingRequests.get(i).run();
             }
-            mPendingRequests = null;
+            mPendingRequests.clear();
         }
     }
 
     @Override // from AbstractRemoteService
     protected void handleOnDestroy() {
-        if (mPendingRequests != null) {
+        synchronized (mPendingRequests) {
             final int size = mPendingRequests.size();
             if (mVerbose) Slog.v(mTag, "Canceling " + size + " pending requests");
             for (int i = 0; i < size; i++) {
                 mPendingRequests.get(i).cancel();
             }
-            mPendingRequests = null;
+            mPendingRequests.clear();
         }
     }
 
     @Override // from AbstractRemoteService
     final void handleBindFailure() {
-        if (mPendingRequests != null) {
+        synchronized (mPendingRequests) {
             final int size = mPendingRequests.size();
             if (mVerbose) Slog.v(mTag, "Sending failure to " + size + " pending requests");
             for (int i = 0; i < size; i++) {
@@ -84,7 +86,7 @@ public abstract class AbstractMultiplePendingRequestsRemoteService<S
                 request.onFailed();
                 request.finish();
             }
-            mPendingRequests = null;
+            mPendingRequests.clear();
         }
     }
 
@@ -94,18 +96,21 @@ public abstract class AbstractMultiplePendingRequestsRemoteService<S
 
         pw.append(prefix).append("initialCapacity=").append(String.valueOf(mInitialCapacity))
                 .println();
-        final int size = mPendingRequests == null ? 0 : mPendingRequests.size();
+        int size;
+        synchronized (mPendingRequests) {
+            size = mPendingRequests.size();
+        }
         pw.append(prefix).append("pendingRequests=").append(String.valueOf(size)).println();
     }
 
     @Override // from AbstractRemoteService
     void handlePendingRequestWhileUnBound(@NonNull BasePendingRequest<S, I> pendingRequest) {
-        if (mPendingRequests == null) {
-            mPendingRequests = new ArrayList<>(mInitialCapacity);
-        }
-        mPendingRequests.add(pendingRequest);
-        if (mVerbose) {
-            Slog.v(mTag, "queued " + mPendingRequests.size() + " requests; last=" + pendingRequest);
+        synchronized (mPendingRequests) {
+            mPendingRequests.add(pendingRequest);
+            if (mVerbose) {
+                Slog.v(mTag,
+                        "queued " + mPendingRequests.size() + " requests; last=" + pendingRequest);
+            }
         }
     }
 }
