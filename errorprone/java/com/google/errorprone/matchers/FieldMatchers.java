@@ -36,7 +36,8 @@ public final class FieldMatchers {
     return new FieldReferenceMatcher() {
       @Override
       boolean classIsAppropriate(ClassSymbol classSymbol) {
-        return classSymbol.getQualifiedName().contentEquals(className);
+        return classSymbol != null
+                && classSymbol.getQualifiedName().contentEquals(className);
       }
 
       @Override
@@ -50,12 +51,14 @@ public final class FieldMatchers {
     return new FieldReferenceMatcher() {
       @Override
       boolean classIsAppropriate(ClassSymbol classSymbol) {
-        return classSymbol.getQualifiedName().contentEquals(className);
+        return classSymbol != null
+                && classSymbol.getQualifiedName().contentEquals(className);
       }
 
       @Override
       boolean fieldSymbolIsAppropriate(Symbol symbol) {
-        return symbol.isStatic() && symbol.getSimpleName().contentEquals(fieldName);
+        return symbol != null
+                && symbol.isStatic() && symbol.getSimpleName().contentEquals(fieldName);
       }
     };
   }
@@ -64,12 +67,14 @@ public final class FieldMatchers {
     return new FieldReferenceMatcher() {
       @Override
       boolean classIsAppropriate(ClassSymbol classSymbol) {
-        return classSymbol.getQualifiedName().contentEquals(className);
+        return classSymbol != null
+                && classSymbol.getQualifiedName().contentEquals(className);
       }
 
       @Override
       boolean fieldSymbolIsAppropriate(Symbol symbol) {
-        return !symbol.isStatic() && symbol.getSimpleName().contentEquals(fieldName);
+        return symbol != null
+                && !symbol.isStatic() && symbol.getSimpleName().contentEquals(fieldName);
       }
     };
   }
