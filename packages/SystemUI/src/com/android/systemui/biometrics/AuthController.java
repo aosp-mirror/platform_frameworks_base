@@ -36,7 +36,7 @@ import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
-import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -306,9 +306,9 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
 
         if (mFingerprintManager != null && mFingerprintManager.isHardwareDetected()) {
-            final List<FingerprintSensorProperties> fingerprintSensorProperties =
-                    mFingerprintManager.getSensorProperties();
-            for (FingerprintSensorProperties props : fingerprintSensorProperties) {
+            final List<FingerprintSensorPropertiesInternal> fingerprintSensorProperties =
+                    mFingerprintManager.getSensorPropertiesInternal();
+            for (FingerprintSensorPropertiesInternal props : fingerprintSensorProperties) {
                 if (props.isAnyUdfpsType()) {
                     mUdfpsController = mUdfpsControllerFactory.get();
                     break;

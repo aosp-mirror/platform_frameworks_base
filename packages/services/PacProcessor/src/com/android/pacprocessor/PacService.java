@@ -17,13 +17,14 @@ package com.android.pacprocessor;
 
 import android.app.Service;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
+import android.webkit.PacProcessor;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.net.IProxyService;
 
 import java.net.MalformedURLException;
@@ -31,24 +32,21 @@ import java.net.URL;
 
 public class PacService extends Service {
     private static final String TAG = "PacService";
-    private static final boolean sUseWebViewPacProcessor = Resources.getSystem().getBoolean(
-            com.android.internal.R.bool.config_useWebViewPacProcessor);
 
-    private final LibpacInterface mLibpac = sUseWebViewPacProcessor
-            ? PacWebView.getInstance()
-            : PacNative.getInstance();
+    private Object mLock = new Object();
+
+    @GuardedBy("mLock")
+    private final PacProcessor mPacProcessor = PacProcessor.getInstance();
 
     private ProxyServiceStub mStub = new ProxyServiceStub();
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mLibpac.startPacSupport();
     }
 
     @Override
     public void onDestroy() {
-        mLibpac.stopPacSupport();
         super.onDestroy();
     }
 
@@ -74,7 +72,10 @@ public class PacService extends Service {
                         throw new IllegalArgumentException("Invalid host was passed");
                     }
                 }
-                return mLibpac.makeProxyRequest(url, host);
+
+                synchronized (mLock) {
+                    return mPacProcessor.findProxyForUrl(url);
+                }
             } catch (MalformedURLException e) {
                 throw new IllegalArgumentException("Invalid URL was passed");
             }
@@ -86,7 +87,11 @@ public class PacService extends Service {
                 Log.e(TAG, "Only system user is allowed to call setPacFile");
                 throw new SecurityException();
             }
-            mLibpac.setCurrentProxyScript(script);
+            synchronized (mLock) {
+                if (!mPacProcessor.setProxyScript(script)) {
+                    Log.e(TAG, "Unable to parse proxy script.");
+                }
+            }
         }
     }
 }

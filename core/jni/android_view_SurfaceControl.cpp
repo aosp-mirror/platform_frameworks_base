@@ -1434,7 +1434,8 @@ static jlong nativeReadFromParcel(JNIEnv* env, jclass clazz, jobject parcelObj) 
         doThrowNPE(env);
         return 0;
     }
-    sp<SurfaceControl> surface = SurfaceControl::readFromParcel(parcel);
+    sp<SurfaceControl> surface;
+    SurfaceControl::readFromParcel(*parcel, &surface);
     if (surface == nullptr) {
         return 0;
     }
@@ -1462,7 +1463,7 @@ static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
     }
     SurfaceControl* const self = reinterpret_cast<SurfaceControl *>(nativeObject);
     if (self != nullptr) {
-        self->writeToParcel(parcel);
+        self->writeToParcel(*parcel);
     }
 }
 
@@ -1555,6 +1556,13 @@ static void nativeSetFocusedWindow(JNIEnv* env, jclass clazz, jlong transactionO
     }
     transaction->setFocusedWindow(toToken, focusedToken, systemTime(SYSTEM_TIME_MONOTONIC),
                                   displayId);
+}
+
+static void nativeSetFrameTimelineVsync(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                        jlong frameTimelineVsyncId) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    transaction->setFrameTimelineVsync(frameTimelineVsyncId);
 }
 
 // ----------------------------------------------------------------------------
@@ -1741,6 +1749,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetFixedTransformHint},
     {"nativeSetFocusedWindow", "(JLandroid/os/IBinder;Landroid/os/IBinder;I)V",
             (void*)nativeSetFocusedWindow},
+    {"nativeSetFrameTimelineVsync", "(JJ)V",
+            (void*)nativeSetFrameTimelineVsync },
         // clang-format on
 };
 

@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection.render
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.NotificationLog
+import java.lang.RuntimeException
 import javax.inject.Inject
 
 class ShadeViewDifferLogger @Inject constructor(
@@ -65,6 +66,15 @@ class ShadeViewDifferLogger @Inject constructor(
             int1 = toIndex
         }, {
             "Moving child view $str1 in $str2 to index $int1"
+        })
+    }
+
+    fun logDuplicateNodeInTree(node: NodeSpec, ex: RuntimeException) {
+        buffer.log(TAG, LogLevel.ERROR, {
+            str1 = ex.toString()
+            str2 = treeSpecToStr(node)
+        }, {
+            "$str1 when mapping tree: $str2"
         })
     }
 }

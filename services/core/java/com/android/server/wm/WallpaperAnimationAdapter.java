@@ -93,7 +93,7 @@ class WallpaperAnimationAdapter implements AnimationAdapter {
     RemoteAnimationTarget createRemoteAnimationTarget() {
         mTarget = new RemoteAnimationTarget(-1, -1, getLeash(), false, null, null,
                 mWallpaperToken.getPrefixOrderIndex(), new Point(), null, null,
-                mWallpaperToken.getWindowConfiguration(), true, null, null);
+                mWallpaperToken.getWindowConfiguration(), true, null, null, null);
         return mTarget;
     }
 

@@ -1303,7 +1303,8 @@ public class NotificationStackScrollLayoutController {
         mView.clearNotifications(ROWS_GENTLE, closeShade);
     }
 
-    private void onAnimationEnd(List<ExpandableNotificationRow> viewsToRemove, int selectedRows) {
+    private void onAnimationEnd(List<ExpandableNotificationRow> viewsToRemove,
+            @SelectedRows int selectedRows) {
         if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
             if (selectedRows == ROWS_ALL) {
                 mNotifCollection.dismissAllNotifications(
@@ -1336,6 +1337,7 @@ public class NotificationStackScrollLayoutController {
             }
             if (selectedRows == ROWS_ALL) {
                 try {
+                    // TODO(b/169585328): Do not clear media player notifications
                     mIStatusBarService.onClearAllNotifications(
                             mLockscreenUserManager.getCurrentUserId());
                 } catch (Exception ignored) {

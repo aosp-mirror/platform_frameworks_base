@@ -49,9 +49,6 @@ import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A class that coordinates access to the face authentication hardware.
@@ -299,6 +296,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * int[], Surface)} with {@code surface} set to null.
      *
      * @see FaceManager#enroll(int, byte[], CancellationSignal, EnrollmentCallback, int[], Surface)
+     * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
     public void enroll(int userId, byte[] hardwareAuthToken, CancellationSignal cancel,
@@ -443,7 +441,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
     public void generateChallenge(GenerateChallengeCallback callback) {
-        final List<FaceSensorProperties> faceSensorProperties = getSensorProperties();
+        final List<FaceSensorPropertiesInternal> faceSensorProperties =
+                getSensorPropertiesInternal();
         if (faceSensorProperties.isEmpty()) {
             Slog.e(TAG, "No sensors");
             return;
@@ -460,7 +459,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
     public void revokeChallenge() {
-        final List<FaceSensorProperties> faceSensorProperties = getSensorProperties();
+        final List<FaceSensorPropertiesInternal> faceSensorProperties =
+                getSensorPropertiesInternal();
         if (faceSensorProperties.isEmpty()) {
             Slog.e(TAG, "No sensors during revokeChallenge");
         }
@@ -597,6 +597,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * Determine if there is a face enrolled.
      *
      * @return true if a face is enrolled, false otherwise
+     * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     public boolean hasEnrolledTemplates() {
@@ -632,6 +633,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * Determine if face authentication sensor hardware is present and functional.
      *
      * @return true if hardware is present and functional, false otherwise.
+     * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     public boolean isHardwareDetected() {
@@ -648,17 +650,32 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     }
 
     /**
+     * Retrieves a list of properties for all face authentication sensors on the device.
+     * @hide
+     */
+    @NonNull
+    public List<FaceSensorProperties> getSensorProperties() {
+        final List<FaceSensorProperties> properties = new ArrayList<>();
+        final List<FaceSensorPropertiesInternal> internalProperties
+                = getSensorPropertiesInternal();
+        for (FaceSensorPropertiesInternal internalProp : internalProperties) {
+            properties.add(FaceSensorProperties.from(internalProp));
+        }
+        return properties;
+    }
+
+    /**
      * Get statically configured sensor properties.
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     @NonNull
-    public List<FaceSensorProperties> getSensorProperties() {
+    public List<FaceSensorPropertiesInternal> getSensorPropertiesInternal() {
         try {
             if (mService == null || !mService.isHardwareDetected(mContext.getOpPackageName())) {
                 return new ArrayList<>();
             }
-            return mService.getSensorProperties(mContext.getOpPackageName());
+            return mService.getSensorPropertiesInternal(mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -874,6 +891,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     /**
      * Container for callback data from {@link FaceManager#authenticate(CryptoObject,
      * CancellationSignal, int, AuthenticationCallback, Handler)}.
+     * @hide
      */
     public static class AuthenticationResult {
         private Face mFace;
@@ -943,6 +961,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * FaceManager#authenticate(CryptoObject, CancellationSignal,
      * int, AuthenticationCallback, Handler) } must provide an implementation of this for listening
      * to face events.
+     * @hide
      */
     public abstract static class AuthenticationCallback
             extends BiometricAuthenticator.AuthenticationCallback {

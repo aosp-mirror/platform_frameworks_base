@@ -84,7 +84,7 @@ public class SystemLocationPowerSaveModeHelperTest {
         Context context = mock(Context.class);
         doReturn(powerManager).when(context).getSystemService(PowerManager.class);
 
-        mHelper = new SystemLocationPowerSaveModeHelper(context);
+        mHelper = new SystemLocationPowerSaveModeHelper(context, new LocationEventLog());
         mHelper.onSystemReady();
     }
 

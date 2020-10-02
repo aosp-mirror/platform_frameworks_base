@@ -225,6 +225,8 @@ public final class SurfaceControl implements Parcelable {
             int transformHint);
     private static native void nativeSetFocusedWindow(long transactionObj, IBinder toToken,
                                                       IBinder focusedToken, int displayId);
+    private static native void nativeSetFrameTimelineVsync(long transactionObj,
+            long frameTimelineVsyncId);
 
     @Nullable
     @GuardedBy("mLock")
@@ -3337,6 +3339,19 @@ public final class SurfaceControl implements Parcelable {
         public Transaction remove(@NonNull SurfaceControl sc) {
             reparent(sc, null);
             sc.release();
+            return this;
+        }
+
+        /**
+         * Sets the frame timeline vsync id received from choreographer
+         * {@link Choreographer#getVsyncId()} that corresponds to the transaction submitted on that
+         * surface control.
+         *
+         * @hide
+         */
+        @NonNull
+        public Transaction setFrameTimelineVsync(long frameTimelineVsyncId) {
+            nativeSetFrameTimelineVsync(mNativeObject, frameTimelineVsyncId);
             return this;
         }
 

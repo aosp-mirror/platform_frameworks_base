@@ -21,7 +21,7 @@ import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.fingerprint.Fingerprint;
-import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.view.Surface;
 import java.util.List;
 
@@ -31,7 +31,7 @@ import java.util.List;
  */
 interface IFingerprintService {
     // Retrieve static sensor properties for all fingerprint sensors
-    List<FingerprintSensorProperties> getSensorProperties(String opPackageName);
+    List<FingerprintSensorPropertiesInternal> getSensorPropertiesInternal(String opPackageName);
 
     // Authenticate the given sessionId with a fingerprint. This is protected by
     // USE_FINGERPRINT/USE_BIOMETRIC permission. This is effectively deprecated, since it only comes

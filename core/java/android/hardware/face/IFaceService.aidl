@@ -19,7 +19,7 @@ import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.Face;
-import android.hardware.face.FaceSensorProperties;
+import android.hardware.face.FaceSensorPropertiesInternal;
 import android.view.Surface;
 
 /**
@@ -29,7 +29,7 @@ import android.view.Surface;
  */
 interface IFaceService {
     // Retrieve static sensor properties for all face sensors
-    List<FaceSensorProperties> getSensorProperties(String opPackageName);
+    List<FaceSensorPropertiesInternal> getSensorPropertiesInternal(String opPackageName);
 
     // Authenticate the given sessionId with a face
     void authenticate(IBinder token, long operationId, int userid, IFaceServiceReceiver receiver,

@@ -28,7 +28,8 @@ public class FakeLocationPowerSaveModeHelper extends LocationPowerSaveModeHelper
     @LocationPowerSaveMode
     private int mLocationPowerSaveMode;
 
-    public FakeLocationPowerSaveModeHelper() {
+    public FakeLocationPowerSaveModeHelper(LocationEventLog locationEventLog) {
+        super(locationEventLog);
         mLocationPowerSaveMode = IPowerManager.LOCATION_MODE_NO_CHANGE;
     }
 
