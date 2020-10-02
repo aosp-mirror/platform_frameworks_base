@@ -19,10 +19,11 @@ package com.android.systemui.qs;
 import android.annotation.NonNull;
 import android.view.ViewGroup;
 
-import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.R;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -32,17 +33,19 @@ import javax.inject.Inject;
  */
 @QSScope
 public class QSPanelController extends ViewController<QSPanel> {
-    private final BroadcastDispatcher mBroadcastDispatcher;
+    private final BrightnessController mBrightnessController;
 
     @Inject
-    QSPanelController(QSPanel view, BroadcastDispatcher broadcastDispatcher) {
+    QSPanelController(QSPanel view, BrightnessController.Factory brightnessControllerFactory) {
         super(view);
-        mBroadcastDispatcher = broadcastDispatcher;
+
+        mBrightnessController = brightnessControllerFactory.create(
+                mView.findViewById(R.id.brightness_slider));
     }
 
     @Override
     protected void onViewAttached() {
-
+        mView.setBrightnessController(mBrightnessController);
     }
 
     @Override
@@ -54,7 +57,6 @@ public class QSPanelController extends ViewController<QSPanel> {
     QSPanel getView() {
         return mView;
     }
-
 
     /**
      * Set the header container of quick settings.
@@ -90,6 +92,14 @@ public class QSPanelController extends ViewController<QSPanel> {
     /** */
     public void setListening(boolean listening, boolean expanded) {
         mView.setListening(listening, expanded);
+
+        // Set the listening as soon as the QS fragment starts listening regardless of the
+        //expansion, so it will update the current brightness before the slider is visible.
+        if (listening) {
+            mBrightnessController.registerCallbacks();
+        } else {
+            mBrightnessController.unregisterCallbacks();
+        }
     }
 
     /** */

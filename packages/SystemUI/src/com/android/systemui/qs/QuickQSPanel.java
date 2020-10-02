@@ -30,7 +30,6 @@ import android.widget.LinearLayout;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
@@ -69,13 +68,12 @@ public class QuickQSPanel extends QSPanel {
             @Named(VIEW_CONTEXT) Context context,
             AttributeSet attrs,
             DumpManager dumpManager,
-            BroadcastDispatcher broadcastDispatcher,
             QSLogger qsLogger,
             @Named(QUICK_QS_PANEL) MediaHost mediaHost,
             UiEventLogger uiEventLogger,
             UserTracker userTracker
     ) {
-        super(context, attrs, dumpManager, broadcastDispatcher, qsLogger, mediaHost, uiEventLogger,
+        super(context, attrs, dumpManager, qsLogger, mediaHost, uiEventLogger,
                 userTracker);
         sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
         applyBottomMargin((View) mRegularTileLayout);
