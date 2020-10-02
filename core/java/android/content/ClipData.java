@@ -22,6 +22,7 @@ import static android.content.ContentResolver.SCHEME_CONTENT;
 import static android.content.ContentResolver.SCHEME_FILE;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.pm.ActivityInfo;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -201,6 +202,8 @@ public class ClipData implements Parcelable {
         final Intent mIntent;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         Uri mUri;
+        // Additional activity info resolved by the system
+        ActivityInfo mActivityInfo;
 
         /** @hide */
         public Item(Item other) {
@@ -310,6 +313,22 @@ public class ClipData implements Parcelable {
          */
         public Uri getUri() {
             return mUri;
+        }
+
+        /**
+         * Retrieve the activity info contained in this Item.
+         * @hide
+         */
+        public ActivityInfo getActivityInfo() {
+            return mActivityInfo;
+        }
+
+        /**
+         * Updates the activity info for in this Item.
+         * @hide
+         */
+        public void setActivityInfo(ActivityInfo info) {
+            mActivityInfo = info;
         }
 
         /**
@@ -1129,18 +1148,9 @@ public class ClipData implements Parcelable {
             Item item = mItems.get(i);
             TextUtils.writeToParcel(item.mText, dest, flags);
             dest.writeString8(item.mHtmlText);
-            if (item.mIntent != null) {
-                dest.writeInt(1);
-                item.mIntent.writeToParcel(dest, flags);
-            } else {
-                dest.writeInt(0);
-            }
-            if (item.mUri != null) {
-                dest.writeInt(1);
-                item.mUri.writeToParcel(dest, flags);
-            } else {
-                dest.writeInt(0);
-            }
+            dest.writeTypedObject(item.mIntent, flags);
+            dest.writeTypedObject(item.mUri, flags);
+            dest.writeTypedObject(item.mActivityInfo, flags);
         }
     }
 
@@ -1151,14 +1161,17 @@ public class ClipData implements Parcelable {
         } else {
             mIcon = null;
         }
-        mItems = new ArrayList<Item>();
+        mItems = new ArrayList<>();
         final int N = in.readInt();
         for (int i=0; i<N; i++) {
             CharSequence text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             String htmlText = in.readString8();
-            Intent intent = in.readInt() != 0 ? Intent.CREATOR.createFromParcel(in) : null;
-            Uri uri = in.readInt() != 0 ? Uri.CREATOR.createFromParcel(in) : null;
-            mItems.add(new Item(text, htmlText, intent, uri));
+            Intent intent = in.readTypedObject(Intent.CREATOR);
+            Uri uri = in.readTypedObject(Uri.CREATOR);
+            ActivityInfo info = in.readTypedObject(ActivityInfo.CREATOR);
+            Item item = new Item(text, htmlText, intent, uri);
+            item.setActivityInfo(info);
+            mItems.add(item);
         }
     }
 

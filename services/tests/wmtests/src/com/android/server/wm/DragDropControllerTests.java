@@ -18,27 +18,43 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
+import static android.view.DragEvent.ACTION_DRAG_STARTED;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.verify;
 
+import android.app.PendingIntent;
 import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.platform.test.annotations.Presubmit;
+import android.view.DragEvent;
+import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
+import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -51,6 +67,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -71,6 +88,7 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     static class TestDragDropController extends DragDropController {
         private Runnable mCloseCallback;
+        boolean mDeferDragStateClosed;
 
         TestDragDropController(WindowManagerService service, Looper looper) {
             super(service, looper);
@@ -83,6 +101,9 @@ public class DragDropControllerTests extends WindowTestsBase {
 
         @Override
         void onDragStateClosedLocked(DragState dragState) {
+            if (mDeferDragStateClosed) {
+                return;
+            }
             super.onDragStateClosedLocked(dragState);
             if (mCloseCallback != null) {
                 mCloseCallback.run();
@@ -101,8 +122,9 @@ public class DragDropControllerTests extends WindowTestsBase {
         final Task task = createTaskInStack(stack, ownerId);
         task.addChild(activity, 0);
 
+        // Use a new TestIWindow so we don't collect events for other windows
         final WindowState window = createWindow(
-                null, TYPE_BASE_APPLICATION, activity, name, ownerId, false);
+                null, TYPE_BASE_APPLICATION, activity, name, ownerId, false, new TestIWindow());
         window.mInputChannel = new InputChannel();
         window.mHasSurface = true;
         return window;
@@ -146,12 +168,12 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     @Test
     public void testDragFlow() {
-        dragFlow(0, ClipData.newPlainText("label", "Test"), 0, 0);
+        doDragAndDrop(0, ClipData.newPlainText("label", "Test"), 0, 0);
     }
 
     @Test
     public void testPerformDrag_NullDataWithGrantUri() {
-        dragFlow(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ, null, 0, 0);
+        doDragAndDrop(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ, null, 0, 0);
     }
 
     @Test
@@ -160,10 +182,110 @@ public class DragDropControllerTests extends WindowTestsBase {
                 createDropTargetWindow("Other user's window", 1 * UserHandle.PER_USER_RANGE);
         doReturn(otherUsersWindow).when(mDisplayContent).getTouchableWinAtPointLocked(10, 10);
 
-        dragFlow(0, null, 10, 10);
+        doDragAndDrop(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ, null, 10, 10);
+        mToken = otherUsersWindow.mClient.asBinder();
     }
 
-    private void dragFlow(int flag, ClipData data, float dropX, float dropY) {
+    @Test
+    public void testPrivateInterceptGlobalDragDropFlagChecksPermission() {
+        spyOn(mWm.mContext);
+
+        DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
+        WindowManager.LayoutParams attrs = new WindowManager.LayoutParams();
+        attrs.privateFlags |= PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
+        policy.validateAddingWindowLw(attrs, Binder.getCallingPid(), Binder.getCallingUid());
+
+        verify(mWm.mContext).enforcePermission(
+                eq(android.Manifest.permission.MANAGE_ACTIVITY_STACKS), anyInt(), anyInt(), any());
+    }
+
+    @Test
+    public void testPrivateInterceptGlobalDragDropFlagBehaviour() {
+        mWindow.mAttrs.privateFlags |= PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
+        mWindow.setViewVisibility(View.GONE);
+
+        // Necessary for now since DragState.sendDragStartedLocked() will recycle drag events
+        // immediately after dispatching, which is a problem when using mockito arguments captor
+        // because it returns and modifies the same drag event
+        TestIWindow iwindow = (TestIWindow) mWindow.mClient;
+        final ArrayList<DragEvent> dragEvents = new ArrayList<>();
+        iwindow.setDragEventJournal(dragEvents);
+
+        startDrag(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ,
+                ClipData.newPlainText("label", "text"), () -> {
+                    // Verify the start-drag event is sent for invisible windows
+                    final DragEvent dragEvent = dragEvents.get(0);
+                    assertTrue(dragEvent.getAction() == ACTION_DRAG_STARTED);
+
+                    // Verify after consuming that the drag surface is relinquished
+                    try {
+                        mTarget.mDeferDragStateClosed = true;
+
+                        // Verify the drop event includes the drag surface
+                        mTarget.handleMotionEvent(false, 0, 0);
+                        final DragEvent dropEvent = dragEvents.get(dragEvents.size() - 1);
+                        assertTrue(dropEvent.getDragSurface() != null);
+
+                        mTarget.reportDropResult(iwindow, true);
+                    } finally {
+                        mTarget.mDeferDragStateClosed = false;
+                    }
+                    assertTrue(mTarget.dragSurfaceRelinquished());
+                });
+    }
+
+    @Test
+    public void testValidateAppActivityArguments() {
+        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
+            @Override
+            public void onAnimatorScaleChanged(float scale) {}
+        });
+        try {
+            session.validateAndResolveDragMimeTypeExtras(
+                    createClipDataForActivity(null, null), 0);
+            fail("Expected failure without pending intent and user");
+        } catch (IllegalArgumentException e) {
+            // Expected failure
+        }
+        try {
+            session.validateAndResolveDragMimeTypeExtras(
+                    createClipDataForActivity(mock(PendingIntent.class), null), 0);
+            fail("Expected failure without user");
+        } catch (IllegalArgumentException e) {
+            // Expected failure
+        }
+        try {
+            session.validateAndResolveDragMimeTypeExtras(
+                    createClipDataForActivity(null, mock(UserHandle.class)), 0);
+            fail("Expected failure without pending intent");
+        } catch (IllegalArgumentException e) {
+            // Expected failure
+        }
+    }
+
+    private ClipData createClipDataForActivity(PendingIntent pi, UserHandle user) {
+        final Intent data = new Intent();
+        if (pi != null) {
+            data.putExtra(ClipDescription.EXTRA_PENDING_INTENT, (Parcelable) pi);
+        }
+        if (user != null) {
+            data.putExtra(Intent.EXTRA_USER, user);
+        }
+        final ClipData clipData = new ClipData(
+                new ClipDescription("drag", new String[] {
+                        MIMETYPE_APPLICATION_ACTIVITY}),
+                new ClipData.Item(data));
+        return clipData;
+    }
+
+    private void doDragAndDrop(int flags, ClipData data, float dropX, float dropY) {
+        startDrag(flags, data, () -> {
+            mTarget.handleMotionEvent(false, dropX, dropY);
+            mToken = mWindow.mClient.asBinder();
+        });
+    }
+
+    private void startDrag(int flag, ClipData data, Runnable r) {
         final SurfaceSession appSession = new SurfaceSession();
         try {
             final SurfaceControl surface = new SurfaceControl.Builder(appSession)
@@ -174,13 +296,10 @@ public class DragDropControllerTests extends WindowTestsBase {
 
             assertTrue(mWm.mInputManager.transferTouchFocus(new InputChannel(),
                     new InputChannel()));
-            mToken = mTarget.performDrag(
-                    new SurfaceSession(), 0, 0, mWindow.mClient, flag, surface, 0, 0, 0, 0, 0,
-                    data);
+            mToken = mTarget.performDrag(0, 0, mWindow.mClient, flag, surface, 0, 0, 0, 0, 0, data);
             assertNotNull(mToken);
 
-            mTarget.handleMotionEvent(false, dropX, dropY);
-            mToken = mWindow.mClient.asBinder();
+            r.run();
         } finally {
             appSession.kill();
         }

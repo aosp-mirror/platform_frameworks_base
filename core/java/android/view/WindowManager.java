@@ -69,6 +69,7 @@ import android.annotation.TestApi;
 import android.app.KeyguardManager;
 import android.app.Presentation;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
@@ -2096,6 +2097,21 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME = 0x40000000;
 
         /**
+         * Flag to indicate that we want to intercept and handle global drag and drop for all users.
+         * This flag allows a window to considered for drag events even if not visible, and will
+         * receive drags for all active users in the system.
+         *
+         * Additional data is provided to windows with this flag, including the {@link ClipData}
+         * including all items with the {@link DragEvent#ACTION_DRAG_STARTED} event, and the
+         * actual drag surface with the {@link DragEvent#ACTION_DROP} event. If the window consumes,
+         * the drop, then the cleanup of the drag surface (provided as a part of
+         * {@link DragEvent#ACTION_DROP}) will be relinquished to the window.
+         * @hide
+         */
+        @RequiresPermission(permission.MANAGE_ACTIVITY_STACKS)
+        public static final int PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP = 0x80000000;
+
+        /**
          * An internal annotation for flags that can be specified to {@link #softInputMode}.
          *
          * @hide
@@ -2245,7 +2261,11 @@ public interface WindowManager extends ViewManager {
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_TRUSTED_OVERLAY,
                         equals = PRIVATE_FLAG_TRUSTED_OVERLAY,
-                        name = "TRUSTED_OVERLAY")
+                        name = "TRUSTED_OVERLAY"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
+                        equals = PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
+                        name = "INTERCEPT_GLOBAL_DRAG_AND_DROP")
         })
         @PrivateFlags
         @TestApi

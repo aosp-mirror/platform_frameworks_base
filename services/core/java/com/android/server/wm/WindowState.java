@@ -1745,8 +1745,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * a combination of the above "visible now" with the check that the
      * Input Manager uses when discarding windows from input consideration.
      */
-    boolean isPotentialDragTarget() {
-        return isVisibleNow() && !mRemoved
+    boolean isPotentialDragTarget(boolean targetInterceptsGlobalDrag) {
+        return (targetInterceptsGlobalDrag || isVisibleNow()) && !mRemoved
                 && mInputChannel != null && mInputWindowHandle != null;
     }
 

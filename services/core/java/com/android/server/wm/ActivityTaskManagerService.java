@@ -1659,11 +1659,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         try {
             // Collect information about the target of the Intent.
-            ActivityInfo aInfo = mStackSupervisor.resolveActivity(intent, resolvedType,
-                    0 /* startFlags */, null /* profilerInfo */, userId,
-                    ActivityStarter.computeResolveFilterUid(callingUid, callingUid,
-                            UserHandle.USER_NULL));
-            aInfo = mAmInternal.getActivityInfoForUser(aInfo, userId);
+            final ActivityInfo aInfo = resolveActivityInfoForIntent(intent, resolvedType, userId,
+                    callingUid);
 
             synchronized (mGlobalLock) {
                 return mStackSupervisor.canPlaceEntityOnDisplay(displayId, callingPid, callingUid,
@@ -1672,6 +1669,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    ActivityInfo resolveActivityInfoForIntent(Intent intent, String resolvedType,
+            int userId, int callingUid) {
+        ActivityInfo aInfo = mStackSupervisor.resolveActivity(intent, resolvedType,
+                0 /* startFlags */, null /* profilerInfo */, userId,
+                ActivityStarter.computeResolveFilterUid(callingUid, callingUid,
+                        UserHandle.USER_NULL));
+        return mAmInternal.getActivityInfoForUser(aInfo, userId);
     }
 
     /**

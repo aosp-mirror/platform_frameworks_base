@@ -16,7 +16,10 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
@@ -101,6 +104,7 @@ class DragState {
     ClipDescription mDataDescription;
     int mTouchSource;
     boolean mDragResult;
+    boolean mRelinquishDragSurface;
     float mOriginalAlpha;
     float mOriginalX, mOriginalY;
     float mCurrentX, mCurrentY;
@@ -141,7 +145,7 @@ class DragState {
         mSurfaceControl = surface;
         mFlags = flags;
         mLocalWin = localWin;
-        mNotifiedWindows = new ArrayList<WindowState>();
+        mNotifiedWindows = new ArrayList<>();
         mTransaction = service.mTransactionFactory.get();
     }
 
@@ -211,7 +215,8 @@ class DragState {
                     y = mCurrentY;
                 }
                 DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED,
-                        x, y, null, null, null, null, mDragResult);
+                        x, y, mThumbOffsetX, mThumbOffsetY, null, null, null, null, null,
+                        mDragResult);
                 try {
                     ws.mClient.dispatchDragEvent(evt);
                 } catch (RemoteException e) {
@@ -239,7 +244,9 @@ class DragState {
             mInputSurface = null;
         }
         if (mSurfaceControl != null) {
-            mTransaction.reparent(mSurfaceControl, null).apply();
+            if (!mRelinquishDragSurface) {
+                mTransaction.reparent(mSurfaceControl, null).apply();
+            }
             mSurfaceControl = null;
         }
         if (mAnimator != null && !mAnimationCompleted) {
@@ -365,7 +372,7 @@ class DragState {
         }
 
         mDisplayContent.forAllWindows(w -> {
-            sendDragStartedLocked(w, touchX, touchY, mDataDescription);
+            sendDragStartedLocked(w, touchX, touchY, mDataDescription, mData);
         }, false /* traverseTopToBottom */ );
     }
 
@@ -378,10 +385,12 @@ class DragState {
      * process, so it's safe for the caller to call recycle() on the event afterwards.
      */
     private void sendDragStartedLocked(WindowState newWin, float touchX, float touchY,
-            ClipDescription desc) {
-        if (mDragInProgress && isValidDropTarget(newWin)) {
+            ClipDescription desc, ClipData data) {
+        final boolean interceptsGlobalDrag = targetInterceptsGlobalDrag(newWin);
+        if (mDragInProgress && isValidDropTarget(newWin, interceptsGlobalDrag)) {
             DragEvent event = obtainDragEvent(newWin, DragEvent.ACTION_DRAG_STARTED,
-                    touchX, touchY, null, desc, null, null, false);
+                    touchX, touchY, mThumbOffsetX, mThumbOffsetY, null, desc,
+                    interceptsGlobalDrag ? data : null, null, null, false);
             try {
                 newWin.mClient.dispatchDragEvent(event);
                 // track each window that we've notified that the drag is starting
@@ -397,11 +406,11 @@ class DragState {
         }
     }
 
-    private boolean isValidDropTarget(WindowState targetWin) {
+    private boolean isValidDropTarget(WindowState targetWin, boolean interceptsGlobalDrag) {
         if (targetWin == null) {
             return false;
         }
-        if (!targetWin.isPotentialDragTarget()) {
+        if (!targetWin.isPotentialDragTarget(interceptsGlobalDrag)) {
             return false;
         }
         if ((mFlags & View.DRAG_FLAG_GLOBAL) == 0 || !targetWindowSupportsGlobalDrag(targetWin)) {
@@ -411,8 +420,9 @@ class DragState {
             }
         }
 
-        return mCrossProfileCopyAllowed ||
-                mSourceUserId == UserHandle.getUserId(targetWin.getOwningUid());
+        return interceptsGlobalDrag
+                || mCrossProfileCopyAllowed
+                || mSourceUserId == UserHandle.getUserId(targetWin.getOwningUid());
     }
 
     private boolean targetWindowSupportsGlobalDrag(WindowState targetWin) {
@@ -420,6 +430,13 @@ class DragState {
         // above.
         return targetWin.mActivityRecord == null
                 || targetWin.mActivityRecord.mTargetSdk >= Build.VERSION_CODES.N;
+    }
+
+    /**
+     * @return whether the given window {@param targetWin} can intercept global drags.
+     */
+    public boolean targetInterceptsGlobalDrag(WindowState targetWin) {
+        return (targetWin.mAttrs.privateFlags & PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP) != 0;
     }
 
     /* helper - send a ACTION_DRAG_STARTED event only if the window has not
@@ -435,7 +452,7 @@ class DragState {
             if (DEBUG_DRAG) {
                 Slog.d(TAG_WM, "need to send DRAG_STARTED to new window " + newWin);
             }
-            sendDragStartedLocked(newWin, mCurrentX, mCurrentY, mDataDescription);
+            sendDragStartedLocked(newWin, mCurrentX, mCurrentY, mDataDescription, mData);
         }
     }
 
@@ -512,7 +529,7 @@ class DragState {
                 }
                 // force DRAG_EXITED_EVENT if appropriate
                 DragEvent evt = obtainDragEvent(mTargetWindow, DragEvent.ACTION_DRAG_EXITED,
-                        0, 0, null, null, null, null, false);
+                        0, 0, 0, 0, null, null, null, null, null, false);
                 mTargetWindow.mClient.dispatchDragEvent(evt);
                 if (myPid != mTargetWindow.mSession.mPid) {
                     evt.recycle();
@@ -523,7 +540,7 @@ class DragState {
                     Slog.d(TAG_WM, "sending DRAG_LOCATION to " + touchedWin);
                 }
                 DragEvent evt = obtainDragEvent(touchedWin, DragEvent.ACTION_DRAG_LOCATION,
-                        x, y, null, null, null, null, false);
+                        x, y, mThumbOffsetX, mThumbOffsetY, null, null, null, null, null, false);
                 touchedWin.mClient.dispatchDragEvent(evt);
                 if (myPid != touchedWin.mSession.mPid) {
                     evt.recycle();
@@ -581,7 +598,9 @@ class DragState {
         final int myPid = Process.myPid();
         final IBinder token = touchedWin.mClient.asBinder();
         final DragEvent evt = obtainDragEvent(touchedWin, DragEvent.ACTION_DROP, x, y,
-                null, null, mData, dragAndDropPermissions, false);
+                mThumbOffsetX, mThumbOffsetY, null, null, mData,
+                targetInterceptsGlobalDrag(touchedWin) ? mSurfaceControl : null,
+                dragAndDropPermissions, false);
         try {
             touchedWin.mClient.dispatchDragEvent(evt);
 
@@ -606,15 +625,14 @@ class DragState {
         return mDragInProgress;
     }
 
-    private static DragEvent obtainDragEvent(WindowState win, int action,
-            float x, float y, Object localState,
-            ClipDescription description, ClipData data,
-            IDragAndDropPermissions dragAndDropPermissions,
-            boolean result) {
+    private static DragEvent obtainDragEvent(WindowState win, int action, float x, float y,
+            float offsetX, float offsetY, Object localState, ClipDescription description,
+            ClipData data, SurfaceControl dragSurface,
+            IDragAndDropPermissions dragAndDropPermissions, boolean result) {
         final float winX = win.translateToWindowX(x);
         final float winY = win.translateToWindowY(y);
-        return DragEvent.obtain(action, winX, winY, localState, description, data,
-                dragAndDropPermissions, result);
+        return DragEvent.obtain(action, winX, winY, offsetX, offsetY, localState, description, data,
+                dragSurface, dragAndDropPermissions, result);
     }
 
     private ValueAnimator createReturnAnimationLocked() {

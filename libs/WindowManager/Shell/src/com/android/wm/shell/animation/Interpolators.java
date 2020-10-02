@@ -17,12 +17,16 @@
 package com.android.wm.shell.animation;
 
 import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
 
 /**
  * Common interpolators used in wm shell library.
  */
 public class Interpolators {
+
+    public static final Interpolator LINEAR = new LinearInterpolator();
+
     /**
      * Interpolator for alpha in animation.
      */
