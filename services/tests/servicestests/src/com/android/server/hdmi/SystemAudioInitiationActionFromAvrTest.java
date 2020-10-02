@@ -150,7 +150,7 @@ public class SystemAudioInitiationActionFromAvrTest {
 
                     @Override
                     public void setAndBroadcastActiveSourceFromOneDeviceType(
-                            int sourceAddress, int physicalAddress) {
+                            int sourceAddress, int physicalAddress, String caller) {
                         mBroadcastActiveSource = true;
                     }
 
