@@ -16,4 +16,4 @@
 
 package android.media.tv;
 
-parcelable TvChannelInfo;
+parcelable TunedInfo;
