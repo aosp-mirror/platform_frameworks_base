@@ -32,6 +32,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.net.LinkProperties.ProvisioningChange;
+import android.net.util.LinkPropertiesUtils.CompareResult;
 import android.os.Build;
 import android.system.OsConstants;
 import android.util.ArraySet;
@@ -40,7 +41,6 @@ import androidx.core.os.BuildCompat;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.net.module.util.LinkPropertiesUtils.CompareResult;
 import com.android.testutils.DevSdkIgnoreRule;
 import com.android.testutils.DevSdkIgnoreRule.IgnoreAfter;
 import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo;
