@@ -92,6 +92,8 @@ public interface ServiceProvider {
             @NonNull IFingerprintServiceReceiver receiver, int fingerId, int userId,
             @NonNull String opPackageName);
 
+    void scheduleInternalCleanup(int sensorId, int userId);
+
     boolean isHardwareDetected(int sensorId);
 
     void rename(int sensorId, int fingerId, int userId, @NonNull String name);
@@ -102,9 +104,9 @@ public interface ServiceProvider {
 
     long getAuthenticatorId(int sensorId, int userId);
 
-    void onFingerDown(int sensorId, int x, int y, float minor, float major);
+    void onPointerDown(int sensorId, int x, int y, float minor, float major);
 
-    void onFingerUp(int sensorId);
+    void onPointerUp(int sensorId);
 
     void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller);
 

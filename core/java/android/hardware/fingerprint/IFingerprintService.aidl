@@ -121,10 +121,10 @@ interface IFingerprintService {
     void initializeConfiguration(int sensorId, int strength);
 
     // Notifies about a finger touching the sensor area.
-    void onFingerDown(int sensorId, int x, int y, float minor, float major);
+    void onPointerDown(int sensorId, int x, int y, float minor, float major);
 
     // Notifies about a finger leaving the sensor area.
-    void onFingerUp(int sensorId);
+    void onPointerUp(int sensorId);
 
     // Sets the controller for managing the UDFPS overlay.
     void setUdfpsOverlayController(in IUdfpsOverlayController controller);
