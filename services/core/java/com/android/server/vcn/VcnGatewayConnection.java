@@ -16,30 +16,57 @@
 
 package com.android.server.vcn;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+
 import static com.android.server.VcnManagementService.VDBG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.net.ConnectivityManager;
 import android.net.InetAddresses;
+import android.net.IpPrefix;
 import android.net.IpSecManager;
 import android.net.IpSecManager.IpSecTunnelInterface;
 import android.net.IpSecManager.ResourceUnavailableException;
 import android.net.IpSecTransform;
+import android.net.LinkAddress;
+import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkAgent;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.net.NetworkInfo.DetailedState;
+import android.net.RouteInfo;
 import android.net.annotations.PolicyDirection;
+import android.net.ipsec.ike.ChildSessionCallback;
 import android.net.ipsec.ike.ChildSessionConfiguration;
+import android.net.ipsec.ike.ChildSessionParams;
 import android.net.ipsec.ike.IkeSession;
+import android.net.ipsec.ike.IkeSessionCallback;
+import android.net.ipsec.ike.IkeSessionConfiguration;
+import android.net.ipsec.ike.IkeSessionParams;
+import android.net.ipsec.ike.exceptions.IkeException;
+import android.net.ipsec.ike.exceptions.IkeProtocolException;
 import android.net.vcn.VcnGatewayConnectionConfig;
+import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Message;
 import android.os.ParcelUuid;
+import android.telephony.TelephonyManager;
+import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkRecord;
 import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkTrackerCallback;
 
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -628,12 +655,155 @@ public class VcnGatewayConnection extends StateMachine {
         protected void processStateMsg(Message msg) {}
     }
 
-    private static class Dependencies {
+    // TODO: Remove this when migrating to new NetworkAgent API
+    private static NetworkInfo buildNetworkInfo(boolean isConnected) {
+        NetworkInfo info =
+                new NetworkInfo(
+                        ConnectivityManager.TYPE_MOBILE,
+                        TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                        "MOBILE",
+                        "VCN");
+        info.setDetailedState(
+                isConnected ? DetailedState.CONNECTED : DetailedState.DISCONNECTED, null, null);
+
+        return info;
+    }
+
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    static NetworkCapabilities buildNetworkCapabilities(
+            @NonNull VcnGatewayConnectionConfig gatewayConnectionConfig) {
+        final NetworkCapabilities caps = new NetworkCapabilities();
+
+        caps.addTransportType(TRANSPORT_CELLULAR);
+        caps.addCapability(NET_CAPABILITY_NOT_CONGESTED);
+        caps.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
+
+        // Add exposed capabilities
+        for (int cap : gatewayConnectionConfig.getAllExposedCapabilities()) {
+            caps.addCapability(cap);
+        }
+
+        return caps;
+    }
+
+    private static LinkProperties buildConnectedLinkProperties(
+            @NonNull VcnGatewayConnectionConfig gatewayConnectionConfig,
+            @NonNull IpSecTunnelInterface tunnelIface,
+            @NonNull ChildSessionConfiguration childConfig) {
+        final LinkProperties lp = new LinkProperties();
+
+        lp.setInterfaceName(tunnelIface.getInterfaceName());
+        for (LinkAddress addr : childConfig.getInternalAddresses()) {
+            lp.addLinkAddress(addr);
+        }
+        for (InetAddress addr : childConfig.getInternalDnsServers()) {
+            lp.addDnsServer(addr);
+        }
+
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), null));
+        lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null));
+
+        lp.setMtu(gatewayConnectionConfig.getMaxMtu());
+
+        return lp;
+    }
+
+    private class IkeSessionCallbackImpl implements IkeSessionCallback {
+        private final int mToken;
+
+        IkeSessionCallbackImpl(int token) {
+            mToken = token;
+        }
+
+        @Override
+        public void onOpened(@NonNull IkeSessionConfiguration ikeSessionConfig) {
+            Slog.v(TAG, "IkeOpened for token " + mToken);
+            // Nothing to do here.
+        }
+
+        @Override
+        public void onClosed() {
+            Slog.v(TAG, "IkeClosed for token " + mToken);
+            sessionClosed(mToken, null);
+        }
+
+        @Override
+        public void onClosedExceptionally(@NonNull IkeException exception) {
+            Slog.v(TAG, "IkeClosedExceptionally for token " + mToken, exception);
+            sessionClosed(mToken, exception);
+        }
+
+        @Override
+        public void onError(@NonNull IkeProtocolException exception) {
+            Slog.v(TAG, "IkeError for token " + mToken, exception);
+            // Non-fatal, log and continue.
+        }
+    }
+
+    private class ChildSessionCallbackImpl implements ChildSessionCallback {
+        private final int mToken;
+
+        ChildSessionCallbackImpl(int token) {
+            mToken = token;
+        }
+
+        @Override
+        public void onOpened(@NonNull ChildSessionConfiguration childConfig) {
+            Slog.v(TAG, "ChildOpened for token " + mToken);
+            childOpened(mToken, childConfig);
+        }
+
+        @Override
+        public void onClosed() {
+            Slog.v(TAG, "ChildClosed for token " + mToken);
+            sessionLost(mToken, null);
+        }
+
+        @Override
+        public void onClosedExceptionally(@NonNull IkeException exception) {
+            Slog.v(TAG, "ChildClosedExceptionally for token " + mToken, exception);
+            sessionLost(mToken, exception);
+        }
+
+        @Override
+        public void onIpSecTransformCreated(@NonNull IpSecTransform transform, int direction) {
+            Slog.v(TAG, "ChildTransformCreated; Direction: " + direction + "; token " + mToken);
+            childTransformCreated(mToken, transform, direction);
+        }
+
+        @Override
+        public void onIpSecTransformDeleted(@NonNull IpSecTransform transform, int direction) {
+            // Nothing to be done; no references to the IpSecTransform are held, and this transform
+            // will be closed by the IKE library.
+            Slog.v(TAG, "ChildTransformDeleted; Direction: " + direction + "; for token " + mToken);
+        }
+    }
+
+    /** External dependencies used by VcnGatewayConnection, for injection in tests. */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static class Dependencies {
+        /** Builds a new UnderlyingNetworkTracker. */
         public UnderlyingNetworkTracker newUnderlyingNetworkTracker(
                 VcnContext vcnContext,
                 ParcelUuid subscriptionGroup,
                 UnderlyingNetworkTrackerCallback callback) {
             return new UnderlyingNetworkTracker(vcnContext, subscriptionGroup, callback);
+        }
+
+        /** Builds a new IkeSession. */
+        public IkeSession newIkeSession(
+                VcnContext vcnContext,
+                IkeSessionParams ikeSessionParams,
+                ChildSessionParams childSessionParams,
+                IkeSessionCallback ikeSessionCallback,
+                ChildSessionCallback childSessionCallback) {
+            return new IkeSession(
+                    vcnContext.getContext(),
+                    ikeSessionParams,
+                    childSessionParams,
+                    new HandlerExecutor(new Handler(vcnContext.getLooper())),
+                    ikeSessionCallback,
+                    childSessionCallback);
         }
     }
 }
