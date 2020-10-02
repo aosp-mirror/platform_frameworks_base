@@ -519,19 +519,17 @@ class Face10 implements IHwBinder.DeathRecipient {
             @NonNull String opPackageName) {
         mHandler.post(() -> {
             if (mCurrentChallengeOwner != null) {
-                Slog.w(TAG, "Current challenge owner: " + mCurrentChallengeOwner
-                        + ", interrupted by: " + opPackageName);
                 final ClientMonitorCallbackConverter listener =
                         mCurrentChallengeOwner.getListener();
-                if (listener == null) {
-                    Slog.w(TAG, "Null listener, skip sending interruption callback");
-                    return;
-                }
-
-                try {
-                    listener.onChallengeInterrupted(mSensorId);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Unable to notify challenge interrupted", e);
+                Slog.w(TAG, "Current challenge owner: " + mCurrentChallengeOwner
+                        + ", listener: " + listener
+                        + ", interrupted by: " + opPackageName);
+                if (listener != null) {
+                    try {
+                        listener.onChallengeInterrupted(mSensorId);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Unable to notify challenge interrupted", e);
+                    }
                 }
             }
 
