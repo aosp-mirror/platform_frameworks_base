@@ -38,8 +38,8 @@ import dagger.Provides;
 /**
  * Module for QS dependencies
  */
-// TODO: Add other QS classes
-@Module(includes = {MediaModule.class})
+@Module(subcomponents = {QSFragmentComponent.class},
+        includes = {MediaModule.class})
 public interface QSModule {
 
     @Provides
@@ -59,7 +59,6 @@ public interface QSModule {
         manager.init();
         return manager;
     }
-
 
     /** */
     @Binds
