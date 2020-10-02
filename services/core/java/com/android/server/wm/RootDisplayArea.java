@@ -27,7 +27,8 @@ import java.util.Map;
 
 /**
  * Root of a {@link DisplayArea} hierarchy. It can be either the {@link DisplayContent} as the root
- * of the whole logical display, or the root of a {@link DisplayArea} group.
+ * of the whole logical display, or a {@link DisplayAreaGroup} as the root of a partition of the
+ * logical display.
  */
 class RootDisplayArea extends DisplayArea<DisplayArea> {
 
@@ -48,6 +49,16 @@ class RootDisplayArea extends DisplayArea<DisplayArea> {
 
     RootDisplayArea(WindowManagerService wms, String name, int featureId) {
         super(wms, Type.ANY, name, featureId);
+    }
+
+    @Override
+    RootDisplayArea getRootDisplayArea() {
+        return this;
+    }
+
+    /** Whether the orientation (based on dimensions) of this root is different from the Display. */
+    boolean isOrientationDifferentFromDisplay() {
+        return false;
     }
 
     /** Finds the {@link DisplayArea.Tokens} that this type of window should be attached to. */
