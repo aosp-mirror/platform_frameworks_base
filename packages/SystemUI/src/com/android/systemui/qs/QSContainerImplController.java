@@ -17,30 +17,44 @@
 package com.android.systemui.qs;
 
 import com.android.systemui.R;
+import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
 
-public class QSContainerImplController {
-    private final QSContainerImpl mView;
+class QSContainerImplController extends ViewController<QSContainerImpl> {
     private final QuickStatusBarHeaderController mQuickStatusBarHeaderController;
 
     private QSContainerImplController(QSContainerImpl view,
             QuickStatusBarHeaderController.Builder quickStatusBarHeaderControllerBuilder) {
-        mView = view;
+        super(view);
         mQuickStatusBarHeaderController = quickStatusBarHeaderControllerBuilder
                 .setQuickStatusBarHeader(mView.findViewById(R.id.header)).build();
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        mQuickStatusBarHeaderController.init();
     }
 
     public void setListening(boolean listening) {
         mQuickStatusBarHeaderController.setListening(listening);
     }
 
-    public static class Builder {
+    @Override
+    protected void onViewAttached() {
+    }
+
+    @Override
+    protected void onViewDetached() {
+    }
+
+    static class Builder {
         private final QuickStatusBarHeaderController.Builder mQuickStatusBarHeaderControllerBuilder;
         private QSContainerImpl mView;
 
         @Inject
-        public Builder(
+        Builder(
                 QuickStatusBarHeaderController.Builder quickStatusBarHeaderControllerBuilder) {
             mQuickStatusBarHeaderControllerBuilder = quickStatusBarHeaderControllerBuilder;
         }
