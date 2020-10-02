@@ -3589,6 +3589,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             msg.append(", deviceId=").append(getDeviceId());
             msg.append(", source=0x").append(Integer.toHexString(getSource()));
             msg.append(", displayId=").append(getDisplayId());
+            msg.append(", eventId=").append(getId());
         }
         msg.append(" }");
         return msg.toString();
