@@ -19,6 +19,7 @@
 
 #include <jni.h>
 #include <memory>
+#include <utility>
 
 #include <minikin/Font.h>
 
@@ -34,17 +35,9 @@ struct FontFamilyWrapper {
 };
 
 struct FontWrapper {
-  FontWrapper(minikin::Font&& font) : font(std::move(font)) {}
-  minikin::Font font;
+  explicit FontWrapper(std::shared_ptr<minikin::Font>&& font) : font(font) {}
+  std::shared_ptr<minikin::Font> font;
 };
-
-// We assume FontWrapper's address is the same as underlying Font's address.
-// This assumption is used for looking up Java font object from native address.
-// The Font object can be created without Java's Font object but all Java's Font objects point to
-// the native FontWrapper. So when looking up Java object from minikin::Layout which gives us Font
-// address, we lookup Font Java object from Font address with assumption that it is the same as
-// FontWrapper address.
-static_assert(offsetof(FontWrapper, font) == 0);
 
 // Utility wrapper for java.util.List
 class ListHelper {
