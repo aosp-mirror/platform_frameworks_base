@@ -17,12 +17,13 @@
 package com.google.errorprone.bugpatterns.android;
 
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
+import static com.google.errorprone.bugpatterns.android.TargetSdkChecker.binaryTreeExact;
 import static com.google.errorprone.matchers.FieldMatchers.anyFieldInClass;
 import static com.google.errorprone.matchers.FieldMatchers.staticField;
 import static com.google.errorprone.matchers.Matchers.allOf;
 import static com.google.errorprone.matchers.Matchers.anyOf;
 import static com.google.errorprone.matchers.Matchers.anything;
-import static com.google.errorprone.matchers.Matchers.binaryTree;
+import static com.google.errorprone.matchers.Matchers.kindIs;
 import static com.google.errorprone.matchers.Matchers.not;
 
 import com.google.auto.service.AutoService;
@@ -34,6 +35,7 @@ import com.google.errorprone.matchers.Description;
 import com.google.errorprone.matchers.Matcher;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.Tree.Kind;
 
 /**
  * Each SDK level often has dozens of different behavior changes, which can be
@@ -85,14 +87,28 @@ public final class CompatChangeChecker extends BugChecker implements BinaryTreeM
             staticField("android.os.Build.VERSION_CODES", "O"),
             staticField("android.os.Build.VERSION_CODES", "O_MR1"),
             staticField("android.os.Build.VERSION_CODES", "P"),
-            staticField("android.os.Build.VERSION_CODES", "Q"));
+            staticField("android.os.Build.VERSION_CODES", "Q"),
+            staticField("android.os.Build.VERSION_CODES", "R"));
+
+    private static final Matcher<ExpressionTree> R_VERSION_CODE =
+            staticField("android.os.Build.VERSION_CODES", "R");
+
+    private static final Matcher<ExpressionTree> CUR_DEVELOPMENT_VERSION_CODE =
+            staticField("android.os.Build.VERSION_CODES", "CUR_DEVELOPMENT");
 
     private static final Matcher<ExpressionTree> MODERN_VERSION_CODE =
-            allOf(VERSION_CODE, not(LEGACY_VERSION_CODE));
+            allOf(VERSION_CODE, not(LEGACY_VERSION_CODE), not(CUR_DEVELOPMENT_VERSION_CODE));
+
+    private static final Matcher<ExpressionTree> BOOLEAN_OPERATOR = anyOf(
+            kindIs(Kind.LESS_THAN), kindIs(Kind.LESS_THAN_EQUAL),
+            kindIs(Kind.GREATER_THAN), kindIs(Kind.GREATER_THAN_EQUAL),
+            kindIs(Kind.EQUAL_TO), kindIs(Kind.NOT_EQUAL_TO));
 
     private static final Matcher<BinaryTree> INVALID = anyOf(
-            binaryTree(MODERN_VERSION_CODE, anything()),
-            binaryTree(anything(), MODERN_VERSION_CODE));
+            allOf(BOOLEAN_OPERATOR, binaryTreeExact(MODERN_VERSION_CODE, anything())),
+            allOf(BOOLEAN_OPERATOR, binaryTreeExact(anything(), MODERN_VERSION_CODE)),
+            allOf(kindIs(Kind.GREATER_THAN), binaryTreeExact(anything(), R_VERSION_CODE)),
+            allOf(kindIs(Kind.LESS_THAN), binaryTreeExact(R_VERSION_CODE, anything())));
 
     @Override
     public Description matchBinary(BinaryTree tree, VisitorState state) {

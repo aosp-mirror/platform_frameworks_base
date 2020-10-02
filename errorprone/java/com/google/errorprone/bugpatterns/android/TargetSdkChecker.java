@@ -89,7 +89,7 @@ public final class TargetSdkChecker extends BugChecker implements BinaryTreeMatc
         return Description.NO_MATCH;
     }
 
-    private static Matcher<BinaryTree> binaryTreeExact(Matcher<ExpressionTree> left,
+    static Matcher<BinaryTree> binaryTreeExact(Matcher<ExpressionTree> left,
             Matcher<ExpressionTree> right) {
         return new Matcher<BinaryTree>() {
             @Override

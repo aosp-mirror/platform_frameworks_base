@@ -3,6 +3,11 @@ java_defaults {
     plugins: [
         "error_prone_android_framework",
     ],
+    errorprone: {
+        javacflags: [
+            "-Xep:AndroidFrameworkCompatChange:ERROR",
+        ],
+    },
 }
 
 filegroup {
