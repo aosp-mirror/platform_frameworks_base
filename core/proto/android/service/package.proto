@@ -124,6 +124,11 @@ message PackageProto {
         optional string originating_package_name = 2;
     }
 
+    message StatesProto {
+        optional bool is_startable = 1;
+        optional bool is_loading = 2;
+    }
+
     // Name of package. e.g. "com.android.providers.telephony".
     optional string name = 1;
     // UID for this package as assigned by Android OS.
@@ -145,4 +150,6 @@ message PackageProto {
     repeated UserInfoProto users = 9;
     // Where the request to install this package came from,
     optional InstallSourceProto install_source = 10;
+    // Whether the package is startable or is still loading
+    optional StatesProto states = 11;
 }

@@ -2135,6 +2135,11 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
     return binder::Status::ok();
 }
 
+binder::Status IncrementalService::DataLoaderStub::reportStreamHealth(MountId mountId,
+                                                                      int newStatus) {
+    return binder::Status::ok();
+}
+
 bool IncrementalService::DataLoaderStub::isHealthParamsValid() const {
     return mHealthCheckParams.blockedTimeoutMs > 0 &&
             mHealthCheckParams.blockedTimeoutMs < mHealthCheckParams.unhealthyTimeoutMs;

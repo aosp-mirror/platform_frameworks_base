@@ -16392,12 +16392,24 @@ public class PackageManagerService extends IPackageManager.Stub
                 } else if (!previousUserIds.contains(userId)) {
                     ps.setInstallReason(installReason, userId);
                 }
+
+                // TODO(b/169721400): generalize Incremental States and create a Callback object
+                // that can be used for all the packages.
+                final IncrementalStatesCallback incrementalStatesCallback =
+                        new IncrementalStatesCallback(ps, userId);
+                final String codePath = ps.getPathString();
+                if (IncrementalManager.isIncrementalPath(codePath) && mIncrementalManager != null) {
+                    mIncrementalManager.registerCallback(codePath, incrementalStatesCallback);
+                    ps.setIncrementalStatesCallback(incrementalStatesCallback);
+                }
+
                 // Ensure that the uninstall reason is UNKNOWN for users with the package installed.
                 for (int currentUserId : allUsersList) {
                     if (ps.getInstalled(currentUserId)) {
                         ps.setUninstallReason(UNINSTALL_REASON_UNKNOWN, currentUserId);
                     }
                 }
+
                 mSettings.writeKernelMappingLPr(ps);
             }
             res.name = pkgName;
@@ -17194,6 +17206,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mDexManager.notifyPackageUpdated(pkg.getPackageName(),
                         pkg.getBaseApkPath(), pkg.getSplitCodePaths());
             }
+            reconciledPkg.pkgSetting.setStatesOnCommit();
 
             // Prepare the application profiles for the new code paths.
             // This needs to be done before invoking dexopt so that any install-time profile
@@ -17288,6 +17301,155 @@ public class PackageManagerService extends IPackageManager.Stub
             notifyPackageChangeObserversOnUpdate(reconciledPkg);
         }
         NativeLibraryHelper.waitForNativeBinariesExtraction(incrementalStorages);
+    }
+
+    private class IncrementalStatesCallback extends IPackageLoadingProgressCallback.Stub
+            implements IncrementalStates.Callback {
+        @GuardedBy("mPackageSetting")
+        private final PackageSetting mPackageSetting;
+        private final String mPackageName;
+        private final String mPathString;
+        private final int mUserId;
+        private final int[] mInstalledUserIds;
+
+        IncrementalStatesCallback(PackageSetting packageSetting, int userId) {
+            mPackageSetting = packageSetting;
+            mPackageName = packageSetting.name;
+            mUserId = userId;
+            mPathString = packageSetting.getPathString();
+            final int[] allUserIds = resolveUserIds(userId);
+            final ArrayList<Integer> installedUserIds = new ArrayList<>();
+            for (int i = 0; i < allUserIds.length; i++) {
+                if (packageSetting.getInstalled(allUserIds[i])) {
+                    installedUserIds.add(allUserIds[i]);
+                }
+            }
+            final int numInstalledUserId = installedUserIds.size();
+            mInstalledUserIds = new int[numInstalledUserId];
+            for (int i = 0; i < numInstalledUserId; i++) {
+                mInstalledUserIds[i] = installedUserIds.get(i);
+            }
+        }
+
+        @Override
+        public void onPackageLoadingProgressChanged(float progress) {
+            synchronized (mPackageSetting) {
+                mPackageSetting.setLoadingProgress(progress);
+            }
+        }
+
+        @Override
+        public void onPackageFullyLoaded() {
+            mIncrementalManager.unregisterCallback(mPathString, this);
+            final SparseArray<int[]> newBroadcastAllowList;
+            synchronized (mLock) {
+                newBroadcastAllowList = mAppsFilter.getVisibilityAllowList(
+                        getPackageSettingInternal(mPackageName, Process.SYSTEM_UID),
+                        mInstalledUserIds, mSettings.mPackages);
+            }
+            Bundle extras = new Bundle(1);
+            extras.putInt(Intent.EXTRA_UID, mUserId);
+            extras.putString(Intent.EXTRA_PACKAGE_NAME, mPackageName);
+            sendPackageBroadcast(Intent.ACTION_PACKAGE_FULLY_LOADED, mPackageName,
+                    extras, 0 /*flags*/,
+                    null /*targetPackage*/, null /*finishedReceiver*/,
+                    mInstalledUserIds, null /* instantUserIds */, newBroadcastAllowList);
+        }
+
+        @Override
+        public void onPackageUnstartable(int reason) {
+            final SparseArray<int[]> newBroadcastAllowList;
+            synchronized (mLock) {
+                newBroadcastAllowList = mAppsFilter.getVisibilityAllowList(
+                        getPackageSettingInternal(mPackageName, Process.SYSTEM_UID),
+                        mInstalledUserIds, mSettings.mPackages);
+            }
+            Bundle extras = new Bundle(1);
+            extras.putInt(Intent.EXTRA_UID, mUserId);
+            extras.putString(Intent.EXTRA_PACKAGE_NAME, mPackageName);
+            extras.putInt(Intent.EXTRA_REASON, reason);
+            // send broadcast to users with this app installed
+            sendPackageBroadcast(Intent.ACTION_PACKAGE_UNSTARTABLE, mPackageName,
+                    extras, 0 /*flags*/,
+                    null /*targetPackage*/, null /*finishedReceiver*/,
+                    mInstalledUserIds, null /* instantUserIds */, newBroadcastAllowList);
+        }
+
+        @Override
+        public void onPackageStartable() {
+            final SparseArray<int[]> newBroadcastAllowList;
+            synchronized (mLock) {
+                newBroadcastAllowList = mAppsFilter.getVisibilityAllowList(
+                        getPackageSettingInternal(mPackageName, Process.SYSTEM_UID),
+                        mInstalledUserIds, mSettings.mPackages);
+            }
+            Bundle extras = new Bundle(1);
+            extras.putInt(Intent.EXTRA_UID, mUserId);
+            extras.putString(Intent.EXTRA_PACKAGE_NAME, mPackageName);
+            // send broadcast to users with this app installed
+            sendPackageBroadcast(Intent.ACTION_PACKAGE_STARTABLE, mPackageName,
+                    extras, 0 /*flags*/,
+                    null /*targetPackage*/, null /*finishedReceiver*/,
+                    mInstalledUserIds, null /* instantUserIds */, newBroadcastAllowList);
+        }
+    }
+
+    /**
+     * This is an internal method that is used to indicate changes on the health status of the
+     * Incremental Storage used by an installed package with an associated user id. This might
+     * result in a change in the loading state of the package.
+     */
+    public void onStorageHealthStatusChanged(String packageName, int status, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        mPermissionManager.enforceCrossUserPermission(
+                callingUid, userId, true, false,
+                "onStorageHealthStatusChanged");
+        final PackageSetting ps = getPackageSettingForUser(packageName, callingUid, userId);
+        if (ps == null) {
+            return;
+        }
+        ps.setStorageHealthStatus(status);
+    }
+
+    /**
+     * This is an internal method that is used to indicate changes on the stream status of the
+     * data loader used by an installed package with an associated user id. This might
+     * result in a change in the loading state of the package.
+     */
+    public void onStreamStatusChanged(String packageName, int status, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        mPermissionManager.enforceCrossUserPermission(
+                callingUid, userId, true, false,
+                "onStreamStatusChanged");
+        final PackageSetting ps = getPackageSettingForUser(packageName, callingUid, userId);
+        if (ps == null) {
+            return;
+        }
+        ps.setStreamStatus(status);
+    }
+
+    @Nullable PackageSetting getPackageSettingForUser(String packageName, int callingUid,
+            int userId) {
+        final PackageSetting ps;
+        synchronized (mLock) {
+            ps = mSettings.mPackages.get(packageName);
+            if (ps == null) {
+                Slog.w(TAG, "Failed to get package setting. Package " + packageName
+                        + " is not installed");
+                return null;
+            }
+            if (!ps.getInstalled(userId)) {
+                Slog.w(TAG, "Failed to get package setting. Package " + packageName
+                        + " is not installed for user " + userId);
+                return null;
+            }
+            if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
+                Slog.w(TAG, "Failed to get package setting. Package " + packageName
+                        + " is not visible to the calling app");
+                return null;
+            }
+        }
+        return ps;
     }
 
     private void notifyPackageChangeObserversOnUpdate(ReconciledPackage reconciledPkg) {
@@ -25409,24 +25571,15 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public boolean registerInstalledLoadingProgressCallback(String packageName,
                 PackageManagerInternal.InstalledLoadingProgressCallback callback, int userId) {
-            final int callingUid = Binder.getCallingUid();
-            mPermissionManager.enforceCrossUserPermission(
-                    callingUid, userId, true, false,
-                    "registerLoadingProgressCallback");
-            final PackageSetting ps;
-            synchronized (mLock) {
-                ps = mSettings.mPackages.get(packageName);
-                if (ps == null) {
-                    Slog.w(TAG, "Failed registering loading progress callback. Package "
-                            + packageName + " is not installed");
-                    return false;
-                }
-                if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
-                    Slog.w(TAG, "Failed registering loading progress callback. Package "
-                            + packageName + " is not visible to the calling app");
-                    return false;
-                }
-                // TODO(b/165841827): return false if package is fully loaded
+            final PackageSetting ps = getPackageSettingForUser(packageName, Binder.getCallingUid(),
+                    userId);
+            if (ps == null) {
+                return false;
+            }
+            if (!ps.isPackageLoading()) {
+                Slog.w(TAG,
+                        "Failed registering loading progress callback. Package is fully loaded.");
+                return false;
             }
             if (mIncrementalManager == null) {
                 Slog.w(TAG,

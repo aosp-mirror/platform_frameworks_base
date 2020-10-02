@@ -333,6 +333,8 @@ public class PackageSetting extends PackageSettingBase {
                     installSource.originatingPackageName);
             proto.end(sourceToken);
         }
+        proto.write(PackageProto.StatesProto.IS_STARTABLE, incrementalStates.isStartable());
+        proto.write(PackageProto.StatesProto.IS_LOADING, incrementalStates.isLoading());
         writeUsersInfoToProto(proto, PackageProto.USERS);
         proto.end(packageToken);
     }
