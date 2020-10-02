@@ -284,25 +284,28 @@ public class AudioRecordingDisclosureBar implements
             mAnimator.setTarget(mIndicatorView);
             mAnimator.setProperty(View.ALPHA);
             mAnimator.addListener(new AnimatorListenerAdapter() {
+                boolean mCancelled;
+
                 @Override
                 public void onAnimationStart(Animator animation, boolean isReverse) {
-                    if (DEBUG) Log.d(TAG, "onAnimationStart");
+                    if (DEBUG) Log.d(TAG, "AnimatorListenerAdapter#onAnimationStart");
+                    mCancelled = false;
                 }
 
                 @Override
                 public void onAnimationCancel(Animator animation) {
-                    if (DEBUG) Log.d(TAG, "onAnimationCancel");
+                    if (DEBUG) Log.d(TAG, "AnimatorListenerAdapter#onAnimationCancel");
+                    mCancelled = true;
                 }
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    if (DEBUG) Log.d(TAG, "onAnimationEnd");
-
-                    if (mState == STATE_APPEARING) {
-                        mState = STATE_SHOWN;
-                    } else if (mState == STATE_DISAPPEARING) {
-                        removeIndicatorView();
-                        mState = STATE_NOT_SHOWN;
+                    if (DEBUG) Log.d(TAG, "AnimatorListenerAdapter#onAnimationEnd");
+                    // When ValueAnimator#cancel() is called it always calls onAnimationCancel(...)
+                    // and then onAnimationEnd(...). We, however, only want to proceed here if the
+                    // animation ended "naturally".
+                    if (!mCancelled) {
+                        onAnimationFinished();
                     }
                 }
             });
@@ -319,6 +322,17 @@ public class AudioRecordingDisclosureBar implements
         mAnimator.start();
     }
 
+    private void onAnimationFinished() {
+        if (DEBUG) Log.d(TAG, "onAnimationFinished");
+
+        if (mState == STATE_APPEARING) {
+            mState = STATE_SHOWN;
+        } else if (mState == STATE_DISAPPEARING) {
+            removeIndicatorView();
+            mState = STATE_NOT_SHOWN;
+        }
+    }
+
     private boolean hasActiveRecorders() {
         for (int index = mAudioActivityObservers.length - 1; index >= 0; index--) {
             for (String activePackage : mAudioActivityObservers[index].getActivePackages()) {
@@ -330,6 +344,8 @@ public class AudioRecordingDisclosureBar implements
     }
 
     private void removeIndicatorView() {
+        if (DEBUG) Log.d(TAG, "removeIndicatorView");
+
         final WindowManager windowManager = (WindowManager) mContext.getSystemService(
                 Context.WINDOW_SERVICE);
         windowManager.removeView(mIndicatorView);
