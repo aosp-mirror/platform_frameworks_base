@@ -1208,7 +1208,64 @@ public class VcnGatewayConnection extends StateMachine {
      */
     class RetryTimeoutState extends ActiveBaseState {
         @Override
-        protected void processStateMsg(Message msg) {}
+        protected void enterState() throws Exception {
+            // Reset upon entry to ConnectedState
+            mFailedAttempts++;
+
+            if (mUnderlying == null) {
+                Slog.wtf(TAG, "Underlying network was null in retry state");
+                transitionTo(mDisconnectedState);
+            } else {
+                sendMessageDelayed(
+                        EVENT_RETRY_TIMEOUT_EXPIRED, mCurrentToken, getNextRetryIntervalsMs());
+            }
+        }
+
+        @Override
+        protected void processStateMsg(Message msg) {
+            switch (msg.what) {
+                case EVENT_UNDERLYING_NETWORK_CHANGED:
+                    final UnderlyingNetworkRecord oldUnderlying = mUnderlying;
+                    mUnderlying = ((EventUnderlyingNetworkChangedInfo) msg.obj).newUnderlying;
+
+                    // If new underlying is null, all networks were lost; go back to disconnected.
+                    if (mUnderlying == null) {
+                        removeMessages(EVENT_RETRY_TIMEOUT_EXPIRED);
+
+                        transitionTo(mDisconnectedState);
+                        return;
+                    } else if (oldUnderlying != null
+                            && mUnderlying.network.equals(oldUnderlying.network)) {
+                        // If the network has not changed, do nothing.
+                        return;
+                    }
+
+                    // Fallthrough
+                case EVENT_RETRY_TIMEOUT_EXPIRED:
+                    removeMessages(EVENT_RETRY_TIMEOUT_EXPIRED);
+
+                    transitionTo(mConnectingState);
+                    break;
+                case EVENT_DISCONNECT_REQUESTED:
+                    handleDisconnectRequested(((EventDisconnectRequestedInfo) msg.obj).reason);
+                    break;
+                default:
+                    logUnhandledMessage(msg);
+                    break;
+            }
+        }
+
+        private long getNextRetryIntervalsMs() {
+            final int retryDelayIndex = mFailedAttempts - 1;
+            final long[] retryIntervalsMs = mConnectionConfig.getRetryIntervalsMs();
+
+            // Repeatedly use last item in retry timeout list.
+            if (retryDelayIndex >= retryIntervalsMs.length) {
+                return retryIntervalsMs[retryIntervalsMs.length - 1];
+            }
+
+            return retryIntervalsMs[retryDelayIndex];
+        }
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
