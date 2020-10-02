@@ -1918,7 +1918,9 @@ public final class ProcessList {
 
             String instructionSet = null;
             if (app.info.primaryCpuAbi != null) {
-                instructionSet = VMRuntime.getInstructionSet(app.info.primaryCpuAbi);
+                // If ABI override is specified, use the isa derived from the value of ABI override.
+                // Otherwise, use the isa derived from primary ABI
+                instructionSet = VMRuntime.getInstructionSet(requiredAbi);
             }
 
             app.gids = gids;
@@ -1927,7 +1929,7 @@ public final class ProcessList {
 
             // If instructionSet is non-null, this indicates that the system_server is spawning a
             // process with an ISA that may be different from its own. System (kernel and hardware)
-            // compatililty for these features is checked in the decideTaggingLevel in the
+            // compatibility for these features is checked in the decideTaggingLevel in the
             // system_server process (not the child process). As both MTE and TBI are only supported
             // in aarch64, we can simply ensure that the new process is also aarch64. This prevents
             // the mismatch where a 64-bit system server spawns a 32-bit child that thinks it should
