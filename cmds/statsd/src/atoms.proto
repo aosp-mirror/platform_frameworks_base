@@ -493,6 +493,8 @@ message Atom {
         WifiConnectionStateChanged wifi_connection_state_changed = 308 [(module) = "wifi"];
         HdmiCecActiveSourceChanged hdmi_cec_active_source_changed = 309 [(module) = "framework"];
         HdmiCecMessageReported hdmi_cec_message_reported = 310 [(module) = "framework"];
+        AirplaneMode airplane_mode = 311 [(module) = "telephony"];
+        ModemRestart modem_restart = 312 [(module) = "telephony"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -10575,12 +10577,48 @@ message OutgoingSms {
 }
 
 /**
+ * Push information about usage of airplane mode.
+ *
+ * Logged from:
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/AirplaneModeStats.java
+ */
+message AirplaneMode {
+    // Status of airplane mode
+    optional bool is_enabled = 1;
+
+    // When is_enabled is false, indicates if this was a very short airplane mode toggle
+    // (i.e. airplane mode was disabled after less than 10 seconds from enablement).
+    optional bool short_toggle = 2;
+
+    // Carrier ID of the SIM card.
+    // See https://source.android.com/devices/tech/config/carrierid.
+    optional int32 carrier_id = 3;
+}
+
+/**
+ * Push information about modem restarts.
+ *
+ * Logged from:
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/ModemRestartStats.java
+ */
+message ModemRestart {
+    // Software version of the modem, as provided by android.os.Build.getRadioVersion().
+    optional string baseband_version = 1;
+
+    // Reason of the modem restart, as provided in the modemReset indication of IRadio HAL.
+    optional string reason = 2;
+
+    // Carrier ID of the first SIM card.
+    // See https://source.android.com/devices/tech/config/carrierid.
+    optional int32 carrier_id = 3;
+}
+
+/**
  * Logs gnss stats from location service provider
  *
  * Pulled from:
  *  frameworks/base/location/java/com/android/internal/location/gnssmetrics/GnssMetrics.java
  */
-
 message GnssStats {
     // Number of location reports since boot
     optional int64 location_reports = 1;
