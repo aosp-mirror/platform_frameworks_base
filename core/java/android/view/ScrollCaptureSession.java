@@ -36,15 +36,15 @@ public class ScrollCaptureSession {
     private final Point mPositionInWindow;
 
     @Nullable
-    private ScrollCaptureClient mClient;
+    private ScrollCaptureConnection mConnection;
 
     /** @hide */
     public ScrollCaptureSession(Surface surface, Rect scrollBounds, Point positionInWindow,
-            ScrollCaptureClient client) {
+            ScrollCaptureConnection connection) {
         mSurface = surface;
         mScrollBounds = scrollBounds;
         mPositionInWindow = positionInWindow;
-        mClient = client;
+        mConnection = connection;
     }
 
     /**
@@ -88,8 +88,8 @@ public class ScrollCaptureSession {
      * @param capturedArea the area captured, relative to scroll bounds
      */
     public void notifyBufferSent(long frameNumber, @NonNull Rect capturedArea) {
-        if (mClient != null) {
-            mClient.onRequestImageCompleted(frameNumber, capturedArea);
+        if (mConnection != null) {
+            mConnection.onRequestImageCompleted(frameNumber, capturedArea);
         }
     }
 
@@ -97,7 +97,7 @@ public class ScrollCaptureSession {
      * @hide
      */
     public void disconnect() {
-        mClient = null;
+        mConnection = null;
         if (mSurface.isValid()) {
             mSurface.release();
         }
