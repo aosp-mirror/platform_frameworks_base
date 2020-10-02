@@ -103,7 +103,8 @@ public class WindowAnimator {
         mAnimationFrameCallback = frameTimeNs -> {
             synchronized (mService.mGlobalLock) {
                 mAnimationFrameCallbackScheduled = false;
-                animate(frameTimeNs);
+                final long vsyncId = mChoreographer.getVsyncId();
+                animate(frameTimeNs, vsyncId);
                 if (mNotifyWhenNoAnimation && !mLastRootAnimating) {
                     mService.mGlobalLock.notifyAll();
                 }
@@ -125,13 +126,15 @@ public class WindowAnimator {
         mInitialized = true;
     }
 
-    private void animate(long frameTimeNs) {
+    private void animate(long frameTimeNs, long vsyncId) {
         if (!mInitialized) {
             return;
         }
 
         // Schedule next frame already such that back-pressure happens continuously.
         scheduleAnimation();
+
+        mTransaction.setFrameTimelineVsync(vsyncId);
 
         mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
         mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;

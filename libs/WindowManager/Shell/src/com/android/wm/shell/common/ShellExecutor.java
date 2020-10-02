@@ -14,26 +14,22 @@
  * limitations under the License.
  */
 
-#pragma once
+package com.android.wm.shell.common;
 
-#include "Shader.h"
-#include "SkShader.h"
-
-namespace android::uirenderer {
+import java.util.concurrent.Executor;
 
 /**
- * Shader implementation that renders a Bitmap as either a SkShader or SkImageFilter
+ * Super basic Executor interface that adds support for delayed execution and removing callbacks.
+ * Intended to wrap Handler while better-supporting testing.
  */
-class BitmapShader : public Shader {
-public:
-    BitmapShader(const sk_sp<SkImage>& image, const SkTileMode tileModeX,
-                 const SkTileMode tileModeY, const SkMatrix* matrix);
-    ~BitmapShader() override;
+public interface ShellExecutor extends Executor {
+    /**
+     * See {@link android.os.Handler#postDelayed(Runnable, long)}.
+     */
+    void executeDelayed(Runnable r, long delayMillis);
 
-protected:
-    sk_sp<SkShader> makeSkShader() override;
-
-private:
-    sk_sp<SkShader> skShader;
-};
-}  // namespace android::uirenderer
+    /**
+     * See {@link android.os.Handler#removeCallbacks}.
+     */
+    void removeCallbacks(Runnable r);
+}

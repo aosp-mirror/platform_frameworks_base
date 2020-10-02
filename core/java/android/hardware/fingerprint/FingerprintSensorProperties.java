@@ -18,7 +18,6 @@ package android.hardware.fingerprint;
 
 import android.annotation.IntDef;
 import android.hardware.biometrics.SensorProperties;
-import android.os.Parcel;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,14 +27,39 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 public class FingerprintSensorProperties extends SensorProperties {
-
+    /**
+     * @hide
+     */
     public static final int TYPE_UNKNOWN = 0;
+
+    /**
+     * @hide
+     */
     public static final int TYPE_REAR = 1;
+
+    /**
+     * @hide
+     */
     public static final int TYPE_UDFPS_ULTRASONIC = 2;
+
+    /**
+     * @hide
+     */
     public static final int TYPE_UDFPS_OPTICAL = 3;
+
+    /**
+     * @hide
+     */
     public static final int TYPE_POWER_BUTTON = 4;
+
+    /**
+     * @hide
+     */
     public static final int TYPE_HOME_BUTTON = 5;
 
+    /**
+     * @hide
+     */
     @IntDef({TYPE_UNKNOWN,
             TYPE_REAR,
             TYPE_UDFPS_ULTRASONIC,
@@ -45,60 +69,34 @@ public class FingerprintSensorProperties extends SensorProperties {
     @Retention(RetentionPolicy.SOURCE)
     public @interface SensorType {}
 
-    public final @SensorType int sensorType;
-    // IBiometricsFingerprint@2.1 does not manage timeout below the HAL, so the Gatekeeper HAT
-    // cannot be checked
-    public final boolean resetLockoutRequiresHardwareAuthToken;
+    @SensorType final int mSensorType;
 
     /**
-     * Initializes SensorProperties with specified values
+     * Constructs a {@link FingerprintSensorProperties} from the internal parcelable representation.
+     * @hide
      */
-    public FingerprintSensorProperties(int sensorId, @Strength int strength,
-            int maxEnrollmentsPerUser, @SensorType int sensorType,
-            boolean resetLockoutRequiresHardwareAuthToken) {
-        super(sensorId, strength, maxEnrollmentsPerUser);
-        this.sensorType = sensorType;
-        this.resetLockoutRequiresHardwareAuthToken = resetLockoutRequiresHardwareAuthToken;
+    public static FingerprintSensorProperties from(
+            FingerprintSensorPropertiesInternal internalProp) {
+        return new FingerprintSensorProperties(internalProp.sensorId,
+                internalProp.sensorStrength,
+                internalProp.sensorType);
     }
 
-    protected FingerprintSensorProperties(Parcel in) {
-        super(in);
-        sensorType = in.readInt();
-        resetLockoutRequiresHardwareAuthToken = in.readBoolean();
+    /**
+     * @hide
+     */
+    public FingerprintSensorProperties(int sensorId, int sensorStrength,
+            @SensorType int sensorType) {
+        super(sensorId, sensorStrength);
+        mSensorType = sensorType;
     }
 
-    public static final Creator<FingerprintSensorProperties> CREATOR =
-            new Creator<FingerprintSensorProperties>() {
-                @Override
-                public FingerprintSensorProperties createFromParcel(Parcel in) {
-                    return new FingerprintSensorProperties(in);
-                }
-
-                @Override
-                public FingerprintSensorProperties[] newArray(int size) {
-                    return new FingerprintSensorProperties[size];
-                }
-            };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeInt(sensorType);
-        dest.writeBoolean(resetLockoutRequiresHardwareAuthToken);
-    }
-
-    public boolean isAnyUdfpsType() {
-        switch (sensorType) {
-            case TYPE_UDFPS_OPTICAL:
-            case TYPE_UDFPS_ULTRASONIC:
-                return true;
-            default:
-                return false;
-        }
+    /**
+     * @hide
+     * @return The sensor's type.
+     */
+    @SensorType
+    public int getSensorType() {
+        return mSensorType;
     }
 }

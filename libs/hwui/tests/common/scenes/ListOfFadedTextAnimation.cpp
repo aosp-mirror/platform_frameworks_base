@@ -17,8 +17,7 @@
 #include "TestSceneBase.h"
 #include "tests/common/TestListViewSceneBase.h"
 #include "hwui/Paint.h"
-#include "SkColor.h"
-#include <shader/LinearGradientShader.h>
+#include <SkGradientShader.h>
 
 class ListOfFadedTextAnimation;
 
@@ -43,26 +42,15 @@ class ListOfFadedTextAnimation : public TestListViewSceneBase {
         pts[0].set(0, 0);
         pts[1].set(0, 1);
 
+        SkColor colors[2] = {Color::Black, Color::Transparent};
+        sk_sp<SkShader> s(
+                SkGradientShader::MakeLinear(pts, colors, NULL, 2, SkTileMode::kClamp));
+
         SkMatrix matrix;
         matrix.setScale(1, length);
         matrix.postRotate(-90);
-
-        std::vector<SkColor4f> vColors(2);
-        vColors[0] = SkColors::kBlack;
-        vColors[1] = SkColors::kTransparent;
-
-        sk_sp<LinearGradientShader> linearGradientShader = sk_make_sp<LinearGradientShader>(
-                    pts,
-                    vColors,
-                    SkColorSpace::MakeSRGB(),
-                    nullptr,
-                    SkTileMode::kClamp,
-                    0,
-                    &matrix
-                );
-
         Paint fadingPaint;
-        fadingPaint.setShader(linearGradientShader);
+        fadingPaint.setShader(s->makeWithLocalMatrix(matrix));
         fadingPaint.setBlendMode(SkBlendMode::kDstOut);
         canvas.drawRect(0, 0, length, itemHeight, fadingPaint);
         canvas.restore();

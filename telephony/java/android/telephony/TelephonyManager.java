@@ -13032,6 +13032,40 @@ public class TelephonyManager {
     @SystemApi
     public interface CallForwardingInfoCallback {
         /**
+         * Indicates that the operation was successful.
+         */
+        int RESULT_SUCCESS = 0;
+
+        /**
+         * Indicates that setting or retrieving the call forwarding info failed with an unknown
+         * error.
+         */
+        int RESULT_ERROR_UNKNOWN = 1;
+
+        /**
+         * Indicates that call forwarding is not enabled because the recipient is not on a
+         * Fixed Dialing Number (FDN) list.
+         */
+        int RESULT_ERROR_FDN_CHECK_FAILURE = 2;
+
+        /**
+         * Indicates that call forwarding is not supported on the network at this time.
+         */
+        int RESULT_ERROR_NOT_SUPPORTED = 3;
+
+        /**
+         * Call forwarding errors
+         * @hide
+         */
+        @IntDef(prefix = { "RESULT_ERROR_" }, value = {
+                RESULT_ERROR_UNKNOWN,
+                RESULT_ERROR_NOT_SUPPORTED,
+                RESULT_ERROR_FDN_CHECK_FAILURE
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        @interface CallForwardingError{
+        }
+        /**
          * Called when the call forwarding info is successfully retrieved from the network.
          * @param info information about how calls are forwarded
          */
@@ -13041,7 +13075,7 @@ public class TelephonyManager {
          * Called when there was an error retrieving the call forwarding information.
          * @param error
          */
-        void onError(@CallForwardingInfo.CallForwardingError int error);
+        void onError(@CallForwardingError int error);
     }
 
     /**
@@ -13114,9 +13148,9 @@ public class TelephonyManager {
      * @param executor The executor on which the listener will be called. Must be non-null if
      *                 {@code listener} is non-null.
      * @param resultListener Asynchronous listener that'll be called when the operation completes.
-     *                      Called with {@link CallForwardingInfo#SUCCESS} if the operation
-     *                      succeeded and an error code from {@link CallForwardingInfo}
-     *                      if it failed.
+     *                      Called with {@link CallForwardingInfoCallback#RESULT_SUCCESS} if the
+     *                      operation succeeded and an error code from
+     *                      {@link CallForwardingInfoCallback} it failed.
      *
      * @throws IllegalArgumentException if any of the following are true for the parameter
      * callForwardingInfo:
@@ -13142,7 +13176,8 @@ public class TelephonyManager {
     @SystemApi
     public void setCallForwarding(@NonNull CallForwardingInfo callForwardingInfo,
             @Nullable @CallbackExecutor Executor executor,
-            @Nullable @CallForwardingInfo.CallForwardingError Consumer<Integer> resultListener) {
+            @Nullable @CallForwardingInfoCallback.CallForwardingError
+                    Consumer<Integer> resultListener) {
         if (callForwardingInfo == null) {
             throw new IllegalArgumentException("callForwardingInfo is null");
         }
@@ -13298,7 +13333,7 @@ public class TelephonyManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public void setCallWaitingStatus(boolean enabled, @Nullable Executor executor,
+    public void setCallWaitingEnabled(boolean enabled, @Nullable Executor executor,
             @Nullable Consumer<Integer> resultListener) {
         if (resultListener != null) {
             Objects.requireNonNull(executor);
@@ -13699,5 +13734,39 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
             return true;
         }
+    }
+
+    /**
+     * Returns a list of the equivalent home PLMNs (EF_EHPLMN) from the USIM app.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @return A list of equivalent home PLMNs. Returns an empty list if EF_EHPLMN is empty or
+     * does not exist on the SIM card.
+     *
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @throws SecurityException if the caller doesn't have the permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    public @NonNull List<String> getEquivalentHomePlmns() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getEquivalentHomePlmns(getSubId(), mContext.getOpPackageName(),
+                        getAttributionTag());
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+
+        return Collections.emptyList();
     }
 }

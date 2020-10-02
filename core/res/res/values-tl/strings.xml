@@ -432,13 +432,23 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"baguhin ang mga setting ng iyong audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Pinapayagan ang app na baguhin ang mga pandaigdigang setting ng audio gaya ng volume at kung aling speaker ang ginagamit para sa output."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"mag-record ng audio"</string>
-    <string name="permdesc_recordAudio" msgid="3976213377904701093">"Makakapag-record ng audio ang app na ito gamit ang mikropono anumang oras."</string>
+    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
+    <skip />
+    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
+    <skip />
+    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="176788115994050692">"magpadala ng mga command sa SIM"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Pinapahintulutang magpadala ang app ng mga command sa SIM. Napakapanganib nito."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"tukuyin ang pisikal na aktibidad"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Matutukoy ng app na ito ang iyong pisikal na aktibidad."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"kumuha ng mga larawan at video"</string>
-    <string name="permdesc_camera" msgid="1354600178048761499">"Makakakuha ng mga larawan at makakapag-record ng mga video ang app na ito gamit ang camera anumang oras."</string>
+    <!-- no translation found for permdesc_camera (5240801376168647151) -->
+    <skip />
+    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
+    <skip />
+    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
+    <skip />
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Bigyan ang isang application o serbisyo ng access sa mga camera ng system para kumuha ng mga larawan at video"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ang may pribilehiyong app o system app na ito ay makakakuha ng mga larawan at makakapag-record ng mga video gamit ang isang camera ng system anumang oras. Kinakailangang may android.permission.CAMERA na pahintulot din ang app"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Payagan ang isang application o serbisyo na makatanggap ng mga callback tungkol sa pagbubukas o pagsasara ng mga camera device."</string>
@@ -1622,12 +1632,10 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Lakasan ang volume nang lagpas sa inirerekomendang antas?\n\nMaaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gagamitin ang Shortcut sa Accessibility?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kapag naka-on ang shortcut, magsisimula ang isang feature ng pagiging naa-access kapag pinindot ang parehong button ng volume."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (3135860819356676426) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"I-on ang shortcut para sa mga feature ng pagiging naa-access?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Mao-on ang mga feature ng accessibility kapag pinindot nang matagal ang parehong volume key nang ilang segundo. Posibleng mabago nito ang paggana ng iyong device.\n\nMga kasalukuyang feature:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuwede mong baguhin ang mga napiling feature sa Mga Setting &gt; Accessibility."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <!-- no translation found for accessibility_shortcut_single_service_warning_title (1909518473488345266) -->
-    <skip />
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"I-on ang shortcut ng <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Mao-on ang feature ng accessibility na <xliff:g id="SERVICE">%1$s</xliff:g> kapag pinindot nang matagal ang parehong volume key nang ilang segundo. Posibleng mabago nito ang paggana ng iyong device.\n\nPuwede mong palitan ng ibang feature ang shortcut na ito sa Mga Setting &gt; Accessibility."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"I-on"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Huwag i-on"</string>

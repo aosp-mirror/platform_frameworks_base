@@ -69,7 +69,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Utility class to deal with Font ContentProviders.
+ * @deprecated Use the <a href="{@docRoot}jetpack">Jetpack Core Library</a>
+ *      {@link androidx.core.provider.FontsContractCompat} for consistent behavior across all
+ *      devices.
  */
+@Deprecated
 public class FontsContract {
     private static final String TAG = "FontsContract";
 
@@ -79,7 +83,11 @@ public class FontsContract {
      * This should point to a real file or shared memory, as the client will mmap the given file
      * descriptor. Pipes, sockets and other non-mmap-able file descriptors will fail to load in the
      * client application.
+     *
+     * @deprecated Use the {@link androidx.core.provider.FontsContractCompat.Columns} for consistent
+     * behavior across all devices.
      */
+    @Deprecated
     public static final class Columns implements BaseColumns {
 
         // Do not instantiate.
@@ -174,7 +182,11 @@ public class FontsContract {
 
     /**
      * Object represent a font entry in the family returned from {@link #fetchFonts}.
+     *
+     * @deprecated Use the {@link androidx.core.provider.FontsContractCompat.FontInfo} for
+     * consistent behavior across all devices
      */
+    @Deprecated
     public static class FontInfo {
         private final Uri mUri;
         private final int mTtcIndex;
@@ -251,7 +263,11 @@ public class FontsContract {
 
     /**
      * Object returned from {@link #fetchFonts}.
+     *
+     * @deprecated Use the {@link androidx.core.provider.FontsContractCompat.FontFamilyResult} for
+     * consistent behavior across all devices
      */
+    @Deprecated
     public static class FontFamilyResult {
         /**
          * Constant represents that the font was successfully retrieved. Note that when this value
@@ -412,7 +428,11 @@ public class FontsContract {
 
     /**
      * Interface used to receive asynchronously fetched typefaces.
+     *
+     * @deprecated Use the {@link androidx.core.provider.FontsContractCompat.FontRequestCallback}
+     * for consistent behavior across all devices
      */
+    @Deprecated
     public static class FontRequestCallback {
         /**
          * Constant returned by {@link #onTypefaceRequestFailed(int)} signaling that the given

@@ -432,13 +432,23 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"ubah setelan audio Anda"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Memungkinkan aplikasi mengubah setelan audio global, misalnya volume dan pengeras suara mana yang digunakan untuk keluaran."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"rekam audio"</string>
-    <string name="permdesc_recordAudio" msgid="3976213377904701093">"Aplikasi ini dapat merekam audio menggunakan mikrofon kapan saja."</string>
+    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
+    <skip />
+    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
+    <skip />
+    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="176788115994050692">"kirimkan perintah ke SIM"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Mengizinkan aplikasi mengirim perintah ke SIM. Ini sangat berbahaya."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"kenali aktivitas fisik"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Aplikasi ini dapat mengenali aktivitas fisik Anda."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ambil gambar dan video"</string>
-    <string name="permdesc_camera" msgid="1354600178048761499">"Aplikasi ini dapat mengambil foto dan merekam video menggunakan kamera kapan saja."</string>
+    <!-- no translation found for permdesc_camera (5240801376168647151) -->
+    <skip />
+    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
+    <skip />
+    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
+    <skip />
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Izinkan akses aplikasi atau layanan ke kamera sistem untuk mengambil gambar dan video"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Aplikasi sistem atau yang diberi hak istimewa ini dapat mengambil gambar dan merekam video menggunakan kamera sistem kapan saja. Mewajibkan aplikasi untuk memiliki izin android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Izinkan aplikasi atau layanan untuk menerima callback tentang perangkat kamera yang sedang dibuka atau ditutup."</string>
@@ -1622,12 +1632,10 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Mengeraskan volume di atas tingkat yang disarankan?\n\nMendengarkan dengan volume keras dalam waktu yang lama dapat merusak pendengaran Anda."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gunakan Pintasan Aksesibilitas?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Saat pintasan aktif, menekan kedua tombol volume selama 3 detik akan memulai fitur aksesibilitas."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (3135860819356676426) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Aktifkan pintasan untuk fitur aksesibilitas?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Menahan kedua tombol volume selama beberapa detik akan mengaktifkan fitur aksesibilitas. Tindakan ini dapat mengubah cara kerja perangkat Anda.\n\nFitur saat ini:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nAnda dapat mengubah fitur yang dipilih di Setelan &gt; Aksesibilitas."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <!-- no translation found for accessibility_shortcut_single_service_warning_title (1909518473488345266) -->
-    <skip />
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Aktifkan pintasan <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Menahan kedua tombol volume selama beberapa detik akan mengaktifkan <xliff:g id="SERVICE">%1$s</xliff:g>, yang merupakan fitur aksesibilitas. Tindakan ini dapat mengubah cara kerja perangkat Anda.\n\nAnda dapat mengubah pintasan ini ke fitur lain di Setelan &gt; Aksesibilitas."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktifkan"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Jangan aktifkan"</string>

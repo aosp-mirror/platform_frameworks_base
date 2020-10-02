@@ -30,8 +30,6 @@
 #include <minikin/FamilyVariant.h>
 #include <minikin/Hyphenator.h>
 
-#include <shader/Shader.h>
-
 namespace android {
 
 class Paint : public SkPaint {
@@ -151,13 +149,8 @@ public:
     // The only respected flags are : [ antialias, dither, filterBitmap ]
     static uint32_t GetSkPaintJavaFlags(const SkPaint&);
     static void SetSkPaintJavaFlags(SkPaint*, uint32_t flags);
-
-    void setShader(sk_sp<uirenderer::Shader> shader);
  
 private:
-
-    using SkPaint::setShader;
-
     SkFont mFont;
     sk_sp<SkDrawLooper> mLooper;
 
@@ -176,7 +169,6 @@ private:
     bool mStrikeThru = false;
     bool mUnderline = false;
     bool mDevKern = false;
-    sk_sp<uirenderer::Shader> mShader;
 };
 
 }  // namespace android

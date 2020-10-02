@@ -1826,7 +1826,7 @@ public final class ViewRootImpl implements ViewParent,
 
         Surface ret = null;
         if (mBlastBufferQueue == null) {
-            mBlastBufferQueue = new BLASTBufferQueue(
+            mBlastBufferQueue = new BLASTBufferQueue(mTag,
                 mBlastSurfaceControl, width, height, mEnableTripleBuffering);
             // We only return the Surface the first time, as otherwise
             // it hasn't changed and there is no need to update.

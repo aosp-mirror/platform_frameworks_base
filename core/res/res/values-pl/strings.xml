@@ -438,13 +438,23 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"zmienianie ustawień audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Pozwala aplikacji na modyfikowanie globalnych ustawień dźwięku, takich jak głośność oraz urządzenie wyjściowe."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"nagrywanie dźwięku"</string>
-    <string name="permdesc_recordAudio" msgid="3976213377904701093">"Ta aplikacja może w dowolnym momencie nagrać dźwięk przez mikrofon."</string>
+    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
+    <skip />
+    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
+    <skip />
+    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="176788115994050692">"wysyłanie poleceń do karty SIM"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Pozwala aplikacji na wysyłanie poleceń do karty SIM. To bardzo niebezpieczne."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"rozpoznawanie aktywności fizycznej"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Ta aplikacja może rozpoznawać Twoją aktywność fizyczną."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"wykonywanie zdjęć i filmów wideo"</string>
-    <string name="permdesc_camera" msgid="1354600178048761499">"Ta aplikacja może w dowolnym momencie robić zdjęcia i nagrywać filmy przy użyciu aparatu."</string>
+    <!-- no translation found for permdesc_camera (5240801376168647151) -->
+    <skip />
+    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
+    <skip />
+    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
+    <skip />
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Zezwól na dostęp aplikacji lub usługi do aparatów systemu i robienie zdjęć oraz nagrywanie filmów"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ta aplikacja systemowa z podwyższonymi uprawnieniami może w dowolnym momencie robić zdjęcia i nagrywać filmy przy użyciu aparatu systemowego. Wymaga przyznania uprawnień android.permission.CAMERA również aplikacji."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Zezwól na dostęp aplikacji lub usługi na otrzymywanie wywoływania zwrotnego o urządzeniach z aparatem, kiedy są one uruchamiane lub zamykane."</string>
@@ -1666,12 +1676,10 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Zwiększyć głośność ponad zalecany poziom?\n\nSłuchanie głośno przez długi czas może uszkodzić Twój słuch."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Użyć skrótu do ułatwień dostępu?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Gdy skrót jest włączony, jednoczesne naciskanie przez trzy sekundy obu przycisków głośności uruchamia funkcję ułatwień dostępu."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (3135860819356676426) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Włączyć skrót ułatwień dostępu?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Przytrzymanie obu klawiszy głośności przez kilka sekund włącza ułatwienia dostępu. Może to zmienić sposób działania urządzenia.\n\nBieżące funkcje:\n<xliff:g id="SERVICE">%1$s</xliff:g>\naby zmienić wybrane funkcje, kliknij Ustawienia &gt; Ułatwienia dostępu."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <!-- no translation found for accessibility_shortcut_single_service_warning_title (1909518473488345266) -->
-    <skip />
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Włączyć skrót <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Przytrzymanie obu klawiszy głośności przez kilka sekund włącza usługę <xliff:g id="SERVICE">%1$s</xliff:g>, stanowiącą ułatwienie dostępu. Może to zmienić sposób działania urządzenia.\n\nAby zmienić ten skrót i wskazać inną funkcję, kliknij Ustawienia &gt; Ułatwienia dostępu."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Włącz"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Nie włączaj"</string>

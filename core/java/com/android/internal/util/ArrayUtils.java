@@ -760,6 +760,7 @@ public class ArrayUtils {
 
     /**
      * Returns an array containing elements from the given one that match the given predicate.
+     * The returned array may, in some cases, be the reference to the input array.
      */
     public static @Nullable <T> T[] filter(@Nullable T[] items,
             @NonNull IntFunction<T[]> arrayConstructor,
@@ -775,16 +776,13 @@ public class ArrayUtils {
                 matchesCount++;
             }
         }
-        if (matchesCount == 0) {
-            return items;
-        }
         if (matchesCount == items.length) {
             return items;
         }
-        if (matchesCount == 0) {
-            return null;
-        }
         T[] result = arrayConstructor.apply(matchesCount);
+        if (matchesCount == 0) {
+            return result;
+        }
         int outIdx = 0;
         for (int i = 0; i < size; i++) {
             if (predicate.test(items[i])) {

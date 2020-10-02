@@ -161,6 +161,7 @@ import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.IActivityController;
+import android.app.PictureInPictureParams;
 import android.app.RemoteAction;
 import android.app.ResultInfo;
 import android.app.TaskInfo;
@@ -2372,6 +2373,7 @@ class Task extends WindowContainer<WindowContainer> {
     private void initializeChangeTransition(Rect startBounds) {
         mDisplayContent.prepareAppTransition(TRANSIT_TASK_CHANGE_WINDOWING_MODE,
                 false /* alwaysKeepCurrent */, 0, false /* forceOverride */);
+        mAtmService.getTransitionController().collect(this);
         mDisplayContent.mChangingContainers.add(this);
 
         mSurfaceFreezer.freeze(getPendingTransaction(), startBounds);
@@ -4059,15 +4061,18 @@ class Task extends WindowContainer<WindowContainer> {
         info.topActivityType = top.getActivityType();
         info.isResizeable = isResizeable();
 
-        ActivityRecord rootActivity = top.getRootActivity();
-        if (rootActivity == null || rootActivity.pictureInPictureArgs.empty()) {
-            info.pictureInPictureParams = null;
-        } else {
-            info.pictureInPictureParams = rootActivity.pictureInPictureArgs;
-        }
+        info.pictureInPictureParams = getPictureInPictureParams();
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
+    }
+
+    @Nullable PictureInPictureParams getPictureInPictureParams() {
+        final Task top = getTopMostTask();
+        if (top == null) return null;
+        final ActivityRecord rootActivity = top.getRootActivity();
+        return (rootActivity == null || rootActivity.pictureInPictureArgs.empty())
+                ? null : rootActivity.pictureInPictureArgs;
     }
 
     /**
@@ -4762,6 +4767,16 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Override
+    boolean showSurfaceOnCreation() {
+        // Organized tasks handle their own surface visibility
+        final boolean willBeOrganized =
+                mAtmService.mTaskOrganizerController.isSupportedWindowingMode(getWindowingMode())
+                && isRootTask();
+        return !mAtmService.getTransitionController().isShellTransitionsEnabled()
+                || !willBeOrganized;
+    }
+
+    @Override
     protected void reparentSurfaceControl(SurfaceControl.Transaction t, SurfaceControl newParent) {
         /**
          * Avoid reparenting SurfaceControl of the organized tasks that are always on top, since
@@ -4781,7 +4796,9 @@ class Task extends WindowContainer<WindowContainer> {
             // hide it to allow the task organizer to show it when it is properly reparented. We
             // skip this for tasks created by the organizer because they can synchronously update
             // the leash before new children are added to the task.
-            if (!mCreatedByOrganizer && mTaskOrganizer != null && !prevHasBeenVisible) {
+            if (!mAtmService.getTransitionController().isShellTransitionsEnabled()
+                    && !mCreatedByOrganizer
+                    && mTaskOrganizer != null && !prevHasBeenVisible) {
                 getSyncTransaction().hide(getSurfaceControl());
                 commitPendingTransaction();
             }
@@ -6362,7 +6379,15 @@ class Task extends WindowContainer<WindowContainer> {
                         transit = TRANSIT_TASK_OPEN;
                     }
                 }
-                dc.prepareAppTransition(transit, keepCurTransition);
+                if (mAtmService.getTransitionController().isShellTransitionsEnabled()
+                        // TODO(shell-transitions): eventually all transitions.
+                        && transit == TRANSIT_TASK_OPEN) {
+                    Transition transition =
+                            mAtmService.getTransitionController().requestTransition(transit);
+                    transition.collect(task);
+                } else {
+                    dc.prepareAppTransition(transit, keepCurTransition);
+                }
                 mStackSupervisor.mNoAnimActivities.remove(r);
             }
             boolean doShow = true;

@@ -16,76 +16,25 @@
 
 package android.hardware.face;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.hardware.biometrics.SensorProperties;
 
 /**
  * Container for face sensor properties.
  * @hide
  */
-public class FaceSensorProperties implements Parcelable {
+public class FaceSensorProperties extends SensorProperties {
 
     /**
-     * A statically configured ID representing this sensor. Sensor IDs must be unique across all
-     * biometrics across the device, starting at 0, and in increments of 1.
+     * @hide
      */
-    public final int sensorId;
+    public static FaceSensorProperties from(FaceSensorPropertiesInternal internalProp) {
+        return new FaceSensorProperties(internalProp.sensorId, internalProp.sensorStrength);
+    }
     /**
-     * True if the sensor is able to perform generic face detection, without running the
-     * matching algorithm, and without affecting the lockout counter.
+     * @hide
      */
-    public final boolean supportsFaceDetection;
-    /**
-     * True if the sensor is able to provide self illumination in dark scenarios, without support
-     * from above the HAL.
-     */
-    public final boolean supportsSelfIllumination;
-    /**
-     * Maximum number of enrollments a user/profile can have.
-     */
-    public final int maxTemplatesAllowed;
-
-    /**
-     * Initializes SensorProperties with specified values
-     */
-    public FaceSensorProperties(int sensorId, boolean supportsFaceDetection,
-            boolean supportsSelfIllumination, int maxTemplatesAllowed) {
-        this.sensorId = sensorId;
-        this.supportsFaceDetection = supportsFaceDetection;
-        this.supportsSelfIllumination = supportsSelfIllumination;
-        this.maxTemplatesAllowed = maxTemplatesAllowed;
+    public FaceSensorProperties(int sensorId, int sensorStrength) {
+        super(sensorId, sensorStrength);
     }
 
-    protected FaceSensorProperties(Parcel in) {
-        sensorId = in.readInt();
-        supportsFaceDetection = in.readBoolean();
-        supportsSelfIllumination = in.readBoolean();
-        maxTemplatesAllowed = in.readInt();
-    }
-
-    public static final Creator<FaceSensorProperties> CREATOR =
-            new Creator<FaceSensorProperties>() {
-        @Override
-        public FaceSensorProperties createFromParcel(Parcel in) {
-            return new FaceSensorProperties(in);
-        }
-
-        @Override
-        public FaceSensorProperties[] newArray(int size) {
-            return new FaceSensorProperties[size];
-        }
-    };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(sensorId);
-        dest.writeBoolean(supportsFaceDetection);
-        dest.writeBoolean(supportsSelfIllumination);
-        dest.writeInt(maxTemplatesAllowed);
-    }
 }

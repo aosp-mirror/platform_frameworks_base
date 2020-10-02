@@ -14,17 +14,22 @@
 
 package com.android.systemui.qs;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 
@@ -33,12 +38,16 @@ import com.android.systemui.R.id;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -48,17 +57,43 @@ public class QSFooterImplTest extends LeakCheckedTest {
     private QSFooterImpl mFooter;
     private ActivityStarter mActivityStarter;
     private DeviceProvisionedController mDeviceProvisionedController;
+    private UserInfoController mUserInfoController;
+    private UserTracker mUserTracker;
+    @Mock
+    private ClipboardManager mClipboardManager;
 
     @Before
     public void setup() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
         mActivityStarter = mDependency.injectMockDependency(ActivityStarter.class);
         mDeviceProvisionedController = mDependency.injectMockDependency(
                 DeviceProvisionedController.class);
-        mDependency.injectMockDependency(UserTracker.class);
+        mUserInfoController = mDependency.injectMockDependency(UserInfoController.class);
+        mUserTracker = mDependency.injectMockDependency(UserTracker.class);
+
+        mContext.addMockSystemService(ClipboardManager.class, mClipboardManager);
+
+        when(mUserTracker.getUserContext()).thenReturn(mContext);
+
         TestableLooper.get(this).runWithLooper(
                 () -> mFooter = (QSFooterImpl) LayoutInflater.from(mContext).inflate(
                         R.layout.qs_footer_impl, null));
+    }
+
+    @Test
+    public void testBuildTextCopy() {
+        TextView buildTextView = mFooter.requireViewById(R.id.build);
+        CharSequence buildText = "TEST";
+        buildTextView.setText(buildText);
+        buildTextView.setLongClickable(true);
+
+        buildTextView.performLongClick();
+
+        ArgumentCaptor<ClipData> captor = ArgumentCaptor.forClass(ClipData.class);
+        verify(mClipboardManager).setPrimaryClip(captor.capture());
+        assertThat(captor.getValue().getItemAt(0).getText()).isEqualTo(buildText);
     }
 
     @Test

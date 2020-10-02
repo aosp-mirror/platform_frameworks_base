@@ -636,13 +636,13 @@ class MediaDataManager(
         Assert.isMainThread()
         val removed = mediaEntries.remove(key)
         if (useMediaResumption && removed?.resumeAction != null &&
-                !isBlockedFromResume(removed?.packageName)) {
+                !isBlockedFromResume(removed.packageName)) {
             Log.d(TAG, "Not removing $key because resumable")
             // Move to resume key (aka package name) if that key doesn't already exist.
             val resumeAction = getResumeMediaAction(removed.resumeAction!!)
             val updated = removed.copy(token = null, actions = listOf(resumeAction),
                     actionsToShowInCompact = listOf(0), active = false, resumption = true)
-            val pkg = removed?.packageName
+            val pkg = removed.packageName
             val migrate = mediaEntries.put(pkg, updated) == null
             // Notify listeners of "new" controls when migrating or removed and update when not
             if (migrate) {

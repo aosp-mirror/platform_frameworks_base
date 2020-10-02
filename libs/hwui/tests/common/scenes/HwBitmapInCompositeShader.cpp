@@ -20,10 +20,6 @@
 #include <SkGradientShader.h>
 #include <SkImagePriv.h>
 #include <ui/PixelFormat.h>
-#include <shader/BitmapShader.h>
-#include <shader/LinearGradientShader.h>
-#include <shader/RadialGradientShader.h>
-#include <shader/ComposeShader.h>
 
 class HwBitmapInCompositeShader;
 
@@ -54,41 +50,20 @@ public:
             pixels[4000 + 4 * i + 3] = 255;
         }
         buffer->unlock();
-
-        sk_sp<BitmapShader> bitmapShader = sk_make_sp<BitmapShader>(
-                Bitmap::createFrom(
-                        buffer->toAHardwareBuffer(),
-                        SkColorSpace::MakeSRGB()
-                )->makeImage(),
-                SkTileMode::kClamp,
-                SkTileMode::kClamp,
-                nullptr
-        );
+        sk_sp<Bitmap> hardwareBitmap(Bitmap::createFrom(buffer->toAHardwareBuffer(),
+                                                        SkColorSpace::MakeSRGB()));
+        sk_sp<SkShader> hardwareShader(createBitmapShader(*hardwareBitmap));
 
         SkPoint center;
         center.set(50, 50);
+        SkColor colors[2];
+        colors[0] = Color::Black;
+        colors[1] = Color::White;
+        sk_sp<SkShader> gradientShader = SkGradientShader::MakeRadial(
+                center, 50, colors, nullptr, 2, SkTileMode::kRepeat);
 
-        std::vector<SkColor4f> vColors(2);
-        vColors[0] = SkColors::kBlack;
-        vColors[1] = SkColors::kWhite;
-
-        sk_sp<RadialGradientShader> radialShader = sk_make_sp<RadialGradientShader>(
-                center,
-                50,
-                vColors,
-                SkColorSpace::MakeSRGB(),
-                nullptr,
-                SkTileMode::kRepeat,
-                0,
-                nullptr
-            );
-
-        sk_sp<ComposeShader> compositeShader = sk_make_sp<ComposeShader>(
-                    *bitmapShader.get(),
-                    *radialShader.get(),
-                    SkBlendMode::kDstATop,
-                    nullptr
-                );
+        sk_sp<SkShader> compositeShader(
+                SkShaders::Blend(SkBlendMode::kDstATop, hardwareShader, gradientShader));
 
         Paint paint;
         paint.setShader(std::move(compositeShader));

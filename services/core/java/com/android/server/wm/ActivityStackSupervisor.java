@@ -1830,7 +1830,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         for (int i = mStoppingActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord s = mStoppingActivities.get(i);
             final boolean animating = s.isAnimating(TRANSITION | PARENTS,
-                    ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
+                    ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)
+                    || mService.getTransitionController().inTransition(s);
             if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + s.nowVisible
                     + " animating=" + animating + " finishing=" + s.finishing);
             if (!animating || mService.mShuttingDown) {

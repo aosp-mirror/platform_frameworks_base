@@ -130,7 +130,7 @@ public class SmsApplicationTest {
 
         when(mTelephonyManager.isSmsCapable()).thenReturn(true);
         when(mRoleManager.isRoleAvailable(RoleManager.ROLE_SMS)).thenReturn(true);
-        when(mRoleManager.getDefaultSmsPackage(anyInt()))
+        when(mRoleManager.getSmsRoleHolder(anyInt()))
                 .thenReturn(TEST_COMPONENT_NAME.getPackageName());
 
         for (String opStr : APP_OPS_TO_CHECK) {

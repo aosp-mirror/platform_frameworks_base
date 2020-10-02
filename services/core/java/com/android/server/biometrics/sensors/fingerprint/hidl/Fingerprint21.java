@@ -33,6 +33,7 @@ import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprintClientCallback;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Handler;
@@ -91,7 +92,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
     final Context mContext;
     private final IActivityTaskManager mActivityTaskManager;
-    @NonNull private final FingerprintSensorProperties mSensorProperties;
+    @NonNull private final FingerprintSensorPropertiesInternal mSensorProperties;
     private final BiometricScheduler mScheduler;
     private final Handler mHandler;
     private final LockoutResetDispatcher mLockoutResetDispatcher;
@@ -347,7 +348,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         final int maxEnrollmentsPerUser = mContext.getResources()
                 .getInteger(R.integer.config_fingerprintMaxTemplatesPerUser);
 
-        mSensorProperties = new FingerprintSensorProperties(sensorId,
+        mSensorProperties = new FingerprintSensorPropertiesInternal(sensorId,
                 Utils.authenticatorStrengthToPropertyStrength(strength), maxEnrollmentsPerUser,
                 sensorType, resetLockoutRequiresHardwareAuthToken);
     }
@@ -487,8 +488,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
     @Override
     @NonNull
-    public List<FingerprintSensorProperties> getSensorProperties() {
-        final List<FingerprintSensorProperties> properties = new ArrayList<>();
+    public List<FingerprintSensorPropertiesInternal> getSensorProperties() {
+        final List<FingerprintSensorPropertiesInternal> properties = new ArrayList<>();
         properties.add(mSensorProperties);
         return properties;
     }

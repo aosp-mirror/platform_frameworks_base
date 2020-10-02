@@ -338,6 +338,9 @@ public final class UidPermissionState {
 
     public boolean isPermissionReviewRequired() {
         synchronized (mLock) {
+            if (mPermissions == null) {
+                return false;
+            }
             final int permissionsSize = mPermissions.size();
             for (int i = 0; i < permissionsSize; i++) {
                 final PermissionState permission = mPermissions.valueAt(i);

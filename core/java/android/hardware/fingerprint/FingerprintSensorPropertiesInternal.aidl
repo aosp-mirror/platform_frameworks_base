@@ -13,28 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package android.hardware.fingerprint;
 
-#pragma once
-
-#include "Shader.h"
-#include "SkShader.h"
-#include "include/effects/SkRuntimeEffect.h"
-
-namespace android::uirenderer {
-
-/**
- * RuntimeShader implementation that can map to either a SkShader or SkImageFilter
- */
-class RuntimeShader : public Shader {
-public:
-    RuntimeShader(SkRuntimeEffect& effect, sk_sp<SkData> data, bool isOpaque,
-                  const SkMatrix* matrix);
-    ~RuntimeShader() override;
-
-protected:
-    sk_sp<SkShader> makeSkShader() override;
-
-private:
-    sk_sp<SkShader> skShader;
-};
-}  // namespace android::uirenderer
+parcelable FingerprintSensorPropertiesInternal;

@@ -291,6 +291,7 @@ public class NotifCollection implements Dumpable {
         mLogger.logDismissAll(userId);
 
         try {
+            // TODO(b/169585328): Do not clear media player notifications
             mStatusBarService.onClearAllNotifications(userId);
         } catch (RemoteException e) {
             // system process is dead if we're here.

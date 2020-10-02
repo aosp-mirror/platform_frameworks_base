@@ -10721,16 +10721,12 @@ package android.telephony {
     method public int getTimeoutSeconds();
     method public boolean isEnabled();
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallForwardingInfo> CREATOR;
-    field public static final int ERROR_FDN_CHECK_FAILURE = 2; // 0x2
-    field public static final int ERROR_NOT_SUPPORTED = 3; // 0x3
-    field public static final int ERROR_UNKNOWN = 1; // 0x1
     field public static final int REASON_ALL = 4; // 0x4
     field public static final int REASON_ALL_CONDITIONAL = 5; // 0x5
     field public static final int REASON_BUSY = 1; // 0x1
     field public static final int REASON_NOT_REACHABLE = 3; // 0x3
     field public static final int REASON_NO_REPLY = 2; // 0x2
     field public static final int REASON_UNCONDITIONAL = 0; // 0x0
-    field public static final int SUCCESS = 0; // 0x0
   }
 
   public final class CallQuality implements android.os.Parcelable {
@@ -11416,6 +11412,7 @@ package android.telephony {
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDeviceSoftwareVersion(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getEmergencyCallbackMode();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEmergencyNumberDbVersion();
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<java.lang.String> getEquivalentHomePlmns();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimDomain();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimIst();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.Map<java.lang.Integer,java.lang.Integer> getLogicalToPhysicalSlotMapping();
@@ -11473,7 +11470,7 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setAllowedNetworkTypes(long);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCallForwarding(@NonNull android.telephony.CallForwardingInfo, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCallWaitingStatus(boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCallWaitingEnabled(boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCarrierDataEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setCarrierRestrictionRules(@NonNull android.telephony.CarrierRestrictionRules);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataActivationState(int);
@@ -11572,6 +11569,10 @@ package android.telephony {
   public static interface TelephonyManager.CallForwardingInfoCallback {
     method public void onCallForwardingInfoAvailable(@NonNull android.telephony.CallForwardingInfo);
     method public void onError(int);
+    field public static final int RESULT_ERROR_FDN_CHECK_FAILURE = 2; // 0x2
+    field public static final int RESULT_ERROR_NOT_SUPPORTED = 3; // 0x3
+    field public static final int RESULT_ERROR_UNKNOWN = 1; // 0x1
+    field public static final int RESULT_SUCCESS = 0; // 0x0
   }
 
   public final class UiccAccessRule implements android.os.Parcelable {
@@ -12963,11 +12964,12 @@ package android.webkit {
   }
 
   public interface PacProcessor {
+    method @NonNull public static android.webkit.PacProcessor createInstance();
     method @Nullable public String findProxyForUrl(@NonNull String);
     method @NonNull public static android.webkit.PacProcessor getInstance();
-    method @NonNull public static android.webkit.PacProcessor getInstanceForNetwork(@Nullable android.net.Network);
     method @Nullable public default android.net.Network getNetwork();
     method public default void releasePacProcessor();
+    method public default void setNetwork(@Nullable android.net.Network);
     method public boolean setProxyScript(@NonNull String);
   }
 
@@ -13103,11 +13105,11 @@ package android.webkit {
   }
 
   public interface WebViewFactoryProvider {
+    method @NonNull public default android.webkit.PacProcessor createPacProcessor();
     method public android.webkit.WebViewProvider createWebView(android.webkit.WebView, android.webkit.WebView.PrivateAccess);
     method public android.webkit.CookieManager getCookieManager();
     method public android.webkit.GeolocationPermissions getGeolocationPermissions();
     method @NonNull public default android.webkit.PacProcessor getPacProcessor();
-    method @NonNull public default android.webkit.PacProcessor getPacProcessorForNetwork(@Nullable android.net.Network);
     method public android.webkit.ServiceWorkerController getServiceWorkerController();
     method public android.webkit.WebViewFactoryProvider.Statics getStatics();
     method @Deprecated public android.webkit.TokenBindingService getTokenBindingService();

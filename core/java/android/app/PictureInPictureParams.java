@@ -326,6 +326,16 @@ public final class PictureInPictureParams implements Parcelable {
         out.writeBoolean(mAutoEnterEnabled);
     }
 
+    @Override
+    public String toString() {
+        return "PictureInPictureParams("
+                + " aspectRatio=" + getAspectRatioRational()
+                + " sourceRectHint=" + getSourceRectHint()
+                + " hasSetActions=" + hasSetActions()
+                + " isAutoPipEnabled=" + isAutoEnterEnabled()
+                + ")";
+    }
+
     public static final @android.annotation.NonNull Creator<PictureInPictureParams> CREATOR =
             new Creator<PictureInPictureParams>() {
                 public PictureInPictureParams createFromParcel(Parcel in) {

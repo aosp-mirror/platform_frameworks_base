@@ -14,9 +14,20 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-       android:shape="rectangle">
-  <solid android:color="@color/system_bar_background_pill_color"/>
-  <corners android:radius="30dp"/>
-</shape>
+<layer-list
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <item>
+        <aapt:attr name="android:drawable">
+            <shape android:shape="rectangle">
+                <solid android:color="@color/system_bar_background_pill_color"/>
+                <corners android:radius="30dp"/>
+            </shape>
+        </aapt:attr>
+    </item>
+    <item>
+        <aapt:attr name="android:drawable">
+            <ripple android:color="?android:attr/colorControlHighlight"/>
+        </aapt:attr>
+    </item>
+</layer-list>
