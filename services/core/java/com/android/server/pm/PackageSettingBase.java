@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IncrementalStatesInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.UninstallReason;
@@ -33,6 +34,7 @@ import android.content.pm.PackageUserState;
 import android.content.pm.Signature;
 import android.content.pm.SuspendDialogInfo;
 import android.os.PersistableBundle;
+import android.os.incremental.IncrementalManager;
 import android.service.pm.PackageProto;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -133,6 +135,9 @@ public abstract class PackageSettingBase extends SettingBase {
 
     boolean forceQueryableOverride;
 
+    @NonNull
+    public IncrementalStates incrementalStates;
+
     PackageSettingBase(String name, String realName, @NonNull File path,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
@@ -151,6 +156,7 @@ public abstract class PackageSettingBase extends SettingBase {
         this.versionCode = pVersionCode;
         this.signatures = new PackageSignatures();
         this.installSource = InstallSource.EMPTY;
+        this.incrementalStates = new IncrementalStates();
     }
 
     /**
@@ -257,6 +263,7 @@ public abstract class PackageSettingBase extends SettingBase {
                        orig.usesStaticLibrariesVersions.length) : null;
         updateAvailable = orig.updateAvailable;
         forceQueryableOverride = orig.forceQueryableOverride;
+        incrementalStates = orig.incrementalStates;
     }
 
     @VisibleForTesting
@@ -733,6 +740,66 @@ public abstract class PackageSettingBase extends SettingBase {
         modifyUserState(userId).resetOverrideComponentLabelIcon();
     }
 
+    /**
+     * @return True if package is startable, false otherwise.
+     */
+    public boolean isPackageStartable() {
+        return incrementalStates.isStartable();
+    }
+
+    /**
+     * @return True if package is still being loaded, false if the package is fully loaded.
+     */
+    public boolean isPackageLoading() {
+        return incrementalStates.isLoading();
+    }
+
+    /**
+     * @return all current states in a Parcelable.
+     */
+    public IncrementalStatesInfo getIncrementalStates() {
+        return incrementalStates.getIncrementalStatesInfo();
+    }
+
+    /**
+     * Called to indicate that the package installation has been committed. This will create a
+     * new startable state and a new loading state with default values. By default, the package is
+     * startable after commit. For a package installed on Incremental, the loading state is true.
+     * For non-Incremental packages, the loading state is false.
+     */
+    public void setStatesOnCommit() {
+        incrementalStates.onCommit(IncrementalManager.isIncrementalPath(getPathString()));
+    }
+
+    /**
+     * Called to set the callback to listen for startable state changes.
+     */
+    public void setIncrementalStatesCallback(IncrementalStates.Callback callback) {
+        incrementalStates.setCallback(callback);
+    }
+
+    /**
+     * Called to report progress changes. This might trigger loading state change.
+     * @see IncrementalStates#setProgress(float)
+     */
+    public void setLoadingProgress(float progress) {
+        incrementalStates.setProgress(progress);
+    }
+
+    /**
+     * @see IncrementalStates#onStorageHealthStatusChanged(int)
+     */
+    public void setStorageHealthStatus(int status) {
+        incrementalStates.onStorageHealthStatusChanged(status);
+    }
+
+    /**
+     * @see IncrementalStates#onStreamStatusChanged(int)
+     */
+    public void setStreamStatus(int status) {
+        incrementalStates.onStreamStatusChanged(status);
+    }
+
     protected PackageSettingBase updateFrom(PackageSettingBase other) {
         super.copyFrom(other);
         setPath(other.getPath());
@@ -756,6 +823,7 @@ public abstract class PackageSettingBase extends SettingBase {
         this.updateAvailable = other.updateAvailable;
         this.verificationInfo = other.verificationInfo;
         this.forceQueryableOverride = other.forceQueryableOverride;
+        this.incrementalStates = other.incrementalStates;
 
         if (mOldCodePaths != null) {
             if (other.mOldCodePaths != null) {
