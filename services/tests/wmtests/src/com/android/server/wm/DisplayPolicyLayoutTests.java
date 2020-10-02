@@ -45,6 +45,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 import static android.view.WindowManagerPolicyConstants.ALT_BAR_BOTTOM;
 import static android.view.WindowManagerPolicyConstants.ALT_BAR_LEFT;
@@ -750,6 +751,51 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
         assertInsetBy(mWindow.getDisplayFrameLw(), 0, 0, 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_withFlexibleSystemBars_adjustStableFrame() {
+        mDisplayPolicy.removeWindowLw(mStatusBarWindow);
+        mDisplayPolicy.removeWindowLw(mNavBarWindow);
+
+        WindowState statusWin = spy(createWindow(null, TYPE_STATUS_BAR_ADDITIONAL,
+                "StatusBarAdditional"));
+        doNothing().when(statusWin).computeFrameLw();
+        statusWin.mAttrs.providesInsetsTypes = new int[]{ITYPE_STATUS_BAR};
+        statusWin.mAttrs.gravity = Gravity.TOP;
+        statusWin.mAttrs.height = STATUS_BAR_HEIGHT;
+        statusWin.mAttrs.width = MATCH_PARENT;
+        statusWin.getFrameLw().set(0, 0, DISPLAY_WIDTH, STATUS_BAR_HEIGHT);
+        addWindow(statusWin);
+
+        WindowState navWin = spy(createWindow(null, TYPE_NAVIGATION_BAR_PANEL,
+                "NavigationBarPanel"));
+        doNothing().when(navWin).computeFrameLw();
+        navWin.mAttrs.providesInsetsTypes = new int[]{ITYPE_NAVIGATION_BAR};
+        navWin.mAttrs.gravity = Gravity.BOTTOM;
+        navWin.mAttrs.height = NAV_BAR_HEIGHT;
+        navWin.mAttrs.width = MATCH_PARENT;
+        navWin.getFrameLw().set(0, DISPLAY_HEIGHT - NAV_BAR_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        addWindow(navWin);
+
+        WindowState climateWin = spy(createWindow(null, TYPE_NAVIGATION_BAR_PANEL,
+                "ClimatePanel"));
+        doNothing().when(climateWin).computeFrameLw();
+        climateWin.mAttrs.providesInsetsTypes = new int[]{ITYPE_CLIMATE_BAR};
+        climateWin.mAttrs.gravity = Gravity.LEFT;
+        climateWin.mAttrs.height = MATCH_PARENT;
+        climateWin.mAttrs.width = 20;
+        climateWin.getFrameLw().set(0, 0, 20, DISPLAY_HEIGHT);
+        addWindow(climateWin);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(statusWin, null, mFrames);
+        mDisplayPolicy.layoutWindowLw(navWin, null, mFrames);
+        mDisplayPolicy.layoutWindowLw(climateWin, null, mFrames);
+
+        assertThat(mFrames.mStable,
+                is(new Rect(20, STATUS_BAR_HEIGHT, DISPLAY_WIDTH,
+                        DISPLAY_HEIGHT - NAV_BAR_HEIGHT)));
     }
 
     @Test

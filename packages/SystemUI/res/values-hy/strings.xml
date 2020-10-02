@@ -246,7 +246,7 @@
     <string name="accessibility_remove_notification" msgid="1641455251495815527">"Մաքրել ծանուցումը:"</string>
     <string name="accessibility_gps_enabled" msgid="4061313248217660858">"GPS-ը միացված է:"</string>
     <string name="accessibility_gps_acquiring" msgid="896207402196024040">"GPS-ի ստացում:"</string>
-    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Հեռամուտքագրիչը միացված է:"</string>
+    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Հեռատիպը միացված է:"</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Թրթռազանգ:"</string>
     <string name="accessibility_ringer_silent" msgid="8994620163934249882">"Զանգակը լռեցված է:"</string>
     <!-- no translation found for accessibility_casting (8708751252897282313) -->
