@@ -586,7 +586,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private final NetworkPolicyLogger mLogger = new NetworkPolicyLogger();
 
-    /** List of apps indexed by appId and whether they have the internet permission */
+    /** List of apps indexed by uid and whether they have the internet permission */
     @GuardedBy("mUidRulesFirstLock")
     private final SparseBooleanArray mInternetPermissionMap = new SparseBooleanArray();
 
@@ -972,7 +972,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 if (LOGV) Slog.v(TAG, "ACTION_PACKAGE_ADDED for uid=" + uid);
                 // Clear the cache for the app
                 synchronized (mUidRulesFirstLock) {
-                    mInternetPermissionMap.delete(UserHandle.getAppId(uid));
+                    mInternetPermissionMap.delete(uid);
                     updateRestrictionRulesForUidUL(uid);
                 }
             }
@@ -4194,16 +4194,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @GuardedBy("mUidRulesFirstLock")
     private boolean hasInternetPermissionUL(int uid) {
         try {
-            final int appId = UserHandle.getAppId(uid);
-            final boolean hasPermission;
-            if (mInternetPermissionMap.indexOfKey(appId) < 0) {
-                hasPermission =
-                        mIPm.checkUidPermission(Manifest.permission.INTERNET, uid)
-                                == PackageManager.PERMISSION_GRANTED;
-                mInternetPermissionMap.put(appId, hasPermission);
-            } else {
-                hasPermission = mInternetPermissionMap.get(appId);
+            if (mInternetPermissionMap.get(uid)) {
+                return true;
             }
+            // If the cache shows that uid doesn't have internet permission,
+            // then always re-check with PackageManager just to be safe.
+            final boolean hasPermission = mIPm.checkUidPermission(Manifest.permission.INTERNET,
+                    uid) == PackageManager.PERMISSION_GRANTED;
+            mInternetPermissionMap.put(uid, hasPermission);
             return hasPermission;
         } catch (RemoteException e) {
         }
