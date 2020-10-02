@@ -138,11 +138,6 @@ public class HdmiControlServiceBinderAPITest {
 
         mPlaybackDevice = new HdmiCecLocalDevicePlayback(mHdmiControlService) {
             @Override
-            void setIsActiveSource(boolean on) {
-                mIsActiveSource = on;
-            }
-
-            @Override
             protected void wakeUpIfActiveSource() {}
 
             @Override
@@ -186,13 +181,13 @@ public class HdmiControlServiceBinderAPITest {
             }
         });
         assertEquals(mResult, -1);
-        assertThat(mPlaybackDevice.mIsActiveSource).isFalse();
+        assertThat(mPlaybackDevice.isActiveSource()).isFalse();
 
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
         assertThat(mHdmiControlService.isAddressAllocated()).isTrue();
         assertEquals(mResult, HdmiControlManager.RESULT_SUCCESS);
-        assertThat(mPlaybackDevice.mIsActiveSource).isTrue();
+        assertThat(mPlaybackDevice.isActiveSource()).isTrue();
     }
 
     @Test
@@ -207,6 +202,6 @@ public class HdmiControlServiceBinderAPITest {
             }
         });
         assertEquals(mResult, HdmiControlManager.RESULT_SUCCESS);
-        assertThat(mPlaybackDevice.mIsActiveSource).isTrue();
+        assertThat(mPlaybackDevice.isActiveSource()).isTrue();
     }
 }

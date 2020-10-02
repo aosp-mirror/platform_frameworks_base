@@ -379,7 +379,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         assertRunOnServiceThread();
         if (reason == mService.INITIATED_BY_ENABLE_CEC) {
             mService.setAndBroadcastActiveSource(mService.getPhysicalAddress(),
-                    getDeviceInfo().getDeviceType(), Constants.ADDR_BROADCAST);
+                    getDeviceInfo().getDeviceType(), Constants.ADDR_BROADCAST,
+                    "HdmiCecLocalDeviceAudioSystem#onAddressAllocated()");
         }
         mService.sendCecCommand(
                 HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
@@ -1324,7 +1325,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         if (getRoutingPort() == Constants.CEC_SWITCH_HOME && mService.isPlaybackDevice()) {
             routeToInputFromPortId(Constants.CEC_SWITCH_HOME);
             mService.setAndBroadcastActiveSourceFromOneDeviceType(
-                    message.getSource(), mService.getPhysicalAddress());
+                    message.getSource(), mService.getPhysicalAddress(),
+                    "HdmiCecLocalDeviceAudioSystem#handleRoutingChangeAndInformationForSwitch()");
             return;
         }
 
