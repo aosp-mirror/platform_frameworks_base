@@ -642,11 +642,11 @@ public final class Parcel {
      * {@link #dataPosition}.  This is used to validate that the marshalled
      * transaction is intended for the target interface.
      */
-    public final void writeInterfaceToken(String interfaceName) {
+    public final void writeInterfaceToken(@NonNull String interfaceName) {
         nativeWriteInterfaceToken(mNativePtr, interfaceName);
     }
 
-    public final void enforceInterface(String interfaceName) {
+    public final void enforceInterface(@NonNull String interfaceName) {
         nativeEnforceInterface(mNativePtr, interfaceName);
     }
 
