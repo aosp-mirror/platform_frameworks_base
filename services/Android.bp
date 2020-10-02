@@ -6,6 +6,7 @@ java_defaults {
     errorprone: {
         javacflags: [
             "-Xep:AndroidFrameworkCompatChange:ERROR",
+            "-Xep:AndroidFrameworkUid:ERROR",
         ],
     },
 }
