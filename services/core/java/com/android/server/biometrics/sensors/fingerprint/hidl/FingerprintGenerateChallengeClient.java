@@ -45,7 +45,14 @@ public class FingerprintGenerateChallengeClient
     @Override
     protected void startHalOperation() {
         try {
-            mChallenge = getFreshDaemon().preEnroll();
+            final long challenge = getFreshDaemon().preEnroll();
+            try {
+                getListener().onChallengeGenerated(getSensorId(), challenge);
+                mCallback.onClientFinished(this, true /* success */);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
+                mCallback.onClientFinished(this, false /* success */);
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "preEnroll failed", e);
         }
