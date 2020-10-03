@@ -17,6 +17,7 @@
 package com.android.systemui.accessibility;
 
 import static android.view.Choreographer.FrameCallback;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
 import static org.hamcrest.Matchers.containsString;
@@ -28,6 +29,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
@@ -293,5 +295,16 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
                 mMirrorView.performAccessibilityAction(R.id.accessibility_action_move_right, null));
         assertTrue(
                 mMirrorView.performAccessibilityAction(R.id.accessibility_action_move_left, null));
+    }
+
+    @Test
+    public void onNavigationModeChanged_updateMirrorViewLayout() {
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                    Float.NaN);
+            mWindowMagnificationController.onNavigationModeChanged(NAV_BAR_MODE_GESTURAL);
+        });
+
+        verify(mWindowManager).updateViewLayout(eq(mMirrorView), any());
     }
 }
