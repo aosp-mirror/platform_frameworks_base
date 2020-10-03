@@ -59,7 +59,14 @@ public class FaceGenerateChallengeClient extends GenerateChallengeClient<IBiomet
     @Override
     protected void startHalOperation() {
         try {
-            mChallenge = getFreshDaemon().generateChallenge(CHALLENGE_TIMEOUT_SEC).value;
+            final long challenge = getFreshDaemon().generateChallenge(CHALLENGE_TIMEOUT_SEC).value;
+            try {
+                getListener().onChallengeGenerated(getSensorId(), challenge);
+                mCallback.onClientFinished(this, true /* success */);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
+                mCallback.onClientFinished(this, false /* success */);
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "generateChallenge failed", e);
         }
