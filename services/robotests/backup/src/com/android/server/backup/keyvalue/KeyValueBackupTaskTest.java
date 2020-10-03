@@ -41,6 +41,7 @@ import static com.android.server.backup.testing.Utils.oneTimeIterable;
 import static com.android.server.backup.testing.Utils.transferStreamedData;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -2880,8 +2881,8 @@ public class KeyValueBackupTaskTest  {
     }
 
     private static IterableSubject assertDirectory(Path directory) throws IOException {
-        return assertThat(oneTimeIterable(Files.newDirectoryStream(directory).iterator()))
-                .named("directory " + directory);
+        return assertWithMessage("directory " + directory).that(
+                oneTimeIterable(Files.newDirectoryStream(directory).iterator()));
     }
 
     private static void assertJournalDoesNotContain(

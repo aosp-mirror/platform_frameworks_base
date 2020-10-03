@@ -87,12 +87,12 @@ public class SoftApConfigurationTest {
         }
 
         SoftApConfiguration unparceled = parcelUnparcel(original);
-        assertThat(unparceled).isNotSameAs(original);
+        assertThat(unparceled).isNotSameInstanceAs(original);
         assertThat(unparceled).isEqualTo(original);
         assertThat(unparceled.hashCode()).isEqualTo(original.hashCode());
 
         SoftApConfiguration copy = new SoftApConfiguration.Builder(original).build();
-        assertThat(copy).isNotSameAs(original);
+        assertThat(copy).isNotSameInstanceAs(original);
         assertThat(copy).isEqualTo(original);
         assertThat(copy.hashCode()).isEqualTo(original.hashCode());
     }
@@ -111,12 +111,12 @@ public class SoftApConfigurationTest {
         assertThat(original.getMaxNumberOfClients()).isEqualTo(0);
 
         SoftApConfiguration unparceled = parcelUnparcel(original);
-        assertThat(unparceled).isNotSameAs(original);
+        assertThat(unparceled).isNotSameInstanceAs(original);
         assertThat(unparceled).isEqualTo(original);
         assertThat(unparceled.hashCode()).isEqualTo(original.hashCode());
 
         SoftApConfiguration copy = new SoftApConfiguration.Builder(original).build();
-        assertThat(copy).isNotSameAs(original);
+        assertThat(copy).isNotSameInstanceAs(original);
         assertThat(copy).isEqualTo(original);
         assertThat(copy.hashCode()).isEqualTo(original.hashCode());
     }
@@ -159,12 +159,12 @@ public class SoftApConfigurationTest {
         }
 
         SoftApConfiguration unparceled = parcelUnparcel(original);
-        assertThat(unparceled).isNotSameAs(original);
+        assertThat(unparceled).isNotSameInstanceAs(original);
         assertThat(unparceled).isEqualTo(original);
         assertThat(unparceled.hashCode()).isEqualTo(original.hashCode());
 
         SoftApConfiguration copy = new SoftApConfiguration.Builder(original).build();
-        assertThat(copy).isNotSameAs(original);
+        assertThat(copy).isNotSameInstanceAs(original);
         assertThat(copy).isEqualTo(original);
         assertThat(copy.hashCode()).isEqualTo(original.hashCode());
     }
@@ -185,12 +185,12 @@ public class SoftApConfigurationTest {
 
 
         SoftApConfiguration unparceled = parcelUnparcel(original);
-        assertThat(unparceled).isNotSameAs(original);
+        assertThat(unparceled).isNotSameInstanceAs(original);
         assertThat(unparceled).isEqualTo(original);
         assertThat(unparceled.hashCode()).isEqualTo(original.hashCode());
 
         SoftApConfiguration copy = new SoftApConfiguration.Builder(original).build();
-        assertThat(copy).isNotSameAs(original);
+        assertThat(copy).isNotSameInstanceAs(original);
         assertThat(copy).isEqualTo(original);
         assertThat(copy.hashCode()).isEqualTo(original.hashCode());
     }
@@ -212,12 +212,12 @@ public class SoftApConfigurationTest {
 
 
         SoftApConfiguration unparceled = parcelUnparcel(original);
-        assertThat(unparceled).isNotSameAs(original);
+        assertThat(unparceled).isNotSameInstanceAs(original);
         assertThat(unparceled).isEqualTo(original);
         assertThat(unparceled.hashCode()).isEqualTo(original.hashCode());
 
         SoftApConfiguration copy = new SoftApConfiguration.Builder(original).build();
-        assertThat(copy).isNotSameAs(original);
+        assertThat(copy).isNotSameInstanceAs(original);
         assertThat(copy).isEqualTo(original);
         assertThat(copy.hashCode()).isEqualTo(original.hashCode());
     }

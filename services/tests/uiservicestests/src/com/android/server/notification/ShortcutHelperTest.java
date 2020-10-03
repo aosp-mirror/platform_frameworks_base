@@ -305,6 +305,7 @@ public class ShortcutHelperTest extends UiServiceTestCase {
         //when(mShortcutServiceInternal.isSharingShortcut(anyInt(), anyString(), anyString(),
          //       anyString(), anyInt(), any())).thenReturn(true);
 
-        assertThat(mShortcutHelper.getValidShortcutInfo("a", "p", UserHandle.SYSTEM)).isSameAs(si);
+        assertThat(mShortcutHelper.getValidShortcutInfo("a", "p", UserHandle.SYSTEM))
+                .isSameInstanceAs(si);
     }
 }
