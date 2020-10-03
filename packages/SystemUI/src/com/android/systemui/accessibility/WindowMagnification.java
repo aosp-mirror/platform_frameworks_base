@@ -37,6 +37,7 @@ import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.CommandQueue;
 
 import javax.inject.Inject;
@@ -66,7 +67,8 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
 
     @Inject
     public WindowMagnification(Context context, @Main Handler mainHandler,
-            CommandQueue commandQueue, ModeSwitchesController modeSwitchesController) {
+            CommandQueue commandQueue, ModeSwitchesController modeSwitchesController,
+            NavigationModeController navigationModeController) {
         super(context);
         mHandler = mainHandler;
         mLastConfiguration = new Configuration(context.getResources().getConfiguration());
@@ -77,6 +79,9 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
         final WindowMagnificationController controller = new WindowMagnificationController(mContext,
                 mHandler, new SfVsyncFrameCallbackProvider(), null,
                 new SurfaceControl.Transaction(), this);
+        final int navBarMode = navigationModeController.addListener(
+                controller::onNavigationModeChanged);
+        controller.onNavigationModeChanged(navBarMode);
         mWindowMagnificationAnimationController = new WindowMagnificationAnimationController(
                 mContext, controller);
     }

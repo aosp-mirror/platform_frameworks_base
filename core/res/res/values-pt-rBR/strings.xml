@@ -432,23 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"alterar as suas configurações de áudio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Permite que o app modifique configurações de áudio globais como volume e alto-falantes de saída."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"gravar áudio"</string>
-    <!-- no translation found for permdesc_recordAudio (5857246765327514062) -->
-    <skip />
-    <!-- no translation found for permlab_recordBackgroundAudio (5891032812308878254) -->
-    <skip />
-    <!-- no translation found for permdesc_recordBackgroundAudio (1992623135737407516) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"Enquanto está sendo usado, este app pode gravar áudio usando o microfone."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"gravar áudio em segundo plano"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Este app pode gravar áudio usando o microfone a qualquer momento."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"enviar comandos para o chip"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Permite que o app envie comandos ao chip. Muito perigoso."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"reconhecer atividade física"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Este app pode reconhecer sua atividade física."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"tirar fotos e gravar vídeos"</string>
-    <!-- no translation found for permdesc_camera (5240801376168647151) -->
-    <skip />
-    <!-- no translation found for permlab_backgroundCamera (7549917926079731681) -->
-    <skip />
-    <!-- no translation found for permdesc_backgroundCamera (1615291686191138250) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5240801376168647151">"Enquanto está sendo usado, este app pode tirar fotos e gravar vídeos usando a câmera."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"tirar fotos e gravar vídeos em segundo plano"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Este app pode tirar fotos e gravar vídeos usando a câmera a qualquer momento."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Permitir que um aplicativo ou serviço acesse as câmeras do sistema para tirar fotos e gravar vídeos"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Esse app do sistema ou com privilégios pode tirar fotos e gravar vídeos a qualquer momento usando a câmera do sistema. É necessário que o app tenha também a permissão android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permitir que um aplicativo ou serviço receba callbacks sobre dispositivos de câmera sendo abertos ou fechados."</string>

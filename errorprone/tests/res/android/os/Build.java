@@ -18,7 +18,9 @@ package android.os;
 
 public class Build {
     public static class VERSION_CODES {
+        public static final int CUR_DEVELOPMENT = 10000;
         public static final int DONUT = 4;
         public static final int R = 30;
+        public static final int S = CUR_DEVELOPMENT;
     }
 }

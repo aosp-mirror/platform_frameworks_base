@@ -892,9 +892,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.LOCATION_SETTINGS_LINK_TO_PERMISSIONS_ENABLED,
                 GlobalSettingsProto.Location.SETTINGS_LINK_TO_PERMISSIONS_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.LOCATION_GLOBAL_KILL_SWITCH,
-                GlobalSettingsProto.Location.GLOBAL_KILL_SWITCH);
-        dumpSetting(s, p,
                 Settings.Global.GNSS_SATELLITE_BLACKLIST,
                 GlobalSettingsProto.Location.GNSS_SATELLITE_BLACKLIST);
         dumpSetting(s, p,
