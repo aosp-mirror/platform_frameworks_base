@@ -879,12 +879,12 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"குறைந்த முன்னுரிமை உள்ள அறிவிப்பு ஐகான்களைக் காட்டு"</string>
     <string name="other" msgid="429768510980739978">"மற்றவை"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"டைலை அகற்றும்"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"கடைசியில் டைலைச் சேர்க்கும்"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"டைலை நகர்த்து"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"டைலைச் சேர்"</string>
-    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> இடத்திற்கு நகர்த்தும்"</string>
-    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> என்ற இடத்தில் சேர்க்கும்"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"கட்டத்தை அகற்றும்"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"கடைசியில் கட்டத்தைச் சேர்க்கும்"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"கட்டத்தை நகர்த்து"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"கட்டத்தைச் சேர்"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g>க்கு நகர்த்தும்"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g>ல் சேர்க்கும்"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"இடம்: <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"விரைவு அமைப்புகள் திருத்தி."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> அறிவிப்பு: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -1012,6 +1012,18 @@
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"அமைப்புகள்"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"பெரிதாக்கல் சாளரம்"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"பெரிதாக்கல் சாளரக் கட்டுப்பாடுகள்"</string>
+    <!-- no translation found for accessibility_control_zoom_in (1189272315480097417) -->
+    <skip />
+    <!-- no translation found for accessibility_control_zoom_out (69578832020304084) -->
+    <skip />
+    <!-- no translation found for accessibility_control_move_up (6622825494014720136) -->
+    <skip />
+    <!-- no translation found for accessibility_control_move_down (5390922476900974512) -->
+    <skip />
+    <!-- no translation found for accessibility_control_move_left (8156206978511401995) -->
+    <skip />
+    <!-- no translation found for accessibility_control_move_right (8926821093629582888) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"சாதனக் கட்டுப்பாடுகள்"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"இணைக்கப்பட்ட சாதனங்களில் கட்டுப்பாடுகளைச் சேர்க்கலாம்"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"சாதனக் கட்டுப்பாடுகளை அமைத்தல்"</string>
@@ -1075,4 +1087,8 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (இணைப்பு துண்டிக்கப்பட்டது)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"இணைக்க முடியவில்லை. மீண்டும் முயலவும்."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"புதிய சாதனத்தை இணைத்தல்"</string>
+    <!-- no translation found for build_number_clip_data_label (3623176728412560914) -->
+    <skip />
+    <!-- no translation found for build_number_copy_toast (877720921605503046) -->
+    <skip />
 </resources>

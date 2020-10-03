@@ -481,7 +481,7 @@ static void nativeSetRelativeLayer(JNIEnv* env, jclass clazz, jlong transactionO
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     auto relative = reinterpret_cast<SurfaceControl *>(relativeToObject);
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->setRelativeLayer(ctrl, relative->getHandle(), zorder);
+    transaction->setRelativeLayer(ctrl, relative, zorder);
 }
 
 static void nativeSetPosition(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1327,10 +1327,10 @@ static jboolean nativeGetAnimationFrameStats(JNIEnv* env, jclass clazz, jobject 
 
 static void nativeDeferTransactionUntil(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject, jlong barrierObject, jlong frameNumber) {
-    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    auto barrier = reinterpret_cast<SurfaceControl *>(barrierObject);
+    sp<SurfaceControl> ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    sp<SurfaceControl> barrier = reinterpret_cast<SurfaceControl*>(barrierObject);
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->deferTransactionUntil_legacy(ctrl, barrier->getHandle(), frameNumber);
+    transaction->deferTransactionUntil_legacy(ctrl, barrier, frameNumber);
 }
 
 static void nativeDeferTransactionUntilSurface(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1351,7 +1351,7 @@ static void nativeReparentChildren(JNIEnv* env, jclass clazz, jlong transactionO
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     auto newParent = reinterpret_cast<SurfaceControl *>(newParentObject);
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->reparentChildren(ctrl, newParent->getHandle());
+    transaction->reparentChildren(ctrl, newParent);
 }
 
 static void nativeReparent(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1360,7 +1360,7 @@ static void nativeReparent(JNIEnv* env, jclass clazz, jlong transactionObj,
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     auto newParent = reinterpret_cast<SurfaceControl *>(newParentObject);
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->reparent(ctrl, newParent != NULL ? newParent->getHandle() : NULL);
+    transaction->reparent(ctrl, newParent);
 }
 
 static void nativeSeverChildren(JNIEnv* env, jclass clazz, jlong transactionObj,

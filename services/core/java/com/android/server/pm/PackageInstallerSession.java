@@ -141,6 +141,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexManager;
@@ -1086,6 +1087,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    private ParcelFileDescriptor openTargetInternal(String path, int flags, int mode)
+            throws IOException, ErrnoException {
+        // TODO: this should delegate to DCS so the system process avoids
+        // holding open FDs into containers.
+        final FileDescriptor fd = Os.open(path, flags, mode);
+        return new ParcelFileDescriptor(fd);
+    }
+
+    private ParcelFileDescriptor createRevocableFdInternal(RevocableFileDescriptor fd,
+            ParcelFileDescriptor pfd) throws IOException {
+        int releasedFdInt = pfd.detachFd();
+        FileDescriptor releasedFd = new FileDescriptor();
+        releasedFd.setInt$(releasedFdInt);
+        fd.init(mContext, releasedFd);
+        return fd.getRevocableFileDescriptor();
+    }
+
     private ParcelFileDescriptor doWriteInternal(String name, long offsetBytes, long lengthBytes,
             ParcelFileDescriptor incomingFd) throws IOException {
         // Quick validity check of state, and allocate a pipe for ourselves. We
@@ -1118,21 +1136,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 Binder.restoreCallingIdentity(identity);
             }
 
-            // TODO: this should delegate to DCS so the system process avoids
-            // holding open FDs into containers.
-            final FileDescriptor targetFd = Os.open(target.getAbsolutePath(),
+            ParcelFileDescriptor targetPfd = openTargetInternal(target.getAbsolutePath(),
                     O_CREAT | O_WRONLY, 0644);
             Os.chmod(target.getAbsolutePath(), 0644);
 
             // If caller specified a total length, allocate it for them. Free up
             // cache space to grow, if needed.
             if (stageDir != null && lengthBytes > 0) {
-                mContext.getSystemService(StorageManager.class).allocateBytes(targetFd, lengthBytes,
+                mContext.getSystemService(StorageManager.class).allocateBytes(
+                        targetPfd.getFileDescriptor(), lengthBytes,
                         PackageHelper.translateAllocateFlags(params.installFlags));
             }
 
             if (offsetBytes > 0) {
-                Os.lseek(targetFd, offsetBytes, OsConstants.SEEK_SET);
+                Os.lseek(targetPfd.getFileDescriptor(), offsetBytes, OsConstants.SEEK_SET);
             }
 
             if (incomingFd != null) {
@@ -1142,8 +1159,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 // inserted above to hold the session active.
                 try {
                     final Int64Ref last = new Int64Ref(0);
-                    FileUtils.copy(incomingFd.getFileDescriptor(), targetFd, lengthBytes, null,
-                            Runnable::run, (long progress) -> {
+                    FileUtils.copy(incomingFd.getFileDescriptor(), targetPfd.getFileDescriptor(),
+                            lengthBytes, null, Runnable::run,
+                            (long progress) -> {
                                 if (params.sizeBytes > 0) {
                                     final long delta = progress - last.value;
                                     last.value = progress;
@@ -1154,7 +1172,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                                 }
                             });
                 } finally {
-                    IoUtils.closeQuietly(targetFd);
+                    IoUtils.closeQuietly(targetPfd);
                     IoUtils.closeQuietly(incomingFd);
 
                     // We're done here, so remove the "bridge" that was holding
@@ -1170,12 +1188,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
                 return null;
             } else if (PackageInstaller.ENABLE_REVOCABLE_FD) {
-                fd.init(mContext, targetFd);
-                return fd.getRevocableFileDescriptor();
+                return createRevocableFdInternal(fd, targetPfd);
             } else {
-                bridge.setTargetFile(targetFd);
+                bridge.setTargetFile(targetPfd);
                 bridge.start();
-                return new ParcelFileDescriptor(bridge.getClientSocket());
+                return bridge.getClientSocket();
             }
 
         } catch (ErrnoException e) {
@@ -1684,20 +1701,26 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private void onStorageUnhealthy() {
+    private void onStorageHealthStatusChanged(int status) {
         final String packageName = getPackageName();
         if (TextUtils.isEmpty(packageName)) {
             // The package has not been installed.
             return;
         }
-        final PackageManagerService packageManagerService = mPm;
-        mHandler.post(() -> {
-            if (packageManagerService.deletePackageX(packageName,
-                    PackageManager.VERSION_CODE_HIGHEST, UserHandle.USER_SYSTEM,
-                    PackageManager.DELETE_ALL_USERS) != PackageManager.DELETE_SUCCEEDED) {
-                Slog.e(TAG, "Failed to uninstall package with failed dataloader: " + packageName);
-            }
-        });
+        mHandler.post(PooledLambda.obtainRunnable(
+                PackageManagerService::onStorageHealthStatusChanged,
+                mPm, packageName, status, userId).recycleOnUse());
+    }
+
+    private void onStreamHealthStatusChanged(int status) {
+        final String packageName = getPackageName();
+        if (TextUtils.isEmpty(packageName)) {
+            // The package has not been installed.
+            return;
+        }
+        mHandler.post(PooledLambda.obtainRunnable(
+                PackageManagerService::onStreamStatusChanged,
+                mPm, packageName, status, userId).recycleOnUse());
     }
 
     /**
@@ -3245,7 +3268,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 if (isDestroyedOrDataLoaderFinished) {
                     switch (status) {
                         case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
-                            onStorageUnhealthy();
+                            // treat as unhealthy storage
+                            onStorageHealthStatusChanged(
+                                    IStorageHealthListener.HEALTH_STATUS_UNHEALTHY);
                             return;
                     }
                     return;
@@ -3342,6 +3367,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     sendPendingStreaming(mContext, statusReceiver, sessionId, e.getMessage());
                 }
             }
+            @Override
+            public void reportStreamHealth(int dataLoaderId, int streamStatus) {
+                synchronized (mLock) {
+                    if (!mDestroyed && !mDataLoaderFinished) {
+                        // ignore streaming status if package isn't installed
+                        return;
+                    }
+                }
+                onStreamHealthStatusChanged(streamStatus);
+            }
         };
 
         if (!manualStartAndDestroy) {
@@ -3361,11 +3396,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     }
                     if (isDestroyedOrDataLoaderFinished) {
                         // App's installed.
-                        switch (status) {
-                            case IStorageHealthListener.HEALTH_STATUS_UNHEALTHY:
-                                onStorageUnhealthy();
-                                return;
-                        }
+                        onStorageHealthStatusChanged(status);
                         return;
                     }
 

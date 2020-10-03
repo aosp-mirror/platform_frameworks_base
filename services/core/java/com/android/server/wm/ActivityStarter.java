@@ -57,14 +57,13 @@ import static android.os.Process.INVALID_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
 import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
-import static com.android.server.wm.ActivityStackSupervisor.TAG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_USER_LEAVING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_FOCUS;
@@ -1909,10 +1908,8 @@ class ActivityStarter {
             // if that is the case, so this is it!  And for paranoia, make sure we have
             // correctly resumed the top activity.
             if (!mMovedToFront && mDoResume) {
-                if (DEBUG_TASKS) {
-                    Slog.d(TAG_TASKS, "Bring to front target: " + mTargetStack
-                            + " from " + targetTaskTop);
-                }
+                ProtoLog.d(WM_DEBUG_TASKS, "Bring to front target: %s from %s", mTargetStack,
+                        targetTaskTop);
                 mTargetStack.moveToFront("intentActivityFound");
             }
             resumeTargetStackIfNeeded();
@@ -2564,10 +2561,8 @@ class ActivityStarter {
                 mVoiceInteractor, toTop, mStartActivity, mSourceRecord, mOptions);
         addOrReparentStartingActivity(task, "setTaskFromReuseOrCreateNewTask - mReuseTask");
 
-        if (DEBUG_TASKS) {
-            Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity
-                    + " in new task " + mStartActivity.getTask());
-        }
+        ProtoLog.v(WM_DEBUG_TASKS, "Starting new activity %s in new task %s",
+                mStartActivity, mStartActivity.getTask());
 
         if (taskToAffiliate != null) {
             mStartActivity.setTaskToAffiliateWith(taskToAffiliate);

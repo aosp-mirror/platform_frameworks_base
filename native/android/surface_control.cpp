@@ -317,10 +317,9 @@ void ASurfaceTransaction_reparent(ASurfaceTransaction* aSurfaceTransaction,
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
     sp<SurfaceControl> newParentSurfaceControl = ASurfaceControl_to_SurfaceControl(
             newParentASurfaceControl);
-    sp<IBinder> newParentHandle = (newParentSurfaceControl)? newParentSurfaceControl->getHandle() : nullptr;
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
 
-    transaction->reparent(surfaceControl, newParentHandle);
+    transaction->reparent(surfaceControl, newParentSurfaceControl);
 }
 
 void ASurfaceTransaction_setVisibility(ASurfaceTransaction* aSurfaceTransaction,

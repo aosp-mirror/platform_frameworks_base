@@ -271,11 +271,6 @@
          when there's no network connection. If the scan doesn't timeout, use zero -->
     <integer name="config_radioScanningTimeout">0</integer>
 
-    <!-- When true, Android uses the PAC implementation included in WebView to handle
-         networks with PAC scripts.
-         When false, Android's own implementation of libpac is used.-->
-    <bool name ="config_useWebViewPacProcessor">true</bool>
-
     <!-- XXXXX NOTE THE FOLLOWING RESOURCES USE THE WRONG NAMING CONVENTION.
          Please don't copy them, copy anything else. -->
 
@@ -1582,6 +1577,16 @@
          [This is only used if config_enableUpdateableTimeZoneRules and
          config_timeZoneRulesUpdateTrackingEnabled are true.] -->
     <integer name="config_timeZoneRulesCheckRetryCount">5</integer>
+
+    <!-- Whether to enable primary location time zone provider overlay which allows the primary
+         location time zone provider to be replaced by an app at run-time. When disabled, only the
+         config_primaryLocationTimeZoneProviderPackageName package will be searched for the primary
+         location time zone provider, otherwise any system package is eligible. Anyone who wants to
+         disable the overlay mechanism can set it to false. -->
+    <bool name="config_enablePrimaryLocationTimeZoneOverlay" translatable="false">false</bool>
+    <!-- Package name providing the primary location time zone provider. Used only when
+         config_enablePrimaryLocationTimeZoneOverlay is false. -->
+    <string name="config_primaryLocationTimeZoneProviderPackageName" translatable="false">@null</string>
 
     <!-- Whether to enable network location overlay which allows network location provider to be
          replaced by an app at run-time. When disabled, only the

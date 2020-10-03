@@ -255,7 +255,9 @@ abstract class LocationTimeZoneProvider implements Dumpable {
 
         @Override
         public String toString() {
-            return "State{"
+            // this.provider is omitted deliberately to avoid recursion, since the provider holds
+            // a reference to its state.
+            return "ProviderState{"
                     + "stateEnum=" + prettyPrintStateEnum(stateEnum)
                     + ", event=" + event
                     + ", currentUserConfiguration=" + currentUserConfiguration

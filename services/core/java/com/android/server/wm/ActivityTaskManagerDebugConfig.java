@@ -43,14 +43,10 @@ public class ActivityTaskManagerDebugConfig {
     // Enable all debug log categories for activities.
     private static final boolean DEBUG_ALL_ACTIVITIES = DEBUG_ALL || false;
 
-    static final boolean DEBUG_PAUSE = DEBUG_ALL || false;
     static final boolean DEBUG_RECENTS = DEBUG_ALL || false;
     static final boolean DEBUG_RECENTS_TRIM_TASKS = DEBUG_RECENTS || false;
-    static final boolean DEBUG_SAVED_STATE = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_STACK = DEBUG_ALL || false;
-    static final boolean DEBUG_STATES = DEBUG_ALL_ACTIVITIES || false;
     public static final boolean DEBUG_SWITCH = DEBUG_ALL || false;
-    static final boolean DEBUG_TASKS = DEBUG_ALL || false;
     static final boolean DEBUG_TRANSITION = DEBUG_ALL || false;
     static final boolean DEBUG_VISIBILITY = DEBUG_ALL || false;
     static final boolean DEBUG_APP = DEBUG_ALL_ACTIVITIES || false;

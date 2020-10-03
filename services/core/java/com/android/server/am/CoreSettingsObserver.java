@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import android.annotation.NonNull;
 import android.app.ActivityThread;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -223,16 +224,17 @@ final class CoreSettingsObserver extends ContentObserver {
 
     @VisibleForTesting
     void populateSettings(Bundle snapshot, Map<String, Class<?>> map) {
-        Context context = mActivityManagerService.mContext;
+        final Context context = mActivityManagerService.mContext;
+        final ContentResolver cr = context.getContentResolver();
         for (Map.Entry<String, Class<?>> entry : map.entrySet()) {
             String setting = entry.getKey();
             final String value;
             if (map == sSecureSettingToTypeMap) {
-                value = Settings.Secure.getString(context.getContentResolver(), setting);
+                value = Settings.Secure.getStringForUser(cr, setting, cr.getUserId());
             } else if (map == sSystemSettingToTypeMap) {
-                value = Settings.System.getString(context.getContentResolver(), setting);
+                value = Settings.System.getStringForUser(cr, setting, cr.getUserId());
             } else {
-                value = Settings.Global.getString(context.getContentResolver(), setting);
+                value = Settings.Global.getString(cr, setting);
             }
             if (value == null) {
                 snapshot.remove(setting);
