@@ -4088,7 +4088,7 @@ public class UserBackupManagerService {
             mActiveRestoreSession = new ActiveRestoreSession(this, packageName, transport,
                     getEligibilityRulesForOperation(operationType));
             mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_SESSION_TIMEOUT,
-                    mAgentTimeoutParameters.getRestoreAgentTimeoutMillis());
+                    mAgentTimeoutParameters.getRestoreSessionTimeoutMillis());
         }
         return mActiveRestoreSession;
     }
