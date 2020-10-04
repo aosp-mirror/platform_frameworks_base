@@ -200,6 +200,7 @@ private:
 
     private:
         binder::Status onStatusChanged(MountId mount, int newStatus) final;
+        binder::Status reportStreamHealth(MountId mount, int newStatus) final;
 
         sp<content::pm::IDataLoader> getDataLoader();
 

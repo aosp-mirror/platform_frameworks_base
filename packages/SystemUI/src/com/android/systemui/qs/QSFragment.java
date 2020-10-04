@@ -142,7 +142,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQSContainerImplController = mQSContainerImplControllerBuilder
                 .setQSContainerImpl((QSContainerImpl) view)
                 .build();
-
+        mQSContainerImplController.init();
 
         mQSDetail.setQsPanel(mQSPanel, mHeader, (View) mFooter);
         mQSAnimator = new QSAnimator(this, mHeader.findViewById(R.id.quick_qs_panel), mQSPanel);
@@ -367,14 +367,13 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         if (DEBUG) Log.d(TAG, "setListening " + listening);
         mListening = listening;
         mQSContainerImplController.setListening(listening);
-        mHeader.setListening(listening);
         mFooter.setListening(listening);
         mQSPanel.setListening(mListening, mQsExpanded);
     }
 
     @Override
     public void setHeaderListening(boolean listening) {
-        mHeader.setListening(listening);
+        mQSContainerImplController.setListening(listening);
         mFooter.setListening(listening);
     }
 

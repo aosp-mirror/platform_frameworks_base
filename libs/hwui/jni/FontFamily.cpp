@@ -42,7 +42,7 @@ struct NativeFamilyBuilder {
         : langId(langId), variant(static_cast<minikin::FamilyVariant>(variant)) {}
     uint32_t langId;
     minikin::FamilyVariant variant;
-    std::vector<minikin::Font> fonts;
+    std::vector<std::shared_ptr<minikin::Font>> fonts;
     std::vector<minikin::FontVariation> axes;
 };
 

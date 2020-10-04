@@ -3567,6 +3567,9 @@ public final class Settings {
             if (outConfig.fontScale < 0) {
                 outConfig.fontScale = DEFAULT_FONT_SCALE;
             }
+            outConfig.forceBoldText = Settings.Secure.getIntForUser(
+                    cr, Settings.Secure.FORCE_BOLD_TEXT, Configuration.FORCE_BOLD_TEXT_NO,
+                    userHandle);
 
             final String localeValue =
                     Settings.System.getStringForUser(cr, SYSTEM_LOCALES, userHandle);
@@ -3597,6 +3600,7 @@ public final class Settings {
             if (!inoutConfig.userSetLocale && !inoutConfig.getLocales().isEmpty()) {
                 inoutConfig.clearLocales();
             }
+            inoutConfig.forceBoldText = Configuration.FORCE_BOLD_TEXT_UNDEFINED;
         }
 
         /**
@@ -3620,7 +3624,11 @@ public final class Settings {
                             DEFAULT_OVERRIDEABLE_BY_RESTORE);
         }
 
-        /** @hide */
+        /**
+         * Convenience function for checking if settings should be overwritten with config changes.
+         * @see #putConfigurationForUser(ContentResolver, Configuration, int)
+         * @hide
+         */
         public static boolean hasInterestingConfigurationChanges(int changes) {
             return (changes & ActivityInfo.CONFIG_FONT_SCALE) != 0 ||
                     (changes & ActivityInfo.CONFIG_LOCALE) != 0;
@@ -13405,15 +13413,6 @@ public final class Settings {
          */
         public static final String POWER_BUTTON_VERY_LONG_PRESS =
                 "power_button_very_long_press";
-
-        /**
-         * Global settings that shouldn't be persisted.
-         *
-         * @hide
-         */
-        public static final String[] TRANSIENT_SETTINGS = {
-                LOCATION_GLOBAL_KILL_SWITCH,
-        };
 
         /**
          * Keys we no longer back up under the current schema, but want to continue to

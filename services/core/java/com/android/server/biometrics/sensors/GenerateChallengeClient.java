@@ -27,8 +27,6 @@ public abstract class GenerateChallengeClient<T> extends ClientMonitor<T> {
 
     private static final String TAG = "GenerateChallengeClient";
 
-    protected long mChallenge;
-
     public GenerateChallengeClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             @NonNull String owner, int sensorId) {
@@ -51,12 +49,5 @@ public abstract class GenerateChallengeClient<T> extends ClientMonitor<T> {
         super.start(callback);
 
         startHalOperation();
-        try {
-            getListener().onChallengeGenerated(getSensorId(), mChallenge);
-            mCallback.onClientFinished(this, true /* success */);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
-            mCallback.onClientFinished(this, false /* success */);
-        }
     }
 }

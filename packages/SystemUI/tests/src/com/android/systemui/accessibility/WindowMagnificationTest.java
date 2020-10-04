@@ -35,6 +35,7 @@ import android.view.accessibility.IWindowMagnificationConnectionCallback;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.CommandQueue;
 
 import org.junit.Before;
@@ -53,6 +54,8 @@ public class WindowMagnificationTest extends SysuiTestCase {
     private AccessibilityManager mAccessibilityManager;
     @Mock
     private ModeSwitchesController mModeSwitchesController;
+    @Mock
+    private NavigationModeController mNavigationModeController;
     private CommandQueue mCommandQueue;
     private WindowMagnification mWindowMagnification;
 
@@ -63,7 +66,8 @@ public class WindowMagnificationTest extends SysuiTestCase {
 
         mCommandQueue = new CommandQueue(getContext());
         mWindowMagnification = new WindowMagnification(getContext(),
-                getContext().getMainThreadHandler(), mCommandQueue, mModeSwitchesController);
+                getContext().getMainThreadHandler(), mCommandQueue, mModeSwitchesController,
+                mNavigationModeController);
         mWindowMagnification.start();
     }
 

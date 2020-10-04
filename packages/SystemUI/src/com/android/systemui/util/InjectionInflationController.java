@@ -27,7 +27,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.qs.QSFooterImpl;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QuickQSPanel;
-import com.android.systemui.qs.QuickStatusBarHeader;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 
@@ -92,10 +91,6 @@ public class InjectionInflationController {
                     @BindsInstance AttributeSet attributeSet);
         }
 
-        /**
-         * Creates the QuickStatusBarHeader.
-         */
-        QuickStatusBarHeader createQsHeader();
         /**
          * Creates the QSFooterImpl.
          */

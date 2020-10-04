@@ -119,7 +119,8 @@ public class SystemAudioInitiationActionFromAvr extends HdmiCecFeatureAction {
         // claim Active Source and start to query TV system audio mode support.
         if (audioSystem().mService.isPlaybackDevice()) {
             audioSystem().mService.setAndBroadcastActiveSourceFromOneDeviceType(
-                    Constants.ADDR_BROADCAST, getSourcePath());
+                    Constants.ADDR_BROADCAST, getSourcePath(),
+                    "SystemAudioInitiationActionFromAvr#handleActiveSourceTimeout()");
             mState = STATE_WAITING_FOR_TV_SUPPORT;
             queryTvSystemAudioModeSupport();
         } else {

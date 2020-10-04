@@ -30,7 +30,7 @@
 namespace android {
 
 struct NativeFamilyBuilder {
-    std::vector<minikin::Font> fonts;
+    std::vector<std::shared_ptr<minikin::Font>> fonts;
 };
 
 static inline NativeFamilyBuilder* toBuilder(jlong ptr) {

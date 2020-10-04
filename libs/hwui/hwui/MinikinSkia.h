@@ -49,6 +49,8 @@ public:
     void GetFontExtent(minikin::MinikinExtent* extent, const minikin::MinikinPaint& paint,
                        const minikin::FontFakery& fakery) const override;
 
+    const std::string& GetFontPath() const override { return mFilePath; }
+
     SkTypeface* GetSkTypeface() const;
     sk_sp<SkTypeface> RefSkTypeface() const;
 

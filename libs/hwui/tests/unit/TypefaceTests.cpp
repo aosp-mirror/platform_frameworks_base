@@ -59,7 +59,7 @@ std::shared_ptr<minikin::FontFamily> buildFamily(const char* fileName) {
     std::shared_ptr<minikin::MinikinFont> font =
             std::make_shared<MinikinFontSkia>(std::move(typeface), data, st.st_size, fileName, 0,
                                               std::vector<minikin::FontVariation>());
-    std::vector<minikin::Font> fonts;
+    std::vector<std::shared_ptr<minikin::Font>> fonts;
     fonts.push_back(minikin::Font::Builder(font).build());
     return std::make_shared<minikin::FontFamily>(std::move(fonts));
 }

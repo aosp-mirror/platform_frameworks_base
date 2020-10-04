@@ -516,7 +516,7 @@ public final class Font {
         mLocaleList = localeList;
 
         synchronized (MAP_LOCK) {
-            FONT_PTR_MAP.append(mNativePtr, new WeakReference<>(this));
+            FONT_PTR_MAP.append(nGetNativeFontPtr(mNativePtr), new WeakReference<>(this));
         }
     }
 
@@ -716,4 +716,7 @@ public final class Font {
 
     @FastNative
     private static native float nGetFontMetrics(long font, long paint, Paint.FontMetrics metrics);
+
+    @CriticalNative
+    private static native long nGetNativeFontPtr(long ptr);
 }

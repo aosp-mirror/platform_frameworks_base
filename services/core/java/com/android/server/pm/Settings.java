@@ -2809,6 +2809,12 @@ public final class Settings {
         if (pkg.forceQueryableOverride) {
             serializer.attribute(null, "forceQueryable", "true");
         }
+        if (pkg.isPackageStartable()) {
+            serializer.attribute(null, "isStartable", "true");
+        }
+        if (pkg.isPackageLoading()) {
+            serializer.attribute(null, "isLoading", "true");
+        }
 
         writeUsesStaticLibLPw(serializer, pkg.usesStaticLibraries, pkg.usesStaticLibrariesVersions);
 
@@ -3594,6 +3600,8 @@ public final class Settings {
         String version = null;
         long versionCode = 0;
         String installedForceQueryable = null;
+        String isStartable = null;
+        String isLoading = null;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
@@ -3610,6 +3618,8 @@ public final class Settings {
             cpuAbiOverrideString = parser.getAttributeValue(null, "cpuAbiOverride");
             updateAvailable = parser.getAttributeValue(null, "updateAvailable");
             installedForceQueryable = parser.getAttributeValue(null, "forceQueryable");
+            isStartable = parser.getAttributeValue(null, "isStartable");
+            isLoading = parser.getAttributeValue(null, "isLoading");
 
             if (primaryCpuAbiString == null && legacyCpuAbiString != null) {
                 primaryCpuAbiString = legacyCpuAbiString;
@@ -3793,6 +3803,8 @@ public final class Settings {
             packageSetting.secondaryCpuAbiString = secondaryCpuAbiString;
             packageSetting.updateAvailable = "true".equals(updateAvailable);
             packageSetting.forceQueryableOverride = "true".equals(installedForceQueryable);
+            packageSetting.incrementalStates = new IncrementalStates("true".equals(isStartable),
+                    "true".equals(isLoading));
             // Handle legacy string here for single-user mode
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {
