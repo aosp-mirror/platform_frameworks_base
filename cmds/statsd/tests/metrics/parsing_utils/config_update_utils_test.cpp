@@ -1266,6 +1266,135 @@ TEST_F(ConfigUpdateTest, TestCountMetricStateChanged) {
     EXPECT_EQ(metricsToUpdate[0], UPDATE_REPLACE);
 }
 
+TEST_F(ConfigUpdateTest, TestGaugeMetricPreserve) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    Predicate predicate = CreateScreenIsOnPredicate();
+    *config.add_predicate() = predicate;
+
+    GaugeMetric* metric = config.add_gauge_metric();
+    metric->set_id(12345);
+    metric->set_what(whatMatcher.id());
+    metric->set_condition(predicate.id());
+    metric->mutable_gauge_fields_filter()->set_include_all(true);
+
+    EXPECT_TRUE(initConfig(config));
+
+    unordered_map<int64_t, int> metricToActivationMap;
+    vector<UpdateStatus> metricsToUpdate(1, UPDATE_UNKNOWN);
+    EXPECT_TRUE(determineAllMetricUpdateStatuses(config, oldMetricProducerMap, oldMetricProducers,
+                                                 metricToActivationMap,
+                                                 /*replacedMatchers*/ {}, /*replacedConditions=*/{},
+                                                 /*replacedStates=*/{}, metricsToUpdate));
+    EXPECT_EQ(metricsToUpdate[0], UPDATE_PRESERVE);
+}
+
+TEST_F(ConfigUpdateTest, TestGaugeMetricDefinitionChange) {
+    StatsdConfig config;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    GaugeMetric* metric = config.add_gauge_metric();
+    metric->set_id(12345);
+    metric->set_what(whatMatcher.id());
+    metric->mutable_gauge_fields_filter()->set_include_all(true);
+
+    EXPECT_TRUE(initConfig(config));
+
+    // Change split bucket on app upgrade, which should change the proto, causing replacement.
+    metric->set_split_bucket_for_app_upgrade(false);
+
+    unordered_map<int64_t, int> metricToActivationMap;
+    vector<UpdateStatus> metricsToUpdate(1, UPDATE_UNKNOWN);
+    EXPECT_TRUE(determineAllMetricUpdateStatuses(config, oldMetricProducerMap, oldMetricProducers,
+                                                 metricToActivationMap,
+                                                 /*replacedMatchers*/ {}, /*replacedConditions=*/{},
+                                                 /*replacedStates=*/{}, metricsToUpdate));
+    EXPECT_EQ(metricsToUpdate[0], UPDATE_REPLACE);
+}
+
+TEST_F(ConfigUpdateTest, TestGaugeMetricWhatChanged) {
+    StatsdConfig config;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    GaugeMetric* metric = config.add_gauge_metric();
+    metric->set_id(12345);
+    metric->set_what(whatMatcher.id());
+    metric->mutable_gauge_fields_filter()->set_include_all(true);
+
+    EXPECT_TRUE(initConfig(config));
+
+    unordered_map<int64_t, int> metricToActivationMap;
+    vector<UpdateStatus> metricsToUpdate(1, UPDATE_UNKNOWN);
+    EXPECT_TRUE(determineAllMetricUpdateStatuses(
+            config, oldMetricProducerMap, oldMetricProducers, metricToActivationMap,
+            /*replacedMatchers*/ {whatMatcher.id()}, /*replacedConditions=*/{},
+            /*replacedStates=*/{}, metricsToUpdate));
+    EXPECT_EQ(metricsToUpdate[0], UPDATE_REPLACE);
+}
+
+TEST_F(ConfigUpdateTest, TestGaugeMetricConditionChanged) {
+    StatsdConfig config;
+    AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = startMatcher;
+    AtomMatcher stopMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = stopMatcher;
+    AtomMatcher whatMatcher = CreateScreenBrightnessChangedAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    Predicate predicate = CreateScreenIsOnPredicate();
+    *config.add_predicate() = predicate;
+
+    GaugeMetric* metric = config.add_gauge_metric();
+    metric->set_id(12345);
+    metric->set_what(whatMatcher.id());
+    metric->set_condition(predicate.id());
+    metric->mutable_gauge_fields_filter()->set_include_all(true);
+
+    EXPECT_TRUE(initConfig(config));
+
+    unordered_map<int64_t, int> metricToActivationMap;
+    vector<UpdateStatus> metricsToUpdate(1, UPDATE_UNKNOWN);
+    EXPECT_TRUE(determineAllMetricUpdateStatuses(
+            config, oldMetricProducerMap, oldMetricProducers, metricToActivationMap,
+            /*replacedMatchers*/ {}, /*replacedConditions=*/{predicate.id()},
+            /*replacedStates=*/{}, metricsToUpdate));
+    EXPECT_EQ(metricsToUpdate[0], UPDATE_REPLACE);
+}
+
+TEST_F(ConfigUpdateTest, TestGaugeMetricTriggerEventChanged) {
+    StatsdConfig config;
+    AtomMatcher triggerEvent = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = triggerEvent;
+    AtomMatcher whatMatcher = CreateTemperatureAtomMatcher();
+    *config.add_atom_matcher() = whatMatcher;
+
+    GaugeMetric* metric = config.add_gauge_metric();
+    metric->set_id(12345);
+    metric->set_what(whatMatcher.id());
+    metric->set_trigger_event(triggerEvent.id());
+    metric->mutable_gauge_fields_filter()->set_include_all(true);
+    metric->set_sampling_type(GaugeMetric::FIRST_N_SAMPLES);
+
+    // Create an initial config.
+    EXPECT_TRUE(initConfig(config));
+
+    unordered_map<int64_t, int> metricToActivationMap;
+    vector<UpdateStatus> metricsToUpdate(1, UPDATE_UNKNOWN);
+    EXPECT_TRUE(determineAllMetricUpdateStatuses(
+            config, oldMetricProducerMap, oldMetricProducers, metricToActivationMap,
+            /*replacedMatchers*/ {triggerEvent.id()}, /*replacedConditions=*/{},
+            /*replacedStates=*/{}, metricsToUpdate));
+    EXPECT_EQ(metricsToUpdate[0], UPDATE_REPLACE);
+}
+
 TEST_F(ConfigUpdateTest, TestUpdateEventMetrics) {
     StatsdConfig config;
 
