@@ -19,6 +19,7 @@ package com.android.internal.app;
 import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.PermissionChecker.PID_UNKNOWN;
+import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.annotation.Nullable;
 import android.annotation.StringRes;
@@ -69,7 +70,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
 import android.view.WindowInsets;
+import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -100,7 +103,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
 
 /**
  * This activity is displayed when the system attempts to start an Intent for
@@ -822,6 +824,8 @@ public class ResolverActivity extends Activity implements
     @Override
     protected void onStart() {
         super.onStart();
+
+        this.getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
         if (shouldShowTabs()) {
             mWorkProfileStateReceiver = createWorkProfileStateReceiver();
             registerWorkProfileStateReceiver();
@@ -849,6 +853,12 @@ public class ResolverActivity extends Activity implements
     @Override
     protected void onStop() {
         super.onStop();
+
+        final Window window = this.getWindow();
+        final WindowManager.LayoutParams attrs = window.getAttributes();
+        attrs.privateFlags &= ~SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+        window.setAttributes(attrs);
+
         if (mRegistered) {
             mPersonalPackageMonitor.unregister();
             if (mWorkPackageMonitor != null) {
