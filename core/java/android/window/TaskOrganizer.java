@@ -39,13 +39,14 @@ public class TaskOrganizer extends WindowOrganizer {
     private ITaskOrganizerController mTaskOrganizerController;
 
     public TaskOrganizer() {
-        mTaskOrganizerController = getController();
+        this(null);
     }
 
     /** @hide */
     @VisibleForTesting
     public TaskOrganizer(ITaskOrganizerController taskOrganizerController) {
-        mTaskOrganizerController = taskOrganizerController;
+        mTaskOrganizerController = taskOrganizerController != null
+                ? taskOrganizerController : getController();
     }
 
     /**
