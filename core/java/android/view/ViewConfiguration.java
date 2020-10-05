@@ -254,7 +254,7 @@ public class ViewConfiguration {
     /**
      * Max distance in dips to overfling for edge effects
      */
-    private static final int OVERFLING_DISTANCE = 6;
+    private static final int OVERFLING_DISTANCE = 0;
 
     /**
      * Amount to scroll in response to a horizontal {@link MotionEvent#ACTION_SCROLL} event,
