@@ -15,6 +15,6 @@
 ** limitations under the License.
 */
 
-package com.android.server.pm;
+package android.content.pm;
 
 parcelable IncrementalStatesInfo;
