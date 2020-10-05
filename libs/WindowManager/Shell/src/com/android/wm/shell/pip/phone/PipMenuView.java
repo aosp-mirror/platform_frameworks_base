@@ -429,25 +429,6 @@ public class PipMenuView extends FrameLayout {
         }
     }
 
-    void updateDismissFraction(float fraction) {
-        int alpha;
-        final float menuAlpha = 1 - fraction;
-        if (mMenuState == MENU_STATE_FULL) {
-            mMenuContainer.setAlpha(menuAlpha);
-            mSettingsButton.setAlpha(menuAlpha);
-            mDismissButton.setAlpha(menuAlpha);
-            final float interpolatedAlpha =
-                    MENU_BACKGROUND_ALPHA * menuAlpha + DISMISS_BACKGROUND_ALPHA * fraction;
-            alpha = (int) (interpolatedAlpha * 255);
-        } else {
-            if (mMenuState == MENU_STATE_CLOSE) {
-                mDismissButton.setAlpha(menuAlpha);
-            }
-            alpha = (int) (fraction * DISMISS_BACKGROUND_ALPHA * 255);
-        }
-        mBackgroundDrawable.setAlpha(alpha);
-    }
-
     private void notifyMenuStateChange(int menuState, boolean resize, Runnable callback) {
         mMenuState = menuState;
         mController.onMenuStateChanged(menuState, resize, callback);
