@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
 import android.os.CancellationSignal;
+import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -73,7 +74,7 @@ public class PeopleService extends SystemService {
 
     @Override
     public void onStart() {
-        publishBinderService(Context.PEOPLE_SERVICE, new BinderService());
+        publishBinderService(Context.PEOPLE_SERVICE, mService);
         publishLocalService(PeopleServiceInternal.class, new LocalService());
     }
 
@@ -117,7 +118,7 @@ public class PeopleService extends SystemService {
                 message);
     }
 
-    private final class BinderService extends IPeopleManager.Stub {
+    final IBinder mService = new IPeopleManager.Stub() {
 
         @Override
         public ParceledListSlice<ConversationChannel> getRecentConversations() {
@@ -146,7 +147,7 @@ public class PeopleService extends SystemService {
             enforceSystemRootOrSystemUI(getContext(), "get last interaction");
             return mDataManager.getLastInteraction(packageName, userId, shortcutId);
         }
-    }
+    };
 
     @VisibleForTesting
     final class LocalService extends PeopleServiceInternal {
