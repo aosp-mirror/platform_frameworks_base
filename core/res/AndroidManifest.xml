@@ -2849,6 +2849,21 @@
         android:description="@string/permdesc_getPackageSize"
         android:protectionLevel="normal" />
 
+    <!-- Dummy user-facing group for faking package signature -->
+    <permission-group android:name="android.permission-group.FAKE_PACKAGE"
+        android:label="@string/permgrouplab_fake_package_signature"
+        android:description="@string/permgroupdesc_fake_package_signature"
+        android:request="@string/permgrouprequest_fake_package_signature"
+        android:priority="100" />
+
+    <!-- Allows an application to change the package signature as
+         seen by applications -->
+    <permission android:name="android.permission.FAKE_PACKAGE_SIGNATURE"
+        android:permissionGroup="android.permission-group.UNDEFINED"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_fakePackageSignature"
+        android:description="@string/permdesc_fakePackageSignature" />
+
     <!-- @deprecated No longer useful, see
          {@link android.content.pm.PackageManager#addPackageToPreferred}
          for details. -->
