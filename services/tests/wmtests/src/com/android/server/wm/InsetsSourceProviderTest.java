@@ -205,7 +205,8 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         mProvider.updateControlForTarget(target, false /* force */);
         InsetsState state = new InsetsState();
         state.getSource(ITYPE_STATUS_BAR).setVisible(false);
-        mProvider.onInsetsModified(target, state.getSource(ITYPE_STATUS_BAR));
+        target.updateRequestedVisibility(state);
+        mProvider.updateClientVisibility(target);
         assertFalse(mSource.isVisible());
     }
 
@@ -217,7 +218,8 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         mProvider.setWindow(statusBar, null, null);
         InsetsState state = new InsetsState();
         state.getSource(ITYPE_STATUS_BAR).setVisible(false);
-        mProvider.onInsetsModified(target, state.getSource(ITYPE_STATUS_BAR));
+        target.updateRequestedVisibility(state);
+        mProvider.updateClientVisibility(target);
         assertTrue(mSource.isVisible());
     }
 

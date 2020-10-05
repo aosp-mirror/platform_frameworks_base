@@ -484,7 +484,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     /** The state dispatched from server */
     private final InsetsState mLastDispatchedState = new InsetsState();
 
-    /** The state sent to server */
+    // TODO: Use other class to represent the requested visibility of each type, because the
+    //       display frame and the frame in each source are not used.
+    /** The requested visibilities sent to server */
     private final InsetsState mRequestedState = new InsetsState();
 
     private final Rect mFrame = new Rect();
@@ -499,6 +501,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private final List<WindowInsetsAnimation> mUnmodifiableTmpRunningAnims =
             Collections.unmodifiableList(mTmpRunningAnims);
     private final ArrayList<InsetsAnimationControlImpl> mTmpFinishedControls = new ArrayList<>();
+    private final ArraySet<InsetsSourceConsumer> mRequestedVisibilityChanged = new ArraySet<>();
     private WindowInsets mLastInsets;
 
     private boolean mAnimCallbackScheduled;
@@ -639,11 +642,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 true /* excludeInvisibleIme */)) {
             if (DEBUG) Log.d(TAG, "onStateChanged, notifyInsetsChanged");
             mHost.notifyInsetsChanged();
-        }
-        if (!mState.equals(mLastDispatchedState, true /* excludingCaptionInsets */,
-                true /* excludeInvisibleIme */)) {
-            if (DEBUG) Log.d(TAG, "onStateChanged, send state to WM: " + mState);
-            updateRequestedState();
         }
         return true;
     }
@@ -808,9 +806,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (hideTypes[0] != 0) {
             applyAnimation(hideTypes[0], false /* show */, false /* fromIme */);
         }
-        if (requestedStateStale) {
-            updateRequestedState();
-        }
+
+        // InsetsSourceConsumer#setControl might change the requested visibility.
+        updateRequestedVisibility();
     }
 
     @Override
@@ -945,6 +943,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (types == 0) {
             // nothing to animate.
             listener.onCancelled(null);
+            updateRequestedVisibility();
             if (DEBUG) Log.d(TAG, "no types to animate in controlAnimationUnchecked");
             return;
         }
@@ -980,12 +979,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     }
                 });
             }
+            updateRequestedVisibility();
             return;
         }
 
         if (typesReady == 0) {
             if (DEBUG) Log.d(TAG, "No types ready. onCancelled()");
             listener.onCancelled(null);
+            updateRequestedVisibility();
             return;
         }
 
@@ -1010,6 +1011,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         } else {
             hideDirectly(types, false /* animationFinished */, animationType);
         }
+        updateRequestedVisibility();
     }
 
     /**
@@ -1177,7 +1179,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
         if (stateChanged) {
             mHost.notifyInsetsChanged();
-            updateRequestedState();
         }
     }
 
@@ -1202,7 +1203,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     @VisibleForTesting
     public void notifyVisibilityChanged() {
         mHost.notifyInsetsChanged();
-        updateRequestedState();
     }
 
     /**
@@ -1251,36 +1251,37 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         return ANIMATION_TYPE_NONE;
     }
 
+    @VisibleForTesting
+    public void onRequestedVisibilityChanged(InsetsSourceConsumer consumer) {
+        mRequestedVisibilityChanged.add(consumer);
+    }
+
     /**
-     * Sends the local visibility state back to window manager if it is changed.
+     * Sends the requested visibilities to window manager if any of them is changed.
      */
-    private void updateRequestedState() {
+    private void updateRequestedVisibility() {
         boolean changed = false;
-        for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
-            final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
+        for (int i = mRequestedVisibilityChanged.size() - 1; i >= 0; i--) {
+            final InsetsSourceConsumer consumer = mRequestedVisibilityChanged.valueAt(i);
             final @InternalInsetsType int type = consumer.getType();
             if (type == ITYPE_CAPTION_BAR) {
                 continue;
             }
-            if (consumer.getControl() != null) {
-                final InsetsSource localSource = mState.getSource(type);
-                if (!localSource.equals(mRequestedState.peekSource(type))) {
-                    // Our requested state is stale. Update it here and send it to window manager.
-                    mRequestedState.addSource(new InsetsSource(localSource));
-                    changed = true;
-                }
-                if (!localSource.equals(mLastDispatchedState.peekSource(type))) {
-                    // The server state is not what we expected. This can happen while we don't have
-                    // the control. Since we have the control now, we need to send our request again
-                    // to modify the server state.
-                    changed = true;
-                }
+            final boolean requestedVisible = consumer.isRequestedVisible();
+            if (requestedVisible != mRequestedState.getSourceOrDefaultVisibility(type)) {
+                mRequestedState.getSource(type).setVisible(requestedVisible);
+                changed = true;
             }
         }
+        mRequestedVisibilityChanged.clear();
         if (!changed) {
             return;
         }
         mHost.onInsetsModified(mRequestedState);
+    }
+
+    InsetsState getRequestedVisibility() {
+        return mRequestedState;
     }
 
     @VisibleForTesting
@@ -1316,6 +1317,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
             getSourceConsumer(internalTypes.valueAt(i)).hide(animationFinished, animationType);
         }
+        updateRequestedVisibility();
     }
 
     private void showDirectly(@InsetsType int types) {
@@ -1326,6 +1328,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
             getSourceConsumer(internalTypes.valueAt(i)).show(false /* fromIme */);
         }
+        updateRequestedVisibility();
     }
 
     /**
