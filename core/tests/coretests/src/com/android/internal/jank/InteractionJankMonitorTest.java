@@ -17,8 +17,10 @@
 package com.android.internal.jank;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE;
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_TO_STATSD_INTERACTION_TYPE;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -44,6 +46,13 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @SmallTest
 public class InteractionJankMonitorTest {
@@ -138,4 +147,27 @@ public class InteractionJankMonitorTest {
         verify(tracker).cancel();
     }
 
+    @Test
+    public void testCujTypeEnumCorrectlyDefined() throws Exception {
+        List<Field> cujEnumFields =
+                Arrays.stream(InteractionJankMonitor.class.getDeclaredFields())
+                        .filter(field -> field.getName().startsWith("CUJ_")
+                                && Modifier.isStatic(field.getModifiers())
+                                && field.getType() == int.class)
+                        .collect(Collectors.toList());
+
+        HashSet<Integer> allValues = new HashSet<>();
+        for (Field field : cujEnumFields) {
+            int fieldValue = field.getInt(null);
+            assertWithMessage(
+                    "Field %s must have a mapping to a value in CUJ_TO_STATSD_INTERACTION_TYPE",
+                    field.getName())
+                    .that(fieldValue < CUJ_TO_STATSD_INTERACTION_TYPE.length)
+                    .isTrue();
+            assertWithMessage("All CujType values must be unique. Field %s repeats existing value.",
+                    field.getName())
+                    .that(allValues.add(fieldValue))
+                    .isTrue();
+        }
+    }
 }
