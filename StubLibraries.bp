@@ -143,6 +143,11 @@ droidstubs {
             api_file: "non-updatable-api/current.txt",
             removed_api_file: "non-updatable-api/removed.txt",
         },
+        last_released: {
+            api_file: ":android-non-updatable.api.public.latest",
+            removed_api_file: ":android-non-updatable-removed.api.public.latest",
+            baseline_file: ":public-api-incompatibilities-with-last-released",
+        },
         api_lint: {
             enabled: true,
             new_since: ":android-non-updatable.api.public.latest",
@@ -204,6 +209,11 @@ droidstubs {
         current: {
             api_file: "non-updatable-api/system-current.txt",
             removed_api_file: "non-updatable-api/system-removed.txt",
+        },
+        last_released: {
+            api_file: ":android-non-updatable.api.system.latest",
+            removed_api_file: ":android-non-updatable-removed.api.system.latest",
+            baseline_file: ":system-api-incompatibilities-with-last-released"
         },
         api_lint: {
             enabled: true,
