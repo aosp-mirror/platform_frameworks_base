@@ -150,9 +150,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQSContainerImplController.init();
 
         mQSDetail.setQsPanel(mQSPanelController.getView(), mHeader, (View) mFooter);
-        mQSAnimator = new QSAnimator(
-                this, mHeader.findViewById(R.id.quick_qs_panel), mQSPanelController.getView());
-
+        mQSAnimator = qsFragmentComponent.getQSAnimator();
 
         mQSCustomizer = view.findViewById(R.id.qs_customize);
         mQSCustomizer.setQs(this);
@@ -322,6 +320,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 setQsExpansion(mLastQSExpansion, 0);
             }
         }
+    }
+
+    public QSPanelController getQSPanelController() {
+        return mQSPanelController;
     }
 
     public QSPanel getQsPanel() {

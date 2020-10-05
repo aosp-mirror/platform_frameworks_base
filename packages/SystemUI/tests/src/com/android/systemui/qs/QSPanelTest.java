@@ -113,8 +113,8 @@ public class QSPanelTest extends SysuiTestCase {
         mUiEventLogger = new UiEventLoggerFake();
         mTestableLooper.runWithLooper(() -> {
             mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
-            mQsPanel = new QSPanel(mContext, null, mDumpManager, mBroadcastDispatcher,
-                    mQSLogger, mMediaHost, mUiEventLogger, mUserTracker);
+            mQsPanel = new QSPanel(mContext, null, mDumpManager, mQSLogger, mMediaHost,
+                    mUiEventLogger);
             mQsPanel.onFinishInflate();
             // Provides a parent with non-zero size for QSPanel
             mParentView = new FrameLayout(mContext);

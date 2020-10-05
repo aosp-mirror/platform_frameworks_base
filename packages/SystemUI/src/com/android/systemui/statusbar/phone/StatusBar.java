@@ -172,7 +172,7 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSFragment;
-import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.WindowManagerWrapper;
@@ -408,7 +408,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationPanelViewController mNotificationPanelViewController;
 
     // settings
-    private QSPanel mQSPanel;
+    private QSPanelController mQSPanelController;
 
     KeyguardIndicationController mKeyguardIndicationController;
 
@@ -1200,8 +1200,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             fragmentHostManager.addTagListener(QS.TAG, (tag, f) -> {
                 QS qs = (QS) f;
                 if (qs instanceof QSFragment) {
-                    mQSPanel = ((QSFragment) qs).getQsPanel();
-                    mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
+                    mQSPanelController = ((QSFragment) qs).getQSPanelController();
+                    mQSPanelController.setBrightnessMirror(mBrightnessMirrorController);
                 }
             });
         }
@@ -1593,19 +1593,19 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void addQsTile(ComponentName tile) {
-        if (mQSPanel != null && mQSPanel.getHost() != null) {
-            mQSPanel.getHost().addTile(tile);
+        if (mQSPanelController != null && mQSPanelController.getHost() != null) {
+            mQSPanelController.getHost().addTile(tile);
         }
     }
 
     public void remQsTile(ComponentName tile) {
-        if (mQSPanel != null && mQSPanel.getHost() != null) {
-            mQSPanel.getHost().removeTile(tile);
+        if (mQSPanelController != null && mQSPanelController.getHost() != null) {
+            mQSPanelController.getHost().removeTile(tile);
         }
     }
 
     public void clickTile(ComponentName tile) {
-        mQSPanel.clickTile(tile);
+        mQSPanelController.clickTile(tile);
     }
 
     /**
@@ -2197,7 +2197,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (!mUserSetup) return;
 
         if (subPanel != null) {
-            mQSPanel.openDetails(subPanel);
+            mQSPanelController.openDetails(subPanel);
         }
         mNotificationPanelViewController.expandWithQs();
 
@@ -2845,7 +2845,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 resetUserExpandedStates();
             }
             else if (DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG.equals(action)) {
-                mQSPanel.showDeviceMonitoringDialog();
+                mQSPanelController.showDeviceMonitoringDialog();
             }
             Trace.endSection();
         }
@@ -2936,8 +2936,8 @@ public class StatusBar extends SystemUI implements DemoMode,
      */
     void updateResources() {
         // Update the quick setting tiles
-        if (mQSPanel != null) {
-            mQSPanel.updateResources();
+        if (mQSPanelController != null) {
+            mQSPanelController.updateResources();
         }
 
         if (mStatusBarWindowController != null) {
@@ -3402,8 +3402,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Keyguard state has changed, but QS is not listening anymore. Make sure to update the tile
         // visibilities so next time we open the panel we know the correct height already.
-        if (mQSPanel != null) {
-            mQSPanel.refreshAllTiles();
+        if (mQSPanelController != null) {
+            mQSPanelController.refreshAllTiles();
         }
         mHandler.removeMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
         releaseGestureWakeLock();

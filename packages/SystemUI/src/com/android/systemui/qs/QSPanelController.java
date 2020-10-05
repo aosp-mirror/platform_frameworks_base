@@ -17,6 +17,8 @@
 package com.android.systemui.qs;
 
 import android.annotation.NonNull;
+import android.content.ComponentName;
+import android.content.res.Configuration;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
@@ -24,6 +26,7 @@ import com.android.systemui.media.MediaHost;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.settings.BrightnessController;
+import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -33,11 +36,26 @@ import javax.inject.Inject;
  */
 @QSScope
 public class QSPanelController extends ViewController<QSPanel> {
+    private final QSSecurityFooter mQsSecurityFooter;
     private final BrightnessController mBrightnessController;
 
+    private final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
+            new QSPanel.OnConfigurationChangedListener() {
+        @Override
+        public void onConfigurationChange(Configuration newConfig) {
+            mView.updateResources();
+            mQsSecurityFooter.onConfigurationChanged();
+            if (mView.isListening()) {
+                refreshAllTiles();
+            }
+        }
+    };
+
     @Inject
-    QSPanelController(QSPanel view, BrightnessController.Factory brightnessControllerFactory) {
+    QSPanelController(QSPanel view, QSSecurityFooter qsSecurityFooter,
+            BrightnessController.Factory brightnessControllerFactory) {
         super(view);
+        mQsSecurityFooter = qsSecurityFooter;
 
         mBrightnessController = brightnessControllerFactory.create(
                 mView.findViewById(R.id.brightness_slider));
@@ -45,12 +63,19 @@ public class QSPanelController extends ViewController<QSPanel> {
 
     @Override
     protected void onViewAttached() {
+        mView.updateResources();
+        if (mView.isListening()) {
+            refreshAllTiles();
+        }
         mView.setBrightnessController(mBrightnessController);
+        mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
+        mView.setSecurityFooter(mQsSecurityFooter.getView());
+        mView.switchTileLayout(true);
     }
 
     @Override
     protected void onViewDetached() {
-
+        mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
     }
 
     /** TODO(b/168904199): Remove this method once view is controllerized. */
@@ -72,6 +97,7 @@ public class QSPanelController extends ViewController<QSPanel> {
     /** */
     public void setHost(QSTileHost host, QSCustomizer customizer) {
         mView.setHost(host, customizer);
+        mQsSecurityFooter.setHostEnvironment(host);
     }
 
     /** */
@@ -91,7 +117,12 @@ public class QSPanelController extends ViewController<QSPanel> {
 
     /** */
     public void setListening(boolean listening, boolean expanded) {
-        mView.setListening(listening, expanded);
+        mView.setListening(listening && expanded);
+        if (mView.isListening()) {
+            refreshAllTiles();
+        }
+
+        mQsSecurityFooter.setListening(listening);
 
         // Set the listening as soon as the QS fragment starts listening regardless of the
         //expansion, so it will update the current brightness before the slider is visible.
@@ -115,5 +146,41 @@ public class QSPanelController extends ViewController<QSPanel> {
     /** */
     public void closeDetail() {
         mView.closeDetail();
+    }
+
+    /** */
+    public void setBrightnessMirror(BrightnessMirrorController brightnessMirrorController) {
+        mView.setBrightnessMirror(brightnessMirrorController);
+    }
+
+    /** Get the QSTileHost this panel uses. */
+    public QSTileHost getHost() {
+        return mView.getHost();
+    }
+
+    /** Click a tile. */
+    public void clickTile(ComponentName tile) {
+        mView.clickTile(tile);
+    }
+
+    /** Open the details for a specific tile.. */
+    public void openDetails(String subPanel) {
+        mView.openDetails(subPanel);
+    }
+
+    /** Show the device monitoring dialog. */
+    public void showDeviceMonitoringDialog() {
+        mQsSecurityFooter.showDeviceMonitoringDialog();
+    }
+
+    /** Update appearance of QSPanel. */
+    public void updateResources() {
+        mView.updateResources();
+    }
+
+    /** Update state of all tiles. */
+    public void refreshAllTiles() {
+        mView.refreshAllTiles();
+        mQsSecurityFooter.refreshState();
     }
 }

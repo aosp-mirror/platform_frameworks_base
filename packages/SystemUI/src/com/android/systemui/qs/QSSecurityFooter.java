@@ -44,11 +44,15 @@ import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.SecurityController;
 
-public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListener {
+import javax.inject.Inject;
+
+@QSScope
+class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListener {
     protected static final String TAG = "QSSecurityFooter";
     protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean DEBUG_FORCE_VISIBLE = false;
@@ -72,12 +76,13 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     private int mFooterTextId;
     private int mFooterIconId;
 
+    @Inject
     public QSSecurityFooter(QSPanel qsPanel, Context context, UserTracker userTracker) {
         mRootView = LayoutInflater.from(context)
                 .inflate(R.layout.quick_settings_footer, qsPanel, false);
         mRootView.setOnClickListener(this);
-        mFooterText = (TextView) mRootView.findViewById(R.id.footer_text);
-        mFooterIcon = (ImageView) mRootView.findViewById(R.id.footer_icon);
+        mFooterText = mRootView.findViewById(R.id.footer_text);
+        mFooterIcon = mRootView.findViewById(R.id.footer_icon);
         mFooterIconId = R.drawable.ic_info_outline;
         mContext = context;
         mMainHandler = new Handler(Looper.myLooper());

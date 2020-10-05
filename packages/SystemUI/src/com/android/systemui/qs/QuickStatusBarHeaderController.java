@@ -281,7 +281,11 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mListening = listening;
 
         mHeaderQsPanel.setListening(listening);
-        if (mHeaderQsPanel.switchTileLayout()) {
+        if (mHeaderQsPanel.isListening()) {
+            mHeaderQsPanel.refreshAllTiles();
+        }
+
+        if (mHeaderQsPanel.switchTileLayout(false)) {
             mView.updateResources();
         }
 

@@ -38,7 +38,6 @@ import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -70,11 +69,8 @@ public class QuickQSPanel extends QSPanel {
             DumpManager dumpManager,
             QSLogger qsLogger,
             @Named(QUICK_QS_PANEL) MediaHost mediaHost,
-            UiEventLogger uiEventLogger,
-            UserTracker userTracker
-    ) {
-        super(context, attrs, dumpManager, qsLogger, mediaHost, uiEventLogger,
-                userTracker);
+            UiEventLogger uiEventLogger) {
+        super(context, attrs, dumpManager, qsLogger, mediaHost, uiEventLogger);
         sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
         applyBottomMargin((View) mRegularTileLayout);
     }
@@ -84,11 +80,6 @@ public class QuickQSPanel extends QSPanel {
         MarginLayoutParams layoutParams = (MarginLayoutParams) view.getLayoutParams();
         layoutParams.bottomMargin = margin;
         view.setLayoutParams(layoutParams);
-    }
-
-    @Override
-    protected void addSecurityFooter() {
-        // No footer needed
     }
 
     @Override
