@@ -673,8 +673,6 @@ public final class Choreographer {
         ThreadedRenderer.setFPSDivisor(divisor);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "Use {@link "
-            + "#postFrameCallback} instead")
     void doFrame(long frameTimeNanos, int frame, long frameTimelineVsyncId) {
         final long startNanos;
         synchronized (mLock) {
