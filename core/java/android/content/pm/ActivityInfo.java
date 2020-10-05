@@ -1109,6 +1109,34 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     }
 
     /**
+     * Returns the reversed orientation.
+     * @hide
+     */
+    @ActivityInfo.ScreenOrientation
+    public static int reverseOrientation(@ActivityInfo.ScreenOrientation int orientation) {
+        switch (orientation) {
+            case SCREEN_ORIENTATION_LANDSCAPE:
+                return SCREEN_ORIENTATION_PORTRAIT;
+            case SCREEN_ORIENTATION_PORTRAIT:
+                return SCREEN_ORIENTATION_LANDSCAPE;
+            case SCREEN_ORIENTATION_SENSOR_LANDSCAPE:
+                return SCREEN_ORIENTATION_SENSOR_PORTRAIT;
+            case SCREEN_ORIENTATION_SENSOR_PORTRAIT:
+                return SCREEN_ORIENTATION_SENSOR_LANDSCAPE;
+            case SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
+                return SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+            case SCREEN_ORIENTATION_REVERSE_PORTRAIT:
+                return SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+            case SCREEN_ORIENTATION_USER_LANDSCAPE:
+                return SCREEN_ORIENTATION_USER_PORTRAIT;
+            case SCREEN_ORIENTATION_USER_PORTRAIT:
+                return SCREEN_ORIENTATION_USER_LANDSCAPE;
+            default:
+                return orientation;
+        }
+    }
+
+    /**
      * Returns true if the activity supports picture-in-picture.
      * @hide
      */
